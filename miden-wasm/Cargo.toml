@@ -1,0 +1,23 @@
+[package]
+name = "miden-playground"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+wasm-bindgen = { version = "0.2.95", default-features = true }
+console_error_panic_hook = "0.1.7"
+miden-tx = { version = "0.6.0", default-features = false }
+miden-lib = { version = "0.6.0", default-features = false }
+miden-objects = { version = "0.6.0", default-features = false }
+miden-crypto = { version = "0.12.0", default-features = false }
+assembly = { package = "miden-assembly", version = "0.11", default-features = false }
+vm-processor = { package = "miden-processor", version = "0.11", default-features = false }
+rand = { version = "0.8", default-features = false }
+rand_chacha = {version = "0.3" }
+winter-maybe-async = { version = "0.10" }
+log = {version = "0.4", default-features = false }
+env_logger = {version = "0.10", default-features = false }
+web-sys = { version = "0.3", features = ["console"]}
+
+[lib]
+crate-type = ["cdylib", "rlib"]
