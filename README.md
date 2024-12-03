@@ -18,5 +18,5 @@ npm run dev
 To build the miden-wasm package, run:
 
 ```bash
-npm run build:wasm
+npm run wasm:build
 ```
