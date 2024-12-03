@@ -4,7 +4,8 @@
 	"private": true,
 	"scripts": {
 		"dev": "next dev --turbopack",
-		"build:wasm": "cd miden-wasm && wasm-pack build --target web --out-dir pkg --release && cd .. && npm install",
+		"wasm:build": "cd miden-wasm && wasm-pack build --target web --out-dir pkg --release && rm ./pkg/.gitignore && cd .. && npm install",
+		"pages:build": "npx @cloudflare/next-on-pages",
 		"build": "next build",
 		"start": "next start",
 		"lint": "next lint"
@@ -22,11 +23,13 @@
 		"tailwindcss-animate": "^1.0.7"
 	},
 	"devDependencies": {
+		"@cloudflare/next-on-pages": "^1.13.6",
 		"@types/node": "^20",
 		"@types/react": "^18",
 		"@types/react-dom": "^18",
 		"eslint": "^8",
 		"eslint-config-next": "15.0.3",
+		"eslint-plugin-next-on-pages": "^1.13.6",
 		"postcss": "^8",
 		"tailwindcss": "^3.4.1",
 		"typescript": "^5"
