@@ -1,13 +1,5 @@
-import { MidenContextProvider } from '@/lib/context-providers'
+import { Playground } from '@/components/playground'
 
 export default function Home() {
-	return (
-		<div className="">
-			<MidenContextProvider>
-				<main className="">
-					<p>Hello world!</p>
-				</main>
-			</MidenContextProvider>
-		</div>
-	)
+	return <Playground />
 }
