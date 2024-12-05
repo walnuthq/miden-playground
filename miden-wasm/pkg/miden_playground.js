@@ -125,7 +125,33 @@ export function execute(account_code, note_script, note_inputs, transaction_scri
     return Outputs.__wrap(ret[0]);
 }
 
-function notDefined(what) { return () => { throw new Error(`${what} is not defined`); }; }
+function getArrayU8FromWasm0(ptr, len) {
+    ptr = ptr >>> 0;
+    return getUint8ArrayMemory0().subarray(ptr / 1, ptr / 1 + len);
+}
+/**
+ * @returns {Uint8Array}
+ */
+export function generate_secret_key() {
+    const ret = wasm.generate_secret_key();
+    var v1 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+    return v1;
+}
+
+function passArray8ToWasm0(arg, malloc) {
+    const ptr = malloc(arg.length * 1, 1) >>> 0;
+    getUint8ArrayMemory0().set(arg, ptr / 1);
+    WASM_VECTOR_LEN = arg.length;
+    return ptr;
+}
+
+function _assertClass(instance, klass) {
+    if (!(instance instanceof klass)) {
+        throw new Error(`expected instance of ${klass.name}`);
+    }
+    return instance.ptr;
+}
 
 let cachedDataViewMemory0 = null;
 
@@ -134,6 +160,213 @@ function getDataViewMemory0() {
         cachedDataViewMemory0 = new DataView(wasm.memory.buffer);
     }
     return cachedDataViewMemory0;
+}
+
+function getArrayJsValueFromWasm0(ptr, len) {
+    ptr = ptr >>> 0;
+    const mem = getDataViewMemory0();
+    const result = [];
+    for (let i = ptr; i < ptr + 4 * len; i += 4) {
+        result.push(wasm.__wbindgen_export_0.get(mem.getUint32(i, true)));
+    }
+    wasm.__externref_drop_slice(ptr, len);
+    return result;
+}
+
+function notDefined(what) { return () => { throw new Error(`${what} is not defined`); }; }
+
+const ClientAccountFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_clientaccount_free(ptr >>> 0, 1));
+
+export class ClientAccount {
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        ClientAccountFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_clientaccount_free(ptr, 0);
+    }
+    /**
+     * @returns {string}
+     */
+    get id_hex() {
+        let deferred1_0;
+        let deferred1_1;
+        try {
+            const ret = wasm.__wbg_get_clientaccount_id_hex(this.__wbg_ptr);
+            deferred1_0 = ret[0];
+            deferred1_1 = ret[1];
+            return getStringFromWasm0(ret[0], ret[1]);
+        } finally {
+            wasm.__wbindgen_free(deferred1_0, deferred1_1, 1);
+        }
+    }
+    /**
+     * @param {string} arg0
+     */
+    set id_hex(arg0) {
+        const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_clientaccount_id_hex(this.__wbg_ptr, ptr0, len0);
+    }
+    /**
+     * @param {Uint8Array} secret_key
+     * @param {bigint} account_id
+     * @param {string} account_code
+     * @param {boolean} wallet
+     * @param {boolean} auth
+     */
+    constructor(secret_key, account_id, account_code, wallet, auth) {
+        const ptr0 = passArray8ToWasm0(secret_key, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passStringToWasm0(account_code, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len1 = WASM_VECTOR_LEN;
+        const ret = wasm.clientaccount_new(ptr0, len0, account_id, ptr1, len1, wallet, auth);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        this.__wbg_ptr = ret[0] >>> 0;
+        ClientAccountFinalization.register(this, this.__wbg_ptr, this);
+        return this;
+    }
+    /**
+     * @param {bigint} faucet_id
+     * @param {BigUint64Array} note_inputs
+     * @param {string} note_script
+     * @param {bigint | undefined} [asset]
+     * @returns {ClientNote}
+     */
+    create_note(faucet_id, note_inputs, note_script, asset) {
+        const ptr0 = passArray64ToWasm0(note_inputs, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passStringToWasm0(note_script, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len1 = WASM_VECTOR_LEN;
+        const ret = wasm.clientaccount_create_note(this.__wbg_ptr, faucet_id, ptr0, len0, ptr1, len1, !isLikeNone(asset), isLikeNone(asset) ? BigInt(0) : asset);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return ClientNote.__wrap(ret[0]);
+    }
+    /**
+     * @param {string} transaction_script
+     * @param {ClientNote} note
+     */
+    consume_note(transaction_script, note) {
+        const ptr0 = passStringToWasm0(transaction_script, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        _assertClass(note, ClientNote);
+        var ptr1 = note.__destroy_into_raw();
+        const ret = wasm.clientaccount_consume_note(this.__wbg_ptr, ptr0, len0, ptr1);
+        if (ret[1]) {
+            throw takeFromExternrefTable0(ret[0]);
+        }
+    }
+    /**
+     * @returns {(ClientAsset)[]}
+     */
+    assets() {
+        const ret = wasm.clientaccount_assets(this.__wbg_ptr);
+        var v1 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
+        return v1;
+    }
+}
+
+const ClientAssetFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_clientasset_free(ptr >>> 0, 1));
+
+export class ClientAsset {
+
+    static __wrap(ptr) {
+        ptr = ptr >>> 0;
+        const obj = Object.create(ClientAsset.prototype);
+        obj.__wbg_ptr = ptr;
+        ClientAssetFinalization.register(obj, obj.__wbg_ptr, obj);
+        return obj;
+    }
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        ClientAssetFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_clientasset_free(ptr, 0);
+    }
+    /**
+     * @returns {string}
+     */
+    faucet_id() {
+        let deferred1_0;
+        let deferred1_1;
+        try {
+            const ret = wasm.clientasset_faucet_id(this.__wbg_ptr);
+            deferred1_0 = ret[0];
+            deferred1_1 = ret[1];
+            return getStringFromWasm0(ret[0], ret[1]);
+        } finally {
+            wasm.__wbindgen_free(deferred1_0, deferred1_1, 1);
+        }
+    }
+    /**
+     * @returns {bigint}
+     */
+    amount() {
+        const ret = wasm.clientasset_amount(this.__wbg_ptr);
+        return BigInt.asUintN(64, ret);
+    }
+}
+
+const ClientNoteFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_clientnote_free(ptr >>> 0, 1));
+
+export class ClientNote {
+
+    static __wrap(ptr) {
+        ptr = ptr >>> 0;
+        const obj = Object.create(ClientNote.prototype);
+        obj.__wbg_ptr = ptr;
+        ClientNoteFinalization.register(obj, obj.__wbg_ptr, obj);
+        return obj;
+    }
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        ClientNoteFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_clientnote_free(ptr, 0);
+    }
+    /**
+     * @returns {string}
+     */
+    id() {
+        let deferred1_0;
+        let deferred1_1;
+        try {
+            const ret = wasm.clientnote_id(this.__wbg_ptr);
+            deferred1_0 = ret[0];
+            deferred1_1 = ret[1];
+            return getStringFromWasm0(ret[0], ret[1]);
+        } finally {
+            wasm.__wbindgen_free(deferred1_0, deferred1_1, 1);
+        }
+    }
 }
 
 const OutputsFinalization = (typeof FinalizationRegistry === 'undefined')
@@ -374,6 +607,10 @@ async function __wbg_load(module, imports) {
 function __wbg_get_imports() {
     const imports = {};
     imports.wbg = {};
+    imports.wbg.__wbg_clientasset_new = function(arg0) {
+        const ret = ClientAsset.__wrap(arg0);
+        return ret;
+    };
     imports.wbg.__wbindgen_string_new = function(arg0, arg1) {
         const ret = getStringFromWasm0(arg0, arg1);
         return ret;

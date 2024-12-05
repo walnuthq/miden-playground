@@ -2,10 +2,14 @@
 extern crate alloc;
 
 mod account_builder;
+mod client;
 mod mock_chain;
 mod mock_host;
 mod transaction_context;
 mod transaction_context_builder;
+mod utils;
+
+pub use crate::client::{ClientAccount, ClientNote};
 
 use crate::transaction_context_builder::TransactionContextBuilder;
 
@@ -273,11 +277,8 @@ pub fn get_account_with_account_code(
         components.push(RpoFalcon512::new(PublicKey::new(public_key)).into());
     }
 
-    let (account_code, account_storage) = Account::initialize_from_components(
-        account_id.account_type(),
-        &components,
-    )
-    .unwrap();
+    let (account_code, account_storage) =
+        Account::initialize_from_components(account_id.account_type(), &components).unwrap();
 
     let account_vault = match assets {
         Some(asset) => AssetVault::new(&[asset]).unwrap(),
