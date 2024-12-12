@@ -12,12 +12,14 @@ import {
 import { useMiden } from '@/lib/context-providers';
 
 export function AccountState() {
-	const { assets } = useMiden();
+	const { selectedAccount } = useMiden();
 
 	return (
-		<div className="h-full border border-neutral-200 rounded-md p-2">
+		<div className="h-full border-t border-neutral-200 p-2">
 			<Table>
-				{assets.length <= 0 && <TableCaption>No assets found. Consume a note.</TableCaption>}
+				{selectedAccount.assets.length <= 0 && (
+					<TableCaption>No assets found. Consume a note.</TableCaption>
+				)}
 				<TableHeader>
 					<TableRow>
 						<TableHead className="w-44">Asset Type</TableHead>
@@ -26,10 +28,10 @@ export function AccountState() {
 					</TableRow>
 				</TableHeader>
 				<TableBody>
-					{assets.map((asset) => (
+					{selectedAccount.assets.map((asset) => (
 						<TableRow key={asset.faucetId}>
 							<TableCell className="font-medium">Fungible Asset</TableCell>
-							<TableCell>{asset.faucetId}</TableCell>
+							<TableCell>{asset.faucetIdHex}</TableCell>
 							<TableCell className="">{asset.amount}</TableCell>
 						</TableRow>
 					))}

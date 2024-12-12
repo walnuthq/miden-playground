@@ -1,15 +1,27 @@
-import { ClientAsset, ClientNote } from 'miden-wasm';
+export interface Account {
+	id: string;
+	idBigInt: bigint;
+	name: string;
+	script: string;
+	isWallet: boolean;
+	isAuth: boolean;
+	assets: Asset[];
+	secretKey: Uint8Array;
+	isHidden: boolean;
+}
 
 export interface Note {
 	name: string;
 	id: string;
 	script: string;
+	assets: Asset[];
+	inputs: BigUint64Array;
 	isConsumed: boolean;
-	wasmNote: ClientNote;
+	creatorId: string;
 }
 
 export interface Asset {
-	faucetId: string;
-	amount: number;
-	wasmAsset: ClientAsset;
+	faucetId: bigint;
+	faucetIdHex: string;
+	amount: bigint;
 }

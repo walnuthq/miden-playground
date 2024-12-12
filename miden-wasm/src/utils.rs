@@ -76,7 +76,7 @@ pub fn get_account_with_account_code(
     account_code_library: Library,
     account_id: AccountId,
     public_key: Word,
-    assets: Option<Asset>,
+    assets: Vec<Asset>,
     wallet: bool,
     auth: bool,
 ) -> Result<Account, AccountError> {
@@ -101,10 +101,7 @@ pub fn get_account_with_account_code(
     let (account_code, account_storage) =
         Account::initialize_from_components(account_id.account_type(), &components).unwrap();
 
-    let account_vault = match assets {
-        Some(asset) => AssetVault::new(&[asset]).unwrap(),
-        None => AssetVault::new(&[]).unwrap(),
-    };
+    let account_vault = AssetVault::new(&assets).unwrap();
 
     Ok(Account::from_parts(
         account_id,

@@ -11,15 +11,21 @@
 		"lint": "next lint"
 	},
 	"dependencies": {
+		"@monaco-editor/react": "^4.6.0",
+		"@radix-ui/react-checkbox": "^1.1.2",
 		"@radix-ui/react-scroll-area": "^1.2.1",
+		"@radix-ui/react-select": "^2.1.2",
 		"@radix-ui/react-slot": "^1.1.0",
+		"@radix-ui/react-switch": "^1.1.1",
+		"@radix-ui/react-tabs": "^1.1.1",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
 		"lucide-react": "^0.462.0",
 		"miden-wasm": "file:miden-wasm/pkg",
+		"monaco-editor": "^0.52.2",
 		"next": "15.0.3",
-		"react": "19.0.0-rc-66855b96-20241106",
-		"react-dom": "19.0.0-rc-66855b96-20241106",
+		"react": "^18",
+		"react-dom": "^18",
 		"tailwind-merge": "^2.5.5",
 		"tailwindcss-animate": "^1.0.7"
 	},
