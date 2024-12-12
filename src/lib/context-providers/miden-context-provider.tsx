@@ -8,32 +8,42 @@ import React, {
 	useEffect,
 	useState
 } from 'react';
-import init, { ClientAccount } from 'miden-wasm';
-import { ACCOUNT_SCRIPT, P2ID_SCRIPT } from '@/lib/consts';
-import { Asset, Note } from '@/lib/types';
+import init from 'miden-wasm';
+import { Account, Note } from '@/lib/types';
 import { TRANSACTION_SCRIPT } from '@/lib/consts/transaction';
-const USER_ACCOUNT_ID = 9223372036854775839n;
-const SYSTEM_ACCOUNT_ID = 10376293541461622847n;
-const FAUCET_ID = 2305843009213693983n;
+import { consumeNote } from '@/lib/wasm-api';
+import { defaultAccounts, defaultNotes } from '@/lib/consts/defaults';
 
 interface MidenContextProps {
+	accounts: Account[];
+	selectedAccount: Account;
 	isInitialized: boolean;
-	notes: Note[];
-	assets: Asset[];
-	consumeNote: (noteId: string) => void;
 	consoleLogs: { message: string; type: 'info' | 'error' }[];
+	notes: Note[];
+
+	setAccountScript: (script: string) => void;
+	consumeNote: (noteId: string) => void;
 	addInfoLog: (message: string) => void;
 	addErrorLog: (message: string) => void;
+	toggleWalletComponent: () => void;
+	toggleAuthComponent: () => void;
+	selectAccount: (accountId: string) => void;
 }
 
 export const MidenContext = createContext<MidenContextProps>({
+	accounts: [],
+	selectedAccount: {} as Account,
 	isInitialized: false,
-	notes: [],
-	assets: [],
-	consumeNote: () => {},
 	consoleLogs: [],
+	notes: [],
+
+	setAccountScript: () => {},
+	consumeNote: () => {},
 	addInfoLog: () => {},
-	addErrorLog: () => {}
+	addErrorLog: () => {},
+	toggleWalletComponent: () => {},
+	toggleAuthComponent: () => {},
+	selectAccount: () => {}
 });
 
 const fetchSecretKey = async () => {
@@ -45,10 +55,12 @@ const fetchSecretKey = async () => {
 
 export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
 	const [isInitialized, setIsInitialized] = useState(false);
-	const [notes, setNotes] = useState<Note[]>([]);
-	const [userAccount, setUserAccount] = useState<ClientAccount | null>(null);
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const [notes, setNotes] = useState<Note[]>(defaultNotes());
 	const [consoleLogs, setConsoleLogs] = useState<{ message: string; type: 'info' | 'error' }[]>([]);
-	const [assets, setAssets] = useState<Asset[]>([]);
+
+	const [accounts, setAccounts] = useState<Account[]>(defaultAccounts());
+	const [selectedAccount, setSelectedAccount] = useState<Account>(accounts[1]);
 
 	const addInfoLog = useCallback((message: string) => {
 		console.log(message);
@@ -60,49 +72,32 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		setConsoleLogs((prevLogs) => [...prevLogs, { message, type: 'error' }]);
 	}, []);
 
-	const setupDefaults = useCallback(
-		async (secretKey: Uint8Array) => {
-			let systemAccount: ClientAccount | null = null;
-			try {
-				const userAccount = new ClientAccount(
-					secretKey,
-					USER_ACCOUNT_ID,
-					ACCOUNT_SCRIPT,
-					true,
-					true
-				);
-				systemAccount = new ClientAccount(secretKey, SYSTEM_ACCOUNT_ID, ACCOUNT_SCRIPT, true, true);
-				setUserAccount(userAccount);
-			} catch (error) {
-				addErrorLog(`Error setting up accounts: ${error}`);
-			}
-			if (!systemAccount) {
-				addErrorLog('System account not found');
+	const toggleWalletComponent = useCallback(() => {
+		const updatedAccount = { ...selectedAccount, isWallet: !selectedAccount.isWallet };
+		setSelectedAccount(updatedAccount);
+		setAccounts((prev) =>
+			prev.map((account) => (account.id === selectedAccount.id ? updatedAccount : account))
+		);
+	}, [selectedAccount]);
+
+	const toggleAuthComponent = useCallback(() => {
+		const updatedAccount = { ...selectedAccount, isAuth: !selectedAccount.isAuth };
+		setSelectedAccount(updatedAccount);
+		setAccounts((prev) =>
+			prev.map((account) => (account.id === selectedAccount.id ? updatedAccount : account))
+		);
+	}, [selectedAccount]);
+
+	const selectAccount = useCallback(
+		(accountId: string) => {
+			const account = accounts.find((acc) => acc.id === accountId);
+			if (!account) {
+				addErrorLog(`Account with id ${accountId} not found`);
 				return;
 			}
-			try {
-				const note = createNote({
-					account: systemAccount,
-					faucetId: FAUCET_ID,
-					amount: 100n,
-					inputs: new BigUint64Array([USER_ACCOUNT_ID]),
-					script: P2ID_SCRIPT,
-					name: 'P2ID'
-				});
-				const note2 = createNote({
-					account: systemAccount,
-					faucetId: FAUCET_ID,
-					amount: 200n,
-					inputs: new BigUint64Array([USER_ACCOUNT_ID]),
-					script: P2ID_SCRIPT,
-					name: 'P2ID (2)'
-				});
-				setNotes([note, note2]);
-			} catch (error) {
-				addErrorLog(`Error setting up notes: ${error}`);
-			}
+			setSelectedAccount(account);
 		},
-		[addErrorLog]
+		[accounts, addErrorLog]
 	);
 
 	useEffect(() => {
@@ -110,42 +105,79 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			.then(([_, secretKey]) => {
 				console.log('WASM initialized successfully');
-				setupDefaults(secretKey);
+				setAccounts((prevAccounts) =>
+					prevAccounts.map((account) => ({
+						...account,
+						secretKey: secretKey
+					}))
+				);
+				setSelectedAccount((prev) => ({
+					...prev,
+					secretKey: secretKey
+				}));
 				addInfoLog('App initialized...');
 				setIsInitialized(true);
 			})
 			.catch((error: unknown) => {
 				addErrorLog(`Failed to initialize WASM: ${error}`);
 			});
-	}, [addErrorLog, addInfoLog, setupDefaults]);
+	}, [addErrorLog, addInfoLog]);
 
-	const consumeNote = (noteId: string) => {
+	const consumeNoteHandler = (noteId: string) => {
 		const note = notes.find((note) => note.id === noteId);
-		if (note && userAccount) {
-			try {
-				userAccount.consume_note(TRANSACTION_SCRIPT, note.wasmNote);
-				note.isConsumed = true;
-				setNotes([...notes]);
-				addInfoLog('');
-				addInfoLog('Succesfully created transaction.');
-				addInfoLog('The transaction did not generate any output notes.');
-				addInfoLog(`The ${note.name} Note was consumed.`);
-				setAssets(
-					userAccount.assets().map((asset) => ({
-						faucetId: asset.faucet_id(),
-						amount: Number(asset.amount()),
-						wasmAsset: asset
-					}))
-				);
-			} catch (error) {
-				addErrorLog(`Error consuming note: ${error}`);
-			}
+		const senderAccount = accounts.find((acc) => acc.id === note?.creatorId);
+		if (!note || !senderAccount) return;
+		try {
+			const newAccountState = consumeNote({
+				sender: senderAccount,
+				receiver: selectedAccount,
+				note,
+				transactionScript: TRANSACTION_SCRIPT
+			});
+			const updatedAccount = { ...selectedAccount, assets: newAccountState.assets };
+			setSelectedAccount(updatedAccount);
+			setAccounts((prevAccounts) =>
+				prevAccounts.map((acc) => (acc.id === selectedAccount.id ? updatedAccount : acc))
+			);
+			setNotes((prevNotes) =>
+				prevNotes.map((n) => (n.id === noteId ? { ...n, isConsumed: true } : n))
+			);
+			addInfoLog('');
+			addInfoLog('Succesfully created transaction.');
+			addInfoLog('The transaction did not generate any output notes.');
+			addInfoLog(`The ${note.name} Note was consumed.`);
+		} catch (error) {
+			addErrorLog(`Error consuming note: ${error}`);
 		}
 	};
 
+	const setAccountScript = useCallback(
+		(script: string) => {
+			const updatedAccount = { ...selectedAccount, script };
+			setSelectedAccount(updatedAccount);
+			setAccounts((prev) =>
+				prev.map((account) => (account.id === selectedAccount.id ? updatedAccount : account))
+			);
+		},
+		[selectedAccount]
+	);
+
 	return (
 		<MidenContext.Provider
-			value={{ notes, consumeNote, assets, consoleLogs, addInfoLog, addErrorLog, isInitialized }}
+			value={{
+				accounts,
+				selectedAccount,
+				notes,
+				consumeNote: consumeNoteHandler,
+				consoleLogs,
+				addInfoLog,
+				addErrorLog,
+				isInitialized,
+				setAccountScript,
+				toggleWalletComponent,
+				toggleAuthComponent,
+				selectAccount
+			}}
 		>
 			{children}
 		</MidenContext.Provider>
@@ -158,30 +190,4 @@ export const useMiden = () => {
 		throw new Error('useMiden must be used within a MidenContextProvider');
 	}
 	return context;
-};
-
-const createNote = ({
-	account,
-	faucetId,
-	amount,
-	inputs,
-	script,
-	name
-}: {
-	account: ClientAccount;
-	amount: bigint;
-	inputs: BigUint64Array;
-	script: string;
-	faucetId: bigint;
-	name: string;
-}): Note => {
-	const note = account.create_note(faucetId, inputs, script, amount);
-
-	return {
-		id: note.id(),
-		name,
-		script,
-		isConsumed: false,
-		wasmNote: note
-	};
 };
