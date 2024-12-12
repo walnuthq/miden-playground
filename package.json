@@ -4,7 +4,7 @@
 	"private": true,
 	"scripts": {
 		"dev": "next dev --turbopack",
-		"wasm:build": "cd miden-wasm && wasm-pack build --target web --out-dir pkg --release && rm ./pkg/.gitignore && cd .. && npm install --force",
+		"wasm:build": "cd miden-wasm && wasm-pack build --target web --out-dir pkg --release && rm ./pkg/.gitignore && cd .. && npm install",
 		"pages:build": "npx @cloudflare/next-on-pages",
 		"build": "next build",
 		"start": "next start",
@@ -24,8 +24,8 @@
 		"miden-wasm": "file:miden-wasm/pkg",
 		"monaco-editor": "^0.52.2",
 		"next": "15.0.3",
-		"react": "19.0.0-rc-66855b96-20241106",
-		"react-dom": "19.0.0-rc-66855b96-20241106",
+		"react": "^18",
+		"react-dom": "^18",
 		"tailwind-merge": "^2.5.5",
 		"tailwindcss-animate": "^1.0.7"
 	},
