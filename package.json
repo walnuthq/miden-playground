@@ -26,6 +26,7 @@
 		"next": "15.0.3",
 		"react": "^18",
 		"react-dom": "^18",
+		"react-resizable-panels": "^2.1.7",
 		"tailwind-merge": "^2.5.5",
 		"tailwindcss-animate": "^1.0.7"
 	},

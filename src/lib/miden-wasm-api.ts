@@ -1,21 +1,23 @@
-import { AssetWrapper, consume_note } from 'miden-wasm';
-import { Account, Asset, Note } from '@/lib/types';
+import { AssetWrapper, consume_note, generate_account_id } from 'miden-wasm';
+import { Account, Note, TransactionResult } from '@/lib/types';
 
 export function consumeNote({
-	sender,
+	senderId,
+	senderScript,
 	receiver,
 	note,
 	transactionScript
 }: {
-	sender: Account;
+	senderId: bigint;
+	senderScript: string;
 	receiver: Account;
 	note: Note;
 	transactionScript: string;
-}): { assets: Asset[] } {
-	const result = consume_note(
+}): TransactionResult {
+	return consume_note(
 		transactionScript,
-		sender.idBigInt,
-		sender.script,
+		senderId,
+		senderScript,
 		receiver.script,
 		receiver.secretKey,
 		receiver.idBigInt,
@@ -26,6 +28,8 @@ export function consumeNote({
 		note.inputs,
 		note.script
 	);
+}
 
-	return { assets: result.assets };
+export function generateAccountId(): bigint {
+	return generate_account_id();
 }

@@ -162,6 +162,13 @@ function getStringFromWasm0(ptr, len) {
     ptr = ptr >>> 0;
     return cachedTextDecoder.decode(getUint8ArrayMemory0().subarray(ptr, ptr + len));
 }
+/**
+ * @returns {bigint}
+ */
+export function generate_account_id() {
+    const ret = wasm.generate_account_id();
+    return BigInt.asUintN(64, ret);
+}
 
 function passArray8ToWasm0(arg, malloc) {
     const ptr = malloc(arg.length * 1, 1) >>> 0;

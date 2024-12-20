@@ -29,7 +29,7 @@ use miden_lib::{
     transaction::TransactionKernel,
 };
 use miden_objects::{
-    accounts::{Account, AccountComponent, AccountId, StorageSlot},
+    accounts::{Account, AccountComponent, AccountHeader, AccountId, AccountType, StorageSlot},
     assets::{Asset, AssetVault, FungibleAsset},
     crypto::dsa::rpo_falcon512::SecretKey,
     notes::{
@@ -205,7 +205,7 @@ impl From<AssetWrapper> for Asset {
     }
 }
 
-fn account_to_js_value(account: &Account) -> JsValue {
+fn account_to_js_value(account: &Account, final_account: &AccountHeader) -> JsValue {
     let assets = account.vault().assets();
     let assets_array = js_sys::Array::new();
 
@@ -246,9 +246,35 @@ fn account_to_js_value(account: &Account) -> JsValue {
         assets_array.push(&asset_obj);
     }
 
+    let account_hash = final_account.hash().to_hex();
+    let code_commitment = final_account.code_commitment().to_hex();
+    let storage_commitment = final_account.storage_commitment().to_hex();
+    let vault_root = final_account.vault_root().to_hex();
+    let nonce = final_account.nonce().as_int();
+
     let obj = js_sys::Object::new();
     js_sys::Reflect::set(&obj, &"assets".into(), &assets_array).unwrap();
+    js_sys::Reflect::set(&obj, &"accountHash".into(), &JsValue::from(account_hash)).unwrap();
+    js_sys::Reflect::set(
+        &obj,
+        &"codeCommitment".into(),
+        &JsValue::from(code_commitment),
+    )
+    .unwrap();
+    js_sys::Reflect::set(
+        &obj,
+        &"storageCommitment".into(),
+        &JsValue::from(storage_commitment),
+    )
+    .unwrap();
+    js_sys::Reflect::set(&obj, &"vaultRoot".into(), &JsValue::from(vault_root)).unwrap();
+    js_sys::Reflect::set(&obj, &"nonce".into(), &JsValue::from(nonce)).unwrap();
     obj.into()
+}
+
+#[wasm_bindgen]
+pub fn generate_account_id() -> u64 {
+    AccountId::new_dummy([0_u8; 32], AccountType::RegularAccountUpdatableCode).into()
 }
 
 #[wasm_bindgen]
@@ -367,5 +393,7 @@ pub fn consume_note(
             format!("Account delta cannot be applied: {:?}", err)
         })?;
 
-    Ok(account_to_js_value(&receiver_account))
+    let final_account = executed_transaction.final_account();
+
+    Ok(account_to_js_value(&receiver_account, &final_account))
 }
