@@ -9,94 +9,186 @@ import React, {
 	useState
 } from 'react';
 import init from 'miden-wasm';
-import { Transaction } from '@/lib/types';
-import { TRANSACTION_SCRIPT } from '@/lib/consts/transaction';
+import { Account, EditorFiles, ExecutionOutput, Note } from '@/lib/types';
+import { createP2IDNote, defaultAccounts, SYSTEM_ACCOUNT_ID } from '@/lib/consts/defaults';
 import { consumeNote } from '@/lib/miden-wasm-api';
-import { defaultTransaction, defaultTransactions, SYSTEM_ACCOUNT_ID } from '@/lib/consts/defaults';
 import { ACCOUNT_SCRIPT } from '@/lib/consts';
+import { TRANSACTION_SCRIPT } from '@/lib/consts/transaction';
+import { convertToBigUint64Array } from '@/lib/utils';
+
+type Tabs = 'transaction' | 'accounts' | 'notes';
 
 interface MidenContextProps {
 	isInitialized: boolean;
-	transactions: Record<string, Transaction>;
-	selectedTransactionId: string | null;
-	selectedTransaction: Transaction | null;
-	runTransaction: () => void;
-	createTransaction: () => void;
-	selectTransaction: (transactionId: string) => void;
+	files: EditorFiles;
+	selectedFileId: string | null;
+	selectedTab: Tabs;
+	accounts: Record<string, Account>;
+	selectedAccountId: string;
+	notes: Record<string, Note>;
+	selectedNoteId: string;
+	selectedTransactionAccountId: string | null;
+	selectedTransactionNotesIds: string[];
+	executionOutput: ExecutionOutput | null;
+	setExecutionOutput: (output: ExecutionOutput) => void;
+	selectTransactionNote: (noteId: string) => void;
+	selectTransactionAccount: (accountId: string) => void;
+	selectAccount: (accountId: string) => void;
+	selectNote: (noteId: string) => void;
+	selectFile: (fileId: string) => void;
+	closeFile: (fileId: string) => void;
+	selectTab: (tab: Tabs) => void;
+	executeTransaction: () => void;
 }
 
 export const MidenContext = createContext<MidenContextProps>({
 	isInitialized: false,
-	transactions: {},
-	selectedTransactionId: null,
-	selectedTransaction: null,
-	runTransaction: () => {},
-	createTransaction: () => {},
-	selectTransaction: () => {}
+	files: {},
+	selectedFileId: null,
+	selectedTab: 'transaction',
+	accounts: {},
+	selectedAccountId: '',
+	notes: {},
+	selectedNoteId: '',
+	selectedTransactionAccountId: null,
+	selectedTransactionNotesIds: [],
+	executionOutput: null,
+	setExecutionOutput: () => {},
+	selectTransactionAccount: () => {},
+	selectTransactionNote: () => {},
+	selectAccount: () => {},
+	selectNote: () => {},
+	selectFile: () => {},
+	closeFile: () => {},
+	selectTab: () => {},
+	executeTransaction: () => {}
 });
 
 export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
 	const [isInitialized, setIsInitialized] = useState(false);
 
-	const [transactions, setTransactions] = useState<Record<string, Transaction>>({});
-	const [selectedTransactionId, setSelectedTransactionId] = useState<string | null>(null);
+	const [files, setFiles] = useState<EditorFiles>({});
+	const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
+	const [selectedTab, setSelectedTab] = useState<Tabs>('transaction');
+	const [accounts, setAccounts] = useState<Record<string, Account>>({});
+	const [selectedAccountId, setSelectedAccountId] = useState<string>('');
+	const [notes, setNotes] = useState<Record<string, Note>>({});
+	const [selectedNoteId, setSelectedNoteId] = useState<string>('');
+	const [selectedTransactionAccountId, setSelectedTransactionAccountId] = useState<string | null>(
+		null
+	);
+	const [selectedTransactionNotesIds, setSelectedTransactionNotesIds] = useState<string[]>([]);
+	const [executionOutput, setExecutionOutput] = useState<ExecutionOutput | null>(null);
+
+	const selectTransactionNote = useCallback((noteId: string) => {
+		setSelectedTransactionNotesIds((prev) => {
+			if (prev.includes(noteId)) {
+				return prev;
+			}
+			return [...prev, noteId];
+		});
+	}, []);
+
+	const selectTransactionAccount = useCallback((accountId: string) => {
+		setSelectedTransactionAccountId(accountId);
+	}, []);
+
+	const selectAccount = useCallback((accountId: string) => {
+		setSelectedAccountId(accountId);
+	}, []);
+
+	const selectNote = useCallback((noteId: string) => {
+		setSelectedNoteId(noteId);
+	}, []);
+
+	const selectTab = useCallback((tab: Tabs) => {
+		setSelectedTab(tab);
+	}, []);
+
+	const selectFile = useCallback((fileId: string) => {
+		setFiles((prev) => ({
+			...prev,
+			[fileId]: { ...prev[fileId], isOpen: true }
+		}));
+		setSelectedFileId(fileId);
+	}, []);
+
+	const closeFile = useCallback(
+		(fileId: string) => {
+			setFiles((prev) => ({
+				...prev,
+				[fileId]: { ...prev[fileId], isOpen: false }
+			}));
+			if (selectedFileId === fileId) {
+				setSelectedFileId(null);
+			}
+		},
+		[selectedFileId]
+	);
+
+	const executeTransaction = useCallback(() => {
+		if (!selectedTransactionAccountId) return;
+		const account = accounts[selectedTransactionAccountId];
+		const note = notes[selectedTransactionNotesIds[0]];
+		const noteInputs = convertToBigUint64Array(JSON.parse(files[note.inputFileId].content));
+		const output = consumeNote({
+			senderId: SYSTEM_ACCOUNT_ID,
+			senderScript: ACCOUNT_SCRIPT,
+			receiver: account,
+			receiverScript: files[account.scriptFileId].content,
+			note,
+			noteScript: files[note.scriptFileId].content,
+			noteInputs,
+			transactionScript: TRANSACTION_SCRIPT
+		});
+		setExecutionOutput(output);
+	}, [accounts, files, notes, selectedTransactionAccountId, selectedTransactionNotesIds]);
 
 	useEffect(() => {
 		init()
 			.then(() => {
 				console.log('WASM initialized successfully');
+				const { accounts, newFiles: accountFiles } = defaultAccounts();
+				console.log(' accounts', accounts);
+				setAccounts(accounts);
+				const defaultAccount = Object.values(accounts)[0];
+				setSelectedAccountId(defaultAccount.id);
+				const { note, newFiles: noteFiles } = createP2IDNote({
+					forAccountId: defaultAccount.idBigInt
+				});
+				setFiles({ ...accountFiles, ...noteFiles });
+				setNotes({ [note.id]: note });
+				setSelectedNoteId(note.id);
 				setIsInitialized(true);
-				setTransactions(defaultTransactions());
 			})
 			.catch((error: unknown) => {
 				alert(`Failed to initialize WASM: ${error}`);
 			});
 	}, []);
 
-	const createTransaction = useCallback(() => {
-		const transaction = defaultTransaction(Object.keys(transactions).length);
-		setTransactions((prev) => ({
-			...prev,
-			[transaction.id]: transaction
-		}));
-	}, [transactions]);
-
-	const selectTransaction = useCallback((transactionId: string) => {
-		setSelectedTransactionId(transactionId);
-	}, []);
-
-	const runTransaction = useCallback(() => {
-		if (!selectedTransactionId) return;
-		const transaction = transactions[selectedTransactionId];
-		if (!transaction) return;
-		console.log(transaction);
-		const result = consumeNote({
-			senderId: SYSTEM_ACCOUNT_ID,
-			senderScript: ACCOUNT_SCRIPT,
-			receiver: transaction.accounts[0],
-			note: transaction.notes[0],
-			transactionScript: TRANSACTION_SCRIPT
-		});
-		console.log(result);
-		setTransactions((prev) => ({
-			...prev,
-			[transaction.id]: {
-				...transaction,
-				result
-			}
-		}));
-	}, [transactions, selectedTransactionId]);
-
 	return (
 		<MidenContext.Provider
 			value={{
 				isInitialized,
-				transactions,
-				selectedTransactionId,
-				selectedTransaction: selectedTransactionId ? transactions[selectedTransactionId] : null,
-				createTransaction,
-				selectTransaction,
-				runTransaction
+				files,
+				selectedFileId,
+				selectedTab,
+				accounts,
+				selectedAccountId,
+				notes,
+				selectedNoteId,
+				selectedTransactionAccountId,
+				selectedTransactionNotesIds,
+				executionOutput,
+				setExecutionOutput,
+				selectTransactionAccount,
+				selectTransactionNote,
+				selectAccount,
+				selectNote,
+				selectFile,
+				closeFile,
+				selectTab,
+				executeTransaction
 			}}
 		>
 			{children}

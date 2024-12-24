@@ -205,6 +205,25 @@ impl From<AssetWrapper> for Asset {
     }
 }
 
+#[wasm_bindgen]
+pub struct NoteWrapper {
+    note_assets: Vec<AssetWrapper>,
+    note_inputs: Vec<u64>,
+    note_script: String,
+}
+
+#[wasm_bindgen]
+impl NoteWrapper {
+    #[wasm_bindgen(constructor)]
+    pub fn new(note_assets: Vec<AssetWrapper>, note_inputs: Vec<u64>, note_script: String) -> Self {
+        Self {
+            note_assets,
+            note_inputs,
+            note_script,
+        }
+    }
+}
+
 fn account_to_js_value(account: &Account, final_account: &AccountHeader) -> JsValue {
     let assets = account.vault().assets();
     let assets_array = js_sys::Array::new();
@@ -273,8 +292,9 @@ fn account_to_js_value(account: &Account, final_account: &AccountHeader) -> JsVa
 }
 
 #[wasm_bindgen]
-pub fn generate_account_id() -> u64 {
-    AccountId::new_dummy([0_u8; 32], AccountType::RegularAccountUpdatableCode).into()
+pub fn generate_account_id(seed: Vec<u8>) -> u64 {
+    let seed_array: [u8; 32] = seed.try_into().expect("seed must be 32 bytes");
+    AccountId::new_dummy(seed_array, AccountType::RegularAccountUpdatableCode).into()
 }
 
 #[wasm_bindgen]

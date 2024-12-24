@@ -1,35 +1,43 @@
 import { AssetWrapper, consume_note, generate_account_id } from 'miden-wasm';
-import { Account, Note, TransactionResult } from '@/lib/types';
+import { Account, Note, ExecutionOutput } from '@/lib/types';
 
 export function consumeNote({
 	senderId,
 	senderScript,
 	receiver,
+	receiverScript,
 	note,
+	noteScript,
+	noteInputs,
 	transactionScript
 }: {
 	senderId: bigint;
 	senderScript: string;
 	receiver: Account;
+	receiverScript: string;
 	note: Note;
+	noteScript: string;
+	noteInputs: BigUint64Array;
 	transactionScript: string;
-}): TransactionResult {
+}): ExecutionOutput {
 	return consume_note(
 		transactionScript,
 		senderId,
 		senderScript,
-		receiver.script,
+		receiverScript,
 		receiver.secretKey,
 		receiver.idBigInt,
 		receiver.assets.map((a) => new AssetWrapper(a.faucetId, a.amount)),
 		receiver.isWallet,
 		receiver.isAuth,
 		note.assets.map((a) => new AssetWrapper(a.faucetId, a.amount)),
-		note.inputs,
-		note.script
+		noteInputs,
+		noteScript
 	);
 }
 
 export function generateAccountId(): bigint {
-	return generate_account_id();
+	const seed = new Uint8Array(32);
+	window.crypto.getRandomValues(seed);
+	return generate_account_id(seed);
 }
