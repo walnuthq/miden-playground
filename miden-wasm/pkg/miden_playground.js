@@ -221,12 +221,10 @@ function takeFromExternrefTable0(idx) {
  * @param {(AssetWrapper)[]} receiver_assets
  * @param {boolean} receiver_wallet_enabled
  * @param {boolean} receiver_auth_enabled
- * @param {(AssetWrapper)[]} note_assets
- * @param {BigUint64Array} note_inputs
- * @param {string} note_script
+ * @param {(NoteWrapper)[]} notes
  * @returns {any}
  */
-export function consume_note(transaction_script, sender_account_id, sender_account_code, receiver_account_code, receiver_secret_key, receiver_account_id, receiver_assets, receiver_wallet_enabled, receiver_auth_enabled, note_assets, note_inputs, note_script) {
+export function consume_notes(transaction_script, sender_account_id, sender_account_code, receiver_account_code, receiver_secret_key, receiver_account_id, receiver_assets, receiver_wallet_enabled, receiver_auth_enabled, notes) {
     const ptr0 = passStringToWasm0(transaction_script, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
     const len0 = WASM_VECTOR_LEN;
     const ptr1 = passStringToWasm0(sender_account_code, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
@@ -237,13 +235,9 @@ export function consume_note(transaction_script, sender_account_id, sender_accou
     const len3 = WASM_VECTOR_LEN;
     const ptr4 = passArrayJsValueToWasm0(receiver_assets, wasm.__wbindgen_malloc);
     const len4 = WASM_VECTOR_LEN;
-    const ptr5 = passArrayJsValueToWasm0(note_assets, wasm.__wbindgen_malloc);
+    const ptr5 = passArrayJsValueToWasm0(notes, wasm.__wbindgen_malloc);
     const len5 = WASM_VECTOR_LEN;
-    const ptr6 = passArray64ToWasm0(note_inputs, wasm.__wbindgen_malloc);
-    const len6 = WASM_VECTOR_LEN;
-    const ptr7 = passStringToWasm0(note_script, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-    const len7 = WASM_VECTOR_LEN;
-    const ret = wasm.consume_note(ptr0, len0, sender_account_id, ptr1, len1, ptr2, len2, ptr3, len3, receiver_account_id, ptr4, len4, receiver_wallet_enabled, receiver_auth_enabled, ptr5, len5, ptr6, len6, ptr7, len7);
+    const ret = wasm.consume_notes(ptr0, len0, sender_account_id, ptr1, len1, ptr2, len2, ptr3, len3, receiver_account_id, ptr4, len4, receiver_wallet_enabled, receiver_auth_enabled, ptr5, len5);
     if (ret[2]) {
         throw takeFromExternrefTable0(ret[1]);
     }
@@ -318,6 +312,13 @@ const NoteWrapperFinalization = (typeof FinalizationRegistry === 'undefined')
 
 export class NoteWrapper {
 
+    static __unwrap(jsValue) {
+        if (!(jsValue instanceof NoteWrapper)) {
+            return 0;
+        }
+        return jsValue.__destroy_into_raw();
+    }
+
     __destroy_into_raw() {
         const ptr = this.__wbg_ptr;
         this.__wbg_ptr = 0;
@@ -330,16 +331,16 @@ export class NoteWrapper {
         wasm.__wbg_notewrapper_free(ptr, 0);
     }
     /**
-     * @param {(AssetWrapper)[]} note_assets
-     * @param {BigUint64Array} note_inputs
-     * @param {string} note_script
+     * @param {(AssetWrapper)[]} assets
+     * @param {BigUint64Array} inputs
+     * @param {string} script
      */
-    constructor(note_assets, note_inputs, note_script) {
-        const ptr0 = passArrayJsValueToWasm0(note_assets, wasm.__wbindgen_malloc);
+    constructor(assets, inputs, script) {
+        const ptr0 = passArrayJsValueToWasm0(assets, wasm.__wbindgen_malloc);
         const len0 = WASM_VECTOR_LEN;
-        const ptr1 = passArray64ToWasm0(note_inputs, wasm.__wbindgen_malloc);
+        const ptr1 = passArray64ToWasm0(inputs, wasm.__wbindgen_malloc);
         const len1 = WASM_VECTOR_LEN;
-        const ptr2 = passStringToWasm0(note_script, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const ptr2 = passStringToWasm0(script, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len2 = WASM_VECTOR_LEN;
         const ret = wasm.notewrapper_new(ptr0, len0, ptr1, len1, ptr2, len2);
         this.__wbg_ptr = ret >>> 0;
@@ -395,6 +396,10 @@ function __wbg_get_imports() {
     };
     imports.wbg.__wbg_new_688846f374351c92 = function() {
         const ret = new Object();
+        return ret;
+    };
+    imports.wbg.__wbg_notewrapper_unwrap = function(arg0) {
+        const ret = NoteWrapper.__unwrap(arg0);
         return ret;
     };
     imports.wbg.__wbg_push_6edad0df4b546b2c = function(arg0, arg1) {

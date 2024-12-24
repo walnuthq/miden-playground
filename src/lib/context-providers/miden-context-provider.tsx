@@ -10,7 +10,7 @@ import React, {
 } from 'react';
 import init from 'miden-wasm';
 import { Account, EditorFiles, ExecutionOutput, Note } from '@/lib/types';
-import { createP2IDNote, defaultAccounts, SYSTEM_ACCOUNT_ID } from '@/lib/consts/defaults';
+import { defaultAccounts, defaultNotes, SYSTEM_ACCOUNT_ID } from '@/lib/consts/defaults';
 import { consumeNote } from '@/lib/miden-wasm-api';
 import { ACCOUNT_SCRIPT } from '@/lib/consts';
 import { TRANSACTION_SCRIPT } from '@/lib/consts/transaction';
@@ -129,16 +129,19 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	const executeTransaction = useCallback(() => {
 		if (!selectedTransactionAccountId) return;
 		const account = accounts[selectedTransactionAccountId];
-		const note = notes[selectedTransactionNotesIds[0]];
-		const noteInputs = convertToBigUint64Array(JSON.parse(files[note.inputFileId].content));
+		const transactionNotes = selectedTransactionNotesIds.map((noteId) => {
+			return {
+				note: notes[noteId],
+				noteScript: files[notes[noteId].scriptFileId].content,
+				noteInputs: convertToBigUint64Array(JSON.parse(files[notes[noteId].inputFileId].content))
+			};
+		});
 		const output = consumeNote({
 			senderId: SYSTEM_ACCOUNT_ID,
 			senderScript: ACCOUNT_SCRIPT,
 			receiver: account,
 			receiverScript: files[account.scriptFileId].content,
-			note,
-			noteScript: files[note.scriptFileId].content,
-			noteInputs,
+			notes: transactionNotes,
 			transactionScript: TRANSACTION_SCRIPT
 		});
 		setExecutionOutput(output);
@@ -149,16 +152,13 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			.then(() => {
 				console.log('WASM initialized successfully');
 				const { accounts, newFiles: accountFiles } = defaultAccounts();
-				console.log(' accounts', accounts);
 				setAccounts(accounts);
 				const defaultAccount = Object.values(accounts)[0];
 				setSelectedAccountId(defaultAccount.id);
-				const { note, newFiles: noteFiles } = createP2IDNote({
-					forAccountId: defaultAccount.idBigInt
-				});
+				const { notes, newFiles: noteFiles } = defaultNotes(defaultAccount.idBigInt);
 				setFiles({ ...accountFiles, ...noteFiles });
-				setNotes({ [note.id]: note });
-				setSelectedNoteId(note.id);
+				setNotes(notes);
+				setSelectedNoteId(Object.values(notes)[0].id);
 				setIsInitialized(true);
 			})
 			.catch((error: unknown) => {

@@ -1,4 +1,4 @@
-import { AssetWrapper, consume_note, generate_account_id } from 'miden-wasm';
+import { AssetWrapper, consume_notes, generate_account_id, NoteWrapper } from 'miden-wasm';
 import { Account, Note, ExecutionOutput } from '@/lib/types';
 
 export function consumeNote({
@@ -6,21 +6,25 @@ export function consumeNote({
 	senderScript,
 	receiver,
 	receiverScript,
-	note,
-	noteScript,
-	noteInputs,
+	notes,
 	transactionScript
 }: {
 	senderId: bigint;
 	senderScript: string;
 	receiver: Account;
 	receiverScript: string;
-	note: Note;
-	noteScript: string;
-	noteInputs: BigUint64Array;
+	notes: { note: Note; noteScript: string; noteInputs: BigUint64Array }[];
 	transactionScript: string;
 }): ExecutionOutput {
-	return consume_note(
+	const notesWrapper = notes.map(
+		({ note, noteScript, noteInputs }) =>
+			new NoteWrapper(
+				note.assets.map((a) => new AssetWrapper(a.faucetId, a.amount)),
+				noteInputs,
+				noteScript
+			)
+	);
+	return consume_notes(
 		transactionScript,
 		senderId,
 		senderScript,
@@ -30,9 +34,7 @@ export function consumeNote({
 		receiver.assets.map((a) => new AssetWrapper(a.faucetId, a.amount)),
 		receiver.isWallet,
 		receiver.isAuth,
-		note.assets.map((a) => new AssetWrapper(a.faucetId, a.amount)),
-		noteInputs,
-		noteScript
+		notesWrapper
 	);
 }
 

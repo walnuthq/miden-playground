@@ -1,4 +1,4 @@
-import { Account, EditorFiles, Note } from '@/lib/types';
+import { Account, Asset, EditorFiles, Note } from '@/lib/types';
 import { ACCOUNT_SCRIPT } from './account';
 import { P2ID_SCRIPT } from './p2id';
 import { SECRET_KEY } from './secret-key';
@@ -51,7 +51,15 @@ export function defaultAccounts(): {
 	};
 }
 
-export function createP2IDNote({ forAccountId }: { forAccountId: bigint }): {
+export function createP2IDNote({
+	forAccountId,
+	assets,
+	name
+}: {
+	forAccountId: bigint;
+	assets: Asset[];
+	name: string;
+}): {
 	note: Note;
 	newFiles: EditorFiles;
 } {
@@ -61,22 +69,34 @@ export function createP2IDNote({ forAccountId }: { forAccountId: bigint }): {
 	const newFiles: EditorFiles = {
 		[scriptFileId]: {
 			id: scriptFileId,
-			name: 'Note script/P2ID',
+			name: `Note script/${name}`,
 			content: P2ID_SCRIPT,
 			isOpen: false
 		},
 		[inputFileId]: {
 			id: inputFileId,
-			name: 'Note Input',
+			name: `Note Input/${name}`,
 			content: JSON.stringify(['0x' + forAccountId.toString(16)], null, 2),
 			isOpen: false
 		}
 	};
 	const note: Note = {
 		id: noteId,
-		name: 'P2ID Note',
+		name,
 		scriptFileId,
 		isConsumed: false,
+		assets,
+		inputFileId
+	};
+	return { note, newFiles };
+}
+
+export function defaultNotes(forAccountId: bigint): {
+	notes: Record<string, Note>;
+	newFiles: EditorFiles;
+} {
+	const noteA = createP2IDNote({
+		forAccountId,
 		assets: [
 			{
 				faucetId: DEFAULT_FAUCET_IDS[0],
@@ -84,8 +104,24 @@ export function createP2IDNote({ forAccountId }: { forAccountId: bigint }): {
 				amount: 100n
 			}
 		],
-		// inputs: new BigUint64Array([forAccountId])
-		inputFileId
+		name: 'P2ID 1'
+	});
+	const noteB = createP2IDNote({
+		forAccountId,
+		assets: [
+			{
+				faucetId: DEFAULT_FAUCET_IDS[0],
+				faucetIdHex: DEFAULT_FAUCET_IDS[0].toString(16),
+				amount: 200n
+			}
+		],
+		name: 'P2ID 2'
+	});
+	return {
+		notes: {
+			[noteA.note.id]: noteA.note,
+			[noteB.note.id]: noteB.note
+		},
+		newFiles: { ...noteA.newFiles, ...noteB.newFiles }
 	};
-	return { note, newFiles };
 }

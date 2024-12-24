@@ -207,19 +207,19 @@ impl From<AssetWrapper> for Asset {
 
 #[wasm_bindgen]
 pub struct NoteWrapper {
-    note_assets: Vec<AssetWrapper>,
-    note_inputs: Vec<u64>,
-    note_script: String,
+    assets: Vec<AssetWrapper>,
+    inputs: Vec<u64>,
+    script: String,
 }
 
 #[wasm_bindgen]
 impl NoteWrapper {
     #[wasm_bindgen(constructor)]
-    pub fn new(note_assets: Vec<AssetWrapper>, note_inputs: Vec<u64>, note_script: String) -> Self {
+    pub fn new(assets: Vec<AssetWrapper>, inputs: Vec<u64>, script: String) -> Self {
         Self {
-            note_assets,
-            note_inputs,
-            note_script,
+            assets,
+            inputs,
+            script,
         }
     }
 }
@@ -298,7 +298,7 @@ pub fn generate_account_id(seed: Vec<u8>) -> u64 {
 }
 
 #[wasm_bindgen]
-pub fn consume_note(
+pub fn consume_notes(
     transaction_script: &str,
     sender_account_id: u64,
     sender_account_code: &str,
@@ -308,43 +308,48 @@ pub fn consume_note(
     receiver_assets: Vec<AssetWrapper>,
     receiver_wallet_enabled: bool,
     receiver_auth_enabled: bool,
-    note_assets: Vec<AssetWrapper>,
-    note_inputs: Vec<u64>,
-    note_script: &str,
+    notes: Vec<NoteWrapper>,
 ) -> Result<JsValue, JsValue> {
-    let note_assets: Vec<Asset> = note_assets
-        .into_iter()
-        .map(|asset_wrapper| {
-            let faucet_id = AccountId::try_from(asset_wrapper.faucet_id)
-                .map_err(|err| format!("faucet id is wrong: {:?}", err))?;
-
-            let fungible_asset: Asset = FungibleAsset::new(faucet_id, asset_wrapper.amount)
-                .map_err(|err| format!("fungible asset is wrong: {:?}", err))?
-                .into();
-
-            Ok(fungible_asset)
-        })
-        .collect::<Result<Vec<Asset>, String>>()?;
-
-    let note_inputs: Vec<Felt> = note_inputs.iter().map(|&x| Felt::new(x)).collect();
-
     let sender_account_id = AccountId::try_from(sender_account_id)
         .map_err(|err| format!("Sender Account id is wrong: {:?}", err))?;
 
     let sender_account_code_library = create_account_component_library(sender_account_code)
         .map_err(|err| format!("Account library cannot be built: {:?}", err))?;
 
-    let note = get_note_with_fungible_asset_and_script(
-        note_assets,
-        note_script,
-        sender_account_id,
-        note_inputs,
-        sender_account_code_library.clone(),
-    )
-    .map_err(|err| {
-        console::log_1(&format!("Note creation failed: {:?}", err).into());
-        format!("Note cannot be built: {:?}", err)
-    })?;
+    let notes = notes
+        .into_iter()
+        .map(|note| {
+            let note_assets: Vec<Asset> = note
+                .assets
+                .into_iter()
+                .map(|asset_wrapper| {
+                    let faucet_id = AccountId::try_from(asset_wrapper.faucet_id)
+                        .map_err(|err| format!("faucet id is wrong: {:?}", err))?;
+
+                    let fungible_asset: Asset = FungibleAsset::new(faucet_id, asset_wrapper.amount)
+                        .map_err(|err| format!("fungible asset is wrong: {:?}", err))?
+                        .into();
+
+                    Ok(fungible_asset)
+                })
+                .collect::<Result<Vec<Asset>, String>>()?;
+            let note_inputs: Vec<Felt> = note.inputs.iter().map(|&x| Felt::new(x)).collect();
+
+            let note = get_note_with_fungible_asset_and_script(
+                note_assets,
+                note.script.as_str(),
+                sender_account_id,
+                note_inputs,
+                sender_account_code_library.clone(),
+            )
+            .map_err(|err| {
+                console::log_1(&format!("Note creation failed: {:?}", err).into());
+                format!("Note cannot be built: {:?}", err)
+            })?;
+
+            Ok(note)
+        })
+        .collect::<Result<Vec<Note>, String>>()?;
 
     let receiver_account_code_library = create_account_component_library(receiver_account_code)
         .map_err(|err| format!("Account library cannot be built: {:?}", err))?;
@@ -384,7 +389,7 @@ pub fn consume_note(
     let tx_args_target = TransactionArgs::with_tx_script(tx_script);
 
     let tx_context = TransactionContextBuilder::new(receiver_account.clone())
-        .input_notes(vec![note.clone()])
+        .input_notes(notes.clone())
         .build();
 
     let executor =

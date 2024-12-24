@@ -1,7 +1,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export function generate_account_id(seed: Uint8Array): bigint;
-export function consume_note(transaction_script: string, sender_account_id: bigint, sender_account_code: string, receiver_account_code: string, receiver_secret_key: Uint8Array, receiver_account_id: bigint, receiver_assets: (AssetWrapper)[], receiver_wallet_enabled: boolean, receiver_auth_enabled: boolean, note_assets: (AssetWrapper)[], note_inputs: BigUint64Array, note_script: string): any;
+export function consume_notes(transaction_script: string, sender_account_id: bigint, sender_account_code: string, receiver_account_code: string, receiver_secret_key: Uint8Array, receiver_account_id: bigint, receiver_assets: (AssetWrapper)[], receiver_wallet_enabled: boolean, receiver_auth_enabled: boolean, notes: (NoteWrapper)[]): any;
 export class AssetWrapper {
   free(): void;
   constructor(faucet_id: bigint, amount: bigint);
@@ -10,7 +10,7 @@ export class AssetWrapper {
 }
 export class NoteWrapper {
   free(): void;
-  constructor(note_assets: (AssetWrapper)[], note_inputs: BigUint64Array, note_script: string);
+  constructor(assets: (AssetWrapper)[], inputs: BigUint64Array, script: string);
 }
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
@@ -26,7 +26,7 @@ export interface InitOutput {
   readonly __wbg_notewrapper_free: (a: number, b: number) => void;
   readonly notewrapper_new: (a: number, b: number, c: number, d: number, e: number, f: number) => number;
   readonly generate_account_id: (a: number, b: number) => bigint;
-  readonly consume_note: (a: number, b: number, c: bigint, d: number, e: number, f: number, g: number, h: number, i: number, j: bigint, k: number, l: number, m: number, n: number, o: number, p: number, q: number, r: number, s: number, t: number) => [number, number, number];
+  readonly consume_notes: (a: number, b: number, c: bigint, d: number, e: number, f: number, g: number, h: number, i: number, j: bigint, k: number, l: number, m: number, n: number, o: number, p: number) => [number, number, number];
   readonly __wbindgen_exn_store: (a: number) => void;
   readonly __externref_table_alloc: () => number;
   readonly __wbindgen_export_2: WebAssembly.Table;
