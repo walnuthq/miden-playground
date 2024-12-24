@@ -12,7 +12,7 @@ import init from 'miden-wasm';
 import { Account, EditorFiles, ExecutionOutput, Note } from '@/lib/types';
 import { defaultAccounts, defaultNotes, SYSTEM_ACCOUNT_ID } from '@/lib/consts/defaults';
 import { consumeNote } from '@/lib/miden-wasm-api';
-import { ACCOUNT_SCRIPT } from '@/lib/consts';
+import { ACCOUNT_SCRIPT, TRANSACTION_SCRIPT_FILE_ID } from '@/lib/consts';
 import { TRANSACTION_SCRIPT } from '@/lib/consts/transaction';
 import { convertToBigUint64Array } from '@/lib/utils';
 
@@ -67,7 +67,14 @@ export const MidenContext = createContext<MidenContextProps>({
 export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
 	const [isInitialized, setIsInitialized] = useState(false);
 
-	const [files, setFiles] = useState<EditorFiles>({});
+	const [files, setFiles] = useState<EditorFiles>({
+		[TRANSACTION_SCRIPT_FILE_ID]: {
+			id: TRANSACTION_SCRIPT_FILE_ID,
+			name: 'Transaction script',
+			content: TRANSACTION_SCRIPT,
+			isOpen: false
+		}
+	});
 	const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
 	const [selectedTab, setSelectedTab] = useState<Tabs>('transaction');
 	const [accounts, setAccounts] = useState<Record<string, Account>>({});
@@ -142,7 +149,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			receiver: account,
 			receiverScript: files[account.scriptFileId].content,
 			notes: transactionNotes,
-			transactionScript: TRANSACTION_SCRIPT
+			transactionScript: files[TRANSACTION_SCRIPT_FILE_ID].content
 		});
 		setExecutionOutput(output);
 	}, [accounts, files, notes, selectedTransactionAccountId, selectedTransactionNotesIds]);
@@ -156,7 +163,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				const defaultAccount = Object.values(accounts)[0];
 				setSelectedAccountId(defaultAccount.id);
 				const { notes, newFiles: noteFiles } = defaultNotes(defaultAccount.idBigInt);
-				setFiles({ ...accountFiles, ...noteFiles });
+				setFiles((prev) => ({ ...prev, ...accountFiles, ...noteFiles }));
 				setNotes(notes);
 				setSelectedNoteId(Object.values(notes)[0].id);
 				setIsInitialized(true);
