@@ -12,7 +12,14 @@ import init from 'miden-wasm';
 import { Account, EditorFiles, ExecutionOutput, Note } from '@/lib/types';
 import { defaultAccounts, defaultNotes, SYSTEM_ACCOUNT_ID } from '@/lib/consts/defaults';
 import { consumeNote } from '@/lib/miden-wasm-api';
-import { ACCOUNT_SCRIPT, TRANSACTION_SCRIPT_FILE_ID } from '@/lib/consts';
+import {
+	ACCOUNT_AUTH_SCRIPT,
+	ACCOUNT_SCRIPT,
+	ACCOUNT_WALLET_SCRIPT,
+	AUTHENTICATION_COMPONENT_SCRIPT_FILE_ID,
+	TRANSACTION_SCRIPT_FILE_ID,
+	WALLET_COMPONENT_SCRIPT_FILE_ID
+} from '@/lib/consts';
 import { TRANSACTION_SCRIPT } from '@/lib/consts/transaction';
 import { convertToBigUint64Array } from '@/lib/utils';
 
@@ -72,7 +79,25 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			id: TRANSACTION_SCRIPT_FILE_ID,
 			name: 'Transaction script',
 			content: TRANSACTION_SCRIPT,
-			isOpen: false
+			isOpen: false,
+			readonly: true,
+			variant: 'script'
+		},
+		[WALLET_COMPONENT_SCRIPT_FILE_ID]: {
+			id: WALLET_COMPONENT_SCRIPT_FILE_ID,
+			name: 'Wallet component script',
+			content: ACCOUNT_WALLET_SCRIPT,
+			isOpen: false,
+			readonly: true,
+			variant: 'script'
+		},
+		[AUTHENTICATION_COMPONENT_SCRIPT_FILE_ID]: {
+			id: AUTHENTICATION_COMPONENT_SCRIPT_FILE_ID,
+			name: 'Authentication component script',
+			content: ACCOUNT_AUTH_SCRIPT,
+			isOpen: false,
+			readonly: true,
+			variant: 'script'
 		}
 	});
 	const [selectedFileId, setSelectedFileId] = useState<string | null>(null);

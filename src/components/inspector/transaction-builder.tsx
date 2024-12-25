@@ -29,7 +29,7 @@ export const TransactionBuilder: React.FC = () => {
 		<div className="flex flex-col">
 			<DropdownMenu>
 				<DropdownMenuTrigger>
-					<div className="flex flex-row items-center gap-2 text-white h-[54px] px-3">
+					<div className="flex flex-row items-center gap-2 text-white py-2 px-3">
 						<InlineIcon variant="plus-square" className="w-6 h-6 cursor-pointer" />
 						<span>Account</span>
 					</div>
@@ -42,10 +42,12 @@ export const TransactionBuilder: React.FC = () => {
 					))}
 				</DropdownMenuContent>
 			</DropdownMenu>
-			{selectedTransactionAccount && <ListItem name={selectedTransactionAccount.name} level={1} />}
+			{selectedTransactionAccount && (
+				<ListItem name={selectedTransactionAccount.name} isAccount={true} />
+			)}
 			<DropdownMenu>
 				<DropdownMenuTrigger>
-					<div className="flex flex-row items-center gap-2 text-white h-[54px] px-3">
+					<div className="flex flex-row items-center gap-2 text-white py-2 px-3">
 						<InlineIcon variant="plus-square" className="w-6 h-6 cursor-pointer" />
 						<span>Note</span>
 					</div>
@@ -59,51 +61,32 @@ export const TransactionBuilder: React.FC = () => {
 				</DropdownMenuContent>
 			</DropdownMenu>
 			{selectedTransactionNotesIds.map((noteId) => (
-				<ListItem key={noteId} name={notes[noteId].name} level={1} />
+				<ListItem key={noteId} name={notes[noteId].name} />
 			))}
 			<div
-				className="flex flex-row items-center gap-2 text-white h-[54px] px-3 cursor-pointer"
+				className="flex flex-row items-center gap-2 text-white py-2 px-3 cursor-pointer"
 				onClick={() => {
 					selectFile(TRANSACTION_SCRIPT_FILE_ID);
 				}}
 			>
-				<InlineIcon variant="plus-square" className="w-6 h-6" />
+				<InlineIcon variant="file_2" color="white" className="w-5 h-5" />
 				<span>Transaction script</span>
 			</div>
 		</div>
 	);
 };
 
-function ListItem({
-	name,
-	isSelected,
-	isCollapsed,
-	level,
-	switchCollapsed,
-	onClick
-}: {
-	name: string;
-	isSelected?: boolean;
-	isCollapsed?: boolean;
-	level?: number;
-	switchCollapsed?: () => void;
-	onClick?: () => void;
-}) {
+function ListItem({ name, isAccount }: { name: string; isAccount?: boolean }) {
 	return (
 		<div
-			className={`border-b-2 border-dark-miden-700 h-[54px] flex flex-row items-center gap-2 text-white select-none cursor-pointer
-    ${isSelected ? 'bg-dark-miden-800' : ''}
+			className={`ml-10 flex flex-row py-2 items-center gap-2 text-white select-none cursor-pointer
     `}
-			style={{ paddingLeft: `${(level ?? 0) * 20 + 24 + (switchCollapsed ? 0 : 20)}px` }}
-			onClick={onClick}
 		>
-			{switchCollapsed && (
-				<InlineIcon
-					variant="arrow"
-					className={`w-3 h-3 cursor-pointer ${!isCollapsed ? 'rotate-90' : ''}`}
-					onClick={switchCollapsed}
-				/>
-			)}
+			<InlineIcon
+				variant={isAccount ? 'account' : 'file'}
+				className={`w-5 h-5 cursor-pointer`}
+				color="white"
+			/>
 			<span>{name}</span>
 		</div>
 	);

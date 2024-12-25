@@ -13,7 +13,11 @@ export const Toolbar: React.FC = () => {
 			className="h-[54px] bg-dark-miden-800
 							flex flex-row items-center justify-between"
 		>
-			<div className="h-full flex flex-col justify-end overflow-hidden">
+			<div className="h-full flex gap-4 items-end overflow-hidden">
+				<div className="mb-2 ml-4">
+					<InlineIcon variant="left-arrow" color="white" className="w-6 h-6" />
+				</div>
+
 				<ScrollArea>
 					<div className="flex flex-row gap-2">
 						{Object.keys(files)

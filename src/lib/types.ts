@@ -38,6 +38,8 @@ export interface EditorFile {
 	name: string;
 	content: string;
 	isOpen: boolean;
+	variant: 'script' | 'file';
+	readonly: boolean;
 }
 
 export type EditorFiles = Record<string, EditorFile>;

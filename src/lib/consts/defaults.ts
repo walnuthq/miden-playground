@@ -17,7 +17,9 @@ export function createAccount(name: string): { account: Account; newFiles: Edito
 			id: scriptFileId,
 			name: 'Custom component',
 			content: ACCOUNT_SCRIPT,
-			isOpen: false
+			isOpen: false,
+			readonly: false,
+			variant: 'script'
 		}
 	};
 	const account: Account = {
@@ -71,13 +73,17 @@ export function createP2IDNote({
 			id: scriptFileId,
 			name: `Note script/${name}`,
 			content: P2ID_SCRIPT,
-			isOpen: false
+			isOpen: false,
+			readonly: false,
+			variant: 'script'
 		},
 		[inputFileId]: {
 			id: inputFileId,
 			name: `Note Input/${name}`,
 			content: JSON.stringify(['0x' + forAccountId.toString(16)], null, 2),
-			isOpen: false
+			isOpen: false,
+			readonly: true,
+			variant: 'script'
 		}
 	};
 	const note: Note = {
