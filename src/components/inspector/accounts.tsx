@@ -7,9 +7,15 @@ import {
 	WALLET_COMPONENT_SCRIPT_FILE_ID
 } from '@/lib/consts';
 import InlineIcon from '@/components/ui/inline-icon';
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
 
 export function Accounts() {
-	const { accounts, selectedAccountId, selectFile, files } = useMiden();
+	const { accounts, selectedAccountId, selectFile, files, selectAccount } = useMiden();
 	const account = accounts[selectedAccountId];
 	const customComponent = files[account.scriptFileId];
 	const walletComponent = files[WALLET_COMPONENT_SCRIPT_FILE_ID];
@@ -18,15 +24,33 @@ export function Accounts() {
 		<div className="flex flex-col">
 			<div
 				className="h-[54px] border-b-2 border-dark-miden-700 bg-dark-miden-800
-					text-white font-medium flex gap-2 items-center px-3"
+					text-white font-medium flex flex-row justify-between items-center px-3"
 			>
-				<div>
-					<InlineIcon variant="plus-square" className="w-6 h-6 cursor-pointer" />
+				<div className="flex flex-row gap-2 items-center">
+					<div>
+						<InlineIcon variant="plus-square" className="w-6 h-6 cursor-pointer" />
+					</div>
+					{accounts[selectedAccountId].name}
+					<div>
+						<InlineIcon variant="pencil" color={'gray'} className="w-4 h-4 cursor-pointer" />
+					</div>
 				</div>
-				{accounts[selectedAccountId].name}
-				<div>
-					<InlineIcon variant="pencil" color={'gray'} className="w-4 h-4 cursor-pointer" />
-				</div>
+				<DropdownMenu>
+					<DropdownMenuTrigger>
+						<InlineIcon
+							variant="arrow"
+							color={'white'}
+							className="w-4 h-4 cursor-pointer rotate-90"
+						/>
+					</DropdownMenuTrigger>
+					<DropdownMenuContent>
+						{Object.values(accounts).map((account) => (
+							<DropdownMenuItem key={account.id} onClick={() => selectAccount(account.id)}>
+								{account.name}
+							</DropdownMenuItem>
+						))}
+					</DropdownMenuContent>
+				</DropdownMenu>
 			</div>
 			<div className="flex flex-col">
 				<FileItem editorFile={customComponent} onClick={() => selectFile(account.scriptFileId)} />
