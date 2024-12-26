@@ -29,13 +29,17 @@ export function createSwapNote({
 			id: scriptFileId,
 			name: `Note script/${name}`,
 			content: SWAP_SCRIPT,
-			isOpen: false
+			isOpen: false,
+			variant: 'script',
+			readonly: false
 		},
 		[inputFileId]: {
 			id: inputFileId,
 			name: `Note Input/${name}`,
 			content: JSON.stringify(inputs, null, 2),
-			isOpen: false
+			isOpen: false,
+			variant: 'file',
+			readonly: false
 		}
 	};
 	const note: Note = {

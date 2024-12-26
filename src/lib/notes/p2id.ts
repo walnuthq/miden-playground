@@ -23,13 +23,17 @@ export function createP2IDNote({
 			id: scriptFileId,
 			name: `Note script/${name}`,
 			content: P2ID_SCRIPT,
-			isOpen: false
+			isOpen: false,
+			variant: 'script',
+			readonly: false
 		},
 		[inputFileId]: {
 			id: inputFileId,
 			name: `Note Input/${name}`,
 			content: JSON.stringify(['0x' + receiverId.toString(16)], null, 2),
-			isOpen: false
+			isOpen: false,
+			variant: 'file',
+			readonly: false
 		}
 	};
 	const note: Note = {
