@@ -206,6 +206,17 @@ export function generate_account_id(seed) {
     return BigInt.asUintN(64, ret);
 }
 
+/**
+ * @param {Uint8Array} seed
+ * @returns {bigint}
+ */
+export function generate_faucet_id(seed) {
+    const ptr0 = passArray8ToWasm0(seed, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.generate_faucet_id(ptr0, len0);
+    return BigInt.asUintN(64, ret);
+}
+
 function takeFromExternrefTable0(idx) {
     const value = wasm.__wbindgen_export_2.get(idx);
     wasm.__externref_table_dealloc(idx);
@@ -213,45 +224,71 @@ function takeFromExternrefTable0(idx) {
 }
 /**
  * @param {string} transaction_script
- * @param {bigint} sender_account_id
- * @param {string} sender_account_code
  * @param {string} receiver_account_code
  * @param {Uint8Array} receiver_secret_key
  * @param {bigint} receiver_account_id
- * @param {(AssetWrapper)[]} receiver_assets
+ * @param {(AssetData)[]} receiver_assets
  * @param {boolean} receiver_wallet_enabled
  * @param {boolean} receiver_auth_enabled
- * @param {(NoteWrapper)[]} notes
+ * @param {(NoteData)[]} notes
  * @returns {any}
  */
-export function consume_notes(transaction_script, sender_account_id, sender_account_code, receiver_account_code, receiver_secret_key, receiver_account_id, receiver_assets, receiver_wallet_enabled, receiver_auth_enabled, notes) {
+export function execute_transaction(transaction_script, receiver_account_code, receiver_secret_key, receiver_account_id, receiver_assets, receiver_wallet_enabled, receiver_auth_enabled, notes) {
     const ptr0 = passStringToWasm0(transaction_script, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
     const len0 = WASM_VECTOR_LEN;
-    const ptr1 = passStringToWasm0(sender_account_code, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const ptr1 = passStringToWasm0(receiver_account_code, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
     const len1 = WASM_VECTOR_LEN;
-    const ptr2 = passStringToWasm0(receiver_account_code, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const ptr2 = passArray8ToWasm0(receiver_secret_key, wasm.__wbindgen_malloc);
     const len2 = WASM_VECTOR_LEN;
-    const ptr3 = passArray8ToWasm0(receiver_secret_key, wasm.__wbindgen_malloc);
+    const ptr3 = passArrayJsValueToWasm0(receiver_assets, wasm.__wbindgen_malloc);
     const len3 = WASM_VECTOR_LEN;
-    const ptr4 = passArrayJsValueToWasm0(receiver_assets, wasm.__wbindgen_malloc);
+    const ptr4 = passArrayJsValueToWasm0(notes, wasm.__wbindgen_malloc);
     const len4 = WASM_VECTOR_LEN;
-    const ptr5 = passArrayJsValueToWasm0(notes, wasm.__wbindgen_malloc);
-    const len5 = WASM_VECTOR_LEN;
-    const ret = wasm.consume_notes(ptr0, len0, sender_account_id, ptr1, len1, ptr2, len2, ptr3, len3, receiver_account_id, ptr4, len4, receiver_wallet_enabled, receiver_auth_enabled, ptr5, len5);
+    const ret = wasm.execute_transaction(ptr0, len0, ptr1, len1, ptr2, len2, receiver_account_id, ptr3, len3, receiver_wallet_enabled, receiver_auth_enabled, ptr4, len4);
     if (ret[2]) {
         throw takeFromExternrefTable0(ret[1]);
     }
     return takeFromExternrefTable0(ret[0]);
 }
 
-const AssetWrapperFinalization = (typeof FinalizationRegistry === 'undefined')
-    ? { register: () => {}, unregister: () => {} }
-    : new FinalizationRegistry(ptr => wasm.__wbg_assetwrapper_free(ptr >>> 0, 1));
+function _assertClass(instance, klass) {
+    if (!(instance instanceof klass)) {
+        throw new Error(`expected instance of ${klass.name}`);
+    }
+}
 
-export class AssetWrapper {
+function getArrayU64FromWasm0(ptr, len) {
+    ptr = ptr >>> 0;
+    return getBigUint64ArrayMemory0().subarray(ptr / 8, ptr / 8 + len);
+}
+/**
+ * @param {Uint8Array} seed
+ * @param {bigint} sender_account_id
+ * @param {AssetData} requested_asset
+ * @returns {BigUint64Array}
+ */
+export function create_swap_note_inputs(seed, sender_account_id, requested_asset) {
+    const ptr0 = passArray8ToWasm0(seed, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    _assertClass(requested_asset, AssetData);
+    var ptr1 = requested_asset.__destroy_into_raw();
+    const ret = wasm.create_swap_note_inputs(ptr0, len0, sender_account_id, ptr1);
+    if (ret[3]) {
+        throw takeFromExternrefTable0(ret[2]);
+    }
+    var v3 = getArrayU64FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 8, 8);
+    return v3;
+}
+
+const AssetDataFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_assetdata_free(ptr >>> 0, 1));
+
+export class AssetData {
 
     static __unwrap(jsValue) {
-        if (!(jsValue instanceof AssetWrapper)) {
+        if (!(jsValue instanceof AssetData)) {
             return 0;
         }
         return jsValue.__destroy_into_raw();
@@ -260,60 +297,60 @@ export class AssetWrapper {
     __destroy_into_raw() {
         const ptr = this.__wbg_ptr;
         this.__wbg_ptr = 0;
-        AssetWrapperFinalization.unregister(this);
+        AssetDataFinalization.unregister(this);
         return ptr;
     }
 
     free() {
         const ptr = this.__destroy_into_raw();
-        wasm.__wbg_assetwrapper_free(ptr, 0);
+        wasm.__wbg_assetdata_free(ptr, 0);
     }
     /**
      * @returns {bigint}
      */
     get faucet_id() {
-        const ret = wasm.__wbg_get_assetwrapper_faucet_id(this.__wbg_ptr);
+        const ret = wasm.__wbg_get_assetdata_faucet_id(this.__wbg_ptr);
         return BigInt.asUintN(64, ret);
     }
     /**
      * @param {bigint} arg0
      */
     set faucet_id(arg0) {
-        wasm.__wbg_set_assetwrapper_faucet_id(this.__wbg_ptr, arg0);
+        wasm.__wbg_set_assetdata_faucet_id(this.__wbg_ptr, arg0);
     }
     /**
      * @returns {bigint}
      */
     get amount() {
-        const ret = wasm.__wbg_get_assetwrapper_amount(this.__wbg_ptr);
+        const ret = wasm.__wbg_get_assetdata_amount(this.__wbg_ptr);
         return BigInt.asUintN(64, ret);
     }
     /**
      * @param {bigint} arg0
      */
     set amount(arg0) {
-        wasm.__wbg_set_assetwrapper_amount(this.__wbg_ptr, arg0);
+        wasm.__wbg_set_assetdata_amount(this.__wbg_ptr, arg0);
     }
     /**
      * @param {bigint} faucet_id
      * @param {bigint} amount
      */
     constructor(faucet_id, amount) {
-        const ret = wasm.assetwrapper_new(faucet_id, amount);
+        const ret = wasm.assetdata_new(faucet_id, amount);
         this.__wbg_ptr = ret >>> 0;
-        AssetWrapperFinalization.register(this, this.__wbg_ptr, this);
+        AssetDataFinalization.register(this, this.__wbg_ptr, this);
         return this;
     }
 }
 
-const NoteWrapperFinalization = (typeof FinalizationRegistry === 'undefined')
+const NoteDataFinalization = (typeof FinalizationRegistry === 'undefined')
     ? { register: () => {}, unregister: () => {} }
-    : new FinalizationRegistry(ptr => wasm.__wbg_notewrapper_free(ptr >>> 0, 1));
+    : new FinalizationRegistry(ptr => wasm.__wbg_notedata_free(ptr >>> 0, 1));
 
-export class NoteWrapper {
+export class NoteData {
 
     static __unwrap(jsValue) {
-        if (!(jsValue instanceof NoteWrapper)) {
+        if (!(jsValue instanceof NoteData)) {
             return 0;
         }
         return jsValue.__destroy_into_raw();
@@ -322,29 +359,33 @@ export class NoteWrapper {
     __destroy_into_raw() {
         const ptr = this.__wbg_ptr;
         this.__wbg_ptr = 0;
-        NoteWrapperFinalization.unregister(this);
+        NoteDataFinalization.unregister(this);
         return ptr;
     }
 
     free() {
         const ptr = this.__destroy_into_raw();
-        wasm.__wbg_notewrapper_free(ptr, 0);
+        wasm.__wbg_notedata_free(ptr, 0);
     }
     /**
-     * @param {(AssetWrapper)[]} assets
+     * @param {(AssetData)[]} assets
      * @param {BigUint64Array} inputs
      * @param {string} script
+     * @param {bigint} sender_id
+     * @param {string} sender_script
      */
-    constructor(assets, inputs, script) {
+    constructor(assets, inputs, script, sender_id, sender_script) {
         const ptr0 = passArrayJsValueToWasm0(assets, wasm.__wbindgen_malloc);
         const len0 = WASM_VECTOR_LEN;
         const ptr1 = passArray64ToWasm0(inputs, wasm.__wbindgen_malloc);
         const len1 = WASM_VECTOR_LEN;
         const ptr2 = passStringToWasm0(script, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len2 = WASM_VECTOR_LEN;
-        const ret = wasm.notewrapper_new(ptr0, len0, ptr1, len1, ptr2, len2);
+        const ptr3 = passStringToWasm0(sender_script, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len3 = WASM_VECTOR_LEN;
+        const ret = wasm.notedata_new(ptr0, len0, ptr1, len1, ptr2, len2, sender_id, ptr3, len3);
         this.__wbg_ptr = ret >>> 0;
-        NoteWrapperFinalization.register(this, this.__wbg_ptr, this);
+        NoteDataFinalization.register(this, this.__wbg_ptr, this);
         return this;
     }
 }
@@ -383,8 +424,8 @@ async function __wbg_load(module, imports) {
 function __wbg_get_imports() {
     const imports = {};
     imports.wbg = {};
-    imports.wbg.__wbg_assetwrapper_unwrap = function(arg0) {
-        const ret = AssetWrapper.__unwrap(arg0);
+    imports.wbg.__wbg_assetdata_unwrap = function(arg0) {
+        const ret = AssetData.__unwrap(arg0);
         return ret;
     };
     imports.wbg.__wbg_log_464d1b2190ca1e04 = function(arg0) {
@@ -398,8 +439,8 @@ function __wbg_get_imports() {
         const ret = new Object();
         return ret;
     };
-    imports.wbg.__wbg_notewrapper_unwrap = function(arg0) {
-        const ret = NoteWrapper.__unwrap(arg0);
+    imports.wbg.__wbg_notedata_unwrap = function(arg0) {
+        const ret = NoteData.__unwrap(arg0);
         return ret;
     };
     imports.wbg.__wbg_push_6edad0df4b546b2c = function(arg0, arg1) {

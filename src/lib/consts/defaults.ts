@@ -1,13 +1,11 @@
-import { Account, Asset, EditorFiles, Note } from '@/lib/types';
+import { Account, EditorFiles, Note } from '@/lib/types';
 import { ACCOUNT_SCRIPT } from './account';
-import { P2ID_SCRIPT } from './p2id';
 import { SECRET_KEY } from './secret-key';
 import { generateAccountId } from '@/lib/miden-wasm-api';
 import { generateId } from '@/lib/utils';
+import { createP2IDNote } from '../notes/p2id';
 
-export const SYSTEM_ACCOUNT_ID = 9223372036854775838n;
-
-export const DEFAULT_FAUCET_IDS = [2305843009213693983n];
+export const DEFAULT_FAUCET_IDS = [2305843009213693983n, 3103030043208856727n];
 
 export function createAccount(name: string): { account: Account; newFiles: EditorFiles } {
 	const id = generateAccountId();
@@ -26,7 +24,18 @@ export function createAccount(name: string): { account: Account; newFiles: Edito
 		name,
 		isWallet: true,
 		isAuth: true,
-		assets: [],
+		assets: [
+			{
+				faucetId: DEFAULT_FAUCET_IDS[0],
+				faucetIdHex: DEFAULT_FAUCET_IDS[0].toString(16),
+				amount: 500n
+			},
+			{
+				faucetId: DEFAULT_FAUCET_IDS[1],
+				faucetIdHex: DEFAULT_FAUCET_IDS[1].toString(16),
+				amount: 500n
+			}
+		],
 		secretKey: SECRET_KEY,
 		scriptFileId
 	};
@@ -51,52 +60,16 @@ export function defaultAccounts(): {
 	};
 }
 
-export function createP2IDNote({
-	forAccountId,
-	assets,
-	name
-}: {
-	forAccountId: bigint;
-	assets: Asset[];
-	name: string;
-}): {
-	note: Note;
-	newFiles: EditorFiles;
-} {
-	const noteId = generateId();
-	const scriptFileId = generateId();
-	const inputFileId = generateId();
-	const newFiles: EditorFiles = {
-		[scriptFileId]: {
-			id: scriptFileId,
-			name: `Note script/${name}`,
-			content: P2ID_SCRIPT,
-			isOpen: false
-		},
-		[inputFileId]: {
-			id: inputFileId,
-			name: `Note Input/${name}`,
-			content: JSON.stringify(['0x' + forAccountId.toString(16)], null, 2),
-			isOpen: false
-		}
-	};
-	const note: Note = {
-		id: noteId,
-		name,
-		scriptFileId,
-		isConsumed: false,
-		assets,
-		inputFileId
-	};
-	return { note, newFiles };
-}
-
-export function defaultNotes(forAccountId: bigint): {
+export function defaultNotes(
+	accountId1: bigint,
+	accountId2: bigint
+): {
 	notes: Record<string, Note>;
 	newFiles: EditorFiles;
 } {
-	const noteA = createP2IDNote({
-		forAccountId,
+	const p2idNote1 = createP2IDNote({
+		senderId: accountId1,
+		receiverId: accountId2,
 		assets: [
 			{
 				faucetId: DEFAULT_FAUCET_IDS[0],
@@ -106,22 +79,37 @@ export function defaultNotes(forAccountId: bigint): {
 		],
 		name: 'P2ID 1'
 	});
-	const noteB = createP2IDNote({
-		forAccountId,
+	const p2idNote2 = createP2IDNote({
+		senderId: accountId1,
+		receiverId: accountId2,
 		assets: [
 			{
-				faucetId: DEFAULT_FAUCET_IDS[0],
-				faucetIdHex: DEFAULT_FAUCET_IDS[0].toString(16),
+				faucetId: DEFAULT_FAUCET_IDS[1],
+				faucetIdHex: DEFAULT_FAUCET_IDS[1].toString(16),
 				amount: 200n
 			}
 		],
 		name: 'P2ID 2'
 	});
+	// const swapNote = createSwapNote({
+	// 	senderId: accountId1,
+	// 	offeredAsset: {
+	// 		faucetId: DEFAULT_FAUCET_IDS[0],
+	// 		faucetIdHex: DEFAULT_FAUCET_IDS[0].toString(16),
+	// 		amount: 100n
+	// 	},
+	// 	requestedAsset: {
+	// 		faucetId: DEFAULT_FAUCET_IDS[1],
+	// 		faucetIdHex: DEFAULT_FAUCET_IDS[1].toString(16),
+	// 		amount: 200n
+	// 	},
+	// 	name: 'SWAP'
+	// });
 	return {
 		notes: {
-			[noteA.note.id]: noteA.note,
-			[noteB.note.id]: noteB.note
+			[p2idNote1.note.id]: p2idNote1.note,
+			[p2idNote2.note.id]: p2idNote2.note
 		},
-		newFiles: { ...noteA.newFiles, ...noteB.newFiles }
+		newFiles: { ...p2idNote1.newFiles, ...p2idNote2.newFiles }
 	};
 }

@@ -10,9 +10,9 @@ import React, {
 } from 'react';
 import init from 'miden-wasm';
 import { Account, EditorFiles, ExecutionOutput, Note } from '@/lib/types';
-import { defaultAccounts, defaultNotes, SYSTEM_ACCOUNT_ID } from '@/lib/consts/defaults';
-import { consumeNote } from '@/lib/miden-wasm-api';
-import { ACCOUNT_SCRIPT, TRANSACTION_SCRIPT_FILE_ID } from '@/lib/consts';
+import { defaultAccounts, defaultNotes } from '@/lib/consts/defaults';
+import { consumeNotes } from '@/lib/miden-wasm-api';
+import { TRANSACTION_SCRIPT_FILE_ID } from '@/lib/consts';
 import { TRANSACTION_SCRIPT } from '@/lib/consts/transaction';
 import { convertToBigUint64Array } from '@/lib/utils';
 
@@ -137,15 +137,15 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		if (!selectedTransactionAccountId) return;
 		const account = accounts[selectedTransactionAccountId];
 		const transactionNotes = selectedTransactionNotesIds.map((noteId) => {
+			const sender = accounts[notes[noteId].noteMetadata.senderId.toString(16)];
 			return {
 				note: notes[noteId],
 				noteScript: files[notes[noteId].scriptFileId].content,
-				noteInputs: convertToBigUint64Array(JSON.parse(files[notes[noteId].inputFileId].content))
+				noteInputs: convertToBigUint64Array(JSON.parse(files[notes[noteId].inputFileId].content)),
+				senderScript: files[sender.scriptFileId].content
 			};
 		});
-		const output = consumeNote({
-			senderId: SYSTEM_ACCOUNT_ID,
-			senderScript: ACCOUNT_SCRIPT,
+		const output = consumeNotes({
 			receiver: account,
 			receiverScript: files[account.scriptFileId].content,
 			notes: transactionNotes,
@@ -160,9 +160,13 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				console.log('WASM initialized successfully');
 				const { accounts, newFiles: accountFiles } = defaultAccounts();
 				setAccounts(accounts);
-				const defaultAccount = Object.values(accounts)[0];
-				setSelectedAccountId(defaultAccount.id);
-				const { notes, newFiles: noteFiles } = defaultNotes(defaultAccount.idBigInt);
+				const defaultAccount1 = Object.values(accounts)[0];
+				const defaultAccount2 = Object.values(accounts)[1];
+				setSelectedAccountId(defaultAccount1.id);
+				const { notes, newFiles: noteFiles } = defaultNotes(
+					defaultAccount1.idBigInt,
+					defaultAccount2.idBigInt
+				);
 				setFiles((prev) => ({ ...prev, ...accountFiles, ...noteFiles }));
 				setNotes(notes);
 				setSelectedNoteId(Object.values(notes)[0].id);
