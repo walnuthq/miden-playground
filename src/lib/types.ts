@@ -21,10 +21,15 @@ export interface Account {
 export interface Note {
 	name: string;
 	id: string;
-	scriptFileId: string;
 	assets: Asset[];
-	inputFileId: string;
 	isConsumed: boolean;
+	inputFileId: string;
+	scriptFileId: string;
+	noteMetadata: NoteMetadata;
+}
+
+export interface NoteMetadata {
+	senderId: bigint;
 }
 
 export interface Asset {
