@@ -8,42 +8,16 @@ import InlineIcon from '@/components/ui/inline-icon';
 import { EditorFile } from '@/lib/types';
 
 export function Inspector() {
-	const { selectedTab, selectedAccountId, accounts } = useMiden();
-	const tabName =
-		selectedTab === 'transaction'
-			? 'Compose transaction'
-			: selectedTab === 'accounts'
-			? accounts[selectedAccountId].name
-			: selectedTab === 'notes'
-			? 'Note'
-			: selectedTab === 'transaction-arguments'
-			? 'Transaction arguments'
-			: '';
-
-	return (
-		<div className="flex flex-col">
-			<div
-				className="h-[54px] border-b-2 border-dark-miden-700 bg-dark-miden-800
-					text-white font-medium flex gap-2 items-center px-3"
-			>
-				<div>
-					{(selectedTab === 'accounts' || selectedTab === 'notes') && (
-						<InlineIcon variant="plus-square" className="w-6 h-6 cursor-pointer" />
-					)}
-				</div>
-
-				{tabName}
-				<div>
-					{selectedTab === 'accounts' && (
-						<InlineIcon variant="pencil" color={'gray'} className="w-4 h-4 cursor-pointer" />
-					)}
-				</div>
-			</div>
-			{selectedTab === 'transaction' && <TransactionBuilder />}
-			{selectedTab === 'accounts' && <Accounts />}
-			{selectedTab === 'notes' && <Notes />}
-		</div>
-	);
+	const { selectedTab } = useMiden();
+	if (selectedTab === 'transaction') {
+		return <TransactionBuilder />;
+	}
+	if (selectedTab === 'accounts') {
+		return <Accounts />;
+	}
+	if (selectedTab === 'notes') {
+		return <Notes />;
+	}
 }
 
 export function FileItem({
