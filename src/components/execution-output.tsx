@@ -27,18 +27,18 @@ export function ExecutionOutput() {
 					<Table className="text-white">
 						<TableHeader>
 							<TableRow>
-								<TableHead className="border-b border-dark-miden-700 border-r">
-									Program hash
-								</TableHead>
 								<TableHead className="border-b border-dark-miden-700 border-r">Cycles</TableHead>
 								<TableHead className="border-b border-dark-miden-700">Trace length</TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>
 							<TableRow>
-								<TableCell className="border-b border-dark-miden-700 border-r"></TableCell>
-								<TableCell className="border-b border-dark-miden-700 border-r"></TableCell>
-								<TableCell className="border-b border-dark-miden-700"></TableCell>
+								<TableCell className="border-b border-dark-miden-700 border-r">
+									{executionOutput.totalCycles}
+								</TableCell>
+								<TableCell className="border-b border-dark-miden-700">
+									{executionOutput.traceLength}
+								</TableCell>
 							</TableRow>
 						</TableBody>
 					</Table>
@@ -59,7 +59,7 @@ export function ExecutionOutput() {
 						<TableBody>
 							<TableRow>
 								<TableCell className="border-b border-dark-miden-700 border-r">
-									Placeholder
+									{'0x' + executionOutput.accountId.toString(16)}
 								</TableCell>
 								<TableCell className="border-b border-dark-miden-700 border-r">
 									{executionOutput?.accountHash?.substring(0, 10)}
