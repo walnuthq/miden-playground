@@ -21,11 +21,16 @@ use assembly::{
     utils::Deserializable,
     DefaultSourceManager, Library, LibraryPath, Report,
 };
-use miden_crypto::dsa::rpo_falcon512::PublicKey;
+use miden_crypto::{
+    dsa::rpo_falcon512::PublicKey,
+    rand::{FeltRng, RpoRandomCoin},
+};
+use rand::Rng;
 use rand_chacha::{rand_core::SeedableRng, ChaCha20Rng};
 
 use miden_lib::{
     accounts::{auth::RpoFalcon512, wallets::BasicWallet},
+    notes::utils::build_p2id_recipient,
     transaction::TransactionKernel,
 };
 use miden_objects::{
@@ -33,10 +38,10 @@ use miden_objects::{
     assets::{Asset, AssetVault, FungibleAsset},
     crypto::dsa::rpo_falcon512::SecretKey,
     notes::{
-        Note, NoteAssets, NoteExecutionHint, NoteInputs, NoteMetadata, NoteRecipient, NoteScript,
-        NoteType,
+        Note, NoteAssets, NoteExecutionHint, NoteExecutionMode, NoteInputs, NoteMetadata,
+        NoteRecipient, NoteScript, NoteTag, NoteType,
     },
-    transaction::{TransactionArgs, TransactionScript},
+    transaction::{ExecutedTransaction, OutputNotes, TransactionArgs, TransactionScript},
     AccountError, Felt, NoteError, TransactionScriptError, Word, ZERO,
 };
 use miden_tx::TransactionExecutor;
@@ -183,21 +188,21 @@ pub fn get_pk_and_authenticator(
 }
 
 #[wasm_bindgen]
-pub struct AssetWrapper {
+pub struct AssetData {
     pub faucet_id: u64,
     pub amount: u64,
 }
 
 #[wasm_bindgen]
-impl AssetWrapper {
+impl AssetData {
     #[wasm_bindgen(constructor)]
     pub fn new(faucet_id: u64, amount: u64) -> Self {
         Self { faucet_id, amount }
     }
 }
 
-impl From<AssetWrapper> for Asset {
-    fn from(asset: AssetWrapper) -> Self {
+impl From<AssetData> for Asset {
+    fn from(asset: AssetData) -> Self {
         Self::Fungible(
             FungibleAsset::new(AccountId::try_from(asset.faucet_id).unwrap(), asset.amount)
                 .unwrap(),
@@ -205,8 +210,37 @@ impl From<AssetWrapper> for Asset {
     }
 }
 
-fn account_to_js_value(account: &Account, final_account: &AccountHeader) -> JsValue {
-    let assets = account.vault().assets();
+#[wasm_bindgen]
+pub struct NoteData {
+    assets: Vec<AssetData>,
+    inputs: Vec<u64>,
+    script: String,
+    sender_id: u64,
+    sender_script: String,
+}
+
+#[wasm_bindgen]
+impl NoteData {
+    #[wasm_bindgen(constructor)]
+    pub fn new(
+        assets: Vec<AssetData>,
+        inputs: Vec<u64>,
+        script: String,
+        sender_id: u64,
+        sender_script: String,
+    ) -> Self {
+        Self {
+            assets,
+            inputs,
+            script,
+            sender_id,
+            sender_script,
+        }
+    }
+}
+
+// TODO: handle errors
+fn serialize_assets(assets: &[Asset]) -> js_sys::Array {
     let assets_array = js_sys::Array::new();
 
     for asset in assets {
@@ -246,13 +280,43 @@ fn account_to_js_value(account: &Account, final_account: &AccountHeader) -> JsVa
         assets_array.push(&asset_obj);
     }
 
+    assets_array
+}
+
+// TODO: handle errors
+fn serialize_execution_output(
+    account: &Account,
+    final_account: &AccountHeader,
+    output_notes: &OutputNotes,
+    executed_transaction: &ExecutedTransaction,
+) -> JsValue {
+    let assets: Vec<Asset> = account.vault().assets().collect();
+    let assets_array = serialize_assets(&assets);
+
     let account_hash = final_account.hash().to_hex();
     let code_commitment = final_account.code_commitment().to_hex();
     let storage_commitment = final_account.storage_commitment().to_hex();
     let vault_root = final_account.vault_root().to_hex();
     let nonce = final_account.nonce().as_int();
 
+    let account_id: u64 = account.id().into();
+
+    let output_notes_array = js_sys::Array::new();
+    for note in output_notes.iter() {
+        let note_obj = js_sys::Object::new();
+        js_sys::Reflect::set(&note_obj, &"id".into(), &JsValue::from(note.id().to_hex())).unwrap();
+        if let Some(note_assets) = note.assets() {
+            let assets: Vec<Asset> = note_assets.iter().map(|a| a.clone()).collect();
+            js_sys::Reflect::set(&note_obj, &"assets".into(), &serialize_assets(&assets)).unwrap();
+        }
+        output_notes_array.push(&note_obj);
+    }
+
+    let total_cycles = executed_transaction.measurements().total_cycles();
+    let trace_length = executed_transaction.measurements().trace_length();
+
     let obj = js_sys::Object::new();
+    js_sys::Reflect::set(&obj, &"outputNotes".into(), &output_notes_array).unwrap();
     js_sys::Reflect::set(&obj, &"assets".into(), &assets_array).unwrap();
     js_sys::Reflect::set(&obj, &"accountHash".into(), &JsValue::from(account_hash)).unwrap();
     js_sys::Reflect::set(
@@ -269,62 +333,79 @@ fn account_to_js_value(account: &Account, final_account: &AccountHeader) -> JsVa
     .unwrap();
     js_sys::Reflect::set(&obj, &"vaultRoot".into(), &JsValue::from(vault_root)).unwrap();
     js_sys::Reflect::set(&obj, &"nonce".into(), &JsValue::from(nonce)).unwrap();
+    js_sys::Reflect::set(&obj, &"accountId".into(), &JsValue::from(account_id)).unwrap();
+    js_sys::Reflect::set(&obj, &"totalCycles".into(), &JsValue::from(total_cycles)).unwrap();
+    js_sys::Reflect::set(&obj, &"traceLength".into(), &JsValue::from(trace_length)).unwrap();
+
     obj.into()
 }
 
 #[wasm_bindgen]
-pub fn generate_account_id() -> u64 {
-    AccountId::new_dummy([0_u8; 32], AccountType::RegularAccountUpdatableCode).into()
+pub fn generate_account_id(seed: Vec<u8>) -> u64 {
+    let seed_array: [u8; 32] = seed.try_into().expect("seed must be 32 bytes");
+    AccountId::new_dummy(seed_array, AccountType::RegularAccountUpdatableCode).into()
 }
 
 #[wasm_bindgen]
-pub fn consume_note(
+pub fn generate_faucet_id(seed: Vec<u8>) -> u64 {
+    let seed_array: [u8; 32] = seed.try_into().expect("seed must be 32 bytes");
+    AccountId::new_dummy(seed_array, AccountType::FungibleFaucet).into()
+}
+
+#[wasm_bindgen]
+pub fn execute_transaction(
     transaction_script: &str,
-    sender_account_id: u64,
-    sender_account_code: &str,
     receiver_account_code: &str,
     receiver_secret_key: Vec<u8>,
     receiver_account_id: u64,
-    receiver_assets: Vec<AssetWrapper>,
+    receiver_assets: Vec<AssetData>,
     receiver_wallet_enabled: bool,
     receiver_auth_enabled: bool,
-    note_assets: Vec<AssetWrapper>,
-    note_inputs: Vec<u64>,
-    note_script: &str,
+    notes: Vec<NoteData>,
 ) -> Result<JsValue, JsValue> {
-    let note_assets: Vec<Asset> = note_assets
+    let notes = notes
         .into_iter()
-        .map(|asset_wrapper| {
-            let faucet_id = AccountId::try_from(asset_wrapper.faucet_id)
-                .map_err(|err| format!("faucet id is wrong: {:?}", err))?;
+        .map(|note| {
+            let note_assets: Vec<Asset> = note
+                .assets
+                .into_iter()
+                .map(|asset_wrapper| {
+                    let faucet_id = AccountId::try_from(asset_wrapper.faucet_id)
+                        .map_err(|err| format!("faucet id is wrong: {:?}", err))?;
+                    console::log_1(&format!("Faucet ID: {:?}", faucet_id).into());
 
-            let fungible_asset: Asset = FungibleAsset::new(faucet_id, asset_wrapper.amount)
-                .map_err(|err| format!("fungible asset is wrong: {:?}", err))?
-                .into();
+                    let fungible_asset: Asset = FungibleAsset::new(faucet_id, asset_wrapper.amount)
+                        .map_err(|err| format!("fungible asset is wrong: {:?}", err))?
+                        .into();
+                    console::log_1(&format!("Fungible asset created: {:?}", fungible_asset).into());
 
-            Ok(fungible_asset)
+                    Ok(fungible_asset)
+                })
+                .collect::<Result<Vec<Asset>, String>>()?;
+            let note_inputs: Vec<Felt> = note.inputs.iter().map(|&x| Felt::new(x)).collect();
+
+            let sender_account_id = AccountId::try_from(note.sender_id)
+                .map_err(|err| format!("Sender Account id is wrong: {:?}", err))?;
+
+            let sender_account_code_library =
+                create_account_component_library(note.sender_script.as_str())
+                    .map_err(|err| format!("Account library cannot be built: {:?}", err))?;
+
+            let note = get_note_with_fungible_asset_and_script(
+                note_assets,
+                note.script.as_str(),
+                sender_account_id,
+                note_inputs,
+                sender_account_code_library.clone(),
+            )
+            .map_err(|err| {
+                console::log_1(&format!("Note creation failed: {:?}", err).into());
+                format!("Note cannot be built: {:?}", err)
+            })?;
+
+            Ok(note)
         })
-        .collect::<Result<Vec<Asset>, String>>()?;
-
-    let note_inputs: Vec<Felt> = note_inputs.iter().map(|&x| Felt::new(x)).collect();
-
-    let sender_account_id = AccountId::try_from(sender_account_id)
-        .map_err(|err| format!("Sender Account id is wrong: {:?}", err))?;
-
-    let sender_account_code_library = create_account_component_library(sender_account_code)
-        .map_err(|err| format!("Account library cannot be built: {:?}", err))?;
-
-    let note = get_note_with_fungible_asset_and_script(
-        note_assets,
-        note_script,
-        sender_account_id,
-        note_inputs,
-        sender_account_code_library.clone(),
-    )
-    .map_err(|err| {
-        console::log_1(&format!("Note creation failed: {:?}", err).into());
-        format!("Note cannot be built: {:?}", err)
-    })?;
+        .collect::<Result<Vec<Note>, String>>()?;
 
     let receiver_account_code_library = create_account_component_library(receiver_account_code)
         .map_err(|err| format!("Account library cannot be built: {:?}", err))?;
@@ -348,6 +429,7 @@ pub fn consume_note(
     })?;
 
     let assembler = TransactionKernel::assembler().with_debug_mode(true);
+
     let tx_script = TransactionScript::compile(
         transaction_script,
         [],
@@ -361,10 +443,10 @@ pub fn consume_note(
         JsValue::from_str(&err.to_string())
     })?;
 
-    let tx_args_target = TransactionArgs::with_tx_script(tx_script);
+    let tx_args_target = TransactionArgs::with_tx_script(tx_script.clone());
 
     let tx_context = TransactionContextBuilder::new(receiver_account.clone())
-        .input_notes(vec![note.clone()])
+        .input_notes(notes.clone())
         .build();
 
     let executor =
@@ -394,6 +476,62 @@ pub fn consume_note(
         })?;
 
     let final_account = executed_transaction.final_account();
+    let output_notes = executed_transaction.output_notes();
 
-    Ok(account_to_js_value(&receiver_account, &final_account))
+    Ok(serialize_execution_output(
+        &receiver_account,
+        &final_account,
+        &output_notes,
+        &executed_transaction,
+    ))
+}
+
+// TODO: handle errors
+#[wasm_bindgen]
+pub fn create_swap_note_inputs(
+    seed: Vec<u8>,
+    sender_account_id: u64,
+    // offered_asset: AssetData,
+    requested_asset: AssetData,
+) -> Result<Vec<u64>, JsValue> {
+    let sender = AccountId::try_from(sender_account_id).unwrap();
+    // let offered_asset: Asset = offered_asset.into();
+    let requested_asset: Asset = requested_asset.into();
+
+    let mut rng = ChaCha20Rng::from_seed(seed.try_into().unwrap());
+    let coin_seed: [u64; 4] = rng.gen();
+    let mut rng = RpoRandomCoin::new(coin_seed.map(Felt::new));
+
+    let payback_serial_num = rng.draw_word();
+    let payback_recipient = build_p2id_recipient(sender, payback_serial_num).unwrap();
+
+    let payback_recipient_word: Word = payback_recipient.digest().into();
+    let requested_asset_word: Word = requested_asset.into();
+    let payback_tag = NoteTag::from_account_id(sender, NoteExecutionMode::Local).unwrap();
+
+    let inputs = NoteInputs::new(vec![
+        payback_recipient_word[0],
+        payback_recipient_word[1],
+        payback_recipient_word[2],
+        payback_recipient_word[3],
+        requested_asset_word[0],
+        requested_asset_word[1],
+        requested_asset_word[2],
+        requested_asset_word[3],
+        Felt::new(payback_tag.inner() as u64),
+        NoteExecutionHint::always().into(),
+    ])
+    .unwrap();
+
+    // build the tag for the SWAP use case
+    // let tag = build_swap_tag(NoteType::Private, &offered_asset, &requested_asset).unwrap();
+    // let serial_num = rng.draw_word();
+
+    let inputs_u64 = inputs
+        .values()
+        .iter()
+        .map(|x| x.as_int())
+        .collect::<Vec<u64>>();
+
+    Ok(inputs_u64)
 }

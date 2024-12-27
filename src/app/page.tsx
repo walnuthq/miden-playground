@@ -1,7 +1,7 @@
-import { Playground } from '@/components/playground'
+import { Playground } from '@/components/playground';
 
-export const runtime = 'edge'
+export const runtime = 'edge';
 
 export default function Home() {
-	return <Playground />
+	return <Playground />;
 }

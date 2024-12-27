@@ -1,3 +1,66 @@
+import { Asset } from '@/lib/types';
+import { generateId } from '@/lib/utils';
+import { Note } from '@/lib/notes';
+import { EditorFiles } from '@/lib/files';
+
+export function createP2IDNote({
+	senderId,
+	receiverId,
+	assets,
+	name
+}: {
+	senderId: bigint;
+	receiverId: bigint;
+	assets: Asset[];
+	name: string;
+}): {
+	note: Note;
+	newFiles: EditorFiles;
+} {
+	const noteId = generateId();
+	const scriptFileId = generateId();
+	const inputFileId = generateId();
+	const metadataFileId = generateId();
+	const newFiles: EditorFiles = {
+		[scriptFileId]: {
+			id: scriptFileId,
+			name: `${name} Script`,
+			content: { value: P2ID_SCRIPT },
+			isOpen: false,
+			variant: 'script',
+			readonly: false
+		},
+		[inputFileId]: {
+			id: inputFileId,
+			name: `${name} Inputs`,
+			content: { value: JSON.stringify(['0x' + receiverId.toString(16)], null, 2) },
+			isOpen: false,
+			variant: 'file',
+			readonly: false
+		},
+		[metadataFileId]: {
+			id: metadataFileId,
+			name: `${name} Metadata`,
+			content: { value: JSON.stringify({ senderId: '0x' + senderId.toString(16) }, null, 2) },
+			isOpen: false,
+			variant: 'file',
+			readonly: false
+		}
+	};
+
+	const note = new Note({
+		id: noteId,
+		name,
+		scriptFileId,
+		isConsumed: false,
+		assets,
+		inputFileId,
+		senderId,
+		metadataFileId
+	});
+	return { note, newFiles };
+}
+
 export const P2ID_SCRIPT = `
 use.miden::account
 use.miden::note
@@ -102,4 +165,4 @@ begin
     push.3.3.3.3 push.1 call.account_module::custom_set_item dropw dropw
 end
 
-`
+`;

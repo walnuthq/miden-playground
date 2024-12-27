@@ -1,35 +1,69 @@
-import { AssetWrapper, consume_note, generate_account_id } from 'miden-wasm';
-import { Account, Note, TransactionResult } from '@/lib/types';
+import {
+	AssetData,
+	execute_transaction,
+	generate_account_id,
+	NoteData,
+	generate_faucet_id,
+	create_swap_note_inputs
+} from 'miden-wasm';
+import { ExecutionOutput, Asset } from '@/lib/types';
+import { Account } from '@/lib/account';
+import { Note } from '@/lib/notes';
 
-export function consumeNote({
-	senderId,
-	senderScript,
+export function consumeNotes({
 	receiver,
-	note,
+	receiverScript,
+	notes,
 	transactionScript
 }: {
-	senderId: bigint;
-	senderScript: string;
 	receiver: Account;
-	note: Note;
+	receiverScript: string;
+	notes: { note: Note; noteScript: string; noteInputs: BigUint64Array; senderScript: string }[];
 	transactionScript: string;
-}): TransactionResult {
-	return consume_note(
+}): ExecutionOutput {
+	const notesWrapper = notes.map(
+		({ note, noteScript, noteInputs, senderScript }) =>
+			new NoteData(
+				note.assets.map((a) => new AssetData(a.faucetId, a.amount)),
+				noteInputs,
+				noteScript,
+				note.senderId,
+				senderScript
+			)
+	);
+	return execute_transaction(
 		transactionScript,
-		senderId,
-		senderScript,
-		receiver.script,
+		receiverScript,
 		receiver.secretKey,
-		receiver.idBigInt,
-		receiver.assets.map((a) => new AssetWrapper(a.faucetId, a.amount)),
+		receiver.id,
+		receiver.assets.map((a) => new AssetData(a.faucetId, a.amount)),
 		receiver.isWallet,
 		receiver.isAuth,
-		note.assets.map((a) => new AssetWrapper(a.faucetId, a.amount)),
-		note.inputs,
-		note.script
+		notesWrapper
 	);
 }
 
 export function generateAccountId(): bigint {
-	return generate_account_id();
+	const seed = new Uint8Array(32);
+	window.crypto.getRandomValues(seed);
+	return generate_account_id(seed);
+}
+
+export function generateFaucetId(): bigint {
+	const seed = new Uint8Array(32);
+	window.crypto.getRandomValues(seed);
+	return generate_faucet_id(seed);
+}
+
+export function createSwapNoteInputs(
+	senderAccountId: bigint,
+	requestedAsset: Asset
+): BigUint64Array {
+	const seed = new Uint8Array(32);
+	window.crypto.getRandomValues(seed);
+	return create_swap_note_inputs(
+		seed,
+		senderAccountId,
+		new AssetData(requestedAsset.faucetId, requestedAsset.amount)
+	);
 }

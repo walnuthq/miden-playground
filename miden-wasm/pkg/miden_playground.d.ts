@@ -1,32 +1,43 @@
 /* tslint:disable */
 /* eslint-disable */
-export function generate_account_id(): bigint;
-export function consume_note(transaction_script: string, sender_account_id: bigint, sender_account_code: string, receiver_account_code: string, receiver_secret_key: Uint8Array, receiver_account_id: bigint, receiver_assets: (AssetWrapper)[], receiver_wallet_enabled: boolean, receiver_auth_enabled: boolean, note_assets: (AssetWrapper)[], note_inputs: BigUint64Array, note_script: string): any;
-export class AssetWrapper {
+export function generate_account_id(seed: Uint8Array): bigint;
+export function generate_faucet_id(seed: Uint8Array): bigint;
+export function execute_transaction(transaction_script: string, receiver_account_code: string, receiver_secret_key: Uint8Array, receiver_account_id: bigint, receiver_assets: (AssetData)[], receiver_wallet_enabled: boolean, receiver_auth_enabled: boolean, notes: (NoteData)[]): any;
+export function create_swap_note_inputs(seed: Uint8Array, sender_account_id: bigint, requested_asset: AssetData): BigUint64Array;
+export class AssetData {
   free(): void;
   constructor(faucet_id: bigint, amount: bigint);
   faucet_id: bigint;
   amount: bigint;
+}
+export class NoteData {
+  free(): void;
+  constructor(assets: (AssetData)[], inputs: BigUint64Array, script: string, sender_id: bigint, sender_script: string);
 }
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
-  readonly __wbg_assetwrapper_free: (a: number, b: number) => void;
-  readonly __wbg_get_assetwrapper_faucet_id: (a: number) => bigint;
-  readonly __wbg_set_assetwrapper_faucet_id: (a: number, b: bigint) => void;
-  readonly __wbg_get_assetwrapper_amount: (a: number) => bigint;
-  readonly __wbg_set_assetwrapper_amount: (a: number, b: bigint) => void;
-  readonly assetwrapper_new: (a: bigint, b: bigint) => number;
-  readonly generate_account_id: () => bigint;
-  readonly consume_note: (a: number, b: number, c: bigint, d: number, e: number, f: number, g: number, h: number, i: number, j: bigint, k: number, l: number, m: number, n: number, o: number, p: number, q: number, r: number, s: number, t: number) => [number, number, number];
+  readonly __wbg_assetdata_free: (a: number, b: number) => void;
+  readonly __wbg_get_assetdata_faucet_id: (a: number) => bigint;
+  readonly __wbg_set_assetdata_faucet_id: (a: number, b: bigint) => void;
+  readonly __wbg_get_assetdata_amount: (a: number) => bigint;
+  readonly __wbg_set_assetdata_amount: (a: number, b: bigint) => void;
+  readonly assetdata_new: (a: bigint, b: bigint) => number;
+  readonly __wbg_notedata_free: (a: number, b: number) => void;
+  readonly notedata_new: (a: number, b: number, c: number, d: number, e: number, f: number, g: bigint, h: number, i: number) => number;
+  readonly generate_account_id: (a: number, b: number) => bigint;
+  readonly generate_faucet_id: (a: number, b: number) => bigint;
+  readonly execute_transaction: (a: number, b: number, c: number, d: number, e: number, f: number, g: bigint, h: number, i: number, j: number, k: number, l: number, m: number) => [number, number, number];
+  readonly create_swap_note_inputs: (a: number, b: number, c: bigint, d: number) => [number, number, number, number];
   readonly __wbindgen_exn_store: (a: number) => void;
   readonly __externref_table_alloc: () => number;
   readonly __wbindgen_export_2: WebAssembly.Table;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
   readonly __externref_table_dealloc: (a: number) => void;
+  readonly __wbindgen_free: (a: number, b: number, c: number) => void;
   readonly __wbindgen_start: () => void;
 }
 
