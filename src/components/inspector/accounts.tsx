@@ -15,7 +15,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 export function Accounts() {
-	const { accounts, selectedAccountId, selectFile, files, selectAccount } = useMiden();
+	const { accounts, selectedAccountId, selectFile, files, selectAccount, selectedFileId } =
+		useMiden();
 	const account = accounts[selectedAccountId];
 	const customComponent = files[account.scriptFileId];
 	const walletComponent = files[WALLET_COMPONENT_SCRIPT_FILE_ID];
@@ -39,12 +40,8 @@ export function Accounts() {
 					</div>
 				</div>
 				<DropdownMenu>
-					<DropdownMenuTrigger>
-						<InlineIcon
-							variant="arrow"
-							color={'white'}
-							className="w-4 h-4 cursor-pointer rotate-90"
-						/>
+					<DropdownMenuTrigger className="cursor-pointer hover:bg-white/10 p-1.5 rounded-miden">
+						<InlineIcon variant="arrow" color={'white'} className="w-4 h-4 rotate-90" />
 					</DropdownMenuTrigger>
 					<DropdownMenuContent>
 						{Object.values(accounts).map((account) => (
@@ -56,17 +53,31 @@ export function Accounts() {
 				</DropdownMenu>
 			</div>
 			<div className="flex flex-col">
-				<FileItem editorFile={customComponent} onClick={() => selectFile(account.scriptFileId)} />
+				<FileItem
+					editorFile={customComponent}
+					isSelected={selectedFileId === account.scriptFileId}
+					onClick={() => selectFile(account.scriptFileId)}
+				/>
 				<FileItem
 					editorFile={walletComponent}
+					isSelected={selectedFileId === WALLET_COMPONENT_SCRIPT_FILE_ID}
 					onClick={() => selectFile(WALLET_COMPONENT_SCRIPT_FILE_ID)}
 				/>
 				<FileItem
 					editorFile={authComponent}
+					isSelected={selectedFileId === AUTHENTICATION_COMPONENT_SCRIPT_FILE_ID}
 					onClick={() => selectFile(AUTHENTICATION_COMPONENT_SCRIPT_FILE_ID)}
 				/>
-				<FileItem editorFile={metadataFile} onClick={() => selectFile(metadataFile.id)} />
-				<FileItem editorFile={vaultFile} onClick={() => selectFile(vaultFile.id)} />
+				<FileItem
+					editorFile={metadataFile}
+					onClick={() => selectFile(metadataFile.id)}
+					isSelected={selectedFileId === metadataFile.id}
+				/>
+				<FileItem
+					editorFile={vaultFile}
+					onClick={() => selectFile(vaultFile.id)}
+					isSelected={selectedFileId === vaultFile.id}
+				/>
 			</div>
 		</div>
 	);

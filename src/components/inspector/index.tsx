@@ -5,7 +5,7 @@ import { TransactionBuilder } from './transaction-builder';
 import { Accounts } from './accounts';
 import { Notes } from './notes';
 import InlineIcon from '@/components/ui/inline-icon';
-import { EditorFile } from '@/lib/types';
+import { EditorFile } from '@/lib/files';
 
 export function Inspector() {
 	const { selectedTab } = useMiden();
@@ -23,11 +23,13 @@ export function Inspector() {
 export function FileItem({
 	editorFile,
 	isSelected,
-	onClick
+	onClick,
+	isNote = false
 }: {
 	editorFile: EditorFile;
 	isSelected?: boolean;
 	onClick?: () => void;
+	isNote?: boolean;
 }) {
 	return (
 		<div
@@ -36,15 +38,21 @@ export function FileItem({
     `}
 			onClick={onClick}
 		>
-			<InlineIcon variant={editorFile.readonly ? 'lock' : 'unlock'} className={`w-4 h-4`} />
+			{!isNote && (
+				<InlineIcon variant={editorFile.readonly ? 'lock' : 'unlock'} className={`w-4 h-4`} />
+			)}
 			<InlineIcon
-				variant={editorFile.variant === 'script' ? 'file_2' : 'file'}
+				variant={isNote ? 'file_3' : editorFile.variant === 'script' ? 'file_2' : 'file'}
 				color="white"
 				className={`w-4 h-4`}
 			/>
 			<span>{editorFile.name}</span>
-			<div className=" ml-auto">
-				<InlineIcon variant={'trash'} color="white" className={`w-4 h-4`} />
+			<div className=" ml-auto cursor-pointer hover:bg-white/10 p-1.5 rounded-miden">
+				<InlineIcon
+					variant={isNote ? 'arrow' : 'trash'}
+					color="white"
+					className={`w-4 h-4 ${isNote && 'rotate-90'}`}
+				/>
 			</div>
 		</div>
 	);

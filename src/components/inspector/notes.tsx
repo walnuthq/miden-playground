@@ -1,7 +1,7 @@
 'use client';
 
 import { useMiden } from '@/lib/context-providers';
-import { ListItem } from '.';
+import { FileItem } from '.';
 import InlineIcon from '@/components/ui/inline-icon';
 import {
 	DropdownMenu,
@@ -11,9 +11,11 @@ import {
 } from '../ui/dropdown-menu';
 
 export function Notes() {
-	const { files, notes, selectedNoteId, selectFile, selectNote } = useMiden();
+	const { files, notes, selectedNoteId, selectFile, selectedFileId, selectNote } = useMiden();
 	const note = notes[selectedNoteId];
 	const noteScriptFile = files[note.scriptFileId];
+	const noteInputFile = files[note.inputFileId];
+	const noteMetadataFile = files[note.metadataFileId];
 
 	return (
 		<div className="flex flex-col">
@@ -45,9 +47,24 @@ export function Notes() {
 				</DropdownMenu>
 			</div>
 			<div className="flex flex-col">
-				<ListItem name={noteScriptFile.name} onClick={() => selectFile(noteScriptFile.id)} />
-				<ListItem name="Note input" onClick={() => selectFile(note.inputFileId)} />
-				<ListItem name="Note metadata" onClick={() => selectFile(note.metadataFileId)} />
+				<FileItem
+					isNote
+					editorFile={noteScriptFile}
+					onClick={() => selectFile(noteScriptFile.id)}
+					isSelected={selectedFileId === noteScriptFile.id}
+				/>
+				<FileItem
+					isNote
+					editorFile={noteInputFile}
+					onClick={() => selectFile(note.inputFileId)}
+					isSelected={selectedFileId === note.inputFileId}
+				/>
+				<FileItem
+					isNote
+					editorFile={noteMetadataFile}
+					onClick={() => selectFile(note.metadataFileId)}
+					isSelected={selectedFileId === note.metadataFileId}
+				/>
 			</div>
 		</div>
 	);

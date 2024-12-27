@@ -6,7 +6,8 @@ import { useMiden } from '@/lib/context-providers';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
 export const Toolbar: React.FC = () => {
-	const { files, closeFile, selectFile, selectedFileId, executeTransaction } = useMiden();
+	const { files, closeFile, selectFile, selectedFileId, executeTransaction, collapsedTabs } =
+		useMiden();
 
 	return (
 		<div
@@ -14,24 +15,30 @@ export const Toolbar: React.FC = () => {
 							flex flex-row items-center justify-between"
 		>
 			<div className="h-full flex gap-4 items-end overflow-hidden">
-				<div className="mb-2 ml-4">
-					<InlineIcon variant="left-arrow" color="white" className="w-6 h-6" />
+				<div
+					onClick={() => collapsedTabs()}
+					className="ml-4 self-center cursor-pointer hover:bg-white/10 p-1.5 rounded-miden"
+				>
+					<InlineIcon variant={'left-arrow'} color="white" className={` w-6 h-6`} />
 				</div>
-
 				<ScrollArea>
-					<div className="flex flex-row gap-2">
+					<div className="flex flex-row">
 						{Object.keys(files)
 							.filter((fileId) => files[fileId].isOpen)
 							.map((fileId) => (
 								<div
 									key={fileId}
-									className={`text-white px-3 py-2 rounded-t-miden flex flex-row items-center gap-2 cursor-pointer select-none ${
-										selectedFileId === fileId ? 'bg-dark-miden-950' : ''
+									className={`text-white text-sm px-3 py-2 border-r last:border-r-0 border-dark-miden-950 flex flex-row items-center gap-2 cursor-pointer select-none ${
+										selectedFileId === fileId ? 'bg-[#040113]' : ''
 									}`}
 									onClick={() => {
 										selectFile(fileId);
 									}}
 								>
+									<InlineIcon
+										variant={files[fileId].readonly ? 'lock' : 'unlock'}
+										className={`w-4 h-4`}
+									/>
 									<span className="text-nowrap">{files[fileId].name}</span>
 									<div
 										className="cursor-pointer hover:bg-white/10 p-1.5 rounded-miden"
@@ -48,7 +55,7 @@ export const Toolbar: React.FC = () => {
 					<ScrollBar orientation="horizontal" className="h-1 p-0" />
 				</ScrollArea>
 			</div>
-			<div className="px-3">
+			<div className="mr-2 cursor-pointer hover:bg-white/10 p-1.5 rounded-miden">
 				<InlineIcon
 					variant="play"
 					className={`w-7 h-7 cursor-pointer`}
