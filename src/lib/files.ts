@@ -9,6 +9,7 @@ export interface EditorFile {
 	content:
 		| { value: string; dynamic?: undefined }
 		| { value?: undefined; dynamic: EditorFileDynamicContent };
+	order?: number;
 }
 
 export type EditorFiles = Record<string, EditorFile>;

@@ -49,7 +49,7 @@ export class Account {
 		const newFiles: EditorFiles = {
 			[scriptFileId]: {
 				id: scriptFileId,
-				name: 'Custom component',
+				name: 'Custom script',
 				content: { value: ACCOUNT_SCRIPT },
 				isOpen: false,
 				readonly: false,

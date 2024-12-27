@@ -94,7 +94,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		},
 		[WALLET_COMPONENT_SCRIPT_FILE_ID]: {
 			id: WALLET_COMPONENT_SCRIPT_FILE_ID,
-			name: 'Wallet component script',
+			name: 'Wallet script',
 			content: { value: ACCOUNT_WALLET_SCRIPT },
 			isOpen: false,
 			readonly: true,
@@ -102,7 +102,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		},
 		[AUTHENTICATION_COMPONENT_SCRIPT_FILE_ID]: {
 			id: AUTHENTICATION_COMPONENT_SCRIPT_FILE_ID,
-			name: 'Authentication component script',
+			name: 'Auth script',
 			content: { value: ACCOUNT_AUTH_SCRIPT },
 			isOpen: false,
 			readonly: true,
@@ -149,20 +149,28 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	const selectFile = useCallback((fileId: string) => {
 		setFiles((prev) => ({
 			...prev,
-			[fileId]: { ...prev[fileId], isOpen: true }
+			[fileId]: { ...prev[fileId], isOpen: true, order: Date.now() }
 		}));
 		setSelectedFileId(fileId);
 	}, []);
 
 	const closeFile = useCallback(
 		(fileId: string) => {
-			setFiles((prev) => ({
-				...prev,
-				[fileId]: { ...prev[fileId], isOpen: false }
-			}));
-			if (selectedFileId === fileId) {
-				setSelectedFileId(null);
-			}
+			setFiles((prev) => {
+				const newFiles = { ...prev, [fileId]: { ...prev[fileId], isOpen: false } };
+				if (selectedFileId === fileId) {
+					const openFiles = Object.values(newFiles).filter((file) => file.isOpen);
+					if (openFiles.length > 0) {
+						const fileWithHighestOrder = openFiles.reduce((prev, current) => {
+							return (prev.order || 0) > (current.order || 0) ? prev : current;
+						});
+						setSelectedFileId(fileWithHighestOrder.id);
+					} else {
+						setSelectedFileId(null);
+					}
+				}
+				return newFiles;
+			});
 		},
 		[selectedFileId]
 	);
