@@ -30,12 +30,8 @@ export function Notes() {
 					{notes[selectedNoteId].name}
 				</div>
 				<DropdownMenu>
-					<DropdownMenuTrigger>
-						<InlineIcon
-							variant="arrow"
-							color={'white'}
-							className="w-4 h-4 cursor-pointer rotate-90"
-						/>
+					<DropdownMenuTrigger className="cursor-pointer hover:bg-white/10 p-1.5 rounded-miden">
+						<InlineIcon variant="arrow" color={'white'} className="w-4 h-4 rotate-90" />
 					</DropdownMenuTrigger>
 					<DropdownMenuContent>
 						{Object.values(notes).map((note) => (

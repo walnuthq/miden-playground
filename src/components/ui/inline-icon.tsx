@@ -202,7 +202,7 @@ const InlineIcon: React.FC<InlineIconProps> = ({ variant, className, color, onCl
 			case 'file':
 				return (
 					<svg
-						width="20"
+						width="16"
 						height="20"
 						viewBox="0 0 20 20"
 						fill="none"
@@ -336,10 +336,11 @@ const InlineIcon: React.FC<InlineIconProps> = ({ variant, className, color, onCl
 						viewBox="0 0 16 20"
 						fill="none"
 						xmlns="http://www.w3.org/2000/svg"
+						className={className}
 					>
 						<path
 							d="M9.66665 9.16667H4.66665M6.33331 12.5H4.66665M11.3333 5.83333H4.66665M14.6666 5.66667V14.3333C14.6666 15.7335 14.6666 16.4335 14.3942 16.9683C14.1545 17.4387 13.772 17.8212 13.3016 18.0609C12.7668 18.3333 12.0668 18.3333 10.6666 18.3333H5.33331C3.93318 18.3333 3.23312 18.3333 2.69834 18.0609C2.22793 17.8212 1.84548 17.4387 1.6058 16.9683C1.33331 16.4335 1.33331 15.7335 1.33331 14.3333V5.66667C1.33331 4.26654 1.33331 3.56647 1.6058 3.03169C1.84548 2.56129 2.22793 2.17884 2.69834 1.93915C3.23312 1.66667 3.93318 1.66667 5.33331 1.66667H10.6666C12.0668 1.66667 12.7668 1.66667 13.3016 1.93915C13.772 2.17884 14.1545 2.56129 14.3942 3.03169C14.6666 3.56647 14.6666 4.26654 14.6666 5.66667Z"
-							stroke="#FEFCFF"
+							stroke={color}
 							strokeWidth="2"
 							strokeLinecap="round"
 							strokeLinejoin="round"

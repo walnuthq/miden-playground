@@ -40,7 +40,7 @@ export function Accounts() {
 					</div>
 				</div>
 				<DropdownMenu>
-					<DropdownMenuTrigger className="cursor-pointer hover:bg-white/10 p-1.5 rounded-miden">
+					<DropdownMenuTrigger className="cursor-pointer hover:bg-white/10 p-1.5 rounded-miden ">
 						<InlineIcon variant="arrow" color={'white'} className="w-4 h-4 rotate-90" />
 					</DropdownMenuTrigger>
 					<DropdownMenuContent>

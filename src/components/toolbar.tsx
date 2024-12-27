@@ -28,7 +28,7 @@ export const Toolbar: React.FC = () => {
 							.map((fileId) => (
 								<div
 									key={fileId}
-									className={`text-white text-sm px-3 py-2 border-r last:border-r-0 border-dark-miden-950 flex flex-row items-center gap-2 cursor-pointer select-none ${
+									className={`text-white text-sm px-3 py-2 border-l-[1.5px] border-t-[1.5px] last:border-r-[1.5px]  border-dark-miden-700 flex flex-row items-center gap-2 cursor-pointer select-none ${
 										selectedFileId === fileId ? 'bg-[#040113]' : ''
 									}`}
 									onClick={() => {
