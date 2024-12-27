@@ -1,7 +1,8 @@
-import { Asset, EditorFiles } from '@/lib/types';
+import { Asset } from '@/lib/types';
 import { generateId } from '@/lib/utils';
 import { createSwapNoteInputs } from '@/lib/miden-wasm-api';
 import { Note } from '@/lib/notes';
+import { EditorFiles } from '@/lib/files';
 
 export function createSwapNote({
 	senderId,
@@ -20,6 +21,7 @@ export function createSwapNote({
 	const noteId = generateId();
 	const scriptFileId = generateId();
 	const inputFileId = generateId();
+	const metadataFileId = generateId();
 	const inputsBigInt = createSwapNoteInputs(senderId, requestedAsset);
 	const inputs: string[] = [];
 	for (const input of inputsBigInt) {
@@ -29,7 +31,7 @@ export function createSwapNote({
 		[scriptFileId]: {
 			id: scriptFileId,
 			name: `Note script/${name}`,
-			content: SWAP_SCRIPT,
+			content: { value: SWAP_SCRIPT },
 			isOpen: false,
 			variant: 'script',
 			readonly: false
@@ -37,7 +39,15 @@ export function createSwapNote({
 		[inputFileId]: {
 			id: inputFileId,
 			name: `Note Input/${name}`,
-			content: JSON.stringify(inputs, null, 2),
+			content: { value: JSON.stringify(inputs, null, 2) },
+			isOpen: false,
+			variant: 'file',
+			readonly: false
+		},
+		[metadataFileId]: {
+			id: metadataFileId,
+			name: `Note Metadata/${name}`,
+			content: { value: JSON.stringify({ senderId: '0x' + senderId.toString(16) }, null, 2) },
 			isOpen: false,
 			variant: 'file',
 			readonly: false
@@ -48,6 +58,7 @@ export function createSwapNote({
 		id: noteId,
 		name,
 		scriptFileId,
+		metadataFileId,
 		isConsumed: false,
 		assets: [offeredAsset],
 		inputFileId,
