@@ -30,7 +30,7 @@ use rand_chacha::{rand_core::SeedableRng, ChaCha20Rng};
 
 use miden_lib::{
     accounts::{auth::RpoFalcon512, wallets::BasicWallet},
-    notes::utils::{build_p2id_recipient, build_swap_tag},
+    notes::utils::build_p2id_recipient,
     transaction::TransactionKernel,
 };
 use miden_objects::{
@@ -41,7 +41,7 @@ use miden_objects::{
         Note, NoteAssets, NoteExecutionHint, NoteExecutionMode, NoteInputs, NoteMetadata,
         NoteRecipient, NoteScript, NoteTag, NoteType,
     },
-    transaction::{OutputNotes, TransactionArgs, TransactionScript},
+    transaction::{ExecutedTransaction, OutputNotes, TransactionArgs, TransactionScript},
     AccountError, Felt, NoteError, TransactionScriptError, Word, ZERO,
 };
 use miden_tx::TransactionExecutor;
@@ -239,6 +239,7 @@ impl NoteData {
     }
 }
 
+// TODO: handle errors
 fn serialize_assets(assets: &[Asset]) -> js_sys::Array {
     let assets_array = js_sys::Array::new();
 
@@ -282,10 +283,12 @@ fn serialize_assets(assets: &[Asset]) -> js_sys::Array {
     assets_array
 }
 
+// TODO: handle errors
 fn serialize_execution_output(
     account: &Account,
     final_account: &AccountHeader,
     output_notes: &OutputNotes,
+    executed_transaction: &ExecutedTransaction,
 ) -> JsValue {
     let assets: Vec<Asset> = account.vault().assets().collect();
     let assets_array = serialize_assets(&assets);
@@ -295,6 +298,8 @@ fn serialize_execution_output(
     let storage_commitment = final_account.storage_commitment().to_hex();
     let vault_root = final_account.vault_root().to_hex();
     let nonce = final_account.nonce().as_int();
+
+    let account_id: u64 = account.id().into();
 
     let output_notes_array = js_sys::Array::new();
     for note in output_notes.iter() {
@@ -306,6 +311,9 @@ fn serialize_execution_output(
         }
         output_notes_array.push(&note_obj);
     }
+
+    let total_cycles = executed_transaction.measurements().total_cycles();
+    let trace_length = executed_transaction.measurements().trace_length();
 
     let obj = js_sys::Object::new();
     js_sys::Reflect::set(&obj, &"outputNotes".into(), &output_notes_array).unwrap();
@@ -325,6 +333,10 @@ fn serialize_execution_output(
     .unwrap();
     js_sys::Reflect::set(&obj, &"vaultRoot".into(), &JsValue::from(vault_root)).unwrap();
     js_sys::Reflect::set(&obj, &"nonce".into(), &JsValue::from(nonce)).unwrap();
+    js_sys::Reflect::set(&obj, &"accountId".into(), &JsValue::from(account_id)).unwrap();
+    js_sys::Reflect::set(&obj, &"totalCycles".into(), &JsValue::from(total_cycles)).unwrap();
+    js_sys::Reflect::set(&obj, &"traceLength".into(), &JsValue::from(trace_length)).unwrap();
+
     obj.into()
 }
 
@@ -470,9 +482,11 @@ pub fn execute_transaction(
         &receiver_account,
         &final_account,
         &output_notes,
+        &executed_transaction,
     ))
 }
 
+// TODO: handle errors
 #[wasm_bindgen]
 pub fn create_swap_note_inputs(
     seed: Vec<u8>,

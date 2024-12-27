@@ -5,6 +5,9 @@ export interface ExecutionOutput {
 	storageCommitment: string;
 	vaultRoot: string;
 	nonce: number;
+	accountId: bigint;
+	totalCycles: number;
+	traceLength: number;
 }
 
 export interface Asset {

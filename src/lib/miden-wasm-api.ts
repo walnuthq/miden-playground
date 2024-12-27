@@ -6,7 +6,9 @@ import {
 	generate_faucet_id,
 	create_swap_note_inputs
 } from 'miden-wasm';
-import { Account, Note, ExecutionOutput, Asset } from '@/lib/types';
+import { ExecutionOutput, Asset } from '@/lib/types';
+import { Account } from '@/lib/account';
+import { Note } from '@/lib/notes';
 
 export function consumeNotes({
 	receiver,
@@ -25,7 +27,7 @@ export function consumeNotes({
 				note.assets.map((a) => new AssetData(a.faucetId, a.amount)),
 				noteInputs,
 				noteScript,
-				note.noteMetadata.senderId,
+				note.senderId,
 				senderScript
 			)
 	);
@@ -33,7 +35,7 @@ export function consumeNotes({
 		transactionScript,
 		receiverScript,
 		receiver.secretKey,
-		receiver.idBigInt,
+		receiver.id,
 		receiver.assets.map((a) => new AssetData(a.faucetId, a.amount)),
 		receiver.isWallet,
 		receiver.isAuth,
