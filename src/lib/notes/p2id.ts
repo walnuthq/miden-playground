@@ -1,5 +1,7 @@
-import { Asset, EditorFiles, Note } from '@/lib/types';
+import { Asset } from '@/lib/types';
 import { generateId } from '@/lib/utils';
+import { Note } from '@/lib/notes';
+import { EditorFiles } from '@/lib/files';
 
 export function createP2IDNote({
 	senderId,
@@ -18,11 +20,12 @@ export function createP2IDNote({
 	const noteId = generateId();
 	const scriptFileId = generateId();
 	const inputFileId = generateId();
+	const metadataFileId = generateId();
 	const newFiles: EditorFiles = {
 		[scriptFileId]: {
 			id: scriptFileId,
 			name: `Note script/${name}`,
-			content: P2ID_SCRIPT,
+			content: { value: P2ID_SCRIPT },
 			isOpen: false,
 			variant: 'script',
 			readonly: false
@@ -30,23 +33,31 @@ export function createP2IDNote({
 		[inputFileId]: {
 			id: inputFileId,
 			name: `Note Input/${name}`,
-			content: JSON.stringify(['0x' + receiverId.toString(16)], null, 2),
+			content: { value: JSON.stringify(['0x' + receiverId.toString(16)], null, 2) },
+			isOpen: false,
+			variant: 'file',
+			readonly: false
+		},
+		[metadataFileId]: {
+			id: metadataFileId,
+			name: `Note Metadata/${name}`,
+			content: { value: JSON.stringify({ senderId: '0x' + senderId.toString(16) }, null, 2) },
 			isOpen: false,
 			variant: 'file',
 			readonly: false
 		}
 	};
-	const note: Note = {
+
+	const note = new Note({
 		id: noteId,
 		name,
 		scriptFileId,
 		isConsumed: false,
 		assets,
 		inputFileId,
-		noteMetadata: {
-			senderId
-		}
-	};
+		senderId,
+		metadataFileId
+	});
 	return { note, newFiles };
 }
 

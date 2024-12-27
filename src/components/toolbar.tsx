@@ -25,7 +25,7 @@ export const Toolbar: React.FC = () => {
 							.map((fileId) => (
 								<div
 									key={fileId}
-									className={`text-white px-3 py-2 rounded-t-miden flex flex-row items-center gap-2 cursor-pointer ${
+									className={`text-white px-3 py-2 rounded-t-miden flex flex-row items-center gap-2 cursor-pointer select-none ${
 										selectedFileId === fileId ? 'bg-dark-miden-950' : ''
 									}`}
 									onClick={() => {

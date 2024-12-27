@@ -9,11 +9,9 @@ import React, {
 	useState
 } from 'react';
 import init from 'miden-wasm';
-import { Account, EditorFiles, ExecutionOutput, Note } from '@/lib/types';
+import { ExecutionOutput } from '@/lib/types';
 import { defaultAccounts, defaultNotes } from '@/lib/consts/defaults';
 import {
-	ACCOUNT_AUTH_SCRIPT,
-	ACCOUNT_WALLET_SCRIPT,
 	AUTHENTICATION_COMPONENT_SCRIPT_FILE_ID,
 	TRANSACTION_SCRIPT_FILE_ID,
 	WALLET_COMPONENT_SCRIPT_FILE_ID
@@ -21,6 +19,9 @@ import {
 import { consumeNotes } from '@/lib/miden-wasm-api';
 import { TRANSACTION_SCRIPT } from '@/lib/consts/transaction';
 import { convertToBigUint64Array } from '@/lib/utils';
+import { Account, ACCOUNT_AUTH_SCRIPT, ACCOUNT_WALLET_SCRIPT } from '@/lib/account';
+import { Note } from '@/lib/notes';
+import { EditorFiles } from '@/lib/files';
 
 type Tabs = 'transaction' | 'accounts' | 'notes';
 
@@ -77,7 +78,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		[TRANSACTION_SCRIPT_FILE_ID]: {
 			id: TRANSACTION_SCRIPT_FILE_ID,
 			name: 'Transaction script',
-			content: TRANSACTION_SCRIPT,
+			content: { value: TRANSACTION_SCRIPT },
 			isOpen: false,
 			readonly: true,
 			variant: 'script'
@@ -85,7 +86,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		[WALLET_COMPONENT_SCRIPT_FILE_ID]: {
 			id: WALLET_COMPONENT_SCRIPT_FILE_ID,
 			name: 'Wallet component script',
-			content: ACCOUNT_WALLET_SCRIPT,
+			content: { value: ACCOUNT_WALLET_SCRIPT },
 			isOpen: false,
 			readonly: true,
 			variant: 'script'
@@ -93,7 +94,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		[AUTHENTICATION_COMPONENT_SCRIPT_FILE_ID]: {
 			id: AUTHENTICATION_COMPONENT_SCRIPT_FILE_ID,
 			name: 'Authentication component script',
-			content: ACCOUNT_AUTH_SCRIPT,
+			content: { value: ACCOUNT_AUTH_SCRIPT },
 			isOpen: false,
 			readonly: true,
 			variant: 'script'
@@ -161,19 +162,21 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		if (!selectedTransactionAccountId) return;
 		const account = accounts[selectedTransactionAccountId];
 		const transactionNotes = selectedTransactionNotesIds.map((noteId) => {
-			const sender = accounts[notes[noteId].noteMetadata.senderId.toString(16)];
+			const sender = accounts[notes[noteId].senderIdHex];
 			return {
 				note: notes[noteId],
-				noteScript: files[notes[noteId].scriptFileId].content,
-				noteInputs: convertToBigUint64Array(JSON.parse(files[notes[noteId].inputFileId].content)),
-				senderScript: files[sender.scriptFileId].content
+				noteScript: files[notes[noteId].scriptFileId].content.value!,
+				noteInputs: convertToBigUint64Array(
+					JSON.parse(files[notes[noteId].inputFileId].content.value!)
+				),
+				senderScript: files[sender.scriptFileId].content.value!
 			};
 		});
 		const output = consumeNotes({
 			receiver: account,
-			receiverScript: files[account.scriptFileId].content,
+			receiverScript: files[account.scriptFileId].content.value!,
 			notes: transactionNotes,
-			transactionScript: files[TRANSACTION_SCRIPT_FILE_ID].content
+			transactionScript: files[TRANSACTION_SCRIPT_FILE_ID].content.value!
 		});
 		setExecutionOutput(output);
 	}, [accounts, files, notes, selectedTransactionAccountId, selectedTransactionNotesIds]);
@@ -186,11 +189,8 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				setAccounts(accounts);
 				const defaultAccount1 = Object.values(accounts)[0];
 				const defaultAccount2 = Object.values(accounts)[1];
-				setSelectedAccountId(defaultAccount1.id);
-				const { notes, newFiles: noteFiles } = defaultNotes(
-					defaultAccount1.idBigInt,
-					defaultAccount2.idBigInt
-				);
+				setSelectedAccountId(defaultAccount1.idHex);
+				const { notes, newFiles: noteFiles } = defaultNotes(defaultAccount1.id, defaultAccount2.id);
 				setFiles((prev) => ({ ...prev, ...accountFiles, ...noteFiles }));
 				setNotes(notes);
 				setSelectedNoteId(Object.values(notes)[0].id);

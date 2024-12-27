@@ -45,7 +45,7 @@ export const TransactionBuilder: React.FC = () => {
 						{Object.values(accounts).map((account) => (
 							<DropdownMenuItem
 								key={account.id}
-								onClick={() => selectTransactionAccount(account.id)}
+								onClick={() => selectTransactionAccount(account.idHex)}
 							>
 								{account.name}
 							</DropdownMenuItem>

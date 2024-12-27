@@ -47,7 +47,7 @@ export function Notes() {
 			<div className="flex flex-col">
 				<ListItem name={noteScriptFile.name} onClick={() => selectFile(noteScriptFile.id)} />
 				<ListItem name="Note input" onClick={() => selectFile(note.inputFileId)} />
-				<ListItem name="Note metadata" />
+				<ListItem name="Note metadata" onClick={() => selectFile(note.metadataFileId)} />
 			</div>
 		</div>
 	);

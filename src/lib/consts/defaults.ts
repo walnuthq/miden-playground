@@ -1,59 +1,20 @@
-import { Account, EditorFiles, Note } from '@/lib/types';
-import { ACCOUNT_SCRIPT } from './account';
-import { SECRET_KEY } from './secret-key';
-import { generateAccountId } from '@/lib/miden-wasm-api';
-import { generateId } from '@/lib/utils';
-import { createP2IDNote } from '../notes/p2id';
+import { createP2IDNote } from '@/lib/notes/p2id';
+import { Account } from '@/lib/account';
+import { Note } from '@/lib/notes';
+import { EditorFiles } from '@/lib/files';
 
 export const DEFAULT_FAUCET_IDS = [2305843009213693983n, 3103030043208856727n];
-
-export function createAccount(name: string): { account: Account; newFiles: EditorFiles } {
-	const id = generateAccountId();
-	const scriptFileId = generateId();
-	const newFiles: EditorFiles = {
-		[scriptFileId]: {
-			id: scriptFileId,
-			name: 'Custom component',
-			content: ACCOUNT_SCRIPT,
-			isOpen: false,
-			readonly: false,
-			variant: 'script'
-		}
-	};
-	const account: Account = {
-		id: id.toString(16),
-		idBigInt: id,
-		name,
-		isWallet: true,
-		isAuth: true,
-		assets: [
-			{
-				faucetId: DEFAULT_FAUCET_IDS[0],
-				faucetIdHex: DEFAULT_FAUCET_IDS[0].toString(16),
-				amount: 500n
-			},
-			{
-				faucetId: DEFAULT_FAUCET_IDS[1],
-				faucetIdHex: DEFAULT_FAUCET_IDS[1].toString(16),
-				amount: 500n
-			}
-		],
-		secretKey: SECRET_KEY,
-		scriptFileId
-	};
-	return { account, newFiles };
-}
 
 export function defaultAccounts(): {
 	accounts: Record<string, Account>;
 	newFiles: EditorFiles;
 } {
-	const accountA = createAccount('Account A');
-	const accountB = createAccount('Account B');
+	const accountA = Account.new('Account A');
+	const accountB = Account.new('Account B');
 	return {
 		accounts: {
-			[accountA.account.id]: accountA.account,
-			[accountB.account.id]: accountB.account
+			[accountA.account.idHex]: accountA.account,
+			[accountB.account.idHex]: accountB.account
 		},
 		newFiles: {
 			...accountA.newFiles,

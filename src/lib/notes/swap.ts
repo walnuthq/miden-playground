@@ -1,6 +1,7 @@
-import { Asset, Note, EditorFiles } from '@/lib/types';
+import { Asset, EditorFiles } from '@/lib/types';
 import { generateId } from '@/lib/utils';
 import { createSwapNoteInputs } from '@/lib/miden-wasm-api';
+import { Note } from '@/lib/notes';
 
 export function createSwapNote({
 	senderId,
@@ -42,17 +43,16 @@ export function createSwapNote({
 			readonly: false
 		}
 	};
-	const note: Note = {
+
+	const note = new Note({
 		id: noteId,
 		name,
 		scriptFileId,
 		isConsumed: false,
 		assets: [offeredAsset],
 		inputFileId,
-		noteMetadata: {
-			senderId
-		}
-	};
+		senderId
+	});
 	return { note, newFiles };
 }
 

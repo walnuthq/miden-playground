@@ -20,6 +20,9 @@ export function Accounts() {
 	const customComponent = files[account.scriptFileId];
 	const walletComponent = files[WALLET_COMPONENT_SCRIPT_FILE_ID];
 	const authComponent = files[AUTHENTICATION_COMPONENT_SCRIPT_FILE_ID];
+	const metadataFile = files[account.metadataFileId];
+	const vaultFile = files[account.vaultFileId];
+
 	return (
 		<div className="flex flex-col">
 			<div
@@ -45,7 +48,7 @@ export function Accounts() {
 					</DropdownMenuTrigger>
 					<DropdownMenuContent>
 						{Object.values(accounts).map((account) => (
-							<DropdownMenuItem key={account.id} onClick={() => selectAccount(account.id)}>
+							<DropdownMenuItem key={account.id} onClick={() => selectAccount(account.idHex)}>
 								{account.name}
 							</DropdownMenuItem>
 						))}
@@ -62,6 +65,8 @@ export function Accounts() {
 					editorFile={authComponent}
 					onClick={() => selectFile(AUTHENTICATION_COMPONENT_SCRIPT_FILE_ID)}
 				/>
+				<FileItem editorFile={metadataFile} onClick={() => selectFile(metadataFile.id)} />
+				<FileItem editorFile={vaultFile} onClick={() => selectFile(vaultFile.id)} />
 			</div>
 		</div>
 	);

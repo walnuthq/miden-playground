@@ -24,6 +24,7 @@
 		"lucide-react": "^0.462.0",
 		"miden-wasm": "file:miden-wasm/pkg",
 		"monaco-editor": "^0.52.2",
+		"monaco-editor-core": "^0.52.2",
 		"next": "15.0.3",
 		"react": "^18",
 		"react-dom": "^18",
