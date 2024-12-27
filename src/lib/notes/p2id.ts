@@ -24,7 +24,7 @@ export function createP2IDNote({
 	const newFiles: EditorFiles = {
 		[scriptFileId]: {
 			id: scriptFileId,
-			name: `Note script/${name}`,
+			name: `${name} Script`,
 			content: { value: P2ID_SCRIPT },
 			isOpen: false,
 			variant: 'script',
@@ -32,7 +32,7 @@ export function createP2IDNote({
 		},
 		[inputFileId]: {
 			id: inputFileId,
-			name: `Note Input/${name}`,
+			name: `${name} Inputs`,
 			content: { value: JSON.stringify(['0x' + receiverId.toString(16)], null, 2) },
 			isOpen: false,
 			variant: 'file',
@@ -40,7 +40,7 @@ export function createP2IDNote({
 		},
 		[metadataFileId]: {
 			id: metadataFileId,
-			name: `Note Metadata/${name}`,
+			name: `${name} Metadata`,
 			content: { value: JSON.stringify({ senderId: '0x' + senderId.toString(16) }, null, 2) },
 			isOpen: false,
 			variant: 'file',
