@@ -292,6 +292,12 @@ fn serialize_execution_output(
 ) -> JsValue {
     let assets: Vec<Asset> = account.vault().assets().collect();
     let assets_array = serialize_assets(&assets);
+    let storage: Vec<String> = account
+        .storage()
+        .as_elements()
+        .into_iter()
+        .map(|slot| slot.to_string())
+        .collect();
 
     let account_hash = final_account.hash().to_hex();
     let code_commitment = final_account.code_commitment().to_hex();
@@ -318,6 +324,7 @@ fn serialize_execution_output(
     let obj = js_sys::Object::new();
     js_sys::Reflect::set(&obj, &"outputNotes".into(), &output_notes_array).unwrap();
     js_sys::Reflect::set(&obj, &"assets".into(), &assets_array).unwrap();
+    js_sys::Reflect::set(&obj, &"storage".into(), &JsValue::from(storage)).unwrap();
     js_sys::Reflect::set(&obj, &"accountHash".into(), &JsValue::from(account_hash)).unwrap();
     js_sys::Reflect::set(
         &obj,

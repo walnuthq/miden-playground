@@ -25,6 +25,7 @@ export const Toolbar: React.FC = () => {
 					<div className="flex flex-row">
 						{Object.keys(files)
 							.filter((fileId) => files[fileId].isOpen)
+							.sort((a, b) => (files[a]?.positionOrder ?? 0) - (files[b]?.positionOrder ?? 0))
 							.map((fileId) => (
 								<div
 									key={fileId}

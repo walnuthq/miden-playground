@@ -8,7 +8,7 @@ import {
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger
-} from '../ui/dropdown-menu';
+} from '@/components/ui/dropdown-menu';
 
 export function Notes() {
 	const { files, notes, selectedNoteId, selectFile, selectedFileId, selectNote } = useMiden();
@@ -24,11 +24,15 @@ export function Notes() {
 					text-white font-medium flex flex-row justify-between items-center px-3"
 			>
 				<div className="flex flex-row gap-2 items-center">
-					<div>
-						<InlineIcon variant="plus-square" className="w-6 h-6 cursor-pointer" />
-					</div>
+					<DropdownMenu>
+						<DropdownMenuTrigger className="cursor-pointer hover:bg-white/10 p-1.5 rounded-miden ">
+							<InlineIcon variant="plus-square" className="w-6 h-6 cursor-pointer" />
+						</DropdownMenuTrigger>
+						<DropdownMenuContent></DropdownMenuContent>
+					</DropdownMenu>
 					{notes[selectedNoteId].name}
 				</div>
+
 				<DropdownMenu>
 					<DropdownMenuTrigger className="cursor-pointer hover:bg-white/10 p-1.5 rounded-miden">
 						<InlineIcon variant="arrow" color={'white'} className="w-4 h-4 rotate-90" />
@@ -44,19 +48,16 @@ export function Notes() {
 			</div>
 			<div className="flex flex-col">
 				<FileItem
-					isNote
 					editorFile={noteScriptFile}
 					onClick={() => selectFile(noteScriptFile.id)}
 					isSelected={selectedFileId === noteScriptFile.id}
 				/>
 				<FileItem
-					isNote
 					editorFile={noteInputFile}
 					onClick={() => selectFile(note.inputFileId)}
 					isSelected={selectedFileId === note.inputFileId}
 				/>
 				<FileItem
-					isNote
 					editorFile={noteMetadataFile}
 					onClick={() => selectFile(note.metadataFileId)}
 					isSelected={selectedFileId === note.metadataFileId}
