@@ -8,6 +8,7 @@ export interface ExecutionOutput {
 	accountId: bigint;
 	totalCycles: number;
 	traceLength: number;
+	storage: string[];
 }
 
 export interface Asset {

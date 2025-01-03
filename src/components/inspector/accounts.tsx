@@ -15,14 +15,26 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 export function Accounts() {
-	const { accounts, selectedAccountId, selectFile, files, selectAccount, selectedFileId } =
-		useMiden();
+	const {
+		accounts,
+		selectedAccountId,
+		selectFile,
+		files,
+		selectAccount,
+		selectedFileId,
+		createAccount,
+		disableWalletComponent,
+		disableAuthComponent,
+		enableAuthComponent,
+		enableWalletComponent
+	} = useMiden();
 	const account = accounts[selectedAccountId];
 	const customComponent = files[account.scriptFileId];
 	const walletComponent = files[WALLET_COMPONENT_SCRIPT_FILE_ID];
 	const authComponent = files[AUTHENTICATION_COMPONENT_SCRIPT_FILE_ID];
 	const metadataFile = files[account.metadataFileId];
 	const vaultFile = files[account.vaultFileId];
+	const storageFile = files[account.storageFileId];
 
 	return (
 		<div className="flex flex-col">
@@ -31,13 +43,30 @@ export function Accounts() {
 					text-white font-medium flex flex-row justify-between items-center px-3"
 			>
 				<div className="flex flex-row gap-2 items-center">
-					<div>
-						<InlineIcon variant="plus-square" className="w-6 h-6 cursor-pointer" />
-					</div>
+					<DropdownMenu>
+						<DropdownMenuTrigger className="cursor-pointer hover:bg-white/10 p-1.5 rounded-miden ">
+							<InlineIcon variant="plus-square" className="w-6 h-6 cursor-pointer" />
+						</DropdownMenuTrigger>
+						<DropdownMenuContent>
+							{!account.isAuth && (
+								<DropdownMenuItem onClick={() => enableAuthComponent(selectedAccountId)}>
+									Add authentication component
+								</DropdownMenuItem>
+							)}
+							{!account.isWallet && (
+								<DropdownMenuItem onClick={() => enableWalletComponent(selectedAccountId)}>
+									Add wallet component
+								</DropdownMenuItem>
+							)}
+							<DropdownMenuItem onClick={() => createAccount()}>
+								Create new account
+							</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
 					{accounts[selectedAccountId].name}
-					<div>
+					{/* <div>
 						<InlineIcon variant="pencil" color={'gray'} className="w-4 h-4 cursor-pointer" />
-					</div>
+					</div> */}
 				</div>
 				<DropdownMenu>
 					<DropdownMenuTrigger className="cursor-pointer hover:bg-white/10 p-1.5 rounded-miden ">
@@ -58,16 +87,22 @@ export function Accounts() {
 					isSelected={selectedFileId === account.scriptFileId}
 					onClick={() => selectFile(account.scriptFileId)}
 				/>
-				<FileItem
-					editorFile={walletComponent}
-					isSelected={selectedFileId === WALLET_COMPONENT_SCRIPT_FILE_ID}
-					onClick={() => selectFile(WALLET_COMPONENT_SCRIPT_FILE_ID)}
-				/>
-				<FileItem
-					editorFile={authComponent}
-					isSelected={selectedFileId === AUTHENTICATION_COMPONENT_SCRIPT_FILE_ID}
-					onClick={() => selectFile(AUTHENTICATION_COMPONENT_SCRIPT_FILE_ID)}
-				/>
+				{account.isWallet && (
+					<FileItem
+						editorFile={walletComponent}
+						isSelected={selectedFileId === WALLET_COMPONENT_SCRIPT_FILE_ID}
+						onClick={() => selectFile(WALLET_COMPONENT_SCRIPT_FILE_ID)}
+						onRemove={() => disableWalletComponent(account.idHex)}
+					/>
+				)}
+				{account.isAuth && (
+					<FileItem
+						editorFile={authComponent}
+						isSelected={selectedFileId === AUTHENTICATION_COMPONENT_SCRIPT_FILE_ID}
+						onClick={() => selectFile(AUTHENTICATION_COMPONENT_SCRIPT_FILE_ID)}
+						onRemove={() => disableAuthComponent(account.idHex)}
+					/>
+				)}
 				<FileItem
 					editorFile={metadataFile}
 					onClick={() => selectFile(metadataFile.id)}
@@ -77,6 +112,11 @@ export function Accounts() {
 					editorFile={vaultFile}
 					onClick={() => selectFile(vaultFile.id)}
 					isSelected={selectedFileId === vaultFile.id}
+				/>
+				<FileItem
+					editorFile={storageFile}
+					onClick={() => selectFile(storageFile.id)}
+					isSelected={selectedFileId === storageFile.id}
 				/>
 			</div>
 		</div>

@@ -35,7 +35,7 @@ export function createP2IDNote({
 			name: `${name} Inputs`,
 			content: { value: JSON.stringify(['0x' + receiverId.toString(16)], null, 2) },
 			isOpen: false,
-			variant: 'file',
+			variant: 'note',
 			readonly: false
 		},
 		[metadataFileId]: {
@@ -43,8 +43,8 @@ export function createP2IDNote({
 			name: `${name} Metadata`,
 			content: { value: JSON.stringify({ senderId: '0x' + senderId.toString(16) }, null, 2) },
 			isOpen: false,
-			variant: 'file',
-			readonly: false
+			variant: 'note',
+			readonly: true
 		}
 	};
 

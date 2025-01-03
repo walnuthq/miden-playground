@@ -24,12 +24,12 @@ export function FileItem({
 	editorFile,
 	isSelected,
 	onClick,
-	isNote = false
+	onRemove
 }: {
 	editorFile: EditorFile;
 	isSelected?: boolean;
 	onClick?: () => void;
-	isNote?: boolean;
+	onRemove?: () => void;
 }) {
 	return (
 		<div
@@ -40,13 +40,25 @@ export function FileItem({
 		>
 			<InlineIcon variant={editorFile.readonly ? 'lock' : 'unlock'} className={`w-4 h-4`} />
 			<InlineIcon
-				variant={isNote ? 'file_3' : editorFile.variant === 'script' ? 'file_2' : 'file'}
+				variant={
+					editorFile.variant === 'script'
+						? 'file_2'
+						: editorFile.variant === 'file'
+						? 'file'
+						: 'file_3'
+				}
 				color="white"
 				className={`w-4 h-4`}
 			/>
 			<span>{editorFile.name}</span>
-			{!isNote && (
-				<div className=" ml-auto cursor-pointer hover:bg-white/10 p-1.5 rounded-miden">
+			{onRemove && (
+				<div
+					className=" ml-auto cursor-pointer hover:bg-white/10 p-1.5 rounded-miden"
+					onClick={(event) => {
+						event.stopPropagation();
+						onRemove();
+					}}
+				>
 					<InlineIcon variant={'trash'} color="white" className={`w-4 h-4 `} />
 				</div>
 			)}

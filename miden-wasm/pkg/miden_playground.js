@@ -451,6 +451,13 @@ function __wbg_get_imports() {
         const ret = Reflect.set(arg0, arg1, arg2);
         return ret;
     }, arguments) };
+    imports.wbg.__wbindgen_array_new = function() {
+        const ret = [];
+        return ret;
+    };
+    imports.wbg.__wbindgen_array_push = function(arg0, arg1) {
+        arg0.push(arg1);
+    };
     imports.wbg.__wbindgen_bigint_from_u64 = function(arg0) {
         const ret = BigInt.asUintN(64, arg0);
         return ret;

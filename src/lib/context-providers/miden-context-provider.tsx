@@ -35,8 +35,15 @@ interface MidenContextProps {
 	notes: Record<string, Note>;
 	selectedNoteId: string;
 	selectedTransactionAccountId: string | null;
+	isCollapsedTabs: boolean;
 	selectedTransactionNotesIds: string[];
 	executionOutput: ExecutionOutput | null;
+	updateFileContent: (fileId: string, content: string) => void;
+	disableWalletComponent: (accountId: string) => void;
+	disableAuthComponent: (accountId: string) => void;
+	enableWalletComponent: (accountId: string) => void;
+	enableAuthComponent: (accountId: string) => void;
+	createAccount: () => void;
 	setExecutionOutput: (output: ExecutionOutput) => void;
 	selectTransactionNote: (noteId: string) => void;
 	selectTransactionAccount: (accountId: string) => void;
@@ -47,7 +54,6 @@ interface MidenContextProps {
 	selectTab: (tab: Tabs) => void;
 	executeTransaction: () => void;
 	collapsedTabs: () => void;
-	isCollapsedTabs: boolean;
 }
 
 export const MidenContext = createContext<MidenContextProps>({
@@ -62,6 +68,13 @@ export const MidenContext = createContext<MidenContextProps>({
 	selectedTransactionAccountId: null,
 	selectedTransactionNotesIds: [],
 	executionOutput: null,
+	isCollapsedTabs: false,
+	updateFileContent: () => {},
+	disableWalletComponent: () => {},
+	disableAuthComponent: () => {},
+	enableWalletComponent: () => {},
+	enableAuthComponent: () => {},
+	createAccount: () => {},
 	setExecutionOutput: () => {},
 	selectTransactionAccount: () => {},
 	selectTransactionNote: () => {},
@@ -71,8 +84,7 @@ export const MidenContext = createContext<MidenContextProps>({
 	closeFile: () => {},
 	selectTab: () => {},
 	executeTransaction: () => {},
-	collapsedTabs: () => {},
-	isCollapsedTabs: false
+	collapsedTabs: () => {}
 });
 
 export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
@@ -94,7 +106,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		},
 		[WALLET_COMPONENT_SCRIPT_FILE_ID]: {
 			id: WALLET_COMPONENT_SCRIPT_FILE_ID,
-			name: 'Wallet script',
+			name: 'Wallet component',
 			content: { value: ACCOUNT_WALLET_SCRIPT },
 			isOpen: false,
 			readonly: true,
@@ -102,7 +114,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		},
 		[AUTHENTICATION_COMPONENT_SCRIPT_FILE_ID]: {
 			id: AUTHENTICATION_COMPONENT_SCRIPT_FILE_ID,
-			name: 'Auth script',
+			name: 'Auth component',
 			content: { value: ACCOUNT_AUTH_SCRIPT },
 			isOpen: false,
 			readonly: true,
@@ -147,10 +159,17 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	}, []);
 
 	const selectFile = useCallback((fileId: string) => {
-		setFiles((prev) => ({
-			...prev,
-			[fileId]: { ...prev[fileId], isOpen: true, order: Date.now() }
-		}));
+		setFiles((prev) => {
+			const prevIsOpen = prev[fileId].isOpen;
+			const file = { ...prev[fileId], isOpen: true, openOrder: Date.now() };
+			if (!prevIsOpen) {
+				file.positionOrder = Date.now();
+			}
+			return {
+				...prev,
+				[fileId]: file
+			};
+		});
 		setSelectedFileId(fileId);
 	}, []);
 
@@ -162,7 +181,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 					const openFiles = Object.values(newFiles).filter((file) => file.isOpen);
 					if (openFiles.length > 0) {
 						const fileWithHighestOrder = openFiles.reduce((prev, current) => {
-							return (prev.order || 0) > (current.order || 0) ? prev : current;
+							return (prev.openOrder || 0) > (current.openOrder || 0) ? prev : current;
 						});
 						setSelectedFileId(fileWithHighestOrder.id);
 					} else {
@@ -196,7 +215,61 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			transactionScript: files[TRANSACTION_SCRIPT_FILE_ID].content.value!
 		});
 		setExecutionOutput(output);
+		setAccounts((prev) => {
+			const account = prev[selectedTransactionAccountId];
+			account.assets = output.assets;
+			account.storage = output.storage;
+			return { ...prev, [selectedTransactionAccountId]: account };
+		});
 	}, [accounts, files, notes, selectedTransactionAccountId, selectedTransactionNotesIds]);
+
+	const createAccount = useCallback(() => {
+		const newAccountName = Account.getNextAccountName(accounts);
+		const { account, newFiles } = Account.new(newAccountName);
+
+		setAccounts((prev) => {
+			return { ...prev, [account.idHex]: account };
+		});
+		setSelectedAccountId(account.idHex);
+		setFiles((prev) => ({ ...prev, ...newFiles }));
+	}, [accounts]);
+
+	const disableWalletComponent = useCallback((accountId: string) => {
+		setAccounts((prev) => {
+			const account = prev[accountId];
+			account.disableWalletComponent();
+			return { ...prev, [accountId]: account };
+		});
+	}, []);
+
+	const disableAuthComponent = useCallback((accountId: string) => {
+		setAccounts((prev) => {
+			const account = prev[accountId];
+			account.disableAuthComponent();
+			return { ...prev, [accountId]: account };
+		});
+	}, []);
+
+	const enableWalletComponent = useCallback((accountId: string) => {
+		setAccounts((prev) => {
+			const account = prev[accountId];
+			account.enableWalletComponent();
+			return { ...prev, [accountId]: account };
+		});
+	}, []);
+
+	const enableAuthComponent = useCallback((accountId: string) => {
+		setAccounts((prev) => {
+			const account = prev[accountId];
+			account.enableAuthComponent();
+			return { ...prev, [accountId]: account };
+		});
+	}, []);
+
+	const updateFileContent = useCallback((fileId: string, content: string) => {
+		console.log('UPDATE FILE CONTENT', fileId);
+		setFiles((prev) => ({ ...prev, [fileId]: { ...prev[fileId], content: { value: content } } }));
+	}, []);
 
 	useEffect(() => {
 		init()
@@ -232,6 +305,13 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				selectedTransactionAccountId,
 				selectedTransactionNotesIds,
 				executionOutput,
+				isCollapsedTabs,
+				updateFileContent,
+				disableWalletComponent,
+				disableAuthComponent,
+				enableWalletComponent,
+				enableAuthComponent,
+				createAccount,
 				setExecutionOutput,
 				selectTransactionAccount,
 				selectTransactionNote,
@@ -241,8 +321,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				closeFile,
 				selectTab,
 				executeTransaction,
-				collapsedTabs,
-				isCollapsedTabs
+				collapsedTabs
 			}}
 		>
 			{children}

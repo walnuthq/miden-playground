@@ -4,12 +4,13 @@ export interface EditorFile {
 	id: string;
 	name: string;
 	isOpen: boolean;
-	variant: 'script' | 'file';
+	variant: 'script' | 'file' | 'note';
 	readonly: boolean;
 	content:
 		| { value: string; dynamic?: undefined }
 		| { value?: undefined; dynamic: EditorFileDynamicContent };
-	order?: number;
+	openOrder?: number;
+	positionOrder?: number;
 }
 
 export type EditorFiles = Record<string, EditorFile>;
@@ -17,7 +18,7 @@ export type EditorFiles = Record<string, EditorFile>;
 export interface EditorFileDynamicContent {
 	account?: {
 		accountId: string;
-		variant: 'metadata' | 'vault';
+		variant: 'metadata' | 'vault' | 'storage';
 	};
 	note?: {
 		noteId: string;
@@ -30,9 +31,9 @@ export const useEditorFile = (fileId: string) => {
 	return files[fileId];
 };
 
-export const useSelectedEditorFileContent = () => {
+export const useSelectedEditorFile = (): { content: string; file: EditorFile | null } => {
 	const { files, accounts, selectedFileId } = useMiden();
-	if (!selectedFileId) return '';
+	if (!selectedFileId) return { content: '', file: null };
 
 	const file = files[selectedFileId];
 
@@ -55,6 +56,9 @@ export const useSelectedEditorFileContent = () => {
 						null,
 						2
 					);
+				} else if (file.content.dynamic.account.variant === 'storage') {
+					const account = accounts[file.content.dynamic.account.accountId];
+					content = JSON.stringify(account.storage, null, 2);
 				}
 			}
 		} else {
@@ -62,5 +66,5 @@ export const useSelectedEditorFileContent = () => {
 		}
 	}
 
-	return content;
+	return { content, file };
 };

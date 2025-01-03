@@ -41,7 +41,7 @@ export function createSwapNote({
 			name: `Note Input/${name}`,
 			content: { value: JSON.stringify(inputs, null, 2) },
 			isOpen: false,
-			variant: 'file',
+			variant: 'note',
 			readonly: false
 		},
 		[metadataFileId]: {
@@ -49,8 +49,8 @@ export function createSwapNote({
 			name: `Note Metadata/${name}`,
 			content: { value: JSON.stringify({ senderId: '0x' + senderId.toString(16) }, null, 2) },
 			isOpen: false,
-			variant: 'file',
-			readonly: false
+			variant: 'note',
+			readonly: true
 		}
 	};
 

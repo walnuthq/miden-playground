@@ -11,10 +11,12 @@ interface AccountProps {
 	isWallet: boolean;
 	isAuth: boolean;
 	assets: Asset[];
+	storage: string[];
 	secretKey: Uint8Array;
 	scriptFileId: string;
 	metadataFileId: string;
 	vaultFileId: string;
+	storageFileId: string;
 }
 
 export class Account {
@@ -23,10 +25,12 @@ export class Account {
 	isWallet: boolean;
 	isAuth: boolean;
 	assets: Asset[];
+	storage: string[];
 	secretKey: Uint8Array;
 	scriptFileId: string;
 	metadataFileId: string;
 	vaultFileId: string;
+	storageFileId: string;
 
 	constructor(props: AccountProps) {
 		this.id = props.id;
@@ -38,6 +42,8 @@ export class Account {
 		this.scriptFileId = props.scriptFileId;
 		this.metadataFileId = props.metadataFileId;
 		this.vaultFileId = props.vaultFileId;
+		this.storageFileId = props.storageFileId;
+		this.storage = props.storage;
 	}
 
 	static new(name: string): { account: Account; newFiles: EditorFiles } {
@@ -46,10 +52,11 @@ export class Account {
 		const scriptFileId = generateId();
 		const metadataFileId = generateId();
 		const vaultFileId = generateId();
+		const storageFileId = generateId();
 		const newFiles: EditorFiles = {
 			[scriptFileId]: {
 				id: scriptFileId,
-				name: 'Custom script',
+				name: 'Custom component',
 				content: { value: ACCOUNT_SCRIPT },
 				isOpen: false,
 				readonly: false,
@@ -84,6 +91,21 @@ export class Account {
 				isOpen: false,
 				readonly: true,
 				variant: 'file'
+			},
+			[storageFileId]: {
+				id: storageFileId,
+				name: 'Storage',
+				content: {
+					dynamic: {
+						account: {
+							accountId: idHex,
+							variant: 'storage'
+						}
+					}
+				},
+				isOpen: false,
+				readonly: true,
+				variant: 'file'
 			}
 		};
 		const account = new Account({
@@ -103,10 +125,12 @@ export class Account {
 					amount: 500n
 				}
 			],
+			storage: [],
 			secretKey: SECRET_KEY,
 			scriptFileId,
 			metadataFileId,
-			vaultFileId
+			vaultFileId,
+			storageFileId
 		});
 
 		return { account, newFiles };
@@ -114,6 +138,36 @@ export class Account {
 
 	get idHex() {
 		return '0x' + this.id.toString(16);
+	}
+
+	static getNextAccountName(accounts: Record<string, Account>) {
+		const accountNames = Object.values(accounts).map((account) => account.name);
+		let nextAccountName = '';
+		let i = 0;
+		while (true) {
+			nextAccountName = `Account ${String.fromCharCode(65 + i)}`;
+			if (!accountNames.includes(nextAccountName)) {
+				break;
+			}
+			i++;
+		}
+		return nextAccountName;
+	}
+
+	disableWalletComponent() {
+		this.isWallet = false;
+	}
+
+	disableAuthComponent() {
+		this.isAuth = false;
+	}
+
+	enableWalletComponent() {
+		this.isWallet = true;
+	}
+
+	enableAuthComponent() {
+		this.isAuth = true;
 	}
 }
 

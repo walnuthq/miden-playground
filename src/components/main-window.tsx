@@ -4,18 +4,23 @@ import { Toolbar } from '@/components/toolbar';
 import { useMiden } from '@/lib/context-providers';
 import { Editor as MonacoEditor, Monaco, useMonaco } from '@monaco-editor/react';
 import { cn } from '@/lib/utils';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ExecutionOutput } from './execution-output';
 import { ResizableHandle, ResizablePanel } from '@/components/ui/resizable';
-import { useSelectedEditorFileContent } from '@/lib/files';
+import { useSelectedEditorFile } from '@/lib/files';
+import { editor } from 'monaco-editor';
 
 export function MainWindow() {
-	const { files, selectedFileId, selectedTab, executionOutput } = useMiden();
+	const { selectedTab, executionOutput, updateFileContent } = useMiden();
 	const monaco = useMonaco();
 
-	const file = selectedFileId ? files[selectedFileId] : null;
-	const content = useSelectedEditorFileContent();
+	const { content, file } = useSelectedEditorFile();
 
+	const [value, setValue] = useState(content);
+
+	useEffect(() => {
+		setValue(content);
+	}, [content]);
 	const configureMonaco = useCallback((_monaco: Monaco) => {
 		if (_monaco) {
 			console.log('configureMonaco');
@@ -45,32 +50,33 @@ export function MainWindow() {
 			<ResizablePanel defaultSize={selectedTab === 'transaction' && executionOutput ? 45 : 75}>
 				<div className="flex flex-col h-full">
 					<Toolbar />
-					<div className="flex-1">
-						{selectedFileId && (
-							<MonacoEditor
-								onMount={(editor, _monaco) => {
-									configureMonaco(_monaco);
-								}}
-								options={{
-									overviewRulerLanes: 0,
-									minimap: { enabled: false },
-									wordBreak: 'keepAll',
-									wordWrap: 'on',
-									smoothScrolling: true,
-									scrollbar: {
-										verticalSliderSize: 5,
-										verticalScrollbarSize: 5
-									},
-									theme: 'miden',
-									readOnly: file ? file.readonly : true
-								}}
-								value={content}
-								className={cn(
-									'whitespace-pre-wrap overflow-hidden p-0 m-0 w-full h-full absolute top-0 left-0'
-								)}
-								onChange={() => {}}
-							/>
-						)}
+					<div className={`flex-1 ${file ? 'block' : 'hidden'}`}>
+						<MonacoEditor
+							onChange={(value) => {
+								setValue(value ?? '');
+								if (file && !file.readonly) updateFileContent(file.id, value ?? '');
+							}}
+							onMount={(editor: editor.IStandaloneCodeEditor, _monaco) => {
+								configureMonaco(_monaco);
+							}}
+							options={{
+								overviewRulerLanes: 0,
+								minimap: { enabled: false },
+								wordBreak: 'keepAll',
+								wordWrap: 'on',
+								smoothScrolling: true,
+								scrollbar: {
+									verticalSliderSize: 5,
+									verticalScrollbarSize: 5
+								},
+								theme: 'miden',
+								readOnly: file ? file.readonly : true
+							}}
+							value={value}
+							className={cn(
+								'whitespace-pre-wrap overflow-hidden p-0 m-0 w-full h-full absolute top-0 left-0'
+							)}
+						/>
 					</div>
 				</div>
 			</ResizablePanel>
