@@ -46,8 +46,6 @@ interface MidenContextProps {
 	closeFile: (fileId: string) => void;
 	selectTab: (tab: Tabs) => void;
 	executeTransaction: () => void;
-	collapsedTabs: () => void;
-	isCollapsedTabs: boolean;
 }
 
 export const MidenContext = createContext<MidenContextProps>({
@@ -70,18 +68,11 @@ export const MidenContext = createContext<MidenContextProps>({
 	selectFile: () => {},
 	closeFile: () => {},
 	selectTab: () => {},
-	executeTransaction: () => {},
-	collapsedTabs: () => {},
-	isCollapsedTabs: false
+	executeTransaction: () => {}
 });
 
 export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
 	const [isInitialized, setIsInitialized] = useState(false);
-	const [isCollapsedTabs, setCollapsedTabs] = useState(false);
-
-	const collapsedTabs = useCallback(() => {
-		setCollapsedTabs((prev) => !prev);
-	}, []);
 
 	const [files, setFiles] = useState<EditorFiles>({
 		[TRANSACTION_SCRIPT_FILE_ID]: {
@@ -240,9 +231,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				selectFile,
 				closeFile,
 				selectTab,
-				executeTransaction,
-				collapsedTabs,
-				isCollapsedTabs
+				executeTransaction
 			}}
 		>
 			{children}
