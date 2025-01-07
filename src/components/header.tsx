@@ -4,7 +4,9 @@ export function Header() {
 			<div className="font-bold text-2xl">
 				Miden <span className="text-lg p-1.5 bg-white/10 rounded-miden">Playground</span>
 			</div>
-			<div className="font-bold text-neutral-400 text-xl">Documentation</div>
+			<div className="font-bold text-neutral-400 text-xl cursor-pointer px-2 rounded-miden hover:bg-white/5">
+				Documentation
+			</div>
 		</div>
 	);
 }

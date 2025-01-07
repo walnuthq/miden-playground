@@ -32,11 +32,18 @@ export function Accounts() {
 			>
 				<div className="flex flex-row gap-2 items-center">
 					<div>
-						<InlineIcon variant="plus-square" className="w-6 h-6 cursor-pointer" />
+						<InlineIcon
+							variant="plus-square"
+							className="w-8 h-8 cursor-pointer hover:bg-white/10 p-1 rounded-miden"
+						/>
 					</div>
 					{accounts[selectedAccountId].name}
 					<div>
-						<InlineIcon variant="pencil" color={'gray'} className="w-4 h-4 cursor-pointer" />
+						<InlineIcon
+							variant="pencil"
+							color={'gray'}
+							className="w-6 h-6 cursor-pointer hover:bg-white/10 p-1 rounded-miden"
+						/>
 					</div>
 				</div>
 				<DropdownMenu>
