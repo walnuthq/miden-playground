@@ -1,6 +1,5 @@
-import { createP2IDNote } from '@/lib/notes/p2id';
 import { Account } from '@/lib/account';
-import { Note } from '@/lib/notes';
+import { Note, createP2IDNote } from '@/lib/notes';
 import { EditorFiles } from '@/lib/files';
 
 export const DEFAULT_FAUCET_IDS = [2305843009213693983n, 3103030043208856727n];
@@ -40,7 +39,7 @@ export function defaultNotes(
 				amount: 100n
 			}
 		],
-		name: 'P2ID 1'
+		name: 'P2ID (1)'
 	});
 	const p2idNote2 = createP2IDNote({
 		senderId: accountId1,
@@ -52,8 +51,21 @@ export function defaultNotes(
 				amount: 200n
 			}
 		],
-		name: 'P2ID 2'
+		name: 'P2ID (2)'
 	});
+	// const p2idrNote = createP2IDRNote({
+	// 	senderId: accountId1,
+	// 	receiverId: accountId2,
+	// 	reclaimBlockHeight: 100,
+	// 	assets: [
+	// 		{
+	// 			faucetId: DEFAULT_FAUCET_IDS[0],
+	// 			faucetIdHex: DEFAULT_FAUCET_IDS[0].toString(16),
+	// 			amount: 100n
+	// 		}
+	// 	],
+	// 	name: 'P2IDR'
+	// });
 	// const swapNote = createSwapNote({
 	// 	senderId: accountId1,
 	// 	offeredAsset: {

@@ -20,8 +20,9 @@ import { consumeNotes } from '@/lib/miden-wasm-api';
 import { TRANSACTION_SCRIPT } from '@/lib/consts/transaction';
 import { convertToBigUint64Array } from '@/lib/utils';
 import { Account, ACCOUNT_AUTH_SCRIPT, ACCOUNT_WALLET_SCRIPT } from '@/lib/account';
-import { Note } from '@/lib/notes';
+import { createP2IDRNote, Note } from '@/lib/notes';
 import { EditorFiles } from '@/lib/files';
+import { createP2IDNote } from '@/lib/notes/p2id';
 
 type Tabs = 'transaction' | 'accounts' | 'notes';
 
@@ -38,6 +39,8 @@ interface MidenContextProps {
 	isCollapsedTabs: boolean;
 	selectedTransactionNotesIds: string[];
 	executionOutput: ExecutionOutput | null;
+	createSampleP2IDNote: () => void;
+	createSampleP2IDRNote: () => void;
 	updateFileContent: (fileId: string, content: string) => void;
 	disableWalletComponent: (accountId: string) => void;
 	disableAuthComponent: (accountId: string) => void;
@@ -69,6 +72,8 @@ export const MidenContext = createContext<MidenContextProps>({
 	selectedTransactionNotesIds: [],
 	executionOutput: null,
 	isCollapsedTabs: false,
+	createSampleP2IDNote: () => {},
+	createSampleP2IDRNote: () => {},
 	updateFileContent: () => {},
 	disableWalletComponent: () => {},
 	disableAuthComponent: () => {},
@@ -271,6 +276,37 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		setFiles((prev) => ({ ...prev, [fileId]: { ...prev[fileId], content: { value: content } } }));
 	}, []);
 
+	const createSampleP2IDNote = useCallback(() => {
+		const newNoteName = Note.getNextNoteName('P2ID', notes);
+		const receiverId = accounts[selectedAccountId].id;
+		const senderId = Object.values(accounts).filter((account) => account.id !== receiverId)[0].id;
+		const { note, newFiles } = createP2IDNote({
+			senderId,
+			receiverId,
+			assets: [],
+			name: newNoteName
+		});
+		setNotes((prev) => ({ ...prev, [note.id]: note }));
+		setFiles((prev) => ({ ...prev, ...newFiles }));
+		setSelectedNoteId(note.id);
+	}, [notes, accounts, selectedAccountId]);
+
+	const createSampleP2IDRNote = useCallback(() => {
+		const newNoteName = Note.getNextNoteName('P2IDR', notes);
+		const receiverId = accounts[selectedAccountId].id;
+		const senderId = Object.values(accounts).filter((account) => account.id !== receiverId)[0].id;
+		const { note, newFiles } = createP2IDRNote({
+			senderId,
+			receiverId,
+			reclaimBlockHeight: 100,
+			assets: [],
+			name: newNoteName
+		});
+		setNotes((prev) => ({ ...prev, [note.id]: note }));
+		setFiles((prev) => ({ ...prev, ...newFiles }));
+		setSelectedNoteId(note.id);
+	}, [notes, accounts, selectedAccountId]);
+
 	useEffect(() => {
 		init()
 			.then(() => {
@@ -306,6 +342,8 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				selectedTransactionNotesIds,
 				executionOutput,
 				isCollapsedTabs,
+				createSampleP2IDNote,
+				createSampleP2IDRNote,
 				updateFileContent,
 				disableWalletComponent,
 				disableAuthComponent,
