@@ -22,6 +22,7 @@ export function createSwapNote({
 	const scriptFileId = generateId();
 	const inputFileId = generateId();
 	const metadataFileId = generateId();
+	const vaultFileId = generateId();
 	const inputsBigInt = createSwapNoteInputs(senderId, requestedAsset);
 	const inputs: string[] = [];
 	for (const input of inputsBigInt) {
@@ -51,6 +52,14 @@ export function createSwapNote({
 			isOpen: false,
 			variant: 'note',
 			readonly: true
+		},
+		[vaultFileId]: {
+			id: vaultFileId,
+			name: `${name} Vault`,
+			content: { dynamic: { note: { noteId, variant: 'vault' } } },
+			isOpen: false,
+			variant: 'note',
+			readonly: true
 		}
 	};
 
@@ -62,7 +71,8 @@ export function createSwapNote({
 		isConsumed: false,
 		assets: [offeredAsset],
 		inputFileId,
-		senderId
+		senderId,
+		vaultFileId
 	});
 	return { note, newFiles };
 }

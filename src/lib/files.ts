@@ -22,7 +22,7 @@ export interface EditorFileDynamicContent {
 	};
 	note?: {
 		noteId: string;
-		variant: 'metadata';
+		variant: 'metadata' | 'vault';
 	};
 }
 
@@ -32,7 +32,7 @@ export const useEditorFile = (fileId: string) => {
 };
 
 export const useSelectedEditorFile = (): { content: string; file: EditorFile | null } => {
-	const { files, accounts, selectedFileId } = useMiden();
+	const { files, accounts, selectedFileId, notes } = useMiden();
 	if (!selectedFileId) return { content: '', file: null };
 
 	const file = files[selectedFileId];
@@ -59,6 +59,24 @@ export const useSelectedEditorFile = (): { content: string; file: EditorFile | n
 				} else if (file.content.dynamic.account.variant === 'storage') {
 					const account = accounts[file.content.dynamic.account.accountId];
 					content = JSON.stringify(account.storage, null, 2);
+				}
+			} else if (file.content.dynamic.note) {
+				if (file.content.dynamic.note.variant === 'metadata') {
+					const note = notes[file.content.dynamic.note.noteId];
+					content = JSON.stringify(
+						{
+							senderId: '0x' + note.senderId.toString(16)
+						},
+						null,
+						2
+					);
+				} else if (file.content.dynamic.note.variant === 'vault') {
+					const note = notes[file.content.dynamic.note.noteId];
+					content = JSON.stringify(
+						note.assets.map((asset) => [asset.amount.toString(), 0, 0, asset.faucetIdHex]),
+						null,
+						2
+					);
 				}
 			}
 		} else {

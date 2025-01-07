@@ -11,11 +11,21 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 export function Notes() {
-	const { files, notes, selectedNoteId, selectFile, selectedFileId, selectNote } = useMiden();
+	const {
+		files,
+		notes,
+		selectedNoteId,
+		selectFile,
+		selectedFileId,
+		selectNote,
+		createSampleP2IDNote,
+		createSampleP2IDRNote
+	} = useMiden();
 	const note = notes[selectedNoteId];
 	const noteScriptFile = files[note.scriptFileId];
 	const noteInputFile = files[note.inputFileId];
 	const noteMetadataFile = files[note.metadataFileId];
+	const noteVaultFile = files[note.vaultFileId];
 
 	return (
 		<div className="flex flex-col">
@@ -28,7 +38,14 @@ export function Notes() {
 						<DropdownMenuTrigger className="cursor-pointer hover:bg-white/10 p-1.5 rounded-miden ">
 							<InlineIcon variant="plus-square" className="w-6 h-6 cursor-pointer" />
 						</DropdownMenuTrigger>
-						<DropdownMenuContent></DropdownMenuContent>
+						<DropdownMenuContent>
+							<DropdownMenuItem onClick={() => createSampleP2IDNote()}>
+								Create P2ID note
+							</DropdownMenuItem>
+							<DropdownMenuItem onClick={() => createSampleP2IDRNote()}>
+								Create P2IDR note
+							</DropdownMenuItem>
+						</DropdownMenuContent>
 					</DropdownMenu>
 					{notes[selectedNoteId].name}
 				</div>
@@ -61,6 +78,11 @@ export function Notes() {
 					editorFile={noteMetadataFile}
 					onClick={() => selectFile(note.metadataFileId)}
 					isSelected={selectedFileId === note.metadataFileId}
+				/>
+				<FileItem
+					editorFile={noteVaultFile}
+					onClick={() => selectFile(note.vaultFileId)}
+					isSelected={selectedFileId === note.vaultFileId}
 				/>
 			</div>
 		</div>
