@@ -23,7 +23,6 @@ export function MainWindow() {
 	}, [content]);
 	const configureMonaco = useCallback((_monaco: Monaco) => {
 		if (_monaco) {
-			console.log('configureMonaco');
 			_monaco.editor.defineTheme('miden', {
 				base: 'vs-dark',
 				inherit: true,
