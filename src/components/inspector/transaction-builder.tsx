@@ -19,7 +19,12 @@ export const TransactionBuilder: React.FC = () => {
 		selectedTransactionNotesIds,
 		selectTransactionNote,
 		selectTransactionAccount,
-		selectFile
+		selectFile,
+		removeTransactionNote,
+		removeTransactionAccount,
+		selectNote,
+		selectAccount,
+		selectTab
 	} = useMiden();
 	const selectedTransactionAccount = selectedTransactionAccountId
 		? accounts[selectedTransactionAccountId]
@@ -53,7 +58,15 @@ export const TransactionBuilder: React.FC = () => {
 					</DropdownMenuContent>
 				</DropdownMenu>
 				{selectedTransactionAccount && (
-					<ListItem name={selectedTransactionAccount.name} isAccount={true} />
+					<ListItem
+						name={selectedTransactionAccount.name}
+						variant="account"
+						onClick={() => {
+							selectAccount(selectedTransactionAccount.idHex);
+							selectTab('accounts');
+						}}
+						onRemove={() => removeTransactionAccount()}
+					/>
 				)}
 				<DropdownMenu>
 					<DropdownMenuTrigger>
@@ -71,7 +84,16 @@ export const TransactionBuilder: React.FC = () => {
 					</DropdownMenuContent>
 				</DropdownMenu>
 				{selectedTransactionNotesIds.map((noteId) => (
-					<ListItem key={noteId} name={notes[noteId].name} />
+					<ListItem
+						key={noteId}
+						name={notes[noteId].name}
+						variant="file"
+						onRemove={() => removeTransactionNote(noteId)}
+						onClick={() => {
+							selectNote(noteId);
+							selectTab('notes');
+						}}
+					/>
 				))}
 				<div
 					className="flex flex-row items-center gap-2 text-white py-2 px-3 cursor-pointer"
@@ -87,18 +109,37 @@ export const TransactionBuilder: React.FC = () => {
 	);
 };
 
-function ListItem({ name, isAccount }: { name: string; isAccount?: boolean }) {
+function ListItem({
+	name,
+	variant,
+	onRemove,
+	onClick
+}: {
+	name: string;
+	variant: 'account' | 'file';
+	onRemove?: () => void;
+	onClick?: () => void;
+}) {
 	return (
 		<div
-			className={`ml-10 flex flex-row py-2 items-center gap-2 text-white select-none cursor-pointer
-    `}
+			className={`ml-10 flex flex-row py-2 px-2 items-center gap-2 text-white select-none cursor-pointer rounded-l-miden ${
+				onClick ? 'cursor-pointer hover:bg-white/10' : 'cursor-default'
+			}`}
+			onClick={onClick}
 		>
-			<InlineIcon
-				variant={isAccount ? 'account' : 'file'}
-				className={`w-5 h-5 cursor-pointer`}
-				color="white"
-			/>
+			<InlineIcon variant={variant} className={`w-5 h-5 cursor-pointer`} color="white" />
 			<span>{name}</span>
+			{onRemove && (
+				<div
+					className=" ml-auto cursor-pointer hover:bg-white/10 p-1.5 rounded-miden"
+					onClick={(event) => {
+						event.stopPropagation();
+						onRemove();
+					}}
+				>
+					<InlineIcon variant={'trash'} color="white" className={`w-4 h-4 `} />
+				</div>
+			)}
 		</div>
 	);
 }

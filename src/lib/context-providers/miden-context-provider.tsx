@@ -23,6 +23,7 @@ import { Account, ACCOUNT_AUTH_SCRIPT, ACCOUNT_WALLET_SCRIPT } from '@/lib/accou
 import { createP2IDRNote, Note } from '@/lib/notes';
 import { EditorFiles } from '@/lib/files';
 import { createP2IDNote } from '@/lib/notes/p2id';
+import { useToast } from '@/hooks/use-toast';
 
 type Tabs = 'transaction' | 'accounts' | 'notes';
 
@@ -39,6 +40,7 @@ interface MidenContextProps {
 	isCollapsedTabs: boolean;
 	selectedTransactionNotesIds: string[];
 	executionOutput: ExecutionOutput | null;
+	isExecutingTransaction: boolean;
 	createSampleP2IDNote: () => void;
 	createSampleP2IDRNote: () => void;
 	updateFileContent: (fileId: string, content: string) => void;
@@ -49,7 +51,9 @@ interface MidenContextProps {
 	createAccount: () => void;
 	setExecutionOutput: (output: ExecutionOutput) => void;
 	selectTransactionNote: (noteId: string) => void;
+	removeTransactionNote: (noteId: string) => void;
 	selectTransactionAccount: (accountId: string) => void;
+	removeTransactionAccount: () => void;
 	selectAccount: (accountId: string) => void;
 	selectNote: (noteId: string) => void;
 	selectFile: (fileId: string) => void;
@@ -71,6 +75,7 @@ export const MidenContext = createContext<MidenContextProps>({
 	selectedTransactionAccountId: null,
 	selectedTransactionNotesIds: [],
 	executionOutput: null,
+	isExecutingTransaction: false,
 	isCollapsedTabs: false,
 	createSampleP2IDNote: () => {},
 	createSampleP2IDRNote: () => {},
@@ -83,6 +88,8 @@ export const MidenContext = createContext<MidenContextProps>({
 	setExecutionOutput: () => {},
 	selectTransactionAccount: () => {},
 	selectTransactionNote: () => {},
+	removeTransactionNote: () => {},
+	removeTransactionAccount: () => {},
 	selectAccount: () => {},
 	selectNote: () => {},
 	selectFile: () => {},
@@ -93,8 +100,11 @@ export const MidenContext = createContext<MidenContextProps>({
 });
 
 export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
+	const { toast } = useToast();
+
 	const [isInitialized, setIsInitialized] = useState(false);
 	const [isCollapsedTabs, setCollapsedTabs] = useState(false);
+	const [isExecutingTransaction, setIsExecutingTransaction] = useState(false);
 
 	const collapsedTabs = useCallback(() => {
 		setCollapsedTabs((prev) => !prev);
@@ -201,6 +211,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 
 	const executeTransaction = useCallback(() => {
 		if (!selectedTransactionAccountId) return;
+		setIsExecutingTransaction(true);
 		const account = accounts[selectedTransactionAccountId];
 		const transactionNotes = selectedTransactionNotesIds.map((noteId) => {
 			const sender = accounts[notes[noteId].senderIdHex];
@@ -213,20 +224,33 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				senderScript: files[sender.scriptFileId].content.value!
 			};
 		});
-		const output = consumeNotes({
-			receiver: account,
-			receiverScript: files[account.scriptFileId].content.value!,
-			notes: transactionNotes,
-			transactionScript: files[TRANSACTION_SCRIPT_FILE_ID].content.value!
-		});
-		setExecutionOutput(output);
-		setAccounts((prev) => {
-			const account = prev[selectedTransactionAccountId];
-			account.assets = output.assets;
-			account.storage = output.storage;
-			return { ...prev, [selectedTransactionAccountId]: account };
-		});
-	}, [accounts, files, notes, selectedTransactionAccountId, selectedTransactionNotesIds]);
+		try {
+			const output = consumeNotes({
+				receiver: account,
+				receiverScript: files[account.scriptFileId].content.value!,
+				notes: transactionNotes,
+				transactionScript: files[TRANSACTION_SCRIPT_FILE_ID].content.value!
+			});
+			setExecutionOutput(output);
+			setAccounts((prev) => {
+				const account = prev[selectedTransactionAccountId];
+				account.assets = output.assets;
+				account.storage = output.storage;
+				return { ...prev, [selectedTransactionAccountId]: account };
+			});
+			toast({
+				title: 'Execution successful'
+			});
+		} catch (error) {
+			toast({
+				title: 'Execution failed',
+				description: 'Error: ' + error,
+				variant: 'destructive'
+			});
+		}
+
+		setIsExecutingTransaction(false);
+	}, [accounts, files, notes, selectedTransactionAccountId, selectedTransactionNotesIds, toast]);
 
 	const createAccount = useCallback(() => {
 		const newAccountName = Account.getNextAccountName(accounts);
@@ -327,6 +351,14 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			});
 	}, []);
 
+	const removeTransactionNote = useCallback((noteId: string) => {
+		setSelectedTransactionNotesIds((prev) => prev.filter((id) => id !== noteId));
+	}, []);
+
+	const removeTransactionAccount = useCallback(() => {
+		setSelectedTransactionAccountId(null);
+	}, []);
+
 	return (
 		<MidenContext.Provider
 			value={{
@@ -341,6 +373,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				selectedTransactionAccountId,
 				selectedTransactionNotesIds,
 				executionOutput,
+				isExecutingTransaction,
 				isCollapsedTabs,
 				createSampleP2IDNote,
 				createSampleP2IDRNote,
@@ -353,6 +386,8 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				setExecutionOutput,
 				selectTransactionAccount,
 				selectTransactionNote,
+				removeTransactionNote,
+				removeTransactionAccount,
 				selectAccount,
 				selectNote,
 				selectFile,
