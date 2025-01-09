@@ -34,7 +34,7 @@ export function FileItem({
 	return (
 		<div
 			className={`border-b-2 border-dark-miden-700 h-[54px] px-2 flex flex-row items-center gap-2 text-white select-none cursor-pointer
-    ${isSelected ? 'bg-dark-miden-800' : 'hover:bg-white/5'}
+    ${isSelected ? 'bg-dark-miden-800' : 'hover:bg-white/10'}
     `}
 			onClick={onClick}
 		>
@@ -78,7 +78,7 @@ export function ListItem({
 	return (
 		<div
 			className={`border-b-2 border-dark-miden-700 h-[54px] px-6 flex flex-row items-center gap-2 text-white select-none cursor-pointer
-    ${isSelected ? 'bg-dark-miden-800' : 'hover:bg-white/5'}
+    ${isSelected ? 'bg-dark-miden-800' : 'hover:bg-white/10'}
     `}
 			onClick={onClick}
 		>

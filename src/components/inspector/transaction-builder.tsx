@@ -42,7 +42,7 @@ export const TransactionBuilder: React.FC = () => {
 			<div className="flex flex-col">
 				<DropdownMenu>
 					<DropdownMenuTrigger>
-						<div className="flex flex-row items-center gap-2 text-white py-2 px-3 hover:bg-white/5">
+						<div className="flex flex-row items-center gap-2 text-white py-2 px-3 hover:bg-white/10">
 							<InlineIcon variant="plus-square" className="w-6 h-6 cursor-pointer" />
 							<span>Account</span>
 						</div>
@@ -71,7 +71,7 @@ export const TransactionBuilder: React.FC = () => {
 				)}
 				<DropdownMenu>
 					<DropdownMenuTrigger>
-						<div className="flex flex-row items-center gap-2 text-white py-2 px-3 hover:bg-white/5">
+						<div className="flex flex-row items-center gap-2 text-white py-2 px-3 hover:bg-white/10">
 							<InlineIcon variant="plus-square" className="w-6 h-6 cursor-pointer" />
 							<span>Note</span>
 						</div>
@@ -98,7 +98,7 @@ export const TransactionBuilder: React.FC = () => {
 				))}
 				<div
 					className={`flex flex-row items-center ${
-						selectedFileId === TRANSACTION_SCRIPT_FILE_ID ? 'bg-white/5' : 'hover:bg-white/5'
+						selectedFileId === TRANSACTION_SCRIPT_FILE_ID ? 'bg-white/5' : 'hover:bg-white/10'
 					} gap-2 text-white py-2 px-3 cursor-pointer`}
 					onClick={() => {
 						selectFile(TRANSACTION_SCRIPT_FILE_ID);
