@@ -35,7 +35,7 @@ export function Notes() {
 			>
 				<div className="flex flex-row gap-2 items-center">
 					<DropdownMenu>
-						<DropdownMenuTrigger className="cursor-pointer hover:bg-white/10 p-1.5 rounded-miden ">
+						<DropdownMenuTrigger className="cursor-pointer rounded-miden ">
 							<InlineIcon
 								variant="plus-square"
 								className="w-8 h-8 cursor-pointer hover:bg-white/10 p-1 rounded-miden"
