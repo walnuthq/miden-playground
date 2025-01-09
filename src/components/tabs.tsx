@@ -9,7 +9,7 @@ export const Tabs = () => {
 	return (
 		<div className="border-r-2 border-dark-miden-700 w-[44px]">
 			<div
-				className="h-[54px] border-b-2 border-dark-miden-700 flex items-center justify-center cursor-pointer"
+				className="h-[54px] border-b-2 border-dark-miden-700 flex items-center justify-center cursor-pointer hover:bg-white/5"
 				onClick={() => selectTab('transaction')}
 			>
 				<InlineIcon
@@ -19,7 +19,7 @@ export const Tabs = () => {
 				/>
 			</div>
 			<div
-				className="h-[54px] border-b-2 border-dark-miden-700 flex items-center justify-center cursor-pointer"
+				className="h-[54px] border-b-2 border-dark-miden-700 flex items-center justify-center cursor-pointer hover:bg-white/5"
 				onClick={() => selectTab('accounts')}
 			>
 				<InlineIcon
@@ -29,7 +29,7 @@ export const Tabs = () => {
 				/>
 			</div>
 			<div
-				className="h-[54px] border-b-2 border-dark-miden-700 flex items-center justify-center cursor-pointer"
+				className="h-[54px] border-b-2 border-dark-miden-700 flex items-center justify-center cursor-pointer hover:bg-white/5"
 				onClick={() => selectTab('notes')}
 			>
 				<InlineIcon

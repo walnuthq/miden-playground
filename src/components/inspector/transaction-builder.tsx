@@ -24,7 +24,8 @@ export const TransactionBuilder: React.FC = () => {
 		removeTransactionAccount,
 		selectNote,
 		selectAccount,
-		selectTab
+		selectTab,
+		selectedFileId
 	} = useMiden();
 	const selectedTransactionAccount = selectedTransactionAccountId
 		? accounts[selectedTransactionAccountId]
@@ -41,7 +42,7 @@ export const TransactionBuilder: React.FC = () => {
 			<div className="flex flex-col">
 				<DropdownMenu>
 					<DropdownMenuTrigger>
-						<div className="flex flex-row items-center gap-2 text-white py-2 px-3">
+						<div className="flex flex-row items-center gap-2 text-white py-2 px-3 hover:bg-white/5">
 							<InlineIcon variant="plus-square" className="w-6 h-6 cursor-pointer" />
 							<span>Account</span>
 						</div>
@@ -70,7 +71,7 @@ export const TransactionBuilder: React.FC = () => {
 				)}
 				<DropdownMenu>
 					<DropdownMenuTrigger>
-						<div className="flex flex-row items-center gap-2 text-white py-2 px-3">
+						<div className="flex flex-row items-center gap-2 text-white py-2 px-3 hover:bg-white/5">
 							<InlineIcon variant="plus-square" className="w-6 h-6 cursor-pointer" />
 							<span>Note</span>
 						</div>
@@ -96,7 +97,9 @@ export const TransactionBuilder: React.FC = () => {
 					/>
 				))}
 				<div
-					className="flex flex-row items-center gap-2 text-white py-2 px-3 cursor-pointer"
+					className={`flex flex-row items-center ${
+						selectedFileId === TRANSACTION_SCRIPT_FILE_ID ? 'bg-white/5' : 'hover:bg-white/5'
+					} gap-2 text-white py-2 px-3 cursor-pointer`}
 					onClick={() => {
 						selectFile(TRANSACTION_SCRIPT_FILE_ID);
 					}}
@@ -122,7 +125,7 @@ function ListItem({
 }) {
 	return (
 		<div
-			className={`ml-10 flex flex-row py-2 px-2 items-center gap-2 text-white select-none cursor-pointer rounded-l-miden ${
+			className={`ml-10 flex flex-row p-2 px-2 items-center gap-2 text-white select-none cursor-pointer rounded-l-miden ${
 				onClick ? 'cursor-pointer hover:bg-white/10' : 'cursor-default'
 			}`}
 			onClick={onClick}

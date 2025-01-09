@@ -1,19 +1,19 @@
 'use client';
 
-import React from 'react';
 import InlineIcon from '@/components/ui/inline-icon';
 import { useMiden } from '@/lib/context-providers';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
-export const Toolbar: React.FC = () => {
+export const Toolbar = ({ toggleInspector }: { toggleInspector: () => void }) => {
 	const {
 		files,
 		closeFile,
 		selectFile,
 		selectedFileId,
 		executeTransaction,
-		collapsedTabs,
-		isExecutingTransaction
+		isExecutingTransaction,
+		isCollapsedTabs,
+		collapsedTabs
 	} = useMiden();
 	const filesToDisplay = Object.keys(files)
 		.filter((fileId) => files[fileId].isOpen)
@@ -26,10 +26,17 @@ export const Toolbar: React.FC = () => {
 		>
 			<div className="h-full flex gap-4 items-end overflow-hidden">
 				<div
-					onClick={() => collapsedTabs()}
+					onClick={() => {
+						toggleInspector();
+						collapsedTabs();
+					}}
 					className="ml-4 self-center cursor-pointer hover:bg-white/10 p-1.5 rounded-miden"
 				>
-					<InlineIcon variant={'left-arrow'} color="white" className={` w-6 h-6`} />
+					<InlineIcon
+						variant={'left-arrow'}
+						color="white"
+						className={`${isCollapsedTabs ? 'rotate-180' : 'rotate-0'} w-6 h-6`}
+					/>
 				</div>
 				<ScrollArea>
 					<div className="flex flex-row">

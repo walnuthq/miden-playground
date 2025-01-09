@@ -106,9 +106,9 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	const [isCollapsedTabs, setCollapsedTabs] = useState(false);
 	const [isExecutingTransaction, setIsExecutingTransaction] = useState(false);
 
-	const collapsedTabs = useCallback(() => {
-		setCollapsedTabs((prev) => !prev);
-	}, []);
+	const collapsedTabs = () => {
+		setCollapsedTabs(!isCollapsedTabs);
+	};
 
 	const [files, setFiles] = useState<EditorFiles>({
 		[TRANSACTION_SCRIPT_FILE_ID]: {
