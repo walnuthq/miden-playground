@@ -125,7 +125,7 @@ function ListItem({
 }) {
 	return (
 		<div
-			className={`ml-10 flex flex-row p-2 px-2 items-center gap-2 text-white select-none cursor-pointer rounded-l-miden ${
+			className={`ml-10 flex flex-row p-2 items-center gap-2 text-white select-none cursor-pointer rounded-l-miden ${
 				onClick ? 'cursor-pointer hover:bg-white/10' : 'cursor-default'
 			}`}
 			onClick={onClick}
