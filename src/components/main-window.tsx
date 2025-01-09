@@ -10,7 +10,7 @@ import { ResizableHandle, ResizablePanel } from '@/components/ui/resizable';
 import { useSelectedEditorFile } from '@/lib/files';
 import { editor } from 'monaco-editor';
 
-export function MainWindow() {
+export function MainWindow({ toggleInspector }: { toggleInspector: () => void }) {
 	const { selectedTab, executionOutput, updateFileContent } = useMiden();
 	const monaco = useMonaco();
 
@@ -48,7 +48,7 @@ export function MainWindow() {
 		<>
 			<ResizablePanel defaultSize={selectedTab === 'transaction' && executionOutput ? 45 : 75}>
 				<div className="flex flex-col h-full">
-					<Toolbar />
+					<Toolbar toggleInspector={toggleInspector} />
 					<div className={`flex-1 ${file ? 'block' : 'hidden'}`}>
 						<MonacoEditor
 							onChange={(value) => {
