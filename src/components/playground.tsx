@@ -18,35 +18,35 @@ interface PanelHandle {
 
 export function Playground() {
 	const inspectorPanelRef = useRef<PanelHandle>(null);
-	const { isCollapsedTabs, collapsedTabs } = useMiden();
+	const { isCollapsedTabs, collapseTabs } = useMiden();
 	const toggleInspector = () => {
 		if (inspectorPanelRef.current) {
 			if (isCollapsedTabs) {
 				inspectorPanelRef.current.expand();
-				collapsedTabs();
+				collapseTabs();
 			} else {
 				inspectorPanelRef.current.collapse();
-				collapsedTabs();
+				collapseTabs();
 			}
 		}
 	};
 
 	const handlePanelCollapse = () => {
 		if (!isCollapsedTabs) {
-			collapsedTabs();
+			collapseTabs();
 		}
 	};
 
 	const handlePanelExpand = () => {
 		if (isCollapsedTabs) {
-			collapsedTabs();
+			collapseTabs();
 		}
 	};
 
 	// const handlePanelResize = () => {
 	// 	const size = inspectorPanelRef.current?.getSize();
 	// 	if (size < 5) {
-	// 		collapsedTabs();
+	// 		collapseTabs();
 	// 	}
 	// };
 	return (

@@ -13,7 +13,7 @@ export const Toolbar = ({ toggleInspector }: { toggleInspector: () => void }) =>
 		executeTransaction,
 		isExecutingTransaction,
 		isCollapsedTabs,
-		collapsedTabs
+		collapseTabs
 	} = useMiden();
 	const filesToDisplay = Object.keys(files)
 		.filter((fileId) => files[fileId].isOpen)
@@ -28,7 +28,7 @@ export const Toolbar = ({ toggleInspector }: { toggleInspector: () => void }) =>
 				<div
 					onClick={() => {
 						toggleInspector();
-						collapsedTabs();
+						collapseTabs();
 					}}
 					className="ml-4 self-center cursor-pointer hover:bg-white/10 p-1.5 rounded-miden"
 				>

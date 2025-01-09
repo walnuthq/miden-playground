@@ -60,7 +60,7 @@ interface MidenContextProps {
 	closeFile: (fileId: string) => void;
 	selectTab: (tab: Tabs) => void;
 	executeTransaction: () => void;
-	collapsedTabs: () => void;
+	collapseTabs: () => void;
 }
 
 export const MidenContext = createContext<MidenContextProps>({
@@ -96,7 +96,7 @@ export const MidenContext = createContext<MidenContextProps>({
 	closeFile: () => {},
 	selectTab: () => {},
 	executeTransaction: () => {},
-	collapsedTabs: () => {}
+	collapseTabs: () => {}
 });
 
 export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
@@ -106,7 +106,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	const [isCollapsedTabs, setCollapsedTabs] = useState(false);
 	const [isExecutingTransaction, setIsExecutingTransaction] = useState(false);
 
-	const collapsedTabs = () => {
+	const collapseTabs = () => {
 		setCollapsedTabs(!isCollapsedTabs);
 	};
 
@@ -394,7 +394,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				closeFile,
 				selectTab,
 				executeTransaction,
-				collapsedTabs
+				collapseTabs
 			}}
 		>
 			{children}
