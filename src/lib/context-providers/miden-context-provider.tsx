@@ -61,6 +61,7 @@ interface MidenContextProps {
 	selectTab: (tab: Tabs) => void;
 	executeTransaction: () => void;
 	collapseTabs: () => void;
+	createNewNote: () => void;
 }
 
 export const MidenContext = createContext<MidenContextProps>({
@@ -96,7 +97,8 @@ export const MidenContext = createContext<MidenContextProps>({
 	closeFile: () => {},
 	selectTab: () => {},
 	executeTransaction: () => {},
-	collapseTabs: () => {}
+	collapseTabs: () => {},
+	createNewNote: () => {}
 });
 
 export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
@@ -210,7 +212,22 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	);
 
 	const executeTransaction = useCallback(() => {
-		if (!selectedTransactionAccountId) return;
+		if (!selectedTransactionAccountId) {
+			toast({
+				title: 'No account selected',
+				description: 'Please select an account to execute the transaction',
+				variant: 'destructive'
+			});
+			return;
+		}
+		if (selectedTransactionNotesIds.length === 0) {
+			toast({
+				title: 'No notes selected',
+				description: 'Please select at least one note to execute the transaction',
+				variant: 'destructive'
+			});
+			return;
+		}
 		setIsExecutingTransaction(true);
 		const account = accounts[selectedTransactionAccountId];
 		const transactionNotes = selectedTransactionNotesIds.map((noteId) => {
@@ -331,6 +348,19 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		setSelectedNoteId(note.id);
 	}, [notes, accounts, selectedAccountId]);
 
+	const createSampleNote = useCallback(() => {
+		const newNoteName = Note.getNextNoteName('NOTE', notes);
+		const senderId = accounts[selectedAccountId].id;
+		const { note, newFiles } = Note.createEmptyNote({
+			senderId,
+			assets: [],
+			name: newNoteName
+		});
+		setNotes((prev) => ({ ...prev, [note.id]: note }));
+		setFiles((prev) => ({ ...prev, ...newFiles }));
+		setSelectedNoteId(note.id);
+	}, [notes, accounts, selectedAccountId]);
+
 	useEffect(() => {
 		init()
 			.then(() => {
@@ -394,7 +424,8 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				closeFile,
 				selectTab,
 				executeTransaction,
-				collapseTabs
+				collapseTabs,
+				createNewNote: createSampleNote
 			}}
 		>
 			{children}
