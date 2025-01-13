@@ -3,6 +3,8 @@ export * from './p2idr';
 export * from './swap';
 
 import { Asset } from '@/lib/types';
+import { EditorFiles } from '@/lib/files';
+import { generateId } from '@/lib/utils';
 
 export interface NoteProps {
 	name: string;
@@ -43,7 +45,7 @@ export class Note {
 		return '0x' + this.senderId.toString(16);
 	}
 
-	static getNextNoteName(type: 'P2ID' | 'P2IDR' | 'SWAP', notes: Record<string, Note>) {
+	static getNextNoteName(type: 'P2ID' | 'P2IDR' | 'SWAP' | 'NOTE', notes: Record<string, Note>) {
 		const noteNames = Object.values(notes).map((note) => note.name);
 		let nextNoteName = '';
 		let i = 0;
@@ -55,5 +57,73 @@ export class Note {
 			i++;
 		}
 		return nextNoteName;
+	}
+
+	static createEmptyNote({
+		senderId,
+		assets,
+		name
+	}: {
+		senderId: bigint;
+		assets: Asset[];
+		name: string;
+	}): {
+		note: Note;
+		newFiles: EditorFiles;
+	} {
+		const noteId = generateId();
+		const scriptFileId = generateId();
+		const inputFileId = generateId();
+		const metadataFileId = generateId();
+		const vaultFileId = generateId();
+		const newFiles: EditorFiles = {
+			[scriptFileId]: {
+				id: scriptFileId,
+				name: `${name} Script`,
+				content: { value: '' },
+				isOpen: false,
+				variant: 'script',
+				readonly: false
+			},
+			[inputFileId]: {
+				id: inputFileId,
+				name: `${name} Inputs`,
+				content: {
+					value: JSON.stringify([], null, 2)
+				},
+				isOpen: false,
+				variant: 'note',
+				readonly: false
+			},
+			[metadataFileId]: {
+				id: metadataFileId,
+				name: `${name} Metadata`,
+				content: { dynamic: { note: { noteId, variant: 'metadata' } } },
+				isOpen: false,
+				variant: 'file',
+				readonly: true
+			},
+			[vaultFileId]: {
+				id: vaultFileId,
+				name: `${name} Vault`,
+				content: { dynamic: { note: { noteId, variant: 'vault' } } },
+				isOpen: false,
+				variant: 'file',
+				readonly: true
+			}
+		};
+
+		const note = new Note({
+			id: noteId,
+			name,
+			scriptFileId,
+			isConsumed: false,
+			assets,
+			inputFileId,
+			senderId,
+			metadataFileId,
+			vaultFileId
+		});
+		return { note, newFiles };
 	}
 }

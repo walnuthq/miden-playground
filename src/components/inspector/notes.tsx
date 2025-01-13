@@ -19,7 +19,8 @@ export function Notes() {
 		selectedFileId,
 		selectNote,
 		createSampleP2IDNote,
-		createSampleP2IDRNote
+		createSampleP2IDRNote,
+		createNewNote
 	} = useMiden();
 	const note = notes[selectedNoteId];
 	const noteScriptFile = files[note.scriptFileId];
@@ -48,6 +49,7 @@ export function Notes() {
 							<DropdownMenuItem onClick={() => createSampleP2IDRNote()}>
 								Create P2IDR note
 							</DropdownMenuItem>
+							<DropdownMenuItem onClick={() => createNewNote()}>Create empty note</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>
 					{notes[selectedNoteId].name}
