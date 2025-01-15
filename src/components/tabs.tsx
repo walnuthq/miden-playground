@@ -20,16 +20,6 @@ export const Tabs = () => {
 			</div>
 			<div
 				className="h-[54px] border-b-2 border-dark-miden-700 flex items-center justify-center cursor-pointer hover:bg-white/10"
-				onClick={() => selectTab('accounts')}
-			>
-				<InlineIcon
-					variant="user-square"
-					color={selectedTab === 'accounts' ? '#9748FF' : '#FFFDFD'}
-					className={`w-5 h-5`}
-				/>
-			</div>
-			<div
-				className="h-[54px] border-b-2 border-dark-miden-700 flex items-center justify-center cursor-pointer hover:bg-white/10"
 				onClick={() => selectTab('notes')}
 			>
 				<InlineIcon

@@ -9,7 +9,6 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { TRANSACTION_SCRIPT_FILE_ID } from '@/lib/consts';
 
 export const TransactionBuilder: React.FC = () => {
 	const {
@@ -19,13 +18,11 @@ export const TransactionBuilder: React.FC = () => {
 		selectedTransactionNotesIds,
 		selectTransactionNote,
 		selectTransactionAccount,
-		selectFile,
 		removeTransactionNote,
 		removeTransactionAccount,
 		selectNote,
 		selectAccount,
-		selectTab,
-		selectedFileId
+		selectTab
 	} = useMiden();
 	const selectedTransactionAccount = selectedTransactionAccountId
 		? accounts[selectedTransactionAccountId]
@@ -96,17 +93,6 @@ export const TransactionBuilder: React.FC = () => {
 						}}
 					/>
 				))}
-				<div
-					className={`flex flex-row items-center ${
-						selectedFileId === TRANSACTION_SCRIPT_FILE_ID ? 'bg-white/5' : 'hover:bg-white/10'
-					} gap-2 text-white py-2 px-3 cursor-pointer`}
-					onClick={() => {
-						selectFile(TRANSACTION_SCRIPT_FILE_ID);
-					}}
-				>
-					<InlineIcon variant="file_2" color="white" className="w-5 h-5" />
-					<span>Transaction script</span>
-				</div>
 			</div>
 		</div>
 	);
@@ -134,7 +120,7 @@ function ListItem({
 			<span>{name}</span>
 			{onRemove && (
 				<div
-					className=" ml-auto cursor-pointer hover:bg-white/10 p-1.5 rounded-miden"
+					className=" ml-auto cursor-pointer hover:bg-white/10 p-1 rounded-miden"
 					onClick={(event) => {
 						event.stopPropagation();
 						onRemove();

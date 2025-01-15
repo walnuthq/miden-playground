@@ -3,7 +3,7 @@
 import { useMiden } from '@/lib/context-providers';
 import { TransactionBuilder } from './transaction-builder';
 import { Accounts } from './accounts';
-import { Notes } from './notes';
+import { AssetExplorer } from './asset-explorer';
 import InlineIcon from '@/components/ui/inline-icon';
 import { EditorFile } from '@/lib/files';
 
@@ -16,7 +16,7 @@ export function Inspector() {
 		return <Accounts />;
 	}
 	if (selectedTab === 'notes') {
-		return <Notes />;
+		return <AssetExplorer />;
 	}
 }
 
@@ -33,12 +33,14 @@ export function FileItem({
 }) {
 	return (
 		<div
-			className={`border-b-2 border-dark-miden-700 h-[54px] px-2 flex flex-row items-center gap-2 text-white select-none cursor-pointer
-    ${isSelected ? 'bg-dark-miden-800' : 'hover:bg-white/10'}
+			className={`pl-9 pr-3  flex flex-row items-center gap-2 text-white select-none cursor-pointer
+    ${isSelected ? 'bg-dark-miden-700 ' : 'hover:bg-dark-miden-800'}
     `}
 			onClick={onClick}
 		>
-			<InlineIcon variant={editorFile.readonly ? 'lock' : 'unlock'} className={`w-4 h-4`} />
+			<div className="py-1.5">
+				<InlineIcon variant={editorFile.readonly ? 'lock' : 'unlock'} className={`w-4 h-4`} />
+			</div>
 			<InlineIcon
 				variant={
 					editorFile.variant === 'script'
@@ -53,7 +55,7 @@ export function FileItem({
 			<span>{editorFile.name}</span>
 			{onRemove && (
 				<div
-					className=" ml-auto cursor-pointer hover:bg-white/10 p-1.5 rounded-miden"
+					className=" ml-auto cursor-pointer hover:bg-white/10 p-1 rounded-miden"
 					onClick={(event) => {
 						event.stopPropagation();
 						onRemove();
