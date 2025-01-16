@@ -9,10 +9,10 @@ export interface ExecutionOutput {
 	totalCycles: number;
 	traceLength: number;
 	storage: string[];
+	outputNotes: { id: string; senderId: string; tag: string; assets: Asset[] }[];
 }
 
 export interface Asset {
 	faucetId: bigint;
-	faucetIdHex: string;
 	amount: bigint;
 }

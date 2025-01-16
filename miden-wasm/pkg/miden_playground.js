@@ -189,6 +189,11 @@ function passArray64ToWasm0(arg, malloc) {
     return ptr;
 }
 
+function getArrayU64FromWasm0(ptr, len) {
+    ptr = ptr >>> 0;
+    return getBigUint64ArrayMemory0().subarray(ptr / 8, ptr / 8 + len);
+}
+
 function passArray8ToWasm0(arg, malloc) {
     const ptr = malloc(arg.length * 1, 1) >>> 0;
     getUint8ArrayMemory0().set(arg, ptr / 1);
@@ -256,29 +261,39 @@ function _assertClass(instance, klass) {
         throw new Error(`expected instance of ${klass.name}`);
     }
 }
-
-function getArrayU64FromWasm0(ptr, len) {
-    ptr = ptr >>> 0;
-    return getBigUint64ArrayMemory0().subarray(ptr / 8, ptr / 8 + len);
-}
 /**
  * @param {Uint8Array} seed
  * @param {bigint} sender_account_id
+ * @param {AssetData} offered_asset
+ * @param {bigint} receiver_account_id
  * @param {AssetData} requested_asset
- * @returns {BigUint64Array}
+ * @returns {CreateSwapNoteResult}
  */
-export function create_swap_note_inputs(seed, sender_account_id, requested_asset) {
+export function create_swap_note(seed, sender_account_id, offered_asset, receiver_account_id, requested_asset) {
     const ptr0 = passArray8ToWasm0(seed, wasm.__wbindgen_malloc);
     const len0 = WASM_VECTOR_LEN;
+    _assertClass(offered_asset, AssetData);
+    var ptr1 = offered_asset.__destroy_into_raw();
     _assertClass(requested_asset, AssetData);
-    var ptr1 = requested_asset.__destroy_into_raw();
-    const ret = wasm.create_swap_note_inputs(ptr0, len0, sender_account_id, ptr1);
-    if (ret[3]) {
-        throw takeFromExternrefTable0(ret[2]);
+    var ptr2 = requested_asset.__destroy_into_raw();
+    const ret = wasm.create_swap_note(ptr0, len0, sender_account_id, ptr1, receiver_account_id, ptr2);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
     }
-    var v3 = getArrayU64FromWasm0(ret[0], ret[1]).slice();
+    return CreateSwapNoteResult.__wrap(ret[0]);
+}
+
+/**
+ * @param {Uint8Array} seed
+ * @returns {BigUint64Array}
+ */
+export function generate_note_serial_number(seed) {
+    const ptr0 = passArray8ToWasm0(seed, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.generate_note_serial_number(ptr0, len0);
+    var v2 = getArrayU64FromWasm0(ret[0], ret[1]).slice();
     wasm.__wbindgen_free(ret[0], ret[1] * 8, 8);
-    return v3;
+    return v2;
 }
 
 const AssetDataFinalization = (typeof FinalizationRegistry === 'undefined')
@@ -343,11 +358,62 @@ export class AssetData {
     }
 }
 
+const CreateSwapNoteResultFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_createswapnoteresult_free(ptr >>> 0, 1));
+
+export class CreateSwapNoteResult {
+
+    static __wrap(ptr) {
+        ptr = ptr >>> 0;
+        const obj = Object.create(CreateSwapNoteResult.prototype);
+        obj.__wbg_ptr = ptr;
+        CreateSwapNoteResultFinalization.register(obj, obj.__wbg_ptr, obj);
+        return obj;
+    }
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        CreateSwapNoteResultFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_createswapnoteresult_free(ptr, 0);
+    }
+    /**
+     * @returns {BigUint64Array}
+     */
+    note_inputs() {
+        const ret = wasm.createswapnoteresult_note_inputs(this.__wbg_ptr);
+        var v1 = getArrayU64FromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 8, 8);
+        return v1;
+    }
+    /**
+     * @returns {NoteData}
+     */
+    payback_note() {
+        const ret = wasm.createswapnoteresult_payback_note(this.__wbg_ptr);
+        return NoteData.__wrap(ret);
+    }
+}
+
 const NoteDataFinalization = (typeof FinalizationRegistry === 'undefined')
     ? { register: () => {}, unregister: () => {} }
     : new FinalizationRegistry(ptr => wasm.__wbg_notedata_free(ptr >>> 0, 1));
 
 export class NoteData {
+
+    static __wrap(ptr) {
+        ptr = ptr >>> 0;
+        const obj = Object.create(NoteData.prototype);
+        obj.__wbg_ptr = ptr;
+        NoteDataFinalization.register(obj, obj.__wbg_ptr, obj);
+        return obj;
+    }
 
     static __unwrap(jsValue) {
         if (!(jsValue instanceof NoteData)) {
@@ -373,8 +439,9 @@ export class NoteData {
      * @param {string} script
      * @param {bigint} sender_id
      * @param {string} sender_script
+     * @param {BigUint64Array} serial_number
      */
-    constructor(assets, inputs, script, sender_id, sender_script) {
+    constructor(assets, inputs, script, sender_id, sender_script, serial_number) {
         const ptr0 = passArrayJsValueToWasm0(assets, wasm.__wbindgen_malloc);
         const len0 = WASM_VECTOR_LEN;
         const ptr1 = passArray64ToWasm0(inputs, wasm.__wbindgen_malloc);
@@ -383,10 +450,67 @@ export class NoteData {
         const len2 = WASM_VECTOR_LEN;
         const ptr3 = passStringToWasm0(sender_script, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len3 = WASM_VECTOR_LEN;
-        const ret = wasm.notedata_new(ptr0, len0, ptr1, len1, ptr2, len2, sender_id, ptr3, len3);
+        const ptr4 = passArray64ToWasm0(serial_number, wasm.__wbindgen_malloc);
+        const len4 = WASM_VECTOR_LEN;
+        const ret = wasm.notedata_new(ptr0, len0, ptr1, len1, ptr2, len2, sender_id, ptr3, len3, ptr4, len4);
         this.__wbg_ptr = ret >>> 0;
         NoteDataFinalization.register(this, this.__wbg_ptr, this);
         return this;
+    }
+    /**
+     * @returns {BigUint64Array}
+     */
+    inputs() {
+        const ret = wasm.notedata_inputs(this.__wbg_ptr);
+        var v1 = getArrayU64FromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 8, 8);
+        return v1;
+    }
+    /**
+     * @returns {string}
+     */
+    script() {
+        let deferred1_0;
+        let deferred1_1;
+        try {
+            const ret = wasm.notedata_script(this.__wbg_ptr);
+            deferred1_0 = ret[0];
+            deferred1_1 = ret[1];
+            return getStringFromWasm0(ret[0], ret[1]);
+        } finally {
+            wasm.__wbindgen_free(deferred1_0, deferred1_1, 1);
+        }
+    }
+    /**
+     * @returns {bigint}
+     */
+    sender_id() {
+        const ret = wasm.notedata_sender_id(this.__wbg_ptr);
+        return BigInt.asUintN(64, ret);
+    }
+    /**
+     * @returns {string}
+     */
+    sender_script() {
+        let deferred1_0;
+        let deferred1_1;
+        try {
+            const ret = wasm.notedata_sender_script(this.__wbg_ptr);
+            deferred1_0 = ret[0];
+            deferred1_1 = ret[1];
+            return getStringFromWasm0(ret[0], ret[1]);
+        } finally {
+            wasm.__wbindgen_free(deferred1_0, deferred1_1, 1);
+        }
+    }
+    /**
+     * @returns {BigUint64Array}
+     */
+    serial_number() {
+        const ret = wasm.notedata_serial_number(this.__wbg_ptr);
+        var v1 = getArrayU64FromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 8, 8);
+        return v1;
     }
 }
 

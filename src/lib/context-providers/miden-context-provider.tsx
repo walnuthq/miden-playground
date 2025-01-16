@@ -20,7 +20,7 @@ import { consumeNotes } from '@/lib/miden-wasm-api';
 import { TRANSACTION_SCRIPT } from '@/lib/consts/transaction';
 import { convertToBigUint64Array } from '@/lib/utils';
 import { Account, ACCOUNT_AUTH_SCRIPT, ACCOUNT_WALLET_SCRIPT } from '@/lib/account';
-import { createP2IDRNote, Note } from '@/lib/notes';
+import { createP2IDRNote, createSwapNote, Note } from '@/lib/notes';
 import { EditorFiles } from '@/lib/files';
 import { createP2IDNote } from '@/lib/notes/p2id';
 import { useToast } from '@/hooks/use-toast';
@@ -62,6 +62,7 @@ interface MidenContextProps {
 	executeTransaction: () => void;
 	collapseTabs: () => void;
 	createNewNote: () => void;
+	createSampleSwapNotes: () => void;
 }
 
 export const MidenContext = createContext<MidenContextProps>({
@@ -98,7 +99,8 @@ export const MidenContext = createContext<MidenContextProps>({
 	selectTab: () => {},
 	executeTransaction: () => {},
 	collapseTabs: () => {},
-	createNewNote: () => {}
+	createNewNote: () => {},
+	createSampleSwapNotes: () => {}
 });
 
 export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
@@ -149,6 +151,18 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	);
 	const [selectedTransactionNotesIds, setSelectedTransactionNotesIds] = useState<string[]>([]);
 	const [executionOutput, setExecutionOutput] = useState<ExecutionOutput | null>(null);
+
+	const updateAccountById = (accountId: string, updateFn: (account: Account) => Account) => {
+		setAccounts((prev) => {
+			const account = prev[accountId];
+			if (!account) {
+				console.error(`Account with ID ${accountId} not found.`);
+				return prev;
+			}
+			const updatedAccount = updateFn(account.clone());
+			return { ...prev, [accountId]: updatedAccount };
+		});
+	};
 
 	const selectTransactionNote = useCallback((noteId: string) => {
 		setSelectedTransactionNotesIds((prev) => {
@@ -248,12 +262,12 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				notes: transactionNotes,
 				transactionScript: files[TRANSACTION_SCRIPT_FILE_ID].content.value!
 			});
+			console.log('output', output);
 			setExecutionOutput(output);
-			setAccounts((prev) => {
-				const account = prev[selectedTransactionAccountId];
+			updateAccountById(selectedTransactionAccountId, (account) => {
 				account.assets = output.assets;
 				account.storage = output.storage;
-				return { ...prev, [selectedTransactionAccountId]: account };
+				return account;
 			});
 			toast({
 				title: 'Execution successful'
@@ -272,7 +286,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	const createAccount = useCallback(() => {
 		const newAccountName = Account.getNextAccountName(accounts);
 		const { account, newFiles } = Account.new(newAccountName);
-
 		setAccounts((prev) => {
 			return { ...prev, [account.idHex]: account };
 		});
@@ -281,41 +294,64 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	}, [accounts]);
 
 	const disableWalletComponent = useCallback((accountId: string) => {
-		setAccounts((prev) => {
-			const account = prev[accountId];
+		updateAccountById(accountId, (account) => {
 			account.disableWalletComponent();
-			return { ...prev, [accountId]: account };
+			return account;
 		});
 	}, []);
 
 	const disableAuthComponent = useCallback((accountId: string) => {
-		setAccounts((prev) => {
-			const account = prev[accountId];
+		updateAccountById(accountId, (account) => {
 			account.disableAuthComponent();
-			return { ...prev, [accountId]: account };
+			return account;
 		});
 	}, []);
 
 	const enableWalletComponent = useCallback((accountId: string) => {
-		setAccounts((prev) => {
-			const account = prev[accountId];
+		updateAccountById(accountId, (account) => {
 			account.enableWalletComponent();
-			return { ...prev, [accountId]: account };
+			return account;
 		});
 	}, []);
 
 	const enableAuthComponent = useCallback((accountId: string) => {
-		setAccounts((prev) => {
-			const account = prev[accountId];
+		updateAccountById(accountId, (account) => {
 			account.enableAuthComponent();
-			return { ...prev, [accountId]: account };
+			return account;
 		});
 	}, []);
 
 	const updateFileContent = useCallback((fileId: string, content: string) => {
-		console.log('UPDATE FILE CONTENT', fileId);
 		setFiles((prev) => ({ ...prev, [fileId]: { ...prev[fileId], content: { value: content } } }));
 	}, []);
+
+	const createSampleSwapNotes = useCallback(() => {
+		const newNoteName = Note.getNextNoteName('SWAP', notes);
+		const sender = accounts[selectedAccountId];
+		const receiver = Object.values(accounts).filter((account) => account.id !== sender.id)[0];
+		const offeredAssetOfSender = sender.assets[0];
+		const requestedAssetOfReceiver = receiver.assets.filter(
+			(asset) => asset.faucetId !== offeredAssetOfSender.faucetId
+		)[0];
+
+		const offeredAsset = { ...offeredAssetOfSender, amount: 10n };
+		const requestedAsset = { ...requestedAssetOfReceiver, amount: 10n };
+
+		const { note, newFiles, paybackNote } = createSwapNote({
+			senderId: sender.id,
+			receiverId: receiver.id,
+			offeredAsset,
+			requestedAsset,
+			name: newNoteName
+		});
+		updateAccountById(sender.idHex, (account) => {
+			account.updateAssetAmount(offeredAsset.faucetId, (amount) => amount - offeredAsset.amount);
+			return account;
+		});
+		setNotes((prev) => ({ ...prev, [note.id]: note, [paybackNote.id]: paybackNote }));
+		setFiles((prev) => ({ ...prev, ...newFiles }));
+		setSelectedNoteId(note.id);
+	}, [notes, accounts, selectedAccountId]);
 
 	const createSampleP2IDNote = useCallback(() => {
 		const newNoteName = Note.getNextNoteName('P2ID', notes);
@@ -425,7 +461,8 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				selectTab,
 				executeTransaction,
 				collapseTabs,
-				createNewNote: createSampleNote
+				createNewNote: createSampleNote,
+				createSampleSwapNotes
 			}}
 		>
 			{children}

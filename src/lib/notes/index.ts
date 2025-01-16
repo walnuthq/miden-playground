@@ -5,6 +5,7 @@ export * from './swap';
 import { Asset } from '@/lib/types';
 import { EditorFiles } from '@/lib/files';
 import { generateId } from '@/lib/utils';
+import { generateNoteSerialNumber } from '../miden-wasm-api';
 
 export interface NoteProps {
 	name: string;
@@ -28,6 +29,7 @@ export class Note {
 	senderId: bigint;
 	metadataFileId: string;
 	vaultFileId: string;
+	serialNumber: BigUint64Array;
 
 	constructor(props: NoteProps) {
 		this.name = props.name;
@@ -39,6 +41,7 @@ export class Note {
 		this.senderId = props.senderId;
 		this.metadataFileId = props.metadataFileId;
 		this.vaultFileId = props.vaultFileId;
+		this.serialNumber = generateNoteSerialNumber();
 	}
 
 	get senderIdHex(): string {
@@ -125,5 +128,9 @@ export class Note {
 			vaultFileId
 		});
 		return { note, newFiles };
+	}
+
+	get serialNumberDecimalString(): string {
+		return this.serialNumber.reduce((acc, num) => acc + BigInt(num), BigInt(0)).toString();
 	}
 }

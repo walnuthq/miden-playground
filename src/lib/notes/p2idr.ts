@@ -37,7 +37,7 @@ export function createP2IDRNote({
 			id: inputFileId,
 			name: `${name} Inputs`,
 			content: {
-				value: JSON.stringify(['0x' + receiverId.toString(16), reclaimBlockHeight], null, 2)
+				value: JSON.stringify([receiverId.toString(), reclaimBlockHeight], null, 2)
 			},
 			isOpen: false,
 			variant: 'note',
