@@ -36,7 +36,9 @@ const AccountsList = ({
 	return (
 		<>
 			<div
-				onClick={() => toggleCollapse('top-level-accounts', setCollapsedAccounts)}
+				onClick={() => {
+					toggleCollapse('top-level-accounts', setCollapsedAccounts);
+				}}
 				className="
         text-white font-medium cursor-pointer hover:bg-dark-miden-800 flex flex-row justify-between items-center px-3"
 			>
@@ -59,7 +61,14 @@ const AccountsList = ({
 						/>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent>
-						<DropdownMenuItem onClick={() => createAccount()}>Create new account</DropdownMenuItem>
+						<DropdownMenuItem
+							onClick={(e) => {
+								createAccount();
+								e.stopPropagation();
+							}}
+						>
+							Create new account
+						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
 			</div>
@@ -70,7 +79,9 @@ const AccountsList = ({
 					return (
 						<React.Fragment key={account.id}>
 							<div
-								onClick={() => toggleCollapse(account.idHex, setCollapsedAccounts)}
+								onClick={() => {
+									toggleCollapse(account.idHex, setCollapsedAccounts);
+								}}
 								className="
               text-white font-medium  cursor-pointer hover:bg-dark-miden-800 flex flex-row justify-between items-center pl-6 pr-3"
 							>

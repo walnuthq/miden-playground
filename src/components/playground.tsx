@@ -6,6 +6,7 @@ import { MainWindow } from '@/components/main-window';
 import { Tabs } from '@/components/tabs';
 import { Inspector } from '@/components/inspector';
 import { useRef } from 'react';
+import { ScrollArea } from './ui/scroll-area';
 interface PanelHandle {
 	collapse: () => void;
 	expand: () => void;
@@ -54,7 +55,7 @@ export function Playground() {
 			<header className="h-16">
 				<Header />
 			</header>
-			<main className="flex-1 border-2 border-dark-miden-700 flex flex-row rounded-miden">
+			<main className="flex-1 border-2 border-dark-miden-700 flex flex-row rounded-miden overflow-hidden">
 				<Tabs />
 				<ResizablePanelGroup direction="horizontal">
 					<ResizablePanel
@@ -67,9 +68,9 @@ export function Playground() {
 						onCollapse={handlePanelCollapse}
 						onExpand={handlePanelExpand}
 					>
-						<div className="relative h-full">
+						<ScrollArea className="relative h-full overflow-auto">
 							<Inspector />
-						</div>
+						</ScrollArea>
 					</ResizablePanel>
 					<ResizableHandle className="w-[2px] bg-dark-miden-700" />
 					<MainWindow toggleInspector={toggleInspector} />

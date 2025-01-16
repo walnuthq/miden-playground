@@ -17,9 +17,9 @@ export function AssetExplorer() {
 	const { selectFile, selectedFileId } = useMiden();
 
 	return (
-		<div className="flex flex-col py-2 space-y-2">
+		<div className="flex flex-col py-2 text-xs">
 			<div
-				className={`flex px-3 flex-row items-center ${
+				className={`flex px-3 py-1 flex-row items-center ${
 					selectedFileId === TRANSACTION_SCRIPT_FILE_ID ? 'bg-dark-miden-800' : 'hover:bg-white/10'
 				} gap-2 text-white cursor-pointer`}
 				onClick={() => {

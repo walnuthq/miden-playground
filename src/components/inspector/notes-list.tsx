@@ -58,13 +58,30 @@ const NotesList = ({
 						/>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent>
-						<DropdownMenuItem onClick={() => createSampleP2IDNote()}>
+						<DropdownMenuItem
+							onClick={(e) => {
+								createSampleP2IDNote();
+								e.stopPropagation();
+							}}
+						>
 							Create P2ID note
 						</DropdownMenuItem>
-						<DropdownMenuItem onClick={() => createSampleP2IDRNote()}>
+						<DropdownMenuItem
+							onClick={(e) => {
+								createSampleP2IDRNote();
+								e.stopPropagation();
+							}}
+						>
 							Create P2IDR note
 						</DropdownMenuItem>
-						<DropdownMenuItem onClick={() => createNewNote()}>Create empty note</DropdownMenuItem>
+						<DropdownMenuItem
+							onClick={(e) => {
+								createNewNote();
+								e.stopPropagation();
+							}}
+						>
+							Create empty note
+						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
 			</div>
