@@ -33,6 +33,7 @@ const AccountsList = ({
 		<>
 			<InspectorItem
 				name="Accounts"
+				nameClasses="font-bold"
 				variant="collapsable"
 				onCreate={(option) => {
 					if (option === 'Create new account') {

@@ -25,7 +25,7 @@ export const Toolbar = ({ toggleInspector }: { toggleInspector: () => void }) =>
 							flex flex-row items-center justify-between"
 		>
 			<div className="h-full flex gap-4 items-end overflow-hidden">
-				<div
+				{/* <div
 					onClick={() => {
 						toggleInspector();
 						collapseTabs();
@@ -37,9 +37,9 @@ export const Toolbar = ({ toggleInspector }: { toggleInspector: () => void }) =>
 						color="white"
 						className={`${isCollapsedTabs ? 'rotate-180' : 'rotate-0'} w-6 h-6`}
 					/>
-				</div>
+				</div> */}
 				<ScrollArea>
-					<div className="flex flex-row">
+					<div className="flex flex-row px-2">
 						{filesToDisplay.map((fileId, index) => (
 							<div
 								key={fileId}
