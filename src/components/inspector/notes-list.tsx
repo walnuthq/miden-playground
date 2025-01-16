@@ -28,6 +28,7 @@ const NotesList = ({
 		<>
 			<InspectorItem
 				name="Notes"
+				nameClasses="font-bold"
 				variant="collapsable"
 				isCollapsed={isCollapsedNotesTopLevel}
 				level={0}

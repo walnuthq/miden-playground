@@ -4,6 +4,7 @@ import InlineIcon from '@/components/ui/inline-icon';
 import { useMiden } from '@/lib/context-providers';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const Toolbar = ({ toggleInspector }: { toggleInspector: () => void }) => {
 	const {
 		files,
@@ -11,9 +12,7 @@ export const Toolbar = ({ toggleInspector }: { toggleInspector: () => void }) =>
 		selectFile,
 		selectedFileId,
 		executeTransaction,
-		isExecutingTransaction,
-		isCollapsedTabs,
-		collapseTabs
+		isExecutingTransaction
 	} = useMiden();
 	const filesToDisplay = Object.keys(files)
 		.filter((fileId) => files[fileId].isOpen)
@@ -25,7 +24,7 @@ export const Toolbar = ({ toggleInspector }: { toggleInspector: () => void }) =>
 							flex flex-row items-center justify-between"
 		>
 			<div className="h-full flex gap-4 items-end overflow-hidden">
-				<div
+				{/* <div
 					onClick={() => {
 						toggleInspector();
 						collapseTabs();
@@ -37,9 +36,9 @@ export const Toolbar = ({ toggleInspector }: { toggleInspector: () => void }) =>
 						color="white"
 						className={`${isCollapsedTabs ? 'rotate-180' : 'rotate-0'} w-6 h-6`}
 					/>
-				</div>
+				</div> */}
 				<ScrollArea>
-					<div className="flex flex-row">
+					<div className="flex flex-row px-2">
 						{filesToDisplay.map((fileId, index) => (
 							<div
 								key={fileId}

@@ -58,7 +58,8 @@ export function InspectorItem({
 	onRemove,
 	level,
 	onCreate,
-	onCreateOptions
+	onCreateOptions,
+	nameClasses
 }: {
 	name: string;
 	isReadOnly?: boolean;
@@ -70,10 +71,11 @@ export function InspectorItem({
 	level: number;
 	onCreate?: (option: string) => void;
 	onCreateOptions?: string[];
+	nameClasses?: string;
 }) {
 	return (
 		<div
-			className={`h-6 pr-3 flex flex-row items-center justify-between text-white select-none cursor-pointer
+			className={`text-xs h-6 pr-3 flex flex-row items-center justify-between text-white select-none cursor-pointer
     ${isSelected ? 'bg-dark-miden-700 ' : 'hover:bg-dark-miden-800'}`}
 			onClick={onClick}
 			style={{ paddingLeft: `${level * 10 + 8}px` }}
@@ -95,11 +97,11 @@ export function InspectorItem({
 							: 'arrow'
 					}
 					color="white"
-					className={`${variant === 'collapsable' ? 'w-3 h-3' : 'w-4 h-4'} ${
+					className={`opacity-80 ${variant === 'collapsable' ? 'w-3 h-3 m-0.5' : 'w-4 h-4'} ${
 						isCollapsed === false ? 'rotate-90' : ''
 					}`}
 				/>
-				<span>{name}</span>
+				<span className={nameClasses}>{name}</span>
 			</div>
 			<div className="flex flex-row items-center gap-2">
 				{onRemove && (
@@ -110,14 +112,14 @@ export function InspectorItem({
 							onRemove();
 						}}
 					>
-						<InlineIcon variant={'trash'} color="white" className="w-4 h-4" />
+						<InlineIcon variant={'trash'} color="white" className="w-4 h-4 opacity-80" />
 					</div>
 				)}
 				{onCreate && onCreateOptions && (
 					<DropdownMenu>
 						<DropdownMenuTrigger>
 							<div className="cursor-pointer hover:bg-white/10 rounded-miden p-0.5">
-								<InlineIcon variant="file-plus" color="white" className="w-4 h-4" />
+								<InlineIcon variant="file-plus" color="white" className="w-4 h-4 opacity-80" />
 							</div>
 						</DropdownMenuTrigger>
 						<DropdownMenuContent>

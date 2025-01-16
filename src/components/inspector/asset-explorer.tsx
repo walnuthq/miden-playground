@@ -17,7 +17,13 @@ export function AssetExplorer() {
 	const { selectFile, selectedFileId, files } = useMiden();
 
 	return (
-		<div className="flex flex-col py-2 text-xs">
+		<div className="flex flex-col">
+			<div
+				className="h-[54px] border-b-2 border-dark-miden-700 bg-dark-miden-800
+					text-white font-medium flex gap-2 items-center px-3 mb-2"
+			>
+				Assets explorer
+			</div>
 			<FileItem
 				editorFile={files[TRANSACTION_SCRIPT_FILE_ID]}
 				onClick={() => selectFile(TRANSACTION_SCRIPT_FILE_ID)}
