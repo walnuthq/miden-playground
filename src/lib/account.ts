@@ -4,6 +4,7 @@ import { SECRET_KEY } from '@/lib/consts/secret-key';
 import { DEFAULT_FAUCET_IDS } from '@/lib/consts/defaults';
 import { Asset } from '@/lib/types';
 import { EditorFiles } from '@/lib/files';
+import _ from 'lodash';
 
 interface AccountProps {
 	id: bigint;
@@ -44,6 +45,10 @@ export class Account {
 		this.vaultFileId = props.vaultFileId;
 		this.storageFileId = props.storageFileId;
 		this.storage = props.storage;
+	}
+
+	clone() {
+		return new Account(_.cloneDeep(this));
 	}
 
 	static new(name: string): { account: Account; newFiles: EditorFiles } {
@@ -116,12 +121,10 @@ export class Account {
 			assets: [
 				{
 					faucetId: DEFAULT_FAUCET_IDS[0],
-					faucetIdHex: DEFAULT_FAUCET_IDS[0].toString(16),
 					amount: 500n
 				},
 				{
 					faucetId: DEFAULT_FAUCET_IDS[1],
-					faucetIdHex: DEFAULT_FAUCET_IDS[1].toString(16),
 					amount: 500n
 				}
 			],
@@ -168,6 +171,13 @@ export class Account {
 
 	enableAuthComponent() {
 		this.isAuth = true;
+	}
+
+	updateAssetAmount(faucetId: bigint, updateFn: (amount: bigint) => bigint) {
+		const asset = this.assets.find((asset) => asset.faucetId === faucetId);
+		if (asset) {
+			asset.amount = updateFn(asset.amount);
+		}
 	}
 }
 

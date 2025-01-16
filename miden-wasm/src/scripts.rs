@@ -1,77 +1,4 @@
-import { Asset } from '@/lib/types';
-import { generateId } from '@/lib/utils';
-import { Note } from '@/lib/notes';
-import { EditorFiles } from '@/lib/files';
-
-export function createP2IDNote({
-	senderId,
-	receiverId,
-	assets,
-	name
-}: {
-	senderId: bigint;
-	receiverId: bigint;
-	assets: Asset[];
-	name: string;
-}): {
-	note: Note;
-	newFiles: EditorFiles;
-} {
-	const noteId = generateId();
-	const scriptFileId = generateId();
-	const inputFileId = generateId();
-	const metadataFileId = generateId();
-	const vaultFileId = generateId();
-	const newFiles: EditorFiles = {
-		[scriptFileId]: {
-			id: scriptFileId,
-			name: `${name} Script`,
-			content: { value: P2ID_SCRIPT },
-			isOpen: false,
-			variant: 'script',
-			readonly: false
-		},
-		[inputFileId]: {
-			id: inputFileId,
-			name: `${name} Inputs`,
-			content: { value: JSON.stringify([receiverId.toString()], null, 2) },
-			isOpen: false,
-			variant: 'note',
-			readonly: false
-		},
-		[metadataFileId]: {
-			id: metadataFileId,
-			name: `${name} Metadata`,
-			content: { dynamic: { note: { noteId, variant: 'metadata' } } },
-			isOpen: false,
-			variant: 'file',
-			readonly: true
-		},
-		[vaultFileId]: {
-			id: vaultFileId,
-			name: `${name} Vault`,
-			content: { dynamic: { note: { noteId, variant: 'vault' } } },
-			isOpen: false,
-			variant: 'file',
-			readonly: true
-		}
-	};
-
-	const note = new Note({
-		id: noteId,
-		name,
-		scriptFileId,
-		isConsumed: false,
-		assets,
-		inputFileId,
-		senderId,
-		metadataFileId,
-		vaultFileId
-	});
-	return { note, newFiles };
-}
-
-export const P2ID_SCRIPT = `
+pub const P2ID_SCRIPT: &str = "
 use.miden::account
 use.miden::note
 use.miden::contracts::wallets::basic->wallet
@@ -174,5 +101,17 @@ begin
     call.account_module::custom
     push.3.3.3.3 push.1 call.account_module::custom_set_item dropw dropw
 end
+";
 
-`;
+pub const ACCOUNT_SCRIPT: &str = "use.miden::account
+use.std::sys
+
+export.custom
+    push.1 drop
+end
+
+export.custom_set_item
+    exec.account::set_item
+    exec.sys::truncate_stack
+end
+";

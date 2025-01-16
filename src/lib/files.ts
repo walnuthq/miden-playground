@@ -42,9 +42,10 @@ export const useSelectedEditorFile = (): { content: string; file: EditorFile | n
 		if (file.content.dynamic) {
 			if (file.content.dynamic.account) {
 				if (file.content.dynamic.account.variant === 'metadata') {
+					const account = accounts[file.content.dynamic.account.accountId];
 					content = JSON.stringify(
 						{
-							accountId: file.content.dynamic.account.accountId
+							accountId: account.id.toString()
 						},
 						null,
 						2
@@ -52,7 +53,12 @@ export const useSelectedEditorFile = (): { content: string; file: EditorFile | n
 				} else if (file.content.dynamic.account.variant === 'vault') {
 					const account = accounts[file.content.dynamic.account.accountId];
 					content = JSON.stringify(
-						account.assets.map((asset) => [asset.amount.toString(), 0, 0, asset.faucetIdHex]),
+						account.assets.map((asset) => [
+							asset.amount.toString(),
+							0,
+							0,
+							asset.faucetId.toString()
+						]),
 						null,
 						2
 					);
@@ -65,7 +71,8 @@ export const useSelectedEditorFile = (): { content: string; file: EditorFile | n
 					const note = notes[file.content.dynamic.note.noteId];
 					content = JSON.stringify(
 						{
-							senderId: '0x' + note.senderId.toString(16)
+							senderId: note.senderId.toString(),
+							serialNumber: note.serialNumberDecimalString
 						},
 						null,
 						2
@@ -73,7 +80,7 @@ export const useSelectedEditorFile = (): { content: string; file: EditorFile | n
 				} else if (file.content.dynamic.note.variant === 'vault') {
 					const note = notes[file.content.dynamic.note.noteId];
 					content = JSON.stringify(
-						note.assets.map((asset) => [asset.amount.toString(), 0, 0, asset.faucetIdHex]),
+						note.assets.map((asset) => [asset.amount.toString(), 0, 0, asset.faucetId.toString()]),
 						null,
 						2
 					);
