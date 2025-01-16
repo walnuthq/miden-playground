@@ -25,7 +25,7 @@ import { EditorFiles } from '@/lib/files';
 import { createP2IDNote } from '@/lib/notes/p2id';
 import { useToast } from '@/hooks/use-toast';
 
-type Tabs = 'transaction' | 'accounts' | 'notes';
+type Tabs = 'transaction' | 'assets';
 
 interface MidenContextProps {
 	isInitialized: boolean;
@@ -35,7 +35,6 @@ interface MidenContextProps {
 	accounts: Record<string, Account>;
 	selectedAccountId: string;
 	notes: Record<string, Note>;
-	selectedNoteId: string;
 	selectedTransactionAccountId: string | null;
 	isCollapsedTabs: boolean;
 	selectedTransactionNotesIds: string[];
@@ -55,7 +54,6 @@ interface MidenContextProps {
 	selectTransactionAccount: (accountId: string) => void;
 	removeTransactionAccount: () => void;
 	selectAccount: (accountId: string) => void;
-	selectNote: (noteId: string) => void;
 	selectFile: (fileId: string) => void;
 	closeFile: (fileId: string) => void;
 	selectTab: (tab: Tabs) => void;
@@ -63,6 +61,8 @@ interface MidenContextProps {
 	collapseTabs: () => void;
 	createNewNote: () => void;
 	createSampleSwapNotes: () => void;
+	deleteNote: (noteId: string) => void;
+	deleteAccount: (accountId: string) => void;
 }
 
 export const MidenContext = createContext<MidenContextProps>({
@@ -73,7 +73,6 @@ export const MidenContext = createContext<MidenContextProps>({
 	accounts: {},
 	selectedAccountId: '',
 	notes: {},
-	selectedNoteId: '',
 	selectedTransactionAccountId: null,
 	selectedTransactionNotesIds: [],
 	executionOutput: null,
@@ -93,14 +92,15 @@ export const MidenContext = createContext<MidenContextProps>({
 	removeTransactionNote: () => {},
 	removeTransactionAccount: () => {},
 	selectAccount: () => {},
-	selectNote: () => {},
 	selectFile: () => {},
 	closeFile: () => {},
 	selectTab: () => {},
 	executeTransaction: () => {},
 	collapseTabs: () => {},
 	createNewNote: () => {},
-	createSampleSwapNotes: () => {}
+	createSampleSwapNotes: () => {},
+	deleteNote: () => {},
+	deleteAccount: () => {}
 });
 
 export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
@@ -120,7 +120,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			name: 'Transaction script',
 			content: { value: TRANSACTION_SCRIPT },
 			isOpen: false,
-			readonly: true,
+			readonly: false,
 			variant: 'script'
 		},
 		[WALLET_COMPONENT_SCRIPT_FILE_ID]: {
@@ -145,7 +145,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	const [accounts, setAccounts] = useState<Record<string, Account>>({});
 	const [selectedAccountId, setSelectedAccountId] = useState<string>('');
 	const [notes, setNotes] = useState<Record<string, Note>>({});
-	const [selectedNoteId, setSelectedNoteId] = useState<string>('');
 	const [selectedTransactionAccountId, setSelectedTransactionAccountId] = useState<string | null>(
 		null
 	);
@@ -179,10 +178,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 
 	const selectAccount = useCallback((accountId: string) => {
 		setSelectedAccountId(accountId);
-	}, []);
-
-	const selectNote = useCallback((noteId: string) => {
-		setSelectedNoteId(noteId);
 	}, []);
 
 	const selectTab = useCallback((tab: Tabs) => {
@@ -350,7 +345,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		});
 		setNotes((prev) => ({ ...prev, [note.id]: note, [paybackNote.id]: paybackNote }));
 		setFiles((prev) => ({ ...prev, ...newFiles }));
-		setSelectedNoteId(note.id);
 	}, [notes, accounts, selectedAccountId]);
 
 	const createSampleP2IDNote = useCallback(() => {
@@ -365,7 +359,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		});
 		setNotes((prev) => ({ ...prev, [note.id]: note }));
 		setFiles((prev) => ({ ...prev, ...newFiles }));
-		setSelectedNoteId(note.id);
 	}, [notes, accounts, selectedAccountId]);
 
 	const createSampleP2IDRNote = useCallback(() => {
@@ -381,7 +374,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		});
 		setNotes((prev) => ({ ...prev, [note.id]: note }));
 		setFiles((prev) => ({ ...prev, ...newFiles }));
-		setSelectedNoteId(note.id);
 	}, [notes, accounts, selectedAccountId]);
 
 	const createSampleNote = useCallback(() => {
@@ -394,7 +386,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		});
 		setNotes((prev) => ({ ...prev, [note.id]: note }));
 		setFiles((prev) => ({ ...prev, ...newFiles }));
-		setSelectedNoteId(note.id);
 	}, [notes, accounts, selectedAccountId]);
 
 	useEffect(() => {
@@ -409,7 +400,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				const { notes, newFiles: noteFiles } = defaultNotes(defaultAccount1.id, defaultAccount2.id);
 				setFiles((prev) => ({ ...prev, ...accountFiles, ...noteFiles }));
 				setNotes(notes);
-				setSelectedNoteId(Object.values(notes)[0].id);
 				setIsInitialized(true);
 			})
 			.catch((error: unknown) => {
@@ -425,6 +415,51 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		setSelectedTransactionAccountId(null);
 	}, []);
 
+	const removeFile = useCallback((fileId: string) => {
+		setFiles((prev) => {
+			const newFiles = { ...prev };
+			delete newFiles[fileId];
+			return newFiles;
+		});
+	}, []);
+
+	const deleteNote = useCallback(
+		(noteId: string) => {
+			setNotes((prev) => {
+				const newNotes = { ...prev };
+				const note = newNotes[noteId];
+				if (note) {
+					removeFile(note.inputFileId);
+					removeFile(note.scriptFileId);
+					removeFile(note.metadataFileId);
+					removeFile(note.vaultFileId);
+					setSelectedTransactionNotesIds((prev) => prev.filter((id) => id !== noteId));
+				}
+				delete newNotes[noteId];
+				return newNotes;
+			});
+		},
+		[removeFile]
+	);
+
+	const deleteAccount = useCallback(
+		(accountId: string) => {
+			setAccounts((prev) => {
+				const newAccounts = { ...prev };
+				const account = newAccounts[accountId];
+				if (account) {
+					removeFile(account.scriptFileId);
+					removeFile(account.vaultFileId);
+					removeFile(account.metadataFileId);
+					removeFile(account.storageFileId);
+					delete newAccounts[accountId];
+				}
+				return newAccounts;
+			});
+		},
+		[removeFile]
+	);
+
 	return (
 		<MidenContext.Provider
 			value={{
@@ -435,7 +470,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				accounts,
 				selectedAccountId,
 				notes,
-				selectedNoteId,
 				selectedTransactionAccountId,
 				selectedTransactionNotesIds,
 				executionOutput,
@@ -455,14 +489,15 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				removeTransactionNote,
 				removeTransactionAccount,
 				selectAccount,
-				selectNote,
 				selectFile,
 				closeFile,
 				selectTab,
 				executeTransaction,
 				collapseTabs,
 				createNewNote: createSampleNote,
-				createSampleSwapNotes
+				createSampleSwapNotes,
+				deleteNote,
+				deleteAccount
 			}}
 		>
 			{children}

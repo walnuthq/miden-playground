@@ -19,10 +19,7 @@ export const TransactionBuilder: React.FC = () => {
 		selectTransactionNote,
 		selectTransactionAccount,
 		removeTransactionNote,
-		removeTransactionAccount,
-		selectNote,
-		selectAccount,
-		selectTab
+		removeTransactionAccount
 	} = useMiden();
 	const selectedTransactionAccount = selectedTransactionAccountId
 		? accounts[selectedTransactionAccountId]
@@ -59,10 +56,6 @@ export const TransactionBuilder: React.FC = () => {
 					<ListItem
 						name={selectedTransactionAccount.name}
 						variant="account"
-						onClick={() => {
-							selectAccount(selectedTransactionAccount.idHex);
-							selectTab('accounts');
-						}}
 						onRemove={() => removeTransactionAccount()}
 					/>
 				)}
@@ -87,10 +80,6 @@ export const TransactionBuilder: React.FC = () => {
 						name={notes[noteId].name}
 						variant="file"
 						onRemove={() => removeTransactionNote(noteId)}
-						onClick={() => {
-							selectNote(noteId);
-							selectTab('notes');
-						}}
 					/>
 				))}
 			</div>

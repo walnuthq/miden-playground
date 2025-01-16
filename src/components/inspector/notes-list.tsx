@@ -1,13 +1,6 @@
 import { useMiden } from '@/lib/context-providers';
 import React, { useState } from 'react';
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger
-} from '../ui/dropdown-menu';
-import InlineIcon from '../ui/inline-icon';
-import { FileItem } from '.';
+import { FileItem, InspectorItem } from '.';
 
 const NotesList = ({
 	toggleCollapse
@@ -24,112 +17,81 @@ const NotesList = ({
 		selectedFileId,
 		createSampleP2IDNote,
 		createSampleP2IDRNote,
-		createNewNote
+		createNewNote,
+		createSampleSwapNotes,
+		deleteNote
 	} = useMiden();
 	const [collapsedNotes, setCollapsedNotes] = useState<Record<string, boolean>>({});
 	const isCollapsedNotesTopLevel = collapsedNotes['top-level-notes'] || false;
 
 	return (
 		<>
-			<div
+			<InspectorItem
+				name="Notes"
+				variant="collapsable"
+				isCollapsed={isCollapsedNotesTopLevel}
+				level={0}
 				onClick={() => {
 					toggleCollapse('top-level-notes', setCollapsedNotes);
 				}}
-				className="
-      text-white font-medium cursor-pointer hover:bg-dark-miden-800 flex flex-row justify-between items-center px-3"
-			>
-				<div className="flex gap-2 items-center">
-					<span className="cursor-pointer text-white">
-						<InlineIcon
-							variant="arrow"
-							color="white"
-							className={`w-3 h-3 ${isCollapsedNotesTopLevel ? '' : 'rotate-90'}`}
-						/>
-					</span>
-					<div className="font-semibold">Notes</div>
-				</div>
-
-				<DropdownMenu>
-					<DropdownMenuTrigger className="cursor-pointer rounded-miden ">
-						<InlineIcon
-							variant="file-plus"
-							color="white"
-							className="w-6 h-6 cursor-pointer hover:bg-white/10 p-1 rounded-miden"
-						/>
-					</DropdownMenuTrigger>
-					<DropdownMenuContent>
-						<DropdownMenuItem
-							onClick={(e) => {
-								createSampleP2IDNote();
-								e.stopPropagation();
-							}}
-						>
-							Create P2ID note
-						</DropdownMenuItem>
-						<DropdownMenuItem
-							onClick={(e) => {
-								createSampleP2IDRNote();
-								e.stopPropagation();
-							}}
-						>
-							Create P2IDR note
-						</DropdownMenuItem>
-						<DropdownMenuItem
-							onClick={(e) => {
-								createNewNote();
-								e.stopPropagation();
-							}}
-						>
-							Create empty note
-						</DropdownMenuItem>
-					</DropdownMenuContent>
-				</DropdownMenu>
-			</div>
+				onCreate={(option) => {
+					if (option === 'Create P2ID note') {
+						createSampleP2IDNote();
+					} else if (option === 'Create P2IDR note') {
+						createSampleP2IDRNote();
+					} else if (option === 'Create SWAP note') {
+						createSampleSwapNotes();
+					} else if (option === 'Create empty note') {
+						createNewNote();
+					}
+				}}
+				onCreateOptions={[
+					'Create P2ID note',
+					'Create P2IDR note',
+					'Create SWAP note',
+					'Create empty note'
+				]}
+			/>
 			{!isCollapsedNotesTopLevel &&
 				Object.values(notes).map((note) => {
 					const isCollapsed = collapsedNotes[note.id] || false;
 					return (
 						<React.Fragment key={note.id}>
-							<div
+							<InspectorItem
+								name={note.name}
+								variant="collapsable"
+								isCollapsed={isCollapsed}
+								level={1}
 								onClick={() => toggleCollapse(note.id, setCollapsedNotes)}
-								className="
-text-white font-medium flex cursor-pointer hover:bg-dark-miden-800 flex-row justify-between items-center pl-6 pr-3"
-							>
-								<div className="flex items-center gap-2">
-									<span className=" text-white">
-										<InlineIcon
-											variant="arrow"
-											color="white"
-											className={`w-3 h-3 ${isCollapsed ? '' : 'rotate-90'}`}
-										/>
-									</span>
-									<div>{note.name}</div>
-								</div>
-								<div className="ml-auto cursor-pointer hover:bg-white/10 p-1 rounded-miden">
-									<InlineIcon variant={'trash'} color="white" className={`w-4 h-4`} />
-								</div>
-							</div>
+								onRemove={() => {
+									deleteNote(note.id);
+								}}
+							/>
 							{!isCollapsed && (
 								<div className="flex flex-col">
 									<FileItem
 										editorFile={files[note.scriptFileId]}
-										onClick={() => selectFile(files[note.scriptFileId].id)}
-										isSelected={selectedFileId === files[note.scriptFileId].id}
+										onClick={() => selectFile(note.scriptFileId)}
+										isSelected={selectedFileId === note.scriptFileId}
+										level={2}
 									/>
 									<FileItem
 										editorFile={files[note.inputFileId]}
 										onClick={() => selectFile(note.inputFileId)}
 										isSelected={selectedFileId === note.inputFileId}
+										level={2}
 									/>
 									<FileItem
 										editorFile={files[note.metadataFileId]}
 										onClick={() => selectFile(note.metadataFileId)}
 										isSelected={selectedFileId === note.metadataFileId}
+										level={2}
 									/>
 									<FileItem
 										editorFile={files[note.vaultFileId]}
 										onClick={() => selectFile(note.vaultFileId)}
 										isSelected={selectedFileId === note.vaultFileId}
+										level={2}
 									/>
 								</div>
 							)}
