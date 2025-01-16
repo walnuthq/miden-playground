@@ -35,7 +35,6 @@ export function defaultNotes(
 		assets: [
 			{
 				faucetId: DEFAULT_FAUCET_IDS[0],
-				faucetIdHex: DEFAULT_FAUCET_IDS[0].toString(16),
 				amount: 100n
 			}
 		],
@@ -47,7 +46,6 @@ export function defaultNotes(
 		assets: [
 			{
 				faucetId: DEFAULT_FAUCET_IDS[1],
-				faucetIdHex: DEFAULT_FAUCET_IDS[1].toString(16),
 				amount: 200n
 			}
 		],

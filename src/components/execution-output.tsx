@@ -59,7 +59,7 @@ export function ExecutionOutput() {
 						<TableBody>
 							<TableRow>
 								<TableCell className="border-b border-dark-miden-700 border-r">
-									{'0x' + executionOutput.accountId.toString(16)}
+									{executionOutput.accountId.toString()}
 								</TableCell>
 								<TableCell className="border-b border-dark-miden-700 border-r">
 									{executionOutput?.accountHash?.substring(0, 10)}
@@ -119,7 +119,7 @@ export function ExecutionOutput() {
 										Fungible Asset
 									</TableCell>
 									<TableCell className="border-b border-dark-miden-700 border-r">
-										{asset.faucetIdHex}
+										{asset.faucetId.toString()}
 									</TableCell>
 									<TableCell className="border-b border-dark-miden-700">{asset.amount}</TableCell>
 								</TableRow>
@@ -143,6 +143,29 @@ export function ExecutionOutput() {
 								<TableCell className="border-b border-dark-miden-700 border-r"></TableCell>
 								<TableCell className="border-b border-dark-miden-700"></TableCell>
 							</TableRow>
+						</TableBody>
+					</Table>
+					<div className="bg-blue-miden text-white px-2 py-1">Output notes</div>
+					<Table className="text-white">
+						<TableHeader>
+							<TableRow>
+								<TableHead className="border-b border-dark-miden-700 border-r">ID</TableHead>
+								<TableHead className="border-b border-dark-miden-700 border-r">Sender ID</TableHead>
+								<TableHead className="border-b border-dark-miden-700">Tag</TableHead>
+							</TableRow>
+						</TableHeader>
+						<TableBody>
+							{executionOutput.outputNotes.map((note) => (
+								<TableRow key={note.id}>
+									<TableCell className="border-b border-dark-miden-700 border-r">
+										{note.id.substring(0, 10)}
+									</TableCell>
+									<TableCell className="border-b border-dark-miden-700 border-r">
+										{note.senderId}
+									</TableCell>
+									<TableCell className="border-b border-dark-miden-700">{note.tag}</TableCell>
+								</TableRow>
+							))}
 						</TableBody>
 					</Table>
 				</div>

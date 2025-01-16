@@ -1,37 +1,59 @@
 import { Asset } from '@/lib/types';
 import { generateId } from '@/lib/utils';
-import { createSwapNoteInputs } from '@/lib/miden-wasm-api';
+import { createSwapNotes } from '@/lib/miden-wasm-api';
 import { Note } from '@/lib/notes';
 import { EditorFiles } from '@/lib/files';
 
 export function createSwapNote({
 	senderId,
+	receiverId,
 	offeredAsset,
 	requestedAsset,
 	name
 }: {
 	senderId: bigint;
+	receiverId: bigint;
 	offeredAsset: Asset;
 	requestedAsset: Asset;
 	name: string;
 }): {
 	note: Note;
 	newFiles: EditorFiles;
+	paybackNote: Note;
 } {
 	const noteId = generateId();
 	const scriptFileId = generateId();
 	const inputFileId = generateId();
 	const metadataFileId = generateId();
 	const vaultFileId = generateId();
-	const inputsBigInt = createSwapNoteInputs(senderId, requestedAsset);
+	const { swapNoteInputs, paybackNote: paybackNoteData } = createSwapNotes(
+		senderId,
+		receiverId,
+		requestedAsset,
+		offeredAsset
+	);
 	const inputs: string[] = [];
-	for (const input of inputsBigInt) {
-		inputs.push(`0x${input.toString(16)}`);
+	for (const input of swapNoteInputs) {
+		inputs.push(input.toString());
 	}
+
+	console.log('swapNoteInputs', swapNoteInputs);
+
+	const paybackNoteId = generateId();
+	const paybackScriptFileId = generateId();
+	const paybackInputFileId = generateId();
+	const paybackMetadataFileId = generateId();
+	const paybackVaultFileId = generateId();
+
+	const paybackInputs: string[] = [];
+	for (const input of paybackNoteData.inputs()) {
+		paybackInputs.push(input.toString());
+	}
+
 	const newFiles: EditorFiles = {
 		[scriptFileId]: {
 			id: scriptFileId,
-			name: `Note script/${name}`,
+			name: `${name} Script`,
 			content: { value: SWAP_SCRIPT },
 			isOpen: false,
 			variant: 'script',
@@ -39,16 +61,18 @@ export function createSwapNote({
 		},
 		[inputFileId]: {
 			id: inputFileId,
-			name: `Note Input/${name}`,
-			content: { value: JSON.stringify(inputs, null, 2) },
+			name: `${name} Inputs`,
+			content: {
+				value: JSON.stringify(inputs, null, 2)
+			},
 			isOpen: false,
 			variant: 'note',
 			readonly: false
 		},
 		[metadataFileId]: {
 			id: metadataFileId,
-			name: `Note Metadata/${name}`,
-			content: { value: JSON.stringify({ senderId: '0x' + senderId.toString(16) }, null, 2) },
+			name: `${name} Metadata`,
+			content: { dynamic: { note: { noteId, variant: 'metadata' } } },
 			isOpen: false,
 			variant: 'note',
 			readonly: true
@@ -60,8 +84,54 @@ export function createSwapNote({
 			isOpen: false,
 			variant: 'note',
 			readonly: true
+		},
+		[paybackScriptFileId]: {
+			id: paybackScriptFileId,
+			name: `Payback ${name} Script`,
+			content: { value: paybackNoteData.script() },
+			isOpen: false,
+			variant: 'script',
+			readonly: false
+		},
+		[paybackInputFileId]: {
+			id: paybackInputFileId,
+			name: `Payback ${name} Inputs`,
+			content: {
+				value: JSON.stringify(paybackInputs, null, 2)
+			},
+			isOpen: false,
+			variant: 'note',
+			readonly: false
+		},
+		[paybackMetadataFileId]: {
+			id: paybackMetadataFileId,
+			name: `Payback ${name} Metadata`,
+			content: { dynamic: { note: { noteId: paybackNoteId, variant: 'metadata' } } },
+			isOpen: false,
+			variant: 'note',
+			readonly: true
+		},
+		[paybackVaultFileId]: {
+			id: paybackVaultFileId,
+			name: `Payback ${name} Vault`,
+			content: { dynamic: { note: { noteId: paybackNoteId, variant: 'vault' } } },
+			isOpen: false,
+			variant: 'note',
+			readonly: true
 		}
 	};
+
+	const paybackNote = new Note({
+		id: paybackNoteId,
+		name: `Payback ${name}`,
+		scriptFileId: paybackScriptFileId,
+		metadataFileId: paybackMetadataFileId,
+		isConsumed: false,
+		assets: [requestedAsset],
+		inputFileId: paybackInputFileId,
+		senderId: paybackNoteData.sender_id(),
+		vaultFileId: paybackVaultFileId
+	});
 
 	const note = new Note({
 		id: noteId,
@@ -74,7 +144,8 @@ export function createSwapNote({
 		senderId,
 		vaultFileId
 	});
-	return { note, newFiles };
+
+	return { note, newFiles, paybackNote };
 }
 
 export const SWAP_SCRIPT = `use.miden::note

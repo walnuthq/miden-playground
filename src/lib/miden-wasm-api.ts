@@ -4,7 +4,8 @@ import {
 	generate_account_id,
 	NoteData,
 	generate_faucet_id,
-	create_swap_note_inputs
+	generate_note_serial_number,
+	create_swap_note
 } from 'miden-wasm';
 import { ExecutionOutput, Asset } from '@/lib/types';
 import { Account } from '@/lib/account';
@@ -28,7 +29,8 @@ export function consumeNotes({
 				noteInputs,
 				noteScript,
 				note.senderId,
-				senderScript
+				senderScript,
+				note.serialNumber
 			)
 	);
 	return execute_transaction(
@@ -55,15 +57,25 @@ export function generateFaucetId(): bigint {
 	return generate_faucet_id(seed);
 }
 
-export function createSwapNoteInputs(
+export function createSwapNotes(
 	senderAccountId: bigint,
-	requestedAsset: Asset
-): BigUint64Array {
+	receiverAccountId: bigint,
+	requestedAsset: Asset,
+	offeredAsset: Asset
+): { swapNoteInputs: BigUint64Array; paybackNote: NoteData } {
 	const seed = new Uint8Array(32);
 	window.crypto.getRandomValues(seed);
-	return create_swap_note_inputs(
+	const result = create_swap_note(
 		seed,
 		senderAccountId,
+		new AssetData(offeredAsset.faucetId, offeredAsset.amount),
+		receiverAccountId,
 		new AssetData(requestedAsset.faucetId, requestedAsset.amount)
 	);
+	return { swapNoteInputs: result.note_inputs(), paybackNote: result.payback_note() };
+}
+export function generateNoteSerialNumber(): BigUint64Array {
+	const seed = new Uint8Array(32);
+	window.crypto.getRandomValues(seed);
+	return generate_note_serial_number(seed);
 }

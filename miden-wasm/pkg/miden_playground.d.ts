@@ -3,16 +3,28 @@
 export function generate_account_id(seed: Uint8Array): bigint;
 export function generate_faucet_id(seed: Uint8Array): bigint;
 export function execute_transaction(transaction_script: string, receiver_account_code: string, receiver_secret_key: Uint8Array, receiver_account_id: bigint, receiver_assets: (AssetData)[], receiver_wallet_enabled: boolean, receiver_auth_enabled: boolean, notes: (NoteData)[]): any;
-export function create_swap_note_inputs(seed: Uint8Array, sender_account_id: bigint, requested_asset: AssetData): BigUint64Array;
+export function create_swap_note(seed: Uint8Array, sender_account_id: bigint, offered_asset: AssetData, receiver_account_id: bigint, requested_asset: AssetData): CreateSwapNoteResult;
+export function generate_note_serial_number(seed: Uint8Array): BigUint64Array;
 export class AssetData {
   free(): void;
   constructor(faucet_id: bigint, amount: bigint);
   faucet_id: bigint;
   amount: bigint;
 }
+export class CreateSwapNoteResult {
+  private constructor();
+  free(): void;
+  note_inputs(): BigUint64Array;
+  payback_note(): NoteData;
+}
 export class NoteData {
   free(): void;
-  constructor(assets: (AssetData)[], inputs: BigUint64Array, script: string, sender_id: bigint, sender_script: string);
+  constructor(assets: (AssetData)[], inputs: BigUint64Array, script: string, sender_id: bigint, sender_script: string, serial_number: BigUint64Array);
+  inputs(): BigUint64Array;
+  script(): string;
+  sender_id(): bigint;
+  sender_script(): string;
+  serial_number(): BigUint64Array;
 }
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
@@ -26,18 +38,27 @@ export interface InitOutput {
   readonly __wbg_set_assetdata_amount: (a: number, b: bigint) => void;
   readonly assetdata_new: (a: bigint, b: bigint) => number;
   readonly __wbg_notedata_free: (a: number, b: number) => void;
-  readonly notedata_new: (a: number, b: number, c: number, d: number, e: number, f: number, g: bigint, h: number, i: number) => number;
+  readonly notedata_new: (a: number, b: number, c: number, d: number, e: number, f: number, g: bigint, h: number, i: number, j: number, k: number) => number;
+  readonly notedata_inputs: (a: number) => [number, number];
+  readonly notedata_script: (a: number) => [number, number];
+  readonly notedata_sender_id: (a: number) => bigint;
+  readonly notedata_sender_script: (a: number) => [number, number];
+  readonly notedata_serial_number: (a: number) => [number, number];
   readonly generate_account_id: (a: number, b: number) => bigint;
   readonly generate_faucet_id: (a: number, b: number) => bigint;
   readonly execute_transaction: (a: number, b: number, c: number, d: number, e: number, f: number, g: bigint, h: number, i: number, j: number, k: number, l: number, m: number) => [number, number, number];
-  readonly create_swap_note_inputs: (a: number, b: number, c: bigint, d: number) => [number, number, number, number];
+  readonly __wbg_createswapnoteresult_free: (a: number, b: number) => void;
+  readonly createswapnoteresult_note_inputs: (a: number) => [number, number];
+  readonly createswapnoteresult_payback_note: (a: number) => number;
+  readonly create_swap_note: (a: number, b: number, c: bigint, d: number, e: bigint, f: number) => [number, number, number];
+  readonly generate_note_serial_number: (a: number, b: number) => [number, number];
   readonly __wbindgen_exn_store: (a: number) => void;
   readonly __externref_table_alloc: () => number;
   readonly __wbindgen_export_2: WebAssembly.Table;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
-  readonly __externref_table_dealloc: (a: number) => void;
   readonly __wbindgen_free: (a: number, b: number, c: number) => void;
+  readonly __externref_table_dealloc: (a: number) => void;
   readonly __wbindgen_start: () => void;
 }
 

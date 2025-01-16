@@ -17,7 +17,7 @@ export function convertToBigUint64Array(values: (string | number)[]): BigUint64A
 				if (value.startsWith('0x') || value.startsWith('0X')) {
 					return BigInt(value);
 				} else {
-					return BigInt(parseInt(value, 10));
+					return BigInt(value);
 				}
 			} else {
 				return BigInt(value);
