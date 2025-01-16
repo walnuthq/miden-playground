@@ -4,6 +4,7 @@ import InlineIcon from '@/components/ui/inline-icon';
 import { useMiden } from '@/lib/context-providers';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const Toolbar = ({ toggleInspector }: { toggleInspector: () => void }) => {
 	const {
 		files,
@@ -11,9 +12,7 @@ export const Toolbar = ({ toggleInspector }: { toggleInspector: () => void }) =>
 		selectFile,
 		selectedFileId,
 		executeTransaction,
-		isExecutingTransaction,
-		isCollapsedTabs,
-		collapseTabs
+		isExecutingTransaction
 	} = useMiden();
 	const filesToDisplay = Object.keys(files)
 		.filter((fileId) => files[fileId].isOpen)
