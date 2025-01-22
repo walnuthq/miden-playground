@@ -1,8 +1,5 @@
-import { useMiden } from '@/lib/context-providers';
 import AccountsList from './accounts-list';
 import NotesList from './notes-list';
-import { TRANSACTION_SCRIPT_FILE_ID } from '@/lib/consts';
-import { FileItem } from '.';
 
 export function AssetExplorer() {
 	const toggleCollapse = (
@@ -14,7 +11,6 @@ export function AssetExplorer() {
 			[id]: !prev[id]
 		}));
 	};
-	const { selectFile, selectedFileId, files } = useMiden();
 
 	return (
 		<div className="flex flex-col">
@@ -24,12 +20,6 @@ export function AssetExplorer() {
 			>
 				Assets explorer
 			</div>
-			<FileItem
-				editorFile={files[TRANSACTION_SCRIPT_FILE_ID]}
-				onClick={() => selectFile(TRANSACTION_SCRIPT_FILE_ID)}
-				isSelected={selectedFileId === TRANSACTION_SCRIPT_FILE_ID}
-				level={0}
-			/>
 			<AccountsList toggleCollapse={toggleCollapse} />
 			<NotesList toggleCollapse={toggleCollapse} />
 		</div>

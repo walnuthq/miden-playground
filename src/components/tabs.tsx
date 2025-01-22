@@ -7,19 +7,26 @@ export const Tabs = () => {
 	const { selectedTab, selectTab } = useMiden();
 
 	return (
-		<div className="border-r-2 border-dark-miden-700 w-[44px]">
+		<div className="flex  flex-row border-dark-miden-700">
 			<div
-				className="h-[54px] border-b-2 border-dark-miden-700 flex items-center justify-center cursor-pointer hover:bg-white/10"
-				onClick={() => selectTab('transaction')}
+				className={`text-white text-sm px-4 py-4 border-dark-miden-700 flex flex-row items-center gap-2 cursor-pointer select-none ${
+					selectedTab === 'transaction' ? 'bg-[#040113]' : ''
+				}`}
+				onClick={() => {
+					selectTab('transaction');
+				}}
 			>
 				<InlineIcon
 					variant="transaction-builder"
 					color={selectedTab === 'transaction' ? '#9748FF' : '#FFFDFD'}
 					className={`w-5 h-5`}
 				/>
+				Compose transaction
 			</div>
 			<div
-				className="h-[54px] border-b-2 border-dark-miden-700 flex items-center justify-center cursor-pointer hover:bg-white/10"
+				className={`text-white text-sm px-4 py-4 border-dark-miden-700 flex flex-row items-center gap-2 cursor-pointer select-none ${
+					selectedTab === 'assets' ? 'bg-[#040113]' : ''
+				}`}
 				onClick={() => selectTab('assets')}
 			>
 				<InlineIcon
@@ -27,6 +34,7 @@ export const Tabs = () => {
 					color={selectedTab === 'assets' ? '#9748FF' : '#FFFDFD'}
 					className={`w-5 h-5`}
 				/>
+				Assets Explorer
 			</div>
 		</div>
 	);
