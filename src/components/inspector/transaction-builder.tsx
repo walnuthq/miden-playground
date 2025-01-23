@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import InlineIcon from '@/components/ui/inline-icon';
 import { useMiden } from '@/lib/context-providers';
 import {
