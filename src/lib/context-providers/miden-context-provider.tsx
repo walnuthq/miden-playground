@@ -23,7 +23,6 @@ import { Account, ACCOUNT_AUTH_SCRIPT, ACCOUNT_WALLET_SCRIPT } from '@/lib/accou
 import { createP2IDRNote, createSwapNote, Note } from '@/lib/notes';
 import { EditorFiles } from '@/lib/files';
 import { createP2IDNote } from '@/lib/notes/p2id';
-import { useToast } from '@/hooks/use-toast';
 
 type Tabs = 'transaction' | 'assets';
 
@@ -61,6 +60,9 @@ interface MidenContextProps {
 	createSampleSwapNotes: () => void;
 	deleteNote: (noteId: string) => void;
 	deleteAccount: (accountId: string) => void;
+	consoleLogs: { message: string; type: 'info' | 'error' }[];
+	addInfoLog: (message: string) => void;
+	addErrorLog: (message: string) => void;
 }
 
 export const MidenContext = createContext<MidenContextProps>({
@@ -96,12 +98,13 @@ export const MidenContext = createContext<MidenContextProps>({
 	createNewNote: () => {},
 	createSampleSwapNotes: () => {},
 	deleteNote: () => {},
-	deleteAccount: () => {}
+	deleteAccount: () => {},
+	consoleLogs: [],
+	addInfoLog: () => {},
+	addErrorLog: () => {}
 });
 
 export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
-	const { toast } = useToast();
-
 	const [isInitialized, setIsInitialized] = useState(false);
 	const [isCollapsedTabs, setCollapsedTabs] = useState(false);
 	const [isExecutingTransaction, setIsExecutingTransaction] = useState(false);
@@ -109,6 +112,18 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	const collapseTabs = () => {
 		setCollapsedTabs(!isCollapsedTabs);
 	};
+
+	const [consoleLogs, setConsoleLogs] = useState<{ message: string; type: 'info' | 'error' }[]>([]);
+
+	const addInfoLog = useCallback((message: string) => {
+		console.log(message);
+		setConsoleLogs((prevLogs) => [...prevLogs, { message, type: 'info' }]);
+	}, []);
+
+	const addErrorLog = useCallback((message: string) => {
+		console.log('ERROR: ', message);
+		setConsoleLogs((prevLogs) => [...prevLogs, { message, type: 'error' }]);
+	}, []);
 
 	const [files, setFiles] = useState<EditorFiles>({
 		[TRANSACTION_SCRIPT_FILE_ID]: {
@@ -213,19 +228,11 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 
 	const executeTransaction = useCallback(() => {
 		if (!selectedTransactionAccountId) {
-			toast({
-				title: 'No account selected',
-				description: 'Please select an account to execute the transaction',
-				variant: 'destructive'
-			});
+			addErrorLog('No account selected: Please select an account to execute the transaction');
 			return;
 		}
 		if (selectedTransactionNotesIds.length === 0) {
-			toast({
-				title: 'No notes selected',
-				description: 'Please select at least one note to execute the transaction',
-				variant: 'destructive'
-			});
+			addErrorLog('No notes selected: Please select at least one note to execute the transaction');
 			return;
 		}
 		setIsExecutingTransaction(true);
@@ -255,19 +262,21 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				account.storage = output.storage;
 				return account;
 			});
-			toast({
-				title: 'Execution successful'
-			});
+			addInfoLog('Execution successful');
 		} catch (error) {
-			toast({
-				title: 'Execution failed',
-				description: 'Error: ' + error,
-				variant: 'destructive'
-			});
+			addErrorLog('Execution failed. Error: ' + error);
 		}
 
 		setIsExecutingTransaction(false);
-	}, [accounts, files, notes, selectedTransactionAccountId, selectedTransactionNotesIds, toast]);
+	}, [
+		accounts,
+		addErrorLog,
+		addInfoLog,
+		files,
+		notes,
+		selectedTransactionAccountId,
+		selectedTransactionNotesIds
+	]);
 
 	const createAccount = useCallback(() => {
 		const newAccountName = Account.getNextAccountName(accounts);
@@ -484,7 +493,10 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				createNewNote: createSampleNote,
 				createSampleSwapNotes,
 				deleteNote,
-				deleteAccount
+				deleteAccount,
+				consoleLogs,
+				addErrorLog,
+				addInfoLog
 			}}
 		>
 			{children}

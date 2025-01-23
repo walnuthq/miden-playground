@@ -9,22 +9,38 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
+import { TRANSACTION_SCRIPT_FILE_ID } from '@/lib/consts';
+import {
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectLabel,
+	SelectTrigger,
+	SelectValue
+} from '../ui/select';
 
 export const TransactionBuilder: React.FC = () => {
 	const {
 		accounts,
-		selectedTransactionAccountId,
 		notes,
 		selectedTransactionNotesIds,
 		selectTransactionNote,
 		selectTransactionAccount,
 		removeTransactionNote,
+		selectFile,
+		selectedFileId,
+		selectedTransactionAccountId,
 		removeTransactionAccount
 	} = useMiden();
-	const selectedTransactionAccount = selectedTransactionAccountId
-		? accounts[selectedTransactionAccountId]
-		: null;
 
+	const handleValueChange = (value: string) => {
+		if (value === 'None') {
+			removeTransactionAccount();
+		} else {
+			selectTransactionAccount(value);
+		}
+	};
 	return (
 		<div className="flex flex-col">
 			<div
@@ -33,11 +49,41 @@ export const TransactionBuilder: React.FC = () => {
 			>
 				Compose transaction
 			</div>
-			<div className="flex flex-col">
-				<DropdownMenu>
+			<div className="flex flex-col gap-2 text-sm">
+				<div className="px-3 text-white font-bold mt-2">Account</div>
+				<div className="flex justify-center">
+					<Select
+						value={
+							selectedTransactionAccountId
+								? accounts[selectedTransactionAccountId].name
+								: 'Select account'
+						}
+						onValueChange={handleValueChange}
+					>
+						<SelectTrigger className="flex justify-center border-2 border-dark-miden-700 rounded-miden w-56 bg-dark-miden-900 hover:bg-dark-miden-700 text-white">
+							<SelectValue placeholder="Select account">
+								{selectedTransactionAccountId
+									? accounts[selectedTransactionAccountId].name
+									: 'Select account'}
+							</SelectValue>
+						</SelectTrigger>
+						<SelectContent>
+							<SelectGroup>
+								<SelectLabel>Select account</SelectLabel>
+								{Object.values(accounts).map((account) => (
+									<SelectItem key={account.id} value={account.idHex}>
+										{account.name}
+									</SelectItem>
+								))}
+								{selectedTransactionAccountId && <SelectItem value="None">None</SelectItem>}
+							</SelectGroup>
+						</SelectContent>
+					</Select>
+				</div>
+				{/* <DropdownMenu>
 					<DropdownMenuTrigger>
 						<div className="flex flex-row items-center gap-2 text-white py-2 px-3 hover:bg-white/10">
-							<InlineIcon variant="plus-square" className="w-6 h-6 cursor-pointer" />
+							<InlineIcon variant="plus-square" className="w-4 h-4 cursor-pointer" />
 							<span>Account</span>
 						</div>
 					</DropdownMenuTrigger>
@@ -58,12 +104,20 @@ export const TransactionBuilder: React.FC = () => {
 						variant="account"
 						onRemove={() => removeTransactionAccount()}
 					/>
-				)}
+				)} */}
+				<div className="px-3 text-white font-bold">Notes</div>
+				{selectedTransactionNotesIds.map((noteId) => (
+					<ListItem
+						key={noteId}
+						name={notes[noteId].name}
+						variant="file"
+						onRemove={() => removeTransactionNote(noteId)}
+					/>
+				))}
 				<DropdownMenu>
-					<DropdownMenuTrigger>
-						<div className="flex flex-row items-center gap-2 text-white py-2 px-3 hover:bg-white/10">
-							<InlineIcon variant="plus-square" className="w-6 h-6 cursor-pointer" />
-							<span>Note</span>
+					<DropdownMenuTrigger className="border-2 mx-auto w-56 border-dark-miden-700 rounded-miden">
+						<div className="flex justify-center items-center gap-2 text-white py-2 px-3 hover:bg-dark-miden-700">
+							<span>Add notes</span>
 						</div>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent>
@@ -74,14 +128,18 @@ export const TransactionBuilder: React.FC = () => {
 						))}
 					</DropdownMenuContent>
 				</DropdownMenu>
-				{selectedTransactionNotesIds.map((noteId) => (
-					<ListItem
-						key={noteId}
-						name={notes[noteId].name}
-						variant="file"
-						onRemove={() => removeTransactionNote(noteId)}
-					/>
-				))}
+
+				<div
+					onClick={() => selectFile(TRANSACTION_SCRIPT_FILE_ID)}
+					className={`flex flex-row items-center gap-2 text-white py-1 px-3 cursor-pointer ${
+						selectedFileId === TRANSACTION_SCRIPT_FILE_ID
+							? 'bg-dark-miden-700 '
+							: 'hover:bg-dark-miden-800'
+					}`}
+				>
+					<InlineIcon variant="file_2" color="white" className="w-4 h-4 cursor-pointer" />
+					<span>Transaction script</span>
+				</div>
 			</div>
 		</div>
 	);
@@ -100,12 +158,12 @@ function ListItem({
 }) {
 	return (
 		<div
-			className={`ml-10 flex flex-row p-2 items-center gap-2 text-white select-none cursor-pointer rounded-l-miden ${
+			className={`flex text-sm flex-row px-3 py-1 items-center gap-2 text-white select-none cursor-pointer rounded-l-miden ${
 				onClick ? 'cursor-pointer hover:bg-white/10' : 'cursor-default'
 			}`}
 			onClick={onClick}
 		>
-			<InlineIcon variant={variant} className={`w-5 h-5 cursor-pointer`} color="white" />
+			<InlineIcon variant={variant} className={`w-4 h-4 cursor-pointer`} color="white" />
 			<span>{name}</span>
 			{onRemove && (
 				<div
