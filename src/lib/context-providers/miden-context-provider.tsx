@@ -23,7 +23,6 @@ import { Account, ACCOUNT_AUTH_SCRIPT, ACCOUNT_WALLET_SCRIPT } from '@/lib/accou
 import { createP2IDRNote, createSwapNote, Note } from '@/lib/notes';
 import { EditorFiles } from '@/lib/files';
 import { createP2IDNote } from '@/lib/notes/p2id';
-import { useToast } from '@/hooks/use-toast';
 
 type Tabs = 'transaction' | 'assets';
 

@@ -9,6 +9,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
+import { TRANSACTION_SCRIPT_FILE_ID } from '@/lib/consts';
 
 export const TransactionBuilder: React.FC = () => {
 	const {
@@ -19,7 +20,8 @@ export const TransactionBuilder: React.FC = () => {
 		selectTransactionNote,
 		selectTransactionAccount,
 		removeTransactionNote,
-		removeTransactionAccount
+		removeTransactionAccount,
+		selectFile
 	} = useMiden();
 	const selectedTransactionAccount = selectedTransactionAccountId
 		? accounts[selectedTransactionAccountId]
@@ -34,9 +36,12 @@ export const TransactionBuilder: React.FC = () => {
 				Compose transaction
 			</div>
 			<div className="flex flex-col">
-				<div className="flex flex-row items-center gap-2 text-white py-2 px-3 hover:bg-dark-miden-700">
+				<div
+					onClick={() => selectFile(TRANSACTION_SCRIPT_FILE_ID)}
+					className="flex flex-row items-center gap-2 text-white py-2 px-3 hover:bg-dark-miden-700"
+				>
 					<InlineIcon variant="file_2" color="white" className="w-4 h-4 cursor-pointer" />
-					<span>Transaction file</span>
+					<span>Transaction script</span>
 				</div>
 				<DropdownMenu>
 					<DropdownMenuTrigger>
