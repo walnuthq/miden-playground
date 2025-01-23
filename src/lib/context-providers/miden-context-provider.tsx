@@ -106,8 +106,6 @@ export const MidenContext = createContext<MidenContextProps>({
 });
 
 export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
-	const { toast } = useToast();
-
 	const [isInitialized, setIsInitialized] = useState(false);
 	const [isCollapsedTabs, setCollapsedTabs] = useState(false);
 	const [isExecutingTransaction, setIsExecutingTransaction] = useState(false);
