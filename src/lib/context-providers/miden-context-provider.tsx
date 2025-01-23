@@ -231,20 +231,10 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 
 	const executeTransaction = useCallback(() => {
 		if (!selectedTransactionAccountId) {
-			toast({
-				title: 'No account selected',
-				description: 'Please select an account to execute the transaction',
-				variant: 'destructive'
-			});
 			addErrorLog('No account selected: Please select an account to execute the transaction');
 			return;
 		}
 		if (selectedTransactionNotesIds.length === 0) {
-			toast({
-				title: 'No notes selected',
-				description: 'Please select at least one note to execute the transaction',
-				variant: 'destructive'
-			});
 			addErrorLog('No notes selected: Please select at least one note to execute the transaction');
 			return;
 		}
@@ -275,16 +265,8 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				account.storage = output.storage;
 				return account;
 			});
-			toast({
-				title: 'Execution successful'
-			});
 			addInfoLog('Execution successful');
 		} catch (error) {
-			toast({
-				title: 'Execution failed',
-				description: 'Error: ' + error,
-				variant: 'destructive'
-			});
 			addErrorLog('Execution failed. Error: ' + error);
 		}
 
@@ -296,8 +278,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		files,
 		notes,
 		selectedTransactionAccountId,
-		selectedTransactionNotesIds,
-		toast
+		selectedTransactionNotesIds
 	]);
 
 	const createAccount = useCallback(() => {
