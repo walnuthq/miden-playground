@@ -106,10 +106,18 @@ export const TransactionBuilder: React.FC = () => {
 					/>
 				)} */}
 				<div className="px-3 text-white font-bold">Notes</div>
+				{selectedTransactionNotesIds.map((noteId) => (
+					<ListItem
+						key={noteId}
+						name={notes[noteId].name}
+						variant="file"
+						onRemove={() => removeTransactionNote(noteId)}
+					/>
+				))}
 				<DropdownMenu>
 					<DropdownMenuTrigger className="border-2 mx-auto w-56 border-dark-miden-700 rounded-miden">
 						<div className="flex justify-center items-center gap-2 text-white py-2 px-3 hover:bg-dark-miden-700">
-							<span>Select notes</span>
+							<span>Add notes</span>
 						</div>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent>
@@ -120,14 +128,6 @@ export const TransactionBuilder: React.FC = () => {
 						))}
 					</DropdownMenuContent>
 				</DropdownMenu>
-				{selectedTransactionNotesIds.map((noteId) => (
-					<ListItem
-						key={noteId}
-						name={notes[noteId].name}
-						variant="file"
-						onRemove={() => removeTransactionNote(noteId)}
-					/>
-				))}
 
 				<div
 					onClick={() => selectFile(TRANSACTION_SCRIPT_FILE_ID)}
