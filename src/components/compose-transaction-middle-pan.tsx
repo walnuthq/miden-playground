@@ -1,19 +1,12 @@
 import { useSelectedAccountData } from '@/lib/files';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { Editor as MonacoEditor, Monaco, useMonaco } from '@monaco-editor/react';
 import { ScrollArea } from './ui/scroll-area';
 import { Console } from './console';
-import { useMiden } from '@/lib/context-providers';
-import { TRANSACTION_SCRIPT_FILE_ID } from '@/lib/consts';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 
 const ComposeTransactionMiddlePan = () => {
 	const { metadata, vault } = useSelectedAccountData();
-	const [accountValue, setAccountValue] = useState(vault);
-	const { files } = useMiden();
-
-	useEffect(() => {
-		setAccountValue(vault);
-	}, [vault]);
 
 	const configureMonaco = useCallback((_monaco: Monaco) => {
 		if (_monaco) {
@@ -41,62 +34,37 @@ const ComposeTransactionMiddlePan = () => {
 	}, [configureMonaco, monaco]);
 
 	return (
-		<div className="flex flex-col justify-end  h-[94%]">
-			{metadata && vault && (
+		<div className="flex flex-col justify-end h-full">
+			{metadata && vault ? (
 				<div className="flex-1 overflow-hidden text-white">
 					<ScrollArea className="h-full w-full px-4">
-						<div className="py-4">
-							<span className="font-bold">Account ID: </span>
-							{metadata}
-						</div>
-						<div className="font-bold pb-4">Vault: </div>
-						<div className="space-y-4 pb-4">
-							<div className="h-[200px] rounded-miden">
-								<MonacoEditor
-									options={{
-										overviewRulerLanes: 0,
-										minimap: { enabled: false },
-										wordBreak: 'keepAll',
-										wordWrap: 'on',
-										smoothScrolling: true,
-										scrollbar: {
-											verticalSliderSize: 5,
-											verticalScrollbarSize: 5
-										},
-										theme: 'miden',
-										readOnly: true
-									}}
-									value={accountValue}
-									height="100%"
-									className="whitespace-pre-wrap"
-								/>
-							</div>
-						</div>
-						<div className="font-bold pb-4">Bit code:</div>
-						<div className="font-bold">Transaction script:</div>
-						<div className="space-y-4 pb-4">
-							<div className="h-[200px] rounded-miden">
-								<MonacoEditor
-									options={{
-										overviewRulerLanes: 0,
-										minimap: { enabled: false },
-										wordBreak: 'keepAll',
-										wordWrap: 'on',
-										smoothScrolling: true,
-										scrollbar: {
-											verticalSliderSize: 5,
-											verticalScrollbarSize: 5
-										},
-										theme: 'miden',
-										readOnly: true
-									}}
-									value={files[TRANSACTION_SCRIPT_FILE_ID].content.value}
-									height="100%"
-									className="whitespace-pre-wrap"
-								/>
-							</div>
-						</div>
+						<Table className="[&_tr:hover]:bg-transparent">
+							<TableHeader>
+								<TableRow>
+									<TableHead>Account ID</TableHead>
+									<TableHead>Vault</TableHead>
+									<TableHead>Bit Code</TableHead>
+								</TableRow>
+							</TableHeader>
+							<TableBody>
+								<TableRow>
+									<TableCell>{metadata}</TableCell>
+									<TableCell>
+										<pre className="whitespace-pre-wrap overflow-auto max-h-[200px]">
+											<pre className="whitespace-nowrap overflow-auto">{vault}</pre>
+										</pre>
+									</TableCell>
+									<TableCell>{'bitCode'}</TableCell>
+								</TableRow>
+							</TableBody>
+						</Table>
 					</ScrollArea>
+				</div>
+			) : (
+				<div className="flex-1 p-9 text-xl text-gray-400">
+					<div className="">First, select account on left</div>
+					<div className="mt-16">Then add notes</div>
+					<div className="mt-64">Link to docs</div>
 				</div>
 			)}
 			<Console />

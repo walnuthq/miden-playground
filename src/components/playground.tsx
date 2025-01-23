@@ -55,9 +55,10 @@ export function Playground() {
 			<header className="h-16">
 				<Header />
 			</header>
+
+			<Tabs />
 			<main className="flex-1 border-2 border-dark-miden-700 rounded-miden overflow-hidden">
-				<Tabs />
-				<ResizablePanelGroup direction="horizontal">
+				<ResizablePanelGroup className="" direction="horizontal">
 					<ResizablePanel
 						ref={inspectorPanelRef}
 						defaultSize={25}

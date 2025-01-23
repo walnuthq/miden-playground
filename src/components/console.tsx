@@ -3,10 +3,19 @@
 import { useMiden } from '@/lib/context-providers';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import { useEffect, useRef } from 'react';
 
 export function Console() {
 	const { consoleLogs } = useMiden();
+	const logsEndRef = useRef<HTMLDivElement>(null);
 
+	const scrollToBottom = () => {
+		logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+	};
+
+	useEffect(() => {
+		scrollToBottom();
+	}, [consoleLogs]);
 	return (
 		<ScrollArea className="h-[240px]  border-dark-miden-700 bg-dark-miden-800 flex flex-col pt-11 px-4 pb-4">
 			<div className="absolute top-4 left-4 text-neutral-400 uppercase text-[13px] font-semibold leading-6">
@@ -24,6 +33,7 @@ export function Console() {
 					<br />
 				</span>
 			))}
+			<div ref={logsEndRef} />
 		</ScrollArea>
 	);
 }
