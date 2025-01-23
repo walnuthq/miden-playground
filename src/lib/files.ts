@@ -31,16 +31,24 @@ export const useEditorFile = (fileId: string) => {
 	return files[fileId];
 };
 
-export const useSelectedEditorFile = (): { content: string; file: EditorFile | null } => {
+export const useSelectedEditorFile = (): {
+	content: string;
+	file: EditorFile | null;
+	type: string | null;
+	typeId: string;
+} => {
 	const { files, accounts, selectedFileId, notes } = useMiden();
-	if (!selectedFileId) return { content: '', file: null };
+	if (!selectedFileId) return { content: '', file: null, type: null, typeId: '' };
 
 	const file = files[selectedFileId];
-
+	let type = null;
+	let typeId = '';
 	let content = '';
 	if (file) {
 		if (file.content.dynamic) {
 			if (file.content.dynamic.account) {
+				type = 'account';
+				typeId = file.content.dynamic.account.accountId;
 				if (file.content.dynamic.account.variant === 'metadata') {
 					const account = accounts[file.content.dynamic.account.accountId];
 					content = JSON.stringify(
@@ -67,6 +75,8 @@ export const useSelectedEditorFile = (): { content: string; file: EditorFile | n
 					content = JSON.stringify(account.storage, null, 2);
 				}
 			} else if (file.content.dynamic.note) {
+				type = 'note';
+				typeId = file.content.dynamic.note.noteId;
 				if (file.content.dynamic.note.variant === 'metadata') {
 					const note = notes[file.content.dynamic.note.noteId];
 					content = JSON.stringify(
@@ -91,5 +101,34 @@ export const useSelectedEditorFile = (): { content: string; file: EditorFile | n
 		}
 	}
 
-	return { content, file };
+	return { content, file, type, typeId };
+};
+
+export const useSelectedAccountData = (): {
+	metadata: string;
+	vault: string;
+} => {
+	const { accounts, selectedTransactionAccountId } = useMiden();
+
+	if (!selectedTransactionAccountId) {
+		return {
+			metadata: '',
+			vault: ''
+		};
+	}
+
+	const account = accounts[selectedTransactionAccountId];
+
+	const metadata = account.id.toString();
+
+	const vault = JSON.stringify(
+		account.assets.map((asset) => [asset.amount.toString(), 0, 0, asset.faucetId.toString()]),
+		null,
+		2
+	);
+
+	return {
+		metadata,
+		vault
+	};
 };

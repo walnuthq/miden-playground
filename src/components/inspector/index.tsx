@@ -75,7 +75,7 @@ export function InspectorItem({
 }) {
 	return (
 		<div
-			className={`text-xs h-6 pr-3 flex flex-row items-center justify-between text-white select-none cursor-pointer
+			className={`text-sm h-6 pr-3 flex flex-row items-center justify-between text-white select-none cursor-pointer
     ${isSelected ? 'bg-dark-miden-700 ' : 'hover:bg-dark-miden-800'}`}
 			onClick={onClick}
 			style={{ paddingLeft: `${level * 10 + 8}px` }}

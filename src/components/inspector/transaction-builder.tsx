@@ -9,6 +9,15 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
+import {
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectLabel,
+	SelectTrigger,
+	SelectValue
+} from '../ui/select';
 
 export const TransactionBuilder: React.FC = () => {
 	const {
@@ -33,11 +42,46 @@ export const TransactionBuilder: React.FC = () => {
 			>
 				Compose transaction
 			</div>
-			<div className="flex flex-col">
-				<DropdownMenu>
+			<div className="flex flex-col gap-4 text-sm">
+				<div className="flex flex-row items-center gap-2 text-white py-2 px-3 hover:bg-dark-miden-700">
+					<InlineIcon variant="file_2" color="white" className="w-4 h-4 cursor-pointer" />
+					<span>Transaction file</span>
+				</div>
+				<div className="px-3 text-white font-bold">Account</div>
+				<div className="flex justify-center">
+					<Select
+						onValueChange={(value) => {
+							const selectedAccount = Object.values(accounts).find(
+								(account) => account.name === value
+							);
+							if (selectedAccount) {
+								selectTransactionAccount(selectedAccount.idHex);
+							} else if (value === 'None') {
+								removeTransactionAccount();
+							}
+						}}
+					>
+						<SelectTrigger className="flex justify-center border-2 border-dark-miden-700 rounded-miden w-56 bg-dark-miden-900 hover:bg-dark-miden-700 text-white">
+							<SelectValue placeholder="Select account" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectGroup>
+								<SelectLabel>Select account</SelectLabel>
+								{Object.values(accounts).map((account) => (
+									<SelectItem key={account.id} value={account.name}>
+										{account.name}
+									</SelectItem>
+								))}
+								{selectedTransactionAccount && <SelectItem value="None">None</SelectItem>}
+							</SelectGroup>
+						</SelectContent>
+					</Select>
+				</div>
+
+				{/* <DropdownMenu>
 					<DropdownMenuTrigger>
 						<div className="flex flex-row items-center gap-2 text-white py-2 px-3 hover:bg-white/10">
-							<InlineIcon variant="plus-square" className="w-6 h-6 cursor-pointer" />
+							<InlineIcon variant="plus-square" className="w-4 h-4 cursor-pointer" />
 							<span>Account</span>
 						</div>
 					</DropdownMenuTrigger>
@@ -58,12 +102,12 @@ export const TransactionBuilder: React.FC = () => {
 						variant="account"
 						onRemove={() => removeTransactionAccount()}
 					/>
-				)}
+				)} */}
+				<div className="px-3 text-white font-bold">Notes</div>
 				<DropdownMenu>
-					<DropdownMenuTrigger>
-						<div className="flex flex-row items-center gap-2 text-white py-2 px-3 hover:bg-white/10">
-							<InlineIcon variant="plus-square" className="w-6 h-6 cursor-pointer" />
-							<span>Note</span>
+					<DropdownMenuTrigger className="border-2 mx-auto w-56 border-dark-miden-700 rounded-miden">
+						<div className="flex justify-center items-center gap-2 text-white py-2 px-3 hover:bg-dark-miden-700">
+							<span>Select notes</span>
 						</div>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent>
@@ -100,12 +144,12 @@ function ListItem({
 }) {
 	return (
 		<div
-			className={`ml-10 flex flex-row p-2 items-center gap-2 text-white select-none cursor-pointer rounded-l-miden ${
+			className={`flex flex-row px-3 items-center gap-2 text-white select-none cursor-pointer rounded-l-miden ${
 				onClick ? 'cursor-pointer hover:bg-white/10' : 'cursor-default'
 			}`}
 			onClick={onClick}
 		>
-			<InlineIcon variant={variant} className={`w-5 h-5 cursor-pointer`} color="white" />
+			<InlineIcon variant={variant} className={`w-4 h-4 cursor-pointer`} color="white" />
 			<span>{name}</span>
 			{onRemove && (
 				<div
