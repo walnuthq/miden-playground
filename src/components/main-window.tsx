@@ -9,6 +9,7 @@ import { ExecutionOutput } from './execution-output';
 import { ResizableHandle, ResizablePanel } from '@/components/ui/resizable';
 import { useSelectedEditorFile } from '@/lib/files';
 import { editor } from 'monaco-editor';
+import ComposeTransactionMiddlePan from './compose-transaction-middle-pan';
 
 export function MainWindow({ toggleInspector }: { toggleInspector: () => void }) {
 	const { selectedTab, executionOutput, updateFileContent } = useMiden();
@@ -49,33 +50,37 @@ export function MainWindow({ toggleInspector }: { toggleInspector: () => void })
 			<ResizablePanel defaultSize={selectedTab === 'transaction' && executionOutput ? 45 : 75}>
 				<div className="flex flex-col h-full">
 					<Toolbar toggleInspector={toggleInspector} />
-					<div className={`flex-1 ${file ? 'block' : 'hidden'}`}>
-						<MonacoEditor
-							onChange={(value) => {
-								setValue(value ?? '');
-								if (file && !file.readonly) updateFileContent(file.id, value ?? '');
-							}}
-							onMount={(editor: editor.IStandaloneCodeEditor, _monaco) => {
-								configureMonaco(_monaco);
-							}}
-							options={{
-								overviewRulerLanes: 0,
-								minimap: { enabled: false },
-								wordBreak: 'keepAll',
-								wordWrap: 'on',
-								smoothScrolling: true,
-								scrollbar: {
-									verticalSliderSize: 5,
-									verticalScrollbarSize: 5
-								},
-								theme: 'miden',
-								readOnly: file ? file.readonly : true
-							}}
-							value={value}
-							className={cn(
-								'whitespace-pre-wrap overflow-hidden p-0 m-0 w-full h-full absolute top-0 left-0'
-							)}
-						/>
+					<div className={`flex-1 ${file || selectedTab === 'transaction' ? 'block' : 'hidden'}`}>
+						{selectedTab !== 'transaction' ? (
+							<MonacoEditor
+								onChange={(value) => {
+									setValue(value ?? '');
+									if (file && !file.readonly) updateFileContent(file.id, value ?? '');
+								}}
+								onMount={(editor: editor.IStandaloneCodeEditor, _monaco) => {
+									configureMonaco(_monaco);
+								}}
+								options={{
+									overviewRulerLanes: 0,
+									minimap: { enabled: false },
+									wordBreak: 'keepAll',
+									wordWrap: 'on',
+									smoothScrolling: true,
+									scrollbar: {
+										verticalSliderSize: 5,
+										verticalScrollbarSize: 5
+									},
+									theme: 'miden',
+									readOnly: file ? file.readonly : true
+								}}
+								value={value}
+								className={cn(
+									'whitespace-pre-wrap overflow-hidden p-0 m-0 w-full h-full absolute top-0 left-0'
+								)}
+							/>
+						) : (
+							<ComposeTransactionMiddlePan />
+						)}
 					</div>
 				</div>
 			</ResizablePanel>

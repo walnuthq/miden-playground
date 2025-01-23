@@ -26,7 +26,7 @@ export const TransactionBuilder: React.FC = () => {
 		: null;
 
 	return (
-		<div className="flex flex-col">
+		<div className="flex flex-col text-sm">
 			<div
 				className="h-[54px] border-b-2 border-dark-miden-700 bg-dark-miden-800
 					text-white font-medium flex gap-2 items-center px-3"
@@ -34,10 +34,14 @@ export const TransactionBuilder: React.FC = () => {
 				Compose transaction
 			</div>
 			<div className="flex flex-col">
+				<div className="flex flex-row items-center gap-2 text-white py-2 px-3 hover:bg-dark-miden-700">
+					<InlineIcon variant="file_2" color="white" className="w-4 h-4 cursor-pointer" />
+					<span>Transaction file</span>
+				</div>
 				<DropdownMenu>
 					<DropdownMenuTrigger>
 						<div className="flex flex-row items-center gap-2 text-white py-2 px-3 hover:bg-white/10">
-							<InlineIcon variant="plus-square" className="w-6 h-6 cursor-pointer" />
+							<InlineIcon variant="plus-square" className="w-4 h-4 cursor-pointer" />
 							<span>Account</span>
 						</div>
 					</DropdownMenuTrigger>
@@ -62,7 +66,7 @@ export const TransactionBuilder: React.FC = () => {
 				<DropdownMenu>
 					<DropdownMenuTrigger>
 						<div className="flex flex-row items-center gap-2 text-white py-2 px-3 hover:bg-white/10">
-							<InlineIcon variant="plus-square" className="w-6 h-6 cursor-pointer" />
+							<InlineIcon variant="plus-square" className="w-4 h-4 cursor-pointer" />
 							<span>Note</span>
 						</div>
 					</DropdownMenuTrigger>
@@ -100,12 +104,12 @@ function ListItem({
 }) {
 	return (
 		<div
-			className={`ml-10 flex flex-row p-2 items-center gap-2 text-white select-none cursor-pointer rounded-l-miden ${
+			className={`ml-10 flex text-sm flex-row p-1 items-center gap-2 text-white select-none cursor-pointer rounded-l-miden ${
 				onClick ? 'cursor-pointer hover:bg-white/10' : 'cursor-default'
 			}`}
 			onClick={onClick}
 		>
-			<InlineIcon variant={variant} className={`w-5 h-5 cursor-pointer`} color="white" />
+			<InlineIcon variant={variant} className={`w-4 h-4 cursor-pointer`} color="white" />
 			<span>{name}</span>
 			{onRemove && (
 				<div
