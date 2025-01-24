@@ -148,11 +148,7 @@ export const TransactionBuilder: React.FC = () => {
 						}}
 						className={`text-white text-sm w-full justify-center py-2 pl-2 h-full flex items-center hover:bg-dark-miden-700 cursor-pointer `}
 					>
-						{selectedTransactionAccountId ? (
-							<span className="flex items-center gap-3">Execute Transaction</span>
-						) : (
-							'Select account'
-						)}
+						<span className="flex items-center gap-3">Execute Transaction</span>
 					</div>
 				</div>
 			</div>
