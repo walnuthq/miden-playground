@@ -93,3 +93,67 @@ export const useSelectedEditorFile = (): { content: string; file: EditorFile | n
 
 	return { content, file };
 };
+
+export const useSelectedAccountData = (): {
+	metadata: string;
+	vault: string;
+} => {
+	const { accounts, selectedTransactionAccountId } = useMiden();
+
+	if (!selectedTransactionAccountId) {
+		return {
+			metadata: '',
+			vault: ''
+		};
+	}
+
+	const account = accounts[selectedTransactionAccountId];
+
+	const metadata = account.id.toString();
+
+	const vault = JSON.stringify(
+		account.assets.map((asset) => [asset.amount.toString(), 0, 0, asset.faucetId.toString()]),
+		null,
+		2
+	);
+
+	return {
+		metadata,
+		vault
+	};
+};
+
+export const useSelectedNoteData = (): {
+	noteVault: string;
+	script: string;
+	input: string;
+} => {
+	const { notes, files, selectedOverview } = useMiden();
+	if (!notes[selectedOverview]) {
+		return {
+			noteVault: '',
+			script: '',
+			input: ''
+		};
+	}
+	const note = notes[selectedOverview];
+
+	const noteVault = JSON.stringify(
+		note.assets.map((asset) => [asset.amount.toString(), 0, 0, asset.faucetId.toString()]),
+		null,
+		2
+	);
+
+	const script =
+		note && note.scriptFileId && files[note.scriptFileId] && files[note.scriptFileId].content?.value
+			? files[note.scriptFileId].content.value?.split('\n').slice(0, 10).join('\n')
+			: '';
+
+	const input = JSON.stringify(JSON.parse(files[note.inputFileId]?.content.value || '{}'), null, 2);
+
+	return {
+		noteVault,
+		script: script || '',
+		input
+	};
+};
