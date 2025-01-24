@@ -63,6 +63,8 @@ interface MidenContextProps {
 	consoleLogs: { message: string; type: 'info' | 'error' }[];
 	addInfoLog: (message: string) => void;
 	addErrorLog: (message: string) => void;
+	selectedOverview: string;
+	selectOverview: (tab: string) => void;
 }
 
 export const MidenContext = createContext<MidenContextProps>({
@@ -101,7 +103,9 @@ export const MidenContext = createContext<MidenContextProps>({
 	deleteAccount: () => {},
 	consoleLogs: [],
 	addInfoLog: () => {},
-	addErrorLog: () => {}
+	addErrorLog: () => {},
+	selectedOverview: '',
+	selectOverview: () => {}
 });
 
 export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
@@ -158,8 +162,13 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	const [selectedTransactionAccountId, setSelectedTransactionAccountId] = useState<string | null>(
 		null
 	);
+	const [selectedOverview, setSelectedOverview] = useState('');
 	const [selectedTransactionNotesIds, setSelectedTransactionNotesIds] = useState<string[]>([]);
 	const [executionOutput, setExecutionOutput] = useState<ExecutionOutput | null>(null);
+
+	const selectOverview = useCallback((tab: string) => {
+		setSelectedOverview(tab);
+	}, []);
 
 	const updateAccountById = (accountId: string, updateFn: (account: Account) => Account) => {
 		setAccounts((prev) => {
@@ -496,7 +505,9 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				deleteAccount,
 				consoleLogs,
 				addErrorLog,
-				addInfoLog
+				addInfoLog,
+				selectedOverview,
+				selectOverview
 			}}
 		>
 			{children}
