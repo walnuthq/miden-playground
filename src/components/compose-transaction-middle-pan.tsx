@@ -86,7 +86,7 @@ const ComposeTransactionMiddlePan = () => {
 								<TableRow>
 									<TableHead>{selectedOverview === 'account' ? 'Account ID' : 'Script'}</TableHead>
 									<TableHead>Vault</TableHead>
-									<TableHead>{selectedOverview === 'account' ? 'Bit Code' : 'Input'}</TableHead>
+									<TableHead>{selectedOverview === 'account' ? '' : 'Input'}</TableHead>
 								</TableRow>
 							</TableHeader>
 							<TableBody>
@@ -109,7 +109,7 @@ const ComposeTransactionMiddlePan = () => {
 										{' '}
 										<pre className="whitespace-pre-wrap overflow-auto max-h-[200px]">
 											<pre className="whitespace-nowrap overflow-auto">
-												{selectedOverview === 'account' ? 'bitCode' : input}{' '}
+												{selectedOverview === 'account' ? '' : input}{' '}
 											</pre>
 										</pre>
 									</TableCell>
