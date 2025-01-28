@@ -10,6 +10,7 @@ import { ResizableHandle, ResizablePanel } from '@/components/ui/resizable';
 import { useSelectedEditorFile } from '@/lib/files';
 import { editor } from 'monaco-editor';
 import ComposeTransactionMiddlePan from './compose-transaction-middle-pan';
+import Breadcrumbs from './breadcrumbs';
 
 export function MainWindow({ toggleInspector }: { toggleInspector: () => void }) {
 	const { selectedTab, executionOutput, updateFileContent } = useMiden();
@@ -50,6 +51,7 @@ export function MainWindow({ toggleInspector }: { toggleInspector: () => void })
 			<ResizablePanel defaultSize={selectedTab === 'transaction' && executionOutput ? 45 : 75}>
 				<div className="flex flex-col h-full">
 					<Toolbar toggleInspector={toggleInspector} />
+					{selectedTab !== 'transaction' && <Breadcrumbs />}
 					<div className={`flex-1 ${file || selectedTab === 'transaction' ? 'block' : 'hidden'}`}>
 						{selectedTab !== 'transaction' ? (
 							<MonacoEditor
