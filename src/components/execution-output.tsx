@@ -133,16 +133,42 @@ export function ExecutionOutput() {
 								<TableHead className="border-b border-dark-miden-700 border-r">
 									Slot index
 								</TableHead>
-								<TableHead className="border-b border-dark-miden-700 border-r">Slot type</TableHead>
-								<TableHead className="border-b border-dark-miden-700">Slot value</TableHead>
+								<TableHead className="border-b border-dark-miden-700 border-r">
+									Previous value
+								</TableHead>
+								<TableHead className="border-b border-dark-miden-700">New value</TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>
-							<TableRow>
-								<TableCell className="border-b border-dark-miden-700 border-r"></TableCell>
-								<TableCell className="border-b border-dark-miden-700 border-r"></TableCell>
-								<TableCell className="border-b border-dark-miden-700"></TableCell>
-							</TableRow>
+							{Object.entries(executionOutput.storageDiffs).map(([index, diff]) => (
+								<TableRow key={index}>
+									<TableCell className="border-b border-dark-miden-700 border-r">{index}</TableCell>
+									<TableCell className="border-b border-dark-miden-700 border-r">
+										{diff.old
+											? '[' +
+											  diff.old
+													.map((item) => {
+														// eslint-disable-next-line @typescript-eslint/no-explicit-any
+														return item.toString() as any;
+													})
+													.join(', ') +
+											  ']'
+											: ''}
+									</TableCell>
+									<TableCell className="border-b border-dark-miden-700">
+										{diff.new
+											? '[' +
+											  diff.new
+													.map((item) => {
+														// eslint-disable-next-line @typescript-eslint/no-explicit-any
+														return item.toString() as any;
+													})
+													.join(', ') +
+											  ']'
+											: ''}
+									</TableCell>
+								</TableRow>
+							))}
 						</TableBody>
 					</Table>
 					<div className="bg-blue-miden text-white px-2 py-1">Output notes</div>

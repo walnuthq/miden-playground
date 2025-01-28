@@ -8,8 +8,15 @@ export interface ExecutionOutput {
 	accountId: bigint;
 	totalCycles: number;
 	traceLength: number;
-	storage: string[];
+	storage: BigUint64Array[];
 	outputNotes: { id: string; senderId: string; tag: string; assets: Asset[] }[];
+	storageDiffs: Record<
+		number,
+		{
+			old?: BigUint64Array;
+			new: BigUint64Array;
+		}
+	>;
 }
 
 export interface Asset {

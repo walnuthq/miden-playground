@@ -44,8 +44,6 @@ const ComposeTransactionMiddlePan = () => {
 		}
 	}, [configureMonaco, monaco]);
 
-	console.log(script);
-
 	return (
 		<div className="flex flex-col justify-end h-full">
 			{selectedFileId === TRANSACTION_SCRIPT_FILE_ID &&
