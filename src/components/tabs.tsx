@@ -2,10 +2,9 @@
 
 import InlineIcon from '@/components/ui/inline-icon';
 import { useMiden } from '@/lib/context-providers';
-import { TRANSACTION_SCRIPT_FILE_ID } from '@/lib/consts';
 
 export const Tabs = () => {
-	const { selectedTab, selectTab, closeFile, selectedFileId } = useMiden();
+	const { selectedTab, selectTab } = useMiden();
 
 	return (
 		<div className="flex  flex-row ">
@@ -29,9 +28,6 @@ export const Tabs = () => {
 					selectedTab === 'assets' ? 'bg-[#040113]' : ''
 				}`}
 				onClick={() => {
-					if (selectedFileId === TRANSACTION_SCRIPT_FILE_ID) {
-						closeFile(TRANSACTION_SCRIPT_FILE_ID);
-					}
 					selectTab('assets');
 				}}
 			>

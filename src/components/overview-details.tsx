@@ -1,26 +1,65 @@
 import React, { ReactNode } from 'react';
+import { Copy } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+
+interface ValueWithCopy {
+	value: ReactNode;
+	copyable?: boolean;
+	label?: string;
+	divider?: boolean;
+}
 
 interface OverviewLayoutProps {
-	data: Record<string, ReactNode>;
+	data: Record<string, ReactNode | ValueWithCopy>;
 }
 
 const OverviewLayout = ({ data }: OverviewLayoutProps) => {
 	const entries = Object.entries(data);
+	const { toast } = useToast();
+
+	const handleCopy = (text: string, label: string) => {
+		navigator.clipboard.writeText(text);
+		toast({
+			title: `${label} has been copied`,
+			variant: 'default'
+		});
+	};
+
+	const renderValue = (value: ReactNode | ValueWithCopy, label: string) => {
+		if (value && typeof value === 'object' && 'value' in value) {
+			return (
+				<div className="flex items-center gap-2">
+					<div>{value.value}</div>
+					{value.copyable && typeof value.value !== 'object' && (
+						<button
+							onClick={() => handleCopy(String(value.value), label)}
+							className="p-1 hover:bg-dark-miden-800 rounded transition-colors"
+						>
+							<Copy className="w-4 h-4 text-gray-400" />
+						</button>
+					)}
+				</div>
+			);
+		}
+
+		return <div className="w-full">{value}</div>;
+	};
 
 	return (
-		<div className="flex gap-52 mt-1">
-			<div className="flex flex-col gap-4">
-				{entries.map(([label]) => (
-					<div key={label} className="text-gray-400">
-						{label}:
+		<div className="w-full p-6">
+			{entries.map(([label, value]) => {
+				const hasDivider =
+					value && typeof value === 'object' && 'divider' in value && value.divider;
+
+				return (
+					<div key={label} className={`${hasDivider ? 'border-b border-dark-miden-700 mb-4' : ''}`}>
+						<div className="flex items-start gap-24 mb-4">
+							<div className="text-gray-400 min-w-[120px]">{label}:</div>
+							{renderValue(value, label)}
+						</div>
 					</div>
-				))}
-			</div>
-			<div className="flex flex-col gap-4">
-				{entries.map(([label, value]) => (
-					<div key={label}>{value}</div>
-				))}
-			</div>
+				);
+			})}
 		</div>
 	);
 };

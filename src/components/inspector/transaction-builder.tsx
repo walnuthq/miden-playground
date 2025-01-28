@@ -9,7 +9,6 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { TRANSACTION_SCRIPT_FILE_ID } from '@/lib/consts';
 
 export const TransactionBuilder: React.FC = () => {
 	const {
@@ -19,7 +18,6 @@ export const TransactionBuilder: React.FC = () => {
 		selectTransactionNote,
 		selectTransactionAccount,
 		removeTransactionNote,
-		selectFile,
 		selectedTransactionAccountId,
 		removeTransactionAccount,
 		selectOverview,
@@ -125,7 +123,6 @@ export const TransactionBuilder: React.FC = () => {
 
 				<div
 					onClick={() => {
-						selectFile(TRANSACTION_SCRIPT_FILE_ID);
 						selectOverview('transaction-script');
 					}}
 					className={`flex flex-row items-center mt-4 gap-2 text-white py-2 px-3 cursor-pointer ${
