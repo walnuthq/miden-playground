@@ -15,7 +15,7 @@ export const Toolbar = ({ toggleInspector }: { toggleInspector: () => void }) =>
 	return (
 		<div
 			className="h-[54px] bg-dark-miden-800
-							flex flex-row items-center justify-between"
+							flex flex-row items-end justify-between"
 		>
 			{selectedTab !== 'transaction' ? (
 				<ScrollArea>
@@ -57,11 +57,11 @@ export const Toolbar = ({ toggleInspector }: { toggleInspector: () => void }) =>
 					<ScrollBar orientation="horizontal" className="h-1 p-0" />
 				</ScrollArea>
 			) : selectedOverview === 'account' ? (
-				<div className="text-white px-3 flex !items-center">Account overview</div>
+				<div className="text-white px-3 flex self-center">Account overview</div>
 			) : selectedOverview === 'transaction-script' ? (
-				<div className="text-white px-3 flex !items-center">Transaction script</div>
+				<div className="text-white px-3 flex self-center">Transaction script</div>
 			) : (
-				selectedOverview && <div className="text-white px-3 flex !items-center">Note overview</div>
+				selectedOverview && <div className="text-white px-3 flex self-center">Note overview</div>
 			)}
 			<div className="h-full flex gap-4 items-end overflow-hidden">
 				{/* <div
