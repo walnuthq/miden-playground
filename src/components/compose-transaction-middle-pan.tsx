@@ -8,13 +8,90 @@ import { useMiden } from '@/lib/context-providers';
 import { TRANSACTION_SCRIPT_FILE_ID } from '@/lib/consts';
 import { ScrollArea, ScrollBar } from './ui/scroll-area';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
+import { ColumnDef } from '@tanstack/react-table';
+import { AssetsDatatable } from './assets-datatable';
+import OverviewLayout from './overview-details';
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuTrigger
+} from './ui/dropdown-menu';
+import { Button } from './ui/button';
+import { MoreHorizontal } from 'lucide-react';
 
+export type VaultType = {
+	asset_type: string;
+	id: string;
+	symbol: string;
+	amount: string;
+};
+export const columns: ColumnDef<VaultType>[] = [
+	{
+		accessorKey: 'asset_type',
+		header: 'Asset type'
+	},
+	{
+		accessorKey: 'id',
+		header: 'Faucet ID'
+	},
+	{
+		accessorKey: 'symbol',
+		header: 'Symbol'
+	},
+	{
+		accessorKey: 'amount',
+		header: 'Amount'
+	},
+	{
+		id: 'actions',
+		enableHiding: false,
+		cell: ({ row }) => {
+			const faucet = row.original;
+
+			return (
+				<DropdownMenu>
+					<DropdownMenuTrigger asChild>
+						<Button variant="ghost" className="h-8 w-8 p-0">
+							<span className="sr-only">Open menu</span>
+							<MoreHorizontal />
+						</Button>
+					</DropdownMenuTrigger>
+					<DropdownMenuContent align="end">
+						<DropdownMenuLabel>Actions</DropdownMenuLabel>
+						<DropdownMenuItem onClick={() => navigator.clipboard.writeText(faucet.id)}>
+							Copy faucet ID
+						</DropdownMenuItem>
+					</DropdownMenuContent>
+				</DropdownMenu>
+			);
+		}
+	}
+];
 const ComposeTransactionMiddlePan = () => {
-	const { metadata, vault } = useSelectedAccountData();
+	const { metadata, vault, name } = useSelectedAccountData();
 	const { noteVault, script, input } = useSelectedNoteData();
 	const { updateFileContent, selectedFileId, selectedOverview } = useMiden();
 	const { content, file } = useSelectedEditorFile();
 	const [value, setValue] = useState(content);
+	const [vaultData, setVaultData] = useState();
+	useEffect(() => {
+		if (vault) {
+			const vaultArray = JSON.parse(vault);
+
+			setVaultData(
+				vaultArray.map((item: number[]) => {
+					return {
+						asset_type: item[1],
+						id: item[3],
+						symbol: item[2],
+						amount: item[0]
+					};
+				})
+			);
+		}
+	}, [vault]);
 
 	useEffect(() => {
 		setValue(content);
@@ -43,8 +120,6 @@ const ComposeTransactionMiddlePan = () => {
 			configureMonaco(monaco);
 		}
 	}, [configureMonaco, monaco]);
-
-	console.log(script);
 
 	return (
 		<div className="flex flex-col justify-end h-full">
@@ -80,42 +155,49 @@ const ComposeTransactionMiddlePan = () => {
 				</div>
 			) : selectedOverview !== '' ? (
 				<div className="flex-1 overflow-hidden text-white">
-					<ScrollArea className="h-full w-full px-4">
-						<Table className="[&_tr:hover]:bg-transparent">
-							<TableHeader>
-								<TableRow>
-									<TableHead>{selectedOverview === 'account' ? 'Account ID' : 'Script'}</TableHead>
-									<TableHead>Vault</TableHead>
-									<TableHead>{selectedOverview === 'account' ? '' : 'Input'}</TableHead>
-								</TableRow>
-							</TableHeader>
-							<TableBody>
-								<TableRow>
-									<TableCell>
-										<ScrollArea>
-											<pre className="whitespace-pre-wrap max-h-[200px]">
-												{selectedOverview === 'account' ? metadata : script}
+					<ScrollArea className="h-full w-full px-3 py-2">
+						{selectedOverview === 'account' ? (
+							vaultData && (
+								<OverviewLayout
+									data={{
+										'Account name': name,
+										'Account ID': metadata,
+										Vault: <AssetsDatatable data={vaultData} columns={columns} />
+									}}
+								/>
+							)
+						) : (
+							<Table className="[&_tr:hover]:bg-transparent">
+								<TableHeader>
+									<TableRow>
+										<TableHead>{'Script'}</TableHead>
+										<TableHead>Vault</TableHead>
+										<TableHead>{'Input'}</TableHead>
+									</TableRow>
+								</TableHeader>
+								<TableBody>
+									<TableRow>
+										<TableCell>
+											<ScrollArea>
+												<pre className="whitespace-pre-wrap max-h-[200px]">{script}</pre>
+											</ScrollArea>
+										</TableCell>
+										<TableCell>
+											<pre className="whitespace-pre-wrap overflow-auto max-h-[200px]">
+												<pre className="whitespace-nowrap overflow-auto">{noteVault}</pre>
 											</pre>
-										</ScrollArea>
-									</TableCell>
-									<TableCell>
-										<pre className="whitespace-pre-wrap overflow-auto max-h-[200px]">
-											<pre className="whitespace-nowrap overflow-auto">
-												{selectedOverview === 'account' ? vault : noteVault}
+										</TableCell>
+										<TableCell>
+											{' '}
+											<pre className="whitespace-pre-wrap overflow-auto max-h-[200px]">
+												<pre className="whitespace-nowrap overflow-auto">{input} </pre>
 											</pre>
-										</pre>
-									</TableCell>
-									<TableCell>
-										{' '}
-										<pre className="whitespace-pre-wrap overflow-auto max-h-[200px]">
-											<pre className="whitespace-nowrap overflow-auto">
-												{selectedOverview === 'account' ? '' : input}{' '}
-											</pre>
-										</pre>
-									</TableCell>
-								</TableRow>
-							</TableBody>
-						</Table>
+										</TableCell>
+									</TableRow>
+								</TableBody>
+							</Table>
+						)}
+
 						<ScrollBar orientation="horizontal" />
 					</ScrollArea>
 				</div>

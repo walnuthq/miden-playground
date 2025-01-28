@@ -95,6 +95,7 @@ export const useSelectedEditorFile = (): { content: string; file: EditorFile | n
 };
 
 export const useSelectedAccountData = (): {
+	name: string;
 	metadata: string;
 	vault: string;
 } => {
@@ -102,6 +103,7 @@ export const useSelectedAccountData = (): {
 
 	if (!selectedTransactionAccountId) {
 		return {
+			name: '',
 			metadata: '',
 			vault: ''
 		};
@@ -111,6 +113,8 @@ export const useSelectedAccountData = (): {
 
 	const metadata = account.id.toString();
 
+	const name = account.name;
+
 	const vault = JSON.stringify(
 		account.assets.map((asset) => [asset.amount.toString(), 0, 0, asset.faucetId.toString()]),
 		null,
@@ -118,6 +122,7 @@ export const useSelectedAccountData = (): {
 	);
 
 	return {
+		name,
 		metadata,
 		vault
 	};
