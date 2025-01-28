@@ -5,7 +5,9 @@ import {
 	NoteData,
 	generate_faucet_id,
 	generate_note_serial_number,
-	create_swap_note
+	create_swap_note,
+	AccountData,
+	WordWrapper
 } from 'miden-wasm';
 import { ExecutionOutput, Asset } from '@/lib/types';
 import { Account } from '@/lib/account';
@@ -14,11 +16,13 @@ import { Note } from '@/lib/notes';
 export function consumeNotes({
 	receiver,
 	receiverScript,
+	receiverStorage,
 	notes,
 	transactionScript
 }: {
 	receiver: Account;
 	receiverScript: string;
+	receiverStorage: BigUint64Array[];
 	notes: { note: Note; noteScript: string; noteInputs: BigUint64Array; senderScript: string }[];
 	transactionScript: string;
 }): ExecutionOutput {
@@ -33,16 +37,17 @@ export function consumeNotes({
 				note.serialNumber
 			)
 	);
-	return execute_transaction(
-		transactionScript,
+
+	const receiverAccount = new AccountData(
 		receiverScript,
 		receiver.secretKey,
 		receiver.id,
 		receiver.assets.map((a) => new AssetData(a.faucetId, a.amount)),
 		receiver.isWallet,
 		receiver.isAuth,
-		notesWrapper
+		receiverStorage.map((row) => new WordWrapper(new BigUint64Array(row)))
 	);
+	return execute_transaction(transactionScript, receiverAccount, notesWrapper);
 }
 
 export function generateAccountId(): bigint {

@@ -2,7 +2,7 @@ import { generateAccountId } from '@/lib/miden-wasm-api';
 import { generateId } from '@/lib/utils';
 import { SECRET_KEY } from '@/lib/consts/secret-key';
 import { DEFAULT_FAUCET_IDS } from '@/lib/consts/defaults';
-import { Asset } from '@/lib/types';
+import { Asset, ExecutionOutput } from '@/lib/types';
 import { EditorFiles } from '@/lib/files';
 import _ from 'lodash';
 
@@ -12,7 +12,6 @@ interface AccountProps {
 	isWallet: boolean;
 	isAuth: boolean;
 	assets: Asset[];
-	storage: string[];
 	secretKey: Uint8Array;
 	scriptFileId: string;
 	metadataFileId: string;
@@ -26,7 +25,6 @@ export class Account {
 	isWallet: boolean;
 	isAuth: boolean;
 	assets: Asset[];
-	storage: string[];
 	secretKey: Uint8Array;
 	scriptFileId: string;
 	metadataFileId: string;
@@ -44,7 +42,6 @@ export class Account {
 		this.metadataFileId = props.metadataFileId;
 		this.vaultFileId = props.vaultFileId;
 		this.storageFileId = props.storageFileId;
-		this.storage = props.storage;
 	}
 
 	clone() {
@@ -101,15 +98,10 @@ export class Account {
 				id: storageFileId,
 				name: 'Storage',
 				content: {
-					dynamic: {
-						account: {
-							accountId: idHex,
-							variant: 'storage'
-						}
-					}
+					value: Account.stringifyStorage(Account.initialStorage())
 				},
 				isOpen: false,
-				readonly: true,
+				readonly: false,
 				variant: 'file'
 			}
 		};
@@ -128,7 +120,6 @@ export class Account {
 					amount: 500n
 				}
 			],
-			storage: [],
 			secretKey: SECRET_KEY,
 			scriptFileId,
 			metadataFileId,
@@ -178,6 +169,48 @@ export class Account {
 		if (asset) {
 			asset.amount = updateFn(asset.amount);
 		}
+	}
+
+	static initialStorage() {
+		const storage = Array(3).fill(new BigUint64Array([0n, 0n, 0n, 0n]));
+		storage[2] = new BigUint64Array([
+			13642120692355817730n,
+			14340237824901842161n,
+			3638127317171027907n,
+			15110848026471267870n
+		]); // pub key
+		return storage;
+	}
+
+	static parseStorage(storage: string): BigUint64Array[] {
+		return JSON.parse(storage).map((row: string[]) => new BigUint64Array(row.map(BigInt)));
+	}
+
+	static stringifyStorage(storage: BigUint64Array[]): string {
+		return JSON.stringify(
+			storage.map((row) => Array.from(row).map((item) => item.toString())),
+			null,
+			2
+		);
+	}
+
+	static computeStorageDiffs(
+		oldStorage: BigUint64Array[],
+		newStorage: BigUint64Array[]
+	): ExecutionOutput['storageDiffs'] {
+		const diffs: ExecutionOutput['storageDiffs'] = {};
+		for (let i = 0; i < newStorage.length; i++) {
+			if (
+				!oldStorage[i] ||
+				oldStorage[i][0] !== newStorage[i][0] ||
+				oldStorage[i][1] !== newStorage[i][1] ||
+				oldStorage[i][2] !== newStorage[i][2] ||
+				oldStorage[i][3] !== newStorage[i][3]
+			) {
+				diffs[i] = { old: oldStorage[i], new: newStorage[i] };
+			}
+		}
+		return diffs;
 	}
 }
 

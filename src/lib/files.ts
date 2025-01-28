@@ -18,7 +18,7 @@ export type EditorFiles = Record<string, EditorFile>;
 export interface EditorFileDynamicContent {
 	account?: {
 		accountId: string;
-		variant: 'metadata' | 'vault' | 'storage';
+		variant: 'metadata' | 'vault';
 	};
 	note?: {
 		noteId: string;
@@ -62,9 +62,6 @@ export const useSelectedEditorFile = (): { content: string; file: EditorFile | n
 						null,
 						2
 					);
-				} else if (file.content.dynamic.account.variant === 'storage') {
-					const account = accounts[file.content.dynamic.account.accountId];
-					content = JSON.stringify(account.storage, null, 2);
 				}
 			} else if (file.content.dynamic.note) {
 				if (file.content.dynamic.note.variant === 'metadata') {

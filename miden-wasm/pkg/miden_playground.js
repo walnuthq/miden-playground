@@ -163,37 +163,6 @@ function getStringFromWasm0(ptr, len) {
     return cachedTextDecoder.decode(getUint8ArrayMemory0().subarray(ptr, ptr + len));
 }
 
-function passArrayJsValueToWasm0(array, malloc) {
-    const ptr = malloc(array.length * 4, 4) >>> 0;
-    const mem = getDataViewMemory0();
-    for (let i = 0; i < array.length; i++) {
-        mem.setUint32(ptr + 4 * i, addToExternrefTable0(array[i]), true);
-    }
-    WASM_VECTOR_LEN = array.length;
-    return ptr;
-}
-
-let cachedBigUint64ArrayMemory0 = null;
-
-function getBigUint64ArrayMemory0() {
-    if (cachedBigUint64ArrayMemory0 === null || cachedBigUint64ArrayMemory0.byteLength === 0) {
-        cachedBigUint64ArrayMemory0 = new BigUint64Array(wasm.memory.buffer);
-    }
-    return cachedBigUint64ArrayMemory0;
-}
-
-function passArray64ToWasm0(arg, malloc) {
-    const ptr = malloc(arg.length * 8, 8) >>> 0;
-    getBigUint64ArrayMemory0().set(arg, ptr / 8);
-    WASM_VECTOR_LEN = arg.length;
-    return ptr;
-}
-
-function getArrayU64FromWasm0(ptr, len) {
-    ptr = ptr >>> 0;
-    return getBigUint64ArrayMemory0().subarray(ptr / 8, ptr / 8 + len);
-}
-
 function passArray8ToWasm0(arg, malloc) {
     const ptr = malloc(arg.length * 1, 1) >>> 0;
     getUint8ArrayMemory0().set(arg, ptr / 1);
@@ -222,6 +191,22 @@ export function generate_faucet_id(seed) {
     return BigInt.asUintN(64, ret);
 }
 
+function _assertClass(instance, klass) {
+    if (!(instance instanceof klass)) {
+        throw new Error(`expected instance of ${klass.name}`);
+    }
+}
+
+function passArrayJsValueToWasm0(array, malloc) {
+    const ptr = malloc(array.length * 4, 4) >>> 0;
+    const mem = getDataViewMemory0();
+    for (let i = 0; i < array.length; i++) {
+        mem.setUint32(ptr + 4 * i, addToExternrefTable0(array[i]), true);
+    }
+    WASM_VECTOR_LEN = array.length;
+    return ptr;
+}
+
 function takeFromExternrefTable0(idx) {
     const value = wasm.__wbindgen_export_2.get(idx);
     wasm.__externref_table_dealloc(idx);
@@ -229,37 +214,36 @@ function takeFromExternrefTable0(idx) {
 }
 /**
  * @param {string} transaction_script
- * @param {string} receiver_account_code
- * @param {Uint8Array} receiver_secret_key
- * @param {bigint} receiver_account_id
- * @param {(AssetData)[]} receiver_assets
- * @param {boolean} receiver_wallet_enabled
- * @param {boolean} receiver_auth_enabled
+ * @param {AccountData} receiver
  * @param {(NoteData)[]} notes
  * @returns {any}
  */
-export function execute_transaction(transaction_script, receiver_account_code, receiver_secret_key, receiver_account_id, receiver_assets, receiver_wallet_enabled, receiver_auth_enabled, notes) {
+export function execute_transaction(transaction_script, receiver, notes) {
     const ptr0 = passStringToWasm0(transaction_script, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
     const len0 = WASM_VECTOR_LEN;
-    const ptr1 = passStringToWasm0(receiver_account_code, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-    const len1 = WASM_VECTOR_LEN;
-    const ptr2 = passArray8ToWasm0(receiver_secret_key, wasm.__wbindgen_malloc);
+    _assertClass(receiver, AccountData);
+    var ptr1 = receiver.__destroy_into_raw();
+    const ptr2 = passArrayJsValueToWasm0(notes, wasm.__wbindgen_malloc);
     const len2 = WASM_VECTOR_LEN;
-    const ptr3 = passArrayJsValueToWasm0(receiver_assets, wasm.__wbindgen_malloc);
-    const len3 = WASM_VECTOR_LEN;
-    const ptr4 = passArrayJsValueToWasm0(notes, wasm.__wbindgen_malloc);
-    const len4 = WASM_VECTOR_LEN;
-    const ret = wasm.execute_transaction(ptr0, len0, ptr1, len1, ptr2, len2, receiver_account_id, ptr3, len3, receiver_wallet_enabled, receiver_auth_enabled, ptr4, len4);
+    const ret = wasm.execute_transaction(ptr0, len0, ptr1, ptr2, len2);
     if (ret[2]) {
         throw takeFromExternrefTable0(ret[1]);
     }
     return takeFromExternrefTable0(ret[0]);
 }
 
-function _assertClass(instance, klass) {
-    if (!(instance instanceof klass)) {
-        throw new Error(`expected instance of ${klass.name}`);
+let cachedBigUint64ArrayMemory0 = null;
+
+function getBigUint64ArrayMemory0() {
+    if (cachedBigUint64ArrayMemory0 === null || cachedBigUint64ArrayMemory0.byteLength === 0) {
+        cachedBigUint64ArrayMemory0 = new BigUint64Array(wasm.memory.buffer);
     }
+    return cachedBigUint64ArrayMemory0;
+}
+
+function getArrayU64FromWasm0(ptr, len) {
+    ptr = ptr >>> 0;
+    return getBigUint64ArrayMemory0().subarray(ptr / 8, ptr / 8 + len);
 }
 /**
  * @param {Uint8Array} seed
@@ -294,6 +278,58 @@ export function generate_note_serial_number(seed) {
     var v2 = getArrayU64FromWasm0(ret[0], ret[1]).slice();
     wasm.__wbindgen_free(ret[0], ret[1] * 8, 8);
     return v2;
+}
+
+function passArray64ToWasm0(arg, malloc) {
+    const ptr = malloc(arg.length * 8, 8) >>> 0;
+    getBigUint64ArrayMemory0().set(arg, ptr / 8);
+    WASM_VECTOR_LEN = arg.length;
+    return ptr;
+}
+
+const AccountDataFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_accountdata_free(ptr >>> 0, 1));
+
+export class AccountData {
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        AccountDataFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_accountdata_free(ptr, 0);
+    }
+    /**
+     * @param {string} account_code
+     * @param {Uint8Array} secret_key
+     * @param {bigint} account_id
+     * @param {(AssetData)[]} assets
+     * @param {boolean} wallet_enabled
+     * @param {boolean} auth_enabled
+     * @param {(WordWrapper)[]} storage
+     */
+    constructor(account_code, secret_key, account_id, assets, wallet_enabled, auth_enabled, storage) {
+        const ptr0 = passStringToWasm0(account_code, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passArray8ToWasm0(secret_key, wasm.__wbindgen_malloc);
+        const len1 = WASM_VECTOR_LEN;
+        const ptr2 = passArrayJsValueToWasm0(assets, wasm.__wbindgen_malloc);
+        const len2 = WASM_VECTOR_LEN;
+        const ptr3 = passArrayJsValueToWasm0(storage, wasm.__wbindgen_malloc);
+        const len3 = WASM_VECTOR_LEN;
+        const ret = wasm.accountdata_new(ptr0, len0, ptr1, len1, account_id, ptr2, len2, wallet_enabled, auth_enabled, ptr3, len3);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        this.__wbg_ptr = ret[0] >>> 0;
+        AccountDataFinalization.register(this, this.__wbg_ptr, this);
+        return this;
+    }
 }
 
 const AssetDataFinalization = (typeof FinalizationRegistry === 'undefined')
@@ -514,6 +550,43 @@ export class NoteData {
     }
 }
 
+const WordWrapperFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_wordwrapper_free(ptr >>> 0, 1));
+
+export class WordWrapper {
+
+    static __unwrap(jsValue) {
+        if (!(jsValue instanceof WordWrapper)) {
+            return 0;
+        }
+        return jsValue.__destroy_into_raw();
+    }
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        WordWrapperFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_wordwrapper_free(ptr, 0);
+    }
+    /**
+     * @param {BigUint64Array} word
+     */
+    constructor(word) {
+        const ptr0 = passArray64ToWasm0(word, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.wordwrapper_new(ptr0, len0);
+        this.__wbg_ptr = ret >>> 0;
+        WordWrapperFinalization.register(this, this.__wbg_ptr, this);
+        return this;
+    }
+}
+
 async function __wbg_load(module, imports) {
     if (typeof Response === 'function' && module instanceof Response) {
         if (typeof WebAssembly.instantiateStreaming === 'function') {
@@ -552,6 +625,10 @@ function __wbg_get_imports() {
         const ret = AssetData.__unwrap(arg0);
         return ret;
     };
+    imports.wbg.__wbg_buffer_61b7ce01341d7f88 = function(arg0) {
+        const ret = arg0.buffer;
+        return ret;
+    };
     imports.wbg.__wbg_log_464d1b2190ca1e04 = function(arg0) {
         console.log(arg0);
     };
@@ -561,6 +638,14 @@ function __wbg_get_imports() {
     };
     imports.wbg.__wbg_new_688846f374351c92 = function() {
         const ret = new Object();
+        return ret;
+    };
+    imports.wbg.__wbg_new_6d1effa695f4d0af = function(arg0) {
+        const ret = new BigUint64Array(arg0);
+        return ret;
+    };
+    imports.wbg.__wbg_newwithbyteoffsetandlength_f103ea547800738d = function(arg0, arg1, arg2) {
+        const ret = new BigUint64Array(arg0, arg1 >>> 0, arg2 >>> 0);
         return ret;
     };
     imports.wbg.__wbg_notedata_unwrap = function(arg0) {
@@ -575,12 +660,9 @@ function __wbg_get_imports() {
         const ret = Reflect.set(arg0, arg1, arg2);
         return ret;
     }, arguments) };
-    imports.wbg.__wbindgen_array_new = function() {
-        const ret = [];
+    imports.wbg.__wbg_wordwrapper_unwrap = function(arg0) {
+        const ret = WordWrapper.__unwrap(arg0);
         return ret;
-    };
-    imports.wbg.__wbindgen_array_push = function(arg0, arg1) {
-        arg0.push(arg1);
     };
     imports.wbg.__wbindgen_bigint_from_u64 = function(arg0) {
         const ret = BigInt.asUintN(64, arg0);
@@ -602,6 +684,10 @@ function __wbg_get_imports() {
         table.set(offset + 2, true);
         table.set(offset + 3, false);
         ;
+    };
+    imports.wbg.__wbindgen_memory = function() {
+        const ret = wasm.memory;
+        return ret;
     };
     imports.wbg.__wbindgen_number_new = function(arg0) {
         const ret = arg0;

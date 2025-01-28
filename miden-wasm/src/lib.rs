@@ -7,6 +7,7 @@ mod mock_host;
 mod scripts;
 mod transaction_context;
 mod transaction_context_builder;
+mod wrappers;
 
 use crate::transaction_context_builder::TransactionContextBuilder;
 
@@ -35,7 +36,10 @@ use miden_lib::{
     transaction::TransactionKernel,
 };
 use miden_objects::{
-    accounts::{Account, AccountComponent, AccountHeader, AccountId, AccountType, StorageSlot},
+    accounts::{
+        Account, AccountComponent, AccountHeader, AccountId, AccountStorage, AccountType,
+        StorageSlot,
+    },
     assets::{Asset, AssetVault, FungibleAsset},
     crypto::dsa::rpo_falcon512::SecretKey,
     notes::{
@@ -48,7 +52,11 @@ use miden_objects::{
 use miden_tx::TransactionExecutor;
 use scripts::{ACCOUNT_SCRIPT, P2ID_SCRIPT};
 use wasm_bindgen::prelude::*;
-use web_sys::{console, js_sys};
+use web_sys::{
+    console,
+    js_sys::{self, BigUint64Array},
+};
+use wrappers::{AccountData, AssetData, NoteData};
 
 // Added this line to import the necessary libraries for more detailed logging
 extern crate console_error_panic_hook;
@@ -77,12 +85,13 @@ pub fn get_account_with_account_code(
     account_id: AccountId,
     public_key: Word,
     assets: Vec<Asset>,
+    storage: Vec<StorageSlot>,
     wallet: bool,
     auth: bool,
 ) -> Result<Account, AccountError> {
     let account_component = AccountComponent::new(
         account_code_library,
-        vec![StorageSlot::Value(Word::default()); 200],
+        vec![StorageSlot::Value(Word::default()); 2],
     )
     .unwrap()
     .with_supports_all_types();
@@ -99,6 +108,10 @@ pub fn get_account_with_account_code(
         Account::initialize_from_components(account_id.account_type(), &components).unwrap();
 
     let account_vault = AssetVault::new(&assets).unwrap();
+
+    let mut account_storage_slots = account_storage.slots().clone();
+    account_storage_slots.extend(storage.into_iter().skip(3));
+    let account_storage = AccountStorage::new(account_storage_slots).unwrap();
 
     Ok(Account::from_parts(
         account_id,
@@ -188,83 +201,6 @@ pub fn get_pk_and_authenticator(
     )
 }
 
-#[wasm_bindgen]
-#[derive(Clone, Debug)]
-pub struct AssetData {
-    pub faucet_id: u64,
-    pub amount: u64,
-}
-
-#[wasm_bindgen]
-impl AssetData {
-    #[wasm_bindgen(constructor)]
-    pub fn new(faucet_id: u64, amount: u64) -> Self {
-        Self { faucet_id, amount }
-    }
-}
-
-impl From<AssetData> for Asset {
-    fn from(asset: AssetData) -> Self {
-        Self::Fungible(
-            FungibleAsset::new(AccountId::try_from(asset.faucet_id).unwrap(), asset.amount)
-                .unwrap(),
-        )
-    }
-}
-
-#[wasm_bindgen]
-#[derive(Clone, Debug)]
-pub struct NoteData {
-    assets: Vec<AssetData>,
-    inputs: Vec<u64>,
-    script: String,
-    sender_id: u64,
-    sender_script: String,
-    serial_number: Vec<u64>,
-}
-
-#[wasm_bindgen]
-impl NoteData {
-    #[wasm_bindgen(constructor)]
-    pub fn new(
-        assets: Vec<AssetData>,
-        inputs: Vec<u64>,
-        script: String,
-        sender_id: u64,
-        sender_script: String,
-        serial_number: Vec<u64>,
-    ) -> Self {
-        Self {
-            assets,
-            inputs,
-            script,
-            sender_id,
-            sender_script,
-            serial_number,
-        }
-    }
-
-    pub fn inputs(&self) -> Vec<u64> {
-        self.inputs.clone()
-    }
-
-    pub fn script(&self) -> String {
-        self.script.clone()
-    }
-
-    pub fn sender_id(&self) -> u64 {
-        self.sender_id
-    }
-
-    pub fn sender_script(&self) -> String {
-        self.sender_script.clone()
-    }
-
-    pub fn serial_number(&self) -> Vec<u64> {
-        self.serial_number.clone()
-    }
-}
-
 // TODO: handle errors
 fn serialize_assets(assets: &[Asset]) -> js_sys::Array {
     let assets_array = js_sys::Array::new();
@@ -312,11 +248,14 @@ fn serialize_execution_output(
 ) -> JsValue {
     let assets: Vec<Asset> = account.vault().assets().collect();
     let assets_array = serialize_assets(&assets);
-    let storage: Vec<String> = account
+    let storage: Vec<Vec<u64>> = account
         .storage()
-        .as_elements()
-        .into_iter()
-        .map(|slot| slot.to_string())
+        .slots()
+        .iter()
+        .map(|slot| match slot {
+            StorageSlot::Value(value) => value.iter().map(|x| x.as_int()).collect(),
+            StorageSlot::Map(_) => vec![],
+        })
         .collect();
 
     let account_hash = final_account.hash().to_hex();
@@ -356,7 +295,17 @@ fn serialize_execution_output(
     let obj = js_sys::Object::new();
     js_sys::Reflect::set(&obj, &"outputNotes".into(), &output_notes_array).unwrap();
     js_sys::Reflect::set(&obj, &"assets".into(), &assets_array).unwrap();
-    js_sys::Reflect::set(&obj, &"storage".into(), &JsValue::from(storage)).unwrap();
+    js_sys::Reflect::set(
+        &obj,
+        &"storage".into(),
+        &JsValue::from(
+            storage
+                .iter()
+                .map(|row| BigUint64Array::from(row.as_slice()))
+                .collect::<js_sys::Array>(),
+        ),
+    )
+    .unwrap();
     js_sys::Reflect::set(&obj, &"accountHash".into(), &JsValue::from(account_hash)).unwrap();
     js_sys::Reflect::set(
         &obj,
@@ -394,14 +343,11 @@ pub fn generate_faucet_id(seed: Vec<u8>) -> u64 {
 #[wasm_bindgen]
 pub fn execute_transaction(
     transaction_script: &str,
-    receiver_account_code: &str,
-    receiver_secret_key: Vec<u8>,
-    receiver_account_id: u64,
-    receiver_assets: Vec<AssetData>,
-    receiver_wallet_enabled: bool,
-    receiver_auth_enabled: bool,
+    receiver: AccountData,
     notes: Vec<NoteData>,
 ) -> Result<JsValue, JsValue> {
+    let mut receiver = receiver;
+
     let notes = notes
         .into_iter()
         .map(|note| {
@@ -453,34 +399,13 @@ pub fn execute_transaction(
         })
         .collect::<Result<Vec<Note>, String>>()?;
 
-    let receiver_account_code_library = create_account_component_library(receiver_account_code)
-        .map_err(|err| format!("Account library cannot be built: {:?}", err))?;
-
-    let receiver_account_id = AccountId::try_from(receiver_account_id)
-        .map_err(|err| format!("Target Account id is wrong: {:?}", err))?;
-
-    let (pub_key, falcon_auth) = get_pk_and_authenticator(Some(receiver_secret_key));
-
-    let mut receiver_account = get_account_with_account_code(
-        receiver_account_code_library.clone(),
-        receiver_account_id,
-        pub_key,
-        receiver_assets.into_iter().map(|a| a.into()).collect(),
-        receiver_wallet_enabled,
-        receiver_auth_enabled,
-    )
-    .map_err(|err| {
-        console::log_1(&format!("Receiver account creation failed: {:?}", err).into());
-        format!("Account cannot be built: {:?}", err)
-    })?;
-
     let assembler = TransactionKernel::assembler().with_debug_mode(true);
 
     let tx_script = TransactionScript::compile(
         transaction_script,
         [],
         assembler
-            .with_library(receiver_account_code_library.clone())
+            .with_library(receiver.code_library.clone())
             .expect("adding oracle library should not fail")
             .clone(),
     )
@@ -491,12 +416,12 @@ pub fn execute_transaction(
 
     let tx_args_target = TransactionArgs::with_tx_script(tx_script.clone());
 
-    let tx_context = TransactionContextBuilder::new(receiver_account.clone())
+    let tx_context = TransactionContextBuilder::new(receiver.account.clone())
         .input_notes(notes.clone())
         .build();
 
     let executor =
-        TransactionExecutor::new(Arc::new(tx_context.clone()), Some(falcon_auth.clone()))
+        TransactionExecutor::new(Arc::new(tx_context.clone()), Some(receiver.falcon_auth()))
             .with_debug_mode(true);
 
     let block_ref = tx_context.tx_inputs().block_header().block_num();
@@ -509,13 +434,14 @@ pub fn execute_transaction(
         .collect::<Vec<_>>();
 
     let executed_transaction = executor
-        .execute_transaction(receiver_account_id, block_ref, &note_ids, tx_args_target)
+        .execute_transaction(receiver.account.id(), block_ref, &note_ids, tx_args_target)
         .map_err(|err| {
             console::log_1(&format!("Transaction execution failed: {:?}", err).into());
             format!("Execution failed: {:?}", err)
         })?;
 
-    receiver_account
+    receiver
+        .account
         .apply_delta(executed_transaction.account_delta())
         .map_err(|err| {
             console::log_1(&format!("Failed to apply account delta: {:?}", err).into());
@@ -528,7 +454,7 @@ pub fn execute_transaction(
     console::log_1(&format!("Output notes: {:?}", output_notes).into());
 
     Ok(serialize_execution_output(
-        &receiver_account,
+        &receiver.account,
         &final_account,
         &output_notes,
         &executed_transaction,

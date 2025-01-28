@@ -182,6 +182,21 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		});
 	};
 
+	const updateFileById = useCallback((fileId: string, updateFn: (content: string) => string) => {
+		setFiles((prev) => {
+			const file = prev[fileId];
+			if (!file) {
+				console.error(`File with ID ${fileId} not found.`);
+				return prev;
+			}
+			if (file.content.dynamic) {
+				console.error(`File with ID ${fileId} is dynamic and cannot be updated.`);
+				return prev;
+			}
+			const updatedContent = updateFn(file.content.value);
+			return { ...prev, [fileId]: { ...file, content: { value: updatedContent } } };
+		});
+	}, []);
 	const selectTransactionNote = useCallback((noteId: string) => {
 		setSelectedTransactionNotesIds((prev) => {
 			if (prev.includes(noteId)) {
@@ -258,18 +273,23 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			};
 		});
 		try {
+			const storage = Account.parseStorage(files[account.storageFileId].content.value!);
 			const output = consumeNotes({
 				receiver: account,
 				receiverScript: files[account.scriptFileId].content.value!,
+				receiverStorage: storage,
 				notes: transactionNotes,
 				transactionScript: files[TRANSACTION_SCRIPT_FILE_ID].content.value!
 			});
 			console.log('output', output);
+			output.storageDiffs = Account.computeStorageDiffs(storage, output.storage);
 			setExecutionOutput(output);
 			updateAccountById(selectedTransactionAccountId, (account) => {
 				account.assets = output.assets;
-				account.storage = output.storage;
 				return account;
+			});
+			updateFileById(account.storageFileId, () => {
+				return Account.stringifyStorage(output.storage);
 			});
 			addInfoLog('Execution successful');
 		} catch (error) {
@@ -284,7 +304,8 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		files,
 		notes,
 		selectedTransactionAccountId,
-		selectedTransactionNotesIds
+		selectedTransactionNotesIds,
+		updateFileById
 	]);
 
 	const createAccount = useCallback(() => {
