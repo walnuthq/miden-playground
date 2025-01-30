@@ -33,7 +33,7 @@ const OverviewLayout = ({ data }: OverviewLayoutProps) => {
 					{value.copyable && typeof value.value !== 'object' && (
 						<button
 							onClick={() => handleCopy(String(value.value), label)}
-							className="p-1 hover:bg-dark-miden-800 rounded transition-colors"
+							className="p-1 hover:bg-theme-surface-highlight rounded transition-colors"
 						>
 							<Copy className="w-4 h-4 text-gray-400" />
 						</button>
@@ -52,7 +52,7 @@ const OverviewLayout = ({ data }: OverviewLayoutProps) => {
 					value && typeof value === 'object' && 'divider' in value && value.divider;
 
 				return (
-					<div key={label} className={`${hasDivider ? 'border-b border-dark-miden-700 mb-4' : ''}`}>
+					<div key={label} className={`${hasDivider ? 'border-b border-theme-border mb-4' : ''}`}>
 						<div className="flex items-start gap-24 mb-4">
 							<div className="text-gray-400 min-w-[120px]">{label}:</div>
 							{renderValue(value, label)}

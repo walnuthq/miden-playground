@@ -36,23 +36,23 @@ export const TransactionBuilder: React.FC = () => {
 	return (
 		<div className="flex flex-col">
 			<div
-				className="h-[54px] border-b-2 border-dark-miden-700 bg-dark-miden-800
-					text-white font-medium flex gap-2 items-center px-3"
+				className="h-[54px] border-b-2 border-theme-border bg-theme-surface-highlight
+					text-theme-text font-medium flex gap-2 items-center px-3"
 			>
 				Compose transaction
 			</div>
 			<div className="flex flex-col gap-2 text-sm">
-				<div className="px-3 text-white font-bold mt-4">Account</div>
+				<div className="px-3 text-theme-text font-bold mt-4">Account</div>
 				<div className="flex justify-center px-2">
-					<div className="border-2 mx-auto flex justify-between items-center w-full border-dark-miden-700 rounded-miden">
+					<div className="border-2 mx-auto flex justify-between items-center w-full border-theme-border rounded-theme">
 						<div
 							onClick={() => {
 								if (selectedTransactionAccountId) {
 									selectOverview('account');
 								}
 							}}
-							className={`text-white w-full py-2 border-r-2 border-dark-miden-700 pl-2 h-full flex items-center ${
-								selectedTransactionAccountId && 'hover:bg-dark-miden-700 cursor-pointer'
+							className={`text-theme-text w-full py-2 border-r-2 border-theme-border pl-2 h-full flex items-center ${
+								selectedTransactionAccountId && 'hover:bg-theme-border cursor-pointer'
 							} `}
 						>
 							{selectedTransactionAccountId ? (
@@ -66,7 +66,7 @@ export const TransactionBuilder: React.FC = () => {
 						</div>
 						<DropdownMenu>
 							<DropdownMenuTrigger>
-								<div className=" gap-2  text-white py-3 px-3 hover:bg-dark-miden-700">
+								<div className=" gap-2  text-theme-text py-3 px-3 hover:bg-theme-border">
 									<InlineIcon variant="arrow" className="rotate-90 w-4 h-4" />
 								</div>
 							</DropdownMenuTrigger>
@@ -83,7 +83,7 @@ export const TransactionBuilder: React.FC = () => {
 						</DropdownMenu>
 					</div>
 				</div>
-				<div className="px-3 mt-4 text-white font-bold">Notes to consume</div>
+				<div className="px-3 mt-4 text-theme-text font-bold">Notes to consume</div>
 				{selectedTransactionNotesIds.map((noteId) => (
 					<ListItem
 						key={noteId}
@@ -96,7 +96,7 @@ export const TransactionBuilder: React.FC = () => {
 				<div className="px-2">
 					<DropdownMenu>
 						<DropdownMenuTrigger
-							className={`border-2 mx-auto w-full border-dark-miden-700 rounded-miden ${
+							className={`border-2 mx-auto w-full border-theme-border rounded-theme ${
 								Object.values(notes).some((note) => !selectedTransactionNotesIds.includes(note.id))
 									? ''
 									: 'opacity-50 pointer-events-none'
@@ -105,7 +105,7 @@ export const TransactionBuilder: React.FC = () => {
 								!Object.values(notes).some((note) => !selectedTransactionNotesIds.includes(note.id))
 							}
 						>
-							<div className="flex justify-center items-center gap-2 text-white py-2 px-3 hover:bg-dark-miden-700">
+							<div className="flex justify-center items-center gap-2 text-theme-text py-2 px-3 hover:bg-theme-border">
 								<span>Add notes</span>
 							</div>
 						</DropdownMenuTrigger>
@@ -125,10 +125,10 @@ export const TransactionBuilder: React.FC = () => {
 					onClick={() => {
 						selectOverview('transaction-script');
 					}}
-					className={`flex flex-row items-center mt-4 gap-2 text-white py-2 px-3 cursor-pointer ${
+					className={`flex flex-row items-center mt-4 gap-2 text-theme-text py-2 px-3 cursor-pointer ${
 						selectedOverview === 'transaction-script'
-							? 'bg-dark-miden-700 '
-							: 'hover:bg-dark-miden-800'
+							? 'bg-theme-border '
+							: 'hover:bg-theme-surface-highlight'
 					}`}
 				>
 					<InlineIcon variant="file_2" color="white" className="w-4 h-4 cursor-pointer" />
@@ -136,14 +136,14 @@ export const TransactionBuilder: React.FC = () => {
 				</div>
 			</div>
 			<div className="flex justify-center px-2 mt-4">
-				<div className="border-2 mx-auto w-full border-dark-miden-700 rounded-miden">
+				<div className="border-2 mx-auto w-full border-theme-border rounded-theme">
 					<div
 						onClick={() => {
 							if (!isExecutingTransaction) {
 								executeTransaction();
 							}
 						}}
-						className={`text-white text-sm w-full justify-center py-2 pl-2 h-full flex items-center hover:bg-dark-miden-700 cursor-pointer `}
+						className={`text-theme-text text-sm w-full justify-center py-2 pl-2 h-full flex items-center hover:bg-theme-border cursor-pointer `}
 					>
 						<span className="flex items-center gap-3">Execute Transaction</span>
 					</div>
@@ -166,7 +166,7 @@ function ListItem({
 }) {
 	return (
 		<div
-			className={`flex text-sm flex-row px-3 py-1 items-center gap-2 text-white select-none cursor-pointer  ${
+			className={`flex text-sm flex-row px-3 py-1 items-center gap-2 text-theme-text select-none cursor-pointer  ${
 				onClick ? 'cursor-pointer hover:bg-white/10' : 'cursor-default'
 			}`}
 			onClick={onClick}
@@ -175,7 +175,7 @@ function ListItem({
 			<span>{name}</span>
 			{onRemove && (
 				<div
-					className=" ml-auto cursor-pointer hover:bg-white/10 p-1 rounded-miden"
+					className=" ml-auto cursor-pointer hover:bg-white/10 p-1 rounded-theme"
 					onClick={(event) => {
 						event.stopPropagation();
 						onRemove();

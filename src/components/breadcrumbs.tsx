@@ -45,7 +45,7 @@ const Breadcrumbs = () => {
 	const dynamicName = getName();
 
 	return (
-		<div className="flex gap-2 text-white bg-[#040113] shadow-sm shadow-dark-miden-700 text-xs flex-row border-dark-miden-700 px-4 p-1">
+		<div className="flex gap-2 text-theme-text bg-[#040113] shadow-sm shadow-theme-border text-xs flex-row border-theme-border px-4 p-1">
 			<div>{type}</div>
 			{(file.content.dynamic || note || account) && dynamicName && (
 				<div className="flex items-center gap-2">

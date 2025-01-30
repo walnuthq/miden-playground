@@ -9,11 +9,33 @@ body {
 
 @layer base {
 	:root {
-		--miden-dark-950: #141318;
-		--miden-dark-700: #2b2932;
-		--miden-dark-800: #212027;
-		--miden-blue: #28354c;
+		--miden-dark-950: hsl(252, 12%, 8%);
+		--miden-dark-700: hsl(253, 10%, 18%);
+		--miden-dark-800: hsl(249, 10%, 14%);
+		--miden-blue: hsl(218, 31%, 23%);
 		--rounded-miden: 5px;
+	}
+
+	:root {
+		--theme-radius: 5px;
+
+		--theme-surface: 252, 12%, 8%;
+		--theme-border: 253, 10%, 18%;
+		--theme-surface-highlight: 249, 10%, 14%;
+
+		--theme-text: 0, 100%, 99%;
+
+		--theme-text-subtle: 253, 10%, 58%;
+		--theme-text-subtlest: 253, 10%, 45%;
+
+		--theme-primary: 266, 100%, 64%;
+		--theme-secondary: 207, 48%, 53%;
+
+		--theme-info: 206, 100%, 63%;
+		--theme-success: 150, 99%, 44%;
+		--theme-notice: 48, 80%, 63%;
+		--theme-warning: 28, 100%, 61%;
+		--theme-danger: 342, 90%, 68%;
 	}
 
 	:root {

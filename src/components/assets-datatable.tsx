@@ -24,7 +24,7 @@ export function AssetsDatatable<TData, TValue>({ columns, data }: DataTableProps
 	});
 
 	return (
-		<div className="rounded-md border-2 border-dark-miden-700">
+		<div className="rounded-md border-2 border-theme-border">
 			<Table className="[&_tr:hover]:bg-transparent">
 				<TableHeader>
 					{table.getHeaderGroups().map((headerGroup) => (

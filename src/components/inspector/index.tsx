@@ -75,8 +75,8 @@ export function InspectorItem({
 }) {
 	return (
 		<div
-			className={`text-sm h-6 pr-3 flex flex-row items-center justify-between text-white select-none cursor-pointer
-    ${isSelected ? 'bg-dark-miden-700 ' : 'hover:bg-dark-miden-800'}`}
+			className={`text-sm h-6 pr-3 flex flex-row items-center justify-between text-theme-text select-none cursor-pointer
+    ${isSelected ? 'bg-theme-border ' : 'hover:bg-theme-surface-highlight'}`}
 			onClick={onClick}
 			style={{ paddingLeft: `${level * 10 + 8}px` }}
 		>
@@ -106,7 +106,7 @@ export function InspectorItem({
 			<div className="flex flex-row items-center gap-2">
 				{onRemove && (
 					<div
-						className="cursor-pointer hover:bg-white/10 p-0.5 rounded-miden"
+						className="cursor-pointer hover:bg-white/10 p-0.5 rounded-theme"
 						onClick={(event) => {
 							event.stopPropagation();
 							onRemove();
@@ -118,7 +118,7 @@ export function InspectorItem({
 				{onCreate && onCreateOptions && (
 					<DropdownMenu>
 						<DropdownMenuTrigger>
-							<div className="cursor-pointer hover:bg-white/10 rounded-miden p-0.5">
+							<div className="cursor-pointer hover:bg-white/10 rounded-theme p-0.5">
 								<InlineIcon variant="file-plus" color="white" className="w-4 h-4 opacity-80" />
 							</div>
 						</DropdownMenuTrigger>
