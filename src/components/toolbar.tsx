@@ -14,7 +14,7 @@ export const Toolbar = ({ toggleInspector }: { toggleInspector: () => void }) =>
 
 	return (
 		<div
-			className="h-[54px] bg-dark-miden-800
+			className="h-[54px] bg-theme-surface-highlight
 							flex flex-row items-end justify-between"
 		>
 			{selectedTab !== 'transaction' ? (
@@ -23,7 +23,7 @@ export const Toolbar = ({ toggleInspector }: { toggleInspector: () => void }) =>
 						{filesToDisplay.map((fileId, index) => (
 							<div
 								key={fileId}
-								className={`text-white text-sm px-3 py-2 border-l-[1.5px] border-t-[1.5px] last:border-r-[1.5px]  border-dark-miden-700 flex flex-row items-center gap-2 cursor-pointer select-none ${
+								className={`text-theme-text text-sm px-3 py-2 border-l-[1.5px] border-t-[1.5px] last:border-r-[1.5px]  border-theme-border flex flex-row items-center gap-2 cursor-pointer select-none ${
 									selectedFileId === fileId ? 'bg-[#040113]' : ''
 								} ${index === 0 ? 'rounded-tl-miden' : ''} ${
 									index === filesToDisplay.length - 1 ? 'rounded-tr-miden' : ''
@@ -43,7 +43,7 @@ export const Toolbar = ({ toggleInspector }: { toggleInspector: () => void }) =>
 								/>
 								<span className="text-nowrap">{files[fileId].name}</span>
 								<div
-									className="cursor-pointer hover:bg-white/10 p-1.5 rounded-miden"
+									className="cursor-pointer hover:bg-white/10 p-1.5 rounded-theme"
 									onClick={(event) => {
 										event.stopPropagation();
 										closeFile(fileId);
@@ -57,11 +57,13 @@ export const Toolbar = ({ toggleInspector }: { toggleInspector: () => void }) =>
 					<ScrollBar orientation="horizontal" className="h-1 p-0" />
 				</ScrollArea>
 			) : selectedOverview === 'account' ? (
-				<div className="text-white px-3 flex self-center">Account overview</div>
+				<div className="text-theme-text px-3 flex self-center">Account overview</div>
 			) : selectedOverview === 'transaction-script' ? (
-				<div className="text-white px-3 flex self-center">Transaction script</div>
+				<div className="text-theme-text px-3 flex self-center">Transaction script</div>
 			) : (
-				selectedOverview && <div className="text-white px-3 flex self-center">Note overview</div>
+				selectedOverview && (
+					<div className="text-theme-text px-3 flex self-center">Note overview</div>
+				)
 			)}
 			<div className="h-full flex gap-4 items-end overflow-hidden">
 				{/* <div
@@ -69,7 +71,7 @@ export const Toolbar = ({ toggleInspector }: { toggleInspector: () => void }) =>
 						toggleInspector();
 						collapseTabs();
 					}}
-					className="ml-4 self-center cursor-pointer hover:bg-white/10 p-1.5 rounded-miden"
+					className="ml-4 self-center cursor-pointer hover:bg-white/10 p-1.5 rounded-theme"
 				>
 					<InlineIcon
 						variant={'left-arrow'}

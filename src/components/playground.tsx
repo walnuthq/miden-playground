@@ -56,7 +56,7 @@ export function Playground() {
 				<Header />
 			</header>
 			<Tabs />
-			<main className="flex-1 border-2 border-dark-miden-700 rounded-miden overflow-hidden">
+			<main className="flex-1 border-2 border-theme-border rounded-theme overflow-hidden">
 				<ResizablePanelGroup direction="horizontal">
 					<ResizablePanel
 						ref={inspectorPanelRef}
@@ -72,7 +72,7 @@ export function Playground() {
 							<Inspector />
 						</ScrollArea>
 					</ResizablePanel>
-					<ResizableHandle className="w-[2px] bg-dark-miden-700" />
+					<ResizableHandle className="w-[2px] bg-theme-border" />
 					<MainWindow toggleInspector={toggleInspector} />
 				</ResizablePanelGroup>
 			</main>

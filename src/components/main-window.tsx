@@ -88,7 +88,7 @@ export function MainWindow({ toggleInspector }: { toggleInspector: () => void })
 			</ResizablePanel>
 			{selectedTab === 'transaction' && executionOutput && (
 				<>
-					<ResizableHandle className="w-[2px] bg-dark-miden-700" />
+					<ResizableHandle className="w-[2px] bg-theme-border" />
 					<ResizablePanel defaultSize={30}>
 						<ExecutionOutput />
 					</ResizablePanel>

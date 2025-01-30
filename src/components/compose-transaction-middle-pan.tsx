@@ -53,7 +53,7 @@ export const columns: ColumnDef<VaultType>[] = [
 			return (
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
-						<Button className="h-8 w-8 p-0 hover:bg-dark-miden-700">
+						<Button className="h-8 w-8 p-0 hover:bg-theme-border">
 							<span className="sr-only">Open menu</span>
 							<MoreHorizontal />
 						</Button>
@@ -145,7 +145,7 @@ const ComposeTransactionMiddlePan = () => {
 	return (
 		<div className="flex flex-col justify-end h-full">
 			{selectedOverview === 'transaction-script' ? (
-				<div className="flex-1 overflow-hidden text-white">
+				<div className="flex-1 overflow-hidden text-theme-text">
 					<MonacoEditor
 						onChange={(value) => {
 							setTransactionScriptValue(value ?? '');
@@ -178,7 +178,7 @@ const ComposeTransactionMiddlePan = () => {
 					/>
 				</div>
 			) : selectedOverview !== '' ? (
-				<div className="flex-1 overflow-hidden text-white">
+				<div className="flex-1 overflow-hidden text-theme-text">
 					<ScrollArea className="h-full w-full pb-2">
 						{selectedOverview === 'account'
 							? vaultData && (
@@ -203,9 +203,10 @@ const ComposeTransactionMiddlePan = () => {
 											Vault: <AssetsDatatable data={noteVaultData} columns={columns} />,
 
 											Inputs: (
-												<Textarea className="border-dark-miden-700 w-full min-h-20" value={input}>
-													{input}
-												</Textarea>
+												<Textarea
+													className="border-theme-border w-full min-h-20"
+													defaultValue={input}
+												/>
 											),
 											Script: (
 												<MonacoEditor
@@ -231,7 +232,7 @@ const ComposeTransactionMiddlePan = () => {
 													}}
 													value={noteScriptValue}
 													className={cn(
-														'whitespace-pre-wrap overflow-hidden rounded-miden p-0 m-0 w-full h-[300px] absolute top-0 left-0'
+														'whitespace-pre-wrap overflow-hidden rounded-theme p-0 m-0 w-full h-[300px] absolute top-0 left-0'
 													)}
 												/>
 											)

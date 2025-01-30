@@ -15,8 +15,8 @@ export function AssetExplorer() {
 	return (
 		<div className="flex flex-col">
 			<div
-				className="h-[54px] border-b-2 border-dark-miden-700 bg-dark-miden-800
-					text-white font-medium flex gap-2 items-center px-3"
+				className="h-[54px] border-b-2 border-theme-border bg-theme-surface-highlight
+					text-theme-text font-medium flex gap-2 items-center px-3"
 			>
 				Assets explorer
 			</div>
