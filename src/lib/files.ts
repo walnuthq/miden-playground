@@ -92,6 +92,7 @@ export const useSelectedEditorFile = (): { content: string; file: EditorFile | n
 };
 
 export const useSelectedAccountData = (): {
+	name: string;
 	metadata: string;
 	vault: string;
 } => {
@@ -99,6 +100,7 @@ export const useSelectedAccountData = (): {
 
 	if (!selectedTransactionAccountId) {
 		return {
+			name: '',
 			metadata: '',
 			vault: ''
 		};
@@ -108,6 +110,8 @@ export const useSelectedAccountData = (): {
 
 	const metadata = account.id.toString();
 
+	const name = account.name;
+
 	const vault = JSON.stringify(
 		account.assets.map((asset) => [asset.amount.toString(), 0, 0, asset.faucetId.toString()]),
 		null,
@@ -115,12 +119,15 @@ export const useSelectedAccountData = (): {
 	);
 
 	return {
+		name,
 		metadata,
 		vault
 	};
 };
 
 export const useSelectedNoteData = (): {
+	noteName: string;
+	noteMetadata?: { senderId: string; serialNumber: string };
 	noteVault: string;
 	script: string;
 	input: string;
@@ -128,12 +135,18 @@ export const useSelectedNoteData = (): {
 	const { notes, files, selectedOverview } = useMiden();
 	if (!notes[selectedOverview]) {
 		return {
+			noteName: '',
 			noteVault: '',
 			script: '',
 			input: ''
 		};
 	}
 	const note = notes[selectedOverview];
+	const noteName = note.name;
+	const noteMetadata = {
+		senderId: note.senderId.toString(),
+		serialNumber: note.serialNumberDecimalString
+	};
 
 	const noteVault = JSON.stringify(
 		note.assets.map((asset) => [asset.amount.toString(), 0, 0, asset.faucetId.toString()]),
@@ -143,12 +156,13 @@ export const useSelectedNoteData = (): {
 
 	const script =
 		note && note.scriptFileId && files[note.scriptFileId] && files[note.scriptFileId].content?.value
-			? files[note.scriptFileId].content.value?.split('\n').slice(0, 10).join('\n')
+			? files[note.scriptFileId].content.value
 			: '';
 
 	const input = JSON.stringify(JSON.parse(files[note.inputFileId]?.content.value || '{}'), null, 2);
-
 	return {
+		noteName,
+		noteMetadata,
 		noteVault,
 		script: script || '',
 		input

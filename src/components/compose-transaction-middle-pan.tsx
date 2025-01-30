@@ -3,22 +3,120 @@ import { Editor as MonacoEditor, Monaco, useMonaco } from '@monaco-editor/react'
 import { Console } from './console';
 import { cn } from '@/lib/utils';
 import { editor } from 'monaco-editor';
-import { useSelectedAccountData, useSelectedEditorFile, useSelectedNoteData } from '@/lib/files';
+import { useSelectedAccountData, useSelectedNoteData } from '@/lib/files';
 import { useMiden } from '@/lib/context-providers';
 import { TRANSACTION_SCRIPT_FILE_ID } from '@/lib/consts';
 import { ScrollArea, ScrollBar } from './ui/scroll-area';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
+import { ColumnDef } from '@tanstack/react-table';
+import { AssetsDatatable } from './assets-datatable';
+import OverviewLayout from './overview-details';
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuTrigger
+} from './ui/dropdown-menu';
+import { Button } from './ui/button';
+import { MoreHorizontal } from 'lucide-react';
+import { Textarea } from './ui/textarea';
 
+export type VaultType = {
+	asset_type: string;
+	id: string;
+	symbol: string;
+	amount: string;
+};
+export const columns: ColumnDef<VaultType>[] = [
+	{
+		accessorKey: 'asset_type',
+		header: 'Asset type'
+	},
+	{
+		accessorKey: 'id',
+		header: 'Faucet ID'
+	},
+	{
+		accessorKey: 'symbol',
+		header: 'Symbol'
+	},
+	{
+		accessorKey: 'amount',
+		header: 'Amount'
+	},
+	{
+		id: 'actions',
+		enableHiding: false,
+		cell: ({ row }) => {
+			const faucet = row.original;
+
+			return (
+				<DropdownMenu>
+					<DropdownMenuTrigger asChild>
+						<Button className="h-8 w-8 p-0 hover:bg-dark-miden-700">
+							<span className="sr-only">Open menu</span>
+							<MoreHorizontal />
+						</Button>
+					</DropdownMenuTrigger>
+					<DropdownMenuContent align="end">
+						<DropdownMenuLabel>Actions</DropdownMenuLabel>
+						<DropdownMenuItem onClick={() => navigator.clipboard.writeText(faucet.id)}>
+							Copy faucet ID
+						</DropdownMenuItem>
+					</DropdownMenuContent>
+				</DropdownMenu>
+			);
+		}
+	}
+];
 const ComposeTransactionMiddlePan = () => {
-	const { metadata, vault } = useSelectedAccountData();
-	const { noteVault, script, input } = useSelectedNoteData();
-	const { updateFileContent, selectedFileId, selectedOverview } = useMiden();
-	const { content, file } = useSelectedEditorFile();
-	const [value, setValue] = useState(content);
+	const { metadata, vault, name } = useSelectedAccountData();
+	const { noteName, noteMetadata, noteVault, script, input } = useSelectedNoteData();
+	const { updateFileContent, selectedOverview, files } = useMiden();
+	const [transactionScriptValue, setTransactionScriptValue] = useState(
+		files[TRANSACTION_SCRIPT_FILE_ID].content.value
+	);
+	const [noteScriptValue, setNoteScriptValue] = useState(script);
+	const [vaultData, setVaultData] = useState();
+	const [noteVaultData, setNoteVaultData] = useState();
+	useEffect(() => {
+		if (vault) {
+			const vaultArray = JSON.parse(vault);
+			setVaultData(
+				vaultArray.map((item: number[]) => {
+					return {
+						asset_type: item[1],
+						id: item[3],
+						symbol: item[2],
+						amount: item[0]
+					};
+				})
+			);
+		}
+		if (noteVault) {
+			const noteVaultArray = JSON.parse(noteVault);
+
+			setNoteVaultData(
+				noteVaultArray.map((item: number[]) => {
+					return {
+						asset_type: item[1],
+						id: item[3],
+						symbol: item[2],
+						amount: item[0]
+					};
+				})
+			);
+		}
+	}, [vault, noteVault]);
 
 	useEffect(() => {
-		setValue(content);
-	}, [content]);
+		setTransactionScriptValue(files[TRANSACTION_SCRIPT_FILE_ID].content.value);
+	}, [files]);
+
+	useEffect(() => {
+		setNoteScriptValue(script);
+	}, [script]);
+
 	const configureMonaco = useCallback((_monaco: Monaco) => {
 		if (_monaco) {
 			_monaco.editor.defineTheme('miden', {
@@ -46,13 +144,16 @@ const ComposeTransactionMiddlePan = () => {
 
 	return (
 		<div className="flex flex-col justify-end h-full">
-			{selectedFileId === TRANSACTION_SCRIPT_FILE_ID &&
-			selectedOverview === 'transaction-script' ? (
+			{selectedOverview === 'transaction-script' ? (
 				<div className="flex-1 overflow-hidden text-white">
 					<MonacoEditor
 						onChange={(value) => {
-							setValue(value ?? '');
-							if (file && !file.readonly) updateFileContent(file.id, value ?? '');
+							setTransactionScriptValue(value ?? '');
+							if (
+								files[TRANSACTION_SCRIPT_FILE_ID].content.value &&
+								!files[TRANSACTION_SCRIPT_FILE_ID].readonly
+							)
+								updateFileContent(TRANSACTION_SCRIPT_FILE_ID, value ?? '');
 						}}
 						onMount={(editor: editor.IStandaloneCodeEditor, _monaco) => {
 							configureMonaco(_monaco);
@@ -70,7 +171,7 @@ const ComposeTransactionMiddlePan = () => {
 							theme: 'miden',
 							readOnly: false
 						}}
-						value={value}
+						value={transactionScriptValue}
 						className={cn(
 							'whitespace-pre-wrap overflow-hidden p-0 m-0 w-full h-full absolute top-0 left-0'
 						)}
@@ -78,42 +179,66 @@ const ComposeTransactionMiddlePan = () => {
 				</div>
 			) : selectedOverview !== '' ? (
 				<div className="flex-1 overflow-hidden text-white">
-					<ScrollArea className="h-full w-full px-4">
-						<Table className="[&_tr:hover]:bg-transparent">
-							<TableHeader>
-								<TableRow>
-									<TableHead>{selectedOverview === 'account' ? 'Account ID' : 'Script'}</TableHead>
-									<TableHead>Vault</TableHead>
-									<TableHead>{selectedOverview === 'account' ? '' : 'Input'}</TableHead>
-								</TableRow>
-							</TableHeader>
-							<TableBody>
-								<TableRow>
-									<TableCell>
-										<ScrollArea>
-											<pre className="whitespace-pre-wrap max-h-[200px]">
-												{selectedOverview === 'account' ? metadata : script}
-											</pre>
-										</ScrollArea>
-									</TableCell>
-									<TableCell>
-										<pre className="whitespace-pre-wrap overflow-auto max-h-[200px]">
-											<pre className="whitespace-nowrap overflow-auto">
-												{selectedOverview === 'account' ? vault : noteVault}
-											</pre>
-										</pre>
-									</TableCell>
-									<TableCell>
-										{' '}
-										<pre className="whitespace-pre-wrap overflow-auto max-h-[200px]">
-											<pre className="whitespace-nowrap overflow-auto">
-												{selectedOverview === 'account' ? '' : input}{' '}
-											</pre>
-										</pre>
-									</TableCell>
-								</TableRow>
-							</TableBody>
-						</Table>
+					<ScrollArea className="h-full w-full pb-2">
+						{selectedOverview === 'account'
+							? vaultData && (
+									<OverviewLayout
+										data={{
+											'Account name': { value: name, copyable: true },
+											'Account ID': { value: metadata, copyable: true, divider: true },
+											Vault: <AssetsDatatable data={vaultData} columns={columns} />
+										}}
+									/>
+							  )
+							: noteVaultData && (
+									<OverviewLayout
+										data={{
+											'Note name': { value: noteName, copyable: true },
+											'Sender address': { value: noteMetadata?.senderId, copyable: true },
+											'Serial number': {
+												value: noteMetadata?.serialNumber,
+												copyable: true,
+												divider: true
+											},
+											Vault: <AssetsDatatable data={noteVaultData} columns={columns} />,
+
+											Inputs: (
+												<Textarea className="border-dark-miden-700 w-full min-h-20" value={input}>
+													{input}
+												</Textarea>
+											),
+											Script: (
+												<MonacoEditor
+													onChange={(value) => {
+														setNoteScriptValue(value ?? '');
+														// if (file && !file.readonly) updateFileContent(file.id, value ?? '');
+													}}
+													onMount={(editor: editor.IStandaloneCodeEditor, _monaco) => {
+														configureMonaco(_monaco);
+													}}
+													options={{
+														overviewRulerLanes: 0,
+														minimap: { enabled: false },
+														wordBreak: 'keepAll',
+														wordWrap: 'on',
+														smoothScrolling: true,
+														scrollbar: {
+															verticalSliderSize: 5,
+															verticalScrollbarSize: 5
+														},
+														theme: 'miden',
+														readOnly: false
+													}}
+													value={noteScriptValue}
+													className={cn(
+														'whitespace-pre-wrap overflow-hidden rounded-miden p-0 m-0 w-full h-[300px] absolute top-0 left-0'
+													)}
+												/>
+											)
+										}}
+									/>
+							  )}
+
 						<ScrollBar orientation="horizontal" />
 					</ScrollArea>
 				</div>
