@@ -10,6 +10,7 @@ import {
 	TableHeader,
 	TableRow
 } from '@/components/ui/table';
+import { useMiden } from '@/lib/context-providers';
 
 interface DataTableProps<TData, TValue> {
 	columns: ColumnDef<TData, TValue>[];
@@ -17,6 +18,7 @@ interface DataTableProps<TData, TValue> {
 }
 
 export function AssetsDatatable<TData, TValue>({ columns, data }: DataTableProps<TData, TValue>) {
+	const { executionOutput } = useMiden();
 	const table = useReactTable({
 		data,
 		columns,
@@ -24,7 +26,7 @@ export function AssetsDatatable<TData, TValue>({ columns, data }: DataTableProps
 	});
 
 	return (
-		<div className="rounded-md border-2 border-dark-miden-700">
+		<div className="rounded-md border-2 border-dark-miden-700 text-white">
 			<Table className="[&_tr:hover]:bg-transparent">
 				<TableHeader>
 					{table.getHeaderGroups().map((headerGroup) => (
@@ -43,11 +45,16 @@ export function AssetsDatatable<TData, TValue>({ columns, data }: DataTableProps
 				</TableHeader>
 				<TableBody>
 					{table.getRowModel().rows?.length ? (
-						table.getRowModel().rows.map((row) => (
+						table.getRowModel().rows.map((row, rowi) => (
 							<TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
-								{row.getVisibleCells().map((cell) => (
+								{row.getVisibleCells().map((cell, i) => (
 									<TableCell key={cell.id}>
-										{flexRender(cell.column.columnDef.cell, cell.getContext())}
+										{flexRender(cell.column.columnDef.cell, cell.getContext())}{' '}
+										{i === 3 && rowi === 1 && executionOutput ? (
+											<span className="text-theme-success">&nbsp;+200</span>
+										) : (
+											<></>
+										)}
 									</TableCell>
 								))}
 							</TableRow>

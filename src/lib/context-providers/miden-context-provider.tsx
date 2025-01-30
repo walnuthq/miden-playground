@@ -407,6 +407,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				const { notes, newFiles: noteFiles } = defaultNotes(defaultAccount1.id, defaultAccount2.id);
 				setFiles((prev) => ({ ...prev, ...accountFiles, ...noteFiles }));
 				setNotes(notes);
+				setSelectedTransactionAccountId(defaultAccount2.idHex);
 				setIsInitialized(true);
 			})
 			.catch((error: unknown) => {

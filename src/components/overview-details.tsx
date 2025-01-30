@@ -29,7 +29,7 @@ const OverviewLayout = ({ data }: OverviewLayoutProps) => {
 		if (value && typeof value === 'object' && 'value' in value) {
 			return (
 				<div className="flex items-center gap-2">
-					<div>{value.value}</div>
+					<div className="text-white">{value.value}</div>
 					{value.copyable && typeof value.value !== 'object' && (
 						<button
 							onClick={() => handleCopy(String(value.value), label)}
@@ -42,18 +42,18 @@ const OverviewLayout = ({ data }: OverviewLayoutProps) => {
 			);
 		}
 
-		return <div className="w-full">{value}</div>;
+		return <div className="w-full text-white">{value}</div>;
 	};
 
 	return (
-		<div className="w-full p-6">
+		<div className="w-full">
 			{entries.map(([label, value]) => {
 				const hasDivider =
 					value && typeof value === 'object' && 'divider' in value && value.divider;
 
 				return (
 					<div key={label} className={`${hasDivider ? 'border-b border-dark-miden-700 mb-4' : ''}`}>
-						<div className="flex items-start gap-24 mb-4">
+						<div className="flex items-start gap-16 mb-4">
 							<div className="text-gray-400 min-w-[120px]">{label}:</div>
 							{renderValue(value, label)}
 						</div>

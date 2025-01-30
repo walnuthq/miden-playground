@@ -98,14 +98,16 @@ export const useSelectedAccountData = (): {
 	name: string;
 	metadata: string;
 	vault: string;
+	script: string;
 } => {
-	const { accounts, selectedTransactionAccountId } = useMiden();
+	const { accounts, selectedTransactionAccountId, files } = useMiden();
 
 	if (!selectedTransactionAccountId) {
 		return {
 			name: '',
 			metadata: '',
-			vault: ''
+			vault: '',
+			script: ''
 		};
 	}
 
@@ -124,7 +126,8 @@ export const useSelectedAccountData = (): {
 	return {
 		name,
 		metadata,
-		vault
+		vault,
+		script: files[account.scriptFileId]?.content.value || ''
 	};
 };
 

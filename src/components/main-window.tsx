@@ -47,7 +47,7 @@ export function MainWindow({ toggleInspector }: { toggleInspector: () => void })
 
 	return (
 		<>
-			<ResizablePanel defaultSize={selectedTab === 'transaction' && executionOutput ? 45 : 75}>
+			<ResizablePanel defaultSize={75}>
 				<div className="flex flex-col h-full">
 					<Toolbar toggleInspector={toggleInspector} />
 					<div className={`flex-1 ${file || selectedTab === 'transaction' ? 'block' : 'hidden'}`}>
@@ -84,14 +84,14 @@ export function MainWindow({ toggleInspector }: { toggleInspector: () => void })
 					</div>
 				</div>
 			</ResizablePanel>
-			{selectedTab === 'transaction' && executionOutput && (
+			{/* {selectedTab === 'transaction' && executionOutput && (
 				<>
 					<ResizableHandle className="w-[2px] bg-dark-miden-700" />
 					<ResizablePanel defaultSize={30}>
 						<ExecutionOutput />
 					</ResizablePanel>
 				</>
-			)}
+			)} */}
 		</>
 	);
 }
