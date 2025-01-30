@@ -57,13 +57,29 @@ export default {
 						'800': 'var(--miden-dark-800)'
 					}
 				},
-				blue: { miden: 'var(--miden-blue)' }
+				blue: { miden: 'var(--miden-blue)' },
+				theme: {
+					surface: 'hsl(var(--theme-surface))',
+					border: 'hsl(var(--theme-border))',
+					'surface-highlight': 'hsl(var(--theme-surface-highlight))',
+					text: 'hsl(var(--theme-text))',
+					'text-subtle': 'hsl(var(--theme-text-subtle))',
+					'text-subtlest': 'hsl(var(--theme-text-subtlest))',
+					primary: 'hsl(var(--theme-primary))',
+					secondary: 'hsl(var(--theme-secondary))',
+					info: 'hsl(var(--theme-info))',
+					success: 'hsl(var(--theme-success))',
+					notice: 'hsl(var(--theme-notice))',
+					warning: 'hsl(var(--theme-warning))',
+					danger: 'hsl(var(--theme-danger))'
+				}
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)',
-				miden: 'var(--rounded-miden)'
+				miden: 'var(--rounded-miden)',
+				theme: 'var(--theme-radius)'
 			}
 		}
 	},
