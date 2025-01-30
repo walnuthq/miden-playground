@@ -1,6 +1,6 @@
 'use client';
 
-import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
+import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
 
 import {
 	Table,
@@ -10,21 +10,45 @@ import {
 	TableHeader,
 	TableRow
 } from '@/components/ui/table';
+import { useMiden } from '@/lib/context-providers';
+import { cn } from '@/lib/utils';
 
-interface DataTableProps<TData, TValue> {
-	columns: ColumnDef<TData, TValue>[];
-	data: TData[];
-}
+export function Vault({
+	noteId,
+	accountId,
+	className
+}: {
+	noteId?: string;
+	accountId?: string;
+	className?: string;
+}) {
+	const { notes, accounts } = useMiden();
 
-export function AssetsDatatable<TData, TValue>({ columns, data }: DataTableProps<TData, TValue>) {
+	const note = noteId ? notes[noteId] : null;
+	const account = accountId ? accounts[accountId] : null;
+	const assets = note?.assets || account?.assets || [];
+
+	const columns = [
+		{
+			accessorKey: 'faucetId',
+			header: 'Faucet ID'
+		},
+		{
+			accessorKey: 'amount',
+			header: 'Amount'
+		}
+	];
+
 	const table = useReactTable({
-		data,
+		data: assets,
 		columns,
 		getCoreRowModel: getCoreRowModel()
 	});
 
+	if (!noteId && !accountId) return null;
+
 	return (
-		<div className="rounded-md border-2 border-theme-border">
+		<div className={cn('rounded-theme border border-theme-border w-fit', className)}>
 			<Table className="[&_tr:hover]:bg-transparent">
 				<TableHeader>
 					{table.getHeaderGroups().map((headerGroup) => (
@@ -46,7 +70,7 @@ export function AssetsDatatable<TData, TValue>({ columns, data }: DataTableProps
 						table.getRowModel().rows.map((row) => (
 							<TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
 								{row.getVisibleCells().map((cell) => (
-									<TableCell key={cell.id}>
+									<TableCell key={cell.id} className="pr-8 last:p-2">
 										{flexRender(cell.column.columnDef.cell, cell.getContext())}
 									</TableCell>
 								))}

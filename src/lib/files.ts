@@ -92,6 +92,7 @@ export const useSelectedEditorFile = (): { content: string; file: EditorFile | n
 };
 
 export const useSelectedAccountData = (): {
+	id: string;
 	name: string;
 	metadata: string;
 	vault: string;
@@ -100,6 +101,7 @@ export const useSelectedAccountData = (): {
 
 	if (!selectedTransactionAccountId) {
 		return {
+			id: '',
 			name: '',
 			metadata: '',
 			vault: ''
@@ -119,6 +121,7 @@ export const useSelectedAccountData = (): {
 	);
 
 	return {
+		id: account.idHex,
 		name,
 		metadata,
 		vault
@@ -126,6 +129,7 @@ export const useSelectedAccountData = (): {
 };
 
 export const useSelectedNoteData = (): {
+	id: string;
 	noteName: string;
 	noteMetadata?: { senderId: string; serialNumber: string };
 	noteVault: string;
@@ -135,6 +139,7 @@ export const useSelectedNoteData = (): {
 	const { notes, files, selectedOverview } = useMiden();
 	if (!notes[selectedOverview]) {
 		return {
+			id: '',
 			noteName: '',
 			noteVault: '',
 			script: '',
@@ -161,6 +166,7 @@ export const useSelectedNoteData = (): {
 
 	const input = JSON.stringify(JSON.parse(files[note.inputFileId]?.content.value || '{}'), null, 2);
 	return {
+		id: note.id,
 		noteName,
 		noteMetadata,
 		noteVault,
