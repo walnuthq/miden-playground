@@ -133,4 +133,11 @@ export class Note {
 	get serialNumberDecimalString(): string {
 		return this.serialNumber.reduce((acc, num) => acc + BigInt(num), BigInt(0)).toString();
 	}
+
+	updateAssetAmount(faucetId: bigint, updateFn: (amount: bigint) => bigint) {
+		const asset = this.assets.find((asset) => asset.faucetId === faucetId);
+		if (asset) {
+			asset.amount = updateFn(asset.amount);
+		}
+	}
 }

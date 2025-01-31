@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { useMiden } from '@/lib/context-providers';
 import { TRANSACTION_SCRIPT_FILE_ID } from '@/lib/consts';
 import { ScrollArea, ScrollBar } from './ui/scroll-area';
-import { AssetsDatatable, columns } from './assets-datatable';
+import { Vault } from './vault';
 import OverviewLayout from './overview-details';
 import { Textarea } from './ui/textarea';
 import { CustomMonacoEditor } from './custom-monaco-editor';
@@ -88,7 +88,7 @@ const ComposeTransactionMiddlePan = () => {
 												copyable: true,
 												divider: true
 											},
-											Vault: <AssetsDatatable data={vaultData} columns={columns} />
+											Vault: <Vault accountId={selectedAccountData?.id} />
 										}}
 									/>
 							  )
@@ -105,8 +105,7 @@ const ComposeTransactionMiddlePan = () => {
 												copyable: true,
 												divider: true
 											},
-											Vault: <AssetsDatatable data={noteVaultData} columns={columns} />,
-
+											Vault: <Vault noteId={selectedNoteData?.id} />,
 											Inputs: (
 												<Textarea
 													className="border-theme-border w-full min-h-20"

@@ -3,7 +3,7 @@
 export const memory: WebAssembly.Memory;
 export const generate_account_id: (a: number, b: number) => bigint;
 export const generate_faucet_id: (a: number, b: number) => bigint;
-export const execute_transaction: (a: number, b: number, c: number, d: number, e: number) => [number, number, number];
+export const execute_transaction: (a: number, b: number, c: number, d: number, e: number, f: bigint) => [number, number, number];
 export const __wbg_createswapnoteresult_free: (a: number, b: number) => void;
 export const createswapnoteresult_note_inputs: (a: number) => [number, number];
 export const createswapnoteresult_payback_note: (a: number) => number;
