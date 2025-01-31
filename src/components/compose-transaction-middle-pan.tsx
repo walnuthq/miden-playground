@@ -1,3 +1,4 @@
+'use client';
 import React, { useEffect, useState } from 'react';
 import { Console } from './console';
 import { cn } from '@/lib/utils';
@@ -70,18 +71,18 @@ export const columns: ColumnDef<VaultType>[] = [
 	}
 ];
 const ComposeTransactionMiddlePan = () => {
-	const { metadata, vault, name } = useSelectedAccountData();
-	const { noteName, noteMetadata, noteVault, script, input } = useSelectedNoteData();
+	const selectedAccountData = useSelectedAccountData();
+	const selectedNoteData = useSelectedNoteData();
 	const { updateFileContent, selectedOverviewTab, files } = useMiden();
 	const [transactionScriptValue, setTransactionScriptValue] = useState(
 		files[TRANSACTION_SCRIPT_FILE_ID].content.value
 	);
-	const [noteScriptValue, setNoteScriptValue] = useState(script);
+	const [noteScriptValue, setNoteScriptValue] = useState(selectedNoteData?.script);
 	const [vaultData, setVaultData] = useState();
 	const [noteVaultData, setNoteVaultData] = useState();
 	useEffect(() => {
-		if (vault) {
-			const vaultArray = JSON.parse(vault);
+		if (selectedAccountData?.vault) {
+			const vaultArray = JSON.parse(selectedAccountData?.vault);
 			setVaultData(
 				vaultArray.map((item: number[]) => {
 					return {
@@ -93,8 +94,8 @@ const ComposeTransactionMiddlePan = () => {
 				})
 			);
 		}
-		if (noteVault) {
-			const noteVaultArray = JSON.parse(noteVault);
+		if (selectedNoteData?.noteVault) {
+			const noteVaultArray = JSON.parse(selectedNoteData?.noteVault);
 
 			setNoteVaultData(
 				noteVaultArray.map((item: number[]) => {
@@ -107,15 +108,15 @@ const ComposeTransactionMiddlePan = () => {
 				})
 			);
 		}
-	}, [vault, noteVault]);
+	}, [selectedAccountData?.vault, selectedNoteData?.noteVault]);
 
 	useEffect(() => {
 		setTransactionScriptValue(files[TRANSACTION_SCRIPT_FILE_ID].content.value);
 	}, [files]);
 
 	useEffect(() => {
-		setNoteScriptValue(script);
-	}, [script]);
+		setNoteScriptValue(selectedNoteData?.script);
+	}, [selectedNoteData?.script]);
 
 	return (
 		<div className="flex flex-col justify-end h-full">
@@ -143,8 +144,12 @@ const ComposeTransactionMiddlePan = () => {
 							? vaultData && (
 									<OverviewLayout
 										data={{
-											'Account name': { value: name, copyable: true },
-											'Account ID': { value: metadata, copyable: true, divider: true },
+											'Account name': { value: selectedAccountData?.name, copyable: true },
+											'Account ID': {
+												value: selectedAccountData?.metadata,
+												copyable: true,
+												divider: true
+											},
 											Vault: <AssetsDatatable data={vaultData} columns={columns} />
 										}}
 									/>
@@ -152,10 +157,13 @@ const ComposeTransactionMiddlePan = () => {
 							: noteVaultData && (
 									<OverviewLayout
 										data={{
-											'Note name': { value: noteName, copyable: true },
-											'Sender address': { value: noteMetadata?.senderId, copyable: true },
+											'Note name': { value: selectedNoteData?.noteName, copyable: true },
+											'Sender address': {
+												value: selectedNoteData?.noteMetadata?.senderId,
+												copyable: true
+											},
 											'Serial number': {
-												value: noteMetadata?.serialNumber,
+												value: selectedNoteData?.noteMetadata?.serialNumber,
 												copyable: true,
 												divider: true
 											},
@@ -164,7 +172,7 @@ const ComposeTransactionMiddlePan = () => {
 											Inputs: (
 												<Textarea
 													className="border-theme-border w-full min-h-20"
-													defaultValue={input}
+													defaultValue={selectedNoteData?.input}
 												/>
 											),
 											Script: (

@@ -1,3 +1,4 @@
+'use client';
 import { Editor as MonacoEditor, Monaco } from '@monaco-editor/react';
 import { editor } from 'monaco-editor';
 import { useCallback, useEffect } from 'react';

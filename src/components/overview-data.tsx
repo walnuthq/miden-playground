@@ -4,15 +4,11 @@ export const useSelectedAccountData = (): {
 	name: string;
 	metadata: string;
 	vault: string;
-} => {
+} | null => {
 	const { accounts, selectedTransactionAccountId } = useMiden();
 
 	if (!selectedTransactionAccountId) {
-		return {
-			name: '',
-			metadata: '',
-			vault: ''
-		};
+		return null;
 	}
 
 	const account = accounts[selectedTransactionAccountId];
@@ -27,7 +23,6 @@ export const useSelectedAccountData = (): {
 		2
 	);
 
-	console.log(vault);
 	return {
 		name,
 		metadata,
@@ -41,24 +36,14 @@ export const useSelectedNoteData = (): {
 	noteVault: string;
 	script: string;
 	input: string;
-} => {
+} | null => {
 	const { notes, files, selectedOverviewTab } = useMiden();
 	if (!selectedOverviewTab) {
-		return {
-			noteName: '',
-			noteVault: '',
-			script: '',
-			input: ''
-		};
+		return null;
 	}
 	const note = notes[selectedOverviewTab];
 	if (!note) {
-		return {
-			noteName: '',
-			noteVault: '',
-			script: '',
-			input: ''
-		};
+		return null;
 	}
 	const noteName = note.name;
 	const noteMetadata = {
