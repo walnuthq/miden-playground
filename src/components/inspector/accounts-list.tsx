@@ -90,9 +90,9 @@ const AccountsList = ({
 										level={2}
 									/>
 									<FileItem
-										editorFile={files[account.codeFileId]}
-										isSelected={selectedFileId === account.codeFileId}
-										onClick={() => selectFile(account.codeFileId)}
+										editorFile={files[account.scriptFileId]}
+										isSelected={selectedFileId === account.scriptFileId}
+										onClick={() => selectFile(account.scriptFileId)}
 										level={2}
 									/>
 									<FileItem

@@ -17,11 +17,11 @@ import { TRANSACTION_SCRIPT } from '@/lib/consts/transaction';
 import { convertToBigUint64Array } from '@/lib/utils';
 import { Account } from '@/lib/account';
 import { createP2IDRNote, createSwapNote, Note } from '@/lib/notes';
-import { EditorFiles } from '@/lib/files';
 import { createP2IDNote } from '@/lib/notes/p2id';
+import { EditorFiles } from '../files';
 
 type Tabs = 'transaction' | 'assets';
-type OverviewTabs = string | null;
+type OverviewTabs = 'transaction-script' | 'account' | string | null;
 
 interface MidenContextProps {
 	isInitialized: boolean;
@@ -61,7 +61,7 @@ interface MidenContextProps {
 	addInfoLog: (message: string) => void;
 	addErrorLog: (message: string) => void;
 	selectedOverviewTab: OverviewTabs;
-	selectOverview: (tab: string | null) => void;
+	selectOverview: (tab: OverviewTabs) => void;
 	updateAccountAssetAmount: (
 		accountId: string,
 		faucetId: bigint,
@@ -155,11 +155,11 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	const [selectedTransactionAccountId, setSelectedTransactionAccountId] = useState<string | null>(
 		null
 	);
-	const [selectedOverviewTab, setSelectedOverviewTab] = useState<string | null>(null);
+	const [selectedOverviewTab, setSelectedOverviewTab] = useState<OverviewTabs>(null);
 	const [selectedTransactionNotesIds, setSelectedTransactionNotesIds] = useState<string[]>([]);
 	const [executionOutput, setExecutionOutput] = useState<ExecutionOutput | null>(null);
 
-	const selectOverview = useCallback((tab: string | null) => {
+	const selectOverview = useCallback((tab: OverviewTabs) => {
 		setSelectedOverviewTab(tab);
 	}, []);
 
@@ -338,9 +338,16 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			return account;
 		});
 	}, []);
-
 	const updateFileContent = useCallback((fileId: string, content: string) => {
-		setFiles((prev) => ({ ...prev, [fileId]: { ...prev[fileId], content: { value: content } } }));
+		setFiles((prev) => ({
+			...prev,
+			[fileId]: {
+				...prev[fileId],
+				content: prev[fileId].content.dynamic
+					? prev[fileId].content
+					: { ...prev[fileId].content, value: content }
+			}
+		}));
 	}, []);
 
 	const createSampleSwapNotes = useCallback(() => {

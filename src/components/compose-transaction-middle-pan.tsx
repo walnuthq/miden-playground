@@ -10,7 +10,7 @@ import { Vault } from './vault';
 import OverviewLayout from './overview-details';
 import { Textarea } from './ui/textarea';
 import { CustomMonacoEditor } from './custom-monaco-editor';
-import { useSelectedAccountData, useSelectedNoteData } from './overview-data';
+import { useSelectedAccountData, useSelectedNoteData } from '../lib/overview-data';
 
 const ComposeTransactionMiddlePan = () => {
 	const selectedAccountData = useSelectedAccountData();
@@ -20,33 +20,6 @@ const ComposeTransactionMiddlePan = () => {
 		files[TRANSACTION_SCRIPT_FILE_ID].content.value
 	);
 	const [noteScriptValue, setNoteScriptValue] = useState(selectedNoteData?.script);
-	const [vaultData, setVaultData] = useState();
-	const [noteVaultData, setNoteVaultData] = useState();
-	useEffect(() => {
-		if (selectedAccountData?.vault) {
-			const vaultArray = JSON.parse(selectedAccountData?.vault);
-			setVaultData(
-				vaultArray.map((item: number[]) => {
-					return {
-						faucetId: item[0],
-						amount: item[0]
-					};
-				})
-			);
-		}
-		if (selectedNoteData?.noteVault) {
-			const noteVaultArray = JSON.parse(selectedNoteData?.noteVault);
-
-			setNoteVaultData(
-				noteVaultArray.map((item: number[]) => {
-					return {
-						faucetId: item[3],
-						amount: item[0]
-					};
-				})
-			);
-		}
-	}, [selectedAccountData?.vault, selectedNoteData?.noteVault]);
 
 	useEffect(() => {
 		setTransactionScriptValue(files[TRANSACTION_SCRIPT_FILE_ID].content.value);
@@ -75,11 +48,11 @@ const ComposeTransactionMiddlePan = () => {
 						)}
 					/>
 				</div>
-			) : selectedOverviewTab !== '' ? (
+			) : selectedOverviewTab !== null ? (
 				<div className="flex-1 overflow-hidden text-theme-text">
 					<ScrollArea className="h-full w-full pb-2">
 						{selectedOverviewTab === 'account'
-							? vaultData && (
+							? selectedAccountData?.id && (
 									<OverviewLayout
 										data={{
 											'Account name': { value: selectedAccountData?.name, copyable: true },
@@ -92,7 +65,7 @@ const ComposeTransactionMiddlePan = () => {
 										}}
 									/>
 							  )
-							: noteVaultData && (
+							: selectedNoteData?.id && (
 									<OverviewLayout
 										data={{
 											'Note name': { value: selectedNoteData?.noteName, copyable: true },
