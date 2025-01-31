@@ -1,7 +1,5 @@
 'use client';
 
-import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
-
 import {
 	Table,
 	TableBody,
@@ -12,6 +10,7 @@ import {
 } from '@/components/ui/table';
 import { useMiden } from '@/lib/context-providers';
 import { cn } from '@/lib/utils';
+import { faucetSymbols } from '@/lib/consts';
 
 export function Vault({
 	noteId,
@@ -22,28 +21,25 @@ export function Vault({
 	accountId?: string;
 	className?: string;
 }) {
-	const { notes, accounts } = useMiden();
+	const { notes, accounts, updateAccountAssetAmount, updateNoteAssetAmount } = useMiden();
 
 	const note = noteId ? notes[noteId] : null;
 	const account = accountId ? accounts[accountId] : null;
-	const assets = note?.assets || account?.assets || [];
+	const editableAssets = (note?.assets || account?.assets || []).map((asset) => ({
+		faucetId: asset.faucetId,
+		amount: parseInt(asset.amount.toString()),
+		symbol: faucetSymbols[asset.faucetId.toString()],
+		type: 'Fungible'
+	}));
 
-	const columns = [
-		{
-			accessorKey: 'faucetId',
-			header: 'Faucet ID'
-		},
-		{
-			accessorKey: 'amount',
-			header: 'Amount'
+	const handleAmountChange = (faucetId: bigint, newAmount: string) => {
+		const newAmountInt = newAmount ? parseInt(newAmount) : 0;
+		if (noteId) {
+			updateNoteAssetAmount(noteId, faucetId, () => BigInt(newAmountInt));
+		} else if (accountId) {
+			updateAccountAssetAmount(accountId, faucetId, () => BigInt(newAmountInt));
 		}
-	];
-
-	const table = useReactTable({
-		data: assets,
-		columns,
-		getCoreRowModel: getCoreRowModel()
-	});
+	};
 
 	if (!noteId && !accountId) return null;
 
@@ -51,34 +47,35 @@ export function Vault({
 		<div className={cn('rounded-theme border border-theme-border w-fit', className)}>
 			<Table className="[&_tr:hover]:bg-transparent">
 				<TableHeader>
-					{table.getHeaderGroups().map((headerGroup) => (
-						<TableRow key={headerGroup.id}>
-							{headerGroup.headers.map((header) => {
-								return (
-									<TableHead key={header.id}>
-										{header.isPlaceholder
-											? null
-											: flexRender(header.column.columnDef.header, header.getContext())}
-									</TableHead>
-								);
-							})}
-						</TableRow>
-					))}
+					<TableRow>
+						<TableHead className="pr-4">Type</TableHead>
+						<TableHead className="pr-4">Faucet ID</TableHead>
+						<TableHead className="pr-4">Symbol</TableHead>
+						<TableHead className="pr-4">Amount</TableHead>
+					</TableRow>
 				</TableHeader>
 				<TableBody>
-					{table.getRowModel().rows?.length ? (
-						table.getRowModel().rows.map((row) => (
-							<TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
-								{row.getVisibleCells().map((cell) => (
-									<TableCell key={cell.id} className="pr-8 last:p-2">
-										{flexRender(cell.column.columnDef.cell, cell.getContext())}
-									</TableCell>
-								))}
+					{editableAssets.length ? (
+						editableAssets.map((asset) => (
+							<TableRow key={asset.faucetId}>
+								<TableCell className="pr-8 last:p-2">{asset.type}</TableCell>
+								<TableCell className="pr-8 last:p-2">{asset.faucetId}</TableCell>
+								<TableCell className="pr-8 last:p-2">{asset.symbol}</TableCell>
+								<TableCell className="pr-8 last:p-2">
+									<input
+										type="number"
+										value={asset.amount}
+										onChange={(e) => handleAmountChange(asset.faucetId, e.target.value)}
+										className="bg-transparent outline-none w-20"
+										min={0}
+										maxLength={10}
+									/>
+								</TableCell>
 							</TableRow>
 						))
 					) : (
 						<TableRow>
-							<TableCell colSpan={columns.length} className="h-24 text-center">
+							<TableCell colSpan={4} className="h-24 text-center">
 								No results.
 							</TableCell>
 						</TableRow>
