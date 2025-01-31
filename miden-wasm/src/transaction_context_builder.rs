@@ -49,12 +49,12 @@ impl TransactionContextBuilder {
         self
     }
 
-    pub fn build(self) -> TransactionContext {
+    pub fn build(self, block_num: u64) -> TransactionContext {
         let mut mock_chain = MockChainBuilder::default()
             .notes(self.input_notes.clone())
             .build();
 
-        for _ in 0..4 {
+        for _ in 0..block_num {
             mock_chain.seal_block(None);
         }
 

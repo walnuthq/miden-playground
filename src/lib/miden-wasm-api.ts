@@ -18,13 +18,15 @@ export function consumeNotes({
 	receiverScript,
 	receiverStorage,
 	notes,
-	transactionScript
+	transactionScript,
+	blockNumber
 }: {
 	receiver: Account;
 	receiverScript: string;
 	receiverStorage: BigUint64Array[];
 	notes: { note: Note; noteScript: string; noteInputs: BigUint64Array; senderScript: string }[];
 	transactionScript: string;
+	blockNumber: number;
 }): ExecutionOutput {
 	const notesWrapper = notes.map(
 		({ note, noteScript, noteInputs, senderScript }) =>
@@ -47,7 +49,7 @@ export function consumeNotes({
 		receiver.isAuth,
 		receiverStorage.map((row) => new WordWrapper(new BigUint64Array(row)))
 	);
-	return execute_transaction(transactionScript, receiverAccount, notesWrapper);
+	return execute_transaction(transactionScript, receiverAccount, notesWrapper, BigInt(blockNumber));
 }
 
 export function generateAccountId(): bigint {

@@ -291,7 +291,8 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				receiverScript: files[account.scriptFileId].content.value!,
 				receiverStorage: storage,
 				notes: transactionNotes,
-				transactionScript: files[TRANSACTION_SCRIPT_FILE_ID].content.value!
+				transactionScript: files[TRANSACTION_SCRIPT_FILE_ID].content.value!,
+				blockNumber: 4
 			});
 			console.log('output', output);
 			output.storageDiffs = Account.computeStorageDiffs(storage, output.storage);
