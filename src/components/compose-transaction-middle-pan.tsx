@@ -1,9 +1,7 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { Editor as MonacoEditor, Monaco, useMonaco } from '@monaco-editor/react';
+import React, { useEffect, useState } from 'react';
 import { Console } from './console';
 import { cn } from '@/lib/utils';
-import { editor } from 'monaco-editor';
-import { useSelectedAccountData, useSelectedNoteData } from '@/lib/files';
+
 import { useMiden } from '@/lib/context-providers';
 import { TRANSACTION_SCRIPT_FILE_ID } from '@/lib/consts';
 import { ScrollArea, ScrollBar } from './ui/scroll-area';
@@ -20,6 +18,8 @@ import {
 import { Button } from './ui/button';
 import { MoreHorizontal } from 'lucide-react';
 import { Textarea } from './ui/textarea';
+import { CustomMonacoEditor } from './custom-monaco-editor';
+import { useSelectedAccountData, useSelectedNoteData } from './overview-data';
 
 export type VaultType = {
 	asset_type: string;
@@ -72,7 +72,7 @@ export const columns: ColumnDef<VaultType>[] = [
 const ComposeTransactionMiddlePan = () => {
 	const { metadata, vault, name } = useSelectedAccountData();
 	const { noteName, noteMetadata, noteVault, script, input } = useSelectedNoteData();
-	const { updateFileContent, selectedOverview, files } = useMiden();
+	const { updateFileContent, selectedOverviewTab, files } = useMiden();
 	const [transactionScriptValue, setTransactionScriptValue] = useState(
 		files[TRANSACTION_SCRIPT_FILE_ID].content.value
 	);
@@ -117,36 +117,11 @@ const ComposeTransactionMiddlePan = () => {
 		setNoteScriptValue(script);
 	}, [script]);
 
-	const configureMonaco = useCallback((_monaco: Monaco) => {
-		if (_monaco) {
-			_monaco.editor.defineTheme('miden', {
-				base: 'vs-dark',
-				inherit: true,
-				rules: [],
-				colors: {
-					'editor.background': '#040113',
-					'editor.foreground': '#4E8CC0',
-					'editorLineNumber.foreground': '#4E8CC0',
-					'editorLineNumber.activeForeground': '#83afd4'
-				}
-			});
-			_monaco.editor.setTheme('miden');
-		}
-	}, []);
-
-	const monaco = useMonaco();
-
-	useEffect(() => {
-		if (monaco) {
-			configureMonaco(monaco);
-		}
-	}, [configureMonaco, monaco]);
-
 	return (
 		<div className="flex flex-col justify-end h-full">
-			{selectedOverview === 'transaction-script' ? (
+			{selectedOverviewTab === 'transaction-script' ? (
 				<div className="flex-1 overflow-hidden text-theme-text">
-					<MonacoEditor
+					<CustomMonacoEditor
 						onChange={(value) => {
 							setTransactionScriptValue(value ?? '');
 							if (
@@ -155,32 +130,16 @@ const ComposeTransactionMiddlePan = () => {
 							)
 								updateFileContent(TRANSACTION_SCRIPT_FILE_ID, value ?? '');
 						}}
-						onMount={(editor: editor.IStandaloneCodeEditor, _monaco) => {
-							configureMonaco(_monaco);
-						}}
-						options={{
-							overviewRulerLanes: 0,
-							minimap: { enabled: false },
-							wordBreak: 'keepAll',
-							wordWrap: 'on',
-							smoothScrolling: true,
-							scrollbar: {
-								verticalSliderSize: 5,
-								verticalScrollbarSize: 5
-							},
-							theme: 'miden',
-							readOnly: false
-						}}
 						value={transactionScriptValue}
 						className={cn(
 							'whitespace-pre-wrap overflow-hidden p-0 m-0 w-full h-full absolute top-0 left-0'
 						)}
 					/>
 				</div>
-			) : selectedOverview !== '' ? (
+			) : selectedOverviewTab !== '' ? (
 				<div className="flex-1 overflow-hidden text-theme-text">
 					<ScrollArea className="h-full w-full pb-2">
-						{selectedOverview === 'account'
+						{selectedOverviewTab === 'account'
 							? vaultData && (
 									<OverviewLayout
 										data={{
@@ -209,26 +168,10 @@ const ComposeTransactionMiddlePan = () => {
 												/>
 											),
 											Script: (
-												<MonacoEditor
+												<CustomMonacoEditor
 													onChange={(value) => {
 														setNoteScriptValue(value ?? '');
 														// if (file && !file.readonly) updateFileContent(file.id, value ?? '');
-													}}
-													onMount={(editor: editor.IStandaloneCodeEditor, _monaco) => {
-														configureMonaco(_monaco);
-													}}
-													options={{
-														overviewRulerLanes: 0,
-														minimap: { enabled: false },
-														wordBreak: 'keepAll',
-														wordWrap: 'on',
-														smoothScrolling: true,
-														scrollbar: {
-															verticalSliderSize: 5,
-															verticalScrollbarSize: 5
-														},
-														theme: 'miden',
-														readOnly: false
 													}}
 													value={noteScriptValue}
 													className={cn(

@@ -1,4 +1,6 @@
 import { useMiden } from '@/lib/context-providers';
+import { AUTHENTICATION_COMPONENT_SCRIPT_FILE_ID, WALLET_COMPONENT_SCRIPT_FILE_ID } from './consts';
+import { Account } from './account';
 
 export interface EditorFile {
 	id: string;
@@ -18,7 +20,7 @@ export type EditorFiles = Record<string, EditorFile>;
 export interface EditorFileDynamicContent {
 	account?: {
 		accountId: string;
-		variant: 'metadata' | 'vault';
+		variant: 'metadata' | 'vault' | 'code';
 	};
 	note?: {
 		noteId: string;
@@ -31,140 +33,95 @@ export const useEditorFile = (fileId: string) => {
 	return files[fileId];
 };
 
-export const useSelectedEditorFile = (): { content: string; file: EditorFile | null } => {
+interface EditorFileContent {
+	content: string;
+	file: EditorFile | null;
+	account?: Account | null;
+}
+
+type SelectedEditorFileResult =
+	| EditorFileContent
+	| {
+			walletScript: EditorFileContent;
+			authScript: EditorFileContent;
+			accountScript: EditorFileContent;
+			isMultiFile: true;
+	  };
+
+export const useSelectedEditorFile = (): SelectedEditorFileResult => {
 	const { files, accounts, selectedFileId, notes } = useMiden();
-	if (!selectedFileId) return { content: '', file: null };
+
+	if (!selectedFileId) return { content: '', file: null, account: null };
 
 	const file = files[selectedFileId];
+	if (!file) return { content: '', file: null, account: null };
+
+	if (file.content.dynamic?.account?.variant === 'code') {
+		const account = accounts[file.content.dynamic.account.accountId];
+
+		return {
+			walletScript: {
+				content: files[WALLET_COMPONENT_SCRIPT_FILE_ID]?.content.value || '',
+				file: files[WALLET_COMPONENT_SCRIPT_FILE_ID] || null,
+				account
+			},
+			authScript: {
+				content: files[AUTHENTICATION_COMPONENT_SCRIPT_FILE_ID]?.content.value || '',
+				file: files[AUTHENTICATION_COMPONENT_SCRIPT_FILE_ID] || null,
+				account
+			},
+			accountScript: {
+				content: files[account.scriptFileId]?.content.value || '',
+				file: files[account.scriptFileId] || null,
+				account
+			},
+			isMultiFile: true
+		};
+	}
 
 	let content = '';
-	if (file) {
-		if (file.content.dynamic) {
-			if (file.content.dynamic.account) {
-				if (file.content.dynamic.account.variant === 'metadata') {
-					const account = accounts[file.content.dynamic.account.accountId];
-					content = JSON.stringify(
-						{
-							accountId: account.id.toString()
-						},
-						null,
-						2
-					);
-				} else if (file.content.dynamic.account.variant === 'vault') {
-					const account = accounts[file.content.dynamic.account.accountId];
-					content = JSON.stringify(
-						account.assets.map((asset) => [
-							asset.amount.toString(),
-							0,
-							0,
-							asset.faucetId.toString()
-						]),
-						null,
-						2
-					);
-				}
-			} else if (file.content.dynamic.note) {
-				if (file.content.dynamic.note.variant === 'metadata') {
-					const note = notes[file.content.dynamic.note.noteId];
-					content = JSON.stringify(
-						{
-							senderId: note.senderId.toString(),
-							serialNumber: note.serialNumberDecimalString
-						},
-						null,
-						2
-					);
-				} else if (file.content.dynamic.note.variant === 'vault') {
-					const note = notes[file.content.dynamic.note.noteId];
-					content = JSON.stringify(
-						note.assets.map((asset) => [asset.amount.toString(), 0, 0, asset.faucetId.toString()]),
-						null,
-						2
-					);
-				}
+	if (file.content.dynamic) {
+		if (file.content.dynamic.account) {
+			if (file.content.dynamic.account.variant === 'metadata') {
+				const account = accounts[file.content.dynamic.account.accountId];
+				content = JSON.stringify(
+					{
+						accountId: account.id.toString()
+					},
+					null,
+					2
+				);
+			} else if (file.content.dynamic.account.variant === 'vault') {
+				const account = accounts[file.content.dynamic.account.accountId];
+				content = JSON.stringify(
+					account.assets.map((asset) => [asset.amount.toString(), 0, 0, asset.faucetId.toString()]),
+					null,
+					2
+				);
 			}
-		} else {
-			content = file.content.value;
+		} else if (file.content.dynamic.note) {
+			if (file.content.dynamic.note.variant === 'metadata') {
+				const note = notes[file.content.dynamic.note.noteId];
+				content = JSON.stringify(
+					{
+						senderId: note.senderId.toString(),
+						serialNumber: note.serialNumberDecimalString
+					},
+					null,
+					2
+				);
+			} else if (file.content.dynamic.note.variant === 'vault') {
+				const note = notes[file.content.dynamic.note.noteId];
+				content = JSON.stringify(
+					note.assets.map((asset) => [asset.amount.toString(), 0, 0, asset.faucetId.toString()]),
+					null,
+					2
+				);
+			}
 		}
+	} else {
+		content = file.content.value;
 	}
 
 	return { content, file };
-};
-
-export const useSelectedAccountData = (): {
-	name: string;
-	metadata: string;
-	vault: string;
-} => {
-	const { accounts, selectedTransactionAccountId } = useMiden();
-
-	if (!selectedTransactionAccountId) {
-		return {
-			name: '',
-			metadata: '',
-			vault: ''
-		};
-	}
-
-	const account = accounts[selectedTransactionAccountId];
-
-	const metadata = account.id.toString();
-
-	const name = account.name;
-
-	const vault = JSON.stringify(
-		account.assets.map((asset) => [asset.amount.toString(), 0, 0, asset.faucetId.toString()]),
-		null,
-		2
-	);
-
-	return {
-		name,
-		metadata,
-		vault
-	};
-};
-
-export const useSelectedNoteData = (): {
-	noteName: string;
-	noteMetadata?: { senderId: string; serialNumber: string };
-	noteVault: string;
-	script: string;
-	input: string;
-} => {
-	const { notes, files, selectedOverview } = useMiden();
-	if (!notes[selectedOverview]) {
-		return {
-			noteName: '',
-			noteVault: '',
-			script: '',
-			input: ''
-		};
-	}
-	const note = notes[selectedOverview];
-	const noteName = note.name;
-	const noteMetadata = {
-		senderId: note.senderId.toString(),
-		serialNumber: note.serialNumberDecimalString
-	};
-
-	const noteVault = JSON.stringify(
-		note.assets.map((asset) => [asset.amount.toString(), 0, 0, asset.faucetId.toString()]),
-		null,
-		2
-	);
-
-	const script =
-		note && note.scriptFileId && files[note.scriptFileId] && files[note.scriptFileId].content?.value
-			? files[note.scriptFileId].content.value
-			: '';
-
-	const input = JSON.stringify(JSON.parse(files[note.inputFileId]?.content.value || '{}'), null, 2);
-	return {
-		noteName,
-		noteMetadata,
-		noteVault,
-		script: script || '',
-		input
-	};
 };
