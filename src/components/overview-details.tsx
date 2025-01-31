@@ -35,7 +35,7 @@ const OverviewLayout = ({ data }: OverviewLayoutProps) => {
 							onClick={() => handleCopy(String(value.value), label)}
 							className="p-1 hover:bg-theme-surface-highlight rounded transition-colors"
 						>
-							<Copy className="w-4 h-4 text-gray-400" />
+							<Copy className="w-4 h-4 text-theme-secondary" />
 						</button>
 					)}
 				</div>
@@ -54,7 +54,7 @@ const OverviewLayout = ({ data }: OverviewLayoutProps) => {
 				return (
 					<div key={label} className={`${hasDivider ? 'border-b border-theme-border mb-4' : ''}`}>
 						<div className="flex items-start gap-24 mb-4">
-							<div className="text-gray-400 min-w-[120px]">{label}:</div>
+							<div className="text-theme-text-subtle min-w-[120px]">{label}:</div>
 							{renderValue(value, label)}
 						</div>
 					</div>

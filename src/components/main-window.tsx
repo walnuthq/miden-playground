@@ -12,13 +12,7 @@ import Breadcrumbs from './breadcrumbs';
 import { CustomMonacoEditor } from './custom-monaco-editor';
 import { MultiFileEditor } from './multi-file-editor';
 export function MainWindow({ toggleInspector }: { toggleInspector: () => void }) {
-	const {
-		selectedTab,
-		executionOutput,
-		updateFileContent,
-		disableWalletComponent,
-		disableAuthComponent
-	} = useMiden();
+	const { selectedTab, executionOutput, updateFileContent } = useMiden();
 	const result = useSelectedEditorFile();
 
 	const [value, setValue] = useState('');
@@ -36,14 +30,7 @@ export function MainWindow({ toggleInspector }: { toggleInspector: () => void })
 		}
 
 		if ('isMultiFile' in result) {
-			return (
-				<MultiFileEditor
-					result={result}
-					updateFileContent={updateFileContent}
-					disableWalletComponent={disableWalletComponent}
-					disableAuthComponent={disableAuthComponent}
-				/>
-			);
+			return <MultiFileEditor result={result} />;
 		}
 
 		return (

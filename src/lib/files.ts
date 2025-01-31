@@ -33,7 +33,7 @@ export const useEditorFile = (fileId: string) => {
 	return files[fileId];
 };
 
-interface EditorFileContent {
+export interface EditorFileContent {
 	content: string;
 	file: EditorFile | null;
 	account?: Account | null;

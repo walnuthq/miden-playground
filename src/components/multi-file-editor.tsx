@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { CustomMonacoEditor } from './custom-monaco-editor';
 import InlineIcon from './ui/inline-icon';
 import { useMiden } from '@/lib/context-providers';
+import { EditorFileContent } from '@/lib/files';
 
 interface EditorSection {
 	title: string;
@@ -16,7 +17,14 @@ interface EditorSection {
 	onChange?: (value: string) => void;
 }
 
-export const MultiFileEditor = ({ result }: { result }) => {
+type SelectedEditorFileResult = {
+	walletScript: EditorFileContent;
+	authScript: EditorFileContent;
+	accountScript: EditorFileContent;
+	isMultiFile: true;
+};
+
+export const MultiFileEditor = ({ result }: { result: SelectedEditorFileResult }) => {
 	const { updateFileContent, disableWalletComponent, disableAuthComponent } = useMiden();
 	const getEditorSections = (): EditorSection[] => {
 		const sections: EditorSection[] = [
@@ -32,7 +40,7 @@ export const MultiFileEditor = ({ result }: { result }) => {
 			}
 		];
 
-		if (result.walletScript.account.isWallet) {
+		if (result?.walletScript?.account?.isWallet) {
 			sections.push({
 				title: 'Wallet',
 				content: result.walletScript.content,
@@ -43,7 +51,7 @@ export const MultiFileEditor = ({ result }: { result }) => {
 			});
 		}
 
-		if (result.authScript.account.isAuth) {
+		if (result?.authScript?.account?.isAuth) {
 			sections.push({
 				title: 'Auth component',
 				content: result.authScript.content,
@@ -84,7 +92,6 @@ export const MultiFileEditor = ({ result }: { result }) => {
 					<CustomMonacoEditor
 						readOnly={section.readOnly}
 						value={section.content}
-						onChange={section.onChange}
 						className={cn('h-44 absolute top-0 left-0')}
 					/>
 				</div>
