@@ -216,16 +216,17 @@ function takeFromExternrefTable0(idx) {
  * @param {string} transaction_script
  * @param {AccountData} receiver
  * @param {(NoteData)[]} notes
+ * @param {bigint} block_number
  * @returns {any}
  */
-export function execute_transaction(transaction_script, receiver, notes) {
+export function execute_transaction(transaction_script, receiver, notes, block_number) {
     const ptr0 = passStringToWasm0(transaction_script, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
     const len0 = WASM_VECTOR_LEN;
     _assertClass(receiver, AccountData);
     var ptr1 = receiver.__destroy_into_raw();
     const ptr2 = passArrayJsValueToWasm0(notes, wasm.__wbindgen_malloc);
     const len2 = WASM_VECTOR_LEN;
-    const ret = wasm.execute_transaction(ptr0, len0, ptr1, ptr2, len2);
+    const ret = wasm.execute_transaction(ptr0, len0, ptr1, ptr2, len2, block_number);
     if (ret[2]) {
         throw takeFromExternrefTable0(ret[1]);
     }

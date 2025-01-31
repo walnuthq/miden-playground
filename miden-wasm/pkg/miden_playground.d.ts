@@ -2,7 +2,7 @@
 /* eslint-disable */
 export function generate_account_id(seed: Uint8Array): bigint;
 export function generate_faucet_id(seed: Uint8Array): bigint;
-export function execute_transaction(transaction_script: string, receiver: AccountData, notes: (NoteData)[]): any;
+export function execute_transaction(transaction_script: string, receiver: AccountData, notes: (NoteData)[], block_number: bigint): any;
 export function create_swap_note(seed: Uint8Array, sender_account_id: bigint, offered_asset: AssetData, receiver_account_id: bigint, requested_asset: AssetData): CreateSwapNoteResult;
 export function generate_note_serial_number(seed: Uint8Array): BigUint64Array;
 export class AccountData {
@@ -41,7 +41,7 @@ export interface InitOutput {
   readonly memory: WebAssembly.Memory;
   readonly generate_account_id: (a: number, b: number) => bigint;
   readonly generate_faucet_id: (a: number, b: number) => bigint;
-  readonly execute_transaction: (a: number, b: number, c: number, d: number, e: number) => [number, number, number];
+  readonly execute_transaction: (a: number, b: number, c: number, d: number, e: number, f: bigint) => [number, number, number];
   readonly __wbg_createswapnoteresult_free: (a: number, b: number) => void;
   readonly createswapnoteresult_note_inputs: (a: number) => [number, number];
   readonly createswapnoteresult_payback_note: (a: number) => number;

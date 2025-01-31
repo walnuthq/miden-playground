@@ -345,6 +345,7 @@ pub fn execute_transaction(
     transaction_script: &str,
     receiver: AccountData,
     notes: Vec<NoteData>,
+    block_number: u64,
 ) -> Result<JsValue, JsValue> {
     let mut receiver = receiver;
 
@@ -418,7 +419,7 @@ pub fn execute_transaction(
 
     let tx_context = TransactionContextBuilder::new(receiver.account.clone())
         .input_notes(notes.clone())
-        .build();
+        .build(block_number);
 
     let executor =
         TransactionExecutor::new(Arc::new(tx_context.clone()), Some(receiver.falcon_auth()))
