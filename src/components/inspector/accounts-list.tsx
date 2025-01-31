@@ -1,9 +1,5 @@
 import { useMiden } from '@/lib/context-providers';
 import React, { useState } from 'react';
-import {
-	AUTHENTICATION_COMPONENT_SCRIPT_FILE_ID,
-	WALLET_COMPONENT_SCRIPT_FILE_ID
-} from '@/lib/consts';
 import { FileItem, InspectorItem } from '.';
 
 const AccountsList = ({
@@ -20,8 +16,6 @@ const AccountsList = ({
 		selectedFileId,
 		accounts,
 		createAccount,
-		disableWalletComponent,
-		disableAuthComponent,
 		enableAuthComponent,
 		enableWalletComponent,
 		deleteAccount
@@ -90,33 +84,15 @@ const AccountsList = ({
 							{!isCollapsed && (
 								<div className="flex flex-col">
 									<FileItem
-										editorFile={files[account.scriptFileId]}
-										isSelected={selectedFileId === account.scriptFileId}
-										onClick={() => selectFile(account.scriptFileId)}
-										level={2}
-									/>
-									{account.isWallet && (
-										<FileItem
-											editorFile={files[WALLET_COMPONENT_SCRIPT_FILE_ID]}
-											isSelected={selectedFileId === WALLET_COMPONENT_SCRIPT_FILE_ID}
-											onClick={() => selectFile(WALLET_COMPONENT_SCRIPT_FILE_ID)}
-											onRemove={() => disableWalletComponent(account.idHex)}
-											level={2}
-										/>
-									)}
-									{account.isAuth && (
-										<FileItem
-											editorFile={files[AUTHENTICATION_COMPONENT_SCRIPT_FILE_ID]}
-											isSelected={selectedFileId === AUTHENTICATION_COMPONENT_SCRIPT_FILE_ID}
-											onClick={() => selectFile(AUTHENTICATION_COMPONENT_SCRIPT_FILE_ID)}
-											onRemove={() => disableAuthComponent(account.idHex)}
-											level={2}
-										/>
-									)}
-									<FileItem
 										editorFile={files[account.metadataFileId]}
 										onClick={() => selectFile(account.metadataFileId)}
 										isSelected={selectedFileId === account.metadataFileId}
+										level={2}
+									/>
+									<FileItem
+										editorFile={files[account.scriptFileId]}
+										isSelected={selectedFileId === account.scriptFileId}
+										onClick={() => selectFile(account.scriptFileId)}
 										level={2}
 									/>
 									<FileItem

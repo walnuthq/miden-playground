@@ -21,7 +21,7 @@ export const TransactionBuilder: React.FC = () => {
 		selectedTransactionAccountId,
 		removeTransactionAccount,
 		selectOverview,
-		selectedOverview,
+		selectedOverviewTab,
 		isExecutingTransaction,
 		executeTransaction
 	} = useMiden();
@@ -126,7 +126,7 @@ export const TransactionBuilder: React.FC = () => {
 						selectOverview('transaction-script');
 					}}
 					className={`flex flex-row items-center mt-4 gap-2 text-theme-text py-2 px-3 cursor-pointer ${
-						selectedOverview === 'transaction-script'
+						selectedOverviewTab === 'transaction-script'
 							? 'bg-theme-border '
 							: 'hover:bg-theme-surface-highlight'
 					}`}

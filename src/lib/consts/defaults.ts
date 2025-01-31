@@ -1,6 +1,6 @@
 import { Account } from '@/lib/account';
 import { Note, createP2IDNote } from '@/lib/notes';
-import { EditorFiles } from '@/lib/files';
+import { EditorFiles } from '../files';
 
 export const DEFAULT_FAUCET_IDS = [2305843009213693983n, 3103030043208856727n];
 

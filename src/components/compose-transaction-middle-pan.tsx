@@ -1,101 +1,39 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { Editor as MonacoEditor, Monaco, useMonaco } from '@monaco-editor/react';
+'use client';
+import React, { useEffect, useState } from 'react';
 import { Console } from './console';
 import { cn } from '@/lib/utils';
-import { editor } from 'monaco-editor';
-import { useSelectedAccountData, useSelectedNoteData } from '@/lib/files';
+
 import { useMiden } from '@/lib/context-providers';
 import { TRANSACTION_SCRIPT_FILE_ID } from '@/lib/consts';
 import { ScrollArea, ScrollBar } from './ui/scroll-area';
 import { Vault } from './vault';
 import OverviewLayout from './overview-details';
 import { Textarea } from './ui/textarea';
+import { CustomMonacoEditor } from './custom-monaco-editor';
+import { useSelectedAccountData, useSelectedNoteData } from '../lib/overview-data';
 
 const ComposeTransactionMiddlePan = () => {
-	const { id: selectedAccountId, metadata, vault, name } = useSelectedAccountData();
-	const {
-		id: selectedNoteId,
-		noteName,
-		noteMetadata,
-		noteVault,
-		script,
-		input
-	} = useSelectedNoteData();
-	const { updateFileContent, selectedOverview, files } = useMiden();
+	const selectedAccountData = useSelectedAccountData();
+	const selectedNoteData = useSelectedNoteData();
+	const { updateFileContent, selectedOverviewTab, files } = useMiden();
 	const [transactionScriptValue, setTransactionScriptValue] = useState(
 		files[TRANSACTION_SCRIPT_FILE_ID].content.value
 	);
-	const [noteScriptValue, setNoteScriptValue] = useState(script);
-	const [vaultData, setVaultData] = useState();
-	const [noteVaultData, setNoteVaultData] = useState();
-	useEffect(() => {
-		if (vault) {
-			const vaultArray = JSON.parse(vault);
-			setVaultData(
-				vaultArray.map((item: number[]) => {
-					return {
-						asset_type: item[1],
-						id: item[3],
-						symbol: item[2],
-						amount: item[0]
-					};
-				})
-			);
-		}
-		if (noteVault) {
-			const noteVaultArray = JSON.parse(noteVault);
-
-			setNoteVaultData(
-				noteVaultArray.map((item: number[]) => {
-					return {
-						asset_type: item[1],
-						id: item[3],
-						symbol: item[2],
-						amount: item[0]
-					};
-				})
-			);
-		}
-	}, [vault, noteVault]);
+	const [noteScriptValue, setNoteScriptValue] = useState(selectedNoteData?.script);
 
 	useEffect(() => {
 		setTransactionScriptValue(files[TRANSACTION_SCRIPT_FILE_ID].content.value);
 	}, [files]);
 
 	useEffect(() => {
-		setNoteScriptValue(script);
-	}, [script]);
-
-	const configureMonaco = useCallback((_monaco: Monaco) => {
-		if (_monaco) {
-			_monaco.editor.defineTheme('miden', {
-				base: 'vs-dark',
-				inherit: true,
-				rules: [],
-				colors: {
-					'editor.background': '#040113',
-					'editor.foreground': '#4E8CC0',
-					'editorLineNumber.foreground': '#4E8CC0',
-					'editorLineNumber.activeForeground': '#83afd4'
-				}
-			});
-			_monaco.editor.setTheme('miden');
-		}
-	}, []);
-
-	const monaco = useMonaco();
-
-	useEffect(() => {
-		if (monaco) {
-			configureMonaco(monaco);
-		}
-	}, [configureMonaco, monaco]);
+		setNoteScriptValue(selectedNoteData?.script);
+	}, [selectedNoteData?.script]);
 
 	return (
 		<div className="flex flex-col justify-end h-full">
-			{selectedOverview === 'transaction-script' ? (
+			{selectedOverviewTab === 'transaction-script' ? (
 				<div className="flex-1 overflow-hidden text-theme-text">
-					<MonacoEditor
+					<CustomMonacoEditor
 						onChange={(value) => {
 							setTransactionScriptValue(value ?? '');
 							if (
@@ -104,79 +42,54 @@ const ComposeTransactionMiddlePan = () => {
 							)
 								updateFileContent(TRANSACTION_SCRIPT_FILE_ID, value ?? '');
 						}}
-						onMount={(editor: editor.IStandaloneCodeEditor, _monaco) => {
-							configureMonaco(_monaco);
-						}}
-						options={{
-							overviewRulerLanes: 0,
-							minimap: { enabled: false },
-							wordBreak: 'keepAll',
-							wordWrap: 'on',
-							smoothScrolling: true,
-							scrollbar: {
-								verticalSliderSize: 5,
-								verticalScrollbarSize: 5
-							},
-							theme: 'miden',
-							readOnly: false
-						}}
 						value={transactionScriptValue}
 						className={cn(
 							'whitespace-pre-wrap overflow-hidden p-0 m-0 w-full h-full absolute top-0 left-0'
 						)}
 					/>
 				</div>
-			) : selectedOverview !== '' ? (
+			) : selectedOverviewTab !== null ? (
 				<div className="flex-1 overflow-hidden text-theme-text">
 					<ScrollArea className="h-full w-full pb-2">
-						{selectedOverview === 'account'
-							? vaultData && (
+						{selectedOverviewTab === 'account'
+							? selectedAccountData?.id && (
 									<OverviewLayout
 										data={{
-											'Account name': { value: name, copyable: true },
-											'Account ID': { value: metadata, copyable: true, divider: true },
-											Vault: <Vault accountId={selectedAccountId} />
-										}}
-									/>
-							  )
-							: noteVaultData && (
-									<OverviewLayout
-										data={{
-											'Note name': { value: noteName, copyable: true },
-											'Sender address': { value: noteMetadata?.senderId, copyable: true },
-											'Serial number': {
-												value: noteMetadata?.serialNumber,
+											'Account name': { value: selectedAccountData?.name, copyable: true },
+											'Account ID': {
+												value: selectedAccountData?.metadata,
 												copyable: true,
 												divider: true
 											},
-											Vault: <Vault noteId={selectedNoteId} />,
+											Vault: <Vault accountId={selectedAccountData?.id} />
+										}}
+									/>
+							  )
+							: selectedNoteData?.id && (
+									<OverviewLayout
+										data={{
+											'Note name': { value: selectedNoteData?.noteName, copyable: true },
+											'Sender address': {
+												value: selectedNoteData?.noteMetadata?.senderId,
+												copyable: true
+											},
+											'Serial number': {
+												value: selectedNoteData?.noteMetadata?.serialNumber,
+												copyable: true,
+												divider: true
+											},
+											Vault: <Vault noteId={selectedNoteData?.id} />,
 											Inputs: (
 												<Textarea
 													className="border-theme-border w-full min-h-20"
-													defaultValue={input}
+													defaultValue={selectedNoteData?.input}
 												/>
 											),
 											Script: (
-												<MonacoEditor
+												<CustomMonacoEditor
 													onChange={(value) => {
 														setNoteScriptValue(value ?? '');
 														// if (file && !file.readonly) updateFileContent(file.id, value ?? '');
-													}}
-													onMount={(editor: editor.IStandaloneCodeEditor, _monaco) => {
-														configureMonaco(_monaco);
-													}}
-													options={{
-														overviewRulerLanes: 0,
-														minimap: { enabled: false },
-														wordBreak: 'keepAll',
-														wordWrap: 'on',
-														smoothScrolling: true,
-														scrollbar: {
-															verticalSliderSize: 5,
-															verticalScrollbarSize: 5
-														},
-														theme: 'miden',
-														readOnly: false
 													}}
 													value={noteScriptValue}
 													className={cn(

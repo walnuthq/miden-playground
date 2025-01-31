@@ -1,7 +1,7 @@
 import { Asset } from '@/lib/types';
 import { generateId } from '@/lib/utils';
 import { Note } from '@/lib/notes';
-import { EditorFiles } from '@/lib/files';
+import { EditorFiles } from '../files';
 
 export function createP2IDRNote({
 	senderId,
