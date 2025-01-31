@@ -6,70 +6,12 @@ import { cn } from '@/lib/utils';
 import { useMiden } from '@/lib/context-providers';
 import { TRANSACTION_SCRIPT_FILE_ID } from '@/lib/consts';
 import { ScrollArea, ScrollBar } from './ui/scroll-area';
-import { ColumnDef } from '@tanstack/react-table';
-import { AssetsDatatable } from './assets-datatable';
+import { AssetsDatatable, columns } from './assets-datatable';
 import OverviewLayout from './overview-details';
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuTrigger
-} from './ui/dropdown-menu';
-import { Button } from './ui/button';
-import { MoreHorizontal } from 'lucide-react';
 import { Textarea } from './ui/textarea';
 import { CustomMonacoEditor } from './custom-monaco-editor';
 import { useSelectedAccountData, useSelectedNoteData } from './overview-data';
 
-export type VaultType = {
-	asset_type: string;
-	id: string;
-	symbol: string;
-	amount: string;
-};
-export const columns: ColumnDef<VaultType>[] = [
-	{
-		accessorKey: 'asset_type',
-		header: 'Asset type'
-	},
-	{
-		accessorKey: 'id',
-		header: 'Faucet ID'
-	},
-	{
-		accessorKey: 'symbol',
-		header: 'Symbol'
-	},
-	{
-		accessorKey: 'amount',
-		header: 'Amount'
-	},
-	{
-		id: 'actions',
-		enableHiding: false,
-		cell: ({ row }) => {
-			const faucet = row.original;
-
-			return (
-				<DropdownMenu>
-					<DropdownMenuTrigger asChild>
-						<Button className="h-8 w-8 p-0 hover:bg-theme-border">
-							<span className="sr-only">Open menu</span>
-							<MoreHorizontal />
-						</Button>
-					</DropdownMenuTrigger>
-					<DropdownMenuContent align="end">
-						<DropdownMenuLabel>Actions</DropdownMenuLabel>
-						<DropdownMenuItem onClick={() => navigator.clipboard.writeText(faucet.id)}>
-							Copy faucet ID
-						</DropdownMenuItem>
-					</DropdownMenuContent>
-				</DropdownMenu>
-			);
-		}
-	}
-];
 const ComposeTransactionMiddlePan = () => {
 	const selectedAccountData = useSelectedAccountData();
 	const selectedNoteData = useSelectedNoteData();
@@ -86,9 +28,7 @@ const ComposeTransactionMiddlePan = () => {
 			setVaultData(
 				vaultArray.map((item: number[]) => {
 					return {
-						asset_type: item[1],
-						id: item[3],
-						symbol: item[2],
+						faucetId: item[0],
 						amount: item[0]
 					};
 				})
@@ -100,9 +40,7 @@ const ComposeTransactionMiddlePan = () => {
 			setNoteVaultData(
 				noteVaultArray.map((item: number[]) => {
 					return {
-						asset_type: item[1],
-						id: item[3],
-						symbol: item[2],
+						faucetId: item[3],
 						amount: item[0]
 					};
 				})
