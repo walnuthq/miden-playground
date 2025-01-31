@@ -7,71 +7,20 @@ import { useSelectedAccountData, useSelectedNoteData } from '@/lib/files';
 import { useMiden } from '@/lib/context-providers';
 import { TRANSACTION_SCRIPT_FILE_ID } from '@/lib/consts';
 import { ScrollArea, ScrollBar } from './ui/scroll-area';
-import { ColumnDef } from '@tanstack/react-table';
-import { AssetsDatatable } from './assets-datatable';
+import { Vault } from './vault';
 import OverviewLayout from './overview-details';
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuTrigger
-} from './ui/dropdown-menu';
-import { Button } from './ui/button';
-import { MoreHorizontal } from 'lucide-react';
 import { Textarea } from './ui/textarea';
 
-export type VaultType = {
-	asset_type: string;
-	id: string;
-	symbol: string;
-	amount: string;
-};
-export const columns: ColumnDef<VaultType>[] = [
-	{
-		accessorKey: 'asset_type',
-		header: 'Asset type'
-	},
-	{
-		accessorKey: 'id',
-		header: 'Faucet ID'
-	},
-	{
-		accessorKey: 'symbol',
-		header: 'Symbol'
-	},
-	{
-		accessorKey: 'amount',
-		header: 'Amount'
-	},
-	{
-		id: 'actions',
-		enableHiding: false,
-		cell: ({ row }) => {
-			const faucet = row.original;
-
-			return (
-				<DropdownMenu>
-					<DropdownMenuTrigger asChild>
-						<Button className="h-8 w-8 p-0 hover:bg-theme-border">
-							<span className="sr-only">Open menu</span>
-							<MoreHorizontal />
-						</Button>
-					</DropdownMenuTrigger>
-					<DropdownMenuContent align="end">
-						<DropdownMenuLabel>Actions</DropdownMenuLabel>
-						<DropdownMenuItem onClick={() => navigator.clipboard.writeText(faucet.id)}>
-							Copy faucet ID
-						</DropdownMenuItem>
-					</DropdownMenuContent>
-				</DropdownMenu>
-			);
-		}
-	}
-];
 const ComposeTransactionMiddlePan = () => {
-	const { metadata, vault, name } = useSelectedAccountData();
-	const { noteName, noteMetadata, noteVault, script, input } = useSelectedNoteData();
+	const { id: selectedAccountId, metadata, vault, name } = useSelectedAccountData();
+	const {
+		id: selectedNoteId,
+		noteName,
+		noteMetadata,
+		noteVault,
+		script,
+		input
+	} = useSelectedNoteData();
 	const { updateFileContent, selectedOverview, files } = useMiden();
 	const [transactionScriptValue, setTransactionScriptValue] = useState(
 		files[TRANSACTION_SCRIPT_FILE_ID].content.value
@@ -186,7 +135,7 @@ const ComposeTransactionMiddlePan = () => {
 										data={{
 											'Account name': { value: name, copyable: true },
 											'Account ID': { value: metadata, copyable: true, divider: true },
-											Vault: <AssetsDatatable data={vaultData} columns={columns} />
+											Vault: <Vault accountId={selectedAccountId} />
 										}}
 									/>
 							  )
@@ -200,8 +149,7 @@ const ComposeTransactionMiddlePan = () => {
 												copyable: true,
 												divider: true
 											},
-											Vault: <AssetsDatatable data={noteVaultData} columns={columns} />,
-
+											Vault: <Vault noteId={selectedNoteId} />,
 											Inputs: (
 												<Textarea
 													className="border-theme-border w-full min-h-20"

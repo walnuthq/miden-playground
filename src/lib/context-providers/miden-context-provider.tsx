@@ -65,6 +65,16 @@ interface MidenContextProps {
 	addErrorLog: (message: string) => void;
 	selectedOverview: string;
 	selectOverview: (tab: string) => void;
+	updateAccountAssetAmount: (
+		accountId: string,
+		faucetId: bigint,
+		updateFn: (amount: bigint) => bigint
+	) => void;
+	updateNoteAssetAmount: (
+		noteId: string,
+		faucetId: bigint,
+		updateFn: (amount: bigint) => bigint
+	) => void;
 }
 
 export const MidenContext = createContext<MidenContextProps>({
@@ -105,7 +115,9 @@ export const MidenContext = createContext<MidenContextProps>({
 	addInfoLog: () => {},
 	addErrorLog: () => {},
 	selectedOverview: '',
-	selectOverview: () => {}
+	selectOverview: () => {},
+	updateAccountAssetAmount: () => {},
+	updateNoteAssetAmount: () => {}
 });
 
 export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
@@ -488,6 +500,33 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		[removeFile]
 	);
 
+	const updateAccountAssetAmount = (
+		accountId: string,
+		faucetId: bigint,
+		updateFn: (amount: bigint) => bigint
+	) => {
+		updateAccountById(accountId, (account) => {
+			account.updateAssetAmount(faucetId, updateFn);
+			return account;
+		});
+	};
+
+	const updateNoteAssetAmount = (
+		noteId: string,
+		faucetId: bigint,
+		updateFn: (amount: bigint) => bigint
+	) => {
+		setNotes((prev) => {
+			const note = prev[noteId];
+			if (!note) {
+				console.error(`Note with ID ${noteId} not found.`);
+				return prev;
+			}
+			note.updateAssetAmount(faucetId, updateFn);
+			return { ...prev, [noteId]: note };
+		});
+	};
+
 	return (
 		<MidenContext.Provider
 			value={{
@@ -528,7 +567,9 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				addErrorLog,
 				addInfoLog,
 				selectedOverview,
-				selectOverview
+				selectOverview,
+				updateAccountAssetAmount,
+				updateNoteAssetAmount
 			}}
 		>
 			{children}
