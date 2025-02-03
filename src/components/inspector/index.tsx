@@ -1,7 +1,5 @@
 'use client';
 
-import { useMiden } from '@/lib/context-providers';
-import { TransactionBuilder } from './transaction-builder';
 import { AssetExplorer } from './asset-explorer';
 import InlineIcon from '@/components/ui/inline-icon';
 import {
@@ -13,13 +11,7 @@ import {
 import { EditorFile } from '@/lib/files';
 
 export function Inspector() {
-	const { selectedTab } = useMiden();
-	if (selectedTab === 'transaction') {
-		return <TransactionBuilder />;
-	}
-	if (selectedTab === 'assets') {
-		return <AssetExplorer />;
-	}
+	return <AssetExplorer />;
 }
 
 export function FileItem({
