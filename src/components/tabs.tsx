@@ -9,7 +9,7 @@ export const Tabs = () => {
 	return (
 		<div className="flex  flex-row ">
 			<div
-				className={`text-theme-text border-x-2 border-t-2 border-theme-border rounded-tl-miden text-sm px-4 py-4 flex flex-row items-center gap-2 cursor-pointer select-none ${
+				className={`w-[200px] text-theme-text border-x-2 border-t-2 border-theme-border rounded-tl-miden text-sm px-4 py-4 flex flex-row items-center gap-2 cursor-pointer select-none ${
 					selectedTab === 'transaction' ? 'bg-[#040113]' : ''
 				}`}
 				onClick={() => {
@@ -24,7 +24,7 @@ export const Tabs = () => {
 				Compose transaction
 			</div>
 			<div
-				className={`text-theme-text border-r-2 border-t-2 rounded-tr-miden text-sm px-4 py-4 border-theme-border flex flex-row items-center gap-2 cursor-pointer select-none ${
+				className={`w-[200px] text-theme-text border-r-2 border-t-2 rounded-tr-miden text-sm px-4 py-4 border-theme-border flex flex-row items-center gap-2 cursor-pointer select-none ${
 					selectedTab === 'assets' ? 'bg-[#040113]' : ''
 				}`}
 				onClick={() => {
@@ -36,7 +36,7 @@ export const Tabs = () => {
 					color={selectedTab === 'assets' ? '#9748FF' : '#FFFDFD'}
 					className={`w-5 h-5`}
 				/>
-				Assets Explorer
+				Editor
 			</div>
 		</div>
 	);

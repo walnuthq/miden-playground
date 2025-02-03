@@ -23,3 +23,8 @@ export interface Asset {
 	faucetId: bigint;
 	amount: bigint;
 }
+
+export interface AccountUpdates {
+	accountId: string;
+	assetsDelta: Record<string, bigint>; // FaucetId -> Amount Delta
+}

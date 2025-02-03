@@ -29,20 +29,20 @@ const OverviewLayout = ({ data }: OverviewLayoutProps) => {
 		if (value && typeof value === 'object' && 'value' in value) {
 			return (
 				<div className="flex items-center gap-2">
-					<div>{value.value}</div>
+					<div className="text-theme-text text-sm">{value.value}</div>
 					{value.copyable && typeof value.value !== 'object' && (
 						<button
 							onClick={() => handleCopy(String(value.value), label)}
 							className="p-1 hover:bg-theme-surface-highlight rounded transition-colors"
 						>
-							<Copy className="w-4 h-4 text-theme-secondary" />
+							<Copy className="w-4 h-4 text-theme-primary" />
 						</button>
 					)}
 				</div>
 			);
 		}
 
-		return <div className="w-full">{value}</div>;
+		return <div className="w-full text-theme-text text-sm">{value}</div>;
 	};
 
 	return (
@@ -53,8 +53,8 @@ const OverviewLayout = ({ data }: OverviewLayoutProps) => {
 
 				return (
 					<div key={label} className={`${hasDivider ? 'border-b border-theme-border mb-4' : ''}`}>
-						<div className="flex items-start gap-24 mb-4">
-							<div className="text-theme-text-subtle min-w-[120px]">{label}:</div>
+						<div className="flex items-start gap-4 mb-4">
+							<div className="text-theme-text-subtle min-w-[120px] text-sm">{label}:</div>
 							{renderValue(value, label)}
 						</div>
 					</div>

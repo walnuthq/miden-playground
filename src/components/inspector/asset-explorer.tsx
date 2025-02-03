@@ -18,7 +18,7 @@ export function AssetExplorer() {
 				className="h-[54px] border-b-2 border-theme-border bg-theme-surface-highlight
 					text-theme-text font-medium flex gap-2 items-center px-3"
 			>
-				Assets explorer
+				Editor
 			</div>
 			{/* <FileItem
 				editorFile={files[TRANSACTION_SCRIPT_FILE_ID]}

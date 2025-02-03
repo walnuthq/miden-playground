@@ -15,13 +15,16 @@ import { faucetSymbols } from '@/lib/consts';
 export function Vault({
 	noteId,
 	accountId,
-	className
+	className,
+	displayDelta = false
 }: {
 	noteId?: string;
 	accountId?: string;
 	className?: string;
+	displayDelta?: boolean;
 }) {
-	const { notes, accounts, updateAccountAssetAmount, updateNoteAssetAmount } = useMiden();
+	const { notes, accounts, updateAccountAssetAmount, updateNoteAssetAmount, accountUpdates } =
+		useMiden();
 
 	const note = noteId ? notes[noteId] : null;
 	const account = accountId ? accounts[accountId] : null;
@@ -43,7 +46,9 @@ export function Vault({
 
 	if (!noteId && !accountId) return null;
 
-	return (
+	return editableAssets.length <= 0 ? (
+		'No assets'
+	) : (
 		<div className={cn('rounded-theme border border-theme-border w-fit', className)}>
 			<Table className="[&_tr:hover]:bg-transparent">
 				<TableHeader>
@@ -61,7 +66,7 @@ export function Vault({
 								<TableCell className="pr-8 last:p-2">{asset.type}</TableCell>
 								<TableCell className="pr-8 last:p-2">{asset.faucetId}</TableCell>
 								<TableCell className="pr-8 last:p-2">{asset.symbol}</TableCell>
-								<TableCell className="pr-8 last:p-2">
+								<TableCell className="pr-8 last:p-2 flex flex-row font-mono">
 									<input
 										type="number"
 										value={asset.amount}
@@ -70,6 +75,23 @@ export function Vault({
 										min={0}
 										maxLength={10}
 									/>
+									<div className="min-w-8">
+										{displayDelta &&
+											accountUpdates &&
+											accountUpdates.accountId === accountId &&
+											accountUpdates.assetsDelta[asset.faucetId.toString()].toString() !== '0' && (
+												<span
+													className={`text-sm text-muted-foreground ${
+														accountUpdates.assetsDelta[asset.faucetId.toString()] > 0
+															? 'text-theme-success'
+															: 'text-theme-danger'
+													}`}
+												>
+													{accountUpdates.assetsDelta[asset.faucetId.toString()] > 0 ? '+' : '-'}
+													{accountUpdates.assetsDelta[asset.faucetId.toString()]}
+												</span>
+											)}
+									</div>
 								</TableCell>
 							</TableRow>
 						))
