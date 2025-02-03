@@ -3,9 +3,9 @@ export * from './p2idr';
 export * from './swap';
 
 import { Asset } from '@/lib/types';
-import { EditorFiles } from '@/lib/files';
 import { generateId } from '@/lib/utils';
 import { generateNoteSerialNumber } from '../miden-wasm-api';
+import { EditorFiles } from '../files';
 
 export interface NoteProps {
 	name: string;

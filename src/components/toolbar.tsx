@@ -6,7 +6,7 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const Toolbar = ({ toggleInspector }: { toggleInspector: () => void }) => {
-	const { files, closeFile, selectFile, selectedFileId, selectedTab, selectedOverview } =
+	const { files, closeFile, selectFile, selectedFileId, selectedTab, selectedOverviewTab } =
 		useMiden();
 	const filesToDisplay = Object.keys(files)
 		.filter((fileId) => files[fileId].isOpen)
@@ -56,12 +56,12 @@ export const Toolbar = ({ toggleInspector }: { toggleInspector: () => void }) =>
 					</div>
 					<ScrollBar orientation="horizontal" className="h-1 p-0" />
 				</ScrollArea>
-			) : selectedOverview === 'account' ? (
+			) : selectedOverviewTab === 'account' ? (
 				<div className="text-theme-text px-3 flex self-center">Account overview</div>
-			) : selectedOverview === 'transaction-script' ? (
+			) : selectedOverviewTab === 'transaction-script' ? (
 				<div className="text-theme-text px-3 flex self-center">Transaction script</div>
 			) : (
-				selectedOverview && (
+				selectedOverviewTab && (
 					<div className="text-theme-text px-3 flex self-center">Note overview</div>
 				)
 			)}

@@ -2,7 +2,7 @@ import { Asset } from '@/lib/types';
 import { generateId } from '@/lib/utils';
 import { createSwapNotes } from '@/lib/miden-wasm-api';
 import { Note } from '@/lib/notes';
-import { EditorFiles } from '@/lib/files';
+import { EditorFiles } from '../files';
 
 export function createSwapNote({
 	senderId,

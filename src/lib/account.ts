@@ -3,8 +3,8 @@ import { generateId } from '@/lib/utils';
 import { SECRET_KEY } from '@/lib/consts/secret-key';
 import { DEFAULT_FAUCET_IDS } from '@/lib/consts/defaults';
 import { Asset, ExecutionOutput } from '@/lib/types';
-import { EditorFiles } from '@/lib/files';
 import _ from 'lodash';
+import { EditorFiles } from './files';
 
 interface AccountProps {
 	id: bigint;
@@ -17,6 +17,7 @@ interface AccountProps {
 	metadataFileId: string;
 	vaultFileId: string;
 	storageFileId: string;
+	codeFileId: string;
 }
 
 export class Account {
@@ -30,6 +31,7 @@ export class Account {
 	metadataFileId: string;
 	vaultFileId: string;
 	storageFileId: string;
+	codeFileId: string;
 
 	constructor(props: AccountProps) {
 		this.id = props.id;
@@ -42,6 +44,7 @@ export class Account {
 		this.metadataFileId = props.metadataFileId;
 		this.vaultFileId = props.vaultFileId;
 		this.storageFileId = props.storageFileId;
+		this.codeFileId = props.codeFileId;
 	}
 
 	clone() {
@@ -55,18 +58,19 @@ export class Account {
 		const metadataFileId = generateId();
 		const vaultFileId = generateId();
 		const storageFileId = generateId();
+		const codeFileId = generateId();
 		const newFiles: EditorFiles = {
 			[scriptFileId]: {
 				id: scriptFileId,
-				name: 'Custom component',
-				content: { value: ACCOUNT_SCRIPT },
+				name: 'Code',
+				content: { value: ACCOUNT_SCRIPT, variant: 'account-code', accountId: idHex },
 				isOpen: false,
 				readonly: false,
 				variant: 'script'
 			},
 			[metadataFileId]: {
 				id: metadataFileId,
-				name: 'Metadata',
+				name: 'Info',
 				isOpen: false,
 				readonly: true,
 				variant: 'file',
@@ -124,7 +128,8 @@ export class Account {
 			scriptFileId,
 			metadataFileId,
 			vaultFileId,
-			storageFileId
+			storageFileId,
+			codeFileId
 		});
 
 		return { account, newFiles };

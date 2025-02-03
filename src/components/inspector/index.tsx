@@ -4,13 +4,13 @@ import { useMiden } from '@/lib/context-providers';
 import { TransactionBuilder } from './transaction-builder';
 import { AssetExplorer } from './asset-explorer';
 import InlineIcon from '@/components/ui/inline-icon';
-import { EditorFile } from '@/lib/files';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
+import { EditorFile } from '@/lib/files';
 
 export function Inspector() {
 	const { selectedTab } = useMiden();
@@ -37,10 +37,10 @@ export function FileItem({
 }) {
 	return (
 		<InspectorItem
-			name={editorFile.name}
-			variant={editorFile.variant}
+			name={editorFile?.name}
+			variant={editorFile?.variant}
 			level={level}
-			isReadOnly={editorFile.readonly}
+			isReadOnly={editorFile?.readonly}
 			isSelected={isSelected}
 			onClick={onClick}
 			onRemove={onRemove}

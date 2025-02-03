@@ -11,20 +11,17 @@ import React, {
 import init from 'miden-wasm';
 import { ExecutionOutput } from '@/lib/types';
 import { defaultAccounts, defaultNotes } from '@/lib/consts/defaults';
-import {
-	AUTHENTICATION_COMPONENT_SCRIPT_FILE_ID,
-	TRANSACTION_SCRIPT_FILE_ID,
-	WALLET_COMPONENT_SCRIPT_FILE_ID
-} from '@/lib/consts';
+import { TRANSACTION_SCRIPT_FILE_ID } from '@/lib/consts';
 import { consumeNotes } from '@/lib/miden-wasm-api';
 import { TRANSACTION_SCRIPT } from '@/lib/consts/transaction';
 import { convertToBigUint64Array } from '@/lib/utils';
-import { Account, ACCOUNT_AUTH_SCRIPT, ACCOUNT_WALLET_SCRIPT } from '@/lib/account';
+import { Account } from '@/lib/account';
 import { createP2IDRNote, createSwapNote, Note } from '@/lib/notes';
-import { EditorFiles } from '@/lib/files';
 import { createP2IDNote } from '@/lib/notes/p2id';
+import { EditorFiles } from '../files';
 
 type Tabs = 'transaction' | 'assets';
+type OverviewTabs = 'transaction-script' | 'account' | string | null;
 
 interface MidenContextProps {
 	isInitialized: boolean;
@@ -63,8 +60,8 @@ interface MidenContextProps {
 	consoleLogs: { message: string; type: 'info' | 'error' }[];
 	addInfoLog: (message: string) => void;
 	addErrorLog: (message: string) => void;
-	selectedOverview: string;
-	selectOverview: (tab: string) => void;
+	selectedOverviewTab: OverviewTabs;
+	selectOverview: (tab: OverviewTabs) => void;
 	updateAccountAssetAmount: (
 		accountId: string,
 		faucetId: bigint,
@@ -114,7 +111,7 @@ export const MidenContext = createContext<MidenContextProps>({
 	consoleLogs: [],
 	addInfoLog: () => {},
 	addErrorLog: () => {},
-	selectedOverview: '',
+	selectedOverviewTab: null,
 	selectOverview: () => {},
 	updateAccountAssetAmount: () => {},
 	updateNoteAssetAmount: () => {}
@@ -149,22 +146,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			isOpen: false,
 			readonly: false,
 			variant: 'script'
-		},
-		[WALLET_COMPONENT_SCRIPT_FILE_ID]: {
-			id: WALLET_COMPONENT_SCRIPT_FILE_ID,
-			name: 'Wallet component',
-			content: { value: ACCOUNT_WALLET_SCRIPT },
-			isOpen: false,
-			readonly: true,
-			variant: 'script'
-		},
-		[AUTHENTICATION_COMPONENT_SCRIPT_FILE_ID]: {
-			id: AUTHENTICATION_COMPONENT_SCRIPT_FILE_ID,
-			name: 'Auth component',
-			content: { value: ACCOUNT_AUTH_SCRIPT },
-			isOpen: false,
-			readonly: true,
-			variant: 'script'
 		}
 	});
 	const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
@@ -174,12 +155,12 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	const [selectedTransactionAccountId, setSelectedTransactionAccountId] = useState<string | null>(
 		null
 	);
-	const [selectedOverview, setSelectedOverview] = useState('');
+	const [selectedOverviewTab, setSelectedOverviewTab] = useState<OverviewTabs>(null);
 	const [selectedTransactionNotesIds, setSelectedTransactionNotesIds] = useState<string[]>([]);
 	const [executionOutput, setExecutionOutput] = useState<ExecutionOutput | null>(null);
 
-	const selectOverview = useCallback((tab: string) => {
-		setSelectedOverview(tab);
+	const selectOverview = useCallback((tab: OverviewTabs) => {
+		setSelectedOverviewTab(tab);
 	}, []);
 
 	const updateAccountById = (accountId: string, updateFn: (account: Account) => Account) => {
@@ -357,9 +338,16 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			return account;
 		});
 	}, []);
-
 	const updateFileContent = useCallback((fileId: string, content: string) => {
-		setFiles((prev) => ({ ...prev, [fileId]: { ...prev[fileId], content: { value: content } } }));
+		setFiles((prev) => ({
+			...prev,
+			[fileId]: {
+				...prev[fileId],
+				content: prev[fileId].content.dynamic
+					? prev[fileId].content
+					: { ...prev[fileId].content, value: content }
+			}
+		}));
 	}, []);
 
 	const createSampleSwapNotes = useCallback(() => {
@@ -567,7 +555,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				consoleLogs,
 				addErrorLog,
 				addInfoLog,
-				selectedOverview,
+				selectedOverviewTab,
 				selectOverview,
 				updateAccountAssetAmount,
 				updateNoteAssetAmount
