@@ -28,23 +28,23 @@ body {
 	:root {
 		--theme-radius: 5px;
 
-		--theme-surface: 252, 12%, 8%;
-		--theme-border: 253, 10%, 18%;
-		--theme-surface-highlight: 249, 10%, 14%;
+		--theme-surface: 252 12% 8%;
+		--theme-border: 253 10% 18%;
+		--theme-surface-highlight: 249 10% 14%;
 
-		--theme-text: 0, 100%, 99%;
+		--theme-text: 0 100% 99%;
 
-		--theme-text-subtle: 253, 10%, 58%;
-		--theme-text-subtlest: 253, 10%, 45%;
+		--theme-text-subtle: 253 10% 58%;
+		--theme-text-subtlest: 253 10% 45%;
 
-		--theme-primary: 266, 100%, 64%;
-		--theme-secondary: 207, 48%, 53%;
+		--theme-primary: 266 100% 64%;
+		--theme-secondary: 207 48% 53%;
 
-		--theme-info: 206, 100%, 63%;
-		--theme-success: 150, 99%, 44%;
-		--theme-notice: 48, 80%, 63%;
-		--theme-warning: 28, 100%, 61%;
-		--theme-danger: 342, 90%, 68%;
+		--theme-info: 206 100% 63%;
+		--theme-success: 150 99% 44%;
+		--theme-notice: 48 80% 63%;
+		--theme-warning: 28 100% 61%;
+		--theme-danger: 342 90% 68%;
 	}
 
 	:root {

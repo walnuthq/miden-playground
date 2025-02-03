@@ -9,8 +9,10 @@ export const Tabs = () => {
 	return (
 		<div className="flex  flex-row ">
 			<div
-				className={`w-[200px] text-theme-text border-x-2 border-t-2 border-theme-border rounded-tl-miden text-sm px-4 py-4 flex flex-row items-center gap-2 cursor-pointer select-none ${
-					selectedTab === 'transaction' ? 'bg-[#040113]' : ''
+				className={`p-3 w-[210px]  font-semibold border-x-2 border-t-2 border-theme-border rounded-tl-miden text-sm flex flex-row items-center gap-2 cursor-pointer select-none ${
+					selectedTab === 'transaction'
+						? 'bg-theme-surface-highlight text-theme-text'
+						: 'text-theme-text-subtle'
 				}`}
 				onClick={() => {
 					selectTab('transaction');
@@ -18,14 +20,17 @@ export const Tabs = () => {
 			>
 				<InlineIcon
 					variant="transaction-builder"
-					color={selectedTab === 'transaction' ? '#9748FF' : '#FFFDFD'}
-					className={`w-5 h-5`}
+					className={`w-5 h-5 ${
+						selectedTab === 'transaction' ? 'text-theme-primary' : 'text-theme-primary/40'
+					}`}
 				/>
 				Compose transaction
 			</div>
 			<div
-				className={`w-[200px] text-theme-text border-r-2 border-t-2 rounded-tr-miden text-sm px-4 py-4 border-theme-border flex flex-row items-center gap-2 cursor-pointer select-none ${
-					selectedTab === 'assets' ? 'bg-[#040113]' : ''
+				className={`p-3 w-[210px] font-semibold border-r-2 border-t-2 rounded-tr-miden text-sm border-theme-border flex flex-row items-center gap-2 cursor-pointer select-none ${
+					selectedTab === 'assets'
+						? 'bg-theme-surface-highlight text-theme-text'
+						: 'text-theme-text-subtle'
 				}`}
 				onClick={() => {
 					selectTab('assets');
@@ -33,8 +38,9 @@ export const Tabs = () => {
 			>
 				<InlineIcon
 					variant="file"
-					color={selectedTab === 'assets' ? '#9748FF' : '#FFFDFD'}
-					className={`w-5 h-5`}
+					className={`w-5 h-5 ${
+						selectedTab === 'assets' ? 'text-theme-primary' : 'text-theme-primary/40'
+					}`}
 				/>
 				Editor
 			</div>
