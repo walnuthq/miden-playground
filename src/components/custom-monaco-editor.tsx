@@ -1,8 +1,7 @@
 'use client';
 import { Editor as MonacoEditor, Monaco } from '@monaco-editor/react';
 import { editor } from 'monaco-editor';
-import { useCallback, useEffect } from 'react';
-import { useMonaco } from '@monaco-editor/react';
+import { useCallback } from 'react';
 
 interface CustomMonacoEditorProps {
 	value: string | undefined;
@@ -17,11 +16,9 @@ export function CustomMonacoEditor({
 	onChange,
 	readOnly = false
 }: CustomMonacoEditorProps) {
-	const monaco = useMonaco();
-
-	const configureMonaco = useCallback((_monaco: Monaco) => {
-		if (_monaco) {
-			_monaco.editor.defineTheme('miden', {
+	const configureMonaco = useCallback((monaco: Monaco) => {
+		if (monaco) {
+			monaco.editor.defineTheme('miden', {
 				base: 'vs-dark',
 				inherit: true,
 				rules: [],
@@ -32,23 +29,17 @@ export function CustomMonacoEditor({
 					'editorLineNumber.activeForeground': '#83afd4'
 				}
 			});
-			_monaco.editor.setTheme('miden');
+			monaco.editor.setTheme('miden');
 		}
 	}, []);
-
-	useEffect(() => {
-		if (monaco) {
-			configureMonaco(monaco);
-		}
-	}, [configureMonaco, monaco]);
 
 	return (
 		<MonacoEditor
 			value={value}
 			onChange={onChange}
 			className={className}
-			onMount={(editor: editor.IStandaloneCodeEditor, _monaco) => {
-				configureMonaco(_monaco);
+			onMount={(editor: editor.IStandaloneCodeEditor, monaco) => {
+				configureMonaco(monaco);
 			}}
 			options={{
 				overviewRulerLanes: 0,
