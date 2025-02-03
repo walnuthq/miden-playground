@@ -88,7 +88,7 @@ export const ComposeTransactionTab = () => {
 					</div>
 				</div>
 				<div className="basis-1/3 flex flex-col gap-1">
-					<div className="text-theme-text-subtle text-base font-mono">Transaction script</div>
+					<div className="text-theme-text-subtle text-base font-mono px-2">Transaction script</div>
 					<div className="flex-1 border-2 border-theme-border rounded-theme overflow-hidden">
 						<CustomMonacoEditor
 							onChange={(value) => {
@@ -102,7 +102,7 @@ export const ComposeTransactionTab = () => {
 			</div>
 			<div className="basis-1/2 flex flex-col">
 				<ScrollArea className="flex-1 flex flex-col pb-8 pr-3">
-					<div className="text-theme-text-subtle text-base font-mono mb-2">Notes</div>
+					<div className="text-theme-text-subtle text-base font-mono mb-2 px-2">Notes</div>
 					<div className="flex-1 flex flex-col">
 						{selectedTransactionNotesIds.map((noteId) => (
 							<div
