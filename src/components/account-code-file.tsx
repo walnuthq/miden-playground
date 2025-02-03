@@ -2,11 +2,8 @@ import { cn } from '@/lib/utils';
 import React, { useEffect, useState } from 'react';
 import { CustomMonacoEditor } from './custom-monaco-editor';
 import { useMiden } from '@/lib/context-providers';
-import {
-	AUTHENTICATION_COMPONENT_SCRIPT_FILE_ID,
-	WALLET_COMPONENT_SCRIPT_FILE_ID
-} from '@/lib/consts';
 import ToggleSwitch from './ToggleSwitch';
+import { ACCOUNT_AUTH_SCRIPT, ACCOUNT_WALLET_SCRIPT } from '@/lib/account';
 
 const AccountCodeFile = ({
 	accountFile,
@@ -21,7 +18,6 @@ const AccountCodeFile = ({
 		updateFileContent,
 		disableWalletComponent,
 		disableAuthComponent,
-		files,
 		enableAuthComponent,
 		enableWalletComponent,
 		accounts
@@ -62,7 +58,7 @@ const AccountCodeFile = ({
 					/>
 				</div>
 				<CustomMonacoEditor
-					value={files[WALLET_COMPONENT_SCRIPT_FILE_ID].content.value}
+					value={ACCOUNT_WALLET_SCRIPT}
 					className={cn(
 						`h-44 absolute top-0 left-0 transition-opacity ease-in-out ${
 							account.isWallet ? '' : 'opacity-25'
@@ -83,7 +79,7 @@ const AccountCodeFile = ({
 					/>
 				</div>
 				<CustomMonacoEditor
-					value={files[AUTHENTICATION_COMPONENT_SCRIPT_FILE_ID].content.value}
+					value={ACCOUNT_AUTH_SCRIPT}
 					className={cn(
 						`h-44 absolute top-0 left-0 transition-opacity ease-in-out ${
 							account.isAuth ? '' : 'opacity-25'

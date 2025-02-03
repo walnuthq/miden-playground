@@ -4,7 +4,6 @@ import { SECRET_KEY } from '@/lib/consts/secret-key';
 import { DEFAULT_FAUCET_IDS } from '@/lib/consts/defaults';
 import { Asset, ExecutionOutput } from '@/lib/types';
 import _ from 'lodash';
-import { AUTHENTICATION_COMPONENT_SCRIPT_FILE_ID, WALLET_COMPONENT_SCRIPT_FILE_ID } from './consts';
 import { EditorFiles } from './files';
 
 interface AccountProps {
@@ -61,22 +60,6 @@ export class Account {
 		const storageFileId = generateId();
 		const codeFileId = generateId();
 		const newFiles: EditorFiles = {
-			[WALLET_COMPONENT_SCRIPT_FILE_ID]: {
-				id: WALLET_COMPONENT_SCRIPT_FILE_ID,
-				name: 'Wallet component',
-				content: { value: ACCOUNT_WALLET_SCRIPT },
-				isOpen: false,
-				readonly: true,
-				variant: 'script'
-			},
-			[AUTHENTICATION_COMPONENT_SCRIPT_FILE_ID]: {
-				id: AUTHENTICATION_COMPONENT_SCRIPT_FILE_ID,
-				name: 'Auth component',
-				content: { value: ACCOUNT_AUTH_SCRIPT },
-				isOpen: false,
-				readonly: true,
-				variant: 'script'
-			},
 			[scriptFileId]: {
 				id: scriptFileId,
 				name: 'Code',

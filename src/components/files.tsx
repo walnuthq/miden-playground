@@ -1,19 +1,11 @@
 import { useMiden } from '@/lib/context-providers';
 import AccountCodeFile from './account-code-file';
 import { CustomMonacoEditor } from './custom-monaco-editor';
-import { useEffect, useState } from 'react';
 
 export const Files = () => {
 	const { files, accounts, selectedFileId, notes, updateFileContent } = useMiden();
-	const [value, setValue] = useState('');
 
 	const file = selectedFileId ? files[selectedFileId] : null;
-
-	useEffect(() => {
-		if (file && !file.content.dynamic && file.content.variant !== 'account-code') {
-			setValue(file.content.value);
-		}
-	}, [file, file?.content.dynamic, file?.content.value]);
 
 	if (!selectedFileId || !file) return null;
 
@@ -73,13 +65,12 @@ export const Files = () => {
 		return (
 			<CustomMonacoEditor
 				onChange={(value) => {
-					setValue(value ?? '');
 					if (file.id) {
 						updateFileContent(file.id, value ?? '');
 					}
 				}}
 				readOnly={file.readonly}
-				value={value}
+				value={file.content.value}
 			/>
 		);
 	}
