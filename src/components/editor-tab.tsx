@@ -1,0 +1,28 @@
+import { ResizablePanel, ResizableHandle, ResizablePanelGroup } from '@/components/ui/resizable';
+import { Toolbar } from '@/components/toolbar';
+import { Files } from '@/components/files';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Inspector } from '@/components/inspector';
+import Breadcrumbs from '@/components/breadcrumbs';
+
+export const EditorTab = () => {
+	return (
+		<ResizablePanelGroup direction="horizontal">
+			<ResizablePanel defaultSize={25}>
+				<ScrollArea className="relative h-full overflow-auto">
+					<Inspector />
+				</ScrollArea>
+			</ResizablePanel>
+			<ResizableHandle className="w-[2px] bg-theme-border" />
+			<ResizablePanel defaultSize={75}>
+				<div className="flex flex-col h-full">
+					<Toolbar />
+					<Breadcrumbs />
+					<div className="flex-1">
+						<Files />
+					</div>
+				</div>
+			</ResizablePanel>
+		</ResizablePanelGroup>
+	);
+};

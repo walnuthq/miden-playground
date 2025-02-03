@@ -4,10 +4,8 @@ import InlineIcon from '@/components/ui/inline-icon';
 import { useMiden } from '@/lib/context-providers';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const Toolbar = ({ toggleInspector }: { toggleInspector: () => void }) => {
-	const { files, closeFile, selectFile, selectedFileId, selectedTab, selectedOverviewTab } =
-		useMiden();
+export const Toolbar = () => {
+	const { files, closeFile, selectFile, selectedFileId, selectedTab } = useMiden();
 	const filesToDisplay = Object.keys(files)
 		.filter((fileId) => files[fileId].isOpen)
 		.sort((a, b) => (files[a]?.positionOrder ?? 0) - (files[b]?.positionOrder ?? 0));
@@ -56,14 +54,8 @@ export const Toolbar = ({ toggleInspector }: { toggleInspector: () => void }) =>
 					</div>
 					<ScrollBar orientation="horizontal" className="h-1 p-0" />
 				</ScrollArea>
-			) : selectedOverviewTab === 'account' ? (
-				<div className="text-theme-text px-3 flex self-center">Account overview</div>
-			) : selectedOverviewTab === 'transaction-script' ? (
-				<div className="text-theme-text px-3 flex self-center">Transaction script</div>
 			) : (
-				selectedOverviewTab && (
-					<div className="text-theme-text px-3 flex self-center">Note overview</div>
-				)
+				<></>
 			)}
 			<div className="h-full flex gap-4 items-end overflow-hidden">
 				{/* <div
