@@ -9,7 +9,6 @@ import React, {
 	useState
 } from 'react';
 import init from 'miden-wasm';
-import { ExecutionOutput } from '@/lib/types';
 import { defaultAccounts, defaultNotes } from '@/lib/consts/defaults';
 import { TRANSACTION_SCRIPT_FILE_ID } from '@/lib/consts';
 import { consumeNotes } from '@/lib/miden-wasm-api';
@@ -18,10 +17,10 @@ import { convertToBigUint64Array } from '@/lib/utils';
 import { Account } from '@/lib/account';
 import { createP2IDRNote, createSwapNote, Note } from '@/lib/notes';
 import { createP2IDNote } from '@/lib/notes/p2id';
-import { EditorFiles } from '../files';
+import { EditorFiles } from '@/lib/files';
+import { AccountUpdates } from '@/lib/types';
 
 type Tabs = 'transaction' | 'assets';
-type OverviewTabs = 'transaction-script' | 'account' | string | null;
 
 interface MidenContextProps {
 	isInitialized: boolean;
@@ -33,8 +32,10 @@ interface MidenContextProps {
 	selectedTransactionAccountId: string | null;
 	isCollapsedTabs: boolean;
 	selectedTransactionNotesIds: string[];
-	executionOutput: ExecutionOutput | null;
 	isExecutingTransaction: boolean;
+	blockNumber: number;
+	accountUpdates: AccountUpdates | null;
+	setBlockNumber: (blockNumber: number) => void;
 	createSampleP2IDNote: () => void;
 	createSampleP2IDRNote: () => void;
 	updateFileContent: (fileId: string, content: string) => void;
@@ -43,7 +44,6 @@ interface MidenContextProps {
 	enableWalletComponent: (accountId: string) => void;
 	enableAuthComponent: (accountId: string) => void;
 	createAccount: () => void;
-	setExecutionOutput: (output: ExecutionOutput) => void;
 	selectTransactionNote: (noteId: string) => void;
 	removeTransactionNote: (noteId: string) => void;
 	selectTransactionAccount: (accountId: string) => void;
@@ -60,8 +60,6 @@ interface MidenContextProps {
 	consoleLogs: { message: string; type: 'info' | 'error' }[];
 	addInfoLog: (message: string) => void;
 	addErrorLog: (message: string) => void;
-	selectedOverviewTab: OverviewTabs;
-	selectOverview: (tab: OverviewTabs) => void;
 	updateAccountAssetAmount: (
 		accountId: string,
 		faucetId: bigint,
@@ -83,9 +81,11 @@ export const MidenContext = createContext<MidenContextProps>({
 	notes: {},
 	selectedTransactionAccountId: null,
 	selectedTransactionNotesIds: [],
-	executionOutput: null,
 	isExecutingTransaction: false,
 	isCollapsedTabs: false,
+	blockNumber: 4,
+	accountUpdates: null,
+	setBlockNumber: () => {},
 	createSampleP2IDNote: () => {},
 	createSampleP2IDRNote: () => {},
 	updateFileContent: () => {},
@@ -94,7 +94,6 @@ export const MidenContext = createContext<MidenContextProps>({
 	enableWalletComponent: () => {},
 	enableAuthComponent: () => {},
 	createAccount: () => {},
-	setExecutionOutput: () => {},
 	selectTransactionAccount: () => {},
 	selectTransactionNote: () => {},
 	removeTransactionNote: () => {},
@@ -111,8 +110,6 @@ export const MidenContext = createContext<MidenContextProps>({
 	consoleLogs: [],
 	addInfoLog: () => {},
 	addErrorLog: () => {},
-	selectedOverviewTab: null,
-	selectOverview: () => {},
 	updateAccountAssetAmount: () => {},
 	updateNoteAssetAmount: () => {}
 });
@@ -126,7 +123,11 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		setCollapsedTabs(!isCollapsedTabs);
 	};
 
+	const [blockNumber, setBlockNumber] = useState<number>(4);
+
 	const [consoleLogs, setConsoleLogs] = useState<{ message: string; type: 'info' | 'error' }[]>([]);
+
+	const [accountUpdates, setAccountUpdates] = useState<AccountUpdates | null>(null);
 
 	const addInfoLog = useCallback((message: string) => {
 		console.log(message);
@@ -155,13 +156,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	const [selectedTransactionAccountId, setSelectedTransactionAccountId] = useState<string | null>(
 		null
 	);
-	const [selectedOverviewTab, setSelectedOverviewTab] = useState<OverviewTabs>(null);
 	const [selectedTransactionNotesIds, setSelectedTransactionNotesIds] = useState<string[]>([]);
-	const [executionOutput, setExecutionOutput] = useState<ExecutionOutput | null>(null);
-
-	const selectOverview = useCallback((tab: OverviewTabs) => {
-		setSelectedOverviewTab(tab);
-	}, []);
 
 	const updateAccountById = (accountId: string, updateFn: (account: Account) => Account) => {
 		setAccounts((prev) => {
@@ -273,11 +268,27 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				receiverStorage: storage,
 				notes: transactionNotes,
 				transactionScript: files[TRANSACTION_SCRIPT_FILE_ID].content.value!,
-				blockNumber: 4
+				blockNumber
 			});
-			console.log('output', output);
+
+			console.log('Transaction output', output);
+
 			output.storageDiffs = Account.computeStorageDiffs(storage, output.storage);
-			setExecutionOutput(output);
+
+			const accountUpdates: AccountUpdates = {
+				accountId: selectedTransactionAccountId,
+				assetsDelta: output.assets.reduce((acc, asset) => {
+					acc[asset.faucetId.toString()] =
+						asset.amount -
+						(accounts[selectedTransactionAccountId]?.assets.find(
+							(a) => a.faucetId === asset.faucetId
+						)?.amount ?? 0n);
+					return acc;
+				}, {} as Record<string, bigint>)
+			};
+
+			setAccountUpdates(accountUpdates);
+
 			updateAccountById(selectedTransactionAccountId, (account) => {
 				account.assets = output.assets;
 				return account;
@@ -285,7 +296,9 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			updateFileById(account.storageFileId, () => {
 				return Account.stringifyStorage(output.storage);
 			});
+
 			addInfoLog('Execution successful');
+			addInfoLog(`Total cycles: ${output.totalCycles}; Trace length: ${output.traceLength}`);
 		} catch (error) {
 			addErrorLog('Execution failed. Error: ' + error);
 		}
@@ -295,6 +308,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		accounts,
 		addErrorLog,
 		addInfoLog,
+		blockNumber,
 		files,
 		notes,
 		selectedTransactionAccountId,
@@ -429,6 +443,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				const { notes, newFiles: noteFiles } = defaultNotes(defaultAccount1.id, defaultAccount2.id);
 				setFiles((prev) => ({ ...prev, ...accountFiles, ...noteFiles }));
 				setNotes(notes);
+				setSelectedTransactionAccountId(defaultAccount2.idHex);
 				setIsInitialized(true);
 			})
 			.catch((error: unknown) => {
@@ -527,9 +542,11 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				notes,
 				selectedTransactionAccountId,
 				selectedTransactionNotesIds,
-				executionOutput,
 				isExecutingTransaction,
 				isCollapsedTabs,
+				blockNumber,
+				accountUpdates,
+				setBlockNumber,
 				createSampleP2IDNote,
 				createSampleP2IDRNote,
 				updateFileContent,
@@ -538,7 +555,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				enableWalletComponent,
 				enableAuthComponent,
 				createAccount,
-				setExecutionOutput,
 				selectTransactionAccount,
 				selectTransactionNote,
 				removeTransactionNote,
@@ -555,8 +571,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				consoleLogs,
 				addErrorLog,
 				addInfoLog,
-				selectedOverviewTab,
-				selectOverview,
 				updateAccountAssetAmount,
 				updateNoteAssetAmount
 			}}
