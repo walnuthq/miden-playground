@@ -3,33 +3,35 @@ use assembly::Library;
 use miden_objects::{
     accounts::{Account, AccountId, StorageSlot},
     assets::{Asset, FungibleAsset},
+    notes::Note,
     Felt, Word,
 };
 use wasm_bindgen::prelude::*;
 use web_sys::console;
 
-use crate::{
-    create_account_component_library, get_account_with_account_code, get_pk_and_authenticator,
+use crate::utils::{
+    create_account_component_library, get_account_with_account_code,
+    get_note_with_fungible_asset_and_script, get_pk_and_authenticator,
 };
 
 #[wasm_bindgen]
 #[derive(Clone, Debug)]
-pub struct WordWrapper(Word);
+pub struct WordData(Word);
 
 #[wasm_bindgen]
-impl WordWrapper {
+impl WordData {
     #[wasm_bindgen(constructor)]
-    pub fn new(word: Vec<u64>) -> Self {
+    pub fn new(word: Vec<u64>) -> Result<Self, String> {
         let u64_array: [u64; 4] = word
             .as_slice()
             .try_into()
-            .expect("word must be a Vec<u64> of length 4");
-        Self(u64_array.map(Felt::new))
+            .map_err(|err| format!("word must be a Vec<u64> of length 4: {:?}", err))?;
+        Ok(Self(u64_array.map(Felt::new)))
     }
 }
 
-impl From<WordWrapper> for Word {
-    fn from(word: WordWrapper) -> Self {
+impl From<WordData> for Word {
+    fn from(word: WordData) -> Self {
         word.0
     }
 }
@@ -52,7 +54,7 @@ impl AccountData {
         assets: Vec<AssetData>,
         wallet_enabled: bool,
         auth_enabled: bool,
-        storage: Vec<WordWrapper>,
+        storage: Vec<WordData>,
     ) -> Result<Self, JsValue> {
         let account_code_library = create_account_component_library(account_code.as_str())
             .map_err(|err| format!("Account library cannot be built: {:?}", err))?;
@@ -66,7 +68,13 @@ impl AccountData {
             account_code_library.clone(),
             account_id,
             pub_key,
-            assets.into_iter().map(|a| a.into()).collect(),
+            assets
+                .into_iter()
+                .map(|a| {
+                    a.try_into()
+                        .map_err(|err| format!("Asset cannot be built: {:?}", err))
+                })
+                .collect::<Result<Vec<Asset>, String>>()?,
             storage
                 .into_iter()
                 .map(|s| StorageSlot::Value(s.into()))
@@ -107,12 +115,15 @@ impl AssetData {
     }
 }
 
-impl From<AssetData> for Asset {
-    fn from(asset: AssetData) -> Self {
-        Self::Fungible(
-            FungibleAsset::new(AccountId::try_from(asset.faucet_id).unwrap(), asset.amount)
-                .unwrap(),
-        )
+impl TryFrom<AssetData> for Asset {
+    type Error = anyhow::Error;
+
+    fn try_from(asset: AssetData) -> Result<Self, Self::Error> {
+        let asset_id = AccountId::try_from(asset.faucet_id).map_err(|err| anyhow::anyhow!(err))?;
+
+        Ok(Self::Fungible(
+            FungibleAsset::new(asset_id, asset.amount).map_err(|err| anyhow::anyhow!(err))?,
+        ))
     }
 }
 
@@ -166,5 +177,43 @@ impl NoteData {
 
     pub fn serial_number(&self) -> Vec<u64> {
         self.serial_number.clone()
+    }
+}
+
+impl TryFrom<NoteData> for Note {
+    type Error = anyhow::Error;
+
+    fn try_from(note_data: NoteData) -> Result<Self, Self::Error> {
+        let note_assets: Vec<Asset> = note_data
+            .assets
+            .into_iter()
+            .map(|asset_data| {
+                let fungible_asset: Asset = asset_data.try_into()?;
+                Ok(fungible_asset)
+            })
+            .collect::<anyhow::Result<Vec<Asset>>>()?;
+
+        let note_inputs: Vec<Felt> = note_data.inputs.iter().map(|&x| Felt::new(x)).collect();
+
+        let sender_account_id =
+            AccountId::try_from(note_data.sender_id).map_err(|err| anyhow::anyhow!(err))?;
+
+        let sender_account_code_library =
+            create_account_component_library(note_data.sender_script.as_str())
+                .map_err(|err| anyhow::anyhow!(err))?;
+
+        let serial_number: [u64; 4] = note_data.serial_number.as_slice().try_into()?;
+
+        let note = get_note_with_fungible_asset_and_script(
+            note_assets,
+            note_data.script.as_str(),
+            sender_account_id,
+            note_inputs,
+            sender_account_code_library.clone(),
+            serial_number.map(Felt::new),
+        )
+        .map_err(|err| anyhow::anyhow!(err))?;
+
+        Ok(note)
     }
 }

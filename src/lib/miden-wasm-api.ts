@@ -7,7 +7,7 @@ import {
 	generate_note_serial_number,
 	create_swap_note,
 	AccountData,
-	WordWrapper
+	WordData
 } from 'miden-wasm';
 import { ExecutionOutput, Asset } from '@/lib/types';
 import { Account } from '@/lib/account';
@@ -47,7 +47,7 @@ export function consumeNotes({
 		receiver.assets.map((a) => new AssetData(a.faucetId, a.amount)),
 		receiver.isWallet,
 		receiver.isAuth,
-		receiverStorage.map((row) => new WordWrapper(new BigUint64Array(row)))
+		receiverStorage.map((row) => new WordData(new BigUint64Array(row)))
 	);
 	return execute_transaction(transactionScript, receiverAccount, notesWrapper, BigInt(blockNumber));
 }
@@ -67,15 +67,13 @@ export function generateFaucetId(): bigint {
 export function createSwapNotes(
 	senderAccountId: bigint,
 	receiverAccountId: bigint,
-	requestedAsset: Asset,
-	offeredAsset: Asset
+	requestedAsset: Asset
 ): { swapNoteInputs: BigUint64Array; paybackNote: NoteData } {
 	const seed = new Uint8Array(32);
 	window.crypto.getRandomValues(seed);
 	const result = create_swap_note(
 		seed,
 		senderAccountId,
-		new AssetData(offeredAsset.faucetId, offeredAsset.amount),
 		receiverAccountId,
 		new AssetData(requestedAsset.faucetId, requestedAsset.amount)
 	);
