@@ -29,8 +29,7 @@ export function createSwapNote({
 	const { swapNoteInputs, paybackNote: paybackNoteData } = createSwapNotes(
 		senderId,
 		receiverId,
-		requestedAsset,
-		offeredAsset
+		requestedAsset
 	);
 	const inputs: string[] = [];
 	for (const input of swapNoteInputs) {

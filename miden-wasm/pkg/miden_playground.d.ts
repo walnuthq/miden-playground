@@ -2,12 +2,12 @@
 /* eslint-disable */
 export function generate_account_id(seed: Uint8Array): bigint;
 export function generate_faucet_id(seed: Uint8Array): bigint;
-export function execute_transaction(transaction_script: string, receiver: AccountData, notes: (NoteData)[], block_number: bigint): any;
-export function create_swap_note(seed: Uint8Array, sender_account_id: bigint, offered_asset: AssetData, receiver_account_id: bigint, requested_asset: AssetData): CreateSwapNoteResult;
 export function generate_note_serial_number(seed: Uint8Array): BigUint64Array;
+export function execute_transaction(transaction_script: string, receiver: AccountData, notes: (NoteData)[], block_number: bigint): any;
+export function create_swap_note(seed: Uint8Array, sender_account_id: bigint, receiver_account_id: bigint, requested_asset: AssetData): CreateSwapNoteResult;
 export class AccountData {
   free(): void;
-  constructor(account_code: string, secret_key: Uint8Array, account_id: bigint, assets: (AssetData)[], wallet_enabled: boolean, auth_enabled: boolean, storage: (WordWrapper)[]);
+  constructor(account_code: string, secret_key: Uint8Array, account_id: bigint, assets: (AssetData)[], wallet_enabled: boolean, auth_enabled: boolean, storage: (WordData)[]);
 }
 export class AssetData {
   free(): void;
@@ -30,7 +30,7 @@ export class NoteData {
   sender_script(): string;
   serial_number(): BigUint64Array;
 }
-export class WordWrapper {
+export class WordData {
   free(): void;
   constructor(word: BigUint64Array);
 }
@@ -39,16 +39,16 @@ export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembl
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
-  readonly generate_account_id: (a: number, b: number) => bigint;
-  readonly generate_faucet_id: (a: number, b: number) => bigint;
+  readonly generate_account_id: (a: number, b: number) => [bigint, number, number];
+  readonly generate_faucet_id: (a: number, b: number) => [bigint, number, number];
+  readonly generate_note_serial_number: (a: number, b: number) => [number, number, number, number];
   readonly execute_transaction: (a: number, b: number, c: number, d: number, e: number, f: bigint) => [number, number, number];
   readonly __wbg_createswapnoteresult_free: (a: number, b: number) => void;
   readonly createswapnoteresult_note_inputs: (a: number) => [number, number];
   readonly createswapnoteresult_payback_note: (a: number) => number;
-  readonly create_swap_note: (a: number, b: number, c: bigint, d: number, e: bigint, f: number) => [number, number, number];
-  readonly generate_note_serial_number: (a: number, b: number) => [number, number];
-  readonly __wbg_wordwrapper_free: (a: number, b: number) => void;
-  readonly wordwrapper_new: (a: number, b: number) => number;
+  readonly create_swap_note: (a: number, b: number, c: bigint, d: bigint, e: number) => [number, number, number];
+  readonly __wbg_worddata_free: (a: number, b: number) => void;
+  readonly worddata_new: (a: number, b: number) => [number, number, number];
   readonly __wbg_accountdata_free: (a: number, b: number) => void;
   readonly accountdata_new: (a: number, b: number, c: number, d: number, e: bigint, f: number, g: number, h: number, i: number, j: number, k: number) => [number, number, number];
   readonly __wbg_assetdata_free: (a: number, b: number) => void;
@@ -68,9 +68,9 @@ export interface InitOutput {
   readonly __externref_table_alloc: () => number;
   readonly __wbindgen_export_2: WebAssembly.Table;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
-  readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
   readonly __externref_table_dealloc: (a: number) => void;
   readonly __wbindgen_free: (a: number, b: number, c: number) => void;
+  readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
   readonly __wbindgen_start: () => void;
 }
 

@@ -2,342 +2,64 @@
 extern crate alloc;
 
 mod account_builder;
+mod bindings;
 mod mock_chain;
 mod mock_host;
 mod scripts;
+mod serialization;
 mod transaction_context;
 mod transaction_context_builder;
-mod wrappers;
+mod utils;
 
 use crate::transaction_context_builder::TransactionContextBuilder;
 
-use alloc::{
-    format,
-    string::{String, ToString},
-    sync::Arc,
-    vec,
-    vec::Vec,
-};
-use assembly::{
-    ast::{Module, ModuleKind},
-    utils::Deserializable,
-    DefaultSourceManager, Library, LibraryPath, Report,
-};
-use miden_crypto::{
-    dsa::rpo_falcon512::PublicKey,
-    rand::{FeltRng, RpoRandomCoin},
-};
-use rand::Rng;
-use rand_chacha::{rand_core::SeedableRng, ChaCha20Rng};
-
-use miden_lib::{
-    accounts::{auth::RpoFalcon512, wallets::BasicWallet},
-    notes::utils::{build_p2id_recipient, build_swap_tag},
-    transaction::TransactionKernel,
-};
+use alloc::{format, string::ToString, sync::Arc, vec, vec::Vec};
+use bindings::{AccountData, AssetData, NoteData};
+use miden_crypto::rand::{FeltRng, RpoRandomCoin};
+use miden_lib::{notes::utils::build_p2id_recipient, transaction::TransactionKernel};
 use miden_objects::{
-    accounts::{
-        Account, AccountComponent, AccountHeader, AccountId, AccountStorage, AccountType,
-        StorageSlot,
-    },
-    assets::{Asset, AssetVault, FungibleAsset},
-    crypto::dsa::rpo_falcon512::SecretKey,
-    notes::{
-        Note, NoteAssets, NoteExecutionHint, NoteExecutionMode, NoteInputs, NoteMetadata,
-        NoteRecipient, NoteScript, NoteTag, NoteType,
-    },
-    transaction::{ExecutedTransaction, OutputNotes, TransactionArgs, TransactionScript},
-    AccountError, Felt, NoteError, TransactionScriptError, Word, ZERO,
+    accounts::{AccountId, AccountType},
+    assets::Asset,
+    notes::{Note, NoteExecutionHint, NoteExecutionMode, NoteInputs, NoteTag},
+    transaction::{TransactionArgs, TransactionScript},
+    Felt, Word,
 };
 use miden_tx::TransactionExecutor;
+use rand::Rng;
+use rand_chacha::{rand_core::SeedableRng, ChaCha20Rng};
 use scripts::{ACCOUNT_SCRIPT, P2ID_SCRIPT};
+use serialization::serialize_execution_output;
 use wasm_bindgen::prelude::*;
-use web_sys::{
-    console,
-    js_sys::{self, BigUint64Array},
-};
-use wrappers::{AccountData, AssetData, NoteData};
 
 // Added this line to import the necessary libraries for more detailed logging
 extern crate console_error_panic_hook;
 
-fn create_account_component_library(account_code: &str) -> Result<Library, Report> {
-    let assembler = TransactionKernel::assembler().with_debug_mode(true);
-    let source_manager = Arc::new(DefaultSourceManager::default());
-
-    let account_component_module = Module::parser(ModuleKind::Library)
-        .parse_str(
-            LibraryPath::new("account_component::account_module").unwrap(),
-            account_code,
-            &source_manager,
-        )
-        .map_err(|err| err)?;
-
-    let account_library = assembler
-        .assemble_library([account_component_module])
-        .map_err(|err| err)?;
-
-    Ok(account_library)
+#[wasm_bindgen]
+pub fn generate_account_id(seed: Vec<u8>) -> Result<u64, JsValue> {
+    let seed_array: [u8; 32] = seed
+        .try_into()
+        .map_err(|err| format!("seed must be 32 bytes: {:?}", err))?;
+    let id: u64 = AccountId::new_dummy(seed_array, AccountType::RegularAccountUpdatableCode).into();
+    Ok(id)
 }
 
-pub fn get_account_with_account_code(
-    account_code_library: Library,
-    account_id: AccountId,
-    public_key: Word,
-    assets: Vec<Asset>,
-    storage: Vec<StorageSlot>,
-    wallet: bool,
-    auth: bool,
-) -> Result<Account, AccountError> {
-    let account_component = AccountComponent::new(
-        account_code_library,
-        vec![StorageSlot::Value(Word::default()); 2],
-    )
-    .unwrap()
-    .with_supports_all_types();
-
-    let mut components = vec![account_component];
-    if wallet {
-        components.push(BasicWallet.into());
-    }
-    if auth {
-        components.push(RpoFalcon512::new(PublicKey::new(public_key)).into());
-    }
-
-    let (account_code, account_storage) =
-        Account::initialize_from_components(account_id.account_type(), &components).unwrap();
-
-    let account_vault = AssetVault::new(&assets).unwrap();
-
-    let mut account_storage_slots = account_storage.slots().clone();
-    account_storage_slots.extend(storage.into_iter().skip(3));
-    let account_storage = AccountStorage::new(account_storage_slots).unwrap();
-
-    Ok(Account::from_parts(
-        account_id,
-        account_vault,
-        account_storage,
-        account_code,
-        Felt::new(1),
-    ))
+#[wasm_bindgen]
+pub fn generate_faucet_id(seed: Vec<u8>) -> Result<u64, JsValue> {
+    let seed_array: [u8; 32] = seed
+        .try_into()
+        .map_err(|err| format!("seed must be 32 bytes: {:?}", err))?;
+    let id: u64 = AccountId::new_dummy(seed_array, AccountType::FungibleFaucet).into();
+    Ok(id)
 }
 
-pub fn get_note_with_fungible_asset_and_script(
-    asset_vec: Vec<Asset>,
-    note_script: &str,
-    sender_id: AccountId,
-    inputs: Vec<Felt>,
-    custom_library: Library,
-    serial_number: Word,
-) -> Result<Note, NoteError> {
-    let assembler = TransactionKernel::assembler()
-        .with_debug_mode(true)
-        .with_library(custom_library)
-        .map_err(|err| {
-            log::error!("Failed to create note assembler with library: {:?}", err);
-            err
-        })
-        .unwrap();
-
-    let note_script = NoteScript::compile(note_script, assembler).map_err(|err| {
-        log::error!("Failed to compile note script: {:?}", err);
-        err
-    })?;
-
-    let vault = NoteAssets::new(asset_vec).map_err(|err| err.into())?;
-
-    let metadata = NoteMetadata::new(
-        sender_id,
-        NoteType::Public,
-        1.into(),
-        NoteExecutionHint::Always,
-        ZERO,
-    )
-    .map_err(|err| err)?;
-    let note_inputs = NoteInputs::new(inputs).unwrap();
-    let recipient = NoteRecipient::new(serial_number, note_script, note_inputs);
-
-    Ok(Note::new(vault, metadata, recipient))
-}
-
-pub fn build_transaction_script(
-    transaction_script: &str,
-) -> Result<TransactionScript, TransactionScriptError> {
-    let compiled_tx_script =
-        TransactionScript::compile(transaction_script, [], TransactionKernel::assembler())
-            .map_err(|err| err.into())?;
-    Ok(compiled_tx_script)
-}
-
-pub fn get_pk_and_authenticator(
-    secret_key_bytes: Option<Vec<u8>>,
-) -> (
-    Word,
-    alloc::sync::Arc<dyn miden_tx::auth::TransactionAuthenticator>,
-) {
-    use alloc::sync::Arc;
-    use miden_objects::accounts::AuthSecretKey;
-    use miden_tx::auth::{BasicAuthenticator, TransactionAuthenticator};
-
-    let seed = [0_u8; 32];
-    let mut rng = ChaCha20Rng::from_seed(seed);
-
-    let sec_key = if let Some(secret_key_bytes) = secret_key_bytes {
-        SecretKey::read_from_bytes(&secret_key_bytes).unwrap()
-    } else {
-        SecretKey::with_rng(&mut rng)
-    };
-
-    let pub_key: Word = sec_key.public_key().into();
-
-    let authenticator = BasicAuthenticator::<ChaCha20Rng>::new_with_rng(
-        &[(pub_key, AuthSecretKey::RpoFalcon512(sec_key))],
-        rng,
+#[wasm_bindgen]
+pub fn generate_note_serial_number(seed: Vec<u8>) -> Result<Vec<u64>, JsValue> {
+    let mut rng = ChaCha20Rng::from_seed(
+        seed.try_into()
+            .map_err(|err| format!("seed must be 32 bytes: {:?}", err))?,
     );
-
-    (
-        pub_key,
-        Arc::new(authenticator) as Arc<dyn TransactionAuthenticator>,
-    )
-}
-
-// TODO: handle errors
-fn serialize_assets(assets: &[Asset]) -> js_sys::Array {
-    let assets_array = js_sys::Array::new();
-
-    for asset in assets {
-        let asset_obj = js_sys::Object::new();
-        match asset {
-            Asset::Fungible(asset) => {
-                js_sys::Reflect::set(
-                    &asset_obj,
-                    &"faucetId".into(),
-                    &JsValue::from(u64::from(asset.faucet_id())),
-                )
-                .unwrap();
-                js_sys::Reflect::set(&asset_obj, &"amount".into(), &JsValue::from(asset.amount()))
-                    .unwrap();
-            }
-            Asset::NonFungible(asset) => {
-                js_sys::Reflect::set(
-                    &asset_obj,
-                    &"faucetId".into(),
-                    &JsValue::from(u64::from(asset.faucet_id())),
-                )
-                .unwrap();
-                js_sys::Reflect::set(
-                    &asset_obj,
-                    &"faucetIdHex".into(),
-                    &JsValue::from(asset.faucet_id().to_hex()),
-                )
-                .unwrap();
-            }
-        }
-        assets_array.push(&asset_obj);
-    }
-
-    assets_array
-}
-
-// TODO: handle errors
-fn serialize_execution_output(
-    account: &Account,
-    final_account: &AccountHeader,
-    output_notes: &OutputNotes,
-    executed_transaction: &ExecutedTransaction,
-) -> JsValue {
-    let assets: Vec<Asset> = account.vault().assets().collect();
-    let assets_array = serialize_assets(&assets);
-    let storage: Vec<Vec<u64>> = account
-        .storage()
-        .slots()
-        .iter()
-        .map(|slot| match slot {
-            StorageSlot::Value(value) => value.iter().map(|x| x.as_int()).collect(),
-            StorageSlot::Map(_) => vec![],
-        })
-        .collect();
-
-    let account_hash = final_account.hash().to_hex();
-    let code_commitment = final_account.code_commitment().to_hex();
-    let storage_commitment = final_account.storage_commitment().to_hex();
-    let vault_root = final_account.vault_root().to_hex();
-    let nonce = final_account.nonce().as_int();
-
-    let account_id: u64 = account.id().into();
-
-    let output_notes_array = js_sys::Array::new();
-    for note in output_notes.iter() {
-        let note_obj = js_sys::Object::new();
-        js_sys::Reflect::set(&note_obj, &"id".into(), &JsValue::from(note.id().to_hex())).unwrap();
-        js_sys::Reflect::set(
-            &note_obj,
-            &"senderId".into(),
-            &JsValue::from(note.metadata().sender().to_string()),
-        )
-        .unwrap();
-        js_sys::Reflect::set(
-            &note_obj,
-            &"tag".into(),
-            &JsValue::from(note.metadata().tag().to_string()),
-        )
-        .unwrap();
-        if let Some(note_assets) = note.assets() {
-            let assets: Vec<Asset> = note_assets.iter().map(|a| a.clone()).collect();
-            js_sys::Reflect::set(&note_obj, &"assets".into(), &serialize_assets(&assets)).unwrap();
-        }
-        output_notes_array.push(&note_obj);
-    }
-
-    let total_cycles = executed_transaction.measurements().total_cycles();
-    let trace_length = executed_transaction.measurements().trace_length();
-
-    let obj = js_sys::Object::new();
-    js_sys::Reflect::set(&obj, &"outputNotes".into(), &output_notes_array).unwrap();
-    js_sys::Reflect::set(&obj, &"assets".into(), &assets_array).unwrap();
-    js_sys::Reflect::set(
-        &obj,
-        &"storage".into(),
-        &JsValue::from(
-            storage
-                .iter()
-                .map(|row| BigUint64Array::from(row.as_slice()))
-                .collect::<js_sys::Array>(),
-        ),
-    )
-    .unwrap();
-    js_sys::Reflect::set(&obj, &"accountHash".into(), &JsValue::from(account_hash)).unwrap();
-    js_sys::Reflect::set(
-        &obj,
-        &"codeCommitment".into(),
-        &JsValue::from(code_commitment),
-    )
-    .unwrap();
-    js_sys::Reflect::set(
-        &obj,
-        &"storageCommitment".into(),
-        &JsValue::from(storage_commitment),
-    )
-    .unwrap();
-    js_sys::Reflect::set(&obj, &"vaultRoot".into(), &JsValue::from(vault_root)).unwrap();
-    js_sys::Reflect::set(&obj, &"nonce".into(), &JsValue::from(nonce)).unwrap();
-    js_sys::Reflect::set(&obj, &"accountId".into(), &JsValue::from(account_id)).unwrap();
-    js_sys::Reflect::set(&obj, &"totalCycles".into(), &JsValue::from(total_cycles)).unwrap();
-    js_sys::Reflect::set(&obj, &"traceLength".into(), &JsValue::from(trace_length)).unwrap();
-
-    obj.into()
-}
-
-#[wasm_bindgen]
-pub fn generate_account_id(seed: Vec<u8>) -> u64 {
-    let seed_array: [u8; 32] = seed.try_into().expect("seed must be 32 bytes");
-    AccountId::new_dummy(seed_array, AccountType::RegularAccountUpdatableCode).into()
-}
-
-#[wasm_bindgen]
-pub fn generate_faucet_id(seed: Vec<u8>) -> u64 {
-    let seed_array: [u8; 32] = seed.try_into().expect("seed must be 32 bytes");
-    AccountId::new_dummy(seed_array, AccountType::FungibleFaucet).into()
+    let coin_seed: [u64; 4] = rng.gen();
+    Ok(coin_seed.to_vec())
 }
 
 #[wasm_bindgen]
@@ -351,54 +73,9 @@ pub fn execute_transaction(
 
     let notes = notes
         .into_iter()
-        .map(|note| {
-            let note_assets: Vec<Asset> = note
-                .assets
-                .into_iter()
-                .map(|asset_wrapper| {
-                    let faucet_id = AccountId::try_from(asset_wrapper.faucet_id)
-                        .map_err(|err| format!("faucet id is wrong: {:?}", err))?;
-                    console::log_1(&format!("Faucet ID: {:?}", faucet_id).into());
-
-                    let fungible_asset: Asset = FungibleAsset::new(faucet_id, asset_wrapper.amount)
-                        .map_err(|err| format!("fungible asset is wrong: {:?}", err))?
-                        .into();
-                    console::log_1(&format!("Fungible asset created: {:?}", fungible_asset).into());
-
-                    Ok(fungible_asset)
-                })
-                .collect::<Result<Vec<Asset>, String>>()?;
-            let note_inputs: Vec<Felt> = note.inputs.iter().map(|&x| Felt::new(x)).collect();
-
-            let sender_account_id = AccountId::try_from(note.sender_id)
-                .map_err(|err| format!("Sender Account id is wrong: {:?}", err))?;
-
-            let sender_account_code_library =
-                create_account_component_library(note.sender_script.as_str())
-                    .map_err(|err| format!("Account library cannot be built: {:?}", err))?;
-
-            let serial_number: [u64; 4] = note
-                .serial_number
-                .as_slice()
-                .try_into()
-                .expect("serial number must be a Vec<u64> of length 4");
-
-            let note = get_note_with_fungible_asset_and_script(
-                note_assets,
-                note.script.as_str(),
-                sender_account_id,
-                note_inputs,
-                sender_account_code_library.clone(),
-                serial_number.map(Felt::new),
-            )
-            .map_err(|err| {
-                console::log_1(&format!("Note creation failed: {:?}", err).into());
-                format!("Note cannot be built: {:?}", err)
-            })?;
-
-            Ok(note)
-        })
-        .collect::<Result<Vec<Note>, String>>()?;
+        .map(|note| Note::try_from(note))
+        .collect::<anyhow::Result<Vec<Note>>>()
+        .map_err(|err| format!("Note cannot be built: {:?}", err))?;
 
     let assembler = TransactionKernel::assembler().with_debug_mode(true);
 
@@ -410,10 +87,7 @@ pub fn execute_transaction(
             .expect("adding oracle library should not fail")
             .clone(),
     )
-    .map_err(|err| {
-        console::log_1(&format!("Transaction script compilation failed: {:?}", err).into());
-        JsValue::from_str(&err.to_string())
-    })?;
+    .map_err(|err| JsValue::from_str(&err.to_string()))?;
 
     let tx_args_target = TransactionArgs::with_tx_script(tx_script.clone());
 
@@ -423,7 +97,7 @@ pub fn execute_transaction(
 
     let executor =
         TransactionExecutor::new(Arc::new(tx_context.clone()), Some(receiver.falcon_auth()))
-            .with_debug_mode(true);
+            .with_tracing();
 
     let block_ref = tx_context.tx_inputs().block_header().block_num();
 
@@ -436,30 +110,22 @@ pub fn execute_transaction(
 
     let executed_transaction = executor
         .execute_transaction(receiver.account.id(), block_ref, &note_ids, tx_args_target)
-        .map_err(|err| {
-            console::log_1(&format!("Transaction execution failed: {:?}", err).into());
-            format!("Execution failed: {:?}", err)
-        })?;
+        .map_err(|err| format!("Execution failed: {:?}", err))?;
 
     receiver
         .account
         .apply_delta(executed_transaction.account_delta())
-        .map_err(|err| {
-            console::log_1(&format!("Failed to apply account delta: {:?}", err).into());
-            format!("Account delta cannot be applied: {:?}", err)
-        })?;
+        .map_err(|err| format!("Account delta cannot be applied: {:?}", err))?;
 
     let final_account = executed_transaction.final_account();
     let output_notes = executed_transaction.output_notes();
 
-    console::log_1(&format!("Output notes: {:?}", output_notes).into());
-
-    Ok(serialize_execution_output(
+    serialize_execution_output(
         &receiver.account,
         &final_account,
         &output_notes,
         &executed_transaction,
-    ))
+    )
 }
 
 #[wasm_bindgen]
@@ -479,29 +145,35 @@ impl CreateSwapNoteResult {
     }
 }
 
-// TODO: handle errors
 #[wasm_bindgen]
 pub fn create_swap_note(
     seed: Vec<u8>,
     sender_account_id: u64,
-    offered_asset: AssetData,
     receiver_account_id: u64,
     requested_asset: AssetData,
 ) -> Result<CreateSwapNoteResult, JsValue> {
-    let sender = AccountId::try_from(sender_account_id).unwrap();
-    let offered_asset_converted: Asset = offered_asset.clone().into();
-    let requested_asset_converted: Asset = requested_asset.clone().into();
+    let sender = AccountId::try_from(sender_account_id)
+        .map_err(|err| format!("Failed to convert sender account id: {:?}", err))?;
+    let requested_asset_converted: Asset = requested_asset
+        .clone()
+        .try_into()
+        .map_err(|err| format!("Failed to convert requested asset: {:?}", err))?;
 
-    let mut rng = ChaCha20Rng::from_seed(seed.try_into().unwrap());
+    let mut rng = ChaCha20Rng::from_seed(
+        seed.try_into()
+            .map_err(|err| format!("Failed to convert seed: {:?}", err))?,
+    );
     let coin_seed: [u64; 4] = rng.gen();
     let mut rng = RpoRandomCoin::new(coin_seed.map(Felt::new));
 
     let payback_serial_num = rng.draw_word();
-    let payback_recipient = build_p2id_recipient(sender, payback_serial_num).unwrap();
+    let payback_recipient = build_p2id_recipient(sender, payback_serial_num)
+        .map_err(|err| format!("Failed to build payback recipient: {:?}", err))?;
 
     let payback_recipient_word: Word = payback_recipient.digest().into();
     let requested_asset_word: Word = requested_asset_converted.into();
-    let payback_tag = NoteTag::from_account_id(sender, NoteExecutionMode::Local).unwrap();
+    let payback_tag = NoteTag::from_account_id(sender, NoteExecutionMode::Local)
+        .map_err(|err| format!("Failed to build payback tag: {:?}", err))?;
 
     let inputs = NoteInputs::new(vec![
         payback_recipient_word[0],
@@ -515,18 +187,7 @@ pub fn create_swap_note(
         Felt::new(payback_tag.inner() as u64),
         NoteExecutionHint::always().into(),
     ])
-    .unwrap();
-
-    // build the tag for the SWAP use case
-    let tag = build_swap_tag(
-        NoteType::Private,
-        &offered_asset_converted,
-        &requested_asset_converted,
-    )
-    .unwrap();
-
-    console::log_1(&format!("The tag for the SWAP use case: {:?}", tag).into());
-    // let serial_num = rng.draw_word();
+    .map_err(|err| format!("Failed to build inputs: {:?}", err))?;
 
     let inputs_u64 = inputs
         .values()
@@ -550,11 +211,4 @@ pub fn create_swap_note(
             serial_number: payback_serial_num.iter().map(|x| x.as_int()).collect(),
         },
     })
-}
-
-#[wasm_bindgen]
-pub fn generate_note_serial_number(seed: Vec<u8>) -> Vec<u64> {
-    let mut rng = ChaCha20Rng::from_seed(seed.try_into().unwrap());
-    let coin_seed: [u64; 4] = rng.gen();
-    coin_seed.to_vec()
 }
