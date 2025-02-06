@@ -283,7 +283,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 
 			console.log('Transaction output', output);
 
-			output.storageDiffs = Account.computeStorageDiffs(storage, output.storage);
+			output.storageDiffs = Account.previousStorageValues(storage, output.storage);
 			if (Object.keys(output.storageDiffs).length > 0) {
 				setAccountStorageDiffs(output.storageDiffs);
 			}

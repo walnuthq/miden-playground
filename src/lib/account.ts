@@ -199,7 +199,7 @@ export class Account {
 		);
 	}
 
-	static computeStorageDiffs(
+	static previousStorageValues(
 		oldStorage: BigUint64Array[],
 		newStorage: BigUint64Array[]
 	): ExecutionOutput['storageDiffs'] {
@@ -212,7 +212,7 @@ export class Account {
 				oldStorage[i][2] !== newStorage[i][2] ||
 				oldStorage[i][3] !== newStorage[i][3]
 			) {
-				diffs[i] = { old: oldStorage[i], new: newStorage[i] };
+				diffs[i] = { old: oldStorage[i] };
 			}
 		}
 		return diffs;
