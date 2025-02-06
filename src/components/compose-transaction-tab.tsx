@@ -14,6 +14,7 @@ import {
 import { CustomMonacoEditor } from '@/components/custom-monaco-editor';
 import { TRANSACTION_SCRIPT_FILE_ID } from '@/lib/consts';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Storage } from './storage';
 
 export const ComposeTransactionTab = () => {
 	const {
@@ -81,7 +82,7 @@ export const ComposeTransactionTab = () => {
 										divider: true
 									},
 									Vault: <Vault accountId={selectedAccountData?.idHex} displayDelta />,
-									Storage: ''
+									Storage: <Storage accountId={selectedAccountData?.idHex} />
 								}}
 							/>
 						)}

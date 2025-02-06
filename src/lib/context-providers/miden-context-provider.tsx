@@ -21,6 +21,13 @@ import { EditorFiles } from '@/lib/files';
 import { AccountUpdates } from '@/lib/types';
 
 type Tabs = 'transaction' | 'assets';
+type StorageDiffs = Record<
+	number,
+	{
+		old?: BigUint64Array;
+		new: BigUint64Array;
+	}
+>;
 
 interface MidenContextProps {
 	isInitialized: boolean;
@@ -35,6 +42,7 @@ interface MidenContextProps {
 	isExecutingTransaction: boolean;
 	blockNumber: number;
 	accountUpdates: AccountUpdates | null;
+	accountStorageDiffs: StorageDiffs;
 	setBlockNumber: (blockNumber: number) => void;
 	createSampleP2IDNote: () => void;
 	createSampleP2IDRNote: () => void;
@@ -85,6 +93,7 @@ export const MidenContext = createContext<MidenContextProps>({
 	isCollapsedTabs: false,
 	blockNumber: 4,
 	accountUpdates: null,
+	accountStorageDiffs: {},
 	setBlockNumber: () => {},
 	createSampleP2IDNote: () => {},
 	createSampleP2IDRNote: () => {},
@@ -128,6 +137,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	const [consoleLogs, setConsoleLogs] = useState<{ message: string; type: 'info' | 'error' }[]>([]);
 
 	const [accountUpdates, setAccountUpdates] = useState<AccountUpdates | null>(null);
+	const [accountStorageDiffs, setAccountStorageDiffs] = useState({});
 
 	const addInfoLog = useCallback((message: string) => {
 		console.log(message);
@@ -274,6 +284,9 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			console.log('Transaction output', output);
 
 			output.storageDiffs = Account.computeStorageDiffs(storage, output.storage);
+			if (Object.keys(output.storageDiffs).length > 0) {
+				setAccountStorageDiffs(output.storageDiffs);
+			}
 
 			const accountUpdates: AccountUpdates = {
 				accountId: selectedTransactionAccountId,
@@ -546,6 +559,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				isCollapsedTabs,
 				blockNumber,
 				accountUpdates,
+				accountStorageDiffs,
 				setBlockNumber,
 				createSampleP2IDNote,
 				createSampleP2IDRNote,
