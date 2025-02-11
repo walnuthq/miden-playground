@@ -27,7 +27,7 @@ export function createP2IDRNote({
 	const newFiles: EditorFiles = {
 		[scriptFileId]: {
 			id: scriptFileId,
-			name: `${name} Script`,
+			name: `Script`,
 			content: { value: P2IDR_SCRIPT },
 			isOpen: false,
 			variant: 'script',
@@ -35,7 +35,7 @@ export function createP2IDRNote({
 		},
 		[inputFileId]: {
 			id: inputFileId,
-			name: `${name} Inputs`,
+			name: `Inputs`,
 			content: {
 				value: JSON.stringify([receiverId.toString(), reclaimBlockHeight], null, 2)
 			},
@@ -45,7 +45,7 @@ export function createP2IDRNote({
 		},
 		[metadataFileId]: {
 			id: metadataFileId,
-			name: `${name} Metadata`,
+			name: `Metadata`,
 			content: { dynamic: { note: { noteId, variant: 'metadata' } } },
 			isOpen: false,
 			variant: 'file',
@@ -53,7 +53,7 @@ export function createP2IDRNote({
 		},
 		[vaultFileId]: {
 			id: vaultFileId,
-			name: `${name} Vault`,
+			name: `Vault`,
 			content: { dynamic: { note: { noteId, variant: 'vault' } } },
 			isOpen: false,
 			variant: 'file',
@@ -72,6 +72,8 @@ export function createP2IDRNote({
 		metadataFileId,
 		vaultFileId
 	});
+	const serialNumberString = note.serialNumberDecimalString.slice(0, 10);
+	note.name = `${name} - ${serialNumberString}`;
 	return { note, newFiles };
 }
 
