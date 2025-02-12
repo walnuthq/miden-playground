@@ -102,7 +102,8 @@ export class Account {
 				id: storageFileId,
 				name: 'Storage',
 				content: {
-					value: Account.stringifyStorage(Account.initialStorage())
+					value: Account.stringifyStorage(Account.initialStorage()),
+					accountId: idHex
 				},
 				isOpen: false,
 				readonly: false,

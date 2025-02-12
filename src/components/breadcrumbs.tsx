@@ -35,7 +35,12 @@ const Breadcrumbs = () => {
 
 	const getName = () => {
 		if (type === 'Accounts') {
-			const accountId = files[selectedFileId].content.dynamic?.account?.accountId || account?.idHex;
+			const accountId =
+				files[selectedFileId].content.dynamic?.account?.accountId ||
+				('accountId' in files[selectedFileId].content
+					? files[selectedFileId].content.accountId
+					: undefined) ||
+				account?.idHex;
 			return accountId ? accounts[accountId]?.name : undefined;
 		}
 		const noteId = files[selectedFileId].content.dynamic?.note?.noteId;
@@ -47,12 +52,16 @@ const Breadcrumbs = () => {
 	return (
 		<div className="flex gap-2 text-theme-text bg-[#040113] shadow-sm shadow-theme-border text-xs flex-row border-theme-border px-4 p-1">
 			<div>{type}</div>
-			{(files[selectedFileId].content.dynamic || note || account) && dynamicName && (
-				<div className="flex items-center gap-2">
-					<InlineIcon variant="arrow" color="white" className="w-2 h-2" />
-					<div>{dynamicName}</div>
-				</div>
-			)}
+			{(files[selectedFileId].content.dynamic ||
+				files[selectedFileId].content.accountId ||
+				note ||
+				account) &&
+				dynamicName && (
+					<div className="flex items-center gap-2">
+						<InlineIcon variant="arrow" color="white" className="w-2 h-2" />
+						<div>{dynamicName}</div>
+					</div>
+				)}
 			<div className="flex items-center gap-2">
 				<InlineIcon variant="arrow" color="white" className="w-2 h-2" />
 				<div>{files[selectedFileId].name}</div>
