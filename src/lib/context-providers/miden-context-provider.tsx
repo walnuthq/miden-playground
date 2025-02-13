@@ -365,7 +365,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	}, []);
 
 	const createSampleSwapNotes = useCallback(() => {
-		const newNoteName = Note.getNextNoteName('SWAP', notes);
 		const sender = Object.values(accounts)[0];
 		const receiver = Object.values(accounts).filter((account) => account.id !== sender.id)[0];
 		const offeredAssetOfSender = sender.assets[0];
@@ -381,7 +380,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			receiverId: receiver.id,
 			offeredAsset,
 			requestedAsset,
-			name: newNoteName
+			name: 'SWAP'
 		});
 		updateAccountById(sender.idHex, (account) => {
 			account.updateAssetAmount(offeredAsset.faucetId, (amount) => amount - offeredAsset.amount);
@@ -389,24 +388,22 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		});
 		setNotes((prev) => ({ ...prev, [note.id]: note, [paybackNote.id]: paybackNote }));
 		setFiles((prev) => ({ ...prev, ...newFiles }));
-	}, [notes, accounts]);
+	}, [accounts]);
 
 	const createSampleP2IDNote = useCallback(() => {
-		const newNoteName = Note.getNextNoteName('P2ID', notes);
 		const receiverId = Object.values(accounts)[0].id;
 		const senderId = Object.values(accounts).filter((account) => account.id !== receiverId)[0].id;
 		const { note, newFiles } = createP2IDNote({
 			senderId,
 			receiverId,
 			assets: [],
-			name: newNoteName
+			name: 'P2ID'
 		});
 		setNotes((prev) => ({ ...prev, [note.id]: note }));
 		setFiles((prev) => ({ ...prev, ...newFiles }));
-	}, [notes, accounts]);
+	}, [accounts]);
 
 	const createSampleP2IDRNote = useCallback(() => {
-		const newNoteName = Note.getNextNoteName('P2IDR', notes);
 		const receiverId = accounts[0].id;
 		const senderId = Object.values(accounts).filter((account) => account.id !== receiverId)[0].id;
 		const { note, newFiles } = createP2IDRNote({
@@ -414,23 +411,22 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			receiverId,
 			reclaimBlockHeight: 100,
 			assets: [],
-			name: newNoteName
+			name: 'P2IDR'
 		});
 		setNotes((prev) => ({ ...prev, [note.id]: note }));
 		setFiles((prev) => ({ ...prev, ...newFiles }));
-	}, [notes, accounts]);
+	}, [accounts]);
 
 	const createSampleNote = useCallback(() => {
-		const newNoteName = Note.getNextNoteName('NOTE', notes);
 		const senderId = Object.values(accounts)[0].id;
 		const { note, newFiles } = Note.createEmptyNote({
 			senderId,
 			assets: [],
-			name: newNoteName
+			name: 'NOTE'
 		});
 		setNotes((prev) => ({ ...prev, [note.id]: note }));
 		setFiles((prev) => ({ ...prev, ...newFiles }));
-	}, [notes, accounts]);
+	}, [accounts]);
 
 	useEffect(() => {
 		init()

@@ -52,7 +52,7 @@ export function createSwapNote({
 	const newFiles: EditorFiles = {
 		[scriptFileId]: {
 			id: scriptFileId,
-			name: `${name} Script`,
+			name: `Script`,
 			content: { value: SWAP_SCRIPT },
 			isOpen: false,
 			variant: 'script',
@@ -60,7 +60,7 @@ export function createSwapNote({
 		},
 		[inputFileId]: {
 			id: inputFileId,
-			name: `${name} Inputs`,
+			name: `Inputs`,
 			content: {
 				value: JSON.stringify(inputs, null, 2)
 			},
@@ -70,7 +70,7 @@ export function createSwapNote({
 		},
 		[metadataFileId]: {
 			id: metadataFileId,
-			name: `${name} Metadata`,
+			name: `Metadata`,
 			content: { dynamic: { note: { noteId, variant: 'metadata' } } },
 			isOpen: false,
 			variant: 'note',
@@ -78,7 +78,7 @@ export function createSwapNote({
 		},
 		[vaultFileId]: {
 			id: vaultFileId,
-			name: `${name} Vault`,
+			name: `Vault`,
 			content: { dynamic: { note: { noteId, variant: 'vault' } } },
 			isOpen: false,
 			variant: 'note',
@@ -86,7 +86,7 @@ export function createSwapNote({
 		},
 		[paybackScriptFileId]: {
 			id: paybackScriptFileId,
-			name: `Payback ${name} Script`,
+			name: `Payback Script`,
 			content: { value: paybackNoteData.script() },
 			isOpen: false,
 			variant: 'script',
@@ -94,7 +94,7 @@ export function createSwapNote({
 		},
 		[paybackInputFileId]: {
 			id: paybackInputFileId,
-			name: `Payback ${name} Inputs`,
+			name: `Payback Inputs`,
 			content: {
 				value: JSON.stringify(paybackInputs, null, 2)
 			},
@@ -104,7 +104,7 @@ export function createSwapNote({
 		},
 		[paybackMetadataFileId]: {
 			id: paybackMetadataFileId,
-			name: `Payback ${name} Metadata`,
+			name: `Payback Metadata`,
 			content: { dynamic: { note: { noteId: paybackNoteId, variant: 'metadata' } } },
 			isOpen: false,
 			variant: 'note',
@@ -112,7 +112,7 @@ export function createSwapNote({
 		},
 		[paybackVaultFileId]: {
 			id: paybackVaultFileId,
-			name: `Payback ${name} Vault`,
+			name: `Payback Vault`,
 			content: { dynamic: { note: { noteId: paybackNoteId, variant: 'vault' } } },
 			isOpen: false,
 			variant: 'note',
@@ -143,7 +143,9 @@ export function createSwapNote({
 		senderId,
 		vaultFileId
 	});
-
+	const serialNumberString = note.serialNumberDecimalString.slice(0, 10);
+	note.name = `${name} - ${serialNumberString}`;
+	paybackNote.name = `${paybackNote.name} - ${serialNumberString}`;
 	return { note, newFiles, paybackNote };
 }
 
