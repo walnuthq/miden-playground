@@ -247,19 +247,38 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			addErrorLog('No notes selected: Please select at least one note to execute the transaction');
 			return;
 		}
+
 		setIsExecutingTransaction(true);
 		const account = accounts[selectedTransactionAccountId];
-		const transactionNotes = selectedTransactionNotesIds.map((noteId) => {
-			const sender = accounts[notes[noteId].senderIdHex];
-			return {
-				note: notes[noteId],
-				noteScript: files[notes[noteId].scriptFileId].content.value!,
-				noteInputs: convertToBigUint64Array(
-					JSON.parse(files[notes[noteId].inputFileId].content.value!)
-				),
+
+		const transactionNotes: {
+			note: Note;
+			noteScript: string;
+			noteInputs: BigUint64Array<ArrayBufferLike>;
+			senderScript: string;
+		}[] = [];
+		const consumedNotesIds: string[] = [];
+		for (const noteId of selectedTransactionNotesIds) {
+			const note = notes[noteId];
+
+			if (note.isConsumed) {
+				addErrorLog(`${note.name} is already consumed`);
+				setIsExecutingTransaction(false);
+				return;
+			} else {
+				consumedNotesIds.push(noteId);
+			}
+
+			const sender = accounts[note.senderIdHex];
+
+			transactionNotes.push({
+				note,
+				noteScript: files[note.scriptFileId].content.value!,
+				noteInputs: convertToBigUint64Array(JSON.parse(files[note.inputFileId].content.value!)),
 				senderScript: files[sender.scriptFileId].content.value!
-			};
-		});
+			});
+		}
+
 		try {
 			const storage = Account.parseStorage(files[account.storageFileId].content.value!);
 			const output = consumeNotes({
@@ -296,8 +315,20 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			updateFileById(account.storageFileId, () => {
 				return Account.stringifyStorage(output.storage);
 			});
-
 			addInfoLog('Execution successful');
+
+			setNotes((prev) => {
+				const oldNotes = { ...prev };
+
+				consumedNotesIds.forEach((consumedNoteId) => {
+					if (oldNotes[consumedNoteId]) {
+						oldNotes[consumedNoteId].isConsumed = true;
+					}
+				});
+
+				return oldNotes;
+			});
+
 			addInfoLog(`Total cycles: ${output.totalCycles}; Trace length: ${output.traceLength}`);
 		} catch (error) {
 			addErrorLog('Execution failed. Error: ' + error);
