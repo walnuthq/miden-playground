@@ -14,7 +14,6 @@ export interface ExecutionOutput {
 		number,
 		{
 			old?: BigUint64Array;
-			new: BigUint64Array;
 		}
 	>;
 }
