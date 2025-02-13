@@ -257,7 +257,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			noteInputs: BigUint64Array<ArrayBufferLike>;
 			senderScript: string;
 		}[] = [];
-
+		const consumedNotesIds: string[] = [];
 		for (const noteId of selectedTransactionNotesIds) {
 			const note = notes[noteId];
 
@@ -266,7 +266,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				setIsExecutingTransaction(false);
 				return;
 			} else {
-				notes[noteId].isConsumed = true;
+				consumedNotesIds.push(noteId);
 			}
 
 			const sender = accounts[note.senderIdHex];
@@ -316,6 +316,19 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				return Account.stringifyStorage(output.storage);
 			});
 			addInfoLog('Execution successful');
+
+			setNotes((prev) => {
+				const oldNotes = { ...prev };
+
+				consumedNotesIds.forEach((consumedNoteId) => {
+					if (oldNotes[consumedNoteId]) {
+						oldNotes[consumedNoteId].isConsumed = true;
+					}
+				});
+
+				return oldNotes;
+			});
+
 			addInfoLog(`Total cycles: ${output.totalCycles}; Trace length: ${output.traceLength}`);
 		} catch (error) {
 			addErrorLog('Execution failed. Error: ' + error);
