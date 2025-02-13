@@ -23,6 +23,14 @@ const AccountCodeFile = ({
 	} = useMiden();
 	const [value, setValue] = useState('');
 	const account = accounts[accountId];
+	const [walletHeight, setWalletHeight] = useState(0);
+	const [authHeight, setAuthHeight] = useState(0);
+
+	useEffect(() => {
+		setWalletHeight(ACCOUNT_WALLET_SCRIPT.split('\n').length * 18);
+		setAuthHeight(ACCOUNT_AUTH_SCRIPT.split('\n').length * 18);
+	}, []);
+
 	useEffect(() => {
 		setValue(accountFile);
 	}, [accountFile]);
@@ -36,7 +44,7 @@ const AccountCodeFile = ({
 					</div>
 					<CustomMonacoEditor
 						value={value}
-						className="h-96"
+						className="!h-96"
 						onChange={(value) => {
 							setValue(value ?? '');
 							if (fileId) {
@@ -58,12 +66,8 @@ const AccountCodeFile = ({
 					</div>
 					<CustomMonacoEditor
 						value={ACCOUNT_WALLET_SCRIPT}
+						style={{ height: `${walletHeight > 100 ? 100 : walletHeight}px` }}
 						className={`transition-opacity ease-in-out ${account.isWallet ? '' : 'opacity-25'} 
-        ${
-					ACCOUNT_WALLET_SCRIPT.split('\n').length * 18 > 80
-						? 'h-[80px]'
-						: `h-[${ACCOUNT_WALLET_SCRIPT.split('\n').length * 18}px]`
-				}
 				`}
 						readOnly
 					/>
@@ -80,11 +84,8 @@ const AccountCodeFile = ({
 					</div>
 					<CustomMonacoEditor
 						value={ACCOUNT_AUTH_SCRIPT}
-						className={`${
-							ACCOUNT_AUTH_SCRIPT.split('\n').length * 18 > 80
-								? 'h-[80px]'
-								: `h-[${ACCOUNT_AUTH_SCRIPT.split('\n').length * 18}px]`
-						} transition-opacity ease-in-out ${account.isAuth ? '' : 'opacity-25'}`}
+						style={{ height: `${authHeight > 100 ? 100 : authHeight}px` }}
+						className={` transition-opacity ease-in-out ${account.isAuth ? '' : 'opacity-25'}`}
 						readOnly
 					/>
 				</div>
