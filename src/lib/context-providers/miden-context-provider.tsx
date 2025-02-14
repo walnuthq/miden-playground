@@ -11,7 +11,7 @@ import React, {
 import init from 'miden-wasm';
 import { defaultAccounts, defaultNotes } from '@/lib/consts/defaults';
 import { TRANSACTION_SCRIPT_FILE_ID } from '@/lib/consts';
-import { consumeNotes, generateFaucetId } from '@/lib/miden-wasm-api';
+import { consumeNotes } from '@/lib/miden-wasm-api';
 import { TRANSACTION_SCRIPT } from '@/lib/consts/transaction';
 import { convertToBigUint64Array } from '@/lib/utils';
 import { Account } from '@/lib/account';
