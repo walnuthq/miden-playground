@@ -41,7 +41,7 @@ export const Toolbar = () => {
 								/>
 								<span className="text-nowrap">{files[fileId].name}</span>
 								<div
-									className="cursor-pointer hover:bg-white/10 p-1.5 rounded-theme"
+									className="cursor-pointer hover:bg-theme-border p-1 rounded-theme"
 									onClick={(event) => {
 										event.stopPropagation();
 										closeFile(fileId);
@@ -63,7 +63,7 @@ export const Toolbar = () => {
 						toggleInspector();
 						collapseTabs();
 					}}
-					className="ml-4 self-center cursor-pointer hover:bg-white/10 p-1.5 rounded-theme"
+					className="ml-4 self-center cursor-pointer hover:bg-theme-border p-1.5 rounded-theme"
 				>
 					<InlineIcon
 						variant={'left-arrow'}

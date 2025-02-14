@@ -9,7 +9,7 @@ export const Tabs = () => {
 	return (
 		<div className="flex  flex-row ">
 			<div
-				className={`p-3 w-[210px]  font-semibold border-x-2 border-t-2 border-theme-border rounded-tl-miden text-sm flex flex-row items-center gap-2 cursor-pointer select-none ${
+				className={`p-3 w-[210px]  font-semibold border-x border-t border-theme-border rounded-tl-miden text-sm flex flex-row items-center gap-2 cursor-pointer select-none ${
 					selectedTab === 'transaction'
 						? 'bg-theme-surface-highlight text-theme-text'
 						: 'text-theme-text-subtle'
@@ -27,7 +27,7 @@ export const Tabs = () => {
 				Compose transaction
 			</div>
 			<div
-				className={`p-3 w-[210px] font-semibold border-r-2 border-t-2 rounded-tr-miden text-sm border-theme-border flex flex-row items-center gap-2 cursor-pointer select-none ${
+				className={`p-3 w-[210px] font-semibold border-r border-t rounded-tr-miden text-sm border-theme-border flex flex-row items-center gap-2 cursor-pointer select-none ${
 					selectedTab === 'assets'
 						? 'bg-theme-surface-highlight text-theme-text'
 						: 'text-theme-text-subtle'

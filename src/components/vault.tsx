@@ -53,9 +53,8 @@ export function Vault({
 			<Table className="[&_tr:hover]:bg-transparent">
 				<TableHeader>
 					<TableRow>
-						<TableHead className="pr-4">Type</TableHead>
-						<TableHead className="pr-4">Faucet ID</TableHead>
 						<TableHead className="pr-4">Symbol</TableHead>
+						<TableHead className="pr-4">Faucet ID</TableHead>
 						<TableHead className="pr-4">Amount</TableHead>
 					</TableRow>
 				</TableHeader>
@@ -63,9 +62,8 @@ export function Vault({
 					{editableAssets.length ? (
 						editableAssets.map((asset) => (
 							<TableRow key={asset.faucetId}>
-								<TableCell className="pr-8 last:p-2">{asset.type}</TableCell>
-								<TableCell className="pr-8 last:p-2">{asset.faucetId}</TableCell>
 								<TableCell className="pr-8 last:p-2">{asset.symbol}</TableCell>
+								<TableCell className="pr-8 last:p-2">{asset.faucetId}</TableCell>
 								<TableCell className="pr-8 last:p-2 flex flex-row font-mono">
 									<input
 										type="number"
