@@ -59,12 +59,12 @@ export const ComposeTransactionTab = () => {
 										</DropdownMenuTrigger>
 										<DropdownMenuContent>
 											{Object.values(accounts)
-												.filter((account) => account.idHex !== selectedTransactionAccountId)
+												.filter((account) => account.id.id !== selectedTransactionAccountId)
 												.map((account) => (
 													<DropdownMenuItem
-														key={account.id}
+														key={account.id.id}
 														onClick={() => {
-															selectTransactionAccount(account.idHex);
+															selectTransactionAccount(account.id.id);
 														}}
 													>
 														{account.name}
@@ -79,7 +79,7 @@ export const ComposeTransactionTab = () => {
 									<div className="flex flex-col text-sm">
 										<div className="flex justify-between px-4 pt-2">
 											<div className=" text-theme-text">Account ID:</div>
-											<div className=" text-theme-text">{selectedAccountData?.id}</div>
+											<div className=" text-theme-text">{selectedAccountData?.id.id}</div>
 										</div>
 										<div className="px-4 py-1">
 											<div className=" text-theme-text-subtle">Assets:</div>
@@ -200,7 +200,7 @@ export const ComposeTransactionTab = () => {
 									</div>
 									<div className="mt-6">ACCOUNT VAULT CHANGES</div>
 									<div className="mt-2">
-										<Vault accountId={selectedAccountData?.idHex} displayDelta />
+										<Vault accountId={selectedAccountData?.id.id} displayDelta />
 									</div>
 									<div className="mt-6">ACCOUNT STORAGE CHANGES</div>
 								</ScrollArea>

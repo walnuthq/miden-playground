@@ -35,7 +35,7 @@ export function Vault({
 		type: 'Fungible'
 	}));
 
-	const handleAmountChange = (faucetId: bigint, newAmount: string) => {
+	const handleAmountChange = (faucetId: string, newAmount: string) => {
 		const newAmountInt = newAmount ? parseInt(newAmount) : 0;
 		if (noteId) {
 			updateNoteAssetAmount(noteId, faucetId, () => BigInt(newAmountInt));
@@ -85,7 +85,7 @@ export function Vault({
 															: 'text-theme-danger'
 													}`}
 												>
-													{accountUpdates.assetsDelta[asset.faucetId.toString()] > 0 ? '+' : '-'}
+													{accountUpdates.assetsDelta[asset.faucetId.toString()] > 0 ? '+' : ''}
 													{accountUpdates.assetsDelta[asset.faucetId.toString()]}
 												</span>
 											)}

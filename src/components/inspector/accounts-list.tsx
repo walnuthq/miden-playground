@@ -43,7 +43,7 @@ const AccountsList = ({
 			/>
 			{!isCollapsedAccTopLevel &&
 				Object.values(accounts).map((account) => {
-					const isCollapsed = collapsedAccounts[account.idHex] || false;
+					const isCollapsed = collapsedAccounts[account.id.id] || false;
 
 					const onCreateOptions = [];
 					if (!account.isAuth) {
@@ -57,25 +57,25 @@ const AccountsList = ({
 						!account.isAuth || !account.isWallet
 							? (option: string) => {
 									if (option === 'Add auth component') {
-										enableAuthComponent(account.idHex);
+										enableAuthComponent(account.id.id);
 									} else if (option === 'Add wallet component') {
-										enableWalletComponent(account.idHex);
+										enableWalletComponent(account.id.id);
 									}
 							  }
 							: undefined;
 
 					return (
-						<React.Fragment key={account.id}>
+						<React.Fragment key={account.id.id}>
 							<InspectorItem
 								name={account.name}
 								variant="collapsable"
 								isCollapsed={isCollapsed}
 								level={1}
 								onClick={() => {
-									toggleCollapse(account.idHex, setCollapsedAccounts);
+									toggleCollapse(account.id.id, setCollapsedAccounts);
 								}}
 								onRemove={() => {
-									deleteAccount(account.idHex);
+									deleteAccount(account.id.id);
 								}}
 								onCreate={onCreate}
 								onCreateOptions={onCreateOptions}
