@@ -28,12 +28,13 @@ export const ComposeTransactionTab = () => {
 		executeTransaction,
 		blockNumber,
 		removeTransactionNote,
-		setBlockNumber
+		setBlockNumber,
+		accountUpdates
 	} = useMiden();
 	const selectedAccountData = selectedTransactionAccountId
 		? accounts[selectedTransactionAccountId]
 		: null;
-	console.log(selectedAccountData?.storageFileId);
+	console.log(accountUpdates);
 	const [isOpenDropdown, setIsOpenDropdown] = useState(false);
 	const [_blockNumber, _setBlockNumber] = useState(blockNumber.toString());
 	return (
@@ -89,7 +90,7 @@ export const ComposeTransactionTab = () => {
 								)}
 							</div>
 
-							<div className=" text-theme-text mt-2">NOTES TO CONSUME</div>
+							<div className=" text-theme-text mt-6">NOTES TO CONSUME</div>
 							<div className="flex flex-col gap-4 mt-2">
 								{selectedTransactionNotesIds.length > 0 ? (
 									selectedTransactionNotesIds.map((noteId) => (
@@ -116,7 +117,7 @@ export const ComposeTransactionTab = () => {
 							</div>
 
 							{selectedTransactionNotesIds.length < Object.keys(notes).length && (
-								<div className="mt-2">
+								<div className="mt-6">
 									<DropdownMenu open={isOpenDropdown} onOpenChange={setIsOpenDropdown}>
 										<DropdownMenuTrigger className="w-full  border border-theme-border transition-all rounded-miden px-4 py-1 bg-theme-surface-highlight  text-theme-text hover:bg-theme-border">
 											<span className="select-none">Select note</span>
@@ -138,18 +139,9 @@ export const ComposeTransactionTab = () => {
 									</DropdownMenu>
 								</div>
 							)}
-							<div className="mt-2 ">
-								<button
-									disabled
-									className="w-full flex opacity-50 justify-center gap-2 border items-center border-theme-border rounded-miden px-4 py-1 bg-theme-surface-highlight transition-all text-theme-text "
-								>
-									<InlineIcon variant="file_2" color="white" className={`w-4 h-4`} />
-									<span>Transaction script</span>
-									<InlineIcon variant="arrow-link" color="white" className={`w-4 h-4`} />
-								</button>
-							</div>
+
 							{Object.values(notes).find((note) => note.isConsumed) && (
-								<div className="mt-2">CONSUMED NOTES</div>
+								<div className="mt-6">CONSUMED NOTES</div>
 							)}
 							<div>
 								{Object.values(notes)
@@ -163,7 +155,7 @@ export const ComposeTransactionTab = () => {
 										</div>
 									))}
 							</div>
-							<div className="mt-2">
+							<div className="mt-6">
 								<div className=" text-theme-text ">BLOCK NUMBER</div>
 								<input
 									type="text"
@@ -176,14 +168,22 @@ export const ComposeTransactionTab = () => {
 									className="w-full mt-2 border border-theme-border rounded-miden px-4 py-1 bg-transparent outline-none text-theme-text"
 								/>
 							</div>
-
+							<div className="mt-6 ">
+								<button
+									disabled
+									className="w-full flex opacity-50 justify-center gap-2 border items-center border-theme-border rounded-miden px-4 py-1 bg-theme-surface-highlight transition-all text-theme-text "
+								>
+									<span>Edit Transaction Script</span>
+									<InlineIcon variant="arrow-link" color="white" className={`w-4 h-4`} />
+								</button>
+							</div>
 							<div className="mt-2">
 								<button
 									disabled={selectedTransactionNotesIds.length === 0}
 									onClick={() => {
 										executeTransaction();
 									}}
-									className={`w-full  border border-theme-border rounded-miden px-4 py-1 bg-theme-surface-highlight transition-all text-theme-text ${
+									className={`w-full outline-none border border-theme-border rounded-miden px-4 py-1 bg-theme-surface-highlight transition-all text-theme-text ${
 										selectedTransactionNotesIds.length > 0 ? 'hover:bg-theme-border' : 'opacity-50'
 									}`}
 								>
@@ -198,18 +198,20 @@ export const ComposeTransactionTab = () => {
 					<div className="flex flex-col h-full text-sm">
 						<ResizablePanelGroup direction="vertical">
 							<ResizablePanel defaultSize={75}>
-								<ScrollArea className="relative h-full pt-5 px-4 overflow-auto text-theme-text">
-									<div className="flex justify-center">EXECUTION OUTPUT</div>
-									<div className="mt-2">OUTPUT NOTES</div>
-									<div className="mt-2">
-										<OutputNotes />
-									</div>
-									<div className="mt-2">ACCOUNT VAULT CHANGES</div>
-									<div className="mt-2">
-										<Vault accountId={selectedAccountData?.id.id} displayDelta />
-									</div>
-									<div className="mt-2">ACCOUNT STORAGE CHANGES</div>
-								</ScrollArea>
+								{accountUpdates !== null && (
+									<ScrollArea className="relative h-full pt-5 px-4 overflow-auto text-theme-text">
+										<div className="flex justify-center">EXECUTION OUTPUT</div>
+										<div className="mt-2">OUTPUT NOTES</div>
+										<div className="mt-2">
+											<OutputNotes />
+										</div>
+										<div className="mt-2">ACCOUNT VAULT CHANGES</div>
+										<div className="mt-2">
+											<Vault accountId={selectedAccountData?.id.id} displayDelta />
+										</div>
+										<div className="mt-2">ACCOUNT STORAGE CHANGES</div>
+									</ScrollArea>
+								)}
 							</ResizablePanel>
 							<ResizableHandle className="w-[1px] bg-theme-border" />
 							<ResizablePanel defaultSize={25}>
