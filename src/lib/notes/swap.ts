@@ -36,8 +36,6 @@ export function createSwapNote({
 		inputs.push(input.toString());
 	}
 
-	console.log('swapNoteInputs', swapNoteInputs);
-
 	const paybackNoteId = generateId();
 	const paybackScriptFileId = generateId();
 	const paybackInputFileId = generateId();

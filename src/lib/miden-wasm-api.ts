@@ -29,21 +29,6 @@ export function consumeNotes({
 	blockNumber: number;
 }): ExecutionOutput {
 	const notesWrapper = notes.map(({ note, noteScript, noteInputs, senderScript }) => {
-		console.log(
-			'Note',
-			'note.assets:',
-			note.assets,
-			'noteInputs:',
-			noteInputs,
-			'noteScript:',
-			noteScript,
-			'note.senderId:',
-			note.senderId,
-			'senderScript:',
-			senderScript,
-			'note.serialNumber:',
-			note.serialNumber
-		);
 		return new NoteData(
 			note.assets.map((a) => new AssetData(a.faucetId, a.amount)),
 			noteInputs,
@@ -63,23 +48,6 @@ export function consumeNotes({
 		receiver.isAuth,
 		receiverStorage.map((row) => new WordData(new BigUint64Array(row)))
 	);
-	console.log(
-		'receiverAccount',
-		'receiverScript:',
-		receiverScript,
-		'receiverSecretKey:',
-		receiver.secretKey,
-		'receiverId:',
-		receiver.id,
-		'receiverAssets:',
-		receiver.assets,
-		'receiverIsWallet:',
-		receiver.isWallet,
-		'receiverIsAuth:',
-		receiver.isAuth
-	);
-	console.log('transactionScript:', transactionScript);
-	console.log('blockNumber:', blockNumber);
 	return execute_transaction(transactionScript, receiverAccount, notesWrapper, BigInt(blockNumber));
 }
 

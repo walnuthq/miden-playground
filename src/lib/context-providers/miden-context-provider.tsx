@@ -251,7 +251,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		const account = accounts[selectedTransactionAccountId];
 		const transactionNotes = selectedTransactionNotesIds.map((noteId) => {
 			const sender = accounts[notes[noteId].senderId];
-			console.log('INPUTS', files[notes[noteId].inputFileId].content.value);
 			return {
 				note: notes[noteId],
 				noteScript: files[notes[noteId].scriptFileId].content.value!,
@@ -271,8 +270,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				transactionScript: files[TRANSACTION_SCRIPT_FILE_ID].content.value!,
 				blockNumber
 			});
-
-			console.log('Transaction output', output);
 
 			output.storageDiffs = Account.computeStorageDiffs(storage, output.storage);
 
@@ -446,8 +443,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				setNotes(notes);
 				setSelectedTransactionAccountId(defaultAccount2.id.id);
 				setIsInitialized(true);
-				console.log(generateFaucetId());
-				console.log(generateFaucetId());
 			})
 			.catch((error: unknown) => {
 				alert(`Failed to initialize WASM: ${error}`);
