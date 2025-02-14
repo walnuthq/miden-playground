@@ -2,12 +2,12 @@ import { generateAccountId } from '@/lib/miden-wasm-api';
 import { generateId } from '@/lib/utils';
 import { SECRET_KEY } from '@/lib/consts/secret-key';
 import { DEFAULT_FAUCET_IDS } from '@/lib/consts/defaults';
-import { Asset, ExecutionOutput } from '@/lib/types';
+import { AccountId, Asset, ExecutionOutput } from '@/lib/types';
 import _ from 'lodash';
 import { EditorFiles } from './files';
 
 interface AccountProps {
-	id: bigint;
+	id: AccountId;
 	name: string;
 	isWallet: boolean;
 	isAuth: boolean;
@@ -21,7 +21,7 @@ interface AccountProps {
 }
 
 export class Account {
-	id: bigint;
+	id: AccountId;
 	name: string;
 	isWallet: boolean;
 	isAuth: boolean;
@@ -52,8 +52,7 @@ export class Account {
 	}
 
 	static new(name: string): { account: Account; newFiles: EditorFiles } {
-		const id = generateAccountId();
-		const idHex = '0x' + id.toString(16);
+		const accountId = generateAccountId();
 		const scriptFileId = generateId();
 		const metadataFileId = generateId();
 		const vaultFileId = generateId();
@@ -63,7 +62,7 @@ export class Account {
 			[scriptFileId]: {
 				id: scriptFileId,
 				name: 'Code',
-				content: { value: ACCOUNT_SCRIPT, variant: 'account-code', accountId: idHex },
+				content: { value: ACCOUNT_SCRIPT, variant: 'account-code', accountId: accountId.id },
 				isOpen: false,
 				readonly: false,
 				variant: 'script'
@@ -77,7 +76,7 @@ export class Account {
 				content: {
 					dynamic: {
 						account: {
-							accountId: idHex,
+							accountId: accountId.id,
 							variant: 'metadata'
 						}
 					}
@@ -89,7 +88,7 @@ export class Account {
 				content: {
 					dynamic: {
 						account: {
-							accountId: idHex,
+							accountId: accountId.id,
 							variant: 'vault'
 						}
 					}
@@ -103,7 +102,7 @@ export class Account {
 				name: 'Storage',
 				content: {
 					value: Account.stringifyStorage(Account.initialStorage()),
-					accountId: idHex
+					accountId: accountId.id
 				},
 				isOpen: false,
 				readonly: false,
@@ -111,7 +110,7 @@ export class Account {
 			}
 		};
 		const account = new Account({
-			id: id,
+			id: accountId,
 			name,
 			isWallet: true,
 			isAuth: true,
@@ -134,10 +133,6 @@ export class Account {
 		});
 
 		return { account, newFiles };
-	}
-
-	get idHex() {
-		return '0x' + this.id.toString(16);
 	}
 
 	static getNextAccountName(accounts: Record<string, Account>) {
@@ -170,7 +165,7 @@ export class Account {
 		this.isAuth = true;
 	}
 
-	updateAssetAmount(faucetId: bigint, updateFn: (amount: bigint) => bigint) {
+	updateAssetAmount(faucetId: string, updateFn: (amount: bigint) => bigint) {
 		const asset = this.assets.find((asset) => asset.faucetId === faucetId);
 		if (asset) {
 			asset.amount = updateFn(asset.amount);
@@ -232,8 +227,17 @@ export.custom_set_item
     exec.sys::truncate_stack
 end`;
 
-export const ACCOUNT_AUTH_SCRIPT = `export.::miden::contracts::auth::basic::auth_tx_rpo_falcon512`;
+export const ACCOUNT_AUTH_SCRIPT = `# The MASM code of the RPO Falcon 512 authentication Account Component.
+#
+# See the \`RpoFalcon512\` Rust type's documentation for more details.
 
-export const ACCOUNT_WALLET_SCRIPT = `export.::miden::contracts::wallets::basic::receive_asset
+export.::miden::contracts::auth::basic::auth_tx_rpo_falcon512`;
+
+export const ACCOUNT_WALLET_SCRIPT = `# The MASM code of the Basic Wallet Account Component.
+#
+# See the \`BasicWallet\` Rust type's documentation for more details.
+
+export.::miden::contracts::wallets::basic::receive_asset
 export.::miden::contracts::wallets::basic::create_note
-export.::miden::contracts::wallets::basic::move_asset_to_note`;
+export.::miden::contracts::wallets::basic::move_asset_to_note
+`;

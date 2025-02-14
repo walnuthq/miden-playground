@@ -20,11 +20,17 @@ export interface ExecutionOutput {
 }
 
 export interface Asset {
-	faucetId: bigint;
+	faucetId: string;
 	amount: bigint;
 }
 
 export interface AccountUpdates {
 	accountId: string;
 	assetsDelta: Record<string, bigint>; // FaucetId -> Amount Delta
+}
+
+export interface AccountId {
+	id: string;
+	prefix: bigint;
+	suffix: bigint;
 }

@@ -40,7 +40,7 @@ const Breadcrumbs = () => {
 				('accountId' in files[selectedFileId].content
 					? files[selectedFileId].content.accountId
 					: undefined) ||
-				account?.idHex;
+				account?.id.id;
 			return accountId ? accounts[accountId]?.name : undefined;
 		}
 		const noteId = files[selectedFileId].content.dynamic?.note?.noteId;
