@@ -44,20 +44,6 @@ export class Note {
 		this.serialNumber = generateNoteSerialNumber();
 	}
 
-	static getNextNoteName(type: 'P2ID' | 'P2IDR' | 'SWAP' | 'NOTE', notes: Record<string, Note>) {
-		const noteNames = Object.values(notes).map((note) => note.name);
-		let nextNoteName = '';
-		let i = 0;
-		while (true) {
-			nextNoteName = `${type} (${i + 1})`;
-			if (!noteNames.includes(nextNoteName)) {
-				break;
-			}
-			i++;
-		}
-		return nextNoteName;
-	}
-
 	static createEmptyNote({
 		senderId,
 		assets,
@@ -78,7 +64,7 @@ export class Note {
 		const newFiles: EditorFiles = {
 			[scriptFileId]: {
 				id: scriptFileId,
-				name: `${name} Script`,
+				name: `Script`,
 				content: { value: '' },
 				isOpen: false,
 				variant: 'script',
@@ -86,7 +72,7 @@ export class Note {
 			},
 			[inputFileId]: {
 				id: inputFileId,
-				name: `${name} Inputs`,
+				name: `Inputs`,
 				content: {
 					value: JSON.stringify([], null, 2)
 				},
@@ -96,7 +82,7 @@ export class Note {
 			},
 			[metadataFileId]: {
 				id: metadataFileId,
-				name: `${name} Metadata`,
+				name: `Metadata`,
 				content: { dynamic: { note: { noteId, variant: 'metadata' } } },
 				isOpen: false,
 				variant: 'file',
@@ -104,7 +90,7 @@ export class Note {
 			},
 			[vaultFileId]: {
 				id: vaultFileId,
-				name: `${name} Vault`,
+				name: `Vault`,
 				content: { dynamic: { note: { noteId, variant: 'vault' } } },
 				isOpen: false,
 				variant: 'file',
@@ -123,6 +109,8 @@ export class Note {
 			metadataFileId,
 			vaultFileId
 		});
+		const serialNumberString = note.serialNumberDecimalString.slice(0, 10);
+		note.name = `${name} - ${serialNumberString}`;
 		return { note, newFiles };
 	}
 

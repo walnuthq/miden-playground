@@ -25,7 +25,7 @@ export function createP2IDNote({
 	const newFiles: EditorFiles = {
 		[scriptFileId]: {
 			id: scriptFileId,
-			name: `${name} Script`,
+			name: `Script`,
 			content: { value: P2ID_SCRIPT },
 			isOpen: false,
 			variant: 'script',
@@ -33,7 +33,7 @@ export function createP2IDNote({
 		},
 		[inputFileId]: {
 			id: inputFileId,
-			name: `${name} Inputs`,
+			name: `Inputs`,
 			content: {
 				value: JSON.stringify([receiverId.suffix.toString(), receiverId.prefix.toString()], null, 2)
 			},
@@ -43,7 +43,7 @@ export function createP2IDNote({
 		},
 		[metadataFileId]: {
 			id: metadataFileId,
-			name: `${name} Metadata`,
+			name: `Metadata`,
 			content: { dynamic: { note: { noteId, variant: 'metadata' } } },
 			isOpen: false,
 			variant: 'file',
@@ -51,7 +51,7 @@ export function createP2IDNote({
 		},
 		[vaultFileId]: {
 			id: vaultFileId,
-			name: `${name} Vault`,
+			name: `Vault`,
 			content: { dynamic: { note: { noteId, variant: 'vault' } } },
 			isOpen: false,
 			variant: 'file',
@@ -61,7 +61,7 @@ export function createP2IDNote({
 
 	const note = new Note({
 		id: noteId,
-		name,
+		name: name + 'dddd',
 		scriptFileId,
 		isConsumed: false,
 		assets,
@@ -70,6 +70,8 @@ export function createP2IDNote({
 		metadataFileId,
 		vaultFileId
 	});
+	const serialNumberString = note.serialNumberDecimalString.slice(0, 10);
+	note.name = `${name} - ${serialNumberString}`;
 	return { note, newFiles };
 }
 
