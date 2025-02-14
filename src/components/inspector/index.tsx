@@ -74,7 +74,7 @@ export function InspectorItem({
 		>
 			<div className="flex flex-row items-center gap-2">
 				{isReadOnly !== undefined && (
-					<div className="py-1.5">
+					<div className="py-1">
 						<InlineIcon variant={isReadOnly ? 'lock' : 'unlock'} className={`w-4 h-4`} />
 					</div>
 				)}
@@ -98,7 +98,7 @@ export function InspectorItem({
 			<div className="flex flex-row items-center gap-2">
 				{onRemove && (
 					<div
-						className="cursor-pointer hover:bg-white/10 p-0.5 rounded-theme"
+						className="cursor-pointer hover:bg-theme-border p-1 rounded-theme"
 						onClick={(event) => {
 							event.stopPropagation();
 							onRemove();
@@ -110,7 +110,7 @@ export function InspectorItem({
 				{onCreate && onCreateOptions && (
 					<DropdownMenu>
 						<DropdownMenuTrigger>
-							<div className="cursor-pointer hover:bg-white/10 rounded-theme p-0.5">
+							<div className="cursor-pointer hover:bg-theme-border rounded-theme p-1">
 								<InlineIcon variant="file-plus" color="white" className="w-4 h-4 opacity-80" />
 							</div>
 						</DropdownMenuTrigger>
