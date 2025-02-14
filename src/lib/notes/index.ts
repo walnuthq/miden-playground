@@ -14,7 +14,7 @@ export interface NoteProps {
 	isConsumed: boolean;
 	inputFileId: string;
 	scriptFileId: string;
-	senderId: bigint;
+	senderId: string;
 	metadataFileId: string;
 	vaultFileId: string;
 }
@@ -26,7 +26,7 @@ export class Note {
 	isConsumed: boolean;
 	inputFileId: string;
 	scriptFileId: string;
-	senderId: bigint;
+	senderId: string;
 	metadataFileId: string;
 	vaultFileId: string;
 	serialNumber: BigUint64Array;
@@ -42,10 +42,6 @@ export class Note {
 		this.metadataFileId = props.metadataFileId;
 		this.vaultFileId = props.vaultFileId;
 		this.serialNumber = generateNoteSerialNumber();
-	}
-
-	get senderIdHex(): string {
-		return '0x' + this.senderId.toString(16);
 	}
 
 	static getNextNoteName(type: 'P2ID' | 'P2IDR' | 'SWAP' | 'NOTE', notes: Record<string, Note>) {
@@ -67,7 +63,7 @@ export class Note {
 		assets,
 		name
 	}: {
-		senderId: bigint;
+		senderId: string;
 		assets: Asset[];
 		name: string;
 	}): {
@@ -134,7 +130,7 @@ export class Note {
 		return this.serialNumber.reduce((acc, num) => acc + BigInt(num), BigInt(0)).toString();
 	}
 
-	updateAssetAmount(faucetId: bigint, updateFn: (amount: bigint) => bigint) {
+	updateAssetAmount(faucetId: string, updateFn: (amount: bigint) => bigint) {
 		const asset = this.assets.find((asset) => asset.faucetId === faucetId);
 		if (asset) {
 			asset.amount = updateFn(asset.amount);

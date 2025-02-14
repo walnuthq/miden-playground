@@ -1,4 +1,4 @@
-import { Asset } from '@/lib/types';
+import { AccountId, Asset } from '@/lib/types';
 import { generateId } from '@/lib/utils';
 import { createSwapNotes } from '@/lib/miden-wasm-api';
 import { Note } from '@/lib/notes';
@@ -11,8 +11,8 @@ export function createSwapNote({
 	requestedAsset,
 	name
 }: {
-	senderId: bigint;
-	receiverId: bigint;
+	senderId: AccountId;
+	receiverId: AccountId;
 	offeredAsset: Asset;
 	requestedAsset: Asset;
 	name: string;
@@ -27,8 +27,8 @@ export function createSwapNote({
 	const metadataFileId = generateId();
 	const vaultFileId = generateId();
 	const { swapNoteInputs, paybackNote: paybackNoteData } = createSwapNotes(
-		senderId,
-		receiverId,
+		senderId.id,
+		receiverId.id,
 		requestedAsset
 	);
 	const inputs: string[] = [];
@@ -140,7 +140,7 @@ export function createSwapNote({
 		isConsumed: false,
 		assets: [offeredAsset],
 		inputFileId,
-		senderId,
+		senderId: senderId.id,
 		vaultFileId
 	});
 
@@ -164,37 +164,54 @@ const.ERR_SWAP_WRONG_NUMBER_OF_INPUTS=0x00020055
 # SWAP script requires exactly 1 note asset
 const.ERR_SWAP_WRONG_NUMBER_OF_ASSETS=0x00020056
 
-# Swap script: adds an asset from the note into consumers account and
-# creates a note consumable by note issuer containing requested ASSET.
-#
-# Requires that the account exposes:
-#
-# Inputs: [SCRIPT_ROOT]
-# Outputs: []
-#
-# Note inputs are assumed to be as follows:
-# - RECIPIENT
-# - ASSET
-# - TAG = [tag, 0, 0, 0]
-#
-# FAILS if:
-# - Account does not expose miden::contracts::wallets::basic::receive_asset procedure
-# - Account does not expose miden::contracts::wallets::basic::create_note procedure
-# - Account does not expose miden::contracts::wallets::basic::move_asset_to_note procedure
-# - Account vault does not contain the requested asset
-# - Adding a fungible asset would result in amount overflow, i.e., the total amount would be
-#   greater than 2^63
+#! Swap script: adds an asset from the note into consumers account and
+#! creates a note consumable by note issuer containing requested ASSET.
+#!
+#! Requires that the account exposes:
+#! - miden::contracts::wallets::basic::receive_asset procedure.
+#! - miden::contracts::wallets::basic::create_note procedure.
+#! - miden::contracts::wallets::basic::move_asset_to_note procedure.
+#!
+#! Inputs:  []
+#! Outputs: []
+#!
+#! Note inputs are assumed to be as follows:
+#! - RECIPIENT
+#! - ASSET
+#! - TAG = [tag, 0, 0, 0]
+#!
+#! Panics if:
+#! - account does not expose miden::contracts::wallets::basic::receive_asset procedure.
+#! - account does not expose miden::contracts::wallets::basic::create_note procedure.
+#! - account does not expose miden::contracts::wallets::basic::move_asset_to_note procedure.
+#! - account vault does not contain the requested asset.
+#! - adding a fungible asset would result in amount overflow, i.e., the total amount would be
+#!   greater than 2^63.
 begin
-    # drop the transaction script root
-    dropw
-    # => []
+    # store the note inputs to memory starting at address 12
+    push.12 exec.note::get_assets
+    # => [num_assets, ptr]
 
-    # store ASSET into memory at address 3
-    push.3 exec.note::get_assets assert.err=ERR_SWAP_WRONG_NUMBER_OF_ASSETS
+    # make sure the number of inputs is 1
+    assert.err=ERR_SWAP_WRONG_NUMBER_OF_ASSETS
     # => [ptr]
 
-    # load the ASSET and add it to the account
-    mem_loadw call.wallet::receive_asset dropw
+    # load the ASSET
+    mem_loadw
+    # => [ASSET]
+    
+    # pad the stack before call
+    padw swapw padw padw swapdw
+    # => [ASSET, pad(12)]
+
+    # add the ASSET to the account
+    call.wallet::receive_asset
+    # => [pad(16)]
+
+    # clean the stack
+    repeat.4
+        dropw
+    end
     # => []
 
     # store note inputs into memory starting at address 0
@@ -209,10 +226,10 @@ begin
     drop padw mem_loadw
     # => [RECIPIENT]
 
-    padw mem_loadw.1
+    padw mem_loadw.4
     # => [ASSET, RECIPIENT]
 
-    padw mem_loadw.2
+    padw mem_loadw.8
     # => [0, 0, execution_hint, tag, ASSET, RECIPIENT]
 
     drop drop swap
@@ -230,16 +247,16 @@ begin
 
     # create a note using inputs
     padw swapdw padw movdnw.2
-    # => [tag, aux, note_type, execution_hint, RECIPIENT, PAD(8), ASSET]
+    # => [tag, aux, note_type, execution_hint, RECIPIENT, pad(8), ASSET]
     call.wallet::create_note
-    # => [note_idx, PAD(15), ASSET]
+    # => [note_idx, pad(15), ASSET]
 
     swapw dropw movupw.3 
-    # => [ASSET, note_idx, PAD(11)]
+    # => [ASSET, note_idx, pad(11)]
 
     # move asset to the note
     call.wallet::move_asset_to_note
-    # => [ASSET, note_idx, PAD(11)]
+    # => [ASSET, note_idx, pad(11)]
 
     # clean stack
     dropw dropw dropw dropw

@@ -1,7 +1,7 @@
 use alloc::{string::ToString, vec, vec::Vec};
 use miden_objects::{
-    accounts::{Account, AccountHeader, StorageSlot},
-    assets::Asset,
+    account::{Account, AccountHeader, StorageSlot},
+    asset::Asset,
     transaction::{ExecutedTransaction, OutputNotes},
 };
 use wasm_bindgen::JsValue;
@@ -17,21 +17,12 @@ fn serialize_assets(assets: &[Asset]) -> Result<js_sys::Array, JsValue> {
                 js_sys::Reflect::set(
                     &asset_obj,
                     &"faucetId".into(),
-                    &JsValue::from(u64::from(asset.faucet_id())),
+                    &JsValue::from(asset.faucet_id().to_hex()),
                 )?;
                 js_sys::Reflect::set(&asset_obj, &"amount".into(), &JsValue::from(asset.amount()))?;
             }
-            Asset::NonFungible(asset) => {
-                js_sys::Reflect::set(
-                    &asset_obj,
-                    &"faucetId".into(),
-                    &JsValue::from(u64::from(asset.faucet_id())),
-                )?;
-                js_sys::Reflect::set(
-                    &asset_obj,
-                    &"faucetIdHex".into(),
-                    &JsValue::from(asset.faucet_id().to_hex()),
-                )?;
+            Asset::NonFungible(_) => {
+                continue;
             }
         }
         assets_array.push(&asset_obj);
@@ -64,7 +55,7 @@ pub fn serialize_execution_output(
     let vault_root = final_account.vault_root().to_hex();
     let nonce = final_account.nonce().as_int();
 
-    let account_id: u64 = account.id().into();
+    let account_id = account.id().to_hex();
 
     let output_notes_array = js_sys::Array::new();
     for note in output_notes.iter() {

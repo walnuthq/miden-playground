@@ -6,14 +6,16 @@ use assembly::{
 };
 use miden_crypto::dsa::rpo_falcon512::PublicKey;
 use miden_lib::{
-    accounts::{auth::RpoFalcon512, wallets::BasicWallet},
+    account::{auth::RpoFalcon512, wallets::BasicWallet},
     transaction::TransactionKernel,
 };
 use miden_objects::{
-    accounts::{Account, AccountComponent, AccountId, AccountStorage, StorageSlot},
-    assets::{Asset, AssetVault},
+    account::{
+        Account, AccountCode, AccountComponent, AccountId, AccountStorage, AccountType, StorageSlot,
+    },
+    asset::{Asset, AssetVault},
     crypto::dsa::rpo_falcon512::SecretKey,
-    notes::{
+    note::{
         Note, NoteAssets, NoteExecutionHint, NoteInputs, NoteMetadata, NoteRecipient, NoteScript,
         NoteType,
     },
@@ -40,6 +42,26 @@ pub fn create_account_component_library(account_code: &str) -> Result<Library, R
     Ok(account_library)
 }
 
+fn account_storage_from_components(
+    components: &[AccountComponent],
+    account_type: AccountType,
+) -> Result<AccountStorage, AccountError> {
+    let mut storage_slots = match account_type {
+        AccountType::FungibleFaucet => vec![StorageSlot::empty_value()],
+        AccountType::NonFungibleFaucet => vec![StorageSlot::empty_map()],
+        _ => vec![],
+    };
+
+    storage_slots.extend(
+        components
+            .iter()
+            .flat_map(|component| component.storage_slots())
+            .cloned(),
+    );
+
+    AccountStorage::new(storage_slots)
+}
+
 pub fn get_account_with_account_code(
     account_code_library: Library,
     account_id: AccountId,
@@ -64,8 +86,11 @@ pub fn get_account_with_account_code(
         components.push(RpoFalcon512::new(PublicKey::new(public_key)).into());
     }
 
-    let (account_code, account_storage) =
-        Account::initialize_from_components(account_id.account_type(), &components).unwrap();
+    // let (account_code, account_storage) =
+    //     Account::initialize_from_components(account_id.account_type(), &components).unwrap();
+
+    let account_code = AccountCode::from_components(&components, account_id.account_type())?;
+    let account_storage = account_storage_from_components(&components, account_id.account_type())?;
 
     let account_vault = AssetVault::new(&assets).unwrap();
 
@@ -127,7 +152,7 @@ pub fn get_pk_and_authenticator(
     alloc::sync::Arc<dyn miden_tx::auth::TransactionAuthenticator>,
 ) {
     use alloc::sync::Arc;
-    use miden_objects::accounts::AuthSecretKey;
+    use miden_objects::account::AuthSecretKey;
     use miden_tx::auth::{BasicAuthenticator, TransactionAuthenticator};
 
     let seed = [0_u8; 32];

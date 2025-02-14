@@ -35,7 +35,7 @@ const Breadcrumbs = () => {
 
 	const getName = () => {
 		if (type === 'Accounts') {
-			const accountId = files[selectedFileId].content.dynamic?.account?.accountId || account?.idHex;
+			const accountId = files[selectedFileId].content.dynamic?.account?.accountId || account?.id.id;
 			return accountId ? accounts[accountId]?.name : undefined;
 		}
 		const noteId = files[selectedFileId].content.dynamic?.note?.noteId;

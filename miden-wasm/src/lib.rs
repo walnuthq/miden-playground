@@ -1,55 +1,76 @@
 #![no_std]
 extern crate alloc;
 
-mod account_builder;
 mod bindings;
-mod mock_chain;
-mod mock_host;
 mod scripts;
 mod serialization;
-mod transaction_context;
-mod transaction_context_builder;
 mod utils;
 
-use crate::transaction_context_builder::TransactionContextBuilder;
-
-use alloc::{format, string::ToString, sync::Arc, vec, vec::Vec};
-use bindings::{AccountData, AssetData, NoteData};
+use alloc::{
+    format,
+    string::{String, ToString},
+    sync::Arc,
+    vec,
+    vec::Vec,
+};
+use bindings::{AccountData, AccountIdData, AssetData, NoteData};
 use miden_crypto::rand::{FeltRng, RpoRandomCoin};
-use miden_lib::{notes::utils::build_p2id_recipient, transaction::TransactionKernel};
+use miden_lib::{note::utils::build_p2id_recipient, transaction::TransactionKernel};
 use miden_objects::{
-    accounts::{AccountId, AccountType},
-    assets::Asset,
-    notes::{Note, NoteExecutionHint, NoteExecutionMode, NoteInputs, NoteTag},
+    account::{AccountId, AccountIdVersion, AccountStorageMode, AccountType},
+    asset::Asset,
+    note::{Note, NoteExecutionHint, NoteExecutionMode, NoteId, NoteInputs, NoteTag},
     transaction::{TransactionArgs, TransactionScript},
     Felt, Word,
 };
-use miden_tx::TransactionExecutor;
+use miden_tx::{
+    testing::{MockChain, TransactionContextBuilder},
+    TransactionExecutor,
+};
 use rand::Rng;
 use rand_chacha::{rand_core::SeedableRng, ChaCha20Rng};
 use scripts::{ACCOUNT_SCRIPT, P2ID_SCRIPT};
 use serialization::serialize_execution_output;
 use wasm_bindgen::prelude::*;
+use web_sys::console;
 
 // Added this line to import the necessary libraries for more detailed logging
 extern crate console_error_panic_hook;
 
 #[wasm_bindgen]
-pub fn generate_account_id(seed: Vec<u8>) -> Result<u64, JsValue> {
-    let seed_array: [u8; 32] = seed
+pub fn generate_account_id(seed: Vec<u8>) -> Result<AccountIdData, JsValue> {
+    let seed_array: [u8; 15] = seed
         .try_into()
-        .map_err(|err| format!("seed must be 32 bytes: {:?}", err))?;
-    let id: u64 = AccountId::new_dummy(seed_array, AccountType::RegularAccountUpdatableCode).into();
-    Ok(id)
+        .map_err(|err| format!("seed must be 15 bytes: {:?}", err))?;
+    let account_id = AccountId::dummy(
+        seed_array,
+        AccountIdVersion::Version0,
+        AccountType::RegularAccountUpdatableCode,
+        AccountStorageMode::Private,
+    );
+    Ok(AccountIdData {
+        id: account_id.to_hex(),
+        prefix: account_id.prefix().as_u64(),
+        suffix: account_id.suffix().as_int(),
+    })
 }
 
 #[wasm_bindgen]
-pub fn generate_faucet_id(seed: Vec<u8>) -> Result<u64, JsValue> {
-    let seed_array: [u8; 32] = seed
+pub fn generate_faucet_id(seed: Vec<u8>) -> Result<AccountIdData, JsValue> {
+    let seed_array: [u8; 15] = seed
         .try_into()
-        .map_err(|err| format!("seed must be 32 bytes: {:?}", err))?;
-    let id: u64 = AccountId::new_dummy(seed_array, AccountType::FungibleFaucet).into();
-    Ok(id)
+        .map_err(|err| format!("seed must be 15 bytes: {:?}", err))?;
+    let account_id = AccountId::dummy(
+        seed_array,
+        AccountIdVersion::Version0,
+        AccountType::FungibleFaucet,
+        AccountStorageMode::Private,
+    );
+    Ok(AccountIdData {
+        id: account_id.to_hex(),
+        prefix: account_id.prefix().as_u64(),
+        suffix: account_id.suffix().as_int(),
+    })
 }
 
 #[wasm_bindgen]
@@ -71,6 +92,11 @@ pub fn execute_transaction(
 ) -> Result<JsValue, JsValue> {
     let mut receiver = receiver;
 
+    console::log_1(&JsValue::from_str(&format!(
+        "receiver: {:?}",
+        receiver.account.id().to_hex()
+    )));
+
     let notes = notes
         .into_iter()
         .map(|note| Note::try_from(note))
@@ -91,13 +117,34 @@ pub fn execute_transaction(
 
     let tx_args_target = TransactionArgs::with_tx_script(tx_script.clone());
 
-    let tx_context = TransactionContextBuilder::new(receiver.account.clone())
-        .input_notes(notes.clone())
-        .build(block_number);
+    let tx_inputs = {
+        let mut mock_chain = MockChain::default();
+        for i in notes {
+            mock_chain.add_pending_note(i);
+        }
 
-    let executor =
-        TransactionExecutor::new(Arc::new(tx_context.clone()), Some(receiver.falcon_auth()))
-            .with_tracing();
+        for _ in 0..block_number {
+            mock_chain.seal_block(None);
+        }
+
+        let input_note_ids: Vec<NoteId> = mock_chain
+            .available_notes()
+            .iter()
+            .map(|n| n.id())
+            .collect();
+
+        mock_chain.get_transaction_inputs(receiver.account.clone(), None, &input_note_ids, &[])
+    };
+
+    let tx_context = TransactionContextBuilder::new(receiver.account.clone())
+        .tx_inputs(tx_inputs)
+        .build();
+
+    let executor = TransactionExecutor::new(
+        Arc::new(tx_context.tx_inputs().clone()),
+        Some(receiver.falcon_auth()),
+    )
+    .with_tracing();
 
     let block_ref = tx_context.tx_inputs().block_header().block_num();
 
@@ -148,11 +195,11 @@ impl CreateSwapNoteResult {
 #[wasm_bindgen]
 pub fn create_swap_note(
     seed: Vec<u8>,
-    sender_account_id: u64,
-    receiver_account_id: u64,
+    sender_account_id: String,
+    receiver_account_id: String,
     requested_asset: AssetData,
 ) -> Result<CreateSwapNoteResult, JsValue> {
-    let sender = AccountId::try_from(sender_account_id)
+    let sender = AccountId::from_hex(&sender_account_id)
         .map_err(|err| format!("Failed to convert sender account id: {:?}", err))?;
     let requested_asset_converted: Asset = requested_asset
         .clone()

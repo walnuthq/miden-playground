@@ -11,7 +11,7 @@ import React, {
 import init from 'miden-wasm';
 import { defaultAccounts, defaultNotes } from '@/lib/consts/defaults';
 import { TRANSACTION_SCRIPT_FILE_ID } from '@/lib/consts';
-import { consumeNotes } from '@/lib/miden-wasm-api';
+import { consumeNotes, generateFaucetId } from '@/lib/miden-wasm-api';
 import { TRANSACTION_SCRIPT } from '@/lib/consts/transaction';
 import { convertToBigUint64Array } from '@/lib/utils';
 import { Account } from '@/lib/account';
@@ -62,12 +62,12 @@ interface MidenContextProps {
 	addErrorLog: (message: string) => void;
 	updateAccountAssetAmount: (
 		accountId: string,
-		faucetId: bigint,
+		faucetId: string,
 		updateFn: (amount: bigint) => bigint
 	) => void;
 	updateNoteAssetAmount: (
 		noteId: string,
-		faucetId: bigint,
+		faucetId: string,
 		updateFn: (amount: bigint) => bigint
 	) => void;
 }
@@ -250,7 +250,8 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		setIsExecutingTransaction(true);
 		const account = accounts[selectedTransactionAccountId];
 		const transactionNotes = selectedTransactionNotesIds.map((noteId) => {
-			const sender = accounts[notes[noteId].senderIdHex];
+			const sender = accounts[notes[noteId].senderId];
+			console.log('INPUTS', files[notes[noteId].inputFileId].content.value);
 			return {
 				note: notes[noteId],
 				noteScript: files[notes[noteId].scriptFileId].content.value!,
@@ -320,7 +321,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		const newAccountName = Account.getNextAccountName(accounts);
 		const { account, newFiles } = Account.new(newAccountName);
 		setAccounts((prev) => {
-			return { ...prev, [account.idHex]: account };
+			return { ...prev, [account.id.id]: account };
 		});
 		setFiles((prev) => ({ ...prev, ...newFiles }));
 	}, [accounts]);
@@ -383,7 +384,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			requestedAsset,
 			name: newNoteName
 		});
-		updateAccountById(sender.idHex, (account) => {
+		updateAccountById(sender.id.id, (account) => {
 			account.updateAssetAmount(offeredAsset.faucetId, (amount) => amount - offeredAsset.amount);
 			return account;
 		});
@@ -407,7 +408,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 
 	const createSampleP2IDRNote = useCallback(() => {
 		const newNoteName = Note.getNextNoteName('P2IDR', notes);
-		const receiverId = accounts[0].id;
+		const receiverId = Object.values(accounts)[0].id;
 		const senderId = Object.values(accounts).filter((account) => account.id !== receiverId)[0].id;
 		const { note, newFiles } = createP2IDRNote({
 			senderId,
@@ -424,7 +425,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		const newNoteName = Note.getNextNoteName('NOTE', notes);
 		const senderId = Object.values(accounts)[0].id;
 		const { note, newFiles } = Note.createEmptyNote({
-			senderId,
+			senderId: senderId.id,
 			assets: [],
 			name: newNoteName
 		});
@@ -443,8 +444,10 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				const { notes, newFiles: noteFiles } = defaultNotes(defaultAccount1.id, defaultAccount2.id);
 				setFiles((prev) => ({ ...prev, ...accountFiles, ...noteFiles }));
 				setNotes(notes);
-				setSelectedTransactionAccountId(defaultAccount2.idHex);
+				setSelectedTransactionAccountId(defaultAccount2.id.id);
 				setIsInitialized(true);
+				console.log(generateFaucetId());
+				console.log(generateFaucetId());
 			})
 			.catch((error: unknown) => {
 				alert(`Failed to initialize WASM: ${error}`);
@@ -506,7 +509,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 
 	const updateAccountAssetAmount = (
 		accountId: string,
-		faucetId: bigint,
+		faucetId: string,
 		updateFn: (amount: bigint) => bigint
 	) => {
 		updateAccountById(accountId, (account) => {
@@ -517,7 +520,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 
 	const updateNoteAssetAmount = (
 		noteId: string,
-		faucetId: bigint,
+		faucetId: string,
 		updateFn: (amount: bigint) => bigint
 	) => {
 		setNotes((prev) => {

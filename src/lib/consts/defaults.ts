@@ -1,8 +1,12 @@
 import { Account } from '@/lib/account';
 import { Note, createP2IDNote } from '@/lib/notes';
 import { EditorFiles } from '../files';
+import { AccountId } from '@/lib/types';
 
-export const DEFAULT_FAUCET_IDS = [2305843009213693983n, 3103030043208856727n];
+export const DEFAULT_FAUCET_IDS = [
+	'0x2a3c549c1f3eb8a000009b55653cc0',
+	'0x3f3e2714af2401a00000e02c698d0e'
+];
 
 export function defaultAccounts(): {
 	accounts: Record<string, Account>;
@@ -12,8 +16,8 @@ export function defaultAccounts(): {
 	const accountB = Account.new('Account B');
 	return {
 		accounts: {
-			[accountA.account.idHex]: accountA.account,
-			[accountB.account.idHex]: accountB.account
+			[accountA.account.id.id]: accountA.account,
+			[accountB.account.id.id]: accountB.account
 		},
 		newFiles: {
 			...accountA.newFiles,
@@ -23,8 +27,8 @@ export function defaultAccounts(): {
 }
 
 export function defaultNotes(
-	accountId1: bigint,
-	accountId2: bigint
+	accountId1: AccountId,
+	accountId2: AccountId
 ): {
 	notes: Record<string, Note>;
 	newFiles: EditorFiles;
