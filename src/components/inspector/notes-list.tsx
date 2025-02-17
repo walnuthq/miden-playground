@@ -59,6 +59,7 @@ const NotesList = ({
 					return (
 						<React.Fragment key={note.id}>
 							<InspectorItem
+								isConsumed={note.isConsumed}
 								name={note.name}
 								variant="collapsable"
 								isCollapsed={isCollapsed}
