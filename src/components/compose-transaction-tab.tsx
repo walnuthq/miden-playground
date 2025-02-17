@@ -10,7 +10,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { faucetSymbols } from '@/lib/consts';
+import { faucetSymbols, TRANSACTION_SCRIPT_FILE_ID } from '@/lib/consts';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from './ui/resizable';
 import OutputNotes from './output-notes';
@@ -29,7 +29,9 @@ export const ComposeTransactionTab = () => {
 		blockNumber,
 		removeTransactionNote,
 		setBlockNumber,
-		accountUpdates
+		accountUpdates,
+		selectFile,
+		selectTab
 	} = useMiden();
 	const selectedAccountData = selectedTransactionAccountId
 		? accounts[selectedTransactionAccountId]
@@ -170,8 +172,11 @@ export const ComposeTransactionTab = () => {
 							</div>
 							<div className="mt-6 ">
 								<button
-									disabled
-									className="w-full flex opacity-50 justify-center gap-2 border items-center border-theme-border rounded-miden px-4 py-1 bg-theme-surface-highlight transition-all text-theme-text "
+									onClick={() => {
+										selectFile(TRANSACTION_SCRIPT_FILE_ID);
+										selectTab('assets');
+									}}
+									className="w-full flex justify-center gap-2 border items-center border-theme-border rounded-miden px-4 py-1 bg-theme-surface-highlight  text-theme-text hover:bg-theme-border transition-all"
 								>
 									<span>Edit Transaction Script</span>
 									<InlineIcon variant="arrow-link" color="white" className={`w-4 h-4`} />
