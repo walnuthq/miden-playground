@@ -12,19 +12,17 @@ export const Toolbar = () => {
 
 	return (
 		<div
-			className="h-[54px] bg-theme-surface-highlight
+			className="h-[36px] bg-theme-surface-highlight
 							flex flex-row items-end justify-between"
 		>
 			{selectedTab !== 'transaction' ? (
 				<ScrollArea>
-					<div className="flex flex-row px-2">
-						{filesToDisplay.map((fileId, index) => (
+					<div className="flex flex-row">
+						{filesToDisplay.map((fileId) => (
 							<div
 								key={fileId}
-								className={`text-theme-text text-sm px-3 py-2 border-l-[1.5px] border-t-[1.5px] last:border-r-[1.5px]  border-theme-border flex flex-row items-center gap-2 cursor-pointer select-none ${
+								className={`text-theme-text text-sm px-3 py-2 first:border-l-0 border-l-[1.5px] border-t-[1.5px]   border-theme-border flex flex-row items-center gap-2 cursor-pointer select-none ${
 									selectedFileId === fileId ? 'bg-[#040113]' : ''
-								} ${index === 0 ? 'rounded-tl-miden' : ''} ${
-									index === filesToDisplay.length - 1 ? 'rounded-tr-miden' : ''
 								}`}
 								onClick={() => selectFile(fileId)}
 								onAuxClick={(event) => {

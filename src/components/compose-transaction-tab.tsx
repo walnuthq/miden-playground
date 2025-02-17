@@ -13,7 +13,7 @@ import {
 import { faucetSymbols, TRANSACTION_SCRIPT_FILE_ID } from '@/lib/consts';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from './ui/resizable';
-import OutputNotes from './output-notes';
+// import OutputNotes from './output-notes';
 import NoteCard from './note-card';
 import InlineIcon from './ui/inline-icon';
 import Link from 'next/link';
@@ -220,18 +220,18 @@ export const ComposeTransactionTab = () => {
 								{accountUpdates !== null ? (
 									<ScrollArea className="relative h-full pt-5 px-4 overflow-auto text-theme-text">
 										<div className="flex justify-center">EXECUTION OUTPUT</div>
-										<div className="mt-2">OUTPUT NOTES</div>
+										{/* <div className="mt-6">OUTPUT NOTES</div>
 										<div className="mt-2">
 											<OutputNotes />
-										</div>
-										<div className="mt-2">ACCOUNT VAULT CHANGES</div>
+										</div> */}
+										<div className="mt-6">ACCOUNT VAULT CHANGES</div>
 										<div className="mt-2">
 											<Vault accountId={selectedAccountData?.id.id} displayDelta />
 										</div>
-										<div className="mt-2">ACCOUNT STORAGE CHANGES</div>
+										{/* <div className="mt-6">ACCOUNT STORAGE CHANGES</div> */}
 									</ScrollArea>
 								) : (
-									<ScrollArea className="relative h-full px-4 overflow-auto mt-24 max-w-3xl mx-auto text-theme-text">
+									<ScrollArea className="relative h-full px-4 overflow-auto mt-20 max-w-3xl mx-auto text-theme-text">
 										<div className="flex flex-col gap-4">
 											<h1 className="font-bold text-4xl">Miden Playground</h1>
 											<h3 className="font-bold text-2xl mt-8">Getting Started</h3>

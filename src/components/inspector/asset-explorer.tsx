@@ -15,10 +15,10 @@ export function AssetExplorer() {
 	return (
 		<div className="flex flex-col">
 			<div
-				className="h-[54px] border-b border-theme-border bg-theme-surface-highlight
+				className="h-[36px] border-b border-theme-border bg-theme-surface-highlight
 					text-theme-text font-bold text-sm flex gap-2 items-center px-3"
 			>
-				Editor
+				File explorer
 			</div>
 			{/* <FileItem
 				editorFile={files[TRANSACTION_SCRIPT_FILE_ID]}
