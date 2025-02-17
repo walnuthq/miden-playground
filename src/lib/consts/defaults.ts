@@ -42,7 +42,7 @@ export function defaultNotes(
 				amount: 100n
 			}
 		],
-		name: 'P2ID (1)'
+		name: 'P2ID'
 	});
 	const p2idNote2 = createP2IDNote({
 		senderId: accountId1,
@@ -53,7 +53,7 @@ export function defaultNotes(
 				amount: 200n
 			}
 		],
-		name: 'P2ID (2)'
+		name: 'P2ID'
 	});
 	// const p2idrNote = createP2IDRNote({
 	// 	senderId: accountId1,

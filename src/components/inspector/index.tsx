@@ -51,7 +51,8 @@ export function InspectorItem({
 	level,
 	onCreate,
 	onCreateOptions,
-	nameClasses
+	nameClasses,
+	isConsumed = false
 }: {
 	name: string;
 	isReadOnly?: boolean;
@@ -64,6 +65,7 @@ export function InspectorItem({
 	onCreate?: (option: string) => void;
 	onCreateOptions?: string[];
 	nameClasses?: string;
+	isConsumed?: boolean;
 }) {
 	return (
 		<div
@@ -93,7 +95,9 @@ export function InspectorItem({
 						isCollapsed === false ? 'rotate-90' : ''
 					}`}
 				/>
-				<span className={nameClasses}>{name}</span>
+				<span className={nameClasses}>
+					{name} {isConsumed && <span className="text-theme-danger"> (Consumed)</span>}
+				</span>
 			</div>
 			<div className="flex flex-row items-center gap-2">
 				{onRemove && (
