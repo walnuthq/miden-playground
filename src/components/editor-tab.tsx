@@ -13,7 +13,7 @@ export const EditorTab = () => {
 					<Inspector />
 				</ScrollArea>
 			</ResizablePanel>
-			<ResizableHandle className="w-[2px] bg-theme-border" />
+			<ResizableHandle className="w-[1px] bg-theme-border" />
 			<ResizablePanel defaultSize={75}>
 				<div className="flex flex-col h-full">
 					<Toolbar />

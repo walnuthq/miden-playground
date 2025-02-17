@@ -15,7 +15,7 @@ export function Playground() {
 				<Header />
 			</header>
 			<Tabs />
-			<main className="flex-1 border-2 border-theme-border rounded-b-theme rounded-tr-theme overflow-hidden">
+			<main className="flex-1 border border-theme-border rounded-b-theme rounded-tr-theme overflow-hidden">
 				{selectedTab === 'transaction' ? <ComposeTransactionTab /> : <EditorTab />}
 			</main>
 		</div>
