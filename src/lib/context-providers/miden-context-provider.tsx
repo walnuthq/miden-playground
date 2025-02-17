@@ -29,6 +29,7 @@ interface MidenContextProps {
 	selectedTab: Tabs;
 	accounts: Record<string, Account>;
 	notes: Record<string, Note>;
+	latestConsumedNotes: Record<string, Note>;
 	selectedTransactionAccountId: string | null;
 	isCollapsedTabs: boolean;
 	selectedTransactionNotesIds: string[];
@@ -62,12 +63,12 @@ interface MidenContextProps {
 	addErrorLog: (message: string) => void;
 	updateAccountAssetAmount: (
 		accountId: string,
-		faucetId: bigint,
+		faucetId: string,
 		updateFn: (amount: bigint) => bigint
 	) => void;
 	updateNoteAssetAmount: (
 		noteId: string,
-		faucetId: bigint,
+		faucetId: string,
 		updateFn: (amount: bigint) => bigint
 	) => void;
 }
@@ -79,6 +80,7 @@ export const MidenContext = createContext<MidenContextProps>({
 	selectedTab: 'transaction',
 	accounts: {},
 	notes: {},
+	latestConsumedNotes: {},
 	selectedTransactionAccountId: null,
 	selectedTransactionNotesIds: [],
 	isExecutingTransaction: false,
@@ -153,6 +155,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	const [selectedTab, setSelectedTab] = useState<Tabs>('transaction');
 	const [accounts, setAccounts] = useState<Record<string, Account>>({});
 	const [notes, setNotes] = useState<Record<string, Note>>({});
+	const [latestConsumedNotes, setLatestConsumedNotes] = useState<Record<string, Note>>({});
 	const [selectedTransactionAccountId, setSelectedTransactionAccountId] = useState<string | null>(
 		null
 	);
@@ -247,19 +250,38 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			addErrorLog('No notes selected: Please select at least one note to execute the transaction');
 			return;
 		}
+
 		setIsExecutingTransaction(true);
 		const account = accounts[selectedTransactionAccountId];
-		const transactionNotes = selectedTransactionNotesIds.map((noteId) => {
-			const sender = accounts[notes[noteId].senderIdHex];
-			return {
-				note: notes[noteId],
-				noteScript: files[notes[noteId].scriptFileId].content.value!,
-				noteInputs: convertToBigUint64Array(
-					JSON.parse(files[notes[noteId].inputFileId].content.value!)
-				),
+
+		const transactionNotes: {
+			note: Note;
+			noteScript: string;
+			noteInputs: BigUint64Array<ArrayBufferLike>;
+			senderScript: string;
+		}[] = [];
+		const consumedNotesIds: string[] = [];
+		for (const noteId of selectedTransactionNotesIds) {
+			const note = notes[noteId];
+
+			if (note.isConsumed) {
+				addErrorLog(`${note.name} is already consumed`);
+				setIsExecutingTransaction(false);
+				return;
+			} else {
+				consumedNotesIds.push(noteId);
+			}
+
+			const sender = accounts[note.senderId];
+
+			transactionNotes.push({
+				note,
+				noteScript: files[note.scriptFileId].content.value!,
+				noteInputs: convertToBigUint64Array(JSON.parse(files[note.inputFileId].content.value!)),
 				senderScript: files[sender.scriptFileId].content.value!
-			};
-		});
+			});
+		}
+
 		try {
 			const storage = Account.parseStorage(files[account.storageFileId].content.value!);
 			const output = consumeNotes({
@@ -270,8 +292,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				transactionScript: files[TRANSACTION_SCRIPT_FILE_ID].content.value!,
 				blockNumber
 			});
-
-			console.log('Transaction output', output);
 
 			output.storageDiffs = Account.computeStorageDiffs(storage, output.storage);
 
@@ -296,8 +316,34 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			updateFileById(account.storageFileId, () => {
 				return Account.stringifyStorage(output.storage);
 			});
-
 			addInfoLog('Execution successful');
+
+			setNotes((prev) => {
+				const oldNotes = { ...prev };
+
+				consumedNotesIds.forEach((consumedNoteId) => {
+					if (oldNotes[consumedNoteId]) {
+						oldNotes[consumedNoteId].isConsumed = true;
+					}
+				});
+
+				return oldNotes;
+			});
+
+			setLatestConsumedNotes(() => {
+				const newLatestConsumedNotes: Record<string, Note> = {};
+
+				consumedNotesIds.forEach((consumedNoteId) => {
+					if (notes[consumedNoteId]) {
+						newLatestConsumedNotes[consumedNoteId] = notes[consumedNoteId];
+					}
+				});
+
+				return newLatestConsumedNotes;
+			});
+
+			setSelectedTransactionNotesIds([]);
+
 			addInfoLog(`Total cycles: ${output.totalCycles}; Trace length: ${output.traceLength}`);
 		} catch (error) {
 			addErrorLog('Execution failed. Error: ' + error);
@@ -320,7 +366,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		const newAccountName = Account.getNextAccountName(accounts);
 		const { account, newFiles } = Account.new(newAccountName);
 		setAccounts((prev) => {
-			return { ...prev, [account.idHex]: account };
+			return { ...prev, [account.id.id]: account };
 		});
 		setFiles((prev) => ({ ...prev, ...newFiles }));
 	}, [accounts]);
@@ -365,7 +411,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	}, []);
 
 	const createSampleSwapNotes = useCallback(() => {
-		const newNoteName = Note.getNextNoteName('SWAP', notes);
 		const sender = Object.values(accounts)[0];
 		const receiver = Object.values(accounts).filter((account) => account.id !== sender.id)[0];
 		const offeredAssetOfSender = sender.assets[0];
@@ -381,56 +426,54 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			receiverId: receiver.id,
 			offeredAsset,
 			requestedAsset,
-			name: newNoteName
+			name: 'SWAP'
 		});
-		updateAccountById(sender.idHex, (account) => {
+		updateAccountById(sender.id.id, (account) => {
 			account.updateAssetAmount(offeredAsset.faucetId, (amount) => amount - offeredAsset.amount);
 			return account;
 		});
 		setNotes((prev) => ({ ...prev, [note.id]: note, [paybackNote.id]: paybackNote }));
 		setFiles((prev) => ({ ...prev, ...newFiles }));
-	}, [notes, accounts]);
+	}, [accounts]);
 
 	const createSampleP2IDNote = useCallback(() => {
-		const newNoteName = Note.getNextNoteName('P2ID', notes);
 		const receiverId = Object.values(accounts)[0].id;
 		const senderId = Object.values(accounts).filter((account) => account.id !== receiverId)[0].id;
 		const { note, newFiles } = createP2IDNote({
 			senderId,
 			receiverId,
 			assets: [],
-			name: newNoteName
+			name: 'P2ID'
 		});
 		setNotes((prev) => ({ ...prev, [note.id]: note }));
 		setFiles((prev) => ({ ...prev, ...newFiles }));
-	}, [notes, accounts]);
+	}, [accounts]);
 
 	const createSampleP2IDRNote = useCallback(() => {
-		const newNoteName = Note.getNextNoteName('P2IDR', notes);
-		const receiverId = accounts[0].id;
-		const senderId = Object.values(accounts).filter((account) => account.id !== receiverId)[0].id;
+		const receiverId = Object.values(accounts)[0].id;
+		const senderId = Object.values(accounts).filter((account) => account.id.id !== receiverId.id)[0]
+			.id;
 		const { note, newFiles } = createP2IDRNote({
 			senderId,
 			receiverId,
 			reclaimBlockHeight: 100,
 			assets: [],
-			name: newNoteName
+			name: 'P2IDR'
 		});
 		setNotes((prev) => ({ ...prev, [note.id]: note }));
 		setFiles((prev) => ({ ...prev, ...newFiles }));
-	}, [notes, accounts]);
+	}, [accounts]);
 
 	const createSampleNote = useCallback(() => {
-		const newNoteName = Note.getNextNoteName('NOTE', notes);
 		const senderId = Object.values(accounts)[0].id;
 		const { note, newFiles } = Note.createEmptyNote({
-			senderId,
+			senderId: senderId.id,
 			assets: [],
-			name: newNoteName
+			name: 'NOTE'
 		});
 		setNotes((prev) => ({ ...prev, [note.id]: note }));
 		setFiles((prev) => ({ ...prev, ...newFiles }));
-	}, [notes, accounts]);
+	}, [accounts]);
 
 	useEffect(() => {
 		init()
@@ -443,7 +486,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				const { notes, newFiles: noteFiles } = defaultNotes(defaultAccount1.id, defaultAccount2.id);
 				setFiles((prev) => ({ ...prev, ...accountFiles, ...noteFiles }));
 				setNotes(notes);
-				setSelectedTransactionAccountId(defaultAccount2.idHex);
+				setSelectedTransactionAccountId(defaultAccount2.id.id);
 				setIsInitialized(true);
 			})
 			.catch((error: unknown) => {
@@ -506,7 +549,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 
 	const updateAccountAssetAmount = (
 		accountId: string,
-		faucetId: bigint,
+		faucetId: string,
 		updateFn: (amount: bigint) => bigint
 	) => {
 		updateAccountById(accountId, (account) => {
@@ -517,7 +560,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 
 	const updateNoteAssetAmount = (
 		noteId: string,
-		faucetId: bigint,
+		faucetId: string,
 		updateFn: (amount: bigint) => bigint
 	) => {
 		setNotes((prev) => {
@@ -540,6 +583,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				selectedTab,
 				accounts,
 				notes,
+				latestConsumedNotes,
 				selectedTransactionAccountId,
 				selectedTransactionNotesIds,
 				isExecutingTransaction,

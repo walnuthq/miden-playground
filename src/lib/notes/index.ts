@@ -14,7 +14,7 @@ export interface NoteProps {
 	isConsumed: boolean;
 	inputFileId: string;
 	scriptFileId: string;
-	senderId: bigint;
+	senderId: string;
 	metadataFileId: string;
 	vaultFileId: string;
 }
@@ -26,7 +26,7 @@ export class Note {
 	isConsumed: boolean;
 	inputFileId: string;
 	scriptFileId: string;
-	senderId: bigint;
+	senderId: string;
 	metadataFileId: string;
 	vaultFileId: string;
 	serialNumber: BigUint64Array;
@@ -44,30 +44,12 @@ export class Note {
 		this.serialNumber = generateNoteSerialNumber();
 	}
 
-	get senderIdHex(): string {
-		return '0x' + this.senderId.toString(16);
-	}
-
-	static getNextNoteName(type: 'P2ID' | 'P2IDR' | 'SWAP' | 'NOTE', notes: Record<string, Note>) {
-		const noteNames = Object.values(notes).map((note) => note.name);
-		let nextNoteName = '';
-		let i = 0;
-		while (true) {
-			nextNoteName = `${type} (${i + 1})`;
-			if (!noteNames.includes(nextNoteName)) {
-				break;
-			}
-			i++;
-		}
-		return nextNoteName;
-	}
-
 	static createEmptyNote({
 		senderId,
 		assets,
 		name
 	}: {
-		senderId: bigint;
+		senderId: string;
 		assets: Asset[];
 		name: string;
 	}): {
@@ -82,7 +64,7 @@ export class Note {
 		const newFiles: EditorFiles = {
 			[scriptFileId]: {
 				id: scriptFileId,
-				name: `${name} Script`,
+				name: `Script`,
 				content: { value: '' },
 				isOpen: false,
 				variant: 'script',
@@ -90,7 +72,7 @@ export class Note {
 			},
 			[inputFileId]: {
 				id: inputFileId,
-				name: `${name} Inputs`,
+				name: `Inputs`,
 				content: {
 					value: JSON.stringify([], null, 2)
 				},
@@ -100,7 +82,7 @@ export class Note {
 			},
 			[metadataFileId]: {
 				id: metadataFileId,
-				name: `${name} Metadata`,
+				name: `Metadata`,
 				content: { dynamic: { note: { noteId, variant: 'metadata' } } },
 				isOpen: false,
 				variant: 'file',
@@ -108,7 +90,7 @@ export class Note {
 			},
 			[vaultFileId]: {
 				id: vaultFileId,
-				name: `${name} Vault`,
+				name: `Vault`,
 				content: { dynamic: { note: { noteId, variant: 'vault' } } },
 				isOpen: false,
 				variant: 'file',
@@ -127,6 +109,8 @@ export class Note {
 			metadataFileId,
 			vaultFileId
 		});
+		const serialNumberString = note.serialNumberDecimalString.slice(0, 10);
+		note.name = `${name} - ${serialNumberString}`;
 		return { note, newFiles };
 	}
 
@@ -134,7 +118,7 @@ export class Note {
 		return this.serialNumber.reduce((acc, num) => acc + BigInt(num), BigInt(0)).toString();
 	}
 
-	updateAssetAmount(faucetId: bigint, updateFn: (amount: bigint) => bigint) {
+	updateAssetAmount(faucetId: string, updateFn: (amount: bigint) => bigint) {
 		const asset = this.assets.find((asset) => asset.faucetId === faucetId);
 		if (asset) {
 			asset.amount = updateFn(asset.amount);
