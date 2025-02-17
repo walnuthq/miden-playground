@@ -1,9 +1,9 @@
 use alloc::{format, string::String, sync::Arc, vec::Vec};
 use assembly::Library;
 use miden_objects::{
-    accounts::{Account, AccountId, StorageSlot},
-    assets::{Asset, FungibleAsset},
-    notes::Note,
+    account::{Account, AccountId, StorageSlot},
+    asset::{Asset, FungibleAsset},
+    note::Note,
     Felt, Word,
 };
 use wasm_bindgen::prelude::*;
@@ -13,6 +13,14 @@ use crate::utils::{
     create_account_component_library, get_account_with_account_code,
     get_note_with_fungible_asset_and_script, get_pk_and_authenticator,
 };
+
+#[wasm_bindgen(getter_with_clone)]
+#[derive(Clone, Debug)]
+pub struct AccountIdData {
+    pub id: String,
+    pub prefix: u64,
+    pub suffix: u64,
+}
 
 #[wasm_bindgen]
 #[derive(Clone, Debug)]
@@ -50,7 +58,7 @@ impl AccountData {
     pub fn new(
         account_code: String,
         secret_key: Vec<u8>,
-        account_id: u64,
+        account_id: String,
         assets: Vec<AssetData>,
         wallet_enabled: bool,
         auth_enabled: bool,
@@ -59,7 +67,7 @@ impl AccountData {
         let account_code_library = create_account_component_library(account_code.as_str())
             .map_err(|err| format!("Account library cannot be built: {:?}", err))?;
 
-        let account_id = AccountId::try_from(account_id)
+        let account_id = AccountId::from_hex(&account_id)
             .map_err(|err| format!("Target Account id is wrong: {:?}", err))?;
 
         let (pub_key, _) = get_pk_and_authenticator(Some(secret_key.clone()));
@@ -100,17 +108,17 @@ impl AccountData {
     }
 }
 
-#[wasm_bindgen]
+#[wasm_bindgen(getter_with_clone)]
 #[derive(Clone, Debug)]
 pub struct AssetData {
-    pub faucet_id: u64,
+    pub faucet_id: String,
     pub amount: u64,
 }
 
 #[wasm_bindgen]
 impl AssetData {
     #[wasm_bindgen(constructor)]
-    pub fn new(faucet_id: u64, amount: u64) -> Self {
+    pub fn new(faucet_id: String, amount: u64) -> Self {
         Self { faucet_id, amount }
     }
 }
@@ -119,7 +127,7 @@ impl TryFrom<AssetData> for Asset {
     type Error = anyhow::Error;
 
     fn try_from(asset: AssetData) -> Result<Self, Self::Error> {
-        let asset_id = AccountId::try_from(asset.faucet_id).map_err(|err| anyhow::anyhow!(err))?;
+        let asset_id = AccountId::from_hex(&asset.faucet_id).map_err(|err| anyhow::anyhow!(err))?;
 
         Ok(Self::Fungible(
             FungibleAsset::new(asset_id, asset.amount).map_err(|err| anyhow::anyhow!(err))?,
@@ -133,7 +141,7 @@ pub struct NoteData {
     pub(crate) assets: Vec<AssetData>,
     pub(crate) inputs: Vec<u64>,
     pub(crate) script: String,
-    pub(crate) sender_id: u64,
+    pub(crate) sender_id: String,
     pub(crate) sender_script: String,
     pub(crate) serial_number: Vec<u64>,
 }
@@ -145,7 +153,7 @@ impl NoteData {
         assets: Vec<AssetData>,
         inputs: Vec<u64>,
         script: String,
-        sender_id: u64,
+        sender_id: String,
         sender_script: String,
         serial_number: Vec<u64>,
     ) -> Self {
@@ -167,8 +175,8 @@ impl NoteData {
         self.script.clone()
     }
 
-    pub fn sender_id(&self) -> u64 {
-        self.sender_id
+    pub fn sender_id(&self) -> String {
+        self.sender_id.clone()
     }
 
     pub fn sender_script(&self) -> String {
@@ -196,7 +204,7 @@ impl TryFrom<NoteData> for Note {
         let note_inputs: Vec<Felt> = note_data.inputs.iter().map(|&x| Felt::new(x)).collect();
 
         let sender_account_id =
-            AccountId::try_from(note_data.sender_id).map_err(|err| anyhow::anyhow!(err))?;
+            AccountId::from_hex(&note_data.sender_id).map_err(|err| anyhow::anyhow!(err))?;
 
         let sender_account_code_library =
             create_account_component_library(note_data.sender_script.as_str())

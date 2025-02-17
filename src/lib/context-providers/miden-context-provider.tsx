@@ -62,12 +62,12 @@ interface MidenContextProps {
 	addErrorLog: (message: string) => void;
 	updateAccountAssetAmount: (
 		accountId: string,
-		faucetId: bigint,
+		faucetId: string,
 		updateFn: (amount: bigint) => bigint
 	) => void;
 	updateNoteAssetAmount: (
 		noteId: string,
-		faucetId: bigint,
+		faucetId: string,
 		updateFn: (amount: bigint) => bigint
 	) => void;
 }
@@ -269,7 +269,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				consumedNotesIds.push(noteId);
 			}
 
-			const sender = accounts[note.senderIdHex];
+			const sender = accounts[note.senderId];
 
 			transactionNotes.push({
 				note,
@@ -289,8 +289,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				transactionScript: files[TRANSACTION_SCRIPT_FILE_ID].content.value!,
 				blockNumber
 			});
-
-			console.log('Transaction output', output);
 
 			output.storageDiffs = Account.computeStorageDiffs(storage, output.storage);
 
@@ -351,7 +349,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		const newAccountName = Account.getNextAccountName(accounts);
 		const { account, newFiles } = Account.new(newAccountName);
 		setAccounts((prev) => {
-			return { ...prev, [account.idHex]: account };
+			return { ...prev, [account.id.id]: account };
 		});
 		setFiles((prev) => ({ ...prev, ...newFiles }));
 	}, [accounts]);
@@ -396,7 +394,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	}, []);
 
 	const createSampleSwapNotes = useCallback(() => {
-		const newNoteName = Note.getNextNoteName('SWAP', notes);
 		const sender = Object.values(accounts)[0];
 		const receiver = Object.values(accounts).filter((account) => account.id !== sender.id)[0];
 		const offeredAssetOfSender = sender.assets[0];
@@ -412,56 +409,54 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			receiverId: receiver.id,
 			offeredAsset,
 			requestedAsset,
-			name: newNoteName
+			name: 'SWAP'
 		});
-		updateAccountById(sender.idHex, (account) => {
+		updateAccountById(sender.id.id, (account) => {
 			account.updateAssetAmount(offeredAsset.faucetId, (amount) => amount - offeredAsset.amount);
 			return account;
 		});
 		setNotes((prev) => ({ ...prev, [note.id]: note, [paybackNote.id]: paybackNote }));
 		setFiles((prev) => ({ ...prev, ...newFiles }));
-	}, [notes, accounts]);
+	}, [accounts]);
 
 	const createSampleP2IDNote = useCallback(() => {
-		const newNoteName = Note.getNextNoteName('P2ID', notes);
 		const receiverId = Object.values(accounts)[0].id;
 		const senderId = Object.values(accounts).filter((account) => account.id !== receiverId)[0].id;
 		const { note, newFiles } = createP2IDNote({
 			senderId,
 			receiverId,
 			assets: [],
-			name: newNoteName
+			name: 'P2ID'
 		});
 		setNotes((prev) => ({ ...prev, [note.id]: note }));
 		setFiles((prev) => ({ ...prev, ...newFiles }));
-	}, [notes, accounts]);
+	}, [accounts]);
 
 	const createSampleP2IDRNote = useCallback(() => {
-		const newNoteName = Note.getNextNoteName('P2IDR', notes);
-		const receiverId = accounts[0].id;
-		const senderId = Object.values(accounts).filter((account) => account.id !== receiverId)[0].id;
+		const receiverId = Object.values(accounts)[0].id;
+		const senderId = Object.values(accounts).filter((account) => account.id.id !== receiverId.id)[0]
+			.id;
 		const { note, newFiles } = createP2IDRNote({
 			senderId,
 			receiverId,
 			reclaimBlockHeight: 100,
 			assets: [],
-			name: newNoteName
+			name: 'P2IDR'
 		});
 		setNotes((prev) => ({ ...prev, [note.id]: note }));
 		setFiles((prev) => ({ ...prev, ...newFiles }));
-	}, [notes, accounts]);
+	}, [accounts]);
 
 	const createSampleNote = useCallback(() => {
-		const newNoteName = Note.getNextNoteName('NOTE', notes);
 		const senderId = Object.values(accounts)[0].id;
 		const { note, newFiles } = Note.createEmptyNote({
-			senderId,
+			senderId: senderId.id,
 			assets: [],
-			name: newNoteName
+			name: 'NOTE'
 		});
 		setNotes((prev) => ({ ...prev, [note.id]: note }));
 		setFiles((prev) => ({ ...prev, ...newFiles }));
-	}, [notes, accounts]);
+	}, [accounts]);
 
 	useEffect(() => {
 		init()
@@ -474,7 +469,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				const { notes, newFiles: noteFiles } = defaultNotes(defaultAccount1.id, defaultAccount2.id);
 				setFiles((prev) => ({ ...prev, ...accountFiles, ...noteFiles }));
 				setNotes(notes);
-				setSelectedTransactionAccountId(defaultAccount2.idHex);
+				setSelectedTransactionAccountId(defaultAccount2.id.id);
 				setIsInitialized(true);
 			})
 			.catch((error: unknown) => {
@@ -537,7 +532,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 
 	const updateAccountAssetAmount = (
 		accountId: string,
-		faucetId: bigint,
+		faucetId: string,
 		updateFn: (amount: bigint) => bigint
 	) => {
 		updateAccountById(accountId, (account) => {
@@ -548,7 +543,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 
 	const updateNoteAssetAmount = (
 		noteId: string,
-		faucetId: bigint,
+		faucetId: string,
 		updateFn: (amount: bigint) => bigint
 	) => {
 		setNotes((prev) => {

@@ -56,12 +56,12 @@ export const ComposeTransactionTab = () => {
 							</DropdownMenuTrigger>
 							<DropdownMenuContent>
 								{Object.values(accounts)
-									.filter((account) => account.idHex !== selectedTransactionAccountId)
+									.filter((account) => account.id.id !== selectedTransactionAccountId)
 									.map((account) => (
 										<DropdownMenuItem
-											key={account.id}
+											key={account.id.id}
 											onClick={() => {
-												selectTransactionAccount(account.idHex);
+												selectTransactionAccount(account.id.id);
 											}}
 										>
 											{account.name}
@@ -76,11 +76,11 @@ export const ComposeTransactionTab = () => {
 								data={{
 									'Account name': { value: selectedAccountData?.name, copyable: true },
 									'Account ID': {
-										value: selectedAccountData?.id,
+										value: selectedAccountData?.id.id,
 										copyable: true,
 										divider: true
 									},
-									Vault: <Vault accountId={selectedAccountData?.idHex} displayDelta />,
+									Vault: <Vault accountId={selectedAccountData?.id.id} displayDelta />,
 									Storage: ''
 								}}
 							/>
