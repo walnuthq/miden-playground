@@ -183,8 +183,10 @@ export const ComposeTransactionTab = () => {
 									onClick={() => {
 										executeTransaction();
 									}}
-									className={`w-full outline-none border border-theme-border rounded-miden px-4 py-1 bg-theme-surface-highlight transition-all text-theme-text ${
-										selectedTransactionNotesIds.length > 0 ? 'hover:bg-theme-border' : 'opacity-50'
+									className={`w-full outline-none border border-theme-border rounded-miden px-4 py-1 bg-theme-primary transition-all text-theme-text ${
+										selectedTransactionNotesIds.length > 0
+											? 'hover:bg-theme-primary-hover'
+											: 'opacity-50'
 									}`}
 								>
 									Execute Transaction
