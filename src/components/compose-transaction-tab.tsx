@@ -21,6 +21,7 @@ export const ComposeTransactionTab = () => {
 	const {
 		accounts,
 		notes,
+		latestConsumedNotes,
 		selectedTransactionAccountId,
 		selectedTransactionNotesIds,
 		selectTransactionNote,
@@ -93,30 +94,35 @@ export const ComposeTransactionTab = () => {
 							<div className=" text-theme-text mt-6">NOTES TO CONSUME</div>
 							<div className="flex flex-col gap-4 mt-2">
 								{selectedTransactionNotesIds.length > 0 ? (
-									selectedTransactionNotesIds.map((noteId) => (
-										<div key={noteId} className="">
-											<div className="border border-theme-border rounded-miden relative text-sm ">
-												<NoteCard noteId={noteId} />
-											</div>
-											<div className="flex mt-2 justify-end items-center">
-												<button
-													onClick={(event) => {
-														event.stopPropagation();
-														removeTransactionNote(noteId);
-													}}
-													className="px-2 rounded-miden border-theme-border text-theme-text-subtlest hover:text-theme-text hover:underline"
-												>
-													Remove
-												</button>
-											</div>
-										</div>
-									))
+									selectedTransactionNotesIds.map(
+										(noteId) =>
+											!notes[noteId].isConsumed && (
+												<div key={noteId} className="">
+													<div className="border border-theme-border rounded-miden relative text-sm ">
+														<NoteCard noteId={noteId} />
+													</div>
+													<div className="flex mt-2 justify-end items-center">
+														<button
+															onClick={(event) => {
+																event.stopPropagation();
+																removeTransactionNote(noteId);
+															}}
+															className="px-2 rounded-miden border-theme-border text-theme-text-subtlest hover:text-theme-text hover:underline"
+														>
+															Remove
+														</button>
+													</div>
+												</div>
+											)
+									)
 								) : (
 									<div className="text-sm">Select at least one note</div>
 								)}
 							</div>
 
-							{selectedTransactionNotesIds.length < Object.keys(notes).length && (
+							{Object.values(notes).filter(
+								(note) => !selectedTransactionNotesIds.includes(note.id) && !note.isConsumed
+							).length > 0 && (
 								<div className="mt-6">
 									<DropdownMenu open={isOpenDropdown} onOpenChange={setIsOpenDropdown}>
 										<DropdownMenuTrigger className="w-full  border border-theme-border transition-all rounded-miden px-4 py-1 bg-theme-surface-highlight  text-theme-text hover:bg-theme-border">
@@ -124,7 +130,10 @@ export const ComposeTransactionTab = () => {
 										</DropdownMenuTrigger>
 										<DropdownMenuContent>
 											{Object.values(notes)
-												.filter((note) => !selectedTransactionNotesIds.includes(note.id))
+												.filter(
+													(note) =>
+														!selectedTransactionNotesIds.includes(note.id) && !note.isConsumed
+												)
 												.map((note) => (
 													<DropdownMenuItem
 														key={note.id}
@@ -140,20 +149,18 @@ export const ComposeTransactionTab = () => {
 								</div>
 							)}
 
-							{Object.values(notes).find((note) => note.isConsumed) && (
+							{Object.values(latestConsumedNotes).length > 0 && (
 								<div className="mt-6">CONSUMED NOTES</div>
 							)}
-							<div>
-								{Object.values(notes)
-									.filter((note) => note.isConsumed)
-									.map((note) => (
-										<div
-											key={note.id}
-											className="border border-theme-border rounded-miden relative text-sm pl-4 py-4 "
-										>
-											<NoteCard noteId={note.id} />
-										</div>
-									))}
+							<div className="flex flex-col gap-4 mt-2">
+								{Object.values(latestConsumedNotes).map((note) => (
+									<div
+										key={note.id}
+										className="border border-theme-border rounded-miden relative text-sm "
+									>
+										<NoteCard noteId={note.id} />
+									</div>
+								))}
 							</div>
 							<div className="mt-6">
 								<div className=" text-theme-text ">BLOCK NUMBER</div>

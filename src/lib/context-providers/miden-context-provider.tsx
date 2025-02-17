@@ -29,6 +29,7 @@ interface MidenContextProps {
 	selectedTab: Tabs;
 	accounts: Record<string, Account>;
 	notes: Record<string, Note>;
+	latestConsumedNotes: Record<string, Note>;
 	selectedTransactionAccountId: string | null;
 	isCollapsedTabs: boolean;
 	selectedTransactionNotesIds: string[];
@@ -79,6 +80,7 @@ export const MidenContext = createContext<MidenContextProps>({
 	selectedTab: 'transaction',
 	accounts: {},
 	notes: {},
+	latestConsumedNotes: {},
 	selectedTransactionAccountId: null,
 	selectedTransactionNotesIds: [],
 	isExecutingTransaction: false,
@@ -153,6 +155,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	const [selectedTab, setSelectedTab] = useState<Tabs>('transaction');
 	const [accounts, setAccounts] = useState<Record<string, Account>>({});
 	const [notes, setNotes] = useState<Record<string, Note>>({});
+	const [latestConsumedNotes, setLatestConsumedNotes] = useState<Record<string, Note>>({});
 	const [selectedTransactionAccountId, setSelectedTransactionAccountId] = useState<string | null>(
 		null
 	);
@@ -326,6 +329,20 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 
 				return oldNotes;
 			});
+
+			setLatestConsumedNotes(() => {
+				const newLatestConsumedNotes: Record<string, Note> = {};
+
+				consumedNotesIds.forEach((consumedNoteId) => {
+					if (notes[consumedNoteId]) {
+						newLatestConsumedNotes[consumedNoteId] = notes[consumedNoteId];
+					}
+				});
+
+				return newLatestConsumedNotes;
+			});
+
+			setSelectedTransactionNotesIds([]);
 
 			addInfoLog(`Total cycles: ${output.totalCycles}; Trace length: ${output.traceLength}`);
 		} catch (error) {
@@ -566,6 +583,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				selectedTab,
 				accounts,
 				notes,
+				latestConsumedNotes,
 				selectedTransactionAccountId,
 				selectedTransactionNotesIds,
 				isExecutingTransaction,

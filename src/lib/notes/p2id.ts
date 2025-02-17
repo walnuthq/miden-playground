@@ -61,7 +61,7 @@ export function createP2IDNote({
 
 	const note = new Note({
 		id: noteId,
-		name: name + 'dddd',
+		name: name,
 		scriptFileId,
 		isConsumed: false,
 		assets,
