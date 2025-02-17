@@ -4,6 +4,7 @@ import { useMiden } from '@/lib/context-providers/miden-context-provider';
 import InlineIcon from './ui/inline-icon';
 import {
 	AUTHENTICATION_COMPONENT_SCRIPT_FILE_ID,
+	TRANSACTION_SCRIPT_FILE_ID,
 	WALLET_COMPONENT_SCRIPT_FILE_ID
 } from '@/lib/consts';
 
@@ -18,6 +19,13 @@ const Breadcrumbs = () => {
 		(account) => selectedFileId === account.scriptFileId
 	);
 
+	if (selectedFileId === TRANSACTION_SCRIPT_FILE_ID) {
+		return (
+			<div className="flex gap-2 text-theme-text bg-[#040113] shadow-sm shadow-theme-border text-xs flex-row border-theme-border px-4 p-1">
+				<div>Transaction Script</div>
+			</div>
+		);
+	}
 	const isComponent =
 		selectedFileId === AUTHENTICATION_COMPONENT_SCRIPT_FILE_ID ||
 		selectedFileId === WALLET_COMPONENT_SCRIPT_FILE_ID ||
