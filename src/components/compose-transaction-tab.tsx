@@ -16,6 +16,7 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from './ui/resiz
 import OutputNotes from './output-notes';
 import NoteCard from './note-card';
 import InlineIcon from './ui/inline-icon';
+import Link from 'next/link';
 
 export const ComposeTransactionTab = () => {
 	const {
@@ -216,7 +217,7 @@ export const ComposeTransactionTab = () => {
 					<div className="flex flex-col h-full text-sm">
 						<ResizablePanelGroup direction="vertical">
 							<ResizablePanel defaultSize={75}>
-								{accountUpdates !== null && (
+								{accountUpdates !== null ? (
 									<ScrollArea className="relative h-full pt-5 px-4 overflow-auto text-theme-text">
 										<div className="flex justify-center">EXECUTION OUTPUT</div>
 										<div className="mt-2">OUTPUT NOTES</div>
@@ -228,6 +229,53 @@ export const ComposeTransactionTab = () => {
 											<Vault accountId={selectedAccountData?.id.id} displayDelta />
 										</div>
 										<div className="mt-2">ACCOUNT STORAGE CHANGES</div>
+									</ScrollArea>
+								) : (
+									<ScrollArea className="relative h-full px-4 overflow-auto mt-24 max-w-3xl mx-auto text-theme-text">
+										<div className="flex flex-col gap-4">
+											<h1 className="font-bold text-4xl">Miden Playground</h1>
+											<h3 className="font-bold text-2xl mt-8">Getting Started</h3>
+											<div>
+												<div>1. Execute Transactions:</div>
+												<ul style={{ listStyleType: 'disc', paddingLeft: '20px' }} className="ml-2">
+													<li>Select an account and at least one note from the left-side menu.</li>
+													<li>Click &quot;Execute Transaction&quot; to see Miden in action.</li>
+												</ul>
+											</div>
+											<div>
+												<div>2. Craft Notes for Transactions:</div>
+												<ul style={{ listStyleType: 'disc', paddingLeft: '20px' }} className="ml-2">
+													<li>Create notes in the editor tab.</li>
+													<li>Each note includes a vault with assets and a script.</li>
+												</ul>
+											</div>
+											<div>
+												<div>3. Create More Accounts:</div>
+												<ul style={{ listStyleType: 'disc', paddingLeft: '20px' }} className="ml-2">
+													<li>
+														Store assets in your account&apos;s vault and keep data in its storage.
+													</li>
+													<li>Create additional accounts in the editor tab as needed.</li>
+												</ul>
+											</div>
+										</div>
+										<div className="flex flex-col gap-4 mt-8">
+											<h3 className="font-bold text-2xl">Need help?</h3>
+											<ul style={{ listStyleType: 'disc', paddingLeft: '20px' }} className="ml-2">
+												<li>
+													<Link href="/" className="font-bold text-theme-primary hover:underline">
+														📚 Read our docs
+													</Link>{' '}
+													for detailed guides and instructions.
+												</li>
+												<li>
+													<Link href="/" className="font-bold text-theme-primary hover:underline">
+														🎥 Watch our video
+													</Link>{' '}
+													tutorial to get started quickly.
+												</li>
+											</ul>
+										</div>
 									</ScrollArea>
 								)}
 							</ResizablePanel>
