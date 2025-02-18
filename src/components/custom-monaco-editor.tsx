@@ -1,19 +1,22 @@
 'use client';
+import { cn } from '@/lib/utils';
 import { Editor as MonacoEditor, Monaco } from '@monaco-editor/react';
 import { editor } from 'monaco-editor';
-import { useCallback } from 'react';
+import { CSSProperties, useCallback } from 'react';
 
 interface CustomMonacoEditorProps {
 	value: string | undefined;
 	className?: string;
 	onChange?: (value: string | undefined) => void;
 	readOnly?: boolean;
+	style?: CSSProperties | undefined;
 }
 
 export function CustomMonacoEditor({
 	value,
 	className,
 	onChange,
+	style,
 	readOnly = false
 }: CustomMonacoEditorProps) {
 	const configureMonaco = useCallback((monaco: Monaco) => {
@@ -34,26 +37,27 @@ export function CustomMonacoEditor({
 	}, []);
 
 	return (
-		<MonacoEditor
-			value={value}
-			onChange={onChange}
-			className={className}
-			onMount={(editor: editor.IStandaloneCodeEditor, monaco) => {
-				configureMonaco(monaco);
-			}}
-			options={{
-				overviewRulerLanes: 0,
-				minimap: { enabled: false },
-				wordBreak: 'keepAll',
-				wordWrap: 'on',
-				smoothScrolling: true,
-				scrollbar: {
-					verticalSliderSize: 5,
-					verticalScrollbarSize: 5
-				},
-				theme: 'miden',
-				readOnly
-			}}
-		/>
+		<div className={cn(className, 'h-full')} style={style}>
+			<MonacoEditor
+				value={value}
+				onChange={onChange}
+				onMount={(editor: editor.IStandaloneCodeEditor, monaco) => {
+					configureMonaco(monaco);
+				}}
+				options={{
+					overviewRulerLanes: 0,
+					minimap: { enabled: false },
+					wordBreak: 'keepAll',
+					wordWrap: 'on',
+					smoothScrolling: true,
+					scrollbar: {
+						verticalSliderSize: 5,
+						verticalScrollbarSize: 5
+					},
+					theme: 'miden',
+					readOnly
+				}}
+			/>
+		</div>
 	);
 }
