@@ -266,7 +266,7 @@ export const ComposeTransactionTab = () => {
 										</div>
 										<div className="flex flex-col gap-4 mt-8">
 											<h3 className="font-bold text-2xl">Need help?</h3>
-											<ul style={{ paddingLeft: '20px' }} className="ml-2">
+											<ul>
 												<li>
 													📚{' '}
 													<Link
