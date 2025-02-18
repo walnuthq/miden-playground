@@ -21,7 +21,7 @@ export const Toolbar = () => {
 						{filesToDisplay.map((fileId) => (
 							<div
 								key={fileId}
-								className={`text-theme-text text-sm px-3 py-2 first:border-l-0 border-l-[1.5px] border-t-[1.5px]   border-theme-border flex flex-row items-center gap-2 cursor-pointer select-none ${
+								className={`text-theme-text text-sm px-3 py-2 first:border-l-0 border-l-[1.5px] border-t-[1.5px] last:border-r-[1.5px]  border-theme-border flex flex-row items-center gap-2 cursor-pointer select-none ${
 									selectedFileId === fileId ? 'bg-[#040113]' : ''
 								}`}
 								onClick={() => selectFile(fileId)}
