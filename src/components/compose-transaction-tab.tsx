@@ -231,7 +231,7 @@ export const ComposeTransactionTab = () => {
 										<div className="mt-2">ACCOUNT STORAGE CHANGES</div>
 									</ScrollArea>
 								) : (
-									<ScrollArea className="relative h-full px-4 overflow-auto mt-20 max-w-3xl mx-auto text-theme-text">
+									<ScrollArea className="relative h-full px-4 overflow-auto mt-16 max-w-3xl mx-auto text-theme-text">
 										<div className="flex flex-col gap-4">
 											<h1 className="font-bold text-4xl">Miden Playground</h1>
 											<h3 className="font-bold text-2xl mt-8">Getting Started</h3>
@@ -273,14 +273,13 @@ export const ComposeTransactionTab = () => {
 													for detailed guides and instructions.
 												</li>
 												<li>
-													🗂
+													🗂 Check our{' '}
 													<Link
 														href="https://github.com/0xPolygonMiden/miden-vm"
 														className="font-bold text-theme-primary hover:underline"
 													>
-														{' '}
-														Explore our GitHub repository
-													</Link>{' '}
+														GitHub repository
+													</Link>.
 												</li>
 											</ul>
 										</div>
