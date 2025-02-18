@@ -263,20 +263,23 @@ export const ComposeTransactionTab = () => {
 											<h3 className="font-bold text-2xl">Need help?</h3>
 											<ul style={{ paddingLeft: '20px' }} className="ml-2">
 												<li>
+													📚{' '}
 													<Link
 														href="https://0xpolygonmiden.github.io/miden-vm/"
 														className="font-bold text-theme-primary hover:underline"
 													>
-														📚 Read our docs
+														Read our docs
 													</Link>{' '}
 													for detailed guides and instructions.
 												</li>
 												<li>
+													🗂
 													<Link
 														href="https://github.com/0xPolygonMiden/miden-vm"
 														className="font-bold text-theme-primary hover:underline"
 													>
-														🗂 Our github
+														{' '}
+														Explore our GitHub repository
 													</Link>{' '}
 												</li>
 											</ul>
