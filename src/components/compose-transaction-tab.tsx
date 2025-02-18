@@ -121,7 +121,7 @@ export const ComposeTransactionTab = () => {
 								) : (
 									<div className="text-sm">
 										{Object.values(notes).some((note) => !notes[note.id].isConsumed)
-											? 'Select at least one note'
+											? 'Add at least one note'
 											: 'No notes available. Please create notes first'}
 									</div>
 								)}
@@ -133,7 +133,7 @@ export const ComposeTransactionTab = () => {
 								<div className="mt-6">
 									<DropdownMenu open={isOpenDropdown} onOpenChange={setIsOpenDropdown}>
 										<DropdownMenuTrigger className="w-full  border border-theme-border transition-all rounded-miden px-4 py-1 bg-theme-surface-highlight  text-theme-text hover:bg-theme-border">
-											<span className="select-none">Select note</span>
+											<span className="select-none">Add note</span>
 										</DropdownMenuTrigger>
 										<DropdownMenuContent>
 											{Object.values(notes)
