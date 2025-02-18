@@ -236,7 +236,7 @@ export const ComposeTransactionTab = () => {
 										<div className="mt-2 text-theme-text-subtle">No storage changes</div>
 									</ScrollArea>
 								) : (
-									<ScrollArea className="relative h-full px-4 overflow-auto mt-20 max-w-3xl mx-auto text-theme-text">
+									<ScrollArea className="relative h-full px-4 overflow-auto mt-16 max-w-3xl mx-auto text-theme-text">
 										<div className="flex flex-col gap-4">
 											<h1 className="font-bold text-4xl">Miden Playground</h1>
 											<h3 className="font-bold text-2xl mt-8">Getting Started</h3>
@@ -266,18 +266,26 @@ export const ComposeTransactionTab = () => {
 										</div>
 										<div className="flex flex-col gap-4 mt-8">
 											<h3 className="font-bold text-2xl">Need help?</h3>
-											<ul style={{ listStyleType: 'disc', paddingLeft: '20px' }} className="ml-2">
+											<ul>
 												<li>
-													<Link href="/" className="font-bold text-theme-primary hover:underline">
-														📚 Read our docs
+													📚{' '}
+													<Link
+														href="https://0xpolygonmiden.github.io/miden-vm/"
+														className="font-bold text-theme-primary hover:underline"
+													>
+														Read our docs
 													</Link>{' '}
 													for detailed guides and instructions.
 												</li>
 												<li>
-													<Link href="/" className="font-bold text-theme-primary hover:underline">
-														🎥 Watch our video
-													</Link>{' '}
-													tutorial to get started quickly.
+													🗂 Check our{' '}
+													<Link
+														href="https://github.com/0xPolygonMiden/miden-vm"
+														className="font-bold text-theme-primary hover:underline"
+													>
+														GitHub repository
+													</Link>
+													.
 												</li>
 											</ul>
 										</div>
