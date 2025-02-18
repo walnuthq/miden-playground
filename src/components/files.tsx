@@ -16,7 +16,9 @@ const useSelectedEditorFile = (): { content: string; file: EditorFile | null } =
 					const account = accounts[file.content.dynamic.account.accountId];
 					content = JSON.stringify(
 						{
-							accountId: account.id.id.toString()
+							accountId: account.id.id.toString(),
+							prefix: account.id.prefix.toString(),
+							suffix: account.id.suffix.toString()
 						},
 						null,
 						2
