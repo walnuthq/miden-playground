@@ -220,15 +220,20 @@ export const ComposeTransactionTab = () => {
 								{accountUpdates !== null ? (
 									<ScrollArea className="relative h-full pt-5 px-4 overflow-auto text-theme-text">
 										<div className="flex justify-center">EXECUTION OUTPUT</div>
-										<div className="mt-2">OUTPUT NOTES</div>
+										<div className="mt-6">OUTPUT NOTES</div>
 										<div className="mt-2">
 											<OutputNotes />
 										</div>
-										<div className="mt-2">ACCOUNT VAULT CHANGES</div>
+										<div className="mt-6">
+											{selectedAccountData?.name.toUpperCase()} VAULT CHANGES
+										</div>
 										<div className="mt-2">
 											<Vault accountId={selectedAccountData?.id.id} displayDelta />
 										</div>
-										<div className="mt-2">ACCOUNT STORAGE CHANGES</div>
+										<div className="mt-6">
+											{selectedAccountData?.name.toUpperCase()} STORAGE CHANGES
+										</div>
+										<div className="mt-2 text-theme-text-subtle">No storage changes</div>
 									</ScrollArea>
 								) : (
 									<ScrollArea className="relative h-full px-4 overflow-auto mt-16 max-w-3xl mx-auto text-theme-text">
