@@ -237,21 +237,21 @@ export const ComposeTransactionTab = () => {
 											<h3 className="font-bold text-2xl mt-8">Getting Started</h3>
 											<div>
 												<div>1. Execute Transactions:</div>
-												<ul style={{ paddingLeft: '20px' }} className="ml-2">
+												<ul style={{ listStyleType: 'disc', paddingLeft: '20px' }} className="ml-2">
 													<li>Select an account and at least one note from the left-side menu.</li>
 													<li>Click &quot;Execute Transaction&quot; to see Miden in action.</li>
 												</ul>
 											</div>
 											<div>
 												<div>2. Craft Notes for Transactions:</div>
-												<ul style={{ paddingLeft: '20px' }} className="ml-2">
+												<ul style={{ listStyleType: 'disc', paddingLeft: '20px' }} className="ml-2">
 													<li>Create notes in the editor tab.</li>
 													<li>Each note includes a vault with assets and a script.</li>
 												</ul>
 											</div>
 											<div>
 												<div>3. Create More Accounts:</div>
-												<ul style={{ paddingLeft: '20px' }} className="ml-2">
+												<ul style={{ listStyleType: 'disc', paddingLeft: '20px' }} className="ml-2">
 													<li>
 														Store assets in your account&apos;s vault and keep data in its storage.
 													</li>
@@ -279,7 +279,8 @@ export const ComposeTransactionTab = () => {
 														className="font-bold text-theme-primary hover:underline"
 													>
 														GitHub repository
-													</Link>.
+													</Link>
+													.
 												</li>
 											</ul>
 										</div>
