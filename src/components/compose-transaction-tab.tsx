@@ -156,19 +156,6 @@ export const ComposeTransactionTab = () => {
 								</div>
 							)}
 
-							{Object.values(latestConsumedNotes).length > 0 && (
-								<div className="mt-6">CONSUMED NOTES</div>
-							)}
-							<div className="flex flex-col gap-4 mt-2">
-								{Object.values(latestConsumedNotes).map((note) => (
-									<div
-										key={note.id}
-										className="border border-theme-border rounded-miden relative text-sm "
-									>
-										<NoteCard noteId={note.id} />
-									</div>
-								))}
-							</div>
 							<div className="mt-6">
 								<div className=" text-theme-text ">BLOCK NUMBER</div>
 								<input
@@ -208,6 +195,19 @@ export const ComposeTransactionTab = () => {
 								>
 									Execute Transaction
 								</button>
+							</div>
+							{Object.values(latestConsumedNotes).length > 0 && (
+								<div className="mt-6">CONSUMED NOTES</div>
+							)}
+							<div className="flex flex-col gap-4 mt-2">
+								{Object.values(latestConsumedNotes).map((note) => (
+									<div
+										key={note.id}
+										className="border border-theme-border rounded-miden relative text-sm "
+									>
+										<NoteCard noteId={note.id} />
+									</div>
+								))}
 							</div>
 						</div>
 					</ScrollArea>
