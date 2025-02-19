@@ -17,6 +17,7 @@ import OutputNotes from './output-notes';
 import NoteCard from './note-card';
 import InlineIcon from './ui/inline-icon';
 import Link from 'next/link';
+import { useToast } from '@/hooks/use-toast';
 
 export const ComposeTransactionTab = () => {
 	const {
@@ -33,7 +34,9 @@ export const ComposeTransactionTab = () => {
 		setBlockNumber,
 		accountUpdates,
 		selectFile,
-		selectTab
+		selectTab,
+		firstExecuteClick,
+		toggleFisrtExecuteClick
 	} = useMiden();
 	const selectedAccountData = selectedTransactionAccountId
 		? accounts[selectedTransactionAccountId]
@@ -41,6 +44,9 @@ export const ComposeTransactionTab = () => {
 	console.log(accountUpdates);
 	const [isOpenDropdown, setIsOpenDropdown] = useState(false);
 	const [_blockNumber, _setBlockNumber] = useState(blockNumber.toString());
+
+	const { toast } = useToast();
+
 	return (
 		<>
 			<ResizablePanelGroup direction="horizontal">
@@ -196,14 +202,22 @@ export const ComposeTransactionTab = () => {
 							</div>
 							<div className="mt-2">
 								<button
-									disabled={selectedTransactionNotesIds.length === 0}
+									disabled={firstExecuteClick && selectedTransactionNotesIds.length === 0}
 									onClick={() => {
-										executeTransaction();
+										if (!firstExecuteClick) {
+											toast({
+												title: `Select at least one note`,
+												variant: 'destructive'
+											});
+										} else if (selectedTransactionNotesIds.length > 0) {
+											executeTransaction();
+										}
+										toggleFisrtExecuteClick();
 									}}
-									className={`w-full outline-none border border-theme-border rounded-miden px-4 py-1 bg-theme-primary transition-all text-theme-text ${
-										selectedTransactionNotesIds.length > 0
-											? 'hover:bg-theme-primary-hover'
-											: 'opacity-50 !bg-theme-surface-highlight'
+									className={`w-full outline-none border border-theme-border rounded-miden px-4 py-1 transition-all text-theme-text ${
+										!firstExecuteClick || selectedTransactionNotesIds.length > 0
+											? 'bg-theme-primary hover:bg-theme-primary-hover'
+											: 'bg-theme-surface-highlight opacity-50'
 									}`}
 								>
 									Execute Transaction

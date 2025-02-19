@@ -71,6 +71,8 @@ interface MidenContextProps {
 		faucetId: string,
 		updateFn: (amount: bigint) => bigint
 	) => void;
+	firstExecuteClick: boolean;
+	toggleFisrtExecuteClick: () => void;
 }
 
 export const MidenContext = createContext<MidenContextProps>({
@@ -113,13 +115,20 @@ export const MidenContext = createContext<MidenContextProps>({
 	addInfoLog: () => {},
 	addErrorLog: () => {},
 	updateAccountAssetAmount: () => {},
-	updateNoteAssetAmount: () => {}
+	updateNoteAssetAmount: () => {},
+	firstExecuteClick: false,
+	toggleFisrtExecuteClick: () => {}
 });
 
 export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
 	const [isInitialized, setIsInitialized] = useState(false);
 	const [isCollapsedTabs, setCollapsedTabs] = useState(false);
 	const [isExecutingTransaction, setIsExecutingTransaction] = useState(false);
+	const [firstExecuteClick, setFirstExecuteClick] = useState(false);
+
+	const toggleFisrtExecuteClick = () => {
+		setFirstExecuteClick(true);
+	};
 
 	const collapseTabs = () => {
 		setCollapsedTabs(!isCollapsedTabs);
@@ -616,7 +625,9 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				addErrorLog,
 				addInfoLog,
 				updateAccountAssetAmount,
-				updateNoteAssetAmount
+				updateNoteAssetAmount,
+				firstExecuteClick,
+				toggleFisrtExecuteClick
 			}}
 		>
 			{children}
