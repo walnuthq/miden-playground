@@ -1,12 +1,15 @@
 import InlineIcon from './ui/inline-icon';
+import Image from 'next/image';
+import logo from '../app/images/miden_logo.png';
 
 export function Header() {
 	return (
 		<div className="h-full text-theme-text flex justify-between items-center">
-			<div className="font-bold text-xl flex gap-2">
+			<div className="font-bold text-xl flex items-center gap-1">
+				<Image src={logo} alt="logo" className="w-10 h-10" />
 				Miden{' '}
 				<div className="text-xs font-normal text-theme-primary">
-					<span className="bg-theme-border/40 py-1 px-1.5 rounded-full">PLAYGROUND</span>
+					<span className="bg-theme-border/40 py-1 px-1.5 ml-2 rounded-full">PLAYGROUND</span>
 				</div>
 			</div>
 			<a
