@@ -17,7 +17,6 @@ import OutputNotes from './output-notes';
 import NoteCard from './note-card';
 import InlineIcon from './ui/inline-icon';
 import Link from 'next/link';
-import { useToast } from '@/hooks/use-toast';
 
 export const ComposeTransactionTab = () => {
 	const {
@@ -44,8 +43,6 @@ export const ComposeTransactionTab = () => {
 	console.log(accountUpdates);
 	const [isOpenDropdown, setIsOpenDropdown] = useState(false);
 	const [_blockNumber, _setBlockNumber] = useState(blockNumber.toString());
-
-	const { toast } = useToast();
 
 	return (
 		<>
@@ -204,14 +201,7 @@ export const ComposeTransactionTab = () => {
 								<button
 									disabled={firstExecuteClick && selectedTransactionNotesIds.length === 0}
 									onClick={() => {
-										if (!firstExecuteClick) {
-											toast({
-												title: `Select at least one note`,
-												variant: 'destructive'
-											});
-										} else if (selectedTransactionNotesIds.length > 0) {
-											executeTransaction();
-										}
+										executeTransaction();
 										toggleFisrtExecuteClick();
 									}}
 									className={`w-full outline-none border border-theme-border rounded-miden px-4 py-1 transition-all text-theme-text ${
