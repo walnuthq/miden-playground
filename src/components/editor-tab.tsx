@@ -8,7 +8,7 @@ import Breadcrumbs from '@/components/breadcrumbs';
 export const EditorTab = () => {
 	return (
 		<ResizablePanelGroup direction="horizontal">
-			<ResizablePanel defaultSize={25}>
+			<ResizablePanel minSize={15} defaultSize={25}>
 				<ScrollArea className="relative h-full overflow-auto">
 					<Inspector />
 				</ScrollArea>
