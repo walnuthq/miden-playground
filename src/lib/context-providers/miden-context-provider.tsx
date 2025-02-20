@@ -313,7 +313,8 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 							(a) => a.faucetId === asset.faucetId
 						)?.amount ?? 0n);
 					return acc;
-				}, {} as Record<string, bigint>)
+				}, {} as Record<string, bigint>),
+				outputNotes: output.outputNotes
 			};
 
 			setAccountUpdates(accountUpdates);
