@@ -256,7 +256,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			return;
 		}
 		if (selectedTransactionNotesIds.length === 0) {
-			addErrorLog('No notes selected: Please select at least one note to execute the transaction');
+			addErrorLog('No notes added: Please add at least one note to execute the transaction');
 			return;
 		}
 
