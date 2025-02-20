@@ -164,7 +164,8 @@ export const ComposeTransactionTab = () => {
 							<div className="mt-6">
 								<div className=" text-theme-text ">BLOCK NUMBER</div>
 								<input
-									type="text"
+									type="number"
+									min={1}
 									value={_blockNumber}
 									onChange={(e) => {
 										_setBlockNumber(e.target.value);
