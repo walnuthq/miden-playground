@@ -462,19 +462,22 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	}, [accounts, selectedTransactionAccountId]);
 
 	const createSampleP2IDRNote = useCallback(() => {
-		const receiverId = Object.values(accounts)[0].id;
+		const receiverId = selectedTransactionAccountId
+			? accounts[selectedTransactionAccountId].id
+			: Object.values(accounts)[0].id;
 		const senderId = Object.values(accounts).filter((account) => account.id.id !== receiverId.id)[0]
 			.id;
+		const assets = [{ ...accounts[senderId.id].assets[0], amount: 10n }];
 		const { note, newFiles } = createP2IDRNote({
 			senderId,
 			receiverId,
-			reclaimBlockHeight: 100,
-			assets: [],
+			reclaimBlockHeight: 20,
+			assets,
 			name: 'P2IDR'
 		});
 		setNotes((prev) => ({ ...prev, [note.id]: note }));
 		setFiles((prev) => ({ ...prev, ...newFiles }));
-	}, [accounts]);
+	}, [accounts, selectedTransactionAccountId]);
 
 	const createSampleNote = useCallback(() => {
 		const senderId = Object.values(accounts)[0].id;
