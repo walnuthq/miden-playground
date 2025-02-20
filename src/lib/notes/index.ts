@@ -17,6 +17,8 @@ export interface NoteProps {
 	senderId: string;
 	metadataFileId: string;
 	vaultFileId: string;
+	initialNoteId?: string;
+	isExpectedOutput?: boolean;
 }
 
 export class Note {
@@ -30,6 +32,8 @@ export class Note {
 	metadataFileId: string;
 	vaultFileId: string;
 	serialNumber: BigUint64Array;
+	isExpectedOutput?: boolean;
+	initialNoteId?: string;
 
 	constructor(props: NoteProps) {
 		this.name = props.name;
@@ -42,6 +46,8 @@ export class Note {
 		this.metadataFileId = props.metadataFileId;
 		this.vaultFileId = props.vaultFileId;
 		this.serialNumber = generateNoteSerialNumber();
+		this.initialNoteId = props.initialNoteId;
+		this.isExpectedOutput = props.isExpectedOutput;
 	}
 
 	static createEmptyNote({

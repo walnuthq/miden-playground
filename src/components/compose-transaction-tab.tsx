@@ -142,7 +142,9 @@ export const ComposeTransactionTab = () => {
 											{Object.values(notes)
 												.filter(
 													(note) =>
-														!selectedTransactionNotesIds.includes(note.id) && !note.isConsumed
+														!selectedTransactionNotesIds.includes(note.id) &&
+														!note.isConsumed &&
+														!note.isExpectedOutput
 												)
 												.map((note) => (
 													<DropdownMenuItem

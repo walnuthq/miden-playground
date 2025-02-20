@@ -353,6 +353,16 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 
 			setSelectedTransactionNotesIds([]);
 
+			for (const outputNote of output.outputNotes) {
+				setNotes((prev) => {
+					const note = Object.values(prev).find((note) => note.initialNoteId === outputNote.id);
+					if (note) {
+						note.isExpectedOutput = false;
+					}
+					return prev;
+				});
+			}
+
 			addInfoLog(`Total cycles: ${output.totalCycles}; Trace length: ${output.traceLength}`);
 		} catch (error) {
 			addErrorLog('Execution failed. Error: ' + error);
@@ -420,8 +430,10 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	}, []);
 
 	const createSampleSwapNotes = useCallback(() => {
-		const sender = Object.values(accounts)[0];
-		const receiver = Object.values(accounts).filter((account) => account.id !== sender.id)[0];
+		const receiver = selectedTransactionAccountId
+			? accounts[selectedTransactionAccountId]
+			: Object.values(accounts)[0];
+		const sender = Object.values(accounts).filter((account) => account.id !== receiver.id)[0];
 		const offeredAssetOfSender = sender.assets[0];
 		const requestedAssetOfReceiver = receiver.assets.filter(
 			(asset) => asset.faucetId !== offeredAssetOfSender.faucetId
@@ -443,7 +455,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		});
 		setNotes((prev) => ({ ...prev, [note.id]: note, [paybackNote.id]: paybackNote }));
 		setFiles((prev) => ({ ...prev, ...newFiles }));
-	}, [accounts]);
+	}, [accounts, selectedTransactionAccountId]);
 
 	const createSampleP2IDNote = useCallback(() => {
 		const receiverId = selectedTransactionAccountId
