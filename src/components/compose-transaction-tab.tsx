@@ -17,6 +17,7 @@ import OutputNotes from './output-notes';
 import NoteCard from './note-card';
 import InlineIcon from './ui/inline-icon';
 import Link from 'next/link';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
 export const ComposeTransactionTab = () => {
 	const {
@@ -51,7 +52,30 @@ export const ComposeTransactionTab = () => {
 					<ScrollArea className="relative h-full px-4 py-5  overflow-auto text-theme-text text-sm">
 						<div className="">
 							<div className="flex justify-between items-center">
-								<div className=" text-theme-text ">EXECUTING ACCOUNT</div>
+								<TooltipProvider>
+									<Tooltip delayDuration={100}>
+										<div className=" text-theme-text flex gap-2 items-center">
+											EXECUTING ACCOUNT{' '}
+											<TooltipTrigger className="self-start">
+												<InlineIcon
+													className="w-4 h-4 cursor-pointer hover:text-theme-text text-theme-text-subtle"
+													variant="question"
+												/>
+											</TooltipTrigger>
+											<TooltipContent>
+												Learn about accounts in the{' '}
+												<a
+													target="_blank"
+													className="text-theme-primary hover:underline"
+													href="https://0xpolygonmiden.github.io/miden-docs/miden-base/architecture/account.html"
+												>
+													docs
+												</a>
+												.
+											</TooltipContent>
+										</div>
+									</Tooltip>
+								</TooltipProvider>
 								<div>
 									<DropdownMenu>
 										<DropdownMenuTrigger>
@@ -97,7 +121,30 @@ export const ComposeTransactionTab = () => {
 								)}
 							</div>
 
-							<div className=" text-theme-text mt-6">NOTES TO CONSUME</div>
+							<TooltipProvider>
+								<Tooltip delayDuration={100}>
+									<div className=" text-theme-text mt-6 flex items-center gap-2">
+										NOTES TO CONSUME{' '}
+										<TooltipTrigger className="self-start">
+											<InlineIcon
+												className="w-4 h-4 cursor-pointer hover:text-theme-text text-theme-text-subtle"
+												variant="question"
+											/>
+										</TooltipTrigger>
+										<TooltipContent>
+											Learn about notes in the{' '}
+											<a
+												target="_blank"
+												className="text-theme-primary hover:underline"
+												href="https://0xpolygonmiden.github.io/miden-docs/miden-base/architecture/note.html"
+											>
+												docs
+											</a>
+											.
+										</TooltipContent>
+									</div>
+								</Tooltip>
+							</TooltipProvider>
 							<div className="flex flex-col gap-4 mt-2">
 								{selectedTransactionNotesIds.length > 0 ? (
 									selectedTransactionNotesIds.map(
@@ -162,7 +209,22 @@ export const ComposeTransactionTab = () => {
 							)}
 
 							<div className="mt-6">
-								<div className=" text-theme-text ">BLOCK NUMBER</div>
+								<TooltipProvider>
+									<Tooltip delayDuration={100}>
+										<div className="text-theme-text mt-6 flex items-center gap-2">
+											BLOCK NUMBER{' '}
+											<TooltipTrigger className="self-start">
+												<InlineIcon
+													className="w-4 h-4 cursor-pointer hover:text-theme-text text-theme-text-subtle"
+													variant="question"
+												/>
+											</TooltipTrigger>
+											<TooltipContent>
+												Transaction will be executed at the specified block number.
+											</TooltipContent>
+										</div>
+									</Tooltip>
+								</TooltipProvider>
 								<input
 									type="text"
 									value={_blockNumber}
