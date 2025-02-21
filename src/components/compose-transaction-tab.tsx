@@ -58,7 +58,7 @@ export const ComposeTransactionTab = () => {
 											EXECUTING ACCOUNT{' '}
 											<TooltipTrigger>
 												<InlineIcon
-													className="w-3 h-3 cursor-pointer hover:text-theme-text text-theme-text-subtle"
+													className=" w-4 h-4 cursor-pointer hover:text-theme-text text-theme-text-subtle"
 													variant="question"
 												/>
 											</TooltipTrigger>
@@ -127,7 +127,7 @@ export const ComposeTransactionTab = () => {
 										NOTES TO CONSUME{' '}
 										<TooltipTrigger>
 											<InlineIcon
-												className="w-3 h-3 cursor-pointer hover:text-theme-text text-theme-text-subtle"
+												className="w-4 h-4 cursor-pointer hover:text-theme-text text-theme-text-subtle"
 												variant="question"
 											/>
 										</TooltipTrigger>
@@ -215,7 +215,7 @@ export const ComposeTransactionTab = () => {
 											BLOCK NUMBER{' '}
 											<TooltipTrigger>
 												<InlineIcon
-													className="w-3 h-3 cursor-pointer hover:text-theme-text text-theme-text-subtle"
+													className="w-4 h-4 cursor-pointer hover:text-theme-text text-theme-text-subtle"
 													variant="question"
 												/>
 											</TooltipTrigger>
