@@ -56,9 +56,9 @@ export const ComposeTransactionTab = () => {
 									<Tooltip delayDuration={100}>
 										<div className=" text-theme-text flex gap-2 items-center">
 											EXECUTING ACCOUNT{' '}
-											<TooltipTrigger className="self-start">
+											<TooltipTrigger>
 												<InlineIcon
-													className="w-4 h-4 cursor-pointer hover:text-theme-text text-theme-text-subtle"
+													className="w-3 h-3 cursor-pointer hover:text-theme-text text-theme-text-subtle"
 													variant="question"
 												/>
 											</TooltipTrigger>
@@ -125,9 +125,9 @@ export const ComposeTransactionTab = () => {
 								<Tooltip delayDuration={100}>
 									<div className=" text-theme-text mt-6 flex items-center gap-2">
 										NOTES TO CONSUME{' '}
-										<TooltipTrigger className="self-start">
+										<TooltipTrigger>
 											<InlineIcon
-												className="w-4 h-4 cursor-pointer hover:text-theme-text text-theme-text-subtle"
+												className="w-3 h-3 cursor-pointer hover:text-theme-text text-theme-text-subtle"
 												variant="question"
 											/>
 										</TooltipTrigger>
@@ -213,9 +213,9 @@ export const ComposeTransactionTab = () => {
 									<Tooltip delayDuration={100}>
 										<div className="text-theme-text mt-6 flex items-center gap-2">
 											BLOCK NUMBER{' '}
-											<TooltipTrigger className="self-start">
+											<TooltipTrigger>
 												<InlineIcon
-													className="w-4 h-4 cursor-pointer hover:text-theme-text text-theme-text-subtle"
+													className="w-3 h-3 cursor-pointer hover:text-theme-text text-theme-text-subtle"
 													variant="question"
 												/>
 											</TooltipTrigger>
