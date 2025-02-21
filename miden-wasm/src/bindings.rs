@@ -144,6 +144,7 @@ pub struct NoteData {
     pub(crate) sender_id: String,
     pub(crate) sender_script: String,
     pub(crate) serial_number: Vec<u64>,
+    pub(crate) id: Option<String>,
 }
 
 #[wasm_bindgen]
@@ -156,6 +157,7 @@ impl NoteData {
         sender_id: String,
         sender_script: String,
         serial_number: Vec<u64>,
+        id: Option<String>,
     ) -> Self {
         Self {
             assets,
@@ -164,6 +166,7 @@ impl NoteData {
             sender_id,
             sender_script,
             serial_number,
+            id,
         }
     }
 
@@ -185,6 +188,10 @@ impl NoteData {
 
     pub fn serial_number(&self) -> Vec<u64> {
         self.serial_number.clone()
+    }
+
+    pub fn id(&self) -> Option<String> {
+        self.id.clone()
     }
 }
 

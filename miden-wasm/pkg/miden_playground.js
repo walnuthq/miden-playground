@@ -226,11 +226,40 @@ export function create_swap_note(seed, sender_account_id, receiver_account_id, r
     return CreateSwapNoteResult.__wrap(ret[0]);
 }
 
+/**
+ * @param {NoteData} note
+ * @returns {string}
+ */
+export function get_note_id(note) {
+    let deferred3_0;
+    let deferred3_1;
+    try {
+        _assertClass(note, NoteData);
+        var ptr0 = note.__destroy_into_raw();
+        const ret = wasm.get_note_id(ptr0);
+        var ptr2 = ret[0];
+        var len2 = ret[1];
+        if (ret[3]) {
+            ptr2 = 0; len2 = 0;
+            throw takeFromExternrefTable0(ret[2]);
+        }
+        deferred3_0 = ptr2;
+        deferred3_1 = len2;
+        return getStringFromWasm0(ptr2, len2);
+    } finally {
+        wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
+    }
+}
+
 function passArray64ToWasm0(arg, malloc) {
     const ptr = malloc(arg.length * 8, 8) >>> 0;
     getBigUint64ArrayMemory0().set(arg, ptr / 8);
     WASM_VECTOR_LEN = arg.length;
     return ptr;
+}
+
+function isLikeNone(x) {
+    return x === undefined || x === null;
 }
 
 const AccountDataFinalization = (typeof FinalizationRegistry === 'undefined')
@@ -512,8 +541,9 @@ export class NoteData {
      * @param {string} sender_id
      * @param {string} sender_script
      * @param {BigUint64Array} serial_number
+     * @param {string | undefined} [id]
      */
-    constructor(assets, inputs, script, sender_id, sender_script, serial_number) {
+    constructor(assets, inputs, script, sender_id, sender_script, serial_number, id) {
         const ptr0 = passArrayJsValueToWasm0(assets, wasm.__wbindgen_malloc);
         const len0 = WASM_VECTOR_LEN;
         const ptr1 = passArray64ToWasm0(inputs, wasm.__wbindgen_malloc);
@@ -526,7 +556,9 @@ export class NoteData {
         const len4 = WASM_VECTOR_LEN;
         const ptr5 = passArray64ToWasm0(serial_number, wasm.__wbindgen_malloc);
         const len5 = WASM_VECTOR_LEN;
-        const ret = wasm.notedata_new(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5);
+        var ptr6 = isLikeNone(id) ? 0 : passStringToWasm0(id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        var len6 = WASM_VECTOR_LEN;
+        const ret = wasm.notedata_new(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6);
         this.__wbg_ptr = ret >>> 0;
         NoteDataFinalization.register(this, this.__wbg_ptr, this);
         return this;
@@ -592,6 +624,18 @@ export class NoteData {
         const ret = wasm.notedata_serial_number(this.__wbg_ptr);
         var v1 = getArrayU64FromWasm0(ret[0], ret[1]).slice();
         wasm.__wbindgen_free(ret[0], ret[1] * 8, 8);
+        return v1;
+    }
+    /**
+     * @returns {string | undefined}
+     */
+    id() {
+        const ret = wasm.notedata_id(this.__wbg_ptr);
+        let v1;
+        if (ret[0] !== 0) {
+            v1 = getStringFromWasm0(ret[0], ret[1]).slice();
+            wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+        }
         return v1;
     }
 }

@@ -127,7 +127,9 @@ export function createSwapNote({
 		assets: [requestedAsset],
 		inputFileId: paybackInputFileId,
 		senderId: paybackNoteData.sender_id(),
-		vaultFileId: paybackVaultFileId
+		vaultFileId: paybackVaultFileId,
+		initialNoteId: paybackNoteData.id(),
+		isExpectedOutput: true
 	});
 
 	const note = new Note({
@@ -143,7 +145,7 @@ export function createSwapNote({
 	});
 	const serialNumberString = note.serialNumberDecimalString.slice(0, 10);
 	note.name = `${name} - ${serialNumberString}`;
-	paybackNote.name = `${paybackNote.name} - ${serialNumberString}`;
+	paybackNote.name = `${paybackNote.name} - ${paybackNote.serialNumberDecimalString.slice(0, 10)}`;
 	return { note, newFiles, paybackNote };
 }
 

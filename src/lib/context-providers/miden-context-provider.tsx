@@ -71,6 +71,8 @@ interface MidenContextProps {
 		faucetId: string,
 		updateFn: (amount: bigint) => bigint
 	) => void;
+	firstExecuteClick: boolean;
+	toggleFisrtExecuteClick: () => void;
 }
 
 export const MidenContext = createContext<MidenContextProps>({
@@ -113,13 +115,20 @@ export const MidenContext = createContext<MidenContextProps>({
 	addInfoLog: () => {},
 	addErrorLog: () => {},
 	updateAccountAssetAmount: () => {},
-	updateNoteAssetAmount: () => {}
+	updateNoteAssetAmount: () => {},
+	firstExecuteClick: false,
+	toggleFisrtExecuteClick: () => {}
 });
 
 export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
 	const [isInitialized, setIsInitialized] = useState(false);
 	const [isCollapsedTabs, setCollapsedTabs] = useState(false);
 	const [isExecutingTransaction, setIsExecutingTransaction] = useState(false);
+	const [firstExecuteClick, setFirstExecuteClick] = useState(false);
+
+	const toggleFisrtExecuteClick = () => {
+		setFirstExecuteClick(true);
+	};
 
 	const collapseTabs = () => {
 		setCollapsedTabs(!isCollapsedTabs);
@@ -247,7 +256,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			return;
 		}
 		if (selectedTransactionNotesIds.length === 0) {
-			addErrorLog('No notes selected: Please select at least one note to execute the transaction');
+			addErrorLog('No notes added: Please add at least one note to execute the transaction');
 			return;
 		}
 
@@ -304,7 +313,8 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 							(a) => a.faucetId === asset.faucetId
 						)?.amount ?? 0n);
 					return acc;
-				}, {} as Record<string, bigint>)
+				}, {} as Record<string, bigint>),
+				outputNotes: output.outputNotes
 			};
 
 			setAccountUpdates(accountUpdates);
@@ -343,6 +353,16 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			});
 
 			setSelectedTransactionNotesIds([]);
+
+			for (const outputNote of output.outputNotes) {
+				setNotes((prev) => {
+					const note = Object.values(prev).find((note) => note.initialNoteId === outputNote.id);
+					if (note) {
+						note.isExpectedOutput = false;
+					}
+					return prev;
+				});
+			}
 
 			addInfoLog(`Total cycles: ${output.totalCycles}; Trace length: ${output.traceLength}`);
 		} catch (error) {
@@ -411,8 +431,10 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	}, []);
 
 	const createSampleSwapNotes = useCallback(() => {
-		const sender = Object.values(accounts)[0];
-		const receiver = Object.values(accounts).filter((account) => account.id !== sender.id)[0];
+		const receiver = selectedTransactionAccountId
+			? accounts[selectedTransactionAccountId]
+			: Object.values(accounts)[0];
+		const sender = Object.values(accounts).filter((account) => account.id !== receiver.id)[0];
 		const offeredAssetOfSender = sender.assets[0];
 		const requestedAssetOfReceiver = receiver.assets.filter(
 			(asset) => asset.faucetId !== offeredAssetOfSender.faucetId
@@ -434,35 +456,41 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		});
 		setNotes((prev) => ({ ...prev, [note.id]: note, [paybackNote.id]: paybackNote }));
 		setFiles((prev) => ({ ...prev, ...newFiles }));
-	}, [accounts]);
+	}, [accounts, selectedTransactionAccountId]);
 
 	const createSampleP2IDNote = useCallback(() => {
-		const receiverId = Object.values(accounts)[0].id;
+		const receiverId = selectedTransactionAccountId
+			? accounts[selectedTransactionAccountId].id
+			: Object.values(accounts)[0].id;
 		const senderId = Object.values(accounts).filter((account) => account.id !== receiverId)[0].id;
+		const assets = [{ ...accounts[senderId.id].assets[0], amount: 10n }];
 		const { note, newFiles } = createP2IDNote({
 			senderId,
 			receiverId,
-			assets: [],
+			assets,
 			name: 'P2ID'
 		});
 		setNotes((prev) => ({ ...prev, [note.id]: note }));
 		setFiles((prev) => ({ ...prev, ...newFiles }));
-	}, [accounts]);
+	}, [accounts, selectedTransactionAccountId]);
 
 	const createSampleP2IDRNote = useCallback(() => {
-		const receiverId = Object.values(accounts)[0].id;
+		const receiverId = selectedTransactionAccountId
+			? accounts[selectedTransactionAccountId].id
+			: Object.values(accounts)[0].id;
 		const senderId = Object.values(accounts).filter((account) => account.id.id !== receiverId.id)[0]
 			.id;
+		const assets = [{ ...accounts[senderId.id].assets[0], amount: 10n }];
 		const { note, newFiles } = createP2IDRNote({
 			senderId,
 			receiverId,
-			reclaimBlockHeight: 100,
-			assets: [],
+			reclaimBlockHeight: 20,
+			assets,
 			name: 'P2IDR'
 		});
 		setNotes((prev) => ({ ...prev, [note.id]: note }));
 		setFiles((prev) => ({ ...prev, ...newFiles }));
-	}, [accounts]);
+	}, [accounts, selectedTransactionAccountId]);
 
 	const createSampleNote = useCallback(() => {
 		const senderId = Object.values(accounts)[0].id;
@@ -616,7 +644,9 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				addErrorLog,
 				addInfoLog,
 				updateAccountAssetAmount,
-				updateNoteAssetAmount
+				updateNoteAssetAmount,
+				firstExecuteClick,
+				toggleFisrtExecuteClick
 			}}
 		>
 			{children}

@@ -48,7 +48,14 @@ export function consumeNotes({
 		receiver.isAuth,
 		receiverStorage.map((row) => new WordData(new BigUint64Array(row)))
 	);
-	return execute_transaction(transactionScript, receiverAccount, notesWrapper, BigInt(blockNumber));
+	const output = execute_transaction(
+		transactionScript,
+		receiverAccount,
+		notesWrapper,
+		BigInt(blockNumber)
+	);
+	console.log(output);
+	return output;
 }
 
 export function generateAccountId(): AccountId {
@@ -78,7 +85,8 @@ export function createSwapNotes(
 		receiverAccountId,
 		new AssetData(requestedAsset.faucetId, requestedAsset.amount)
 	);
-	return { swapNoteInputs: result.note_inputs(), paybackNote: result.payback_note() };
+	const paybackNote = result.payback_note();
+	return { swapNoteInputs: result.note_inputs(), paybackNote };
 }
 export function generateNoteSerialNumber(): BigUint64Array {
 	const seed = new Uint8Array(32);

@@ -54,52 +54,54 @@ const NotesList = ({
 				]}
 			/>
 			{!isCollapsedNotesTopLevel &&
-				Object.values(notes).map((note) => {
-					const isCollapsed = collapsedNotes[note.id] || false;
-					return (
-						<React.Fragment key={note.id}>
-							<InspectorItem
-								isConsumed={note.isConsumed}
-								name={note.name}
-								variant="collapsable"
-								isCollapsed={isCollapsed}
-								level={1}
-								onClick={() => toggleCollapse(note.id, setCollapsedNotes)}
-								onRemove={() => {
-									deleteNote(note.id);
-								}}
-							/>
-							{!isCollapsed && (
-								<div className="flex flex-col">
-									<FileItem
-										editorFile={files[note.scriptFileId]}
-										onClick={() => selectFile(note.scriptFileId)}
-										isSelected={selectedFileId === note.scriptFileId}
-										level={2}
-									/>
-									<FileItem
-										editorFile={files[note.inputFileId]}
-										onClick={() => selectFile(note.inputFileId)}
-										isSelected={selectedFileId === note.inputFileId}
-										level={2}
-									/>
-									<FileItem
-										editorFile={files[note.metadataFileId]}
-										onClick={() => selectFile(note.metadataFileId)}
-										isSelected={selectedFileId === note.metadataFileId}
-										level={2}
-									/>
-									<FileItem
-										editorFile={files[note.vaultFileId]}
-										onClick={() => selectFile(note.vaultFileId)}
-										isSelected={selectedFileId === note.vaultFileId}
-										level={2}
-									/>
-								</div>
-							)}
-						</React.Fragment>
-					);
-				})}
+				Object.values(notes)
+					.filter((note) => !note.isExpectedOutput)
+					.map((note) => {
+						const isCollapsed = collapsedNotes[note.id] || false;
+						return (
+							<React.Fragment key={note.id}>
+								<InspectorItem
+									isConsumed={note.isConsumed}
+									name={note.name}
+									variant="collapsable"
+									isCollapsed={isCollapsed}
+									level={1}
+									onClick={() => toggleCollapse(note.id, setCollapsedNotes)}
+									onRemove={() => {
+										deleteNote(note.id);
+									}}
+								/>
+								{!isCollapsed && (
+									<div className="flex flex-col">
+										<FileItem
+											editorFile={files[note.scriptFileId]}
+											onClick={() => selectFile(note.scriptFileId)}
+											isSelected={selectedFileId === note.scriptFileId}
+											level={2}
+										/>
+										<FileItem
+											editorFile={files[note.inputFileId]}
+											onClick={() => selectFile(note.inputFileId)}
+											isSelected={selectedFileId === note.inputFileId}
+											level={2}
+										/>
+										<FileItem
+											editorFile={files[note.metadataFileId]}
+											onClick={() => selectFile(note.metadataFileId)}
+											isSelected={selectedFileId === note.metadataFileId}
+											level={2}
+										/>
+										<FileItem
+											editorFile={files[note.vaultFileId]}
+											onClick={() => selectFile(note.vaultFileId)}
+											isSelected={selectedFileId === note.vaultFileId}
+											level={2}
+										/>
+									</div>
+								)}
+							</React.Fragment>
+						);
+					})}
 		</>
 	);
 };

@@ -27,6 +27,7 @@ export interface Asset {
 export interface AccountUpdates {
 	accountId: string;
 	assetsDelta: Record<string, bigint>; // FaucetId -> Amount Delta
+	outputNotes: ExecutionOutput['outputNotes'];
 }
 
 export interface AccountId {

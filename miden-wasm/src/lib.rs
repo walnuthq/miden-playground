@@ -242,20 +242,34 @@ pub fn create_swap_note(
         .map(|x| x.as_int())
         .collect::<Vec<u64>>();
 
+    let mut payback_note_data = NoteData {
+        id: None,
+        assets: vec![requested_asset],
+        inputs: payback_recipient
+            .inputs()
+            .values()
+            .iter()
+            .map(|x| x.as_int())
+            .collect(),
+        script: P2ID_SCRIPT.to_string(),
+        sender_id: receiver_account_id,
+        sender_script: ACCOUNT_SCRIPT.to_string(),
+        serial_number: payback_serial_num.iter().map(|x| x.as_int()).collect(),
+    };
+
+    let payback_note = Note::try_from(payback_note_data.clone())
+        .map_err(|err| format!("Failed to convert payback note: {:?}", err))?;
+
+    payback_note_data.id = Some(payback_note.id().to_hex());
+
     Ok(CreateSwapNoteResult {
         note_inputs: inputs_u64,
-        payback_note: NoteData {
-            assets: vec![requested_asset],
-            inputs: payback_recipient
-                .inputs()
-                .values()
-                .iter()
-                .map(|x| x.as_int())
-                .collect(),
-            script: P2ID_SCRIPT.to_string(),
-            sender_id: receiver_account_id,
-            sender_script: ACCOUNT_SCRIPT.to_string(),
-            serial_number: payback_serial_num.iter().map(|x| x.as_int()).collect(),
-        },
+        payback_note: payback_note_data,
     })
+}
+
+#[wasm_bindgen]
+pub fn get_note_id(note: NoteData) -> Result<String, JsValue> {
+    let note = Note::try_from(note).map_err(|err| format!("Failed to convert note: {:?}", err))?;
+    Ok(note.id().to_hex())
 }
