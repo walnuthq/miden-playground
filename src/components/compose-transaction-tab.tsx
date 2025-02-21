@@ -35,7 +35,6 @@ export const ComposeTransactionTab = () => {
 		accountUpdates,
 		selectFile,
 		selectTab,
-		createAccount,
 		firstExecuteClick,
 		toggleFisrtExecuteClick
 	} = useMiden();
@@ -101,7 +100,7 @@ export const ComposeTransactionTab = () => {
 											<DropdownMenuItem
 												onClick={(e) => {
 													e.preventDefault();
-													createAccount();
+													selectTab('assets');
 												}}
 											>
 												Create account
