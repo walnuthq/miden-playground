@@ -34,6 +34,7 @@ export const ComposeTransactionTab = () => {
 		accountUpdates,
 		selectFile,
 		selectTab,
+		createAccount,
 		firstExecuteClick,
 		toggleFisrtExecuteClick
 	} = useMiden();
@@ -73,6 +74,14 @@ export const ComposeTransactionTab = () => {
 														{account.name}
 													</DropdownMenuItem>
 												))}
+											<DropdownMenuItem
+												onClick={(e) => {
+													e.preventDefault();
+													createAccount();
+												}}
+											>
+												Create account
+											</DropdownMenuItem>
 										</DropdownMenuContent>
 									</DropdownMenu>
 								</div>
@@ -108,6 +117,16 @@ export const ComposeTransactionTab = () => {
 														<NoteCard noteId={noteId} />
 													</div>
 													<div className="flex mt-2 justify-end items-center">
+														<button
+															onClick={(event) => {
+																event.stopPropagation();
+																selectFile(notes[noteId].scriptFileId);
+																selectTab('assets');
+															}}
+															className="px-2 rounded-miden border-theme-border text-theme-text-subtlest hover:text-theme-text hover:underline"
+														>
+															Edit
+														</button>
 														<button
 															onClick={(event) => {
 																event.stopPropagation();
