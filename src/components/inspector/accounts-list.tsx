@@ -18,7 +18,9 @@ const AccountsList = ({
 		createAccount,
 		enableAuthComponent,
 		enableWalletComponent,
-		deleteAccount
+		deleteAccount,
+		selectTransactionAccount,
+		selectedTransactionAccountId
 	} = useMiden();
 	const [collapsedAccounts, setCollapsedAccounts] = useState<Record<string, boolean>>({});
 	const isCollapsedAccTopLevel = collapsedAccounts['top-level-accounts'] || false;
@@ -44,7 +46,6 @@ const AccountsList = ({
 			{!isCollapsedAccTopLevel &&
 				Object.values(accounts).map((account) => {
 					const isCollapsed = collapsedAccounts[account.id.id] || false;
-
 					const onCreateOptions = [];
 					if (!account.isAuth) {
 						onCreateOptions.push('Add auth component');
@@ -74,9 +75,16 @@ const AccountsList = ({
 								onClick={() => {
 									toggleCollapse(account.id.id, setCollapsedAccounts);
 								}}
-								onRemove={() => {
-									deleteAccount(account.id.id);
-								}}
+								onRemove={
+									account.deletable
+										? () => {
+												if (account.id.id === selectedTransactionAccountId) {
+													selectTransactionAccount(Object.values(accounts)[0].id.id);
+												}
+												deleteAccount(account.id.id);
+										  }
+										: undefined
+								}
 								onCreate={onCreate}
 								onCreateOptions={onCreateOptions}
 							/>
