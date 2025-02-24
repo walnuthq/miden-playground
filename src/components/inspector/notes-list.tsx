@@ -19,7 +19,8 @@ const NotesList = ({
 		createSampleP2IDRNote,
 		createNewNote,
 		createSampleSwapNotes,
-		deleteNote
+		deleteNote,
+		closeFile
 	} = useMiden();
 	const [collapsedNotes, setCollapsedNotes] = useState<Record<string, boolean>>({});
 	const isCollapsedNotesTopLevel = collapsedNotes['top-level-notes'] || false;
@@ -68,6 +69,18 @@ const NotesList = ({
 									level={1}
 									onClick={() => toggleCollapse(note.id, setCollapsedNotes)}
 									onRemove={() => {
+										Object.values(files).map((file) => {
+											if (
+												[
+													note.scriptFileId,
+													note.inputFileId,
+													note.metadataFileId,
+													note.vaultFileId
+												].includes(file.id)
+											) {
+												closeFile(file.id);
+											}
+										});
 										deleteNote(note.id);
 									}}
 								/>
