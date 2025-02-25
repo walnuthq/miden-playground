@@ -13,7 +13,7 @@ export function Header() {
 				</div>
 			</div>
 			<a
-				href="https://0xpolygonmiden.github.io/miden-vm/"
+				href="https://0xpolygonmiden.github.io/miden-docs/miden-base/index.html"
 				target="_blank"
 				className="font-bold text-theme-text-subtle flex items-center gap-1 text-base cursor-pointer px-2 rounded-theme hover:bg-theme-border"
 			>
