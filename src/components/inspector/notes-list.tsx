@@ -20,7 +20,9 @@ const NotesList = ({
 		createNewNote,
 		createSampleSwapNotes,
 		deleteNote,
-		closeFile
+		closeFile,
+		removeTransactionNote,
+		selectedTransactionNotesIds
 	} = useMiden();
 	const [collapsedNotes, setCollapsedNotes] = useState<Record<string, boolean>>({});
 	const isCollapsedNotesTopLevel = collapsedNotes['top-level-notes'] || false;
@@ -81,6 +83,10 @@ const NotesList = ({
 												closeFile(file.id);
 											}
 										});
+
+										if (selectedTransactionNotesIds.includes(note.id)) {
+											removeTransactionNote(note.id);
+										}
 										deleteNote(note.id);
 									}}
 								/>
