@@ -12,8 +12,8 @@ export function defaultAccounts(): {
 	accounts: Record<string, Account>;
 	newFiles: EditorFiles;
 } {
-	const accountA = Account.new('Account A');
-	const accountB = Account.new('Account B');
+	const accountA = Account.new('Account A', false);
+	const accountB = Account.new('Account B', false);
 	return {
 		accounts: {
 			[accountA.account.id.id]: accountA.account,
