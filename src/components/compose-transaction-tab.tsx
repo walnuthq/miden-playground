@@ -244,7 +244,8 @@ export const ComposeTransactionTab = () => {
 									</Tooltip>
 								</TooltipProvider>
 								<input
-									type="text"
+									type="number"
+									min={1}
 									value={_blockNumber}
 									onChange={(e) => {
 										_setBlockNumber(e.target.value);
