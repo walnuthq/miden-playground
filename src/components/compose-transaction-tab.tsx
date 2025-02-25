@@ -190,7 +190,7 @@ export const ComposeTransactionTab = () => {
 									<div className="text-sm">
 										{Object.values(notes).some((note) => !notes[note.id].isConsumed)
 											? 'Add at least one note'
-											: 'No notes available. Please create notes first'}
+											: 'All of your notes are consumed. Please create new notes'}
 									</div>
 								)}
 							</div>
