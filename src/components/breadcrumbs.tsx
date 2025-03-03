@@ -11,7 +11,7 @@ import {
 const Breadcrumbs = () => {
 	const { notes, accounts, files, selectedFileId } = useMiden();
 
-	if (!selectedFileId) return null;
+	if (!selectedFileId || !files[selectedFileId]) return null;
 	const note = Object.values(notes).find(
 		(note) => selectedFileId === note.inputFileId || selectedFileId === note.scriptFileId
 	);
