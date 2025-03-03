@@ -51,7 +51,11 @@ export const ComposeTransactionTab = () => {
 				<ResizablePanel defaultSize={25}>
 					<ScrollArea className="relative h-full px-4 py-5  overflow-auto text-theme-text text-sm">
 						<div className="">
-							<div className="flex justify-between items-center">
+							<div
+								className={`${
+									Object.values(accounts).length > 0 && 'flex'
+								} justify-between items-center`}
+							>
 								<TooltipProvider>
 									<Tooltip delayDuration={100}>
 										<div className=" text-theme-text flex gap-2 items-center">
@@ -77,36 +81,50 @@ export const ComposeTransactionTab = () => {
 									</Tooltip>
 								</TooltipProvider>
 								<div>
-									<DropdownMenu>
-										<DropdownMenuTrigger>
-											<div className="px-2 text-theme-text  hover:bg-theme-border rounded-miden transition-all flex flex-row items-center gap-2 cursor-pointer">
-												<span className="">{selectedAccountData?.name}</span>
-												<InlineIcon variant="arrow" className="w-3 h-3 rotate-90" />
-											</div>
-										</DropdownMenuTrigger>
-										<DropdownMenuContent>
-											{Object.values(accounts)
-												.filter((account) => account.id.id !== selectedTransactionAccountId)
-												.map((account) => (
-													<DropdownMenuItem
-														key={account.id.id}
-														onClick={() => {
-															selectTransactionAccount(account.id.id);
-														}}
-													>
-														{account.name}
-													</DropdownMenuItem>
-												))}
-											<DropdownMenuItem
+									{Object.values(accounts).length > 0 ? (
+										<DropdownMenu>
+											<DropdownMenuTrigger>
+												<div className="px-2 text-theme-text  hover:bg-theme-border rounded-miden transition-all flex flex-row items-center gap-2 cursor-pointer">
+													<span className="">{selectedAccountData?.name}</span>
+													<InlineIcon variant="arrow" className="w-3 h-3 rotate-90" />
+												</div>
+											</DropdownMenuTrigger>
+											<DropdownMenuContent>
+												{Object.values(accounts)
+													.filter((account) => account.id.id !== selectedTransactionAccountId)
+													.map((account) => (
+														<DropdownMenuItem
+															key={account.id.id}
+															onClick={() => {
+																selectTransactionAccount(account.id.id);
+															}}
+														>
+															{account.name}
+														</DropdownMenuItem>
+													))}
+												<DropdownMenuItem
+													onClick={(e) => {
+														e.preventDefault();
+														selectTab('assets');
+													}}
+												>
+													Create account
+												</DropdownMenuItem>
+											</DropdownMenuContent>
+										</DropdownMenu>
+									) : (
+										<div className="mt-2 w-fit">
+											<p
 												onClick={(e) => {
 													e.preventDefault();
 													selectTab('assets');
 												}}
+												className="text-theme-text-subtlest hover:text-theme-text hover:underline cursor-pointer"
 											>
-												Create account
-											</DropdownMenuItem>
-										</DropdownMenuContent>
-									</DropdownMenu>
+												Please create an account first
+											</p>
+										</div>
+									)}
 								</div>
 							</div>
 							<div className="border border-theme-border rounded-miden mt-2">

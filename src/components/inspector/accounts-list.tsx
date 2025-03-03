@@ -18,9 +18,7 @@ const AccountsList = ({
 		createAccount,
 		enableAuthComponent,
 		enableWalletComponent,
-		deleteAccount,
-		selectTransactionAccount,
-		selectedTransactionAccountId
+		deleteAccount
 	} = useMiden();
 	const [collapsedAccounts, setCollapsedAccounts] = useState<Record<string, boolean>>({});
 	const isCollapsedAccTopLevel = collapsedAccounts['top-level-accounts'] || false;
@@ -75,16 +73,9 @@ const AccountsList = ({
 								onClick={() => {
 									toggleCollapse(account.id.id, setCollapsedAccounts);
 								}}
-								onRemove={
-									account.deletable
-										? () => {
-												if (account.id.id === selectedTransactionAccountId) {
-													selectTransactionAccount(Object.values(accounts)[0].id.id);
-												}
-												deleteAccount(account.id.id);
-										  }
-										: undefined
-								}
+								onRemove={() => {
+									deleteAccount(account.id.id);
+								}}
 								onCreate={onCreate}
 								onCreateOptions={onCreateOptions}
 							/>

@@ -9,7 +9,6 @@ import { EditorFiles } from './files';
 interface AccountProps {
 	id: AccountId;
 	name: string;
-	deletable: boolean;
 	isWallet: boolean;
 	isAuth: boolean;
 	assets: Asset[];
@@ -24,7 +23,6 @@ interface AccountProps {
 export class Account {
 	id: AccountId;
 	name: string;
-	deletable: boolean;
 	isWallet: boolean;
 	isAuth: boolean;
 	assets: Asset[];
@@ -38,7 +36,6 @@ export class Account {
 	constructor(props: AccountProps) {
 		this.id = props.id;
 		this.name = props.name;
-		this.deletable = props.deletable;
 		this.isWallet = props.isWallet;
 		this.isAuth = props.isAuth;
 		this.assets = props.assets;
@@ -54,10 +51,7 @@ export class Account {
 		return new Account(_.cloneDeep(this));
 	}
 
-	static new(
-		name: string,
-		deletable = true
-	): { account: Account; newFiles: EditorFiles; deletable?: boolean } {
+	static new(name: string): { account: Account; newFiles: EditorFiles } {
 		const accountId = generateAccountId();
 		const scriptFileId = generateId();
 		const metadataFileId = generateId();
@@ -118,7 +112,6 @@ export class Account {
 		const account = new Account({
 			id: accountId,
 			name,
-			deletable,
 			isWallet: true,
 			isAuth: true,
 			assets: [
