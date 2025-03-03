@@ -18,6 +18,8 @@ const AccountsList = ({
 		createAccount,
 		enableAuthComponent,
 		enableWalletComponent,
+		selectedTransactionAccountId,
+		selectTransactionAccount,
 		deleteAccount
 	} = useMiden();
 	const [collapsedAccounts, setCollapsedAccounts] = useState<Record<string, boolean>>({});
@@ -74,6 +76,12 @@ const AccountsList = ({
 									toggleCollapse(account.id.id, setCollapsedAccounts);
 								}}
 								onRemove={() => {
+									if (
+										account.id.id === selectedTransactionAccountId &&
+										Object.values(accounts).length > 0
+									) {
+										selectTransactionAccount(Object.values(accounts)[0].id.id);
+									}
 									deleteAccount(account.id.id);
 								}}
 								onCreate={onCreate}
