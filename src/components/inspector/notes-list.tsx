@@ -65,7 +65,7 @@ const NotesList = ({
 						} else {
 							toast({
 								title: 'Cannot create SWAP note',
-								description: 'To create a SWAP note, you need to create more than one account.',
+								description: 'To create a SWAP note, you need to have at least two accounts.',
 								variant: 'destructive'
 							});
 						}
