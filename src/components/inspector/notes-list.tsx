@@ -45,7 +45,7 @@ const NotesList = ({
 						} else {
 							toast({
 								title: 'Cannot create P2ID note',
-								description: 'To create a P2ID note, you need to create more than one account.',
+								description: 'To create a P2ID note, you need to have at least two accounts.',
 								variant: 'destructive'
 							});
 						}
