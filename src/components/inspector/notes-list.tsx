@@ -55,7 +55,7 @@ const NotesList = ({
 						} else {
 							toast({
 								title: 'Cannot create P2IDR note',
-								description: 'To create a P2IDR note, you need to create more than one account.',
+								description: 'To create a P2IDR note, you need to have at least two accounts.',
 								variant: 'destructive'
 							});
 						}
