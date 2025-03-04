@@ -113,7 +113,7 @@ export const ComposeTransactionTab = () => {
 								{selectedAccountData && (
 									<div className="flex flex-col text-sm">
 										<div className="flex justify-between px-4 pt-2">
-											<div className=" text-theme-text">Account ID:</div>
+											<div className=" text-theme-text whitespace-nowrap mr-4">Account ID:</div>
 											<div className=" text-theme-text">{selectedAccountData?.id.id}</div>
 										</div>
 										<div className="px-4 py-1"></div>
@@ -283,17 +283,13 @@ export const ComposeTransactionTab = () => {
 									Execute Transaction
 								</button>
 							</div>
-							{Object.values(latestConsumedNotes).length > 0 && (
-								<div className="mt-6">CONSUMED NOTES</div>
-							)}
+							{Object.values(latestConsumedNotes).length > 0 &&
+								Object.values(notes).some((value) =>
+									Object.values(latestConsumedNotes).includes(value)
+								) && <div className="mt-6">CONSUMED NOTES</div>}
 							<div className="flex flex-col gap-4 mt-2">
 								{Object.values(latestConsumedNotes).map((note) => (
-									<div
-										key={note.id}
-										className="border border-theme-border rounded-miden relative text-sm "
-									>
-										<NoteCard noteId={note.id} />
-									</div>
+									<NoteCard key={note.id} noteId={note.id} />
 								))}
 							</div>
 						</div>

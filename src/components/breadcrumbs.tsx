@@ -11,7 +11,7 @@ import {
 const Breadcrumbs = () => {
 	const { notes, accounts, files, selectedFileId } = useMiden();
 
-	if (!selectedFileId) return null;
+	if (!selectedFileId || !files[selectedFileId]) return null;
 	const note = Object.values(notes).find(
 		(note) => selectedFileId === note.inputFileId || selectedFileId === note.scriptFileId
 	);
@@ -29,7 +29,7 @@ const Breadcrumbs = () => {
 	const isComponent =
 		selectedFileId === AUTHENTICATION_COMPONENT_SCRIPT_FILE_ID ||
 		selectedFileId === WALLET_COMPONENT_SCRIPT_FILE_ID ||
-		files[selectedFileId].name === 'Custom component';
+		files[selectedFileId]?.name === 'Custom component';
 
 	const type = files[selectedFileId].content.dynamic?.account
 		? 'Accounts'
