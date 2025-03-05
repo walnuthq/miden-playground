@@ -172,6 +172,12 @@ export class Account {
 		}
 	}
 
+	addAsset(faucetId: string, amount: bigint) {
+		this.assets.push({
+			faucetId,
+			amount
+		});
+	}
 	static initialStorage() {
 		const storage = Array(3).fill(new BigUint64Array([0n, 0n, 0n, 0n]));
 		storage[2] = new BigUint64Array([

@@ -8,9 +8,10 @@ import {
 	TableHeader,
 	TableRow
 } from '@/components/ui/table';
+// import { faucets } from '@/lib/consts';
 import { useMiden } from '@/lib/context-providers';
 import { cn } from '@/lib/utils';
-import { faucetSymbols } from '@/lib/consts';
+// import { faucetSymbols } from '@/lib/consts';
 
 export function Vault({
 	noteId,
@@ -23,15 +24,21 @@ export function Vault({
 	className?: string;
 	displayDelta?: boolean;
 }) {
-	const { notes, accounts, updateAccountAssetAmount, updateNoteAssetAmount, accountUpdates } =
-		useMiden();
+	const {
+		notes,
+		accounts,
+		updateAccountAssetAmount,
+		updateNoteAssetAmount,
+		accountUpdates,
+		faucets
+	} = useMiden();
 
 	const note = noteId ? notes[noteId] : null;
 	const account = accountId ? accounts[accountId] : null;
 	const editableAssets = (note?.assets || account?.assets || []).map((asset) => ({
 		faucetId: asset.faucetId,
 		amount: parseInt(asset.amount.toString()),
-		symbol: faucetSymbols[asset.faucetId.toString()],
+		symbol: faucets[asset.faucetId.toString()],
 		type: 'Fungible'
 	}));
 
