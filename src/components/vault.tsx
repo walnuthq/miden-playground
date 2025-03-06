@@ -11,18 +11,21 @@ import {
 // import { faucets } from '@/lib/consts';
 import { useMiden } from '@/lib/context-providers';
 import { cn } from '@/lib/utils';
+import { useState } from 'react';
 // import { faucetSymbols } from '@/lib/consts';
 
 export function Vault({
 	noteId,
 	accountId,
 	className,
+	addAssetAbility = false,
 	displayDelta = false
 }: {
 	noteId?: string;
 	accountId?: string;
 	className?: string;
 	displayDelta?: boolean;
+	addAssetAbility?: boolean;
 }) {
 	const {
 		notes,
@@ -30,9 +33,11 @@ export function Vault({
 		updateAccountAssetAmount,
 		updateNoteAssetAmount,
 		accountUpdates,
-		faucets
+		faucets,
+		addFaucets
 	} = useMiden();
-
+	const [customAssetName, setCustomAssetName] = useState<string>('');
+	const [customAssetAmount, setCustomAssetAmount] = useState<string>('');
 	const note = noteId ? notes[noteId] : null;
 	const account = accountId ? accounts[accountId] : null;
 	const editableAssets = (note?.assets || account?.assets || []).map((asset) => ({
@@ -56,7 +61,9 @@ export function Vault({
 	return editableAssets.length <= 0 ? (
 		'No assets'
 	) : (
-		<div className={cn('rounded-theme border border-theme-border w-fit', className)}>
+		<div
+			className={cn('rounded-theme border border-theme-border w-fit overflow-hidden', className)}
+		>
 			<Table className="[&_tr:hover]:bg-transparent">
 				<TableHeader>
 					<TableRow>
@@ -84,7 +91,7 @@ export function Vault({
 										{displayDelta &&
 											accountUpdates &&
 											accountUpdates.accountId === accountId &&
-											accountUpdates.assetsDelta[asset.faucetId.toString()].toString() !== '0' && (
+											accountUpdates.assetsDelta[asset.faucetId.toString()]?.toString() !== '0' && (
 												<span
 													className={`text-sm text-muted-foreground ${
 														accountUpdates.assetsDelta[asset.faucetId.toString()] > 0
@@ -106,6 +113,54 @@ export function Vault({
 								No results.
 							</TableCell>
 						</TableRow>
+					)}
+					{addAssetAbility && (
+						<>
+							<TableRow className="">
+								<TableCell>
+									<input
+										value={customAssetName}
+										type="string"
+										onChange={(e) => {
+											setCustomAssetName(e.target.value);
+										}}
+										placeholder="Type asset name"
+										className="bg-transparent outline-none"
+									/>
+								</TableCell>
+								<TableCell></TableCell>
+								<TableCell>
+									<input
+										value={customAssetAmount}
+										onChange={(e) => {
+											setCustomAssetAmount(e.target.value);
+										}}
+										min={0}
+										type="number"
+										placeholder="Type asset amount"
+										className="bg-transparent outline-none"
+									/>
+								</TableCell>
+							</TableRow>
+							{customAssetAmount != '' && customAssetName.trim() != '' && (
+								<TableRow className="p-0">
+									<TableCell colSpan={3} className="p-0">
+										<button
+											onClick={() => {
+												if (accountId) {
+													addFaucets(customAssetName.trim(), BigInt(customAssetAmount), accountId);
+													setCustomAssetAmount('');
+													setCustomAssetName('');
+												}
+											}}
+											className="w-full text-center transition-all px-4 py-1 bg-theme-surface-highlight  text-theme-text hover:bg-theme-border"
+										>
+											Add asset
+										</button>
+									</TableCell>
+								</TableRow>
+							)}
+						</>
 					)}
 				</TableBody>
 			</Table>

@@ -37,8 +37,7 @@ export const ComposeTransactionTab = () => {
 		selectTab,
 		firstExecuteClick,
 		toggleFisrtExecuteClick,
-		faucets,
-		addFaucets
+		faucets
 	} = useMiden();
 	const selectedAccountData = selectedTransactionAccountId
 		? accounts[selectedTransactionAccountId]
@@ -46,8 +45,6 @@ export const ComposeTransactionTab = () => {
 	console.log(accountUpdates);
 	const [isOpenDropdown, setIsOpenDropdown] = useState(false);
 	const [_blockNumber, _setBlockNumber] = useState(blockNumber.toString());
-	const [customAssetName, setCustomAssetName] = useState<string>('');
-	const [customAssetAmount, setCustomAssetAmount] = useState<string>('');
 
 	return (
 		<>
@@ -129,48 +126,9 @@ export const ComposeTransactionTab = () => {
 												</div>
 											</div>
 										))}
-										<div className="border-t border-theme-border px-4 py-2">
-											<div className="flex justify-between items-center text-theme-text">
-												<input
-													value={customAssetName}
-													type="string"
-													onChange={(e) => {
-														setCustomAssetName(e.target.value);
-													}}
-													placeholder="Type asset name"
-													className="bg-transparent outline-none"
-												/>
-												<input
-													value={customAssetAmount}
-													onChange={(e) => {
-														setCustomAssetAmount(e.target.value);
-													}}
-													min={0}
-													type="number"
-													placeholder="Type asset amount"
-													className="bg-transparent outline-none"
-												/>
-											</div>
-										</div>
 									</div>
 								)}
 							</div>
-							<button
-								onClick={() => {
-									if (selectedTransactionAccountId) {
-										addFaucets(
-											customAssetName,
-											BigInt(customAssetAmount),
-											selectedTransactionAccountId
-										);
-										setCustomAssetAmount('');
-										setCustomAssetName('');
-									}
-								}}
-								className="w-full mt-2 text-center border border-theme-border transition-all rounded-miden px-4 py-1 bg-theme-surface-highlight  text-theme-text hover:bg-theme-border"
-							>
-								Add asset
-							</button>
 							<TooltipProvider>
 								<Tooltip delayDuration={100}>
 									<div className=" text-theme-text mt-6 flex items-center gap-2">
