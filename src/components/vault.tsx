@@ -34,7 +34,7 @@ export function Vault({
 		updateNoteAssetAmount,
 		accountUpdates,
 		faucets,
-		addFaucets
+		createFaucet
 	} = useMiden();
 	const [customAssetName, setCustomAssetName] = useState<string>('');
 	const [customAssetAmount, setCustomAssetAmount] = useState<string>('');
@@ -61,109 +61,106 @@ export function Vault({
 	return editableAssets.length <= 0 ? (
 		'No assets'
 	) : (
-		<div
-			className={cn('rounded-theme border border-theme-border w-fit overflow-hidden', className)}
-		>
-			<Table className="[&_tr:hover]:bg-transparent">
-				<TableHeader>
-					<TableRow>
-						<TableHead className="pr-4">Symbol</TableHead>
-						<TableHead className="pr-4">Faucet ID</TableHead>
-						<TableHead className="pr-4">Amount</TableHead>
-					</TableRow>
-				</TableHeader>
-				<TableBody>
-					{editableAssets.length ? (
-						editableAssets.map((asset) => (
-							<TableRow key={asset.faucetId}>
-								<TableCell className="pr-8 last:p-2">{asset.symbol}</TableCell>
-								<TableCell className="pr-8 last:p-2">{asset.faucetId}</TableCell>
-								<TableCell className="pr-8 last:p-2 flex flex-row font-mono">
-									<input
-										type="number"
-										value={asset.amount}
-										onChange={(e) => handleAmountChange(asset.faucetId, e.target.value)}
-										className="bg-transparent outline-none w-20"
-										min={0}
-										maxLength={10}
-									/>
-									<div className="min-w-8">
-										{displayDelta &&
-											accountUpdates &&
-											accountUpdates.accountId === accountId &&
-											accountUpdates.assetsDelta[asset.faucetId.toString()]?.toString() !== '0' && (
-												<span
-													className={`text-sm text-muted-foreground ${
-														accountUpdates.assetsDelta[asset.faucetId.toString()] > 0
-															? 'text-theme-success'
-															: 'text-theme-danger'
-													}`}
-												>
-													{accountUpdates.assetsDelta[asset.faucetId.toString()] > 0 ? '+' : ''}
-													{accountUpdates.assetsDelta[asset.faucetId.toString()]}
-												</span>
-											)}
-									</div>
-								</TableCell>
-							</TableRow>
-						))
-					) : (
+		<div className=" w-fit">
+			<div className={cn('rounded-theme border border-theme-border overflow-hidden', className)}>
+				<Table className="[&_tr:hover]:bg-transparent">
+					<TableHeader>
 						<TableRow>
-							<TableCell colSpan={4} className="h-24 text-center">
-								No results.
-							</TableCell>
+							<TableHead className="pr-4">Symbol</TableHead>
+							<TableHead className="pr-4">Faucet ID</TableHead>
+							<TableHead className="pr-4">Amount</TableHead>
 						</TableRow>
-					)}
-					{addAssetAbility && (
-						<>
-							<TableRow className="">
-								<TableCell>
-									<input
-										value={customAssetName}
-										type="string"
-										onChange={(e) => {
-											setCustomAssetName(e.target.value);
-										}}
-										placeholder="Type asset name"
-										className="bg-transparent outline-none"
-									/>
-								</TableCell>
-								<TableCell></TableCell>
-								<TableCell>
-									<input
-										value={customAssetAmount}
-										onChange={(e) => {
-											setCustomAssetAmount(e.target.value);
-										}}
-										min={0}
-										type="number"
-										placeholder="Type asset amount"
-										className="bg-transparent outline-none"
-									/>
-								</TableCell>
-							</TableRow>
-							{customAssetAmount != '' && customAssetName.trim() != '' && (
-								<TableRow className="p-0">
-									<TableCell colSpan={3} className="p-0">
-										<button
-											onClick={() => {
-												if (accountId) {
-													addFaucets(customAssetName.trim(), BigInt(customAssetAmount), accountId);
-													setCustomAssetAmount('');
-													setCustomAssetName('');
-												}
-											}}
-											className="w-full text-center transition-all px-4 py-1 bg-theme-surface-highlight  text-theme-text hover:bg-theme-border"
-										>
-											Add asset
-										</button>
+					</TableHeader>
+					<TableBody>
+						{editableAssets.length ? (
+							editableAssets.map((asset) => (
+								<TableRow key={asset.faucetId}>
+									<TableCell className="pr-8 last:p-2">{asset.symbol}</TableCell>
+									<TableCell className="pr-8 last:p-2">{asset.faucetId}</TableCell>
+									<TableCell className="pr-8 last:p-2 flex flex-row font-mono">
+										<input
+											type="number"
+											value={asset.amount}
+											onChange={(e) => handleAmountChange(asset.faucetId, e.target.value)}
+											className="bg-transparent outline-none w-20"
+											min={0}
+											maxLength={10}
+										/>
+										<div className="min-w-8">
+											{displayDelta &&
+												accountUpdates &&
+												accountUpdates.accountId === accountId &&
+												accountUpdates.assetsDelta[asset.faucetId.toString()]?.toString() !==
+													'0' && (
+													<span
+														className={`text-sm text-muted-foreground ${
+															accountUpdates.assetsDelta[asset.faucetId.toString()] > 0
+																? 'text-theme-success'
+																: 'text-theme-danger'
+														}`}
+													>
+														{accountUpdates.assetsDelta[asset.faucetId.toString()] > 0 ? '+' : ''}
+														{accountUpdates.assetsDelta[asset.faucetId.toString()]}
+													</span>
+												)}
+										</div>
 									</TableCell>
 								</TableRow>
-							)}
-						</>
-					)}
-				</TableBody>
-			</Table>
+							))
+						) : (
+							<TableRow>
+								<TableCell colSpan={4} className="h-24 text-center">
+									No results.
+								</TableCell>
+							</TableRow>
+						)}
+						{addAssetAbility && (
+							<>
+								<TableRow className="">
+									<TableCell>
+										<input
+											value={customAssetName}
+											type="string"
+											onChange={(e) => {
+												setCustomAssetName(e.target.value);
+											}}
+											placeholder="Type asset name"
+											className="bg-transparent outline-none"
+										/>
+									</TableCell>
+									<TableCell></TableCell>
+									<TableCell>
+										<input
+											value={customAssetAmount}
+											onChange={(e) => {
+												setCustomAssetAmount(e.target.value);
+											}}
+											min={0}
+											type="number"
+											placeholder="Type asset amount"
+											className="bg-transparent outline-none"
+										/>
+									</TableCell>
+								</TableRow>
+							</>
+						)}
+					</TableBody>
+				</Table>
+			</div>
+			{customAssetAmount != '' && customAssetName.trim() != '' && (
+				<button
+					onClick={() => {
+						if (accountId) {
+							createFaucet(customAssetName.trim(), BigInt(customAssetAmount), accountId);
+							setCustomAssetAmount('');
+							setCustomAssetName('');
+						}
+					}}
+					className="w-full mt-2 rounded-theme text-sm text-center transition-all px-4 py-1 bg-theme-surface-highlight  text-theme-text hover:bg-theme-border"
+				>
+					Create asset
+				</button>
+			)}
 		</div>
 	);
 }
