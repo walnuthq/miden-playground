@@ -1,6 +1,7 @@
 import { useMiden } from '@/lib/context-providers';
 import React, { useState } from 'react';
 import { FileItem, InspectorItem } from '.';
+import { useToast } from '@/hooks/use-toast';
 
 const NotesList = ({
 	toggleCollapse
@@ -20,13 +21,15 @@ const NotesList = ({
 		createNewNote,
 		createSampleSwapNotes,
 		deleteNote,
+		accounts,
 		closeFile,
 		removeTransactionNote,
 		selectedTransactionNotesIds
 	} = useMiden();
 	const [collapsedNotes, setCollapsedNotes] = useState<Record<string, boolean>>({});
 	const isCollapsedNotesTopLevel = collapsedNotes['top-level-notes'] || false;
-
+	const accountsCount = Object.values(accounts).length;
+	const { toast } = useToast();
 	return (
 		<>
 			<InspectorItem
@@ -40,11 +43,35 @@ const NotesList = ({
 				}}
 				onCreate={(option) => {
 					if (option === 'Create P2ID note') {
-						createSampleP2IDNote();
+						if (accountsCount > 1) {
+							createSampleP2IDNote();
+						} else {
+							toast({
+								title: 'Cannot create P2ID note',
+								description: 'To create a P2ID note, you need to have at least two accounts.',
+								variant: 'destructive'
+							});
+						}
 					} else if (option === 'Create P2IDR note') {
-						createSampleP2IDRNote();
+						if (accountsCount > 1) {
+							createSampleP2IDRNote();
+						} else {
+							toast({
+								title: 'Cannot create P2IDR note',
+								description: 'To create a P2IDR note, you need to have at least two accounts.',
+								variant: 'destructive'
+							});
+						}
 					} else if (option === 'Create SWAP note') {
-						createSampleSwapNotes();
+						if (accountsCount > 1) {
+							createSampleSwapNotes();
+						} else {
+							toast({
+								title: 'Cannot create SWAP note',
+								description: 'To create a SWAP note, you need to have at least two accounts.',
+								variant: 'destructive'
+							});
+						}
 					} else if (option === 'Create empty note') {
 						createNewNote();
 					}
