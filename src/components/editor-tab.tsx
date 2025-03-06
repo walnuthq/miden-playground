@@ -18,7 +18,7 @@ export const EditorTab = () => {
 				<div className="flex flex-col h-full">
 					<Toolbar />
 					<Breadcrumbs />
-					<div className="flex-1">
+					<div className="flex-1 bg-[#040113]">
 						<Files />
 					</div>
 				</div>

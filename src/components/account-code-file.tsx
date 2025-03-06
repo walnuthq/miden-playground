@@ -35,12 +35,12 @@ const AccountCodeFile = ({
 		setValue(accountFile);
 	}, [accountFile]);
 	return (
-		<div className="relative mx-9 mt-6 text-theme-text">
+		<div className="relative text-theme-text">
 			<div className="space-y-6">
 				{' '}
 				<div className="flex flex-col">
-					<div className="flex mb-2 justify-between">
-						<div className="font-bold">Custom component</div>
+					<div className="flex mb-2 justify-between px-4 p-1">
+						<div className="text-sm">CUSTOM COMPONENT</div>
 					</div>
 					<CustomMonacoEditor
 						value={value}
@@ -55,8 +55,8 @@ const AccountCodeFile = ({
 					/>
 				</div>
 				<div className="flex flex-col">
-					<div className="flex mb-2 justify-between">
-						<div className="font-bold">Wallet component</div>
+					<div className="flex mb-2 justify-between px-4 p-1">
+						<div className="text-sm ">WALLET COMPONENT</div>
 						<ToggleSwitch
 							id="wallet-switch"
 							onToggle={(isEnabled: boolean) =>
@@ -73,8 +73,8 @@ const AccountCodeFile = ({
 					/>
 				</div>
 				<div className="flex flex-col">
-					<div className="flex mb-2 justify-between">
-						<div className="font-bold">Auth component</div>
+					<div className="flex mb-2 justify-between  px-4 p-1">
+						<div className="text-sm">AUTH COMPONENT</div>
 						<ToggleSwitch
 							id="wallet-switch"
 							onToggle={(isEnabled: boolean) =>
