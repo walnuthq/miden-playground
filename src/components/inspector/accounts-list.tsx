@@ -20,7 +20,8 @@ const AccountsList = ({
 		enableWalletComponent,
 		selectedTransactionAccountId,
 		selectTransactionAccount,
-		deleteAccount
+		deleteAccount,
+		closeFile
 	} = useMiden();
 	const [collapsedAccounts, setCollapsedAccounts] = useState<Record<string, boolean>>({});
 	const isCollapsedAccTopLevel = collapsedAccounts['top-level-accounts'] || false;
@@ -83,6 +84,18 @@ const AccountsList = ({
 										selectTransactionAccount(Object.values(accounts)[0].id.id);
 									}
 									deleteAccount(account.id.id);
+									Object.values(files).map((file) => {
+										if (
+											[
+												account.metadataFileId,
+												account.scriptFileId,
+												account.vaultFileId,
+												account.storageFileId
+											].includes(file.id)
+										) {
+											closeFile(file.id);
+										}
+									});
 								}}
 								onCreate={onCreate}
 								onCreateOptions={onCreateOptions}

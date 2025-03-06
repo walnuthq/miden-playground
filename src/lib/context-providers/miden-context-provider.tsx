@@ -9,7 +9,7 @@ import React, {
 	useState
 } from 'react';
 import init from 'miden-wasm';
-import { defaultAccounts, defaultNotes } from '@/lib/consts/defaults';
+import { DEFAULT_FAUCET_IDS, defaultAccounts, defaultNotes } from '@/lib/consts/defaults';
 import { TRANSACTION_SCRIPT_FILE_ID } from '@/lib/consts';
 import { consumeNotes } from '@/lib/miden-wasm-api';
 import { TRANSACTION_SCRIPT } from '@/lib/consts/transaction';
@@ -256,7 +256,9 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			return;
 		}
 		if (selectedTransactionNotesIds.length === 0) {
-			addErrorLog('No notes added: Please add at least one note to execute the transaction');
+			addErrorLog(
+				'At least one note is required to execute the transaction. Please add a note and try again.'
+			);
 			return;
 		}
 
@@ -303,7 +305,14 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			});
 
 			output.storageDiffs = Account.computeStorageDiffs(storage, output.storage);
+			if (!output.assets.some((a) => a.faucetId === DEFAULT_FAUCET_IDS[0])) {
+				output.assets.push({ faucetId: DEFAULT_FAUCET_IDS[0], amount: 0n });
+			}
 
+			if (!output.assets.some((a) => a.faucetId === DEFAULT_FAUCET_IDS[1])) {
+				output.assets.push({ faucetId: DEFAULT_FAUCET_IDS[1], amount: 0n });
+			}
+			console.log(output.assets);
 			const accountUpdates: AccountUpdates = {
 				accountId: selectedTransactionAccountId,
 				assetsDelta: output.assets.reduce((acc, asset) => {
@@ -316,7 +325,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				}, {} as Record<string, bigint>),
 				outputNotes: output.outputNotes
 			};
-
 			setAccountUpdates(accountUpdates);
 
 			updateAccountById(selectedTransactionAccountId, (account) => {
