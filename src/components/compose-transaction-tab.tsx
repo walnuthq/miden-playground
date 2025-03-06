@@ -36,7 +36,8 @@ export const ComposeTransactionTab = () => {
 		selectFile,
 		selectTab,
 		firstExecuteClick,
-		toggleFisrtExecuteClick
+		toggleFisrtExecuteClick,
+		createAccount
 	} = useMiden();
 	const selectedAccountData = selectedTransactionAccountId
 		? accounts[selectedTransactionAccountId]
@@ -113,22 +114,22 @@ export const ComposeTransactionTab = () => {
 											</DropdownMenuContent>
 										</DropdownMenu>
 									) : (
-										<div className="mt-2 w-fit">
-											<p
-												onClick={(e) => {
-													e.preventDefault();
-													selectTab('assets');
+										<div className="mt-2">
+											<div>Please create an account first</div>
+											<button
+												onClick={() => {
+													createAccount();
 												}}
-												className="text-theme-text-subtlest hover:text-theme-text hover:underline cursor-pointer"
+												className={`mt-6 w-full outline-none border border-theme-border rounded-miden px-4 py-1 transition-all bg-theme-surface-highlight text-theme-text hover:bg-theme-border`}
 											>
-												Please create an account first
-											</p>
+												Create account
+											</button>
 										</div>
 									)}
 								</div>
 							</div>
-							<div className="border border-theme-border rounded-miden mt-2">
-								{selectedAccountData && (
+							{selectedAccountData && (
+								<div className="border border-theme-border rounded-miden mt-2">
 									<div className="flex flex-col text-sm">
 										<div className="flex justify-between px-4 pt-2">
 											<div className=" text-theme-text">Account ID:</div>
@@ -144,8 +145,8 @@ export const ComposeTransactionTab = () => {
 											</div>
 										))}
 									</div>
-								)}
-							</div>
+								</div>
+							)}
 
 							<TooltipProvider>
 								<Tooltip delayDuration={100}>
