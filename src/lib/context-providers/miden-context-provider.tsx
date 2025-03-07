@@ -337,7 +337,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				blockNumber
 			});
 
-			console.log('Transaction output', output);
 
 			output.storageDiffs = Account.previousStorageValues(storage, output.storage);
 			if (Object.keys(output.storageDiffs).length > 0) {
