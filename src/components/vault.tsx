@@ -140,7 +140,7 @@ export function Vault({
 											}}
 											min={0}
 											type="number"
-											placeholder="Type asset amount"
+											placeholder="New asset amount"
 											className="bg-transparent outline-none"
 										/>
 									</TableCell>
