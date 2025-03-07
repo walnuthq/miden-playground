@@ -96,6 +96,7 @@ export const Files = () => {
 	} else {
 		return (
 			<CustomMonacoEditor
+				lang={file.name !== 'Script' ? 'javascript' : 'masm'}
 				onChange={(value) => {
 					setValue(value ?? '');
 					if (file && !file.readonly) updateFileContent(file.id, value ?? '');

@@ -12,12 +12,14 @@ interface CustomMonacoEditorProps {
 	onChange?: (value: string | undefined) => void;
 	readOnly?: boolean;
 	style?: CSSProperties | undefined;
+	lang?: string;
 }
 
 export function CustomMonacoEditor({
 	value,
 	className,
 	onChange,
+	lang,
 	style,
 	readOnly = false
 }: CustomMonacoEditorProps) {
@@ -77,6 +79,7 @@ export function CustomMonacoEditor({
 
 			<MonacoEditor
 				value={value}
+				language={lang}
 				onChange={onChange}
 				height="100%"
 				width="100%"

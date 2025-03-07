@@ -3,6 +3,7 @@ import { generateId } from '@/lib/utils';
 import { createSwapNotes } from '@/lib/miden-wasm-api';
 import { Note } from '@/lib/notes';
 import { EditorFiles } from '../files';
+import json5 from 'json5';
 
 export function createSwapNote({
 	senderId,
@@ -47,6 +48,9 @@ export function createSwapNote({
 		paybackInputs.push(input.toString());
 	}
 
+	const inputsString = json5.stringify(inputs, null, 2);
+	const inputsWithComments = inputsString.replace('[\n', '[\n //inputs\n');
+
 	const newFiles: EditorFiles = {
 		[scriptFileId]: {
 			id: scriptFileId,
@@ -60,7 +64,7 @@ export function createSwapNote({
 			id: inputFileId,
 			name: `Inputs`,
 			content: {
-				value: JSON.stringify(inputs, null, 2)
+				value: inputsWithComments
 			},
 			isOpen: false,
 			variant: 'note',

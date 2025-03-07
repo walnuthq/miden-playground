@@ -19,6 +19,7 @@ import { createP2IDRNote, createSwapNote, Note } from '@/lib/notes';
 import { createP2IDNote } from '@/lib/notes/p2id';
 import { EditorFiles } from '@/lib/files';
 import { AccountUpdates } from '@/lib/types';
+import json5 from 'json5';
 
 type Tabs = 'transaction' | 'assets';
 type StorageDiffs = Record<
@@ -321,7 +322,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			transactionNotes.push({
 				note,
 				noteScript: files[note.scriptFileId].content.value!,
-				noteInputs: convertToBigUint64Array(JSON.parse(files[note.inputFileId].content.value!)),
+				noteInputs: convertToBigUint64Array(json5.parse(files[note.inputFileId].content.value!)),
 				senderScript: files[sender.scriptFileId].content.value!
 			});
 		}
@@ -336,7 +337,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				transactionScript: files[TRANSACTION_SCRIPT_FILE_ID].content.value!,
 				blockNumber
 			});
-
 
 			output.storageDiffs = Account.previousStorageValues(storage, output.storage);
 			if (Object.keys(output.storageDiffs).length > 0) {

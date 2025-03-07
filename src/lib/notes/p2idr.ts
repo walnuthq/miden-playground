@@ -2,6 +2,7 @@ import { AccountId, Asset } from '@/lib/types';
 import { generateId } from '@/lib/utils';
 import { Note } from '@/lib/notes';
 import { EditorFiles } from '../files';
+import json5 from 'json5';
 
 export function createP2IDRNote({
 	senderId,
@@ -24,6 +25,15 @@ export function createP2IDRNote({
 	const inputFileId = generateId();
 	const metadataFileId = generateId();
 	const vaultFileId = generateId();
+	const inputsString = json5.stringify(
+		[receiverId.suffix.toString(), receiverId.prefix.toString(), reclaimBlockHeight],
+		null,
+		2
+	);
+	const inputsWithComments = inputsString
+		.replace(',\n', ', //suffix\n')
+		.replace(',\n', ', //prefix\n')
+		.replace(',\n', ' //reclaim block height\n');
 	const newFiles: EditorFiles = {
 		[scriptFileId]: {
 			id: scriptFileId,
@@ -37,11 +47,7 @@ export function createP2IDRNote({
 			id: inputFileId,
 			name: `Inputs`,
 			content: {
-				value: JSON.stringify(
-					[receiverId.suffix.toString(), receiverId.prefix.toString(), reclaimBlockHeight],
-					null,
-					2
-				)
+				value: inputsWithComments
 			},
 			isOpen: false,
 			variant: 'note',
