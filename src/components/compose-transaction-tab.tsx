@@ -50,7 +50,7 @@ export const ComposeTransactionTab = () => {
 	return (
 		<>
 			<ResizablePanelGroup direction="horizontal">
-				<ResizablePanel defaultSize={25}>
+				<ResizablePanel defaultSize={30} className="min-w-[400px]">
 					<ScrollArea className="relative h-full px-4 py-5  overflow-auto text-theme-text text-sm">
 						<div className="">
 							<div
@@ -315,7 +315,7 @@ export const ComposeTransactionTab = () => {
 					</ScrollArea>
 				</ResizablePanel>
 				<ResizableHandle className="w-[1px] bg-theme-border" />
-				<ResizablePanel defaultSize={75}>
+				<ResizablePanel defaultSize={70}>
 					<div className="flex flex-col h-full text-sm">
 						<ResizablePanelGroup direction="vertical">
 							<ResizablePanel defaultSize={75}>
