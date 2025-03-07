@@ -36,15 +36,15 @@ const AccountCodeFile = ({
 	}, [accountFile]);
 	return (
 		<div className="relative text-theme-text">
-			<div className="space-y-6">
+			<div className="">
 				{' '}
 				<div className="flex flex-col">
-					<div className="flex mb-2 justify-between px-4 p-1">
+					<div className="flex justify-between px-4 p-1">
 						<div className="text-sm">CUSTOM COMPONENT</div>
 					</div>
 					<CustomMonacoEditor
 						value={value}
-						className="!h-96"
+						className="!h-72"
 						onChange={(value) => {
 							setValue(value ?? '');
 							if (fileId) {
@@ -55,7 +55,7 @@ const AccountCodeFile = ({
 					/>
 				</div>
 				<div className="flex flex-col">
-					<div className="flex mb-2 justify-between px-4 p-1">
+					<div className="flex justify-between px-4 pt-4 border-t border-theme-border">
 						<div className="text-sm ">WALLET COMPONENT</div>
 						<ToggleSwitch
 							id="wallet-switch"
@@ -66,14 +66,14 @@ const AccountCodeFile = ({
 					</div>
 					<CustomMonacoEditor
 						value={ACCOUNT_WALLET_SCRIPT}
-						style={{ height: `${walletHeight > 100 ? 100 : walletHeight}px` }}
+						style={{ height: `${walletHeight > 100 ? 200 : walletHeight}px` }}
 						className={`transition-opacity ease-in-out ${account.isWallet ? '' : 'opacity-25'} 
 				`}
 						readOnly
 					/>
 				</div>
 				<div className="flex flex-col">
-					<div className="flex mb-2 justify-between  px-4 p-1">
+					<div className="flex justify-between  px-4 pt-4 border-t border-theme-border">
 						<div className="text-sm">AUTH COMPONENT</div>
 						<ToggleSwitch
 							id="wallet-switch"
