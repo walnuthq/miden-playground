@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { TRANSACTION_SCRIPT_FILE_ID } from '@/lib/consts';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Storage } from './storage';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from './ui/resizable';
 import OutputNotes from './output-notes';
 import NoteCard from './note-card';
@@ -38,7 +39,8 @@ export const ComposeTransactionTab = () => {
 		firstExecuteClick,
 		toggleFisrtExecuteClick,
 		faucets,
-		createAccount
+		createAccount,
+		accountStorageDiffs
 	} = useMiden();
 	const selectedAccountData = selectedTransactionAccountId
 		? accounts[selectedTransactionAccountId]
@@ -46,7 +48,6 @@ export const ComposeTransactionTab = () => {
 	console.log(accountUpdates);
 	const [isOpenDropdown, setIsOpenDropdown] = useState(false);
 	const [_blockNumber, _setBlockNumber] = useState(blockNumber.toString());
-
 	return (
 		<>
 			<ResizablePanelGroup direction="horizontal">
@@ -335,7 +336,13 @@ export const ComposeTransactionTab = () => {
 										<div className="mt-6">
 											{selectedAccountData?.name.toUpperCase()} STORAGE CHANGES
 										</div>
-										<div className="mt-2 text-theme-text-subtle">No storage changes</div>
+										<div className="mt-2 text-theme-text-subtle">
+											{Object.keys(accountStorageDiffs).length !== 0 ? (
+												<Storage accountId={selectedTransactionAccountId} />
+											) : (
+												'No storage changes'
+											)}
+										</div>
 									</ScrollArea>
 								) : (
 									<ScrollArea className="relative h-full px-4 overflow-auto mt-16 max-w-3xl mx-auto text-theme-text">

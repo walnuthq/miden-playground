@@ -21,6 +21,14 @@ import { EditorFiles } from '@/lib/files';
 import { AccountUpdates } from '@/lib/types';
 
 type Tabs = 'transaction' | 'assets';
+type StorageDiffs = Record<
+	number,
+	{
+		old?: BigUint64Array;
+		new: BigUint64Array;
+	}
+>;
+
 type Faucets = {
 	[key: string]: string;
 };
@@ -39,6 +47,7 @@ interface MidenContextProps {
 	isExecutingTransaction: boolean;
 	blockNumber: number;
 	accountUpdates: AccountUpdates | null;
+	accountStorageDiffs: StorageDiffs;
 	setBlockNumber: (blockNumber: number) => void;
 	createSampleP2IDNote: () => void;
 	createSampleP2IDRNote: () => void;
@@ -94,6 +103,7 @@ export const MidenContext = createContext<MidenContextProps>({
 	isCollapsedTabs: false,
 	blockNumber: 4,
 	accountUpdates: null,
+	accountStorageDiffs: {},
 	setBlockNumber: () => {},
 	createSampleP2IDNote: () => {},
 	createSampleP2IDRNote: () => {},
@@ -161,6 +171,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	const [consoleLogs, setConsoleLogs] = useState<{ message: string; type: 'info' | 'error' }[]>([]);
 
 	const [accountUpdates, setAccountUpdates] = useState<AccountUpdates | null>(null);
+	const [accountStorageDiffs, setAccountStorageDiffs] = useState({});
 
 	const addInfoLog = useCallback((message: string) => {
 		console.log(message);
@@ -326,7 +337,11 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				blockNumber
 			});
 
-			output.storageDiffs = Account.computeStorageDiffs(storage, output.storage);
+
+			output.storageDiffs = Account.previousStorageValues(storage, output.storage);
+			if (Object.keys(output.storageDiffs).length > 0) {
+				setAccountStorageDiffs(output.storageDiffs);
+			}
 			if (!output.assets.some((a) => a.faucetId === DEFAULT_FAUCET_IDS[0])) {
 				output.assets.push({ faucetId: DEFAULT_FAUCET_IDS[0], amount: 0n });
 			}
@@ -653,6 +668,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				isCollapsedTabs,
 				blockNumber,
 				accountUpdates,
+				accountStorageDiffs,
 				setBlockNumber,
 				createSampleP2IDNote,
 				createSampleP2IDRNote,
