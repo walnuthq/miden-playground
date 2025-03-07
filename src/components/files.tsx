@@ -90,7 +90,7 @@ export const Files = () => {
 	} else if (file?.content?.dynamic?.account?.variant === 'vault') {
 		return (
 			<div className="p-4">
-				<Vault accountId={file.content.dynamic.account.accountId} displayDelta addAssetAbility />
+				<Vault accountId={file.content.dynamic.account.accountId} addAssetAbility />
 			</div>
 		);
 	} else {
