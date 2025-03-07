@@ -10,8 +10,9 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { faucetSymbols, TRANSACTION_SCRIPT_FILE_ID } from '@/lib/consts';
+import { TRANSACTION_SCRIPT_FILE_ID } from '@/lib/consts';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Storage } from './storage';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from './ui/resizable';
 import OutputNotes from './output-notes';
 import NoteCard from './note-card';
@@ -36,7 +37,10 @@ export const ComposeTransactionTab = () => {
 		selectFile,
 		selectTab,
 		firstExecuteClick,
-		toggleFisrtExecuteClick
+		toggleFisrtExecuteClick,
+		faucets,
+		createAccount,
+		accountStorageDiffs
 	} = useMiden();
 	const selectedAccountData = selectedTransactionAccountId
 		? accounts[selectedTransactionAccountId]
@@ -44,14 +48,17 @@ export const ComposeTransactionTab = () => {
 	console.log(accountUpdates);
 	const [isOpenDropdown, setIsOpenDropdown] = useState(false);
 	const [_blockNumber, _setBlockNumber] = useState(blockNumber.toString());
-
 	return (
 		<>
 			<ResizablePanelGroup direction="horizontal">
-				<ResizablePanel defaultSize={25}>
+				<ResizablePanel defaultSize={30} className="min-w-[400px]">
 					<ScrollArea className="relative h-full px-4 py-5  overflow-auto text-theme-text text-sm">
 						<div className="">
-							<div className="flex justify-between items-center">
+							<div
+								className={`${
+									Object.values(accounts).length > 0 && 'flex'
+								} justify-between items-center`}
+							>
 								<TooltipProvider>
 									<Tooltip delayDuration={100}>
 										<div className=" text-theme-text flex gap-2 items-center">
@@ -77,40 +84,54 @@ export const ComposeTransactionTab = () => {
 									</Tooltip>
 								</TooltipProvider>
 								<div>
-									<DropdownMenu>
-										<DropdownMenuTrigger>
-											<div className="px-2 text-theme-text  hover:bg-theme-border rounded-miden transition-all flex flex-row items-center gap-2 cursor-pointer">
-												<span className="">{selectedAccountData?.name}</span>
-												<InlineIcon variant="arrow" className="w-3 h-3 rotate-90" />
-											</div>
-										</DropdownMenuTrigger>
-										<DropdownMenuContent>
-											{Object.values(accounts)
-												.filter((account) => account.id.id !== selectedTransactionAccountId)
-												.map((account) => (
-													<DropdownMenuItem
-														key={account.id.id}
-														onClick={() => {
-															selectTransactionAccount(account.id.id);
-														}}
-													>
-														{account.name}
-													</DropdownMenuItem>
-												))}
-											<DropdownMenuItem
-												onClick={(e) => {
-													e.preventDefault();
-													selectTab('assets');
+									{Object.values(accounts).length > 0 ? (
+										<DropdownMenu>
+											<DropdownMenuTrigger>
+												<div className="px-2 text-theme-text  hover:bg-theme-border rounded-miden transition-all flex flex-row items-center gap-2 cursor-pointer">
+													<span className="">{selectedAccountData?.name}</span>
+													<InlineIcon variant="arrow" className="w-3 h-3 rotate-90" />
+												</div>
+											</DropdownMenuTrigger>
+											<DropdownMenuContent>
+												{Object.values(accounts)
+													.filter((account) => account.id.id !== selectedTransactionAccountId)
+													.map((account) => (
+														<DropdownMenuItem
+															key={account.id.id}
+															onClick={() => {
+																selectTransactionAccount(account.id.id);
+															}}
+														>
+															{account.name}
+														</DropdownMenuItem>
+													))}
+												<DropdownMenuItem
+													onClick={(e) => {
+														e.preventDefault();
+														selectTab('assets');
+													}}
+												>
+													Create account
+												</DropdownMenuItem>
+											</DropdownMenuContent>
+										</DropdownMenu>
+									) : (
+										<div className="mt-2">
+											<div>Please create an account first</div>
+											<button
+												onClick={() => {
+													createAccount();
 												}}
+												className={`mt-6 w-full outline-none border border-theme-border rounded-miden px-4 py-1 transition-all bg-theme-surface-highlight text-theme-text hover:bg-theme-border`}
 											>
 												Create account
-											</DropdownMenuItem>
-										</DropdownMenuContent>
-									</DropdownMenu>
+											</button>
+										</div>
+									)}
 								</div>
 							</div>
-							<div className="border border-theme-border rounded-miden mt-2">
-								{selectedAccountData && (
+							{selectedAccountData && (
+								<div className="border border-theme-border rounded-miden mt-2">
 									<div className="flex flex-col text-sm">
 										<div className="flex justify-between px-4 pt-2">
 											<div className=" text-theme-text whitespace-nowrap mr-4">Account ID:</div>
@@ -120,15 +141,14 @@ export const ComposeTransactionTab = () => {
 										{selectedAccountData?.assets.map((asset) => (
 											<div key={asset.faucetId} className="border-t border-theme-border px-4 py-2">
 												<div className="flex justify-between items-center text-theme-text">
-													<div>{faucetSymbols[asset.faucetId.toString()]}</div>
+													<div>{faucets[asset.faucetId.toString()]}</div>
 													<div>{asset.amount}</div>
 												</div>
 											</div>
 										))}
 									</div>
-								)}
-							</div>
-
+								</div>
+							)}
 							<TooltipProvider>
 								<Tooltip delayDuration={100}>
 									<div className=" text-theme-text mt-6 flex items-center gap-2">
@@ -296,7 +316,7 @@ export const ComposeTransactionTab = () => {
 					</ScrollArea>
 				</ResizablePanel>
 				<ResizableHandle className="w-[1px] bg-theme-border" />
-				<ResizablePanel defaultSize={75}>
+				<ResizablePanel defaultSize={70}>
 					<div className="flex flex-col h-full text-sm">
 						<ResizablePanelGroup direction="vertical">
 							<ResizablePanel defaultSize={75}>
@@ -316,7 +336,13 @@ export const ComposeTransactionTab = () => {
 										<div className="mt-6">
 											{selectedAccountData?.name.toUpperCase()} STORAGE CHANGES
 										</div>
-										<div className="mt-2 text-theme-text-subtle">No storage changes</div>
+										<div className="mt-2 text-theme-text-subtle">
+											{Object.keys(accountStorageDiffs).length !== 0 ? (
+												<Storage accountId={selectedTransactionAccountId} />
+											) : (
+												'No storage changes'
+											)}
+										</div>
 									</ScrollArea>
 								) : (
 									<ScrollArea className="relative h-full px-4 overflow-auto mt-16 max-w-3xl mx-auto text-theme-text">

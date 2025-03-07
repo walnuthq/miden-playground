@@ -44,7 +44,8 @@ const AccountCodeFile = ({
 					</div>
 					<CustomMonacoEditor
 						value={value}
-						className="!h-72"
+						style={{ height: '18rem' }}
+						// className="!h-96"
 						onChange={(value) => {
 							setValue(value ?? '');
 							if (fileId) {

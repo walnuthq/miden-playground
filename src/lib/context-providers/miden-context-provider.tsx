@@ -11,7 +11,7 @@ import React, {
 import init from 'miden-wasm';
 import { DEFAULT_FAUCET_IDS, defaultAccounts, defaultNotes } from '@/lib/consts/defaults';
 import { TRANSACTION_SCRIPT_FILE_ID } from '@/lib/consts';
-import { consumeNotes } from '@/lib/miden-wasm-api';
+import { consumeNotes, generateFaucetId } from '@/lib/miden-wasm-api';
 import { TRANSACTION_SCRIPT } from '@/lib/consts/transaction';
 import { convertToBigUint64Array } from '@/lib/utils';
 import { Account } from '@/lib/account';
@@ -21,6 +21,17 @@ import { EditorFiles } from '@/lib/files';
 import { AccountUpdates } from '@/lib/types';
 
 type Tabs = 'transaction' | 'assets';
+type StorageDiffs = Record<
+	number,
+	{
+		old?: BigUint64Array;
+		new: BigUint64Array;
+	}
+>;
+
+type Faucets = {
+	[key: string]: string;
+};
 
 interface MidenContextProps {
 	isInitialized: boolean;
@@ -36,6 +47,7 @@ interface MidenContextProps {
 	isExecutingTransaction: boolean;
 	blockNumber: number;
 	accountUpdates: AccountUpdates | null;
+	accountStorageDiffs: StorageDiffs;
 	setBlockNumber: (blockNumber: number) => void;
 	createSampleP2IDNote: () => void;
 	createSampleP2IDRNote: () => void;
@@ -73,6 +85,8 @@ interface MidenContextProps {
 	) => void;
 	firstExecuteClick: boolean;
 	toggleFisrtExecuteClick: () => void;
+	faucets: Faucets;
+	createFaucet: (name: string, amount: bigint, accountId: string) => void;
 }
 
 export const MidenContext = createContext<MidenContextProps>({
@@ -89,6 +103,7 @@ export const MidenContext = createContext<MidenContextProps>({
 	isCollapsedTabs: false,
 	blockNumber: 4,
 	accountUpdates: null,
+	accountStorageDiffs: {},
 	setBlockNumber: () => {},
 	createSampleP2IDNote: () => {},
 	createSampleP2IDRNote: () => {},
@@ -117,7 +132,9 @@ export const MidenContext = createContext<MidenContextProps>({
 	updateAccountAssetAmount: () => {},
 	updateNoteAssetAmount: () => {},
 	firstExecuteClick: false,
-	toggleFisrtExecuteClick: () => {}
+	toggleFisrtExecuteClick: () => {},
+	faucets: {},
+	createFaucet: () => {}
 });
 
 export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
@@ -125,6 +142,21 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	const [isCollapsedTabs, setCollapsedTabs] = useState(false);
 	const [isExecutingTransaction, setIsExecutingTransaction] = useState(false);
 	const [firstExecuteClick, setFirstExecuteClick] = useState(false);
+	const [faucets, setFaucets] = useState<Faucets>({
+		'0x2a3c549c1f3eb8a000009b55653cc0': 'BTC',
+		'0x3f3e2714af2401a00000e02c698d0e': 'ETH'
+	});
+
+	const createFaucet = (name: string, amount: bigint, accountId: string) => {
+		const account = accounts[accountId];
+		const faucetId = generateFaucetId().id;
+		setFaucets((prev) => {
+			const newFaucets = prev;
+			newFaucets[faucetId] = name;
+			return newFaucets;
+		});
+		account.addAsset(faucetId, amount);
+	};
 
 	const toggleFisrtExecuteClick = () => {
 		setFirstExecuteClick(true);
@@ -139,6 +171,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	const [consoleLogs, setConsoleLogs] = useState<{ message: string; type: 'info' | 'error' }[]>([]);
 
 	const [accountUpdates, setAccountUpdates] = useState<AccountUpdates | null>(null);
+	const [accountStorageDiffs, setAccountStorageDiffs] = useState({});
 
 	const addInfoLog = useCallback((message: string) => {
 		console.log(message);
@@ -304,7 +337,11 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				blockNumber
 			});
 
-			output.storageDiffs = Account.computeStorageDiffs(storage, output.storage);
+
+			output.storageDiffs = Account.previousStorageValues(storage, output.storage);
+			if (Object.keys(output.storageDiffs).length > 0) {
+				setAccountStorageDiffs(output.storageDiffs);
+			}
 			if (!output.assets.some((a) => a.faucetId === DEFAULT_FAUCET_IDS[0])) {
 				output.assets.push({ faucetId: DEFAULT_FAUCET_IDS[0], amount: 0n });
 			}
@@ -393,11 +430,16 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	const createAccount = useCallback(() => {
 		const newAccountName = Account.getNextAccountName(accounts);
 		const { account, newFiles } = Account.new(newAccountName);
+
 		setAccounts((prev) => {
 			return { ...prev, [account.id.id]: account };
 		});
+
+		if (Object.values(accounts).length === 0) {
+			selectTransactionAccount(account.id.id);
+		}
 		setFiles((prev) => ({ ...prev, ...newFiles }));
-	}, [accounts]);
+	}, [accounts, selectTransactionAccount]);
 
 	const disableWalletComponent = useCallback((accountId: string) => {
 		updateAccountById(accountId, (account) => {
@@ -626,6 +668,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				isCollapsedTabs,
 				blockNumber,
 				accountUpdates,
+				accountStorageDiffs,
 				setBlockNumber,
 				createSampleP2IDNote,
 				createSampleP2IDRNote,
@@ -654,7 +697,9 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				updateAccountAssetAmount,
 				updateNoteAssetAmount,
 				firstExecuteClick,
-				toggleFisrtExecuteClick
+				toggleFisrtExecuteClick,
+				createFaucet,
+				faucets
 			}}
 		>
 			{children}

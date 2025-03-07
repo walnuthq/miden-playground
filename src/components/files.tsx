@@ -3,6 +3,7 @@ import AccountCodeFile from './account-code-file';
 import { CustomMonacoEditor } from './custom-monaco-editor';
 import { EditorFile } from '@/lib/files';
 import { useEffect, useState } from 'react';
+import { Vault } from './vault';
 
 const useSelectedEditorFile = (): { content: string; file: EditorFile | null } => {
 	const { files, accounts, selectedFileId, notes } = useMiden();
@@ -85,6 +86,12 @@ export const Files = () => {
 				fileId={file.id}
 				accountId={file.content.accountId}
 			/>
+		);
+	} else if (file?.content?.dynamic?.account?.variant === 'vault') {
+		return (
+			<div className="p-4">
+				<Vault accountId={file.content.dynamic.account.accountId} addAssetAbility />
+			</div>
 		);
 	} else {
 		return (
