@@ -29,8 +29,8 @@ export function createP2IDNote({
 		2
 	);
 	const inputsWithComments = inputsString
-		.replace(',\n', ', //suffix\n')
-		.replace(',\n', ' //prefix\n');
+		.replace(',\n', ', // Receiver account id suffix\n')
+		.replace(',\n', ', // Receiver account id prefix\n');
 
 	const newFiles: EditorFiles = {
 		[scriptFileId]: {

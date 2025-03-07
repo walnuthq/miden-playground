@@ -31,9 +31,9 @@ export function createP2IDRNote({
 		2
 	);
 	const inputsWithComments = inputsString
-		.replace(',\n', ', //suffix\n')
-		.replace(',\n', ', //prefix\n')
-		.replace(',\n', ' //reclaim block height\n');
+		.replace(',\n', ', // Receiver account id suffix\n')
+		.replace(',\n', ', // Receiver account id prefix\n')
+		.replace(',\n', ', // Reclaim block height\n');
 	const newFiles: EditorFiles = {
 		[scriptFileId]: {
 			id: scriptFileId,
