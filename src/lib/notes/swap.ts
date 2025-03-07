@@ -58,6 +58,15 @@ export function createSwapNote({
 
 	const inputsWithComments = inputsLines.join('\n');
 
+	const paybackInputsString = json5.stringify(
+		[receiverId.suffix.toString(), receiverId.prefix.toString()],
+		null,
+		2
+	);
+	const paybackInputsWithComments = paybackInputsString
+		.replace(',\n', ', // Receiver account id suffix\n')
+		.replace(',\n', ', // Receiver account id prefix\n');
+
 	const newFiles: EditorFiles = {
 		[scriptFileId]: {
 			id: scriptFileId,
@@ -105,7 +114,7 @@ export function createSwapNote({
 			id: paybackInputFileId,
 			name: `Payback Inputs`,
 			content: {
-				value: JSON.stringify(paybackInputs, null, 2)
+				value: paybackInputsWithComments
 			},
 			isOpen: false,
 			variant: 'note',
