@@ -11,7 +11,7 @@ import React, {
 import init from 'miden-wasm';
 import { DEFAULT_FAUCET_IDS, defaultAccounts, defaultNotes } from '@/lib/consts/defaults';
 import { TRANSACTION_SCRIPT_FILE_ID } from '@/lib/consts';
-import { consumeNotes } from '@/lib/miden-wasm-api';
+import { consumeNotes, generateFaucetId } from '@/lib/miden-wasm-api';
 import { TRANSACTION_SCRIPT } from '@/lib/consts/transaction';
 import { convertToBigUint64Array } from '@/lib/utils';
 import { Account } from '@/lib/account';
@@ -21,6 +21,9 @@ import { EditorFiles } from '@/lib/files';
 import { AccountUpdates } from '@/lib/types';
 
 type Tabs = 'transaction' | 'assets';
+type Faucets = {
+	[key: string]: string;
+};
 
 interface MidenContextProps {
 	isInitialized: boolean;
@@ -73,6 +76,8 @@ interface MidenContextProps {
 	) => void;
 	firstExecuteClick: boolean;
 	toggleFisrtExecuteClick: () => void;
+	faucets: Faucets;
+	createFaucet: (name: string, amount: bigint, accountId: string) => void;
 }
 
 export const MidenContext = createContext<MidenContextProps>({
@@ -117,7 +122,9 @@ export const MidenContext = createContext<MidenContextProps>({
 	updateAccountAssetAmount: () => {},
 	updateNoteAssetAmount: () => {},
 	firstExecuteClick: false,
-	toggleFisrtExecuteClick: () => {}
+	toggleFisrtExecuteClick: () => {},
+	faucets: {},
+	createFaucet: () => {}
 });
 
 export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
@@ -125,6 +132,21 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	const [isCollapsedTabs, setCollapsedTabs] = useState(false);
 	const [isExecutingTransaction, setIsExecutingTransaction] = useState(false);
 	const [firstExecuteClick, setFirstExecuteClick] = useState(false);
+	const [faucets, setFaucets] = useState<Faucets>({
+		'0x2a3c549c1f3eb8a000009b55653cc0': 'BTC',
+		'0x3f3e2714af2401a00000e02c698d0e': 'ETH'
+	});
+
+	const createFaucet = (name: string, amount: bigint, accountId: string) => {
+		const account = accounts[accountId];
+		const faucetId = generateFaucetId().id;
+		setFaucets((prev) => {
+			const newFaucets = prev;
+			newFaucets[faucetId] = name;
+			return newFaucets;
+		});
+		account.addAsset(faucetId, amount);
+	};
 
 	const toggleFisrtExecuteClick = () => {
 		setFirstExecuteClick(true);
@@ -659,7 +681,9 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				updateAccountAssetAmount,
 				updateNoteAssetAmount,
 				firstExecuteClick,
-				toggleFisrtExecuteClick
+				toggleFisrtExecuteClick,
+				createFaucet,
+				faucets
 			}}
 		>
 			{children}
