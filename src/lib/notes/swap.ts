@@ -49,7 +49,14 @@ export function createSwapNote({
 	}
 
 	const inputsString = json5.stringify(inputs, null, 2);
-	const inputsWithComments = inputsString.replace('[\n', '[\n //inputs\n');
+	const inputsLines = inputsString.split('\n');
+
+	inputsLines[1] += ' // Payback recipient digest (next 4 values)';
+	inputsLines[5] += ' // Requested asset (next 4 values)';
+	inputsLines[9] += ' //  Payback note tag';
+	inputsLines[10] += ' // Note execution hint (always)';
+
+	const inputsWithComments = inputsLines.join('\n');
 
 	const newFiles: EditorFiles = {
 		[scriptFileId]: {
