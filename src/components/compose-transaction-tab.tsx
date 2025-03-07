@@ -10,7 +10,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { faucetSymbols, TRANSACTION_SCRIPT_FILE_ID } from '@/lib/consts';
+import { TRANSACTION_SCRIPT_FILE_ID } from '@/lib/consts';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Storage } from './storage';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from './ui/resizable';
@@ -38,6 +38,7 @@ export const ComposeTransactionTab = () => {
 		selectTab,
 		firstExecuteClick,
 		toggleFisrtExecuteClick,
+		faucets,
 		createAccount
 	} = useMiden();
 	const selectedAccountData = selectedTransactionAccountId
@@ -140,7 +141,7 @@ export const ComposeTransactionTab = () => {
 										{selectedAccountData?.assets.map((asset) => (
 											<div key={asset.faucetId} className="border-t border-theme-border px-4 py-2">
 												<div className="flex justify-between items-center text-theme-text">
-													<div>{faucetSymbols[asset.faucetId.toString()]}</div>
+													<div>{faucets[asset.faucetId.toString()]}</div>
 													<div>{asset.amount}</div>
 												</div>
 											</div>
@@ -148,7 +149,6 @@ export const ComposeTransactionTab = () => {
 									</div>
 								</div>
 							)}
-
 							<TooltipProvider>
 								<Tooltip delayDuration={100}>
 									<div className=" text-theme-text mt-6 flex items-center gap-2">
