@@ -5,7 +5,7 @@ const Footer = () => {
 		<div className="text-theme-text-subtle text-sm ">
 			Built with ❤️ by{' '}
 			<Link
-				href="https://github.com/walnuthq/miden-playground"
+				href="https://walnut.dev"
 				className="underline"
 				target="_blank"
 			>
