@@ -393,11 +393,16 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	const createAccount = useCallback(() => {
 		const newAccountName = Account.getNextAccountName(accounts);
 		const { account, newFiles } = Account.new(newAccountName);
+
 		setAccounts((prev) => {
 			return { ...prev, [account.id.id]: account };
 		});
+
+		if (Object.values(accounts).length === 0) {
+			selectTransactionAccount(account.id.id);
+		}
 		setFiles((prev) => ({ ...prev, ...newFiles }));
-	}, [accounts]);
+	}, [accounts, selectTransactionAccount]);
 
 	const disableWalletComponent = useCallback((accountId: string) => {
 		updateAccountById(accountId, (account) => {
