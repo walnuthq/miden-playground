@@ -379,7 +379,8 @@ export const ComposeTransactionTab = () => {
 												<li>
 													📚{' '}
 													<Link
-														href="https://0xpolygonmiden.github.io/miden-vm/"
+														href="https://0xpolygonmiden.github.io/miden-docs/miden-base/index.html"
+														target="_blank"
 														className="font-bold text-theme-primary hover:underline"
 													>
 														Read our docs
@@ -390,6 +391,7 @@ export const ComposeTransactionTab = () => {
 													🗂 Check our{' '}
 													<Link
 														href="https://github.com/0xPolygonMiden/miden-vm"
+														target="_blank"
 														className="font-bold text-theme-primary hover:underline"
 													>
 														GitHub repository
