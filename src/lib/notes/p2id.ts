@@ -2,6 +2,7 @@ import { AccountId, Asset } from '@/lib/types';
 import { generateId } from '@/lib/utils';
 import { Note } from '@/lib/notes';
 import { EditorFiles } from '../files';
+import json5 from 'json5';
 
 export function createP2IDNote({
 	senderId,
@@ -22,6 +23,15 @@ export function createP2IDNote({
 	const inputFileId = generateId();
 	const metadataFileId = generateId();
 	const vaultFileId = generateId();
+	const inputsString = json5.stringify(
+		[receiverId.suffix.toString(), receiverId.prefix.toString()],
+		null,
+		2
+	);
+	const inputsWithComments = inputsString
+		.replace(',\n', ', // Receiver account id suffix\n')
+		.replace(',\n', ', // Receiver account id prefix\n');
+
 	const newFiles: EditorFiles = {
 		[scriptFileId]: {
 			id: scriptFileId,
@@ -35,7 +45,7 @@ export function createP2IDNote({
 			id: inputFileId,
 			name: `Inputs`,
 			content: {
-				value: JSON.stringify([receiverId.suffix.toString(), receiverId.prefix.toString()], null, 2)
+				value: inputsWithComments
 			},
 			isOpen: false,
 			variant: 'note',

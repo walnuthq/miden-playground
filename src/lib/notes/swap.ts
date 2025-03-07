@@ -3,6 +3,7 @@ import { generateId } from '@/lib/utils';
 import { createSwapNotes } from '@/lib/miden-wasm-api';
 import { Note } from '@/lib/notes';
 import { EditorFiles } from '../files';
+import json5 from 'json5';
 
 export function createSwapNote({
 	senderId,
@@ -47,6 +48,25 @@ export function createSwapNote({
 		paybackInputs.push(input.toString());
 	}
 
+	const inputsString = json5.stringify(inputs, null, 2);
+	const inputsLines = inputsString.split('\n');
+
+	inputsLines[1] += ' // Payback recipient digest (next 4 values)';
+	inputsLines[5] += ' // Requested asset (next 4 values)';
+	inputsLines[9] += ' //  Payback note tag';
+	inputsLines[10] += ' // Note execution hint (always)';
+
+	const inputsWithComments = inputsLines.join('\n');
+
+	const paybackInputsString = json5.stringify(
+		[receiverId.suffix.toString(), receiverId.prefix.toString()],
+		null,
+		2
+	);
+	const paybackInputsWithComments = paybackInputsString
+		.replace(',\n', ', // Receiver account id suffix\n')
+		.replace(',\n', ', // Receiver account id prefix\n');
+
 	const newFiles: EditorFiles = {
 		[scriptFileId]: {
 			id: scriptFileId,
@@ -60,7 +80,7 @@ export function createSwapNote({
 			id: inputFileId,
 			name: `Inputs`,
 			content: {
-				value: JSON.stringify(inputs, null, 2)
+				value: inputsWithComments
 			},
 			isOpen: false,
 			variant: 'note',
@@ -94,7 +114,7 @@ export function createSwapNote({
 			id: paybackInputFileId,
 			name: `Payback Inputs`,
 			content: {
-				value: JSON.stringify(paybackInputs, null, 2)
+				value: paybackInputsWithComments
 			},
 			isOpen: false,
 			variant: 'note',
