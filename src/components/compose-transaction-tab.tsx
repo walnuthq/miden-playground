@@ -39,7 +39,8 @@ export const ComposeTransactionTab = () => {
 		firstExecuteClick,
 		toggleFisrtExecuteClick,
 		faucets,
-		createAccount
+		createAccount,
+		accountStorageDiffs
 	} = useMiden();
 	const selectedAccountData = selectedTransactionAccountId
 		? accounts[selectedTransactionAccountId]
@@ -47,7 +48,6 @@ export const ComposeTransactionTab = () => {
 	console.log(accountUpdates);
 	const [isOpenDropdown, setIsOpenDropdown] = useState(false);
 	const [_blockNumber, _setBlockNumber] = useState(blockNumber.toString());
-
 	return (
 		<>
 			<ResizablePanelGroup direction="horizontal">
@@ -337,7 +337,11 @@ export const ComposeTransactionTab = () => {
 											{selectedAccountData?.name.toUpperCase()} STORAGE CHANGES
 										</div>
 										<div className="mt-2 text-theme-text-subtle">
-											<Storage accountId={selectedTransactionAccountId} />
+											{Object.keys(accountStorageDiffs).length !== 0 ? (
+												<Storage accountId={selectedTransactionAccountId} />
+											) : (
+												'No storage changes'
+											)}
 										</div>
 									</ScrollArea>
 								) : (
