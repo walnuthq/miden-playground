@@ -328,17 +328,17 @@ export const ComposeTransactionTab = () => {
 											<OutputNotes />
 										</div>
 										<div className="mt-6">
-											{selectedAccountData?.name.toUpperCase()} VAULT CHANGES
+											{accounts[accountUpdates.accountId].name.toUpperCase()} VAULT CHANGES
 										</div>
 										<div className="mt-2">
-											<Vault accountId={selectedAccountData?.id.id} displayDelta />
+											<Vault accountId={accounts[accountUpdates.accountId]?.id.id} displayDelta />
 										</div>
 										<div className="mt-6">
-											{selectedAccountData?.name.toUpperCase()} STORAGE CHANGES
+											{accounts[accountUpdates.accountId].name.toUpperCase()} STORAGE CHANGES
 										</div>
 										<div className="mt-2 text-theme-text-subtle">
 											{Object.keys(accountStorageDiffs).length !== 0 ? (
-												<Storage accountId={selectedTransactionAccountId} />
+												<Storage accountId={accountUpdates.accountId} />
 											) : (
 												'No storage changes'
 											)}
