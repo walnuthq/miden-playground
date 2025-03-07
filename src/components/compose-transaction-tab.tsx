@@ -336,7 +336,9 @@ export const ComposeTransactionTab = () => {
 										<div className="mt-6">
 											{selectedAccountData?.name.toUpperCase()} STORAGE CHANGES
 										</div>
-										<div className="mt-2 text-theme-text-subtle">No storage changes</div>
+										<div className="mt-2 text-theme-text-subtle">
+											<Storage accountId={selectedTransactionAccountId} />
+										</div>
 									</ScrollArea>
 								) : (
 									<ScrollArea className="relative h-full px-4 overflow-auto mt-16 max-w-3xl mx-auto text-theme-text">

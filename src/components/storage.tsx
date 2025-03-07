@@ -13,7 +13,13 @@ import { cn } from '@/lib/utils';
 import { Account } from '@/lib/account';
 import { ScrollArea } from './ui/scroll-area';
 
-export function Storage({ accountId, className }: { accountId?: string; className?: string }) {
+export function Storage({
+	accountId,
+	className
+}: {
+	accountId: string | null;
+	className?: string;
+}) {
 	const { accounts, files, accountStorageDiffs } = useMiden();
 
 	const account = accountId ? accounts[accountId] : null;
