@@ -127,7 +127,7 @@ export function Vault({
 											onChange={(e) => {
 												setCustomAssetName(e.target.value);
 											}}
-											placeholder="Type asset name"
+											placeholder="New asset symbol"
 											className="bg-transparent outline-none"
 										/>
 									</TableCell>
