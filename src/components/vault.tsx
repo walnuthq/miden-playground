@@ -8,6 +8,7 @@ import {
 	TableHeader,
 	TableRow
 } from '@/components/ui/table';
+import { useToast } from '@/hooks/use-toast';
 // import { faucets } from '@/lib/consts';
 import { useMiden } from '@/lib/context-providers';
 import { cn } from '@/lib/utils';
@@ -40,6 +41,8 @@ export function Vault({
 	const [customAssetAmount, setCustomAssetAmount] = useState<string>('');
 	const note = noteId ? notes[noteId] : null;
 	const account = accountId ? accounts[accountId] : null;
+	const { toast } = useToast();
+
 	const editableAssets = (note?.assets || account?.assets || []).map((asset) => ({
 		faucetId: asset.faucetId,
 		amount: parseInt(asset.amount.toString()),
@@ -147,20 +150,23 @@ export function Vault({
 					</TableBody>
 				</Table>
 			</div>
-			{customAssetAmount != '' && customAssetName.trim() != '' && (
-				<button
-					onClick={() => {
-						if (accountId) {
-							createFaucet(customAssetName.trim(), BigInt(customAssetAmount), accountId);
-							setCustomAssetAmount('');
-							setCustomAssetName('');
-						}
-					}}
-					className="w-full mt-2 rounded-theme text-sm text-center transition-all px-4 py-1 bg-theme-surface-highlight  text-theme-text hover:bg-theme-border"
-				>
-					Create asset
-				</button>
-			)}
+			<button
+				onClick={() => {
+					if (customAssetAmount === '' || customAssetName.trim() === '') {
+						toast({
+							title: 'Please enter the symbol and amount to create a new asset',
+							variant: 'destructive'
+						});
+					} else if (accountId) {
+						createFaucet(customAssetName.trim(), BigInt(customAssetAmount), accountId);
+						setCustomAssetAmount('');
+						setCustomAssetName('');
+					}
+				}}
+				className="w-full mt-2 rounded-theme text-sm text-center transition-all px-4 py-1 bg-theme-surface-highlight  text-theme-text hover:bg-theme-border"
+			>
+				Create asset
+			</button>
 		</div>
 	);
 }
