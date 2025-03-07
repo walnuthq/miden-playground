@@ -66,6 +66,7 @@ export default {
 					'text-subtle': 'hsl(var(--theme-text-subtle))',
 					'text-subtlest': 'hsl(var(--theme-text-subtlest))',
 					primary: 'hsl(var(--theme-primary))',
+					'primary-hover': 'hsl(var(--theme-primary-hover))',
 					secondary: 'hsl(var(--theme-secondary))',
 					info: 'hsl(var(--theme-info))',
 					success: 'hsl(var(--theme-success))',

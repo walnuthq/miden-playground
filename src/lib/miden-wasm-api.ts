@@ -9,7 +9,7 @@ import {
 	AccountData,
 	WordData
 } from 'miden-wasm';
-import { ExecutionOutput, Asset } from '@/lib/types';
+import { ExecutionOutput, Asset, AccountId } from '@/lib/types';
 import { Account } from '@/lib/account';
 import { Note } from '@/lib/notes';
 
@@ -28,45 +28,53 @@ export function consumeNotes({
 	transactionScript: string;
 	blockNumber: number;
 }): ExecutionOutput {
-	const notesWrapper = notes.map(
-		({ note, noteScript, noteInputs, senderScript }) =>
-			new NoteData(
-				note.assets.map((a) => new AssetData(a.faucetId, a.amount)),
-				noteInputs,
-				noteScript,
-				note.senderId,
-				senderScript,
-				note.serialNumber
-			)
-	);
+	const notesWrapper = notes.map(({ note, noteScript, noteInputs, senderScript }) => {
+		return new NoteData(
+			note.assets.map((a) => new AssetData(a.faucetId, a.amount)),
+			noteInputs,
+			noteScript,
+			note.senderId,
+			senderScript,
+			note.serialNumber
+		);
+	});
 
 	const receiverAccount = new AccountData(
 		receiverScript,
 		receiver.secretKey,
-		receiver.id,
+		receiver.id.id,
 		receiver.assets.map((a) => new AssetData(a.faucetId, a.amount)),
 		receiver.isWallet,
 		receiver.isAuth,
 		receiverStorage.map((row) => new WordData(new BigUint64Array(row)))
 	);
-	return execute_transaction(transactionScript, receiverAccount, notesWrapper, BigInt(blockNumber));
+	const output = execute_transaction(
+		transactionScript,
+		receiverAccount,
+		notesWrapper,
+		BigInt(blockNumber)
+	);
+	console.log(output);
+	return output;
 }
 
-export function generateAccountId(): bigint {
-	const seed = new Uint8Array(32);
+export function generateAccountId(): AccountId {
+	const seed = new Uint8Array(15);
 	window.crypto.getRandomValues(seed);
-	return generate_account_id(seed);
+	const id = generate_account_id(seed);
+	return { id: id.id, prefix: id.prefix, suffix: id.suffix };
 }
 
-export function generateFaucetId(): bigint {
-	const seed = new Uint8Array(32);
+export function generateFaucetId(): AccountId {
+	const seed = new Uint8Array(15);
 	window.crypto.getRandomValues(seed);
-	return generate_faucet_id(seed);
+	const id = generate_faucet_id(seed);
+	return { id: id.id, prefix: id.prefix, suffix: id.suffix };
 }
 
 export function createSwapNotes(
-	senderAccountId: bigint,
-	receiverAccountId: bigint,
+	senderAccountId: string,
+	receiverAccountId: string,
 	requestedAsset: Asset
 ): { swapNoteInputs: BigUint64Array; paybackNote: NoteData } {
 	const seed = new Uint8Array(32);
@@ -77,7 +85,8 @@ export function createSwapNotes(
 		receiverAccountId,
 		new AssetData(requestedAsset.faucetId, requestedAsset.amount)
 	);
-	return { swapNoteInputs: result.note_inputs(), paybackNote: result.payback_note() };
+	const paybackNote = result.payback_note();
+	return { swapNoteInputs: result.note_inputs(), paybackNote };
 }
 export function generateNoteSerialNumber(): BigUint64Array {
 	const seed = new Uint8Array(32);

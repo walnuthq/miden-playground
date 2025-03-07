@@ -49,7 +49,7 @@ function takeFromExternrefTable0(idx) {
 }
 /**
  * @param {Uint8Array} seed
- * @returns {bigint}
+ * @returns {AccountIdData}
  */
 export function generate_account_id(seed) {
     const ptr0 = passArray8ToWasm0(seed, wasm.__wbindgen_malloc);
@@ -58,12 +58,12 @@ export function generate_account_id(seed) {
     if (ret[2]) {
         throw takeFromExternrefTable0(ret[1]);
     }
-    return BigInt.asUintN(64, ret[0]);
+    return AccountIdData.__wrap(ret[0]);
 }
 
 /**
  * @param {Uint8Array} seed
- * @returns {bigint}
+ * @returns {AccountIdData}
  */
 export function generate_faucet_id(seed) {
     const ptr0 = passArray8ToWasm0(seed, wasm.__wbindgen_malloc);
@@ -72,7 +72,7 @@ export function generate_faucet_id(seed) {
     if (ret[2]) {
         throw takeFromExternrefTable0(ret[1]);
     }
-    return BigInt.asUintN(64, ret[0]);
+    return AccountIdData.__wrap(ret[0]);
 }
 
 let cachedBigUint64ArrayMemory0 = null;
@@ -205,21 +205,50 @@ export function execute_transaction(transaction_script, receiver, notes, block_n
 
 /**
  * @param {Uint8Array} seed
- * @param {bigint} sender_account_id
- * @param {bigint} receiver_account_id
+ * @param {string} sender_account_id
+ * @param {string} receiver_account_id
  * @param {AssetData} requested_asset
  * @returns {CreateSwapNoteResult}
  */
 export function create_swap_note(seed, sender_account_id, receiver_account_id, requested_asset) {
     const ptr0 = passArray8ToWasm0(seed, wasm.__wbindgen_malloc);
     const len0 = WASM_VECTOR_LEN;
+    const ptr1 = passStringToWasm0(sender_account_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len1 = WASM_VECTOR_LEN;
+    const ptr2 = passStringToWasm0(receiver_account_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len2 = WASM_VECTOR_LEN;
     _assertClass(requested_asset, AssetData);
-    var ptr1 = requested_asset.__destroy_into_raw();
-    const ret = wasm.create_swap_note(ptr0, len0, sender_account_id, receiver_account_id, ptr1);
+    var ptr3 = requested_asset.__destroy_into_raw();
+    const ret = wasm.create_swap_note(ptr0, len0, ptr1, len1, ptr2, len2, ptr3);
     if (ret[2]) {
         throw takeFromExternrefTable0(ret[1]);
     }
     return CreateSwapNoteResult.__wrap(ret[0]);
+}
+
+/**
+ * @param {NoteData} note
+ * @returns {string}
+ */
+export function get_note_id(note) {
+    let deferred3_0;
+    let deferred3_1;
+    try {
+        _assertClass(note, NoteData);
+        var ptr0 = note.__destroy_into_raw();
+        const ret = wasm.get_note_id(ptr0);
+        var ptr2 = ret[0];
+        var len2 = ret[1];
+        if (ret[3]) {
+            ptr2 = 0; len2 = 0;
+            throw takeFromExternrefTable0(ret[2]);
+        }
+        deferred3_0 = ptr2;
+        deferred3_1 = len2;
+        return getStringFromWasm0(ptr2, len2);
+    } finally {
+        wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
+    }
 }
 
 function passArray64ToWasm0(arg, malloc) {
@@ -227,6 +256,10 @@ function passArray64ToWasm0(arg, malloc) {
     getBigUint64ArrayMemory0().set(arg, ptr / 8);
     WASM_VECTOR_LEN = arg.length;
     return ptr;
+}
+
+function isLikeNone(x) {
+    return x === undefined || x === null;
 }
 
 const AccountDataFinalization = (typeof FinalizationRegistry === 'undefined')
@@ -249,7 +282,7 @@ export class AccountData {
     /**
      * @param {string} account_code
      * @param {Uint8Array} secret_key
-     * @param {bigint} account_id
+     * @param {string} account_id
      * @param {(AssetData)[]} assets
      * @param {boolean} wallet_enabled
      * @param {boolean} auth_enabled
@@ -260,17 +293,95 @@ export class AccountData {
         const len0 = WASM_VECTOR_LEN;
         const ptr1 = passArray8ToWasm0(secret_key, wasm.__wbindgen_malloc);
         const len1 = WASM_VECTOR_LEN;
-        const ptr2 = passArrayJsValueToWasm0(assets, wasm.__wbindgen_malloc);
+        const ptr2 = passStringToWasm0(account_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len2 = WASM_VECTOR_LEN;
-        const ptr3 = passArrayJsValueToWasm0(storage, wasm.__wbindgen_malloc);
+        const ptr3 = passArrayJsValueToWasm0(assets, wasm.__wbindgen_malloc);
         const len3 = WASM_VECTOR_LEN;
-        const ret = wasm.accountdata_new(ptr0, len0, ptr1, len1, account_id, ptr2, len2, wallet_enabled, auth_enabled, ptr3, len3);
+        const ptr4 = passArrayJsValueToWasm0(storage, wasm.__wbindgen_malloc);
+        const len4 = WASM_VECTOR_LEN;
+        const ret = wasm.accountdata_new(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, wallet_enabled, auth_enabled, ptr4, len4);
         if (ret[2]) {
             throw takeFromExternrefTable0(ret[1]);
         }
         this.__wbg_ptr = ret[0] >>> 0;
         AccountDataFinalization.register(this, this.__wbg_ptr, this);
         return this;
+    }
+}
+
+const AccountIdDataFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_accountiddata_free(ptr >>> 0, 1));
+
+export class AccountIdData {
+
+    static __wrap(ptr) {
+        ptr = ptr >>> 0;
+        const obj = Object.create(AccountIdData.prototype);
+        obj.__wbg_ptr = ptr;
+        AccountIdDataFinalization.register(obj, obj.__wbg_ptr, obj);
+        return obj;
+    }
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        AccountIdDataFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_accountiddata_free(ptr, 0);
+    }
+    /**
+     * @returns {string}
+     */
+    get id() {
+        let deferred1_0;
+        let deferred1_1;
+        try {
+            const ret = wasm.__wbg_get_accountiddata_id(this.__wbg_ptr);
+            deferred1_0 = ret[0];
+            deferred1_1 = ret[1];
+            return getStringFromWasm0(ret[0], ret[1]);
+        } finally {
+            wasm.__wbindgen_free(deferred1_0, deferred1_1, 1);
+        }
+    }
+    /**
+     * @param {string} arg0
+     */
+    set id(arg0) {
+        const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_accountiddata_id(this.__wbg_ptr, ptr0, len0);
+    }
+    /**
+     * @returns {bigint}
+     */
+    get prefix() {
+        const ret = wasm.__wbg_get_accountiddata_prefix(this.__wbg_ptr);
+        return BigInt.asUintN(64, ret);
+    }
+    /**
+     * @param {bigint} arg0
+     */
+    set prefix(arg0) {
+        wasm.__wbg_set_accountiddata_prefix(this.__wbg_ptr, arg0);
+    }
+    /**
+     * @returns {bigint}
+     */
+    get suffix() {
+        const ret = wasm.__wbg_get_accountiddata_suffix(this.__wbg_ptr);
+        return BigInt.asUintN(64, ret);
+    }
+    /**
+     * @param {bigint} arg0
+     */
+    set suffix(arg0) {
+        wasm.__wbg_set_accountiddata_suffix(this.__wbg_ptr, arg0);
     }
 }
 
@@ -299,37 +410,49 @@ export class AssetData {
         wasm.__wbg_assetdata_free(ptr, 0);
     }
     /**
-     * @returns {bigint}
+     * @returns {string}
      */
     get faucet_id() {
-        const ret = wasm.__wbg_get_assetdata_faucet_id(this.__wbg_ptr);
-        return BigInt.asUintN(64, ret);
+        let deferred1_0;
+        let deferred1_1;
+        try {
+            const ret = wasm.__wbg_get_assetdata_faucet_id(this.__wbg_ptr);
+            deferred1_0 = ret[0];
+            deferred1_1 = ret[1];
+            return getStringFromWasm0(ret[0], ret[1]);
+        } finally {
+            wasm.__wbindgen_free(deferred1_0, deferred1_1, 1);
+        }
     }
     /**
-     * @param {bigint} arg0
+     * @param {string} arg0
      */
     set faucet_id(arg0) {
-        wasm.__wbg_set_assetdata_faucet_id(this.__wbg_ptr, arg0);
+        const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_assetdata_faucet_id(this.__wbg_ptr, ptr0, len0);
     }
     /**
      * @returns {bigint}
      */
     get amount() {
-        const ret = wasm.__wbg_get_assetdata_amount(this.__wbg_ptr);
+        const ret = wasm.__wbg_get_accountiddata_prefix(this.__wbg_ptr);
         return BigInt.asUintN(64, ret);
     }
     /**
      * @param {bigint} arg0
      */
     set amount(arg0) {
-        wasm.__wbg_set_assetdata_amount(this.__wbg_ptr, arg0);
+        wasm.__wbg_set_accountiddata_prefix(this.__wbg_ptr, arg0);
     }
     /**
-     * @param {bigint} faucet_id
+     * @param {string} faucet_id
      * @param {bigint} amount
      */
     constructor(faucet_id, amount) {
-        const ret = wasm.assetdata_new(faucet_id, amount);
+        const ptr0 = passStringToWasm0(faucet_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.assetdata_new(ptr0, len0, amount);
         this.__wbg_ptr = ret >>> 0;
         AssetDataFinalization.register(this, this.__wbg_ptr, this);
         return this;
@@ -415,22 +538,27 @@ export class NoteData {
      * @param {(AssetData)[]} assets
      * @param {BigUint64Array} inputs
      * @param {string} script
-     * @param {bigint} sender_id
+     * @param {string} sender_id
      * @param {string} sender_script
      * @param {BigUint64Array} serial_number
+     * @param {string | undefined} [id]
      */
-    constructor(assets, inputs, script, sender_id, sender_script, serial_number) {
+    constructor(assets, inputs, script, sender_id, sender_script, serial_number, id) {
         const ptr0 = passArrayJsValueToWasm0(assets, wasm.__wbindgen_malloc);
         const len0 = WASM_VECTOR_LEN;
         const ptr1 = passArray64ToWasm0(inputs, wasm.__wbindgen_malloc);
         const len1 = WASM_VECTOR_LEN;
         const ptr2 = passStringToWasm0(script, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len2 = WASM_VECTOR_LEN;
-        const ptr3 = passStringToWasm0(sender_script, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const ptr3 = passStringToWasm0(sender_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len3 = WASM_VECTOR_LEN;
-        const ptr4 = passArray64ToWasm0(serial_number, wasm.__wbindgen_malloc);
+        const ptr4 = passStringToWasm0(sender_script, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len4 = WASM_VECTOR_LEN;
-        const ret = wasm.notedata_new(ptr0, len0, ptr1, len1, ptr2, len2, sender_id, ptr3, len3, ptr4, len4);
+        const ptr5 = passArray64ToWasm0(serial_number, wasm.__wbindgen_malloc);
+        const len5 = WASM_VECTOR_LEN;
+        var ptr6 = isLikeNone(id) ? 0 : passStringToWasm0(id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        var len6 = WASM_VECTOR_LEN;
+        const ret = wasm.notedata_new(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6);
         this.__wbg_ptr = ret >>> 0;
         NoteDataFinalization.register(this, this.__wbg_ptr, this);
         return this;
@@ -460,11 +588,19 @@ export class NoteData {
         }
     }
     /**
-     * @returns {bigint}
+     * @returns {string}
      */
     sender_id() {
-        const ret = wasm.notedata_sender_id(this.__wbg_ptr);
-        return BigInt.asUintN(64, ret);
+        let deferred1_0;
+        let deferred1_1;
+        try {
+            const ret = wasm.notedata_sender_id(this.__wbg_ptr);
+            deferred1_0 = ret[0];
+            deferred1_1 = ret[1];
+            return getStringFromWasm0(ret[0], ret[1]);
+        } finally {
+            wasm.__wbindgen_free(deferred1_0, deferred1_1, 1);
+        }
     }
     /**
      * @returns {string}
@@ -488,6 +624,18 @@ export class NoteData {
         const ret = wasm.notedata_serial_number(this.__wbg_ptr);
         var v1 = getArrayU64FromWasm0(ret[0], ret[1]).slice();
         wasm.__wbindgen_free(ret[0], ret[1] * 8, 8);
+        return v1;
+    }
+    /**
+     * @returns {string | undefined}
+     */
+    id() {
+        const ret = wasm.notedata_id(this.__wbg_ptr);
+        let v1;
+        if (ret[0] !== 0) {
+            v1 = getStringFromWasm0(ret[0], ret[1]).slice();
+            wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+        }
         return v1;
     }
 }

@@ -1,15 +1,16 @@
-import { Asset } from '@/lib/types';
+import { AccountId, Asset } from '@/lib/types';
 import { generateId } from '@/lib/utils';
 import { Note } from '@/lib/notes';
 import { EditorFiles } from '../files';
+
 export function createP2IDNote({
 	senderId,
 	receiverId,
 	assets,
 	name
 }: {
-	senderId: bigint;
-	receiverId: bigint;
+	senderId: AccountId;
+	receiverId: AccountId;
 	assets: Asset[];
 	name: string;
 }): {
@@ -24,7 +25,7 @@ export function createP2IDNote({
 	const newFiles: EditorFiles = {
 		[scriptFileId]: {
 			id: scriptFileId,
-			name: `${name} Script`,
+			name: `Script`,
 			content: { value: P2ID_SCRIPT },
 			isOpen: false,
 			variant: 'script',
@@ -32,15 +33,17 @@ export function createP2IDNote({
 		},
 		[inputFileId]: {
 			id: inputFileId,
-			name: `${name} Inputs`,
-			content: { value: JSON.stringify([receiverId.toString()], null, 2) },
+			name: `Inputs`,
+			content: {
+				value: JSON.stringify([receiverId.suffix.toString(), receiverId.prefix.toString()], null, 2)
+			},
 			isOpen: false,
 			variant: 'note',
 			readonly: false
 		},
 		[metadataFileId]: {
 			id: metadataFileId,
-			name: `${name} Metadata`,
+			name: `Metadata`,
 			content: { dynamic: { note: { noteId, variant: 'metadata' } } },
 			isOpen: false,
 			variant: 'file',
@@ -48,7 +51,7 @@ export function createP2IDNote({
 		},
 		[vaultFileId]: {
 			id: vaultFileId,
-			name: `${name} Vault`,
+			name: `Vault`,
 			content: { dynamic: { note: { noteId, variant: 'vault' } } },
 			isOpen: false,
 			variant: 'file',
@@ -58,15 +61,17 @@ export function createP2IDNote({
 
 	const note = new Note({
 		id: noteId,
-		name,
+		name: name,
 		scriptFileId,
 		isConsumed: false,
 		assets,
 		inputFileId,
-		senderId,
+		senderId: senderId.id,
 		metadataFileId,
 		vaultFileId
 	});
+	const serialNumberString = note.serialNumberDecimalString.slice(0, 10);
+	note.name = `${name} - ${serialNumberString}`;
 	return { note, newFiles };
 }
 
@@ -74,28 +79,26 @@ export const P2ID_SCRIPT = `
 use.miden::account
 use.miden::note
 use.miden::contracts::wallets::basic->wallet
-use.account_component::account_module
 
 # ERRORS
 # =================================================================================================
 
-# P2ID scripts expect exactly 1 note input
-const.ERR_P2ID_WRONG_NUMBER_OF_INPUTS=0x00020002
+# P2ID script expects exactly 2 note inputs
+const.ERR_P2ID_WRONG_NUMBER_OF_INPUTS=0x00020050
 
 # P2ID's target account address and transaction address do not match
-const.ERR_P2ID_TARGET_ACCT_MISMATCH=0x00020003
+const.ERR_P2ID_TARGET_ACCT_MISMATCH=0x00020051
 
 #! Helper procedure to add all assets of a note to an account.
 #!
-#! Inputs: []
+#! Inputs:  []
 #! Outputs: []
-#!
 proc.add_note_assets_to_account
     push.0 exec.note::get_assets
     # => [num_of_assets, 0 = ptr, ...]
 
     # compute the pointer at which we should stop iterating
-    dup.1 add
+    mul.4 dup.1 add
     # => [end_ptr, ptr, ...]
 
     # pad the stack and move the pointer to the top
@@ -113,65 +116,70 @@ proc.add_note_assets_to_account
         dup movdn.5
         # => [ptr, 0, 0, 0, 0, ptr, end_ptr, ...]
 
-        # load the asset and add it to the account
-        mem_loadw call.wallet::receive_asset
+        # load the asset
+        mem_loadw
         # => [ASSET, ptr, end_ptr, ...]
+        
+        # pad the stack before call
+        padw swapw padw padw swapdw
+        # => [ASSET, pad(12), ptr, end_ptr, ...]
+
+        # add asset to the account
+        call.wallet::receive_asset
+        # => [pad(16), ptr, end_ptr, ...]
+
+        # clean the stack after call
+        dropw dropw dropw
+        # => [0, 0, 0, 0, ptr, end_ptr, ...]
 
         # increment the pointer and compare it to the end_ptr
-        movup.4 add.1 dup dup.6 neq
-        # => [latch, ptr+1, ASSET, end_ptr, ...]
+        movup.4 add.4 dup dup.6 neq
+        # => [latch, ptr+4, ASSET, end_ptr, ...]
     end
 
     # clear the stack
     drop dropw drop
 end
 
-# Pay-to-ID script: adds all assets from the note to the account, assuming ID of the account
-# matches target account ID specified by the note inputs.
-#
-# Requires that the account exposes: miden::contracts::wallets::basic::receive_asset procedure.
-#
-# Inputs: [SCRIPT_ROOT]
-# Outputs: []
-#
-# Note inputs are assumed to be as follows:
-# - target_account_id is the ID of the account for which the note is intended.
-#
-# FAILS if:
-# - Account does not expose miden::contracts::wallets::basic::receive_asset procedure.
-# - Account ID of executing account is not equal to the Account ID specified via note inputs.
-# - The same non-fungible asset already exists in the account.
-# - Adding a fungible asset would result in amount overflow, i.e., the total amount would be
-#   greater than 2^63.
+#! Pay-to-ID script: adds all assets from the note to the account, assuming ID of the account
+#! matches target account ID specified by the note inputs.
+#!
+#! Requires that the account exposes: 
+#! - miden::contracts::wallets::basic::receive_asset procedure.
+#!
+#! Inputs:  []
+#! Outputs: []
+#!
+#! Note inputs are assumed to be as follows:
+#! - target_account_id is the ID of the account for which the note is intended.
+#!
+#! Panics if:
+#! - Account does not expose miden::contracts::wallets::basic::receive_asset procedure.
+#! - Account ID of executing account is not equal to the Account ID specified via note inputs.
+#! - The same non-fungible asset already exists in the account.
+#! - Adding a fungible asset would result in amount overflow, i.e., the total amount would be
+#!   greater than 2^63.
 begin
-    # drop the note script root
-    dropw
-    # => []
-
     # store the note inputs to memory starting at address 0
     push.0 exec.note::get_inputs
     # => [num_inputs, inputs_ptr]
 
-    # make sure the number of inputs is 1
-    eq.1 assert.err=ERR_P2ID_WRONG_NUMBER_OF_INPUTS
+    # make sure the number of inputs is 2
+    eq.2 assert.err=ERR_P2ID_WRONG_NUMBER_OF_INPUTS
     # => [inputs_ptr]
 
-    # read the target account id from the note inputs
-    mem_load
-    # => [target_account_id]
+    # read the target account ID from the note inputs
+    padw movup.4 mem_loadw drop drop
+    # => [target_account_id_prefix, target_account_id_suffix]
 
     exec.account::get_id
-    # => [account_id, target_account_id, ...]
+    # => [account_id_prefix, account_id_suffix, target_account_id_prefix, target_account_id_suffix, ...]
 
     # ensure account_id = target_account_id, fails otherwise
-    assert_eq.err=ERR_P2ID_TARGET_ACCT_MISMATCH
-    # => [...]
+    exec.account::is_id_equal assert.err=ERR_P2ID_TARGET_ACCT_MISMATCH
+    # => []
 
     exec.add_note_assets_to_account
-    # => [...]
-
-    call.account_module::custom
-    push.3.3.3.3 push.1 call.account_module::custom_set_item dropw dropw
+    # => []
 end
-
 `;

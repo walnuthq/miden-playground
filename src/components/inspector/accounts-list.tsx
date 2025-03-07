@@ -18,7 +18,10 @@ const AccountsList = ({
 		createAccount,
 		enableAuthComponent,
 		enableWalletComponent,
-		deleteAccount
+		selectedTransactionAccountId,
+		selectTransactionAccount,
+		deleteAccount,
+		closeFile
 	} = useMiden();
 	const [collapsedAccounts, setCollapsedAccounts] = useState<Record<string, boolean>>({});
 	const isCollapsedAccTopLevel = collapsedAccounts['top-level-accounts'] || false;
@@ -43,8 +46,7 @@ const AccountsList = ({
 			/>
 			{!isCollapsedAccTopLevel &&
 				Object.values(accounts).map((account) => {
-					const isCollapsed = collapsedAccounts[account.idHex] || false;
-
+					const isCollapsed = collapsedAccounts[account.id.id] || false;
 					const onCreateOptions = [];
 					if (!account.isAuth) {
 						onCreateOptions.push('Add auth component');
@@ -57,25 +59,43 @@ const AccountsList = ({
 						!account.isAuth || !account.isWallet
 							? (option: string) => {
 									if (option === 'Add auth component') {
-										enableAuthComponent(account.idHex);
+										enableAuthComponent(account.id.id);
 									} else if (option === 'Add wallet component') {
-										enableWalletComponent(account.idHex);
+										enableWalletComponent(account.id.id);
 									}
 							  }
 							: undefined;
 
 					return (
-						<React.Fragment key={account.id}>
+						<React.Fragment key={account.id.id}>
 							<InspectorItem
 								name={account.name}
 								variant="collapsable"
 								isCollapsed={isCollapsed}
 								level={1}
 								onClick={() => {
-									toggleCollapse(account.idHex, setCollapsedAccounts);
+									toggleCollapse(account.id.id, setCollapsedAccounts);
 								}}
 								onRemove={() => {
-									deleteAccount(account.idHex);
+									if (
+										account.id.id === selectedTransactionAccountId &&
+										Object.values(accounts).length > 0
+									) {
+										selectTransactionAccount(Object.values(accounts)[0].id.id);
+									}
+									deleteAccount(account.id.id);
+									Object.values(files).map((file) => {
+										if (
+											[
+												account.metadataFileId,
+												account.scriptFileId,
+												account.vaultFileId,
+												account.storageFileId
+											].includes(file.id)
+										) {
+											closeFile(file.id);
+										}
+									});
 								}}
 								onCreate={onCreate}
 								onCreateOptions={onCreateOptions}
