@@ -1,119 +1,563 @@
-{
-	"class": "Account",
-	"instructions": [
-		{
-			"instruction": "get_id",
-			"stackInput": "[]",
-			"stackOutput": "[acct_id_prefix, acct_id_suffix]",
-			"notes": "Returns the account ID. Where: acct_id_prefix and acct_id_suffix are the prefix and suffix felts of the account ID."
-		},
-		{
-			"instruction": "get_nonce",
-			"stackInput": "[]",
-			"stackOutput": "[nonce]",
-			"notes": "Returns the account nonce. Where: nonce is the account nonce."
-		},
-		{
-			"instruction": "get_initial_hash",
-			"stackInput": "[]",
-			"stackOutput": "[INIT_HASH]",
-			"notes": "Returns the initial account hash. Where: INIT_HASH is the initial account hash."
-		},
-		{
-			"instruction": "get_current_hash",
-			"stackInput": "[]",
-			"stackOutput": "[ACCT_HASH]",
-			"notes": "Computes and returns the account hash from account data stored in memory. Where: ACCT_HASH is the hash of the account data."
-		},
-		{
-			"instruction": "incr_nonce",
-			"stackInput": "[value]",
-			"stackOutput": "[]",
-			"notes": "Increments the account nonce by the provided value. Where: value is the value to increment the nonce by. value can be at most 2^32 - 1 otherwise this procedure panics."
-		},
-		{
-			"instruction": "get_item",
-			"stackInput": "[index]",
-			"stackOutput": "[VALUE]",
-			"notes": "Gets an item from the account storage. Panics if the index is out of bounds. Where: index is the index of the item to get, VALUE is the value of the item."
-		},
-		{
-			"instruction": "set_item",
-			"stackInput": "[index, V']",
-			"stackOutput": "[R', V]",
-			"notes": "Sets an item in the account storage. Panics if the index is out of bounds. Where: index is the index of the item to set, V' is the value to set, V is the previous value of the item, R' is the new storage commitment."
-		},
-		{
-			"instruction": "get_map_item",
-			"stackInput": "[index, KEY]",
-			"stackOutput": "[VALUE]",
-			"notes": "Gets a map item from the account storage. Where: index is the index of the map where the KEY VALUE should be read, KEY is the key of the item to get, VALUE is the value of the item. Panics if the index for the map is out of bounds or the slot item at index is not a map."
-		},
-		{
-			"instruction": "set_map_item",
-			"stackInput": "[index, KEY, VALUE]",
-			"stackOutput": "[OLD_MAP_ROOT, OLD_MAP_VALUE]",
-			"notes": "Sets a map item in the account storage. Where: index is the index of the map where the KEY VALUE should be set, KEY is the key to set at VALUE, VALUE is the value to set at KEY, OLD_MAP_ROOT is the old map root, OLD_MAP_VALUE is the old value at KEY. Panics if the index for the map is out of bounds or the slot item at index is not a map."
-		},
-		{
-			"instruction": "get_code_commitment",
-			"stackInput": "[]",
-			"stackOutput": "[CODE_COMMITMENT]",
-			"notes": "Gets the code commitment of the account the transaction is being executed against. Where: CODE_COMMITMENT is the hash of the account code."
-		},
-		{
-			"instruction": "get_storage_commitment",
-			"stackInput": "[]",
-			"stackOutput": "[STORAGE_COMMITMENT]",
-			"notes": "Gets the storage commitment of the account the transaction is being executed against. Where: STORAGE_COMMITMENT is the hash of the account storage."
-		},
-		{
-			"instruction": "get_balance",
-			"stackInput": "[faucet_id_prefix, faucet_id_suffix]",
-			"stackOutput": "[balance]",
-			"notes": "Returns the balance of a fungible asset associated with a faucet_id. Where: faucet_id_prefix and faucet_id_suffix are the prefix and suffix felts of the faucet id of the fungible asset of interest, balance is the vault balance of the fungible asset. Panics if the asset is not a fungible asset."
-		},
-		{
-			"instruction": "has_non_fungible_asset",
-			"stackInput": "[ASSET]",
-			"stackOutput": "[has_asset]",
-			"notes": "Returns a boolean indicating whether the non-fungible asset is present in the vault. Where: ASSET is the non-fungible asset of interest, has_asset is a boolean indicating whether the account vault has the asset of interest. Panics if the ASSET is a fungible asset."
-		},
-		{
-			"instruction": "add_asset",
-			"stackInput": "[ASSET]",
-			"stackOutput": "[ASSET']",
-			"notes": "Add the specified asset to the vault. Where: ASSET' is a final asset in the account vault. If ASSET is a non-fungible asset, then ASSET' is the same as ASSET. If ASSET is a fungible asset, then ASSET' is the total fungible asset in the account vault after ASSET was added to it. Panics if the asset is not valid, the total value of two fungible assets is greater than or equal to 2^63, or the vault already contains the same non-fungible asset."
-		},
-		{
-			"instruction": "remove_asset",
-			"stackInput": "[ASSET]",
-			"stackOutput": "[ASSET]",
-			"notes": "Remove the specified asset from the vault. Where: ASSET is the asset to remove from the vault. Panics if the fungible asset is not found in the vault, the amount of the fungible asset in the vault is less than the amount to be removed, or the non-fungible asset is not found in the vault."
-		},
-		{
-			"instruction": "get_vault_commitment",
-			"stackInput": "[]",
-			"stackOutput": "[COM]",
-			"notes": "Returns a commitment to the account vault. Where: COM is a commitment to the account vault."
-		},
-		{
-			"instruction": "is_fungible_faucet",
-			"stackInput": "[acct_id]",
-			"stackOutput": "[is_fungible_faucet]",
-			"notes": "Returns a boolean indicating whether the account is a fungible faucet. Where: acct_id is the account ID, is_fungible_faucet is a boolean indicating whether the account is a fungible faucet."
-		},
-		{
-			"instruction": "is_non_fungible_faucet",
-			"stackInput": "[acct_id]",
-			"stackOutput": "[is_non_fungible_faucet]",
-			"notes": "Returns a boolean indicating whether the account is a non-fungible faucet. Where: acct_id is the account ID, is_non_fungible_faucet is a boolean indicating whether the account is a non-fungible faucet."
-		},
-		{
-			"instruction": "is_id_equal",
-			"stackInput": "[acct_id_prefix, acct_id_suffix, other_acct_id_prefix, other_acct_id_suffix]",
-			"stackOutput": "[is_id_equal]",
-			"notes": "Returns a boolean indicating whether the given account_ids are equal. Where: acct_id_prefix and acct_id_suffix are the prefix and suffix felts of an account ID, other_acct_id_prefix and other_acct_id_suffix are the prefix and suffix felts of the other account ID to compare against, is_id_equal is a boolean indicating whether the account IDs are equal."
-		}
-	]
-}
+[
+	{
+		"class": "Account",
+		"instructions": [
+			{
+				"instruction": "get_id",
+				"stackInput": "[]",
+				"stackOutput": "[acct_id_prefix, acct_id_suffix]",
+				"notes": "Returns the account ID. Where: acct_id_prefix and acct_id_suffix are the prefix and suffix felts of the account ID."
+			},
+			{
+				"instruction": "get_nonce",
+				"stackInput": "[]",
+				"stackOutput": "[nonce]",
+				"notes": "Returns the account nonce. Where: nonce is the account nonce."
+			},
+			{
+				"instruction": "get_initial_hash",
+				"stackInput": "[]",
+				"stackOutput": "[INIT_HASH]",
+				"notes": "Returns the initial account hash. Where: INIT_HASH is the initial account hash."
+			},
+			{
+				"instruction": "get_current_hash",
+				"stackInput": "[]",
+				"stackOutput": "[ACCT_HASH]",
+				"notes": "Computes and returns the account hash from account data stored in memory. Where: ACCT_HASH is the hash of the account data."
+			},
+			{
+				"instruction": "incr_nonce",
+				"stackInput": "[value]",
+				"stackOutput": "[]",
+				"notes": "Increments the account nonce by the provided value. Where: value is the value to increment the nonce by. value can be at most 2^32 - 1 otherwise this procedure panics."
+			},
+			{
+				"instruction": "get_item",
+				"stackInput": "[index]",
+				"stackOutput": "[VALUE]",
+				"notes": "Gets an item from the account storage. Panics if the index is out of bounds. Where: index is the index of the item to get, VALUE is the value of the item."
+			},
+			{
+				"instruction": "set_item",
+				"stackInput": "[index, V']",
+				"stackOutput": "[R', V]",
+				"notes": "Sets an item in the account storage. Panics if the index is out of bounds. Where: index is the index of the item to set, V' is the value to set, V is the previous value of the item, R' is the new storage commitment."
+			},
+			{
+				"instruction": "get_map_item",
+				"stackInput": "[index, KEY]",
+				"stackOutput": "[VALUE]",
+				"notes": "Gets a map item from the account storage. Where: index is the index of the map where the KEY VALUE should be read, KEY is the key of the item to get, VALUE is the value of the item. Panics if the index for the map is out of bounds or the slot item at index is not a map."
+			},
+			{
+				"instruction": "set_map_item",
+				"stackInput": "[index, KEY, VALUE]",
+				"stackOutput": "[OLD_MAP_ROOT, OLD_MAP_VALUE]",
+				"notes": "Sets a map item in the account storage. Where: index is the index of the map where the KEY VALUE should be set, KEY is the key to set at VALUE, VALUE is the value to set at KEY, OLD_MAP_ROOT is the old map root, OLD_MAP_VALUE is the old value at KEY. Panics if the index for the map is out of bounds or the slot item at index is not a map."
+			},
+			{
+				"instruction": "get_code_commitment",
+				"stackInput": "[]",
+				"stackOutput": "[CODE_COMMITMENT]",
+				"notes": "Gets the code commitment of the account the transaction is being executed against. Where: CODE_COMMITMENT is the hash of the account code."
+			},
+			{
+				"instruction": "get_storage_commitment",
+				"stackInput": "[]",
+				"stackOutput": "[STORAGE_COMMITMENT]",
+				"notes": "Gets the storage commitment of the account the transaction is being executed against. Where: STORAGE_COMMITMENT is the hash of the account storage."
+			},
+			{
+				"instruction": "get_balance",
+				"stackInput": "[faucet_id_prefix, faucet_id_suffix]",
+				"stackOutput": "[balance]",
+				"notes": "Returns the balance of a fungible asset associated with a faucet_id. Where: faucet_id_prefix and faucet_id_suffix are the prefix and suffix felts of the faucet id of the fungible asset of interest, balance is the vault balance of the fungible asset. Panics if the asset is not a fungible asset."
+			},
+			{
+				"instruction": "has_non_fungible_asset",
+				"stackInput": "[ASSET]",
+				"stackOutput": "[has_asset]",
+				"notes": "Returns a boolean indicating whether the non-fungible asset is present in the vault. Where: ASSET is the non-fungible asset of interest, has_asset is a boolean indicating whether the account vault has the asset of interest. Panics if the ASSET is a fungible asset."
+			},
+			{
+				"instruction": "add_asset",
+				"stackInput": "[ASSET]",
+				"stackOutput": "[ASSET']",
+				"notes": "Add the specified asset to the vault. Where: ASSET' is a final asset in the account vault. If ASSET is a non-fungible asset, then ASSET' is the same as ASSET. If ASSET is a fungible asset, then ASSET' is the total fungible asset in the account vault after ASSET was added to it. Panics if the asset is not valid, the total value of two fungible assets is greater than or equal to 2^63, or the vault already contains the same non-fungible asset."
+			},
+			{
+				"instruction": "remove_asset",
+				"stackInput": "[ASSET]",
+				"stackOutput": "[ASSET]",
+				"notes": "Remove the specified asset from the vault. Where: ASSET is the asset to remove from the vault. Panics if the fungible asset is not found in the vault, the amount of the fungible asset in the vault is less than the amount to be removed, or the non-fungible asset is not found in the vault."
+			},
+			{
+				"instruction": "get_vault_commitment",
+				"stackInput": "[]",
+				"stackOutput": "[COM]",
+				"notes": "Returns a commitment to the account vault. Where: COM is a commitment to the account vault."
+			},
+			{
+				"instruction": "is_fungible_faucet",
+				"stackInput": "[acct_id]",
+				"stackOutput": "[is_fungible_faucet]",
+				"notes": "Returns a boolean indicating whether the account is a fungible faucet. Where: acct_id is the account ID, is_fungible_faucet is a boolean indicating whether the account is a fungible faucet."
+			},
+			{
+				"instruction": "is_non_fungible_faucet",
+				"stackInput": "[acct_id]",
+				"stackOutput": "[is_non_fungible_faucet]",
+				"notes": "Returns a boolean indicating whether the account is a non-fungible faucet. Where: acct_id is the account ID, is_non_fungible_faucet is a boolean indicating whether the account is a non-fungible faucet."
+			},
+			{
+				"instruction": "is_id_equal",
+				"stackInput": "[acct_id_prefix, acct_id_suffix, other_acct_id_prefix, other_acct_id_suffix]",
+				"stackOutput": "[is_id_equal]",
+				"notes": "Returns a boolean indicating whether the given account_ids are equal. Where: acct_id_prefix and acct_id_suffix are the prefix and suffix felts of an account ID, other_acct_id_prefix and other_acct_id_suffix are the prefix and suffix felts of the other account ID to compare against, is_id_equal is a boolean indicating whether the account IDs are equal."
+			}
+		]
+	},
+	{
+		"class": "Asset",
+		"instructions": [
+			{
+				"instruction": "build_fungible_asset",
+				"stackInput": "[faucet_id_prefix, faucet_id_suffix, amount]",
+				"stackOutput": "[ASSET]",
+				"notes": "Builds a fungible asset for the specified fungible faucet and amount. Where: faucet_id_prefix and faucet_id_suffix are the prefix and suffix felts of the faucet to create the asset for, amount is the amount of the asset to create, ASSET is the built fungible asset."
+			},
+			{
+				"instruction": "create_fungible_asset",
+				"stackInput": "[amount]",
+				"stackOutput": "[ASSET]",
+				"notes": "Creates a fungible asset for the faucet the transaction is being executed against. Where: amount is the amount of the asset to create, ASSET is the created fungible asset."
+			},
+			{
+				"instruction": "build_non_fungible_asset",
+				"stackInput": "[faucet_id_prefix, DATA_HASH]",
+				"stackOutput": "[ASSET]",
+				"notes": "Builds a non fungible asset for the specified non-fungible faucet and amount. Where: faucet_id_prefix and faucet_id_suffix are the prefix and suffix felts of the faucet to create the asset for, DATA_HASH is the data hash of the non-fungible asset to build, ASSET is the built non-fungible asset."
+			},
+			{
+				"instruction": "create_non_fungible_asset",
+				"stackInput": "[DATA_HASH]",
+				"stackOutput": "[ASSET]",
+				"notes": "Creates a non-fungible asset for the faucet the transaction is being executed against. Where: DATA_HASH is the data hash of the non-fungible asset to create, ASSET is the created non-fungible asset."
+			},
+			{
+				"instruction": "get_fungible_asset_max_amount",
+				"stackInput": "[]",
+				"stackOutput": "[fungible_asset_max_amount]",
+				"notes": "Returns the maximum amount of a fungible asset. Where: fungible_asset_max_amount is the maximum amount of a fungible asset."
+			}
+		]
+	},
+	{
+		"class": "Faucet",
+		"instructions": [
+			{
+				"instruction": "mint",
+				"stackInput": "[ASSET]",
+				"stackOutput": "[ASSET]",
+				"notes": "Mint an asset from the faucet the transaction is being executed against. Where: ASSET is the asset that was minted. Panics if: the transaction is not being executed against a faucet, the asset being minted is not associated with the faucet the transaction is being executed against, the asset is not well formed, for fungible faucets if the total issuance after minting is greater than the maximum amount allowed, for non-fungible faucets if the non-fungible asset being minted already exists."
+			},
+			{
+				"instruction": "burn",
+				"stackInput": "[ASSET]",
+				"stackOutput": "[ASSET]",
+				"notes": "Burn an asset from the faucet the transaction is being executed against. Where: ASSET is the asset that was burned. Panics if: the transaction is not being executed against a faucet, the asset being burned is not associated with the faucet the transaction is being executed against, the asset is not well formed, for fungible faucets if the amount being burned is greater than the total input to the transaction, for non-fungible faucets if the non-fungible asset being burned does not exist or was not provided as input to the transaction via a note or the accounts vault."
+			},
+			{
+				"instruction": "get_total_issuance",
+				"stackInput": "[]",
+				"stackOutput": "[total_issuance]",
+				"notes": "Returns the total issuance of the fungible faucet the transaction is being executed against. Where: total_issuance is the total issuance of the fungible faucet the transaction is being executed against. Panics if: the transaction is not being executed against a fungible faucet."
+			}
+		]
+	},
+	{
+		"class": "KernelProcOffsets",
+		"instructions": [
+			{
+				"instruction": "account_get_initial_hash_offset",
+				"stackInput": "[]",
+				"stackOutput": "[proc_offset]",
+				"notes": "Returns the offset of the `account_get_initial_hash` kernel procedure. Where: proc_offset is the offset of the `account_get_initial_hash` kernel procedure required to get the address where this procedure is stored."
+			},
+			{
+				"instruction": "account_get_current_hash_offset",
+				"stackInput": "[]",
+				"stackOutput": "[proc_offset]",
+				"notes": "Returns the offset of the `account_get_current_hash` kernel procedure. Where: proc_offset is the offset of the `account_get_current_hash` kernel procedure required to get the address where this procedure is stored."
+			},
+			{
+				"instruction": "account_get_id_offset",
+				"stackInput": "[]",
+				"stackOutput": "[proc_offset]",
+				"notes": "Returns the offset of the `account_get_id` kernel procedure. Where: proc_offset is the offset of the `account_get_id` kernel procedure required to get the address where this procedure is stored."
+			},
+			{
+				"instruction": "account_get_nonce_offset",
+				"stackInput": "[]",
+				"stackOutput": "[proc_offset]",
+				"notes": "Returns the offset of the `account_get_nonce` kernel procedure. Where: proc_offset is the offset of the `account_get_nonce` kernel procedure required to get the address where this procedure is stored."
+			},
+			{
+				"instruction": "account_incr_nonce_offset",
+				"stackInput": "[]",
+				"stackOutput": "[proc_offset]",
+				"notes": "Returns the offset of the `account_incr_nonce` kernel procedure. Where: proc_offset is the offset of the `account_incr_nonce` kernel procedure required to get the address where this procedure is stored."
+			},
+			{
+				"instruction": "account_get_code_commitment_offset",
+				"stackInput": "[]",
+				"stackOutput": "[proc_offset]",
+				"notes": "Returns the offset of the `account_get_code_commitment` kernel procedure. Where: proc_offset is the offset of the `account_get_code_commitment` kernel procedure required to get the address where this procedure is stored."
+			},
+			{
+				"instruction": "account_get_storage_commitment_offset",
+				"stackInput": "[]",
+				"stackOutput": "[proc_offset]",
+				"notes": "Returns the offset of the `account_get_storage_commitment` kernel procedure. Where: proc_offset is the offset of the `account_get_storage_commitment` kernel procedure required to get the address where this procedure is stored."
+			},
+			{
+				"instruction": "account_get_item_offset",
+				"stackInput": "[]",
+				"stackOutput": "[proc_offset]",
+				"notes": "Returns the offset of the `account_get_item` kernel procedure. Where: proc_offset is the offset of the `account_get_item` kernel procedure required to get the address where this procedure is stored."
+			},
+			{
+				"instruction": "account_set_item_offset",
+				"stackInput": "[]",
+				"stackOutput": "[proc_offset]",
+				"notes": "Returns the offset of the `account_set_item` kernel procedure. Where: proc_offset is the offset of the `account_set_item` kernel procedure required to get the address where this procedure is stored."
+			},
+			{
+				"instruction": "account_get_map_item_offset",
+				"stackInput": "[]",
+				"stackOutput": "[proc_offset]",
+				"notes": "Returns the offset of the `account_get_map_item` kernel procedure. Where: proc_offset is the offset of the `account_get_map_item` kernel procedure required to get the address where this procedure is stored."
+			},
+			{
+				"instruction": "account_set_map_item_offset",
+				"stackInput": "[]",
+				"stackOutput": "[proc_offset]",
+				"notes": "Returns the offset of the `account_set_map_item` kernel procedure. Where: proc_offset is the offset of the `account_set_map_item` kernel procedure required to get the address where this procedure is stored."
+			},
+			{
+				"instruction": "account_get_vault_commitment_offset",
+				"stackInput": "[]",
+				"stackOutput": "[proc_offset]",
+				"notes": "Returns the offset of the `account_get_vault_commitment` kernel procedure. Where: proc_offset is the offset of the `account_get_vault_commitment` kernel procedure required to get the address where this procedure is stored."
+			},
+			{
+				"instruction": "account_add_asset_offset",
+				"stackInput": "[]",
+				"stackOutput": "[proc_offset]",
+				"notes": "Returns the offset of the `account_add_asset` kernel procedure. Where: proc_offset is the offset of the `account_add_asset` kernel procedure required to get the address where this procedure is stored."
+			},
+			{
+				"instruction": "account_remove_asset_offset",
+				"stackInput": "[]",
+				"stackOutput": "[proc_offset]",
+				"notes": "Returns the offset of the `account_remove_asset` kernel procedure. Where: proc_offset is the offset of the `account_remove_asset` kernel procedure required to get the address where this procedure is stored."
+			},
+			{
+				"instruction": "account_get_balance_offset",
+				"stackInput": "[]",
+				"stackOutput": "[proc_offset]",
+				"notes": "Returns the offset of the `account_get_balance` kernel procedure. Where: proc_offset is the offset of the `account_get_balance` kernel procedure required to get the address where this procedure is stored."
+			},
+			{
+				"instruction": "account_has_non_fungible_asset_offset",
+				"stackInput": "[]",
+				"stackOutput": "[proc_offset]",
+				"notes": "Returns the offset of the `account_has_non_fungible_asset` kernel procedure. Where: proc_offset is the offset of the `account_has_non_fungible_asset` kernel procedure required to get the address where this procedure is stored."
+			},
+			{
+				"instruction": "faucet_mint_asset_offset",
+				"stackInput": "[]",
+				"stackOutput": "[proc_offset]",
+				"notes": "Returns the offset of the `faucet_mint_asset` kernel procedure. Where: proc_offset is the offset of the `faucet_mint_asset` kernel procedure required to get the address where this procedure is stored."
+			},
+			{
+				"instruction": "faucet_burn_asset_offset",
+				"stackInput": "[]",
+				"stackOutput": "[proc_offset]",
+				"notes": "Returns the offset of the `faucet_burn_asset` kernel procedure. Where: proc_offset is the offset of the `faucet_burn_asset` kernel procedure required to get the address where this procedure is stored."
+			},
+			{
+				"instruction": "faucet_get_total_fungible_asset_issuance_offset",
+				"stackInput": "[]",
+				"stackOutput": "[proc_offset]",
+				"notes": "Returns the offset of the `faucet_get_total_fungible_asset_issuance` kernel procedure. Where: proc_offset is the offset of the `faucet_get_total_fungible_asset_issuance` kernel procedure required to get the address where this procedure is stored."
+			},
+			{
+				"instruction": "faucet_is_non_fungible_asset_issued_offset",
+				"stackInput": "[]",
+				"stackOutput": "[proc_offset]",
+				"notes": "Returns the offset of the `faucet_is_non_fungible_asset_issued` kernel procedure. Where: proc_offset is the offset of the `faucet_is_non_fungible_asset_issued` kernel procedure required to get the address where this procedure is stored."
+			},
+			{
+				"instruction": "note_get_assets_info_offset",
+				"stackInput": "[]",
+				"stackOutput": "[proc_offset]",
+				"notes": "Returns the offset of the `note_get_assets_info` kernel procedure. Where: proc_offset is the offset of the `note_get_assets_info` kernel procedure required to get the address where this procedure is stored."
+			},
+			{
+				"instruction": "note_add_asset_offset",
+				"stackInput": "[]",
+				"stackOutput": "[proc_offset]",
+				"notes": "Returns the offset of the `note_add_asset` kernel procedure. Where: proc_offset is the offset of the `note_add_asset` kernel procedure required to get the address where this procedure is stored."
+			},
+			{
+				"instruction": "note_get_serial_number_offset",
+				"stackInput": "[]",
+				"stackOutput": "[proc_offset]",
+				"notes": "Returns the offset of the `note_get_serial_number` kernel procedure. Where: proc_offset is the offset of the `note_get_serial_number` kernel procedure required to get the address where this procedure is stored."
+			},
+			{
+				"instruction": "note_get_inputs_hash_offset",
+				"stackInput": "[]",
+				"stackOutput": "[proc_offset]",
+				"notes": "Returns the offset of the `note_get_inputs_hash` kernel procedure. Where: proc_offset is the offset of the `note_get_inputs_hash` kernel procedure required to get the address where this procedure is stored."
+			},
+			{
+				"instruction": "note_get_sender_offset",
+				"stackInput": "[]",
+				"stackOutput": "[proc_offset]",
+				"notes": "Returns the offset of the `note_get_sender` kernel procedure. Where: proc_offset is the offset of the `note_get_sender` kernel procedure required to get the address where this procedure is stored."
+			},
+			{
+				"instruction": "note_get_script_hash_offset",
+				"stackInput": "[]",
+				"stackOutput": "[proc_offset]",
+				"notes": "Returns the offset of the `note_get_script_hash` kernel procedure. Where: proc_offset is the offset of the `note_get_script_hash` kernel procedure required to get the address where this procedure is stored."
+			},
+			{
+				"instruction": "tx_create_note_offset",
+				"stackInput": "[]",
+				"stackOutput": "[proc_offset]",
+				"notes": "Returns the offset of the `tx_create_note` kernel procedure. Where: proc_offset is the offset of the `tx_create_note` kernel procedure required to get the address where this procedure is stored."
+			},
+			{
+				"instruction": "tx_get_input_notes_commitment_offset",
+				"stackInput": "[]",
+				"stackOutput": "[proc_offset]",
+				"notes": "Returns the offset of the `tx_get_input_notes_commitment` kernel procedure. Where: proc_offset is the offset of the `tx_get_input_notes_commitment` kernel procedure required to get the address where this procedure is stored."
+			},
+			{
+				"instruction": "tx_get_output_notes_commitment_offset",
+				"stackInput": "[]",
+				"stackOutput": "[proc_offset]",
+				"notes": "Returns the offset of the `tx_get_output_notes_commitment` kernel procedure. Where: proc_offset is the offset of the `tx_get_output_notes_commitment` kernel procedure required to get the address where this procedure is stored."
+			},
+			{
+				"instruction": "tx_get_block_hash_offset",
+				"stackInput": "[]",
+				"stackOutput": "[proc_offset]",
+				"notes": "Returns the offset of the `tx_get_block_hash` kernel procedure. Where: proc_offset is the offset of the `tx_get_block_hash` kernel procedure required to get the address where this procedure is stored."
+			},
+			{
+				"instruction": "tx_get_block_number_offset",
+				"stackInput": "[]",
+				"stackOutput": "[proc_offset]",
+				"notes": "Returns the offset of the `tx_get_block_number` kernel procedure. Where: proc_offset is the offset of the `tx_get_block_number` kernel procedure required to get the address where this procedure is stored."
+			},
+			{
+				"instruction": "tx_start_foreign_context_offset",
+				"stackInput": "[]",
+				"stackOutput": "[proc_offset]",
+				"notes": "Returns the offset of the `tx_start_foreign_context` kernel procedure. Where: proc_offset is the offset of the `tx_start_foreign_context` kernel procedure required to get the address where this procedure is stored."
+			},
+			{
+				"instruction": "tx_end_foreign_context_offset",
+				"stackInput": "[]",
+				"stackOutput": "[proc_offset]",
+				"notes": "Returns the offset of the `tx_end_foreign_context` kernel procedure. Where: proc_offset is the offset of the `tx_end_foreign_context` kernel procedure required to get the address where this procedure is stored."
+			},
+			{
+				"instruction": "tx_update_expiration_block_num_offset",
+				"stackInput": "[]",
+				"stackOutput": "[proc_offset]",
+				"notes": "Returns the offset of the `tx_update_expiration_block_num` kernel procedure. Where: proc_offset is the offset of the `tx_update_expiration_block_num` kernel procedure required to get the address where this procedure is stored."
+			},
+			{
+				"instruction": "tx_get_expiration_delta_offset",
+				"stackInput": "[]",
+				"stackOutput": "[proc_offset]",
+				"notes": "Returns the offset of the `tx_get_expiration_delta` kernel procedure. Where: proc_offset is the offset of the `tx_get_expiration_delta` kernel procedure required to get the address where this procedure is stored."
+			}
+		]
+	},
+	{
+		"class": "Note",
+		"instructions": [
+			{
+				"instruction": "write_advice_data_to_memory",
+				"stackInput": "[start_ptr, end_ptr, HASH]",
+				"stackOutput": "[]",
+				"notes": "Writes the data currently on the advice stack into the memory at the specified location and verifies that the hash of the written data is equal to the provided hash."
+			},
+			{
+				"instruction": "get_assets",
+				"stackInput": "[dest_ptr]",
+				"stackOutput": "[num_assets, dest_ptr]",
+				"notes": "Writes the assets of the currently executing note into memory starting at the specified address. Where: dest_ptr is the memory address to write the assets, num_assets is the number of assets in the currently executing note."
+			},
+			{
+				"instruction": "get_inputs",
+				"stackInput": "[dest_ptr]",
+				"stackOutput": "[num_inputs, dest_ptr]",
+				"notes": "Loads the note's inputs to dest_ptr. Where: dest_ptr is the memory address to write the inputs."
+			},
+			{
+				"instruction": "get_sender",
+				"stackInput": "[]",
+				"stackOutput": "[sender_id_prefix, sender_id_suffix]",
+				"notes": "Returns the sender of the note currently being processed. Where: sender_{prefix,suffix} are the prefix and suffix felts of the sender of the note currently being processed. Panics if no note is being processed."
+			},
+			{
+				"instruction": "get_serial_number",
+				"stackInput": "[]",
+				"stackOutput": "[SERIAL_NUMBER]",
+				"notes": "Returns the serial number of the note currently being processed. Where: SERIAL_NUMBER is the serial number of the note currently being processed. Panics if no note is being processed."
+			},
+			{
+				"instruction": "compute_inputs_hash",
+				"stackInput": "[inputs_ptr, num_inputs]",
+				"stackOutput": "[HASH]",
+				"notes": "Computes hash of note inputs starting at the specified memory address. If the number of inputs is 0, procedure returns the empty word: [0, 0, 0, 0]. Panics if num_inputs is greater than 128."
+			},
+			{
+				"instruction": "get_script_hash",
+				"stackInput": "[]",
+				"stackOutput": "[SCRIPT_HASH]",
+				"notes": "Returns the script hash of the note currently being processed. Where: SCRIPT_HASH is the script hash of the note currently being processed. Panics if no note is being processed."
+			}
+		]
+	},
+	{
+		"class": "Transaction",
+		"instructions": [
+			{
+				"instruction": "get_block_number",
+				"stackInput": "[]",
+				"stackOutput": "[num]",
+				"notes": "Returns the block number of the last known block at the time of transaction execution. Where: num is the last known block number."
+			},
+			{
+				"instruction": "get_block_hash",
+				"stackInput": "[EMPTY_WORD]",
+				"stackOutput": "[BLOCK_HASH]",
+				"notes": "Returns the block hash of the reference block. Where: BLOCK_HASH is the reference block for the transaction execution."
+			},
+			{
+				"instruction": "get_input_notes_commitment",
+				"stackInput": "[]",
+				"stackOutput": "[INPUT_NOTES_COMMITMENT]",
+				"notes": "Returns the input notes commitment hash. Where: INPUT_NOTES_COMMITMENT is the input notes commitment hash."
+			},
+			{
+				"instruction": "get_output_notes_commitment",
+				"stackInput": "[0, 0, 0, 0]",
+				"stackOutput": "[COMMITMENT]",
+				"notes": "Returns the output notes hash. This is computed as a sequential hash of (note_id, note_metadata) tuples over all output notes. Where: COMMITMENT is the output notes hash."
+			},
+			{
+				"instruction": "create_note",
+				"stackInput": "[tag, aux, note_type, execution_hint, RECIPIENT]",
+				"stackOutput": "[note_idx]",
+				"notes": "Creates a new note and returns the index of the note. Where: tag is the tag to be included in the note, aux is the auxiliary metadata to be included in the note, note_type is the storage type of the note, execution_hint is the note's execution hint, RECIPIENT is the recipient of the note, note_idx is the index of the created note."
+			},
+			{
+				"instruction": "add_asset_to_note",
+				"stackInput": "[ASSET, note_idx]",
+				"stackOutput": "[ASSET, note_idx]",
+				"notes": "Adds the ASSET to the note specified by the index. Where: note_idx is the index of the note to which the asset is added, ASSET can be a fungible or non-fungible asset."
+			},
+			{
+				"instruction": "build_recipient_hash",
+				"stackInput": "[SERIAL_NUM, SCRIPT_HASH, INPUT_HASH]",
+				"stackOutput": "[RECIPIENT]",
+				"notes": "Returns the RECIPIENT for a specified SERIAL_NUM, SCRIPT_HASH, and inputs hash. Where: SERIAL_NUM is the serial number of the recipient, SCRIPT_HASH is the commitment of the note script, INPUT_HASH is the commitment of the note inputs, RECIPIENT is the recipient of the note."
+			},
+			{
+				"instruction": "execute_foreign_procedure.4",
+				"stackInput": "[foreign_account_id_prefix, foreign_account_id_suffix, FOREIGN_PROC_ROOT, <foreign account inputs>, pad(n)]",
+				"stackOutput": "[<values returned from the foreign procedure>]",
+				"notes": "Executes the provided procedure against the foreign account. WARNING: the procedure to be invoked can not have more than 15 inputs and it can not return more than 15 elements back. Where: foreign_account_id_{prefix,suffix} are the prefix and suffix felts of the account ID of the foreign account to execute the procedure on, pad(n) is the exact number of pads needed to set the number of procedure inputs to 16 at the moment of the foreign procedure execution (n = 16 - mem_addr_size - foreign_inputs_len)."
+			},
+			{
+				"instruction": "update_expiration_block_delta",
+				"stackInput": "[block_height_delta, ...]",
+				"stackOutput": "[...]",
+				"notes": "Updates the transaction expiration delta. The transaction expiration delta specifies how close to the transaction's reference block the transaction must be included into the chain. Once set, transaction expiration delta can be decreased, but not increased. Where: block_height_delta is the desired expiration time delta (1 to 0xFFFF)."
+			},
+			{
+				"instruction": "get_expiration_block_delta",
+				"stackInput": "[...]",
+				"stackOutput": "[block_height_delta, ...]",
+				"notes": "Returns the transaction expiration delta, or 0 if the delta has not been set. Where: block_height_delta is the stored expiration time delta (1 to 0xFFFF)."
+			}
+		]
+	},
+	{
+		"class": "Auth",
+		"instructions": [
+			{
+				"instruction": "auth_tx_rpo_falcon512",
+				"stackInput": "[pad(16)]",
+				"stackOutput": "[pad(16)]",
+				"notes": "Authenticate a transaction using the Falcon signature scheme"
+			}
+		]
+	},
+	{
+		"class": "BASIC FUNGIBLE FAUCET CONTRACT",
+		"instructions": [
+			{
+				"instruction": "auth_tx_rpo_falcon512",
+				"stackInput": "[]",
+				"stackOutput": "[]",
+				"notes": "Basic authentication for the faucet owner. Imported from basic contract."
+			},
+			{
+				"instruction": "distribute.4",
+				"stackInput": "[amount, tag, aux, note_type, execution_hint, RECIPIENT, pad(7)]",
+				"stackOutput": "[note_idx, pad(15)]",
+				"notes": "Distributes freshly minted fungible assets to the provided recipient. Where: amount is the amount to be minted and sent, tag is the tag to be included in the note, aux is the auxiliary data to be included in the note, note_type is the type of the note that holds the asset, execution_hint is the execution hint of the note that holds the asset, RECIPIENT is the recipient of the asset, i.e., hash(hash(hash(serial_num, [0; 4]), script_hash), input_hash), note_idx is the index of the output note. Panics if: the transaction is being executed against an account that is not a fungible asset faucet, the total issuance after minting is greater than the maximum allowed supply."
+			},
+			{
+				"instruction": "burn",
+				"stackInput": "[ASSET, pad(12)]",
+				"stackOutput": "[pad(16)]",
+				"notes": "Burns fungible assets. Where: ASSET is the fungible asset to be burned. Panics if: the transaction is executed against an account which is not a fungible asset faucet, the transaction is executed against a faucet which is not the origin of the specified asset, the amount about to be burned is greater than the outstanding supply of the asset."
+			}
+		]
+	},
+	{
+		"class": "Wallet",
+		"instructions": [
+			{
+				"instruction": "receive_asset",
+				"stackInput": "[ASSET, pad(12)]",
+				"stackOutput": "[pad(16)]",
+				"notes": "Adds the provided asset to the current account. Where: ASSET is the asset to be received, can be fungible or non-fungible. Panics if: the same non-fungible asset already exists in the account, adding a fungible asset would result in amount overflow, i.e., the total amount would be greater than 2^63."
+			},
+			{
+				"instruction": "create_note",
+				"stackInput": "[tag, aux, note_type, execution_hint, RECIPIENT, pad(8)]",
+				"stackOutput": "[note_idx, pad(15)]",
+				"notes": "Creates a new note. The created note will not have any assets attached to it. To add assets to this note use the 'move_asset_to_note' procedure. Where: tag is the tag to be included in the note, aux is the auxiliary data to be included in the note, note_type is the note's storage type, execution_hint is the note's execution hint, RECIPIENT is the recipient of the note, i.e., hash(hash(hash(serial_num, [0; 4]), script_hash), input_hash)."
+			},
+			{
+				"instruction": "move_asset_to_note",
+				"stackInput": "[ASSET, note_idx, pad(11)]",
+				"stackOutput": "[ASSET, note_idx, pad(11)]",
+				"notes": "Removes the specified asset from the account and adds it to the output note with the specified index. Where: note_idx is the index of the output note, ASSET is the fungible or non-fungible asset of interest. Panics if: the fungible asset is not found in the vault, the amount of the fungible asset in the vault is less than the amount to be removed, the non-fungible asset is not found in the vault."
+			}
+		]
+	}
+]
