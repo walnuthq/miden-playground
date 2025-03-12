@@ -1,0 +1,119 @@
+{
+	"class": "Account",
+	"instructions": [
+		{
+			"instruction": "get_id",
+			"stackInput": "[]",
+			"stackOutput": "[acct_id_prefix, acct_id_suffix]",
+			"notes": "Returns the account ID. Where: acct_id_prefix and acct_id_suffix are the prefix and suffix felts of the account ID."
+		},
+		{
+			"instruction": "get_nonce",
+			"stackInput": "[]",
+			"stackOutput": "[nonce]",
+			"notes": "Returns the account nonce. Where: nonce is the account nonce."
+		},
+		{
+			"instruction": "get_initial_hash",
+			"stackInput": "[]",
+			"stackOutput": "[INIT_HASH]",
+			"notes": "Returns the initial account hash. Where: INIT_HASH is the initial account hash."
+		},
+		{
+			"instruction": "get_current_hash",
+			"stackInput": "[]",
+			"stackOutput": "[ACCT_HASH]",
+			"notes": "Computes and returns the account hash from account data stored in memory. Where: ACCT_HASH is the hash of the account data."
+		},
+		{
+			"instruction": "incr_nonce",
+			"stackInput": "[value]",
+			"stackOutput": "[]",
+			"notes": "Increments the account nonce by the provided value. Where: value is the value to increment the nonce by. value can be at most 2^32 - 1 otherwise this procedure panics."
+		},
+		{
+			"instruction": "get_item",
+			"stackInput": "[index]",
+			"stackOutput": "[VALUE]",
+			"notes": "Gets an item from the account storage. Panics if the index is out of bounds. Where: index is the index of the item to get, VALUE is the value of the item."
+		},
+		{
+			"instruction": "set_item",
+			"stackInput": "[index, V']",
+			"stackOutput": "[R', V]",
+			"notes": "Sets an item in the account storage. Panics if the index is out of bounds. Where: index is the index of the item to set, V' is the value to set, V is the previous value of the item, R' is the new storage commitment."
+		},
+		{
+			"instruction": "get_map_item",
+			"stackInput": "[index, KEY]",
+			"stackOutput": "[VALUE]",
+			"notes": "Gets a map item from the account storage. Where: index is the index of the map where the KEY VALUE should be read, KEY is the key of the item to get, VALUE is the value of the item. Panics if the index for the map is out of bounds or the slot item at index is not a map."
+		},
+		{
+			"instruction": "set_map_item",
+			"stackInput": "[index, KEY, VALUE]",
+			"stackOutput": "[OLD_MAP_ROOT, OLD_MAP_VALUE]",
+			"notes": "Sets a map item in the account storage. Where: index is the index of the map where the KEY VALUE should be set, KEY is the key to set at VALUE, VALUE is the value to set at KEY, OLD_MAP_ROOT is the old map root, OLD_MAP_VALUE is the old value at KEY. Panics if the index for the map is out of bounds or the slot item at index is not a map."
+		},
+		{
+			"instruction": "get_code_commitment",
+			"stackInput": "[]",
+			"stackOutput": "[CODE_COMMITMENT]",
+			"notes": "Gets the code commitment of the account the transaction is being executed against. Where: CODE_COMMITMENT is the hash of the account code."
+		},
+		{
+			"instruction": "get_storage_commitment",
+			"stackInput": "[]",
+			"stackOutput": "[STORAGE_COMMITMENT]",
+			"notes": "Gets the storage commitment of the account the transaction is being executed against. Where: STORAGE_COMMITMENT is the hash of the account storage."
+		},
+		{
+			"instruction": "get_balance",
+			"stackInput": "[faucet_id_prefix, faucet_id_suffix]",
+			"stackOutput": "[balance]",
+			"notes": "Returns the balance of a fungible asset associated with a faucet_id. Where: faucet_id_prefix and faucet_id_suffix are the prefix and suffix felts of the faucet id of the fungible asset of interest, balance is the vault balance of the fungible asset. Panics if the asset is not a fungible asset."
+		},
+		{
+			"instruction": "has_non_fungible_asset",
+			"stackInput": "[ASSET]",
+			"stackOutput": "[has_asset]",
+			"notes": "Returns a boolean indicating whether the non-fungible asset is present in the vault. Where: ASSET is the non-fungible asset of interest, has_asset is a boolean indicating whether the account vault has the asset of interest. Panics if the ASSET is a fungible asset."
+		},
+		{
+			"instruction": "add_asset",
+			"stackInput": "[ASSET]",
+			"stackOutput": "[ASSET']",
+			"notes": "Add the specified asset to the vault. Where: ASSET' is a final asset in the account vault. If ASSET is a non-fungible asset, then ASSET' is the same as ASSET. If ASSET is a fungible asset, then ASSET' is the total fungible asset in the account vault after ASSET was added to it. Panics if the asset is not valid, the total value of two fungible assets is greater than or equal to 2^63, or the vault already contains the same non-fungible asset."
+		},
+		{
+			"instruction": "remove_asset",
+			"stackInput": "[ASSET]",
+			"stackOutput": "[ASSET]",
+			"notes": "Remove the specified asset from the vault. Where: ASSET is the asset to remove from the vault. Panics if the fungible asset is not found in the vault, the amount of the fungible asset in the vault is less than the amount to be removed, or the non-fungible asset is not found in the vault."
+		},
+		{
+			"instruction": "get_vault_commitment",
+			"stackInput": "[]",
+			"stackOutput": "[COM]",
+			"notes": "Returns a commitment to the account vault. Where: COM is a commitment to the account vault."
+		},
+		{
+			"instruction": "is_fungible_faucet",
+			"stackInput": "[acct_id]",
+			"stackOutput": "[is_fungible_faucet]",
+			"notes": "Returns a boolean indicating whether the account is a fungible faucet. Where: acct_id is the account ID, is_fungible_faucet is a boolean indicating whether the account is a fungible faucet."
+		},
+		{
+			"instruction": "is_non_fungible_faucet",
+			"stackInput": "[acct_id]",
+			"stackOutput": "[is_non_fungible_faucet]",
+			"notes": "Returns a boolean indicating whether the account is a non-fungible faucet. Where: acct_id is the account ID, is_non_fungible_faucet is a boolean indicating whether the account is a non-fungible faucet."
+		},
+		{
+			"instruction": "is_id_equal",
+			"stackInput": "[acct_id_prefix, acct_id_suffix, other_acct_id_prefix, other_acct_id_suffix]",
+			"stackOutput": "[is_id_equal]",
+			"notes": "Returns a boolean indicating whether the given account_ids are equal. Where: acct_id_prefix and acct_id_suffix are the prefix and suffix felts of an account ID, other_acct_id_prefix and other_acct_id_suffix are the prefix and suffix felts of the other account ID to compare against, is_id_equal is a boolean indicating whether the account IDs are equal."
+		}
+	]
+}

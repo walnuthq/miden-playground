@@ -27,11 +27,12 @@ export const Tabs = () => {
 				Compose transaction
 			</div>
 			<div
-				className={`p-3 w-[210px] font-semibold border-r border-t rounded-tr-miden text-sm border-theme-border flex flex-row items-center gap-2 cursor-pointer select-none ${
-					selectedTab === 'assets'
-						? 'bg-theme-surface-highlight text-theme-text'
-						: 'text-theme-text-subtle'
-				}`}
+				className={`p-3 w-[210px] font-semibold border-r border-t 
+					text-sm border-theme-border flex flex-row items-center gap-2 cursor-pointer select-none ${
+						selectedTab === 'assets'
+							? 'bg-theme-surface-highlight text-theme-text'
+							: 'text-theme-text-subtle'
+					}`}
 				onClick={() => {
 					selectTab('assets');
 				}}
@@ -43,6 +44,25 @@ export const Tabs = () => {
 					}`}
 				/>
 				Editor
+			</div>
+			<div
+				className={`p-3 w-[210px] font-semibold border-r border-t rounded-tr-miden text-sm border-theme-border flex flex-row items-center gap-2 cursor-pointer select-none ${
+					selectedTab === 'instructions'
+						? 'bg-theme-surface-highlight text-theme-text'
+						: 'text-theme-text-subtle'
+				}`}
+				onClick={() => {
+					selectTab('instructions');
+				}}
+			>
+				<InlineIcon
+					variant="question"
+					color="white"
+					className={`w-5 h-5 ${
+						selectedTab === 'instructions' ? 'text-theme-primary' : 'text-theme-primary/40'
+					}`}
+				/>
+				Instructions
 			</div>
 		</div>
 	);

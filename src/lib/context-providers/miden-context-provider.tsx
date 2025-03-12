@@ -21,7 +21,7 @@ import { EditorFiles } from '@/lib/files';
 import { AccountUpdates } from '@/lib/types';
 import json5 from 'json5';
 
-type Tabs = 'transaction' | 'assets';
+type Tabs = 'transaction' | 'assets' | 'instructions';
 type StorageDiffs = Record<
 	number,
 	{
