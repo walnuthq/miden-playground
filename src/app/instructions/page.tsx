@@ -21,7 +21,7 @@ export default function InstructionsPage() {
 						Back to the playground
 					</Link>
 				</nav>
-				<main className="flex-1 border border-theme-border rounded-theme overflow-hidden">
+				<main className="flex-1 border border-theme-border rounded-theme relative overflow-y-scroll">
 					<InstructionsTab />
 				</main>
 				<footer className="h-12 flex items-center justify-start">

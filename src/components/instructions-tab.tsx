@@ -19,7 +19,7 @@ export const InstructionsTab = () => {
 				{items.map((item, idx) => (
 					<span
 						key={idx}
-						className="text-theme-text-subtle bg-theme-surface-highlight px-2 py-1 rounded text-sm"
+						className="text-theme-text-subtle font-mono bg-theme-surface-highlight px-2 py-1 rounded text-sm"
 					>
 						{item}
 					</span>
@@ -30,10 +30,10 @@ export const InstructionsTab = () => {
 	};
 
 	return (
-		<ScrollArea className="w-full h-full">
-			<Table className="[&_tr:hover]:bg-transparent overflow-y-scroll relative">
-				<TableHeader className="bg-theme-surface-highlight sticky top-0 w-full">
-					<TableRow>
+		<ScrollArea className="w-full h-full ">
+			<Table className="[&_tr:hover]:bg-transparent overflow-y-scroll ">
+				<TableHeader className="bg-theme-surface-highlight w-full sticky top-0">
+					<TableRow className=" ">
 						<TableHead className="pr-4 font-bold">Instruction</TableHead>
 						<TableHead className="pr-4 font-bold">Stack Input</TableHead>
 						<TableHead className="pr-4 font-bold">Stack Output</TableHead>
@@ -51,7 +51,9 @@ export const InstructionsTab = () => {
 							</TableRow>
 							{instructionItem.instructions.map((instruction, index) => (
 								<TableRow key={index}>
-									<TableCell className="pr-8 last:p-2">{instruction.instruction}</TableCell>
+									<TableCell className="pr-8 last:p-2  font-mono">
+										{instruction.instruction}
+									</TableCell>
 									<TableCell className="pr-8 last:p-2">
 										{renderStackItems(instruction.stackInput)}
 									</TableCell>
