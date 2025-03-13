@@ -12,6 +12,14 @@ export const InstructionsTab = () => {
 			if (itemsString.trim()) {
 				items.push(...itemsString.split(',').map((item) => item.trim()));
 			}
+		} else {
+			return (
+				<div className="flex flex-wrap gap-2">
+					<span className="text-theme-text-subtle font-mono bg-theme-surface-highlight px-2 py-1 rounded text-sm">
+						[]
+					</span>
+				</div>
+			);
 		}
 
 		return (
@@ -24,7 +32,6 @@ export const InstructionsTab = () => {
 						{item}
 					</span>
 				))}
-				<span className="bg-theme-surface-highlight px-2 py-1 rounded text-sm">...</span>
 			</div>
 		);
 	};
