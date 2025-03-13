@@ -38,7 +38,7 @@ export const InstructionsTab = () => {
 
 	return (
 		<ScrollArea className="w-full h-full ">
-			<Table className="[&_tr:hover]:bg-transparent overflow-y-scroll ">
+			<Table className="[&_tr:hover]:bg-transparent ">
 				<TableHeader className="bg-theme-surface-highlight w-full sticky top-0">
 					<TableRow className=" ">
 						<TableHead className="pr-4 font-bold">Instruction</TableHead>
