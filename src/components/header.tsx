@@ -1,6 +1,7 @@
 import InlineIcon from './ui/inline-icon';
 import Image from 'next/image';
 import logo from '../app/images/miden_logo.png';
+import Link from 'next/link';
 
 export function Header() {
 	return (
@@ -12,14 +13,22 @@ export function Header() {
 					<span className="bg-theme-border/40 py-1 px-1.5 ml-2 rounded-full">PLAYGROUND</span>
 				</div>
 			</div>
-			<a
-				href="https://0xpolygonmiden.github.io/miden-docs/miden-base/index.html"
-				target="_blank"
-				className="font-bold text-theme-text-subtle flex items-center gap-1 text-base cursor-pointer px-2 rounded-theme hover:bg-theme-border"
-			>
-				Documentation
-				<InlineIcon variant="arrow-up-right" className="w-5 h-5" color="gray" />
-			</a>
+			<div className="flex items-center">
+				<Link
+					href="/instructions"
+					className="font-bold text-theme-text-subtle flex items-center gap-1 text-base cursor-pointer px-2 rounded-theme hover:bg-theme-border transition-all"
+				>
+					Instructions
+				</Link>
+				<a
+					href="https://0xpolygonmiden.github.io/miden-docs/miden-base/index.html"
+					target="_blank"
+					className="font-bold text-theme-text-subtle flex items-center gap-1 text-base cursor-pointer px-2 rounded-theme hover:bg-theme-border transition-all"
+				>
+					Documentation
+					<InlineIcon variant="arrow-up-right" className="w-5 h-5" color="gray" />
+				</a>
+			</div>
 		</div>
 	);
 }
