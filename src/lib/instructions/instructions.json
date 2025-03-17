@@ -1,5 +1,39 @@
 [
 	{
+		"class": "Wallet (requires Wallet component)",
+		"instructions": [
+			{
+				"instruction": "receive_asset",
+				"stackInput": "[ASSET, pad(12)]",
+				"stackOutput": "[pad(16)]",
+				"notes": "Adds the provided asset to the current account. Where: asset is the asset to be received, can be fungible or non-fungible. Panics if: the same non-fungible asset already exists in the account, adding a fungible asset would result in amount overflow, i.e., the total amount would be greater than 2^63."
+			},
+			{
+				"instruction": "create_note",
+				"stackInput": "[tag, aux, note_type, execution_hint, RECIPIENT, pad(8)]",
+				"stackOutput": "[note_idx, pad(15)]",
+				"notes": "Creates a new note. The created note will not have any assets attached to it. To add assets to this note use the 'move_asset_to_note' procedure. Where: tag is the tag to be included in the note, aux is the auxiliary data to be included in the note, note_type is the note's storage type, execution_hint is the note's execution hint, recipient is the recipient of the note, i.e., hash(hash(hash(serial_num, [0; 4]), script_hash), input_hash)."
+			},
+			{
+				"instruction": "move_asset_to_note",
+				"stackInput": "[ASSET, note_idx, pad(11)]",
+				"stackOutput": "[ASSET, note_idx, pad(11)]",
+				"notes": "Removes the specified asset from the account and adds it to the output note with the specified index. Where: note_idx is the index of the output note, asset is the fungible or non-fungible asset of interest. Panics if: the fungible asset is not found in the vault, the amount of the fungible asset in the vault is less than the amount to be removed, the non-fungible asset is not found in the vault."
+			}
+		]
+	},
+	{
+		"class": "Auth (requires Auth component)",
+		"instructions": [
+			{
+				"instruction": "auth_tx_rpo_falcon512",
+				"stackInput": "[pad(16)]",
+				"stackOutput": "[pad(16)]",
+				"notes": "Authenticate a transaction using the Falcon signature scheme"
+			}
+		]
+	},
+	{
 		"class": "Account",
 		"instructions": [
 			{
@@ -504,17 +538,6 @@
 		]
 	},
 	{
-		"class": "Auth",
-		"instructions": [
-			{
-				"instruction": "auth_tx_rpo_falcon512",
-				"stackInput": "[pad(16)]",
-				"stackOutput": "[pad(16)]",
-				"notes": "Authenticate a transaction using the Falcon signature scheme"
-			}
-		]
-	},
-	{
 		"class": "BASIC FUNGIBLE FAUCET CONTRACT",
 		"instructions": [
 			{
@@ -534,29 +557,6 @@
 				"stackInput": "[ASSET, pad(12)]",
 				"stackOutput": "[pad(16)]",
 				"notes": "Burns fungible assets. Where: asset is the fungible asset to be burned. Panics if: the transaction is executed against an account which is not a fungible asset faucet, the transaction is executed against a faucet which is not the origin of the specified asset, the amount about to be burned is greater than the outstanding supply of the asset."
-			}
-		]
-	},
-	{
-		"class": "Wallet",
-		"instructions": [
-			{
-				"instruction": "receive_asset",
-				"stackInput": "[ASSET, pad(12)]",
-				"stackOutput": "[pad(16)]",
-				"notes": "Adds the provided asset to the current account. Where: asset is the asset to be received, can be fungible or non-fungible. Panics if: the same non-fungible asset already exists in the account, adding a fungible asset would result in amount overflow, i.e., the total amount would be greater than 2^63."
-			},
-			{
-				"instruction": "create_note",
-				"stackInput": "[tag, aux, note_type, execution_hint, RECIPIENT, pad(8)]",
-				"stackOutput": "[note_idx, pad(15)]",
-				"notes": "Creates a new note. The created note will not have any assets attached to it. To add assets to this note use the 'move_asset_to_note' procedure. Where: tag is the tag to be included in the note, aux is the auxiliary data to be included in the note, note_type is the note's storage type, execution_hint is the note's execution hint, recipient is the recipient of the note, i.e., hash(hash(hash(serial_num, [0; 4]), script_hash), input_hash)."
-			},
-			{
-				"instruction": "move_asset_to_note",
-				"stackInput": "[ASSET, note_idx, pad(11)]",
-				"stackOutput": "[ASSET, note_idx, pad(11)]",
-				"notes": "Removes the specified asset from the account and adds it to the output note with the specified index. Where: note_idx is the index of the output note, asset is the fungible or non-fungible asset of interest. Panics if: the fungible asset is not found in the vault, the amount of the fungible asset in the vault is less than the amount to be removed, the non-fungible asset is not found in the vault."
 			}
 		]
 	}

@@ -48,30 +48,32 @@ export const InstructionsTab = () => {
 					</TableRow>
 				</TableHeader>
 				<TableBody>
-					{instructionsData.map((instructionItem) => (
-						<React.Fragment key={instructionItem.class}>
-							<TableRow>
-								<TableCell className="pr-8 last:p-2 text-base font-bold">
-									{instructionItem.class}
-								</TableCell>
-								<TableCell colSpan={3}></TableCell>
-							</TableRow>
-							{instructionItem.instructions.map((instruction, index) => (
-								<TableRow key={index}>
-									<TableCell className="pr-8 last:p-2  font-mono">
-										{instruction.instruction}
-									</TableCell>
-									<TableCell className="pr-8 last:p-2">
-										{renderStackItems(instruction.stackInput)}
-									</TableCell>
-									<TableCell className="pr-8 last:p-2">
-										{renderStackItems(instruction.stackOutput)}
-									</TableCell>
-									<TableCell className="pr-8 last:p-2">{instruction.notes}</TableCell>
-								</TableRow>
-							))}
-						</React.Fragment>
-					))}
+					{instructionsData.map(
+						(instructionItem) =>
+							instructionItem.class != 'KernelProcOffsets' && (
+								<React.Fragment key={instructionItem.class}>
+									<TableRow>
+										<TableCell colSpan={4} className="pr-8 last:p-2 text-base font-bold">
+											{instructionItem.class}
+										</TableCell>
+									</TableRow>
+									{instructionItem.instructions.map((instruction, index) => (
+										<TableRow key={index}>
+											<TableCell className="pr-8 last:p-2  font-mono">
+												{instruction.instruction}
+											</TableCell>
+											<TableCell className="pr-8 last:p-2">
+												{renderStackItems(instruction.stackInput)}
+											</TableCell>
+											<TableCell className="pr-8 last:p-2">
+												{renderStackItems(instruction.stackOutput)}
+											</TableCell>
+											<TableCell className="pr-8 last:p-2">{instruction.notes}</TableCell>
+										</TableRow>
+									))}
+								</React.Fragment>
+							)
+					)}
 				</TableBody>
 			</Table>
 		</ScrollArea>
