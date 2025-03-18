@@ -82,7 +82,7 @@ export const Files = () => {
 		typeof file.content.accountId === 'string'
 	) {
 		return (
-			<ScrollArea className="flex-1 bg-[#040113] h-full overflow-auto">
+			<ScrollArea className="overflow-auto h-full flex-1 bg-[#040113] ">
 				<AccountCodeFile
 					accountFile={file.content.value}
 					fileId={file.id}
