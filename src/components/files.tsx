@@ -4,6 +4,7 @@ import { CustomMonacoEditor } from './custom-monaco-editor';
 import { EditorFile } from '@/lib/files';
 import { useEffect, useState } from 'react';
 import { Vault } from './vault';
+import { ScrollArea } from './ui/scroll-area';
 
 const useSelectedEditorFile = (): { content: string; file: EditorFile | null } => {
 	const { files, accounts, selectedFileId, notes } = useMiden();
@@ -71,7 +72,7 @@ export const Files = () => {
 	useEffect(() => {
 		setValue(content);
 	}, [content]);
-	if (!selectedFileId || !file) return null;
+	if (!selectedFileId || !file) return <div className="flex-1 bg-[#040113]"></div>;
 
 	if (
 		file.content &&
@@ -81,29 +82,35 @@ export const Files = () => {
 		typeof file.content.accountId === 'string'
 	) {
 		return (
-			<AccountCodeFile
-				accountFile={file.content.value}
-				fileId={file.id}
-				accountId={file.content.accountId}
-			/>
+			<ScrollArea className="flex-1 bg-[#040113] h-full overflow-auto">
+				<AccountCodeFile
+					accountFile={file.content.value}
+					fileId={file.id}
+					accountId={file.content.accountId}
+				/>
+			</ScrollArea>
 		);
 	} else if (file?.content?.dynamic?.account?.variant === 'vault') {
 		return (
-			<div className="p-4">
-				<Vault accountId={file.content.dynamic.account.accountId} addAssetAbility />
+			<div className="flex-1 bg-[#040113]">
+				<div className="p-4">
+					<Vault accountId={file.content.dynamic.account.accountId} addAssetAbility />
+				</div>
 			</div>
 		);
 	} else {
 		return (
-			<CustomMonacoEditor
-				lang={file.name !== 'Script' ? 'javascript' : 'masm'}
-				onChange={(value) => {
-					setValue(value ?? '');
-					if (file && !file.readonly) updateFileContent(file.id, value ?? '');
-				}}
-				readOnly={file.readonly}
-				value={value}
-			/>
+			<div className="flex-1 bg-[#040113]">
+				<CustomMonacoEditor
+					lang={file.name !== 'Script' ? 'javascript' : 'masm'}
+					onChange={(value) => {
+						setValue(value ?? '');
+						if (file && !file.readonly) updateFileContent(file.id, value ?? '');
+					}}
+					readOnly={file.readonly}
+					value={value}
+				/>
+			</div>
 		);
 	}
 };
