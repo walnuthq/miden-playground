@@ -42,6 +42,7 @@ const AccountCodeFile = ({
 					<div className="flex justify-between px-4 p-1">
 						<div className="text-sm">CUSTOM COMPONENT</div>
 					</div>
+
 					<CustomMonacoEditor
 						value={value}
 						style={{ height: '18rem' }}

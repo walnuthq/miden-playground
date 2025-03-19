@@ -57,7 +57,7 @@ export function CustomMonacoEditor({
 
 	return (
 		<div
-			className={cn(className, 'h-full relative bg-[#040113]')}
+			className={cn(className, 'h-full relative bg-[#040113]', `${isFullScreen && '!opacity-100'}`)}
 			style={isFullScreen ? fullScreenStyle : style}
 		>
 			{isFullScreen && (
@@ -76,7 +76,6 @@ export function CustomMonacoEditor({
 					<InlineIcon variant="arrows-pointing-out" color="white" />
 				)}
 			</button>
-
 			<MonacoEditor
 				value={value}
 				language={lang}

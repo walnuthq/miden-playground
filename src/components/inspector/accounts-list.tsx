@@ -16,8 +16,6 @@ const AccountsList = ({
 		selectedFileId,
 		accounts,
 		createAccount,
-		enableAuthComponent,
-		enableWalletComponent,
 		selectedTransactionAccountId,
 		selectTransactionAccount,
 		deleteAccount,
@@ -47,25 +45,6 @@ const AccountsList = ({
 			{!isCollapsedAccTopLevel &&
 				Object.values(accounts).map((account) => {
 					const isCollapsed = collapsedAccounts[account.id.id] || false;
-					const onCreateOptions = [];
-					if (!account.isAuth) {
-						onCreateOptions.push('Add auth component');
-					}
-					if (!account.isWallet) {
-						onCreateOptions.push('Add wallet component');
-					}
-
-					const onCreate =
-						!account.isAuth || !account.isWallet
-							? (option: string) => {
-									if (option === 'Add auth component') {
-										enableAuthComponent(account.id.id);
-									} else if (option === 'Add wallet component') {
-										enableWalletComponent(account.id.id);
-									}
-							  }
-							: undefined;
-
 					return (
 						<React.Fragment key={account.id.id}>
 							<InspectorItem
@@ -97,8 +76,6 @@ const AccountsList = ({
 										}
 									});
 								}}
-								onCreate={onCreate}
-								onCreateOptions={onCreateOptions}
 							/>
 
 							{!isCollapsed && (
