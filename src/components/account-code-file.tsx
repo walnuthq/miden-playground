@@ -72,7 +72,6 @@ const AccountCodeFile = ({
 						className={`transition-opacity ease-in-out ${account.isWallet ? '' : 'opacity-25'} 
 				`}
 						readOnly
-						fullScreenButton={account.isWallet}
 					/>
 				</div>
 				<div className="flex flex-col">
@@ -90,7 +89,6 @@ const AccountCodeFile = ({
 						style={{ height: `${authHeight > 100 ? 100 : authHeight}px` }}
 						className={` transition-opacity ease-in-out ${account.isAuth ? '' : 'opacity-25'}`}
 						readOnly
-						fullScreenButton={account.isAuth}
 					/>
 				</div>
 			</div>

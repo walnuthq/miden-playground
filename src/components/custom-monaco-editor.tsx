@@ -13,7 +13,6 @@ interface CustomMonacoEditorProps {
 	readOnly?: boolean;
 	style?: CSSProperties | undefined;
 	lang?: string;
-	fullScreenButton?: boolean;
 }
 
 export function CustomMonacoEditor({
@@ -22,8 +21,7 @@ export function CustomMonacoEditor({
 	onChange,
 	lang,
 	style,
-	readOnly = false,
-	fullScreenButton = true
+	readOnly = false
 }: CustomMonacoEditorProps) {
 	const [isFullScreen, setFullScreen] = useState(false);
 	const configureMonaco = useCallback((monaco: Monaco) => {
@@ -59,7 +57,7 @@ export function CustomMonacoEditor({
 
 	return (
 		<div
-			className={cn(className, 'h-full relative bg-[#040113]')}
+			className={cn(className, 'h-full relative bg-[#040113]', `${isFullScreen && '!opacity-100'}`)}
 			style={isFullScreen ? fullScreenStyle : style}
 		>
 			{isFullScreen && (
@@ -67,20 +65,17 @@ export function CustomMonacoEditor({
 					<Breadcrumbs />
 				</div>
 			)}
-			{fullScreenButton && (
-				<button
-					onClick={() => setFullScreen(!isFullScreen)}
-					className="absolute top-2 right-2 z-10 w-6 h-6 bg-theme-border flex justify-center opacity-60 items-center text-white rounded hover:opacity-100 transition-all focus:outline-none"
-					title={isFullScreen ? 'Close full screen' : 'Full screen'}
-				>
-					{isFullScreen ? (
-						<InlineIcon variant="arrows-pointing-in" color="white" />
-					) : (
-						<InlineIcon variant="arrows-pointing-out" color="white" />
-					)}
-				</button>
-			)}
-
+			<button
+				onClick={() => setFullScreen(!isFullScreen)}
+				className="absolute top-2 right-2 z-10 w-6 h-6 bg-theme-border flex justify-center opacity-60 items-center text-white rounded hover:opacity-100 transition-all focus:outline-none"
+				title={isFullScreen ? 'Close full screen' : 'Full screen'}
+			>
+				{isFullScreen ? (
+					<InlineIcon variant="arrows-pointing-in" color="white" />
+				) : (
+					<InlineIcon variant="arrows-pointing-out" color="white" />
+				)}
+			</button>
 			<MonacoEditor
 				value={value}
 				language={lang}
