@@ -5,6 +5,8 @@ import { EditorFile } from '@/lib/files';
 import { useEffect, useState } from 'react';
 import { Vault } from './vault';
 import { ScrollArea } from './ui/scroll-area';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
+import { Account } from '@/lib/account';
 
 const useSelectedEditorFile = (): { content: string; file: EditorFile | null } => {
 	const { files, accounts, selectedFileId, notes } = useMiden();
@@ -25,19 +27,20 @@ const useSelectedEditorFile = (): { content: string; file: EditorFile | null } =
 						null,
 						2
 					);
-				} else if (file.content.dynamic.account.variant === 'vault') {
-					const account = accounts[file.content.dynamic.account.accountId];
-					content = JSON.stringify(
-						account.assets.map((asset) => [
-							asset.amount.toString(),
-							0,
-							0,
-							asset.faucetId.toString()
-						]),
-						null,
-						2
-					);
 				}
+				// else if (file.content.dynamic.account.variant === 'vault') {
+				// 	const account = accounts[file.content.dynamic.account.accountId];
+				// 	content = JSON.stringify(
+				// 		account.assets.map((asset) => [
+				// 			asset.amount.toString(),
+				// 			0,
+				// 			0,
+				// 			asset.faucetId.toString()
+				// 		]),
+				// 		null,
+				// 		2
+				// 	);
+				// }
 			} else if (file.content.dynamic.note) {
 				if (file.content.dynamic.note.variant === 'metadata') {
 					const note = notes[file.content.dynamic.note.noteId];
@@ -66,14 +69,30 @@ const useSelectedEditorFile = (): { content: string; file: EditorFile | null } =
 };
 
 export const Files = () => {
-	const { selectedFileId, updateFileContent } = useMiden();
+	const {
+		selectedFileId,
+		updateFileContent,
+		accounts,
+		accountUpdates,
+		files,
+		accountStorageDiffs
+	} = useMiden();
 	const { content, file } = useSelectedEditorFile();
 	const [value, setValue] = useState(content);
+	const account =
+		file && file.content.dynamic && file.content.dynamic.account
+			? accounts[file.content.dynamic.account.accountId]
+			: null;
+	useEffect(() => {
+		console.log('accountUpdates?.accountId', accountUpdates?.accountId);
+	}, [accountUpdates]);
 	useEffect(() => {
 		setValue(content);
 	}, [content]);
 	if (!selectedFileId || !file) return <div className="flex-1 bg-[#040113]"></div>;
-
+	const editableStorage = account?.storageFileId
+		? Account.parseStorage(files[account?.storageFileId].content.value!)
+		: [];
 	if (
 		file.content &&
 		'variant' in file.content &&
@@ -90,11 +109,77 @@ export const Files = () => {
 				/>
 			</ScrollArea>
 		);
-	} else if (file?.content?.dynamic?.account?.variant === 'vault') {
+	} else if (file?.content?.dynamic?.account?.variant === 'metadata') {
 		return (
 			<div className="flex-1 bg-[#040113]">
-				<div className="p-4">
+				<div className="p-4 text-theme-text text-sm">
+					<div>INFO</div>
+					<div className="w-fit mt-2">
+						<div className={'rounded-theme border border-theme-border overflow-hidden'}>
+							<Table className="[&_tr:hover]:bg-transparent">
+								<TableHeader>
+									<TableRow>
+										<TableHead className="pr-4">Name</TableHead>
+										<TableHead className="pr-4">Account ID</TableHead>
+										<TableHead className="pr-4">Nonce</TableHead>
+									</TableRow>
+								</TableHeader>
+								<TableBody>
+									<TableRow>
+										<TableCell className="pr-8 last:p-2">{account?.name.toString()}</TableCell>
+										<TableCell className="pr-8 last:p-2">
+											{account?.id.id.toString()}, [{account?.id.prefix.toString()},{' '}
+											{account?.id.suffix.toString()}]
+										</TableCell>
+										<TableCell className="pr-8 last:p-2 flex flex-row font-mono">
+											<div className="min-w-8">
+												<span className={`text-sm text-muted-foreground`}></span>
+											</div>
+										</TableCell>
+									</TableRow>
+								</TableBody>
+							</Table>
+						</div>
+					</div>
+					<div className="mt-6 mb-2">VAULT</div>
 					<Vault accountId={file.content.dynamic.account.accountId} addAssetAbility />
+					<div className="mt-6">STORAGE</div>
+					<ScrollArea className={'rounded-theme border border-theme-border w-fit h-48 mt-2'}>
+						<Table className="[&_tr:hover]:bg-transparent ">
+							<TableHeader>
+								<TableRow>
+									<TableHead className="pr-4">Index</TableHead>
+									<TableHead className="pr-4">Value</TableHead>
+									<TableHead className="pr-4">Old value</TableHead>
+								</TableRow>
+							</TableHeader>
+							<TableBody>
+								{editableStorage.length ? (
+									editableStorage.map((item, index) =>
+										Array.from(item).map((value, subIndex) => (
+											<TableRow key={`${index}-${subIndex}`}>
+												<TableCell className="pr-8 last:p-2">
+													{subIndex === 0 ? index : ''}
+												</TableCell>
+												<TableCell className="pr-8 last:p-2">{String(value)}</TableCell>
+												<TableCell className="pr-8 last:p-2 font-mono text-theme-danger">
+													{accountStorageDiffs[index] && accountStorageDiffs[index]?.old
+														? accountStorageDiffs[index]?.old[subIndex]
+														: ''}
+												</TableCell>
+											</TableRow>
+										))
+									)
+								) : (
+									<TableRow>
+										<TableCell colSpan={4} className="h-24 text-center">
+											No results.
+										</TableCell>
+									</TableRow>
+								)}
+							</TableBody>
+						</Table>
+					</ScrollArea>
 				</div>
 			</div>
 		);
