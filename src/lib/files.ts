@@ -16,7 +16,7 @@ export type EditorFiles = Record<string, EditorFile>;
 export interface EditorFileDynamicContent {
 	account?: {
 		accountId: string;
-		variant: 'metadata' | 'code';
+		variant: 'metadata' | 'vault' | 'code';
 	};
 	note?: {
 		noteId: string;
