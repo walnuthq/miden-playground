@@ -130,4 +130,10 @@ export class Note {
 			asset.amount = updateFn(asset.amount);
 		}
 	}
+	addAsset(faucetId: string, amount: bigint) {
+		this.assets.push({
+			faucetId,
+			amount
+		});
+	}
 }

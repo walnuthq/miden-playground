@@ -126,21 +126,9 @@ const NotesList = ({
 											level={2}
 										/>
 										<FileItem
-											editorFile={files[note.inputFileId]}
-											onClick={() => selectFile(note.inputFileId)}
-											isSelected={selectedFileId === note.inputFileId}
-											level={2}
-										/>
-										<FileItem
 											editorFile={files[note.metadataFileId]}
 											onClick={() => selectFile(note.metadataFileId)}
 											isSelected={selectedFileId === note.metadataFileId}
-											level={2}
-										/>
-										<FileItem
-											editorFile={files[note.vaultFileId]}
-											onClick={() => selectFile(note.vaultFileId)}
-											isSelected={selectedFileId === note.vaultFileId}
 											level={2}
 										/>
 									</div>

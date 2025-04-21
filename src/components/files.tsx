@@ -5,6 +5,8 @@ import { EditorFile } from '@/lib/files';
 import { useEffect, useState } from 'react';
 import { Vault } from './vault';
 import { ScrollArea } from './ui/scroll-area';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
+import json5 from 'json5';
 
 const useSelectedEditorFile = (): { content: string; file: EditorFile | null } => {
 	const { files, accounts, selectedFileId, notes } = useMiden();
@@ -41,6 +43,7 @@ const useSelectedEditorFile = (): { content: string; file: EditorFile | null } =
 			} else if (file.content.dynamic.note) {
 				if (file.content.dynamic.note.variant === 'metadata') {
 					const note = notes[file.content.dynamic.note.noteId];
+					console.log('files[note.metadataFileId]', files[note.metadataFileId]);
 					content = JSON.stringify(
 						{
 							senderId: note.senderId.toString(),
@@ -66,9 +69,17 @@ const useSelectedEditorFile = (): { content: string; file: EditorFile | null } =
 };
 
 export const Files = () => {
-	const { selectedFileId, updateFileContent } = useMiden();
+	const { selectedFileId, updateFileContent, accountUpdates, files, notes } = useMiden();
 	const { content, file } = useSelectedEditorFile();
 	const [value, setValue] = useState(content);
+	const note =
+		file && file.content.dynamic && file.content.dynamic.note
+			? notes[file?.content?.dynamic?.note?.noteId]
+			: null;
+
+	useEffect(() => {
+		console.log('accountUpdates?.accountId', accountUpdates?.accountId);
+	}, [accountUpdates]);
 	useEffect(() => {
 		setValue(content);
 	}, [content]);
@@ -95,6 +106,78 @@ export const Files = () => {
 			<div className="flex-1 bg-[#040113]">
 				<div className="p-4">
 					<Vault accountId={file.content.dynamic.account.accountId} addAssetAbility />
+				</div>
+			</div>
+		);
+	} else if (file?.content?.dynamic?.note?.variant === 'metadata') {
+		return (
+			<div className="flex-1 bg-[#040113]">
+				<div className="p-4 text-theme-text text-sm">
+					<div>INPUTS</div>
+					<div className="w-fit mt-2">
+						<div className={'rounded-theme border border-theme-border overflow-hidden'}>
+							<Table className="[&_tr:hover]:bg-transparent">
+								{/* <TableHeader>
+									<TableRow>
+										<TableHead className="pr-4">*public_key*</TableHead>
+									</TableRow>
+								</TableHeader> */}
+								<TableBody>
+									{json5.parse(files[note!.inputFileId].content.value!).map((input: string) => (
+										<TableRow key={`${input}-${note?.id}`}>
+											<TableCell className="pr-8 last:p-2">{input}</TableCell>
+										</TableRow>
+									))}
+
+									<TableRow>
+										<TableCell>
+											{' '}
+											<input
+												type="number"
+												className="bg-transparent outline-none w-20"
+												min={0}
+												maxLength={10}
+											/>
+										</TableCell>
+									</TableRow>
+								</TableBody>
+							</Table>
+						</div>
+					</div>
+					<div className="mt-6 mb-2">VAULT</div>
+					<Vault noteId={file.content.dynamic.note.noteId} addAssetAbility />
+					<div className="mt-6">METADATA</div>
+					<div className="w-fit mt-2">
+						<div className={'rounded-theme border border-theme-border overflow-hidden'}>
+							<Table className="[&_tr:hover]:bg-transparent">
+								<TableHeader>
+									<TableRow>
+										<TableHead className="pr-4">Sender ID</TableHead>
+										<TableHead className="pr-4">Serial number</TableHead>
+									</TableRow>
+								</TableHeader>
+								<TableBody>
+									<TableRow>
+										<TableCell className="pr-8 last:p-2">{note!.senderId.toString()}</TableCell>
+										<TableCell className="pr-8 last:p-2">
+											{note!.serialNumberDecimalString}
+										</TableCell>
+									</TableRow>
+									<TableRow>
+										<TableCell>
+											{' '}
+											<input
+												type="number"
+												className="bg-transparent outline-none w-20"
+												min={0}
+												maxLength={10}
+											/>
+										</TableCell>
+									</TableRow>
+								</TableBody>
+							</Table>
+						</div>
+					</div>
 				</div>
 			</div>
 		);

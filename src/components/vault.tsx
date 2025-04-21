@@ -35,7 +35,8 @@ export function Vault({
 		updateNoteAssetAmount,
 		accountUpdates,
 		faucets,
-		createFaucet
+		createFaucet,
+		createNoteFaucet
 	} = useMiden();
 	const [customAssetName, setCustomAssetName] = useState<string>('');
 	const [customAssetAmount, setCustomAssetAmount] = useState<string>('');
@@ -54,6 +55,7 @@ export function Vault({
 		const newAmountInt = newAmount ? parseInt(newAmount) : 0;
 		if (noteId) {
 			updateNoteAssetAmount(noteId, faucetId, () => BigInt(newAmountInt));
+			console.log('sss');
 		} else if (accountId) {
 			updateAccountAssetAmount(accountId, faucetId, () => BigInt(newAmountInt));
 		}
@@ -159,6 +161,10 @@ export function Vault({
 						});
 					} else if (accountId) {
 						createFaucet(customAssetName.trim(), BigInt(customAssetAmount), accountId);
+						setCustomAssetAmount('');
+						setCustomAssetName('');
+					} else if (noteId) {
+						createNoteFaucet(customAssetName.trim(), BigInt(customAssetAmount), noteId);
 						setCustomAssetAmount('');
 						setCustomAssetName('');
 					}

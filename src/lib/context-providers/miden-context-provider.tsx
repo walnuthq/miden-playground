@@ -88,6 +88,7 @@ interface MidenContextProps {
 	toggleFisrtExecuteClick: () => void;
 	faucets: Faucets;
 	createFaucet: (name: string, amount: bigint, accountId: string) => void;
+	createNoteFaucet: (name: string, amount: bigint, noteId: string) => void;
 }
 
 export const MidenContext = createContext<MidenContextProps>({
@@ -135,7 +136,8 @@ export const MidenContext = createContext<MidenContextProps>({
 	firstExecuteClick: false,
 	toggleFisrtExecuteClick: () => {},
 	faucets: {},
-	createFaucet: () => {}
+	createFaucet: () => {},
+	createNoteFaucet: () => {}
 });
 
 export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
@@ -157,6 +159,17 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			return newFaucets;
 		});
 		account.addAsset(faucetId, amount);
+	};
+
+	const createNoteFaucet = (name: string, amount: bigint, noteId: string) => {
+		const note = notes[noteId];
+		const faucetId = generateFaucetId().id;
+		setFaucets((prev) => {
+			const newFaucets = prev;
+			newFaucets[faucetId] = name;
+			return newFaucets;
+		});
+		note.addAsset(faucetId, amount);
 	};
 
 	const toggleFisrtExecuteClick = () => {
@@ -699,7 +712,8 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				firstExecuteClick,
 				toggleFisrtExecuteClick,
 				createFaucet,
-				faucets
+				faucets,
+				createNoteFaucet
 			}}
 		>
 			{children}
