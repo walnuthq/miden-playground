@@ -20,6 +20,6 @@ export interface EditorFileDynamicContent {
 	};
 	note?: {
 		noteId: string;
-		variant: 'metadata';
+		variant: 'metadata' | 'vault';
 	};
 }
