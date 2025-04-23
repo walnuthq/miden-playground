@@ -1,9 +1,25 @@
+'use client';
 import InlineIcon from './ui/inline-icon';
 import Image from 'next/image';
 import logo from '../app/images/miden_logo.png';
 import Link from 'next/link';
+import { useNextStep } from 'nextstepjs';
+import { useEffect } from 'react';
 
 export function Header() {
+	const {
+		startNextStep
+		// closeNextStep,
+		// currentTour,
+		// currentStep,
+		// setCurrentStep,
+		// isNextStepVisible
+	} = useNextStep();
+
+	useEffect(() => {
+		startNextStep('mainTour');
+	}, [startNextStep]);
+
 	return (
 		<div className="h-full text-theme-text flex justify-between items-center">
 			<div className="font-bold text-xl flex items-center gap-1">

@@ -35,7 +35,7 @@ const AccountCodeFile = ({
 		setValue(accountFile);
 	}, [accountFile]);
 	return (
-		<div className="relative text-theme-text">
+		<div className={`relative text-theme-text ${account.name === 'Account C' && 'tutorial-acc'}`}>
 			<div className="">
 				{' '}
 				<div className="flex flex-col">

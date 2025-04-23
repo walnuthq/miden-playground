@@ -114,7 +114,7 @@ export function InspectorItem({
 				{onCreate && onCreateOptions && (
 					<DropdownMenu>
 						<DropdownMenuTrigger>
-							<div className="cursor-pointer hover:bg-theme-border rounded-theme p-1">
+							<div id="step2" className="cursor-pointer hover:bg-theme-border rounded-theme p-1">
 								<InlineIcon variant="file-plus" color="white" className="w-4 h-4 opacity-80" />
 							</div>
 						</DropdownMenuTrigger>

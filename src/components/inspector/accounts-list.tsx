@@ -45,6 +45,7 @@ const AccountsList = ({
 			{!isCollapsedAccTopLevel &&
 				Object.values(accounts).map((account) => {
 					const isCollapsed = collapsedAccounts[account.id.id] || false;
+					console.log('account.name', account.name);
 					return (
 						<React.Fragment key={account.id.id}>
 							<InspectorItem
@@ -86,12 +87,14 @@ const AccountsList = ({
 										isSelected={selectedFileId === account.metadataFileId}
 										level={2}
 									/>
-									<FileItem
-										editorFile={files[account.scriptFileId]}
-										isSelected={selectedFileId === account.scriptFileId}
-										onClick={() => selectFile(account.scriptFileId)}
-										level={2}
-									/>
+									<div id={account.name === 'Account C' ? 'step3' : ''}>
+										<FileItem
+											editorFile={files[account.scriptFileId]}
+											isSelected={selectedFileId === account.scriptFileId}
+											onClick={() => selectFile(account.scriptFileId)}
+											level={2}
+										/>
+									</div>
 									<FileItem
 										editorFile={files[account.vaultFileId]}
 										onClick={() => selectFile(account.vaultFileId)}

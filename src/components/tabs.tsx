@@ -27,6 +27,7 @@ export const Tabs = () => {
 				Compose transaction
 			</div>
 			<div
+				id="step1"
 				className={`p-3 w-[210px] font-semibold border-r border-t rounded-tr-miden text-sm border-theme-border flex flex-row items-center gap-2 cursor-pointer select-none ${
 					selectedTab === 'assets'
 						? 'bg-theme-surface-highlight text-theme-text'
