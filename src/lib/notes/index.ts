@@ -88,7 +88,7 @@ export class Note {
 			},
 			[metadataFileId]: {
 				id: metadataFileId,
-				name: `Metadata`,
+				name: `Info`,
 				content: { dynamic: { note: { noteId, variant: 'metadata' } } },
 				isOpen: false,
 				variant: 'file',

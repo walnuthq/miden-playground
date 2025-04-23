@@ -3,6 +3,7 @@ import { generateId } from '@/lib/utils';
 import { Note } from '@/lib/notes';
 import { EditorFiles } from '../files';
 import json5 from 'json5';
+import { DEFAULT_FAUCET_IDS } from '../consts/defaults';
 
 export function createP2IDRNote({
 	senderId,
@@ -55,7 +56,7 @@ export function createP2IDRNote({
 		},
 		[metadataFileId]: {
 			id: metadataFileId,
-			name: `Metadata`,
+			name: `Info`,
 			content: { dynamic: { note: { noteId, variant: 'metadata' } } },
 			isOpen: false,
 			variant: 'file',
@@ -71,6 +72,16 @@ export function createP2IDRNote({
 		}
 	};
 
+	const hasDefault0 = assets.some((asset) => asset.faucetId === DEFAULT_FAUCET_IDS[0]);
+	const hasDefault1 = assets.some((asset) => asset.faucetId === DEFAULT_FAUCET_IDS[1]);
+
+	if (!hasDefault0) {
+		assets.push({ faucetId: DEFAULT_FAUCET_IDS[0], amount: 0n });
+	}
+
+	if (!hasDefault1) {
+		assets.push({ faucetId: DEFAULT_FAUCET_IDS[1], amount: 0n });
+	}
 	const note = new Note({
 		id: noteId,
 		name,

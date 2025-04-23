@@ -4,6 +4,7 @@ import { createSwapNotes } from '@/lib/miden-wasm-api';
 import { Note } from '@/lib/notes';
 import { EditorFiles } from '../files';
 import json5 from 'json5';
+import { DEFAULT_FAUCET_IDS } from '../consts/defaults';
 
 export function createSwapNote({
 	senderId,
@@ -88,7 +89,7 @@ export function createSwapNote({
 		},
 		[metadataFileId]: {
 			id: metadataFileId,
-			name: `Metadata`,
+			name: `Info`,
 			content: { dynamic: { note: { noteId, variant: 'metadata' } } },
 			isOpen: false,
 			variant: 'note',
@@ -122,7 +123,7 @@ export function createSwapNote({
 		},
 		[paybackMetadataFileId]: {
 			id: paybackMetadataFileId,
-			name: `Payback Metadata`,
+			name: `Info`,
 			content: { dynamic: { note: { noteId: paybackNoteId, variant: 'metadata' } } },
 			isOpen: false,
 			variant: 'note',
@@ -138,13 +139,22 @@ export function createSwapNote({
 		}
 	};
 
+	const paybackRequestedAssets = [requestedAsset];
+	if (requestedAsset.faucetId !== DEFAULT_FAUCET_IDS[0]) {
+		paybackRequestedAssets.push({ faucetId: DEFAULT_FAUCET_IDS[0], amount: 0n });
+	}
+
+	if (requestedAsset.faucetId !== DEFAULT_FAUCET_IDS[1]) {
+		paybackRequestedAssets.push({ faucetId: DEFAULT_FAUCET_IDS[1], amount: 0n });
+	}
+
 	const paybackNote = new Note({
 		id: paybackNoteId,
 		name: `Payback ${name}`,
 		scriptFileId: paybackScriptFileId,
 		metadataFileId: paybackMetadataFileId,
 		isConsumed: false,
-		assets: [requestedAsset],
+		assets: paybackRequestedAssets,
 		inputFileId: paybackInputFileId,
 		senderId: paybackNoteData.sender_id(),
 		vaultFileId: paybackVaultFileId,
@@ -152,13 +162,22 @@ export function createSwapNote({
 		isExpectedOutput: true
 	});
 
+	const swapAssets = [offeredAsset];
+
+	// if (offeredAsset.faucetId !== DEFAULT_FAUCET_IDS[0]) {
+	// 	swapAssets.push({ faucetId: DEFAULT_FAUCET_IDS[0], amount: 0n });
+	// }
+
+	// if (offeredAsset.faucetId !== DEFAULT_FAUCET_IDS[1]) {
+	// 	swapAssets.push({ faucetId: DEFAULT_FAUCET_IDS[1], amount: 0n });
+	// }
 	const note = new Note({
 		id: noteId,
 		name,
 		scriptFileId,
 		metadataFileId,
 		isConsumed: false,
-		assets: [offeredAsset],
+		assets: swapAssets,
 		inputFileId,
 		senderId: senderId.id,
 		vaultFileId

@@ -40,6 +40,10 @@ export function defaultNotes(
 			{
 				faucetId: DEFAULT_FAUCET_IDS[0],
 				amount: 100n
+			},
+			{
+				faucetId: DEFAULT_FAUCET_IDS[1],
+				amount: 0n
 			}
 		],
 		name: 'P2ID'
@@ -48,6 +52,10 @@ export function defaultNotes(
 		senderId: accountId1,
 		receiverId: accountId2,
 		assets: [
+			{
+				faucetId: DEFAULT_FAUCET_IDS[0],
+				amount: 0n
+			},
 			{
 				faucetId: DEFAULT_FAUCET_IDS[1],
 				amount: 200n

@@ -89,6 +89,7 @@ interface MidenContextProps {
 	faucets: Faucets;
 	createFaucet: (name: string, amount: bigint, accountId: string) => void;
 	createNoteFaucet: (name: string, amount: bigint, noteId: string) => void;
+	addNewInput: (noteId: string, newInput: string) => void;
 }
 
 export const MidenContext = createContext<MidenContextProps>({
@@ -137,7 +138,8 @@ export const MidenContext = createContext<MidenContextProps>({
 	toggleFisrtExecuteClick: () => {},
 	faucets: {},
 	createFaucet: () => {},
-	createNoteFaucet: () => {}
+	createNoteFaucet: () => {},
+	addNewInput: () => {}
 });
 
 export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
@@ -159,6 +161,31 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			return newFaucets;
 		});
 		account.addAsset(faucetId, amount);
+	};
+
+	const addNewInput = (noteId: string, newInput: string) => {
+		const note = notes[noteId];
+		try {
+			let currentInputs = [];
+
+			if (files[note!.inputFileId].content.value) {
+				try {
+					currentInputs = json5.parse(files[note!.inputFileId].content.value!);
+				} catch (error) {
+					console.error(error);
+					currentInputs = [];
+				}
+			}
+
+			if (!Array.isArray(currentInputs)) {
+				currentInputs = [];
+			}
+			currentInputs.push(newInput);
+
+			updateFileContent(note!.inputFileId, JSON.stringify(currentInputs));
+		} catch (error) {
+			console.error(error);
+		}
 	};
 
 	const createNoteFaucet = (name: string, amount: bigint, noteId: string) => {
@@ -321,7 +348,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		const consumedNotesIds: string[] = [];
 		for (const noteId of selectedTransactionNotesIds) {
 			const note = notes[noteId];
-
 			if (note.isConsumed) {
 				addErrorLog(`${note.name} is already consumed`);
 				setIsExecutingTransaction(false);
@@ -362,7 +388,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			if (!output.assets.some((a) => a.faucetId === DEFAULT_FAUCET_IDS[1])) {
 				output.assets.push({ faucetId: DEFAULT_FAUCET_IDS[1], amount: 0n });
 			}
-			console.log(output.assets);
 			const accountUpdates: AccountUpdates = {
 				accountId: selectedTransactionAccountId,
 				assetsDelta: output.assets.reduce((acc, asset) => {
@@ -713,7 +738,8 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				toggleFisrtExecuteClick,
 				createFaucet,
 				faucets,
-				createNoteFaucet
+				createNoteFaucet,
+				addNewInput
 			}}
 		>
 			{children}

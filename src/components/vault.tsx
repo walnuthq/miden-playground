@@ -55,7 +55,6 @@ export function Vault({
 		const newAmountInt = newAmount ? parseInt(newAmount) : 0;
 		if (noteId) {
 			updateNoteAssetAmount(noteId, faucetId, () => BigInt(newAmountInt));
-			console.log('sss');
 		} else if (accountId) {
 			updateAccountAssetAmount(accountId, faucetId, () => BigInt(newAmountInt));
 		}
