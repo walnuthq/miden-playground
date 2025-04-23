@@ -1,6 +1,7 @@
 import { useMiden } from '@/lib/context-providers';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FileItem, InspectorItem } from '.';
+import { useNextStep } from 'nextstepjs';
 
 const AccountsList = ({
 	toggleCollapse
@@ -23,6 +24,14 @@ const AccountsList = ({
 	} = useMiden();
 	const [collapsedAccounts, setCollapsedAccounts] = useState<Record<string, boolean>>({});
 	const isCollapsedAccTopLevel = collapsedAccounts['top-level-accounts'] || false;
+	const { currentStep } = useNextStep();
+
+	useEffect(() => {
+		if (currentStep === 1) {
+			createAccount();
+		}
+	}, [currentStep]);
+	console.log('currentStep', currentStep);
 
 	return (
 		<>
