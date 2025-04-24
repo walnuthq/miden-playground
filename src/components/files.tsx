@@ -4,7 +4,7 @@ import { CustomMonacoEditor } from './custom-monaco-editor';
 import { EditorFile } from '@/lib/files';
 import { useEffect, useState } from 'react';
 import { Vault } from './vault';
-import { ScrollArea } from './ui/scroll-area';
+import { ScrollArea, ScrollBar } from './ui/scroll-area';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import json5 from 'json5';
 import { useToast } from '@/hooks/use-toast';
@@ -139,7 +139,7 @@ export const Files = () => {
 		};
 
 		return (
-			<ScrollArea className="flex-1 bg-[#040113] overflow-auto h-full ">
+			<ScrollArea className="flex-1 bg-[#040113] overflow-auto h-full pr-4">
 				<div className="p-4 text-theme-text text-sm">
 					<div>INPUTS</div>
 					<div className="w-fit mt-2">
@@ -235,6 +235,7 @@ export const Files = () => {
 						</div>
 					</div>
 				</div>
+				<ScrollBar orientation="horizontal" />
 			</ScrollArea>
 		);
 	} else {
