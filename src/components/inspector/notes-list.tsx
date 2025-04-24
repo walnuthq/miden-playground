@@ -120,15 +120,15 @@ const NotesList = ({
 								{!isCollapsed && (
 									<div className="flex flex-col">
 										<FileItem
-											editorFile={files[note.scriptFileId]}
-											onClick={() => selectFile(note.scriptFileId)}
-											isSelected={selectedFileId === note.scriptFileId}
-											level={2}
-										/>
-										<FileItem
 											editorFile={files[note.metadataFileId]}
 											onClick={() => selectFile(note.metadataFileId)}
 											isSelected={selectedFileId === note.metadataFileId}
+											level={2}
+										/>
+										<FileItem
+											editorFile={files[note.scriptFileId]}
+											onClick={() => selectFile(note.scriptFileId)}
+											isSelected={selectedFileId === note.scriptFileId}
 											level={2}
 										/>
 									</div>

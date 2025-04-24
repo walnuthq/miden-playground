@@ -45,7 +45,6 @@ export const ComposeTransactionTab = () => {
 	const selectedAccountData = selectedTransactionAccountId
 		? accounts[selectedTransactionAccountId]
 		: null;
-	console.log(accountUpdates);
 	const [isOpenDropdown, setIsOpenDropdown] = useState(false);
 	const [_blockNumber, _setBlockNumber] = useState(blockNumber.toString());
 	return (

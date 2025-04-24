@@ -89,7 +89,7 @@ interface MidenContextProps {
 	faucets: Faucets;
 	createFaucet: (name: string, amount: bigint, accountId: string) => void;
 	createNoteFaucet: (name: string, amount: bigint, noteId: string) => void;
-	addNewInput: (noteId: string, newInput: string) => void;
+	handleChangeInput: (noteId: string, newInput: string, index: number) => void;
 }
 
 export const MidenContext = createContext<MidenContextProps>({
@@ -139,7 +139,7 @@ export const MidenContext = createContext<MidenContextProps>({
 	faucets: {},
 	createFaucet: () => {},
 	createNoteFaucet: () => {},
-	addNewInput: () => {}
+	handleChangeInput: () => {}
 });
 
 export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
@@ -163,7 +163,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		account.addAsset(faucetId, amount);
 	};
 
-	const addNewInput = (noteId: string, newInput: string) => {
+	const handleChangeInput = (noteId: string, newInput: string, index: number) => {
 		const note = notes[noteId];
 		try {
 			let currentInputs = [];
@@ -180,7 +180,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			if (!Array.isArray(currentInputs)) {
 				currentInputs = [];
 			}
-			currentInputs.push(newInput);
+			currentInputs[index] = newInput;
 
 			updateFileContent(note!.inputFileId, JSON.stringify(currentInputs));
 		} catch (error) {
@@ -739,7 +739,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				createFaucet,
 				faucets,
 				createNoteFaucet,
-				addNewInput
+				handleChangeInput
 			}}
 		>
 			{children}

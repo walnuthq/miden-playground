@@ -69,7 +69,7 @@ const useSelectedEditorFile = (): { content: string; file: EditorFile | null } =
 };
 
 export const Files = () => {
-	const { selectedFileId, updateFileContent, accountUpdates, files, notes, addNewInput } =
+	const { selectedFileId, updateFileContent, accountUpdates, files, notes, handleChangeInput } =
 		useMiden();
 	const { content, file } = useSelectedEditorFile();
 	const [newInput, setNewInput] = useState('');
@@ -115,7 +115,7 @@ export const Files = () => {
 	} else if (file?.content?.dynamic?.note?.variant === 'metadata') {
 		const handleAddInput = () => {
 			if (newInput.trim() !== '') {
-				addNewInput(note!.id, newInput);
+				handleChangeInput(note!.id, newInput, parsedInputs().length);
 				setNewInput('');
 			} else {
 				toast({
@@ -147,8 +147,15 @@ export const Files = () => {
 							<Table className="[&_tr:hover]:bg-transparent">
 								<TableBody>
 									{parsedInputs().map((input, index) => (
-										<TableRow key={`${input}-${index}`}>
-											<TableCell className="pr-8 last:p-2">{input}</TableCell>
+										<TableRow key={`input-${note!.id}-${index}`}>
+											<TableCell>
+												<input
+													type="number"
+													value={input}
+													onChange={(e) => handleChangeInput(note!.id, e.target.value, index)}
+													className="bg-transparent outline-none"
+												/>
+											</TableCell>
 										</TableRow>
 									))}
 									<TableRow>
