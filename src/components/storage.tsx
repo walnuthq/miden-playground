@@ -15,13 +15,16 @@ import { ScrollArea } from './ui/scroll-area';
 
 export function Storage({
 	accountId,
-	className
+	className,
+	withoutOldValue = false
 }: {
 	accountId: string | null;
 	className?: string;
+	withoutOldValue?: boolean;
 }) {
 	const { accounts, files, accountStorageDiffs } = useMiden();
 
+	console.log('accountId', accountId);
 	const account = accountId ? accounts[accountId] : null;
 	const editableStorage = account?.storageFileId
 		? Account.parseStorage(files[account?.storageFileId].content.value!)
@@ -38,7 +41,7 @@ export function Storage({
 					<TableRow>
 						<TableHead className="pr-4">Index</TableHead>
 						<TableHead className="pr-4">Value</TableHead>
-						<TableHead className="pr-4">Old value</TableHead>
+						{!withoutOldValue && <TableHead className="pr-4">Old value</TableHead>}
 					</TableRow>
 				</TableHeader>
 				<TableBody>
@@ -48,11 +51,13 @@ export function Storage({
 								<TableRow key={`${index}-${subIndex}`}>
 									<TableCell className="pr-8 last:p-2">{subIndex === 0 ? index : ''}</TableCell>
 									<TableCell className="pr-8 last:p-2">{String(value)}</TableCell>
-									<TableCell className="pr-8 last:p-2 font-mono text-theme-danger">
-										{accountStorageDiffs[index] && accountStorageDiffs[index]?.old
-											? accountStorageDiffs[index]?.old[subIndex]
-											: ''}
-									</TableCell>
+									{!withoutOldValue && (
+										<TableCell className="pr-8 last:p-2 font-mono text-theme-danger">
+											{accountStorageDiffs[index] && accountStorageDiffs[index]?.old
+												? accountStorageDiffs[index]?.old[subIndex]
+												: ''}
+										</TableCell>
+									)}
 								</TableRow>
 							))
 						)
