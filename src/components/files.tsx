@@ -139,7 +139,7 @@ export const Files = () => {
 		};
 
 		return (
-			<div className="flex-1 bg-[#040113]">
+			<ScrollArea className="flex-1 bg-[#040113] overflow-auto h-full ">
 				<div className="p-4 text-theme-text text-sm">
 					<div>INPUTS</div>
 					<div className="w-fit mt-2">
@@ -228,7 +228,7 @@ export const Files = () => {
 						</div>
 					</div>
 				</div>
-			</div>
+			</ScrollArea>
 		);
 	} else {
 		return (
