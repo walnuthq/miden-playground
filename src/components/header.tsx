@@ -5,6 +5,7 @@ import logo from '../app/images/miden_logo.png';
 import Link from 'next/link';
 import { useNextStep } from 'nextstepjs';
 import { useEffect } from 'react';
+import { useMiden } from '@/lib/context-providers';
 
 export function Header() {
 	const {
@@ -15,6 +16,8 @@ export function Header() {
 		// setCurrentStep,
 		// isNextStepVisible
 	} = useNextStep();
+
+	const { selectTab } = useMiden();
 
 	useEffect(() => {
 		startNextStep('mainTour');
@@ -30,6 +33,15 @@ export function Header() {
 				</div>
 			</div>
 			<div className="flex items-center">
+				<div
+					onClick={() => {
+						selectTab('transaction');
+						startNextStep('mainTour');
+					}}
+					className="font-bold text-theme-text-subtle flex items-center gap-1 text-base cursor-pointer px-2 rounded-theme hover:bg-theme-border transition-all"
+				>
+					Start tutorial
+				</div>
 				<Link
 					href="/instructions"
 					className="font-bold text-theme-text-subtle flex items-center gap-1 text-base cursor-pointer px-2 rounded-theme hover:bg-theme-border transition-all"

@@ -1,5 +1,5 @@
 import { useMiden } from '@/lib/context-providers';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { FileItem, InspectorItem } from '.';
 import { useNextStep } from 'nextstepjs';
 
@@ -24,15 +24,14 @@ const AccountsList = ({
 	} = useMiden();
 	const [collapsedAccounts, setCollapsedAccounts] = useState<Record<string, boolean>>({});
 	const isCollapsedAccTopLevel = collapsedAccounts['top-level-accounts'] || false;
-	const { currentStep } = useNextStep();
-
-	useEffect(() => {
-		if (currentStep === 1) {
-			createAccount();
-		}
-	}, [currentStep]);
-	console.log('currentStep', currentStep);
-
+	const {
+		// startNextStep
+		// closeNextStep,
+		// currentTour,
+		currentStep,
+		setCurrentStep
+		// isNextStepVisible
+	} = useNextStep();
 	return (
 		<>
 			<InspectorItem
@@ -42,6 +41,9 @@ const AccountsList = ({
 				onCreate={(option) => {
 					if (option === 'Create new account') {
 						createAccount();
+						if (currentStep === 1) {
+							setCurrentStep(2);
+						}
 					}
 				}}
 				onCreateOptions={['Create new account']}
@@ -52,7 +54,7 @@ const AccountsList = ({
 				}}
 			/>
 			{!isCollapsedAccTopLevel &&
-				Object.values(accounts).map((account) => {
+				Object.values(accounts).map((account, index) => {
 					const isCollapsed = collapsedAccounts[account.id.id] || false;
 					console.log('account.name', account.name);
 					return (
@@ -90,17 +92,29 @@ const AccountsList = ({
 
 							{!isCollapsed && (
 								<div className="flex flex-col">
-									<FileItem
-										editorFile={files[account.metadataFileId]}
-										onClick={() => selectFile(account.metadataFileId)}
-										isSelected={selectedFileId === account.metadataFileId}
-										level={2}
-									/>
-									<div id={account.name === 'Account C' ? 'step3' : ''}>
+									<div id={Object.values(accounts).length - 1 === index ? 'step19' : ''}>
+										<FileItem
+											editorFile={files[account.metadataFileId]}
+											onClick={() => {
+												selectFile(account.metadataFileId);
+												if (currentStep === 18) {
+													setCurrentStep(19, 100);
+												}
+											}}
+											isSelected={selectedFileId === account.metadataFileId}
+											level={2}
+										/>
+									</div>
+									<div id={Object.values(accounts).length - 1 === index ? 'step3' : ''}>
 										<FileItem
 											editorFile={files[account.scriptFileId]}
 											isSelected={selectedFileId === account.scriptFileId}
-											onClick={() => selectFile(account.scriptFileId)}
+											onClick={() => {
+												selectFile(account.scriptFileId);
+												if (currentStep === 2) {
+													setCurrentStep(3);
+												}
+											}}
 											level={2}
 										/>
 									</div>

@@ -2,19 +2,28 @@
 
 import InlineIcon from '@/components/ui/inline-icon';
 import { useMiden } from '@/lib/context-providers';
+import { useNextStep } from 'nextstepjs';
 
 export const Tabs = () => {
 	const { selectedTab, selectTab } = useMiden();
-
+	const { currentStep, setCurrentStep } = useNextStep();
 	return (
 		<div className="flex  flex-row ">
 			<div
+				id="step5"
 				className={`p-3 w-[210px]  font-semibold border-x border-t border-theme-border rounded-tl-miden text-sm flex flex-row items-center gap-2 cursor-pointer select-none ${
 					selectedTab === 'transaction'
 						? 'bg-theme-surface-highlight text-theme-text'
 						: 'text-theme-text-subtle'
 				}`}
 				onClick={() => {
+					if (currentStep === 4) {
+						setCurrentStep(5, 100);
+					} else if (currentStep === 8) {
+						setCurrentStep(9, 100);
+					} else if (currentStep === 13) {
+						setCurrentStep(14, 100);
+					}
 					selectTab('transaction');
 				}}
 			>
@@ -34,6 +43,11 @@ export const Tabs = () => {
 						: 'text-theme-text-subtle'
 				}`}
 				onClick={() => {
+					if (currentStep === 0) {
+						setCurrentStep(1, 100);
+					} else if (currentStep === 16) {
+						setCurrentStep(17, 100);
+					}
 					selectTab('assets');
 				}}
 			>

@@ -100,7 +100,7 @@ export const Files = () => {
 		);
 	} else {
 		return (
-			<div className="flex-1 bg-[#040113]">
+			<div className={`flex-1 bg-[#040113] ${'step8'}`}>
 				<CustomMonacoEditor
 					lang={file.name !== 'Script' ? 'javascript' : 'masm'}
 					onChange={(value) => {

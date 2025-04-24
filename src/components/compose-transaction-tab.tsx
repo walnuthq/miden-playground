@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useMiden } from '@/lib/context-providers';
 import { Vault } from '@/components/vault';
 import { Console } from '@/components/console';
@@ -19,6 +19,7 @@ import NoteCard from './note-card';
 import InlineIcon from './ui/inline-icon';
 import Link from 'next/link';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import { useNextStep } from 'nextstepjs';
 
 export const ComposeTransactionTab = () => {
 	const {
@@ -48,6 +49,20 @@ export const ComposeTransactionTab = () => {
 	console.log(accountUpdates);
 	const [isOpenDropdown, setIsOpenDropdown] = useState(false);
 	const [_blockNumber, _setBlockNumber] = useState(blockNumber.toString());
+	const { currentStep, setCurrentStep } = useNextStep();
+	const [isAccountDropdownOpen, setIsAccountDropdownOpen] = useState(false);
+	useEffect(() => {
+		if (currentStep === 4) {
+			setIsAccountDropdownOpen(true);
+		}
+	}, [currentStep]);
+
+	useEffect(() => {
+		if (currentStep === 9) {
+			setCurrentStep(10, 100);
+		}
+	}, [isOpenDropdown]);
+
 	return (
 		<>
 			<ResizablePanelGroup direction="horizontal">
@@ -85,21 +100,37 @@ export const ComposeTransactionTab = () => {
 								</TooltipProvider>
 								<div>
 									{Object.values(accounts).length > 0 ? (
-										<DropdownMenu>
+										<DropdownMenu
+											open={isAccountDropdownOpen}
+											onOpenChange={setIsAccountDropdownOpen}
+										>
 											<DropdownMenuTrigger>
 												<div className="px-2 text-theme-text  hover:bg-theme-border rounded-miden transition-all flex flex-row items-center gap-2 cursor-pointer">
 													<span className="">{selectedAccountData?.name}</span>
 													<InlineIcon variant="arrow" className="w-3 h-3 rotate-90" />
 												</div>
 											</DropdownMenuTrigger>
-											<DropdownMenuContent>
+											<DropdownMenuContent
+												onInteractOutside={(event) => {
+													if (currentStep === 5) {
+														event.preventDefault();
+													}
+												}}
+											>
 												{Object.values(accounts)
 													.filter((account) => account.id.id !== selectedTransactionAccountId)
-													.map((account) => (
+													.map((account, index) => (
 														<DropdownMenuItem
+															className={`${
+																index === Object.values(accounts).length - 2 ? 'step6' : ''
+															}`}
 															key={account.id.id}
 															onClick={() => {
 																selectTransactionAccount(account.id.id);
+																if (currentStep === 5) {
+																	selectTab('assets');
+																	setCurrentStep(6, 100);
+																}
 															}}
 														>
 															{account.name}
@@ -220,10 +251,19 @@ export const ComposeTransactionTab = () => {
 							).length > 0 && (
 								<div className="mt-6">
 									<DropdownMenu open={isOpenDropdown} onOpenChange={setIsOpenDropdown}>
-										<DropdownMenuTrigger className="w-full  border border-theme-border transition-all rounded-miden px-4 py-1 bg-theme-surface-highlight  text-theme-text hover:bg-theme-border">
+										<DropdownMenuTrigger
+											id="step10"
+											className="w-full border border-theme-border transition-all rounded-miden px-4 py-1 bg-theme-surface-highlight  text-theme-text hover:bg-theme-border"
+										>
 											<span className="select-none">Add note</span>
 										</DropdownMenuTrigger>
-										<DropdownMenuContent>
+										<DropdownMenuContent
+											onInteractOutside={(event) => {
+												if (currentStep === 10) {
+													event.preventDefault();
+												}
+											}}
+										>
 											{Object.values(notes)
 												.filter(
 													(note) =>
@@ -231,11 +271,24 @@ export const ComposeTransactionTab = () => {
 														!note.isConsumed &&
 														!note.isExpectedOutput
 												)
-												.map((note) => (
+												.map((note, index) => (
 													<DropdownMenuItem
+														className={`${
+															Object.values(notes).filter(
+																(note) =>
+																	!selectedTransactionNotesIds.includes(note.id) &&
+																	!note.isConsumed &&
+																	!note.isExpectedOutput
+															).length -
+																1 ===
+															index
+																? 'step11'
+																: ''
+														}`}
 														key={note.id}
 														onClick={() => {
 															selectTransactionNote(note.id);
+															setCurrentStep(11, 100);
 														}}
 													>
 														{note.name}
@@ -280,7 +333,10 @@ export const ComposeTransactionTab = () => {
 									onClick={() => {
 										selectFile(TRANSACTION_SCRIPT_FILE_ID);
 										selectTab('assets');
+
+										setCurrentStep(12, 100);
 									}}
+									id="step12"
 									className="w-full flex justify-center gap-2 border items-center border-theme-border rounded-miden px-4 py-1 bg-theme-surface-highlight  text-theme-text hover:bg-theme-border transition-all"
 								>
 									<span>Edit Transaction Script</span>
@@ -293,7 +349,9 @@ export const ComposeTransactionTab = () => {
 									onClick={() => {
 										executeTransaction();
 										toggleFisrtExecuteClick();
+										setCurrentStep(15, 100);
 									}}
+									id="step15"
 									className={`w-full outline-none border border-theme-border rounded-miden px-4 py-1 transition-all text-theme-text ${
 										!firstExecuteClick || selectedTransactionNotesIds.length > 0
 											? 'bg-theme-primary hover:bg-theme-primary-hover'
@@ -321,7 +379,10 @@ export const ComposeTransactionTab = () => {
 						<ResizablePanelGroup direction="vertical">
 							<ResizablePanel defaultSize={75}>
 								{accountUpdates !== null ? (
-									<ScrollArea className="relative h-full pt-5 px-4 overflow-auto text-theme-text">
+									<ScrollArea
+										id="step16"
+										className="relative h-full pt-5 px-4 overflow-auto text-theme-text"
+									>
 										<div className="flex justify-center">EXECUTION OUTPUT</div>
 										<div className="mt-6">OUTPUT NOTES</div>
 										<div className="mt-2">
