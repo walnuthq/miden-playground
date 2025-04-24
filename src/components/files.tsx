@@ -88,7 +88,7 @@ export const Files = () => {
 		);
 	} else if (file?.content?.dynamic?.account?.variant === 'metadata') {
 		return (
-			<div className="flex-1 bg-[#040113]">
+			<ScrollArea className="flex-1 bg-[#040113] overflow-auto h-full ">
 				<div className="p-4 text-theme-text text-sm">
 					<div>INFO</div>
 					<div className="w-fit mt-2">
@@ -123,7 +123,7 @@ export const Files = () => {
 					<div className="mt-6 mb-2">STORAGE</div>
 					{account && <Storage className="h-72" accountId={account?.id.id} withoutOldValue />}
 				</div>
-			</div>
+			</ScrollArea>
 		);
 	} else {
 		return (
