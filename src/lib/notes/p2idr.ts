@@ -4,6 +4,7 @@ import { Note } from '@/lib/notes';
 import { EditorFiles } from '../files';
 import json5 from 'json5';
 import { DEFAULT_FAUCET_IDS } from '../consts/defaults';
+import { generateNoteTag } from '@/lib/miden-wasm-api';
 
 export function createP2IDRNote({
 	senderId,
@@ -26,6 +27,7 @@ export function createP2IDRNote({
 	const inputFileId = generateId();
 	const metadataFileId = generateId();
 	const vaultFileId = generateId();
+	const tag = generateNoteTag(senderId.id);
 	const inputsString = json5.stringify(
 		[receiverId.suffix.toString(), receiverId.prefix.toString(), reclaimBlockHeight],
 		null,
@@ -91,7 +93,9 @@ export function createP2IDRNote({
 		inputFileId,
 		senderId: senderId.id,
 		metadataFileId,
-		vaultFileId
+		vaultFileId,
+		tag,
+		aux: BigInt(0)
 	});
 	const serialNumberString = note.serialNumberDecimalString.slice(0, 10);
 	note.name = `${name} - ${serialNumberString}`;

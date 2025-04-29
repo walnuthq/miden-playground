@@ -203,25 +203,26 @@ export const Files = () => {
 											{note!.serialNumberDecimalString}
 										</TableCell>
 										<TableCell>
-											{' '}
 											<input
+												value={note!.aux.toString()}
 												type="number"
 												className="bg-transparent outline-none w-20"
 												min={0}
 												maxLength={10}
+												onChange={(e) => {}}
 											/>
 										</TableCell>
 										<TableCell>
-											{' '}
 											<input
+												value={note!.tag}
 												type="number"
 												className="bg-transparent outline-none w-20"
 												min={0}
 												maxLength={10}
+												onChange={(e) => {}}
 											/>
 										</TableCell>
 										<TableCell>
-											{' '}
 											<input
 												type="number"
 												className="bg-transparent outline-none w-20"

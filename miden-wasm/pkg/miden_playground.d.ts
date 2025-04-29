@@ -6,6 +6,8 @@ export function generate_note_serial_number(seed: Uint8Array): BigUint64Array;
 export function execute_transaction(transaction_script: string, receiver: AccountData, notes: (NoteData)[], block_number: bigint): any;
 export function create_swap_note(seed: Uint8Array, sender_account_id: string, receiver_account_id: string, requested_asset: AssetData): CreateSwapNoteResult;
 export function get_note_id(note: NoteData): string;
+export function generate_note_tag(sender_account_id: string): number;
+export function compute_recipient_digest(note: NoteData): string;
 export class AccountData {
   free(): void;
   constructor(account_code: string, secret_key: Uint8Array, account_id: string, assets: (AssetData)[], wallet_enabled: boolean, auth_enabled: boolean, storage: (WordData)[]);
@@ -31,13 +33,15 @@ export class CreateSwapNoteResult {
 }
 export class NoteData {
   free(): void;
-  constructor(assets: (AssetData)[], inputs: BigUint64Array, script: string, sender_id: string, sender_script: string, serial_number: BigUint64Array, id?: string);
+  constructor(assets: (AssetData)[], inputs: BigUint64Array, script: string, sender_id: string, sender_script: string, serial_number: BigUint64Array, tag: number, aux: bigint, id?: string);
   inputs(): BigUint64Array;
   script(): string;
   sender_id(): string;
   sender_script(): string;
   serial_number(): BigUint64Array;
   id(): string | undefined;
+  tag(): number;
+  aux(): bigint;
 }
 export class WordData {
   free(): void;
@@ -57,6 +61,8 @@ export interface InitOutput {
   readonly createswapnoteresult_payback_note: (a: number) => number;
   readonly create_swap_note: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => [number, number, number];
   readonly get_note_id: (a: number) => [number, number, number, number];
+  readonly generate_note_tag: (a: number, b: number) => [number, number, number];
+  readonly compute_recipient_digest: (a: number) => [number, number, number, number];
   readonly __wbg_accountiddata_free: (a: number, b: number) => void;
   readonly __wbg_get_accountiddata_id: (a: number) => [number, number];
   readonly __wbg_set_accountiddata_id: (a: number, b: number, c: number) => void;
@@ -73,13 +79,15 @@ export interface InitOutput {
   readonly __wbg_set_assetdata_faucet_id: (a: number, b: number, c: number) => void;
   readonly assetdata_new: (a: number, b: number, c: bigint) => number;
   readonly __wbg_notedata_free: (a: number, b: number) => void;
-  readonly notedata_new: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number, l: number, m: number, n: number) => number;
+  readonly notedata_new: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number, l: number, m: number, n: bigint, o: number, p: number) => number;
   readonly notedata_inputs: (a: number) => [number, number];
   readonly notedata_script: (a: number) => [number, number];
   readonly notedata_sender_id: (a: number) => [number, number];
   readonly notedata_sender_script: (a: number) => [number, number];
   readonly notedata_serial_number: (a: number) => [number, number];
   readonly notedata_id: (a: number) => [number, number];
+  readonly notedata_tag: (a: number) => number;
+  readonly notedata_aux: (a: number) => bigint;
   readonly __wbg_get_assetdata_amount: (a: number) => bigint;
   readonly __wbg_set_assetdata_amount: (a: number, b: bigint) => void;
   readonly __wbindgen_exn_store: (a: number) => void;

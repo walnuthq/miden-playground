@@ -1,6 +1,6 @@
 import { AccountId, Asset } from '@/lib/types';
 import { generateId } from '@/lib/utils';
-import { createSwapNotes } from '@/lib/miden-wasm-api';
+import { createSwapNotes, generateNoteTag } from '@/lib/miden-wasm-api';
 import { Note } from '@/lib/notes';
 import { EditorFiles } from '../files';
 import json5 from 'json5';
@@ -28,6 +28,7 @@ export function createSwapNote({
 	const inputFileId = generateId();
 	const metadataFileId = generateId();
 	const vaultFileId = generateId();
+	const tag = generateNoteTag(senderId.id);
 	const { swapNoteInputs, paybackNote: paybackNoteData } = createSwapNotes(
 		senderId.id,
 		receiverId.id,
@@ -159,7 +160,9 @@ export function createSwapNote({
 		senderId: paybackNoteData.sender_id(),
 		vaultFileId: paybackVaultFileId,
 		initialNoteId: paybackNoteData.id(),
-		isExpectedOutput: true
+		isExpectedOutput: true,
+		tag: paybackNoteData.tag(),
+		aux: paybackNoteData.aux()
 	});
 
 	const swapAssets = [offeredAsset];
@@ -180,7 +183,9 @@ export function createSwapNote({
 		assets: swapAssets,
 		inputFileId,
 		senderId: senderId.id,
-		vaultFileId
+		vaultFileId,
+		tag,
+		aux: BigInt(0)
 	});
 	const serialNumberString = note.serialNumberDecimalString.slice(0, 10);
 	note.name = `${name} - ${serialNumberString}`;

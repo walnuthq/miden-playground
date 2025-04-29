@@ -7,7 +7,9 @@ import {
 	generate_note_serial_number,
 	create_swap_note,
 	AccountData,
-	WordData
+	WordData,
+	generate_note_tag,
+	compute_recipient_digest
 } from 'miden-wasm';
 import { ExecutionOutput, Asset, AccountId } from '@/lib/types';
 import { Account } from '@/lib/account';
@@ -35,9 +37,16 @@ export function consumeNotes({
 			noteScript,
 			note.senderId,
 			senderScript,
-			note.serialNumber
+			note.serialNumber,
+			note.tag,
+			note.aux
 		);
 	});
+
+	// const start = Date.now();
+	// const digest = computeRecipientDigest(notesWrapper[0]);
+	// console.log(digest);
+	// console.log('Time taken:', Date.now() - start);
 
 	const receiverAccount = new AccountData(
 		receiverScript,
@@ -48,13 +57,16 @@ export function consumeNotes({
 		receiver.isAuth,
 		receiverStorage.map((row) => new WordData(new BigUint64Array(row)))
 	);
+
+	console.log('receiverAccount');
+
 	const output = execute_transaction(
 		transactionScript,
 		receiverAccount,
 		notesWrapper,
 		BigInt(blockNumber)
 	);
-	console.log(output);
+	console.log('output', output);
 	return output;
 }
 
@@ -88,8 +100,17 @@ export function createSwapNotes(
 	const paybackNote = result.payback_note();
 	return { swapNoteInputs: result.note_inputs(), paybackNote };
 }
+
 export function generateNoteSerialNumber(): BigUint64Array {
 	const seed = new Uint8Array(32);
 	window.crypto.getRandomValues(seed);
 	return generate_note_serial_number(seed);
+}
+
+export function generateNoteTag(senderAccountId: string): number {
+	return generate_note_tag(senderAccountId);
+}
+
+export function computeRecipientDigest(note: NoteData): string {
+	return compute_recipient_digest(note);
 }

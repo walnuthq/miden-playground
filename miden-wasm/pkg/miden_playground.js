@@ -251,6 +251,45 @@ export function get_note_id(note) {
     }
 }
 
+/**
+ * @param {string} sender_account_id
+ * @returns {number}
+ */
+export function generate_note_tag(sender_account_id) {
+    const ptr0 = passStringToWasm0(sender_account_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.generate_note_tag(ptr0, len0);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0] >>> 0;
+}
+
+/**
+ * @param {NoteData} note
+ * @returns {string}
+ */
+export function compute_recipient_digest(note) {
+    let deferred3_0;
+    let deferred3_1;
+    try {
+        _assertClass(note, NoteData);
+        var ptr0 = note.__destroy_into_raw();
+        const ret = wasm.compute_recipient_digest(ptr0);
+        var ptr2 = ret[0];
+        var len2 = ret[1];
+        if (ret[3]) {
+            ptr2 = 0; len2 = 0;
+            throw takeFromExternrefTable0(ret[2]);
+        }
+        deferred3_0 = ptr2;
+        deferred3_1 = len2;
+        return getStringFromWasm0(ptr2, len2);
+    } finally {
+        wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
+    }
+}
+
 function passArray64ToWasm0(arg, malloc) {
     const ptr = malloc(arg.length * 8, 8) >>> 0;
     getBigUint64ArrayMemory0().set(arg, ptr / 8);
@@ -541,9 +580,11 @@ export class NoteData {
      * @param {string} sender_id
      * @param {string} sender_script
      * @param {BigUint64Array} serial_number
+     * @param {number} tag
+     * @param {bigint} aux
      * @param {string | undefined} [id]
      */
-    constructor(assets, inputs, script, sender_id, sender_script, serial_number, id) {
+    constructor(assets, inputs, script, sender_id, sender_script, serial_number, tag, aux, id) {
         const ptr0 = passArrayJsValueToWasm0(assets, wasm.__wbindgen_malloc);
         const len0 = WASM_VECTOR_LEN;
         const ptr1 = passArray64ToWasm0(inputs, wasm.__wbindgen_malloc);
@@ -558,7 +599,7 @@ export class NoteData {
         const len5 = WASM_VECTOR_LEN;
         var ptr6 = isLikeNone(id) ? 0 : passStringToWasm0(id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         var len6 = WASM_VECTOR_LEN;
-        const ret = wasm.notedata_new(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6);
+        const ret = wasm.notedata_new(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, tag, aux, ptr6, len6);
         this.__wbg_ptr = ret >>> 0;
         NoteDataFinalization.register(this, this.__wbg_ptr, this);
         return this;
@@ -637,6 +678,20 @@ export class NoteData {
             wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
         }
         return v1;
+    }
+    /**
+     * @returns {number}
+     */
+    tag() {
+        const ret = wasm.notedata_tag(this.__wbg_ptr);
+        return ret >>> 0;
+    }
+    /**
+     * @returns {bigint}
+     */
+    aux() {
+        const ret = wasm.notedata_aux(this.__wbg_ptr);
+        return BigInt.asUintN(64, ret);
     }
 }
 
