@@ -265,31 +265,6 @@ export function generate_note_tag(sender_account_id) {
     return ret[0] >>> 0;
 }
 
-/**
- * @param {NoteData} note
- * @returns {string}
- */
-export function compute_recipient_digest(note) {
-    let deferred3_0;
-    let deferred3_1;
-    try {
-        _assertClass(note, NoteData);
-        var ptr0 = note.__destroy_into_raw();
-        const ret = wasm.compute_recipient_digest(ptr0);
-        var ptr2 = ret[0];
-        var len2 = ret[1];
-        if (ret[3]) {
-            ptr2 = 0; len2 = 0;
-            throw takeFromExternrefTable0(ret[2]);
-        }
-        deferred3_0 = ptr2;
-        deferred3_1 = len2;
-        return getStringFromWasm0(ptr2, len2);
-    } finally {
-        wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
-    }
-}
-
 function passArray64ToWasm0(arg, malloc) {
     const ptr = malloc(arg.length * 8, 8) >>> 0;
     getBigUint64ArrayMemory0().set(arg, ptr / 8);
@@ -692,6 +667,27 @@ export class NoteData {
     aux() {
         const ret = wasm.notedata_aux(this.__wbg_ptr);
         return BigInt.asUintN(64, ret);
+    }
+    /**
+     * @returns {string}
+     */
+    recipient_digest() {
+        let deferred2_0;
+        let deferred2_1;
+        try {
+            const ret = wasm.notedata_recipient_digest(this.__wbg_ptr);
+            var ptr1 = ret[0];
+            var len1 = ret[1];
+            if (ret[3]) {
+                ptr1 = 0; len1 = 0;
+                throw takeFromExternrefTable0(ret[2]);
+            }
+            deferred2_0 = ptr1;
+            deferred2_1 = len1;
+            return getStringFromWasm0(ptr1, len1);
+        } finally {
+            wasm.__wbindgen_free(deferred2_0, deferred2_1, 1);
+        }
     }
 }
 

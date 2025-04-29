@@ -1,6 +1,6 @@
 import { AccountId, Asset } from '@/lib/types';
 import { generateId } from '@/lib/utils';
-import { createSwapNotes, generateNoteTag } from '@/lib/miden-wasm-api';
+import { createNoteData, createSwapNotes, generateNoteTag } from '@/lib/miden-wasm-api';
 import { Note } from '@/lib/notes';
 import { EditorFiles } from '../files';
 import json5 from 'json5';
@@ -11,13 +11,15 @@ export function createSwapNote({
 	receiverId,
 	offeredAsset,
 	requestedAsset,
-	name
+	name,
+	senderScript
 }: {
 	senderId: AccountId;
 	receiverId: AccountId;
 	offeredAsset: Asset;
 	requestedAsset: Asset;
 	name: string;
+	senderScript: string;
 }): {
 	note: Note;
 	newFiles: EditorFiles;
@@ -45,11 +47,6 @@ export function createSwapNote({
 	const paybackMetadataFileId = generateId();
 	const paybackVaultFileId = generateId();
 
-	const paybackInputs: string[] = [];
-	for (const input of paybackNoteData.inputs()) {
-		paybackInputs.push(input.toString());
-	}
-
 	const inputsString = json5.stringify(inputs, null, 2);
 	const inputsLines = inputsString.split('\n');
 
@@ -60,8 +57,9 @@ export function createSwapNote({
 
 	const inputsWithComments = inputsLines.join('\n');
 
+	const paybackInputs = [receiverId.suffix, receiverId.prefix];
 	const paybackInputsString = json5.stringify(
-		[receiverId.suffix.toString(), receiverId.prefix.toString()],
+		paybackInputs.map((input) => input.toString()),
 		null,
 		2
 	);
@@ -162,18 +160,15 @@ export function createSwapNote({
 		initialNoteId: paybackNoteData.id(),
 		isExpectedOutput: true,
 		tag: paybackNoteData.tag(),
-		aux: paybackNoteData.aux()
+		aux: paybackNoteData.aux(),
+		recipientDigest: ''
 	});
+
+	const paybackRecipientDigest = paybackNoteData.recipient_digest();
+	paybackNote.recipientDigest = paybackRecipientDigest;
 
 	const swapAssets = [offeredAsset];
 
-	// if (offeredAsset.faucetId !== DEFAULT_FAUCET_IDS[0]) {
-	// 	swapAssets.push({ faucetId: DEFAULT_FAUCET_IDS[0], amount: 0n });
-	// }
-
-	// if (offeredAsset.faucetId !== DEFAULT_FAUCET_IDS[1]) {
-	// 	swapAssets.push({ faucetId: DEFAULT_FAUCET_IDS[1], amount: 0n });
-	// }
 	const note = new Note({
 		id: noteId,
 		name,
@@ -185,8 +180,19 @@ export function createSwapNote({
 		senderId: senderId.id,
 		vaultFileId,
 		tag,
-		aux: BigInt(0)
+		aux: BigInt(0),
+		recipientDigest: ''
 	});
+
+	const noteData = createNoteData(
+		note,
+		new BigUint64Array(swapNoteInputs),
+		SWAP_SCRIPT,
+		senderScript
+	);
+	const recipientDigest = noteData.recipient_digest();
+	note.recipientDigest = recipientDigest;
+
 	const serialNumberString = note.serialNumberDecimalString.slice(0, 10);
 	note.name = `${name} - ${serialNumberString}`;
 	paybackNote.name = `${paybackNote.name} - ${paybackNote.serialNumberDecimalString.slice(0, 10)}`;

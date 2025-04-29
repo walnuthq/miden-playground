@@ -6,6 +6,7 @@ import { Asset } from '@/lib/types';
 import { generateId } from '@/lib/utils';
 import { generateNoteSerialNumber, generateNoteTag } from '@/lib/miden-wasm-api';
 import { EditorFiles } from '../files';
+import _ from 'lodash';
 
 export interface NoteProps {
 	name: string;
@@ -21,6 +22,8 @@ export interface NoteProps {
 	isExpectedOutput?: boolean;
 	tag: number;
 	aux: bigint;
+	recipientDigest: string;
+	serialNumber?: BigUint64Array;
 }
 
 export class Note {
@@ -38,6 +41,7 @@ export class Note {
 	initialNoteId?: string;
 	tag: number;
 	aux: bigint;
+	recipientDigest: string;
 
 	constructor(props: NoteProps) {
 		this.name = props.name;
@@ -49,11 +53,16 @@ export class Note {
 		this.senderId = props.senderId;
 		this.metadataFileId = props.metadataFileId;
 		this.vaultFileId = props.vaultFileId;
-		this.serialNumber = generateNoteSerialNumber();
+		this.serialNumber = props.serialNumber ?? generateNoteSerialNumber();
 		this.initialNoteId = props.initialNoteId;
 		this.isExpectedOutput = props.isExpectedOutput;
 		this.tag = props.tag;
 		this.aux = props.aux;
+		this.recipientDigest = props.recipientDigest;
+	}
+
+	clone() {
+		return new Note(_.cloneDeep(this));
 	}
 
 	static createEmptyNote({
@@ -123,8 +132,10 @@ export class Note {
 			metadataFileId,
 			vaultFileId,
 			tag,
-			aux: BigInt(0)
+			aux: BigInt(0),
+			recipientDigest: ''
 		});
+
 		const serialNumberString = note.serialNumberDecimalString.slice(0, 10);
 		note.name = `${name} - ${serialNumberString}`;
 		return { note, newFiles };

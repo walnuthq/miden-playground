@@ -69,8 +69,7 @@ const useSelectedEditorFile = (): { content: string; file: EditorFile | null } =
 };
 
 export const Files = () => {
-	const { selectedFileId, updateFileContent, accountUpdates, files, notes, handleChangeInput } =
-		useMiden();
+	const { selectedFileId, updateFileContent, files, notes, handleChangeInput } = useMiden();
 	const { content, file } = useSelectedEditorFile();
 	const [newInput, setNewInput] = useState('');
 	const [value, setValue] = useState(content);
@@ -80,9 +79,6 @@ export const Files = () => {
 			: null;
 	const { toast } = useToast();
 
-	useEffect(() => {
-		console.log('accountUpdates?.accountId', accountUpdates?.accountId);
-	}, [accountUpdates]);
 	useEffect(() => {
 		setValue(content);
 	}, [content]);
@@ -222,14 +218,7 @@ export const Files = () => {
 												onChange={(e) => {}}
 											/>
 										</TableCell>
-										<TableCell>
-											<input
-												type="number"
-												className="bg-transparent outline-none w-20"
-												min={0}
-												maxLength={10}
-											/>
-										</TableCell>
+										<TableCell>{note!.recipientDigest}</TableCell>
 									</TableRow>
 								</TableBody>
 							</Table>

@@ -8,8 +8,7 @@ import {
 	create_swap_note,
 	AccountData,
 	WordData,
-	generate_note_tag,
-	compute_recipient_digest
+	generate_note_tag
 } from 'miden-wasm';
 import { ExecutionOutput, Asset, AccountId } from '@/lib/types';
 import { Account } from '@/lib/account';
@@ -111,6 +110,20 @@ export function generateNoteTag(senderAccountId: string): number {
 	return generate_note_tag(senderAccountId);
 }
 
-export function computeRecipientDigest(note: NoteData): string {
-	return compute_recipient_digest(note);
+export function createNoteData(
+	note: Note,
+	noteInputs: BigUint64Array,
+	noteScript: string,
+	senderScript: string
+): NoteData {
+	return new NoteData(
+		note.assets.map((a) => new AssetData(a.faucetId, a.amount)),
+		noteInputs,
+		noteScript,
+		note.senderId,
+		senderScript,
+		note.serialNumber,
+		note.tag,
+		note.aux
+	);
 }

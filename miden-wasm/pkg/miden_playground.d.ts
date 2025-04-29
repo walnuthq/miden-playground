@@ -7,7 +7,6 @@ export function execute_transaction(transaction_script: string, receiver: Accoun
 export function create_swap_note(seed: Uint8Array, sender_account_id: string, receiver_account_id: string, requested_asset: AssetData): CreateSwapNoteResult;
 export function get_note_id(note: NoteData): string;
 export function generate_note_tag(sender_account_id: string): number;
-export function compute_recipient_digest(note: NoteData): string;
 export class AccountData {
   free(): void;
   constructor(account_code: string, secret_key: Uint8Array, account_id: string, assets: (AssetData)[], wallet_enabled: boolean, auth_enabled: boolean, storage: (WordData)[]);
@@ -42,6 +41,7 @@ export class NoteData {
   id(): string | undefined;
   tag(): number;
   aux(): bigint;
+  recipient_digest(): string;
 }
 export class WordData {
   free(): void;
@@ -62,7 +62,6 @@ export interface InitOutput {
   readonly create_swap_note: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => [number, number, number];
   readonly get_note_id: (a: number) => [number, number, number, number];
   readonly generate_note_tag: (a: number, b: number) => [number, number, number];
-  readonly compute_recipient_digest: (a: number) => [number, number, number, number];
   readonly __wbg_accountiddata_free: (a: number, b: number) => void;
   readonly __wbg_get_accountiddata_id: (a: number) => [number, number];
   readonly __wbg_set_accountiddata_id: (a: number, b: number, c: number) => void;
@@ -88,6 +87,7 @@ export interface InitOutput {
   readonly notedata_id: (a: number) => [number, number];
   readonly notedata_tag: (a: number) => number;
   readonly notedata_aux: (a: number) => bigint;
+  readonly notedata_recipient_digest: (a: number) => [number, number, number, number];
   readonly __wbg_get_assetdata_amount: (a: number) => bigint;
   readonly __wbg_set_assetdata_amount: (a: number, b: bigint) => void;
   readonly __wbindgen_exn_store: (a: number) => void;

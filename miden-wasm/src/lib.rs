@@ -19,7 +19,9 @@ use miden_lib::{note::utils::build_p2id_recipient, transaction::TransactionKerne
 use miden_objects::{
     account::{AccountId, AccountIdVersion, AccountStorageMode, AccountType},
     asset::Asset,
-    note::{Note, NoteExecutionHint, NoteExecutionMode, NoteId, NoteInputs, NoteTag},
+    note::{
+        Note, NoteExecutionHint, NoteExecutionMode, NoteId, NoteInputs, NoteRecipient, NoteTag,
+    },
     transaction::{TransactionArgs, TransactionScript},
     Felt, Word,
 };
@@ -283,11 +285,4 @@ pub fn generate_note_tag(sender_account_id: String) -> Result<u32, JsValue> {
     let tag = NoteTag::from_account_id(sender, NoteExecutionMode::Local)
         .map_err(|err| format!("Failed to generate note tag: {:?}", err))?;
     Ok(tag.inner() as u32)
-}
-
-#[wasm_bindgen]
-pub fn compute_recipient_digest(note: NoteData) -> Result<String, JsValue> {
-    let note = Note::try_from(note).map_err(|err| format!("Failed to convert note: {:?}", err))?;
-    let digest = note.recipient().digest();
-    Ok(digest.to_hex())
 }

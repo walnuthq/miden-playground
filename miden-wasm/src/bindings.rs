@@ -207,6 +207,13 @@ impl NoteData {
     pub fn aux(&self) -> u64 {
         self.aux
     }
+
+    pub fn recipient_digest(&self) -> Result<String, JsValue> {
+        let note = Note::try_from(self.clone())
+            .map_err(|err| format!("Failed to convert note: {:?}", err))?;
+        let digest = note.recipient().digest();
+        Ok(digest.to_hex())
+    }
 }
 
 impl TryFrom<NoteData> for Note {

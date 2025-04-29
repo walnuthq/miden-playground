@@ -6,12 +6,13 @@ import React, {
 	useCallback,
 	useContext,
 	useEffect,
-	useState
+	useState,
+	useRef
 } from 'react';
 import init from 'miden-wasm';
 import { DEFAULT_FAUCET_IDS, defaultAccounts, defaultNotes } from '@/lib/consts/defaults';
 import { TRANSACTION_SCRIPT_FILE_ID } from '@/lib/consts';
-import { consumeNotes, generateFaucetId } from '@/lib/miden-wasm-api';
+import { consumeNotes, createNoteData, generateFaucetId } from '@/lib/miden-wasm-api';
 import { TRANSACTION_SCRIPT } from '@/lib/consts/transaction';
 import { convertToBigUint64Array } from '@/lib/utils';
 import { Account } from '@/lib/account';
@@ -90,6 +91,7 @@ interface MidenContextProps {
 	createFaucet: (name: string, amount: bigint, accountId: string) => void;
 	createNoteFaucet: (name: string, amount: bigint, noteId: string) => void;
 	handleChangeInput: (noteId: string, newInput: string, index: number) => void;
+	updateRecipientDigest: (noteId: string) => void;
 }
 
 export const MidenContext = createContext<MidenContextProps>({
@@ -139,7 +141,8 @@ export const MidenContext = createContext<MidenContextProps>({
 	faucets: {},
 	createFaucet: () => {},
 	createNoteFaucet: () => {},
-	handleChangeInput: () => {}
+	handleChangeInput: () => {},
+	updateRecipientDigest: () => {}
 });
 
 export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
@@ -186,6 +189,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		} catch (error) {
 			console.error(error);
 		}
+		updateRecipientDigest(noteId);
 	};
 
 	const createNoteFaucet = (name: string, amount: bigint, noteId: string) => {
@@ -244,6 +248,44 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	);
 	const [selectedTransactionNotesIds, setSelectedTransactionNotesIds] = useState<string[]>([]);
 
+	// add a ref to store debounce timeouts per note and delay constant
+	const digestTimeoutsRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+	const RECIPIENT_DIGEST_DEBOUNCE_DELAY_MS = 5000;
+
+	const updateRecipientDigest = useCallback(
+		(noteId: string) => {
+			// debounce per noteId
+			if (digestTimeoutsRef.current[noteId]) {
+				clearTimeout(digestTimeoutsRef.current[noteId]);
+			}
+			digestTimeoutsRef.current[noteId] = setTimeout(() => {
+				const note = notes[noteId];
+				const sender = accounts[note.senderId];
+				const noteData = createNoteData(
+					note,
+					convertToBigUint64Array(json5.parse(files[note.inputFileId].content.value!)),
+					files[note.scriptFileId].content.value!,
+					files[sender.scriptFileId].content.value!
+				);
+				const recipientDigest = noteData.recipient_digest();
+				updateNoteById(noteId, (note) => {
+					note.recipientDigest = recipientDigest;
+					return note;
+				});
+				delete digestTimeoutsRef.current[noteId];
+			}, RECIPIENT_DIGEST_DEBOUNCE_DELAY_MS);
+		},
+		[accounts, files, notes]
+	);
+
+	const updateNoteById = (noteId: string, updateFn: (note: Note) => Note) => {
+		setNotes((prev) => {
+			const note = prev[noteId];
+			const updatedNote = updateFn(note.clone());
+			return { ...prev, [noteId]: updatedNote };
+		});
+	};
+
 	const updateAccountById = (accountId: string, updateFn: (account: Account) => Account) => {
 		setAccounts((prev) => {
 			const account = prev[accountId];
@@ -271,6 +313,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			return { ...prev, [fileId]: { ...file, content: { value: updatedContent } } };
 		});
 	}, []);
+
 	const selectTransactionNote = useCallback((noteId: string) => {
 		setSelectedTransactionNotesIds((prev) => {
 			if (prev.includes(noteId)) {
@@ -338,7 +381,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 
 		setIsExecutingTransaction(true);
 		const account = accounts[selectedTransactionAccountId];
-
+		//
 		const transactionNotes: {
 			note: Note;
 			noteScript: string;
@@ -536,7 +579,8 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			receiverId: receiver.id,
 			offeredAsset,
 			requestedAsset,
-			name: 'SWAP'
+			name: 'SWAP',
+			senderScript: files[sender.scriptFileId].content.value!
 		});
 		updateAccountById(sender.id.id, (account) => {
 			account.updateAssetAmount(offeredAsset.faucetId, (amount) => amount - offeredAsset.amount);
@@ -551,16 +595,18 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			? accounts[selectedTransactionAccountId].id
 			: Object.values(accounts)[0].id;
 		const senderId = Object.values(accounts).filter((account) => account.id !== receiverId)[0].id;
-		const assets = [{ ...accounts[senderId.id].assets[0], amount: 10n }];
+		const sender = accounts[senderId.id];
+		const assets = [{ ...sender.assets[0], amount: 10n }];
 		const { note, newFiles } = createP2IDNote({
 			senderId,
 			receiverId,
 			assets,
-			name: 'P2ID'
+			name: 'P2ID',
+			senderScript: files[sender.scriptFileId].content.value!
 		});
 		setNotes((prev) => ({ ...prev, [note.id]: note }));
 		setFiles((prev) => ({ ...prev, ...newFiles }));
-	}, [accounts, selectedTransactionAccountId]);
+	}, [accounts, files, selectedTransactionAccountId]);
 
 	const createSampleP2IDRNote = useCallback(() => {
 		const receiverId = selectedTransactionAccountId
@@ -568,17 +614,19 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			: Object.values(accounts)[0].id;
 		const senderId = Object.values(accounts).filter((account) => account.id.id !== receiverId.id)[0]
 			.id;
-		const assets = [{ ...accounts[senderId.id].assets[0], amount: 10n }];
+		const sender = accounts[senderId.id];
+		const assets = [{ ...sender.assets[0], amount: 10n }];
 		const { note, newFiles } = createP2IDRNote({
 			senderId,
 			receiverId,
 			reclaimBlockHeight: 20,
 			assets,
-			name: 'P2IDR'
+			name: 'P2IDR',
+			senderScript: files[sender.scriptFileId].content.value!
 		});
 		setNotes((prev) => ({ ...prev, [note.id]: note }));
 		setFiles((prev) => ({ ...prev, ...newFiles }));
-	}, [accounts, selectedTransactionAccountId]);
+	}, [accounts, files, selectedTransactionAccountId]);
 
 	const createSampleNote = useCallback(() => {
 		const senderId = Object.values(accounts)[0].id;
@@ -599,7 +647,11 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				setAccounts(accounts);
 				const defaultAccount1 = Object.values(accounts)[0];
 				const defaultAccount2 = Object.values(accounts)[1];
-				const { notes, newFiles: noteFiles } = defaultNotes(defaultAccount1.id, defaultAccount2.id);
+				const { notes, newFiles: noteFiles } = defaultNotes(
+					defaultAccount1.id,
+					defaultAccount2.id,
+					accountFiles[defaultAccount1.scriptFileId].content.value!
+				);
 				setFiles((prev) => ({ ...prev, ...accountFiles, ...noteFiles }));
 				setNotes(notes);
 				setSelectedTransactionAccountId(defaultAccount2.id.id);
@@ -739,7 +791,8 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				createFaucet,
 				faucets,
 				createNoteFaucet,
-				handleChangeInput
+				handleChangeInput,
+				updateRecipientDigest
 			}}
 		>
 			{children}

@@ -28,7 +28,8 @@ export function defaultAccounts(): {
 
 export function defaultNotes(
 	accountId1: AccountId,
-	accountId2: AccountId
+	accountId2: AccountId,
+	senderScript: string
 ): {
 	notes: Record<string, Note>;
 	newFiles: EditorFiles;
@@ -46,7 +47,8 @@ export function defaultNotes(
 				amount: 0n
 			}
 		],
-		name: 'P2ID'
+		name: 'P2ID',
+		senderScript
 	});
 	const p2idNote2 = createP2IDNote({
 		senderId: accountId1,
@@ -61,7 +63,8 @@ export function defaultNotes(
 				amount: 200n
 			}
 		],
-		name: 'P2ID'
+		name: 'P2ID',
+		senderScript
 	});
 	// const p2idrNote = createP2IDRNote({
 	// 	senderId: accountId1,

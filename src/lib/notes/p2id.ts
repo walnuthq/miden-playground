@@ -4,18 +4,20 @@ import { Note } from '@/lib/notes';
 import { EditorFiles } from '../files';
 import json5 from 'json5';
 import { DEFAULT_FAUCET_IDS } from '../consts/defaults';
-import { generateNoteTag } from '../miden-wasm-api';
+import { createNoteData, generateNoteTag } from '../miden-wasm-api';
 
 export function createP2IDNote({
 	senderId,
 	receiverId,
 	assets,
-	name
+	name,
+	senderScript
 }: {
 	senderId: AccountId;
 	receiverId: AccountId;
 	assets: Asset[];
 	name: string;
+	senderScript: string;
 }): {
 	note: Note;
 	newFiles: EditorFiles;
@@ -26,8 +28,9 @@ export function createP2IDNote({
 	const metadataFileId = generateId();
 	const vaultFileId = generateId();
 	const tag = generateNoteTag(senderId.id);
+	const inputs = [receiverId.suffix, receiverId.prefix];
 	const inputsString = json5.stringify(
-		[receiverId.suffix.toString(), receiverId.prefix.toString()],
+		inputs.map((input) => input.toString()),
 		null,
 		2
 	);
@@ -94,8 +97,15 @@ export function createP2IDNote({
 		metadataFileId,
 		vaultFileId,
 		tag,
-		aux: BigInt(0)
+		aux: BigInt(0),
+		recipientDigest: ''
 	});
+
+	const noteData = createNoteData(note, new BigUint64Array(inputs), P2ID_SCRIPT, senderScript);
+	const recipientDigest = noteData.recipient_digest();
+
+	note.recipientDigest = recipientDigest;
+
 	const serialNumberString = note.serialNumberDecimalString.slice(0, 10);
 	note.name = `${name} - ${serialNumberString}`;
 	return { note, newFiles };
