@@ -18,7 +18,7 @@ body {
 
 @layer base {
 	:root {
-		--miden-dark-950: hsl(30, 4%, 9%);
+		--miden-dark-950: hsl(252, 12%, 8%);
 		--miden-dark-700: hsl(253, 10%, 18%);
 		--miden-dark-800: hsl(249, 10%, 14%);
 		--miden-blue: hsl(218, 31%, 23%);
@@ -28,19 +28,19 @@ body {
 	:root {
 		--theme-radius: 5px;
 
-		--theme-surface: 30, 4%, 9%;
-		--theme-border: 7, 14%, 13%;
+		--theme-surface: 252 12% 8%;
+		--theme-border: 253 10% 18%;
 
 		--theme-surface-highlight: 249 10% 14%;
 
-		--theme-text: 0, 0%, 100%;
+		--theme-text: 0 100% 99%;
 
-		--theme-text-subtle: 30, 14%, 91%;
+		--theme-text-subtle: 253 10% 58%;
 		--theme-text-subtlest: 253 10% 45%;
 
 		--theme-primary: 24, 100%, 50%;
 		--theme-primary-hover: 22, 97%, 56%;
-		--theme-secondary: 208, 75%, 37%;
+		--theme-secondary: 19, 91%, 73%;
 
 		--theme-info: 206 100% 63%;
 		--theme-success: 150 99% 44%;
