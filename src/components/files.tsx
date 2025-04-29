@@ -41,6 +41,7 @@ const useSelectedEditorFile = (): { content: string; file: EditorFile | null } =
 			} else if (file.content.dynamic.note) {
 				if (file.content.dynamic.note.variant === 'metadata') {
 					const note = notes[file.content.dynamic.note.noteId];
+					console.log('note', note);
 					content = JSON.stringify(
 						{
 							senderId: note.senderId.toString(),

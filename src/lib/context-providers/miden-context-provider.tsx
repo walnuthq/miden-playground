@@ -439,6 +439,28 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			selectTransactionAccount(account.id.id);
 		}
 		setFiles((prev) => ({ ...prev, ...newFiles }));
+		const existingDataJson = localStorage.getItem('accounts');
+		const existingData = existingDataJson
+			? JSON.parse(existingDataJson)
+			: { accounts: {}, newFiles: {} };
+
+		const updatedData = {
+			accounts: {
+				...existingData.accounts,
+				[account.id.id]: account
+			},
+			newFiles: {
+				...existingData.newFiles,
+				...newFiles
+			}
+		};
+
+		localStorage.setItem(
+			'accounts',
+			JSON.stringify(updatedData, (_, value) =>
+				typeof value === 'bigint' ? value.toString() : value
+			)
+		);
 	}, [accounts, selectTransactionAccount]);
 
 	const disableWalletComponent = useCallback((accountId: string) => {
@@ -522,6 +544,35 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		});
 		setNotes((prev) => ({ ...prev, [note.id]: note }));
 		setFiles((prev) => ({ ...prev, ...newFiles }));
+
+		console.log('newFiles', newFiles);
+		const existingNotesJson = localStorage.getItem('notes');
+		const existingNotesData = existingNotesJson
+			? JSON.parse(existingNotesJson)
+			: { notes: {}, newFiles: {} };
+
+		const noteWithSerialNumber = {
+			...note,
+			serialNumber: Array.from(note.serialNumber)
+		};
+
+		const updatedNotesData = {
+			notes: {
+				...existingNotesData.notes,
+				[note.id]: noteWithSerialNumber
+			},
+			newFiles: {
+				...existingNotesData.newFiles,
+				...newFiles
+			}
+		};
+
+		localStorage.setItem(
+			'notes',
+			JSON.stringify(updatedNotesData, (_, value) =>
+				typeof value === 'bigint' ? value.toString() : value
+			)
+		);
 	}, [accounts, selectedTransactionAccountId]);
 
 	const createSampleP2IDRNote = useCallback(() => {
@@ -556,15 +607,25 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	useEffect(() => {
 		init()
 			.then(() => {
-				console.log('WASM initialized successfully');
-				const { accounts, newFiles: accountFiles } = defaultAccounts();
+				// console.log('WASM initialized successfully');
+				const existingDataJson = localStorage.getItem('accounts');
+				const { accounts, newFiles: accountFiles } = existingDataJson
+					? JSON.parse(existingDataJson)
+					: { accounts: {}, newFiles: {} };
+				// const { accounts, newFiles: accountFiles } = defaultAccounts();
 				setAccounts(accounts);
-				const defaultAccount1 = Object.values(accounts)[0];
-				const defaultAccount2 = Object.values(accounts)[1];
-				const { notes, newFiles: noteFiles } = defaultNotes(defaultAccount1.id, defaultAccount2.id);
+				// const defaultAccount1 = Object.values(accounts)[0];
+				// const defaultAccount2 = Object.values(accounts)[1];
+				// const { notes, newFiles: noteFiles } = defaultNotes(defaultAccount1.id, defaultAccount2.id);
+				// setFiles((prev) => ({ ...prev, ...accountFiles, ...noteFiles }));
+				const existingNotesJson = localStorage.getItem('notes');
+
+				const { notes, newFiles: noteFiles } = existingNotesJson
+					? JSON.parse(existingNotesJson)
+					: { notes: {}, newFiles: {} };
 				setFiles((prev) => ({ ...prev, ...accountFiles, ...noteFiles }));
 				setNotes(notes);
-				setSelectedTransactionAccountId(defaultAccount2.id.id);
+				// setSelectedTransactionAccountId(defaultAccount2.id.id);
 				setIsInitialized(true);
 			})
 			.catch((error: unknown) => {
