@@ -16,8 +16,8 @@ use miden_objects::{
     asset::{Asset, AssetVault},
     crypto::dsa::rpo_falcon512::SecretKey,
     note::{
-        Note, NoteAssets, NoteExecutionHint, NoteInputs, NoteMetadata, NoteRecipient, NoteScript,
-        NoteType,
+        Note, NoteAssets, NoteExecutionHint, NoteExecutionMode, NoteInputs, NoteMetadata,
+        NoteRecipient, NoteScript, NoteTag, NoteType,
     },
     AccountError, Felt, NoteError, Word, ZERO,
 };
@@ -114,6 +114,8 @@ pub fn get_note_with_fungible_asset_and_script(
     inputs: Vec<Felt>,
     custom_library: Library,
     serial_number: Word,
+    tag: NoteTag,
+    aux: Felt,
 ) -> Result<Note, NoteError> {
     let assembler = TransactionKernel::assembler()
         .with_debug_mode(true)
@@ -134,9 +136,9 @@ pub fn get_note_with_fungible_asset_and_script(
     let metadata = NoteMetadata::new(
         sender_id,
         NoteType::Public,
-        1.into(),
+        tag,
         NoteExecutionHint::Always,
-        ZERO,
+        aux,
     )
     .map_err(|err| err)?;
     let note_inputs = NoteInputs::new(inputs).unwrap();

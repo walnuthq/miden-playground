@@ -3,10 +3,10 @@ use assembly::Library;
 use miden_objects::{
     account::{Account, AccountId, StorageSlot},
     asset::{Asset, FungibleAsset},
-    note::Note,
-    Felt, Word,
+    note::{Note, NoteTag},
+    Felt, Word, ZERO,
 };
-use wasm_bindgen::prelude::*;
+use wasm_bindgen::{convert::IntoWasmAbi, prelude::*};
 use web_sys::console;
 
 use crate::utils::{
@@ -145,6 +145,8 @@ pub struct NoteData {
     pub(crate) sender_script: String,
     pub(crate) serial_number: Vec<u64>,
     pub(crate) id: Option<String>,
+    pub(crate) tag: u32,
+    pub(crate) aux: u64,
 }
 
 #[wasm_bindgen]
@@ -157,6 +159,8 @@ impl NoteData {
         sender_id: String,
         sender_script: String,
         serial_number: Vec<u64>,
+        tag: u32,
+        aux: u64,
         id: Option<String>,
     ) -> Self {
         Self {
@@ -167,6 +171,8 @@ impl NoteData {
             sender_script,
             serial_number,
             id,
+            tag,
+            aux,
         }
     }
 
@@ -192,6 +198,21 @@ impl NoteData {
 
     pub fn id(&self) -> Option<String> {
         self.id.clone()
+    }
+
+    pub fn tag(&self) -> u32 {
+        self.tag
+    }
+
+    pub fn aux(&self) -> u64 {
+        self.aux
+    }
+
+    pub fn recipient_digest(&self) -> Result<String, JsValue> {
+        let note = Note::try_from(self.clone())
+            .map_err(|err| format!("Failed to convert note: {:?}", err))?;
+        let digest = note.recipient().digest();
+        Ok(digest.to_hex())
     }
 }
 
@@ -226,6 +247,8 @@ impl TryFrom<NoteData> for Note {
             note_inputs,
             sender_account_code_library.clone(),
             serial_number.map(Felt::new),
+            note_data.tag.into(),
+            Felt::new(note_data.aux),
         )
         .map_err(|err| anyhow::anyhow!(err))?;
 

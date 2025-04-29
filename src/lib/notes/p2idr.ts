@@ -3,19 +3,23 @@ import { generateId } from '@/lib/utils';
 import { Note } from '@/lib/notes';
 import { EditorFiles } from '../files';
 import json5 from 'json5';
+import { DEFAULT_FAUCET_IDS } from '../consts/defaults';
+import { createNoteData, generateNoteTag } from '@/lib/miden-wasm-api';
 
 export function createP2IDRNote({
 	senderId,
 	receiverId,
 	reclaimBlockHeight,
 	assets,
-	name
+	name,
+	senderScript
 }: {
 	senderId: AccountId;
 	receiverId: AccountId;
 	reclaimBlockHeight: number;
 	assets: Asset[];
 	name: string;
+	senderScript: string;
 }): {
 	note: Note;
 	newFiles: EditorFiles;
@@ -25,8 +29,10 @@ export function createP2IDRNote({
 	const inputFileId = generateId();
 	const metadataFileId = generateId();
 	const vaultFileId = generateId();
+	const tag = generateNoteTag(senderId.id);
+	const inputs = [receiverId.suffix, receiverId.prefix, BigInt(reclaimBlockHeight)];
 	const inputsString = json5.stringify(
-		[receiverId.suffix.toString(), receiverId.prefix.toString(), reclaimBlockHeight],
+		inputs.map((input) => input.toString()),
 		null,
 		2
 	);
@@ -55,7 +61,7 @@ export function createP2IDRNote({
 		},
 		[metadataFileId]: {
 			id: metadataFileId,
-			name: `Metadata`,
+			name: `Info`,
 			content: { dynamic: { note: { noteId, variant: 'metadata' } } },
 			isOpen: false,
 			variant: 'file',
@@ -71,6 +77,16 @@ export function createP2IDRNote({
 		}
 	};
 
+	const hasDefault0 = assets.some((asset) => asset.faucetId === DEFAULT_FAUCET_IDS[0]);
+	const hasDefault1 = assets.some((asset) => asset.faucetId === DEFAULT_FAUCET_IDS[1]);
+
+	if (!hasDefault0) {
+		assets.push({ faucetId: DEFAULT_FAUCET_IDS[0], amount: 0n });
+	}
+
+	if (!hasDefault1) {
+		assets.push({ faucetId: DEFAULT_FAUCET_IDS[1], amount: 0n });
+	}
 	const note = new Note({
 		id: noteId,
 		name,
@@ -80,8 +96,17 @@ export function createP2IDRNote({
 		inputFileId,
 		senderId: senderId.id,
 		metadataFileId,
-		vaultFileId
+		vaultFileId,
+		tag,
+		aux: BigInt(0),
+		recipientDigest: ''
 	});
+
+	const noteData = createNoteData(note, new BigUint64Array(inputs), P2IDR_SCRIPT, senderScript);
+	const recipientDigest = noteData.recipient_digest();
+
+	note.recipientDigest = recipientDigest;
+
 	const serialNumberString = note.serialNumberDecimalString.slice(0, 10);
 	note.name = `${name} - ${serialNumberString}`;
 	return { note, newFiles };
