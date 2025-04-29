@@ -30,6 +30,7 @@ body {
 
 		--theme-surface: 252 12% 8%;
 		--theme-border: 253 10% 18%;
+
 		--theme-surface-highlight: 249 10% 14%;
 
 		--theme-text: 0 100% 99%;
@@ -37,9 +38,9 @@ body {
 		--theme-text-subtle: 253 10% 58%;
 		--theme-text-subtlest: 253 10% 45%;
 
-		--theme-primary: 266 100% 64%;
-		--theme-primary-hover: 266 100% 68%;
-		--theme-secondary: 207 48% 53%;
+		--theme-primary: 24, 100%, 50%;
+		--theme-primary-hover: 22, 97%, 56%;
+		--theme-secondary: 19, 91%, 73%;
 
 		--theme-info: 206 100% 63%;
 		--theme-success: 150 99% 44%;
