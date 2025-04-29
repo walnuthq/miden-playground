@@ -92,6 +92,8 @@ interface MidenContextProps {
 	createNoteFaucet: (name: string, amount: bigint, noteId: string) => void;
 	handleChangeInput: (noteId: string, newInput: string, index: number) => void;
 	updateRecipientDigest: (noteId: string) => void;
+	setNoteTag: (noteId: string, tag: number) => void;
+	setNoteAux: (noteId: string, aux: bigint) => void;
 }
 
 export const MidenContext = createContext<MidenContextProps>({
@@ -142,7 +144,9 @@ export const MidenContext = createContext<MidenContextProps>({
 	createFaucet: () => {},
 	createNoteFaucet: () => {},
 	handleChangeInput: () => {},
-	updateRecipientDigest: () => {}
+	updateRecipientDigest: () => {},
+	setNoteTag: () => {},
+	setNoteAux: () => {}
 });
 
 export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
@@ -164,6 +168,20 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			return newFaucets;
 		});
 		account.addAsset(faucetId, amount);
+	};
+
+	const setNoteTag = (noteId: string, tag: number) => {
+		updateNoteById(noteId, (note) => {
+			note.tag = tag;
+			return note;
+		});
+	};
+
+	const setNoteAux = (noteId: string, aux: bigint) => {
+		updateNoteById(noteId, (note) => {
+			note.aux = aux;
+			return note;
+		});
 	};
 
 	const handleChangeInput = (noteId: string, newInput: string, index: number) => {
@@ -588,7 +606,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		});
 		setNotes((prev) => ({ ...prev, [note.id]: note, [paybackNote.id]: paybackNote }));
 		setFiles((prev) => ({ ...prev, ...newFiles }));
-	}, [accounts, selectedTransactionAccountId]);
+	}, [accounts, files, selectedTransactionAccountId]);
 
 	const createSampleP2IDNote = useCallback(() => {
 		const receiverId = selectedTransactionAccountId
@@ -792,7 +810,9 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				faucets,
 				createNoteFaucet,
 				handleChangeInput,
-				updateRecipientDigest
+				updateRecipientDigest,
+				setNoteTag,
+				setNoteAux
 			}}
 		>
 			{children}

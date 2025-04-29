@@ -69,7 +69,15 @@ const useSelectedEditorFile = (): { content: string; file: EditorFile | null } =
 };
 
 export const Files = () => {
-	const { selectedFileId, updateFileContent, files, notes, handleChangeInput } = useMiden();
+	const {
+		selectedFileId,
+		updateFileContent,
+		files,
+		notes,
+		handleChangeInput,
+		setNoteAux,
+		setNoteTag
+	} = useMiden();
 	const { content, file } = useSelectedEditorFile();
 	const [newInput, setNewInput] = useState('');
 	const [value, setValue] = useState(content);
@@ -163,7 +171,6 @@ export const Files = () => {
 												onChange={(e) => setNewInput(e.target.value)}
 												className="bg-transparent outline-none w-20"
 												min={0}
-												maxLength={10}
 											/>
 										</TableCell>
 									</TableRow>
@@ -204,8 +211,7 @@ export const Files = () => {
 												type="number"
 												className="bg-transparent outline-none w-20"
 												min={0}
-												maxLength={10}
-												onChange={(e) => {}}
+												onChange={(e) => setNoteAux(note!.id, BigInt(e.target.value))}
 											/>
 										</TableCell>
 										<TableCell>
@@ -214,8 +220,7 @@ export const Files = () => {
 												type="number"
 												className="bg-transparent outline-none w-20"
 												min={0}
-												maxLength={10}
-												onChange={(e) => {}}
+												onChange={(e) => setNoteTag(note!.id, parseInt(e.target.value))}
 											/>
 										</TableCell>
 										<TableCell>{note!.recipientDigest}</TableCell>
