@@ -1,6 +1,6 @@
 import InlineIcon from './ui/inline-icon';
 import Image from 'next/image';
-import logo from '../app/images/miden_logo.png';
+import logo from '../app/images/miden_logo.svg';
 import Link from 'next/link';
 
 export function Header() {
