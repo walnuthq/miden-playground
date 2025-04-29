@@ -6,7 +6,7 @@ import { AccountId, Asset, ExecutionOutput } from '@/lib/types';
 import _ from 'lodash';
 import { EditorFiles } from './files';
 
-interface AccountProps {
+export interface AccountProps {
 	id: AccountId;
 	name: string;
 	isWallet: boolean;
