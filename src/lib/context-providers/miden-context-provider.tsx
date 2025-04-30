@@ -94,6 +94,13 @@ interface MidenContextProps {
 	updateRecipientDigest: (noteId: string) => void;
 	setNoteTag: (noteId: string, tag: number) => void;
 	setNoteAux: (noteId: string, aux: bigint) => void;
+	handleChangeStorage: (
+		accountId: string,
+		newValue: string,
+		index: number,
+		subIndex: number
+	) => void;
+	createNewStorageSlot: (accountId: string) => void;
 }
 
 export const MidenContext = createContext<MidenContextProps>({
@@ -146,7 +153,9 @@ export const MidenContext = createContext<MidenContextProps>({
 	handleChangeInput: () => {},
 	updateRecipientDigest: () => {},
 	setNoteTag: () => {},
-	setNoteAux: () => {}
+	setNoteAux: () => {},
+	handleChangeStorage: () => {},
+	createNewStorageSlot: () => {}
 });
 
 export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
@@ -182,6 +191,71 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			note.aux = aux;
 			return note;
 		});
+	};
+
+	const isValidUint64 = (value: string): boolean => {
+		if (value === '') return true;
+		const MAX_UINT64 = 2n ** 64n - 1n;
+		const MIN_UINT64 = 0n;
+		try {
+			const bigIntValue = BigInt(value);
+			return bigIntValue >= MIN_UINT64 && bigIntValue <= MAX_UINT64;
+		} catch (error) {
+			console.error(error);
+			return false;
+		}
+	};
+	const handleChangeStorage = (
+		accountId: string,
+		newValue: string,
+		index: number,
+		subIndex: number
+	) => {
+		if (!isValidUint64(newValue) && newValue !== '') {
+			return;
+		}
+		const account = accounts[accountId];
+		try {
+			let currentStorage: BigUint64Array[] = [];
+
+			if (files[account!.storageFileId].content.value) {
+				try {
+					currentStorage = Account.parseStorage(files[account?.storageFileId].content.value!);
+				} catch (error) {
+					console.error(error);
+					currentStorage = [];
+				}
+			}
+			currentStorage[index][subIndex] = BigInt(newValue);
+			console.log('BigInt(newValue)', BigInt(newValue));
+			console.log('(newValue)', newValue);
+			console.log('currentStorage[index][subIndex]', currentStorage[index][subIndex]);
+
+			updateFileContent(account!.storageFileId, Account.stringifyStorage(currentStorage));
+		} catch (error) {
+			console.error(error);
+		}
+	};
+
+	const createNewStorageSlot = (accountId: string) => {
+		const account = accounts[accountId];
+		try {
+			let currentStorage: BigUint64Array[] = [];
+
+			if (files[account!.storageFileId].content.value) {
+				try {
+					currentStorage = Account.parseStorage(files[account?.storageFileId].content.value!);
+				} catch (error) {
+					console.error(error);
+					currentStorage = [];
+				}
+			}
+			currentStorage = [...currentStorage, new BigUint64Array([0n, 0n, 0n, 0n])];
+
+			updateFileContent(account!.storageFileId, Account.stringifyStorage(currentStorage));
+		} catch (error) {
+			console.error(error);
+		}
 	};
 
 	const handleChangeInput = (noteId: string, newInput: string, index: number) => {
@@ -829,7 +903,9 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				handleChangeInput,
 				updateRecipientDigest,
 				setNoteTag,
-				setNoteAux
+				setNoteAux,
+				handleChangeStorage,
+				createNewStorageSlot
 			}}
 		>
 			{children}

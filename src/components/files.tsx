@@ -66,8 +66,7 @@ export const Files = () => {
 		handleChangeInput,
 		setNoteAux,
 		setNoteTag,
-		accounts,
-		accountUpdates
+		accounts
 	} = useMiden();
 	const { content, file } = useSelectedEditorFile();
 	const [newInput, setNewInput] = useState('');
