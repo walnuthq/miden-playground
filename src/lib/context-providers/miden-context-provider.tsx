@@ -15,7 +15,7 @@ import { TRANSACTION_SCRIPT_FILE_ID } from '@/lib/consts';
 import { consumeNotes, createNoteData, generateFaucetId } from '@/lib/miden-wasm-api';
 import { TRANSACTION_SCRIPT } from '@/lib/consts/transaction';
 import { convertToBigUint64Array } from '@/lib/utils';
-import { Account } from '@/lib/account';
+import { Account, AccountProps } from '@/lib/account';
 import { createP2IDRNote, createSwapNote, Note } from '@/lib/notes';
 import { createP2IDNote } from '@/lib/notes/p2id';
 import { EditorFiles } from '@/lib/files';

@@ -13,7 +13,7 @@ const PUBLIC_KEY = new BigUint64Array([
 	15110848026471267870n
 ]);
 
-interface AccountProps {
+export interface AccountProps {
 	id: AccountId;
 	name: string;
 	isWallet: boolean;
