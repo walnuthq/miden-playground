@@ -1,4 +1,4 @@
-use alloc::{sync::Arc, vec, vec::Vec};
+use alloc::{format, sync::Arc, vec, vec::Vec};
 use assembly::{
     ast::{Module, ModuleKind},
     utils::Deserializable,
@@ -16,12 +16,14 @@ use miden_objects::{
     asset::{Asset, AssetVault},
     crypto::dsa::rpo_falcon512::SecretKey,
     note::{
-        Note, NoteAssets, NoteExecutionHint, NoteExecutionMode, NoteInputs, NoteMetadata,
-        NoteRecipient, NoteScript, NoteTag, NoteType,
+        Note, NoteAssets, NoteExecutionHint, NoteInputs, NoteMetadata, NoteRecipient, NoteScript,
+        NoteTag, NoteType,
     },
-    AccountError, Felt, NoteError, Word, ZERO,
+    AccountError, Felt, NoteError, Word,
 };
 use rand_chacha::{rand_core::SeedableRng, ChaCha20Rng};
+use wasm_bindgen::prelude::*;
+use web_sys::console;
 
 pub fn create_account_component_library(account_code: &str) -> Result<Library, Report> {
     let assembler = TransactionKernel::assembler().with_debug_mode(true);
@@ -71,20 +73,18 @@ pub fn get_account_with_account_code(
     wallet: bool,
     auth: bool,
 ) -> Result<Account, AccountError> {
-    let account_component = AccountComponent::new(
-        account_code_library,
-        vec![StorageSlot::Value(Word::default()); 2],
-    )
-    .unwrap()
-    .with_supports_all_types();
+    let account_component = AccountComponent::new(account_code_library, vec![])
+        .unwrap()
+        .with_supports_all_types();
 
-    let mut components = vec![account_component];
+    let mut components = vec![];
     if wallet {
         components.push(BasicWallet.into());
     }
     if auth {
         components.push(RpoFalcon512::new(PublicKey::new(public_key)).into());
     }
+    components.push(account_component);
 
     // let (account_code, account_storage) =
     //     Account::initialize_from_components(account_id.account_type(), &components).unwrap();

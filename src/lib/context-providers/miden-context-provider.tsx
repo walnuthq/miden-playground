@@ -547,12 +547,20 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		});
 	}, []);
 
-	const disableAuthComponent = useCallback((accountId: string) => {
-		updateAccountById(accountId, (account) => {
-			account.disableAuthComponent();
-			return account;
-		});
-	}, []);
+	const disableAuthComponent = useCallback(
+		(accountId: string) => {
+			updateAccountById(accountId, (account) => {
+				const newStorage = account.disableAuthComponent(
+					Account.parseStorage(files[account.storageFileId].content.value!)
+				);
+				updateFileById(account.storageFileId, () => {
+					return Account.stringifyStorage(newStorage);
+				});
+				return account;
+			});
+		},
+		[files, updateFileById]
+	);
 
 	const enableWalletComponent = useCallback((accountId: string) => {
 		updateAccountById(accountId, (account) => {
@@ -561,12 +569,20 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		});
 	}, []);
 
-	const enableAuthComponent = useCallback((accountId: string) => {
-		updateAccountById(accountId, (account) => {
-			account.enableAuthComponent();
-			return account;
-		});
-	}, []);
+	const enableAuthComponent = useCallback(
+		(accountId: string) => {
+			updateAccountById(accountId, (account) => {
+				const newStorage = account.enableAuthComponent(
+					Account.parseStorage(files[account.storageFileId].content.value!)
+				);
+				updateFileById(account.storageFileId, () => {
+					return Account.stringifyStorage(newStorage);
+				});
+				return account;
+			});
+		},
+		[files, updateFileById]
+	);
 	const updateFileContent = useCallback((fileId: string, content: string) => {
 		setFiles((prev) => ({
 			...prev,

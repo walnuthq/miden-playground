@@ -24,7 +24,6 @@ export function Storage({
 }) {
 	const { accounts, files, accountStorageDiffs } = useMiden();
 
-	console.log('accountId', accountId);
 	const account = accountId ? accounts[accountId] : null;
 	const editableStorage = account?.storageFileId
 		? Account.parseStorage(files[account?.storageFileId].content.value!)
@@ -39,6 +38,7 @@ export function Storage({
 			<Table className="[&_tr:hover]:bg-transparent ">
 				<TableHeader>
 					<TableRow>
+						<TableHead className="pr-4">Component</TableHead>
 						<TableHead className="pr-4">Index</TableHead>
 						<TableHead className="pr-4">Value</TableHead>
 						{!withoutOldValue && <TableHead className="pr-4">Old value</TableHead>}
@@ -49,10 +49,21 @@ export function Storage({
 						editableStorage.map((item, index) =>
 							Array.from(item).map((value, subIndex) => (
 								<TableRow key={`${index}-${subIndex}`}>
-									<TableCell className="pr-8 last:p-2">{subIndex === 0 ? index : ''}</TableCell>
-									<TableCell className="pr-8 last:p-2">{String(value)}</TableCell>
+									<TableCell className="pr-8 last:py-2 last:pl-2 last:pr-6">
+										{index === 0 && account?.isAuth && subIndex === 0
+											? 'Auth'
+											: (index === 0 || index === 1) && subIndex === 0
+											? 'Custom'
+											: ''}
+									</TableCell>
+									<TableCell className="pr-8 last:py-2 last:pl-2 last:pr-6">
+										{subIndex === 0 ? index : ''}
+									</TableCell>
+									<TableCell className="pr-8 last:py-2 last:pl-2 last:pr-6">
+										{String(value)}
+									</TableCell>
 									{!withoutOldValue && (
-										<TableCell className="pr-8 last:p-2 font-mono text-theme-danger">
+										<TableCell className="pr-8 last:py-2 last:pl-2 last:pr-6 font-mono text-theme-danger">
 											{accountStorageDiffs[index] && accountStorageDiffs[index]?.old
 												? accountStorageDiffs[index]?.old[subIndex]
 												: ''}
