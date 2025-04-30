@@ -46,7 +46,6 @@ export const ComposeTransactionTab = () => {
 	const selectedAccountData = selectedTransactionAccountId
 		? accounts[selectedTransactionAccountId]
 		: null;
-	console.log(accountUpdates);
 	const [isOpenDropdown, setIsOpenDropdown] = useState(false);
 	const [_blockNumber, _setBlockNumber] = useState(blockNumber.toString());
 	const { currentStep, setCurrentStep } = useNextStep();
@@ -406,8 +405,8 @@ export const ComposeTransactionTab = () => {
 										</div>
 									</ScrollArea>
 								) : (
-									<ScrollArea className="relative h-full px-4 overflow-auto mt-16 max-w-3xl mx-auto text-theme-text">
-										<div className="flex flex-col gap-4">
+									<ScrollArea className="relative h-full px-4 overflow-auto max-w-3xl mx-auto text-theme-text">
+										<div className="flex flex-col gap-4 pt-16">
 											<h1 className="font-bold text-4xl">Miden Playground</h1>
 											<h3 className="font-bold text-2xl mt-8">Getting Started</h3>
 											<div>
@@ -434,7 +433,7 @@ export const ComposeTransactionTab = () => {
 												</ul>
 											</div>
 										</div>
-										<div className="flex flex-col gap-4 mt-8">
+										<div className="flex flex-col gap-4 mt-8 pb-4">
 											<h3 className="font-bold text-2xl">Need help?</h3>
 											<ul>
 												<li>

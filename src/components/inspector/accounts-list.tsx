@@ -118,7 +118,7 @@ const AccountsList = ({
 											level={2}
 										/>
 									</div>
-									<FileItem
+									{/* <FileItem
 										editorFile={files[account.vaultFileId]}
 										onClick={() => selectFile(account.vaultFileId)}
 										isSelected={selectedFileId === account.vaultFileId}
@@ -129,7 +129,7 @@ const AccountsList = ({
 										onClick={() => selectFile(account.storageFileId)}
 										isSelected={selectedFileId === account.storageFileId}
 										level={2}
-									/>
+									/>  */}
 								</div>
 							)}
 						</React.Fragment>

@@ -60,6 +60,7 @@ const AccountCodeFile = ({
 					<div className="flex justify-between px-4 pt-4 border-t border-theme-border">
 						<div className="text-sm ">WALLET COMPONENT</div>
 						<ToggleSwitch
+							checked={account.isWallet}
 							id="wallet-switch"
 							onToggle={(isEnabled: boolean) =>
 								isEnabled ? enableWalletComponent(accountId) : disableWalletComponent(accountId)
@@ -78,6 +79,7 @@ const AccountCodeFile = ({
 					<div className="flex justify-between  px-4 pt-4 border-t border-theme-border">
 						<div className="text-sm">AUTH COMPONENT</div>
 						<ToggleSwitch
+							checked={account.isAuth}
 							id="wallet-switch"
 							onToggle={(isEnabled: boolean) =>
 								isEnabled ? enableAuthComponent(accountId) : disableAuthComponent(accountId)

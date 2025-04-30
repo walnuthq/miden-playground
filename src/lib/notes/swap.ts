@@ -1,22 +1,25 @@
 import { AccountId, Asset } from '@/lib/types';
 import { generateId } from '@/lib/utils';
-import { createSwapNotes } from '@/lib/miden-wasm-api';
+import { createNoteData, createSwapNotes, generateNoteTag } from '@/lib/miden-wasm-api';
 import { Note } from '@/lib/notes';
 import { EditorFiles } from '../files';
 import json5 from 'json5';
+import { DEFAULT_FAUCET_IDS } from '../consts/defaults';
 
 export function createSwapNote({
 	senderId,
 	receiverId,
 	offeredAsset,
 	requestedAsset,
-	name
+	name,
+	senderScript
 }: {
 	senderId: AccountId;
 	receiverId: AccountId;
 	offeredAsset: Asset;
 	requestedAsset: Asset;
 	name: string;
+	senderScript: string;
 }): {
 	note: Note;
 	newFiles: EditorFiles;
@@ -27,6 +30,7 @@ export function createSwapNote({
 	const inputFileId = generateId();
 	const metadataFileId = generateId();
 	const vaultFileId = generateId();
+	const tag = generateNoteTag(senderId.id);
 	const { swapNoteInputs, paybackNote: paybackNoteData } = createSwapNotes(
 		senderId.id,
 		receiverId.id,
@@ -43,11 +47,6 @@ export function createSwapNote({
 	const paybackMetadataFileId = generateId();
 	const paybackVaultFileId = generateId();
 
-	const paybackInputs: string[] = [];
-	for (const input of paybackNoteData.inputs()) {
-		paybackInputs.push(input.toString());
-	}
-
 	const inputsString = json5.stringify(inputs, null, 2);
 	const inputsLines = inputsString.split('\n');
 
@@ -58,8 +57,9 @@ export function createSwapNote({
 
 	const inputsWithComments = inputsLines.join('\n');
 
+	const paybackInputs = [receiverId.suffix, receiverId.prefix];
 	const paybackInputsString = json5.stringify(
-		[receiverId.suffix.toString(), receiverId.prefix.toString()],
+		paybackInputs.map((input) => input.toString()),
 		null,
 		2
 	);
@@ -88,7 +88,7 @@ export function createSwapNote({
 		},
 		[metadataFileId]: {
 			id: metadataFileId,
-			name: `Metadata`,
+			name: `Info`,
 			content: { dynamic: { note: { noteId, variant: 'metadata' } } },
 			isOpen: false,
 			variant: 'note',
@@ -122,7 +122,7 @@ export function createSwapNote({
 		},
 		[paybackMetadataFileId]: {
 			id: paybackMetadataFileId,
-			name: `Payback Metadata`,
+			name: `Info`,
 			content: { dynamic: { note: { noteId: paybackNoteId, variant: 'metadata' } } },
 			isOpen: false,
 			variant: 'note',
@@ -138,19 +138,36 @@ export function createSwapNote({
 		}
 	};
 
+	const paybackRequestedAssets = [requestedAsset];
+	if (requestedAsset.faucetId !== DEFAULT_FAUCET_IDS[0]) {
+		paybackRequestedAssets.push({ faucetId: DEFAULT_FAUCET_IDS[0], amount: 0n });
+	}
+
+	if (requestedAsset.faucetId !== DEFAULT_FAUCET_IDS[1]) {
+		paybackRequestedAssets.push({ faucetId: DEFAULT_FAUCET_IDS[1], amount: 0n });
+	}
+
 	const paybackNote = new Note({
 		id: paybackNoteId,
 		name: `Payback ${name}`,
 		scriptFileId: paybackScriptFileId,
 		metadataFileId: paybackMetadataFileId,
 		isConsumed: false,
-		assets: [requestedAsset],
+		assets: paybackRequestedAssets,
 		inputFileId: paybackInputFileId,
 		senderId: paybackNoteData.sender_id(),
 		vaultFileId: paybackVaultFileId,
 		initialNoteId: paybackNoteData.id(),
-		isExpectedOutput: true
+		isExpectedOutput: true,
+		tag: paybackNoteData.tag(),
+		aux: paybackNoteData.aux(),
+		recipientDigest: ''
 	});
+
+	const paybackRecipientDigest = paybackNoteData.recipient_digest();
+	paybackNote.recipientDigest = paybackRecipientDigest;
+
+	const swapAssets = [offeredAsset];
 
 	const note = new Note({
 		id: noteId,
@@ -158,11 +175,24 @@ export function createSwapNote({
 		scriptFileId,
 		metadataFileId,
 		isConsumed: false,
-		assets: [offeredAsset],
+		assets: swapAssets,
 		inputFileId,
 		senderId: senderId.id,
-		vaultFileId
+		vaultFileId,
+		tag,
+		aux: BigInt(0),
+		recipientDigest: ''
 	});
+
+	const noteData = createNoteData(
+		note,
+		new BigUint64Array(swapNoteInputs),
+		SWAP_SCRIPT,
+		senderScript
+	);
+	const recipientDigest = noteData.recipient_digest();
+	note.recipientDigest = recipientDigest;
+
 	const serialNumberString = note.serialNumberDecimalString.slice(0, 10);
 	note.name = `${name} - ${serialNumberString}`;
 	paybackNote.name = `${paybackNote.name} - ${paybackNote.serialNumberDecimalString.slice(0, 10)}`;

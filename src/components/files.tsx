@@ -4,7 +4,11 @@ import { CustomMonacoEditor } from './custom-monaco-editor';
 import { EditorFile } from '@/lib/files';
 import { useEffect, useState } from 'react';
 import { Vault } from './vault';
-import { ScrollArea } from './ui/scroll-area';
+import { Storage } from './storage';
+import { ScrollArea, ScrollBar } from './ui/scroll-area';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
+import json5 from 'json5';
+import { useToast } from '@/hooks/use-toast';
 
 const useSelectedEditorFile = (): { content: string; file: EditorFile | null } => {
 	const { files, accounts, selectedFileId, notes } = useMiden();
@@ -22,18 +26,6 @@ const useSelectedEditorFile = (): { content: string; file: EditorFile | null } =
 							prefix: account.id.prefix.toString(),
 							suffix: account.id.suffix.toString()
 						},
-						null,
-						2
-					);
-				} else if (file.content.dynamic.account.variant === 'vault') {
-					const account = accounts[file.content.dynamic.account.accountId];
-					content = JSON.stringify(
-						account.assets.map((asset) => [
-							asset.amount.toString(),
-							0,
-							0,
-							asset.faucetId.toString()
-						]),
 						null,
 						2
 					);
@@ -66,14 +58,34 @@ const useSelectedEditorFile = (): { content: string; file: EditorFile | null } =
 };
 
 export const Files = () => {
-	const { selectedFileId, updateFileContent } = useMiden();
+	const {
+		selectedFileId,
+		updateFileContent,
+		files,
+		notes,
+		handleChangeInput,
+		setNoteAux,
+		setNoteTag,
+		accounts
+	} = useMiden();
 	const { content, file } = useSelectedEditorFile();
+	const [newInput, setNewInput] = useState('');
 	const [value, setValue] = useState(content);
+	const account =
+		file && file.content.dynamic && file.content.dynamic.account
+			? accounts[file.content.dynamic.account.accountId]
+			: null;
+
+	const note =
+		file && file.content.dynamic && file.content.dynamic.note
+			? notes[file?.content?.dynamic?.note?.noteId]
+			: null;
+	const { toast } = useToast();
+
 	useEffect(() => {
 		setValue(content);
 	}, [content]);
 	if (!selectedFileId || !file) return <div className="flex-1 bg-[#040113]"></div>;
-
 	if (
 		file.content &&
 		'variant' in file.content &&
@@ -90,13 +102,159 @@ export const Files = () => {
 				/>
 			</ScrollArea>
 		);
-	} else if (file?.content?.dynamic?.account?.variant === 'vault') {
+	} else if (file?.content?.dynamic?.account?.variant === 'metadata') {
 		return (
-			<div className="flex-1 bg-[#040113]">
-				<div className="p-4">
+			<ScrollArea className="flex-1 bg-[#040113] overflow-auto h-full ">
+				<div className="p-4 text-theme-text text-sm">
+					<div>INFO</div>
+					<div className="w-fit mt-2">
+						<div className={'rounded-theme border border-theme-border overflow-hidden'}>
+							<Table className="[&_tr:hover]:bg-transparent">
+								<TableHeader>
+									<TableRow>
+										<TableHead className="pr-4">Name</TableHead>
+										<TableHead className="pr-4">Account ID</TableHead>
+										<TableHead className="pr-4">Nonce</TableHead>
+									</TableRow>
+								</TableHeader>
+								<TableBody>
+									<TableRow>
+										<TableCell className="pr-8 last:p-2">{account?.name.toString()}</TableCell>
+										<TableCell className="pr-8 last:p-2">
+											{account?.id.id.toString()}, ({account?.id.prefix.toString()},{' '}
+											{account?.id.suffix.toString()})
+										</TableCell>
+										<TableCell className="pr-8 last:p-2 flex flex-row font-mono">
+											<div className="min-w-8">{account?.nonce}</div>
+										</TableCell>
+									</TableRow>
+								</TableBody>
+							</Table>
+						</div>
+					</div>
+					<div className="mt-6 mb-2">VAULT</div>
 					<Vault accountId={file.content.dynamic.account.accountId} addAssetAbility />
+					<div className="mt-6 mb-2">STORAGE</div>
+					{account && <Storage className="h-72" accountId={account?.id.id} withoutOldValue />}
 				</div>
-			</div>
+			</ScrollArea>
+		);
+	} else if (file?.content?.dynamic?.note?.variant === 'metadata') {
+		const handleAddInput = () => {
+			if (newInput.trim() !== '') {
+				handleChangeInput(note!.id, newInput, parsedInputs().length);
+				setNewInput('');
+			} else {
+				toast({
+					title: 'Please enter the new input',
+					variant: 'destructive'
+				});
+			}
+		};
+
+		const parsedInputs = () => {
+			try {
+				if (!files[note!.inputFileId].content.value) {
+					return [];
+				}
+				const parsed = json5.parse(files[note!.inputFileId].content.value!);
+				return Array.isArray(parsed) ? parsed : [];
+			} catch (error) {
+				console.error(error);
+				return [];
+			}
+		};
+
+		return (
+			<ScrollArea className="flex-1 bg-[#040113] overflow-auto h-full pr-4">
+				<div className="p-4 text-theme-text text-sm">
+					<div>INPUTS</div>
+					<div className="w-fit mt-2">
+						<div className={'rounded-theme border border-theme-border overflow-hidden'}>
+							<Table className="[&_tr:hover]:bg-transparent">
+								<TableBody>
+									{parsedInputs().map((input, index) => (
+										<TableRow key={`input-${note!.id}-${index}`}>
+											<TableCell>
+												<input
+													type="number"
+													value={input}
+													onChange={(e) => handleChangeInput(note!.id, e.target.value, index)}
+													className="bg-transparent outline-none"
+												/>
+											</TableCell>
+										</TableRow>
+									))}
+									<TableRow>
+										<TableCell>
+											<input
+												type="number"
+												value={newInput}
+												placeholder="New input"
+												onChange={(e) => setNewInput(e.target.value)}
+												className="bg-transparent outline-none w-20"
+												min={0}
+											/>
+										</TableCell>
+									</TableRow>
+								</TableBody>
+							</Table>
+						</div>
+						<button
+							onClick={handleAddInput}
+							className="w-full mt-2 rounded-theme text-sm text-center transition-all px-4 py-1 bg-theme-surface-highlight  text-theme-text hover:bg-theme-border"
+						>
+							Create input
+						</button>
+					</div>
+					<div className="mt-6 mb-2">VAULT</div>
+					<Vault noteId={file.content.dynamic.note.noteId} addAssetAbility />
+					<div className="mt-6">METADATA</div>
+					<div className="w-fit mt-2">
+						<div className={'rounded-theme border border-theme-border overflow-hidden'}>
+							<Table className="[&_tr:hover]:bg-transparent">
+								<TableHeader>
+									<TableRow>
+										<TableHead className="pr-4">Sender ID</TableHead>
+										<TableHead className="pr-4">Serial number</TableHead>
+										<TableHead>Aux</TableHead>
+										<TableHead>Tag</TableHead>
+										<TableHead>Recipient</TableHead>
+									</TableRow>
+								</TableHeader>
+								<TableBody>
+									<TableRow>
+										<TableCell className="pr-8 last:p-2">{note!.senderId.toString()}</TableCell>
+										<TableCell className="pr-8 last:p-2">
+											{note!.serialNumberDecimalString}
+										</TableCell>
+										<TableCell>
+											<input
+												value={note!.aux.toString()}
+												type="number"
+												className="bg-transparent outline-none w-20"
+												min={0}
+												onChange={(e) => setNoteAux(note!.id, BigInt(e.target.value))}
+											/>
+										</TableCell>
+										<TableCell>
+											<input
+												value={note!.tag}
+												type="number"
+												className="bg-transparent outline-none w-20"
+												min={0}
+												onChange={(e) => setNoteTag(note!.id, parseInt(e.target.value))}
+											/>
+										</TableCell>
+										<TableCell>{note!.recipientDigest}</TableCell>
+									</TableRow>
+								</TableBody>
+							</Table>
+						</div>
+					</div>
+				</div>
+				<ScrollBar orientation="horizontal" />
+			</ScrollArea>
 		);
 	} else {
 		return (
