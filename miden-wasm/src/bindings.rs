@@ -63,6 +63,7 @@ impl AccountData {
         wallet_enabled: bool,
         auth_enabled: bool,
         storage: Vec<WordData>,
+        nonce: u64,
     ) -> Result<Self, JsValue> {
         let account_code_library = create_account_component_library(account_code.as_str())
             .map_err(|err| format!("Account library cannot be built: {:?}", err))?;
@@ -89,6 +90,7 @@ impl AccountData {
                 .collect(),
             wallet_enabled,
             auth_enabled,
+            nonce,
         )
         .map_err(|err| {
             console::log_1(&format!("Receiver account creation failed: {:?}", err).into());

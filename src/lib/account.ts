@@ -6,6 +6,13 @@ import { AccountId, Asset, ExecutionOutput } from '@/lib/types';
 import _ from 'lodash';
 import { EditorFiles } from './files';
 
+const PUBLIC_KEY = new BigUint64Array([
+	13642120692355817730n,
+	14340237824901842161n,
+	3638127317171027907n,
+	15110848026471267870n
+]);
+
 interface AccountProps {
 	id: AccountId;
 	name: string;
@@ -18,6 +25,7 @@ interface AccountProps {
 	vaultFileId: string;
 	storageFileId: string;
 	codeFileId: string;
+	nonce: number;
 }
 
 export class Account {
@@ -32,6 +40,7 @@ export class Account {
 	vaultFileId: string;
 	storageFileId: string;
 	codeFileId: string;
+	nonce: number;
 
 	constructor(props: AccountProps) {
 		this.id = props.id;
@@ -45,6 +54,7 @@ export class Account {
 		this.vaultFileId = props.vaultFileId;
 		this.storageFileId = props.storageFileId;
 		this.codeFileId = props.codeFileId;
+		this.nonce = props.nonce;
 	}
 
 	clone() {
@@ -129,7 +139,8 @@ export class Account {
 			metadataFileId,
 			vaultFileId,
 			storageFileId,
-			codeFileId
+			codeFileId,
+			nonce: 1
 		});
 
 		return { account, newFiles };
@@ -153,16 +164,24 @@ export class Account {
 		this.isWallet = false;
 	}
 
-	disableAuthComponent() {
+	disableAuthComponent(storage: BigUint64Array[]): BigUint64Array[] {
+		if (storage.length > 0 && storage[0].toString() === PUBLIC_KEY.toString()) {
+			storage = storage.slice(1);
+		}
 		this.isAuth = false;
+		return storage;
 	}
 
 	enableWalletComponent() {
 		this.isWallet = true;
 	}
 
-	enableAuthComponent() {
+	enableAuthComponent(storage: BigUint64Array[]): BigUint64Array[] {
+		if (storage.length === 0 || storage[0].toString() !== PUBLIC_KEY.toString()) {
+			storage = [PUBLIC_KEY, ...storage];
+		}
 		this.isAuth = true;
+		return storage;
 	}
 
 	updateAssetAmount(faucetId: string, updateFn: (amount: bigint) => bigint) {
@@ -178,14 +197,9 @@ export class Account {
 			amount
 		});
 	}
+
 	static initialStorage() {
-		const storage = Array(3).fill(new BigUint64Array([0n, 0n, 0n, 0n]));
-		storage[2] = new BigUint64Array([
-			13642120692355817730n,
-			14340237824901842161n,
-			3638127317171027907n,
-			15110848026471267870n
-		]); // pub key
+		const storage = [PUBLIC_KEY];
 		return storage;
 	}
 

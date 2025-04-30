@@ -54,10 +54,9 @@ export function consumeNotes({
 		receiver.assets.map((a) => new AssetData(a.faucetId, a.amount)),
 		receiver.isWallet,
 		receiver.isAuth,
-		receiverStorage.map((row) => new WordData(new BigUint64Array(row)))
+		receiverStorage.map((row) => new WordData(new BigUint64Array(row))),
+		BigInt(receiver.nonce)
 	);
-
-	console.log('receiverAccount');
 
 	const output = execute_transaction(
 		transactionScript,
@@ -65,7 +64,7 @@ export function consumeNotes({
 		notesWrapper,
 		BigInt(blockNumber)
 	);
-	console.log('output', output);
+
 	return output;
 }
 

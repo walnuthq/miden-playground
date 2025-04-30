@@ -301,8 +301,9 @@ export class AccountData {
      * @param {boolean} wallet_enabled
      * @param {boolean} auth_enabled
      * @param {(WordData)[]} storage
+     * @param {bigint} nonce
      */
-    constructor(account_code, secret_key, account_id, assets, wallet_enabled, auth_enabled, storage) {
+    constructor(account_code, secret_key, account_id, assets, wallet_enabled, auth_enabled, storage, nonce) {
         const ptr0 = passStringToWasm0(account_code, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
         const ptr1 = passArray8ToWasm0(secret_key, wasm.__wbindgen_malloc);
@@ -313,7 +314,7 @@ export class AccountData {
         const len3 = WASM_VECTOR_LEN;
         const ptr4 = passArrayJsValueToWasm0(storage, wasm.__wbindgen_malloc);
         const len4 = WASM_VECTOR_LEN;
-        const ret = wasm.accountdata_new(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, wallet_enabled, auth_enabled, ptr4, len4);
+        const ret = wasm.accountdata_new(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, wallet_enabled, auth_enabled, ptr4, len4, nonce);
         if (ret[2]) {
             throw takeFromExternrefTable0(ret[1]);
         }

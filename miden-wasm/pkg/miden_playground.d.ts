@@ -9,7 +9,7 @@ export function get_note_id(note: NoteData): string;
 export function generate_note_tag(sender_account_id: string): number;
 export class AccountData {
   free(): void;
-  constructor(account_code: string, secret_key: Uint8Array, account_id: string, assets: (AssetData)[], wallet_enabled: boolean, auth_enabled: boolean, storage: (WordData)[]);
+  constructor(account_code: string, secret_key: Uint8Array, account_id: string, assets: (AssetData)[], wallet_enabled: boolean, auth_enabled: boolean, storage: (WordData)[], nonce: bigint);
 }
 export class AccountIdData {
   private constructor();
@@ -72,7 +72,7 @@ export interface InitOutput {
   readonly __wbg_worddata_free: (a: number, b: number) => void;
   readonly worddata_new: (a: number, b: number) => [number, number, number];
   readonly __wbg_accountdata_free: (a: number, b: number) => void;
-  readonly accountdata_new: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number, l: number) => [number, number, number];
+  readonly accountdata_new: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number, l: number, m: bigint) => [number, number, number];
   readonly __wbg_assetdata_free: (a: number, b: number) => void;
   readonly __wbg_get_assetdata_faucet_id: (a: number) => [number, number];
   readonly __wbg_set_assetdata_faucet_id: (a: number, b: number, c: number) => void;

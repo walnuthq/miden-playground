@@ -4,6 +4,7 @@ import { CustomMonacoEditor } from './custom-monaco-editor';
 import { EditorFile } from '@/lib/files';
 import { useEffect, useState } from 'react';
 import { Vault } from './vault';
+import { Storage } from './storage';
 import { ScrollArea, ScrollBar } from './ui/scroll-area';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import json5 from 'json5';
@@ -25,18 +26,6 @@ const useSelectedEditorFile = (): { content: string; file: EditorFile | null } =
 							prefix: account.id.prefix.toString(),
 							suffix: account.id.suffix.toString()
 						},
-						null,
-						2
-					);
-				} else if (file.content.dynamic.account.variant === 'vault') {
-					const account = accounts[file.content.dynamic.account.accountId];
-					content = JSON.stringify(
-						account.assets.map((asset) => [
-							asset.amount.toString(),
-							0,
-							0,
-							asset.faucetId.toString()
-						]),
 						null,
 						2
 					);
@@ -76,11 +65,17 @@ export const Files = () => {
 		notes,
 		handleChangeInput,
 		setNoteAux,
-		setNoteTag
+		setNoteTag,
+		accounts
 	} = useMiden();
 	const { content, file } = useSelectedEditorFile();
 	const [newInput, setNewInput] = useState('');
 	const [value, setValue] = useState(content);
+	const account =
+		file && file.content.dynamic && file.content.dynamic.account
+			? accounts[file.content.dynamic.account.accountId]
+			: null;
+
 	const note =
 		file && file.content.dynamic && file.content.dynamic.note
 			? notes[file?.content?.dynamic?.note?.noteId]
@@ -91,7 +86,6 @@ export const Files = () => {
 		setValue(content);
 	}, [content]);
 	if (!selectedFileId || !file) return <div className="flex-1 bg-[#040113]"></div>;
-
 	if (
 		file.content &&
 		'variant' in file.content &&
@@ -108,13 +102,42 @@ export const Files = () => {
 				/>
 			</ScrollArea>
 		);
-	} else if (file?.content?.dynamic?.account?.variant === 'vault') {
+	} else if (file?.content?.dynamic?.account?.variant === 'metadata') {
 		return (
-			<div className="flex-1 bg-[#040113]">
-				<div className="p-4">
+			<ScrollArea className="flex-1 bg-[#040113] overflow-auto h-full ">
+				<div className="p-4 text-theme-text text-sm">
+					<div>INFO</div>
+					<div className="w-fit mt-2">
+						<div className={'rounded-theme border border-theme-border overflow-hidden'}>
+							<Table className="[&_tr:hover]:bg-transparent">
+								<TableHeader>
+									<TableRow>
+										<TableHead className="pr-4">Name</TableHead>
+										<TableHead className="pr-4">Account ID</TableHead>
+										<TableHead className="pr-4">Nonce</TableHead>
+									</TableRow>
+								</TableHeader>
+								<TableBody>
+									<TableRow>
+										<TableCell className="pr-8 last:p-2">{account?.name.toString()}</TableCell>
+										<TableCell className="pr-8 last:p-2">
+											{account?.id.id.toString()}, ({account?.id.prefix.toString()},{' '}
+											{account?.id.suffix.toString()})
+										</TableCell>
+										<TableCell className="pr-8 last:p-2 flex flex-row font-mono">
+											<div className="min-w-8">{account?.nonce}</div>
+										</TableCell>
+									</TableRow>
+								</TableBody>
+							</Table>
+						</div>
+					</div>
+					<div className="mt-6 mb-2">VAULT</div>
 					<Vault accountId={file.content.dynamic.account.accountId} addAssetAbility />
+					<div className="mt-6 mb-2">STORAGE</div>
+					{account && <Storage className="h-72" accountId={account?.id.id} withoutOldValue />}
 				</div>
-			</div>
+			</ScrollArea>
 		);
 	} else if (file?.content?.dynamic?.note?.variant === 'metadata') {
 		const handleAddInput = () => {
