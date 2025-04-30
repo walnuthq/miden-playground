@@ -6,15 +6,16 @@ import React, {
 	useCallback,
 	useContext,
 	useEffect,
-	useState
+	useState,
+	useRef
 } from 'react';
 import init from 'miden-wasm';
 import { DEFAULT_FAUCET_IDS } from '@/lib/consts/defaults';
 import { TRANSACTION_SCRIPT_FILE_ID } from '@/lib/consts';
-import { consumeNotes, generateFaucetId } from '@/lib/miden-wasm-api';
+import { consumeNotes, createNoteData, generateFaucetId } from '@/lib/miden-wasm-api';
 import { TRANSACTION_SCRIPT } from '@/lib/consts/transaction';
 import { convertToBigUint64Array } from '@/lib/utils';
-import { Account, AccountProps } from '@/lib/account';
+import { Account } from '@/lib/account';
 import { createP2IDRNote, createSwapNote, Note } from '@/lib/notes';
 import { createP2IDNote } from '@/lib/notes/p2id';
 import { EditorFiles } from '@/lib/files';
@@ -88,6 +89,18 @@ interface MidenContextProps {
 	toggleFisrtExecuteClick: () => void;
 	faucets: Faucets;
 	createFaucet: (name: string, amount: bigint, accountId: string) => void;
+	createNoteFaucet: (name: string, amount: bigint, noteId: string) => void;
+	handleChangeInput: (noteId: string, newInput: string, index: number) => void;
+	updateRecipientDigest: (noteId: string) => void;
+	setNoteTag: (noteId: string, tag: number) => void;
+	setNoteAux: (noteId: string, aux: bigint) => void;
+	handleChangeStorage: (
+		accountId: string,
+		newValue: string,
+		index: number,
+		subIndex: number
+	) => void;
+	createNewStorageSlot: (accountId: string) => void;
 }
 
 export const MidenContext = createContext<MidenContextProps>({
@@ -135,7 +148,14 @@ export const MidenContext = createContext<MidenContextProps>({
 	firstExecuteClick: false,
 	toggleFisrtExecuteClick: () => {},
 	faucets: {},
-	createFaucet: () => {}
+	createFaucet: () => {},
+	createNoteFaucet: () => {},
+	handleChangeInput: () => {},
+	updateRecipientDigest: () => {},
+	setNoteTag: () => {},
+	setNoteAux: () => {},
+	handleChangeStorage: () => {},
+	createNewStorageSlot: () => {}
 });
 
 export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
@@ -174,6 +194,122 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				}
 			})
 		);
+	};
+
+	const setNoteTag = (noteId: string, tag: number) => {
+		updateNoteById(noteId, (note) => {
+			note.tag = tag;
+			return note;
+		});
+	};
+
+	const setNoteAux = (noteId: string, aux: bigint) => {
+		updateNoteById(noteId, (note) => {
+			note.aux = aux;
+			return note;
+		});
+	};
+
+	const isValidUint64 = (value: string): boolean => {
+		if (value === '') return true;
+		const MAX_UINT64 = 2n ** 64n - 1n;
+		const MIN_UINT64 = 0n;
+		try {
+			const bigIntValue = BigInt(value);
+			return bigIntValue >= MIN_UINT64 && bigIntValue <= MAX_UINT64;
+		} catch (error) {
+			console.error(error);
+			return false;
+		}
+	};
+	const handleChangeStorage = (
+		accountId: string,
+		newValue: string,
+		index: number,
+		subIndex: number
+	) => {
+		if (!isValidUint64(newValue) && newValue !== '') {
+			return;
+		}
+		const account = accounts[accountId];
+		try {
+			let currentStorage: BigUint64Array[] = [];
+
+			if (files[account!.storageFileId].content.value) {
+				try {
+					currentStorage = Account.parseStorage(files[account?.storageFileId].content.value!);
+				} catch (error) {
+					console.error(error);
+					currentStorage = [];
+				}
+			}
+			currentStorage[index][subIndex] = BigInt(newValue);
+			console.log('BigInt(newValue)', BigInt(newValue));
+			console.log('(newValue)', newValue);
+			console.log('currentStorage[index][subIndex]', currentStorage[index][subIndex]);
+
+			updateFileContent(account!.storageFileId, Account.stringifyStorage(currentStorage));
+		} catch (error) {
+			console.error(error);
+		}
+	};
+
+	const createNewStorageSlot = (accountId: string) => {
+		const account = accounts[accountId];
+		try {
+			let currentStorage: BigUint64Array[] = [];
+
+			if (files[account!.storageFileId].content.value) {
+				try {
+					currentStorage = Account.parseStorage(files[account?.storageFileId].content.value!);
+				} catch (error) {
+					console.error(error);
+					currentStorage = [];
+				}
+			}
+			currentStorage = [...currentStorage, new BigUint64Array([0n, 0n, 0n, 0n])];
+
+			updateFileContent(account!.storageFileId, Account.stringifyStorage(currentStorage));
+		} catch (error) {
+			console.error(error);
+		}
+	};
+
+	const handleChangeInput = (noteId: string, newInput: string, index: number) => {
+		const note = notes[noteId];
+		try {
+			let currentInputs = [];
+
+			if (files[note!.inputFileId].content.value) {
+				try {
+					currentInputs = json5.parse(files[note!.inputFileId].content.value!);
+				} catch (error) {
+					console.error(error);
+					currentInputs = [];
+				}
+			}
+
+			if (!Array.isArray(currentInputs)) {
+				currentInputs = [];
+			}
+			currentInputs[index] = newInput;
+
+			updateFileContent(note!.inputFileId, JSON.stringify(currentInputs));
+		} catch (error) {
+			console.error(error);
+		}
+		updateRecipientDigest(noteId);
+	};
+
+	const createNoteFaucet = (name: string, amount: bigint, noteId: string) => {
+		const note = notes[noteId];
+		const faucetId = generateFaucetId().id;
+		setFaucets((prev) => {
+			const newFaucets = prev;
+			newFaucets[faucetId] = name;
+			return newFaucets;
+		});
+		note.addAsset(faucetId, amount);
 	};
 
 	const toggleFisrtExecuteClick = () => {
@@ -220,6 +356,44 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		null
 	);
 	const [selectedTransactionNotesIds, setSelectedTransactionNotesIds] = useState<string[]>([]);
+
+	// add a ref to store debounce timeouts per note and delay constant
+	const digestTimeoutsRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+	const RECIPIENT_DIGEST_DEBOUNCE_DELAY_MS = 5000;
+
+	const updateRecipientDigest = useCallback(
+		(noteId: string) => {
+			// debounce per noteId
+			if (digestTimeoutsRef.current[noteId]) {
+				clearTimeout(digestTimeoutsRef.current[noteId]);
+			}
+			digestTimeoutsRef.current[noteId] = setTimeout(() => {
+				const note = notes[noteId];
+				const sender = accounts[note.senderId];
+				const noteData = createNoteData(
+					note,
+					convertToBigUint64Array(json5.parse(files[note.inputFileId].content.value!)),
+					files[note.scriptFileId].content.value!,
+					files[sender.scriptFileId].content.value!
+				);
+				const recipientDigest = noteData.recipient_digest();
+				updateNoteById(noteId, (note) => {
+					note.recipientDigest = recipientDigest;
+					return note;
+				});
+				delete digestTimeoutsRef.current[noteId];
+			}, RECIPIENT_DIGEST_DEBOUNCE_DELAY_MS);
+		},
+		[accounts, files, notes]
+	);
+
+	const updateNoteById = (noteId: string, updateFn: (note: Note) => Note) => {
+		setNotes((prev) => {
+			const note = prev[noteId];
+			const updatedNote = updateFn(note.clone());
+			return { ...prev, [noteId]: updatedNote };
+		});
+	};
 
 	const updateAccountById = (accountId: string, updateFn: (account: Account) => Account) => {
 		setAccounts((prev) => {
@@ -295,6 +469,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			return updatedFiles;
 		});
 	}, []);
+
 	const selectTransactionNote = useCallback((noteId: string) => {
 		setSelectedTransactionNotesIds((prev) => {
 			if (prev.includes(noteId)) {
@@ -362,7 +537,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 
 		setIsExecutingTransaction(true);
 		const account = accounts[selectedTransactionAccountId];
-
+		//
 		const transactionNotes: {
 			note: Note;
 			noteScript: string;
@@ -372,7 +547,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		const consumedNotesIds: string[] = [];
 		for (const noteId of selectedTransactionNotesIds) {
 			const note = notes[noteId];
-
 			if (note.isConsumed) {
 				addErrorLog(`${note.name} is already consumed`);
 				setIsExecutingTransaction(false);
@@ -413,7 +587,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			if (!output.assets.some((a) => a.faucetId === DEFAULT_FAUCET_IDS[1])) {
 				output.assets.push({ faucetId: DEFAULT_FAUCET_IDS[1], amount: 0n });
 			}
-			console.log(output.assets);
 			const accountUpdates: AccountUpdates = {
 				accountId: selectedTransactionAccountId,
 				assetsDelta: output.assets.reduce((acc, asset) => {
@@ -430,6 +603,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 
 			updateAccountById(selectedTransactionAccountId, (account) => {
 				account.assets = output.assets;
+				account.nonce = output.nonce;
 				return account;
 			});
 			updateFileById(account.storageFileId, () => {
@@ -567,12 +741,20 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		});
 	}, []);
 
-	const disableAuthComponent = useCallback((accountId: string) => {
-		updateAccountById(accountId, (account) => {
-			account.disableAuthComponent();
-			return account;
-		});
-	}, []);
+	const disableAuthComponent = useCallback(
+		(accountId: string) => {
+			updateAccountById(accountId, (account) => {
+				const newStorage = account.disableAuthComponent(
+					Account.parseStorage(files[account.storageFileId].content.value!)
+				);
+				updateFileById(account.storageFileId, () => {
+					return Account.stringifyStorage(newStorage);
+				});
+				return account;
+			});
+		},
+		[files, updateFileById]
+	);
 
 	const enableWalletComponent = useCallback((accountId: string) => {
 		updateAccountById(accountId, (account) => {
@@ -581,13 +763,20 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		});
 	}, []);
 
-	const enableAuthComponent = useCallback((accountId: string) => {
-		updateAccountById(accountId, (account) => {
-			account.enableAuthComponent();
-			return account;
-		});
-	}, []);
-
+	const enableAuthComponent = useCallback(
+		(accountId: string) => {
+			updateAccountById(accountId, (account) => {
+				const newStorage = account.enableAuthComponent(
+					Account.parseStorage(files[account.storageFileId].content.value!)
+				);
+				updateFileById(account.storageFileId, () => {
+					return Account.stringifyStorage(newStorage);
+				});
+				return account;
+			});
+		},
+		[files, updateFileById]
+	);
 	const updateFileContent = useCallback((fileId: string, content: string) => {
 		setFiles((prev) => {
 			const updatedFile = {
@@ -652,7 +841,8 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			receiverId: receiver.id,
 			offeredAsset,
 			requestedAsset,
-			name: 'SWAP'
+			name: 'SWAP',
+			senderScript: files[sender.scriptFileId].content.value!
 		});
 
 		updateAccountById(sender.id.id, (account) => {
@@ -687,7 +877,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		};
 
 		localStorage.setItem('notes', encodeForStorage(updatedNotesData));
-	}, [accounts, selectedTransactionAccountId]);
+	}, [accounts, selectedTransactionAccountId, files]);
 
 	const createSampleP2IDNote = useCallback(() => {
 		const receiverId = selectedTransactionAccountId
@@ -695,8 +885,15 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			: Object.values(accounts)[0].id;
 		const senderId = Object.values(accounts).filter((account) => account.id !== receiverId)[0].id;
 		const assets = [{ ...accounts[senderId.id].assets[0], amount: 10n }];
+		const sender = accounts[senderId.id];
 
-		const { note, newFiles } = createP2IDNote({ senderId, receiverId, assets, name: 'P2ID' });
+		const { note, newFiles } = createP2IDNote({
+			senderId,
+			receiverId,
+			assets,
+			name: 'P2ID',
+			senderScript: files[sender.scriptFileId].content.value!
+		});
 		setNotes((prev) => ({ ...prev, [note.id]: note }));
 		setFiles((prev) => ({ ...prev, ...newFiles }));
 
@@ -734,14 +931,15 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			: Object.values(accounts)[0].id;
 		const senderId = Object.values(accounts).filter((account) => account.id.id !== receiverId.id)[0]
 			.id;
-		const assets = [{ ...accounts[senderId.id].assets[0], amount: 10n }];
-
+		const sender = accounts[senderId.id];
+		const assets = [{ ...sender.assets[0], amount: 10n }];
 		const { note, newFiles } = createP2IDRNote({
 			senderId,
 			receiverId,
 			reclaimBlockHeight: 20,
 			assets,
-			name: 'P2IDR'
+			name: 'P2IDR',
+			senderScript: files[sender.scriptFileId].content.value!
 		});
 
 		setNotes((prev) => ({ ...prev, [note.id]: note }));
@@ -773,7 +971,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		};
 
 		localStorage.setItem('notes', encodeForStorage(updatedNotesData));
-	}, [accounts, selectedTransactionAccountId]);
+	}, [accounts, selectedTransactionAccountId, files]);
 
 	const createSampleNote = useCallback(() => {
 		const senderId = Object.values(accounts)[0].id;
@@ -1045,7 +1243,14 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				firstExecuteClick,
 				toggleFisrtExecuteClick,
 				createFaucet,
-				faucets
+				faucets,
+				createNoteFaucet,
+				handleChangeInput,
+				updateRecipientDigest,
+				setNoteTag,
+				setNoteAux,
+				handleChangeStorage,
+				createNewStorageSlot
 			}}
 		>
 			{children}

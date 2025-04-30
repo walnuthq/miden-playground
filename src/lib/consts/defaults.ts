@@ -28,7 +28,8 @@ export function defaultAccounts(): {
 
 export function defaultNotes(
 	accountId1: AccountId,
-	accountId2: AccountId
+	accountId2: AccountId,
+	senderScript: string
 ): {
 	notes: Record<string, Note>;
 	newFiles: EditorFiles;
@@ -40,20 +41,30 @@ export function defaultNotes(
 			{
 				faucetId: DEFAULT_FAUCET_IDS[0],
 				amount: 100n
+			},
+			{
+				faucetId: DEFAULT_FAUCET_IDS[1],
+				amount: 0n
 			}
 		],
-		name: 'P2ID'
+		name: 'P2ID',
+		senderScript
 	});
 	const p2idNote2 = createP2IDNote({
 		senderId: accountId1,
 		receiverId: accountId2,
 		assets: [
 			{
+				faucetId: DEFAULT_FAUCET_IDS[0],
+				amount: 0n
+			},
+			{
 				faucetId: DEFAULT_FAUCET_IDS[1],
 				amount: 200n
 			}
 		],
-		name: 'P2ID'
+		name: 'P2ID',
+		senderScript
 	});
 	// const p2idrNote = createP2IDRNote({
 	// 	senderId: accountId1,

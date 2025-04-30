@@ -4,8 +4,9 @@ export * from './swap';
 
 import { Asset } from '@/lib/types';
 import { generateId } from '@/lib/utils';
-import { generateNoteSerialNumber } from '../miden-wasm-api';
+import { generateNoteSerialNumber, generateNoteTag } from '@/lib/miden-wasm-api';
 import { EditorFiles } from '../files';
+import _ from 'lodash';
 
 export interface NoteProps {
 	name: string;
@@ -19,6 +20,10 @@ export interface NoteProps {
 	vaultFileId: string;
 	initialNoteId?: string;
 	isExpectedOutput?: boolean;
+	tag: number;
+	aux: bigint;
+	recipientDigest: string;
+	serialNumber?: BigUint64Array;
 }
 
 export class Note {
@@ -34,6 +39,9 @@ export class Note {
 	serialNumber: BigUint64Array;
 	isExpectedOutput?: boolean;
 	initialNoteId?: string;
+	tag: number;
+	aux: bigint;
+	recipientDigest: string;
 
 	constructor(props: NoteProps) {
 		this.name = props.name;
@@ -45,9 +53,16 @@ export class Note {
 		this.senderId = props.senderId;
 		this.metadataFileId = props.metadataFileId;
 		this.vaultFileId = props.vaultFileId;
-		this.serialNumber = generateNoteSerialNumber();
+		this.serialNumber = props.serialNumber ?? generateNoteSerialNumber();
 		this.initialNoteId = props.initialNoteId;
 		this.isExpectedOutput = props.isExpectedOutput;
+		this.tag = props.tag;
+		this.aux = props.aux;
+		this.recipientDigest = props.recipientDigest;
+	}
+
+	clone() {
+		return new Note(_.cloneDeep(this));
 	}
 
 	static createEmptyNote({
@@ -67,6 +82,8 @@ export class Note {
 		const inputFileId = generateId();
 		const metadataFileId = generateId();
 		const vaultFileId = generateId();
+		const tag = generateNoteTag(senderId);
+
 		const newFiles: EditorFiles = {
 			[scriptFileId]: {
 				id: scriptFileId,
@@ -88,7 +105,7 @@ export class Note {
 			},
 			[metadataFileId]: {
 				id: metadataFileId,
-				name: `Metadata`,
+				name: `Info`,
 				content: { dynamic: { note: { noteId, variant: 'metadata' } } },
 				isOpen: false,
 				variant: 'file',
@@ -113,8 +130,12 @@ export class Note {
 			inputFileId,
 			senderId,
 			metadataFileId,
-			vaultFileId
+			vaultFileId,
+			tag,
+			aux: BigInt(0),
+			recipientDigest: ''
 		});
+
 		const serialNumberString = note.serialNumberDecimalString.slice(0, 10);
 		note.name = `${name} - ${serialNumberString}`;
 		return { note, newFiles };
@@ -129,5 +150,11 @@ export class Note {
 		if (asset) {
 			asset.amount = updateFn(asset.amount);
 		}
+	}
+	addAsset(faucetId: string, amount: bigint) {
+		this.assets.push({
+			faucetId,
+			amount
+		});
 	}
 }

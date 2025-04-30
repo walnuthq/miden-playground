@@ -19,7 +19,9 @@ use miden_lib::{note::utils::build_p2id_recipient, transaction::TransactionKerne
 use miden_objects::{
     account::{AccountId, AccountIdVersion, AccountStorageMode, AccountType},
     asset::Asset,
-    note::{Note, NoteExecutionHint, NoteExecutionMode, NoteId, NoteInputs, NoteTag},
+    note::{
+        Note, NoteExecutionHint, NoteExecutionMode, NoteId, NoteInputs, NoteRecipient, NoteTag,
+    },
     transaction::{TransactionArgs, TransactionScript},
     Felt, Word,
 };
@@ -255,6 +257,8 @@ pub fn create_swap_note(
         sender_id: receiver_account_id,
         sender_script: ACCOUNT_SCRIPT.to_string(),
         serial_number: payback_serial_num.iter().map(|x| x.as_int()).collect(),
+        tag: payback_tag.inner(),
+        aux: 0,
     };
 
     let payback_note = Note::try_from(payback_note_data.clone())
@@ -272,4 +276,13 @@ pub fn create_swap_note(
 pub fn get_note_id(note: NoteData) -> Result<String, JsValue> {
     let note = Note::try_from(note).map_err(|err| format!("Failed to convert note: {:?}", err))?;
     Ok(note.id().to_hex())
+}
+
+#[wasm_bindgen]
+pub fn generate_note_tag(sender_account_id: String) -> Result<u32, JsValue> {
+    let sender = AccountId::from_hex(&sender_account_id)
+        .map_err(|err| format!("Failed to convert sender account id: {:?}", err))?;
+    let tag = NoteTag::from_account_id(sender, NoteExecutionMode::Local)
+        .map_err(|err| format!("Failed to generate note tag: {:?}", err))?;
+    Ok(tag.inner() as u32)
 }
