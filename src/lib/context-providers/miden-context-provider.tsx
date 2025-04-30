@@ -465,6 +465,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 
 			updateAccountById(selectedTransactionAccountId, (account) => {
 				account.assets = output.assets;
+				account.nonce = output.nonce;
 				return account;
 			});
 			updateFileById(account.storageFileId, () => {

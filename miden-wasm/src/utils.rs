@@ -72,6 +72,7 @@ pub fn get_account_with_account_code(
     storage: Vec<StorageSlot>,
     wallet: bool,
     auth: bool,
+    nonce: u64,
 ) -> Result<Account, AccountError> {
     let account_component = AccountComponent::new(account_code_library, vec![])
         .unwrap()
@@ -103,7 +104,7 @@ pub fn get_account_with_account_code(
         account_vault,
         account_storage,
         account_code,
-        Felt::new(1),
+        Felt::new(nonce),
     ))
 }
 

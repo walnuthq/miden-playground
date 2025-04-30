@@ -25,6 +25,7 @@ interface AccountProps {
 	vaultFileId: string;
 	storageFileId: string;
 	codeFileId: string;
+	nonce: number;
 }
 
 export class Account {
@@ -39,6 +40,7 @@ export class Account {
 	vaultFileId: string;
 	storageFileId: string;
 	codeFileId: string;
+	nonce: number;
 
 	constructor(props: AccountProps) {
 		this.id = props.id;
@@ -52,6 +54,7 @@ export class Account {
 		this.vaultFileId = props.vaultFileId;
 		this.storageFileId = props.storageFileId;
 		this.codeFileId = props.codeFileId;
+		this.nonce = props.nonce;
 	}
 
 	clone() {
@@ -136,7 +139,8 @@ export class Account {
 			metadataFileId,
 			vaultFileId,
 			storageFileId,
-			codeFileId
+			codeFileId,
+			nonce: 1
 		});
 
 		return { account, newFiles };

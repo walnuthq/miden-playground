@@ -126,9 +126,7 @@ export const Files = () => {
 											{account?.id.suffix.toString()})
 										</TableCell>
 										<TableCell className="pr-8 last:p-2 flex flex-row font-mono">
-											<div className="min-w-8">
-												<span className={`text-sm text-muted-foreground`}></span>
-											</div>
+											<div className="min-w-8">{account?.nonce}</div>
 										</TableCell>
 									</TableRow>
 								</TableBody>
