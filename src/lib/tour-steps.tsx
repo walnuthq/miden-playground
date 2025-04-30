@@ -6,7 +6,7 @@ export const steps: Tour[] = [
 		steps: [
 			{
 				title: 'Welcome',
-				content: 'Select the editor, explain why we need it',
+				content: 'Select Editor to create an account',
 				selector: '#step1',
 				icon: '',
 				side: 'bottom',
@@ -23,8 +23,8 @@ export const steps: Tour[] = [
 				pointerRadius: 0
 			},
 			{
-				title: 'Code component',
-				content: 'Select code',
+				title: 'Code',
+				content: 'Accounts are smart contracts with a code interface',
 				selector: '#step3',
 				icon: '',
 				side: 'top',
@@ -32,8 +32,8 @@ export const steps: Tour[] = [
 				pointerRadius: 0
 			},
 			{
-				title: 'Code component',
-				content: 'Explain what are components',
+				title: 'Code components',
+				content: 'Pull in standard components (like wallet or authentication) or build your own',
 				selector: '.step4',
 				icon: '',
 				side: 'left',
@@ -43,7 +43,7 @@ export const steps: Tour[] = [
 			},
 			{
 				title: 'Compose transaction tab',
-				content: 'Select Compose transaction',
+				content: 'Select compose transaction',
 				selector: '#step5',
 				icon: '',
 				side: 'right',
@@ -51,8 +51,8 @@ export const steps: Tour[] = [
 				pointerRadius: 0
 			},
 			{
-				title: 'Select created account',
-				content: 'Select Account C',
+				title: 'Select new account',
+				content: '',
 				selector: '.step6',
 				icon: '',
 				side: 'right',
@@ -61,7 +61,8 @@ export const steps: Tour[] = [
 			},
 			{
 				title: 'Create new P2ID note',
-				content: 'Explain different kinds of notes',
+				content:
+					'Miden offers different standard notes, pay-to-ids, and a token swap. Users can also build custom notes.',
 				selector: '.step7',
 				icon: '',
 				side: 'right',
@@ -70,7 +71,8 @@ export const steps: Tour[] = [
 			},
 			{
 				title: 'Note script',
-				content: 'Explain what is note script',
+				content:
+					'Note scripts define spend conditions. The executing account must process the script at execution.',
 				selector: '.step8',
 				icon: '',
 				side: 'left',
@@ -79,7 +81,7 @@ export const steps: Tour[] = [
 				pointerRadius: 0
 			},
 			{
-				title: 'Select Compose Transaction',
+				title: 'Compose transaction tab',
 				content: 'Select Compose Transaction',
 				selector: '#step5',
 				icon: '',
@@ -89,7 +91,7 @@ export const steps: Tour[] = [
 			},
 			{
 				title: 'Add note',
-				content: 'Add note',
+				content: 'Add the note that the account consumes in the transaction',
 				selector: '#step10',
 				icon: '',
 				side: 'right',
@@ -97,8 +99,9 @@ export const steps: Tour[] = [
 				pointerRadius: 0
 			},
 			{
-				title: 'Add note',
-				content: 'Select note',
+				title: 'Select note',
+				content:
+					'Select the right note. For P2IDs the note inputs and the consuming account ID must match',
 				selector: '.step11',
 				icon: '',
 				side: 'right',
@@ -107,7 +110,7 @@ export const steps: Tour[] = [
 			},
 			{
 				title: 'Transaction script',
-				content: 'Edit transaction script',
+				content: 'Optional scripts to be executed at the end of a transaction',
 				selector: '#step12',
 				icon: '',
 				side: 'right',
@@ -115,8 +118,9 @@ export const steps: Tour[] = [
 				pointerRadius: 0
 			},
 			{
-				title: 'Transaction script',
-				content: 'Explain what is transaction script',
+				title: 'Edit transaction script',
+				content:
+					"The default transaction script signs the transaction and increases the account's nonce",
 				selector: '.step8',
 				icon: '',
 				side: 'left',
@@ -126,7 +130,7 @@ export const steps: Tour[] = [
 			},
 			{
 				title: 'Compose transaction',
-				content: 'Go back to the Compose transaction',
+				content: 'Almost done',
 				selector: '#step5',
 				icon: '',
 				side: 'right',
@@ -135,7 +139,7 @@ export const steps: Tour[] = [
 			},
 			{
 				title: 'Execute transaction',
-				content: 'Execute transaction',
+				content: 'Now, having defined the initial account and note state, execute.',
 				selector: '#step15',
 				icon: '',
 				side: 'right',
@@ -143,8 +147,8 @@ export const steps: Tour[] = [
 				pointerRadius: 0
 			},
 			{
-				title: 'Transaction output',
-				content: 'Explain transaction output',
+				title: 'Transaction result',
+				content: 'Inspect the changes in the account',
 				selector: '#step16',
 				icon: '',
 				side: 'left',
@@ -163,7 +167,18 @@ export const steps: Tour[] = [
 			},
 			{
 				title: 'Consumed note',
-				content: 'Explain that note can be consumed once',
+				content: (
+					<>
+						All notes can only be consumed once (see{' '}
+						<a
+							className="text-theme-primary"
+							href="https://0xmiden.github.io/miden-docs/imported/miden-base/src/note.html#note-nullifier-ensuring-private-consumption"
+						>
+							Nullifiers
+						</a>
+						)
+					</>
+				),
 				selector: '.step18',
 				icon: '',
 				side: 'left',
@@ -184,8 +199,7 @@ export const steps: Tour[] = [
 
 			{
 				title: 'Updated account’s vault',
-				content:
-					'Check updated account vault (it will appear here after merging the corresponding pr)',
+				content: 'Check updated account vault',
 				selector: '.step8',
 				showControls: true,
 				icon: '',
