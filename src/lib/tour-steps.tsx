@@ -42,6 +42,36 @@ export const steps: Tour[] = [
 				pointerRadius: 0
 			},
 			{
+				title: 'Add or remove code components with this switch',
+				content: '',
+				selector: '#auth-switch',
+				icon: '',
+				side: 'left',
+				showControls: true,
+				pointerPadding: 0, // Padding around the target element (in pixels)
+				pointerRadius: 0
+			},
+			{
+				title: 'Go to Info',
+				content: '',
+				selector: '#step19',
+				icon: '',
+				side: 'left',
+				pointerPadding: 0, // Padding around the target element (in pixels)
+				pointerRadius: 0
+			},
+			{
+				title: 'Info',
+				content:
+					'Inspect and define basic account data, add and remove assets, and modify initial storage',
+				selector: '.account-code-step',
+				icon: '',
+				side: 'left',
+				showControls: true,
+				pointerPadding: 0, // Padding around the target element (in pixels)
+				pointerRadius: 0
+			},
+			{
 				title: 'Compose transaction tab',
 				content: 'Select compose transaction',
 				selector: '#step5',
@@ -74,6 +104,37 @@ export const steps: Tour[] = [
 				content:
 					'Note scripts define spend conditions. The executing account must process the script at execution.',
 				selector: '.step8',
+				icon: '',
+				side: 'left',
+				showControls: true,
+				pointerPadding: 0, // Padding around the target element (in pixels)
+				pointerRadius: 0
+			},
+			{
+				title: 'Note info',
+				content: 'Users can define inputs for the note script and add assets to the notes',
+				selector: '.step8',
+				icon: '',
+				side: 'left',
+				showControls: true,
+				pointerPadding: 0, // Padding around the target element (in pixels)
+				pointerRadius: 0
+			},
+			{
+				title: 'Get Account ID',
+				content: 'Copy account ID of the created account',
+				selector: '#account-info',
+				icon: '',
+				side: 'left',
+				showControls: true,
+				pointerPadding: 0, // Padding around the target element (in pixels)
+				pointerRadius: 0
+			},
+			{
+				title: 'Note Inputs',
+				content:
+					'The P2ID note script requires the account ID of the executing account as input (pay-to-ID). Save it here',
+				selector: '#note-inputs',
 				icon: '',
 				side: 'left',
 				showControls: true,
@@ -200,7 +261,7 @@ export const steps: Tour[] = [
 			{
 				title: 'Updated account’s vault',
 				content: 'Check updated account vault',
-				selector: '.step8',
+				selector: '.code-vault',
 				showControls: true,
 				icon: '',
 				side: 'left',

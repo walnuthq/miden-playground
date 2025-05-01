@@ -80,7 +80,7 @@ const AccountCodeFile = ({
 						<div className="text-sm">AUTH COMPONENT</div>
 						<ToggleSwitch
 							checked={account.isAuth}
-							id="wallet-switch"
+							id="auth-switch"
 							onToggle={(isEnabled: boolean) =>
 								isEnabled ? enableAuthComponent(accountId) : disableAuthComponent(accountId)
 							}

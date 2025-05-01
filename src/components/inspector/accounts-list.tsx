@@ -1,5 +1,5 @@
 import { useMiden } from '@/lib/context-providers';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FileItem, InspectorItem } from '.';
 import { useNextStep } from 'nextstepjs';
 
@@ -32,6 +32,11 @@ const AccountsList = ({
 		setCurrentStep
 		// isNextStepVisible
 	} = useNextStep();
+	useEffect(() => {
+		if (currentStep === 12) {
+			selectFile(Object.values(accounts)[Object.values(accounts).length - 1].metadataFileId);
+		}
+	}, [currentStep]);
 	return (
 		<>
 			<InspectorItem
@@ -99,6 +104,12 @@ const AccountsList = ({
 												selectFile(account.metadataFileId);
 												if (currentStep === 18) {
 													setCurrentStep(19, 100);
+												}
+												if (currentStep === 5) {
+													setCurrentStep(6, 100);
+												}
+												if (currentStep === 24) {
+													setCurrentStep(25, 100);
 												}
 											}}
 											isSelected={selectedFileId === account.metadataFileId}

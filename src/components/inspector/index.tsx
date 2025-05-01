@@ -85,7 +85,7 @@ export function InspectorItem({
 	useEffect(() => {
 		if (
 			(onCreateOptions && onCreateOptions[0] === 'Create new account' && currentStep === 0) ||
-			(currentStep === 5 && name === 'Notes')
+			(currentStep === 8 && name === 'Notes')
 		) {
 			setIsOpen(true);
 		}

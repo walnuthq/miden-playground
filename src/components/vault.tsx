@@ -65,7 +65,7 @@ export function Vault({
 	return editableAssets.length <= 0 ? (
 		'No assets'
 	) : (
-		<div className=" w-fit">
+		<div className="code-vault w-fit">
 			<div className={cn('rounded-theme border border-theme-border overflow-hidden', className)}>
 				<Table className="[&_tr:hover]:bg-transparent">
 					<TableHeader>

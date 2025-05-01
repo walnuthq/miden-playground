@@ -42,11 +42,17 @@ const NotesList = ({
 	} = useNextStep();
 
 	useEffect(() => {
-		if (currentStep === 6) {
+		if (currentStep === 9) {
 			selectFile(Object.values(notes)[Object.values(notes).length - 1].scriptFileId);
-			setCurrentStep(7);
+			setCurrentStep(10);
 		}
 	}, [notes]);
+
+	useEffect(() => {
+		if (currentStep === 11 || currentStep === 13) {
+			selectFile(Object.values(notes)[Object.values(notes).length - 1].metadataFileId);
+		}
+	}, [currentStep]);
 	return (
 		<>
 			<InspectorItem

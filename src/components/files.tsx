@@ -94,7 +94,7 @@ export const Files = () => {
 		typeof file.content.accountId === 'string'
 	) {
 		return (
-			<ScrollArea className="overflow-auto h-full flex-1 bg-[#040113] ">
+			<ScrollArea className={`overflow-auto h-full flex-1 bg-[#040113]`}>
 				<AccountCodeFile
 					accountFile={file.content.value}
 					fileId={file.id}
@@ -104,11 +104,11 @@ export const Files = () => {
 		);
 	} else if (file?.content?.dynamic?.account?.variant === 'metadata') {
 		return (
-			<ScrollArea className="flex-1 bg-[#040113] overflow-auto h-full ">
-				<div className="p-4 text-theme-text text-sm">
+			<ScrollArea className="flex-1 bg-[#040113] overflow-auto h-full  account-code-step">
+				<div className="p-4 text-theme-text text-sm" id="account-info">
 					<div>INFO</div>
-					<div className="w-fit mt-2">
-						<div className={'rounded-theme border border-theme-border overflow-hidden'}>
+					<div className="w-fit mt-2 ">
+						<div className={'rounded-theme border border-theme-border overflow-hidden '}>
 							<Table className="[&_tr:hover]:bg-transparent">
 								<TableHeader>
 									<TableRow>
@@ -169,8 +169,8 @@ export const Files = () => {
 			<ScrollArea className="flex-1 bg-[#040113] overflow-auto h-full pr-4">
 				<div className="p-4 text-theme-text text-sm">
 					<div>INPUTS</div>
-					<div className="w-fit mt-2">
-						<div className={'rounded-theme border border-theme-border overflow-hidden'}>
+					<div className="w-fit mt-2 " id="note-inputs">
+						<div className={'rounded-theme border border-theme-border overflow-hidden n'}>
 							<Table className="[&_tr:hover]:bg-transparent">
 								<TableBody>
 									{parsedInputs().map((input, index) => (

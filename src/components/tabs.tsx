@@ -17,12 +17,14 @@ export const Tabs = () => {
 						: 'text-theme-text-subtle'
 				}`}
 				onClick={() => {
-					if (currentStep === 4) {
-						setCurrentStep(5, 100);
+					if (currentStep === 7) {
+						setCurrentStep(8, 100);
 					} else if (currentStep === 8) {
 						setCurrentStep(9, 100);
-					} else if (currentStep === 13) {
-						setCurrentStep(14, 100);
+					} else if (currentStep === 14) {
+						setCurrentStep(15, 100);
+					} else if (currentStep === 19) {
+						setCurrentStep(20, 100);
 					}
 					selectTab('transaction');
 				}}
@@ -47,6 +49,8 @@ export const Tabs = () => {
 						setCurrentStep(1, 100);
 					} else if (currentStep === 16) {
 						setCurrentStep(17, 100);
+					} else if (currentStep === 22) {
+						setCurrentStep(23, 100);
 					}
 					selectTab('assets');
 				}}
