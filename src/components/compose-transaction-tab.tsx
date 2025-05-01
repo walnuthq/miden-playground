@@ -319,7 +319,7 @@ export const ComposeTransactionTab = () => {
 					<div className="flex flex-col h-full text-sm">
 						<ResizablePanelGroup direction="vertical">
 							<ResizablePanel defaultSize={75}>
-								{accountUpdates !== null ? (
+								{accountUpdates !== null && accounts[accountUpdates.accountId] ? (
 									<ScrollArea className="relative h-full pt-5 px-4 overflow-auto text-theme-text">
 										<div className="flex justify-center">EXECUTION OUTPUT</div>
 										<div className="mt-6">OUTPUT NOTES</div>
