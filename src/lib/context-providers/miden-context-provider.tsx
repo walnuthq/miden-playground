@@ -21,6 +21,7 @@ import { createP2IDNote } from '@/lib/notes/p2id';
 import { EditorFiles } from '@/lib/files';
 import { AccountUpdates } from '@/lib/types';
 import json5 from 'json5';
+import { debounce } from 'lodash';
 
 type Tabs = 'transaction' | 'assets';
 type StorageDiffs = Record<
@@ -174,26 +175,10 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 
 		setFaucets((prev) => {
 			const newFaucets = { ...prev, [faucetId]: name };
-			localStorage.setItem('faucets', encodeForStorage(newFaucets));
 			return newFaucets;
 		});
 
 		account.addAsset(faucetId, amount);
-
-		const existingDataB64 = localStorage.getItem('accounts');
-		const existingData = existingDataB64
-			? decodeFromStorage(existingDataB64)
-			: { accounts: {}, newFiles: {} };
-		localStorage.setItem(
-			'accounts',
-			encodeForStorage({
-				...existingData,
-				accounts: {
-					...existingData.accounts,
-					[accountId]: account
-				}
-			})
-		);
 	};
 
 	const setNoteTag = (noteId: string, tag: number) => {
@@ -222,6 +207,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			return false;
 		}
 	};
+
 	const handleChangeStorage = (
 		accountId: string,
 		newValue: string,
@@ -357,6 +343,22 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	);
 	const [selectedTransactionNotesIds, setSelectedTransactionNotesIds] = useState<string[]>([]);
 
+	useEffect(() => {
+		const saveToLocalStorage = debounce(() => {
+			localStorage.setItem(
+				'accounts',
+				encodeForStorage({ accounts: { ...accounts }, newFiles: { ...files } })
+			);
+			localStorage.setItem(
+				'notes',
+				encodeForStorage({ notes: { ...notes }, newFiles: { ...files } })
+			);
+			localStorage.setItem('faucets', encodeForStorage(faucets));
+		}, 1000);
+
+		saveToLocalStorage();
+	}, [accounts, notes, files, faucets]);
+
 	// add a ref to store debounce timeouts per note and delay constant
 	const digestTimeoutsRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 	const RECIPIENT_DIGEST_DEBOUNCE_DELAY_MS = 5000;
@@ -405,18 +407,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			const updatedAccount = updateFn(account.clone());
 			const updatedAccounts = { ...prev, [accountId]: updatedAccount };
 
-			const existingDataB64 = localStorage.getItem('accounts');
-			const existingData = existingDataB64
-				? decodeFromStorage(existingDataB64)
-				: { accounts: {}, newFiles: {} };
-			localStorage.setItem(
-				'accounts',
-				encodeForStorage({
-					...existingData,
-					accounts: updatedAccounts
-				})
-			);
-
 			return updatedAccounts;
 		});
 	};
@@ -435,36 +425,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			const updatedContent = updateFn(file.content.value);
 			const updatedFile = { ...file, content: { value: updatedContent } };
 			const updatedFiles = { ...prev, [fileId]: updatedFile };
-
-			const existingAccountsB64 = localStorage.getItem('accounts');
-			const existingNotesB64 = localStorage.getItem('notes');
-			const decodedAccounts = existingAccountsB64
-				? decodeFromStorage(existingAccountsB64)
-				: { accounts: {}, newFiles: {} };
-			const decodedNotes = existingNotesB64
-				? decodeFromStorage(existingNotesB64)
-				: { notes: {}, newFiles: {} };
-
-			const updatedNewFiles = {
-				...decodedAccounts.newFiles,
-				...decodedNotes.newFiles,
-				[fileId]: updatedFile
-			};
-
-			localStorage.setItem(
-				'accounts',
-				encodeForStorage({
-					...decodedAccounts,
-					newFiles: updatedNewFiles
-				})
-			);
-			localStorage.setItem(
-				'notes',
-				encodeForStorage({
-					...decodedNotes,
-					newFiles: updatedNewFiles
-				})
-			);
 
 			return updatedFiles;
 		});
@@ -714,24 +674,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			selectTransactionAccount(account.id.id);
 		}
 		setFiles((prev) => ({ ...prev, ...newFiles }));
-
-		const existingDataB64 = localStorage.getItem('accounts');
-		const existingData = existingDataB64
-			? decodeFromStorage(existingDataB64)
-			: { accounts: {}, newFiles: {} };
-
-		const updatedData = {
-			accounts: {
-				...existingData.accounts,
-				[account.id.id]: account
-			},
-			newFiles: {
-				...existingData.newFiles,
-				...newFiles
-			}
-		};
-
-		localStorage.setItem('accounts', encodeForStorage(updatedData));
 	}, [accounts, selectTransactionAccount]);
 
 	const disableWalletComponent = useCallback((accountId: string) => {
@@ -788,37 +730,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 
 			const updatedFiles = { ...prev, [fileId]: updatedFile };
 
-			const existingAccountsB64 = localStorage.getItem('accounts');
-			const existingNotesB64 = localStorage.getItem('notes');
-			const decodedAccounts = existingAccountsB64
-				? decodeFromStorage(existingAccountsB64)
-				: { accounts: {}, newFiles: {} };
-			const decodedNotes = existingNotesB64
-				? decodeFromStorage(existingNotesB64)
-				: { notes: {}, newFiles: {} };
-
-			const updatedNewFiles = {
-				...decodedAccounts.newFiles,
-				...decodedNotes.newFiles,
-				[fileId]: updatedFile
-			};
-
-			localStorage.setItem(
-				'accounts',
-				encodeForStorage({
-					...decodedAccounts,
-					newFiles: updatedNewFiles
-				})
-			);
-
-			localStorage.setItem(
-				'notes',
-				encodeForStorage({
-					...decodedNotes,
-					newFiles: updatedNewFiles
-				})
-			);
-
 			return updatedFiles;
 		});
 	}, []);
@@ -852,31 +763,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 
 		setNotes((prev) => ({ ...prev, [note.id]: note, [paybackNote.id]: paybackNote }));
 		setFiles((prev) => ({ ...prev, ...newFiles }));
-
-		const existingNotesB64 = localStorage.getItem('notes');
-		const existingNotesData = existingNotesB64
-			? decodeFromStorage(existingNotesB64)
-			: { notes: {}, newFiles: {} };
-
-		const prepare = (note: Note) => ({
-			...note,
-			serialNumber: Array.from(note.serialNumber).map((n) => n.toString()),
-			serialNumberDecimalString: note.serialNumberDecimalString
-		});
-
-		const updatedNotesData = {
-			notes: {
-				...existingNotesData.notes,
-				[note.id]: prepare(note),
-				[paybackNote.id]: prepare(paybackNote)
-			},
-			newFiles: {
-				...existingNotesData.newFiles,
-				...newFiles
-			}
-		};
-
-		localStorage.setItem('notes', encodeForStorage(updatedNotesData));
 	}, [accounts, selectedTransactionAccountId, files]);
 
 	const createSampleP2IDNote = useCallback(() => {
@@ -896,33 +782,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		});
 		setNotes((prev) => ({ ...prev, [note.id]: note }));
 		setFiles((prev) => ({ ...prev, ...newFiles }));
-
-		const existingNotesB64 = localStorage.getItem('notes');
-		const existingNotesData = existingNotesB64
-			? decodeFromStorage(existingNotesB64)
-			: { notes: {}, newFiles: {} };
-
-		const serialNumber = Array.from(note.serialNumber).map((n) => n.toString());
-		const serialNumberDecimalString = note.serialNumberDecimalString;
-
-		const preparedNote = {
-			...note,
-			serialNumber,
-			serialNumberDecimalString
-		};
-
-		const updatedNotesData = {
-			notes: {
-				...existingNotesData.notes,
-				[note.id]: preparedNote
-			},
-			newFiles: {
-				...existingNotesData.newFiles,
-				...newFiles
-			}
-		};
-
-		localStorage.setItem('notes', encodeForStorage(updatedNotesData));
 	}, [accounts, selectedTransactionAccountId]);
 
 	const createSampleP2IDRNote = useCallback(() => {
@@ -944,33 +803,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 
 		setNotes((prev) => ({ ...prev, [note.id]: note }));
 		setFiles((prev) => ({ ...prev, ...newFiles }));
-
-		const existingNotesB64 = localStorage.getItem('notes');
-		const existingNotesData = existingNotesB64
-			? decodeFromStorage(existingNotesB64)
-			: { notes: {}, newFiles: {} };
-
-		const serialNumber = Array.from(note.serialNumber).map((n) => n.toString());
-		const serialNumberDecimalString = note.serialNumberDecimalString;
-
-		const preparedNote = {
-			...note,
-			serialNumber,
-			serialNumberDecimalString
-		};
-
-		const updatedNotesData = {
-			notes: {
-				...existingNotesData.notes,
-				[note.id]: preparedNote
-			},
-			newFiles: {
-				...existingNotesData.newFiles,
-				...newFiles
-			}
-		};
-
-		localStorage.setItem('notes', encodeForStorage(updatedNotesData));
 	}, [accounts, selectedTransactionAccountId, files]);
 
 	const createSampleNote = useCallback(() => {
@@ -983,33 +815,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 
 		setNotes((prev) => ({ ...prev, [note.id]: note }));
 		setFiles((prev) => ({ ...prev, ...newFiles }));
-
-		const existingNotesB64 = localStorage.getItem('notes');
-		const existingNotesData = existingNotesB64
-			? decodeFromStorage(existingNotesB64)
-			: { notes: {}, newFiles: {} };
-
-		const serialNumber = Array.from(note.serialNumber).map((n) => n.toString());
-		const serialNumberDecimalString = note.serialNumberDecimalString;
-
-		const preparedNote = {
-			...note,
-			serialNumber,
-			serialNumberDecimalString
-		};
-
-		const updatedNotesData = {
-			notes: {
-				...existingNotesData.notes,
-				[note.id]: preparedNote
-			},
-			newFiles: {
-				...existingNotesData.newFiles,
-				...newFiles
-			}
-		};
-
-		localStorage.setItem('notes', encodeForStorage(updatedNotesData));
 	}, [accounts]);
 
 	useEffect(() => {
@@ -1026,9 +831,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				const parsedAccounts = Object.fromEntries(
 					Object.entries(accounts).map(([id, account]) => [id, new Account(account)])
 				);
-
 				setAccounts(parsedAccounts);
-
 				const existingNotesB64 = localStorage.getItem('notes');
 				const { notes: rawNotes, newFiles: noteFiles } = existingNotesB64
 					? (decodeFromStorage(existingNotesB64) as {
@@ -1061,6 +864,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				setNotes(parsedNotes);
 				setFaucets(faucets);
 				setIsInitialized(true);
+
 				if (Object.entries(accounts)[0]) {
 					setSelectedTransactionAccountId(Object.entries(accounts)[0][0]);
 				}
@@ -1099,18 +903,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 					setSelectedTransactionNotesIds((prev) => prev.filter((id) => id !== noteId));
 				}
 				delete newNotes[noteId];
-
-				const existingNotesB64 = localStorage.getItem('notes');
-				const existingNotesData = existingNotesB64
-					? decodeFromStorage(existingNotesB64)
-					: { notes: {}, newFiles: {} };
-
-				const updatedNotesData = {
-					...existingNotesData,
-					notes: newNotes
-				};
-
-				localStorage.setItem('notes', encodeForStorage(updatedNotesData));
 				return newNotes;
 			});
 		},
@@ -1130,17 +922,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 					delete newAccounts[accountId];
 				}
 
-				const existingDataB64 = localStorage.getItem('accounts');
-				const existingData = existingDataB64
-					? decodeFromStorage(existingDataB64)
-					: { accounts: {}, newFiles: {} };
-
-				const updatedData = {
-					...existingData,
-					accounts: newAccounts
-				};
-
-				localStorage.setItem('accounts', encodeForStorage(updatedData));
 				return newAccounts;
 			});
 		},
@@ -1170,27 +951,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			}
 			note.updateAssetAmount(faucetId, updateFn);
 			const updatedNotes = { ...prev, [noteId]: note };
-
-			const existingNotesB64 = localStorage.getItem('notes');
-			const existingNotesData = existingNotesB64
-				? decodeFromStorage(existingNotesB64)
-				: { notes: {}, newFiles: {} };
-
-			const preparedNote = {
-				...note,
-				serialNumber: Array.from(note.serialNumber).map((n) => n.toString()),
-				serialNumberDecimalString: note.serialNumberDecimalString
-			};
-
-			const updatedNotesData = {
-				...existingNotesData,
-				notes: {
-					...existingNotesData.notes,
-					[noteId]: preparedNote
-				}
-			};
-
-			localStorage.setItem('notes', encodeForStorage(updatedNotesData));
 
 			return updatedNotes;
 		});
