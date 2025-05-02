@@ -353,9 +353,16 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			localStorage.setItem('faucets', encodeForStorage(faucets));
 		}, 5000);
 
+		const handleBeforeUnload = () => {
+			saveToLocalStorage.flush();
+		};
+
+		window.addEventListener('beforeunload', handleBeforeUnload);
+
 		saveToLocalStorage();
 
 		return () => {
+			window.removeEventListener('beforeunload', handleBeforeUnload);
 			saveToLocalStorage.cancel();
 		};
 	}, [accounts, notes, files, faucets]);
