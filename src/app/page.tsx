@@ -13,7 +13,7 @@ export default function Home() {
 				steps={steps}
 				cardComponent={CustomCard}
 				shadowRgb="0, 0, 0" // Default is "0, 0, 0" (black)
-				shadowOpacity="0.4"
+				shadowOpacity="0.65"
 			>
 				<MidenContextProvider>
 					<Playground />
