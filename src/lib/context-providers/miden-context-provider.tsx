@@ -230,9 +230,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				}
 			}
 			currentStorage[index][subIndex] = BigInt(newValue);
-			console.log('BigInt(newValue)', BigInt(newValue));
-			console.log('(newValue)', newValue);
-			console.log('currentStorage[index][subIndex]', currentStorage[index][subIndex]);
 
 			updateFileContent(account!.storageFileId, Account.stringifyStorage(currentStorage));
 		} catch (error) {
