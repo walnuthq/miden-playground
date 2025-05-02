@@ -354,9 +354,13 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				encodeForStorage({ notes: { ...notes }, newFiles: { ...files } })
 			);
 			localStorage.setItem('faucets', encodeForStorage(faucets));
-		}, 1000);
+		}, 5000);
 
 		saveToLocalStorage();
+
+		return () => {
+			saveToLocalStorage.cancel();
+		};
 	}, [accounts, notes, files, faucets]);
 
 	// add a ref to store debounce timeouts per note and delay constant
