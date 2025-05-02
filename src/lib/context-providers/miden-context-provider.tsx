@@ -10,17 +10,18 @@ import React, {
 	useRef
 } from 'react';
 import init from 'miden-wasm';
-import { DEFAULT_FAUCET_IDS, defaultAccounts, defaultNotes } from '@/lib/consts/defaults';
+import { DEFAULT_FAUCET_IDS } from '@/lib/consts/defaults';
 import { TRANSACTION_SCRIPT_FILE_ID } from '@/lib/consts';
 import { consumeNotes, createNoteData, generateFaucetId } from '@/lib/miden-wasm-api';
 import { TRANSACTION_SCRIPT } from '@/lib/consts/transaction';
 import { convertToBigUint64Array } from '@/lib/utils';
-import { Account } from '@/lib/account';
+import { Account, AccountProps } from '@/lib/account';
 import { createP2IDRNote, createSwapNote, Note } from '@/lib/notes';
 import { createP2IDNote } from '@/lib/notes/p2id';
 import { EditorFiles } from '@/lib/files';
 import { AccountUpdates } from '@/lib/types';
 import json5 from 'json5';
+import { debounce } from 'lodash';
 
 type Tabs = 'transaction' | 'assets';
 type StorageDiffs = Record<
@@ -171,11 +172,12 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	const createFaucet = (name: string, amount: bigint, accountId: string) => {
 		const account = accounts[accountId];
 		const faucetId = generateFaucetId().id;
+
 		setFaucets((prev) => {
-			const newFaucets = prev;
-			newFaucets[faucetId] = name;
+			const newFaucets = { ...prev, [faucetId]: name };
 			return newFaucets;
 		});
+
 		account.addAsset(faucetId, amount);
 	};
 
@@ -205,6 +207,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			return false;
 		}
 	};
+
 	const handleChangeStorage = (
 		accountId: string,
 		newValue: string,
@@ -227,9 +230,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				}
 			}
 			currentStorage[index][subIndex] = BigInt(newValue);
-			console.log('BigInt(newValue)', BigInt(newValue));
-			console.log('(newValue)', newValue);
-			console.log('currentStorage[index][subIndex]', currentStorage[index][subIndex]);
 
 			updateFileContent(account!.storageFileId, Account.stringifyStorage(currentStorage));
 		} catch (error) {
@@ -340,6 +340,33 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	);
 	const [selectedTransactionNotesIds, setSelectedTransactionNotesIds] = useState<string[]>([]);
 
+	useEffect(() => {
+		const saveToLocalStorage = debounce(() => {
+			localStorage.setItem(
+				'accounts',
+				encodeForStorage({ accounts: { ...accounts }, newFiles: { ...files } })
+			);
+			localStorage.setItem(
+				'notes',
+				encodeForStorage({ notes: { ...notes }, newFiles: { ...files } })
+			);
+			localStorage.setItem('faucets', encodeForStorage(faucets));
+		}, 5000);
+
+		const handleBeforeUnload = () => {
+			saveToLocalStorage.flush();
+		};
+
+		window.addEventListener('beforeunload', handleBeforeUnload);
+
+		saveToLocalStorage();
+
+		return () => {
+			window.removeEventListener('beforeunload', handleBeforeUnload);
+			saveToLocalStorage.cancel();
+		};
+	}, [accounts, notes, files, faucets]);
+
 	// add a ref to store debounce timeouts per note and delay constant
 	const digestTimeoutsRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 	const RECIPIENT_DIGEST_DEBOUNCE_DELAY_MS = 5000;
@@ -386,7 +413,9 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				return prev;
 			}
 			const updatedAccount = updateFn(account.clone());
-			return { ...prev, [accountId]: updatedAccount };
+			const updatedAccounts = { ...prev, [accountId]: updatedAccount };
+
+			return updatedAccounts;
 		});
 	};
 
@@ -402,7 +431,10 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				return prev;
 			}
 			const updatedContent = updateFn(file.content.value);
-			return { ...prev, [fileId]: { ...file, content: { value: updatedContent } } };
+			const updatedFile = { ...file, content: { value: updatedContent } };
+			const updatedFiles = { ...prev, [fileId]: updatedFile };
+
+			return updatedFiles;
 		});
 	}, []);
 
@@ -601,13 +633,50 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		updateFileById
 	]);
 
+	function encodeForStorage(obj: unknown): string {
+		const json = JSON.stringify(obj, (_, value) => {
+			if (typeof value === 'bigint') {
+				return { __type: 'bigint', value: value.toString() };
+			}
+			if (value instanceof Uint8Array) {
+				return { __type: 'uint8array', value: Array.from(value) };
+			}
+			if (value instanceof BigUint64Array) {
+				return { __type: 'biguint64array', value: Array.from(value, (v) => v.toString()) };
+			}
+			return value;
+		});
+		return btoa(encodeURIComponent(json));
+	}
+
+	function decodeFromStorage(input: string) {
+		let json: string;
+		try {
+			json = decodeURIComponent(atob(input));
+		} catch {
+			json = input;
+		}
+
+		return JSON.parse(json, (_, value) => {
+			if (value && typeof value === 'object' && '__type' in value) {
+				switch (value.__type) {
+					case 'bigint':
+						return BigInt(value.value);
+					case 'uint8array':
+						return new Uint8Array(value.value);
+					case 'biguint64array':
+						return new BigUint64Array(value.value.map((v: string) => BigInt(v)));
+				}
+			}
+			return value;
+		});
+	}
+
 	const createAccount = useCallback(() => {
 		const newAccountName = Account.getNextAccountName(accounts);
 		const { account, newFiles } = Account.new(newAccountName);
 
-		setAccounts((prev) => {
-			return { ...prev, [account.id.id]: account };
-		});
+		setAccounts((prev) => ({ ...prev, [account.id.id]: account }));
 
 		if (Object.values(accounts).length === 0) {
 			selectTransactionAccount(account.id.id);
@@ -659,15 +728,18 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		[files, updateFileById]
 	);
 	const updateFileContent = useCallback((fileId: string, content: string) => {
-		setFiles((prev) => ({
-			...prev,
-			[fileId]: {
+		setFiles((prev) => {
+			const updatedFile = {
 				...prev[fileId],
 				content: prev[fileId].content.dynamic
 					? prev[fileId].content
 					: { ...prev[fileId].content, value: content }
-			}
-		}));
+			};
+
+			const updatedFiles = { ...prev, [fileId]: updatedFile };
+
+			return updatedFiles;
+		});
 	}, []);
 
 	const createSampleSwapNotes = useCallback(() => {
@@ -691,21 +763,24 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			name: 'SWAP',
 			senderScript: files[sender.scriptFileId].content.value!
 		});
+
 		updateAccountById(sender.id.id, (account) => {
 			account.updateAssetAmount(offeredAsset.faucetId, (amount) => amount - offeredAsset.amount);
 			return account;
 		});
+
 		setNotes((prev) => ({ ...prev, [note.id]: note, [paybackNote.id]: paybackNote }));
 		setFiles((prev) => ({ ...prev, ...newFiles }));
-	}, [accounts, files, selectedTransactionAccountId]);
+	}, [accounts, selectedTransactionAccountId, files]);
 
 	const createSampleP2IDNote = useCallback(() => {
 		const receiverId = selectedTransactionAccountId
 			? accounts[selectedTransactionAccountId].id
 			: Object.values(accounts)[0].id;
 		const senderId = Object.values(accounts).filter((account) => account.id !== receiverId)[0].id;
+		const assets = [{ ...accounts[senderId.id].assets[0], amount: 10n }];
 		const sender = accounts[senderId.id];
-		const assets = [{ ...sender.assets[0], amount: 10n }];
+
 		const { note, newFiles } = createP2IDNote({
 			senderId,
 			receiverId,
@@ -715,7 +790,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		});
 		setNotes((prev) => ({ ...prev, [note.id]: note }));
 		setFiles((prev) => ({ ...prev, ...newFiles }));
-	}, [accounts, files, selectedTransactionAccountId]);
+	}, [accounts, selectedTransactionAccountId]);
 
 	const createSampleP2IDRNote = useCallback(() => {
 		const receiverId = selectedTransactionAccountId
@@ -733,9 +808,10 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			name: 'P2IDR',
 			senderScript: files[sender.scriptFileId].content.value!
 		});
+
 		setNotes((prev) => ({ ...prev, [note.id]: note }));
 		setFiles((prev) => ({ ...prev, ...newFiles }));
-	}, [accounts, files, selectedTransactionAccountId]);
+	}, [accounts, selectedTransactionAccountId, files]);
 
 	const createSampleNote = useCallback(() => {
 		const senderId = Object.values(accounts)[0].id;
@@ -744,6 +820,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			assets: [],
 			name: 'NOTE'
 		});
+
 		setNotes((prev) => ({ ...prev, [note.id]: note }));
 		setFiles((prev) => ({ ...prev, ...newFiles }));
 	}, [accounts]);
@@ -751,22 +828,56 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	useEffect(() => {
 		init()
 			.then(() => {
-				console.log('WASM initialized successfully');
-				const { accounts, newFiles: accountFiles } = defaultAccounts();
-				setAccounts(accounts);
-				const defaultAccount1 = Object.values(accounts)[0];
-				const defaultAccount2 = Object.values(accounts)[1];
-				const { notes, newFiles: noteFiles } = defaultNotes(
-					defaultAccount1.id,
-					defaultAccount2.id,
-					accountFiles[defaultAccount1.scriptFileId].content.value!
+				const existingAccountsB64 = localStorage.getItem('accounts');
+				const { accounts, newFiles: accountFiles } = existingAccountsB64
+					? (decodeFromStorage(existingAccountsB64) as {
+							accounts: Record<string, AccountProps>;
+							newFiles: EditorFiles;
+					  })
+					: { accounts: {}, newFiles: {} };
+
+				const parsedAccounts = Object.fromEntries(
+					Object.entries(accounts).map(([id, account]) => [id, new Account(account)])
 				);
+				setAccounts(parsedAccounts);
+				const existingNotesB64 = localStorage.getItem('notes');
+				const { notes: rawNotes, newFiles: noteFiles } = existingNotesB64
+					? (decodeFromStorage(existingNotesB64) as {
+							notes: Record<string, Note>;
+							newFiles: EditorFiles;
+					  })
+					: { notes: {}, newFiles: {} };
+
+				const parsedNotes = Object.fromEntries(
+					Object.entries(rawNotes).map(([id, parsedNote]) => {
+						const note = new Note(parsedNote);
+						note.serialNumber = new BigUint64Array(parsedNote.serialNumber.map(BigInt));
+						return [id, note];
+					})
+				);
+
+				const defaultFaucets = {
+					'0x2a3c549c1f3eb8a000009b55653cc0': 'BTC',
+					'0x3f3e2714af2401a00000e02c698d0e': 'ETH'
+				};
+
+				const existingFaucetsB64 = localStorage.getItem('faucets');
+				const faucets = existingFaucetsB64 ? decodeFromStorage(existingFaucetsB64) : defaultFaucets;
+
+				if (!existingFaucetsB64) {
+					localStorage.setItem('faucets', encodeForStorage(defaultFaucets));
+				}
+
 				setFiles((prev) => ({ ...prev, ...accountFiles, ...noteFiles }));
-				setNotes(notes);
-				setSelectedTransactionAccountId(defaultAccount2.id.id);
+				setNotes(parsedNotes);
+				setFaucets(faucets);
 				setIsInitialized(true);
+
+				if (Object.entries(accounts)[0]) {
+					setSelectedTransactionAccountId(Object.entries(accounts)[0][0]);
+				}
 			})
-			.catch((error: unknown) => {
+			.catch((error) => {
 				alert(`Failed to initialize WASM: ${error}`);
 			});
 	}, []);
@@ -818,6 +929,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 					removeFile(account.storageFileId);
 					delete newAccounts[accountId];
 				}
+
 				return newAccounts;
 			});
 		},
@@ -834,7 +946,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			return account;
 		});
 	};
-
 	const updateNoteAssetAmount = (
 		noteId: string,
 		faucetId: string,
@@ -847,7 +958,9 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				return prev;
 			}
 			note.updateAssetAmount(faucetId, updateFn);
-			return { ...prev, [noteId]: note };
+			const updatedNotes = { ...prev, [noteId]: note };
+
+			return updatedNotes;
 		});
 	};
 

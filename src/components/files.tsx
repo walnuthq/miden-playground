@@ -192,7 +192,7 @@ export const Files = () => {
 												value={newInput}
 												placeholder="New input"
 												onChange={(e) => setNewInput(e.target.value)}
-												className="bg-transparent outline-none w-20"
+												className="bg-transparent outline-none w-full"
 												min={0}
 											/>
 										</TableCell>
