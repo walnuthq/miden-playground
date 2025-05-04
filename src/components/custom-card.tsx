@@ -45,8 +45,8 @@ export const CustomCard = ({
 				closeFile(file.id);
 			});
 			clearConsole();
-			setIsTutorialMode(false);
 			if (selectedFileId) closeFile(selectedFileId);
+			setIsTutorialMode(false);
 		} else {
 			if (nextIndex === 13) {
 				selectFile(Object.values(accounts)[Object.values(accounts).length - 1].metadataFileId);
@@ -96,6 +96,7 @@ export const CustomCard = ({
 								removeTransactionAccount();
 							}
 							clearConsole();
+							if (selectedFileId) closeFile(selectedFileId);
 							setIsTutorialMode(false);
 
 							if (skipTour) {
