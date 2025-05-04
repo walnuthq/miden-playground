@@ -62,7 +62,7 @@ export const CustomCard = ({
 	};
 	return (
 		<div className="bg-theme-surface text-theme-text rounded-b-miden shadow-lg p-6  overflow-hidden">
-			<div className="absolute top-0 left-0 h-1 bg-theme-border w-full">
+			<div className="absolute bottom-0 left-0 h-1 bg-theme-border w-full">
 				<div
 					className="h-full bg-theme-primary transition-all duration-300 ease-in-out"
 					style={{ width: `${progress}%` }}
