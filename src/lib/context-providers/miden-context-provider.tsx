@@ -22,6 +22,7 @@ import { EditorFiles } from '@/lib/files';
 import { AccountUpdates } from '@/lib/types';
 import json5 from 'json5';
 import { debounce } from 'lodash';
+import { useNextStep } from 'nextstepjs';
 
 type Tabs = 'transaction' | 'assets';
 type StorageDiffs = Record<
@@ -353,12 +354,10 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	const [selectedTransactionAccountId, setSelectedTransactionAccountId] = useState<string | null>(
 		null
 	);
+	const { startNextStep } = useNextStep();
 	const [selectedTransactionNotesIds, setSelectedTransactionNotesIds] = useState<string[]>([]);
 
-	// 1️⃣ Сохраняем текущее состояние, когда переключаемся в tutorialMode
-
 	useEffect(() => {
-		// Если мы ПЕРЕШЛИ в tutorialMode → перед этим сохраняем обычные данные
 		if (isTutorialMode) {
 			const closedFiles = Object.fromEntries(
 				Object.entries(files).map(([fileId, file]) => [fileId, { ...file, isOpen: false }])
@@ -374,10 +373,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			);
 			localStorage.setItem('faucets', encodeForStorage(faucets));
 		}
-		// В tutorial режиме БОЛЬШЕ НИЧЕГО не сохраняем!
-	}, [isTutorialMode]); // Срабатывает только при смене режима
-
-	// 2️⃣ Автосохранение (только если НЕ tutorialMode)
+	}, [isTutorialMode]);
 
 	useEffect(() => {
 		if (!isTutorialMode) {
@@ -869,6 +865,17 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		setNotes((prev) => ({ ...prev, [note.id]: note }));
 		setFiles((prev) => ({ ...prev, ...newFiles }));
 	}, [accounts]);
+
+	useEffect(() => {
+		const existingIsNewUser = localStorage.getItem('isNewUser');
+
+		console.log('useeffect');
+		if (existingIsNewUser === null || existingIsNewUser === 'true') {
+			localStorage.setItem('isNewUser', JSON.stringify(true));
+			setIsTutorialMode(true);
+			startNextStep('mainTour');
+		}
+	}, []);
 
 	useEffect(() => {
 		init()

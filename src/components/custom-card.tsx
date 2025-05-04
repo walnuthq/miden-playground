@@ -34,6 +34,7 @@ export const CustomCard = ({
 		const nextIndex = currentStep + 1;
 		if (currentStep === totalSteps - 1) {
 			closeNextStep();
+			localStorage.setItem('isNewUser', JSON.stringify(false));
 			selectedTransactionNotesIds.map((noteId) => {
 				removeTransactionNote(noteId);
 			});
@@ -101,6 +102,7 @@ export const CustomCard = ({
 
 							if (skipTour) {
 								skipTour();
+								localStorage.setItem('isNewUser', JSON.stringify(false));
 							}
 						}}
 						className="w-full flex justify-center gap-2 border items-center border-theme-border rounded-miden px-4 py-1 bg-theme-surface-highlight text-theme-text hover:bg-theme-border transition-all"

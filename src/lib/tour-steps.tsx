@@ -73,7 +73,7 @@ export const steps: Tour[] = [
 			},
 			{
 				title: 'Create second account',
-				content: 'Create second account',
+				content: '',
 				selector: '.step2',
 				icon: '',
 				side: 'bottom',
