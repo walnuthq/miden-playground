@@ -56,7 +56,9 @@ export function InspectorItem({
 	onCreateOptions,
 	nameClasses,
 	isConsumed = false,
-	latestConsumedNotes
+	latestConsumedNotes,
+	isInspectorDropdownOpen = false,
+	setIsInspectorDropdownOpen
 }: {
 	name: string;
 	isReadOnly?: boolean;
@@ -71,12 +73,14 @@ export function InspectorItem({
 	nameClasses?: string;
 	isConsumed?: boolean;
 	latestConsumedNotes?: Record<string, Note>;
+	isInspectorDropdownOpen?: boolean;
+	setIsInspectorDropdownOpen?: (isInspectorDropdownOpen: boolean) => void;
 }) {
 	const [isOpen, setIsOpen] = useState(false);
 	const {
 		// startNextStep
 		// closeNextStep,
-		// currentTour,
+		currentTour,
 		currentStep
 		// setCurrentStep,
 		// isNextStepVisible
@@ -84,10 +88,17 @@ export function InspectorItem({
 
 	useEffect(() => {
 		if (
-			(onCreateOptions && onCreateOptions[0] === 'Create new account' && currentStep === 0) ||
-			(currentStep === 8 && name === 'Notes')
+			(onCreateOptions &&
+				onCreateOptions[0] === 'Create new account' &&
+				currentTour === 'mainTour' &&
+				currentStep === 0) ||
+			(currentStep === 9 && name === 'Notes')
 		) {
-			setIsOpen(true);
+			if (setIsInspectorDropdownOpen) {
+				setIsInspectorDropdownOpen(true);
+			} else {
+				setIsOpen(true);
+			}
 		}
 	}, [currentStep]);
 
@@ -142,17 +153,26 @@ export function InspectorItem({
 					</div>
 				)}
 				{onCreate && onCreateOptions && (
-					<DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+					<DropdownMenu
+						open={isInspectorDropdownOpen ? isInspectorDropdownOpen : isOpen}
+						onOpenChange={setIsInspectorDropdownOpen ? setIsInspectorDropdownOpen : setIsOpen}
+					>
 						<DropdownMenuTrigger>
 							<div className="cursor-pointer hover:bg-theme-border rounded-theme p-1">
 								<InlineIcon variant="file-plus" color="white" className="w-4 h-4 opacity-80" />
 							</div>
 						</DropdownMenuTrigger>
 						<DropdownMenuContent
-							className=""
 							onInteractOutside={(event) => {
-								if (currentStep === 1 || currentStep === 6) {
-									event.preventDefault();
+								if (currentTour) {
+									if (
+										currentStep === 1 ||
+										currentStep === 6 ||
+										currentStep === 3 ||
+										currentStep === 7
+									) {
+										event.preventDefault();
+									}
 								}
 							}}
 						>
@@ -160,6 +180,7 @@ export function InspectorItem({
 								<DropdownMenuItem
 									onClick={(e) => {
 										onCreate(option);
+
 										e.stopPropagation();
 									}}
 									className={`${

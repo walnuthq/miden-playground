@@ -48,17 +48,17 @@ export const ComposeTransactionTab = () => {
 		: null;
 	const [isOpenDropdown, setIsOpenDropdown] = useState(false);
 	const [_blockNumber, _setBlockNumber] = useState(blockNumber.toString());
-	const { currentStep, setCurrentStep } = useNextStep();
+	const { currentStep, setCurrentStep, currentTour } = useNextStep();
 	const [isAccountDropdownOpen, setIsAccountDropdownOpen] = useState(false);
 	useEffect(() => {
-		if (currentStep === 7) {
+		if (currentStep === 8 && currentTour) {
 			setIsAccountDropdownOpen(true);
 		}
 	}, [currentStep]);
 
 	useEffect(() => {
-		if (currentStep === 15) {
-			setCurrentStep(16, 100);
+		if (currentStep === 16 && currentTour) {
+			setCurrentStep(17, 100);
 		}
 	}, [isOpenDropdown]);
 
@@ -111,7 +111,7 @@ export const ComposeTransactionTab = () => {
 											</DropdownMenuTrigger>
 											<DropdownMenuContent
 												onInteractOutside={(event) => {
-													if (currentStep === 8) {
+													if (currentStep === 9 && currentTour) {
 														event.preventDefault();
 													}
 												}}
@@ -126,9 +126,9 @@ export const ComposeTransactionTab = () => {
 															key={account.id.id}
 															onClick={() => {
 																selectTransactionAccount(account.id.id);
-																if (currentStep === 8) {
+																if (currentStep === 9 && currentTour) {
 																	selectTab('assets');
-																	setCurrentStep(9, 100);
+																	setCurrentStep(10, 100);
 																}
 															}}
 														>
@@ -258,7 +258,7 @@ export const ComposeTransactionTab = () => {
 										</DropdownMenuTrigger>
 										<DropdownMenuContent
 											onInteractOutside={(event) => {
-												if (currentStep === 11) {
+												if (currentStep === 11 && currentTour) {
 													event.preventDefault();
 												}
 											}}
@@ -287,7 +287,9 @@ export const ComposeTransactionTab = () => {
 														key={note.id}
 														onClick={() => {
 															selectTransactionNote(note.id);
-															setCurrentStep(17, 100);
+															if (currentTour) {
+																setCurrentStep(18, 100);
+															}
 														}}
 													>
 														{note.name}
@@ -332,8 +334,9 @@ export const ComposeTransactionTab = () => {
 									onClick={() => {
 										selectFile(TRANSACTION_SCRIPT_FILE_ID);
 										selectTab('assets');
-
-										setCurrentStep(18, 100);
+										if (currentTour) {
+											setCurrentStep(19, 100);
+										}
 									}}
 									id="step12"
 									className="w-full flex justify-center gap-2 border items-center border-theme-border rounded-miden px-4 py-1 bg-theme-surface-highlight  text-theme-text hover:bg-theme-border transition-all"
@@ -348,7 +351,9 @@ export const ComposeTransactionTab = () => {
 									onClick={() => {
 										executeTransaction();
 										toggleFisrtExecuteClick();
-										setCurrentStep(21, 100);
+										if (currentTour) {
+											setCurrentStep(22, 100);
+										}
 									}}
 									id="step15"
 									className={`w-full outline-none border border-theme-border rounded-miden px-4 py-1 transition-all text-theme-text ${
@@ -382,7 +387,7 @@ export const ComposeTransactionTab = () => {
 										id="step16"
 										className="relative h-full pt-5 px-4 overflow-auto text-theme-text"
 									>
-										<div className="flex justify-center">EXECUTION OUTPUT</div>
+										<div className="flex justify-center">TRANSACTION RESULT</div>
 										<div className="mt-6">OUTPUT NOTES</div>
 										<div className="mt-2">
 											<OutputNotes />

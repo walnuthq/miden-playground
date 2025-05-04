@@ -32,27 +32,16 @@ const NotesList = ({
 	const isCollapsedNotesTopLevel = collapsedNotes['top-level-notes'] || false;
 	const accountsCount = Object.values(accounts).length;
 	const { toast } = useToast();
-	const {
-		// startNextStep
-		// closeNextStep,
-		// currentTour,
-		currentStep,
-		setCurrentStep
-		// isNextStepVisible
-	} = useNextStep();
+	const { currentTour, currentStep, setCurrentStep } = useNextStep();
 
 	useEffect(() => {
-		if (currentStep === 9) {
-			selectFile(Object.values(notes)[Object.values(notes).length - 1].scriptFileId);
-			setCurrentStep(10);
+		if (currentTour) {
+			if (currentStep === 10) {
+				selectFile(Object.values(notes)[Object.values(notes).length - 1].scriptFileId);
+				setCurrentStep(11, 100);
+			}
 		}
 	}, [notes]);
-
-	useEffect(() => {
-		if (currentStep === 11 || currentStep === 13) {
-			selectFile(Object.values(notes)[Object.values(notes).length - 1].metadataFileId);
-		}
-	}, [currentStep]);
 	return (
 		<>
 			<InspectorItem

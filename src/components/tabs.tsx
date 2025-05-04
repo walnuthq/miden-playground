@@ -6,7 +6,7 @@ import { useNextStep } from 'nextstepjs';
 
 export const Tabs = () => {
 	const { selectedTab, selectTab } = useMiden();
-	const { currentStep, setCurrentStep } = useNextStep();
+	const { currentStep, setCurrentStep, currentTour } = useNextStep();
 	return (
 		<div className="flex  flex-row ">
 			<div
@@ -17,15 +17,16 @@ export const Tabs = () => {
 						: 'text-theme-text-subtle'
 				}`}
 				onClick={() => {
-					if (currentStep === 7) {
-						setCurrentStep(8, 100);
-					} else if (currentStep === 8) {
-						setCurrentStep(9, 100);
-					} else if (currentStep === 14) {
-						setCurrentStep(15, 100);
-					} else if (currentStep === 19) {
-						setCurrentStep(20, 100);
+					if (currentTour) {
+						if (currentStep === 8) {
+							setCurrentStep(9, 100);
+						} else if (currentStep === 15) {
+							setCurrentStep(16, 100);
+						} else if (currentStep === 20) {
+							setCurrentStep(21, 100);
+						}
 					}
+
 					selectTab('transaction');
 				}}
 			>
@@ -45,13 +46,16 @@ export const Tabs = () => {
 						: 'text-theme-text-subtle'
 				}`}
 				onClick={() => {
-					if (currentStep === 0) {
-						setCurrentStep(1, 100);
-					} else if (currentStep === 16) {
-						setCurrentStep(17, 100);
-					} else if (currentStep === 22) {
-						setCurrentStep(23, 100);
+					if (currentTour) {
+						if (currentStep === 0) {
+							setCurrentStep(1, 100);
+						} else if (currentStep === 17) {
+							setCurrentStep(18, 100);
+						} else if (currentStep === 23) {
+							setCurrentStep(24, 100);
+						}
 					}
+
 					selectTab('assets');
 				}}
 			>

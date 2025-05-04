@@ -1,5 +1,5 @@
 import { useMiden } from '@/lib/context-providers';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { FileItem, InspectorItem } from '.';
 import { useNextStep } from 'nextstepjs';
 
@@ -20,23 +20,14 @@ const AccountsList = ({
 		selectedTransactionAccountId,
 		selectTransactionAccount,
 		deleteAccount,
-		closeFile
+		closeFile,
+		isInspectorDropdownOpen,
+		setIsInspectorDropdownOpen
 	} = useMiden();
 	const [collapsedAccounts, setCollapsedAccounts] = useState<Record<string, boolean>>({});
 	const isCollapsedAccTopLevel = collapsedAccounts['top-level-accounts'] || false;
-	const {
-		// startNextStep
-		// closeNextStep,
-		// currentTour,
-		currentStep,
-		setCurrentStep
-		// isNextStepVisible
-	} = useNextStep();
-	useEffect(() => {
-		if (currentStep === 12) {
-			selectFile(Object.values(accounts)[Object.values(accounts).length - 1].metadataFileId);
-		}
-	}, [currentStep]);
+	const { currentTour, currentStep, setCurrentStep } = useNextStep();
+
 	return (
 		<>
 			<InspectorItem
@@ -46,22 +37,28 @@ const AccountsList = ({
 				onCreate={(option) => {
 					if (option === 'Create new account') {
 						createAccount();
-						if (currentStep === 1) {
-							setCurrentStep(2);
+
+						if (currentTour) {
+							if (currentStep === 1) {
+								setCurrentStep(2, 100);
+							} else if (currentStep === 7) {
+								setCurrentStep(8);
+							}
 						}
 					}
 				}}
+				setIsInspectorDropdownOpen={setIsInspectorDropdownOpen}
 				onCreateOptions={['Create new account']}
 				isCollapsed={isCollapsedAccTopLevel}
 				level={0}
 				onClick={() => {
 					toggleCollapse('top-level-accounts', setCollapsedAccounts);
 				}}
+				isInspectorDropdownOpen={isInspectorDropdownOpen}
 			/>
 			{!isCollapsedAccTopLevel &&
 				Object.values(accounts).map((account, index) => {
 					const isCollapsed = collapsedAccounts[account.id.id] || false;
-					console.log('account.name', account.name);
 					return (
 						<React.Fragment key={account.id.id}>
 							<InspectorItem
@@ -102,14 +99,16 @@ const AccountsList = ({
 											editorFile={files[account.metadataFileId]}
 											onClick={() => {
 												selectFile(account.metadataFileId);
-												if (currentStep === 18) {
-													setCurrentStep(19, 100);
-												}
-												if (currentStep === 5) {
-													setCurrentStep(6, 100);
-												}
-												if (currentStep === 24) {
-													setCurrentStep(25, 100);
+												if (currentTour) {
+													if (currentStep === 19) {
+														setCurrentStep(20, 100);
+													}
+													if (currentStep === 5) {
+														setCurrentStep(6, 100);
+													}
+													if (currentStep === 25) {
+														setCurrentStep(26, 100);
+													}
 												}
 											}}
 											isSelected={selectedFileId === account.metadataFileId}
@@ -122,7 +121,7 @@ const AccountsList = ({
 											isSelected={selectedFileId === account.scriptFileId}
 											onClick={() => {
 												selectFile(account.scriptFileId);
-												if (currentStep === 2) {
+												if (currentStep === 2 && currentTour) {
 													setCurrentStep(3);
 												}
 											}}

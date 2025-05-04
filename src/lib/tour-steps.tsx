@@ -72,6 +72,15 @@ export const steps: Tour[] = [
 				pointerRadius: 0
 			},
 			{
+				title: 'Create second account',
+				content: 'Create second account',
+				selector: '.step2',
+				icon: '',
+				side: 'bottom',
+				pointerPadding: 0, // Padding around the target element (in pixels)
+				pointerRadius: 0
+			},
+			{
 				title: 'Compose transaction tab',
 				content: 'Select compose transaction',
 				selector: '#step5',
@@ -245,26 +254,6 @@ export const steps: Tour[] = [
 				side: 'left',
 
 				showControls: true,
-				pointerPadding: 0, // Padding around the target element (in pixels)
-				pointerRadius: 0
-			},
-			{
-				title: 'Updated account’s vault',
-				content: 'Open updated account’s vault',
-				selector: '#step19',
-				icon: '',
-				side: 'left',
-				pointerPadding: 0, // Padding around the target element (in pixels)
-				pointerRadius: 0
-			},
-
-			{
-				title: 'Updated account’s vault',
-				content: 'Check updated account vault',
-				selector: '.code-vault',
-				showControls: true,
-				icon: '',
-				side: 'left',
 				pointerPadding: 0, // Padding around the target element (in pixels)
 				pointerRadius: 0
 			}

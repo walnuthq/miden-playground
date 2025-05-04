@@ -105,9 +105,9 @@ export const Files = () => {
 	} else if (file?.content?.dynamic?.account?.variant === 'metadata') {
 		return (
 			<ScrollArea className="flex-1 bg-[#040113] overflow-auto h-full  account-code-step">
-				<div className="p-4 text-theme-text text-sm" id="account-info">
+				<div className="p-4 text-theme-text text-sm">
 					<div>INFO</div>
-					<div className="w-fit mt-2 ">
+					<div className="w-fit mt-2 " id="account-info">
 						<div className={'rounded-theme border border-theme-border overflow-hidden '}>
 							<Table className="[&_tr:hover]:bg-transparent">
 								<TableHeader>
@@ -169,8 +169,11 @@ export const Files = () => {
 			<ScrollArea className="flex-1 bg-[#040113] overflow-auto h-full pr-4">
 				<div className="p-4 text-theme-text text-sm">
 					<div>INPUTS</div>
-					<div className="w-fit mt-2 " id="note-inputs">
-						<div className={'rounded-theme border border-theme-border overflow-hidden n'}>
+					<div className="w-fit mt-2 ">
+						<div
+							className={'rounded-theme border border-theme-border overflow-hidden n'}
+							id="note-inputs"
+						>
 							<Table className="[&_tr:hover]:bg-transparent">
 								<TableBody>
 									{parsedInputs().map((input, index) => (
@@ -260,7 +263,6 @@ export const Files = () => {
 		return (
 			<div className={`flex-1 bg-[#040113] ${'step8'}`}>
 				<CustomMonacoEditor
-					lang={file.name !== 'Script' ? 'javascript' : 'masm'}
 					onChange={(value) => {
 						setValue(value ?? '');
 						if (file && !file.readonly) updateFileContent(file.id, value ?? '');

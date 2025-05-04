@@ -102,6 +102,11 @@ interface MidenContextProps {
 		subIndex: number
 	) => void;
 	createNewStorageSlot: (accountId: string) => void;
+	isInspectorDropdownOpen: boolean;
+	setIsInspectorDropdownOpen: (isInspectorDropdownOpen: boolean) => void;
+	setIsTutorialMode: (isTutorial: boolean) => void;
+	isTutorialMode: boolean;
+	clearConsole: () => void;
 }
 
 export const MidenContext = createContext<MidenContextProps>({
@@ -156,7 +161,12 @@ export const MidenContext = createContext<MidenContextProps>({
 	setNoteTag: () => {},
 	setNoteAux: () => {},
 	handleChangeStorage: () => {},
-	createNewStorageSlot: () => {}
+	createNewStorageSlot: () => {},
+	setIsInspectorDropdownOpen: () => {},
+	isInspectorDropdownOpen: false,
+	setIsTutorialMode: () => {},
+	isTutorialMode: false,
+	clearConsole: () => {}
 });
 
 export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
@@ -164,10 +174,12 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	const [isCollapsedTabs, setCollapsedTabs] = useState(false);
 	const [isExecutingTransaction, setIsExecutingTransaction] = useState(false);
 	const [firstExecuteClick, setFirstExecuteClick] = useState(false);
+	const [isInspectorDropdownOpen, setIsInspectorDropdownOpen] = useState(false);
 	const [faucets, setFaucets] = useState<Faucets>({
 		'0x2a3c549c1f3eb8a000009b55653cc0': 'BTC',
 		'0x3f3e2714af2401a00000e02c698d0e': 'ETH'
 	});
+	const [isTutorialMode, setIsTutorialMode] = useState(false);
 
 	const createFaucet = (name: string, amount: bigint, accountId: string) => {
 		const account = accounts[accountId];
@@ -320,6 +332,9 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		setConsoleLogs((prevLogs) => [...prevLogs, { message, type: 'error' }]);
 	}, []);
 
+	const clearConsole = useCallback(() => {
+		setConsoleLogs([]);
+	}, []);
 	const [files, setFiles] = useState<EditorFiles>({
 		[TRANSACTION_SCRIPT_FILE_ID]: {
 			id: TRANSACTION_SCRIPT_FILE_ID,
@@ -340,32 +355,62 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	);
 	const [selectedTransactionNotesIds, setSelectedTransactionNotesIds] = useState<string[]>([]);
 
+	// 1️⃣ Сохраняем текущее состояние, когда переключаемся в tutorialMode
+
 	useEffect(() => {
-		const saveToLocalStorage = debounce(() => {
+		// Если мы ПЕРЕШЛИ в tutorialMode → перед этим сохраняем обычные данные
+		if (isTutorialMode) {
+			const closedFiles = Object.fromEntries(
+				Object.entries(files).map(([fileId, file]) => [fileId, { ...file, isOpen: false }])
+			);
+
 			localStorage.setItem(
 				'accounts',
-				encodeForStorage({ accounts: { ...accounts }, newFiles: { ...files } })
+				encodeForStorage({ accounts: { ...accounts }, newFiles: { ...closedFiles } })
 			);
 			localStorage.setItem(
 				'notes',
-				encodeForStorage({ notes: { ...notes }, newFiles: { ...files } })
+				encodeForStorage({ notes: { ...notes }, newFiles: { ...closedFiles } })
 			);
 			localStorage.setItem('faucets', encodeForStorage(faucets));
-		}, 5000);
+		}
+		// В tutorial режиме БОЛЬШЕ НИЧЕГО не сохраняем!
+	}, [isTutorialMode]); // Срабатывает только при смене режима
 
-		const handleBeforeUnload = () => {
-			saveToLocalStorage.flush();
-		};
+	// 2️⃣ Автосохранение (только если НЕ tutorialMode)
 
-		window.addEventListener('beforeunload', handleBeforeUnload);
+	useEffect(() => {
+		if (!isTutorialMode) {
+			const saveToLocalStorage = debounce(() => {
+				const closedFiles = Object.fromEntries(
+					Object.entries(files).map(([fileId, file]) => [fileId, { ...file, isOpen: false }])
+				);
 
-		saveToLocalStorage();
+				localStorage.setItem(
+					'accounts',
+					encodeForStorage({ accounts: { ...accounts }, newFiles: { ...closedFiles } })
+				);
+				localStorage.setItem(
+					'notes',
+					encodeForStorage({ notes: { ...notes }, newFiles: { ...closedFiles } })
+				);
+				localStorage.setItem('faucets', encodeForStorage(faucets));
+			}, 5000);
 
-		return () => {
-			window.removeEventListener('beforeunload', handleBeforeUnload);
-			saveToLocalStorage.cancel();
-		};
-	}, [accounts, notes, files, faucets]);
+			const handleBeforeUnload = () => {
+				saveToLocalStorage.flush();
+			};
+
+			window.addEventListener('beforeunload', handleBeforeUnload);
+
+			saveToLocalStorage();
+
+			return () => {
+				window.removeEventListener('beforeunload', handleBeforeUnload);
+				saveToLocalStorage.cancel();
+			};
+		}
+	}, [accounts, notes, files, faucets, isTutorialMode]);
 
 	// add a ref to store debounce timeouts per note and delay constant
 	const digestTimeoutsRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
@@ -828,7 +873,9 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	useEffect(() => {
 		init()
 			.then(() => {
-				const existingAccountsB64 = localStorage.getItem('accounts');
+				const prefix = isTutorialMode ? 'tutorial-' : '';
+
+				const existingAccountsB64 = localStorage.getItem(`${prefix}accounts`);
 				const { accounts, newFiles: accountFiles } = existingAccountsB64
 					? (decodeFromStorage(existingAccountsB64) as {
 							accounts: Record<string, AccountProps>;
@@ -840,7 +887,8 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 					Object.entries(accounts).map(([id, account]) => [id, new Account(account)])
 				);
 				setAccounts(parsedAccounts);
-				const existingNotesB64 = localStorage.getItem('notes');
+
+				const existingNotesB64 = localStorage.getItem(`${prefix}notes`);
 				const { notes: rawNotes, newFiles: noteFiles } = existingNotesB64
 					? (decodeFromStorage(existingNotesB64) as {
 							notes: Record<string, Note>;
@@ -861,11 +909,11 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 					'0x3f3e2714af2401a00000e02c698d0e': 'ETH'
 				};
 
-				const existingFaucetsB64 = localStorage.getItem('faucets');
+				const existingFaucetsB64 = localStorage.getItem(`faucets`);
 				const faucets = existingFaucetsB64 ? decodeFromStorage(existingFaucetsB64) : defaultFaucets;
 
 				if (!existingFaucetsB64) {
-					localStorage.setItem('faucets', encodeForStorage(defaultFaucets));
+					localStorage.setItem(`faucets`, encodeForStorage(defaultFaucets));
 				}
 
 				setFiles((prev) => ({ ...prev, ...accountFiles, ...noteFiles }));
@@ -880,7 +928,7 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			.catch((error) => {
 				alert(`Failed to initialize WASM: ${error}`);
 			});
-	}, []);
+	}, [isTutorialMode]);
 
 	const removeTransactionNote = useCallback((noteId: string) => {
 		setSelectedTransactionNotesIds((prev) => prev.filter((id) => id !== noteId));
@@ -1018,7 +1066,12 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				setNoteTag,
 				setNoteAux,
 				handleChangeStorage,
-				createNewStorageSlot
+				createNewStorageSlot,
+				isInspectorDropdownOpen,
+				setIsInspectorDropdownOpen,
+				isTutorialMode,
+				setIsTutorialMode,
+				clearConsole
 			}}
 		>
 			{children}

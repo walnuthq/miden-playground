@@ -9,16 +9,16 @@ export const runtime = 'edge';
 export default function Home() {
 	return (
 		<NextStepProvider>
-			<NextStep
-				steps={steps}
-				cardComponent={CustomCard}
-				shadowRgb="0, 0, 0" // Default is "0, 0, 0" (black)
-				shadowOpacity="0.65"
-			>
-				<MidenContextProvider>
+			<MidenContextProvider>
+				<NextStep
+					steps={steps}
+					cardComponent={CustomCard}
+					shadowRgb="0, 0, 0" // Default is "0, 0, 0" (black)
+					shadowOpacity="0.65"
+				>
 					<Playground />
-				</MidenContextProvider>
-			</NextStep>
+				</NextStep>
+			</MidenContextProvider>
 		</NextStepProvider>
 	);
 }
