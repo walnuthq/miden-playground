@@ -869,7 +869,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	useEffect(() => {
 		const existingIsNewUser = localStorage.getItem('isNewUser');
 
-		console.log('useeffect');
 		if (existingIsNewUser === null || existingIsNewUser === 'true') {
 			localStorage.setItem('isNewUser', JSON.stringify(true));
 			setIsTutorialMode(true);

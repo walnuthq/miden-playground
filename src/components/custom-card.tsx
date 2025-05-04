@@ -8,7 +8,6 @@ export const CustomCard = ({
 	step,
 	currentStep,
 	totalSteps,
-	// prevStep,
 	skipTour,
 	arrow
 }: CardComponentProps) => {
