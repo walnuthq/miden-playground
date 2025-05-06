@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useMiden } from '@/lib/context-providers';
+import { useAccounts, useFiles, useMiden, useNotes } from '@/lib/context-providers';
 import { Vault } from '@/components/vault';
 import { Console } from '@/components/console';
 import {
@@ -22,26 +22,30 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/t
 
 export const ComposeTransactionTab = () => {
 	const {
-		accounts,
-		notes,
-		latestConsumedNotes,
-		selectedTransactionAccountId,
-		selectedTransactionNotesIds,
-		selectTransactionNote,
-		selectTransactionAccount,
 		executeTransaction,
 		blockNumber,
-		removeTransactionNote,
 		setBlockNumber,
-		accountUpdates,
-		selectFile,
 		selectTab,
 		firstExecuteClick,
 		toggleFisrtExecuteClick,
-		faucets,
+		faucets
+	} = useMiden();
+	const {
+		accounts,
+		selectedTransactionAccountId,
+		selectTransactionAccount,
+		accountUpdates,
 		createAccount,
 		accountStorageDiffs
-	} = useMiden();
+	} = useAccounts();
+	const {
+		notes,
+		latestConsumedNotes,
+		selectedTransactionNotesIds,
+		selectTransactionNote,
+		removeTransactionNote
+	} = useNotes();
+	const { selectFile } = useFiles();
 	const selectedAccountData = selectedTransactionAccountId
 		? accounts[selectedTransactionAccountId]
 		: null;

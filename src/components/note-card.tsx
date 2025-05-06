@@ -1,8 +1,8 @@
-import { useMiden } from '@/lib/context-providers';
+import { useNotes } from '@/lib/context-providers';
 import React from 'react';
 
 const NoteCard = ({ noteId }: { noteId: string }) => {
-	const { notes } = useMiden();
+	const { notes } = useNotes();
 	if (notes[noteId]) {
 		return (
 			<div className="border border-theme-border rounded-miden relative text-sm ">

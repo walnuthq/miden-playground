@@ -1,11 +1,12 @@
 'use client';
 
 import InlineIcon from '@/components/ui/inline-icon';
-import { useMiden } from '@/lib/context-providers';
+import { useFiles, useMiden } from '@/lib/context-providers';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
 export const Toolbar = () => {
-	const { files, closeFile, selectFile, selectedFileId, selectedTab } = useMiden();
+	const { selectedTab } = useMiden();
+	const { files, closeFile, selectFile, selectedFileId } = useFiles();
 	const filesToDisplay = Object.keys(files)
 		.filter((fileId) => files[fileId].isOpen)
 		.sort((a, b) => (files[a]?.positionOrder ?? 0) - (files[b]?.positionOrder ?? 0));

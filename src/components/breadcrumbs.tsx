@@ -1,15 +1,16 @@
 import React from 'react';
-import { useMiden } from '@/lib/context-providers/miden-context-provider';
-
 import InlineIcon from './ui/inline-icon';
 import {
 	AUTHENTICATION_COMPONENT_SCRIPT_FILE_ID,
 	TRANSACTION_SCRIPT_FILE_ID,
 	WALLET_COMPONENT_SCRIPT_FILE_ID
 } from '@/lib/consts';
+import { useAccounts, useFiles, useNotes } from '@/lib/context-providers';
 
 const Breadcrumbs = () => {
-	const { notes, accounts, files, selectedFileId } = useMiden();
+	const { files, selectedFileId } = useFiles();
+	const { accounts } = useAccounts();
+	const { notes } = useNotes();
 
 	if (!selectedFileId || !files[selectedFileId]) return null;
 	const note = Object.values(notes).find(
