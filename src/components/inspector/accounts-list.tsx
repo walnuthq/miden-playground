@@ -1,4 +1,4 @@
-import { useMiden } from '@/lib/context-providers';
+import { useAccounts, useFiles } from '@/lib/context-providers';
 import React, { useState } from 'react';
 import { FileItem, InspectorItem } from '.';
 
@@ -10,17 +10,14 @@ const AccountsList = ({
 		setState: React.Dispatch<React.SetStateAction<Record<string, boolean>>>
 	) => void;
 }) => {
+	const { files, selectFile, selectedFileId, closeFile } = useFiles();
 	const {
-		files,
-		selectFile,
-		selectedFileId,
+		deleteAccount,
 		accounts,
 		createAccount,
 		selectedTransactionAccountId,
-		selectTransactionAccount,
-		deleteAccount,
-		closeFile
-	} = useMiden();
+		selectTransactionAccount
+	} = useAccounts();
 	const [collapsedAccounts, setCollapsedAccounts] = useState<Record<string, boolean>>({});
 	const isCollapsedAccTopLevel = collapsedAccounts['top-level-accounts'] || false;
 

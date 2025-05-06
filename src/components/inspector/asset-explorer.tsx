@@ -1,4 +1,4 @@
-import { useMiden } from '@/lib/context-providers';
+import { useFiles } from '@/lib/context-providers';
 import { FileItem } from '.';
 import AccountsList from './accounts-list';
 import NotesList from './notes-list';
@@ -14,7 +14,7 @@ export function AssetExplorer() {
 			[id]: !prev[id]
 		}));
 	};
-	const { files, selectFile, selectedFileId } = useMiden();
+	const { files, selectFile, selectedFileId } = useFiles();
 
 	return (
 		<div className="flex flex-col pt-2">

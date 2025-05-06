@@ -8,7 +8,7 @@ import {
 	TableHeader,
 	TableRow
 } from '@/components/ui/table';
-import { useMiden } from '@/lib/context-providers';
+import { useAccounts, useFiles } from '@/lib/context-providers';
 import { cn } from '@/lib/utils';
 import { Account } from '@/lib/account';
 import { ScrollArea } from './ui/scroll-area';
@@ -22,8 +22,9 @@ export function Storage({
 	className?: string;
 	withoutOldValue?: boolean;
 }) {
-	const { accounts, files, accountStorageDiffs, handleChangeStorage, createNewStorageSlot } =
-		useMiden();
+	const { files } = useFiles();
+	const { accounts, accountStorageDiffs, handleChangeStorage, createNewStorageSlot } =
+		useAccounts();
 
 	const account = accountId ? accounts[accountId] : null;
 	const editableStorage = account?.storageFileId

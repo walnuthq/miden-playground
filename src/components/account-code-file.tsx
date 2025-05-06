@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { CustomMonacoEditor } from './custom-monaco-editor';
-import { useMiden } from '@/lib/context-providers';
 import ToggleSwitch from './ToggleSwitch';
 import { ACCOUNT_AUTH_SCRIPT, ACCOUNT_WALLET_SCRIPT } from '@/lib/account';
+import { useFiles, useAccounts } from '@/lib/context-providers';
 
 const AccountCodeFile = ({
 	accountFile,
@@ -14,13 +14,13 @@ const AccountCodeFile = ({
 	accountId: string;
 }) => {
 	const {
-		updateFileContent,
 		disableWalletComponent,
 		disableAuthComponent,
 		enableAuthComponent,
 		enableWalletComponent,
 		accounts
-	} = useMiden();
+	} = useAccounts();
+	const { updateFileContent } = useFiles();
 	const [value, setValue] = useState('');
 	const account = accounts[accountId];
 	const [walletHeight, setWalletHeight] = useState(0);
