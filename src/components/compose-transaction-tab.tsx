@@ -57,8 +57,8 @@ export const ComposeTransactionTab = () => {
 	}, [currentStep]);
 
 	useEffect(() => {
-		if (currentStep === 16 && currentTour) {
-			setCurrentStep(17, 100);
+		if (currentStep === 17 && currentTour) {
+			setCurrentStep(18, 100);
 		}
 	}, [isOpenDropdown]);
 
@@ -127,7 +127,6 @@ export const ComposeTransactionTab = () => {
 															onClick={() => {
 																selectTransactionAccount(account.id.id);
 																if (currentStep === 9 && currentTour) {
-																	selectTab('assets');
 																	setCurrentStep(10, 100);
 																}
 															}}
@@ -288,7 +287,7 @@ export const ComposeTransactionTab = () => {
 														onClick={() => {
 															selectTransactionNote(note.id);
 															if (currentTour) {
-																setCurrentStep(18, 100);
+																setCurrentStep(19, 100);
 															}
 														}}
 													>
@@ -335,7 +334,7 @@ export const ComposeTransactionTab = () => {
 										selectFile(TRANSACTION_SCRIPT_FILE_ID);
 										selectTab('assets');
 										if (currentTour) {
-											setCurrentStep(19, 100);
+											setCurrentStep(20, 100);
 										}
 									}}
 									id="step12"
@@ -352,7 +351,7 @@ export const ComposeTransactionTab = () => {
 										executeTransaction();
 										toggleFisrtExecuteClick();
 										if (currentTour) {
-											setCurrentStep(22, 100);
+											setCurrentStep(23, 100);
 										}
 									}}
 									id="step15"

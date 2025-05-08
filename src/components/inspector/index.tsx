@@ -92,7 +92,7 @@ export function InspectorItem({
 				onCreateOptions[0] === 'Create new account' &&
 				currentTour === 'mainTour' &&
 				currentStep === 0) ||
-			(currentStep === 9 && name === 'Notes')
+			(currentStep === 10 && name === 'Notes')
 		) {
 			if (setIsInspectorDropdownOpen) {
 				setIsInspectorDropdownOpen(true);

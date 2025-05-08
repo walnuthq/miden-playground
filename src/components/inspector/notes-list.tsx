@@ -36,9 +36,9 @@ const NotesList = ({
 
 	useEffect(() => {
 		if (currentTour) {
-			if (currentStep === 10) {
+			if (currentStep === 11) {
 				selectFile(Object.values(notes)[Object.values(notes).length - 1].scriptFileId);
-				setCurrentStep(11, 100);
+				setCurrentStep(12, 100);
 			}
 		}
 	}, [notes]);

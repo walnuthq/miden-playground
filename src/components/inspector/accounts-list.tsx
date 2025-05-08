@@ -100,14 +100,14 @@ const AccountsList = ({
 											onClick={() => {
 												selectFile(account.metadataFileId);
 												if (currentTour) {
-													if (currentStep === 19) {
-														setCurrentStep(20, 100);
+													if (currentStep === 20) {
+														setCurrentStep(21, 100);
 													}
 													if (currentStep === 5) {
 														setCurrentStep(6, 100);
 													}
-													if (currentStep === 25) {
-														setCurrentStep(26, 100);
+													if (currentStep === 26) {
+														setCurrentStep(27, 100);
 													}
 												}
 											}}

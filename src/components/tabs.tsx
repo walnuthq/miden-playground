@@ -20,10 +20,10 @@ export const Tabs = () => {
 					if (currentTour) {
 						if (currentStep === 8) {
 							setCurrentStep(9, 100);
-						} else if (currentStep === 15) {
-							setCurrentStep(16, 100);
-						} else if (currentStep === 20) {
-							setCurrentStep(21, 100);
+						} else if (currentStep === 16) {
+							setCurrentStep(17, 100);
+						} else if (currentStep === 21) {
+							setCurrentStep(22, 100);
 						}
 					}
 
@@ -49,10 +49,12 @@ export const Tabs = () => {
 					if (currentTour) {
 						if (currentStep === 0) {
 							setCurrentStep(1, 100);
-						} else if (currentStep === 17) {
-							setCurrentStep(18, 100);
-						} else if (currentStep === 23) {
-							setCurrentStep(24, 100);
+						} else if (currentStep === 18) {
+							setCurrentStep(19, 100);
+						} else if (currentStep === 24) {
+							setCurrentStep(25, 100);
+						} else if (currentStep === 10) {
+							setCurrentStep(11, 100);
 						}
 					}
 

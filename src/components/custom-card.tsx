@@ -48,10 +48,10 @@ export const CustomCard = ({
 			if (selectedFileId) closeFile(selectedFileId);
 			setIsTutorialMode(false);
 		} else {
-			if (nextIndex === 13) {
+			if (nextIndex === 14) {
 				selectFile(Object.values(accounts)[Object.values(accounts).length - 1].metadataFileId);
 			}
-			if (nextIndex === 12 || nextIndex === 14) {
+			if (nextIndex === 13 || nextIndex === 15) {
 				selectFile(Object.values(notes)[Object.values(notes).length - 1].metadataFileId);
 			}
 			if (nextIndex === 7) {

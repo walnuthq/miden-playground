@@ -99,6 +99,15 @@ export const steps: Tour[] = [
 				pointerRadius: 0
 			},
 			{
+				title: 'Go back to the editor to create a note',
+				content: '',
+				selector: '#step1',
+				icon: '',
+				side: 'right',
+				pointerPadding: 0, // Padding around the target element (in pixels)
+				pointerRadius: 0
+			},
+			{
 				title: 'Create new P2ID note',
 				content:
 					'Miden offers different standard notes, pay-to-ids, and a token swap. Users can also build custom notes.',
@@ -131,7 +140,7 @@ export const steps: Tour[] = [
 			},
 			{
 				title: 'Get Account ID',
-				content: 'Copy account ID of the created account',
+				content: 'Copy the two elements of the account ID and save it for later',
 				selector: '#account-info',
 				icon: '',
 				side: 'left',
