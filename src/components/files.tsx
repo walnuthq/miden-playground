@@ -66,8 +66,7 @@ export const Files = () => {
 		handleChangeInput,
 		setNoteAux,
 		setNoteTag,
-		accounts,
-		isTutorialMode
+		accounts
 	} = useMiden();
 	const { content, file } = useSelectedEditorFile();
 	const [newInput, setNewInput] = useState('');
@@ -122,10 +121,7 @@ export const Files = () => {
 									<TableRow>
 										<TableCell className="pr-8 last:p-2">{account?.name.toString()}</TableCell>
 										<TableCell className="pr-8 last:p-2">
-											{!isTutorialMode
-												? `${account?.id.id.toString()}, (${account?.id.prefix.toString()},
-											${account?.id.suffix.toString()})`
-												: `(${account?.id.prefix.toString()},
+											{`(${account?.id.prefix.toString()},
 											${account?.id.suffix.toString()})`}
 										</TableCell>
 										<TableCell className="pr-8 last:p-2 flex flex-row font-mono">
@@ -231,7 +227,10 @@ export const Files = () => {
 								</TableHeader>
 								<TableBody>
 									<TableRow>
-										<TableCell className="pr-8 last:p-2">{note!.senderId.toString()}</TableCell>
+										<TableCell className="pr-8 last:p-2">
+											({accounts[note!.senderId]!.id.prefix.toString()},{' '}
+											{accounts[note!.senderId]!.id.suffix.toString()})
+										</TableCell>
 										<TableCell className="pr-8 last:p-2">
 											{note!.serialNumberDecimalString}
 										</TableCell>

@@ -164,7 +164,10 @@ export const ComposeTransactionTab = () => {
 									<div className="flex flex-col text-sm">
 										<div className="flex justify-between px-4 pt-2">
 											<div className=" text-theme-text whitespace-nowrap mr-4">Account ID:</div>
-											<div className=" text-theme-text">{selectedAccountData?.id.id}</div>
+											<div className=" text-theme-text">
+												({selectedAccountData?.id.prefix.toString()},{' '}
+												{selectedAccountData?.id.suffix.toString()})
+											</div>
 										</div>
 										<div className="px-4 py-1"></div>
 										{selectedAccountData?.assets.map((asset) => (
