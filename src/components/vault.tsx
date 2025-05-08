@@ -65,7 +65,7 @@ export function Vault({
 	return editableAssets.length <= 0 ? (
 		'No assets'
 	) : (
-		<div className=" w-fit">
+		<div className="code-vault w-fit">
 			<div className={cn('rounded-theme border border-theme-border overflow-hidden', className)}>
 				<Table className="[&_tr:hover]:bg-transparent">
 					<TableHeader>
@@ -151,27 +151,29 @@ export function Vault({
 					</TableBody>
 				</Table>
 			</div>
-			<button
-				onClick={() => {
-					if (customAssetAmount === '' || customAssetName.trim() === '') {
-						toast({
-							title: 'Please enter the symbol and amount to create a new asset',
-							variant: 'destructive'
-						});
-					} else if (accountId) {
-						createFaucet(customAssetName.trim(), BigInt(customAssetAmount), accountId);
-						setCustomAssetAmount('');
-						setCustomAssetName('');
-					} else if (noteId) {
-						createNoteFaucet(customAssetName.trim(), BigInt(customAssetAmount), noteId);
-						setCustomAssetAmount('');
-						setCustomAssetName('');
-					}
-				}}
-				className="w-full mt-2 rounded-theme text-sm text-center transition-all px-4 py-1 bg-theme-surface-highlight  text-theme-text hover:bg-theme-border"
-			>
-				Create asset
-			</button>
+			{addAssetAbility && (
+				<button
+					onClick={() => {
+						if (customAssetAmount === '' || customAssetName.trim() === '') {
+							toast({
+								title: 'Please enter the symbol and amount to create a new asset',
+								variant: 'destructive'
+							});
+						} else if (accountId) {
+							createFaucet(customAssetName.trim(), BigInt(customAssetAmount), accountId);
+							setCustomAssetAmount('');
+							setCustomAssetName('');
+						} else if (noteId) {
+							createNoteFaucet(customAssetName.trim(), BigInt(customAssetAmount), noteId);
+							setCustomAssetAmount('');
+							setCustomAssetName('');
+						}
+					}}
+					className="w-full mt-2 rounded-theme text-sm text-center transition-all px-4 py-1 bg-theme-surface-highlight  text-theme-text hover:bg-theme-border"
+				>
+					Create asset
+				</button>
+			)}
 		</div>
 	);
 }

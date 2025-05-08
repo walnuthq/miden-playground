@@ -35,7 +35,7 @@ const AccountCodeFile = ({
 		setValue(accountFile);
 	}, [accountFile]);
 	return (
-		<div className="relative text-theme-text">
+		<div className={`relative text-theme-text ${'step4'}`}>
 			<div className="">
 				{' '}
 				<div className="flex flex-col">
@@ -80,7 +80,7 @@ const AccountCodeFile = ({
 						<div className="text-sm">AUTH COMPONENT</div>
 						<ToggleSwitch
 							checked={account.isAuth}
-							id="wallet-switch"
+							id="auth-switch"
 							onToggle={(isEnabled: boolean) =>
 								isEnabled ? enableAuthComponent(accountId) : disableAuthComponent(accountId)
 							}

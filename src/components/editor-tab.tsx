@@ -4,7 +4,6 @@ import { Files } from '@/components/files';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Inspector } from '@/components/inspector';
 import Breadcrumbs from '@/components/breadcrumbs';
-
 export const EditorTab = () => {
 	return (
 		<ResizablePanelGroup direction="horizontal">

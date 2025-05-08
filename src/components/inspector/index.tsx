@@ -9,6 +9,9 @@ import {
 	DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { EditorFile } from '@/lib/files';
+import { useEffect, useState } from 'react';
+import { useNextStep } from 'nextstepjs';
+import { Note } from '@/lib/notes';
 
 export function Inspector() {
 	return <AssetExplorer />;
@@ -52,7 +55,10 @@ export function InspectorItem({
 	onCreate,
 	onCreateOptions,
 	nameClasses,
-	isConsumed = false
+	isConsumed = false,
+	latestConsumedNotes,
+	isInspectorDropdownOpen = false,
+	setIsInspectorDropdownOpen
 }: {
 	name: string;
 	isReadOnly?: boolean;
@@ -66,10 +72,45 @@ export function InspectorItem({
 	onCreateOptions?: string[];
 	nameClasses?: string;
 	isConsumed?: boolean;
+	latestConsumedNotes?: Record<string, Note>;
+	isInspectorDropdownOpen?: boolean;
+	setIsInspectorDropdownOpen?: (isInspectorDropdownOpen: boolean) => void;
 }) {
+	const [isOpen, setIsOpen] = useState(false);
+	const {
+		// startNextStep
+		// closeNextStep,
+		currentTour,
+		currentStep
+		// setCurrentStep,
+		// isNextStepVisible
+	} = useNextStep();
+
+	useEffect(() => {
+		if (
+			(onCreateOptions &&
+				onCreateOptions[0] === 'Create new account' &&
+				currentTour === 'mainTour' &&
+				currentStep === 0) ||
+			(currentStep === 10 && name === 'Notes')
+		) {
+			if (setIsInspectorDropdownOpen) {
+				setIsInspectorDropdownOpen(true);
+			} else {
+				setIsOpen(true);
+			}
+		}
+	}, [currentStep]);
+
 	return (
 		<div
-			className={`text-sm h-6 pr-3 flex flex-row items-center justify-between text-theme-text select-none cursor-pointer
+			className={`text-sm h-6 pr-3 flex ${
+				latestConsumedNotes &&
+				Object.values(latestConsumedNotes)[Object.values(latestConsumedNotes).length - 1]?.name ===
+					name
+					? 'step18'
+					: ''
+			} flex-row items-center justify-between text-theme-text select-none cursor-pointer
     ${isSelected ? 'bg-theme-border ' : 'hover:bg-theme-surface-highlight'}`}
 			onClick={onClick}
 			style={{ paddingLeft: `${level * 10 + 8}px` }}
@@ -116,19 +157,43 @@ export function InspectorItem({
 					</div>
 				)}
 				{onCreate && onCreateOptions && (
-					<DropdownMenu>
+					<DropdownMenu
+						open={isInspectorDropdownOpen ? isInspectorDropdownOpen : isOpen}
+						onOpenChange={setIsInspectorDropdownOpen ? setIsInspectorDropdownOpen : setIsOpen}
+					>
 						<DropdownMenuTrigger>
 							<div className="cursor-pointer hover:bg-theme-border rounded-theme p-1">
 								<InlineIcon variant="file-plus" color="white" className="w-4 h-4 opacity-80" />
 							</div>
 						</DropdownMenuTrigger>
-						<DropdownMenuContent>
+						<DropdownMenuContent
+							onInteractOutside={(event) => {
+								if (currentTour) {
+									if (
+										currentStep === 1 ||
+										currentStep === 6 ||
+										currentStep === 3 ||
+										currentStep === 7
+									) {
+										event.preventDefault();
+									}
+								}
+							}}
+						>
 							{onCreateOptions?.map((option) => (
 								<DropdownMenuItem
 									onClick={(e) => {
 										onCreate(option);
+
 										e.stopPropagation();
 									}}
+									className={`${
+										option === 'Create new account'
+											? 'step2'
+											: name === 'Notes' && option === 'Create P2ID note'
+											? 'step7'
+											: ''
+									}`}
 									key={option}
 								>
 									{option}

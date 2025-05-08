@@ -1,7 +1,8 @@
 import { useMiden } from '@/lib/context-providers';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FileItem, InspectorItem } from '.';
 import { useToast } from '@/hooks/use-toast';
+import { useNextStep } from 'nextstepjs';
 
 const NotesList = ({
 	toggleCollapse
@@ -24,12 +25,23 @@ const NotesList = ({
 		accounts,
 		closeFile,
 		removeTransactionNote,
-		selectedTransactionNotesIds
+		selectedTransactionNotesIds,
+		latestConsumedNotes
 	} = useMiden();
 	const [collapsedNotes, setCollapsedNotes] = useState<Record<string, boolean>>({});
 	const isCollapsedNotesTopLevel = collapsedNotes['top-level-notes'] || false;
 	const accountsCount = Object.values(accounts).length;
 	const { toast } = useToast();
+	const { currentTour, currentStep, setCurrentStep } = useNextStep();
+
+	useEffect(() => {
+		if (currentTour) {
+			if (currentStep === 11) {
+				selectFile(Object.values(notes)[Object.values(notes).length - 1].scriptFileId);
+				setCurrentStep(12, 100);
+			}
+		}
+	}, [notes]);
 	return (
 		<>
 			<InspectorItem
@@ -96,6 +108,7 @@ const NotesList = ({
 						return (
 							<React.Fragment key={note.id}>
 								<InspectorItem
+									latestConsumedNotes={latestConsumedNotes}
 									isConsumed={note.isConsumed}
 									name={note.name}
 									variant="collapsable"

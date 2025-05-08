@@ -1,9 +1,17 @@
+'use client';
 import InlineIcon from './ui/inline-icon';
 import Image from 'next/image';
 import logo from '../app/images/miden_logo.svg';
 import Link from 'next/link';
+import { useNextStep } from 'nextstepjs';
+import { useMiden } from '@/lib/context-providers';
 
 export function Header() {
+	const { startNextStep } = useNextStep();
+
+	const { selectTab, setIsTutorialMode, files, closeFile, selectedFileId, clearConsole } =
+		useMiden();
+
 	return (
 		<div className="h-full text-theme-text flex justify-between items-center">
 			<div className="font-bold text-xl flex items-center gap-1">
@@ -14,6 +22,21 @@ export function Header() {
 				</div>
 			</div>
 			<div className="flex items-center">
+				<div
+					onClick={() => {
+						Object.values(files).map((file) => {
+							closeFile(file.id);
+						});
+						if (selectedFileId) closeFile(selectedFileId);
+						selectTab('transaction');
+						startNextStep('mainTour');
+						clearConsole();
+						setIsTutorialMode(true);
+					}}
+					className="font-bold text-theme-text-subtle flex items-center gap-1 text-base cursor-pointer px-2 rounded-theme hover:bg-theme-border transition-all"
+				>
+					Start tutorial
+				</div>
 				<Link
 					href="/instructions"
 					className="text-theme-text-subtle flex items-center gap-1 text-base cursor-pointer px-3 py-1 rounded-theme hover:bg-theme-border transition-all"
