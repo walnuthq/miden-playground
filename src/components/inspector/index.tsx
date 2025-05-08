@@ -56,7 +56,7 @@ export function InspectorItem({
 }: {
 	name: string;
 	isReadOnly?: boolean;
-	variant: 'script' | 'note' | 'file' | 'collapsable';
+	variant: 'script' | 'note' | 'file' | 'collapsable' | 'blank';
 	isCollapsed?: boolean;
 	isSelected?: boolean;
 	onClick?: () => void;
@@ -80,21 +80,25 @@ export function InspectorItem({
 						<InlineIcon variant={isReadOnly ? 'lock' : 'unlock'} className={`w-4 h-4`} />
 					</div>
 				)}
-				<InlineIcon
-					variant={
-						variant === 'script'
-							? 'file_2'
-							: variant === 'file'
-							? 'file'
-							: variant === 'note'
-							? 'file_3'
-							: 'arrow'
-					}
-					color="white"
-					className={`opacity-80 ${variant === 'collapsable' ? 'w-3 h-3 m-0.5' : 'w-4 h-4'} ${
-						isCollapsed === false ? 'rotate-90' : ''
-					}`}
-				/>
+				{variant !== 'blank' ? (
+					<InlineIcon
+						variant={
+							variant === 'script'
+								? 'file_2'
+								: variant === 'file'
+								? 'file'
+								: variant === 'note'
+								? 'file_3'
+								: 'arrow'
+						}
+						color="white"
+						className={`opacity-80 ${variant === 'collapsable' ? 'w-3 h-3 m-0.5' : 'w-4 h-4'} ${
+							isCollapsed === false ? 'rotate-90' : ''
+						}`}
+					/>
+				) : (
+					<div className="size-4" />
+				)}
 				<span className={nameClasses}>
 					{name} {isConsumed && <span className="text-theme-danger"> (Consumed)</span>}
 				</span>

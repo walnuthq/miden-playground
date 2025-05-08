@@ -29,9 +29,12 @@ const AccountsList = ({
 			<InspectorItem
 				name="Accounts"
 				nameClasses="font-bold"
-				variant="collapsable"
+				variant={Object.values(accounts).length > 0 ? 'collapsable' : 'blank'}
 				onCreate={(option) => {
 					if (option === 'Create new account') {
+						if (isCollapsedAccTopLevel) {
+							toggleCollapse('top-level-accounts', setCollapsedAccounts);
+						}
 						createAccount();
 					}
 				}}
@@ -39,7 +42,9 @@ const AccountsList = ({
 				isCollapsed={isCollapsedAccTopLevel}
 				level={0}
 				onClick={() => {
-					toggleCollapse('top-level-accounts', setCollapsedAccounts);
+					if (Object.values(accounts).length > 0) {
+						toggleCollapse('top-level-accounts', setCollapsedAccounts);
+					}
 				}}
 			/>
 			{!isCollapsedAccTopLevel &&

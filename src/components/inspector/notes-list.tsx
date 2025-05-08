@@ -35,13 +35,18 @@ const NotesList = ({
 			<InspectorItem
 				name="Notes"
 				nameClasses="font-bold"
-				variant="collapsable"
+				variant={Object.values(notes).length > 0 ? 'collapsable' : 'blank'}
 				isCollapsed={isCollapsedNotesTopLevel}
 				level={0}
 				onClick={() => {
-					toggleCollapse('top-level-notes', setCollapsedNotes);
+					if (Object.values(notes).length > 0) {
+						toggleCollapse('top-level-notes', setCollapsedNotes);
+					}
 				}}
 				onCreate={(option) => {
+					if (isCollapsedNotesTopLevel) {
+						toggleCollapse('top-level-notes', setCollapsedNotes);
+					}
 					if (option === 'Create P2ID note') {
 						if (accountsCount > 1) {
 							createSampleP2IDNote();

@@ -16,14 +16,14 @@ export function Header() {
 			<div className="flex items-center">
 				<Link
 					href="/instructions"
-					className="font-bold text-theme-text-subtle flex items-center gap-1 text-base cursor-pointer px-2 rounded-theme hover:bg-theme-border transition-all"
+					className="text-theme-text-subtle flex items-center gap-1 text-base cursor-pointer px-3 py-1 rounded-theme hover:bg-theme-border transition-all"
 				>
-					Instructions
+					MASM Instructions
 				</Link>
 				<a
-					href="https://0xpolygonmiden.github.io/miden-docs/miden-base/index.html"
+					href="https://0xmiden.github.io/miden-docs/imported/miden-base/src/index.html"
 					target="_blank"
-					className="font-bold text-theme-text-subtle flex items-center gap-1 text-base cursor-pointer px-2 rounded-theme hover:bg-theme-border transition-all"
+					className="text-theme-text-subtle flex items-center gap-1 text-base cursor-pointer px-3 py-1 rounded-theme hover:bg-theme-border transition-all"
 				>
 					Documentation
 					<InlineIcon variant="arrow-up-right" className="w-5 h-5" color="gray" />
