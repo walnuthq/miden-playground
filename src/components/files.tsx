@@ -216,24 +216,22 @@ export const Files = () => {
 					<div className="w-fit mt-2">
 						<div className={'rounded-theme border border-theme-border overflow-hidden'}>
 							<Table className="[&_tr:hover]:bg-transparent">
-								<TableHeader>
-									<TableRow>
-										<TableHead className="pr-4">Sender ID</TableHead>
-										<TableHead className="pr-4">Serial number</TableHead>
-										<TableHead>Aux</TableHead>
-										<TableHead>Tag</TableHead>
-										<TableHead>Recipient</TableHead>
-									</TableRow>
-								</TableHeader>
 								<TableBody>
 									<TableRow>
+										<TableHead className="pr-4">Sender ID</TableHead>
 										<TableCell className="pr-8 last:p-2">
 											({accounts[note!.senderId]!.id.prefix.toString()},{' '}
 											{accounts[note!.senderId]!.id.suffix.toString()})
 										</TableCell>
+									</TableRow>
+									<TableRow>
+										<TableHead className="pr-4">Serial number</TableHead>
 										<TableCell className="pr-8 last:p-2">
 											{note!.serialNumberDecimalString}
 										</TableCell>
+									</TableRow>
+									<TableRow>
+										<TableHead>Aux</TableHead>
 										<TableCell>
 											<input
 												value={note!.aux.toString()}
@@ -243,6 +241,9 @@ export const Files = () => {
 												onChange={(e) => setNoteAux(note!.id, BigInt(e.target.value))}
 											/>
 										</TableCell>
+									</TableRow>
+									<TableRow>
+										<TableHead>Tag</TableHead>
 										<TableCell>
 											<input
 												value={note!.tag}
@@ -252,6 +253,9 @@ export const Files = () => {
 												onChange={(e) => setNoteTag(note!.id, parseInt(e.target.value))}
 											/>
 										</TableCell>
+									</TableRow>
+									<TableRow>
+										<TableHead>Recipient</TableHead>
 										<TableCell>{note!.recipientDigest}</TableCell>
 									</TableRow>
 								</TableBody>
