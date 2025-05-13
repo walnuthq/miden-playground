@@ -419,8 +419,8 @@ export const ComposeTransactionTab = () => {
 										</div>
 									</ScrollArea>
 								) : (
-									<ScrollArea className="relative h-full px-4 overflow-auto max-w-3xl mx-auto text-theme-text py-16">
-										<div className="flex flex-col gap-4">
+									<ScrollArea className="relative h-full overflow-auto text-theme-text">
+										<div className="flex flex-col gap-4 py-16 px-4 max-w-3xl mx-auto">
 											<h1 className="font-bold text-4xl">Miden Playground</h1>
 											<div className="mt-8">
 												A Miden transaction is the state transition of a single{' '}
@@ -466,48 +466,48 @@ export const ComposeTransactionTab = () => {
 												By executing the transaction, you simulate the change in the account&apos;s
 												state.
 											</div>
-										</div>
-										<h3
-											className="font-bold text-2xl mt-8 cursor-pointer hover:underline"
-											onClick={() => {
-												Object.values(files).map((file) => {
-													closeFile(file.id);
-												});
-												if (selectedFileId) closeFile(selectedFileId);
-												selectTab('transaction');
-												startNextStep('mainTour');
-												clearConsole();
-												setIsTutorialMode(true);
-											}}
-										>
-											👉 START
-										</h3>
-										<div className="flex flex-col gap-4 mt-8 pb-4">
-											<h3 className="font-bold text-2xl">Need help?</h3>
-											<ul>
-												<li>
-													📚{' '}
-													<Link
-														href="https://0xmiden.github.io/miden-docs/imported/miden-base/src/index.html"
-														target="_blank"
-														className="font-bold text-theme-primary hover:underline"
-													>
-														Read our docs
-													</Link>{' '}
-													for detailed guides and instructions.
-												</li>
-												<li>
-													🗂 Check our{' '}
-													<Link
-														href="https://github.com/0xMiden/"
-														target="_blank"
-														className="font-bold text-theme-primary hover:underline"
-													>
-														GitHub repository
-													</Link>
-													.
-												</li>
-											</ul>
+											<h3
+												className="font-bold text-2xl mt-8 cursor-pointer hover:underline"
+												onClick={() => {
+													Object.values(files).map((file) => {
+														closeFile(file.id);
+													});
+													if (selectedFileId) closeFile(selectedFileId);
+													selectTab('transaction');
+													startNextStep('mainTour');
+													clearConsole();
+													setIsTutorialMode(true);
+												}}
+											>
+												👉 START
+											</h3>
+											<div className="flex flex-col gap-4 mt-8 pb-4">
+												<h3 className="font-bold text-2xl">Need help?</h3>
+												<ul>
+													<li>
+														📚{' '}
+														<Link
+															href="https://0xmiden.github.io/miden-docs/imported/miden-base/src/index.html"
+															target="_blank"
+															className="font-bold text-theme-primary hover:underline"
+														>
+															Read our docs
+														</Link>{' '}
+														for detailed guides and instructions.
+													</li>
+													<li>
+														🗂 Check our{' '}
+														<Link
+															href="https://github.com/0xMiden/"
+															target="_blank"
+															className="font-bold text-theme-primary hover:underline"
+														>
+															GitHub repository
+														</Link>
+														.
+													</li>
+												</ul>
+											</div>
 										</div>
 									</ScrollArea>
 								)}
