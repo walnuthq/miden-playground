@@ -41,8 +41,15 @@ export const ComposeTransactionTab = () => {
 		toggleFisrtExecuteClick,
 		faucets,
 		createAccount,
-		accountStorageDiffs
+		accountStorageDiffs,
+		setIsTutorialMode,
+		files,
+		closeFile,
+		selectedFileId,
+		clearConsole
 	} = useMiden();
+	const { startNextStep } = useNextStep();
+
 	const selectedAccountData = selectedTransactionAccountId
 		? accounts[selectedTransactionAccountId]
 		: null;
@@ -412,41 +419,76 @@ export const ComposeTransactionTab = () => {
 										</div>
 									</ScrollArea>
 								) : (
-									<ScrollArea className="relative h-full px-4 overflow-auto max-w-3xl mx-auto text-theme-text">
-										<div className="flex flex-col gap-4 pt-16">
+									<ScrollArea className="relative h-full px-4 overflow-auto max-w-3xl mx-auto text-theme-text py-16">
+										<div className="flex flex-col gap-4">
 											<h1 className="font-bold text-4xl">Miden Playground</h1>
-											<h3 className="font-bold text-2xl mt-8">Getting Started</h3>
-											<div>
-												<div>1. Execute Transactions:</div>
-												<ul style={{ listStyleType: 'disc', paddingLeft: '20px' }} className="ml-2">
-													<li>Select an account and at least one note from the left-side menu.</li>
-													<li>Click &quot;Execute Transaction&quot; to see Miden in action.</li>
-												</ul>
+											<div className="mt-8">
+												A Miden transaction is the state transition of a single{' '}
+												<a
+													href="https://0xmiden.github.io/miden-docs/imported/miden-base/src/account.html"
+													className="font-bold text-theme-primary hover:underline"
+												>
+													account
+												</a>
+												.
 											</div>
 											<div>
-												<div>2. Craft Notes for Transactions:</div>
-												<ul style={{ listStyleType: 'disc', paddingLeft: '20px' }} className="ml-2">
-													<li>Create notes in the editor tab.</li>
-													<li>Each note includes a vault with assets and a script.</li>
-												</ul>
+												<img
+													src="/transaction-diagram.png"
+													alt="transaction diagram"
+													className="max-w-md"
+												/>
 											</div>
 											<div>
-												<div>3. Create More Accounts:</div>
-												<ul style={{ listStyleType: 'disc', paddingLeft: '20px' }} className="ml-2">
-													<li>
-														Store assets in your account&apos;s vault and keep data in its storage.
-													</li>
-													<li>Create additional accounts in the editor tab as needed.</li>
-												</ul>
+												In the transaction, the account consumes{' '}
+												<a
+													href="https://0xmiden.github.io/miden-docs/imported/miden-base/src/note.html"
+													className="font-bold text-theme-primary hover:underline"
+												>
+													notes
+												</a>{' '}
+												and their assets, and it can create new notes for other accounts to consume.
+											</div>
+											<div>
+												<div>
+													In this <span className="font-bold">transaction simulator</span>, you can
+													create and execute a transaction by
+												</div>
+												<ol
+													style={{ listStyleType: 'decimal', paddingLeft: '20px' }}
+													className="ml-2"
+												>
+													<li>Defining the initial state of the account.</li>
+													<li>Defining the notes to consume.</li>
+												</ol>
+											</div>
+											<div>
+												By executing the transaction, you simulate the change in the account&apos;s
+												state.
 											</div>
 										</div>
+										<h3
+											className="font-bold text-2xl mt-8 cursor-pointer hover:underline"
+											onClick={() => {
+												Object.values(files).map((file) => {
+													closeFile(file.id);
+												});
+												if (selectedFileId) closeFile(selectedFileId);
+												selectTab('transaction');
+												startNextStep('mainTour');
+												clearConsole();
+												setIsTutorialMode(true);
+											}}
+										>
+											👉 START
+										</h3>
 										<div className="flex flex-col gap-4 mt-8 pb-4">
 											<h3 className="font-bold text-2xl">Need help?</h3>
 											<ul>
 												<li>
 													📚{' '}
 													<Link
-														href="https://0xpolygonmiden.github.io/miden-docs/miden-base/index.html"
+														href="https://0xmiden.github.io/miden-docs/imported/miden-base/src/index.html"
 														target="_blank"
 														className="font-bold text-theme-primary hover:underline"
 													>
@@ -457,7 +499,7 @@ export const ComposeTransactionTab = () => {
 												<li>
 													🗂 Check our{' '}
 													<Link
-														href="https://github.com/0xPolygonMiden/miden-vm"
+														href="https://github.com/0xMiden/"
 														target="_blank"
 														className="font-bold text-theme-primary hover:underline"
 													>
