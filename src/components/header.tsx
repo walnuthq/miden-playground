@@ -1,9 +1,17 @@
+'use client';
 import InlineIcon from './ui/inline-icon';
 import Image from 'next/image';
 import logo from '../app/images/miden_logo.svg';
 import Link from 'next/link';
+import { useNextStep } from 'nextstepjs';
+import { useFiles, useMiden } from '@/lib/context-providers';
 
 export function Header() {
+	const { startNextStep } = useNextStep();
+
+	const { selectTab, setIsTutorialMode, clearConsole } = useMiden();
+
+	const { files, closeFile, selectedFileId } = useFiles();
 	return (
 		<div className="h-full text-theme-text flex justify-between items-center">
 			<div className="font-bold text-xl flex items-center gap-1">
@@ -14,16 +22,31 @@ export function Header() {
 				</div>
 			</div>
 			<div className="flex items-center">
-				<Link
-					href="/instructions"
+				<div
+					onClick={() => {
+						Object.values(files).map((file) => {
+							closeFile(file.id);
+						});
+						if (selectedFileId) closeFile(selectedFileId);
+						selectTab('transaction');
+						startNextStep('mainTour');
+						clearConsole();
+						setIsTutorialMode(true);
+					}}
 					className="font-bold text-theme-text-subtle flex items-center gap-1 text-base cursor-pointer px-2 rounded-theme hover:bg-theme-border transition-all"
 				>
-					Instructions
+					Start tutorial
+				</div>
+				<Link
+					href="/instructions"
+					className="text-theme-text-subtle flex items-center gap-1 text-base cursor-pointer px-3 py-1 rounded-theme hover:bg-theme-border transition-all"
+				>
+					MASM Instructions
 				</Link>
 				<a
-					href="https://0xpolygonmiden.github.io/miden-docs/miden-base/index.html"
+					href="https://0xmiden.github.io/miden-docs/imported/miden-base/src/index.html"
 					target="_blank"
-					className="font-bold text-theme-text-subtle flex items-center gap-1 text-base cursor-pointer px-2 rounded-theme hover:bg-theme-border transition-all"
+					className="text-theme-text-subtle flex items-center gap-1 text-base cursor-pointer px-3 py-1 rounded-theme hover:bg-theme-border transition-all"
 				>
 					Documentation
 					<InlineIcon variant="arrow-up-right" className="w-5 h-5" color="gray" />

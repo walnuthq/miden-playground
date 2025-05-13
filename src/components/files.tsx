@@ -89,7 +89,7 @@ export const Files = () => {
 		typeof file.content.accountId === 'string'
 	) {
 		return (
-			<ScrollArea className="overflow-auto h-full flex-1 bg-[#040113] ">
+			<ScrollArea className={`overflow-auto h-full flex-1 bg-[#040113]`}>
 				<AccountCodeFile
 					accountFile={file.content.value}
 					fileId={file.id}
@@ -99,11 +99,11 @@ export const Files = () => {
 		);
 	} else if (file?.content?.dynamic?.account?.variant === 'metadata') {
 		return (
-			<ScrollArea className="flex-1 bg-[#040113] overflow-auto h-full ">
+			<ScrollArea className="flex-1 bg-[#040113] overflow-auto h-full  account-code-step">
 				<div className="p-4 text-theme-text text-sm">
 					<div>INFO</div>
-					<div className="w-fit mt-2">
-						<div className={'rounded-theme border border-theme-border overflow-hidden'}>
+					<div className="w-fit mt-2 " id="account-info">
+						<div className={'rounded-theme border border-theme-border overflow-hidden '}>
 							<Table className="[&_tr:hover]:bg-transparent">
 								<TableHeader>
 									<TableRow>
@@ -116,8 +116,8 @@ export const Files = () => {
 									<TableRow>
 										<TableCell className="pr-8 last:p-2">{account?.name.toString()}</TableCell>
 										<TableCell className="pr-8 last:p-2">
-											{account?.id.id.toString()}, ({account?.id.prefix.toString()},{' '}
-											{account?.id.suffix.toString()})
+											{`(${account?.id.prefix.toString()},
+											${account?.id.suffix.toString()})`}
 										</TableCell>
 										<TableCell className="pr-8 last:p-2 flex flex-row font-mono">
 											<div className="min-w-8">{account?.nonce}</div>
@@ -164,8 +164,11 @@ export const Files = () => {
 			<ScrollArea className="flex-1 bg-[#040113] overflow-auto h-full pr-4">
 				<div className="p-4 text-theme-text text-sm">
 					<div>INPUTS</div>
-					<div className="w-fit mt-2">
-						<div className={'rounded-theme border border-theme-border overflow-hidden'}>
+					<div className="w-fit mt-2 ">
+						<div
+							className={'rounded-theme border border-theme-border overflow-hidden n'}
+							id="note-inputs"
+						>
 							<Table className="[&_tr:hover]:bg-transparent">
 								<TableBody>
 									{parsedInputs().map((input, index) => (
@@ -208,21 +211,22 @@ export const Files = () => {
 					<div className="w-fit mt-2">
 						<div className={'rounded-theme border border-theme-border overflow-hidden'}>
 							<Table className="[&_tr:hover]:bg-transparent">
-								<TableHeader>
-									<TableRow>
-										<TableHead className="pr-4">Sender ID</TableHead>
-										<TableHead className="pr-4">Serial number</TableHead>
-										<TableHead>Aux</TableHead>
-										<TableHead>Tag</TableHead>
-										<TableHead>Recipient</TableHead>
-									</TableRow>
-								</TableHeader>
 								<TableBody>
 									<TableRow>
-										<TableCell className="pr-8 last:p-2">{note!.senderId.toString()}</TableCell>
+										<TableHead className="pr-4">Sender ID</TableHead>
+										<TableCell className="pr-8 last:p-2">
+											({accounts[note!.senderId]!.id.prefix.toString()},{' '}
+											{accounts[note!.senderId]!.id.suffix.toString()})
+										</TableCell>
+									</TableRow>
+									<TableRow>
+										<TableHead className="pr-4">Serial number</TableHead>
 										<TableCell className="pr-8 last:p-2">
 											{note!.serialNumberDecimalString}
 										</TableCell>
+									</TableRow>
+									<TableRow>
+										<TableHead>Aux</TableHead>
 										<TableCell>
 											<input
 												value={note!.aux.toString()}
@@ -232,6 +236,9 @@ export const Files = () => {
 												onChange={(e) => setNoteAux(note!.id, BigInt(e.target.value))}
 											/>
 										</TableCell>
+									</TableRow>
+									<TableRow>
+										<TableHead>Tag</TableHead>
 										<TableCell>
 											<input
 												value={note!.tag}
@@ -241,6 +248,9 @@ export const Files = () => {
 												onChange={(e) => setNoteTag(note!.id, parseInt(e.target.value))}
 											/>
 										</TableCell>
+									</TableRow>
+									<TableRow>
+										<TableHead>Recipient</TableHead>
 										<TableCell>{note!.recipientDigest}</TableCell>
 									</TableRow>
 								</TableBody>
@@ -253,9 +263,8 @@ export const Files = () => {
 		);
 	} else {
 		return (
-			<div className="flex-1 bg-[#040113]">
+			<div className={`flex-1 bg-[#040113] ${'step8'}`}>
 				<CustomMonacoEditor
-					lang={file.name !== 'Script' ? 'javascript' : 'masm'}
 					onChange={(value) => {
 						setValue(value ?? '');
 						if (file && !file.readonly) updateFileContent(file.id, value ?? '');

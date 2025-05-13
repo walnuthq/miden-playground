@@ -6,7 +6,9 @@ import React, {
 	useCallback,
 	useContext,
 	useState,
-	useRef
+	useRef,
+	Dispatch,
+	SetStateAction
 } from 'react';
 import { createNoteData } from '@/lib/miden-wasm-api';
 import { convertToBigUint64Array } from '@/lib/utils';
@@ -37,6 +39,8 @@ interface NotesContextProps {
 	setNoteAux: (noteId: string, aux: bigint) => void;
 	latestConsumedNotes: Record<string, Note>;
 	setLatestConsumedNotes: (latestConsumedNotes: Record<string, Note>) => void;
+	removeExecutedTransactionNotes: () => void;
+	setNotes: Dispatch<SetStateAction<Record<string, Note>>>;
 }
 
 export const NotesContext = createContext<NotesContextProps>({
@@ -55,7 +59,9 @@ export const NotesContext = createContext<NotesContextProps>({
 	setNoteTag: () => {},
 	setNoteAux: () => {},
 	latestConsumedNotes: {},
-	setLatestConsumedNotes: () => {}
+	setLatestConsumedNotes: () => {},
+	removeExecutedTransactionNotes: () => {},
+	setNotes: () => {}
 });
 
 export const NotesContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
@@ -240,6 +246,10 @@ export const NotesContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		setSelectedTransactionNotesIds((prev) => prev.filter((id) => id !== noteId));
 	}, []);
 
+	const removeExecutedTransactionNotes = useCallback(() => {
+		setSelectedTransactionNotesIds([]);
+	}, []);
+
 	const deleteNote = useCallback(
 		(noteId: string) => {
 			setNotes((prev) => {
@@ -295,7 +305,9 @@ export const NotesContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 				setNoteTag,
 				setNoteAux,
 				latestConsumedNotes,
-				setLatestConsumedNotes
+				setLatestConsumedNotes,
+				removeExecutedTransactionNotes,
+				setNotes
 			}}
 		>
 			{children}

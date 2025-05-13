@@ -11,7 +11,7 @@ export function Playground() {
 	const { selectedTab } = useMiden();
 
 	return (
-		<div className="flex flex-col h-screen px-4 pt-4">
+		<div className="flex flex-col h-screen px-4">
 			<header className="h-16">
 				<Header />
 			</header>

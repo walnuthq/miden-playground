@@ -64,7 +64,7 @@ export const FilesContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 
 	const selectFile = useCallback((fileId: string) => {
 		setFiles((prev) => {
-			const prevIsOpen = prev[fileId].isOpen;
+			const prevIsOpen = prev[fileId]?.isOpen;
 			const file = { ...prev[fileId], isOpen: true, openOrder: Date.now() };
 			if (!prevIsOpen) {
 				file.positionOrder = Date.now();
