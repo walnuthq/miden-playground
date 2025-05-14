@@ -1,4 +1,4 @@
-import { useMiden } from '@/lib/context-providers';
+import { useAccounts, useFiles, useNotes } from '@/lib/context-providers';
 import React, { useEffect, useState } from 'react';
 import { FileItem, InspectorItem } from '.';
 import { useToast } from '@/hooks/use-toast';
@@ -12,22 +12,19 @@ const NotesList = ({
 		setState: React.Dispatch<React.SetStateAction<Record<string, boolean>>>
 	) => void;
 }) => {
+	const { accounts } = useAccounts();
+	const { files, selectFile, selectedFileId, closeFile } = useFiles();
 	const {
-		files,
 		notes,
-		selectFile,
-		selectedFileId,
 		createSampleP2IDNote,
 		createSampleP2IDRNote,
 		createNewNote,
 		createSampleSwapNotes,
 		deleteNote,
-		accounts,
-		closeFile,
 		removeTransactionNote,
 		selectedTransactionNotesIds,
 		latestConsumedNotes
-	} = useMiden();
+	} = useNotes();
 	const [collapsedNotes, setCollapsedNotes] = useState<Record<string, boolean>>({});
 	const isCollapsedNotesTopLevel = collapsedNotes['top-level-notes'] || false;
 	const accountsCount = Object.values(accounts).length;

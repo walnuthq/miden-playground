@@ -2,7 +2,7 @@
 import type { CardComponentProps } from 'nextstepjs';
 import { Button } from './ui/button';
 import { useNextStep } from 'nextstepjs';
-import { useMiden } from '@/lib/context-providers';
+import { useAccounts, useFiles, useMiden, useNotes } from '@/lib/context-providers';
 
 export const CustomCard = ({
 	step,
@@ -12,21 +12,11 @@ export const CustomCard = ({
 	arrow
 }: CardComponentProps) => {
 	const { closeNextStep, setCurrentStep } = useNextStep();
-	const {
-		notes,
-		selectFile,
-		accounts,
-		setIsInspectorDropdownOpen,
-		setIsTutorialMode,
-		closeFile,
-		files,
-		selectedFileId,
-		selectedTransactionNotesIds,
-		selectedTransactionAccountId,
-		removeTransactionAccount,
-		removeTransactionNote,
-		clearConsole
-	} = useMiden();
+	const { setIsInspectorDropdownOpen, setIsTutorialMode, clearConsole } = useMiden();
+
+	const { selectedTransactionNotesIds, removeTransactionNote, notes } = useNotes();
+	const { selectedTransactionAccountId, removeTransactionAccount, accounts } = useAccounts();
+	const { closeFile, files, selectedFileId, selectFile } = useFiles();
 	const progress = ((currentStep + 1) / totalSteps) * 100;
 
 	const delayedNextStep = async () => {

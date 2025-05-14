@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useMiden } from '@/lib/context-providers';
+import { useAccounts, useFiles, useMiden, useNotes } from '@/lib/context-providers';
 import { Vault } from '@/components/vault';
 import { Console } from '@/components/console';
 import {
@@ -23,39 +23,37 @@ import { useNextStep } from 'nextstepjs';
 
 export const ComposeTransactionTab = () => {
 	const {
-		accounts,
-		notes,
-		latestConsumedNotes,
-		selectedTransactionAccountId,
-		selectedTransactionNotesIds,
-		selectTransactionNote,
-		selectTransactionAccount,
 		executeTransaction,
 		blockNumber,
-		removeTransactionNote,
 		setBlockNumber,
-		accountUpdates,
-		selectFile,
 		selectTab,
 		firstExecuteClick,
 		toggleFisrtExecuteClick,
-		faucets,
-		createAccount,
-		accountStorageDiffs,
-		setIsTutorialMode,
-		files,
-		closeFile,
-		selectedFileId,
-		clearConsole
+		faucets
 	} = useMiden();
-	const { startNextStep } = useNextStep();
-
+	const {
+		accounts,
+		selectedTransactionAccountId,
+		selectTransactionAccount,
+		accountUpdates,
+		createAccount,
+		accountStorageDiffs
+	} = useAccounts();
+	const {
+		notes,
+		latestConsumedNotes,
+		selectedTransactionNotesIds,
+		selectTransactionNote,
+		removeTransactionNote
+	} = useNotes();
+	const { selectFile, files, closeFile, selectedFileId } = useFiles();
 	const selectedAccountData = selectedTransactionAccountId
 		? accounts[selectedTransactionAccountId]
 		: null;
+	const { setIsTutorialMode, clearConsole } = useMiden();
 	const [isOpenDropdown, setIsOpenDropdown] = useState(false);
 	const [_blockNumber, _setBlockNumber] = useState(blockNumber.toString());
-	const { currentStep, setCurrentStep, currentTour } = useNextStep();
+	const { currentStep, setCurrentStep, currentTour, startNextStep } = useNextStep();
 	const [isAccountDropdownOpen, setIsAccountDropdownOpen] = useState(false);
 	useEffect(() => {
 		if (currentStep === 8 && currentTour) {
@@ -72,7 +70,7 @@ export const ComposeTransactionTab = () => {
 	return (
 		<>
 			<ResizablePanelGroup direction="horizontal">
-				<ResizablePanel defaultSize={30} className="min-w-[400px]">
+				<ResizablePanel defaultSize={30} className="min-w-[450px]">
 					<ScrollArea className="relative h-full px-4 py-5  overflow-auto text-theme-text text-sm">
 						<div className="">
 							<div

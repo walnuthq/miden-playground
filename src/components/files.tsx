@@ -1,4 +1,4 @@
-import { useMiden } from '@/lib/context-providers';
+import { useAccounts, useFiles, useNotes } from '@/lib/context-providers';
 import AccountCodeFile from './account-code-file';
 import { CustomMonacoEditor } from './custom-monaco-editor';
 import { EditorFile } from '@/lib/files';
@@ -11,7 +11,9 @@ import json5 from 'json5';
 import { useToast } from '@/hooks/use-toast';
 
 const useSelectedEditorFile = (): { content: string; file: EditorFile | null } => {
-	const { files, accounts, selectedFileId, notes } = useMiden();
+	const { files, selectedFileId } = useFiles();
+	const { accounts } = useAccounts();
+	const { notes } = useNotes();
 	if (!selectedFileId) return { content: '', file: null };
 	const file = files[selectedFileId];
 	let content = '';
@@ -58,16 +60,9 @@ const useSelectedEditorFile = (): { content: string; file: EditorFile | null } =
 };
 
 export const Files = () => {
-	const {
-		selectedFileId,
-		updateFileContent,
-		files,
-		notes,
-		handleChangeInput,
-		setNoteAux,
-		setNoteTag,
-		accounts
-	} = useMiden();
+	const { selectedFileId, updateFileContent, files } = useFiles();
+	const { accounts } = useAccounts();
+	const { notes, handleChangeInput, setNoteAux, setNoteTag } = useNotes();
 	const { content, file } = useSelectedEditorFile();
 	const [newInput, setNewInput] = useState('');
 	const [value, setValue] = useState(content);

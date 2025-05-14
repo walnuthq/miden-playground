@@ -1,9 +1,10 @@
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
-import { useMiden } from '@/lib/context-providers';
+import { useAccounts, useNotes } from '@/lib/context-providers';
 
 const OutputNotes = () => {
-	const { accountUpdates, notes } = useMiden();
+	const { notes } = useNotes();
+	const { accountUpdates } = useAccounts();
 
 	return accountUpdates && accountUpdates.outputNotes.length > 0 ? (
 		<div className="rounded-theme border border-theme-border w-fit">

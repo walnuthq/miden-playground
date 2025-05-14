@@ -9,11 +9,9 @@ import {
 	TableRow
 } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
-// import { faucets } from '@/lib/consts';
-import { useMiden } from '@/lib/context-providers';
+import { useAccounts, useMiden, useNotes } from '@/lib/context-providers';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
-// import { faucetSymbols } from '@/lib/consts';
 
 export function Vault({
 	noteId,
@@ -28,16 +26,9 @@ export function Vault({
 	displayDelta?: boolean;
 	addAssetAbility?: boolean;
 }) {
-	const {
-		notes,
-		accounts,
-		updateAccountAssetAmount,
-		updateNoteAssetAmount,
-		accountUpdates,
-		faucets,
-		createFaucet,
-		createNoteFaucet
-	} = useMiden();
+	const { faucets, createFaucet, createNoteFaucet } = useMiden();
+	const { accounts, updateAccountAssetAmount, accountUpdates } = useAccounts();
+	const { notes, updateNoteAssetAmount } = useNotes();
 	const [customAssetName, setCustomAssetName] = useState<string>('');
 	const [customAssetAmount, setCustomAssetAmount] = useState<string>('');
 	const note = noteId ? notes[noteId] : null;
