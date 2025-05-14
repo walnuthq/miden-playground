@@ -4,6 +4,7 @@ import React, { PropsWithChildren, createContext, useCallback, useContext, useSt
 import { TRANSACTION_SCRIPT_FILE_ID } from '@/lib/consts';
 import { TRANSACTION_SCRIPT } from '@/lib/consts/transaction';
 import { EditorFiles } from '@/lib/files';
+import { debounce } from 'lodash';
 
 interface FilesContextProps {
 	files: EditorFiles;
@@ -54,13 +55,13 @@ export const FilesContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 		});
 	}, []);
 
-	const removeFile = useCallback((fileId: string) => {
+	const removeFile = debounce((fileId: string) => {
 		setFiles((prev) => {
 			const newFiles = { ...prev };
 			delete newFiles[fileId];
 			return newFiles;
 		});
-	}, []);
+	}, 1000);
 
 	const selectFile = useCallback((fileId: string) => {
 		setFiles((prev) => {

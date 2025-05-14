@@ -1,14 +1,37 @@
 'use client';
 
-import { useMiden } from '@/lib/context-providers';
+import { useFiles, useMiden } from '@/lib/context-providers';
 import { Header } from '@/components/header';
 import { Tabs } from '@/components/tabs';
 import { ComposeTransactionTab } from './compose-transaction-tab';
 import { EditorTab } from './editor-tab';
 import Footer from './footer';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import { useNextStep } from 'nextstepjs';
 
 export function Playground() {
-	const { selectedTab } = useMiden();
+	const { selectedTab, selectTab, setIsTutorialMode, clearConsole } = useMiden();
+	const { startNextStep } = useNextStep();
+	const { files, closeFile, selectedFileId } = useFiles();
+	const router = useRouter();
+	const searchParams = useSearchParams();
+
+	useEffect(() => {
+		const tutorial = searchParams.get('tutorial');
+		if (tutorial === 'true') {
+			const newUrl = window.location.pathname;
+			router.replace(newUrl);
+			Object.values(files).map((file) => {
+				closeFile(file.id);
+			});
+			if (selectedFileId) closeFile(selectedFileId);
+			selectTab('transaction');
+			startNextStep('mainTour');
+			clearConsole();
+			setIsTutorialMode(true);
+		}
+	}, []);
 
 	return (
 		<div className="flex flex-col h-screen px-4">
