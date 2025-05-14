@@ -33,7 +33,7 @@ export function Header() {
 						clearConsole();
 						setIsTutorialMode(true);
 					}}
-					className="font-bold text-theme-text-subtle flex items-center gap-1 text-base cursor-pointer px-2 rounded-theme hover:bg-theme-border transition-all"
+					className="text-theme-text-subtle flex items-center gap-1 text-base cursor-pointer px-2 rounded-theme hover:bg-theme-border transition-all"
 				>
 					Start tutorial
 				</div>
