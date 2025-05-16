@@ -11,7 +11,7 @@ export const Tabs = () => {
 		<div className="flex flex-col h-full  border-y border-theme-border rounded-l-miden">
 			<div
 				id="step5"
-				className={`p-3 font-semibold border-theme-border rounded-tl-miden border-b border-l  text-sm flex flex-row items-center gap-2 cursor-pointer select-none ${
+				className={`p-3 font-semibold border-theme-border rounded-tl-miden border-l  text-sm flex flex-row items-center gap-2 cursor-pointer select-none ${
 					selectedTab === 'transaction'
 						? 'bg-theme-surface-highlight text-theme-text border-l-theme-primary'
 						: 'text-theme-text-subtle'
@@ -39,7 +39,7 @@ export const Tabs = () => {
 			</div>
 			<div
 				id="step1"
-				className={`p-3 font-semibold text-sm border-b border-l border-theme-border flex flex-row items-center gap-2 cursor-pointer select-none ${
+				className={`p-3 font-semibold text-sm border-l border-theme-border flex flex-row items-center gap-2 cursor-pointer select-none ${
 					selectedTab === 'assets'
 						? 'bg-theme-surface-highlight text-theme-text border-l-theme-primary'
 						: 'text-theme-text-subtle'
