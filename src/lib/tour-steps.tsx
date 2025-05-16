@@ -9,7 +9,7 @@ export const steps: Tour[] = [
 				content: 'Select Editor to create an account',
 				selector: '#step1',
 				icon: '',
-				side: 'bottom',
+				side: 'right',
 				pointerPadding: 0, // Padding around the target element (in pixels)
 				pointerRadius: 0
 			},
@@ -240,7 +240,7 @@ export const steps: Tour[] = [
 				content: 'Go to the editor',
 				selector: '#step1',
 				icon: '',
-				side: 'left',
+				side: 'right',
 				pointerPadding: 0, // Padding around the target element (in pixels)
 				pointerRadius: 0
 			},
