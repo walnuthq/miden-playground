@@ -22,7 +22,6 @@ import { debounce } from 'lodash';
 import { useFiles } from './files-context-provider';
 import { useAccounts } from './accounts-context-provider';
 import { useNotes } from './notes-context-provider';
-import { useNextStep } from 'nextstepjs';
 
 type Tabs = 'transaction' | 'assets';
 
@@ -160,7 +159,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 	}, []);
 
 	const [selectedTab, setSelectedTab] = useState<Tabs>('transaction');
-	const { startNextStep } = useNextStep();
 
 	useEffect(() => {
 		if (isTutorialMode) {
@@ -398,27 +396,6 @@ export const MidenContextProvider: React.FC<PropsWithChildren> = ({ children }) 
 			return value;
 		});
 	}
-
-	useEffect(() => {
-		const existingIsNewUser = localStorage.getItem('isNewUser');
-
-		if (existingIsNewUser === null || existingIsNewUser === 'true') {
-			localStorage.setItem('isNewUser', JSON.stringify(true));
-			setIsTutorialMode(true);
-			startNextStep('mainTour');
-		}
-	}, []);
-
-	useEffect(() => {
-		const existingIsNewUser = localStorage.getItem('isNewUser');
-
-		if (existingIsNewUser === null || existingIsNewUser === 'true') {
-			localStorage.setItem('isNewUser', JSON.stringify(true));
-			setIsTutorialMode(true);
-			startNextStep('mainTour');
-		}
-	}, []);
-
 	useEffect(() => {
 		init()
 			.then(() => {
