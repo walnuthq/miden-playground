@@ -38,10 +38,12 @@ export function Playground() {
 			<header className="h-16">
 				<Header />
 			</header>
-			<Tabs />
-			<main className="flex-1 border border-theme-border rounded-b-theme rounded-tr-theme overflow-hidden">
-				{selectedTab === 'transaction' ? <ComposeTransactionTab /> : <EditorTab />}
-			</main>
+			<div className="flex h-full">
+				<Tabs />
+				<main className="flex-1 border border-theme-border rounded-br-theme rounded-tr-theme overflow-hidden">
+					{selectedTab === 'transaction' ? <ComposeTransactionTab /> : <EditorTab />}
+				</main>
+			</div>
 			<footer className="h-12 flex items-center justify-start">
 				<Footer />
 			</footer>

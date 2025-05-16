@@ -8,12 +8,12 @@ export const Tabs = () => {
 	const { selectedTab, selectTab } = useMiden();
 	const { currentStep, setCurrentStep, currentTour } = useNextStep();
 	return (
-		<div className="flex  flex-row ">
+		<div className="flex flex-col h-full  border-y border-theme-border rounded-l-miden">
 			<div
 				id="step5"
-				className={`p-3 w-[210px]  font-semibold border-x border-t border-theme-border rounded-tl-miden text-sm flex flex-row items-center gap-2 cursor-pointer select-none ${
+				className={`p-3 font-semibold border-theme-border rounded-tl-miden border-b border-l  text-sm flex flex-row items-center gap-2 cursor-pointer select-none ${
 					selectedTab === 'transaction'
-						? 'bg-theme-surface-highlight text-theme-text'
+						? 'bg-theme-surface-highlight text-theme-text border-l-theme-primary'
 						: 'text-theme-text-subtle'
 				}`}
 				onClick={() => {
@@ -36,13 +36,12 @@ export const Tabs = () => {
 						selectedTab === 'transaction' ? 'text-theme-primary' : 'text-theme-primary/40'
 					}`}
 				/>
-				Compose transaction
 			</div>
 			<div
 				id="step1"
-				className={`p-3 w-[210px] font-semibold border-r border-t rounded-tr-miden text-sm border-theme-border flex flex-row items-center gap-2 cursor-pointer select-none ${
+				className={`p-3 font-semibold text-sm border-b border-l border-theme-border flex flex-row items-center gap-2 cursor-pointer select-none ${
 					selectedTab === 'assets'
-						? 'bg-theme-surface-highlight text-theme-text'
+						? 'bg-theme-surface-highlight text-theme-text border-l-theme-primary'
 						: 'text-theme-text-subtle'
 				}`}
 				onClick={() => {
@@ -67,8 +66,8 @@ export const Tabs = () => {
 						selectedTab === 'assets' ? 'text-theme-primary' : 'text-theme-primary/40'
 					}`}
 				/>
-				Editor
 			</div>
+			<div className="flex-1 border-l border-theme-border rounded-b-miden"></div>
 		</div>
 	);
 };
