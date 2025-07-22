@@ -1,0 +1,35 @@
+{
+  "name": "wasm-mock-web-client",
+  "type": "module",
+  "collaborators": [
+    "miden contributors"
+  ],
+  "description": "Web MockClient library that facilitates interaction with the Miden rollup",
+  "version": "0.9.3",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/walnuthq/miden-playground"
+  },
+  "files": [
+    "wasm_mock_web_client_bg.wasm",
+    "wasm_mock_web_client.js",
+    "wasm_mock_web_client_bg.js",
+    "wasm_mock_web_client.d.ts"
+  ],
+  "main": "wasm_mock_web_client.js",
+  "types": "wasm_mock_web_client.d.ts",
+  "sideEffects": [
+    "./wasm_mock_web_client.js",
+    "./snippets/*"
+  ],
+  "keywords": [
+    "miden",
+    "client",
+    "web",
+    "wasm"
+  ],
+  "dependencies": {
+    "dexie": "^4.0.11"
+  }
+}

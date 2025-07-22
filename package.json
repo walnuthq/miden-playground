@@ -1,55 +1,24 @@
 {
-	"name": "miden-playground",
-	"version": "0.1.0",
-	"private": true,
-	"scripts": {
-		"dev": "next dev --turbopack",
-		"wasm:build": "cd miden-wasm && wasm-pack build --target web --out-dir pkg --release && rm ./pkg/.gitignore && cd .. && npm install",
-		"pages:build": "npx @cloudflare/next-on-pages",
-		"build": "next build",
-		"start": "next start",
-		"lint": "next lint"
-	},
-	"dependencies": {
-		"@monaco-editor/react": "^4.6.0",
-		"@radix-ui/react-checkbox": "^1.1.2",
-		"@radix-ui/react-dropdown-menu": "^2.1.4",
-		"@radix-ui/react-scroll-area": "^1.2.1",
-		"@radix-ui/react-select": "^2.1.2",
-		"@radix-ui/react-slot": "^1.1.0",
-		"@radix-ui/react-switch": "^1.1.2",
-		"@radix-ui/react-tabs": "^1.1.1",
-		"@radix-ui/react-toast": "^1.2.4",
-		"@radix-ui/react-tooltip": "^1.1.8",
-		"@tanstack/react-table": "^8.20.6",
-		"@types/lodash": "^4.17.14",
-		"class-variance-authority": "^0.7.1",
-		"clsx": "^2.1.1",
-		"json5": "^2.2.1",
-		"lodash": "^4.17.21",
-		"lucide-react": "^0.462.0",
-		"miden-wasm": "file:miden-wasm/pkg",
-		"monaco-editor": "^0.52.2",
-		"monaco-editor-core": "^0.52.2",
-		"motion": "^12.8.0",
-		"next": "15.0.3",
-		"nextstepjs": "^2.0.0",
-		"react": "^18",
-		"react-dom": "^18",
-		"react-resizable-panels": "^2.1.7",
-		"tailwind-merge": "^2.5.5",
-		"tailwindcss-animate": "^1.0.7"
-	},
-	"devDependencies": {
-		"@cloudflare/next-on-pages": "^1.13.6",
-		"@types/node": "^20",
-		"@types/react": "^18",
-		"@types/react-dom": "^18",
-		"eslint": "^8",
-		"eslint-config-next": "15.0.3",
-		"eslint-plugin-next-on-pages": "^1.13.6",
-		"postcss": "^8",
-		"tailwindcss": "^3.4.1",
-		"typescript": "^5"
-	}
+  "name": "miden-playground",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "lint": "turbo lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "wasm-mock-web-client:dev": "RUSTFLAGS='--cfg getrandom_backend=\"wasm_js\"' wasm-pack build --out-dir ../packages/wasm-mock-web-client --no-opt wasm-mock-web-client && cd packages/wasm-mock-web-client && rm .gitignore",
+    "wasm-mock-web-client:build": "RUSTFLAGS='--cfg getrandom_backend=\"wasm_js\"' wasm-pack build --out-dir ../packages/wasm-mock-web-client --release wasm-mock-web-client && cd packages/wasm-mock-web-client && rm .gitignore && pnpm add dexie"
+  },
+  "devDependencies": {
+    "@workspace/eslint-config": "workspace:*",
+    "@workspace/typescript-config": "workspace:*",
+    "prettier": "^3.6.2",
+    "turbo": "^2.5.5",
+    "typescript": "^5.8.3"
+  },
+  "packageManager": "pnpm@10.12.4",
+  "engines": {
+    "node": ">=20"
+  }
 }

@@ -1,0 +1,28 @@
+[package]
+name = "wasm-mock-web-client"
+version = "0.9.3"
+description = "Web MockClient library that facilitates interaction with the Miden rollup"
+readme = "README.md"
+categories = ["no-std"]
+keywords = ["miden", "client", "web", "wasm"]
+license = "MIT"
+authors = ["miden contributors"]
+repository = "https://github.com/walnuthq/miden-playground"
+rust-version = "1.87"
+edition = "2024"
+
+[dependencies]
+console_error_panic_hook = { version = "0.1" }
+miden-client = { version = "0.9.3", default-features = false, features = ["idxdb", "testing"]}
+miden-crypto = { version = "0.14.1", default-features = false }
+miden-lib = { version = "0.9", default-features = false }
+miden-objects = { version = "0.9", default-features = false }
+miden-testing = { version = "0.9", default-features = false, features = ["async"] }
+rand = { version = "0.9" }
+serde-wasm-bindgen = { version = "0.6" }
+web-sys = { version = "0.3", features = ["console", "Window", "Performance"] }
+wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
+wasm-bindgen-futures = { version = "0.4" }
+
+[lib]
+crate-type = ["cdylib", "rlib"]

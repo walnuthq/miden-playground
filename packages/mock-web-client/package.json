@@ -1,0 +1,31 @@
+{
+  "name": "@workspace/mock-web-client",
+  "version": "0.9.3",
+  "type": "module",
+  "private": true,
+  "collaborators": [
+    "miden contributors"
+  ],
+  "description": "Web MockClient library that facilitates interaction with the Miden rollup",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/walnuthq/miden-playground"
+  },
+  "files": [
+    "workers/web-client-methods-worker.js",
+    "constants.js",
+    "index.js"
+  ],
+  "main": "index.js",
+  "types": "types/index.d.ts",
+  "keywords": [
+    "miden",
+    "client",
+    "web",
+    "wasm"
+  ],
+  "dependencies": {
+    "wasm-mock-web-client": "workspace:*"
+  }
+}
