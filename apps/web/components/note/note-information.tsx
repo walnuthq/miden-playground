@@ -33,7 +33,7 @@ const NoteInformation = ({ inputNote }: { inputNote: InputNote }) => {
             .fungibleAssets()
             .map((fungibleAsset) => ({
               faucetId: fungibleAsset.faucetId().toString(),
-              amount: fungibleAsset.amount(),
+              amount: fungibleAsset.amount().toString(),
             }))}
         />
       </div>

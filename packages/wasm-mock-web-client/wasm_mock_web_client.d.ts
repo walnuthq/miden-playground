@@ -68,6 +68,7 @@ export class AccountDelta {
   private constructor();
   free(): void;
   isEmpty(): boolean;
+  storage(): AccountStorageDelta;
   vault(): AccountVaultDelta;
   nonce(): Felt | undefined;
 }
@@ -97,6 +98,12 @@ export class AccountStorage {
   free(): void;
   commitment(): RpoDigest;
   getItem(index: number): RpoDigest | undefined;
+}
+export class AccountStorageDelta {
+  private constructor();
+  free(): void;
+  isEmpty(): boolean;
+  values(): Word[];
 }
 export class AccountStorageMode {
   private constructor();
@@ -286,10 +293,13 @@ export class MerklePath {
 }
 export class MockWebClient {
   free(): void;
+  newTransaction(account_id: AccountId, transaction_request: TransactionRequest): Promise<TransactionResult>;
+  submitTransaction(transaction_result: TransactionResult, prover?: TransactionProver | null): Promise<void>;
+  newMintTransactionRequest(target_account_id: AccountId, faucet_id: AccountId, note_type: NoteType, amount: bigint): TransactionRequest;
+  newSendTransactionRequest(sender_account_id: AccountId, target_account_id: AccountId, faucet_id: AccountId, note_type: NoteType, amount: bigint, recall_height?: number | null): TransactionRequest;
+  newConsumeTransactionRequest(list_of_note_ids: string[]): TransactionRequest;
   constructor();
   createClient(_node_url?: string | null, seed?: Uint8Array | null): Promise<any>;
-  getTransactions(transaction_filter: TransactionFilter): Promise<TransactionRecord[]>;
-  compileTxScript(script: string): TransactionScript;
   exportNote(note_id: string, export_type: string): Promise<any>;
   /**
    * Retrieves the entire underlying web store and returns it as a JsValue
@@ -302,25 +312,22 @@ export class MockWebClient {
   importAccountById(account_id: AccountId): Promise<any>;
   importNote(note_bytes: any): Promise<any>;
   forceImportStore(store_dump: any): Promise<any>;
+  getTransactions(transaction_filter: TransactionFilter): Promise<TransactionRecord[]>;
+  compileTxScript(script: string): TransactionScript;
   getAccounts(): Promise<AccountHeader[]>;
   getAccount(account_id: AccountId): Promise<Account | undefined>;
-  newTransaction(account_id: AccountId, transaction_request: TransactionRequest): Promise<TransactionResult>;
-  submitTransaction(transaction_result: TransactionResult, prover?: TransactionProver | null): Promise<void>;
-  newMintTransactionRequest(target_account_id: AccountId, faucet_id: AccountId, note_type: NoteType, amount: bigint): TransactionRequest;
-  newSendTransactionRequest(sender_account_id: AccountId, target_account_id: AccountId, faucet_id: AccountId, note_type: NoteType, amount: bigint, recall_height?: number | null): TransactionRequest;
-  newConsumeTransactionRequest(list_of_note_ids: string[]): TransactionRequest;
-  getInputNotes(filter: NoteFilter): Promise<InputNoteRecord[]>;
-  getInputNote(note_id: string): Promise<InputNoteRecord | undefined>;
-  getOutputNotes(filter: NoteFilter): Promise<any>;
-  getOutputNote(note_id: string): Promise<any>;
-  compileNoteScript(script: string): NoteScript;
-  getConsumableNotes(account_id?: AccountId | null): Promise<ConsumableNoteRecord[]>;
   newWallet(storage_mode: AccountStorageMode, mutable: boolean, init_seed?: Uint8Array | null): Promise<Account>;
   newFaucet(storage_mode: AccountStorageMode, non_fungible: boolean, token_symbol: string, decimals: number, max_supply: bigint): Promise<Account>;
   newAccount(account: Account, account_seed: Word | null | undefined, overwrite: boolean): Promise<void>;
   syncState(): Promise<SyncSummary>;
   getSyncHeight(): Promise<number>;
   getLatestEpochBlock(): Promise<BlockHeader>;
+  getInputNotes(filter: NoteFilter): Promise<InputNoteRecord[]>;
+  getInputNote(note_id: string): Promise<InputNoteRecord | undefined>;
+  getOutputNotes(filter: NoteFilter): Promise<any>;
+  getOutputNote(note_id: string): Promise<any>;
+  compileNoteScript(script: string): NoteScript;
+  getConsumableNotes(account_id?: AccountId | null): Promise<ConsumableNoteRecord[]>;
 }
 export class NetworkId {
   free(): void;
@@ -638,4 +645,5 @@ export class Word {
   free(): void;
   static newFromU64s(u64_vec: BigUint64Array): Word;
   static newFromFelts(felt_vec: Felt[]): Word;
+  toHex(): string;
 }

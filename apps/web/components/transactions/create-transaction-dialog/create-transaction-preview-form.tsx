@@ -8,6 +8,7 @@ import {
 import { formatId } from "@/lib/utils";
 import FungibleAssetsTable from "@/components/lib/fungible-assets-table";
 import AccountAddress from "@/components/lib/account-address";
+import AccountStorageDeltaTable from "@/components/lib/account-storage-delta-table";
 
 const SubmitTransactionToastDescription = ({
   transactionRecord,
@@ -41,6 +42,7 @@ const TransactionPreview = ({
 }) => {
   const consumedNotes = transactionResult.consumedNotes().numNotes();
   const createdNotes = transactionResult.createdNotes().numNotes();
+  const accountStorageDelta = transactionResult.accountDelta().storage();
   const accountVaultDelta = transactionResult.accountDelta().vault();
   const fungibleAssetDelta = accountVaultDelta.fungible();
   const nonce = transactionResult.accountDelta().nonce()?.asInt();
@@ -72,7 +74,13 @@ const TransactionPreview = ({
         will be modified as follows:
       </p>
       <p>Storage changes:</p>
-      <p>Storage will not be changed.</p>
+      {accountStorageDelta.isEmpty() ? (
+        <p>Storage will not be changed.</p>
+      ) : (
+        <AccountStorageDeltaTable
+          values={accountStorageDelta.values().map((word) => word.toHex())}
+        />
+      )}
       <p>Vault changes:</p>
       {fungibleAssetDelta.isEmpty() ? (
         <p>Account Vault will not be changed.</p>
@@ -82,7 +90,7 @@ const TransactionPreview = ({
             .iter()
             .map(({ faucetId, amount }) => ({
               faucetId: faucetId.toString(),
-              amount,
+              amount: amount < 0n ? amount.toString() : `+${amount}`,
             }))}
           withAccountAddress={false}
         />

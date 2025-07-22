@@ -1,10 +1,7 @@
 use miden_objects::account::AccountVaultDelta as NativeAccountVaultDelta;
 use wasm_bindgen::prelude::*;
 
-use super::{
-    // account_storage_delta::AccountStorageDelta,
-    fungible_asset_delta::FungibleAssetDelta,
-};
+use super::fungible_asset_delta::FungibleAssetDelta;
 
 #[derive(Clone)]
 #[wasm_bindgen]
@@ -20,25 +17,6 @@ impl AccountVaultDelta {
     pub fn fungible(&self) -> FungibleAssetDelta {
         self.0.fungible().into()
     }
-
-    // TODO: storage
-    // pub fn storage(&self) -> AccountStorageDelta {
-    //     self.0.storage().into()
-    // }
-
-    // pub fn vault(&self) -> AccountVaultDelta {
-    //     self.0.vault().into()
-    // }
-
-    // pub fn nonce(&self) -> Option<Felt> {
-    //     self.0.nonce().map(Into::into)
-    // }
-
-    // TODO: into parts
-    // pub fn into_parts(self) -> (AccountStorageDelta, AccountVaultDelta, Option<Felt>) {
-    //     let (storage, vault, nonce) = self.0.into_parts();
-    //     (storage.into(), vault.into(), nonce.map(|nonce| nonce.into()))
-    // }
 }
 
 // CONVERSIONS

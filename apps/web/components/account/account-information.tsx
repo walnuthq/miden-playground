@@ -21,7 +21,7 @@ const AccountInformation = ({ account }: { account: Account }) => (
           .fungibleAssets()
           .map((fungibleAsset) => ({
             faucetId: fungibleAsset.faucetId().toString(),
-            amount: fungibleAsset.amount(),
+            amount: fungibleAsset.amount().toString(),
           }))}
       />
     </div>

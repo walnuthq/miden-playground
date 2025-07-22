@@ -228,6 +228,12 @@ function debugString(val) {
     return className;
 }
 
+function _assertClass(instance, klass) {
+    if (!(instance instanceof klass)) {
+        throw new Error(`expected instance of ${klass.name}`);
+    }
+}
+
 function passArrayJsValueToWasm0(array, malloc) {
     const ptr = malloc(array.length * 4, 4) >>> 0;
     for (let i = 0; i < array.length; i++) {
@@ -238,10 +244,10 @@ function passArrayJsValueToWasm0(array, malloc) {
     return ptr;
 }
 
-function _assertClass(instance, klass) {
-    if (!(instance instanceof klass)) {
-        throw new Error(`expected instance of ${klass.name}`);
-    }
+function takeFromExternrefTable0(idx) {
+    const value = wasm.__wbindgen_export_5.get(idx);
+    wasm.__externref_table_dealloc(idx);
+    return value;
 }
 
 function passArray8ToWasm0(arg, malloc) {
@@ -249,12 +255,6 @@ function passArray8ToWasm0(arg, malloc) {
     getUint8ArrayMemory0().set(arg, ptr / 1);
     WASM_VECTOR_LEN = arg.length;
     return ptr;
-}
-
-function takeFromExternrefTable0(idx) {
-    const value = wasm.__wbindgen_export_5.get(idx);
-    wasm.__externref_table_dealloc(idx);
-    return value;
 }
 
 let cachedBigUint64ArrayMemory0 = null;
@@ -287,11 +287,11 @@ function getArrayU32FromWasm0(ptr, len) {
     return getUint32ArrayMemory0().subarray(ptr / 4, ptr / 4 + len);
 }
 function __wbg_adapter_52(arg0, arg1, arg2) {
-    wasm.closure2258_externref_shim(arg0, arg1, arg2);
+    wasm.closure2267_externref_shim(arg0, arg1, arg2);
 }
 
-function __wbg_adapter_633(arg0, arg1, arg2, arg3) {
-    wasm.closure2280_externref_shim(arg0, arg1, arg2, arg3);
+function __wbg_adapter_641(arg0, arg1, arg2, arg3) {
+    wasm.closure2289_externref_shim(arg0, arg1, arg2, arg3);
 }
 
 /**
@@ -541,6 +541,13 @@ export class AccountDelta {
         return ret !== 0;
     }
     /**
+     * @returns {AccountStorageDelta}
+     */
+    storage() {
+        const ret = wasm.accountdelta_storage(this.__wbg_ptr);
+        return AccountStorageDelta.__wrap(ret);
+    }
+    /**
      * @returns {AccountVaultDelta}
      */
     vault() {
@@ -762,6 +769,49 @@ export class AccountStorage {
     getItem(index) {
         const ret = wasm.accountstorage_getItem(this.__wbg_ptr, index);
         return ret === 0 ? undefined : RpoDigest.__wrap(ret);
+    }
+}
+
+const AccountStorageDeltaFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_accountstoragedelta_free(ptr >>> 0, 1));
+
+export class AccountStorageDelta {
+
+    static __wrap(ptr) {
+        ptr = ptr >>> 0;
+        const obj = Object.create(AccountStorageDelta.prototype);
+        obj.__wbg_ptr = ptr;
+        AccountStorageDeltaFinalization.register(obj, obj.__wbg_ptr, obj);
+        return obj;
+    }
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        AccountStorageDeltaFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_accountstoragedelta_free(ptr, 0);
+    }
+    /**
+     * @returns {boolean}
+     */
+    isEmpty() {
+        const ret = wasm.accountstoragedelta_isEmpty(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @returns {Word[]}
+     */
+    values() {
+        const ret = wasm.accountstoragedelta_values(this.__wbg_ptr);
+        var v1 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
+        return v1;
     }
 }
 
@@ -1102,7 +1152,7 @@ export class AssetVault {
      * @returns {RpoDigest}
      */
     root() {
-        const ret = wasm.assetvault_root(this.__wbg_ptr);
+        const ret = wasm.accountheader_vaultCommitment(this.__wbg_ptr);
         return RpoDigest.__wrap(ret);
     }
     /**
@@ -1913,7 +1963,7 @@ export class InputNotes {
      * @returns {RpoDigest}
      */
     commitment() {
-        const ret = wasm.accountcode_commitment(this.__wbg_ptr);
+        const ret = wasm.inputnotes_commitment(this.__wbg_ptr);
         return RpoDigest.__wrap(ret);
     }
     /**
@@ -2184,131 +2234,6 @@ export class MockWebClient {
         const ptr = this.__destroy_into_raw();
         wasm.__wbg_mockwebclient_free(ptr, 0);
     }
-    constructor() {
-        const ret = wasm.mockwebclient_new();
-        this.__wbg_ptr = ret >>> 0;
-        MockWebClientFinalization.register(this, this.__wbg_ptr, this);
-        return this;
-    }
-    /**
-     * @param {string | null} [_node_url]
-     * @param {Uint8Array | null} [seed]
-     * @returns {Promise<any>}
-     */
-    createClient(_node_url, seed) {
-        var ptr0 = isLikeNone(_node_url) ? 0 : passStringToWasm0(_node_url, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        var len0 = WASM_VECTOR_LEN;
-        var ptr1 = isLikeNone(seed) ? 0 : passArray8ToWasm0(seed, wasm.__wbindgen_malloc);
-        var len1 = WASM_VECTOR_LEN;
-        const ret = wasm.mockwebclient_createClient(this.__wbg_ptr, ptr0, len0, ptr1, len1);
-        return ret;
-    }
-    /**
-     * @param {TransactionFilter} transaction_filter
-     * @returns {Promise<TransactionRecord[]>}
-     */
-    getTransactions(transaction_filter) {
-        _assertClass(transaction_filter, TransactionFilter);
-        var ptr0 = transaction_filter.__destroy_into_raw();
-        const ret = wasm.mockwebclient_getTransactions(this.__wbg_ptr, ptr0);
-        return ret;
-    }
-    /**
-     * @param {string} script
-     * @returns {TransactionScript}
-     */
-    compileTxScript(script) {
-        const ptr0 = passStringToWasm0(script, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.mockwebclient_compileTxScript(this.__wbg_ptr, ptr0, len0);
-        if (ret[2]) {
-            throw takeFromExternrefTable0(ret[1]);
-        }
-        return TransactionScript.__wrap(ret[0]);
-    }
-    /**
-     * @param {string} note_id
-     * @param {string} export_type
-     * @returns {Promise<any>}
-     */
-    exportNote(note_id, export_type) {
-        const ptr0 = passStringToWasm0(note_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        const len0 = WASM_VECTOR_LEN;
-        const ptr1 = passStringToWasm0(export_type, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        const len1 = WASM_VECTOR_LEN;
-        const ret = wasm.mockwebclient_exportNote(this.__wbg_ptr, ptr0, len0, ptr1, len1);
-        return ret;
-    }
-    /**
-     * Retrieves the entire underlying web store and returns it as a JsValue
-     *
-     * Meant to be used in conjunction with the force_import_store method
-     * @returns {Promise<any>}
-     */
-    exportStore() {
-        const ret = wasm.mockwebclient_exportStore(this.__wbg_ptr);
-        return ret;
-    }
-    /**
-     * @param {any} account_bytes
-     * @returns {Promise<any>}
-     */
-    importAccount(account_bytes) {
-        const ret = wasm.mockwebclient_importAccount(this.__wbg_ptr, account_bytes);
-        return ret;
-    }
-    /**
-     * @param {Uint8Array} init_seed
-     * @param {boolean} mutable
-     * @returns {Promise<Account>}
-     */
-    importPublicAccountFromSeed(init_seed, mutable) {
-        const ptr0 = passArray8ToWasm0(init_seed, wasm.__wbindgen_malloc);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.mockwebclient_importPublicAccountFromSeed(this.__wbg_ptr, ptr0, len0, mutable);
-        return ret;
-    }
-    /**
-     * @param {AccountId} account_id
-     * @returns {Promise<any>}
-     */
-    importAccountById(account_id) {
-        _assertClass(account_id, AccountId);
-        const ret = wasm.mockwebclient_importAccountById(this.__wbg_ptr, account_id.__wbg_ptr);
-        return ret;
-    }
-    /**
-     * @param {any} note_bytes
-     * @returns {Promise<any>}
-     */
-    importNote(note_bytes) {
-        const ret = wasm.mockwebclient_importNote(this.__wbg_ptr, note_bytes);
-        return ret;
-    }
-    /**
-     * @param {any} store_dump
-     * @returns {Promise<any>}
-     */
-    forceImportStore(store_dump) {
-        const ret = wasm.mockwebclient_forceImportStore(this.__wbg_ptr, store_dump);
-        return ret;
-    }
-    /**
-     * @returns {Promise<AccountHeader[]>}
-     */
-    getAccounts() {
-        const ret = wasm.mockwebclient_getAccounts(this.__wbg_ptr);
-        return ret;
-    }
-    /**
-     * @param {AccountId} account_id
-     * @returns {Promise<Account | undefined>}
-     */
-    getAccount(account_id) {
-        _assertClass(account_id, AccountId);
-        const ret = wasm.mockwebclient_getAccount(this.__wbg_ptr, account_id.__wbg_ptr);
-        return ret;
-    }
     /**
      * @param {AccountId} account_id
      * @param {TransactionRequest} transaction_request
@@ -2383,70 +2308,129 @@ export class MockWebClient {
         }
         return TransactionRequest.__wrap(ret[0]);
     }
+    constructor() {
+        const ret = wasm.mockwebclient_new();
+        this.__wbg_ptr = ret >>> 0;
+        MockWebClientFinalization.register(this, this.__wbg_ptr, this);
+        return this;
+    }
     /**
-     * @param {NoteFilter} filter
-     * @returns {Promise<InputNoteRecord[]>}
+     * @param {string | null} [_node_url]
+     * @param {Uint8Array | null} [seed]
+     * @returns {Promise<any>}
      */
-    getInputNotes(filter) {
-        _assertClass(filter, NoteFilter);
-        var ptr0 = filter.__destroy_into_raw();
-        const ret = wasm.mockwebclient_getInputNotes(this.__wbg_ptr, ptr0);
+    createClient(_node_url, seed) {
+        var ptr0 = isLikeNone(_node_url) ? 0 : passStringToWasm0(_node_url, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        var len0 = WASM_VECTOR_LEN;
+        var ptr1 = isLikeNone(seed) ? 0 : passArray8ToWasm0(seed, wasm.__wbindgen_malloc);
+        var len1 = WASM_VECTOR_LEN;
+        const ret = wasm.mockwebclient_createClient(this.__wbg_ptr, ptr0, len0, ptr1, len1);
         return ret;
     }
     /**
      * @param {string} note_id
-     * @returns {Promise<InputNoteRecord | undefined>}
+     * @param {string} export_type
+     * @returns {Promise<any>}
      */
-    getInputNote(note_id) {
+    exportNote(note_id, export_type) {
         const ptr0 = passStringToWasm0(note_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.mockwebclient_getInputNote(this.__wbg_ptr, ptr0, len0);
+        const ptr1 = passStringToWasm0(export_type, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len1 = WASM_VECTOR_LEN;
+        const ret = wasm.mockwebclient_exportNote(this.__wbg_ptr, ptr0, len0, ptr1, len1);
         return ret;
     }
     /**
-     * @param {NoteFilter} filter
+     * Retrieves the entire underlying web store and returns it as a JsValue
+     *
+     * Meant to be used in conjunction with the force_import_store method
      * @returns {Promise<any>}
      */
-    getOutputNotes(filter) {
-        _assertClass(filter, NoteFilter);
-        var ptr0 = filter.__destroy_into_raw();
-        const ret = wasm.mockwebclient_getOutputNotes(this.__wbg_ptr, ptr0);
+    exportStore() {
+        const ret = wasm.mockwebclient_exportStore(this.__wbg_ptr);
         return ret;
     }
     /**
-     * @param {string} note_id
+     * @param {any} account_bytes
      * @returns {Promise<any>}
      */
-    getOutputNote(note_id) {
-        const ptr0 = passStringToWasm0(note_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    importAccount(account_bytes) {
+        const ret = wasm.mockwebclient_importAccount(this.__wbg_ptr, account_bytes);
+        return ret;
+    }
+    /**
+     * @param {Uint8Array} init_seed
+     * @param {boolean} mutable
+     * @returns {Promise<Account>}
+     */
+    importPublicAccountFromSeed(init_seed, mutable) {
+        const ptr0 = passArray8ToWasm0(init_seed, wasm.__wbindgen_malloc);
         const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.mockwebclient_getOutputNote(this.__wbg_ptr, ptr0, len0);
+        const ret = wasm.mockwebclient_importPublicAccountFromSeed(this.__wbg_ptr, ptr0, len0, mutable);
+        return ret;
+    }
+    /**
+     * @param {AccountId} account_id
+     * @returns {Promise<any>}
+     */
+    importAccountById(account_id) {
+        _assertClass(account_id, AccountId);
+        const ret = wasm.mockwebclient_importAccountById(this.__wbg_ptr, account_id.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @param {any} note_bytes
+     * @returns {Promise<any>}
+     */
+    importNote(note_bytes) {
+        const ret = wasm.mockwebclient_importNote(this.__wbg_ptr, note_bytes);
+        return ret;
+    }
+    /**
+     * @param {any} store_dump
+     * @returns {Promise<any>}
+     */
+    forceImportStore(store_dump) {
+        const ret = wasm.mockwebclient_forceImportStore(this.__wbg_ptr, store_dump);
+        return ret;
+    }
+    /**
+     * @param {TransactionFilter} transaction_filter
+     * @returns {Promise<TransactionRecord[]>}
+     */
+    getTransactions(transaction_filter) {
+        _assertClass(transaction_filter, TransactionFilter);
+        var ptr0 = transaction_filter.__destroy_into_raw();
+        const ret = wasm.mockwebclient_getTransactions(this.__wbg_ptr, ptr0);
         return ret;
     }
     /**
      * @param {string} script
-     * @returns {NoteScript}
+     * @returns {TransactionScript}
      */
-    compileNoteScript(script) {
+    compileTxScript(script) {
         const ptr0 = passStringToWasm0(script, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.mockwebclient_compileNoteScript(this.__wbg_ptr, ptr0, len0);
+        const ret = wasm.mockwebclient_compileTxScript(this.__wbg_ptr, ptr0, len0);
         if (ret[2]) {
             throw takeFromExternrefTable0(ret[1]);
         }
-        return NoteScript.__wrap(ret[0]);
+        return TransactionScript.__wrap(ret[0]);
     }
     /**
-     * @param {AccountId | null} [account_id]
-     * @returns {Promise<ConsumableNoteRecord[]>}
+     * @returns {Promise<AccountHeader[]>}
      */
-    getConsumableNotes(account_id) {
-        let ptr0 = 0;
-        if (!isLikeNone(account_id)) {
-            _assertClass(account_id, AccountId);
-            ptr0 = account_id.__destroy_into_raw();
-        }
-        const ret = wasm.mockwebclient_getConsumableNotes(this.__wbg_ptr, ptr0);
+    getAccounts() {
+        const ret = wasm.mockwebclient_getAccounts(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @param {AccountId} account_id
+     * @returns {Promise<Account | undefined>}
+     */
+    getAccount(account_id) {
+        _assertClass(account_id, AccountId);
+        const ret = wasm.mockwebclient_getAccount(this.__wbg_ptr, account_id.__wbg_ptr);
         return ret;
     }
     /**
@@ -2512,6 +2496,72 @@ export class MockWebClient {
      */
     getLatestEpochBlock() {
         const ret = wasm.mockwebclient_getLatestEpochBlock(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @param {NoteFilter} filter
+     * @returns {Promise<InputNoteRecord[]>}
+     */
+    getInputNotes(filter) {
+        _assertClass(filter, NoteFilter);
+        var ptr0 = filter.__destroy_into_raw();
+        const ret = wasm.mockwebclient_getInputNotes(this.__wbg_ptr, ptr0);
+        return ret;
+    }
+    /**
+     * @param {string} note_id
+     * @returns {Promise<InputNoteRecord | undefined>}
+     */
+    getInputNote(note_id) {
+        const ptr0 = passStringToWasm0(note_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.mockwebclient_getInputNote(this.__wbg_ptr, ptr0, len0);
+        return ret;
+    }
+    /**
+     * @param {NoteFilter} filter
+     * @returns {Promise<any>}
+     */
+    getOutputNotes(filter) {
+        _assertClass(filter, NoteFilter);
+        var ptr0 = filter.__destroy_into_raw();
+        const ret = wasm.mockwebclient_getOutputNotes(this.__wbg_ptr, ptr0);
+        return ret;
+    }
+    /**
+     * @param {string} note_id
+     * @returns {Promise<any>}
+     */
+    getOutputNote(note_id) {
+        const ptr0 = passStringToWasm0(note_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.mockwebclient_getOutputNote(this.__wbg_ptr, ptr0, len0);
+        return ret;
+    }
+    /**
+     * @param {string} script
+     * @returns {NoteScript}
+     */
+    compileNoteScript(script) {
+        const ptr0 = passStringToWasm0(script, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.mockwebclient_compileNoteScript(this.__wbg_ptr, ptr0, len0);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return NoteScript.__wrap(ret[0]);
+    }
+    /**
+     * @param {AccountId | null} [account_id]
+     * @returns {Promise<ConsumableNoteRecord[]>}
+     */
+    getConsumableNotes(account_id) {
+        let ptr0 = 0;
+        if (!isLikeNone(account_id)) {
+            _assertClass(account_id, AccountId);
+            ptr0 = account_id.__destroy_into_raw();
+        }
+        const ret = wasm.mockwebclient_getConsumableNotes(this.__wbg_ptr, ptr0);
         return ret;
     }
 }
@@ -3979,7 +4029,7 @@ export class OutputNotes {
      * @returns {RpoDigest}
      */
     commitment() {
-        const ret = wasm.outputnotes_commitment(this.__wbg_ptr);
+        const ret = wasm.blockheader_prevBlockCommitment(this.__wbg_ptr);
         return RpoDigest.__wrap(ret);
     }
     /**
@@ -4087,7 +4137,7 @@ export class PartialNote {
      * @returns {RpoDigest}
      */
     recipientDigest() {
-        const ret = wasm.accountheader_vaultCommitment(this.__wbg_ptr);
+        const ret = wasm.partialnote_recipientDigest(this.__wbg_ptr);
         return RpoDigest.__wrap(ret);
     }
     /**
@@ -4417,7 +4467,7 @@ export class TransactionId {
      * @returns {RpoDigest}
      */
     inner() {
-        const ret = wasm.accountcode_commitment(this.__wbg_ptr);
+        const ret = wasm.inputnotes_commitment(this.__wbg_ptr);
         return RpoDigest.__wrap(ret);
     }
 }
@@ -5125,6 +5175,21 @@ export class Word {
         const ret = wasm.word_newFromFelts(ptr0, len0);
         return Word.__wrap(ret);
     }
+    /**
+     * @returns {string}
+     */
+    toHex() {
+        let deferred1_0;
+        let deferred1_1;
+        try {
+            const ret = wasm.word_toHex(this.__wbg_ptr);
+            deferred1_0 = ret[0];
+            deferred1_1 = ret[1];
+            return getStringFromWasm0(ret[0], ret[1]);
+        } finally {
+            wasm.__wbindgen_free(deferred1_0, deferred1_1, 1);
+        }
+    }
 }
 
 export function __wbg_String_8f0eb39a4a4c2f66(arg0, arg1) {
@@ -5761,6 +5826,10 @@ export function __wbg_lockAccount_4eea03c1a3bec248(arg0, arg1) {
     }
 };
 
+export function __wbg_log_c222819a41e063d3(arg0) {
+    console.log(arg0);
+};
+
 export function __wbg_new0_f788a2397c7ca929() {
     const ret = new Date();
     return ret;
@@ -5778,7 +5847,7 @@ export function __wbg_new_23a2665fac83c611(arg0, arg1) {
             const a = state0.a;
             state0.a = 0;
             try {
-                return __wbg_adapter_633(a, state0.b, arg0, arg1);
+                return __wbg_adapter_641(a, state0.b, arg0, arg1);
             } finally {
                 state0.a = a;
             }
@@ -6209,6 +6278,11 @@ export function __wbg_view_fd8a56e8983f448d(arg0) {
     return isLikeNone(ret) ? 0 : addToExternrefTable0(ret);
 };
 
+export function __wbg_word_new(arg0) {
+    const ret = Word.__wrap(arg0);
+    return ret;
+};
+
 export function __wbindgen_array_new() {
     const ret = [];
     return ret;
@@ -6251,8 +6325,8 @@ export function __wbindgen_cb_drop(arg0) {
     return ret;
 };
 
-export function __wbindgen_closure_wrapper5791(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 2259, __wbg_adapter_52);
+export function __wbindgen_closure_wrapper5861(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 2268, __wbg_adapter_52);
     return ret;
 };
 

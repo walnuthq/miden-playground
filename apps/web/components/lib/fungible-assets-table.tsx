@@ -8,12 +8,13 @@ import {
 } from "@workspace/ui/components/table";
 import useAccounts from "@/hooks/use-accounts";
 import AccountAddress from "@/components/lib/account-address";
+import { cn } from "@workspace/ui/lib/utils";
 
 const FungibleAssetsTable = ({
   fungibleAssets,
   withAccountAddress = true,
 }: {
-  fungibleAssets: { faucetId: string; amount: bigint }[];
+  fungibleAssets: { faucetId: string; amount: string }[];
   withAccountAddress?: boolean;
 }) => {
   const { faucets } = useAccounts();
@@ -45,7 +46,14 @@ const FungibleAssetsTable = ({
                   />
                 </TableCell>
                 <TableCell>{faucet?.tokenSymbol ?? "Unknown"}</TableCell>
-                <TableCell>{fungibleAsset.amount}</TableCell>
+                <TableCell
+                  className={cn({
+                    "text-green-500": fungibleAsset.amount.startsWith("+"),
+                    "text-red-500": fungibleAsset.amount.startsWith("-"),
+                  })}
+                >
+                  {fungibleAsset.amount}
+                </TableCell>
               </TableRow>
             );
           })}

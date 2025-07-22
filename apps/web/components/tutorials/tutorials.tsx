@@ -9,6 +9,8 @@ import tutorial1StoreDump from "@/components/tutorials/tutorial1-store.json";
 import tutorial1State from "@/components/tutorials/tutorial1-state.json";
 import tutorial2StoreDump from "@/components/tutorials/tutorial2-store.json";
 import tutorial2State from "@/components/tutorials/tutorial2-state.json";
+import tutorial3StoreDump from "@/components/tutorials/tutorial3-store.json";
+import tutorial3State from "@/components/tutorials/tutorial3-state.json";
 
 const CreateAndFundWalletStep1: TutorialStep = {
   content: (
@@ -266,6 +268,17 @@ const TransferAssetsBetweenWalletsStep1 = {
   },
 };
 
+const SwapAssetsStep1 = {
+  content: (
+    <div className="flex flex-col gap-4">
+      <p>TODO</p>
+    </div>
+  ),
+  NextStepButton: () => {
+    return <Button disabled>Next step</Button>;
+  },
+};
+
 const tutorials: Tutorial[] = [
   {
     id: "create-and-fund-wallet",
@@ -295,6 +308,16 @@ const tutorials: Tutorial[] = [
     storeDump: JSON.stringify(tutorial2StoreDump),
     state: JSON.stringify(tutorial2State),
     steps: [TransferAssetsBetweenWalletsStep1],
+  },
+  {
+    id: "swap-assets",
+    title: "Swap assets",
+    tagline: "Swap an asset for another.",
+    description: "Learn how to perform a simple swap on Miden.",
+    initialRoute: "/accounts",
+    storeDump: JSON.stringify(tutorial3StoreDump),
+    state: JSON.stringify(tutorial3State),
+    steps: [SwapAssetsStep1],
   },
 ];
 

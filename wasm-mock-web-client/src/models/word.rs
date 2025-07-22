@@ -1,7 +1,7 @@
+use super::felt::Felt;
+use miden_crypto::utils::bytes_to_hex_string;
 use miden_objects::{Felt as NativeFelt, Word as NativeWord};
 use wasm_bindgen::prelude::*;
-
-use super::felt::Felt;
 
 #[wasm_bindgen]
 #[derive(Clone)]
@@ -38,6 +38,22 @@ impl Word {
         let native_word: NativeWord = native_felt_vec;
 
         Word(native_word)
+    }
+
+    fn as_bytes(&self) -> [u8; 32] {
+        let mut result = [0; 32];
+
+        result[..8].copy_from_slice(&self.0[0].as_int().to_le_bytes());
+        result[8..16].copy_from_slice(&self.0[1].as_int().to_le_bytes());
+        result[16..24].copy_from_slice(&self.0[2].as_int().to_le_bytes());
+        result[24..].copy_from_slice(&self.0[3].as_int().to_le_bytes());
+
+        result
+    }
+
+    #[wasm_bindgen(js_name = "toHex")]
+    pub fn to_hex(&self) -> String {
+        bytes_to_hex_string(self.as_bytes())
     }
 }
 

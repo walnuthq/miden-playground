@@ -35,6 +35,7 @@ pub mod account_delta;
 pub mod account_header;
 pub mod account_id;
 pub mod account_storage;
+pub mod account_storage_delta;
 pub mod account_storage_mode;
 // pub mod account_type;
 pub mod account_vault_delta;

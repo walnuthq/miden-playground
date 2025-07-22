@@ -119,7 +119,7 @@ const useTransactions = () => {
     amount: bigint;
   }) => {
     const client = await mockWebClient();
-    const transactionRequest = await client.newMintTransactionRequest(
+    const transactionRequest = client.newMintTransactionRequest(
       AccountId.fromHex(targetAccountId),
       AccountId.fromHex(faucetId),
       noteType,
@@ -138,8 +138,7 @@ const useTransactions = () => {
     noteIds: string[];
   }) => {
     const client = await mockWebClient();
-    const transactionRequest =
-      await client.newConsumeTransactionRequest(noteIds);
+    const transactionRequest = client.newConsumeTransactionRequest(noteIds);
     return client.newTransaction(
       AccountId.fromHex(accountId),
       transactionRequest
@@ -159,7 +158,7 @@ const useTransactions = () => {
     amount: bigint;
   }) => {
     const client = await mockWebClient();
-    const transactionRequest = await client.newSendTransactionRequest(
+    const transactionRequest = client.newSendTransactionRequest(
       AccountId.fromHex(senderAccountId),
       AccountId.fromHex(targetAccountId),
       AccountId.fromHex(faucetId),
@@ -175,6 +174,10 @@ const useTransactions = () => {
     const client = await mockWebClient();
     await client.submitTransaction(transactionResult);
     const syncSummary = await client.syncState();
+    const blockHeader = await client.getLatestEpochBlock();
+    console.log("blockNum", blockHeader.blockNum());
+    console.log("commitment:", blockHeader.commitment().toHex());
+    console.log("chainCommitment:", blockHeader.chainCommitment().toHex());
     // console.log('Transaction submitted');
     const transactionId = transactionResult.executedTransaction().id();
     // console.log('Transaction ID:', transactionId.toHex());
@@ -190,10 +193,10 @@ const useTransactions = () => {
     const newAccount = await client.getAccount(
       transactionResult.executedTransaction().accountId()
     );
-    const previousAccount = accounts.find(
+    /*const previousAccount = accounts.find(
       ({ id }) => id === newAccount?.id().toString()
-    );
-    if (!transactionRecord || !newAccount || !previousAccount) {
+    ); */
+    if (!transactionRecord || !newAccount /* || !previousAccount*/) {
       throw new Error("Transaction record or account not found");
     }
     const inputNotes = await client.getInputNotes(
@@ -220,11 +223,12 @@ const useTransactions = () => {
             .numNotes(),
           updatedAt: syncSummary.blockNum(),
         },
-        account: {
+        account: newAccount,
+        /* account: {
           ...previousAccount,
           account: newAccount,
           updatedAt: syncSummary.blockNum(),
-        },
+        }, */
         inputNotes: inputNotes.map((inputNote) => ({
           inputNote,
           updatedAt: syncSummary.blockNum(),

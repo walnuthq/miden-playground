@@ -224,7 +224,7 @@ export type Action =
       type: "SUBMIT_TRANSACTION";
       payload: {
         transaction: Transaction;
-        account: Account;
+        account: WasmAccount;
         inputNotes: InputNote[];
         syncSummary: SyncSummary;
       };
@@ -301,16 +301,25 @@ export const reducer = (state: State, action: Action): State => {
     }
     case "SUBMIT_TRANSACTION": {
       const index = state.accounts.findIndex(
-        ({ id }) => id === action.payload.account.id
+        ({ id }) => id === action.payload.account.id().toString()
       );
       return {
         ...state,
         transactions: [...state.transactions, action.payload.transaction],
         accounts: [
           ...state.accounts.slice(0, index),
-          action.payload.account,
+          {
+            ...state.accounts[index]!,
+            account: action.payload.account,
+            updatedAt: action.payload.syncSummary.blockNum(),
+          },
           ...state.accounts.slice(index + 1),
         ],
+        /* accounts: [
+          ...state.accounts.slice(0, index),
+          action.payload.account,
+          ...state.accounts.slice(index + 1),
+        ], */
         inputNotes: action.payload.inputNotes,
         syncSummary: action.payload.syncSummary,
       };

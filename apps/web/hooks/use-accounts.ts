@@ -24,6 +24,9 @@ const useAccounts = () => {
     const client = await mockWebClient();
     const wallet = await client.newWallet(storageMode, true);
     const syncSummary = await client.syncState();
+    const blockHeader = await client.getLatestEpochBlock();
+    console.log("commitment:", blockHeader.commitment().toHex());
+    console.log("chainCommitment:", blockHeader.chainCommitment().toHex());
     const account = {
       account: wallet,
       name,
@@ -59,6 +62,9 @@ const useAccounts = () => {
       maxSupply
     );
     const syncSummary = await client.syncState();
+    const blockHeader = await client.getLatestEpochBlock();
+    console.log("commitment:", blockHeader.commitment().toHex());
+    console.log("chainCommitment:", blockHeader.chainCommitment().toHex());
     const account = {
       account: faucet,
       name,
