@@ -3,14 +3,13 @@
 import { type ComponentProps } from "react";
 import { UserCircle, File, Route, HandCoins, Wallet, Home } from "lucide-react";
 import NavMain from "@/components/lib/nav-main";
-// import { NavProjects } from "@/components/nav-projects";
-// import { NavUser } from "@/components/nav-user";
 import { formatId } from "@/lib/utils";
 import ProjectSwitcher from "@/components/lib/project-switcher";
+import Footer from "@/components/lib/footer";
 import {
   Sidebar,
   SidebarContent,
-  // SidebarFooter,
+  SidebarFooter,
   SidebarHeader,
   SidebarRail,
 } from "@workspace/ui/components/sidebar";
@@ -62,9 +61,9 @@ const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
       items: inputNotes
         .sort((a, b) => b.updatedAt - a.updatedAt)
         .slice(0, 5)
-        .map(({ inputNote }) => ({
-          title: formatId(inputNote.id().toString()),
-          url: `/notes/${inputNote.id().toString()}`,
+        .map(({ id }) => ({
+          title: formatId(id),
+          url: `/notes/${id}`,
         })),
     },
   ];
@@ -77,7 +76,9 @@ const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
         {isClient && <NavMain items={items} />}
         {/*<NavProjects projects={data.projects} />*/}
       </SidebarContent>
-      {/*<SidebarFooter><NavUser user={data.user} /></SidebarFooter>*/}
+      <SidebarFooter>
+        <Footer />
+      </SidebarFooter>
       <SidebarRail />
     </Sidebar>
   );

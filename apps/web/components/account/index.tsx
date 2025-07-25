@@ -25,7 +25,7 @@ const Account = ({ address }: { address: string }) => {
         <div className="flex items-center justify-between">
           <TabsList>
             <TabsTrigger value="information">Information</TabsTrigger>
-            <TabsTrigger value="code">Code</TabsTrigger>
+            {/*<TabsTrigger value="code">Code</TabsTrigger>*/}
           </TabsList>
           <CreateTransactionDropdownMenu account={account} />
         </div>

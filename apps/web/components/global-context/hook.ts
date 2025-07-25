@@ -2,9 +2,9 @@ import { useRouter } from "next/navigation";
 import { useContext } from "react";
 import GlobalContext from "@/components/global-context";
 import { deleteStore } from "@/lib/utils";
-import { mockWebClient } from "@/lib/mock-web-client";
+// import { mockWebClient } from "@/lib/mock-web-client";
 
-const emptyStore = {
+/* const emptyStore = {
   accountCode: [],
   accountStorage: [],
   accountVaults: [],
@@ -20,7 +20,7 @@ const emptyStore = {
   partialBlockchainNodes: [],
   tags: [],
   // foreignAccountCode: [],
-};
+}; */
 
 const useGlobalContext = () => {
   const { state, dispatch } = useContext(GlobalContext);

@@ -95,7 +95,7 @@ const CreateFaucetDialog = () => {
               <Input
                 id="token-symbol"
                 name="token-symbol"
-                defaultValue="MID"
+                defaultValue="MDN"
                 required
               />
             </div>

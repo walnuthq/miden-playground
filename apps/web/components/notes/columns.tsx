@@ -28,9 +28,7 @@ const InputNoteActionsCell = ({
   const { openCreateTransactionDialog, newConsumeTransactionRequest } =
     useTransactions();
   const { inputNotes } = useNotes();
-  const inputNote = inputNotes.find(
-    ({ inputNote }) => inputNote.id().toString() === noteId
-  );
+  const inputNote = inputNotes.find(({ id }) => id === noteId);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

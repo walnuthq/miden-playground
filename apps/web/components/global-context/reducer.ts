@@ -37,6 +37,7 @@ export type State = {
   // TUTORIALS
   tutorialId: string;
   tutorialStep: number;
+  tutorialMaxStep: number;
 };
 
 export const initialState = (): State => ({
@@ -61,6 +62,7 @@ export const initialState = (): State => ({
   // TUTORIALS
   tutorialId: "",
   tutorialStep: 0,
+  tutorialMaxStep: 0,
 });
 
 export const stateSerializer = ({
@@ -71,16 +73,26 @@ export const stateSerializer = ({
   inputNotes,
   tutorialId,
   tutorialStep,
+  tutorialMaxStep,
 }: State) =>
   JSON.stringify({
     networkId,
     syncSummary: syncSummary ? syncSummary.serialize().toString() : null,
     accounts: accounts.map(
-      ({ account, name, id, address, tokenSymbol, updatedAt }) => ({
+      ({
+        account,
+        name,
+        id,
+        address,
+        consumableNoteIds,
+        tokenSymbol,
+        updatedAt,
+      }) => ({
         account: account.serialize().toString(),
         name,
         id,
         address,
+        consumableNoteIds,
         tokenSymbol,
         updatedAt,
       })
@@ -100,12 +112,14 @@ export const stateSerializer = ({
         updatedAt,
       })
     ),
-    inputNotes: inputNotes.map(({ inputNote, updatedAt }) => ({
+    inputNotes: inputNotes.map(({ id, inputNote, updatedAt }) => ({
+      id,
       inputNote: inputNote.serialize().toString(),
       updatedAt,
     })),
     tutorialId,
     tutorialStep,
+    tutorialMaxStep,
   });
 
 export const stateDeserializer = (value: string): State => {
@@ -117,6 +131,7 @@ export const stateDeserializer = (value: string): State => {
     inputNotes,
     tutorialId,
     tutorialStep,
+    tutorialMaxStep,
   } = JSON.parse(value) as {
     networkId: string;
     syncSummary: string | null;
@@ -125,6 +140,7 @@ export const stateDeserializer = (value: string): State => {
       name: string;
       id: string;
       address: string;
+      consumableNoteIds: string[];
       tokenSymbol: string;
       updatedAt: number;
     }[];
@@ -135,9 +151,10 @@ export const stateDeserializer = (value: string): State => {
       outputNotesCount: number;
       updatedAt: number;
     }[];
-    inputNotes: { inputNote: string; updatedAt: number }[];
+    inputNotes: { id: string; inputNote: string; updatedAt: number }[];
     tutorialId: string;
     tutorialStep: number;
+    tutorialMaxStep: number;
   };
   return {
     ...initialState(),
@@ -148,13 +165,22 @@ export const stateDeserializer = (value: string): State => {
         )
       : null,
     accounts: accounts.map(
-      ({ account, name, id, address, tokenSymbol, updatedAt }) => ({
+      ({
+        account,
+        name,
+        id,
+        address,
+        consumableNoteIds,
+        tokenSymbol,
+        updatedAt,
+      }) => ({
         account: WasmAccount.deserialize(
           Uint8Array.from(account.split(",").map((byte) => Number(byte)))
         ),
         name,
         id,
         address,
+        consumableNoteIds,
         tokenSymbol,
         updatedAt,
       })
@@ -176,7 +202,8 @@ export const stateDeserializer = (value: string): State => {
         updatedAt,
       })
     ),
-    inputNotes: inputNotes.map(({ inputNote, updatedAt }) => ({
+    inputNotes: inputNotes.map(({ id, inputNote, updatedAt }) => ({
+      id,
       inputNote: InputNoteRecord.deserialize(
         Uint8Array.from(inputNote.split(",").map((byte) => Number(byte)))
       ),
@@ -184,6 +211,7 @@ export const stateDeserializer = (value: string): State => {
     })),
     tutorialId,
     tutorialStep,
+    tutorialMaxStep,
   };
 };
 
@@ -225,6 +253,7 @@ export type Action =
       payload: {
         transaction: Transaction;
         account: WasmAccount;
+        consumableNoteIds: Record<string, string[]>;
         inputNotes: InputNote[];
         syncSummary: SyncSummary;
       };
@@ -233,7 +262,9 @@ export type Action =
       type: "START_TUTORIAL";
       payload: { tutorialId: string };
     }
-  | { type: "NEXT_TUTORIAL_STEP" };
+  | { type: "PREVIOUS_TUTORIAL_STEP" }
+  | { type: "NEXT_TUTORIAL_STEP" }
+  | { type: "SET_TUTORIAL_STEP"; payload: { tutorialStep: number } };
 
 export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -307,13 +338,25 @@ export const reducer = (state: State, action: Action): State => {
         ...state,
         transactions: [...state.transactions, action.payload.transaction],
         accounts: [
-          ...state.accounts.slice(0, index),
+          ...state.accounts.slice(0, index).map((account) => ({
+            ...account,
+            consumableNoteIds:
+              action.payload.consumableNoteIds[account.id] ?? [],
+          })),
           {
             ...state.accounts[index]!,
             account: action.payload.account,
+            consumableNoteIds:
+              action.payload.consumableNoteIds[
+                action.payload.account.id().toString()
+              ] ?? [],
             updatedAt: action.payload.syncSummary.blockNum(),
           },
-          ...state.accounts.slice(index + 1),
+          ...state.accounts.slice(index + 1).map((account) => ({
+            ...account,
+            consumableNoteIds:
+              action.payload.consumableNoteIds[account.id] ?? [],
+          })),
         ],
         /* accounts: [
           ...state.accounts.slice(0, index),
@@ -329,12 +372,26 @@ export const reducer = (state: State, action: Action): State => {
         ...initialState(),
         tutorialId: action.payload.tutorialId,
         tutorialStep: 0,
+        tutorialMaxStep: 0,
+      };
+    }
+    case "PREVIOUS_TUTORIAL_STEP": {
+      return {
+        ...state,
+        tutorialStep: state.tutorialStep - 1,
       };
     }
     case "NEXT_TUTORIAL_STEP": {
       return {
         ...state,
         tutorialStep: state.tutorialStep + 1,
+        tutorialMaxStep: state.tutorialStep + 1,
+      };
+    }
+    case "SET_TUTORIAL_STEP": {
+      return {
+        ...state,
+        tutorialStep: action.payload.tutorialStep,
       };
     }
     default: {

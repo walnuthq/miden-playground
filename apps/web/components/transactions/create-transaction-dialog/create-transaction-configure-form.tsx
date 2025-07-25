@@ -15,6 +15,7 @@ import SelectAccountDropdownMenu from "@/components/transactions/select-account-
 import useAccounts from "@/hooks/use-accounts";
 import SelectConsumableNotesCombobox from "@/components/transactions/select-consumable-notes-combobox";
 import useTransactions from "@/hooks/use-transactions";
+import useTutorials from "@/hooks/use-tutorials";
 
 const CreateTransactionConfigureForm = ({
   transactionType,
@@ -53,6 +54,7 @@ const CreateTransactionConfigureForm = ({
     newConsumeTransactionRequest,
     newSendTransactionRequest,
   } = useTransactions();
+  const { tutorialId } = useTutorials();
   const executingAccount = accounts.find(({ id }) => id === executingAccountId);
   const targetAccount = accounts.find(({ id }) => id === targetAccountId);
   const faucetAccount = accounts.find(({ id }) => id === faucetAccountId);
@@ -120,7 +122,7 @@ const CreateTransactionConfigureForm = ({
                 name="amount"
                 type="number"
                 min="1"
-                defaultValue={1000}
+                defaultValue={tutorialId ? 1000 : 0}
                 required
               />
             </div>

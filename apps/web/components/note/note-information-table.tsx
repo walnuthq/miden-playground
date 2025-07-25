@@ -14,14 +14,15 @@ import {
   TableRow,
 } from "@workspace/ui/components/table";
 import { Badge } from "@workspace/ui/components/badge";
-import { type InputNoteRecord } from "@workspace/mock-web-client";
+import { type InputNote } from "@/lib/types";
 import useGlobalContext from "@/components/global-context/hook";
 import AccountAddress from "@/components/lib/account-address";
+import { CircleCheckBig } from "lucide-react";
 
 const NoteInformationTable = ({
-  inputNote,
+  inputNote: { id, inputNote },
 }: {
-  inputNote: InputNoteRecord;
+  inputNote: InputNote;
 }) => {
   const { networkId } = useGlobalContext();
   const wellKnownNote = noteWellKnownNote(inputNote);
@@ -32,21 +33,32 @@ const NoteInformationTable = ({
         <TableBody>
           <TableRow>
             <TableCell>ID</TableCell>
-            <TableCell>{inputNote.id().toString()}</TableCell>
+            <TableCell>{id}</TableCell>
           </TableRow>
           <TableRow>
             <TableCell>Script Root</TableCell>
-            <TableCell>
-              {noteScriptRoot(inputNote)}
-              {wellKnownNote ? ` (${wellKnownNote})` : ""}
-            </TableCell>
+            <TableCell>{noteScriptRoot(inputNote)}</TableCell>
           </TableRow>
           {/* <TableRow>
             <TableCell>Serial Number</TableCell>
             <TableCell>{noteSerialNumber(inputNote)}</TableCell>
           </TableRow> */}
+          {wellKnownNote && (
+            <TableRow>
+              <TableCell>Type</TableCell>
+              <TableCell>
+                <div className="flex items-center gap-2">
+                  <CircleCheckBig
+                    color="var(--color-green-500)"
+                    className="size-4"
+                  />
+                  {wellKnownNote === "P2ID" && "P2ID (Pay-to-ID) Verified Note"}
+                </div>
+              </TableCell>
+            </TableRow>
+          )}
           <TableRow>
-            <TableCell>Type</TableCell>
+            <TableCell>Storage mode</TableCell>
             <TableCell>
               <Badge variant={type === "Public" ? "default" : "destructive"}>
                 {type}

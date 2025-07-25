@@ -86,7 +86,7 @@ const CreateTransactionDialog = () => {
       open={createTransactionDialogOpen}
       onOpenChange={(open) => !open && onClose()}
     >
-      <DialogContent className="sm:max-w-[640px]">
+      <DialogContent className="sm:max-w-[640px] z-100">
         <DialogHeader>
           <DialogTitle>
             {step === "select" && "Create new transaction"}
