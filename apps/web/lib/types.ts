@@ -1,4 +1,4 @@
-import { type ReactNode, type FunctionComponent } from "react";
+import { type FunctionComponent } from "react";
 import {
   NetworkId,
   type Account as WasmAccount,
@@ -14,6 +14,7 @@ export type Account = {
   name: string;
   id: string;
   address: string;
+  consumableNoteIds: string[];
   tokenSymbol?: string;
   updatedAt: number;
 };
@@ -91,6 +92,7 @@ export const transactionToTableTransaction = (
 });
 
 export type InputNote = {
+  id: string;
   inputNote: InputNoteRecord;
   updatedAt: number;
 };
@@ -176,7 +178,7 @@ export const inputNoteToTableInputNote = (
   inputNote: InputNote,
   networkId: string
 ): TableInputNote => ({
-  id: inputNote.inputNote.id().toString(),
+  id: inputNote.id,
   type: noteType(inputNote.inputNote),
   state: noteState(inputNote.inputNote),
   tag: noteTag(inputNote.inputNote),
@@ -184,7 +186,8 @@ export const inputNoteToTableInputNote = (
 });
 
 export type TutorialStep = {
-  content: ReactNode;
+  title: string;
+  Content: FunctionComponent;
   NextStepButton: FunctionComponent;
 };
 

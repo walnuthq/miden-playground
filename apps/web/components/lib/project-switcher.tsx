@@ -1,4 +1,5 @@
 "use client";
+// import { useEffect } from "react";
 import { ChevronsUpDown } from "lucide-react";
 import {
   DropdownMenu,
@@ -24,7 +25,7 @@ import Logo from "@/components/lib/logo";
 import useGlobalContext from "@/components/global-context/hook";
 import tutorials from "@/components/tutorials/tutorials";
 import useTutorials from "@/hooks/use-tutorials";
-import useProjects from "@/hooks/use-projects";
+// import useProjects from "@/hooks/use-projects";
 import { useIsClient } from "usehooks-ts";
 
 const ProjectSwitcher = () => {
@@ -32,7 +33,13 @@ const ProjectSwitcher = () => {
   const { isMobile } = useSidebar();
   const { resetState } = useGlobalContext();
   const { tutorial, startTutorial } = useTutorials();
-  const { saveProject, loadProject } = useProjects();
+  // const { saveProject, loadProject } = useProjects();
+  /* useEffect(() => {
+    if (tutorialId) {
+      console.log("loading", tutorialId);
+      loadTutorial(tutorialId);
+    }
+  }, [tutorialId]); */
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -52,7 +59,7 @@ const ProjectSwitcher = () => {
                     tutorial ? (
                       tutorial.title
                     ) : (
-                      "Empty project"
+                      "Empty sandbox"
                     )
                   ) : (
                     <>&nbsp;</>
@@ -69,10 +76,15 @@ const ProjectSwitcher = () => {
             sideOffset={4}
           >
             <DropdownMenuItem onClick={() => resetState()}>
-              New empty project
+              New empty sandbox
             </DropdownMenuItem>
+            {/* <DropdownMenuItem
+              onClick={() => loadTutorial("transfer-assets-between-wallets")}
+            >
+              Load tutorial
+            </DropdownMenuItem> */}
             <DropdownMenuSeparator />
-            <DropdownMenuSub>
+            {/* <DropdownMenuSub>
               <DropdownMenuSubTrigger>Projects</DropdownMenuSubTrigger>
               <DropdownMenuPortal>
                 <DropdownMenuSubContent>
@@ -84,7 +96,7 @@ const ProjectSwitcher = () => {
                   </DropdownMenuItem>
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
-            </DropdownMenuSub>
+            </DropdownMenuSub> */}
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>Tutorials</DropdownMenuSubTrigger>
               <DropdownMenuPortal>
@@ -92,7 +104,14 @@ const ProjectSwitcher = () => {
                   {tutorials.map((tutorial) => (
                     <DropdownMenuItem
                       key={tutorial.id}
-                      onClick={() => startTutorial(tutorial.id)}
+                      onClick={async () => {
+                        startTutorial(tutorial.id);
+                        //await sleep(2000);
+                        //loadTutorial(tutorial.id);
+                        /*sleep(2000).then(() => {
+                          loadTutorial(tutorial.id);
+                        });*/
+                      }}
                     >
                       {tutorial.title}
                     </DropdownMenuItem>

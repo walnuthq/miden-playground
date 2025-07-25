@@ -18,6 +18,7 @@ import { Label } from "@workspace/ui/components/label";
 import useAccounts from "@/hooks/use-accounts";
 import { AccountStorageMode } from "@workspace/mock-web-client";
 import AccountAddress from "@/components/lib/account-address";
+// import useTutorials from "@/hooks/use-tutorials";
 
 const CreateWalletDialog = () => {
   const {
@@ -26,12 +27,14 @@ const CreateWalletDialog = () => {
     closeCreateWalletDialog,
     wallets,
   } = useAccounts();
+  // const { tutorialId } = useTutorials();
   const [isPublic, setIsPublic] = useState(true);
   const [loading, setLoading] = useState(false);
   const onClose = () => {
     setIsPublic(true);
     closeCreateWalletDialog();
   };
+  const walletDefaultName = `Wallet ${String.fromCharCode(65 + wallets.length)}`;
   return (
     <Dialog
       open={createWalletDialogOpen}
@@ -49,7 +52,7 @@ const CreateWalletDialog = () => {
             const formData = new FormData(event.currentTarget);
             setLoading(true);
             const wallet = await newWallet({
-              name: formData.get("name")!.toString(),
+              name: formData.get("name")?.toString() ?? walletDefaultName,
               storageMode: formData.getAll("is-public").includes("on")
                 ? AccountStorageMode.public()
                 : AccountStorageMode.private(),
@@ -69,7 +72,8 @@ const CreateWalletDialog = () => {
               <Input
                 id="name"
                 name="name"
-                defaultValue={`Wallet ${String.fromCharCode(65 + wallets.length)}`}
+                // disabled={tutorialId !== ""}
+                defaultValue={walletDefaultName}
                 required
               />
             </div>

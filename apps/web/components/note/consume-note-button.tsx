@@ -2,17 +2,16 @@ import { useState } from "react";
 import { FileInput, RotateCw } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import useTransactions from "@/hooks/use-transactions";
-import { type InputNoteRecord } from "@workspace/mock-web-client";
-import { noteInputsToAccountId } from "@/lib/types";
+import { type InputNote, noteInputsToAccountId } from "@/lib/types";
 import useAccounts from "@/hooks/use-accounts";
 
-const ConsumeNoteButton = ({ inputNote }: { inputNote: InputNoteRecord }) => {
+const ConsumeNoteButton = ({ inputNote }: { inputNote: InputNote }) => {
   const { accounts } = useAccounts();
   const { openCreateTransactionDialog, newConsumeTransactionRequest } =
     useTransactions();
   const [loading, setLoading] = useState(false);
   const targetAccountId = noteInputsToAccountId(
-    inputNote.details().recipient().inputs()
+    inputNote.inputNote.details().recipient().inputs()
   );
   const targetAccount = accounts.find(
     ({ id }) => id === targetAccountId.toString()
@@ -25,7 +24,7 @@ const ConsumeNoteButton = ({ inputNote }: { inputNote: InputNoteRecord }) => {
         setLoading(true);
         const transactionResult = await newConsumeTransactionRequest({
           accountId,
-          noteIds: [inputNote.id().toString()],
+          noteIds: [inputNote.id],
         });
         setLoading(false);
         openCreateTransactionDialog({

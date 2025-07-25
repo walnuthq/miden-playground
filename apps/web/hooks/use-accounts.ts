@@ -24,14 +24,15 @@ const useAccounts = () => {
     const client = await mockWebClient();
     const wallet = await client.newWallet(storageMode, true);
     const syncSummary = await client.syncState();
-    const blockHeader = await client.getLatestEpochBlock();
-    console.log("commitment:", blockHeader.commitment().toHex());
-    console.log("chainCommitment:", blockHeader.chainCommitment().toHex());
+    // const blockHeader = await client.getLatestEpochBlock();
+    // console.log("commitment:", blockHeader.commitment().toHex());
+    // console.log("chainCommitment:", blockHeader.chainCommitment().toHex());
     const account = {
       account: wallet,
       name,
       id: wallet.id().toString(),
       address: wallet.id().toBech32(NetworkId.tryFromStr(networkId)),
+      consumableNoteIds: [],
       updatedAt: syncSummary.blockNum(),
     };
     dispatch({
@@ -63,13 +64,14 @@ const useAccounts = () => {
     );
     const syncSummary = await client.syncState();
     const blockHeader = await client.getLatestEpochBlock();
-    console.log("commitment:", blockHeader.commitment().toHex());
-    console.log("chainCommitment:", blockHeader.chainCommitment().toHex());
+    // console.log("commitment:", blockHeader.commitment().toHex());
+    // console.log("chainCommitment:", blockHeader.chainCommitment().toHex());
     const account = {
       account: faucet,
       name,
       id: faucet.id().toString(),
       address: faucet.id().toBech32(NetworkId.tryFromStr(networkId)),
+      consumableNoteIds: [],
       tokenSymbol,
       updatedAt: syncSummary.blockNum(),
     };

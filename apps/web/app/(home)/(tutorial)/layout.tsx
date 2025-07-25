@@ -14,8 +14,11 @@ const TutorialLayout = ({ children }: { children: ReactNode }) => {
   return (
     <ResizablePanelGroup direction="horizontal">
       <ResizablePanel defaultSize={67}>{children}</ResizablePanel>
-      <ResizableHandle withHandle />
-      <ResizablePanel defaultSize={33}>
+      <ResizableHandle withHandle className="bg-transparent" />
+      <ResizablePanel
+        defaultSize={33}
+        className="bg-sidebar border rounded-md z-60"
+      >
         {tutorial && <TutorialStep tutorial={tutorial} />}
       </ResizablePanel>
     </ResizablePanelGroup>

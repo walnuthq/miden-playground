@@ -14,15 +14,15 @@ const NewEmptyProjectCard = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>New empty project</CardTitle>
-        <CardDescription>Start a new project from scratch.</CardDescription>
+        <CardTitle>New empty sandbox</CardTitle>
+        <CardDescription>Start a new sandbox from scratch.</CardDescription>
       </CardHeader>
       <CardContent className="h-full">
-        <p>Choose this option to create a new empty project from scratch.</p>
+        <p>Choose this option to create a new empty sandbox from scratch.</p>
       </CardContent>
       <CardFooter>
         <Button className="w-full" onClick={() => resetState()}>
-          Create new project
+          Create new sandbox
         </Button>
       </CardFooter>
     </Card>

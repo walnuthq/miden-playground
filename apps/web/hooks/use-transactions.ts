@@ -202,6 +202,17 @@ const useTransactions = () => {
     const inputNotes = await client.getInputNotes(
       new NoteFilter(NoteFilterTypes.All)
     );
+    console.log("inputNotes.length", inputNotes.length);
+    const consumableNoteIds: Record<string, string[]> = {};
+    for (const account of accounts) {
+      const consumableNotes = await client.getConsumableNotes(
+        account.account.id()
+      );
+      const noteIds = consumableNotes.map((consumableNote) =>
+        consumableNote.inputNoteRecord().id().toString()
+      );
+      consumableNoteIds[account.id] = noteIds;
+    }
     dispatch({
       type: "SUBMIT_TRANSACTION",
       payload: {
@@ -224,12 +235,14 @@ const useTransactions = () => {
           updatedAt: syncSummary.blockNum(),
         },
         account: newAccount,
+        consumableNoteIds,
         /* account: {
           ...previousAccount,
           account: newAccount,
           updatedAt: syncSummary.blockNum(),
         }, */
         inputNotes: inputNotes.map((inputNote) => ({
+          id: inputNote.id().toString(),
           inputNote,
           updatedAt: syncSummary.blockNum(),
         })),

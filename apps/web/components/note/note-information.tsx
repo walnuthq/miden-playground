@@ -9,7 +9,7 @@ import NoteInputsTable from "@/components/note/note-inputs-table";
 import DecodedNoteInputsTable from "@/components/note/decoded-note-inputs-table";
 import useGlobalContext from "@/components/global-context/hook";
 import AccountAddress from "@/components/lib/account-address";
-import FungibleAssetsTable from "../lib/fungible-assets-table";
+import FungibleAssetsTable from "@/components/lib/fungible-assets-table";
 
 const NoteInformation = ({ inputNote }: { inputNote: InputNote }) => {
   const { networkId } = useGlobalContext();
@@ -20,7 +20,7 @@ const NoteInformation = ({ inputNote }: { inputNote: InputNote }) => {
         <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
           Note Information
         </h4>
-        <NoteInformationTable inputNote={inputNote.inputNote} />
+        <NoteInformationTable inputNote={inputNote} />
       </div>
       <div className="flex flex-col gap-2">
         <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
@@ -39,7 +39,7 @@ const NoteInformation = ({ inputNote }: { inputNote: InputNote }) => {
       </div>
       <div className="flex flex-col gap-2">
         <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
-          Note Inputs
+          Raw Note Inputs
         </h4>
         <NoteInputsTable
           inputs={inputNote.inputNote.details().recipient().inputs()}
