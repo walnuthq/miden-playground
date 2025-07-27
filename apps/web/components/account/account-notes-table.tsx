@@ -69,49 +69,47 @@ const AccountNotesTable = ({ account }: { account: Account }) => {
     .map((noteId) => inputNotes.find(({ id }) => id === noteId))
     .filter((note) => note !== undefined);
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>ID</TableHead>
-            <TableHead>Script Root</TableHead>
-            <TableHead>Storage mode</TableHead>
-            <TableHead>Sender ID</TableHead>
-            <TableHead />
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {consumableNotes.map((inputNote) => {
-            const type = noteType(inputNote.inputNote);
-            return (
-              <TableRow key={inputNote.id}>
-                <TableCell>
-                  <NoteId inputNote={inputNote} />
-                </TableCell>
-                <TableCell>
-                  <NoteScriptRoot inputNote={inputNote} />
-                </TableCell>
-                <TableCell>
-                  <Badge
-                    variant={type === "Public" ? "default" : "destructive"}
-                  >
-                    {type}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <AccountAddress
-                    address={noteSenderAddress(inputNote.inputNote, networkId)}
-                  />
-                </TableCell>
-                <TableCell>
-                  <NoteActionsCell account={account} noteId={inputNote.id} />
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
-    </div>
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead className="pl-6">ID</TableHead>
+          <TableHead>Script Root</TableHead>
+          <TableHead>Storage mode</TableHead>
+          <TableHead>Sender ID</TableHead>
+          <TableHead className="pr-6" />
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {consumableNotes.map((inputNote) => {
+          const type = noteType(inputNote.inputNote);
+          return (
+            <TableRow key={inputNote.id}>
+              <TableCell className="pl-6">
+                <NoteId inputNote={inputNote} />
+              </TableCell>
+              <TableCell>
+                <NoteScriptRoot inputNote={inputNote} />
+              </TableCell>
+              <TableCell>
+                <Badge
+                  variant={type === "Public" ? "default" : "destructive"}
+                >
+                  {type}
+                </Badge>
+              </TableCell>
+              <TableCell>
+                <AccountAddress
+                  address={noteSenderAddress(inputNote.inputNote, networkId)}
+                />
+              </TableCell>
+              <TableCell className="pr-6">
+                <NoteActionsCell account={account} noteId={inputNote.id} />
+              </TableCell>
+            </TableRow>
+          );
+        })}
+      </TableBody>
+    </Table>
   );
 };
 

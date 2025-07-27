@@ -15,8 +15,8 @@ const ConsumableNotesCard = ({ account }: { account: Account }) => {
   const { openCreateTransactionDialog, newConsumeTransactionRequest } =
     useTransactions();
   return (
-    <Card>
-      <CardHeader>
+    <Card className="pb-0 gap-2">
+      <CardHeader className="">
         <CardTitle>Consumable Notes</CardTitle>
         <CardDescription>
           This account has pending notes that can be consumed.
@@ -41,7 +41,7 @@ const ConsumableNotesCard = ({ account }: { account: Account }) => {
           </Button>
         </CardAction>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-0 pt-4 rounded-b-md">
         <AccountNotesTable account={account} />
       </CardContent>
     </Card>
