@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "main": ".open-next/worker.js",
-  "name": "web",
+  "name": "miden-playground",
   "compatibility_date": "2025-07-26",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": {
