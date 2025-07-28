@@ -27,6 +27,7 @@ out/
 build
 dist
 .open-next
+.wrangler
 
 
 # Debug
