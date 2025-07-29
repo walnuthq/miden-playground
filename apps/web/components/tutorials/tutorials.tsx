@@ -30,11 +30,13 @@ const NextStepButton = ({
   disabled?: boolean;
   onClick: () => void;
 }) => {
-  const { setNextTutorialStepDisabled } = useTutorials();
+  const { nextTutorialStepDisabled, setNextTutorialStepDisabled } =
+    useTutorials();
   useEffect(() => {
-    setNextTutorialStepDisabled(disabled);
-    // return () => setNextTutorialStepDisabled(true);
-  }, [disabled, setNextTutorialStepDisabled]);
+    if (nextTutorialStepDisabled !== disabled) {
+      setNextTutorialStepDisabled(disabled);
+    }
+  }, [disabled, nextTutorialStepDisabled, setNextTutorialStepDisabled]);
   return (
     <Button className="grow-2" disabled={disabled} onClick={onClick}>
       {text}
@@ -513,7 +515,7 @@ const CreateAndFundWalletStep6 = {
 const tutorials: Tutorial[] = [
   {
     id: "create-and-fund-wallet",
-    title: "Create and fund wallet tutorial",
+    title: "Create and fund wallet",
     tagline: "Create a new wallet and fund it using a faucet.",
     description:
       "In this first tutorial, we'll create a new wallet and discover how to fund it by creating your first Miden transactions.",

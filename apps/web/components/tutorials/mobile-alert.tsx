@@ -12,7 +12,7 @@ const MobileAlert = () => (
     <AlertDescription>
       While the playground should be usable on mobile, please note that you'll
       have a better experience using a desktop browser. Click on the book icon
-      to toggle the tutorial panel.
+      above to toggle the tutorial panel.
     </AlertDescription>
   </Alert>
 );

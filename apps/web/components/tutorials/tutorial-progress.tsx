@@ -22,12 +22,9 @@ const TutorialProgressStep = ({
           className={cn(
             "grow-1 first:rounded-l-md last:rounded-r-md border not-first:border-l-0 border-gray-400",
             {
-              // "bg-[#f50]": index <= tutorialMaxStep,
-              // "bg-orange-400": index === tutorialStep,
-              // "bg-orange-100": index > tutorialMaxStep,
-              "bg-green-400": index < tutorialStep,
+              "bg-green-400": index < tutorialStep || index <= tutorialMaxStep,
               "bg-yellow-400": index === tutorialStep,
-              "bg-muted": index > tutorialStep,
+              "bg-muted": index > tutorialStep && index > tutorialMaxStep,
               "cursor-pointer": index <= tutorialMaxStep,
               "cursor-not-allowed": index > tutorialMaxStep,
             }
