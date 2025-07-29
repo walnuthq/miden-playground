@@ -24,7 +24,7 @@ const TutorialStep = ({ tutorial }: { tutorial: Tutorial }) => {
       <div className="flex items-center justify-between gap-4">
         <div>
           <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
-            {tutorial.title}
+            {tutorial.title} tutorial
           </h3>
           <p className="text-muted-foreground text-sm">{step.title}</p>
         </div>

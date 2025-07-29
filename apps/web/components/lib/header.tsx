@@ -40,8 +40,8 @@ const SubLevelPageBreadcrumbs = () => {
         <BreadcrumbLink href={href}>{title}</BreadcrumbLink>
       </BreadcrumbItem>
       <BreadcrumbSeparator className="hidden md:block" />
-      <BreadcrumbItem>
-        <BreadcrumbPage>{page}</BreadcrumbPage>
+      <BreadcrumbItem className="truncate">
+        <BreadcrumbPage className="truncate">{page}</BreadcrumbPage>
       </BreadcrumbItem>
     </>
   );
@@ -64,7 +64,7 @@ const Header = () => {
           orientation="vertical"
           className="mr-2 data-[orientation=vertical]:h-4"
         />
-        <Breadcrumb>
+        <Breadcrumb className="truncate">
           <BreadcrumbList>
             {isTopLevelPage ? (
               <BreadcrumbItem>
