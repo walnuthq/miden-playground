@@ -16,5 +16,7 @@
   "inputNotes": [],
   "tutorialId": "create-and-fund-wallet",
   "tutorialStep": 0,
-  "tutorialMaxStep": 0
+  "tutorialMaxStep": 0,
+  "tutorialOpen": true,
+  "nextTutorialStepDisabled": true
 }

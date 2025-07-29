@@ -1,3 +1,4 @@
+import { useRouter } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -10,6 +11,7 @@ import { Button } from "@workspace/ui/components/button";
 import useGlobalContext from "@/components/global-context/hook";
 
 const NewEmptyProjectCard = () => {
+  const router = useRouter();
   const { resetState } = useGlobalContext();
   return (
     <Card>
@@ -21,7 +23,13 @@ const NewEmptyProjectCard = () => {
         <p>Choose this option to create a new empty sandbox from scratch.</p>
       </CardContent>
       <CardFooter>
-        <Button className="w-full" onClick={() => resetState()}>
+        <Button
+          className="w-full"
+          onClick={() => {
+            resetState();
+            router.push("/accounts");
+          }}
+        >
           Create new sandbox
         </Button>
       </CardFooter>

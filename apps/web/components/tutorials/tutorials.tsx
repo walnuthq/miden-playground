@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { CircleAlert, CircleCheckBig } from "lucide-react";
@@ -18,6 +19,7 @@ import tutorial1State from "@/components/tutorials/tutorial1-state.json";
 // import tutorial3StoreDump from "@/components/tutorials/tutorial3-store.json";
 // import tutorial3State from "@/components/tutorials/tutorial3-state.json";
 import AccountAddress from "@/components/lib/account-address";
+import useGlobalContext from "../global-context/hook";
 
 const NextStepButton = ({
   text = "Next step",
@@ -27,11 +29,18 @@ const NextStepButton = ({
   text?: string;
   disabled?: boolean;
   onClick: () => void;
-}) => (
-  <Button className="grow-2" disabled={disabled} onClick={onClick}>
-    {text}
-  </Button>
-);
+}) => {
+  const { setNextTutorialStepDisabled } = useTutorials();
+  useEffect(() => {
+    setNextTutorialStepDisabled(disabled);
+    // return () => setNextTutorialStepDisabled(true);
+  }, [disabled]);
+  return (
+    <Button className="grow-2" disabled={disabled} onClick={onClick}>
+      {text}
+    </Button>
+  );
+};
 
 const CreateAndFundWalletStep1 = {
   title: "Create your first wallet Account.",
@@ -452,11 +461,22 @@ const CreateAndFundWalletStep6 = {
     );
   },
   NextStepButton: () => {
-    const { startTutorial } = useTutorials();
-    return (
+    //const { startTutorial } = useTutorials();
+    const { resetState } = useGlobalContext();
+    const router = useRouter();
+    /* return (
       <NextStepButton
         text="Next tutorial"
         onClick={() => startTutorial("transfer-assets-between-wallets")}
+      />
+    ); */
+    return (
+      <NextStepButton
+        text="Back to tutorials list"
+        onClick={() => {
+          resetState();
+          router.push("/");
+        }}
       />
     );
   },
