@@ -34,7 +34,7 @@ const NextStepButton = ({
   useEffect(() => {
     setNextTutorialStepDisabled(disabled);
     // return () => setNextTutorialStepDisabled(true);
-  }, [disabled]);
+  }, [disabled, setNextTutorialStepDisabled]);
   return (
     <Button className="grow-2" disabled={disabled} onClick={onClick}>
       {text}

@@ -28,20 +28,16 @@ const TutorialLayout = ({ children }: { children: ReactNode }) => {
       <ResizablePanel id="app" order={1} defaultSize={tutorialOpen ? 67 : 100}>
         {children}
       </ResizablePanel>
-      {true && (
-        <>
-          <ResizableHandle withHandle className="bg-transparent" />
-          <ResizablePanel
-            id="tutorial"
-            ref={tutorialRef}
-            order={2}
-            defaultSize={tutorialOpen ? 33 : 0}
-            className="bg-sidebar border rounded-md z-60"
-          >
-            {tutorial && <TutorialStep tutorial={tutorial} />}
-          </ResizablePanel>
-        </>
-      )}
+      <ResizableHandle withHandle className="bg-transparent" />
+      <ResizablePanel
+        id="tutorial"
+        ref={tutorialRef}
+        order={2}
+        defaultSize={tutorialOpen ? 33 : 0}
+        className="bg-sidebar border rounded-md z-60"
+      >
+        {tutorial && <TutorialStep tutorial={tutorial} />}
+      </ResizablePanel>
     </ResizablePanelGroup>
   );
 };
