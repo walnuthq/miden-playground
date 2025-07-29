@@ -30,7 +30,7 @@ const useGlobalContext = () => {
     //await client.forceImportStore(JSON.stringify(emptyStore));
     await deleteStore();
     dispatch({ type: "RESET_STATE" });
-    router.push("/accounts");
+    // router.push("/accounts");
   };
   return { ...state, dispatch, resetState };
 };

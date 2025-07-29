@@ -3,15 +3,24 @@ import { type Tutorial } from "@/lib/types";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import TutorialProgress from "@/components/tutorials/tutorial-progress";
+import { useIsMobile } from "@workspace/ui/hooks/use-mobile";
+import MobileAlert from "@/components/tutorials/mobile-alert";
+import { cn } from "@workspace/ui/lib/utils";
 
 const TutorialStep = ({ tutorial }: { tutorial: Tutorial }) => {
-  const { tutorialStep, previousTutorialStep } = useTutorials();
+  const isMobile = useIsMobile();
+  const { tutorialStep, tutorialOpen, previousTutorialStep } = useTutorials();
   const step = tutorial.steps[tutorialStep];
   if (!step) {
     return null;
   }
   return (
-    <div className="flex flex-1 flex-col gap-4 p-4">
+    <div
+      className={cn("flex-1 flex-col gap-4 p-4", {
+        flex: tutorialOpen,
+        hidden: !tutorialOpen,
+      })}
+    >
       <div className="flex items-center justify-between gap-4">
         <div>
           <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
@@ -25,6 +34,7 @@ const TutorialStep = ({ tutorial }: { tutorial: Tutorial }) => {
       </div>
       <TutorialProgress steps={tutorial.steps} />
       <div className="flex flex-col gap-4">
+        {isMobile && tutorialStep === 0 && <MobileAlert />}
         <step.Content />
       </div>
       <div className="flex items-center gap-4">

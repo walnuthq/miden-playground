@@ -8,7 +8,7 @@ const Home = () => (
     <h2 className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0">
       Welcome to Miden Playground
     </h2>
-    <div className="grid grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
       <NewEmptyProjectCard />
       {tutorials.map((tutorial) => (
         <StartTutorialCard key={tutorial.id} tutorial={tutorial} />

@@ -38,6 +38,8 @@ export type State = {
   tutorialId: string;
   tutorialStep: number;
   tutorialMaxStep: number;
+  tutorialOpen: boolean;
+  nextTutorialStepDisabled: boolean;
 };
 
 export const initialState = (): State => ({
@@ -63,6 +65,8 @@ export const initialState = (): State => ({
   tutorialId: "",
   tutorialStep: 0,
   tutorialMaxStep: 0,
+  tutorialOpen: true,
+  nextTutorialStepDisabled: true,
 });
 
 export const stateSerializer = ({
@@ -74,6 +78,8 @@ export const stateSerializer = ({
   tutorialId,
   tutorialStep,
   tutorialMaxStep,
+  tutorialOpen,
+  nextTutorialStepDisabled,
 }: State) =>
   JSON.stringify({
     networkId,
@@ -120,6 +126,8 @@ export const stateSerializer = ({
     tutorialId,
     tutorialStep,
     tutorialMaxStep,
+    tutorialOpen,
+    nextTutorialStepDisabled,
   });
 
 export const stateDeserializer = (value: string): State => {
@@ -132,6 +140,8 @@ export const stateDeserializer = (value: string): State => {
     tutorialId,
     tutorialStep,
     tutorialMaxStep,
+    tutorialOpen,
+    nextTutorialStepDisabled,
   } = JSON.parse(value) as {
     networkId: string;
     syncSummary: string | null;
@@ -155,6 +165,8 @@ export const stateDeserializer = (value: string): State => {
     tutorialId: string;
     tutorialStep: number;
     tutorialMaxStep: number;
+    tutorialOpen: boolean;
+    nextTutorialStepDisabled: boolean;
   };
   return {
     ...initialState(),
@@ -212,6 +224,8 @@ export const stateDeserializer = (value: string): State => {
     tutorialId,
     tutorialStep,
     tutorialMaxStep,
+    tutorialOpen,
+    nextTutorialStepDisabled,
   };
 };
 
@@ -264,7 +278,13 @@ export type Action =
     }
   | { type: "PREVIOUS_TUTORIAL_STEP" }
   | { type: "NEXT_TUTORIAL_STEP" }
-  | { type: "SET_TUTORIAL_STEP"; payload: { tutorialStep: number } };
+  | { type: "SET_TUTORIAL_STEP"; payload: { tutorialStep: number } }
+  | { type: "OPEN_TUTORIAL" }
+  | { type: "CLOSE_TUTORIAL" }
+  | {
+      type: "SET_NEXT_TUTORIAL_STEP_DISABLED";
+      payload: { disabled: boolean };
+    };
 
 export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -392,6 +412,24 @@ export const reducer = (state: State, action: Action): State => {
       return {
         ...state,
         tutorialStep: action.payload.tutorialStep,
+      };
+    }
+    case "OPEN_TUTORIAL": {
+      return {
+        ...state,
+        tutorialOpen: true,
+      };
+    }
+    case "CLOSE_TUTORIAL": {
+      return {
+        ...state,
+        tutorialOpen: false,
+      };
+    }
+    case "SET_NEXT_TUTORIAL_STEP_DISABLED": {
+      return {
+        ...state,
+        nextTutorialStepDisabled: action.payload.disabled,
       };
     }
     default: {

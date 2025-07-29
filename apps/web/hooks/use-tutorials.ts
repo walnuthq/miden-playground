@@ -17,8 +17,14 @@ import useAccounts from "@/hooks/use-accounts";
 
 const useTutorials = () => {
   const router = useRouter();
-  const { tutorialId, tutorialStep, tutorialMaxStep, dispatch } =
-    useGlobalContext();
+  const {
+    tutorialId,
+    tutorialStep,
+    tutorialMaxStep,
+    tutorialOpen,
+    nextTutorialStepDisabled,
+    dispatch,
+  } = useGlobalContext();
   const { accounts } = useAccounts();
   const {
     newMintTransactionRequest,
@@ -157,16 +163,28 @@ const useTutorials = () => {
   const nextTutorialStep = () => dispatch({ type: "NEXT_TUTORIAL_STEP" });
   const setTutorialStep = (tutorialStep: number) =>
     dispatch({ type: "SET_TUTORIAL_STEP", payload: { tutorialStep } });
+  const openTutorial = () => dispatch({ type: "OPEN_TUTORIAL" });
+  const closeTutorial = () => dispatch({ type: "CLOSE_TUTORIAL" });
+  const setNextTutorialStepDisabled = (disabled: boolean) =>
+    dispatch({
+      type: "SET_NEXT_TUTORIAL_STEP_DISABLED",
+      payload: { disabled },
+    });
   return {
     tutorialId,
     tutorialStep,
     tutorialMaxStep,
+    tutorialOpen,
+    nextTutorialStepDisabled,
     tutorial: tutorials.find(({ id }) => id === tutorialId),
     startTutorial,
     loadTutorial,
     previousTutorialStep,
     setTutorialStep,
     nextTutorialStep,
+    openTutorial,
+    closeTutorial,
+    setNextTutorialStepDisabled,
   };
 };
 

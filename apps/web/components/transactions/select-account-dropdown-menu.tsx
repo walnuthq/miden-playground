@@ -64,7 +64,7 @@ const SelectAccountDropdownMenu = ({
                 </DropdownMenuLabel>
               )}
               {shownWallets.map((wallet) => (
-                <DropdownMenuRadioItem key={wallet.name} value={wallet.id}>
+                <DropdownMenuRadioItem key={wallet.id} value={wallet.id}>
                   {wallet.name}
                 </DropdownMenuRadioItem>
               ))}

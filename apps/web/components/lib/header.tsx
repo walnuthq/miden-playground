@@ -1,4 +1,5 @@
 "use client";
+import { useIsClient } from "usehooks-ts";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,7 +11,9 @@ import {
 import { Separator } from "@workspace/ui/components/separator";
 import { SidebarTrigger } from "@workspace/ui/components/sidebar";
 import { usePathname } from "next/navigation";
+import TutorialToggle from "@/components/lib/tutorial-toggle";
 import ModeToggle from "@/components/lib/mode-toggle";
+import useTutorials from "@/hooks/use-tutorials";
 
 const getLink = (pathname: string) => {
   const [, route] = pathname.split("/");
@@ -45,6 +48,8 @@ const SubLevelPageBreadcrumbs = () => {
 };
 
 const Header = () => {
+  const isClient = useIsClient();
+  const { tutorialId } = useTutorials();
   const pathname = usePathname();
   const isTopLevelPage =
     pathname === "/" ||
@@ -73,6 +78,7 @@ const Header = () => {
           </BreadcrumbList>
         </Breadcrumb>
         <div className="ml-auto flex items-center gap-2">
+          {isClient && tutorialId && <TutorialToggle />}
           <ModeToggle />
         </div>
       </div>
