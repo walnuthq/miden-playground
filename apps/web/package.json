@@ -9,15 +9,10 @@
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
-    "typecheck": "tsc --noEmit",
-    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
-    "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
-    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
-    "@opennextjs/cloudflare": "^1.6.2",
     "@tanstack/react-table": "^8.21.3",
     "@workspace/mock-web-client": "workspace:*",
     "@workspace/ui": "workspace:*",
@@ -40,7 +35,6 @@
     "@workspace/eslint-config": "workspace:^",
     "@workspace/typescript-config": "workspace:*",
     "copy-webpack-plugin": "^13.0.0",
-    "typescript": "^5.8.3",
-    "wrangler": "^4.26.1"
+    "typescript": "^5.8.3"
   }
 }
