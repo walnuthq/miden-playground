@@ -216,7 +216,7 @@ export class FungibleAssetDelta {
   free(): void;
   numAssets(): number;
   isEmpty(): boolean;
-  iter(): FungibleAssetDeltaItem[];
+  assets(): FungibleAssetDeltaItem[];
 }
 export class FungibleAssetDeltaItem {
   private constructor();

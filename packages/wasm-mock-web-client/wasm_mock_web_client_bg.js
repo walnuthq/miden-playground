@@ -1702,8 +1702,8 @@ export class FungibleAssetDelta {
     /**
      * @returns {FungibleAssetDeltaItem[]}
      */
-    iter() {
-        const ret = wasm.fungibleassetdelta_iter(this.__wbg_ptr);
+    assets() {
+        const ret = wasm.fungibleassetdelta_assets(this.__wbg_ptr);
         var v1 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
         wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
         return v1;

@@ -39,10 +39,6 @@ impl From<(&NativeAccountId, &i64)> for FungibleAssetDeltaItem {
 pub struct FungibleAssetDelta(NativeFungibleAssetDelta);
 #[wasm_bindgen]
 impl FungibleAssetDelta {
-    // pub fn amount(&self, faucet_id: &AccountId) -> i64 {
-    //     self.0.amount(faucet_id.into()).unwrap()
-    // }
-
     #[wasm_bindgen(js_name = "numAssets")]
     pub fn num_assets(&self) -> usize {
         self.0.num_assets()
@@ -53,13 +49,9 @@ impl FungibleAssetDelta {
         self.0.is_empty()
     }
 
-    pub fn iter(&self) -> Vec<FungibleAssetDeltaItem> {
+    pub fn assets(&self) -> Vec<FungibleAssetDeltaItem> {
         self.0.iter().map(Into::into).collect()
     }
-
-    // pub fn iter(&self) -> impl Iterator<Item = (&AccountId, &i64)> {
-    //     self.0.iter()
-    // }
 }
 
 // CONVERSIONS

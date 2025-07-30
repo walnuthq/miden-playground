@@ -87,7 +87,7 @@ const TransactionPreview = ({
       ) : (
         <FungibleAssetsTable
           fungibleAssets={fungibleAssetDelta
-            .iter()
+            .assets()
             .map(({ faucetId, amount }) => ({
               faucetId: faucetId.toString(),
               amount: amount < 0n ? amount.toString() : `+${amount}`,
