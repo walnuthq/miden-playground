@@ -1,4 +1,4 @@
-import { noteType, noteSenderAddress, type Account } from "@/lib/types";
+import { type Account } from "@/lib/types";
 import {
   Table,
   TableBody,
@@ -17,11 +17,9 @@ import { Badge } from "@workspace/ui/components/badge";
 import { MoreVertical } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import AccountAddress from "@/components/lib/account-address";
-import useGlobalContext from "@/components/global-context/hook";
 import useTransactions from "@/hooks/use-transactions";
 import useNotes from "@/hooks/use-notes";
 import NoteId from "@/components/lib/note-id";
-import NoteScriptRoot from "@/components/lib/note-script-root";
 
 const NoteActionsCell = ({
   account,
@@ -63,7 +61,6 @@ const NoteActionsCell = ({
 };
 
 const AccountNotesTable = ({ account }: { account: Account }) => {
-  const { networkId } = useGlobalContext();
   const { inputNotes } = useNotes();
   const consumableNotes = account.consumableNoteIds
     .map((noteId) => inputNotes.find(({ id }) => id === noteId))
@@ -74,41 +71,36 @@ const AccountNotesTable = ({ account }: { account: Account }) => {
         <TableHeader>
           <TableRow>
             <TableHead>ID</TableHead>
-            <TableHead>Script Root</TableHead>
+            <TableHead>Type</TableHead>
             <TableHead>Storage mode</TableHead>
             <TableHead>Sender ID</TableHead>
             <TableHead />
           </TableRow>
         </TableHeader>
         <TableBody>
-          {consumableNotes.map((inputNote) => {
-            const type = noteType(inputNote.inputNote);
-            return (
-              <TableRow key={inputNote.id}>
-                <TableCell>
-                  <NoteId inputNote={inputNote} />
-                </TableCell>
-                <TableCell>
-                  <NoteScriptRoot inputNote={inputNote} />
-                </TableCell>
-                <TableCell>
-                  <Badge
-                    variant={type === "Public" ? "default" : "destructive"}
-                  >
-                    {type}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <AccountAddress
-                    address={noteSenderAddress(inputNote.inputNote, networkId)}
-                  />
-                </TableCell>
-                <TableCell>
-                  <NoteActionsCell account={account} noteId={inputNote.id} />
-                </TableCell>
-              </TableRow>
-            );
-          })}
+          {consumableNotes.map((inputNote) => (
+            <TableRow key={inputNote.id}>
+              <TableCell>
+                <NoteId noteId={inputNote.id} />
+              </TableCell>
+              <TableCell>{inputNote.wellKnownNote ?? "Custom"}</TableCell>
+              <TableCell>
+                <Badge
+                  variant={
+                    inputNote.type === "Public" ? "default" : "destructive"
+                  }
+                >
+                  {inputNote.type}
+                </Badge>
+              </TableCell>
+              <TableCell>
+                <AccountAddress address={inputNote.senderAddress} />
+              </TableCell>
+              <TableCell>
+                <NoteActionsCell account={account} noteId={inputNote.id} />
+              </TableCell>
+            </TableRow>
+          ))}
         </TableBody>
       </Table>
     </div>

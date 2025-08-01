@@ -6,6 +6,7 @@ import {
   TableHeader,
   TableRow,
 } from "@workspace/ui/components/table";
+import { type FungibleAsset } from "@/lib/types";
 import useAccounts from "@/hooks/use-accounts";
 import AccountAddress from "@/components/lib/account-address";
 import { cn } from "@workspace/ui/lib/utils";
@@ -14,7 +15,7 @@ const FungibleAssetsTable = ({
   fungibleAssets,
   withAccountAddress = true,
 }: {
-  fungibleAssets: { faucetId: string; amount: string }[];
+  fungibleAssets: FungibleAsset[];
   withAccountAddress?: boolean;
 }) => {
   const { faucets } = useAccounts();

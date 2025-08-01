@@ -1,7 +1,4 @@
-use miden_objects::{
-    // crypto::hash::rpo::RpoDigest as NativeRpoDigest,
-    transaction::TransactionId as NativeTransactionId,
-};
+use miden_objects::transaction::TransactionId as NativeTransactionId;
 use wasm_bindgen::prelude::*;
 
 use super::{felt::Felt, rpo_digest::RpoDigest};
@@ -12,13 +9,6 @@ pub struct TransactionId(NativeTransactionId);
 
 #[wasm_bindgen]
 impl TransactionId {
-    /* #[wasm_bindgen(js_name = "fromDigest")]
-    pub fn from_digest(digest: RpoDigest) -> TransactionId {
-        let native_digest: NativeRpoDigest = digest.into();
-        let native_id = native_digest.into();
-        TransactionId(native_id)
-    } */
-
     #[wasm_bindgen(js_name = "asElements")]
     pub fn as_elements(&self) -> Vec<Felt> {
         self.0.as_elements().iter().map(Into::into).collect()

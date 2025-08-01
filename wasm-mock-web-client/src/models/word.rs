@@ -1,7 +1,8 @@
-use super::felt::Felt;
 use miden_crypto::utils::bytes_to_hex_string;
 use miden_objects::{Felt as NativeFelt, Word as NativeWord};
 use wasm_bindgen::prelude::*;
+
+use super::felt::Felt;
 
 #[wasm_bindgen]
 #[derive(Clone)]

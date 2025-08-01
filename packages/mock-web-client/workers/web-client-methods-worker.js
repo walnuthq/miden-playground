@@ -1,5 +1,5 @@
-import * as wasm from 'wasm-mock-web-client';
-import { MethodName, WorkerAction } from '../constants';
+import * as wasm from "wasm-mock-web-client";
+import { MethodName, WorkerAction } from "../constants";
 
 /**
  * Worker for executing WebClient methods in a separate thread.
@@ -41,128 +41,143 @@ let processing = false; // Flag to ensure one message is processed at a time.
 
 // Define a mapping from method names to handler functions.
 const methodHandlers = {
-	[MethodName.NEW_WALLET]: async (args) => {
-		const [walletStorageModeStr, mutable, seed] = args;
-		const walletStorageMode = wasm.AccountStorageMode.tryFromStr(walletStorageModeStr);
-		const wallet = await wasmWebClient.newWallet(walletStorageMode, mutable, seed);
-		const serializedWallet = wallet.serialize();
-		return serializedWallet.buffer;
-	},
-	[MethodName.NEW_FAUCET]: async (args) => {
-		const [faucetStorageModeStr, nonFungible, tokenSymbol, decimals, maxSupplyStr] = args;
-		const faucetStorageMode = wasm.AccountStorageMode.tryFromStr(faucetStorageModeStr);
-		const maxSupply = BigInt(maxSupplyStr);
-		const faucet = await wasmWebClient.newFaucet(
-			faucetStorageMode,
-			nonFungible,
-			tokenSymbol,
-			decimals,
-			maxSupply
-		);
-		const serializedFaucet = faucet.serialize();
-		return serializedFaucet.buffer;
-	},
-	[MethodName.NEW_TRANSACTION]: async (args) => {
-		const [accountIdStr, serializedTransactionRequest] = args;
-		const accountId = wasm.AccountId.fromHex(accountIdStr);
-		const transactionRequest = wasm.TransactionRequest.deserialize(
-			new Uint8Array(serializedTransactionRequest)
-		);
+  [MethodName.NEW_WALLET]: async (args) => {
+    const [walletStorageModeStr, mutable, seed] = args;
+    const walletStorageMode =
+      wasm.AccountStorageMode.tryFromStr(walletStorageModeStr);
+    const wallet = await wasmWebClient.newWallet(
+      walletStorageMode,
+      mutable,
+      seed
+    );
+    const serializedWallet = wallet.serialize();
+    return serializedWallet.buffer;
+  },
+  [MethodName.NEW_FAUCET]: async (args) => {
+    const [
+      faucetStorageModeStr,
+      nonFungible,
+      tokenSymbol,
+      decimals,
+      maxSupplyStr,
+    ] = args;
+    const faucetStorageMode =
+      wasm.AccountStorageMode.tryFromStr(faucetStorageModeStr);
+    const maxSupply = BigInt(maxSupplyStr);
+    const faucet = await wasmWebClient.newFaucet(
+      faucetStorageMode,
+      nonFungible,
+      tokenSymbol,
+      decimals,
+      maxSupply
+    );
+    const serializedFaucet = faucet.serialize();
+    return serializedFaucet.buffer;
+  },
+  [MethodName.NEW_TRANSACTION]: async (args) => {
+    const [accountIdStr, serializedTransactionRequest] = args;
+    const accountId = wasm.AccountId.fromHex(accountIdStr);
+    const transactionRequest = wasm.TransactionRequest.deserialize(
+      new Uint8Array(serializedTransactionRequest)
+    );
 
-		const transactionResult = await wasmWebClient.newTransaction(accountId, transactionRequest);
-		const serializedTransactionResult = transactionResult.serialize();
-		return serializedTransactionResult.buffer;
-	},
-	[MethodName.SUBMIT_TRANSACTION]: async (args) => {
-		// Destructure the arguments. The prover may be undefined.
-		const [serializedTransactionResult, serializedProver] = args;
-		const transactionResult = wasm.TransactionResult.deserialize(
-			new Uint8Array(serializedTransactionResult)
-		);
+    const transactionResult = await wasmWebClient.newTransaction(
+      accountId,
+      transactionRequest
+    );
+    const serializedTransactionResult = transactionResult.serialize();
+    return serializedTransactionResult.buffer;
+  },
+  [MethodName.SUBMIT_TRANSACTION]: async (args) => {
+    // Destructure the arguments. The prover may be undefined.
+    const [serializedTransactionResult, serializedProver] = args;
+    const transactionResult = wasm.TransactionResult.deserialize(
+      new Uint8Array(serializedTransactionResult)
+    );
 
-		let prover = undefined;
-		if (serializedProver) {
-			if (serializedProver.startsWith('remote:')) {
-				// For a remote prover, extract the endpoint.
-				// For example, "remote:https://my-custom-endpoint.com" becomes "https://my-custom-endpoint.com"
-				const endpoint = serializedProver.split('remote:')[1];
-				prover = wasm.TransactionProver.deserialize('remote', endpoint);
-			} else if (serializedProver === 'local') {
-				prover = wasm.TransactionProver.deserialize('local');
-			} else {
-				throw new Error('Invalid prover tag received in worker');
-			}
-		}
+    let prover = undefined;
+    if (serializedProver) {
+      if (serializedProver.startsWith("remote:")) {
+        // For a remote prover, extract the endpoint.
+        // For example, "remote:https://my-custom-endpoint.com" becomes "https://my-custom-endpoint.com"
+        const endpoint = serializedProver.split("remote:")[1];
+        prover = wasm.TransactionProver.deserialize("remote", endpoint);
+      } else if (serializedProver === "local") {
+        prover = wasm.TransactionProver.deserialize("local");
+      } else {
+        throw new Error("Invalid prover tag received in worker");
+      }
+    }
 
-		// Call the unified submit_transaction method with an optional prover.
-		await wasmWebClient.submitTransaction(transactionResult, prover);
-		return;
-	},
-	[MethodName.SYNC_STATE]: async () => {
-		const syncSummary = await wasmWebClient.syncState();
-		const serializedSyncSummary = syncSummary.serialize();
-		return serializedSyncSummary.buffer;
-	}
+    // Call the unified submit_transaction method with an optional prover.
+    await wasmWebClient.submitTransaction(transactionResult, prover);
+    return;
+  },
+  [MethodName.SYNC_STATE]: async () => {
+    const syncSummary = await wasmWebClient.syncState();
+    const serializedSyncSummary = syncSummary.serialize();
+    return serializedSyncSummary.buffer;
+  },
 };
 
 /**
  * Process a single message event.
  */
 async function processMessage(event) {
-	const { action, args, methodName, requestId } = event.data;
-	try {
-		if (action === WorkerAction.INIT) {
-			const [rpcUrl, seed] = args;
-			// Initialize the WASM WebClient.
-			wasmWebClient = new wasm.MockWebClient();
-			await wasmWebClient.createClient(rpcUrl, seed);
-			ready = true;
-			// Signal that the worker is fully initialized.
-			self.postMessage({ ready: true });
-			return;
-		} else if (action === WorkerAction.CALL_METHOD) {
-			if (!ready) {
-				throw new Error('Worker is not ready. Please initialize first.');
-			}
-			if (!wasmWebClient) {
-				throw new Error('WebClient not initialized in worker.');
-			}
-			// Look up the handler from the mapping.
-			const handler = methodHandlers[methodName];
-			if (!handler) {
-				throw new Error(`Unsupported method: ${methodName}`);
-			}
-			const result = await handler(args);
-			self.postMessage({ requestId, result });
-			return;
-		} else {
-			throw new Error(`Unsupported action: ${action}`);
-		}
-	} catch (error) {
-		console.error(`WORKER: Error occurred - ${error}`);
-		self.postMessage({ requestId, error: error });
-	}
+  const { action, args, methodName, requestId } = event.data;
+  try {
+    if (action === WorkerAction.INIT) {
+      const [rpcUrl, seed] = args;
+      // Initialize the WASM WebClient.
+      wasmWebClient = new wasm.WebClient();
+      await wasmWebClient.createClient(rpcUrl, seed);
+      ready = true;
+      // Signal that the worker is fully initialized.
+      self.postMessage({ ready: true });
+      return;
+    } else if (action === WorkerAction.CALL_METHOD) {
+      if (!ready) {
+        throw new Error("Worker is not ready. Please initialize first.");
+      }
+      if (!wasmWebClient) {
+        throw new Error("WebClient not initialized in worker.");
+      }
+      // Look up the handler from the mapping.
+      const handler = methodHandlers[methodName];
+      if (!handler) {
+        throw new Error(`Unsupported method: ${methodName}`);
+      }
+      const result = await handler(args);
+      self.postMessage({ requestId, result });
+      return;
+    } else {
+      throw new Error(`Unsupported action: ${action}`);
+    }
+  } catch (error) {
+    console.error(`WORKER: Error occurred - ${error}`);
+    self.postMessage({ requestId, error: error });
+  }
 }
 
 /**
  * Process messages one at a time from the messageQueue.
  */
 async function processQueue() {
-	if (processing || messageQueue.length === 0) return;
-	processing = true;
-	const event = messageQueue.shift();
-	try {
-		await processMessage(event);
-	} finally {
-		processing = false;
-		processQueue(); // Process next message in queue.
-	}
+  if (processing || messageQueue.length === 0) return;
+  processing = true;
+  const event = messageQueue.shift();
+  try {
+    await processMessage(event);
+  } finally {
+    processing = false;
+    processQueue(); // Process next message in queue.
+  }
 }
 
 // Enqueue incoming messages and process them sequentially.
 self.onmessage = (event) => {
-	messageQueue.push(event);
-	processQueue();
+  messageQueue.push(event);
+  processQueue();
 };
 
 // Immediately signal that the worker script has loaded.

@@ -8,7 +8,7 @@ use serde_wasm_bindgen::from_value;
 use wasm_bindgen::prelude::*;
 
 use crate::{
-    MockWebClient,
+    WebClient,
     helpers::generate_wallet,
     js_error_with_context,
     models::{
@@ -18,7 +18,7 @@ use crate::{
 };
 
 #[wasm_bindgen]
-impl MockWebClient {
+impl WebClient {
     #[wasm_bindgen(js_name = "importAccount")]
     pub async fn import_account(&mut self, account_bytes: JsValue) -> Result<JsValue, JsValue> {
         let keystore = self.keystore.clone();
@@ -34,15 +34,12 @@ impl MockWebClient {
                 .await
                 .map_err(|err| js_error_with_context(err, "failed to import account"))?;
 
-            keystore
-                .expect("KeyStore should be initialized")
-                .add_key(&account_data.auth_secret_key)
-                .await
-                .map_err(|err| err.to_string())?;
+            let keystore = keystore.expect("KeyStore should be initialized");
+            for key in account_data.auth_secret_keys {
+                keystore.add_key(&key).await.map_err(|err| err.to_string())?;
+            }
 
-            Ok(JsValue::from_str(&format!(
-                "Imported account with ID: {account_id}"
-            )))
+            Ok(JsValue::from_str(&format!("Imported account with ID: {account_id}")))
         } else {
             Err(JsValue::from_str("Client not initialized"))
         }
@@ -55,17 +52,10 @@ impl MockWebClient {
         mutable: bool,
     ) -> Result<Account, JsValue> {
         let keystore = self.keystore.clone();
-        let client = self
-            .get_mut_inner()
-            .ok_or(JsValue::from_str("Client not initialized"))?;
+        let client = self.get_mut_inner().ok_or(JsValue::from_str("Client not initialized"))?;
 
-        let (generated_acct, _, key_pair) = generate_wallet(
-            client,
-            &AccountStorageMode::public(),
-            mutable,
-            Some(init_seed),
-        )
-        .await?;
+        let (generated_acct, _, key_pair) =
+            generate_wallet(&AccountStorageMode::public(), mutable, Some(init_seed)).await?;
 
         let native_id = generated_acct.id();
         client
@@ -122,10 +112,7 @@ impl MockWebClient {
 
     #[wasm_bindgen(js_name = "forceImportStore")]
     pub async fn force_import_store(&mut self, store_dump: JsValue) -> Result<JsValue, JsValue> {
-        let store = self
-            .store
-            .as_ref()
-            .ok_or(JsValue::from_str("Store not initialized"))?;
+        let store = self.store.as_ref().ok_or(JsValue::from_str("Store not initialized"))?;
         store
             .force_import_store(store_dump)
             .await

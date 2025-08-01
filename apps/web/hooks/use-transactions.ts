@@ -10,6 +10,8 @@ import {
 import {
   type CreateTransactionDialogStep,
   type TransactionType,
+  wasmInputNoteToInputNote,
+  wasmTransactionToTransaction,
 } from "@/lib/types";
 import { mockWebClient } from "@/lib/mock-web-client";
 import useGlobalContext from "@/components/global-context/hook";
@@ -25,6 +27,7 @@ const useTransactions = () => {
     createTransactionDialogNoteIds,
     createTransactionDialogTransactionResult,
     transactions,
+    networkId,
     dispatch,
   } = useGlobalContext();
   const openCreateTransactionDialog = ({
@@ -174,10 +177,10 @@ const useTransactions = () => {
     const client = await mockWebClient();
     await client.submitTransaction(transactionResult);
     const syncSummary = await client.syncState();
-    const blockHeader = await client.getLatestEpochBlock();
-    console.log("blockNum", blockHeader.blockNum());
-    console.log("commitment:", blockHeader.commitment().toHex());
-    console.log("chainCommitment:", blockHeader.chainCommitment().toHex());
+    // const blockHeader = await client.getLatestEpochBlock();
+    // console.log("blockNum", blockHeader.blockNum());
+    // console.log("commitment:", blockHeader.commitment().toHex());
+    // console.log("chainCommitment:", blockHeader.chainCommitment().toHex());
     // console.log('Transaction submitted');
     const transactionId = transactionResult.executedTransaction().id();
     // console.log('Transaction ID:', transactionId.toHex());
@@ -216,24 +219,11 @@ const useTransactions = () => {
     dispatch({
       type: "SUBMIT_TRANSACTION",
       payload: {
-        transaction: {
-          record: transactionRecord,
-          scriptRoot:
-            transactionResult
-              .transactionArguments()
-              .txScript()
-              ?.root()
-              .toHex() ?? "",
-          inputNotesCount: transactionResult
-            .executedTransaction()
-            .inputNotes()
-            .numNotes(),
-          outputNotesCount: transactionResult
-            .executedTransaction()
-            .outputNotes()
-            .numNotes(),
-          updatedAt: syncSummary.blockNum(),
-        },
+        transaction: wasmTransactionToTransaction(
+          transactionRecord,
+          transactionResult,
+          networkId
+        ),
         account: newAccount,
         consumableNoteIds,
         /* account: {
@@ -241,11 +231,14 @@ const useTransactions = () => {
           account: newAccount,
           updatedAt: syncSummary.blockNum(),
         }, */
-        inputNotes: inputNotes.map((inputNote) => ({
+        inputNotes: inputNotes.map((inputNoteRecord) =>
+          wasmInputNoteToInputNote(inputNoteRecord, networkId)
+        ),
+        /* inputNotes: inputNotes.map((inputNote) => ({
           id: inputNote.id().toString(),
           inputNote,
           updatedAt: syncSummary.blockNum(),
-        })),
+        })), */
         syncSummary,
       },
     });

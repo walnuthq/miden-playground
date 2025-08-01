@@ -6,19 +6,18 @@ import {
   TooltipTrigger,
 } from "@workspace/ui/components/tooltip";
 import { formatId } from "@/lib/utils";
-import { type InputNote } from "@/lib/types";
 
-const NoteId = ({ inputNote: { id } }: { inputNote: InputNote }) => (
+const NoteId = ({ noteId }: { noteId: string }) => (
   <Tooltip>
     <TooltipTrigger asChild>
-      <Link href={`/notes/${id}`}>
+      <Link href={`/notes/${noteId}`}>
         <Button className="cursor-pointer -ml-4" variant="link">
-          {formatId(id)}
+          {formatId(noteId)}
         </Button>
       </Link>
     </TooltipTrigger>
     <TooltipContent>
-      <p>{id}</p>
+      <p>{noteId}</p>
     </TooltipContent>
   </Tooltip>
 );

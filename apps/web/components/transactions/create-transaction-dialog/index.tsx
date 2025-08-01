@@ -33,11 +33,11 @@ const CreateTransactionDialog = () => {
     closeCreateTransactionDialog,
   } = useTransactions();
   const [executingAccountId, setExecutingAccountId] = useState(
-    createTransactionDialogAccountId
+    createTransactionDialogAccountId,
   );
   const executingAccount = accounts.find(({ id }) => id === executingAccountId);
   const [transactionType, setTransactionType] = useState(
-    createTransactionDialogTransactionType
+    createTransactionDialogTransactionType,
   );
   const [step, setStep] = useState(createTransactionDialogStep);
   const [targetAccountId, setTargetAccountId] = useState("");
@@ -47,14 +47,14 @@ const CreateTransactionDialog = () => {
     ConsumableNoteRecord[]
   >(createTransactionDialogConsumableNotes);
   const [noteIds, setNoteIds] = useState<string[]>(
-    createTransactionDialogNoteIds
+    createTransactionDialogNoteIds,
   );
   const [faucetAccountId, setFaucetAccountId] = useState("");
   const faucetAccount = accounts.find(({ id }) => id === faucetAccountId);
   const [loading, setLoading] = useState(false);
   const [transactionResult, setTransactionResult] =
     useState<TransactionResult | null>(
-      createTransactionDialogTransactionResult
+      createTransactionDialogTransactionResult,
     );
   const onClose = () => {
     setExecutingAccountId("");

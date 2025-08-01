@@ -1,13 +1,17 @@
+import { range } from "lodash";
 import { type FunctionComponent } from "react";
 import {
-  NetworkId,
   type Account as WasmAccount,
+  type Note as WasmNote,
   type TransactionRecord,
+  type TransactionResult,
   type InputNoteRecord,
   NoteScript,
-  type NoteInputs,
   AccountId,
+  type NoteMetadata,
 } from "@workspace/mock-web-client";
+
+// ACCOUNTS
 
 export type Account = {
   account: WasmAccount;
@@ -47,55 +51,7 @@ export const accountToTableAccount = (account: Account): TableAccount => ({
   nonce: account.account.nonce().asInt(),
 });
 
-export type TransactionType = "consume" | "send" | "mint";
-
-export type CreateTransactionDialogStep = "select" | "configure" | "preview";
-
-export type Transaction = {
-  record: TransactionRecord;
-  scriptRoot: string;
-  inputNotesCount: number;
-  outputNotesCount: number;
-  updatedAt: number;
-};
-
-export type TableTransaction = {
-  id: string;
-  status: string;
-  accountAddress: string;
-  scriptRoot: string;
-  inputNotesCount: number;
-  outputNotesCount: number;
-};
-
-const transactionStatus = (transactionRecord: TransactionRecord) => {
-  const status = transactionRecord.transactionStatus();
-  if (status.isPending()) {
-    return "Pending";
-  } else if (status.isCommitted()) {
-    return `Committed (Block: ${status.getBlockNum()})`;
-  } else {
-    return "Discarded";
-  }
-};
-
-export const transactionToTableTransaction = (
-  { record, scriptRoot, inputNotesCount, outputNotesCount }: Transaction,
-  networkId: string
-): TableTransaction => ({
-  id: record.id().toHex(),
-  status: transactionStatus(record),
-  accountAddress: record.accountId().toBech32(NetworkId.tryFromStr(networkId)),
-  scriptRoot,
-  inputNotesCount,
-  outputNotesCount,
-});
-
-export type InputNote = {
-  id: string;
-  inputNote: InputNoteRecord;
-  updatedAt: number;
-};
+// INPUT NOTES
 
 const noteTypes = { 1: "Public", 2: "Private", 3: "Encrypted" } as const;
 
@@ -115,75 +71,174 @@ const noteStates = {
 
 type NoteState = (typeof noteStates)[keyof typeof noteStates];
 
-export type TableInputNote = {
+export type FungibleAsset = { faucetId: string; amount: string };
+
+export type InputNote = {
   id: string;
   type: NoteType;
   state: NoteState;
   tag: string;
   senderAddress: string;
+  scriptRoot: string;
+  wellKnownNote?: WellKnownNote;
+  fungibleAssets: FungibleAsset[];
+  inputs: bigint[];
+  updatedAt: number;
 };
 
 const wellKnownNotes = {
   [NoteScript.p2id().root().toHex()]: "P2ID",
-  [NoteScript.p2idr().root().toHex()]: "P2IDR",
+  [NoteScript.p2ide().root().toHex()]: "P2IDE",
   [NoteScript.swap().root().toHex()]: "SWAP",
 } as const;
 
-export const noteWellKnownNote = (inputNote: InputNoteRecord) =>
-  wellKnownNotes[noteScriptRoot(inputNote)];
+type WellKnownNote = (typeof wellKnownNotes)[keyof typeof wellKnownNotes];
 
-export const noteScriptRoot = (inputNote: InputNoteRecord) =>
-  inputNote.details().recipient().script().root().toHex();
+// export const noteWellKnownNote = (inputNote: InputNoteRecord) =>
+//   wellKnownNotes[noteScriptRoot(inputNote)];
 
 // export const noteSerialNumber = (inputNote: InputNoteRecord) =>
 //   inputNote.details().recipient().serialNum();
 
-export const noteType = (inputNote: InputNoteRecord) => {
-  const metadata = inputNote.metadata();
+const noteType = (metadata?: NoteMetadata) => {
   return metadata ? noteTypes[metadata.noteType()] : noteTypes[1];
 };
 
-export const noteState = (inputNote: InputNoteRecord) =>
-  noteStates[inputNote.state()];
+// export const noteState = (inputNote: InputNoteRecord) =>
+//   noteStates[inputNote.state()];
 
-export const noteTag = (inputNote: InputNoteRecord) =>
-  inputNote.metadata()?.tag().executionMode().toString() ?? "";
+// export const noteTag = (inputNote: InputNoteRecord) =>
+//   inputNote.metadata()?.tag().executionMode().toString() ?? "";
 
-export const noteSenderAddress = (
-  inputNote: InputNoteRecord,
-  networkId: string
-) =>
-  inputNote.metadata()?.sender().toBech32(NetworkId.tryFromStr(networkId)) ??
-  "";
+// export const noteSenderAddress = (
+//   inputNote: InputNoteRecord,
+//   networkId: string
+// ) => inputNote.metadata()?.sender().toBech32Custom(networkId) ?? "";
 
-export const noteConsumed = (inputNote: InputNoteRecord) =>
-  noteState(inputNote).includes("Consumed");
+export const noteConsumed = ({ state }: InputNote) =>
+  state.includes("Consumed");
 
 // let mut hex_string =
 //   format!("0x{:016x}{:016x}", self.prefix().as_u64(), self.suffix().as_int());
 // hex_string.truncate(32);
 // hex_string
 
-export const noteInputsToAccountId = (noteInputs: NoteInputs) => {
-  const [suffix, prefix] = noteInputs.values();
+export const noteInputsToAccountId = (noteInputs: bigint[]) => {
+  const [suffix, prefix] = noteInputs;
   if (!suffix || !prefix) {
     return AccountId.fromHex("0x000000000000000000000000000000");
   }
-  const prefixString = prefix.asInt().toString(16).padStart(16, "0");
-  const suffixString = suffix.asInt().toString(16).padStart(16, "0");
+  const prefixString = prefix.toString(16).padStart(16, "0");
+  const suffixString = suffix.toString(16).padStart(16, "0");
   return AccountId.fromHex(`0x${prefixString}${suffixString}`.slice(0, 32));
 };
 
-export const inputNoteToTableInputNote = (
-  inputNote: InputNote,
+export const wasmInputNoteToInputNote = (
+  record: InputNoteRecord,
   networkId: string
-): TableInputNote => ({
-  id: inputNote.id,
-  type: noteType(inputNote.inputNote),
-  state: noteState(inputNote.inputNote),
-  tag: noteTag(inputNote.inputNote),
-  senderAddress: noteSenderAddress(inputNote.inputNote, networkId),
+): InputNote => ({
+  id: record.id().toString(),
+  type: noteType(record.metadata()),
+  state: noteStates[record.state()],
+  tag: record.metadata()?.tag().executionMode().toString() ?? "",
+  senderAddress: record.metadata()?.sender().toBech32Custom(networkId) ?? "",
+  scriptRoot: record.details().recipient().script().root().toHex(),
+  wellKnownNote:
+    wellKnownNotes[record.details().recipient().script().root().toHex()],
+  fungibleAssets: record
+    .details()
+    .assets()
+    .fungibleAssets()
+    .map((fungibleAsset) => ({
+      faucetId: fungibleAsset.faucetId().toString(),
+      amount: fungibleAsset.amount().toString(),
+    })),
+  inputs: record
+    .details()
+    .recipient()
+    .inputs()
+    .values()
+    .map((value) => value.asInt()),
+  updatedAt: record.inclusionProof()?.location().blockNum() ?? 0,
 });
+
+// TRANSACTIONS
+
+export type TransactionType = "consume" | "send" | "mint";
+
+export type CreateTransactionDialogStep = "select" | "configure" | "preview";
+
+export type Note = {
+  id: string;
+  type: NoteType;
+  scriptRoot: string;
+  wellKnownNote?: WellKnownNote;
+  senderAddress: string;
+  fungibleAssets: FungibleAsset[];
+};
+
+const wasmNoteToNote = (note: WasmNote, networkId: string): Note => ({
+  id: note.id().toString(),
+  type: noteType(note.metadata()),
+  scriptRoot: note.recipient().script().root().toHex(),
+  wellKnownNote: wellKnownNotes[note.recipient().script().root().toHex()],
+  senderAddress: note.metadata()?.sender().toBech32Custom(networkId) ?? "",
+  fungibleAssets: note
+    .assets()
+    .fungibleAssets()
+    .map((fungibleAsset) => ({
+      faucetId: fungibleAsset.faucetId().toString(),
+      amount: fungibleAsset.amount().toString(),
+    })),
+});
+
+export type Transaction = {
+  id: string;
+  status: string;
+  accountAddress: string;
+  scriptRoot: string;
+  inputNotes: Note[];
+  outputNotes: Note[];
+  updatedAt: number;
+};
+
+const transactionStatus = (transactionRecord: TransactionRecord) => {
+  const status = transactionRecord.transactionStatus();
+  if (status.isPending()) {
+    return "Pending";
+  } else if (status.isCommitted()) {
+    return `Committed (Block: ${status.getBlockNum()})`;
+  } else {
+    return "Discarded";
+  }
+};
+
+export const wasmTransactionToTransaction = (
+  record: TransactionRecord,
+  result: TransactionResult,
+  networkId: string
+): Transaction => ({
+  id: record.id().toHex(),
+  status: transactionStatus(record),
+  accountAddress: record.accountId().toBech32Custom(networkId),
+  scriptRoot: result.transactionArguments().txScript()?.root().toHex() ?? "",
+  inputNotes: range(result.executedTransaction().inputNotes().numNotes()).map(
+    (index) => {
+      const note = result.executedTransaction().inputNotes().getNote(index);
+      return wasmNoteToNote(note.note(), networkId);
+    }
+  ),
+  outputNotes: range(result.executedTransaction().outputNotes().numNotes())
+    .map((index) => {
+      const note = result.executedTransaction().outputNotes().getNote(index);
+      return note.intoFull();
+    })
+    .filter((note) => note !== undefined)
+    .map((note) => wasmNoteToNote(note, networkId)),
+  updatedAt: record.blockNum(),
+});
+
+// TUTORIALS
 
 export type TutorialStep = {
   title: string;

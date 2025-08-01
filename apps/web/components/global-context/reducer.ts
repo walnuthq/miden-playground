@@ -1,10 +1,7 @@
 import {
-  TransactionRecord,
   Account as WasmAccount,
-  NetworkId,
   SyncSummary,
   type TransactionResult,
-  InputNoteRecord,
   type ConsumableNoteRecord,
 } from "@workspace/mock-web-client";
 import {
@@ -44,7 +41,7 @@ export type State = {
 
 export const initialState = (): State => ({
   // GLOBAL
-  networkId: new NetworkId("mlcl").asStr(),
+  networkId: "mlcl",
   syncSummary: null,
   // ACCOUNTS
   createWalletDialogOpen: false,
@@ -103,25 +100,10 @@ export const stateSerializer = ({
         updatedAt,
       })
     ),
-    transactions: transactions.map(
-      ({
-        record,
-        scriptRoot,
-        inputNotesCount,
-        outputNotesCount,
-        updatedAt,
-      }) => ({
-        record: record.serialize().toString(),
-        scriptRoot,
-        inputNotesCount,
-        outputNotesCount,
-        updatedAt,
-      })
-    ),
-    inputNotes: inputNotes.map(({ id, inputNote, updatedAt }) => ({
-      id,
-      inputNote: inputNote.serialize().toString(),
-      updatedAt,
+    transactions,
+    inputNotes: inputNotes.map((inputNote) => ({
+      ...inputNote,
+      inputs: inputNote.inputs.map((input) => input.toString()),
     })),
     tutorialId,
     tutorialStep,
@@ -154,14 +136,8 @@ export const stateDeserializer = (value: string): State => {
       tokenSymbol: string;
       updatedAt: number;
     }[];
-    transactions: {
-      record: string;
-      scriptRoot: string;
-      inputNotesCount: number;
-      outputNotesCount: number;
-      updatedAt: number;
-    }[];
-    inputNotes: { id: string; inputNote: string; updatedAt: number }[];
+    transactions: Transaction[];
+    inputNotes: (Omit<InputNote, "inputs"> & { inputs: string[] })[];
     tutorialId: string;
     tutorialStep: number;
     tutorialMaxStep: number;
@@ -197,29 +173,10 @@ export const stateDeserializer = (value: string): State => {
         updatedAt,
       })
     ),
-    transactions: transactions.map(
-      ({
-        record,
-        scriptRoot,
-        inputNotesCount,
-        outputNotesCount,
-        updatedAt,
-      }) => ({
-        record: TransactionRecord.deserialize(
-          Uint8Array.from(record.split(",").map((byte) => Number(byte)))
-        ),
-        scriptRoot,
-        inputNotesCount,
-        outputNotesCount,
-        updatedAt,
-      })
-    ),
-    inputNotes: inputNotes.map(({ id, inputNote, updatedAt }) => ({
-      id,
-      inputNote: InputNoteRecord.deserialize(
-        Uint8Array.from(inputNote.split(",").map((byte) => Number(byte)))
-      ),
-      updatedAt,
+    transactions,
+    inputNotes: inputNotes.map((inputNote) => ({
+      ...inputNote,
+      inputs: inputNote.inputs.map((input) => BigInt(input)),
     })),
     tutorialId,
     tutorialStep,

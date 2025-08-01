@@ -17,38 +17,30 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@workspace/ui/components/popover";
-import {
-  type InputNoteRecord,
-  type ConsumableNoteRecord,
-} from "@workspace/mock-web-client";
+import { type ConsumableNoteRecord } from "@workspace/mock-web-client";
 import useAccounts from "@/hooks/use-accounts";
-import { type Account, noteType } from "@/lib/types";
+import {
+  wasmInputNoteToInputNote,
+  type Account,
+  type InputNote,
+} from "@/lib/types";
+import useGlobalContext from "@/components/global-context/hook";
 
-const getConsumableNoteFields = (
-  inputNote: InputNoteRecord,
-  faucets: Account[]
-) => {
-  const noteFungibleAssets = inputNote
-    .details()
-    .assets()
-    .fungibleAssets()
-    .map((asset) => {
-      const faucet = faucets.find(
-        ({ id }) => id === asset.faucetId().toString()
-      );
-      return `${asset.amount()}::${faucet?.tokenSymbol ?? "Unknown"}`;
-    });
+const getConsumableNoteFields = (inputNote: InputNote, faucets: Account[]) => {
+  const noteFungibleAssets = inputNote.fungibleAssets.map(
+    ({ faucetId, amount }) => {
+      const faucet = faucets.find(({ id }) => id === faucetId);
+      return `${amount} ${faucet?.tokenSymbol ?? "Unknown"}`;
+    }
+  );
   return {
-    noteId: inputNote.id().toString(),
-    noteType: noteType(inputNote),
+    noteId: inputNote.id,
+    noteType: inputNote.type,
     noteFungibleAssets,
   };
 };
 
-const getConsumableNoteValue = (
-  inputNote: InputNoteRecord,
-  faucets: Account[]
-) => {
+const getConsumableNoteValue = (inputNote: InputNote, faucets: Account[]) => {
   const { noteId, noteType, noteFungibleAssets } = getConsumableNoteFields(
     inputNote,
     faucets
@@ -56,10 +48,7 @@ const getConsumableNoteValue = (
   return [noteId, noteType, noteFungibleAssets.join(",")].join(",");
 };
 
-const getConsumableNoteLabel = (
-  inputNote: InputNoteRecord,
-  faucets: Account[]
-) => {
+const getConsumableNoteLabel = (inputNote: InputNote, faucets: Account[]) => {
   const { noteId, noteType, noteFungibleAssets } = getConsumableNoteFields(
     inputNote,
     faucets
@@ -80,8 +69,9 @@ const SelectConsumableNotesCombobox = ({
   onValueChange: Dispatch<SetStateAction<string[]>>;
   consumableNotes: ConsumableNoteRecord[];
 }) => {
-  const [open, setOpen] = useState(false);
+  const { networkId } = useGlobalContext();
   const { faucets } = useAccounts();
+  const [open, setOpen] = useState(false);
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -110,7 +100,10 @@ const SelectConsumableNotesCombobox = ({
                 <CommandItem
                   key={consumableNote.inputNoteRecord().id().toString()}
                   value={getConsumableNoteValue(
-                    consumableNote.inputNoteRecord(),
+                    wasmInputNoteToInputNote(
+                      consumableNote.inputNoteRecord(),
+                      networkId
+                    ),
                     faucets
                   )}
                   onSelect={(currentValue) => {
@@ -127,7 +120,10 @@ const SelectConsumableNotesCombobox = ({
                   }}
                 >
                   {getConsumableNoteLabel(
-                    consumableNote.inputNoteRecord(),
+                    wasmInputNoteToInputNote(
+                      consumableNote.inputNoteRecord(),
+                      networkId
+                    ),
                     faucets
                   )}
                   <Check
