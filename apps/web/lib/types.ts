@@ -1,6 +1,5 @@
 import { type FunctionComponent } from "react";
 import {
-  NetworkId,
   type Account as WasmAccount,
   type TransactionRecord,
   type InputNoteRecord,
@@ -81,11 +80,11 @@ const transactionStatus = (transactionRecord: TransactionRecord) => {
 
 export const transactionToTableTransaction = (
   { record, scriptRoot, inputNotesCount, outputNotesCount }: Transaction,
-  networkId: string
+  networkId: string,
 ): TableTransaction => ({
   id: record.id().toHex(),
   status: transactionStatus(record),
-  accountAddress: record.accountId().toBech32(NetworkId.tryFromStr(networkId)),
+  accountAddress: record.accountId().toBech32Custom(networkId),
   scriptRoot,
   inputNotesCount,
   outputNotesCount,
@@ -125,7 +124,7 @@ export type TableInputNote = {
 
 const wellKnownNotes = {
   [NoteScript.p2id().root().toHex()]: "P2ID",
-  [NoteScript.p2idr().root().toHex()]: "P2IDR",
+  [NoteScript.p2ide().root().toHex()]: "P2IDE",
   [NoteScript.swap().root().toHex()]: "SWAP",
 } as const;
 
@@ -151,10 +150,8 @@ export const noteTag = (inputNote: InputNoteRecord) =>
 
 export const noteSenderAddress = (
   inputNote: InputNoteRecord,
-  networkId: string
-) =>
-  inputNote.metadata()?.sender().toBech32(NetworkId.tryFromStr(networkId)) ??
-  "";
+  networkId: string,
+) => inputNote.metadata()?.sender().toBech32Custom(networkId) ?? "";
 
 export const noteConsumed = (inputNote: InputNoteRecord) =>
   noteState(inputNote).includes("Consumed");
@@ -176,7 +173,7 @@ export const noteInputsToAccountId = (noteInputs: NoteInputs) => {
 
 export const inputNoteToTableInputNote = (
   inputNote: InputNote,
-  networkId: string
+  networkId: string,
 ): TableInputNote => ({
   id: inputNote.id,
   type: noteType(inputNote.inputNote),

@@ -44,7 +44,7 @@ const CreateTransactionDialogSelectForm = ({
           setLoading(true);
           const client = await mockWebClient();
           const consumableNotes = await client.getConsumableNotes(
-            executingAccount.account.id()
+            executingAccount.account.id(),
           );
           setLoading(false);
           setConsumableNotes(consumableNotes);
@@ -61,7 +61,7 @@ const CreateTransactionDialogSelectForm = ({
               setExecutingAccountId(value);
               const account = accounts.find(({ id }) => id === value);
               setTransactionType(
-                account?.account.isFaucet() ? "mint" : "consume"
+                account?.account.isFaucet() ? "mint" : "consume",
               );
             }}
           />

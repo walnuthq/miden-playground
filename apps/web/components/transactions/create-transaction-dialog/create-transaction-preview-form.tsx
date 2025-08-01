@@ -45,7 +45,7 @@ const TransactionPreview = ({
   const accountStorageDelta = transactionResult.accountDelta().storage();
   const accountVaultDelta = transactionResult.accountDelta().vault();
   const fungibleAssetDelta = accountVaultDelta.fungible();
-  const nonce = transactionResult.accountDelta().nonce()?.asInt();
+  const nonceDelta = transactionResult.accountDelta().nonceDelta()?.asInt();
   return (
     <div className="flex flex-col gap-2 text-sm">
       <p>The transaction will have the following effects:</p>
@@ -95,7 +95,7 @@ const TransactionPreview = ({
           withAccountAddress={false}
         />
       )}
-      <p>New nonce: {nonce}.</p>
+      <p>New nonce: {nonceDelta}.</p>
     </div>
   );
 };

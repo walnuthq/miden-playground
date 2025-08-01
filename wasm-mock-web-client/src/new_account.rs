@@ -2,18 +2,20 @@ use miden_client::{
     Felt,
     account::{AccountBuilder, AccountType},
     auth::AuthSecretKey,
-    crypto::SecretKey,
+    crypto::SecretKey as NativeSecretKey,
 };
 use miden_lib::account::{auth::RpoFalcon512, faucets::BasicFungibleFaucet};
-use miden_objects::{AccountIdError, asset::TokenSymbol};
+use miden_objects::asset::TokenSymbol;
 use rand::RngCore;
 use wasm_bindgen::prelude::*;
 
-use super::models::{account::Account, account_storage_mode::AccountStorageMode};
-use crate::{MockWebClient, helpers::generate_wallet, js_error_with_context, models::word::Word};
+use super::models::{
+    account::Account, account_storage_mode::AccountStorageMode, secret_key::SecretKey, word::Word,
+};
+use crate::{WebClient, helpers::generate_wallet, js_error_with_context};
 
 #[wasm_bindgen]
-impl MockWebClient {
+impl WebClient {
     #[wasm_bindgen(js_name = "newWallet")]
     pub async fn new_wallet(
         &mut self,
@@ -24,7 +26,7 @@ impl MockWebClient {
         let keystore = self.keystore.clone();
         if let Some(client) = self.get_mut_inner() {
             let (new_account, account_seed, key_pair) =
-                generate_wallet(client, storage_mode, mutable, init_seed).await?;
+                generate_wallet(storage_mode, mutable, init_seed).await?;
 
             client
                 .add_account(&new_account, Some(account_seed), false)
@@ -53,14 +55,12 @@ impl MockWebClient {
         max_supply: u64,
     ) -> Result<Account, JsValue> {
         if non_fungible {
-            return Err(JsValue::from_str(
-                "Non-fungible faucets are not supported yet",
-            ));
+            return Err(JsValue::from_str("Non-fungible faucets are not supported yet"));
         }
 
         let keystore = self.keystore.clone();
         if let Some(client) = self.get_mut_inner() {
-            let key_pair = SecretKey::with_rng(client.rng());
+            let key_pair = NativeSecretKey::with_rng(client.rng());
             let pub_key = key_pair.public_key();
 
             let mut init_seed = [0u8; 32];
@@ -71,20 +71,10 @@ impl MockWebClient {
             let max_supply = Felt::try_from(max_supply.to_le_bytes().as_slice())
                 .expect("u64 can be safely converted to a field element");
 
-            let anchor_block = client
-                .get_latest_epoch_block()
-                .await
-                .map_err(|err| js_error_with_context(err, "failed to get latest epoch block"))?;
-
             let (new_account, seed) = match AccountBuilder::new(init_seed)
-                .anchor(
-                    (&anchor_block)
-                        .try_into()
-                        .map_err(|err: AccountIdError| err.to_string())?,
-                )
                 .account_type(AccountType::FungibleFaucet)
                 .storage_mode(storage_mode.into())
-                .with_component(RpoFalcon512::new(pub_key))
+                .with_auth_component(RpoFalcon512::new(pub_key))
                 .with_component(
                     BasicFungibleFaucet::new(symbol, decimals, max_supply)
                         .map_err(|err| js_error_with_context(err, "failed to create new faucet"))?,
@@ -95,7 +85,7 @@ impl MockWebClient {
                 Err(err) => {
                     let error_message = format!("Failed to create new faucet: {err:?}");
                     return Err(JsValue::from_str(&error_message));
-                }
+                },
             };
 
             keystore
@@ -109,7 +99,7 @@ impl MockWebClient {
                 Err(err) => {
                     let error_message = format!("Failed to insert new faucet: {err:?}");
                     Err(JsValue::from_str(&error_message))
-                }
+                },
             }
         } else {
             Err(JsValue::from_str("Client not initialized"))
@@ -133,5 +123,18 @@ impl MockWebClient {
         } else {
             Err(JsValue::from_str("Client not initialized"))
         }
+    }
+
+    #[wasm_bindgen(js_name = "addAccountSecretKeyToWebStore")]
+    pub async fn add_account_secret_key_to_web_store(
+        &mut self,
+        secret_key: &SecretKey,
+    ) -> Result<(), JsValue> {
+        let keystore = self.keystore.as_mut().expect("KeyStore should be initialized");
+        keystore
+            .add_key(&AuthSecretKey::RpoFalcon512(secret_key.into()))
+            .await
+            .map_err(|err| err.to_string())?;
+        Ok(())
     }
 }

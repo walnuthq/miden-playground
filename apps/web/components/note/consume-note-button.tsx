@@ -11,10 +11,10 @@ const ConsumeNoteButton = ({ inputNote }: { inputNote: InputNote }) => {
     useTransactions();
   const [loading, setLoading] = useState(false);
   const targetAccountId = noteInputsToAccountId(
-    inputNote.inputNote.details().recipient().inputs()
+    inputNote.inputNote.details().recipient().inputs(),
   );
   const targetAccount = accounts.find(
-    ({ id }) => id === targetAccountId.toString()
+    ({ id }) => id === targetAccountId.toString(),
   );
   return (
     <Button

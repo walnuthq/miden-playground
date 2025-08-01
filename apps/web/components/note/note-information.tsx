@@ -1,4 +1,3 @@
-import { NetworkId } from "@workspace/mock-web-client";
 import {
   noteWellKnownNote,
   type InputNote,
@@ -57,8 +56,8 @@ const NoteInformation = ({ inputNote }: { inputNote: InputNote }) => {
                 value: (
                   <AccountAddress
                     address={noteInputsToAccountId(
-                      inputNote.inputNote.details().recipient().inputs()
-                    ).toBech32(NetworkId.tryFromStr(networkId))}
+                      inputNote.inputNote.details().recipient().inputs(),
+                    ).toBech32Custom(networkId)}
                   />
                 ),
               },

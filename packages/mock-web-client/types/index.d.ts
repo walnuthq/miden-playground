@@ -1,4 +1,4 @@
-import { MockWebClient as WasmMockWebClient } from "wasm-mock-web-client";
+import { WebClient as WasmWebClient } from "wasm-mock-web-client";
 
 export {
   Account,
@@ -8,6 +8,7 @@ export {
   AccountId,
   AccountStorageMode,
   AccountStorage,
+  AccountStorageRequirements,
   AccountType,
   AdviceMap,
   AssetVault,
@@ -17,11 +18,11 @@ export {
   ConsumableNoteRecord,
   Felt,
   FeltArray,
+  ForeignAccount,
   FungibleAsset,
   InputNoteRecord,
   InputNoteState,
   Library,
-  NetworkId,
   NewSwapTransactionResult,
   Note,
   NoteAndArgs,
@@ -43,8 +44,13 @@ export {
   NoteType,
   OutputNote,
   OutputNotesArray,
+  PublicKey,
+  RpoDigest,
   Rpo256,
+  SecretKey,
   SerializedAccountHeader,
+  SlotAndKeys,
+  SlotAndKeysArray,
   StorageMap,
   StorageSlot,
   SyncSummary,
@@ -60,11 +66,11 @@ export {
   TransactionScriptInputPair,
   TransactionScriptInputPairArray,
   Word,
-  MockWebClient,
+  WebClient,
 } from "wasm-mock-web-client";
 
 // Extend WASM WebClient but override methods that use workers
-export declare class MockWebClient extends WasmMockWebClient {
+export declare class WebClient extends WasmWebClient {
   /**
    * Factory method to create and initialize a new wrapped WebClient.
    *
@@ -72,10 +78,7 @@ export declare class MockWebClient extends WasmMockWebClient {
    * @param seed - The seed for the account (optional).
    * @returns A promise that resolves to a fully initialized WebClient.
    */
-  static createClient(
-    rpcUrl?: string,
-    seed?: Uint8Array,
-  ): Promise<MockWebClient>;
+  static createClient(rpcUrl?: string, seed?: Uint8Array): Promise<WebClient>;
 
   /**
    * Terminates the underlying worker.

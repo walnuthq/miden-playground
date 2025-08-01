@@ -1,8 +1,8 @@
-import { fetchAndCacheAccountAuthByPubKey, getAccountAssetVault, getAccountAuthByPubKey, getAccountCode, getAccountHeaderByCommitment, getAccountHeader, getAccountStorage, getForeignAccountCode, insertAccountAssetVault, insertAccountAuth, insertAccountCode, insertAccountRecord, insertAccountStorage, lockAccount, undoAccountStates, upsertForeignAccountCode } from './snippets/miden-client-e6bb2bd803c562cf/src/store/web_store/js/accounts.js';
-import { getBlockHeaders, getPartialBlockchainNodes, getPartialBlockchainPeaksByBlockNum, insertBlockHeader, insertPartialBlockchainNodes } from './snippets/miden-client-e6bb2bd803c562cf/src/store/web_store/js/chainData.js';
-import { getInputNotesFromIds, getInputNotesFromNullifiers, getInputNotes, getOutputNotesFromIds, getOutputNotesFromNullifiers, getOutputNotes, upsertInputNote, upsertOutputNote } from './snippets/miden-client-e6bb2bd803c562cf/src/store/web_store/js/notes.js';
-import { addNoteTag, applyStateSync, removeNoteTag } from './snippets/miden-client-e6bb2bd803c562cf/src/store/web_store/js/sync.js';
-import { getTransactions, insertTransactionScript, upsertTransactionRecord } from './snippets/miden-client-e6bb2bd803c562cf/src/store/web_store/js/transactions.js';
+import { fetchAndCacheAccountAuthByPubKey, getAccountAssetVault, getAccountAuthByPubKey, getAccountCode, getAccountHeaderByCommitment, getAccountHeader, getAccountStorage, getForeignAccountCode, insertAccountAssetVault, insertAccountAuth, insertAccountCode, insertAccountRecord, insertAccountStorage, lockAccount, undoAccountStates, upsertForeignAccountCode } from './snippets/miden-client-b25228a23470b8b0/src/store/web_store/js/accounts.js';
+import { getBlockHeaders, getPartialBlockchainNodes, getPartialBlockchainPeaksByBlockNum, insertBlockHeader, insertPartialBlockchainNodes } from './snippets/miden-client-b25228a23470b8b0/src/store/web_store/js/chainData.js';
+import { getInputNotesFromIds, getInputNotesFromNullifiers, getInputNotes, getOutputNotesFromIds, getOutputNotesFromNullifiers, getOutputNotes, upsertInputNote, upsertOutputNote } from './snippets/miden-client-b25228a23470b8b0/src/store/web_store/js/notes.js';
+import { addNoteTag, applyStateSync, removeNoteTag } from './snippets/miden-client-b25228a23470b8b0/src/store/web_store/js/sync.js';
+import { getTransactions, insertTransactionScript, upsertTransactionRecord } from './snippets/miden-client-b25228a23470b8b0/src/store/web_store/js/transactions.js';
 
 let wasm;
 export function __wbg_set_wasm(val) {
@@ -234,16 +234,6 @@ function _assertClass(instance, klass) {
     }
 }
 
-function passArrayJsValueToWasm0(array, malloc) {
-    const ptr = malloc(array.length * 4, 4) >>> 0;
-    for (let i = 0; i < array.length; i++) {
-        const add = addToExternrefTable0(array[i]);
-        getDataViewMemory0().setUint32(ptr + 4 * i, add, true);
-    }
-    WASM_VECTOR_LEN = array.length;
-    return ptr;
-}
-
 function takeFromExternrefTable0(idx) {
     const value = wasm.__wbindgen_export_5.get(idx);
     wasm.__externref_table_dealloc(idx);
@@ -254,6 +244,16 @@ function passArray8ToWasm0(arg, malloc) {
     const ptr = malloc(arg.length * 1, 1) >>> 0;
     getUint8ArrayMemory0().set(arg, ptr / 1);
     WASM_VECTOR_LEN = arg.length;
+    return ptr;
+}
+
+function passArrayJsValueToWasm0(array, malloc) {
+    const ptr = malloc(array.length * 4, 4) >>> 0;
+    for (let i = 0; i < array.length; i++) {
+        const add = addToExternrefTable0(array[i]);
+        getDataViewMemory0().setUint32(ptr + 4 * i, add, true);
+    }
+    WASM_VECTOR_LEN = array.length;
     return ptr;
 }
 
@@ -286,14 +286,23 @@ function getArrayU32FromWasm0(ptr, len) {
     ptr = ptr >>> 0;
     return getUint32ArrayMemory0().subarray(ptr / 4, ptr / 4 + len);
 }
-function __wbg_adapter_52(arg0, arg1, arg2) {
-    wasm.closure2267_externref_shim(arg0, arg1, arg2);
+function __wbg_adapter_54(arg0, arg1, arg2) {
+    wasm.closure2288_externref_shim(arg0, arg1, arg2);
 }
 
-function __wbg_adapter_641(arg0, arg1, arg2, arg3) {
-    wasm.closure2289_externref_shim(arg0, arg1, arg2, arg3);
+function __wbg_adapter_692(arg0, arg1, arg2, arg3) {
+    wasm.closure2310_externref_shim(arg0, arg1, arg2, arg3);
 }
 
+/**
+ * @enum {0 | 1 | 2 | 3}
+ */
+export const AccountType = Object.freeze({
+    FungibleFaucet: 0, "0": "FungibleFaucet",
+    NonFungibleFaucet: 1, "1": "NonFungibleFaucet",
+    RegularAccountImmutableCode: 2, "2": "RegularAccountImmutableCode",
+    RegularAccountUpdatableCode: 3, "3": "RegularAccountUpdatableCode",
+});
 /**
  * @enum {0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8}
  */
@@ -339,6 +348,8 @@ export const NoteType = Object.freeze({
      */
     Public: 1, "1": "Public",
 });
+
+const __wbindgen_enum_NetworkId = ["mm", "mtst", "mdev"];
 
 const __wbindgen_enum_ReadableStreamType = ["bytes"];
 
@@ -474,6 +485,138 @@ export class Account {
     }
 }
 
+const AccountBuilderFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_accountbuilder_free(ptr >>> 0, 1));
+
+export class AccountBuilder {
+
+    static __wrap(ptr) {
+        ptr = ptr >>> 0;
+        const obj = Object.create(AccountBuilder.prototype);
+        obj.__wbg_ptr = ptr;
+        AccountBuilderFinalization.register(obj, obj.__wbg_ptr, obj);
+        return obj;
+    }
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        AccountBuilderFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_accountbuilder_free(ptr, 0);
+    }
+    /**
+     * @param {Uint8Array} init_seed
+     */
+    constructor(init_seed) {
+        const ptr0 = passArray8ToWasm0(init_seed, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.accountbuilder_new(ptr0, len0);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        this.__wbg_ptr = ret[0] >>> 0;
+        AccountBuilderFinalization.register(this, this.__wbg_ptr, this);
+        return this;
+    }
+    /**
+     * @param {AccountType} account_type
+     * @returns {AccountBuilder}
+     */
+    accountType(account_type) {
+        const ptr = this.__destroy_into_raw();
+        const ret = wasm.accountbuilder_accountType(ptr, account_type);
+        return AccountBuilder.__wrap(ret);
+    }
+    /**
+     * @param {AccountStorageMode} storage_mode
+     * @returns {AccountBuilder}
+     */
+    storageMode(storage_mode) {
+        const ptr = this.__destroy_into_raw();
+        _assertClass(storage_mode, AccountStorageMode);
+        const ret = wasm.accountbuilder_storageMode(ptr, storage_mode.__wbg_ptr);
+        return AccountBuilder.__wrap(ret);
+    }
+    /**
+     * @param {AccountComponent} account_component
+     * @returns {AccountBuilder}
+     */
+    withComponent(account_component) {
+        const ptr = this.__destroy_into_raw();
+        _assertClass(account_component, AccountComponent);
+        const ret = wasm.accountbuilder_withComponent(ptr, account_component.__wbg_ptr);
+        return AccountBuilder.__wrap(ret);
+    }
+    /**
+     * @param {AccountComponent} account_component
+     * @returns {AccountBuilder}
+     */
+    withAuthComponent(account_component) {
+        const ptr = this.__destroy_into_raw();
+        _assertClass(account_component, AccountComponent);
+        const ret = wasm.accountbuilder_withAuthComponent(ptr, account_component.__wbg_ptr);
+        return AccountBuilder.__wrap(ret);
+    }
+    /**
+     * @returns {AccountBuilderResult}
+     */
+    build() {
+        const ptr = this.__destroy_into_raw();
+        const ret = wasm.accountbuilder_build(ptr);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return AccountBuilderResult.__wrap(ret[0]);
+    }
+}
+
+const AccountBuilderResultFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_accountbuilderresult_free(ptr >>> 0, 1));
+
+export class AccountBuilderResult {
+
+    static __wrap(ptr) {
+        ptr = ptr >>> 0;
+        const obj = Object.create(AccountBuilderResult.prototype);
+        obj.__wbg_ptr = ptr;
+        AccountBuilderResultFinalization.register(obj, obj.__wbg_ptr, obj);
+        return obj;
+    }
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        AccountBuilderResultFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_accountbuilderresult_free(ptr, 0);
+    }
+    /**
+     * @returns {Account}
+     */
+    get account() {
+        const ret = wasm.accountbuilderresult_account(this.__wbg_ptr);
+        return Account.__wrap(ret);
+    }
+    /**
+     * @returns {Word}
+     */
+    get seed() {
+        const ret = wasm.accountbuilderresult_seed(this.__wbg_ptr);
+        return Word.__wrap(ret);
+    }
+}
+
 const AccountCodeFinalization = (typeof FinalizationRegistry === 'undefined')
     ? { register: () => {}, unregister: () => {} }
     : new FinalizationRegistry(ptr => wasm.__wbg_accountcode_free(ptr >>> 0, 1));
@@ -503,8 +646,94 @@ export class AccountCode {
      * @returns {RpoDigest}
      */
     commitment() {
-        const ret = wasm.accountcode_commitment(this.__wbg_ptr);
+        const ret = wasm.accountbuilderresult_seed(this.__wbg_ptr);
         return RpoDigest.__wrap(ret);
+    }
+}
+
+const AccountComponentFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_accountcomponent_free(ptr >>> 0, 1));
+
+export class AccountComponent {
+
+    static __wrap(ptr) {
+        ptr = ptr >>> 0;
+        const obj = Object.create(AccountComponent.prototype);
+        obj.__wbg_ptr = ptr;
+        AccountComponentFinalization.register(obj, obj.__wbg_ptr, obj);
+        return obj;
+    }
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        AccountComponentFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_accountcomponent_free(ptr, 0);
+    }
+    /**
+     * @param {string} account_code
+     * @param {Assembler} assembler
+     * @param {StorageSlot[]} storage_slots
+     * @returns {AccountComponent}
+     */
+    static compile(account_code, assembler, storage_slots) {
+        const ptr0 = passStringToWasm0(account_code, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        _assertClass(assembler, Assembler);
+        const ptr1 = passArrayJsValueToWasm0(storage_slots, wasm.__wbindgen_malloc);
+        const len1 = WASM_VECTOR_LEN;
+        const ret = wasm.accountcomponent_compile(ptr0, len0, assembler.__wbg_ptr, ptr1, len1);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return AccountComponent.__wrap(ret[0]);
+    }
+    /**
+     * @returns {AccountComponent}
+     */
+    withSupportsAllTypes() {
+        const ptr = this.__destroy_into_raw();
+        const ret = wasm.accountcomponent_withSupportsAllTypes(ptr);
+        return AccountComponent.__wrap(ret);
+    }
+    /**
+     * @param {string} procedure_name
+     * @returns {string}
+     */
+    getProcedureHash(procedure_name) {
+        let deferred3_0;
+        let deferred3_1;
+        try {
+            const ptr0 = passStringToWasm0(procedure_name, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+            const len0 = WASM_VECTOR_LEN;
+            const ret = wasm.accountcomponent_getProcedureHash(this.__wbg_ptr, ptr0, len0);
+            var ptr2 = ret[0];
+            var len2 = ret[1];
+            if (ret[3]) {
+                ptr2 = 0; len2 = 0;
+                throw takeFromExternrefTable0(ret[2]);
+            }
+            deferred3_0 = ptr2;
+            deferred3_1 = len2;
+            return getStringFromWasm0(ptr2, len2);
+        } finally {
+            wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
+        }
+    }
+    /**
+     * @param {SecretKey} secret_key
+     * @returns {AccountComponent}
+     */
+    static createAuthComponent(secret_key) {
+        _assertClass(secret_key, SecretKey);
+        const ret = wasm.accountcomponent_createAuthComponent(secret_key.__wbg_ptr);
+        return AccountComponent.__wrap(ret);
     }
 }
 
@@ -555,11 +784,11 @@ export class AccountDelta {
         return AccountVaultDelta.__wrap(ret);
     }
     /**
-     * @returns {Felt | undefined}
+     * @returns {Felt}
      */
-    nonce() {
-        const ret = wasm.accountdelta_nonce(this.__wbg_ptr);
-        return ret === 0 ? undefined : Felt.__wrap(ret);
+    nonceDelta() {
+        const ret = wasm.accountdelta_nonceDelta(this.__wbg_ptr);
+        return Felt.__wrap(ret);
     }
 }
 
@@ -613,7 +842,7 @@ export class AccountHeader {
      * @returns {RpoDigest}
      */
     vaultCommitment() {
-        const ret = wasm.accountheader_vaultCommitment(this.__wbg_ptr);
+        const ret = wasm.accountbuilderresult_seed(this.__wbg_ptr);
         return RpoDigest.__wrap(ret);
     }
     /**
@@ -668,6 +897,16 @@ export class AccountId {
         return AccountId.__wrap(ret);
     }
     /**
+     * @param {string} bech32
+     * @returns {AccountId}
+     */
+    static fromBech32(bech32) {
+        const ptr0 = passStringToWasm0(bech32, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.accountid_fromBech32(ptr0, len0);
+        return AccountId.__wrap(ret);
+    }
+    /**
      * @returns {boolean}
      */
     isFaucet() {
@@ -697,6 +936,58 @@ export class AccountId {
         }
     }
     /**
+     * Will turn the Account ID into its bech32 string representation. To avoid a potential
+     * wrongful encoding, this function will expect only IDs for either mainnet ("mm"),
+     * testnet ("mtst") or devnet ("mdev"). To use a custom bech32 prefix, see
+     * `Self::to_bech_32_custom`.
+     * @param {NetworkId} network_id
+     * @returns {string}
+     */
+    toBech32(network_id) {
+        let deferred2_0;
+        let deferred2_1;
+        try {
+            const ret = wasm.accountid_toBech32(this.__wbg_ptr, (__wbindgen_enum_NetworkId.indexOf(network_id) + 1 || 4) - 1);
+            var ptr1 = ret[0];
+            var len1 = ret[1];
+            if (ret[3]) {
+                ptr1 = 0; len1 = 0;
+                throw takeFromExternrefTable0(ret[2]);
+            }
+            deferred2_0 = ptr1;
+            deferred2_1 = len1;
+            return getStringFromWasm0(ptr1, len1);
+        } finally {
+            wasm.__wbindgen_free(deferred2_0, deferred2_1, 1);
+        }
+    }
+    /**
+     * Turn this Account ID into its bech32 string representation. This method accepts a custom
+     * network ID.
+     * @param {string} custom_network_id
+     * @returns {string}
+     */
+    toBech32Custom(custom_network_id) {
+        let deferred3_0;
+        let deferred3_1;
+        try {
+            const ptr0 = passStringToWasm0(custom_network_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+            const len0 = WASM_VECTOR_LEN;
+            const ret = wasm.accountid_toBech32Custom(this.__wbg_ptr, ptr0, len0);
+            var ptr2 = ret[0];
+            var len2 = ret[1];
+            if (ret[3]) {
+                ptr2 = 0; len2 = 0;
+                throw takeFromExternrefTable0(ret[2]);
+            }
+            deferred3_0 = ptr2;
+            deferred3_1 = len2;
+            return getStringFromWasm0(ptr2, len2);
+        } finally {
+            wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
+        }
+    }
+    /**
      * @returns {Felt}
      */
     prefix() {
@@ -709,24 +1000,6 @@ export class AccountId {
     suffix() {
         const ret = wasm.accountid_suffix(this.__wbg_ptr);
         return Felt.__wrap(ret);
-    }
-    /**
-     * @param {NetworkId} network_id
-     * @returns {string}
-     */
-    toBech32(network_id) {
-        let deferred2_0;
-        let deferred2_1;
-        try {
-            _assertClass(network_id, NetworkId);
-            var ptr0 = network_id.__destroy_into_raw();
-            const ret = wasm.accountid_toBech32(this.__wbg_ptr, ptr0);
-            deferred2_0 = ret[0];
-            deferred2_1 = ret[1];
-            return getStringFromWasm0(ret[0], ret[1]);
-        } finally {
-            wasm.__wbindgen_free(deferred2_0, deferred2_1, 1);
-        }
     }
 }
 
@@ -891,6 +1164,52 @@ export class AccountStorageMode {
     }
 }
 
+const AccountStorageRequirementsFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_accountstoragerequirements_free(ptr >>> 0, 1));
+
+export class AccountStorageRequirements {
+
+    static __wrap(ptr) {
+        ptr = ptr >>> 0;
+        const obj = Object.create(AccountStorageRequirements.prototype);
+        obj.__wbg_ptr = ptr;
+        AccountStorageRequirementsFinalization.register(obj, obj.__wbg_ptr, obj);
+        return obj;
+    }
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        AccountStorageRequirementsFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_accountstoragerequirements_free(ptr, 0);
+    }
+    constructor() {
+        const ret = wasm.accountstoragerequirements_new();
+        this.__wbg_ptr = ret >>> 0;
+        AccountStorageRequirementsFinalization.register(this, this.__wbg_ptr, this);
+        return this;
+    }
+    /**
+     * @param {SlotAndKeys[]} slots_and_keys
+     * @returns {AccountStorageRequirements}
+     */
+    static fromSlotAndKeysArray(slots_and_keys) {
+        const ptr0 = passArrayJsValueToWasm0(slots_and_keys, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.accountstoragerequirements_fromSlotAndKeysArray(ptr0, len0);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return AccountStorageRequirements.__wrap(ret[0]);
+    }
+}
+
 const AccountVaultDeltaFinalization = (typeof FinalizationRegistry === 'undefined')
     ? { register: () => {}, unregister: () => {} }
     : new FinalizationRegistry(ptr => wasm.__wbg_accountvaultdelta_free(ptr >>> 0, 1));
@@ -1000,7 +1319,7 @@ export class AdviceMap {
         wasm.__wbg_advicemap_free(ptr, 0);
     }
     constructor() {
-        const ret = wasm.advicemap_new();
+        const ret = wasm.accountstoragerequirements_new();
         this.__wbg_ptr = ret >>> 0;
         AdviceMapFinalization.register(this, this.__wbg_ptr, this);
         return this;
@@ -1152,7 +1471,7 @@ export class AssetVault {
      * @returns {RpoDigest}
      */
     root() {
-        const ret = wasm.accountheader_vaultCommitment(this.__wbg_ptr);
+        const ret = wasm.assetvault_root(this.__wbg_ptr);
         return RpoDigest.__wrap(ret);
     }
     /**
@@ -1169,6 +1488,41 @@ export class AssetVault {
      */
     fungibleAssets() {
         const ret = wasm.assetvault_fungibleAssets(this.__wbg_ptr);
+        var v1 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
+        return v1;
+    }
+}
+
+const AuthSecretKeyFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_authsecretkey_free(ptr >>> 0, 1));
+
+export class AuthSecretKey {
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        AuthSecretKeyFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_authsecretkey_free(ptr, 0);
+    }
+    /**
+     * @returns {Word}
+     */
+    getRpoFalcon512PublicKeyAsWord() {
+        const ret = wasm.authsecretkey_getRpoFalcon512PublicKeyAsWord(this.__wbg_ptr);
+        return Word.__wrap(ret);
+    }
+    /**
+     * @returns {Felt[]}
+     */
+    getRpoFalcon512SecretKeyAsFelts() {
+        const ret = wasm.authsecretkey_getRpoFalcon512SecretKeyAsFelts(this.__wbg_ptr);
         var v1 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
         wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
         return v1;
@@ -1591,6 +1945,70 @@ export class FlattenedU8Vec {
     num_inner_vecs() {
         const ret = wasm.flattenedu8vec_num_inner_vecs(this.__wbg_ptr);
         return ret >>> 0;
+    }
+}
+
+const ForeignAccountFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_foreignaccount_free(ptr >>> 0, 1));
+
+export class ForeignAccount {
+
+    static __wrap(ptr) {
+        ptr = ptr >>> 0;
+        const obj = Object.create(ForeignAccount.prototype);
+        obj.__wbg_ptr = ptr;
+        ForeignAccountFinalization.register(obj, obj.__wbg_ptr, obj);
+        return obj;
+    }
+
+    static __unwrap(jsValue) {
+        if (!(jsValue instanceof ForeignAccount)) {
+            return 0;
+        }
+        return jsValue.__destroy_into_raw();
+    }
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        ForeignAccountFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_foreignaccount_free(ptr, 0);
+    }
+    /**
+     * @param {AccountId} account_id
+     * @param {AccountStorageRequirements} storage_requirements
+     * @returns {ForeignAccount}
+     */
+    static public(account_id, storage_requirements) {
+        _assertClass(account_id, AccountId);
+        var ptr0 = account_id.__destroy_into_raw();
+        _assertClass(storage_requirements, AccountStorageRequirements);
+        var ptr1 = storage_requirements.__destroy_into_raw();
+        const ret = wasm.foreignaccount_public(ptr0, ptr1);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return ForeignAccount.__wrap(ret[0]);
+    }
+    /**
+     * @returns {AccountStorageRequirements}
+     */
+    storage_slot_requirements() {
+        const ret = wasm.foreignaccount_storage_slot_requirements(this.__wbg_ptr);
+        return AccountStorageRequirements.__wrap(ret);
+    }
+    /**
+     * @returns {AccountId}
+     */
+    account_id() {
+        const ret = wasm.foreignaccount_account_id(this.__wbg_ptr);
+        return AccountId.__wrap(ret);
     }
 }
 
@@ -2217,442 +2635,6 @@ export class MerklePath {
     }
 }
 
-const MockWebClientFinalization = (typeof FinalizationRegistry === 'undefined')
-    ? { register: () => {}, unregister: () => {} }
-    : new FinalizationRegistry(ptr => wasm.__wbg_mockwebclient_free(ptr >>> 0, 1));
-
-export class MockWebClient {
-
-    __destroy_into_raw() {
-        const ptr = this.__wbg_ptr;
-        this.__wbg_ptr = 0;
-        MockWebClientFinalization.unregister(this);
-        return ptr;
-    }
-
-    free() {
-        const ptr = this.__destroy_into_raw();
-        wasm.__wbg_mockwebclient_free(ptr, 0);
-    }
-    /**
-     * @param {AccountId} account_id
-     * @param {TransactionRequest} transaction_request
-     * @returns {Promise<TransactionResult>}
-     */
-    newTransaction(account_id, transaction_request) {
-        _assertClass(account_id, AccountId);
-        _assertClass(transaction_request, TransactionRequest);
-        const ret = wasm.mockwebclient_newTransaction(this.__wbg_ptr, account_id.__wbg_ptr, transaction_request.__wbg_ptr);
-        return ret;
-    }
-    /**
-     * @param {TransactionResult} transaction_result
-     * @param {TransactionProver | null} [prover]
-     * @returns {Promise<void>}
-     */
-    submitTransaction(transaction_result, prover) {
-        _assertClass(transaction_result, TransactionResult);
-        let ptr0 = 0;
-        if (!isLikeNone(prover)) {
-            _assertClass(prover, TransactionProver);
-            ptr0 = prover.__destroy_into_raw();
-        }
-        const ret = wasm.mockwebclient_submitTransaction(this.__wbg_ptr, transaction_result.__wbg_ptr, ptr0);
-        return ret;
-    }
-    /**
-     * @param {AccountId} target_account_id
-     * @param {AccountId} faucet_id
-     * @param {NoteType} note_type
-     * @param {bigint} amount
-     * @returns {TransactionRequest}
-     */
-    newMintTransactionRequest(target_account_id, faucet_id, note_type, amount) {
-        _assertClass(target_account_id, AccountId);
-        _assertClass(faucet_id, AccountId);
-        const ret = wasm.mockwebclient_newMintTransactionRequest(this.__wbg_ptr, target_account_id.__wbg_ptr, faucet_id.__wbg_ptr, note_type, amount);
-        if (ret[2]) {
-            throw takeFromExternrefTable0(ret[1]);
-        }
-        return TransactionRequest.__wrap(ret[0]);
-    }
-    /**
-     * @param {AccountId} sender_account_id
-     * @param {AccountId} target_account_id
-     * @param {AccountId} faucet_id
-     * @param {NoteType} note_type
-     * @param {bigint} amount
-     * @param {number | null} [recall_height]
-     * @returns {TransactionRequest}
-     */
-    newSendTransactionRequest(sender_account_id, target_account_id, faucet_id, note_type, amount, recall_height) {
-        _assertClass(sender_account_id, AccountId);
-        _assertClass(target_account_id, AccountId);
-        _assertClass(faucet_id, AccountId);
-        const ret = wasm.mockwebclient_newSendTransactionRequest(this.__wbg_ptr, sender_account_id.__wbg_ptr, target_account_id.__wbg_ptr, faucet_id.__wbg_ptr, note_type, amount, isLikeNone(recall_height) ? 0x100000001 : (recall_height) >>> 0);
-        if (ret[2]) {
-            throw takeFromExternrefTable0(ret[1]);
-        }
-        return TransactionRequest.__wrap(ret[0]);
-    }
-    /**
-     * @param {string[]} list_of_note_ids
-     * @returns {TransactionRequest}
-     */
-    newConsumeTransactionRequest(list_of_note_ids) {
-        const ptr0 = passArrayJsValueToWasm0(list_of_note_ids, wasm.__wbindgen_malloc);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.mockwebclient_newConsumeTransactionRequest(this.__wbg_ptr, ptr0, len0);
-        if (ret[2]) {
-            throw takeFromExternrefTable0(ret[1]);
-        }
-        return TransactionRequest.__wrap(ret[0]);
-    }
-    constructor() {
-        const ret = wasm.mockwebclient_new();
-        this.__wbg_ptr = ret >>> 0;
-        MockWebClientFinalization.register(this, this.__wbg_ptr, this);
-        return this;
-    }
-    /**
-     * @param {string | null} [_node_url]
-     * @param {Uint8Array | null} [seed]
-     * @returns {Promise<any>}
-     */
-    createClient(_node_url, seed) {
-        var ptr0 = isLikeNone(_node_url) ? 0 : passStringToWasm0(_node_url, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        var len0 = WASM_VECTOR_LEN;
-        var ptr1 = isLikeNone(seed) ? 0 : passArray8ToWasm0(seed, wasm.__wbindgen_malloc);
-        var len1 = WASM_VECTOR_LEN;
-        const ret = wasm.mockwebclient_createClient(this.__wbg_ptr, ptr0, len0, ptr1, len1);
-        return ret;
-    }
-    /**
-     * @param {string} note_id
-     * @param {string} export_type
-     * @returns {Promise<any>}
-     */
-    exportNote(note_id, export_type) {
-        const ptr0 = passStringToWasm0(note_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        const len0 = WASM_VECTOR_LEN;
-        const ptr1 = passStringToWasm0(export_type, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        const len1 = WASM_VECTOR_LEN;
-        const ret = wasm.mockwebclient_exportNote(this.__wbg_ptr, ptr0, len0, ptr1, len1);
-        return ret;
-    }
-    /**
-     * Retrieves the entire underlying web store and returns it as a JsValue
-     *
-     * Meant to be used in conjunction with the force_import_store method
-     * @returns {Promise<any>}
-     */
-    exportStore() {
-        const ret = wasm.mockwebclient_exportStore(this.__wbg_ptr);
-        return ret;
-    }
-    /**
-     * @param {any} account_bytes
-     * @returns {Promise<any>}
-     */
-    importAccount(account_bytes) {
-        const ret = wasm.mockwebclient_importAccount(this.__wbg_ptr, account_bytes);
-        return ret;
-    }
-    /**
-     * @param {Uint8Array} init_seed
-     * @param {boolean} mutable
-     * @returns {Promise<Account>}
-     */
-    importPublicAccountFromSeed(init_seed, mutable) {
-        const ptr0 = passArray8ToWasm0(init_seed, wasm.__wbindgen_malloc);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.mockwebclient_importPublicAccountFromSeed(this.__wbg_ptr, ptr0, len0, mutable);
-        return ret;
-    }
-    /**
-     * @param {AccountId} account_id
-     * @returns {Promise<any>}
-     */
-    importAccountById(account_id) {
-        _assertClass(account_id, AccountId);
-        const ret = wasm.mockwebclient_importAccountById(this.__wbg_ptr, account_id.__wbg_ptr);
-        return ret;
-    }
-    /**
-     * @param {any} note_bytes
-     * @returns {Promise<any>}
-     */
-    importNote(note_bytes) {
-        const ret = wasm.mockwebclient_importNote(this.__wbg_ptr, note_bytes);
-        return ret;
-    }
-    /**
-     * @param {any} store_dump
-     * @returns {Promise<any>}
-     */
-    forceImportStore(store_dump) {
-        const ret = wasm.mockwebclient_forceImportStore(this.__wbg_ptr, store_dump);
-        return ret;
-    }
-    /**
-     * @param {TransactionFilter} transaction_filter
-     * @returns {Promise<TransactionRecord[]>}
-     */
-    getTransactions(transaction_filter) {
-        _assertClass(transaction_filter, TransactionFilter);
-        var ptr0 = transaction_filter.__destroy_into_raw();
-        const ret = wasm.mockwebclient_getTransactions(this.__wbg_ptr, ptr0);
-        return ret;
-    }
-    /**
-     * @param {string} script
-     * @returns {TransactionScript}
-     */
-    compileTxScript(script) {
-        const ptr0 = passStringToWasm0(script, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.mockwebclient_compileTxScript(this.__wbg_ptr, ptr0, len0);
-        if (ret[2]) {
-            throw takeFromExternrefTable0(ret[1]);
-        }
-        return TransactionScript.__wrap(ret[0]);
-    }
-    /**
-     * @returns {Promise<AccountHeader[]>}
-     */
-    getAccounts() {
-        const ret = wasm.mockwebclient_getAccounts(this.__wbg_ptr);
-        return ret;
-    }
-    /**
-     * @param {AccountId} account_id
-     * @returns {Promise<Account | undefined>}
-     */
-    getAccount(account_id) {
-        _assertClass(account_id, AccountId);
-        const ret = wasm.mockwebclient_getAccount(this.__wbg_ptr, account_id.__wbg_ptr);
-        return ret;
-    }
-    /**
-     * @param {AccountStorageMode} storage_mode
-     * @param {boolean} mutable
-     * @param {Uint8Array | null} [init_seed]
-     * @returns {Promise<Account>}
-     */
-    newWallet(storage_mode, mutable, init_seed) {
-        _assertClass(storage_mode, AccountStorageMode);
-        var ptr0 = isLikeNone(init_seed) ? 0 : passArray8ToWasm0(init_seed, wasm.__wbindgen_malloc);
-        var len0 = WASM_VECTOR_LEN;
-        const ret = wasm.mockwebclient_newWallet(this.__wbg_ptr, storage_mode.__wbg_ptr, mutable, ptr0, len0);
-        return ret;
-    }
-    /**
-     * @param {AccountStorageMode} storage_mode
-     * @param {boolean} non_fungible
-     * @param {string} token_symbol
-     * @param {number} decimals
-     * @param {bigint} max_supply
-     * @returns {Promise<Account>}
-     */
-    newFaucet(storage_mode, non_fungible, token_symbol, decimals, max_supply) {
-        _assertClass(storage_mode, AccountStorageMode);
-        const ptr0 = passStringToWasm0(token_symbol, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.mockwebclient_newFaucet(this.__wbg_ptr, storage_mode.__wbg_ptr, non_fungible, ptr0, len0, decimals, max_supply);
-        return ret;
-    }
-    /**
-     * @param {Account} account
-     * @param {Word | null | undefined} account_seed
-     * @param {boolean} overwrite
-     * @returns {Promise<void>}
-     */
-    newAccount(account, account_seed, overwrite) {
-        _assertClass(account, Account);
-        let ptr0 = 0;
-        if (!isLikeNone(account_seed)) {
-            _assertClass(account_seed, Word);
-            ptr0 = account_seed.__destroy_into_raw();
-        }
-        const ret = wasm.mockwebclient_newAccount(this.__wbg_ptr, account.__wbg_ptr, ptr0, overwrite);
-        return ret;
-    }
-    /**
-     * @returns {Promise<SyncSummary>}
-     */
-    syncState() {
-        const ret = wasm.mockwebclient_syncState(this.__wbg_ptr);
-        return ret;
-    }
-    /**
-     * @returns {Promise<number>}
-     */
-    getSyncHeight() {
-        const ret = wasm.mockwebclient_getSyncHeight(this.__wbg_ptr);
-        return ret;
-    }
-    /**
-     * @returns {Promise<BlockHeader>}
-     */
-    getLatestEpochBlock() {
-        const ret = wasm.mockwebclient_getLatestEpochBlock(this.__wbg_ptr);
-        return ret;
-    }
-    /**
-     * @param {NoteFilter} filter
-     * @returns {Promise<InputNoteRecord[]>}
-     */
-    getInputNotes(filter) {
-        _assertClass(filter, NoteFilter);
-        var ptr0 = filter.__destroy_into_raw();
-        const ret = wasm.mockwebclient_getInputNotes(this.__wbg_ptr, ptr0);
-        return ret;
-    }
-    /**
-     * @param {string} note_id
-     * @returns {Promise<InputNoteRecord | undefined>}
-     */
-    getInputNote(note_id) {
-        const ptr0 = passStringToWasm0(note_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.mockwebclient_getInputNote(this.__wbg_ptr, ptr0, len0);
-        return ret;
-    }
-    /**
-     * @param {NoteFilter} filter
-     * @returns {Promise<any>}
-     */
-    getOutputNotes(filter) {
-        _assertClass(filter, NoteFilter);
-        var ptr0 = filter.__destroy_into_raw();
-        const ret = wasm.mockwebclient_getOutputNotes(this.__wbg_ptr, ptr0);
-        return ret;
-    }
-    /**
-     * @param {string} note_id
-     * @returns {Promise<any>}
-     */
-    getOutputNote(note_id) {
-        const ptr0 = passStringToWasm0(note_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.mockwebclient_getOutputNote(this.__wbg_ptr, ptr0, len0);
-        return ret;
-    }
-    /**
-     * @param {string} script
-     * @returns {NoteScript}
-     */
-    compileNoteScript(script) {
-        const ptr0 = passStringToWasm0(script, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.mockwebclient_compileNoteScript(this.__wbg_ptr, ptr0, len0);
-        if (ret[2]) {
-            throw takeFromExternrefTable0(ret[1]);
-        }
-        return NoteScript.__wrap(ret[0]);
-    }
-    /**
-     * @param {AccountId | null} [account_id]
-     * @returns {Promise<ConsumableNoteRecord[]>}
-     */
-    getConsumableNotes(account_id) {
-        let ptr0 = 0;
-        if (!isLikeNone(account_id)) {
-            _assertClass(account_id, AccountId);
-            ptr0 = account_id.__destroy_into_raw();
-        }
-        const ret = wasm.mockwebclient_getConsumableNotes(this.__wbg_ptr, ptr0);
-        return ret;
-    }
-}
-
-const NetworkIdFinalization = (typeof FinalizationRegistry === 'undefined')
-    ? { register: () => {}, unregister: () => {} }
-    : new FinalizationRegistry(ptr => wasm.__wbg_networkid_free(ptr >>> 0, 1));
-
-export class NetworkId {
-
-    static __wrap(ptr) {
-        ptr = ptr >>> 0;
-        const obj = Object.create(NetworkId.prototype);
-        obj.__wbg_ptr = ptr;
-        NetworkIdFinalization.register(obj, obj.__wbg_ptr, obj);
-        return obj;
-    }
-
-    __destroy_into_raw() {
-        const ptr = this.__wbg_ptr;
-        this.__wbg_ptr = 0;
-        NetworkIdFinalization.unregister(this);
-        return ptr;
-    }
-
-    free() {
-        const ptr = this.__destroy_into_raw();
-        wasm.__wbg_networkid_free(ptr, 0);
-    }
-    /**
-     * @param {string} string
-     */
-    constructor(string) {
-        const ptr0 = passStringToWasm0(string, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.networkid_new(ptr0, len0);
-        this.__wbg_ptr = ret >>> 0;
-        NetworkIdFinalization.register(this, this.__wbg_ptr, this);
-        return this;
-    }
-    /**
-     * @returns {NetworkId}
-     */
-    static mainnet() {
-        const ret = wasm.networkid_mainnet();
-        return NetworkId.__wrap(ret);
-    }
-    /**
-     * @returns {NetworkId}
-     */
-    static testnet() {
-        const ret = wasm.networkid_testnet();
-        return NetworkId.__wrap(ret);
-    }
-    /**
-     * @returns {NetworkId}
-     */
-    static devnet() {
-        const ret = wasm.networkid_devnet();
-        return NetworkId.__wrap(ret);
-    }
-    /**
-     * @param {string} s
-     * @returns {NetworkId}
-     */
-    static tryFromStr(s) {
-        const ptr0 = passStringToWasm0(s, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.networkid_tryFromStr(ptr0, len0);
-        if (ret[2]) {
-            throw takeFromExternrefTable0(ret[1]);
-        }
-        return NetworkId.__wrap(ret[0]);
-    }
-    /**
-     * @returns {string}
-     */
-    asStr() {
-        let deferred1_0;
-        let deferred1_1;
-        try {
-            const ret = wasm.networkid_asStr(this.__wbg_ptr);
-            deferred1_0 = ret[0];
-            deferred1_1 = ret[1];
-            return getStringFromWasm0(ret[0], ret[1]);
-        } finally {
-            wasm.__wbindgen_free(deferred1_0, deferred1_1, 1);
-        }
-    }
-}
-
 const NoteFinalization = (typeof FinalizationRegistry === 'undefined')
     ? { register: () => {}, unregister: () => {} }
     : new FinalizationRegistry(ptr => wasm.__wbg_note_free(ptr >>> 0, 1));
@@ -2665,13 +2647,6 @@ export class Note {
         obj.__wbg_ptr = ptr;
         NoteFinalization.register(obj, obj.__wbg_ptr, obj);
         return obj;
-    }
-
-    static __unwrap(jsValue) {
-        if (!(jsValue instanceof Note)) {
-            return 0;
-        }
-        return jsValue.__destroy_into_raw();
     }
 
     __destroy_into_raw() {
@@ -2755,13 +2730,13 @@ export class Note {
      * @param {Felt} aux
      * @returns {Note}
      */
-    static createP2IDRNote(sender, target, assets, note_type, serial_num, recall_height, aux) {
+    static createP2IDENote(sender, target, assets, note_type, serial_num, recall_height, aux) {
         _assertClass(sender, AccountId);
         _assertClass(target, AccountId);
         _assertClass(assets, NoteAssets);
         _assertClass(serial_num, Word);
         _assertClass(aux, Felt);
-        const ret = wasm.note_createP2IDRNote(sender.__wbg_ptr, target.__wbg_ptr, assets.__wbg_ptr, note_type, serial_num.__wbg_ptr, recall_height, aux.__wbg_ptr);
+        const ret = wasm.note_createP2IDENote(sender.__wbg_ptr, target.__wbg_ptr, assets.__wbg_ptr, note_type, serial_num.__wbg_ptr, recall_height, aux.__wbg_ptr);
         return Note.__wrap(ret);
     }
 }
@@ -2993,6 +2968,13 @@ export class NoteDetails {
         return this;
     }
     /**
+     * @returns {NoteId}
+     */
+    id() {
+        const ret = wasm.notedetails_id(this.__wbg_ptr);
+        return NoteId.__wrap(ret);
+    }
+    /**
      * @returns {NoteAssets}
      */
     assets() {
@@ -3013,6 +2995,14 @@ const NoteDetailsAndTagFinalization = (typeof FinalizationRegistry === 'undefine
     : new FinalizationRegistry(ptr => wasm.__wbg_notedetailsandtag_free(ptr >>> 0, 1));
 
 export class NoteDetailsAndTag {
+
+    static __wrap(ptr) {
+        ptr = ptr >>> 0;
+        const obj = Object.create(NoteDetailsAndTag.prototype);
+        obj.__wbg_ptr = ptr;
+        NoteDetailsAndTagFinalization.register(obj, obj.__wbg_ptr, obj);
+        return obj;
+    }
 
     static __unwrap(jsValue) {
         if (!(jsValue instanceof NoteDetailsAndTag)) {
@@ -3045,6 +3035,20 @@ export class NoteDetailsAndTag {
         this.__wbg_ptr = ret >>> 0;
         NoteDetailsAndTagFinalization.register(this, this.__wbg_ptr, this);
         return this;
+    }
+    /**
+     * @returns {NoteDetails}
+     */
+    get noteDetails() {
+        const ret = wasm.notedetailsandtag_noteDetails(this.__wbg_ptr);
+        return NoteDetails.__wrap(ret);
+    }
+    /**
+     * @returns {NoteTag}
+     */
+    get tag() {
+        const ret = wasm.notedetailsandtag_tag(this.__wbg_ptr);
+        return NoteTag.__wrap(ret);
     }
 }
 
@@ -3677,6 +3681,13 @@ export class NoteRecipient {
         return obj;
     }
 
+    static __unwrap(jsValue) {
+        if (!(jsValue instanceof NoteRecipient)) {
+            return 0;
+        }
+        return jsValue.__destroy_into_raw();
+    }
+
     __destroy_into_raw() {
         const ptr = this.__wbg_ptr;
         this.__wbg_ptr = 0;
@@ -3767,8 +3778,8 @@ export class NoteScript {
     /**
      * @returns {NoteScript}
      */
-    static p2idr() {
-        const ret = wasm.notescript_p2idr();
+    static p2ide() {
+        const ret = wasm.notescript_p2ide();
         return NoteScript.__wrap(ret);
     }
     /**
@@ -3814,13 +3825,11 @@ export class NoteTag {
     }
     /**
      * @param {AccountId} account_id
-     * @param {NoteExecutionMode} execution
      * @returns {NoteTag}
      */
-    static fromAccountId(account_id, execution) {
+    static fromAccountId(account_id) {
         _assertClass(account_id, AccountId);
-        _assertClass(execution, NoteExecutionMode);
-        const ret = wasm.notetag_fromAccountId(account_id.__wbg_ptr, execution.__wbg_ptr);
+        const ret = wasm.notetag_fromAccountId(account_id.__wbg_ptr);
         return NoteTag.__wrap(ret);
     }
     /**
@@ -3857,42 +3866,12 @@ export class NoteTag {
         const ret = wasm.notetag_executionMode(this.__wbg_ptr);
         return NoteExecutionMode.__wrap(ret);
     }
-}
-
-const NotesArrayFinalization = (typeof FinalizationRegistry === 'undefined')
-    ? { register: () => {}, unregister: () => {} }
-    : new FinalizationRegistry(ptr => wasm.__wbg_notesarray_free(ptr >>> 0, 1));
-
-export class NotesArray {
-
-    __destroy_into_raw() {
-        const ptr = this.__wbg_ptr;
-        this.__wbg_ptr = 0;
-        NotesArrayFinalization.unregister(this);
-        return ptr;
-    }
-
-    free() {
-        const ptr = this.__destroy_into_raw();
-        wasm.__wbg_notesarray_free(ptr, 0);
-    }
     /**
-     * @param {Note[] | null} [notes_array]
+     * @returns {number}
      */
-    constructor(notes_array) {
-        var ptr0 = isLikeNone(notes_array) ? 0 : passArrayJsValueToWasm0(notes_array, wasm.__wbindgen_malloc);
-        var len0 = WASM_VECTOR_LEN;
-        const ret = wasm.notesarray_new(ptr0, len0);
-        this.__wbg_ptr = ret >>> 0;
-        NotesArrayFinalization.register(this, this.__wbg_ptr, this);
-        return this;
-    }
-    /**
-     * @param {Note} note
-     */
-    push(note) {
-        _assertClass(note, Note);
-        wasm.notesarray_push(this.__wbg_ptr, note.__wbg_ptr);
+    asU32() {
+        const ret = wasm.notetag_asU32(this.__wbg_ptr);
+        return ret >>> 0;
     }
 }
 
@@ -4029,7 +4008,7 @@ export class OutputNotes {
      * @returns {RpoDigest}
      */
     commitment() {
-        const ret = wasm.blockheader_prevBlockCommitment(this.__wbg_ptr);
+        const ret = wasm.accountbuilderresult_seed(this.__wbg_ptr);
         return RpoDigest.__wrap(ret);
     }
     /**
@@ -4130,14 +4109,14 @@ export class PartialNote {
      * @returns {NoteMetadata}
      */
     metadata() {
-        const ret = wasm.noteheader_metadata(this.__wbg_ptr);
+        const ret = wasm.partialnote_metadata(this.__wbg_ptr);
         return NoteMetadata.__wrap(ret);
     }
     /**
      * @returns {RpoDigest}
      */
     recipientDigest() {
-        const ret = wasm.partialnote_recipientDigest(this.__wbg_ptr);
+        const ret = wasm.assetvault_root(this.__wbg_ptr);
         return RpoDigest.__wrap(ret);
     }
     /**
@@ -4146,6 +4125,98 @@ export class PartialNote {
     assets() {
         const ret = wasm.partialnote_assets(this.__wbg_ptr);
         return NoteAssets.__wrap(ret);
+    }
+}
+
+const PublicKeyFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_publickey_free(ptr >>> 0, 1));
+
+export class PublicKey {
+
+    static __wrap(ptr) {
+        ptr = ptr >>> 0;
+        const obj = Object.create(PublicKey.prototype);
+        obj.__wbg_ptr = ptr;
+        PublicKeyFinalization.register(obj, obj.__wbg_ptr, obj);
+        return obj;
+    }
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        PublicKeyFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_publickey_free(ptr, 0);
+    }
+}
+
+const RecipientArrayFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_recipientarray_free(ptr >>> 0, 1));
+
+export class RecipientArray {
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        RecipientArrayFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_recipientarray_free(ptr, 0);
+    }
+    /**
+     * @param {NoteRecipient[] | null} [recipient_array]
+     */
+    constructor(recipient_array) {
+        var ptr0 = isLikeNone(recipient_array) ? 0 : passArrayJsValueToWasm0(recipient_array, wasm.__wbindgen_malloc);
+        var len0 = WASM_VECTOR_LEN;
+        const ret = wasm.recipientarray_new(ptr0, len0);
+        this.__wbg_ptr = ret >>> 0;
+        RecipientArrayFinalization.register(this, this.__wbg_ptr, this);
+        return this;
+    }
+    /**
+     * @param {NoteRecipient} recipient
+     */
+    push(recipient) {
+        _assertClass(recipient, NoteRecipient);
+        wasm.recipientarray_push(this.__wbg_ptr, recipient.__wbg_ptr);
+    }
+}
+
+const Rpo256Finalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_rpo256_free(ptr >>> 0, 1));
+
+export class Rpo256 {
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        Rpo256Finalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_rpo256_free(ptr, 0);
+    }
+    /**
+     * @param {FeltArray} felt_array
+     * @returns {RpoDigest}
+     */
+    static hashElements(felt_array) {
+        _assertClass(felt_array, FeltArray);
+        const ret = wasm.rpo256_hashElements(felt_array.__wbg_ptr);
+        return RpoDigest.__wrap(ret);
     }
 }
 
@@ -4161,6 +4232,13 @@ export class RpoDigest {
         obj.__wbg_ptr = ptr;
         RpoDigestFinalization.register(obj, obj.__wbg_ptr, obj);
         return obj;
+    }
+
+    static __unwrap(jsValue) {
+        if (!(jsValue instanceof RpoDigest)) {
+            return 0;
+        }
+        return jsValue.__destroy_into_raw();
     }
 
     __destroy_into_raw() {
@@ -4206,6 +4284,202 @@ export class RpoDigest {
         } finally {
             wasm.__wbindgen_free(deferred1_0, deferred1_1, 1);
         }
+    }
+}
+
+const SecretKeyFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_secretkey_free(ptr >>> 0, 1));
+
+export class SecretKey {
+
+    static __wrap(ptr) {
+        ptr = ptr >>> 0;
+        const obj = Object.create(SecretKey.prototype);
+        obj.__wbg_ptr = ptr;
+        SecretKeyFinalization.register(obj, obj.__wbg_ptr, obj);
+        return obj;
+    }
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        SecretKeyFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_secretkey_free(ptr, 0);
+    }
+    /**
+     * @param {Uint8Array | null} [seed]
+     * @returns {SecretKey}
+     */
+    static withRng(seed) {
+        var ptr0 = isLikeNone(seed) ? 0 : passArray8ToWasm0(seed, wasm.__wbindgen_malloc);
+        var len0 = WASM_VECTOR_LEN;
+        const ret = wasm.secretkey_withRng(ptr0, len0);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return SecretKey.__wrap(ret[0]);
+    }
+    /**
+     * @returns {PublicKey}
+     */
+    publicKey() {
+        const ret = wasm.secretkey_publicKey(this.__wbg_ptr);
+        return PublicKey.__wrap(ret);
+    }
+}
+
+const SlotAndKeysFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_slotandkeys_free(ptr >>> 0, 1));
+
+export class SlotAndKeys {
+
+    static __unwrap(jsValue) {
+        if (!(jsValue instanceof SlotAndKeys)) {
+            return 0;
+        }
+        return jsValue.__destroy_into_raw();
+    }
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        SlotAndKeysFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_slotandkeys_free(ptr, 0);
+    }
+    /**
+     * @param {number} storage_slot_index
+     * @param {RpoDigest[]} storage_map_keys
+     */
+    constructor(storage_slot_index, storage_map_keys) {
+        const ptr0 = passArrayJsValueToWasm0(storage_map_keys, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.slotandkeys_new(storage_slot_index, ptr0, len0);
+        this.__wbg_ptr = ret >>> 0;
+        SlotAndKeysFinalization.register(this, this.__wbg_ptr, this);
+        return this;
+    }
+    /**
+     * @returns {number}
+     */
+    storage_slot_index() {
+        const ret = wasm.slotandkeys_storage_slot_index(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {RpoDigest[]}
+     */
+    storage_map_keys() {
+        const ret = wasm.slotandkeys_storage_map_keys(this.__wbg_ptr);
+        var v1 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
+        return v1;
+    }
+}
+
+const StorageMapFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_storagemap_free(ptr >>> 0, 1));
+
+export class StorageMap {
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        StorageMapFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_storagemap_free(ptr, 0);
+    }
+    constructor() {
+        const ret = wasm.storagemap_new();
+        this.__wbg_ptr = ret >>> 0;
+        StorageMapFinalization.register(this, this.__wbg_ptr, this);
+        return this;
+    }
+    /**
+     * @param {RpoDigest} key
+     * @param {Word} value
+     * @returns {Word}
+     */
+    insert(key, value) {
+        _assertClass(key, RpoDigest);
+        _assertClass(value, Word);
+        const ret = wasm.storagemap_insert(this.__wbg_ptr, key.__wbg_ptr, value.__wbg_ptr);
+        return Word.__wrap(ret);
+    }
+}
+
+const StorageSlotFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_storageslot_free(ptr >>> 0, 1));
+
+export class StorageSlot {
+
+    static __wrap(ptr) {
+        ptr = ptr >>> 0;
+        const obj = Object.create(StorageSlot.prototype);
+        obj.__wbg_ptr = ptr;
+        StorageSlotFinalization.register(obj, obj.__wbg_ptr, obj);
+        return obj;
+    }
+
+    static __unwrap(jsValue) {
+        if (!(jsValue instanceof StorageSlot)) {
+            return 0;
+        }
+        return jsValue.__destroy_into_raw();
+    }
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        StorageSlotFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_storageslot_free(ptr, 0);
+    }
+    /**
+     * @param {Word} value
+     * @returns {StorageSlot}
+     */
+    static fromValue(value) {
+        _assertClass(value, Word);
+        const ret = wasm.storageslot_fromValue(value.__wbg_ptr);
+        return StorageSlot.__wrap(ret);
+    }
+    /**
+     * @returns {StorageSlot}
+     */
+    static emptyValue() {
+        const ret = wasm.storageslot_emptyValue();
+        return StorageSlot.__wrap(ret);
+    }
+    /**
+     * @param {StorageMap} storage_map
+     * @returns {StorageSlot}
+     */
+    static map(storage_map) {
+        _assertClass(storage_map, StorageMap);
+        const ret = wasm.storageslot_map(storage_map.__wbg_ptr);
+        return StorageSlot.__wrap(ret);
     }
 }
 
@@ -4467,8 +4741,34 @@ export class TransactionId {
      * @returns {RpoDigest}
      */
     inner() {
-        const ret = wasm.inputnotes_commitment(this.__wbg_ptr);
+        const ret = wasm.transactionid_inner(this.__wbg_ptr);
         return RpoDigest.__wrap(ret);
+    }
+}
+
+const TransactionKernelFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_transactionkernel_free(ptr >>> 0, 1));
+
+export class TransactionKernel {
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        TransactionKernelFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_transactionkernel_free(ptr, 0);
+    }
+    /**
+     * @returns {Assembler}
+     */
+    static assembler() {
+        const ret = wasm.transactionkernel_assembler();
+        return Assembler.__wrap(ret);
     }
 }
 
@@ -4705,6 +5005,30 @@ export class TransactionRequest {
         }
         return TransactionRequest.__wrap(ret[0]);
     }
+    /**
+     * @returns {Note[]}
+     */
+    expectedOutputOwnNotes() {
+        const ret = wasm.transactionrequest_expectedOutputOwnNotes(this.__wbg_ptr);
+        if (ret[3]) {
+            throw takeFromExternrefTable0(ret[2]);
+        }
+        var v1 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
+        return v1;
+    }
+    /**
+     * @returns {NoteDetailsAndTag[]}
+     */
+    expectedFutureNotes() {
+        const ret = wasm.transactionrequest_expectedFutureNotes(this.__wbg_ptr);
+        if (ret[3]) {
+            throw takeFromExternrefTable0(ret[2]);
+        }
+        var v1 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
+        return v1;
+    }
 }
 
 const TransactionRequestBuilderFinalization = (typeof FinalizationRegistry === 'undefined')
@@ -4779,13 +5103,13 @@ export class TransactionRequestBuilder {
         return TransactionRequestBuilder.__wrap(ret);
     }
     /**
-     * @param {NotesArray} notes
+     * @param {RecipientArray} recipients
      * @returns {TransactionRequestBuilder}
      */
-    withExpectedOutputNotes(notes) {
+    withExpectedOutputRecipients(recipients) {
         const ptr = this.__destroy_into_raw();
-        _assertClass(notes, NotesArray);
-        const ret = wasm.transactionrequestbuilder_withExpectedOutputNotes(ptr, notes.__wbg_ptr);
+        _assertClass(recipients, RecipientArray);
+        const ret = wasm.transactionrequestbuilder_withExpectedOutputRecipients(ptr, recipients.__wbg_ptr);
         return TransactionRequestBuilder.__wrap(ret);
     }
     /**
@@ -4806,6 +5130,17 @@ export class TransactionRequestBuilder {
         const ptr = this.__destroy_into_raw();
         _assertClass(advice_map, AdviceMap);
         const ret = wasm.transactionrequestbuilder_extendAdviceMap(ptr, advice_map.__wbg_ptr);
+        return TransactionRequestBuilder.__wrap(ret);
+    }
+    /**
+     * @param {ForeignAccount[]} foreign_accounts
+     * @returns {TransactionRequestBuilder}
+     */
+    withForeignAccounts(foreign_accounts) {
+        const ptr = this.__destroy_into_raw();
+        const ptr0 = passArrayJsValueToWasm0(foreign_accounts, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.transactionrequestbuilder_withForeignAccounts(ptr, ptr0, len0);
         return TransactionRequestBuilder.__wrap(ret);
     }
     /**
@@ -4939,17 +5274,14 @@ export class TransactionScript {
     }
     /**
      * @param {string} script_code
-     * @param {TransactionScriptInputPairArray} inputs
      * @param {Assembler} assembler
      * @returns {TransactionScript}
      */
-    static compile(script_code, inputs, assembler) {
+    static compile(script_code, assembler) {
         const ptr0 = passStringToWasm0(script_code, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        _assertClass(inputs, TransactionScriptInputPairArray);
-        var ptr1 = inputs.__destroy_into_raw();
         _assertClass(assembler, Assembler);
-        const ret = wasm.transactionscript_compile(ptr0, len0, ptr1, assembler.__wbg_ptr);
+        const ret = wasm.transactionscript_compile(ptr0, len0, assembler.__wbg_ptr);
         if (ret[2]) {
             throw takeFromExternrefTable0(ret[1]);
         }
@@ -5079,7 +5411,7 @@ export class TransactionStatus {
      * @returns {TransactionStatus}
      */
     static pending() {
-        const ret = wasm.transactionstatus_pending();
+        const ret = wasm.noteexecutionhint_none();
         return TransactionStatus.__wrap(ret);
     }
     /**
@@ -5127,6 +5459,421 @@ export class TransactionStatus {
     getBlockNum() {
         const ret = wasm.transactionstatus_getBlockNum(this.__wbg_ptr);
         return ret === 0x100000001 ? undefined : ret;
+    }
+}
+
+const WebClientFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_webclient_free(ptr >>> 0, 1));
+
+export class WebClient {
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        WebClientFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_webclient_free(ptr, 0);
+    }
+    /**
+     * @param {AccountId} account_id
+     * @param {TransactionRequest} transaction_request
+     * @returns {Promise<TransactionResult>}
+     */
+    newTransaction(account_id, transaction_request) {
+        _assertClass(account_id, AccountId);
+        _assertClass(transaction_request, TransactionRequest);
+        const ret = wasm.webclient_newTransaction(this.__wbg_ptr, account_id.__wbg_ptr, transaction_request.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @param {TransactionResult} transaction_result
+     * @param {TransactionProver | null} [prover]
+     * @returns {Promise<void>}
+     */
+    submitTransaction(transaction_result, prover) {
+        _assertClass(transaction_result, TransactionResult);
+        let ptr0 = 0;
+        if (!isLikeNone(prover)) {
+            _assertClass(prover, TransactionProver);
+            ptr0 = prover.__destroy_into_raw();
+        }
+        const ret = wasm.webclient_submitTransaction(this.__wbg_ptr, transaction_result.__wbg_ptr, ptr0);
+        return ret;
+    }
+    /**
+     * @param {AccountId} target_account_id
+     * @param {AccountId} faucet_id
+     * @param {NoteType} note_type
+     * @param {bigint} amount
+     * @returns {TransactionRequest}
+     */
+    newMintTransactionRequest(target_account_id, faucet_id, note_type, amount) {
+        _assertClass(target_account_id, AccountId);
+        _assertClass(faucet_id, AccountId);
+        const ret = wasm.webclient_newMintTransactionRequest(this.__wbg_ptr, target_account_id.__wbg_ptr, faucet_id.__wbg_ptr, note_type, amount);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return TransactionRequest.__wrap(ret[0]);
+    }
+    /**
+     * @param {AccountId} sender_account_id
+     * @param {AccountId} target_account_id
+     * @param {AccountId} faucet_id
+     * @param {NoteType} note_type
+     * @param {bigint} amount
+     * @param {number | null} [recall_height]
+     * @param {number | null} [timelock_height]
+     * @returns {TransactionRequest}
+     */
+    newSendTransactionRequest(sender_account_id, target_account_id, faucet_id, note_type, amount, recall_height, timelock_height) {
+        _assertClass(sender_account_id, AccountId);
+        _assertClass(target_account_id, AccountId);
+        _assertClass(faucet_id, AccountId);
+        const ret = wasm.webclient_newSendTransactionRequest(this.__wbg_ptr, sender_account_id.__wbg_ptr, target_account_id.__wbg_ptr, faucet_id.__wbg_ptr, note_type, amount, isLikeNone(recall_height) ? 0x100000001 : (recall_height) >>> 0, isLikeNone(timelock_height) ? 0x100000001 : (timelock_height) >>> 0);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return TransactionRequest.__wrap(ret[0]);
+    }
+    /**
+     * @param {string[]} list_of_note_ids
+     * @returns {TransactionRequest}
+     */
+    newConsumeTransactionRequest(list_of_note_ids) {
+        const ptr0 = passArrayJsValueToWasm0(list_of_note_ids, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.webclient_newConsumeTransactionRequest(this.__wbg_ptr, ptr0, len0);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return TransactionRequest.__wrap(ret[0]);
+    }
+    /**
+     * @param {AccountId} sender_account_id
+     * @param {AccountId} offered_asset_faucet_id
+     * @param {bigint} offered_asset_amount
+     * @param {AccountId} requested_asset_faucet_id
+     * @param {bigint} requested_asset_amount
+     * @param {NoteType} note_type
+     * @returns {TransactionRequest}
+     */
+    newSwapTransactionRequest(sender_account_id, offered_asset_faucet_id, offered_asset_amount, requested_asset_faucet_id, requested_asset_amount, note_type) {
+        _assertClass(sender_account_id, AccountId);
+        _assertClass(offered_asset_faucet_id, AccountId);
+        _assertClass(requested_asset_faucet_id, AccountId);
+        const ret = wasm.webclient_newSwapTransactionRequest(this.__wbg_ptr, sender_account_id.__wbg_ptr, offered_asset_faucet_id.__wbg_ptr, offered_asset_amount, requested_asset_faucet_id.__wbg_ptr, requested_asset_amount, note_type);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return TransactionRequest.__wrap(ret[0]);
+    }
+    /**
+     * @param {NoteFilter} filter
+     * @returns {Promise<InputNoteRecord[]>}
+     */
+    getInputNotes(filter) {
+        _assertClass(filter, NoteFilter);
+        var ptr0 = filter.__destroy_into_raw();
+        const ret = wasm.webclient_getInputNotes(this.__wbg_ptr, ptr0);
+        return ret;
+    }
+    /**
+     * @param {string} note_id
+     * @returns {Promise<InputNoteRecord | undefined>}
+     */
+    getInputNote(note_id) {
+        const ptr0 = passStringToWasm0(note_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.webclient_getInputNote(this.__wbg_ptr, ptr0, len0);
+        return ret;
+    }
+    /**
+     * @param {NoteFilter} filter
+     * @returns {Promise<any>}
+     */
+    getOutputNotes(filter) {
+        _assertClass(filter, NoteFilter);
+        var ptr0 = filter.__destroy_into_raw();
+        const ret = wasm.webclient_getOutputNotes(this.__wbg_ptr, ptr0);
+        return ret;
+    }
+    /**
+     * @param {string} note_id
+     * @returns {Promise<any>}
+     */
+    getOutputNote(note_id) {
+        const ptr0 = passStringToWasm0(note_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.webclient_getOutputNote(this.__wbg_ptr, ptr0, len0);
+        return ret;
+    }
+    /**
+     * @param {string} script
+     * @returns {NoteScript}
+     */
+    compileNoteScript(script) {
+        const ptr0 = passStringToWasm0(script, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.webclient_compileNoteScript(this.__wbg_ptr, ptr0, len0);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return NoteScript.__wrap(ret[0]);
+    }
+    /**
+     * @param {AccountId | null} [account_id]
+     * @returns {Promise<ConsumableNoteRecord[]>}
+     */
+    getConsumableNotes(account_id) {
+        let ptr0 = 0;
+        if (!isLikeNone(account_id)) {
+            _assertClass(account_id, AccountId);
+            ptr0 = account_id.__destroy_into_raw();
+        }
+        const ret = wasm.webclient_getConsumableNotes(this.__wbg_ptr, ptr0);
+        return ret;
+    }
+    /**
+     * @returns {Promise<SyncSummary>}
+     */
+    syncState() {
+        const ret = wasm.webclient_syncState(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {Promise<number>}
+     */
+    getSyncHeight() {
+        const ret = wasm.webclient_getSyncHeight(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @param {NoteType} note_type
+     * @param {AccountId} offered_asset_faucet_id
+     * @param {bigint} offered_asset_amount
+     * @param {AccountId} requested_asset_faucet_id
+     * @param {bigint} requested_asset_amount
+     * @returns {NoteTag}
+     */
+    static buildSwapTag(note_type, offered_asset_faucet_id, offered_asset_amount, requested_asset_faucet_id, requested_asset_amount) {
+        _assertClass(offered_asset_faucet_id, AccountId);
+        _assertClass(requested_asset_faucet_id, AccountId);
+        const ret = wasm.webclient_buildSwapTag(note_type, offered_asset_faucet_id.__wbg_ptr, offered_asset_amount, requested_asset_faucet_id.__wbg_ptr, requested_asset_amount);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return NoteTag.__wrap(ret[0]);
+    }
+    /**
+     * @param {TransactionFilter} transaction_filter
+     * @returns {Promise<TransactionRecord[]>}
+     */
+    getTransactions(transaction_filter) {
+        _assertClass(transaction_filter, TransactionFilter);
+        var ptr0 = transaction_filter.__destroy_into_raw();
+        const ret = wasm.webclient_getTransactions(this.__wbg_ptr, ptr0);
+        return ret;
+    }
+    /**
+     * @param {string} script
+     * @returns {TransactionScript}
+     */
+    compileTxScript(script) {
+        const ptr0 = passStringToWasm0(script, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.webclient_compileTxScript(this.__wbg_ptr, ptr0, len0);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return TransactionScript.__wrap(ret[0]);
+    }
+    constructor() {
+        const ret = wasm.webclient_new();
+        this.__wbg_ptr = ret >>> 0;
+        WebClientFinalization.register(this, this.__wbg_ptr, this);
+        return this;
+    }
+    /**
+     * @param {string | null} [_node_url]
+     * @param {Uint8Array | null} [seed]
+     * @returns {Promise<any>}
+     */
+    createClient(_node_url, seed) {
+        var ptr0 = isLikeNone(_node_url) ? 0 : passStringToWasm0(_node_url, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        var len0 = WASM_VECTOR_LEN;
+        var ptr1 = isLikeNone(seed) ? 0 : passArray8ToWasm0(seed, wasm.__wbindgen_malloc);
+        var len1 = WASM_VECTOR_LEN;
+        const ret = wasm.webclient_createClient(this.__wbg_ptr, ptr0, len0, ptr1, len1);
+        return ret;
+    }
+    /**
+     * @returns {Promise<AccountHeader[]>}
+     */
+    getAccounts() {
+        const ret = wasm.webclient_getAccounts(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @param {AccountId} account_id
+     * @returns {Promise<Account | undefined>}
+     */
+    getAccount(account_id) {
+        _assertClass(account_id, AccountId);
+        const ret = wasm.webclient_getAccount(this.__wbg_ptr, account_id.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @param {any} account_bytes
+     * @returns {Promise<any>}
+     */
+    importAccount(account_bytes) {
+        const ret = wasm.webclient_importAccount(this.__wbg_ptr, account_bytes);
+        return ret;
+    }
+    /**
+     * @param {Uint8Array} init_seed
+     * @param {boolean} mutable
+     * @returns {Promise<Account>}
+     */
+    importPublicAccountFromSeed(init_seed, mutable) {
+        const ptr0 = passArray8ToWasm0(init_seed, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.webclient_importPublicAccountFromSeed(this.__wbg_ptr, ptr0, len0, mutable);
+        return ret;
+    }
+    /**
+     * @param {AccountId} account_id
+     * @returns {Promise<any>}
+     */
+    importAccountById(account_id) {
+        _assertClass(account_id, AccountId);
+        const ret = wasm.webclient_importAccountById(this.__wbg_ptr, account_id.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @param {any} note_bytes
+     * @returns {Promise<any>}
+     */
+    importNote(note_bytes) {
+        const ret = wasm.webclient_importNote(this.__wbg_ptr, note_bytes);
+        return ret;
+    }
+    /**
+     * @param {any} store_dump
+     * @returns {Promise<any>}
+     */
+    forceImportStore(store_dump) {
+        const ret = wasm.webclient_forceImportStore(this.__wbg_ptr, store_dump);
+        return ret;
+    }
+    /**
+     * @param {AccountStorageMode} storage_mode
+     * @param {boolean} mutable
+     * @param {Uint8Array | null} [init_seed]
+     * @returns {Promise<Account>}
+     */
+    newWallet(storage_mode, mutable, init_seed) {
+        _assertClass(storage_mode, AccountStorageMode);
+        var ptr0 = isLikeNone(init_seed) ? 0 : passArray8ToWasm0(init_seed, wasm.__wbindgen_malloc);
+        var len0 = WASM_VECTOR_LEN;
+        const ret = wasm.webclient_newWallet(this.__wbg_ptr, storage_mode.__wbg_ptr, mutable, ptr0, len0);
+        return ret;
+    }
+    /**
+     * @param {AccountStorageMode} storage_mode
+     * @param {boolean} non_fungible
+     * @param {string} token_symbol
+     * @param {number} decimals
+     * @param {bigint} max_supply
+     * @returns {Promise<Account>}
+     */
+    newFaucet(storage_mode, non_fungible, token_symbol, decimals, max_supply) {
+        _assertClass(storage_mode, AccountStorageMode);
+        const ptr0 = passStringToWasm0(token_symbol, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.webclient_newFaucet(this.__wbg_ptr, storage_mode.__wbg_ptr, non_fungible, ptr0, len0, decimals, max_supply);
+        return ret;
+    }
+    /**
+     * @param {Account} account
+     * @param {Word | null | undefined} account_seed
+     * @param {boolean} overwrite
+     * @returns {Promise<void>}
+     */
+    newAccount(account, account_seed, overwrite) {
+        _assertClass(account, Account);
+        let ptr0 = 0;
+        if (!isLikeNone(account_seed)) {
+            _assertClass(account_seed, Word);
+            ptr0 = account_seed.__destroy_into_raw();
+        }
+        const ret = wasm.webclient_newAccount(this.__wbg_ptr, account.__wbg_ptr, ptr0, overwrite);
+        return ret;
+    }
+    /**
+     * @param {SecretKey} secret_key
+     * @returns {Promise<void>}
+     */
+    addAccountSecretKeyToWebStore(secret_key) {
+        _assertClass(secret_key, SecretKey);
+        const ret = wasm.webclient_addAccountSecretKeyToWebStore(this.__wbg_ptr, secret_key.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @param {string} tag
+     * @returns {Promise<void>}
+     */
+    addTag(tag) {
+        const ptr0 = passStringToWasm0(tag, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.webclient_addTag(this.__wbg_ptr, ptr0, len0);
+        return ret;
+    }
+    /**
+     * @param {string} tag
+     * @returns {Promise<void>}
+     */
+    removeTag(tag) {
+        const ptr0 = passStringToWasm0(tag, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.webclient_removeTag(this.__wbg_ptr, ptr0, len0);
+        return ret;
+    }
+    /**
+     * @returns {Promise<any>}
+     */
+    listTags() {
+        const ret = wasm.webclient_listTags(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @param {string} note_id
+     * @param {string} export_type
+     * @returns {Promise<any>}
+     */
+    exportNote(note_id, export_type) {
+        const ptr0 = passStringToWasm0(note_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passStringToWasm0(export_type, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len1 = WASM_VECTOR_LEN;
+        const ret = wasm.webclient_exportNote(this.__wbg_ptr, ptr0, len0, ptr1, len1);
+        return ret;
+    }
+    /**
+     * Retrieves the entire underlying web store and returns it as a JsValue
+     *
+     * Meant to be used in conjunction with the force_import_store method
+     * @returns {Promise<any>}
+     */
+    exportStore() {
+        const ret = wasm.webclient_exportStore(this.__wbg_ptr);
+        return ret;
     }
 }
 
@@ -5215,7 +5962,7 @@ export function __wbg_accountid_new(arg0) {
     return ret;
 };
 
-export function __wbg_addNoteTag_ba59bfbc7c953f04(arg0, arg1, arg2, arg3, arg4, arg5) {
+export function __wbg_addNoteTag_93d1a72c6a0ea412(arg0, arg1, arg2, arg3, arg4, arg5) {
     var v0 = getArrayU8FromWasm0(arg0, arg1).slice();
     wasm.__wbindgen_free(arg0, arg1 * 1, 1);
     let v1;
@@ -5236,7 +5983,7 @@ export function __wbg_append_8c7dd8d641a5f01b() { return handleError(function (a
     arg0.append(getStringFromWasm0(arg1, arg2), getStringFromWasm0(arg3, arg4));
 }, arguments) };
 
-export function __wbg_applyStateSync_ec922f60d48e28f5(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13) {
+export function __wbg_applyStateSync_9de9291b3a761f41(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13) {
     let deferred0_0;
     let deferred0_1;
     try {
@@ -5257,11 +6004,6 @@ export function __wbg_applyStateSync_ec922f60d48e28f5(arg0, arg1, arg2, arg3, ar
     } finally {
         wasm.__wbindgen_free(deferred0_0, deferred0_1, 1);
     }
-};
-
-export function __wbg_blockheader_new(arg0) {
-    const ret = BlockHeader.__wrap(arg0);
-    return ret;
 };
 
 export function __wbg_body_0b8fd1fe671660df(arg0) {
@@ -5358,7 +6100,7 @@ export function __wbg_felt_unwrap(arg0) {
     return ret;
 };
 
-export function __wbg_fetchAndCacheAccountAuthByPubKey_c33a4eea3bcfba37(arg0, arg1) {
+export function __wbg_fetchAndCacheAccountAuthByPubKey_e71f034961c8005e(arg0, arg1) {
     let deferred0_0;
     let deferred0_1;
     try {
@@ -5376,8 +6118,13 @@ export function __wbg_fetch_07cd86dd296a5a63(arg0, arg1, arg2) {
     return ret;
 };
 
-export function __wbg_fetch_769f3df592e37b75(arg0, arg1) {
+export function __wbg_fetch_f083e6da40cefe09(arg0, arg1) {
     const ret = fetch(arg0, arg1);
+    return ret;
+};
+
+export function __wbg_foreignaccount_unwrap(arg0) {
+    const ret = ForeignAccount.__unwrap(arg0);
     return ret;
 };
 
@@ -5396,7 +6143,7 @@ export function __wbg_fungibleassetdeltaitem_new(arg0) {
     return ret;
 };
 
-export function __wbg_getAccountAssetVault_e7c63da67dfaf463(arg0, arg1) {
+export function __wbg_getAccountAssetVault_13e258e9395da6a3(arg0, arg1) {
     let deferred0_0;
     let deferred0_1;
     try {
@@ -5409,7 +6156,7 @@ export function __wbg_getAccountAssetVault_e7c63da67dfaf463(arg0, arg1) {
     }
 };
 
-export function __wbg_getAccountAuthByPubKey_e9fea3fdd279fba0(arg0, arg1) {
+export function __wbg_getAccountAuthByPubKey_61dcb9fb8fdf630f(arg0, arg1) {
     let deferred0_0;
     let deferred0_1;
     try {
@@ -5422,7 +6169,7 @@ export function __wbg_getAccountAuthByPubKey_e9fea3fdd279fba0(arg0, arg1) {
     }
 };
 
-export function __wbg_getAccountCode_f6ed578eb01dc638(arg0, arg1) {
+export function __wbg_getAccountCode_a80c3ddd3ed29096(arg0, arg1) {
     let deferred0_0;
     let deferred0_1;
     try {
@@ -5435,7 +6182,7 @@ export function __wbg_getAccountCode_f6ed578eb01dc638(arg0, arg1) {
     }
 };
 
-export function __wbg_getAccountHeaderByCommitment_51bbceb85df7271b(arg0, arg1) {
+export function __wbg_getAccountHeaderByCommitment_4ad574b9d61b3e11(arg0, arg1) {
     let deferred0_0;
     let deferred0_1;
     try {
@@ -5448,7 +6195,7 @@ export function __wbg_getAccountHeaderByCommitment_51bbceb85df7271b(arg0, arg1) 
     }
 };
 
-export function __wbg_getAccountHeader_829c4a8c72177675(arg0, arg1) {
+export function __wbg_getAccountHeader_312ee64e643a2b01(arg0, arg1) {
     let deferred0_0;
     let deferred0_1;
     try {
@@ -5461,7 +6208,7 @@ export function __wbg_getAccountHeader_829c4a8c72177675(arg0, arg1) {
     }
 };
 
-export function __wbg_getAccountStorage_55aed73fa01c14d6(arg0, arg1) {
+export function __wbg_getAccountStorage_8c716f066175817e(arg0, arg1) {
     let deferred0_0;
     let deferred0_1;
     try {
@@ -5474,70 +6221,70 @@ export function __wbg_getAccountStorage_55aed73fa01c14d6(arg0, arg1) {
     }
 };
 
-export function __wbg_getBlockHeaders_5ae44bd05088f8c4(arg0, arg1) {
+export function __wbg_getBlockHeaders_019314ae646624c3(arg0, arg1) {
     var v0 = getArrayJsValueFromWasm0(arg0, arg1).slice();
     wasm.__wbindgen_free(arg0, arg1 * 4, 4);
     const ret = getBlockHeaders(v0);
     return ret;
 };
 
-export function __wbg_getForeignAccountCode_e8739ea1ecdc1623(arg0, arg1) {
+export function __wbg_getForeignAccountCode_a97ac855435a1808(arg0, arg1) {
     var v0 = getArrayJsValueFromWasm0(arg0, arg1).slice();
     wasm.__wbindgen_free(arg0, arg1 * 4, 4);
     const ret = getForeignAccountCode(v0);
     return ret;
 };
 
-export function __wbg_getInputNotesFromIds_5c24812a2e86f472(arg0, arg1) {
+export function __wbg_getInputNotesFromIds_46071b861b54e7ac(arg0, arg1) {
     var v0 = getArrayJsValueFromWasm0(arg0, arg1).slice();
     wasm.__wbindgen_free(arg0, arg1 * 4, 4);
     const ret = getInputNotesFromIds(v0);
     return ret;
 };
 
-export function __wbg_getInputNotesFromNullifiers_d8375a5c3b8ddd08(arg0, arg1) {
+export function __wbg_getInputNotesFromNullifiers_8d87f884ebfa5fea(arg0, arg1) {
     var v0 = getArrayJsValueFromWasm0(arg0, arg1).slice();
     wasm.__wbindgen_free(arg0, arg1 * 4, 4);
     const ret = getInputNotesFromNullifiers(v0);
     return ret;
 };
 
-export function __wbg_getInputNotes_777edff0b5c6f8cb(arg0, arg1) {
+export function __wbg_getInputNotes_8f9ddcb768b819bf(arg0, arg1) {
     var v0 = getArrayU8FromWasm0(arg0, arg1).slice();
     wasm.__wbindgen_free(arg0, arg1 * 1, 1);
     const ret = getInputNotes(v0);
     return ret;
 };
 
-export function __wbg_getOutputNotesFromIds_989d83d6a780d5ca(arg0, arg1) {
+export function __wbg_getOutputNotesFromIds_2e76f0b75ac83cf8(arg0, arg1) {
     var v0 = getArrayJsValueFromWasm0(arg0, arg1).slice();
     wasm.__wbindgen_free(arg0, arg1 * 4, 4);
     const ret = getOutputNotesFromIds(v0);
     return ret;
 };
 
-export function __wbg_getOutputNotesFromNullifiers_da3c7e0ea658145e(arg0, arg1) {
+export function __wbg_getOutputNotesFromNullifiers_82741853ae01f792(arg0, arg1) {
     var v0 = getArrayJsValueFromWasm0(arg0, arg1).slice();
     wasm.__wbindgen_free(arg0, arg1 * 4, 4);
     const ret = getOutputNotesFromNullifiers(v0);
     return ret;
 };
 
-export function __wbg_getOutputNotes_058c23a89aca2306(arg0, arg1) {
+export function __wbg_getOutputNotes_9e976642a0c85969(arg0, arg1) {
     var v0 = getArrayU8FromWasm0(arg0, arg1).slice();
     wasm.__wbindgen_free(arg0, arg1 * 1, 1);
     const ret = getOutputNotes(v0);
     return ret;
 };
 
-export function __wbg_getPartialBlockchainNodes_ba82d1c12407ac1f(arg0, arg1) {
+export function __wbg_getPartialBlockchainNodes_96b9ae9d26e43b31(arg0, arg1) {
     var v0 = getArrayJsValueFromWasm0(arg0, arg1).slice();
     wasm.__wbindgen_free(arg0, arg1 * 4, 4);
     const ret = getPartialBlockchainNodes(v0);
     return ret;
 };
 
-export function __wbg_getPartialBlockchainPeaksByBlockNum_a4bb6bcc764771d5(arg0, arg1) {
+export function __wbg_getPartialBlockchainPeaksByBlockNum_c08109171c8b5ddd(arg0, arg1) {
     let deferred0_0;
     let deferred0_1;
     try {
@@ -5564,7 +6311,7 @@ export function __wbg_getTime_46267b1c24877e30(arg0) {
     return ret;
 };
 
-export function __wbg_getTransactions_dc8d84a7eff23321(arg0, arg1) {
+export function __wbg_getTransactions_ed55850e52b8e118(arg0, arg1) {
     let deferred0_0;
     let deferred0_1;
     try {
@@ -5622,7 +6369,7 @@ export function __wbg_inputnoterecord_new(arg0) {
     return ret;
 };
 
-export function __wbg_insertAccountAssetVault_b954dbc585ea0cff(arg0, arg1, arg2, arg3) {
+export function __wbg_insertAccountAssetVault_2b9edb8a4ab28738(arg0, arg1, arg2, arg3) {
     let deferred0_0;
     let deferred0_1;
     try {
@@ -5637,7 +6384,7 @@ export function __wbg_insertAccountAssetVault_b954dbc585ea0cff(arg0, arg1, arg2,
     }
 };
 
-export function __wbg_insertAccountAuth_397880d915f1361c(arg0, arg1, arg2, arg3) {
+export function __wbg_insertAccountAuth_7917dfda7c7a7702(arg0, arg1, arg2, arg3) {
     let deferred0_0;
     let deferred0_1;
     let deferred1_0;
@@ -5655,7 +6402,7 @@ export function __wbg_insertAccountAuth_397880d915f1361c(arg0, arg1, arg2, arg3)
     }
 };
 
-export function __wbg_insertAccountCode_3b86a12c6e12db71(arg0, arg1, arg2, arg3) {
+export function __wbg_insertAccountCode_e500af4b254885b9(arg0, arg1, arg2, arg3) {
     let deferred0_0;
     let deferred0_1;
     try {
@@ -5670,7 +6417,7 @@ export function __wbg_insertAccountCode_3b86a12c6e12db71(arg0, arg1, arg2, arg3)
     }
 };
 
-export function __wbg_insertAccountRecord_67922c8005baa972(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14) {
+export function __wbg_insertAccountRecord_a10d26eef383146c(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14) {
     let deferred0_0;
     let deferred0_1;
     let deferred1_0;
@@ -5713,7 +6460,7 @@ export function __wbg_insertAccountRecord_67922c8005baa972(arg0, arg1, arg2, arg
     }
 };
 
-export function __wbg_insertAccountStorage_5c68b2cb205317fc(arg0, arg1, arg2, arg3) {
+export function __wbg_insertAccountStorage_0df2b99bfdbc63ff(arg0, arg1, arg2, arg3) {
     let deferred0_0;
     let deferred0_1;
     try {
@@ -5728,7 +6475,7 @@ export function __wbg_insertAccountStorage_5c68b2cb205317fc(arg0, arg1, arg2, ar
     }
 };
 
-export function __wbg_insertBlockHeader_4c5f07b54e23214f(arg0, arg1, arg2, arg3, arg4, arg5, arg6) {
+export function __wbg_insertBlockHeader_10c64aa29512ab7f(arg0, arg1, arg2, arg3, arg4, arg5, arg6) {
     let deferred0_0;
     let deferred0_1;
     try {
@@ -5745,7 +6492,7 @@ export function __wbg_insertBlockHeader_4c5f07b54e23214f(arg0, arg1, arg2, arg3,
     }
 };
 
-export function __wbg_insertPartialBlockchainNodes_828ac602df03ac83(arg0, arg1, arg2, arg3) {
+export function __wbg_insertPartialBlockchainNodes_c42a52406866420b(arg0, arg1, arg2, arg3) {
     var v0 = getArrayJsValueFromWasm0(arg0, arg1).slice();
     wasm.__wbindgen_free(arg0, arg1 * 4, 4);
     var v1 = getArrayJsValueFromWasm0(arg2, arg3).slice();
@@ -5754,7 +6501,7 @@ export function __wbg_insertPartialBlockchainNodes_828ac602df03ac83(arg0, arg1, 
     return ret;
 };
 
-export function __wbg_insertTransactionScript_e5062490ff6e1d60(arg0, arg1, arg2, arg3) {
+export function __wbg_insertTransactionScript_4e32727b060a0e50(arg0, arg1, arg2, arg3) {
     var v0 = getArrayU8FromWasm0(arg0, arg1).slice();
     wasm.__wbindgen_free(arg0, arg1 * 1, 1);
     let v1;
@@ -5813,7 +6560,7 @@ export function __wbg_length_e2d2a49132c1b256(arg0) {
     return ret;
 };
 
-export function __wbg_lockAccount_4eea03c1a3bec248(arg0, arg1) {
+export function __wbg_lockAccount_323d81f18de17726(arg0, arg1) {
     let deferred0_0;
     let deferred0_1;
     try {
@@ -5824,10 +6571,6 @@ export function __wbg_lockAccount_4eea03c1a3bec248(arg0, arg1) {
     } finally {
         wasm.__wbindgen_free(deferred0_0, deferred0_1, 1);
     }
-};
-
-export function __wbg_log_c222819a41e063d3(arg0) {
-    console.log(arg0);
 };
 
 export function __wbg_new0_f788a2397c7ca929() {
@@ -5847,7 +6590,7 @@ export function __wbg_new_23a2665fac83c611(arg0, arg1) {
             const a = state0.a;
             state0.a = 0;
             try {
-                return __wbg_adapter_641(a, state0.b, arg0, arg1);
+                return __wbg_adapter_692(a, state0.b, arg0, arg1);
             } finally {
                 state0.a = a;
             }
@@ -5909,8 +6652,8 @@ export function __wbg_next_6574e1a8a62d1055() { return handleError(function (arg
     return ret;
 }, arguments) };
 
-export function __wbg_note_unwrap(arg0) {
-    const ret = Note.__unwrap(arg0);
+export function __wbg_note_new(arg0) {
+    const ret = Note.__wrap(arg0);
     return ret;
 };
 
@@ -5934,6 +6677,11 @@ export function __wbg_notedetails_unwrap(arg0) {
     return ret;
 };
 
+export function __wbg_notedetailsandtag_new(arg0) {
+    const ret = NoteDetailsAndTag.__wrap(arg0);
+    return ret;
+};
+
 export function __wbg_notedetailsandtag_unwrap(arg0) {
     const ret = NoteDetailsAndTag.__unwrap(arg0);
     return ret;
@@ -5951,6 +6699,11 @@ export function __wbg_noteid_unwrap(arg0) {
 
 export function __wbg_noteidandargs_unwrap(arg0) {
     const ret = NoteIdAndArgs.__unwrap(arg0);
+    return ret;
+};
+
+export function __wbg_noterecipient_unwrap(arg0) {
+    const ret = NoteRecipient.__unwrap(arg0);
     return ret;
 };
 
@@ -5982,7 +6735,7 @@ export function __wbg_releaseLock_091899af97991d2e(arg0) {
     arg0.releaseLock();
 };
 
-export function __wbg_removeNoteTag_258aa8a23e9afe32(arg0, arg1, arg2, arg3, arg4, arg5) {
+export function __wbg_removeNoteTag_2d38aa24cecc7a23(arg0, arg1, arg2, arg3, arg4, arg5) {
     var v0 = getArrayU8FromWasm0(arg0, arg1).slice();
     wasm.__wbindgen_free(arg0, arg1 * 1, 1);
     let v1;
@@ -6012,6 +6765,15 @@ export function __wbg_rpodigest_new(arg0) {
     const ret = RpoDigest.__wrap(arg0);
     return ret;
 };
+
+export function __wbg_rpodigest_unwrap(arg0) {
+    const ret = RpoDigest.__unwrap(arg0);
+    return ret;
+};
+
+export function __wbg_set_11cd83f45504cedf() { return handleError(function (arg0, arg1, arg2, arg3, arg4) {
+    arg0.set(getStringFromWasm0(arg1, arg2), getStringFromWasm0(arg3, arg4));
+}, arguments) };
 
 export function __wbg_set_37837023f3d740e8(arg0, arg1, arg2) {
     arg0[arg1 >>> 0] = arg2;
@@ -6061,6 +6823,11 @@ export function __wbg_setreferrerpolicy_b73612479f761b6f(arg0, arg1) {
     arg0.referrerPolicy = __wbindgen_enum_ReferrerPolicy[arg1];
 };
 
+export function __wbg_slotandkeys_unwrap(arg0) {
+    const ret = SlotAndKeys.__unwrap(arg0);
+    return ret;
+};
+
 export function __wbg_stack_0ed75d68575b0f3c(arg0, arg1) {
     const ret = arg1.stack;
     const ptr1 = passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
@@ -6091,6 +6858,11 @@ export function __wbg_static_accessor_WINDOW_5de37043a91a9c40() {
 
 export function __wbg_status_f6360336ca686bf0(arg0) {
     const ret = arg0.status;
+    return ret;
+};
+
+export function __wbg_storageslot_unwrap(arg0) {
+    const ret = StorageSlot.__unwrap(arg0);
     return ret;
 };
 
@@ -6139,14 +6911,14 @@ export function __wbg_transactionscriptinputpair_unwrap(arg0) {
     return ret;
 };
 
-export function __wbg_undoAccountStates_8f001fb873e60be8(arg0, arg1) {
+export function __wbg_undoAccountStates_e8b196c0e96a395d(arg0, arg1) {
     var v0 = getArrayJsValueFromWasm0(arg0, arg1).slice();
     wasm.__wbindgen_free(arg0, arg1 * 4, 4);
     const ret = undoAccountStates(v0);
     return ret;
 };
 
-export function __wbg_upsertForeignAccountCode_a6bb3cbd0756c14f(arg0, arg1, arg2, arg3, arg4, arg5) {
+export function __wbg_upsertForeignAccountCode_1040f7199ad8f2b2(arg0, arg1, arg2, arg3, arg4, arg5) {
     let deferred0_0;
     let deferred0_1;
     let deferred2_0;
@@ -6166,7 +6938,7 @@ export function __wbg_upsertForeignAccountCode_a6bb3cbd0756c14f(arg0, arg1, arg2
     }
 };
 
-export function __wbg_upsertInputNote_5ebc0eff76a00344(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18) {
+export function __wbg_upsertInputNote_49e5c54e8f3d6ffc(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18) {
     let deferred0_0;
     let deferred0_1;
     let deferred4_0;
@@ -6204,7 +6976,7 @@ export function __wbg_upsertInputNote_5ebc0eff76a00344(arg0, arg1, arg2, arg3, a
     }
 };
 
-export function __wbg_upsertOutputNote_fe43f9fe1a92342c(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13) {
+export function __wbg_upsertOutputNote_fae0a96aac9ded74(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13) {
     let deferred0_0;
     let deferred0_1;
     let deferred2_0;
@@ -6233,7 +7005,7 @@ export function __wbg_upsertOutputNote_fe43f9fe1a92342c(arg0, arg1, arg2, arg3, 
     }
 };
 
-export function __wbg_upsertTransactionRecord_f50ac2be1bd82547(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11) {
+export function __wbg_upsertTransactionRecord_5d7a3aabb7f9644b(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11) {
     let deferred0_0;
     let deferred0_1;
     let deferred3_0;
@@ -6325,8 +7097,8 @@ export function __wbindgen_cb_drop(arg0) {
     return ret;
 };
 
-export function __wbindgen_closure_wrapper5861(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 2268, __wbg_adapter_52);
+export function __wbindgen_closure_wrapper5948(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 2289, __wbg_adapter_54);
     return ret;
 };
 
@@ -6366,6 +7138,11 @@ export function __wbindgen_is_bigint(arg0) {
 
 export function __wbindgen_is_function(arg0) {
     const ret = typeof(arg0) === 'function';
+    return ret;
+};
+
+export function __wbindgen_is_null(arg0) {
+    const ret = arg0 === null;
     return ret;
 };
 

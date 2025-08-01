@@ -27,7 +27,7 @@ const AccountVaultTable = ({ vault }: { vault: AssetVault }) => {
         <TableBody>
           {fungibleAssets.map((fungibleAsset) => {
             const faucet = faucets.find(
-              ({ id }) => id === fungibleAsset.faucetId().toString()
+              ({ id }) => id === fungibleAsset.faucetId().toString(),
             );
             return (
               <TableRow key={fungibleAsset.faucetId().toString()}>

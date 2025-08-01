@@ -123,11 +123,11 @@ const useTransactions = () => {
       AccountId.fromHex(targetAccountId),
       AccountId.fromHex(faucetId),
       noteType,
-      amount
+      amount,
     );
     return client.newTransaction(
       AccountId.fromHex(faucetId),
-      transactionRequest
+      transactionRequest,
     );
   };
   const newConsumeTransactionRequest = async ({
@@ -141,7 +141,7 @@ const useTransactions = () => {
     const transactionRequest = client.newConsumeTransactionRequest(noteIds);
     return client.newTransaction(
       AccountId.fromHex(accountId),
-      transactionRequest
+      transactionRequest,
     );
   };
   const newSendTransactionRequest = async ({
@@ -163,35 +163,35 @@ const useTransactions = () => {
       AccountId.fromHex(targetAccountId),
       AccountId.fromHex(faucetId),
       noteType,
-      amount
+      amount,
     );
     return client.newTransaction(
       AccountId.fromHex(senderAccountId),
-      transactionRequest
+      transactionRequest,
     );
   };
   const submitTransaction = async (transactionResult: TransactionResult) => {
     const client = await mockWebClient();
     await client.submitTransaction(transactionResult);
     const syncSummary = await client.syncState();
-    const blockHeader = await client.getLatestEpochBlock();
-    console.log("blockNum", blockHeader.blockNum());
-    console.log("commitment:", blockHeader.commitment().toHex());
-    console.log("chainCommitment:", blockHeader.chainCommitment().toHex());
+    // const blockHeader = await client.getLatestEpochBlock();
+    // console.log("blockNum", blockHeader.blockNum());
+    // console.log("commitment:", blockHeader.commitment().toHex());
+    // console.log("chainCommitment:", blockHeader.chainCommitment().toHex());
     // console.log('Transaction submitted');
     const transactionId = transactionResult.executedTransaction().id();
     // console.log('Transaction ID:', transactionId.toHex());
     // const accountId = transactionResult.executedTransaction().accountId().toString();
     // console.log('Account ID:', accountId);
     const transactions = await client.getTransactions(
-      TransactionFilter.ids([transactionResult.executedTransaction().id()])
+      TransactionFilter.ids([transactionResult.executedTransaction().id()]),
     );
     // console.log('Transactions:', transactions.length);
     const transactionRecord = transactions.find(
-      (tx) => tx.id().toHex() === transactionId.toHex()
+      (tx) => tx.id().toHex() === transactionId.toHex(),
     );
     const newAccount = await client.getAccount(
-      transactionResult.executedTransaction().accountId()
+      transactionResult.executedTransaction().accountId(),
     );
     /*const previousAccount = accounts.find(
       ({ id }) => id === newAccount?.id().toString()
@@ -200,16 +200,16 @@ const useTransactions = () => {
       throw new Error("Transaction record or account not found");
     }
     const inputNotes = await client.getInputNotes(
-      new NoteFilter(NoteFilterTypes.All)
+      new NoteFilter(NoteFilterTypes.All),
     );
     console.log("inputNotes.length", inputNotes.length);
     const consumableNoteIds: Record<string, string[]> = {};
     for (const account of accounts) {
       const consumableNotes = await client.getConsumableNotes(
-        account.account.id()
+        account.account.id(),
       );
       const noteIds = consumableNotes.map((consumableNote) =>
-        consumableNote.inputNoteRecord().id().toString()
+        consumableNote.inputNoteRecord().id().toString(),
       );
       consumableNoteIds[account.id] = noteIds;
     }

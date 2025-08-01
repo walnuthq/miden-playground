@@ -1,7 +1,6 @@
 import {
   TransactionRecord,
   Account as WasmAccount,
-  NetworkId,
   SyncSummary,
   type TransactionResult,
   InputNoteRecord,
@@ -44,7 +43,7 @@ export type State = {
 
 export const initialState = (): State => ({
   // GLOBAL
-  networkId: new NetworkId("mlcl").asStr(),
+  networkId: "mlcl",
   syncSummary: null,
   // ACCOUNTS
   createWalletDialogOpen: false,
@@ -101,7 +100,7 @@ export const stateSerializer = ({
         consumableNoteIds,
         tokenSymbol,
         updatedAt,
-      })
+      }),
     ),
     transactions: transactions.map(
       ({
@@ -116,7 +115,7 @@ export const stateSerializer = ({
         inputNotesCount,
         outputNotesCount,
         updatedAt,
-      })
+      }),
     ),
     inputNotes: inputNotes.map(({ id, inputNote, updatedAt }) => ({
       id,
@@ -173,7 +172,7 @@ export const stateDeserializer = (value: string): State => {
     networkId,
     syncSummary: syncSummary
       ? SyncSummary.deserialize(
-          Uint8Array.from(syncSummary.split(",").map((byte) => Number(byte)))
+          Uint8Array.from(syncSummary.split(",").map((byte) => Number(byte))),
         )
       : null,
     accounts: accounts.map(
@@ -187,7 +186,7 @@ export const stateDeserializer = (value: string): State => {
         updatedAt,
       }) => ({
         account: WasmAccount.deserialize(
-          Uint8Array.from(account.split(",").map((byte) => Number(byte)))
+          Uint8Array.from(account.split(",").map((byte) => Number(byte))),
         ),
         name,
         id,
@@ -195,7 +194,7 @@ export const stateDeserializer = (value: string): State => {
         consumableNoteIds,
         tokenSymbol,
         updatedAt,
-      })
+      }),
     ),
     transactions: transactions.map(
       ({
@@ -206,18 +205,18 @@ export const stateDeserializer = (value: string): State => {
         updatedAt,
       }) => ({
         record: TransactionRecord.deserialize(
-          Uint8Array.from(record.split(",").map((byte) => Number(byte)))
+          Uint8Array.from(record.split(",").map((byte) => Number(byte))),
         ),
         scriptRoot,
         inputNotesCount,
         outputNotesCount,
         updatedAt,
-      })
+      }),
     ),
     inputNotes: inputNotes.map(({ id, inputNote, updatedAt }) => ({
       id,
       inputNote: InputNoteRecord.deserialize(
-        Uint8Array.from(inputNote.split(",").map((byte) => Number(byte)))
+        Uint8Array.from(inputNote.split(",").map((byte) => Number(byte))),
       ),
       updatedAt,
     })),
@@ -352,7 +351,7 @@ export const reducer = (state: State, action: Action): State => {
     }
     case "SUBMIT_TRANSACTION": {
       const index = state.accounts.findIndex(
-        ({ id }) => id === action.payload.account.id().toString()
+        ({ id }) => id === action.payload.account.id().toString(),
       );
       return {
         ...state,

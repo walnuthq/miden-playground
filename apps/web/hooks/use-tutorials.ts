@@ -46,7 +46,7 @@ const useTutorials = () => {
     await client.forceImportStore(tutorial.storeDump);
     console.log(
       "notes1.length",
-      (await client.getInputNotes(new NoteFilter(NoteFilterTypes.All))).length
+      (await client.getInputNotes(new NoteFilter(NoteFilterTypes.All))).length,
     );
     dispatch({
       type: "LOAD_PROJECT",

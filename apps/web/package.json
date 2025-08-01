@@ -22,7 +22,7 @@
     "@workspace/mock-web-client": "workspace:*",
     "@workspace/ui": "workspace:*",
     "lodash": "^4.17.21",
-    "lucide-react": "^0.534.0",
+    "lucide-react": "^0.535.0",
     "new-github-issue-url": "^1.1.0",
     "next": "15.3.4",
     "next-themes": "^0.4.6",
@@ -40,7 +40,7 @@
     "@workspace/eslint-config": "workspace:^",
     "@workspace/typescript-config": "workspace:*",
     "copy-webpack-plugin": "^13.0.0",
-    "typescript": "^5.8.3",
-    "wrangler": "^4.26.1"
+    "typescript": "^5.9.2",
+    "wrangler": "^4.27.0"
   }
 }

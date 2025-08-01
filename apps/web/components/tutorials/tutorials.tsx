@@ -217,7 +217,7 @@ const CreateAndFundWalletStep3 = {
     const { transactions } = useTransactions();
     const faucet = faucets.find(({ name }) => name === "MDN Faucet");
     const transaction = transactions.find(
-      ({ record }) => record.accountId().toString() === faucet?.id
+      ({ record }) => record.accountId().toString() === faucet?.id,
     );
     return (
       <>
@@ -275,7 +275,7 @@ const CreateAndFundWalletStep3 = {
     const { nextTutorialStep } = useTutorials();
     const faucet = faucets.find(({ name }) => name === "MDN Faucet");
     const transaction = transactions.find(
-      ({ record }) => record.accountId().toString() === faucet?.id
+      ({ record }) => record.accountId().toString() === faucet?.id,
     );
     return (
       <NextStepButton
@@ -339,7 +339,7 @@ const CreateAndFundWalletStep4 = {
     const { nextTutorialStep } = useTutorials();
     const faucet = faucets.find(({ name }) => name === "MDN Faucet");
     const transaction = transactions.find(
-      ({ record }) => record.accountId().toString() === faucet?.id
+      ({ record }) => record.accountId().toString() === faucet?.id,
     );
     const noteId = transaction?.record.outputNotes().getNote(0).id().toString();
     return (
@@ -360,7 +360,7 @@ const CreateAndFundWalletStep5 = {
     const { transactions } = useTransactions();
     const wallet = wallets.find(({ account }) => account.isPublic());
     const transaction = transactions.find(
-      ({ record }) => record.accountId().toString() === wallet?.id
+      ({ record }) => record.accountId().toString() === wallet?.id,
     );
     return (
       <>
@@ -428,7 +428,7 @@ const CreateAndFundWalletStep5 = {
     const { nextTutorialStep } = useTutorials();
     const wallet = wallets.find(({ account }) => account.isPublic());
     const transaction = transactions.find(
-      ({ record }) => record.accountId().toString() === wallet?.id
+      ({ record }) => record.accountId().toString() === wallet?.id,
     );
     return (
       <NextStepButton

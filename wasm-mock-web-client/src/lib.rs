@@ -4,16 +4,18 @@ use alloc::sync::Arc;
 use std::fmt::Write;
 
 use miden_client::{
+    Client,
+    ExecutionOptions,
     keystore::WebKeyStore,
-    store::{Store, TransactionFilter, web_store::WebStore},
-    testing::mock::{MockClient, MockRpcApi},
-    utils::RwLock,
+    // rpc::{Endpoint, TonicRpcClient},
+    store::web_store::WebStore,
+    testing::mock::MockRpcApi,
 };
-use miden_objects::{Felt, crypto::rand::RpoRandomCoin};
-use miden_testing::{MockChain, MockChainNote};
+use miden_objects::{
+    Felt, MAX_TX_EXECUTION_CYCLES, MIN_TX_EXECUTION_CYCLES, crypto::rand::RpoRandomCoin,
+};
 use rand::{Rng, SeedableRng, rngs::StdRng};
 use wasm_bindgen::prelude::*;
-use web_sys::console;
 
 pub mod account;
 pub mod export;
@@ -24,35 +26,36 @@ pub mod new_account;
 pub mod new_transactions;
 pub mod notes;
 pub mod sync;
+pub mod tags;
 pub mod transactions;
 pub mod utils;
 
 #[wasm_bindgen]
-pub struct MockWebClient {
+pub struct WebClient {
     store: Option<Arc<WebStore>>,
     keystore: Option<WebKeyStore<RpoRandomCoin>>,
-    inner: Option<MockClient>,
+    inner: Option<Client>,
 }
 
-impl Default for MockWebClient {
+impl Default for WebClient {
     fn default() -> Self {
         Self::new()
     }
 }
 
 #[wasm_bindgen]
-impl MockWebClient {
+impl WebClient {
     #[wasm_bindgen(constructor)]
     pub fn new() -> Self {
         console_error_panic_hook::set_once();
-        MockWebClient {
+        WebClient {
+            inner: None,
             store: None,
             keystore: None,
-            inner: None,
         }
     }
 
-    pub(crate) fn get_mut_inner(&mut self) -> Option<&mut MockClient> {
+    pub(crate) fn get_mut_inner(&mut self) -> Option<&mut Client> {
         self.inner.as_mut()
     }
 
@@ -67,7 +70,6 @@ impl MockWebClient {
                 if seed_bytes.len() == 32 {
                     let mut seed_array = [0u8; 32];
                     seed_array.copy_from_slice(&seed_bytes);
-                    console::log_1(&format!("{:?}", seed_array).into());
                     StdRng::from_seed(seed_array)
                 } else {
                     return Err(JsValue::from_str("Seed must be exactly 32 bytes"));
@@ -76,11 +78,6 @@ impl MockWebClient {
             None => StdRng::from_os_rng(),
         };
         let coin_seed: [u64; 4] = rng.random();
-        // console::log_1(&format!("{:?}", coin_seed).into());
-        // let coin_seed2: [u64; 4] = rng.random();
-        // console::log_1(&format!("{:?}", coin_seed2).into());
-        // let coin_seed3: [u64; 4] = rng.random();
-        // console::log_1(&format!("{:?}", coin_seed3).into());
 
         let rng = RpoRandomCoin::new(coin_seed.map(Felt::new));
         let web_store: WebStore = WebStore::new()
@@ -90,116 +87,29 @@ impl MockWebClient {
 
         let keystore = WebKeyStore::new(rng);
 
-        // let mut api = MockRpcApi::new();
-        // let account_ids = web_store
-        //     .get_account_ids()
-        //     .await
-        //     .map_err(|_| JsValue::from_str("Failed to retrieve account IDs"))?;
-        // let accounts = account_ids.map(|account_id| web_store.get_account(account_id).await);
-        /* let account_id = account_ids[0];
-        let account_record = web_store
-            .get_account(account_id)
-            .await
-            .map_err(|_| JsValue::from_str("Failed to retrieve account"))?;*/
-        // let mut accounts = vec![];
-        // for account_id in account_ids {
-        //     let account_record = web_store
-        //         .get_account(account_id)
-        //         .await
-        //         .map_err(|_| JsValue::from_str("Failed to retrieve account"))?;
-        //     let account = account_record.unwrap().into();
-        //     accounts.push(account);
-        // }
-        /*let accounts = account_ids
-        .iter()
-        .map(async |account_id| {
-            let ar = web_store
-                .get_account(*account_id)
-                .await
-                .map_err(|_| JsValue::from_str("Failed to retrieve account"))?;
-            let a: miden_objects::account::Account = account_record.unwrap().into();
-            a
-        })
-        .collect::<Vec<miden_objects::account::Account>>();*/
-        // let account: miden_objects::account::Account = account_record.unwrap().into();
-        // console::log_1(&format!("{:?}", account_ids).into());
-        /* let block_num = web_store
-        .get_sync_height()
-        .await
-        .map_err(|_| JsValue::from_str("Failed to retrieve sync height"))?; */
-        // let block_num_result = web_store.get_sync_height().await;
-        // let block_num = match block_num_result {
-        //     Ok(block_num) => block_num,
-        //     Err(_) => 0.into(),
-        // };
-        // console::log_1(&format!("{:?}", block_num).into());
-        // let mut mock_chain2 = MockChain::with_accounts(&accounts);
-        // let commitment = mock_chain2.latest_block_header().commitment();
-        // console::log_1(
-        //     &format!("mock_chain2 initial commitment: {:?}", commitment.to_hex()).into(),
-        // );
-        // let mock_chain = MockChain::new();
-        //let mock_chain = MockChain::new();
-        /* if block_num.as_usize() > 0 {
-            let _ = mock_chain.prove_until_block(block_num);
-        }*/
-        // let commitment = mock_chain.latest_block_header().commitment();
-        // console::log_1(&format!("initial commitment: {:?}", commitment.to_hex()).into());
-        // let abc=mock_chain.latest_partial_blockchain().
-        // api.mock_chain = Arc::new(RwLock::new(mock_chain));
+        // let endpoint = node_url.map_or(Ok(Endpoint::testnet()), |url| {
+        //     Endpoint::try_from(url.as_str()).map_err(|_| JsValue::from_str("Invalid node URL"))
+        // })?;
 
-        self.inner = Some(MockClient::new(
+        // let web_rpc_client = Arc::new(TonicRpcClient::new(&endpoint, 0));
+
+        self.inner = Some(Client::new(
             Arc::new(MockRpcApi::new()),
             Box::new(rng),
             web_store.clone(),
             Arc::new(keystore.clone()),
-            true,
+            ExecutionOptions::new(
+                Some(MAX_TX_EXECUTION_CYCLES),
+                MIN_TX_EXECUTION_CYCLES,
+                false,
+                false,
+            )
+            .expect("Default executor's options should always be valid"),
             None,
             None,
         ));
         self.store = Some(web_store);
         self.keystore = Some(keystore);
-
-        /* let client = self.get_mut_inner().unwrap();
-        let rpc_api = client.test_rpc_api();
-        let (block_header, mmr_proof) = rpc_api
-            .get_block_header_by_number(Some(0.into()), false)
-            .await
-            .map_err(|_| JsValue::from_str("Failed to retrieve block header"))?;
-        let commitment = block_header.commitment();
-        console::log_1(&format!("initial commitment: {:?}", commitment.to_hex()).into());
-
-        let mut mock_chain = MockChain::new();
-        let commitment = mock_chain.latest_block_header().commitment();
-        console::log_1(&format!("initial commitment: {:?}", commitment.to_hex()).into());
-
-        let transactions = client
-            .get_transactions(TransactionFilter::All)
-            .await
-            .map_err(|_| JsValue::from_str("Failed to retrieve transactions"))?;
-        for transaction in transactions {
-            // let nullifiers = transaction.details.input_note_nullifiers;
-            let notes: Vec<miden_objects::transaction::OutputNote> =
-                transaction.details.output_notes.iter().cloned().collect();
-            let nullifiers: Vec<miden_objects::note::Nullifier> = transaction
-                .details
-                .input_note_nullifiers
-                .into_iter()
-                .map(Into::into)
-                .collect();
-            //
-            for note in notes {
-                mock_chain.add_pending_note(note);
-            }
-            //
-            for nullifier in nullifiers {
-                mock_chain.add_pending_nullifier(nullifier);
-            }
-            //
-            mock_chain.prove_next_block();
-            let commitment = mock_chain.latest_block_header().commitment();
-            console::log_1(&format!("tx commitment: {:?}", commitment.to_hex()).into());
-        } */
 
         Ok(JsValue::from_str("Client created successfully"))
     }

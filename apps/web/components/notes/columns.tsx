@@ -44,7 +44,7 @@ const InputNoteActionsCell = ({
             <DropdownMenuItem
               onClick={async () => {
                 const targetAccountId = noteInputsToAccountId(
-                  inputNote.inputNote.details().recipient().inputs()
+                  inputNote.inputNote.details().recipient().inputs(),
                 );
                 const accountId = targetAccountId.toString();
                 //setLoading(true);

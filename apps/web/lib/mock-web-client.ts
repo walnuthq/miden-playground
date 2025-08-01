@@ -1,4 +1,4 @@
-import { MockWebClient } from "@workspace/mock-web-client";
+import { WebClient } from "@workspace/mock-web-client";
 import { range } from "lodash";
 
 /* export const mockWebClient = async (
@@ -6,16 +6,16 @@ import { range } from "lodash";
 ) => MockWebClient.createClient(undefined, seed); */
 
 const globalForMockWebClient = globalThis as unknown as {
-  mockWebClient: MockWebClient;
+  mockWebClient: WebClient;
 };
 
 export const mockWebClient = async (
-  seed: Uint8Array = new Uint8Array(range(32))
+  seed: Uint8Array = new Uint8Array(range(32)),
 ) => {
   if (!globalForMockWebClient.mockWebClient) {
-    globalForMockWebClient.mockWebClient = await MockWebClient.createClient(
+    globalForMockWebClient.mockWebClient = await WebClient.createClient(
       undefined,
-      seed
+      seed,
     );
   }
   return globalForMockWebClient.mockWebClient;

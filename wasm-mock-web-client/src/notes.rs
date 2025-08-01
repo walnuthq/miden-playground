@@ -7,7 +7,7 @@ use wasm_bindgen::prelude::*;
 
 use super::models::note_script::NoteScript;
 use crate::{
-    MockWebClient, js_error_with_context,
+    WebClient, js_error_with_context,
     models::{
         account_id::AccountId, consumable_note_record::ConsumableNoteRecord,
         input_note_record::InputNoteRecord, note_filter::NoteFilter,
@@ -15,7 +15,7 @@ use crate::{
 };
 
 #[wasm_bindgen]
-impl MockWebClient {
+impl WebClient {
     #[wasm_bindgen(js_name = "getInputNotes")]
     pub async fn get_input_notes(
         &mut self,
@@ -59,10 +59,7 @@ impl MockWebClient {
                 .get_output_notes(filter.into())
                 .await
                 .map_err(|err| js_error_with_context(err, "failed to get output notes"))?;
-            let note_ids = notes
-                .iter()
-                .map(|note| note.id().to_string())
-                .collect::<Vec<String>>();
+            let note_ids = notes.iter().map(|note| note.id().to_string()).collect::<Vec<String>>();
 
             serde_wasm_bindgen::to_value(&note_ids).map_err(|e| JsValue::from_str(&e.to_string()))
         } else {
@@ -93,6 +90,7 @@ impl MockWebClient {
     pub fn compile_note_script(&mut self, script: &str) -> Result<NoteScript, JsValue> {
         if let Some(client) = self.get_mut_inner() {
             let native_note_script: NativeNoteScript = client
+                .script_builder()
                 .compile_note_script(script)
                 .map_err(|err| js_error_with_context(err, "failed to compile note script"))?;
 
