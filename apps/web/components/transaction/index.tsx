@@ -6,9 +6,7 @@ import TransactionInformation from "@/components/transaction/transaction-informa
 const Transaction = ({ id }: { id: string }) => {
   const isClient = useIsClient();
   const { transactions } = useTransactions();
-  const transaction = transactions.find(
-    (transaction) => transaction.record.id().toHex() === id,
-  );
+  const transaction = transactions.find((transaction) => transaction.id === id);
   if (!isClient || !transaction) {
     return null;
   }

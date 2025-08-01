@@ -49,9 +49,9 @@ const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
       items: transactions
         .sort((a, b) => b.updatedAt - a.updatedAt)
         .slice(0, 5)
-        .map(({ record }) => ({
-          title: formatId(record.id().toHex()),
-          url: `/transactions/${record.id().toHex()}`,
+        .map(({ id }) => ({
+          title: formatId(id),
+          url: `/transactions/${id}`,
         })),
     },
     {

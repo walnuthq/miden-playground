@@ -1,6 +1,10 @@
 "use client";
 import { MoreVertical } from "lucide-react";
-import { type TableInputNote } from "@/lib/types";
+import {
+  type InputNote,
+  noteConsumed,
+  noteInputsToAccountId,
+} from "@/lib/types";
 import { formatId } from "@/lib/utils";
 import { type ColumnDef } from "@tanstack/react-table";
 import { Button } from "@workspace/ui/components/button";
@@ -12,23 +16,11 @@ import {
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
 import useTransactions from "@/hooks/use-transactions";
-import useNotes from "@/hooks/use-notes";
-import {
-  noteInputsToAccountId,
-  noteWellKnownNote,
-  noteConsumed,
-} from "@/lib/types";
 import AccountAddress from "@/components/lib/account-address";
 
-const InputNoteActionsCell = ({
-  inputNote: { id: noteId },
-}: {
-  inputNote: TableInputNote;
-}) => {
+const InputNoteActionsCell = ({ inputNote }: { inputNote: InputNote }) => {
   const { openCreateTransactionDialog, newConsumeTransactionRequest } =
     useTransactions();
-  const { inputNotes } = useNotes();
-  const inputNote = inputNotes.find(({ id }) => id === noteId);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -38,39 +30,33 @@ const InputNoteActionsCell = ({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        {inputNote &&
-          noteWellKnownNote(inputNote.inputNote) === "P2ID" &&
-          !noteConsumed(inputNote.inputNote) && (
-            <DropdownMenuItem
-              onClick={async () => {
-                const targetAccountId = noteInputsToAccountId(
-                  inputNote.inputNote.details().recipient().inputs(),
-                );
-                const accountId = targetAccountId.toString();
-                //setLoading(true);
-                const transactionResult = await newConsumeTransactionRequest({
-                  accountId,
-                  noteIds: [noteId],
-                });
-                //setLoading(false);
-                openCreateTransactionDialog({
-                  accountId,
-                  transactionType: "consume",
-                  step: "preview",
-                  transactionResult,
-                });
-              }}
-            >
-              Consume note
-            </DropdownMenuItem>
-          )}
+        {inputNote.wellKnownNote === "P2ID" && !noteConsumed(inputNote) && (
+          <DropdownMenuItem
+            onClick={async () => {
+              const targetAccountId = noteInputsToAccountId(inputNote.inputs);
+              const accountId = targetAccountId.toString();
+              const transactionResult = await newConsumeTransactionRequest({
+                accountId,
+                noteIds: [inputNote.id],
+              });
+              openCreateTransactionDialog({
+                accountId,
+                transactionType: "consume",
+                step: "preview",
+                transactionResult,
+              });
+            }}
+          >
+            Consume note
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem onClick={() => {}}>Export note</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
 };
 
-export const columns: ColumnDef<TableInputNote>[] = [
+export const columns: ColumnDef<InputNote>[] = [
   {
     accessorKey: "id",
     header: "ID",
@@ -78,7 +64,7 @@ export const columns: ColumnDef<TableInputNote>[] = [
   },
   {
     accessorKey: "type",
-    header: "Type",
+    header: "Storage mode",
     cell: ({ row }) => (
       <Badge
         variant={row.original.type === "Public" ? "default" : "destructive"}

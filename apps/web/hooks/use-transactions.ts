@@ -10,6 +10,8 @@ import {
 import {
   type CreateTransactionDialogStep,
   type TransactionType,
+  wasmInputNoteToInputNote,
+  wasmTransactionToTransaction,
 } from "@/lib/types";
 import { mockWebClient } from "@/lib/mock-web-client";
 import useGlobalContext from "@/components/global-context/hook";
@@ -25,6 +27,7 @@ const useTransactions = () => {
     createTransactionDialogNoteIds,
     createTransactionDialogTransactionResult,
     transactions,
+    networkId,
     dispatch,
   } = useGlobalContext();
   const openCreateTransactionDialog = ({
@@ -123,11 +126,11 @@ const useTransactions = () => {
       AccountId.fromHex(targetAccountId),
       AccountId.fromHex(faucetId),
       noteType,
-      amount,
+      amount
     );
     return client.newTransaction(
       AccountId.fromHex(faucetId),
-      transactionRequest,
+      transactionRequest
     );
   };
   const newConsumeTransactionRequest = async ({
@@ -141,7 +144,7 @@ const useTransactions = () => {
     const transactionRequest = client.newConsumeTransactionRequest(noteIds);
     return client.newTransaction(
       AccountId.fromHex(accountId),
-      transactionRequest,
+      transactionRequest
     );
   };
   const newSendTransactionRequest = async ({
@@ -163,11 +166,11 @@ const useTransactions = () => {
       AccountId.fromHex(targetAccountId),
       AccountId.fromHex(faucetId),
       noteType,
-      amount,
+      amount
     );
     return client.newTransaction(
       AccountId.fromHex(senderAccountId),
-      transactionRequest,
+      transactionRequest
     );
   };
   const submitTransaction = async (transactionResult: TransactionResult) => {
@@ -184,14 +187,14 @@ const useTransactions = () => {
     // const accountId = transactionResult.executedTransaction().accountId().toString();
     // console.log('Account ID:', accountId);
     const transactions = await client.getTransactions(
-      TransactionFilter.ids([transactionResult.executedTransaction().id()]),
+      TransactionFilter.ids([transactionResult.executedTransaction().id()])
     );
     // console.log('Transactions:', transactions.length);
     const transactionRecord = transactions.find(
-      (tx) => tx.id().toHex() === transactionId.toHex(),
+      (tx) => tx.id().toHex() === transactionId.toHex()
     );
     const newAccount = await client.getAccount(
-      transactionResult.executedTransaction().accountId(),
+      transactionResult.executedTransaction().accountId()
     );
     /*const previousAccount = accounts.find(
       ({ id }) => id === newAccount?.id().toString()
@@ -200,40 +203,27 @@ const useTransactions = () => {
       throw new Error("Transaction record or account not found");
     }
     const inputNotes = await client.getInputNotes(
-      new NoteFilter(NoteFilterTypes.All),
+      new NoteFilter(NoteFilterTypes.All)
     );
     console.log("inputNotes.length", inputNotes.length);
     const consumableNoteIds: Record<string, string[]> = {};
     for (const account of accounts) {
       const consumableNotes = await client.getConsumableNotes(
-        account.account.id(),
+        account.account.id()
       );
       const noteIds = consumableNotes.map((consumableNote) =>
-        consumableNote.inputNoteRecord().id().toString(),
+        consumableNote.inputNoteRecord().id().toString()
       );
       consumableNoteIds[account.id] = noteIds;
     }
     dispatch({
       type: "SUBMIT_TRANSACTION",
       payload: {
-        transaction: {
-          record: transactionRecord,
-          scriptRoot:
-            transactionResult
-              .transactionArguments()
-              .txScript()
-              ?.root()
-              .toHex() ?? "",
-          inputNotesCount: transactionResult
-            .executedTransaction()
-            .inputNotes()
-            .numNotes(),
-          outputNotesCount: transactionResult
-            .executedTransaction()
-            .outputNotes()
-            .numNotes(),
-          updatedAt: syncSummary.blockNum(),
-        },
+        transaction: wasmTransactionToTransaction(
+          transactionRecord,
+          transactionResult,
+          networkId
+        ),
         account: newAccount,
         consumableNoteIds,
         /* account: {
@@ -241,11 +231,14 @@ const useTransactions = () => {
           account: newAccount,
           updatedAt: syncSummary.blockNum(),
         }, */
-        inputNotes: inputNotes.map((inputNote) => ({
+        inputNotes: inputNotes.map((inputNoteRecord) =>
+          wasmInputNoteToInputNote(inputNoteRecord, networkId)
+        ),
+        /* inputNotes: inputNotes.map((inputNote) => ({
           id: inputNote.id().toString(),
           inputNote,
           updatedAt: syncSummary.blockNum(),
-        })),
+        })), */
         syncSummary,
       },
     });

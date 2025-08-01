@@ -1,9 +1,7 @@
 import {
-  TransactionRecord,
   Account as WasmAccount,
   SyncSummary,
   type TransactionResult,
-  InputNoteRecord,
   type ConsumableNoteRecord,
 } from "@workspace/mock-web-client";
 import {
@@ -100,27 +98,12 @@ export const stateSerializer = ({
         consumableNoteIds,
         tokenSymbol,
         updatedAt,
-      }),
+      })
     ),
-    transactions: transactions.map(
-      ({
-        record,
-        scriptRoot,
-        inputNotesCount,
-        outputNotesCount,
-        updatedAt,
-      }) => ({
-        record: record.serialize().toString(),
-        scriptRoot,
-        inputNotesCount,
-        outputNotesCount,
-        updatedAt,
-      }),
-    ),
-    inputNotes: inputNotes.map(({ id, inputNote, updatedAt }) => ({
-      id,
-      inputNote: inputNote.serialize().toString(),
-      updatedAt,
+    transactions,
+    inputNotes: inputNotes.map((inputNote) => ({
+      ...inputNote,
+      inputs: inputNote.inputs.map((input) => input.toString()),
     })),
     tutorialId,
     tutorialStep,
@@ -153,14 +136,8 @@ export const stateDeserializer = (value: string): State => {
       tokenSymbol: string;
       updatedAt: number;
     }[];
-    transactions: {
-      record: string;
-      scriptRoot: string;
-      inputNotesCount: number;
-      outputNotesCount: number;
-      updatedAt: number;
-    }[];
-    inputNotes: { id: string; inputNote: string; updatedAt: number }[];
+    transactions: Transaction[];
+    inputNotes: (Omit<InputNote, "inputs"> & { inputs: string[] })[];
     tutorialId: string;
     tutorialStep: number;
     tutorialMaxStep: number;
@@ -172,7 +149,7 @@ export const stateDeserializer = (value: string): State => {
     networkId,
     syncSummary: syncSummary
       ? SyncSummary.deserialize(
-          Uint8Array.from(syncSummary.split(",").map((byte) => Number(byte))),
+          Uint8Array.from(syncSummary.split(",").map((byte) => Number(byte)))
         )
       : null,
     accounts: accounts.map(
@@ -186,7 +163,7 @@ export const stateDeserializer = (value: string): State => {
         updatedAt,
       }) => ({
         account: WasmAccount.deserialize(
-          Uint8Array.from(account.split(",").map((byte) => Number(byte))),
+          Uint8Array.from(account.split(",").map((byte) => Number(byte)))
         ),
         name,
         id,
@@ -194,31 +171,12 @@ export const stateDeserializer = (value: string): State => {
         consumableNoteIds,
         tokenSymbol,
         updatedAt,
-      }),
+      })
     ),
-    transactions: transactions.map(
-      ({
-        record,
-        scriptRoot,
-        inputNotesCount,
-        outputNotesCount,
-        updatedAt,
-      }) => ({
-        record: TransactionRecord.deserialize(
-          Uint8Array.from(record.split(",").map((byte) => Number(byte))),
-        ),
-        scriptRoot,
-        inputNotesCount,
-        outputNotesCount,
-        updatedAt,
-      }),
-    ),
-    inputNotes: inputNotes.map(({ id, inputNote, updatedAt }) => ({
-      id,
-      inputNote: InputNoteRecord.deserialize(
-        Uint8Array.from(inputNote.split(",").map((byte) => Number(byte))),
-      ),
-      updatedAt,
+    transactions,
+    inputNotes: inputNotes.map((inputNote) => ({
+      ...inputNote,
+      inputs: inputNote.inputs.map((input) => BigInt(input)),
     })),
     tutorialId,
     tutorialStep,
@@ -351,7 +309,7 @@ export const reducer = (state: State, action: Action): State => {
     }
     case "SUBMIT_TRANSACTION": {
       const index = state.accounts.findIndex(
-        ({ id }) => id === action.payload.account.id().toString(),
+        ({ id }) => id === action.payload.account.id().toString()
       );
       return {
         ...state,

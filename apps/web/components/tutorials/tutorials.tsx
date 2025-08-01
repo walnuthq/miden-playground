@@ -217,7 +217,7 @@ const CreateAndFundWalletStep3 = {
     const { transactions } = useTransactions();
     const faucet = faucets.find(({ name }) => name === "MDN Faucet");
     const transaction = transactions.find(
-      ({ record }) => record.accountId().toString() === faucet?.id,
+      ({ accountAddress }) => accountAddress === faucet?.id
     );
     return (
       <>
@@ -275,14 +275,14 @@ const CreateAndFundWalletStep3 = {
     const { nextTutorialStep } = useTutorials();
     const faucet = faucets.find(({ name }) => name === "MDN Faucet");
     const transaction = transactions.find(
-      ({ record }) => record.accountId().toString() === faucet?.id,
+      ({ accountAddress }) => accountAddress === faucet?.id
     );
     return (
       <NextStepButton
         disabled={!transaction}
         onClick={() => {
           nextTutorialStep();
-          router.push(`/transactions/${transaction?.record.id().toHex()}`);
+          router.push(`/transactions/${transaction?.id}`);
         }}
       />
     );
@@ -339,14 +339,13 @@ const CreateAndFundWalletStep4 = {
     const { nextTutorialStep } = useTutorials();
     const faucet = faucets.find(({ name }) => name === "MDN Faucet");
     const transaction = transactions.find(
-      ({ record }) => record.accountId().toString() === faucet?.id,
+      ({ accountAddress }) => accountAddress === faucet?.id
     );
-    const noteId = transaction?.record.outputNotes().getNote(0).id().toString();
     return (
       <NextStepButton
         onClick={() => {
           nextTutorialStep();
-          router.push(`/notes/${noteId}`);
+          router.push(`/notes/${transaction?.outputNotes[0]?.id}`);
         }}
       />
     );
@@ -360,7 +359,7 @@ const CreateAndFundWalletStep5 = {
     const { transactions } = useTransactions();
     const wallet = wallets.find(({ account }) => account.isPublic());
     const transaction = transactions.find(
-      ({ record }) => record.accountId().toString() === wallet?.id,
+      ({ accountAddress }) => accountAddress === wallet?.id
     );
     return (
       <>
@@ -428,7 +427,7 @@ const CreateAndFundWalletStep5 = {
     const { nextTutorialStep } = useTutorials();
     const wallet = wallets.find(({ account }) => account.isPublic());
     const transaction = transactions.find(
-      ({ record }) => record.accountId().toString() === wallet?.id,
+      ({ accountAddress }) => accountAddress === wallet?.id
     );
     return (
       <NextStepButton

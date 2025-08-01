@@ -6,9 +6,8 @@ import {
   TableHeader,
   TableHead,
 } from "@workspace/ui/components/table";
-import { type NoteInputs } from "@workspace/mock-web-client";
 
-const NoteInputsTable = ({ inputs }: { inputs: NoteInputs }) => (
+const NoteInputsTable = ({ inputs }: { inputs: bigint[] }) => (
   <div className="rounded-md border">
     <Table>
       <TableHeader>
@@ -18,10 +17,10 @@ const NoteInputsTable = ({ inputs }: { inputs: NoteInputs }) => (
         </TableRow>
       </TableHeader>
       <TableBody>
-        {inputs.values().map((value, index) => (
+        {inputs.map((value, index) => (
           <TableRow key={index}>
             <TableCell>{index}</TableCell>
-            <TableCell>{value.asInt()}</TableCell>
+            <TableCell>{value}</TableCell>
           </TableRow>
         ))}
       </TableBody>

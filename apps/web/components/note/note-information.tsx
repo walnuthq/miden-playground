@@ -1,8 +1,4 @@
-import {
-  noteWellKnownNote,
-  type InputNote,
-  noteInputsToAccountId,
-} from "@/lib/types";
+import { type InputNote, noteInputsToAccountId } from "@/lib/types";
 import NoteInformationTable from "@/components/note/note-information-table";
 import NoteInputsTable from "@/components/note/note-inputs-table";
 import DecodedNoteInputsTable from "@/components/note/decoded-note-inputs-table";
@@ -12,7 +8,6 @@ import FungibleAssetsTable from "@/components/lib/fungible-assets-table";
 
 const NoteInformation = ({ inputNote }: { inputNote: InputNote }) => {
   const { networkId } = useGlobalContext();
-  const wellKnownNote = noteWellKnownNote(inputNote.inputNote);
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-2">
@@ -25,26 +20,15 @@ const NoteInformation = ({ inputNote }: { inputNote: InputNote }) => {
         <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
           Note Assets
         </h4>
-        <FungibleAssetsTable
-          fungibleAssets={inputNote.inputNote
-            .details()
-            .assets()
-            .fungibleAssets()
-            .map((fungibleAsset) => ({
-              faucetId: fungibleAsset.faucetId().toString(),
-              amount: fungibleAsset.amount().toString(),
-            }))}
-        />
+        <FungibleAssetsTable fungibleAssets={inputNote.fungibleAssets} />
       </div>
       <div className="flex flex-col gap-2">
         <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
           Raw Note Inputs
         </h4>
-        <NoteInputsTable
-          inputs={inputNote.inputNote.details().recipient().inputs()}
-        />
+        <NoteInputsTable inputs={inputNote.inputs} />
       </div>
-      {wellKnownNote === "P2ID" && (
+      {inputNote.wellKnownNote === "P2ID" && (
         <div className="flex flex-col gap-2">
           <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
             Decoded Note Inputs
@@ -56,7 +40,7 @@ const NoteInformation = ({ inputNote }: { inputNote: InputNote }) => {
                 value: (
                   <AccountAddress
                     address={noteInputsToAccountId(
-                      inputNote.inputNote.details().recipient().inputs(),
+                      inputNote.inputs
                     ).toBech32Custom(networkId)}
                   />
                 ),

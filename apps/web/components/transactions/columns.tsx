@@ -1,10 +1,10 @@
 "use client";
-import { type TableTransaction } from "@/lib/types";
+import { type Transaction } from "@/lib/types";
 import { formatId } from "@/lib/utils";
 import { type ColumnDef } from "@tanstack/react-table";
 import AccountAddress from "@/components/lib/account-address";
 
-export const columns: ColumnDef<TableTransaction>[] = [
+export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "id",
     header: "ID",
@@ -25,11 +25,11 @@ export const columns: ColumnDef<TableTransaction>[] = [
     cell: ({ row }) => formatId(row.original.scriptRoot),
   },
   {
-    accessorKey: "inputNotesCount",
+    accessorKey: "inputNotes.length",
     header: "Input Notes Count",
   },
   {
-    accessorKey: "outputNotesCount",
+    accessorKey: "outputNotes.length",
     header: "Output Notes Count",
   },
 ];
