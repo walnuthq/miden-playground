@@ -1,5 +1,4 @@
 import {
-  Account as WasmAccount,
   SyncSummary,
   type TransactionResult,
   type ConsumableNoteRecord,
@@ -81,25 +80,10 @@ export const stateSerializer = ({
   JSON.stringify({
     networkId,
     syncSummary: syncSummary ? syncSummary.serialize().toString() : null,
-    accounts: accounts.map(
-      ({
-        account,
-        name,
-        id,
-        address,
-        consumableNoteIds,
-        tokenSymbol,
-        updatedAt,
-      }) => ({
-        account: account.serialize().toString(),
-        name,
-        id,
-        address,
-        consumableNoteIds,
-        tokenSymbol,
-        updatedAt,
-      })
-    ),
+    accounts: accounts.map((account) => ({
+      ...account,
+      nonce: account.nonce.toString(),
+    })),
     transactions,
     inputNotes: inputNotes.map((inputNote) => ({
       ...inputNote,
@@ -127,15 +111,7 @@ export const stateDeserializer = (value: string): State => {
   } = JSON.parse(value) as {
     networkId: string;
     syncSummary: string | null;
-    accounts: {
-      account: string;
-      name: string;
-      id: string;
-      address: string;
-      consumableNoteIds: string[];
-      tokenSymbol: string;
-      updatedAt: number;
-    }[];
+    accounts: (Omit<Account, "nonce"> & { nonce: string })[];
     transactions: Transaction[];
     inputNotes: (Omit<InputNote, "inputs"> & { inputs: string[] })[];
     tutorialId: string;
@@ -152,27 +128,10 @@ export const stateDeserializer = (value: string): State => {
           Uint8Array.from(syncSummary.split(",").map((byte) => Number(byte)))
         )
       : null,
-    accounts: accounts.map(
-      ({
-        account,
-        name,
-        id,
-        address,
-        consumableNoteIds,
-        tokenSymbol,
-        updatedAt,
-      }) => ({
-        account: WasmAccount.deserialize(
-          Uint8Array.from(account.split(",").map((byte) => Number(byte)))
-        ),
-        name,
-        id,
-        address,
-        consumableNoteIds,
-        tokenSymbol,
-        updatedAt,
-      })
-    ),
+    accounts: accounts.map((account) => ({
+      ...account,
+      nonce: BigInt(account.nonce),
+    })),
     transactions,
     inputNotes: inputNotes.map((inputNote) => ({
       ...inputNote,
@@ -223,7 +182,7 @@ export type Action =
       type: "SUBMIT_TRANSACTION";
       payload: {
         transaction: Transaction;
-        account: WasmAccount;
+        account: Account;
         consumableNoteIds: Record<string, string[]>;
         inputNotes: InputNote[];
         syncSummary: SyncSummary;
@@ -309,7 +268,7 @@ export const reducer = (state: State, action: Action): State => {
     }
     case "SUBMIT_TRANSACTION": {
       const index = state.accounts.findIndex(
-        ({ id }) => id === action.payload.account.id().toString()
+        ({ id }) => id === action.payload.account.id
       );
       return {
         ...state,
@@ -320,26 +279,13 @@ export const reducer = (state: State, action: Action): State => {
             consumableNoteIds:
               action.payload.consumableNoteIds[account.id] ?? [],
           })),
-          {
-            ...state.accounts[index]!,
-            account: action.payload.account,
-            consumableNoteIds:
-              action.payload.consumableNoteIds[
-                action.payload.account.id().toString()
-              ] ?? [],
-            updatedAt: action.payload.syncSummary.blockNum(),
-          },
+          action.payload.account,
           ...state.accounts.slice(index + 1).map((account) => ({
             ...account,
             consumableNoteIds:
               action.payload.consumableNoteIds[account.id] ?? [],
           })),
         ],
-        /* accounts: [
-          ...state.accounts.slice(0, index),
-          action.payload.account,
-          ...state.accounts.slice(index + 1),
-        ], */
         inputNotes: action.payload.inputNotes,
         syncSummary: action.payload.syncSummary,
       };

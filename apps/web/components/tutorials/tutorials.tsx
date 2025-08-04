@@ -48,7 +48,7 @@ const CreateAndFundWalletStep1 = {
   title: "Create your first wallet Account.",
   Content: () => {
     const { wallets } = useAccounts();
-    const wallet = wallets.find(({ account }) => account.isPublic());
+    const wallet = wallets.find(({ isPublic }) => isPublic);
     return (
       <>
         <p>
@@ -123,7 +123,7 @@ const CreateAndFundWalletStep1 = {
     const { nextTutorialStep } = useTutorials();
     const router = useRouter();
     const { wallets } = useAccounts();
-    const wallet = wallets.find(({ account }) => account.isPublic());
+    const wallet = wallets.find(({ isPublic }) => isPublic);
     return (
       <NextStepButton
         disabled={!wallet}
@@ -140,7 +140,7 @@ const CreateAndFundWalletStep2 = {
   title: "Discover your new wallet details.",
   Content: () => {
     const { wallets } = useAccounts();
-    const wallet = wallets.find(({ account }) => account.isPublic());
+    const wallet = wallets.find(({ isPublic }) => isPublic);
     return (
       <>
         <p>
@@ -217,7 +217,7 @@ const CreateAndFundWalletStep3 = {
     const { transactions } = useTransactions();
     const faucet = faucets.find(({ name }) => name === "MDN Faucet");
     const transaction = transactions.find(
-      ({ accountAddress }) => accountAddress === faucet?.id
+      ({ accountAddress }) => accountAddress === faucet?.address
     );
     return (
       <>
@@ -275,7 +275,7 @@ const CreateAndFundWalletStep3 = {
     const { nextTutorialStep } = useTutorials();
     const faucet = faucets.find(({ name }) => name === "MDN Faucet");
     const transaction = transactions.find(
-      ({ accountAddress }) => accountAddress === faucet?.id
+      ({ accountAddress }) => accountAddress === faucet?.address
     );
     return (
       <NextStepButton
@@ -339,7 +339,7 @@ const CreateAndFundWalletStep4 = {
     const { nextTutorialStep } = useTutorials();
     const faucet = faucets.find(({ name }) => name === "MDN Faucet");
     const transaction = transactions.find(
-      ({ accountAddress }) => accountAddress === faucet?.id
+      ({ accountAddress }) => accountAddress === faucet?.address
     );
     return (
       <NextStepButton
@@ -357,9 +357,9 @@ const CreateAndFundWalletStep5 = {
   Content: () => {
     const { wallets } = useAccounts();
     const { transactions } = useTransactions();
-    const wallet = wallets.find(({ account }) => account.isPublic());
+    const wallet = wallets.find(({ isPublic }) => isPublic);
     const transaction = transactions.find(
-      ({ accountAddress }) => accountAddress === wallet?.id
+      ({ accountAddress }) => accountAddress === wallet?.address
     );
     return (
       <>
@@ -425,9 +425,9 @@ const CreateAndFundWalletStep5 = {
     const { wallets } = useAccounts();
     const { transactions } = useTransactions();
     const { nextTutorialStep } = useTutorials();
-    const wallet = wallets.find(({ account }) => account.isPublic());
+    const wallet = wallets.find(({ isPublic }) => isPublic);
     const transaction = transactions.find(
-      ({ accountAddress }) => accountAddress === wallet?.id
+      ({ accountAddress }) => accountAddress === wallet?.address
     );
     return (
       <NextStepButton

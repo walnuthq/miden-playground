@@ -21,7 +21,7 @@ const CreateTransactionDropdownMenu = ({ account }: { account: Account }) => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        {account.account.isFaucet() ? (
+        {account.isFaucet ? (
           <DropdownMenuItem
             onClick={() =>
               openCreateTransactionDialog({

@@ -13,26 +13,25 @@ import {
 
 // ACCOUNTS
 
-export type Account = {
-  account: WasmAccount;
-  name: string;
-  id: string;
-  address: string;
-  consumableNoteIds: string[];
-  tokenSymbol?: string;
-  updatedAt: number;
-};
+export type FungibleAsset = { faucetId: string; amount: string };
 
-export type TableAccount = {
+export type Account = {
   id: string;
   name: string;
   address: string;
   type: string;
   storageMode: "Public" | "Private";
+  isFaucet: boolean;
+  isPublic: boolean;
   nonce: bigint;
+  fungibleAssets: FungibleAsset[];
+  storage: string[];
+  consumableNoteIds: string[];
+  tokenSymbol?: string;
+  updatedAt: number;
 };
 
-const accountType = ({ account, tokenSymbol }: Account) => {
+const accountType = (account: WasmAccount, tokenSymbol?: string) => {
   if (account.isRegularAccount()) {
     return "Regular (updatable)";
   } else if (account.isFaucet()) {
@@ -42,13 +41,36 @@ const accountType = ({ account, tokenSymbol }: Account) => {
   }
 };
 
-export const accountToTableAccount = (account: Account): TableAccount => ({
-  id: account.id,
-  name: account.name,
-  address: account.address,
-  type: accountType(account),
-  storageMode: account.account.isPublic() ? "Public" : "Private",
-  nonce: account.account.nonce().asInt(),
+export const wasmAccountToAccount = (
+  account: WasmAccount,
+  name: string,
+  networkId: string,
+  updatedAt: number,
+  consumableNoteIds: string[] = [],
+  tokenSymbol = ""
+): Account => ({
+  id: account.id().toString(),
+  name,
+  address: account.id().toBech32Custom(networkId),
+  type: accountType(account, tokenSymbol),
+  storageMode: account.isPublic() ? "Public" : "Private",
+  isPublic: account.isPublic(),
+  isFaucet: account.isFaucet(),
+  nonce: account.nonce().asInt(),
+  fungibleAssets: account
+    .vault()
+    .fungibleAssets()
+    .map((fungibleAsset) => ({
+      faucetId: fungibleAsset.faucetId().toString(),
+      amount: fungibleAsset.amount().toString(),
+    })),
+  storage: range(255).reduce<string[]>((previousValue, currentValue) => {
+    const item = account.storage().getItem(currentValue);
+    return item ? [...previousValue, item.toHex()] : previousValue;
+  }, []),
+  consumableNoteIds,
+  tokenSymbol,
+  updatedAt,
 });
 
 // INPUT NOTES
@@ -71,8 +93,6 @@ const noteStates = {
 
 type NoteState = (typeof noteStates)[keyof typeof noteStates];
 
-export type FungibleAsset = { faucetId: string; amount: string };
-
 export type InputNote = {
   id: string;
   type: NoteType;
@@ -93,9 +113,6 @@ const wellKnownNotes = {
 } as const;
 
 type WellKnownNote = (typeof wellKnownNotes)[keyof typeof wellKnownNotes];
-
-// export const noteWellKnownNote = (inputNote: InputNoteRecord) =>
-//   wellKnownNotes[noteScriptRoot(inputNote)];
 
 // export const noteSerialNumber = (inputNote: InputNoteRecord) =>
 //   inputNote.details().recipient().serialNum();

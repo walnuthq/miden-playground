@@ -36,10 +36,10 @@ const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
       items: accounts
         .sort((a, b) => b.updatedAt - a.updatedAt)
         .slice(0, 5)
-        .map(({ account, name, address }) => ({
+        .map(({ name, address, isFaucet }) => ({
           title: name,
           url: `/accounts/${address}`,
-          icon: account.isFaucet() ? HandCoins : Wallet,
+          icon: isFaucet ? HandCoins : Wallet,
         })),
     },
     {

@@ -1,4 +1,3 @@
-import { type AccountStorage } from "@workspace/mock-web-client";
 import {
   Table,
   TableBody,
@@ -8,21 +7,7 @@ import {
   TableRow,
 } from "@workspace/ui/components/table";
 
-const storageItems = (storage: AccountStorage) => {
-  const MAX_NUM_STORAGE_SLOTS = 255;
-  const result = [];
-  for (let index = 0; index < MAX_NUM_STORAGE_SLOTS; index++) {
-    const item = storage.getItem(index);
-    if (item) {
-      result.push(item);
-    } else {
-      break;
-    }
-  }
-  return result;
-};
-
-const AccountStorageTable = ({ storage }: { storage: AccountStorage }) => (
+const AccountStorageTable = ({ storage }: { storage: string[] }) => (
   <div className="rounded-md border">
     <Table>
       <TableHeader>
@@ -33,11 +18,11 @@ const AccountStorageTable = ({ storage }: { storage: AccountStorage }) => (
         </TableRow>
       </TableHeader>
       <TableBody>
-        {storageItems(storage).map((item, index) => (
+        {storage.map((item, index) => (
           <TableRow key={index}>
             <TableCell>{index}</TableCell>
             <TableCell>Value</TableCell>
-            <TableCell>{item.toHex()}</TableCell>
+            <TableCell>{item}</TableCell>
           </TableRow>
         ))}
       </TableBody>
