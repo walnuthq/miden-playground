@@ -1,5 +1,9 @@
 import { partition } from "lodash";
-import { AccountStorageMode } from "@workspace/mock-web-client";
+import {
+  AccountId,
+  AccountStorageMode,
+  Account as WasmAccount,
+} from "@workspace/mock-web-client";
 import { mockWebClient } from "@/lib/mock-web-client";
 import useGlobalContext from "@/components/global-context/hook";
 import { wasmAccountToAccount } from "@/lib/types";
@@ -77,6 +81,27 @@ const useAccounts = () => {
     });
     return account;
   };
+  const importAccount = async (wasmAccount: WasmAccount) => {
+    const client = await mockWebClient();
+    // const serialized = wasmAccount.serialize();
+    // console.log(serialized);
+    // await client.importAccount(wasmAccount.serialize());
+    const accountId = wasmAccount.id();
+    wasmAccount.id = () => {
+      return AccountId.fromHex(accountId.toString());
+    };
+    const syncSummary = await client.syncState();
+    const account = wasmAccountToAccount(
+      wasmAccount,
+      "Imported Wallet",
+      "mtst", //networkId,
+      syncSummary.blockNum()
+    );
+    dispatch({
+      type: "NEW_ACCOUNT",
+      payload: { account, syncSummary },
+    });
+  };
   const openCreateWalletDialog = () =>
     dispatch({
       type: "OPEN_CREATE_WALLET_DIALOG",
@@ -101,6 +126,7 @@ const useAccounts = () => {
     faucets,
     newWallet,
     newFaucet,
+    importAccount,
     openCreateFaucetDialog,
     closeCreateFaucetDialog,
     openCreateWalletDialog,

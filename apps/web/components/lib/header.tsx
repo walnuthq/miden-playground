@@ -1,5 +1,6 @@
 "use client";
 import { useIsClient } from "usehooks-ts";
+import { WalletMultiButton } from "@demox-labs/miden-wallet-adapter-reactui";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -80,6 +81,7 @@ const Header = () => {
         <div className="ml-auto flex items-center gap-2">
           {isClient && tutorialId && <TutorialToggle />}
           <ModeToggle />
+          {isClient && <WalletMultiButton />}
         </div>
       </div>
     </header>
