@@ -18,12 +18,14 @@ const AccountInformation = ({ account }: { account: Account }) => {
         </h4>
         <AccountInformationTable account={account} />
       </div>
-      <div className="flex flex-col gap-2">
-        <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
-          Assets
-        </h4>
-        <FungibleAssetsTable fungibleAssets={account.fungibleAssets} />
-      </div>
+      {account.fungibleAssets.length > 0 && (
+        <div className="flex flex-col gap-2">
+          <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
+            Assets
+          </h4>
+          <FungibleAssetsTable fungibleAssets={account.fungibleAssets} />
+        </div>
+      )}
       <div className="flex flex-col gap-2">
         <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
           Storage

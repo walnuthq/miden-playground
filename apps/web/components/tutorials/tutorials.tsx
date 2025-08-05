@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { CircleAlert, CircleCheckBig } from "lucide-react";
@@ -14,8 +15,8 @@ import useTutorials from "@/hooks/use-tutorials";
 import useTransactions from "@/hooks/use-transactions";
 import tutorial1StoreDump from "@/components/tutorials/tutorial1-store.json";
 import tutorial1State from "@/components/tutorials/tutorial1-state.json";
-// import tutorial2StoreDump from "@/components/tutorials/tutorial2-store.json";
-// import tutorial2State from "@/components/tutorials/tutorial2-state.json";
+import tutorial2StoreDump from "@/components/tutorials/tutorial2-store.json";
+import tutorial2State from "@/components/tutorials/tutorial2-state.json";
 // import tutorial3StoreDump from "@/components/tutorials/tutorial3-store.json";
 // import tutorial3State from "@/components/tutorials/tutorial3-state.json";
 import AccountAddress from "@/components/lib/account-address";
@@ -483,19 +484,344 @@ const CreateAndFundWalletStep6 = {
   },
 };
 
-/* const TransferAssetsBetweenWalletsStep1 = {
-  title: "",
+const TransferAssetsBetweenWalletsStep1 = {
+  title: "Exploring the accounts.",
   Content: () => {
+    const { accounts } = useAccounts();
+    const walletA = accounts.find(({ name }) => name === "Wallet A");
+    const walletB = accounts.find(({ name }) => name === "Wallet B");
+    const faucet = accounts.find(({ name }) => name === "MDN Faucet");
     return (
       <>
-        <p>TODO</p>
+        <p>
+          In this tutorial, we'll learn how to transfer assets between two
+          wallets. We've already created the wallets as well as a fungible
+          faucet.
+        </p>
+        <ul className="ml-6 list-disc [&>li]:mt-2">
+          <li>
+            <Link
+              href={`/accounts/${walletA?.address}`}
+              className="text-primary font-medium underline underline-offset-4"
+            >
+              Wallet A
+            </Link>
+            : This is the source wallet, it has been funded with 1000 MDN tokens
+            and we'll transfer them out to the destination wallet.
+          </li>
+          <li>
+            <Link
+              href={`/accounts/${walletB?.address}`}
+              className="text-primary font-medium underline underline-offset-4"
+            >
+              Wallet B
+            </Link>
+            : This is the destination wallet, it will receive MDN tokens from
+            the source account.
+          </li>
+          <li>
+            <Link
+              href={`/accounts/${faucet?.address}`}
+              className="text-primary font-medium underline underline-offset-4"
+            >
+              MDN Faucet
+            </Link>
+            : This is the fungible faucet where our MDN tokens originate from.
+          </li>
+        </ul>
+        <Alert>
+          <CircleCheckBig color="var(--color-green-500)" />
+          <AlertTitle>Explore the accounts.</AlertTitle>
+          <AlertDescription>
+            Click on each account to explore its current state. Confirm that
+            Wallet A holds 1000 MDN tokens and Wallet B has no assets.
+          </AlertDescription>
+        </Alert>
       </>
     );
   },
   NextStepButton: () => {
-    return <NextStepButton disabled onClick={() => {}} />;
+    const { nextTutorialStep } = useTutorials();
+    return <NextStepButton onClick={nextTutorialStep} />;
   },
-}; */
+};
+
+const TransferAssetsBetweenWalletsStep2 = {
+  title: "Submit a send transaction.",
+  Content: () => {
+    const { accounts } = useAccounts();
+    const { transactions } = useTransactions();
+    const walletA = accounts.find(({ name }) => name === "Wallet A");
+    const walletB = accounts.find(({ name }) => name === "Wallet B");
+    const transaction = transactions.find(
+      ({ accountAddress, outputNotes }) =>
+        accountAddress === walletA?.address && outputNotes.length === 1
+    );
+    return (
+      <>
+        <p>
+          Navigate to{" "}
+          <Link
+            href={`/accounts/${walletA?.address}`}
+            className="text-primary font-medium underline underline-offset-4"
+          >
+            Wallet A
+          </Link>{" "}
+          account and take a look under the assets table: here are the 1000 MDN
+          tokens we'd like to transfer to{" "}
+          <Link
+            href={`/accounts/${walletB?.address}`}
+            className="text-primary font-medium underline underline-offset-4"
+          >
+            Wallet B
+          </Link>{" "}
+          which has no assets at the moment.
+        </p>
+        <p>
+          To initiate a transfer, we first need to create a send transaction
+          from <span className="font-bold">Wallet A</span> targeting{" "}
+          <span className="font-bold">Wallet B</span>. From{" "}
+          <span className="font-bold">Wallet A</span> page, click on the{" "}
+          <span className="italic">"Create new transaction"</span> then{" "}
+          <span className="italic">"New send transaction"</span>.
+        </p>
+        <p>
+          A <span className="italic">"Configure send transaction"</span> dialog
+          will show up where you can select the target account (
+          <span className="font-bold">Wallet B</span>), the asset you want to
+          transfer out (<span className="font-bold">MDN tokens</span>) and the
+          amount to send eg. 1000 tokens.
+        </p>
+        <p>
+          The preview step shows a quick summary of the changes about to be
+          performed on <span className="font-bold">Wallet B</span>. When you're
+          ready to execute the transaction click on{" "}
+          <span className="italic">"Submit"</span>.
+        </p>
+        <Alert>
+          {transaction ? (
+            <CircleCheckBig color="var(--color-green-500)" />
+          ) : (
+            <CircleAlert />
+          )}
+          <AlertTitle>
+            {transaction
+              ? "Your send transaction is submitted."
+              : "Action required: Submit a send transaction."}
+          </AlertTitle>
+          {!transaction && (
+            <AlertDescription>
+              Follow the instructions above to create and submit a send
+              transaction against Wallet A.
+            </AlertDescription>
+          )}
+        </Alert>
+      </>
+    );
+  },
+  NextStepButton: () => {
+    const { nextTutorialStep } = useTutorials();
+    const { accounts } = useAccounts();
+    const { transactions } = useTransactions();
+    const walletA = accounts.find(({ name }) => name === "Wallet A");
+    const transaction = transactions.find(
+      ({ accountAddress, outputNotes }) =>
+        accountAddress === walletA?.address && outputNotes.length === 1
+    );
+    return (
+      <NextStepButton disabled={!transaction} onClick={nextTutorialStep} />
+    );
+  },
+};
+
+const TransferAssetsBetweenWalletsStep3 = {
+  title: "Inspect transaction and output note.",
+  Content: () => {
+    const { accounts } = useAccounts();
+    const { transactions } = useTransactions();
+    const walletA = accounts.find(({ name }) => name === "Wallet A");
+    const walletB = accounts.find(({ name }) => name === "Wallet B");
+    const transaction = transactions.find(
+      ({ accountAddress, outputNotes }) =>
+        accountAddress === walletA?.address && outputNotes.length === 1
+    );
+    const note = transaction?.outputNotes[0];
+    return (
+      <>
+        <p>
+          Your send transaction has been submitted and you can inspect it by{" "}
+          <Link
+            href={`/transactions/${transaction?.id}`}
+            className="text-primary font-medium underline underline-offset-4"
+          >
+            navigating to the first item
+          </Link>{" "}
+          that shows up under the <span className="italic">"Transactions"</span>{" "}
+          sub-menu in the sidebar.
+        </p>
+        <p>
+          See how our MDN tokens have been embedded in the resulting output note
+          generated by the transaction. Click on the{" "}
+          <Link
+            href={`/notes/${note?.id}`}
+            className="text-primary font-medium underline underline-offset-4"
+          >
+            note ID
+          </Link>{" "}
+          to inspect it further.
+        </p>
+        <p>
+          This output note is a{" "}
+          <span className="font-bold">P2ID (Pay-to-ID)</span> note meaning it
+          can be only consumed by the account specified as note inputs when
+          creating the send transaction. Feel free to read this verified note
+          code under the <span className="italic">"Code"</span> tab as it's
+          heavily commented and provides insights on the underlying Miden
+          architecture.
+        </p>
+        <p>
+          When you're done, click on the decoded note inputs target account ID
+          shortcut to navigate to{" "}
+          <Link
+            href={`/accounts/${walletB?.address}`}
+            className="text-primary font-medium underline underline-offset-4"
+          >
+            Wallet B
+          </Link>
+          .
+        </p>
+      </>
+    );
+  },
+  NextStepButton: () => {
+    const { nextTutorialStep } = useTutorials();
+    return <NextStepButton onClick={nextTutorialStep} />;
+  },
+};
+
+const TransferAssetsBetweenWalletsStep4 = {
+  title: "Consume the output note.",
+  Content: () => {
+    const { accounts } = useAccounts();
+    const { transactions } = useTransactions();
+    const walletB = accounts.find(({ name }) => name === "Wallet B");
+    const transaction = transactions.find(
+      ({ accountAddress }) => accountAddress === walletB?.address
+    );
+    return (
+      <>
+        <p>
+          The next step to finish our transfer is to consume the output note
+          with the intended target account.
+        </p>
+        <p>
+          From{" "}
+          <Link
+            href={`/accounts/${walletB?.address}`}
+            className="text-primary font-medium underline underline-offset-4"
+          >
+            Wallet B
+          </Link>{" "}
+          page, take a look at the{" "}
+          <span className="italic">"Consumable Notes"</span> section and see how
+          we automatically detected the <span className="font-bold">P2ID</span>{" "}
+          output note as consumable by its recipient.
+        </p>
+        <p>
+          Click on the <span className="italic">"Consume all notes"</span>{" "}
+          button to trigger a consume note transaction. In this scenario we have
+          only one consumable note, but we could consume an arbitrary number of
+          notes in a single transaction.
+        </p>
+        <p>
+          The preview dialog will let you validate the assets changes about to
+          occur, then click <span className="italic">"Submit"</span> to finalize
+          the transfer.
+        </p>
+        <Alert>
+          {transaction ? (
+            <CircleCheckBig color="var(--color-green-500)" />
+          ) : (
+            <CircleAlert />
+          )}
+          <AlertTitle>
+            {transaction
+              ? "The note has been consumed."
+              : "Action required: Consume the note."}
+          </AlertTitle>
+          {!transaction && (
+            <AlertDescription>
+              Click on "Consume all notes", preview and submit the resulting
+              transaction.
+            </AlertDescription>
+          )}
+        </Alert>
+      </>
+    );
+  },
+  NextStepButton: () => {
+    const { nextTutorialStep } = useTutorials();
+    const { accounts } = useAccounts();
+    const { transactions } = useTransactions();
+    const walletB = accounts.find(({ name }) => name === "Wallet B");
+    const transaction = transactions.find(
+      ({ accountAddress }) => accountAddress === walletB?.address
+    );
+    return (
+      <NextStepButton disabled={!transaction} onClick={nextTutorialStep} />
+    );
+  },
+};
+
+const TransferAssetsBetweenWalletsStep5 = {
+  title: "Confirm assets have been transferred.",
+  Content: () => {
+    const { accounts } = useAccounts();
+    const walletB = accounts.find(({ name }) => name === "Wallet B");
+    return (
+      <>
+        <p>
+          You should now see{" "}
+          <Link
+            href={`/accounts/${walletB?.address}`}
+            className="text-primary font-medium underline underline-offset-4"
+          >
+            Wallet B
+          </Link>{" "}
+          having the transferred amount of MDN tokens under its Assets table.
+        </p>
+        <p>
+          Congratulations! You have successfully used the Miden Playground to
+          transfer assets between two wallets.
+        </p>
+        <p>
+          You have performed basic Miden rollup operations like submitting
+          proofs of transactions, generating and consuming notes.
+        </p>
+      </>
+    );
+  },
+  NextStepButton: () => {
+    //const { startTutorial } = useTutorials();
+    const { resetState } = useGlobalContext();
+    const router = useRouter();
+    /* return (
+      <NextStepButton
+        text="Next tutorial"
+        onClick={() => startTutorial("transfer-assets-between-wallets")}
+      />
+    ); */
+    return (
+      <NextStepButton
+        text="Back to tutorials list"
+        onClick={() => {
+          resetState();
+          router.push("/");
+        }}
+      />
+    );
+  },
+};
 
 /* const SwapAssetsStep1 = {
   title: "",
@@ -530,17 +856,23 @@ const tutorials: Tutorial[] = [
       CreateAndFundWalletStep6,
     ],
   },
-  /* {
+  {
     id: "transfer-assets-between-wallets",
-    title: "Transfer assets between wallets tutorial",
+    title: "Transfer assets between wallets",
     tagline: "Transfer tokens between 2 different wallets.",
     description:
       "This tutorial focuses on learning how to transfer assets between 2 wallets.",
     initialRoute: "/accounts",
     storeDump: JSON.stringify(tutorial2StoreDump),
     state: JSON.stringify(tutorial2State),
-    steps: [TransferAssetsBetweenWalletsStep1],
-  }, */
+    steps: [
+      TransferAssetsBetweenWalletsStep1,
+      TransferAssetsBetweenWalletsStep2,
+      TransferAssetsBetweenWalletsStep3,
+      TransferAssetsBetweenWalletsStep4,
+      TransferAssetsBetweenWalletsStep5,
+    ],
+  },
   /* {
     id: "swap-assets",
     title: "Swap assets",
