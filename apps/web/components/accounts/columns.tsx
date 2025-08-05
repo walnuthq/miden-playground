@@ -1,5 +1,5 @@
 "use client";
-import { type TableAccount } from "@/lib/types";
+import { type Account } from "@/lib/types";
 import { type ColumnDef } from "@tanstack/react-table";
 import { MoreVertical } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
@@ -14,14 +14,8 @@ import useTransactions from "@/hooks/use-transactions";
 import useAccounts from "@/hooks/use-accounts";
 import AccountAddress from "@/components/lib/account-address";
 
-const AccountActionsCell = ({
-  account: { id: accountId },
-}: {
-  account: TableAccount;
-}) => {
+const AccountActionsCell = ({ account }: { account: Account }) => {
   const { openCreateTransactionDialog } = useTransactions();
-  const { accounts } = useAccounts();
-  const account = accounts.find(({ id }) => id === accountId);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -31,11 +25,11 @@ const AccountActionsCell = ({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        {account?.account.isFaucet() ? (
+        {account.isFaucet ? (
           <DropdownMenuItem
             onClick={() =>
               openCreateTransactionDialog({
-                accountId,
+                accountId: account.id,
                 transactionType: "mint",
                 step: "configure",
               })
@@ -48,7 +42,7 @@ const AccountActionsCell = ({
             <DropdownMenuItem
               onClick={() =>
                 openCreateTransactionDialog({
-                  accountId,
+                  accountId: account.id,
                   transactionType: "consume",
                   step: "configure",
                 })
@@ -59,7 +53,7 @@ const AccountActionsCell = ({
             <DropdownMenuItem
               onClick={() =>
                 openCreateTransactionDialog({
-                  accountId,
+                  accountId: account.id,
                   transactionType: "send",
                   step: "configure",
                 })
@@ -77,7 +71,7 @@ const AccountActionsCell = ({
   );
 };
 
-export const columns: ColumnDef<TableAccount>[] = [
+export const columns: ColumnDef<Account>[] = [
   {
     accessorKey: "name",
     header: "Name",

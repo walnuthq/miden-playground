@@ -1,5 +1,5 @@
 "use client";
-// import { useEffect } from "react";
+import { useEffect } from "react";
 import { ChevronsUpDown } from "lucide-react";
 import {
   DropdownMenu,
@@ -27,19 +27,21 @@ import tutorials from "@/components/tutorials/tutorials";
 import useTutorials from "@/hooks/use-tutorials";
 // import useProjects from "@/hooks/use-projects";
 import { useIsClient } from "usehooks-ts";
+import useTransactions from "@/hooks/use-transactions";
 
 const ProjectSwitcher = () => {
   const isClient = useIsClient();
   const { isMobile } = useSidebar();
   const { resetState } = useGlobalContext();
-  const { tutorial, startTutorial } = useTutorials();
+  const { tutorial, tutorialId, startTutorial, loadTutorial } = useTutorials();
+  const { transactions } = useTransactions();
   // const { saveProject, loadProject } = useProjects();
-  /* useEffect(() => {
-    if (tutorialId) {
+  useEffect(() => {
+    if (tutorialId && transactions.length === 0) {
       console.log("loading", tutorialId);
       loadTutorial(tutorialId);
     }
-  }, [tutorialId]); */
+  }, [tutorialId]);
   return (
     <SidebarMenu>
       <SidebarMenuItem>

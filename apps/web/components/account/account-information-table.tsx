@@ -1,4 +1,4 @@
-import { type TableAccount } from "@/lib/types";
+import { type Account } from "@/lib/types";
 import {
   Table,
   TableBody,
@@ -7,7 +7,7 @@ import {
 } from "@workspace/ui/components/table";
 import { Badge } from "@workspace/ui/components/badge";
 
-const AccountInformationTable = ({ account }: { account: TableAccount }) => (
+const AccountInformationTable = ({ account }: { account: Account }) => (
   <div className="rounded-md border">
     <Table>
       <TableBody>

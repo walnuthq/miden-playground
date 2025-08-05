@@ -1,4 +1,4 @@
-import { accountToTableAccount, type Account } from "@/lib/types";
+import { type Account } from "@/lib/types";
 import AccountInformationTable from "@/components/account/account-information-table";
 import AccountStorageTable from "@/components/account/account-storage-table";
 import FungibleAssetsTable from "@/components/lib/fungible-assets-table";
@@ -16,27 +16,21 @@ const AccountInformation = ({ account }: { account: Account }) => {
         <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
           Account Information
         </h4>
-        <AccountInformationTable account={accountToTableAccount(account)} />
+        <AccountInformationTable account={account} />
       </div>
-      <div className="flex flex-col gap-2">
-        <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
-          Assets
-        </h4>
-        <FungibleAssetsTable
-          fungibleAssets={account.account
-            .vault()
-            .fungibleAssets()
-            .map((fungibleAsset) => ({
-              faucetId: fungibleAsset.faucetId().toString(),
-              amount: fungibleAsset.amount().toString(),
-            }))}
-        />
-      </div>
+      {account.fungibleAssets.length > 0 && (
+        <div className="flex flex-col gap-2">
+          <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
+            Assets
+          </h4>
+          <FungibleAssetsTable fungibleAssets={account.fungibleAssets} />
+        </div>
+      )}
       <div className="flex flex-col gap-2">
         <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
           Storage
         </h4>
-        <AccountStorageTable storage={account.account.storage()} />
+        <AccountStorageTable storage={account.storage} />
       </div>
       {account.consumableNoteIds.length > 0 && (
         <>

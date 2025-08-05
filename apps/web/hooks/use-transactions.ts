@@ -10,6 +10,7 @@ import {
 import {
   type CreateTransactionDialogStep,
   type TransactionType,
+  wasmAccountToAccount,
   wasmInputNoteToInputNote,
   wasmTransactionToTransaction,
 } from "@/lib/types";
@@ -193,23 +194,23 @@ const useTransactions = () => {
     const transactionRecord = transactions.find(
       (tx) => tx.id().toHex() === transactionId.toHex()
     );
-    const newAccount = await client.getAccount(
+    const nextAccount = await client.getAccount(
       transactionResult.executedTransaction().accountId()
     );
-    /*const previousAccount = accounts.find(
-      ({ id }) => id === newAccount?.id().toString()
-    ); */
-    if (!transactionRecord || !newAccount /* || !previousAccount*/) {
+    const previousAccount = accounts.find(
+      ({ id }) => id === nextAccount?.id().toString()
+    );
+    if (!transactionRecord || !nextAccount || !previousAccount) {
       throw new Error("Transaction record or account not found");
     }
     const inputNotes = await client.getInputNotes(
       new NoteFilter(NoteFilterTypes.All)
     );
-    console.log("inputNotes.length", inputNotes.length);
+    // console.log("inputNotes.length", inputNotes.length);
     const consumableNoteIds: Record<string, string[]> = {};
     for (const account of accounts) {
       const consumableNotes = await client.getConsumableNotes(
-        account.account.id()
+        AccountId.fromHex(account.id)
       );
       const noteIds = consumableNotes.map((consumableNote) =>
         consumableNote.inputNoteRecord().id().toString()
@@ -224,21 +225,18 @@ const useTransactions = () => {
           transactionResult,
           networkId
         ),
-        account: newAccount,
+        account: wasmAccountToAccount(
+          nextAccount,
+          previousAccount.name,
+          networkId,
+          syncSummary.blockNum(),
+          consumableNoteIds[previousAccount.id],
+          previousAccount.tokenSymbol
+        ),
         consumableNoteIds,
-        /* account: {
-          ...previousAccount,
-          account: newAccount,
-          updatedAt: syncSummary.blockNum(),
-        }, */
         inputNotes: inputNotes.map((inputNoteRecord) =>
           wasmInputNoteToInputNote(inputNoteRecord, networkId)
         ),
-        /* inputNotes: inputNotes.map((inputNote) => ({
-          id: inputNote.id().toString(),
-          inputNote,
-          updatedAt: syncSummary.blockNum(),
-        })), */
         syncSummary,
       },
     });

@@ -4,7 +4,10 @@ import {
   type TransactionType,
 } from "@/lib/types";
 import { Label } from "@workspace/ui/components/label";
-import { type ConsumableNoteRecord } from "@workspace/mock-web-client";
+import {
+  type ConsumableNoteRecord,
+  AccountId,
+} from "@workspace/mock-web-client";
 import { mockWebClient } from "@/lib/mock-web-client";
 import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";
 import SelectTransactionTypeDropdownMenu from "@/components/transactions/select-transaction-type-dropdown-menu";
@@ -44,7 +47,7 @@ const CreateTransactionDialogSelectForm = ({
           setLoading(true);
           const client = await mockWebClient();
           const consumableNotes = await client.getConsumableNotes(
-            executingAccount.account.id(),
+            AccountId.fromHex(executingAccount.id)
           );
           setLoading(false);
           setConsumableNotes(consumableNotes);
@@ -60,9 +63,7 @@ const CreateTransactionDialogSelectForm = ({
             onValueChange={(value) => {
               setExecutingAccountId(value);
               const account = accounts.find(({ id }) => id === value);
-              setTransactionType(
-                account?.account.isFaucet() ? "mint" : "consume",
-              );
+              setTransactionType(account?.isFaucet ? "mint" : "consume");
             }}
           />
         </div>
@@ -72,7 +73,7 @@ const CreateTransactionDialogSelectForm = ({
             value={transactionType}
             onValueChange={setTransactionType}
             selectTypes={
-              executingAccount?.account.isFaucet()
+              executingAccount?.isFaucet
                 ? ["mint", "consume"]
                 : ["consume", "send"]
             }

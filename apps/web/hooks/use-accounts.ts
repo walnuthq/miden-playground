@@ -2,6 +2,7 @@ import { partition } from "lodash";
 import { AccountStorageMode } from "@workspace/mock-web-client";
 import { mockWebClient } from "@/lib/mock-web-client";
 import useGlobalContext from "@/components/global-context/hook";
+import { wasmAccountToAccount } from "@/lib/types";
 
 const useAccounts = () => {
   const {
@@ -11,9 +12,7 @@ const useAccounts = () => {
     accounts,
     dispatch,
   } = useGlobalContext();
-  const [faucets, wallets] = partition(accounts, (account) =>
-    account.account.isFaucet(),
-  );
+  const [faucets, wallets] = partition(accounts, (account) => account.isFaucet);
   const newWallet = async ({
     name,
     storageMode,
@@ -27,14 +26,12 @@ const useAccounts = () => {
     // const blockHeader = await client.getLatestEpochBlock();
     // console.log("commitment:", blockHeader.commitment().toHex());
     // console.log("chainCommitment:", blockHeader.chainCommitment().toHex());
-    const account = {
-      account: wallet,
+    const account = wasmAccountToAccount(
+      wallet,
       name,
-      id: wallet.id().toString(),
-      address: wallet.id().toBech32Custom(networkId),
-      consumableNoteIds: [],
-      updatedAt: syncSummary.blockNum(),
-    };
+      networkId,
+      syncSummary.blockNum()
+    );
     dispatch({
       type: "NEW_ACCOUNT",
       payload: { account, syncSummary },
@@ -60,21 +57,20 @@ const useAccounts = () => {
       false,
       tokenSymbol,
       decimals,
-      maxSupply,
+      maxSupply
     );
     const syncSummary = await client.syncState();
     // const blockHeader = await client.getLatestEpochBlock();
     // console.log("commitment:", blockHeader.commitment().toHex());
     // console.log("chainCommitment:", blockHeader.chainCommitment().toHex());
-    const account = {
-      account: faucet,
+    const account = wasmAccountToAccount(
+      faucet,
       name,
-      id: faucet.id().toString(),
-      address: faucet.id().toBech32Custom(networkId),
-      consumableNoteIds: [],
-      tokenSymbol,
-      updatedAt: syncSummary.blockNum(),
-    };
+      networkId,
+      syncSummary.blockNum(),
+      [],
+      tokenSymbol
+    );
     dispatch({
       type: "NEW_ACCOUNT",
       payload: { account, syncSummary },

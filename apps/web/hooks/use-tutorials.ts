@@ -46,17 +46,17 @@ const useTutorials = () => {
     await client.forceImportStore(tutorial.storeDump);
     console.log(
       "notes1.length",
-      (await client.getInputNotes(new NoteFilter(NoteFilterTypes.All))).length,
+      (await client.getInputNotes(new NoteFilter(NoteFilterTypes.All))).length
     );
     dispatch({
       type: "LOAD_PROJECT",
       payload: { state: stateDeserializer(tutorial.state) },
     });
     if (tutorialId === "transfer-assets-between-wallets") {
-      console.log("accounts", accounts.length);
-      // const { accounts } = JSON.parse(state) as State;
-      /* const faucet = accounts.find(({ name }) => name === "MDN Faucet")!;
-      const wallet = accounts.find(({ name }) => name === "Wallet A")!;
+      //console.log("accounts", accounts.length);
+      /* const state = JSON.parse(tutorial.state) as State;
+      const faucet = state.accounts.find(({ name }) => name === "MDN Faucet")!;
+      const wallet = state.accounts.find(({ name }) => name === "Wallet A")!;
       const mintTransactionResult = await newMintTransactionRequest({
         targetAccountId: wallet.id,
         faucetId: faucet.id,
@@ -65,8 +65,8 @@ const useTutorials = () => {
       });
       console.log("MINTING...");
       const transactionRecord = await submitTransaction(mintTransactionResult);
-      console.log("MINT TX OK"); */
-      /* const note = transactionRecord.outputNotes().getNote(0);
+      console.log("MINT TX OK");
+      const note = transactionRecord.outputNotes().getNote(0);
       const consumeTransactionResult = await newConsumeTransactionRequest({
         accountId: wallet.id,
         noteIds: [note.id().toString()],
@@ -156,6 +156,14 @@ const useTutorials = () => {
       console.log("MINTING...");
       const transactionRecord = await submitTransaction(mintTransactionResult);
       console.log("MINT TX OK");
+      const note = transactionRecord.outputNotes().getNote(0);
+      const consumeTransactionResult = await newConsumeTransactionRequest({
+        accountId: wallet.id,
+        noteIds: [note.id().toString()],
+      });
+      console.log("SUBMITTING...");
+      await submitTransaction(consumeTransactionResult);
+      console.log("SUBMIT TX OK");
     }
   };
   const previousTutorialStep = () =>
