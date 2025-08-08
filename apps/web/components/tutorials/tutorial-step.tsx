@@ -6,6 +6,7 @@ import TutorialProgress from "@/components/tutorials/tutorial-progress";
 import { useIsMobile } from "@workspace/ui/hooks/use-mobile";
 import MobileAlert from "@/components/tutorials/mobile-alert";
 import { cn } from "@workspace/ui/lib/utils";
+import DefaultNextStepButton from "@/components/tutorials/next-step-button";
 
 const TutorialStep = ({ tutorial }: { tutorial: Tutorial }) => {
   const isMobile = useIsMobile();
@@ -14,6 +15,7 @@ const TutorialStep = ({ tutorial }: { tutorial: Tutorial }) => {
   if (!step) {
     return null;
   }
+  const NextStepButton = step.NextStepButton ?? DefaultNextStepButton;
   return (
     <div
       className={cn("flex-1 flex-col gap-4 p-4", {
@@ -47,7 +49,7 @@ const TutorialStep = ({ tutorial }: { tutorial: Tutorial }) => {
             Back
           </Button>
         )}
-        <step.NextStepButton />
+        <NextStepButton />
       </div>
     </div>
   );

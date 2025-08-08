@@ -12,7 +12,7 @@ import {
   NoteType,
   NoteFilterTypes,
 } from "@workspace/mock-web-client";
-import { deleteStore } from "@/lib/utils";
+// import { deleteStore } from "@/lib/utils";
 import useAccounts from "@/hooks/use-accounts";
 
 const useTutorials = () => {
@@ -44,10 +44,6 @@ const useTutorials = () => {
     console.log("clear done"); */
     const client = await mockWebClient();
     await client.forceImportStore(tutorial.storeDump);
-    console.log(
-      "notes1.length",
-      (await client.getInputNotes(new NoteFilter(NoteFilterTypes.All))).length
-    );
     dispatch({
       type: "LOAD_PROJECT",
       payload: { state: stateDeserializer(tutorial.state) },

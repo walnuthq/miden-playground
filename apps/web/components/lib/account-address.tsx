@@ -19,6 +19,7 @@ const AccountAddress = ({
   withLink = true,
   withTooltip = true,
   withCopyButton = true,
+  withName = true,
 }: {
   id?: string;
   address?: string;
@@ -27,6 +28,7 @@ const AccountAddress = ({
   withLink?: boolean;
   withTooltip?: boolean;
   withCopyButton?: boolean;
+  withName?: boolean;
 }) => {
   const { networkId } = useGlobalContext();
   const { accounts } = useAccounts();
@@ -36,7 +38,7 @@ const AccountAddress = ({
       (account) => account.id === id || account.address === address,
     );
   if (!displayedAccount) {
-    return "";
+    return null;
   }
   const displayedAddress = formatted
     ? formatAddress(displayedAccount.address, networkId)
@@ -48,10 +50,14 @@ const AccountAddress = ({
           <Link href={`/accounts/${displayedAccount.address}`}>
             <Button className="cursor-pointer -ml-4" variant="link">
               {displayedAddress}
+              {withName && ` (${displayedAccount.name})`}
             </Button>
           </Link>
         ) : (
-          <Button variant="ghost">{displayedAddress}</Button>
+          <Button variant="ghost">
+            {displayedAddress}
+            {withName && ` (${displayedAccount.name})`}
+          </Button>
         )}
       </TooltipTrigger>
       <TooltipContent>
@@ -63,16 +69,18 @@ const AccountAddress = ({
   ) : withLink ? (
     <Link href={`/accounts/${displayedAccount.address}`}>
       <Button className="cursor-pointer -ml-4" variant="link">
-        {displayedAddress} ({displayedAccount.name})
+        {displayedAddress}
+        {withName && ` (${displayedAccount.name})`}
       </Button>
     </Link>
   ) : (
-    <>
-      {displayedAddress} ({displayedAccount.name})
-    </>
+    <span>
+      {displayedAddress}
+      {withName && ` (${displayedAccount.name})`}
+    </span>
   );
   return withCopyButton ? (
-    <div className="flex items-center">
+    <div className="flex items-center gap-2">
       {accountAddressContent}
       {withCopyButton && (
         <CopyButton content="Copy Account ID" copy={displayedAccount.address} />

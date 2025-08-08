@@ -1,5 +1,6 @@
 "use client";
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { ChevronsUpDown } from "lucide-react";
 import {
   DropdownMenu,
@@ -31,6 +32,7 @@ import useTransactions from "@/hooks/use-transactions";
 
 const ProjectSwitcher = () => {
   const isClient = useIsClient();
+  const router = useRouter();
   const { isMobile } = useSidebar();
   const { resetState } = useGlobalContext();
   const { tutorial, tutorialId, startTutorial, loadTutorial } = useTutorials();
@@ -41,7 +43,7 @@ const ProjectSwitcher = () => {
       console.log("loading", tutorialId);
       loadTutorial(tutorialId);
     }
-  }, [tutorialId]);
+  }, [tutorialId, transactions.length]);
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -77,7 +79,12 @@ const ProjectSwitcher = () => {
             side={isMobile ? "bottom" : "right"}
             sideOffset={4}
           >
-            <DropdownMenuItem onClick={() => resetState()}>
+            <DropdownMenuItem
+              onClick={() => {
+                resetState();
+                router.push("/accounts");
+              }}
+            >
               New empty sandbox
             </DropdownMenuItem>
             {/* <DropdownMenuItem

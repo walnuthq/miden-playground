@@ -127,11 +127,11 @@ const useTransactions = () => {
       AccountId.fromHex(targetAccountId),
       AccountId.fromHex(faucetId),
       noteType,
-      amount
+      amount,
     );
     return client.newTransaction(
       AccountId.fromHex(faucetId),
-      transactionRequest
+      transactionRequest,
     );
   };
   const newConsumeTransactionRequest = async ({
@@ -145,7 +145,7 @@ const useTransactions = () => {
     const transactionRequest = client.newConsumeTransactionRequest(noteIds);
     return client.newTransaction(
       AccountId.fromHex(accountId),
-      transactionRequest
+      transactionRequest,
     );
   };
   const newSendTransactionRequest = async ({
@@ -167,11 +167,11 @@ const useTransactions = () => {
       AccountId.fromHex(targetAccountId),
       AccountId.fromHex(faucetId),
       noteType,
-      amount
+      amount,
     );
     return client.newTransaction(
       AccountId.fromHex(senderAccountId),
-      transactionRequest
+      transactionRequest,
     );
   };
   const submitTransaction = async (transactionResult: TransactionResult) => {
@@ -188,32 +188,32 @@ const useTransactions = () => {
     // const accountId = transactionResult.executedTransaction().accountId().toString();
     // console.log('Account ID:', accountId);
     const transactions = await client.getTransactions(
-      TransactionFilter.ids([transactionResult.executedTransaction().id()])
+      TransactionFilter.ids([transactionResult.executedTransaction().id()]),
     );
     // console.log('Transactions:', transactions.length);
     const transactionRecord = transactions.find(
-      (tx) => tx.id().toHex() === transactionId.toHex()
+      (tx) => tx.id().toHex() === transactionId.toHex(),
     );
     const nextAccount = await client.getAccount(
-      transactionResult.executedTransaction().accountId()
+      transactionResult.executedTransaction().accountId(),
     );
     const previousAccount = accounts.find(
-      ({ id }) => id === nextAccount?.id().toString()
+      ({ id }) => id === nextAccount?.id().toString(),
     );
     if (!transactionRecord || !nextAccount || !previousAccount) {
       throw new Error("Transaction record or account not found");
     }
     const inputNotes = await client.getInputNotes(
-      new NoteFilter(NoteFilterTypes.All)
+      new NoteFilter(NoteFilterTypes.All),
     );
     // console.log("inputNotes.length", inputNotes.length);
     const consumableNoteIds: Record<string, string[]> = {};
     for (const account of accounts) {
       const consumableNotes = await client.getConsumableNotes(
-        AccountId.fromHex(account.id)
+        AccountId.fromHex(account.id),
       );
       const noteIds = consumableNotes.map((consumableNote) =>
-        consumableNote.inputNoteRecord().id().toString()
+        consumableNote.inputNoteRecord().id().toString(),
       );
       consumableNoteIds[account.id] = noteIds;
     }
@@ -223,7 +223,7 @@ const useTransactions = () => {
         transaction: wasmTransactionToTransaction(
           transactionRecord,
           transactionResult,
-          networkId
+          networkId,
         ),
         account: wasmAccountToAccount(
           nextAccount,
@@ -231,11 +231,11 @@ const useTransactions = () => {
           networkId,
           syncSummary.blockNum(),
           consumableNoteIds[previousAccount.id],
-          previousAccount.tokenSymbol
+          previousAccount.tokenSymbol,
         ),
         consumableNoteIds,
         inputNotes: inputNotes.map((inputNoteRecord) =>
-          wasmInputNoteToInputNote(inputNoteRecord, networkId)
+          wasmInputNoteToInputNote(inputNoteRecord, networkId),
         ),
         syncSummary,
       },

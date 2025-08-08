@@ -30,7 +30,7 @@ const useAccounts = () => {
       wallet,
       name,
       networkId,
-      syncSummary.blockNum()
+      syncSummary.blockNum(),
     );
     dispatch({
       type: "NEW_ACCOUNT",
@@ -57,7 +57,7 @@ const useAccounts = () => {
       false,
       tokenSymbol,
       decimals,
-      maxSupply
+      maxSupply,
     );
     const syncSummary = await client.syncState();
     // const blockHeader = await client.getLatestEpochBlock();
@@ -69,7 +69,7 @@ const useAccounts = () => {
       networkId,
       syncSummary.blockNum(),
       [],
-      tokenSymbol
+      tokenSymbol,
     );
     dispatch({
       type: "NEW_ACCOUNT",

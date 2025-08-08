@@ -1,0 +1,12 @@
+import Link from "@/components/tutorials/tutorial-link";
+
+<Link href={`/notes/${props.note?.id}`}>Click here</Link> to access the output
+note created by the mint transaction.
+
+A [Note](https://0xmiden.github.io/miden-docs/imported/miden-base/src/note.html) is the medium through which Accounts communicate. A Note holds assets and defines how they can be consumed.
+
+Each Note has a script that defines the conditions under which it can be consumed. Consumption of a Note can be restricted to certain accounts or entities. For instance, the **P2ID (Pay-to-ID)** note script targets a specific Account ID.
+
+Our note inputs constraint specifies that only our own wallet Account ID can consume the note and receive the embedded assets, which has been enforced during the note creation process by the faucet.
+
+Consumption occurs as part of a transaction. Upon successful consumption a **nullifier** is generated for the consumed notes to ensure they can no longer be spent and avoid double-spending.

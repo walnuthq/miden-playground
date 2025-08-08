@@ -10,7 +10,7 @@ const useProjects = () => {
     console.log(storeDump);
     console.log("STATE");
     console.log(localStorage.getItem("state"));
-    //dispatch({ type: "SAVE_PROJECT" });
+    // dispatch({ type: "SAVE_PROJECT" });
   };
   const loadProject = async () => {
     /* const client = await mockWebClient();

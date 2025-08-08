@@ -6,6 +6,7 @@ import {
   TableRow,
 } from "@workspace/ui/components/table";
 import { Badge } from "@workspace/ui/components/badge";
+import AccountAddress from "@/components/lib/account-address";
 
 const AccountInformationTable = ({ account }: { account: Account }) => (
   <div className="rounded-md border">
@@ -17,7 +18,15 @@ const AccountInformationTable = ({ account }: { account: Account }) => (
         </TableRow>
         <TableRow>
           <TableCell>ID</TableCell>
-          <TableCell>{account.address}</TableCell>
+          <TableCell>
+            <AccountAddress
+              address={account.address}
+              withLink={false}
+              withName={false}
+              formatted={false}
+              withTooltip={false}
+            />
+          </TableCell>
         </TableRow>
         <TableRow>
           <TableCell>Type</TableCell>

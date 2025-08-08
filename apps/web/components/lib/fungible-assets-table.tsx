@@ -33,7 +33,7 @@ const FungibleAssetsTable = ({
         <TableBody>
           {fungibleAssets.map((fungibleAsset) => {
             const faucet = faucets.find(
-              ({ id }) => id === fungibleAsset.faucetId
+              ({ id }) => id === fungibleAsset.faucetId,
             );
             return (
               <TableRow key={fungibleAsset.faucetId}>

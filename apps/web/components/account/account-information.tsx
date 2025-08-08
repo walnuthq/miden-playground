@@ -18,14 +18,23 @@ const AccountInformation = ({ account }: { account: Account }) => {
         </h4>
         <AccountInformationTable account={account} />
       </div>
-      {account.fungibleAssets.length > 0 && (
-        <div className="flex flex-col gap-2">
-          <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
-            Assets
-          </h4>
-          <FungibleAssetsTable fungibleAssets={account.fungibleAssets} />
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center">
+          <div>
+            <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
+              Assets
+            </h4>
+            {account.fungibleAssets.length === 0 && (
+              <p className="text-muted-foreground text-sm">
+                This account has no assets.
+              </p>
+            )}
+          </div>
         </div>
-      )}
+        {account.fungibleAssets.length > 0 && (
+          <FungibleAssetsTable fungibleAssets={account.fungibleAssets} />
+        )}
+      </div>
       <div className="flex flex-col gap-2">
         <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
           Storage

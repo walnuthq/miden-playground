@@ -11,7 +11,6 @@ import {
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
 import useTransactions from "@/hooks/use-transactions";
-import useAccounts from "@/hooks/use-accounts";
 import AccountAddress from "@/components/lib/account-address";
 
 const AccountActionsCell = ({ account }: { account: Account }) => {
@@ -79,7 +78,9 @@ export const columns: ColumnDef<Account>[] = [
   {
     accessorKey: "address",
     header: "ID",
-    cell: ({ row }) => <AccountAddress address={row.original.address} />,
+    cell: ({ row }) => (
+      <AccountAddress address={row.original.address} withName={false} />
+    ),
   },
   {
     accessorKey: "type",

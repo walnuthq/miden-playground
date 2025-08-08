@@ -47,7 +47,7 @@ const CreateTransactionDialogSelectForm = ({
           setLoading(true);
           const client = await mockWebClient();
           const consumableNotes = await client.getConsumableNotes(
-            AccountId.fromHex(executingAccount.id)
+            AccountId.fromHex(executingAccount.id),
           );
           setLoading(false);
           setConsumableNotes(consumableNotes);

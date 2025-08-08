@@ -125,7 +125,7 @@ export const stateDeserializer = (value: string): State => {
     networkId,
     syncSummary: syncSummary
       ? SyncSummary.deserialize(
-          Uint8Array.from(syncSummary.split(",").map((byte) => Number(byte)))
+          Uint8Array.from(syncSummary.split(",").map((byte) => Number(byte))),
         )
       : null,
     accounts: accounts.map((account) => ({
@@ -268,7 +268,7 @@ export const reducer = (state: State, action: Action): State => {
     }
     case "SUBMIT_TRANSACTION": {
       const index = state.accounts.findIndex(
-        ({ id }) => id === action.payload.account.id
+        ({ id }) => id === action.payload.account.id,
       );
       return {
         ...state,
