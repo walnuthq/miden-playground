@@ -27,11 +27,12 @@ import tutorials from "@/components/tutorials/tutorials";
 import useTutorials from "@/hooks/use-tutorials";
 // import useProjects from "@/hooks/use-projects";
 import { useIsClient } from "usehooks-ts";
+import { networks, type NetworkId } from "@/lib/types";
 
 const ProjectSwitcher = () => {
   const isClient = useIsClient();
   const { isMobile } = useSidebar();
-  const { resetState } = useGlobalContext();
+  const { networkId, resetState, switchNetwork } = useGlobalContext();
   const { tutorial, startTutorial } = useTutorials();
   // const { saveProject, loadProject } = useProjects();
   /* useEffect(() => {
@@ -55,7 +56,7 @@ const ProjectSwitcher = () => {
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">Miden Playground</span>
                 <span className="truncate text-xs">
-                  {isClient ? (
+                  {/*isClient ? (
                     tutorial ? (
                       tutorial.title
                     ) : (
@@ -63,7 +64,8 @@ const ProjectSwitcher = () => {
                     )
                   ) : (
                     <>&nbsp;</>
-                  )}
+                  )*/}
+                  {isClient && networks[networkId]}
                 </span>
               </div>
               <ChevronsUpDown className="ml-auto" />
@@ -75,6 +77,22 @@ const ProjectSwitcher = () => {
             side={isMobile ? "bottom" : "right"}
             sideOffset={4}
           >
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>Switch network</DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent>
+                  {Object.keys(networks).map((networkId) => (
+                    <DropdownMenuItem
+                      key={networkId}
+                      onClick={() => switchNetwork(networkId as NetworkId)}
+                    >
+                      {networks[networkId as NetworkId]}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
+            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => resetState()}>
               New empty sandbox
             </DropdownMenuItem>

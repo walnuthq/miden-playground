@@ -16,6 +16,9 @@ import useAccounts from "@/hooks/use-accounts";
 import SelectConsumableNotesCombobox from "@/components/transactions/select-consumable-notes-combobox";
 import useTransactions from "@/hooks/use-transactions";
 import useTutorials from "@/hooks/use-tutorials";
+import { SendTransaction } from "@demox-labs/miden-wallet-adapter-base";
+import { useWallet } from "@demox-labs/miden-wallet-adapter-react";
+import { MidenWalletAdapter } from "@demox-labs/miden-wallet-adapter-miden";
 
 const CreateTransactionConfigureForm = ({
   transactionType,
@@ -48,11 +51,13 @@ const CreateTransactionConfigureForm = ({
   setLoading: Dispatch<SetStateAction<boolean>>;
   setStep: Dispatch<SetStateAction<CreateTransactionDialogStep>>;
 }) => {
+  const { wallet } = useWallet();
   const { accounts } = useAccounts();
   const {
     newMintTransactionRequest,
     newConsumeTransactionRequest,
     newSendTransactionRequest,
+    closeCreateTransactionDialog,
   } = useTransactions();
   const { tutorialId } = useTutorials();
   const executingAccount = accounts.find(({ id }) => id === executingAccountId);
@@ -89,7 +94,21 @@ const CreateTransactionConfigureForm = ({
           targetAccount &&
           faucetAccount
         ) {
-          const transactionResult = await newSendTransactionRequest({
+          if (!wallet) {
+            return;
+          }
+          const transaction = new SendTransaction(
+            executingAccount.id,
+            targetAccount.id,
+            faucetAccount.id,
+            formData.getAll("is-public").includes("on") ? "public" : "private",
+            Number(formData.get("amount")!.toString())
+          );
+          const adapter = wallet.adapter as MidenWalletAdapter;
+          const txId = await adapter.requestSend(transaction);
+          console.log({ txId });
+          closeCreateTransactionDialog();
+          /* const transactionResult = await newSendTransactionRequest({
             senderAccountId: executingAccount.id,
             targetAccountId: targetAccount.id,
             faucetId: faucetAccount.id,
@@ -98,7 +117,7 @@ const CreateTransactionConfigureForm = ({
               : NoteType.Private,
             amount: BigInt(formData.get("amount")!.toString()),
           });
-          setTransactionResult(transactionResult);
+          setTransactionResult(transactionResult); */
         }
         setLoading(false);
         setStep("preview");

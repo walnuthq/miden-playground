@@ -2,17 +2,28 @@ import { partition } from "lodash";
 import {
   AccountId,
   AccountStorageMode,
-  Account as WasmAccount,
+  NoteFilter,
+  NoteFilterTypes,
 } from "@workspace/mock-web-client";
 import { mockWebClient } from "@/lib/mock-web-client";
+import {
+  getAccountById,
+  getConsumableNotes,
+  webClient,
+} from "@/lib/web-client";
 import useGlobalContext from "@/components/global-context/hook";
-import { wasmAccountToAccount } from "@/lib/types";
+import {
+  wasmAccountToAccount,
+  wasmInputNoteToInputNote,
+  type InputNote,
+} from "@/lib/types";
 
 const useAccounts = () => {
   const {
     networkId,
     createWalletDialogOpen,
     createFaucetDialogOpen,
+    importAccountDialogOpen,
     accounts,
     dispatch,
   } = useGlobalContext();
@@ -81,25 +92,73 @@ const useAccounts = () => {
     });
     return account;
   };
-  const importAccount = async (wasmAccount: WasmAccount) => {
-    const client = await mockWebClient();
-    // const serialized = wasmAccount.serialize();
-    // console.log(serialized);
-    // await client.importAccount(wasmAccount.serialize());
-    const accountId = wasmAccount.id();
-    wasmAccount.id = () => {
-      return AccountId.fromHex(accountId.toString());
-    };
+  const importAccountByAddress = async ({
+    name,
+    address,
+  }: {
+    name: string;
+    address: string;
+  }) => {
+    const client = await webClient(networkId);
+    const accountId = AccountId.fromBech32(address);
+    const wasmAccount = await getAccountById(client, accountId);
+    wasmAccount.id = () => AccountId.fromHex(accountId.toString());
     const syncSummary = await client.syncState();
+    const consumableNotes = await getConsumableNotes(client, accountId);
     const account = wasmAccountToAccount(
       wasmAccount,
-      "Imported Wallet",
-      "mtst", //networkId,
-      syncSummary.blockNum()
+      name,
+      networkId,
+      syncSummary.blockNum(),
+      consumableNotes.map((consumableNote) =>
+        consumableNote.inputNoteRecord().id().toString()
+      )
+    );
+    const inputNotes = consumableNotes.map((consumableNote) =>
+      wasmInputNoteToInputNote(consumableNote.inputNoteRecord(), networkId)
     );
     dispatch({
-      type: "NEW_ACCOUNT",
-      payload: { account, syncSummary },
+      type: "IMPORT_ACCOUNT",
+      payload: { account, syncSummary, inputNotes },
+    });
+    return account;
+  };
+  const updateConsumableNotes = async () => {
+    const client = await webClient(networkId);
+    const syncSummary = await client.syncState();
+    // const inputNotes: InputNote[] = [];
+    const consumableNoteIds: Record<string, string[]> = {};
+    for (const account of accounts) {
+      const consumableNotes = await getConsumableNotes(
+        client,
+        AccountId.fromHex(account.id)
+      );
+      /* inputNotes.push(
+        ...consumableNotes.map((consumableNote) =>
+          wasmInputNoteToInputNote(consumableNote.inputNoteRecord(), networkId)
+        )
+      ); */
+      const noteIds = consumableNotes.map((consumableNote) =>
+        consumableNote.inputNoteRecord().id().toString()
+      );
+      console.log(account.id, noteIds);
+      consumableNoteIds[account.id] = noteIds;
+    }
+    const { NoteFilter: WasmNoteFilter } = await import(
+      "@demox-labs/miden-sdk"
+    );
+    const inputNotes = await client.getInputNotes(
+      new WasmNoteFilter(NoteFilterTypes.All)
+    );
+    dispatch({
+      type: "UPDATE_CONSUMABLE_NOTES",
+      payload: {
+        consumableNoteIds,
+        inputNotes: inputNotes.map((inputNoteRecord) =>
+          wasmInputNoteToInputNote(inputNoteRecord, networkId)
+        ),
+        syncSummary,
+      },
     });
   };
   const openCreateWalletDialog = () =>
@@ -118,19 +177,31 @@ const useAccounts = () => {
     dispatch({
       type: "CLOSE_CREATE_FAUCET_DIALOG",
     });
+  const openImportAccountDialog = () =>
+    dispatch({
+      type: "OPEN_IMPORT_ACCOUNT_DIALOG",
+    });
+  const closeImportAccountDialog = () =>
+    dispatch({
+      type: "CLOSE_IMPORT_ACCOUNT_DIALOG",
+    });
   return {
     createWalletDialogOpen,
     createFaucetDialogOpen,
+    importAccountDialogOpen,
     accounts,
     wallets,
     faucets,
     newWallet,
     newFaucet,
-    importAccount,
-    openCreateFaucetDialog,
-    closeCreateFaucetDialog,
+    importAccountByAddress,
+    updateConsumableNotes,
     openCreateWalletDialog,
     closeCreateWalletDialog,
+    openCreateFaucetDialog,
+    closeCreateFaucetDialog,
+    openImportAccountDialog,
+    closeImportAccountDialog,
   };
 };
 

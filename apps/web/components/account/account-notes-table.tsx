@@ -1,4 +1,4 @@
-import { type Account } from "@/lib/types";
+import { type Account, type InputNote } from "@/lib/types";
 import {
   Table,
   TableBody,
@@ -20,16 +20,21 @@ import AccountAddress from "@/components/lib/account-address";
 import useTransactions from "@/hooks/use-transactions";
 import useNotes from "@/hooks/use-notes";
 import NoteId from "@/components/lib/note-id";
+//
+import { ConsumeTransaction } from "@demox-labs/miden-wallet-adapter-base";
+import { useWallet } from "@demox-labs/miden-wallet-adapter-react";
+import { MidenWalletAdapter } from "@demox-labs/miden-wallet-adapter-miden";
 
 const NoteActionsCell = ({
   account,
-  noteId,
+  inputNote,
 }: {
   account: Account;
-  noteId: string;
+  inputNote: InputNote;
 }) => {
   const { openCreateTransactionDialog, newConsumeTransactionRequest } =
     useTransactions();
+  const { wallet } = useWallet();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -41,7 +46,20 @@ const NoteActionsCell = ({
       <DropdownMenuContent align="end">
         <DropdownMenuItem
           onClick={async () => {
-            const transactionResult = await newConsumeTransactionRequest({
+            const [fungibleAsset] = inputNote.fungibleAssets;
+            if (!wallet || !fungibleAsset) {
+              return;
+            }
+            const transaction = new ConsumeTransaction(
+              inputNote.senderAddress,
+              inputNote.id,
+              inputNote.type === "Public" ? "public" : "private",
+              Number(fungibleAsset.amount)
+            );
+            const adapter = wallet.adapter as MidenWalletAdapter;
+            const txId = await adapter.requestConsume(transaction);
+            console.log({ txId });
+            /* const transactionResult = await newConsumeTransactionRequest({
               accountId: account.id,
               noteIds: [noteId],
             });
@@ -50,7 +68,7 @@ const NoteActionsCell = ({
               transactionType: "consume",
               step: "preview",
               transactionResult,
-            });
+            }); */
           }}
         >
           Consume note with {account.name}
@@ -97,7 +115,7 @@ const AccountNotesTable = ({ account }: { account: Account }) => {
                 <AccountAddress address={inputNote.senderAddress} />
               </TableCell>
               <TableCell>
-                <NoteActionsCell account={account} noteId={inputNote.id} />
+                <NoteActionsCell account={account} inputNote={inputNote} />
               </TableCell>
             </TableRow>
           ))}

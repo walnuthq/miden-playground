@@ -5,30 +5,29 @@ import { columns } from "@/components/accounts/columns";
 import AccountsTable from "@/components/accounts/accounts-table";
 import CreateWalletDialog from "@/components/accounts/create-wallet-dialog";
 import CreateFaucetDialog from "@/components/accounts/create-faucet-dialog";
+import ImportAccountDialog from "@/components/accounts/import-account-dialog";
 import useAccounts from "@/hooks/use-accounts";
 import CreateTransactionDialog from "@/components/transactions/create-transaction-dialog";
 import { useWallet } from "@demox-labs/miden-wallet-adapter-react";
-import { importAccountByAddress } from "@/lib/web-client";
 import { AccountId } from "@workspace/mock-web-client";
+import useGlobalContext from "@/components/global-context/hook";
 
 const Accounts = () => {
   const { publicKey } = useWallet();
-  const { accounts, importAccount } = useAccounts();
+  const { networkId } = useGlobalContext();
+  const { accounts, importAccountByAddress } = useAccounts();
   const isClient = useIsClient();
+  // TODO refactor using onConnect callback?
   useEffect(() => {
-    const importAccountByPublicKey = async (address: string) => {
-      const account = await importAccountByAddress(address);
-      await importAccount(account);
-    };
-    if (publicKey) {
+    if (publicKey && networkId === "mtst") {
       const localAccount = accounts.find(
         ({ id }) => id === AccountId.fromBech32(publicKey).toString()
       );
       if (!localAccount) {
-        importAccountByPublicKey(publicKey);
+        importAccountByAddress({ name: "Miden Account 1", address: publicKey });
       }
     }
-  }, [publicKey]);
+  }, [publicKey, networkId]);
   if (!isClient) {
     return null;
   }
@@ -37,6 +36,7 @@ const Accounts = () => {
       {isClient && <AccountsTable columns={columns} data={accounts} />}
       <CreateWalletDialog />
       <CreateFaucetDialog />
+      <ImportAccountDialog />
       <CreateTransactionDialog />
     </div>
   );
