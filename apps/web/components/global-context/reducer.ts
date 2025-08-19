@@ -4,6 +4,7 @@ import {
   type ConsumableNoteRecord,
 } from "@workspace/mock-web-client";
 import {
+  type NetworkId,
   type Account,
   type Transaction,
   type InputNote,
@@ -13,11 +14,12 @@ import {
 
 export type State = {
   // GLOBAL
-  networkId: string;
+  networkId: NetworkId;
   syncSummary: SyncSummary | null;
   // ACCOUNTS
   createWalletDialogOpen: boolean;
   createFaucetDialogOpen: boolean;
+  importAccountDialogOpen: boolean;
   accounts: Account[];
   // TRANSACTIONS
   createTransactionDialogOpen: boolean;
@@ -45,6 +47,7 @@ export const initialState = (): State => ({
   // ACCOUNTS
   createWalletDialogOpen: false,
   createFaucetDialogOpen: false,
+  importAccountDialogOpen: false,
   accounts: [],
   // TRANSACTIONS
   createTransactionDialogOpen: false,
@@ -109,7 +112,7 @@ export const stateDeserializer = (value: string): State => {
     tutorialOpen,
     nextTutorialStepDisabled,
   } = JSON.parse(value) as {
-    networkId: string;
+    networkId: NetworkId;
     syncSummary: string | null;
     accounts: (Omit<Account, "nonce"> & { nonce: string })[];
     transactions: Transaction[];
@@ -147,10 +150,28 @@ export const stateDeserializer = (value: string): State => {
 
 export type Action =
   | { type: "RESET_STATE" }
+  | { type: "SWITCH_NETWORK"; payload: { networkId: NetworkId } }
+  | {
+      type: "SYNC_STATE";
+      payload: {
+        syncSummary: SyncSummary | null;
+        // consumableNoteIds: Record<string, string[]>;
+        accounts: Account[];
+        inputNotes: InputNote[];
+      };
+    }
   | { type: "LOAD_PROJECT"; payload: { state: State } }
   | {
       type: "NEW_ACCOUNT";
       payload: { account: Account; syncSummary: SyncSummary | null };
+    }
+  | {
+      type: "IMPORT_ACCOUNT";
+      payload: {
+        account: Account;
+        syncSummary: SyncSummary | null;
+        inputNotes: InputNote[];
+      };
     }
   | {
       type: "OPEN_CREATE_WALLET_DIALOG";
@@ -163,6 +184,12 @@ export type Action =
     }
   | {
       type: "CLOSE_CREATE_FAUCET_DIALOG";
+    }
+  | {
+      type: "OPEN_IMPORT_ACCOUNT_DIALOG";
+    }
+  | {
+      type: "CLOSE_IMPORT_ACCOUNT_DIALOG";
     }
   | {
       type: "OPEN_CREATE_TRANSACTION_DIALOG";
@@ -189,6 +216,14 @@ export type Action =
       };
     }
   | {
+      type: "UPDATE_CONSUMABLE_NOTES";
+      payload: {
+        consumableNoteIds: Record<string, string[]>;
+        inputNotes: InputNote[];
+        syncSummary: SyncSummary;
+      };
+    }
+  | {
       type: "START_TUTORIAL";
       payload: { tutorialId: string };
     }
@@ -205,7 +240,22 @@ export type Action =
 export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case "RESET_STATE": {
-      return initialState();
+      return { ...initialState(), networkId: state.networkId };
+    }
+    case "SWITCH_NETWORK": {
+      return { ...state, networkId: action.payload.networkId };
+    }
+    case "SYNC_STATE": {
+      return {
+        ...state,
+        syncSummary: action.payload.syncSummary,
+        accounts: action.payload.accounts,
+        /* accounts: state.accounts.map((account) => ({
+          ...account,
+          consumableNoteIds: action.payload.consumableNoteIds[account.id] ?? [],
+        })), */
+        inputNotes: action.payload.inputNotes,
+      };
     }
     case "LOAD_PROJECT": {
       return action.payload.state;
@@ -215,6 +265,18 @@ export const reducer = (state: State, action: Action): State => {
         ...state,
         accounts: [...state.accounts, action.payload.account],
         syncSummary: action.payload.syncSummary,
+      };
+    }
+    case "IMPORT_ACCOUNT": {
+      const noteIds = state.inputNotes.map(({ id }) => id);
+      const filteredInputNotes = action.payload.inputNotes.filter(
+        ({ id }) => !noteIds.includes(id)
+      );
+      return {
+        ...state,
+        accounts: [...state.accounts, action.payload.account],
+        syncSummary: action.payload.syncSummary,
+        inputNotes: [...state.inputNotes, ...filteredInputNotes],
       };
     }
     case "OPEN_CREATE_WALLET_DIALOG": {
@@ -239,6 +301,18 @@ export const reducer = (state: State, action: Action): State => {
       return {
         ...state,
         createFaucetDialogOpen: false,
+      };
+    }
+    case "OPEN_IMPORT_ACCOUNT_DIALOG": {
+      return {
+        ...state,
+        importAccountDialogOpen: true,
+      };
+    }
+    case "CLOSE_IMPORT_ACCOUNT_DIALOG": {
+      return {
+        ...state,
+        importAccountDialogOpen: false,
       };
     }
     case "OPEN_CREATE_TRANSACTION_DIALOG": {
@@ -286,6 +360,17 @@ export const reducer = (state: State, action: Action): State => {
               action.payload.consumableNoteIds[account.id] ?? [],
           })),
         ],
+        inputNotes: action.payload.inputNotes,
+        syncSummary: action.payload.syncSummary,
+      };
+    }
+    case "UPDATE_CONSUMABLE_NOTES": {
+      return {
+        ...state,
+        accounts: state.accounts.map((account) => ({
+          ...account,
+          consumableNoteIds: action.payload.consumableNoteIds[account.id] ?? [],
+        })),
         inputNotes: action.payload.inputNotes,
         syncSummary: action.payload.syncSummary,
       };

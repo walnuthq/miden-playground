@@ -1,5 +1,6 @@
 "use client";
 import { useIsClient } from "usehooks-ts";
+import { WalletMultiButton } from "@demox-labs/miden-wallet-adapter";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -14,6 +15,7 @@ import { usePathname } from "next/navigation";
 import TutorialToggle from "@/components/lib/tutorial-toggle";
 import ModeToggle from "@/components/lib/mode-toggle";
 import useTutorials from "@/hooks/use-tutorials";
+import SyncStateButton from "@/components/lib/sync-state-button";
 
 const getLink = (pathname: string) => {
   const [, route] = pathname.split("/");
@@ -80,6 +82,8 @@ const Header = () => {
         <div className="ml-auto flex items-center gap-2">
           {isClient && tutorialId && <TutorialToggle />}
           <ModeToggle />
+          {isClient && <SyncStateButton />}
+          {isClient && <WalletMultiButton />}
         </div>
       </div>
     </header>

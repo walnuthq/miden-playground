@@ -1,4 +1,4 @@
-import { Plus, Wallet, HandCoins } from "lucide-react";
+import { Plus, Wallet, HandCoins, Import } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,7 +9,11 @@ import { Button } from "@workspace/ui/components/button";
 import useAccounts from "@/hooks/use-accounts";
 
 const CreateAccountDropdownMenu = () => {
-  const { openCreateWalletDialog, openCreateFaucetDialog } = useAccounts();
+  const {
+    openCreateWalletDialog,
+    openCreateFaucetDialog,
+    openImportAccountDialog,
+  } = useAccounts();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -26,6 +30,10 @@ const CreateAccountDropdownMenu = () => {
         <DropdownMenuItem onClick={openCreateFaucetDialog}>
           <HandCoins />
           Create new fungible faucet
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={openImportAccountDialog}>
+          <Import />
+          Import account
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

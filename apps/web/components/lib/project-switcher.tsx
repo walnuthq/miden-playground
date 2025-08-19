@@ -29,12 +29,13 @@ import useTutorials from "@/hooks/use-tutorials";
 // import useProjects from "@/hooks/use-projects";
 import { useIsClient } from "usehooks-ts";
 import useTransactions from "@/hooks/use-transactions";
+import { networks, type NetworkId } from "@/lib/types";
 
 const ProjectSwitcher = () => {
   const isClient = useIsClient();
   const router = useRouter();
   const { isMobile } = useSidebar();
-  const { resetState } = useGlobalContext();
+  const { networkId, resetState, switchNetwork } = useGlobalContext();
   const { tutorial, tutorialId, startTutorial, loadTutorial } = useTutorials();
   const { transactions } = useTransactions();
   // const { saveProject, loadProject } = useProjects();
@@ -59,7 +60,7 @@ const ProjectSwitcher = () => {
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">Miden Playground</span>
                 <span className="truncate text-xs">
-                  {isClient ? (
+                  {/*isClient ? (
                     tutorial ? (
                       tutorial.title
                     ) : (
@@ -67,7 +68,8 @@ const ProjectSwitcher = () => {
                     )
                   ) : (
                     <>&nbsp;</>
-                  )}
+                  )*/}
+                  {isClient && networks[networkId]}
                 </span>
               </div>
               <ChevronsUpDown className="ml-auto" />
@@ -79,12 +81,23 @@ const ProjectSwitcher = () => {
             side={isMobile ? "bottom" : "right"}
             sideOffset={4}
           >
-            <DropdownMenuItem
-              onClick={() => {
-                resetState();
-                router.push("/accounts");
-              }}
-            >
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>Switch network</DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent>
+                  {Object.keys(networks).map((networkId) => (
+                    <DropdownMenuItem
+                      key={networkId}
+                      onClick={() => switchNetwork(networkId as NetworkId)}
+                    >
+                      {networks[networkId as NetworkId]}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => resetState()}>
               New empty sandbox
             </DropdownMenuItem>
             {/* <DropdownMenuItem

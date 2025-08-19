@@ -14,8 +14,7 @@ import {
   wasmInputNoteToInputNote,
   wasmTransactionToTransaction,
 } from "@/lib/types";
-import { mockWebClient } from "@/lib/mock-web-client";
-// import { webClient } from "@/lib/web-client";
+import { webClient } from "@/lib/web-client";
 import useGlobalContext from "@/components/global-context/hook";
 
 const useTransactions = () => {
@@ -73,13 +72,9 @@ const useTransactions = () => {
     noteType: NoteType;
     amount: bigint;
   }) => {
-    const client = await mockWebClient();
-    // const client = await webClient();
-    // const { AccountId: WasmAccountId } = await import(
-    //   "@demox-labs/miden-sdk-next"
-    // );
+    const client = await webClient(networkId);
+    // const { AccountId: WasmAccountId } = await import("@demox-labs/miden-sdk");
     // const AccountIdClass = networkId === "mtst" ? WasmAccountId : AccountId;
-    //
     const transactionRequest = client.newMintTransactionRequest(
       /*Wasm*/ AccountId.fromHex(targetAccountId),
       /*Wasm*/ AccountId.fromHex(faucetId),
@@ -98,8 +93,7 @@ const useTransactions = () => {
     accountId: string;
     noteIds: string[];
   }) => {
-    const client = await mockWebClient();
-    // const client = await webClient();
+    const client = await webClient(networkId);
     const transactionRequest = client.newConsumeTransactionRequest(noteIds);
     return client.newTransaction(
       AccountId.fromHex(accountId),
@@ -119,8 +113,7 @@ const useTransactions = () => {
     noteType: NoteType;
     amount: bigint;
   }) => {
-    const client = await mockWebClient();
-    // const client = await webClient();
+    const client = await webClient(networkId);
     const transactionRequest = client.newSendTransactionRequest(
       AccountId.fromHex(senderAccountId),
       AccountId.fromHex(targetAccountId),
@@ -134,8 +127,7 @@ const useTransactions = () => {
     );
   };
   const submitTransaction = async (transactionResult: TransactionResult) => {
-    const client = await mockWebClient();
-    // const client = await webClient();
+    const client = await webClient(networkId);
     await client.submitTransaction(transactionResult);
     // if (client.usesMockChain()) {
     //   await client.proveBlock();
