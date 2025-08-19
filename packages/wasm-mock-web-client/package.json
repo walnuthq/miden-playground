@@ -30,6 +30,6 @@
     "wasm"
   ],
   "dependencies": {
-    "dexie": "^4.0.11"
+    "dexie": "4.0.8"
   }
 }

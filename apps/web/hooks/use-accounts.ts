@@ -1,6 +1,7 @@
 import { partition } from "lodash";
 import { AccountStorageMode } from "@workspace/mock-web-client";
 import { mockWebClient } from "@/lib/mock-web-client";
+// import { webClient } from "@/lib/web-client";
 import useGlobalContext from "@/components/global-context/hook";
 import { wasmAccountToAccount } from "@/lib/types";
 
@@ -21,16 +22,14 @@ const useAccounts = () => {
     storageMode: AccountStorageMode;
   }) => {
     const client = await mockWebClient();
+    // const client = await webClient();
     const wallet = await client.newWallet(storageMode, true);
     const syncSummary = await client.syncState();
-    // const blockHeader = await client.getLatestEpochBlock();
-    // console.log("commitment:", blockHeader.commitment().toHex());
-    // console.log("chainCommitment:", blockHeader.chainCommitment().toHex());
     const account = wasmAccountToAccount(
       wallet,
       name,
       networkId,
-      syncSummary.blockNum(),
+      syncSummary.blockNum()
     );
     dispatch({
       type: "NEW_ACCOUNT",
@@ -52,12 +51,13 @@ const useAccounts = () => {
     maxSupply: bigint;
   }) => {
     const client = await mockWebClient();
+    // const client = await webClient();
     const faucet = await client.newFaucet(
       storageMode,
       false,
       tokenSymbol,
       decimals,
-      maxSupply,
+      maxSupply
     );
     const syncSummary = await client.syncState();
     // const blockHeader = await client.getLatestEpochBlock();
@@ -69,7 +69,7 @@ const useAccounts = () => {
       networkId,
       syncSummary.blockNum(),
       [],
-      tokenSymbol,
+      tokenSymbol
     );
     dispatch({
       type: "NEW_ACCOUNT",
