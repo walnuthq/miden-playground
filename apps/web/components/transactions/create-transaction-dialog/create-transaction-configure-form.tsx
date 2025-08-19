@@ -16,9 +16,11 @@ import useAccounts from "@/hooks/use-accounts";
 import SelectConsumableNotesCombobox from "@/components/transactions/select-consumable-notes-combobox";
 import useTransactions from "@/hooks/use-transactions";
 import useTutorials from "@/hooks/use-tutorials";
-import { SendTransaction } from "@demox-labs/miden-wallet-adapter-base";
-import { useWallet } from "@demox-labs/miden-wallet-adapter-react";
-import { MidenWalletAdapter } from "@demox-labs/miden-wallet-adapter-miden";
+import {
+  useWallet,
+  SendTransaction,
+  MidenWalletAdapter,
+} from "@demox-labs/miden-wallet-adapter";
 
 const CreateTransactionConfigureForm = ({
   transactionType,
@@ -104,6 +106,7 @@ const CreateTransactionConfigureForm = ({
             formData.getAll("is-public").includes("on") ? "public" : "private",
             Number(formData.get("amount")!.toString())
           );
+          // console.log(transaction);
           const adapter = wallet.adapter as MidenWalletAdapter;
           const txId = await adapter.requestSend(transaction);
           console.log({ txId });

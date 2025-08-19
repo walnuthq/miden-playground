@@ -1,6 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import { type ReactNode } from "react";
-import "@demox-labs/miden-wallet-adapter-reactui/dist/styles.css";
+import "@demox-labs/miden-wallet-adapter/styles.css";
 import "@workspace/ui/globals.css";
 import Providers from "@/components/providers";
 import { Toaster } from "@workspace/ui/components/sonner";

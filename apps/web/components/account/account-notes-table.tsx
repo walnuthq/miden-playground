@@ -21,9 +21,11 @@ import useTransactions from "@/hooks/use-transactions";
 import useNotes from "@/hooks/use-notes";
 import NoteId from "@/components/lib/note-id";
 //
-import { ConsumeTransaction } from "@demox-labs/miden-wallet-adapter-base";
-import { useWallet } from "@demox-labs/miden-wallet-adapter-react";
-import { MidenWalletAdapter } from "@demox-labs/miden-wallet-adapter-miden";
+import {
+  useWallet,
+  ConsumeTransaction,
+  MidenWalletAdapter,
+} from "@demox-labs/miden-wallet-adapter";
 
 const NoteActionsCell = ({
   account,

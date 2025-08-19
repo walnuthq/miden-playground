@@ -17,10 +17,7 @@
   },
   "dependencies": {
     "@demox-labs/miden-sdk": "0.10.1",
-    "@demox-labs/miden-wallet-adapter-base": "^0.1.5",
-    "@demox-labs/miden-wallet-adapter-miden": "^0.1.1",
-    "@demox-labs/miden-wallet-adapter-react": "^0.1.1",
-    "@demox-labs/miden-wallet-adapter-reactui": "^0.1.4",
+    "@demox-labs/miden-wallet-adapter": "0.1.1",
     "@monaco-editor/react": "^4.7.0",
     "@opennextjs/cloudflare": "^1.6.5",
     "@tanstack/react-table": "^8.21.3",

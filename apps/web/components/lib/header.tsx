@@ -1,6 +1,6 @@
 "use client";
 import { useIsClient } from "usehooks-ts";
-import { WalletMultiButton } from "@demox-labs/miden-wallet-adapter-reactui";
+import { WalletMultiButton } from "@demox-labs/miden-wallet-adapter";
 import {
   Breadcrumb,
   BreadcrumbItem,
