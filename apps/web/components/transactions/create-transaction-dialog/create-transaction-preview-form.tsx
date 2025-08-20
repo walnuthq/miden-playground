@@ -5,10 +5,11 @@ import {
   type TransactionResult,
   type TransactionRecord,
 } from "@workspace/mock-web-client";
-import { formatId } from "@/lib/utils";
 import FungibleAssetsTable from "@/components/lib/fungible-assets-table";
 import AccountAddress from "@/components/lib/account-address";
 import AccountStorageDeltaTable from "@/components/lib/account-storage-delta-table";
+import TransactionId from "@/components/lib/transaction-id";
+import NoteId from "@/components/lib/note-id";
 
 const SubmitTransactionToastDescription = ({
   transactionRecord,
@@ -16,17 +17,20 @@ const SubmitTransactionToastDescription = ({
   transactionRecord: TransactionRecord;
 }) => (
   <>
-    <p>Transaction ID: {formatId(transactionRecord.id().toHex())}</p>
+    <p>
+      Transaction ID:{" "}
+      <TransactionId transactionId={transactionRecord.id().toHex()} />
+    </p>
     {transactionRecord.outputNotes().numNotes() > 0 && (
       <>
         <p>Output notes:</p>
-        <ul className="my-6 ml-6 list-disc [&>li]:mt-2">
+        <ul className="ml-6 list-disc [&>li]:mt-2">
           {transactionRecord
             .outputNotes()
             .notes()
             .map((note) => (
               <li key={note.id().toString()}>
-                {formatId(note.id().toString())}
+                <NoteId noteId={note.id().toString()} />
               </li>
             ))}
         </ul>
@@ -46,24 +50,41 @@ const TransactionPreview = ({
   const accountVaultDelta = transactionResult.accountDelta().vault();
   const fungibleAssetDelta = accountVaultDelta.fungible();
   const nonceDelta = transactionResult.accountDelta().nonceDelta()?.asInt();
+  // const consumedNotes = 0;
+  // const createdNotes = 1;
+  // const accountStorageDelta = { isEmpty: () => true };
+  // const fungibleAssetDelta = { isEmpty: () => true };
+  // const nonceDelta = 1;
   return (
     <div className="flex flex-col gap-2 text-sm">
-      <p>The transaction will have the following effects:</p>
-      <p>
-        {consumedNotes === 0
-          ? "No notes will be consumed."
-          : `${consumedNotes} note${
-              consumedNotes === 1 ? "" : "s"
-            } will be consumed as a result of this transaction.`}
-      </p>
-      <p>
-        {createdNotes === 0
-          ? "No notes will be created."
-          : `${createdNotes} note${
-              createdNotes === 1 ? "" : "s"
-            } will be created as a result of this transaction.`}
-      </p>
-      <p>
+      <h5 className="font-semibold">
+        The transaction will have the following effects:
+      </h5>
+      {consumedNotes === 0 ? (
+        <p className="text-muted-foreground text-sm">
+          No notes will be consumed.
+        </p>
+      ) : (
+        <p>
+          <strong>
+            {consumedNotes} note{consumedNotes === 1 ? "" : "s"}
+          </strong>{" "}
+          will be consumed as a result of this transaction.
+        </p>
+      )}
+      {createdNotes === 0 ? (
+        <p className="text-muted-foreground text-sm">
+          No notes will be created.
+        </p>
+      ) : (
+        <p>
+          <strong>
+            {createdNotes} note{createdNotes === 1 ? "" : "s"}
+          </strong>{" "}
+          will be created as a result of this transaction.
+        </p>
+      )}
+      <h5 className="font-semibold">
         The account with ID{" "}
         <AccountAddress
           id={transactionResult.executedTransaction().accountId().toString()}
@@ -72,18 +93,22 @@ const TransactionPreview = ({
           withCopyButton={false}
         />{" "}
         will be modified as follows:
-      </p>
-      <p>Storage changes:</p>
+      </h5>
+      <h5 className="font-semibold">Storage changes:</h5>
       {accountStorageDelta.isEmpty() ? (
-        <p>Storage will not be changed.</p>
+        <p className="text-muted-foreground text-sm">
+          Storage will not be changed.
+        </p>
       ) : (
         <AccountStorageDeltaTable
           values={accountStorageDelta.values().map((word) => word.toHex())}
         />
       )}
-      <p>Vault changes:</p>
+      <h5 className="font-semibold">Vault changes:</h5>
       {fungibleAssetDelta.isEmpty() ? (
-        <p>Account Vault will not be changed.</p>
+        <p className="text-muted-foreground text-sm">
+          Account Vault will not be changed.
+        </p>
       ) : (
         <FungibleAssetsTable
           fungibleAssets={fungibleAssetDelta
@@ -95,7 +120,7 @@ const TransactionPreview = ({
           withAccountAddress={false}
         />
       )}
-      <p>New nonce: {nonceDelta}.</p>
+      <strong>New nonce: {nonceDelta}.</strong>
     </div>
   );
 };

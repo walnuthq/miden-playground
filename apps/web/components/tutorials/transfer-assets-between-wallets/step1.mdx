@@ -1,0 +1,11 @@
+import Link from "@/components/tutorials/tutorial-link";
+
+In this tutorial, you will learn how to transfer assets between two wallets. We've already created the wallets as well as a fungible faucet.
+
+- <Link href={`/accounts/${props.walletA?.address}`}>Wallet A</Link>: This is
+  the source wallet, it has been funded with 1000 MDN tokens and you will
+  transfer them out to the destination wallet.
+- <Link href={`/accounts/${props.walletB?.address}`}>Wallet B</Link>: This is
+  the destination wallet, it will receive MDN tokens from the source account.
+- <Link href={`/accounts/${props.faucet?.address}`}>MDN Faucet</Link>: This is
+  the fungible faucet where our MDN tokens originate from.

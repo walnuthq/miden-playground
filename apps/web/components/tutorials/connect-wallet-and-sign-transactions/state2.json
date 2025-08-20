@@ -1,0 +1,32 @@
+{
+  "networkId": "mtst",
+  "blockNum": 0,
+  "accounts": [
+    {
+      "id": "0x43999c9344b31a206a5464ece82b91",
+      "name": "Miden Faucet",
+      "address": "mtst1qppen8yngje35gr223jwe6ptjy7gedn9",
+      "type": "Fungible faucet (token symbol: MDN)",
+      "storageMode": "Public",
+      "isPublic": true,
+      "isFaucet": true,
+      "nonce": "168425",
+      "fungibleAssets": [],
+      "storage": [
+        "0x0000000000000000000000000000000000000000000000000058df0da5920000",
+        "0x458aaec45213a09362b78150d9efdb5ff0d6d008a9359632497d051572d40ffa",
+        "0x00008a5d78456301060000000000000021410300000000000000000000000000"
+      ],
+      "consumableNoteIds": [],
+      "tokenSymbol": "MDN",
+      "updatedAt": 0
+    }
+  ],
+  "transactions": [],
+  "inputNotes": [],
+  "tutorialId": "connect-wallet-and-sign-transactions",
+  "tutorialStep": 0,
+  "tutorialMaxStep": 0,
+  "tutorialOpen": true,
+  "nextTutorialStepDisabled": true
+}

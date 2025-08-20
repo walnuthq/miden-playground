@@ -12,7 +12,7 @@ const ConsumeNoteButton = ({ inputNote }: { inputNote: InputNote }) => {
   const [loading, setLoading] = useState(false);
   const targetAccountId = noteInputsToAccountId(inputNote.inputs);
   const targetAccount = accounts.find(
-    ({ id }) => id === targetAccountId.toString()
+    ({ id }) => id === targetAccountId.toString(),
   );
   return (
     <Button

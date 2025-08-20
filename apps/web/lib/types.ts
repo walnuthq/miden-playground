@@ -11,6 +11,13 @@ import {
   type NoteMetadata,
 } from "@workspace/mock-web-client";
 
+export const networks = {
+  mtst: "Testnet",
+  mlcl: "Sandbox",
+} as const;
+
+export type NetworkId = keyof typeof networks;
+
 // ACCOUNTS
 
 export type FungibleAsset = { faucetId: string; amount: string };
@@ -47,7 +54,7 @@ export const wasmAccountToAccount = (
   networkId: string,
   updatedAt: number,
   consumableNoteIds: string[] = [],
-  tokenSymbol = ""
+  tokenSymbol?: string
 ): Account => ({
   id: account.id().toString(),
   name,
@@ -158,10 +165,23 @@ export const wasmInputNoteToInputNote = (
   type: noteType(record.metadata()),
   state: noteStates[record.state()],
   tag: record.metadata()?.tag().executionMode().toString() ?? "",
-  senderAddress: record.metadata()?.sender().toBech32Custom(networkId) ?? "",
-  scriptRoot: record.details().recipient().script().root().toHex(),
+  senderAddress:
+    // TODO remove
+    networkId === "mtst"
+      ? (record.metadata()?.sender().toBech32("mtst") ?? "")
+      : (record.metadata()?.sender().toBech32Custom(networkId) ?? ""),
+  // senderAddress: record.metadata()?.sender().toBech32Custom(networkId) ?? "",
+  scriptRoot:
+    networkId === "mtst"
+      ? "0x0"
+      : record.details().recipient().script().root().toHex(),
+  // scriptRoot: record.details().recipient().script().root().toHex(),
   wellKnownNote:
-    wellKnownNotes[record.details().recipient().script().root().toHex()],
+    networkId === "mtst"
+      ? undefined
+      : wellKnownNotes[record.details().recipient().script().root().toHex()],
+  // wellKnownNote:
+  //   wellKnownNotes[record.details().recipient().script().root().toHex()],
   fungibleAssets: record
     .details()
     .assets()
@@ -170,12 +190,21 @@ export const wasmInputNoteToInputNote = (
       faucetId: fungibleAsset.faucetId().toString(),
       amount: fungibleAsset.amount().toString(),
     })),
-  inputs: record
-    .details()
-    .recipient()
-    .inputs()
-    .values()
-    .map((value) => value.asInt()),
+  inputs:
+    networkId === "mtst"
+      ? []
+      : record
+          .details()
+          .recipient()
+          .inputs()
+          .values()
+          .map((value) => value.asInt()),
+  // inputs: record
+  //   .details()
+  //   .recipient()
+  //   .inputs()
+  //   .values()
+  //   .map((value) => value.asInt()),
   updatedAt: record.inclusionProof()?.location().blockNum() ?? 0,
 });
 
@@ -260,7 +289,7 @@ export const wasmTransactionToTransaction = (
 export type TutorialStep = {
   title: string;
   Content: FunctionComponent;
-  NextStepButton: FunctionComponent;
+  NextStepButton?: FunctionComponent;
 };
 
 export type Tutorial = {

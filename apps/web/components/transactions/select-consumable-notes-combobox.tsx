@@ -31,7 +31,7 @@ const getConsumableNoteFields = (inputNote: InputNote, faucets: Account[]) => {
     ({ faucetId, amount }) => {
       const faucet = faucets.find(({ id }) => id === faucetId);
       return `${amount} ${faucet?.tokenSymbol ?? "Unknown"}`;
-    }
+    },
   );
   return {
     noteId: inputNote.id,
@@ -43,7 +43,7 @@ const getConsumableNoteFields = (inputNote: InputNote, faucets: Account[]) => {
 const getConsumableNoteValue = (inputNote: InputNote, faucets: Account[]) => {
   const { noteId, noteType, noteFungibleAssets } = getConsumableNoteFields(
     inputNote,
-    faucets
+    faucets,
   );
   return [noteId, noteType, noteFungibleAssets.join(",")].join(",");
 };
@@ -51,7 +51,7 @@ const getConsumableNoteValue = (inputNote: InputNote, faucets: Account[]) => {
 const getConsumableNoteLabel = (inputNote: InputNote, faucets: Account[]) => {
   const { noteId, noteType, noteFungibleAssets } = getConsumableNoteFields(
     inputNote,
-    faucets
+    faucets,
   );
   return `${noteType} note ${
     noteFungibleAssets.length === 0
@@ -102,14 +102,14 @@ const SelectConsumableNotesCombobox = ({
                   value={getConsumableNoteValue(
                     wasmInputNoteToInputNote(
                       consumableNote.inputNoteRecord(),
-                      networkId
+                      networkId,
                     ),
-                    faucets
+                    faucets,
                   )}
                   onSelect={(currentValue) => {
                     const [currentNoteId] = currentValue.split(",") as [string];
                     const index = value.findIndex(
-                      (noteId) => noteId === currentNoteId
+                      (noteId) => noteId === currentNoteId,
                     );
                     const newValue =
                       index === -1
@@ -122,18 +122,18 @@ const SelectConsumableNotesCombobox = ({
                   {getConsumableNoteLabel(
                     wasmInputNoteToInputNote(
                       consumableNote.inputNoteRecord(),
-                      networkId
+                      networkId,
                     ),
-                    faucets
+                    faucets,
                   )}
                   <Check
                     className={cn(
                       "ml-auto",
                       value.includes(
-                        consumableNote.inputNoteRecord().id().toString()
+                        consumableNote.inputNoteRecord().id().toString(),
                       )
                         ? "opacity-100"
-                        : "opacity-0"
+                        : "opacity-0",
                     )}
                   />
                 </CommandItem>

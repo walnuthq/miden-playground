@@ -1,0 +1,9 @@
+import Link from "@/components/tutorials/tutorial-link";
+
+The next step to finish our transfer is to consume the output note with the intended target account.
+
+From <Link href={`/accounts/${props.walletB?.address}`}>Wallet B</Link> page, take a look at the _"Consumable Notes"_ section and see how we automatically detected the **P2ID** output note as consumable by its recipient.
+
+Click on the _"Consume all notes"_ button to trigger a consume note transaction. In this scenario we have only one consumable note, but we could consume an arbitrary number of notes in a single transaction.
+
+The preview dialog will let you validate the assets changes about to occur, then click _"Submit"_ to finalize the transfer.

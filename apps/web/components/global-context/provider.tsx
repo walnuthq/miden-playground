@@ -22,7 +22,7 @@ const usePersistedReducer = () => {
       setState(nextState);
       return nextState;
     },
-    [setState],
+    [setState]
   );
   return useReducer(persistedReducer, state);
 };

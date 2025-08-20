@@ -40,7 +40,7 @@ const NoteInformation = ({ inputNote }: { inputNote: InputNote }) => {
                 value: (
                   <AccountAddress
                     address={noteInputsToAccountId(
-                      inputNote.inputs
+                      inputNote.inputs,
                     ).toBech32Custom(networkId)}
                   />
                 ),

@@ -1,4 +1,4 @@
-import { type Account } from "@/lib/types";
+import { type Account, type InputNote } from "@/lib/types";
 import {
   Table,
   TableBody,
@@ -18,16 +18,26 @@ import { MoreVertical } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import AccountAddress from "@/components/lib/account-address";
 import useTransactions from "@/hooks/use-transactions";
+import useAccounts from "@/hooks/use-accounts";
 import useNotes from "@/hooks/use-notes";
 import NoteId from "@/components/lib/note-id";
+//
+import {
+  useWallet,
+  ConsumeTransaction,
+  type MidenWalletAdapter,
+} from "@demox-labs/miden-wallet-adapter";
+import useGlobalContext from "@/components/global-context/hook";
 
 const NoteActionsCell = ({
   account,
-  noteId,
+  inputNote,
 }: {
   account: Account;
-  noteId: string;
+  inputNote: InputNote;
 }) => {
+  const { networkId } = useGlobalContext();
+  const { wallet } = useWallet();
   const { openCreateTransactionDialog, newConsumeTransactionRequest } =
     useTransactions();
   return (
@@ -41,16 +51,32 @@ const NoteActionsCell = ({
       <DropdownMenuContent align="end">
         <DropdownMenuItem
           onClick={async () => {
-            const transactionResult = await newConsumeTransactionRequest({
-              accountId: account.id,
-              noteIds: [noteId],
-            });
-            openCreateTransactionDialog({
-              accountId: account.id,
-              transactionType: "consume",
-              step: "preview",
-              transactionResult,
-            });
+            if (networkId === "mlcl") {
+              const transactionResult = await newConsumeTransactionRequest({
+                accountId: account.id,
+                noteIds: [inputNote.id],
+              });
+              openCreateTransactionDialog({
+                accountId: account.id,
+                transactionType: "consume",
+                step: "preview",
+                transactionResult,
+              });
+            } else {
+              const [fungibleAsset] = inputNote.fungibleAssets;
+              if (!wallet || !fungibleAsset) {
+                return;
+              }
+              const transaction = new ConsumeTransaction(
+                inputNote.senderAddress,
+                inputNote.id,
+                inputNote.type === "Public" ? "public" : "private",
+                Number(fungibleAsset.amount)
+              );
+              const adapter = wallet.adapter as MidenWalletAdapter;
+              const txId = await adapter.requestConsume(transaction);
+              console.log({ txId });
+            }
           }}
         >
           Consume note with {account.name}
@@ -61,6 +87,7 @@ const NoteActionsCell = ({
 };
 
 const AccountNotesTable = ({ account }: { account: Account }) => {
+  const { faucets } = useAccounts();
   const { inputNotes } = useNotes();
   const consumableNotes = account.consumableNoteIds
     .map((noteId) => inputNotes.find(({ id }) => id === noteId))
@@ -74,6 +101,7 @@ const AccountNotesTable = ({ account }: { account: Account }) => {
             <TableHead>Type</TableHead>
             <TableHead>Storage mode</TableHead>
             <TableHead>Sender ID</TableHead>
+            <TableHead>Assets</TableHead>
             <TableHead />
           </TableRow>
         </TableHeader>
@@ -97,7 +125,17 @@ const AccountNotesTable = ({ account }: { account: Account }) => {
                 <AccountAddress address={inputNote.senderAddress} />
               </TableCell>
               <TableCell>
-                <NoteActionsCell account={account} noteId={inputNote.id} />
+                {inputNote.fungibleAssets.map(({ faucetId, amount }) => {
+                  const faucet = faucets.find(({ id }) => id === faucetId);
+                  return (
+                    <p key={faucetId}>
+                      {amount} {faucet?.tokenSymbol ?? "Unknown"}
+                    </p>
+                  );
+                })}
+              </TableCell>
+              <TableCell>
+                <NoteActionsCell account={account} inputNote={inputNote} />
               </TableCell>
             </TableRow>
           ))}

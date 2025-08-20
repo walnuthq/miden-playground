@@ -1,0 +1,70 @@
+{
+  "accountCode": [
+    {
+      "root": "0x61dfb7d04da6d96f5f342674cf22e759e0f515e1f21836b06786f753cbfbb925",
+      "code": {
+        "__type": "Blob",
+        "data": "TUFTVAAAAAAHAQcAAAAAAQAAAAIAAAABAAAAAAAAAICvUCqlxqZBbT/vDemLgtrac7Bm+2qchrqpaZD0q5NgvQAAAAAAAACAsNWiMDVY+kBQGgZH8w3TuQ2JsRED3tgugctmm2njcmQAAAAAAAAAgGjbnmt8C6YPrSEPjIa5vdmngCJC/46BiNhwNlOLW2qtAQEBAQEBAQECr1AqpcamQW0/7w3pi4La2nOwZvtqnIa6qWmQ9KuTYL0BAWjbnmt8C6YPrSEPjIa5vdmngCJC/46BiNhwNlOLW2qtAgGw1aIwNVj6QFAaBkfzDdO5DYmxEQPe2C6By2abaeNyZAIB"
+      }
+    }
+  ],
+  "accountStorage": [
+    {
+      "root": "0x0301a99a370778e6a21484f18a81650e015cb89bba683b0231dca9b04e4d057e",
+      "slots": {
+        "__type": "Blob",
+        "data": "AwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWN8NpZIAAABFiq7EUhOgk2K3gVDZ79tf8NbQCKk1ljJJfQUVctQP+gAAAIpdeEVjAQYAAAAAAAAAIUEDAAAAAAAAAAAAAAAAAA=="
+      }
+    }
+  ],
+  "accountVaults": [
+    {
+      "root": "0x3e128c57f6cfa0d44ab1308994171af13cb513422add28d1916b3ff254fef82d",
+      "assets": { "__type": "Blob", "data": "AQ==" }
+    }
+  ],
+  "accountAuth": [],
+  "accounts": [
+    {
+      "id": "0x43999c9344b31a206a5464ece82b91",
+      "codeRoot": "0x61dfb7d04da6d96f5f342674cf22e759e0f515e1f21836b06786f753cbfbb925",
+      "storageRoot": "0x0301a99a370778e6a21484f18a81650e015cb89bba683b0231dca9b04e4d057e",
+      "vaultRoot": "0x3e128c57f6cfa0d44ab1308994171af13cb513422add28d1916b3ff254fef82d",
+      "nonce": "168425",
+      "committed": true,
+      "accountSeed": null,
+      "accountCommitment": "0x154941f2938786e824f4839fdce5d4000480bc0698d007ad0d76a7dda369d41c",
+      "locked": false
+    }
+  ],
+  "transactions": [],
+  "transactionScripts": [],
+  "inputNotes": [],
+  "outputNotes": [],
+  "notesScripts": [],
+  "stateSync": [{ "id": 1, "blockNum": "615969" }],
+  "blockHeaders": [
+    {
+      "blockNum": "615969",
+      "header": {
+        "__type": "Blob",
+        "data": "AAAAAGna5UqwqFO2/a6TX/ciwVw5oJViqYEgBB8RQBmc0QcHIWYJAKG8wPCcldEmjEB0BKWw3hkBjvp+B6xfHZe3krYBI+USylwrkIF6bGbgzuSMfqCiaEbYVIhnKxqHFCaCuu3FQeJVF5jyFZT1GLHQuz6UQ+C8mt9N2blQhh/WZKubNPzAmv4kh6HI3c6T7TCRLheZMk5gyAgYDp4igHj9t340efQTAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABw4B+Xqp+z0x0UMGi1EtcPBqVuTC+e+MvSaU4qemovLgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADuelaA=="
+      },
+      "partialBlockchainPeaks": {
+        "__type": "Blob",
+        "data": "ER/CNZdMiua4SuEtRh6nskR2Bg7MUQ5Ry7Lv+vC75w+GdUxo04sZ3oBudV0nxRpx6BW9+czTejpfoAy3xQc26XkTKIuUn7W4aMpC76HzT1sVgAziJZ++Qn/cj9+i8cGEFo8qQraCR9QtIKTrcMbDQ31tQFnabZZtdgYXY5Ty2eaCXyvOq+0sOOB/FZdSMRITs1Z2NW1MgyJ+FDv+73KUpkYNHRoGsdGSZHr2biob2YXV03BFb+b0ZsDblxSdfO5OhoPFxUpbAwvHgh06rv0/mA75T0agleI7ccisCQOTnexMadrlSrCoU7b9rpNf9yLBXDmglWKpgSAEHxFAGZzRBwc="
+      },
+      "hasClientNotes": "false"
+    }
+  ],
+  "partialBlockchainNodes": [],
+  "tags": [
+    {
+      "tag": "AADm0A==",
+      "sourceNoteId": "",
+      "sourceAccountId": "0x43999c9344b31a206a5464ece82b91",
+      "id": 10
+    }
+  ],
+  "foreignAccountCode": []
+}

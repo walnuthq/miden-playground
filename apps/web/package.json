@@ -12,14 +12,21 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@demox-labs/miden-sdk": "0.10.1",
+    "@demox-labs/miden-wallet-adapter": "^0.2.1",
+    "@mdx-js/loader": "^3.1.0",
+    "@mdx-js/react": "^3.1.0",
     "@monaco-editor/react": "^4.7.0",
+    "@next/mdx": "^15.5.0",
     "@tanstack/react-table": "^8.21.3",
+    "@types/mdx": "^2.0.13",
     "@workspace/mock-web-client": "workspace:*",
     "@workspace/ui": "workspace:*",
+    "js-sha3": "^0.9.3",
     "lodash": "^4.17.21",
-    "lucide-react": "^0.536.0",
+    "lucide-react": "^0.540.0",
     "new-github-issue-url": "^1.1.0",
-    "next": "15.4.5",
+    "next": "^15.5.0",
     "next-themes": "^0.4.6",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
@@ -29,12 +36,12 @@
   },
   "devDependencies": {
     "@types/lodash": "^4.17.20",
-    "@types/node": "^24.2.0",
-    "@types/react": "^19.1.9",
+    "@types/node": "^24.3.0",
+    "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
     "@workspace/eslint-config": "workspace:^",
     "@workspace/typescript-config": "workspace:*",
-    "copy-webpack-plugin": "^13.0.0",
+    "copy-webpack-plugin": "^13.0.1",
     "typescript": "^5.9.2"
   }
 }

@@ -1,0 +1,21 @@
+import Link from "@/components/tutorials/tutorial-link";
+import Image from "next/image";
+
+A [Transaction](https://0xmiden.github.io/miden-docs/imported/miden-base/src/transaction.html) in Miden is the state transition of a single account. A Transaction takes as input a single account and zero or more notes, and outputs the same account with an updated state, together with zero or more notes.
+
+<Image
+  className="max-h-64 object-contain"
+  src="/img/transaction-diagram.png"
+  alt="Transaction diagram"
+  width={842}
+  height={600}
+/>
+
+Compared to most blockchains, where a Transaction typically involves more than one account (e.g., sender and receiver), a Transaction in Miden involves a single account.
+
+In Miden, minting 1000 MDN tokens from a fungible faucet to a wallet takes two transactions, one in which the faucet creates a note containing 1000 MDN and one in which the wallet consumes that note and receives the 1000 MDN.
+
+<Link href={`/transactions/${props.transaction?.id}`}>Click here</Link> to
+navigate to the mint transaction executed in the previous step and notice how it
+created an output note that contains our MDN assets. To actually fund our
+account we'll need to consume this note to transfer these assets in our wallet.

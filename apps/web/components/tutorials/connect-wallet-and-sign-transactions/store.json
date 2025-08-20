@@ -1,0 +1,17 @@
+{
+  "accountCode": [],
+  "accountStorage": [],
+  "accountVaults": [],
+  "accountAuth": [],
+  "accounts": [],
+  "transactions": [],
+  "transactionScripts": [],
+  "inputNotes": [],
+  "outputNotes": [],
+  "notesScripts": [],
+  "stateSync": [{ "id": 1, "blockNum": "0" }],
+  "blockHeaders": [],
+  "partialBlockchainNodes": [],
+  "tags": [],
+  "foreignAccountCode": []
+}

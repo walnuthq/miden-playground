@@ -25,23 +25,41 @@ import Logo from "@/components/lib/logo";
 import useGlobalContext from "@/components/global-context/hook";
 import tutorials from "@/components/tutorials/tutorials";
 import useTutorials from "@/hooks/use-tutorials";
-// import useProjects from "@/hooks/use-projects";
+import useProjects from "@/hooks/use-projects";
 import { useIsClient } from "usehooks-ts";
 import useTransactions from "@/hooks/use-transactions";
+import { networks, type NetworkId } from "@/lib/types";
+import { cn } from "@workspace/ui/lib/utils";
+import useAccounts from "@/hooks/use-accounts";
 
 const ProjectSwitcher = () => {
   const isClient = useIsClient();
   const { isMobile } = useSidebar();
-  const { resetState } = useGlobalContext();
+  const { networkId, blockNum, resetState, switchNetwork } = useGlobalContext();
   const { tutorial, tutorialId, startTutorial, loadTutorial } = useTutorials();
+  const { faucets } = useAccounts();
   const { transactions } = useTransactions();
-  // const { saveProject, loadProject } = useProjects();
+  const { saveProject, loadProject } = useProjects();
   useEffect(() => {
-    if (tutorialId && transactions.length === 0) {
+    // console.log(tutorialId);
+    // console.log(faucets.length);
+    if (
+      tutorialId === "transfer-assets-between-wallets" &&
+      transactions.length === 0
+    ) {
+      console.log("loading", tutorialId);
+      loadTutorial(tutorialId);
+    } else if (
+      tutorialId === "connect-wallet-and-sign-transactions" &&
+      faucets.length === 0
+    ) {
       console.log("loading", tutorialId);
       loadTutorial(tutorialId);
     }
-  }, [tutorialId]);
+  }, [tutorialId, transactions.length, blockNum]);
+  if (!isClient) {
+    return null;
+  }
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -57,15 +75,7 @@ const ProjectSwitcher = () => {
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">Miden Playground</span>
                 <span className="truncate text-xs">
-                  {isClient ? (
-                    tutorial ? (
-                      tutorial.title
-                    ) : (
-                      "Empty sandbox"
-                    )
-                  ) : (
-                    <>&nbsp;</>
-                  )}
+                  {networks[networkId]} - Block #{blockNum}
                 </span>
               </div>
               <ChevronsUpDown className="ml-auto" />
@@ -77,6 +87,27 @@ const ProjectSwitcher = () => {
             side={isMobile ? "bottom" : "right"}
             sideOffset={4}
           >
+            {/* <DropdownMenuSub>
+              <DropdownMenuSubTrigger
+                disabled={!!tutorialId}
+                className={cn({ "text-muted-foreground": !!tutorialId })}
+              >
+                Switch network
+              </DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent>
+                  {Object.keys(networks).map((networkId) => (
+                    <DropdownMenuItem
+                      key={networkId}
+                      onClick={() => switchNetwork(networkId as NetworkId)}
+                    >
+                      {networks[networkId as NetworkId]}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
+            <DropdownMenuSeparator /> */}
             <DropdownMenuItem onClick={() => resetState()}>
               New empty sandbox
             </DropdownMenuItem>

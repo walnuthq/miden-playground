@@ -1,5 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import { type ReactNode } from "react";
+import "@demox-labs/miden-wallet-adapter/styles.css";
 import "@workspace/ui/globals.css";
 import Providers from "@/components/providers";
 import { Toaster } from "@workspace/ui/components/sonner";
@@ -24,7 +25,7 @@ const RootLayout = ({
       className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased`}
     >
       <Providers>{children}</Providers>
-      <Toaster />
+      <Toaster richColors />
     </body>
   </html>
 );

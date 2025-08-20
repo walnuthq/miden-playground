@@ -1,3 +1,4 @@
+import { useTheme } from "next-themes";
 import Editor from "@monaco-editor/react";
 
 const P2ID_SCRIPT = `use.miden::account
@@ -107,43 +108,20 @@ end
 `;
 
 const NoteCode = () => {
+  const { resolvedTheme } = useTheme();
   return (
-    <div className="h-full relative">
-      <Editor
-        height="85vh"
-        onMount={(editor, monaco) => {
-          monaco.editor.defineTheme("miden", {
-            base: "vs-dark",
-            inherit: true,
-            rules: [],
-            colors: {
-              "editor.background": "#040113",
-              "editor.foreground": "#4E8CC0",
-              "editorLineNumber.foreground": "#4E8CC0",
-              "editorLineNumber.activeForeground": "#83afd4",
-            },
-          });
-          monaco.editor.setTheme("miden");
-          // setTimeout(() => editor.layout(), 0);
-        }}
-        options={{
-          overviewRulerLanes: 0,
-          minimap: { enabled: false },
-          wordBreak: "keepAll",
-          wordWrap: "on",
-          smoothScrolling: true,
-          /* scrollbar: {
-            verticalSliderSize: 5,
-            verticalScrollbarSize: 5,
-          }, */
-          theme: "miden",
-          readOnly: true,
-          scrollBeyondLastLine: false,
-        }}
-        defaultLanguage="javascript"
-        defaultValue={P2ID_SCRIPT}
-      />
-    </div>
+    <Editor
+      height="85vh"
+      theme={resolvedTheme === "dark" ? "vs-dark" : "light"}
+      defaultLanguage="javascript"
+      defaultValue={P2ID_SCRIPT}
+      options={{
+        minimap: { enabled: false },
+        wordWrap: "on",
+        readOnly: true,
+        scrollBeyondLastLine: false,
+      }}
+    />
   );
 };
 
