@@ -62,9 +62,11 @@ const useGlobalContext = () => {
     const accounts: Account[] = [];
     for (const account of state.accounts) {
       const wasmAccount = await client.getAccount(
+        // @ts-ignore
         WasmAccountId.fromHex(account.id)
       );
       const consumableNotes = await client.getConsumableNotes(
+        // @ts-ignore
         WasmAccountId.fromHex(account.id)
       );
       const noteIds = consumableNotes.map((consumableNote) =>

@@ -28,6 +28,7 @@ export const webClient = async (networkId: NetworkId) => {
   }
   const { WebClient } = await import("@demox-labs/miden-sdk");
   if (!globalForWebClient.webClient) {
+    // @ts-ignore
     globalForWebClient.webClient = await WebClient.createClient();
   }
   return globalForWebClient.webClient;
@@ -39,11 +40,14 @@ export const getAccountById = async (
 ) => {
   const { AccountId: WasmAccountId } = await import("@demox-labs/miden-sdk");
   const wasmAccountId = WasmAccountId.fromHex(accountId.toString());
+  // @ts-ignore
   const account = await client.getAccount(wasmAccountId);
   if (account) {
     return account;
   }
+  // @ts-ignore
   await client.importAccountById(wasmAccountId);
+  // @ts-ignore
   const importedAccount = await client.getAccount(wasmAccountId);
   if (!importedAccount) {
     throw new Error("Error importing account");
@@ -57,5 +61,6 @@ export const getConsumableNotes = async (
 ) => {
   const { AccountId: WasmAccountId } = await import("@demox-labs/miden-sdk");
   const wasmAccountId = WasmAccountId.fromHex(accountId.toString());
+  // @ts-ignore
   return client.getConsumableNotes(wasmAccountId);
 };
