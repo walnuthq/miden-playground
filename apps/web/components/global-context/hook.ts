@@ -43,8 +43,13 @@ const useGlobalContext = () => {
       payload: { blockNum: syncSummary.blockNum() },
     });
   };
-  const switchNetwork = (networkId: NetworkId) => {
-    dispatch({ type: "SWITCH_NETWORK", payload: { networkId } });
+  const switchNetwork = async (networkId: NetworkId) => {
+    const client = await webClient(networkId);
+    const syncSummary = await client.syncState();
+    dispatch({
+      type: "SWITCH_NETWORK",
+      payload: { networkId, blockNum: syncSummary.blockNum() },
+    });
   };
   const syncState = async () => {
     const client = await webClient(state.networkId);

@@ -30,27 +30,31 @@ import { useIsClient } from "usehooks-ts";
 import useTransactions from "@/hooks/use-transactions";
 import { networks, type NetworkId } from "@/lib/types";
 import { cn } from "@workspace/ui/lib/utils";
+import useAccounts from "@/hooks/use-accounts";
 
 const ProjectSwitcher = () => {
   const isClient = useIsClient();
   const { isMobile } = useSidebar();
   const { networkId, blockNum, resetState, switchNetwork } = useGlobalContext();
   const { tutorial, tutorialId, startTutorial, loadTutorial } = useTutorials();
+  const { faucets } = useAccounts();
   const { transactions } = useTransactions();
   const { saveProject, loadProject } = useProjects();
   useEffect(() => {
+    // console.log(tutorialId);
+    // console.log(faucets.length);
     if (
       tutorialId === "transfer-assets-between-wallets" &&
-      transactions.length > 0
+      transactions.length === 0
     ) {
       console.log("loading", tutorialId);
       loadTutorial(tutorialId);
     } else if (
       tutorialId === "connect-wallet-and-sign-transactions" &&
-      blockNum === 0
+      faucets.length === 0
     ) {
       console.log("loading", tutorialId);
-      //loadTutorial(tutorialId);
+      loadTutorial(tutorialId);
     }
   }, [tutorialId, transactions.length, blockNum]);
   if (!isClient) {
@@ -83,7 +87,7 @@ const ProjectSwitcher = () => {
             side={isMobile ? "bottom" : "right"}
             sideOffset={4}
           >
-            <DropdownMenuSub>
+            {/* <DropdownMenuSub>
               <DropdownMenuSubTrigger
                 disabled={!!tutorialId}
                 className={cn({ "text-muted-foreground": !!tutorialId })}
@@ -103,7 +107,7 @@ const ProjectSwitcher = () => {
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
             </DropdownMenuSub>
-            <DropdownMenuSeparator />
+            <DropdownMenuSeparator /> */}
             <DropdownMenuItem onClick={() => resetState()}>
               New empty sandbox
             </DropdownMenuItem>
@@ -113,7 +117,7 @@ const ProjectSwitcher = () => {
               Load tutorial
             </DropdownMenuItem> */}
             <DropdownMenuSeparator />
-            <DropdownMenuSub>
+            {/* <DropdownMenuSub>
               <DropdownMenuSubTrigger>Projects</DropdownMenuSubTrigger>
               <DropdownMenuPortal>
                 <DropdownMenuSubContent>
@@ -125,7 +129,7 @@ const ProjectSwitcher = () => {
                   </DropdownMenuItem>
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
-            </DropdownMenuSub>
+            </DropdownMenuSub> */}
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>Tutorials</DropdownMenuSubTrigger>
               <DropdownMenuPortal>

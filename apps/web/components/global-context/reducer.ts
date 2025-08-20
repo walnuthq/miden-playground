@@ -145,7 +145,10 @@ export const stateDeserializer = (value: string): State => {
 
 export type Action =
   | { type: "RESET_STATE"; payload: { blockNum: number } }
-  | { type: "SWITCH_NETWORK"; payload: { networkId: NetworkId } }
+  | {
+      type: "SWITCH_NETWORK";
+      payload: { networkId: NetworkId; blockNum: number };
+    }
   | {
       type: "SYNC_STATE";
       payload: {
@@ -242,7 +245,11 @@ export const reducer = (state: State, action: Action): State => {
       };
     }
     case "SWITCH_NETWORK": {
-      return { ...state, networkId: action.payload.networkId };
+      return {
+        ...state,
+        networkId: action.payload.networkId,
+        blockNum: action.payload.blockNum,
+      };
     }
     case "SYNC_STATE": {
       return {

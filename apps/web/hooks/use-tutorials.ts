@@ -43,7 +43,8 @@ const useTutorials = () => {
     /* console.log("clear");
     await clearStore();
     console.log("clear done"); */
-    const client = await webClient(networkId);
+    const state = JSON.parse(tutorial.state) as State;
+    const client = await webClient(state.networkId);
     await client.forceImportStore(tutorial.storeDump);
     const syncSummary = await client.syncState();
     dispatch({
@@ -99,10 +100,10 @@ const useTutorials = () => {
       console.log("INIT DONE"); */
     }
     if (tutorialId === "connect-wallet-and-sign-transactions") {
-      await importAccountByAddress({
-        name: "Miden Faucet",
-        address: "mtst1qppen8yngje35gr223jwe6ptjy7gedn9",
-      });
+      // await importAccountByAddress({
+      //   name: "Miden Faucet",
+      //   address: "mtst1qppen8yngje35gr223jwe6ptjy7gedn9",
+      // });
     }
     // dispatch({ type: "START_TUTORIAL", payload: { tutorialId } });
     /* if (tutorialId === "create-and-fund-wallet") {

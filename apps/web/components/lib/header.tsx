@@ -84,8 +84,12 @@ const Header = () => {
         <div className="ml-auto flex items-center gap-2">
           {isClient && tutorialId && <TutorialToggle />}
           <ModeToggle />
-          {isClient && <SyncStateButton />}
-          {isClient && networkId === "mtst" && <WalletMultiButton />}
+          {isClient && networkId === "mtst" && (
+            <>
+              <SyncStateButton />
+              <WalletMultiButton />
+            </>
+          )}
         </div>
       </div>
     </header>
