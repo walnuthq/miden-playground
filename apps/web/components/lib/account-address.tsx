@@ -6,7 +6,6 @@ import {
   TooltipTrigger,
 } from "@workspace/ui/components/tooltip";
 import { formatAddress } from "@/lib/utils";
-import { type Account } from "@/lib/types";
 import useGlobalContext from "@/components/global-context/hook";
 import useAccounts from "@/hooks/use-accounts";
 import CopyButton from "@/components/lib/copy-button";
@@ -23,7 +22,7 @@ const AccountAddress = ({
 }: {
   id?: string;
   address?: string;
-  account?: Account;
+  account?: { name: string; address: string };
   formatted?: boolean;
   withLink?: boolean;
   withTooltip?: boolean;
@@ -35,7 +34,7 @@ const AccountAddress = ({
   const displayedAccount =
     account ??
     accounts.find(
-      (account) => account.id === id || account.address === address,
+      (account) => account.id === id || account.address === address
     );
   if (!displayedAccount) {
     return null;

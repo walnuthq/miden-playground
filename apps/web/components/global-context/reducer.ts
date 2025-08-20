@@ -1,5 +1,4 @@
 import {
-  SyncSummary,
   type TransactionResult,
   type ConsumableNoteRecord,
 } from "@workspace/mock-web-client";
@@ -15,7 +14,7 @@ import {
 export type State = {
   // GLOBAL
   networkId: NetworkId;
-  syncSummary: SyncSummary | null;
+  blockNum: number;
   // ACCOUNTS
   createWalletDialogOpen: boolean;
   createFaucetDialogOpen: boolean;
@@ -43,7 +42,7 @@ export type State = {
 export const initialState = (): State => ({
   // GLOBAL
   networkId: "mlcl",
-  syncSummary: null,
+  blockNum: 0,
   // ACCOUNTS
   createWalletDialogOpen: false,
   createFaucetDialogOpen: false,
@@ -70,7 +69,7 @@ export const initialState = (): State => ({
 
 export const stateSerializer = ({
   networkId,
-  syncSummary,
+  blockNum,
   accounts,
   transactions,
   inputNotes,
@@ -82,7 +81,7 @@ export const stateSerializer = ({
 }: State) =>
   JSON.stringify({
     networkId,
-    syncSummary: syncSummary ? syncSummary.serialize().toString() : null,
+    blockNum,
     accounts: accounts.map((account) => ({
       ...account,
       nonce: account.nonce.toString(),
@@ -102,7 +101,7 @@ export const stateSerializer = ({
 export const stateDeserializer = (value: string): State => {
   const {
     networkId,
-    syncSummary,
+    blockNum,
     accounts,
     transactions,
     inputNotes,
@@ -113,7 +112,7 @@ export const stateDeserializer = (value: string): State => {
     nextTutorialStepDisabled,
   } = JSON.parse(value) as {
     networkId: NetworkId;
-    syncSummary: string | null;
+    blockNum: number;
     accounts: (Omit<Account, "nonce"> & { nonce: string })[];
     transactions: Transaction[];
     inputNotes: (Omit<InputNote, "inputs"> & { inputs: string[] })[];
@@ -126,11 +125,7 @@ export const stateDeserializer = (value: string): State => {
   return {
     ...initialState(),
     networkId,
-    syncSummary: syncSummary
-      ? SyncSummary.deserialize(
-          Uint8Array.from(syncSummary.split(",").map((byte) => Number(byte))),
-        )
-      : null,
+    blockNum,
     accounts: accounts.map((account) => ({
       ...account,
       nonce: BigInt(account.nonce),
@@ -149,12 +144,12 @@ export const stateDeserializer = (value: string): State => {
 };
 
 export type Action =
-  | { type: "RESET_STATE" }
+  | { type: "RESET_STATE"; payload: { blockNum: number } }
   | { type: "SWITCH_NETWORK"; payload: { networkId: NetworkId } }
   | {
       type: "SYNC_STATE";
       payload: {
-        syncSummary: SyncSummary | null;
+        blockNum: number;
         // consumableNoteIds: Record<string, string[]>;
         accounts: Account[];
         inputNotes: InputNote[];
@@ -163,14 +158,14 @@ export type Action =
   | { type: "LOAD_PROJECT"; payload: { state: State } }
   | {
       type: "NEW_ACCOUNT";
-      payload: { account: Account; syncSummary: SyncSummary | null };
+      payload: { account: Account; blockNum: number };
     }
   | {
       type: "IMPORT_ACCOUNT";
       payload: {
         account: Account;
-        syncSummary: SyncSummary | null;
         inputNotes: InputNote[];
+        blockNum: number;
       };
     }
   | {
@@ -212,7 +207,7 @@ export type Action =
         account: Account;
         consumableNoteIds: Record<string, string[]>;
         inputNotes: InputNote[];
-        syncSummary: SyncSummary;
+        blockNum: number;
       };
     }
   | {
@@ -220,7 +215,7 @@ export type Action =
       payload: {
         consumableNoteIds: Record<string, string[]>;
         inputNotes: InputNote[];
-        syncSummary: SyncSummary;
+        blockNum: number;
       };
     }
   | {
@@ -240,7 +235,11 @@ export type Action =
 export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case "RESET_STATE": {
-      return { ...initialState(), networkId: state.networkId };
+      return {
+        ...initialState(),
+        networkId: state.networkId,
+        blockNum: action.payload.blockNum,
+      };
     }
     case "SWITCH_NETWORK": {
       return { ...state, networkId: action.payload.networkId };
@@ -248,7 +247,7 @@ export const reducer = (state: State, action: Action): State => {
     case "SYNC_STATE": {
       return {
         ...state,
-        syncSummary: action.payload.syncSummary,
+        blockNum: action.payload.blockNum,
         accounts: action.payload.accounts,
         /* accounts: state.accounts.map((account) => ({
           ...account,
@@ -264,7 +263,7 @@ export const reducer = (state: State, action: Action): State => {
       return {
         ...state,
         accounts: [...state.accounts, action.payload.account],
-        syncSummary: action.payload.syncSummary,
+        blockNum: action.payload.blockNum,
       };
     }
     case "IMPORT_ACCOUNT": {
@@ -275,8 +274,8 @@ export const reducer = (state: State, action: Action): State => {
       return {
         ...state,
         accounts: [...state.accounts, action.payload.account],
-        syncSummary: action.payload.syncSummary,
         inputNotes: [...state.inputNotes, ...filteredInputNotes],
+        blockNum: action.payload.blockNum,
       };
     }
     case "OPEN_CREATE_WALLET_DIALOG": {
@@ -342,7 +341,7 @@ export const reducer = (state: State, action: Action): State => {
     }
     case "SUBMIT_TRANSACTION": {
       const index = state.accounts.findIndex(
-        ({ id }) => id === action.payload.account.id,
+        ({ id }) => id === action.payload.account.id
       );
       return {
         ...state,
@@ -361,7 +360,7 @@ export const reducer = (state: State, action: Action): State => {
           })),
         ],
         inputNotes: action.payload.inputNotes,
-        syncSummary: action.payload.syncSummary,
+        blockNum: action.payload.blockNum,
       };
     }
     case "UPDATE_CONSUMABLE_NOTES": {
@@ -372,7 +371,7 @@ export const reducer = (state: State, action: Action): State => {
           consumableNoteIds: action.payload.consumableNoteIds[account.id] ?? [],
         })),
         inputNotes: action.payload.inputNotes,
-        syncSummary: action.payload.syncSummary,
+        blockNum: action.payload.blockNum,
       };
     }
     case "START_TUTORIAL": {

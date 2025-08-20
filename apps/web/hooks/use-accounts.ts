@@ -2,7 +2,6 @@ import { partition } from "lodash";
 import {
   AccountId,
   AccountStorageMode,
-  NoteFilter,
   NoteFilterTypes,
 } from "@workspace/mock-web-client";
 import {
@@ -11,11 +10,7 @@ import {
   webClient,
 } from "@/lib/web-client";
 import useGlobalContext from "@/components/global-context/hook";
-import {
-  wasmAccountToAccount,
-  wasmInputNoteToInputNote,
-  type InputNote,
-} from "@/lib/types";
+import { wasmAccountToAccount, wasmInputNoteToInputNote } from "@/lib/types";
 
 const useAccounts = () => {
   const {
@@ -45,7 +40,7 @@ const useAccounts = () => {
     );
     dispatch({
       type: "NEW_ACCOUNT",
-      payload: { account, syncSummary },
+      payload: { account, blockNum: syncSummary.blockNum() },
     });
     return account;
   };
@@ -71,9 +66,6 @@ const useAccounts = () => {
       maxSupply
     );
     const syncSummary = await client.syncState();
-    // const blockHeader = await client.getLatestEpochBlock();
-    // console.log("commitment:", blockHeader.commitment().toHex());
-    // console.log("chainCommitment:", blockHeader.chainCommitment().toHex());
     const account = wasmAccountToAccount(
       faucet,
       name,
@@ -84,7 +76,7 @@ const useAccounts = () => {
     );
     dispatch({
       type: "NEW_ACCOUNT",
-      payload: { account, syncSummary },
+      payload: { account, blockNum: syncSummary.blockNum() },
     });
     return account;
   };
@@ -115,7 +107,7 @@ const useAccounts = () => {
     );
     dispatch({
       type: "IMPORT_ACCOUNT",
-      payload: { account, syncSummary, inputNotes },
+      payload: { account, inputNotes, blockNum: syncSummary.blockNum() },
     });
     return account;
   };
@@ -137,7 +129,7 @@ const useAccounts = () => {
       const noteIds = consumableNotes.map((consumableNote) =>
         consumableNote.inputNoteRecord().id().toString()
       );
-      console.log(account.id, noteIds);
+      // console.log(account.id, noteIds);
       consumableNoteIds[account.id] = noteIds;
     }
     const { NoteFilter: WasmNoteFilter } = await import(
@@ -153,7 +145,7 @@ const useAccounts = () => {
         inputNotes: inputNotes.map((inputNoteRecord) =>
           wasmInputNoteToInputNote(inputNoteRecord, networkId)
         ),
-        syncSummary,
+        blockNum: syncSummary.blockNum(),
       },
     });
   };

@@ -1,7 +1,7 @@
 import { useRouter } from "next/navigation";
 import useGlobalContext from "@/components/global-context/hook";
 import tutorials from "@/components/tutorials/tutorials";
-import { mockWebClient } from "@/lib/mock-web-client";
+import { webClient } from "@/lib/web-client";
 import {
   stateDeserializer,
   type State,
@@ -18,6 +18,7 @@ import useAccounts from "@/hooks/use-accounts";
 const useTutorials = () => {
   const router = useRouter();
   const {
+    networkId,
     tutorialId,
     tutorialStep,
     tutorialMaxStep,
@@ -25,7 +26,7 @@ const useTutorials = () => {
     nextTutorialStepDisabled,
     dispatch,
   } = useGlobalContext();
-  const { accounts } = useAccounts();
+  const { accounts, importAccountByAddress } = useAccounts();
   const {
     newMintTransactionRequest,
     newConsumeTransactionRequest,
@@ -42,11 +43,17 @@ const useTutorials = () => {
     /* console.log("clear");
     await clearStore();
     console.log("clear done"); */
-    const client = await mockWebClient();
+    const client = await webClient(networkId);
     await client.forceImportStore(tutorial.storeDump);
+    const syncSummary = await client.syncState();
     dispatch({
       type: "LOAD_PROJECT",
-      payload: { state: stateDeserializer(tutorial.state) },
+      payload: {
+        state: {
+          ...stateDeserializer(tutorial.state),
+          blockNum: syncSummary.blockNum(),
+        },
+      },
     });
     if (tutorialId === "transfer-assets-between-wallets") {
       //console.log("accounts", accounts.length);
@@ -90,6 +97,12 @@ const useTutorials = () => {
       }
       console.log("transactionRecord.id", transactionRecord.id().toHex());
       console.log("INIT DONE"); */
+    }
+    if (tutorialId === "connect-wallet-and-sign-transactions") {
+      await importAccountByAddress({
+        name: "Miden Faucet",
+        address: "mtst1qppen8yngje35gr223jwe6ptjy7gedn9",
+      });
     }
     // dispatch({ type: "START_TUTORIAL", payload: { tutorialId } });
     /* if (tutorialId === "create-and-fund-wallet") {
@@ -160,6 +173,11 @@ const useTutorials = () => {
       console.log("SUBMITTING...");
       await submitTransaction(consumeTransactionResult);
       console.log("SUBMIT TX OK");
+    } else if (tutorialId === "connect-wallet-and-sign-transactions") {
+      await importAccountByAddress({
+        name: "Miden Faucet",
+        address: "mtst1qppen8yngje35gr223jwe6ptjy7gedn9",
+      });
     }
   };
   const previousTutorialStep = () =>

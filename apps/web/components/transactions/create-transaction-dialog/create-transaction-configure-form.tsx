@@ -14,12 +14,13 @@ import {
 import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";
 import useAccounts from "@/hooks/use-accounts";
 import SelectConsumableNotesCombobox from "@/components/transactions/select-consumable-notes-combobox";
+import useGlobalContext from "@/components/global-context/hook";
 import useTransactions from "@/hooks/use-transactions";
 import useTutorials from "@/hooks/use-tutorials";
 import {
   useWallet,
   SendTransaction,
-  MidenWalletAdapter,
+  type MidenWalletAdapter,
 } from "@demox-labs/miden-wallet-adapter";
 
 const CreateTransactionConfigureForm = ({
@@ -53,6 +54,7 @@ const CreateTransactionConfigureForm = ({
   setLoading: Dispatch<SetStateAction<boolean>>;
   setStep: Dispatch<SetStateAction<CreateTransactionDialogStep>>;
 }) => {
+  const { networkId } = useGlobalContext();
   const { wallet } = useWallet();
   const { accounts } = useAccounts();
   const {
@@ -96,31 +98,35 @@ const CreateTransactionConfigureForm = ({
           targetAccount &&
           faucetAccount
         ) {
-          if (!wallet) {
-            return;
+          if (networkId === "mlcl") {
+            const transactionResult = await newSendTransactionRequest({
+              senderAccountId: executingAccount.id,
+              targetAccountId: targetAccount.id,
+              faucetId: faucetAccount.id,
+              noteType: formData.getAll("is-public").includes("on")
+                ? NoteType.Public
+                : NoteType.Private,
+              amount: BigInt(formData.get("amount")!.toString()),
+            });
+            setTransactionResult(transactionResult);
+          } else {
+            if (!wallet) {
+              return;
+            }
+            const transaction = new SendTransaction(
+              executingAccount.id,
+              targetAccount.id,
+              faucetAccount.id,
+              formData.getAll("is-public").includes("on")
+                ? "public"
+                : "private",
+              Number(formData.get("amount")!.toString())
+            );
+            const adapter = wallet.adapter as MidenWalletAdapter;
+            const txId = await adapter.requestSend(transaction);
+            console.log({ txId });
+            closeCreateTransactionDialog();
           }
-          const transaction = new SendTransaction(
-            executingAccount.id,
-            targetAccount.id,
-            faucetAccount.id,
-            formData.getAll("is-public").includes("on") ? "public" : "private",
-            Number(formData.get("amount")!.toString())
-          );
-          // console.log(transaction);
-          const adapter = wallet.adapter as MidenWalletAdapter;
-          const txId = await adapter.requestSend(transaction);
-          console.log({ txId });
-          closeCreateTransactionDialog();
-          /* const transactionResult = await newSendTransactionRequest({
-            senderAccountId: executingAccount.id,
-            targetAccountId: targetAccount.id,
-            faucetId: faucetAccount.id,
-            noteType: formData.getAll("is-public").includes("on")
-              ? NoteType.Public
-              : NoteType.Private,
-            amount: BigInt(formData.get("amount")!.toString()),
-          });
-          setTransactionResult(transactionResult); */
         }
         setLoading(false);
         setStep("preview");

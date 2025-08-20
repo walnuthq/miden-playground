@@ -6,8 +6,10 @@ import AccountNotesTable from "@/components/account/account-notes-table";
 import { Separator } from "@workspace/ui/components/separator";
 import { Button } from "@workspace/ui/components/button";
 import useTransactions from "@/hooks/use-transactions";
+import useGlobalContext from "@/components/global-context/hook";
 
 const AccountInformation = ({ account }: { account: Account }) => {
+  const { networkId } = useGlobalContext();
   const { openCreateTransactionDialog, newConsumeTransactionRequest } =
     useTransactions();
   return (
@@ -54,23 +56,26 @@ const AccountInformation = ({ account }: { account: Account }) => {
                   This account has pending notes that can be consumed.
                 </p>
               </div>
-              <Button
-                variant="outline"
-                onClick={async () => {
-                  const transactionResult = await newConsumeTransactionRequest({
-                    accountId: account.id,
-                    noteIds: account.consumableNoteIds,
-                  });
-                  openCreateTransactionDialog({
-                    accountId: account.id,
-                    transactionType: "consume",
-                    step: "preview",
-                    transactionResult,
-                  });
-                }}
-              >
-                Consume all notes
-              </Button>
+              {networkId === "mlcl" && (
+                <Button
+                  variant="outline"
+                  onClick={async () => {
+                    const transactionResult =
+                      await newConsumeTransactionRequest({
+                        accountId: account.id,
+                        noteIds: account.consumableNoteIds,
+                      });
+                    openCreateTransactionDialog({
+                      accountId: account.id,
+                      transactionType: "consume",
+                      step: "preview",
+                      transactionResult,
+                    });
+                  }}
+                >
+                  Consume all notes
+                </Button>
+              )}
             </div>
             <AccountNotesTable account={account} />
           </div>

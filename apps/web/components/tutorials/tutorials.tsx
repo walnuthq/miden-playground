@@ -1,6 +1,7 @@
 import { type Tutorial } from "@/lib/types";
 import createAndFundWalletTutorial from "@/components/tutorials/create-and-fund-wallet";
 import transferAssetsBetweenWalletsTutorial from "@/components/tutorials/transfer-assets-between-wallets";
+import connectWalletAndSignTransactions from "@/components/tutorials/connect-wallet-and-sign-transactions";
 
 /* const SwapAssetsStep1 = {
   title: "",
@@ -19,16 +20,7 @@ import transferAssetsBetweenWalletsTutorial from "@/components/tutorials/transfe
 const tutorials: Tutorial[] = [
   createAndFundWalletTutorial,
   transferAssetsBetweenWalletsTutorial,
-  /* {
-    id: "swap-assets",
-    title: "Swap assets",
-    tagline: "Swap an asset for another.",
-    description: "Learn how to perform a simple swap on Miden.",
-    initialRoute: "/accounts",
-    storeDump: JSON.stringify(tutorial3StoreDump),
-    state: JSON.stringify(tutorial3State),
-    steps: [SwapAssetsStep1],
-  }, */
+  connectWalletAndSignTransactions,
 ];
 
 export default tutorials;

@@ -36,7 +36,12 @@ const useGlobalContext = () => {
     // const client = await webClient();
     await client.forceImportStore(JSON.stringify(emptyStore));
     // await deleteStore();
-    dispatch({ type: "RESET_STATE" });
+    const syncSummary = await client.syncState();
+    console.log("blockNum", syncSummary.blockNum());
+    dispatch({
+      type: "RESET_STATE",
+      payload: { blockNum: syncSummary.blockNum() },
+    });
   };
   const switchNetwork = (networkId: NetworkId) => {
     dispatch({ type: "SWITCH_NETWORK", payload: { networkId } });
@@ -78,7 +83,7 @@ const useGlobalContext = () => {
     dispatch({
       type: "SYNC_STATE",
       payload: {
-        syncSummary,
+        blockNum: syncSummary.blockNum(),
         //consumableNoteIds,
         accounts,
         inputNotes: inputNotes.map((inputNoteRecord) =>

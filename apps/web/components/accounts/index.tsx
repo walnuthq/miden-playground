@@ -13,7 +13,7 @@ import { AccountId } from "@workspace/mock-web-client";
 import useGlobalContext from "@/components/global-context/hook";
 
 const Accounts = () => {
-  const { publicKey: accountId } = useWallet();
+  const { accountId } = useWallet();
   const { networkId } = useGlobalContext();
   const { accounts, importAccountByAddress } = useAccounts();
   const isClient = useIsClient();

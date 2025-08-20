@@ -1,10 +1,10 @@
 import useGlobalContext from "@/components/global-context/hook";
-import { mockWebClient } from "@/lib/mock-web-client";
+import { webClient } from "@/lib/web-client";
 
 const useProjects = () => {
-  const { dispatch } = useGlobalContext();
+  const { networkId, dispatch } = useGlobalContext();
   const saveProject = async () => {
-    const client = await mockWebClient();
+    const client = await webClient(networkId);
     const storeDump = await client.exportStore();
     console.log("STORE_DUMP");
     console.log(storeDump);

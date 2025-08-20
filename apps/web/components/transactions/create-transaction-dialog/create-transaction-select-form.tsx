@@ -8,10 +8,11 @@ import {
   type ConsumableNoteRecord,
   AccountId,
 } from "@workspace/mock-web-client";
-import { mockWebClient } from "@/lib/mock-web-client";
+import { webClient } from "@/lib/web-client";
 import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";
 import SelectTransactionTypeDropdownMenu from "@/components/transactions/select-transaction-type-dropdown-menu";
 import useAccounts from "@/hooks/use-accounts";
+import useGlobalContext from "@/components/global-context/hook";
 // import useTransactions from "@/hooks/use-transactions";
 
 const CreateTransactionDialogSelectForm = ({
@@ -31,6 +32,7 @@ const CreateTransactionDialogSelectForm = ({
   setConsumableNotes: Dispatch<SetStateAction<ConsumableNoteRecord[]>>;
   setStep: Dispatch<SetStateAction<CreateTransactionDialogStep>>;
 }) => {
+  const { networkId } = useGlobalContext();
   const { accounts } = useAccounts();
   const executingAccount = accounts.find(({ id }) => id === executingAccountId);
   // const { createTransactionDialogConsumableNotes } = useTransactions();
@@ -45,9 +47,9 @@ const CreateTransactionDialogSelectForm = ({
           createTransactionDialogConsumableNotes.length === 0*/
         ) {
           setLoading(true);
-          const client = await mockWebClient();
+          const client = await webClient(networkId);
           const consumableNotes = await client.getConsumableNotes(
-            AccountId.fromHex(executingAccount.id),
+            AccountId.fromHex(executingAccount.id)
           );
           setLoading(false);
           setConsumableNotes(consumableNotes);

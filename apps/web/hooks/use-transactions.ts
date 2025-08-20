@@ -196,7 +196,7 @@ const useTransactions = () => {
         inputNotes: inputNotes.map((inputNoteRecord) =>
           wasmInputNoteToInputNote(inputNoteRecord, networkId)
         ),
-        syncSummary,
+        blockNum: syncSummary.blockNum(),
       },
     });
     return transactionRecord;

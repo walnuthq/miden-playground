@@ -1,0 +1,12 @@
+{
+  "networkId": "mtst",
+  "blockNum": 0,
+  "accounts": [],
+  "transactions": [],
+  "inputNotes": [],
+  "tutorialId": "connect-wallet-and-sign-transactions",
+  "tutorialStep": 0,
+  "tutorialMaxStep": 0,
+  "tutorialOpen": true,
+  "nextTutorialStepDisabled": true
+}
