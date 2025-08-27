@@ -14,7 +14,7 @@ import Step4Content from "@/components/tutorials/create-and-fund-wallet/step4.md
 import Step5Content from "@/components/tutorials/create-and-fund-wallet/step5.mdx";
 import Step6Content from "@/components/tutorials/create-and-fund-wallet/step6.mdx";
 
-const CreateAndFundWalletStep1 = {
+const Step1 = {
   title: "Create your first wallet Account.",
   Content: () => {
     const { wallets } = useAccounts();
@@ -44,7 +44,7 @@ const CreateAndFundWalletStep1 = {
   },
 };
 
-const CreateAndFundWalletStep2 = {
+const Step2 = {
   title: "Discover your new wallet details.",
   Content: () => {
     const { wallets } = useAccounts();
@@ -53,14 +53,14 @@ const CreateAndFundWalletStep2 = {
   },
 };
 
-const CreateAndFundWalletStep3 = {
+const Step3 = {
   title: "Submit a mint transaction on the faucet.",
   Content: () => {
     const { faucets } = useAccounts();
     const { transactions } = useTransactions();
     const faucet = faucets.find(({ name }) => name === "MDN Faucet");
     const transaction = transactions.find(
-      ({ accountAddress }) => accountAddress === faucet?.address,
+      ({ accountAddress }) => accountAddress === faucet?.address
     );
     return (
       <>
@@ -80,26 +80,26 @@ const CreateAndFundWalletStep3 = {
     const { transactions } = useTransactions();
     const faucet = faucets.find(({ name }) => name === "MDN Faucet");
     const transaction = transactions.find(
-      ({ accountAddress }) => accountAddress === faucet?.address,
+      ({ accountAddress }) => accountAddress === faucet?.address
     );
     return <NextStepButton disabled={!transaction} />;
   },
 };
 
-const CreateAndFundWalletStep4 = {
+const Step4 = {
   title: "Analyze the mint transaction.",
   Content: () => {
     const { faucets } = useAccounts();
     const { transactions } = useTransactions();
     const faucet = faucets.find(({ name }) => name === "MDN Faucet");
     const transaction = transactions.find(
-      ({ accountAddress }) => accountAddress === faucet?.address,
+      ({ accountAddress }) => accountAddress === faucet?.address
     );
     return <Step4Content transaction={transaction} />;
   },
 };
 
-const CreateAndFundWalletStep5 = {
+const Step5 = {
   title: "Consume the output note.",
   Content: () => {
     const { wallets, faucets } = useAccounts();
@@ -108,10 +108,10 @@ const CreateAndFundWalletStep5 = {
     const wallet = wallets.find(({ isPublic }) => isPublic);
     const faucet = faucets.find(({ name }) => name === "MDN Faucet");
     const transaction = transactions.find(
-      ({ accountAddress }) => accountAddress === wallet?.address,
+      ({ accountAddress }) => accountAddress === wallet?.address
     );
     const note = inputNotes.find(
-      ({ senderAddress }) => senderAddress === faucet?.address,
+      ({ senderAddress }) => senderAddress === faucet?.address
     );
     return (
       <>
@@ -135,13 +135,13 @@ const CreateAndFundWalletStep5 = {
     const { transactions } = useTransactions();
     const wallet = wallets.find(({ isPublic }) => isPublic);
     const transaction = transactions.find(
-      ({ accountAddress }) => accountAddress === wallet?.address,
+      ({ accountAddress }) => accountAddress === wallet?.address
     );
     return <NextStepButton disabled={!transaction} />;
   },
 };
 
-const CreateAndFundWalletStep6 = {
+const Step6 = {
   title: "Confirm your wallet is funded.",
   Content: () => {
     return <Step6Content />;
@@ -177,12 +177,5 @@ export default {
   initialRoute: "/accounts",
   storeDump: JSON.stringify(storeDump),
   state: JSON.stringify(state),
-  steps: [
-    CreateAndFundWalletStep1,
-    CreateAndFundWalletStep2,
-    CreateAndFundWalletStep3,
-    CreateAndFundWalletStep4,
-    CreateAndFundWalletStep5,
-    CreateAndFundWalletStep6,
-  ],
+  steps: [Step1, Step2, Step3, Step4, Step5, Step6],
 };

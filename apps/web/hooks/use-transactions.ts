@@ -6,6 +6,7 @@ import {
   NoteFilterTypes,
   type NoteType,
   type ConsumableNoteRecord,
+  type TransactionRequest,
 } from "@workspace/mock-web-client";
 import {
   type CreateTransactionDialogStep,
@@ -126,6 +127,19 @@ const useTransactions = () => {
       transactionRequest
     );
   };
+  const newCustomTransactionRequest = async ({
+    senderAccountId,
+    transactionRequest,
+  }: {
+    senderAccountId: string;
+    transactionRequest: TransactionRequest;
+  }) => {
+    const client = await webClient(networkId);
+    return client.newTransaction(
+      AccountId.fromHex(senderAccountId),
+      transactionRequest
+    );
+  };
   const submitTransaction = async (transactionResult: TransactionResult) => {
     const client = await webClient(networkId);
     await client.submitTransaction(transactionResult);
@@ -215,6 +229,7 @@ const useTransactions = () => {
     newMintTransactionRequest,
     newConsumeTransactionRequest,
     newSendTransactionRequest,
+    newCustomTransactionRequest,
     submitTransaction,
   };
 };

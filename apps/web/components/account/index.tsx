@@ -8,7 +8,7 @@ import {
   TabsTrigger,
 } from "@workspace/ui/components/tabs";
 import AccountInformation from "@/components/account/account-information";
-import AccountCode from "@/components/account/account-code";
+import AccountComponents from "@/components/account/account-components";
 import CreateTransactionDialog from "@/components/transactions/create-transaction-dialog";
 import CreateTransactionDropdownMenu from "@/components/account/create-transaction-dropdown-menu";
 
@@ -25,15 +25,26 @@ const Account = ({ address }: { address: string }) => {
         <div className="flex items-center justify-between">
           <TabsList>
             <TabsTrigger value="information">Information</TabsTrigger>
-            {/*<TabsTrigger value="code">Code</TabsTrigger>*/}
+            {address === "mtst1qz43ftxkrzcjsqz3hpw332qwny2ggsp0" && (
+              <TabsTrigger value="components">Components</TabsTrigger>
+            )}
           </TabsList>
           <CreateTransactionDropdownMenu account={account} />
         </div>
         <TabsContent value="information">
           <AccountInformation account={account} />
         </TabsContent>
-        <TabsContent value="code">
-          <AccountCode />
+        <TabsContent value="components">
+          <AccountComponents
+            components={[
+              {
+                id: "counter-contract",
+                name: "Counter Contract",
+                type: "account",
+                scriptId: "counter-contract",
+              },
+            ]}
+          />
         </TabsContent>
       </Tabs>
       <CreateTransactionDialog />

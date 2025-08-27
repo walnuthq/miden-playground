@@ -26,13 +26,10 @@ const ImportAccountDialog = () => {
     closeImportAccountDialog,
   } = useAccounts();
   const [loading, setLoading] = useState(false);
-  const onClose = () => {
-    closeImportAccountDialog();
-  };
   return (
     <Dialog
       open={importAccountDialogOpen}
-      onOpenChange={(open) => !open && onClose()}
+      onOpenChange={(open) => !open && closeImportAccountDialog()}
     >
       <DialogContent className="sm:max-w-[640px]">
         <DialogHeader>
@@ -55,7 +52,7 @@ const ImportAccountDialog = () => {
                 <AccountAddress account={account} withTooltip={false} />
               ),
             });
-            onClose();
+            closeImportAccountDialog();
           }}
         >
           <div className="grid grid-cols-2 gap-4">

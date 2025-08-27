@@ -1,6 +1,5 @@
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { EllipsisVertical } from "lucide-react";
-import { usePathname } from "next/navigation";
 import { useWallet } from "@demox-labs/miden-wallet-adapter";
 import { useInterval } from "usehooks-ts";
 import useAccounts from "@/hooks/use-accounts";
@@ -17,7 +16,7 @@ import Step4Content from "@/components/tutorials/connect-wallet-and-sign-transac
 import Step5Content from "@/components/tutorials/connect-wallet-and-sign-transactions/step5.mdx";
 import Step6Content from "@/components/tutorials/connect-wallet-and-sign-transactions/step6.mdx";
 
-const ConnectWalletAndSignTransactionsStep1 = {
+const Step1 = {
   title: "Connect your wallet to testnet.",
   Content: () => {
     const pathname = usePathname();
@@ -53,7 +52,7 @@ const ConnectWalletAndSignTransactionsStep1 = {
   },
 };
 
-const ConnectWalletAndSignTransactionsStep2 = {
+const Step2 = {
   title: "Mint assets from the Miden Faucet.",
   Content: () => {
     // TODO check note inputs refers to connected wallet
@@ -110,7 +109,7 @@ const ConnectWalletAndSignTransactionsStep2 = {
   },
 };
 
-const ConnectWalletAndSignTransactionsStep3 = {
+const Step3 = {
   title: "Consume the requested tokens note.",
   Content: () => {
     const { accountId } = useWallet();
@@ -152,7 +151,7 @@ const ConnectWalletAndSignTransactionsStep3 = {
   },
 };
 
-const ConnectWalletAndSignTransactionsStep4 = {
+const Step4 = {
   title: "Import another wallet in the Playground.",
   Content: () => {
     const { accountId } = useWallet();
@@ -189,7 +188,7 @@ const ConnectWalletAndSignTransactionsStep4 = {
   },
 };
 
-const ConnectWalletAndSignTransactionsStep5 = {
+const Step5 = {
   title: "Send tokens to the recipient wallet.",
   Content: () => {
     // TODO completed
@@ -218,7 +217,7 @@ const ConnectWalletAndSignTransactionsStep5 = {
   },
 };
 
-const ConnectWalletAndSignTransactionsStep6 = {
+const Step6 = {
   title: "Check your wallet activity.",
   Content: () => <Step6Content />,
   NextStepButton: () => {
@@ -245,12 +244,5 @@ export default {
   initialRoute: "/accounts",
   storeDump: JSON.stringify(storeDump),
   state: JSON.stringify(state),
-  steps: [
-    ConnectWalletAndSignTransactionsStep1,
-    ConnectWalletAndSignTransactionsStep2,
-    ConnectWalletAndSignTransactionsStep3,
-    ConnectWalletAndSignTransactionsStep4,
-    ConnectWalletAndSignTransactionsStep5,
-    ConnectWalletAndSignTransactionsStep6,
-  ],
+  steps: [Step1, Step2, Step3, Step4, Step5, Step6],
 };

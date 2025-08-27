@@ -284,6 +284,49 @@ export const wasmTransactionToTransaction = (
   updatedAt: record.blockNum(),
 });
 
+// SCRIPTS
+
+export const scriptTypes = {
+  account: "Account Script",
+  transaction: "Transaction Script",
+  note: "Note Script",
+} as const;
+
+export type ScriptType = keyof typeof scriptTypes;
+
+export const scriptStatuses = {
+  draft: "Draft",
+  compiled: "Compiled",
+} as const;
+
+export type ScriptStatus = keyof typeof scriptStatuses;
+
+export type Script = {
+  id: string;
+  name: string;
+  type: ScriptType;
+  status: ScriptStatus;
+  content: string;
+  masm: string;
+  updatedAt: number;
+};
+
+// COMPONENTS
+
+export const componentTypes = {
+  account: "Account Component",
+  auth: "Auth Component",
+} as const;
+
+export type ComponentType = keyof typeof componentTypes;
+
+export type Component = {
+  id: string;
+  name: string;
+  type: ComponentType;
+  scriptId: string;
+};
+
 // TUTORIALS
 
 export type TutorialStep = {

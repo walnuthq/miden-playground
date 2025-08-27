@@ -7,6 +7,7 @@ import {
   type Account,
   type Transaction,
   type InputNote,
+  type Script,
   type TransactionType,
   type CreateTransactionDialogStep,
 } from "@/lib/types";
@@ -31,6 +32,9 @@ export type State = {
   transactions: Transaction[];
   // NOTES
   inputNotes: InputNote[];
+  // SCRIPTS
+  createScriptDialogOpen: boolean;
+  scripts: Script[];
   // TUTORIALS
   tutorialId: string;
   tutorialStep: number;
@@ -59,6 +63,9 @@ export const initialState = (): State => ({
   transactions: [],
   // NOTES
   inputNotes: [],
+  // SCRIPTS
+  createScriptDialogOpen: false,
+  scripts: [],
   // TUTORIALS
   tutorialId: "",
   tutorialStep: 0,
@@ -73,6 +80,7 @@ export const stateSerializer = ({
   accounts,
   transactions,
   inputNotes,
+  scripts,
   tutorialId,
   tutorialStep,
   tutorialMaxStep,
@@ -91,6 +99,7 @@ export const stateSerializer = ({
       ...inputNote,
       inputs: inputNote.inputs.map((input) => input.toString()),
     })),
+    scripts,
     tutorialId,
     tutorialStep,
     tutorialMaxStep,
@@ -105,6 +114,7 @@ export const stateDeserializer = (value: string): State => {
     accounts,
     transactions,
     inputNotes,
+    scripts,
     tutorialId,
     tutorialStep,
     tutorialMaxStep,
@@ -116,6 +126,7 @@ export const stateDeserializer = (value: string): State => {
     accounts: (Omit<Account, "nonce"> & { nonce: string })[];
     transactions: Transaction[];
     inputNotes: (Omit<InputNote, "inputs"> & { inputs: string[] })[];
+    scripts: Script[];
     tutorialId: string;
     tutorialStep: number;
     tutorialMaxStep: number;
@@ -135,6 +146,7 @@ export const stateDeserializer = (value: string): State => {
       ...inputNote,
       inputs: inputNote.inputs.map((input) => BigInt(input)),
     })),
+    scripts,
     tutorialId,
     tutorialStep,
     tutorialMaxStep,
@@ -211,6 +223,20 @@ export type Action =
         inputNotes: InputNote[];
         blockNum: number;
       };
+    }
+  | {
+      type: "OPEN_CREATE_SCRIPT_DIALOG";
+    }
+  | {
+      type: "CLOSE_CREATE_SCRIPT_DIALOG";
+    }
+  | {
+      type: "NEW_SCRIPT";
+      payload: { script: Script };
+    }
+  | {
+      type: "UPDATE_SCRIPT";
+      payload: { script: Script };
     }
   | {
       type: "START_TUTORIAL";
@@ -355,6 +381,37 @@ export const reducer = (state: State, action: Action): State => {
         ],
         inputNotes: action.payload.inputNotes,
         blockNum: action.payload.blockNum,
+      };
+    }
+    case "OPEN_CREATE_SCRIPT_DIALOG": {
+      return {
+        ...state,
+        createScriptDialogOpen: true,
+      };
+    }
+    case "CLOSE_CREATE_SCRIPT_DIALOG": {
+      return {
+        ...state,
+        createScriptDialogOpen: false,
+      };
+    }
+    case "NEW_SCRIPT": {
+      return {
+        ...state,
+        scripts: [...state.scripts, action.payload.script],
+      };
+    }
+    case "UPDATE_SCRIPT": {
+      const index = state.scripts.findIndex(
+        ({ id }) => id === action.payload.script.id
+      );
+      return {
+        ...state,
+        scripts: [
+          ...state.scripts.slice(0, index),
+          action.payload.script,
+          ...state.scripts.slice(index + 1),
+        ],
       };
     }
     case "START_TUTORIAL": {

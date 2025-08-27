@@ -12,7 +12,7 @@ import Step3Content from "@/components/tutorials/transfer-assets-between-wallets
 import Step4Content from "@/components/tutorials/transfer-assets-between-wallets/step4.mdx";
 import Step5Content from "@/components/tutorials/transfer-assets-between-wallets/step5.mdx";
 
-const TransferAssetsBetweenWalletsStep1 = {
+const Step1 = {
   title: "Exploring the accounts.",
   Content: () => {
     const { accounts } = useAccounts();
@@ -32,7 +32,7 @@ const TransferAssetsBetweenWalletsStep1 = {
   },
 };
 
-const TransferAssetsBetweenWalletsStep2 = {
+const Step2 = {
   title: "Submit a send transaction.",
   Content: () => {
     const { accounts } = useAccounts();
@@ -41,7 +41,7 @@ const TransferAssetsBetweenWalletsStep2 = {
     const walletB = accounts.find(({ name }) => name === "Wallet B");
     const transaction = transactions.find(
       ({ accountAddress, outputNotes }) =>
-        accountAddress === walletA?.address && outputNotes.length === 1,
+        accountAddress === walletA?.address && outputNotes.length === 1
     );
     return (
       <>
@@ -62,13 +62,13 @@ const TransferAssetsBetweenWalletsStep2 = {
     const walletA = accounts.find(({ name }) => name === "Wallet A");
     const transaction = transactions.find(
       ({ accountAddress, outputNotes }) =>
-        accountAddress === walletA?.address && outputNotes.length === 1,
+        accountAddress === walletA?.address && outputNotes.length === 1
     );
     return <NextStepButton disabled={!transaction} />;
   },
 };
 
-const TransferAssetsBetweenWalletsStep3 = {
+const Step3 = {
   title: "Inspect transaction and output note.",
   Content: () => {
     const { accounts } = useAccounts();
@@ -77,7 +77,7 @@ const TransferAssetsBetweenWalletsStep3 = {
     const walletB = accounts.find(({ name }) => name === "Wallet B");
     const transaction = transactions.find(
       ({ accountAddress, outputNotes }) =>
-        accountAddress === walletA?.address && outputNotes.length === 1,
+        accountAddress === walletA?.address && outputNotes.length === 1
     );
     const note = transaction?.outputNotes[0];
     return (
@@ -86,14 +86,14 @@ const TransferAssetsBetweenWalletsStep3 = {
   },
 };
 
-const TransferAssetsBetweenWalletsStep4 = {
+const Step4 = {
   title: "Consume the output note.",
   Content: () => {
     const { accounts } = useAccounts();
     const { transactions } = useTransactions();
     const walletB = accounts.find(({ name }) => name === "Wallet B");
     const transaction = transactions.find(
-      ({ accountAddress }) => accountAddress === walletB?.address,
+      ({ accountAddress }) => accountAddress === walletB?.address
     );
     return (
       <>
@@ -117,13 +117,13 @@ const TransferAssetsBetweenWalletsStep4 = {
     const { transactions } = useTransactions();
     const walletB = accounts.find(({ name }) => name === "Wallet B");
     const transaction = transactions.find(
-      ({ accountAddress }) => accountAddress === walletB?.address,
+      ({ accountAddress }) => accountAddress === walletB?.address
     );
     return <NextStepButton disabled={!transaction} />;
   },
 };
 
-const TransferAssetsBetweenWalletsStep5 = {
+const Step5 = {
   title: "Confirm assets have been transferred.",
   Content: () => {
     const { accounts } = useAccounts();
@@ -161,11 +161,5 @@ export default {
   initialRoute: "/accounts",
   storeDump: JSON.stringify(storeDump),
   state: JSON.stringify(state),
-  steps: [
-    TransferAssetsBetweenWalletsStep1,
-    TransferAssetsBetweenWalletsStep2,
-    TransferAssetsBetweenWalletsStep3,
-    TransferAssetsBetweenWalletsStep4,
-    TransferAssetsBetweenWalletsStep5,
-  ],
+  steps: [Step1, Step2, Step3, Step4, Step5],
 };
