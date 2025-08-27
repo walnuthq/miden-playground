@@ -36,10 +36,10 @@ export const webClient = async (networkId: NetworkId) => {
 
 export const getAccountById = async (
   client: MockWebClient,
-  accountId: AccountId
+  accountId: string
 ) => {
   const { AccountId: WasmAccountId } = await import("@demox-labs/miden-sdk");
-  const wasmAccountId = WasmAccountId.fromHex(accountId.toString());
+  const wasmAccountId = WasmAccountId.fromBech32(accountId);
   // @ts-ignore
   const account = await client.getAccount(wasmAccountId);
   if (account) {
@@ -57,10 +57,10 @@ export const getAccountById = async (
 
 export const getConsumableNotes = async (
   client: MockWebClient,
-  accountId: AccountId
+  accountId: string
 ) => {
   const { AccountId: WasmAccountId } = await import("@demox-labs/miden-sdk");
-  const wasmAccountId = WasmAccountId.fromHex(accountId.toString());
+  const wasmAccountId = WasmAccountId.fromBech32(accountId);
   // @ts-ignore
   return client.getConsumableNotes(wasmAccountId);
 };

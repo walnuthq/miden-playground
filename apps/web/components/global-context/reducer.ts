@@ -153,7 +153,6 @@ export type Action =
       type: "SYNC_STATE";
       payload: {
         blockNum: number;
-        // consumableNoteIds: Record<string, string[]>;
         accounts: Account[];
         inputNotes: InputNote[];
       };
@@ -214,14 +213,6 @@ export type Action =
       };
     }
   | {
-      type: "UPDATE_CONSUMABLE_NOTES";
-      payload: {
-        consumableNoteIds: Record<string, string[]>;
-        inputNotes: InputNote[];
-        blockNum: number;
-      };
-    }
-  | {
       type: "START_TUTORIAL";
       payload: { tutorialId: string };
     }
@@ -256,10 +247,6 @@ export const reducer = (state: State, action: Action): State => {
         ...state,
         blockNum: action.payload.blockNum,
         accounts: action.payload.accounts,
-        /* accounts: state.accounts.map((account) => ({
-          ...account,
-          consumableNoteIds: action.payload.consumableNoteIds[account.id] ?? [],
-        })), */
         inputNotes: action.payload.inputNotes,
       };
     }
@@ -366,17 +353,6 @@ export const reducer = (state: State, action: Action): State => {
               action.payload.consumableNoteIds[account.id] ?? [],
           })),
         ],
-        inputNotes: action.payload.inputNotes,
-        blockNum: action.payload.blockNum,
-      };
-    }
-    case "UPDATE_CONSUMABLE_NOTES": {
-      return {
-        ...state,
-        accounts: state.accounts.map((account) => ({
-          ...account,
-          consumableNoteIds: action.payload.consumableNoteIds[account.id] ?? [],
-        })),
         inputNotes: action.payload.inputNotes,
         blockNum: action.payload.blockNum,
       };

@@ -88,11 +88,10 @@ const useAccounts = () => {
     address: string;
   }) => {
     const client = await webClient(networkId);
-    const accountId = AccountId.fromBech32(address);
-    const wasmAccount = await getAccountById(client, accountId);
-    wasmAccount.id = () => AccountId.fromHex(accountId.toString());
+    const wasmAccount = await getAccountById(client, address);
+    wasmAccount.id = () => AccountId.fromBech32(address);
     const syncSummary = await client.syncState();
-    const consumableNotes = await getConsumableNotes(client, accountId);
+    const consumableNotes = await getConsumableNotes(client, address);
     const account = wasmAccountToAccount(
       wasmAccount,
       name,
@@ -111,43 +110,39 @@ const useAccounts = () => {
     });
     return account;
   };
-  const updateConsumableNotes = async () => {
+  const importConnectedWallet = async (accountId: string) => {
     const client = await webClient(networkId);
-    const syncSummary = await client.syncState();
-    // const inputNotes: InputNote[] = [];
-    const consumableNoteIds: Record<string, string[]> = {};
-    for (const account of accounts) {
-      const consumableNotes = await getConsumableNotes(
-        client,
-        AccountId.fromHex(account.id)
+    try {
+      await getAccountById(client, accountId);
+      return importAccountByAddress({
+        name: "Miden Account 1",
+        address: accountId,
+      });
+    } catch (error) {
+      const wallet = await client.newWallet(AccountStorageMode.public(), true);
+      const serializedWallet = wallet.serialize();
+      const fromHexString = (hexString: string) => {
+        const chunks = hexString.match(/.{1,2}/g)!;
+        return Uint8Array.from(chunks.map((byte) => Number.parseInt(byte, 16)));
+      };
+      const serializedImportedWallet = Uint8Array.from([
+        ...fromHexString(AccountId.fromBech32(accountId).toString().slice(2)),
+        ...serializedWallet.slice(15),
+      ]);
+      const { Account: WasmAccount, Word } = await import(
+        "@demox-labs/miden-sdk"
       );
-      /* inputNotes.push(
-        ...consumableNotes.map((consumableNote) =>
-          wasmInputNoteToInputNote(consumableNote.inputNoteRecord(), networkId)
-        )
-      ); */
-      const noteIds = consumableNotes.map((consumableNote) =>
-        consumableNote.inputNoteRecord().id().toString()
+      await client.newAccount(
+        // @ts-ignore
+        WasmAccount.deserialize(serializedImportedWallet),
+        Word.newFromU64s(BigUint64Array.from([0n, 0n, 0n, 0n])),
+        true
       );
-      // console.log(account.id, noteIds);
-      consumableNoteIds[account.id] = noteIds;
+      return importAccountByAddress({
+        name: "Miden Account 1",
+        address: accountId,
+      });
     }
-    const { NoteFilter: WasmNoteFilter } = await import(
-      "@demox-labs/miden-sdk"
-    );
-    const inputNotes = await client.getInputNotes(
-      new WasmNoteFilter(NoteFilterTypes.All)
-    );
-    dispatch({
-      type: "UPDATE_CONSUMABLE_NOTES",
-      payload: {
-        consumableNoteIds,
-        inputNotes: inputNotes.map((inputNoteRecord) =>
-          wasmInputNoteToInputNote(inputNoteRecord, networkId)
-        ),
-        blockNum: syncSummary.blockNum(),
-      },
-    });
   };
   const openCreateWalletDialog = () =>
     dispatch({
@@ -183,7 +178,7 @@ const useAccounts = () => {
     newWallet,
     newFaucet,
     importAccountByAddress,
-    updateConsumableNotes,
+    importConnectedWallet,
     openCreateWalletDialog,
     closeCreateWalletDialog,
     openCreateFaucetDialog,

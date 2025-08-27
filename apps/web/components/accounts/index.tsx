@@ -9,25 +9,24 @@ import ImportAccountDialog from "@/components/accounts/import-account-dialog";
 import useAccounts from "@/hooks/use-accounts";
 import CreateTransactionDialog from "@/components/transactions/create-transaction-dialog";
 import { useWallet } from "@demox-labs/miden-wallet-adapter";
-import { AccountId } from "@workspace/mock-web-client";
 import useGlobalContext from "@/components/global-context/hook";
 
 const Accounts = () => {
   const { accountId } = useWallet();
   const { networkId } = useGlobalContext();
-  const { accounts, importAccountByAddress } = useAccounts();
+  const { accounts, wallets, importConnectedWallet } = useAccounts();
   const isClient = useIsClient();
   // TODO refactor using onConnect callback?
   useEffect(() => {
     if (accountId && networkId === "mtst") {
-      const localAccount = accounts.find(
-        ({ id }) => id === AccountId.fromBech32(accountId).toString()
+      const connectedWallet = wallets.find(
+        ({ address }) => address === accountId
       );
-      if (!localAccount) {
-        importAccountByAddress({ name: "Miden Account 1", address: accountId });
+      if (!connectedWallet) {
+        importConnectedWallet(accountId);
       }
     }
-  }, [accountId, networkId]);
+  }, [accountId, networkId, wallets.length]);
   if (!isClient) {
     return null;
   }
