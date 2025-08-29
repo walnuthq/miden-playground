@@ -41,7 +41,7 @@ const Step2 = {
     const walletB = accounts.find(({ name }) => name === "Wallet B");
     const transaction = transactions.find(
       ({ accountAddress, outputNotes }) =>
-        accountAddress === walletA?.address && outputNotes.length === 1
+        accountAddress === walletA?.address && outputNotes.length === 1,
     );
     return (
       <>
@@ -62,7 +62,7 @@ const Step2 = {
     const walletA = accounts.find(({ name }) => name === "Wallet A");
     const transaction = transactions.find(
       ({ accountAddress, outputNotes }) =>
-        accountAddress === walletA?.address && outputNotes.length === 1
+        accountAddress === walletA?.address && outputNotes.length === 1,
     );
     return <NextStepButton disabled={!transaction} />;
   },
@@ -77,7 +77,7 @@ const Step3 = {
     const walletB = accounts.find(({ name }) => name === "Wallet B");
     const transaction = transactions.find(
       ({ accountAddress, outputNotes }) =>
-        accountAddress === walletA?.address && outputNotes.length === 1
+        accountAddress === walletA?.address && outputNotes.length === 1,
     );
     const note = transaction?.outputNotes[0];
     return (
@@ -93,7 +93,7 @@ const Step4 = {
     const { transactions } = useTransactions();
     const walletB = accounts.find(({ name }) => name === "Wallet B");
     const transaction = transactions.find(
-      ({ accountAddress }) => accountAddress === walletB?.address
+      ({ accountAddress }) => accountAddress === walletB?.address,
     );
     return (
       <>
@@ -117,7 +117,7 @@ const Step4 = {
     const { transactions } = useTransactions();
     const walletB = accounts.find(({ name }) => name === "Wallet B");
     const transaction = transactions.find(
-      ({ accountAddress }) => accountAddress === walletB?.address
+      ({ accountAddress }) => accountAddress === walletB?.address,
     );
     return <NextStepButton disabled={!transaction} />;
   },

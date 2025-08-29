@@ -59,11 +59,11 @@ const ReadOnlyProceduresTable = () => {
     const { AccountId: WasmAccountId } = await import("@demox-labs/miden-sdk");
     const counter = await client.getAccount(
       // @ts-ignore
-      WasmAccountId.fromBech32(COUNTER_CONTRACT_ADDRESS)
+      WasmAccountId.fromBech32(COUNTER_CONTRACT_ADDRESS),
     );
     const count = counter?.storage().getItem(1);
     const counterValue = BigInt(
-      `0x${count!.toHex().slice(-16).match(/../g)!.reverse().join("")}`
+      `0x${count!.toHex().slice(-16).match(/../g)!.reverse().join("")}`,
     );
     setResult(counterValue.toString());
   };
@@ -185,12 +185,12 @@ const ReadWriteProceduresTable = () => {
     const client = await webClient(networkId);
     const counter = await client.getAccount(
       // @ts-ignore
-      WasmAccountId.fromBech32(COUNTER_CONTRACT_ADDRESS)
+      WasmAccountId.fromBech32(COUNTER_CONTRACT_ADDRESS),
     );
     const count = counter?.storage().getItem(1);
     const counterValue =
       BigInt(
-        `0x${count!.toHex().slice(-16).match(/../g)!.reverse().join("")}`
+        `0x${count!.toHex().slice(-16).match(/../g)!.reverse().join("")}`,
       ) + 1n;
     await sleep(2000);
     setResult(counterValue.toString());

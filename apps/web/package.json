@@ -38,7 +38,7 @@
     "@types/lodash": "^4.17.20",
     "@types/node": "^24.3.0",
     "@types/react": "^19.1.12",
-    "@types/react-dom": "^19.1.8",
+    "@types/react-dom": "^19.1.9",
     "@workspace/eslint-config": "workspace:^",
     "@workspace/typescript-config": "workspace:*",
     "copy-webpack-plugin": "^13.0.1",

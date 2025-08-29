@@ -60,7 +60,7 @@ const Step3 = {
     const { transactions } = useTransactions();
     const faucet = faucets.find(({ name }) => name === "MDN Faucet");
     const transaction = transactions.find(
-      ({ accountAddress }) => accountAddress === faucet?.address
+      ({ accountAddress }) => accountAddress === faucet?.address,
     );
     return (
       <>
@@ -80,7 +80,7 @@ const Step3 = {
     const { transactions } = useTransactions();
     const faucet = faucets.find(({ name }) => name === "MDN Faucet");
     const transaction = transactions.find(
-      ({ accountAddress }) => accountAddress === faucet?.address
+      ({ accountAddress }) => accountAddress === faucet?.address,
     );
     return <NextStepButton disabled={!transaction} />;
   },
@@ -93,7 +93,7 @@ const Step4 = {
     const { transactions } = useTransactions();
     const faucet = faucets.find(({ name }) => name === "MDN Faucet");
     const transaction = transactions.find(
-      ({ accountAddress }) => accountAddress === faucet?.address
+      ({ accountAddress }) => accountAddress === faucet?.address,
     );
     return <Step4Content transaction={transaction} />;
   },
@@ -108,10 +108,10 @@ const Step5 = {
     const wallet = wallets.find(({ isPublic }) => isPublic);
     const faucet = faucets.find(({ name }) => name === "MDN Faucet");
     const transaction = transactions.find(
-      ({ accountAddress }) => accountAddress === wallet?.address
+      ({ accountAddress }) => accountAddress === wallet?.address,
     );
     const note = inputNotes.find(
-      ({ senderAddress }) => senderAddress === faucet?.address
+      ({ senderAddress }) => senderAddress === faucet?.address,
     );
     return (
       <>
@@ -135,7 +135,7 @@ const Step5 = {
     const { transactions } = useTransactions();
     const wallet = wallets.find(({ isPublic }) => isPublic);
     const transaction = transactions.find(
-      ({ accountAddress }) => accountAddress === wallet?.address
+      ({ accountAddress }) => accountAddress === wallet?.address,
     );
     return <NextStepButton disabled={!transaction} />;
   },

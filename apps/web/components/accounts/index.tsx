@@ -20,7 +20,7 @@ const Accounts = () => {
   useEffect(() => {
     if (accountId && networkId === "mtst") {
       const connectedWallet = wallets.find(
-        ({ address }) => address === accountId
+        ({ address }) => address === accountId,
       );
       if (!connectedWallet) {
         importConnectedWallet(accountId);

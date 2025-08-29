@@ -29,9 +29,14 @@ const ImportAccountDialog = () => {
   return (
     <Dialog
       open={importAccountDialogOpen}
+      modal={false}
       onOpenChange={(open) => !open && closeImportAccountDialog()}
     >
-      <DialogContent className="sm:max-w-[640px]">
+      <DialogContent
+        className="sm:max-w-[640px] z-100"
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle>Import Account</DialogTitle>
           <DialogDescription>Import account by address.</DialogDescription>

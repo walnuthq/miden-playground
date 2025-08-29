@@ -36,7 +36,7 @@ const CreateScriptDialog = () => {
       open={createScriptDialogOpen}
       onOpenChange={(open) => !open && closeCreateScriptDialog()}
     >
-      <DialogContent className="sm:max-w-[640px]">
+      <DialogContent className="sm:max-w-[640px] z-100">
         <DialogHeader>
           <DialogTitle>Create Script</DialogTitle>
           <DialogDescription>Create a new script.</DialogDescription>

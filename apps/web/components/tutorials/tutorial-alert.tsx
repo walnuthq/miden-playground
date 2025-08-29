@@ -5,6 +5,7 @@ import {
   AlertTitle,
 } from "@workspace/ui/components/alert";
 import { CircleAlert, CircleCheckBig } from "lucide-react";
+import useTutorials from "@/hooks/use-tutorials";
 
 const TutorialAlert = ({
   completed,
@@ -16,18 +17,27 @@ const TutorialAlert = ({
   title: string;
   titleWhenCompleted?: string;
   description: ReactNode;
-}) => (
-  <Alert>
-    {completed ? (
-      <CircleCheckBig color="var(--color-green-500)" />
-    ) : (
-      <CircleAlert />
-    )}
-    <AlertTitle>
-      {completed === undefined ? title : completed ? titleWhenCompleted : title}
-    </AlertTitle>
-    {!completed && <AlertDescription>{description}</AlertDescription>}
-  </Alert>
-);
+}) => {
+  const { tutorialStep, tutorialMaxStep } = useTutorials();
+  const previouslyCompleted = tutorialStep < tutorialMaxStep;
+  const stepCompleted = completed || previouslyCompleted;
+  return (
+    <Alert>
+      {stepCompleted ? (
+        <CircleCheckBig color="var(--color-green-500)" />
+      ) : (
+        <CircleAlert />
+      )}
+      <AlertTitle>
+        {completed === undefined
+          ? title
+          : stepCompleted
+            ? titleWhenCompleted
+            : title}
+      </AlertTitle>
+      {!stepCompleted && <AlertDescription>{description}</AlertDescription>}
+    </Alert>
+  );
+};
 
 export default TutorialAlert;

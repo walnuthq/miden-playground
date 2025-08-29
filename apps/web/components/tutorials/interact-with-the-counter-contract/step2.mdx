@@ -1,17 +1,17 @@
-Here's a breakdown of what the get_count procedure does:
+Here's a breakdown of what the **get_count** procedure does:
 
 - Pushes 0 onto the stack, representing the index of the storage slot to read.
-- Calls account::get_item with the index of 0.
-- Calls sys::truncate_stack to truncate the stack to size 16.
-- The value returned from account::get_item is still on the stack and will be returned when this procedure is called.
+- Calls **account::get_item** with the index of 0.
+- Calls **sys::truncate_stack** to truncate the stack to size 16.
+- The value returned from **account::get_item** is still on the stack and will be returned when this procedure is called.
 
-Here's a breakdown of what the increment_count procedure does:
+Here's a breakdown of what the **increment_count** procedure does:
 
 - Pushes 0 onto the stack, representing the index of the storage slot to read.
-- Calls account::get_item with the index of 0.
+- Calls **account::get_item** with the index of 0.
 - Pushes 1 onto the stack.
-- Adds 1 to the count value returned from account::get_item.
-- For demonstration purposes, calls debug.stack to see the state of the stack
+- Adds 1 to the count value returned from **account::get_item**.
+- For demonstration purposes, calls **debug.stack** to see the state of the stack
 - Pushes 0 onto the stack, which is the index of the storage slot we want to write to.
-- Calls account::set_item which saves the incremented count to storage at index 0
-- Calls sys::truncate_stack to truncate the stack to size 16.
+- Calls **account::set_item** which saves the incremented count to storage at index 0
+- Calls **sys::truncate_stack** to truncate the stack to size 16.

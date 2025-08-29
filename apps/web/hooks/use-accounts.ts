@@ -36,7 +36,7 @@ const useAccounts = () => {
       wallet,
       name,
       networkId,
-      syncSummary.blockNum()
+      syncSummary.blockNum(),
     );
     dispatch({
       type: "NEW_ACCOUNT",
@@ -63,7 +63,7 @@ const useAccounts = () => {
       false,
       tokenSymbol,
       decimals,
-      maxSupply
+      maxSupply,
     );
     const syncSummary = await client.syncState();
     const account = wasmAccountToAccount(
@@ -72,7 +72,7 @@ const useAccounts = () => {
       networkId,
       syncSummary.blockNum(),
       [],
-      tokenSymbol
+      tokenSymbol,
     );
     dispatch({
       type: "NEW_ACCOUNT",
@@ -98,11 +98,11 @@ const useAccounts = () => {
       networkId,
       syncSummary.blockNum(),
       consumableNotes.map((consumableNote) =>
-        consumableNote.inputNoteRecord().id().toString()
-      )
+        consumableNote.inputNoteRecord().id().toString(),
+      ),
     );
     const inputNotes = consumableNotes.map((consumableNote) =>
-      wasmInputNoteToInputNote(consumableNote.inputNoteRecord(), networkId)
+      wasmInputNoteToInputNote(consumableNote.inputNoteRecord(), networkId),
     );
     dispatch({
       type: "IMPORT_ACCOUNT",
@@ -136,7 +136,7 @@ const useAccounts = () => {
         // @ts-ignore
         WasmAccount.deserialize(serializedImportedWallet),
         Word.newFromU64s(BigUint64Array.from([0n, 0n, 0n, 0n])),
-        true
+        true,
       );
       return importAccountByAddress({
         name: "Miden Account 1",

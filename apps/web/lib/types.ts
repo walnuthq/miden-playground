@@ -54,7 +54,7 @@ export const wasmAccountToAccount = (
   networkId: string,
   updatedAt: number,
   consumableNoteIds: string[] = [],
-  tokenSymbol?: string
+  tokenSymbol?: string,
 ): Account => ({
   id: account.id().toString(),
   name,
@@ -159,7 +159,7 @@ export const noteInputsToAccountId = (noteInputs: bigint[]) => {
 
 export const wasmInputNoteToInputNote = (
   record: InputNoteRecord,
-  networkId: string
+  networkId: string,
 ): InputNote => ({
   id: record.id().toString(),
   type: noteType(record.metadata()),
@@ -262,7 +262,7 @@ const transactionStatus = (transactionRecord: TransactionRecord) => {
 export const wasmTransactionToTransaction = (
   record: TransactionRecord,
   result: TransactionResult,
-  networkId: string
+  networkId: string,
 ): Transaction => ({
   id: record.id().toHex(),
   status: transactionStatus(record),
@@ -272,7 +272,7 @@ export const wasmTransactionToTransaction = (
     (index) => {
       const note = result.executedTransaction().inputNotes().getNote(index);
       return wasmNoteToNote(note.note(), networkId);
-    }
+    },
   ),
   outputNotes: range(result.executedTransaction().outputNotes().numNotes())
     .map((index) => {

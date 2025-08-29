@@ -50,7 +50,7 @@ const findValidNonce = async (challenge: string, target: string) => {
 
 const powChallenge = async (accountId: string) => {
   const powResponse = await fetch(
-    `https://faucet.testnet.miden.io/pow?${new URLSearchParams({ account_id: accountId })}`
+    `https://faucet.testnet.miden.io/pow?${new URLSearchParams({ account_id: accountId })}`,
   );
   if (!powResponse.ok) {
     // const message = await powResponse.text();
@@ -64,7 +64,7 @@ const powChallenge = async (accountId: string) => {
 const requestNote = async (
   accountId: string,
   challenge: string,
-  nonce: number
+  nonce: number,
 ) => {
   try {
     const noteDataRegex = /"data_base64":"([^"]+)"/;
@@ -81,7 +81,7 @@ const requestNote = async (
       })}`,
       {
         headers: { "Content-Type": "text/event-stream" },
-      }
+      },
     );
     const text = await response.text();
     const noteDataMatch = noteDataRegex.exec(text);
@@ -112,7 +112,7 @@ const MintButton = () => {
       };
       waitForSyncState();
     },
-    noteId === "" || account?.consumableNoteIds.includes(noteId) ? null : 1000
+    noteId === "" || account?.consumableNoteIds.includes(noteId) ? null : 1000,
   );
   useEffect(() => {
     if (account?.consumableNoteIds.includes(noteId)) {

@@ -120,7 +120,7 @@ const CreateTransactionConfigureForm = ({
               formData.getAll("is-public").includes("on")
                 ? "public"
                 : "private",
-              Number(formData.get("amount")!.toString())
+              Number(formData.get("amount")!.toString()),
             );
             const adapter = wallet.adapter as MidenWalletAdapter;
             const txId = await adapter.requestSend(transaction);

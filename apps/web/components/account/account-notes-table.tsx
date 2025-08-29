@@ -71,7 +71,7 @@ const NoteActionsCell = ({
                 inputNote.senderAddress,
                 inputNote.id,
                 inputNote.type === "Public" ? "public" : "private",
-                Number(fungibleAsset.amount)
+                Number(fungibleAsset.amount),
               );
               const adapter = wallet.adapter as MidenWalletAdapter;
               const txId = await adapter.requestConsume(transaction);

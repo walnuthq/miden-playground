@@ -37,7 +37,7 @@ const CreateFaucetDialog = () => {
       open={createFaucetDialogOpen}
       onOpenChange={(open) => !open && onClose()}
     >
-      <DialogContent className="sm:max-w-[640px]">
+      <DialogContent className="sm:max-w-[640px] z-100">
         <DialogHeader>
           <DialogTitle>Create Fungible Faucet</DialogTitle>
           <DialogDescription>Create a new fungible faucet.</DialogDescription>

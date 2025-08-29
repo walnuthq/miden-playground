@@ -11,12 +11,12 @@ const globalForMockWebClient = globalThis as unknown as {
 };
 
 export const mockWebClient = async (
-  seed: Uint8Array = new Uint8Array(range(32))
+  seed: Uint8Array = new Uint8Array(range(32)),
 ) => {
   if (!globalForMockWebClient.mockWebClient) {
     globalForMockWebClient.mockWebClient = await WebClient.createClient(
       undefined,
-      seed
+      seed,
     );
   }
   return globalForMockWebClient.mockWebClient;

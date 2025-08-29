@@ -1,9 +1,5 @@
 import { useRouter, usePathname } from "next/navigation";
-import { EllipsisVertical } from "lucide-react";
-import { useWallet } from "@demox-labs/miden-wallet-adapter";
-import { useInterval } from "usehooks-ts";
 import useAccounts from "@/hooks/use-accounts";
-import useNotes from "@/hooks/use-notes";
 import useGlobalContext from "@/components/global-context/hook";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
@@ -13,8 +9,7 @@ import Step1Content from "@/components/tutorials/interact-with-the-counter-contr
 import Step2Content from "@/components/tutorials/interact-with-the-counter-contract/step2.mdx";
 import Step3Content from "@/components/tutorials/interact-with-the-counter-contract/step3.mdx";
 import Step4Content from "@/components/tutorials/interact-with-the-counter-contract/step4.mdx";
-// import Step5Content from "@/components/tutorials/interact-with-the-counter-contract/step5.mdx";
-// import Step6Content from "@/components/tutorials/interact-with-the-counter-contract/step6.mdx";
+import Step5Content from "@/components/tutorials/interact-with-the-counter-contract/step5.mdx";
 
 const Step1 = {
   title: "Learn about Smart Contract scripts.",
@@ -58,7 +53,7 @@ const Step3 = {
     const pathname = usePathname();
     const { accounts } = useAccounts();
     const counter = accounts.find(
-      ({ address }) => address === COUNTER_CONTRACT_ADDRESS
+      ({ address }) => address === COUNTER_CONTRACT_ADDRESS,
     );
     return (
       <>
@@ -118,9 +113,26 @@ const Step4 = {
     );
   },
   NextStepButton: () => {
-    const pathname = usePathname();
     // TODO disabled
     return <NextStepButton disabled={true} />;
+  },
+};
+
+const Step5 = {
+  title: "Refresh the Counter value.",
+  Content: Step5Content,
+  NextStepButton: () => {
+    const { resetState } = useGlobalContext();
+    const router = useRouter();
+    return (
+      <NextStepButton
+        text="Back to tutorials list"
+        onClick={() => {
+          resetState();
+          router.push("/");
+        }}
+      />
+    );
   },
 };
 
@@ -133,5 +145,5 @@ export default {
   initialRoute: "/scripts",
   storeDump: JSON.stringify(storeDump),
   state: JSON.stringify(state),
-  steps: [Step1, Step2, Step3, Step4],
+  steps: [Step1, Step2, Step3, Step4, Step5],
 };

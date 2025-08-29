@@ -49,7 +49,7 @@ const CreateTransactionDialogSelectForm = ({
           setLoading(true);
           const client = await webClient(networkId);
           const consumableNotes = await client.getConsumableNotes(
-            AccountId.fromHex(executingAccount.id)
+            AccountId.fromHex(executingAccount.id),
           );
           setLoading(false);
           setConsumableNotes(consumableNotes);

@@ -57,20 +57,20 @@ const useGlobalContext = () => {
     const { NoteFilter: WasmNoteFilter, AccountId: WasmAccountId } =
       await import("@demox-labs/miden-sdk");
     const inputNotes = await client.getInputNotes(
-      new WasmNoteFilter(NoteFilterTypes.All)
+      new WasmNoteFilter(NoteFilterTypes.All),
     );
     const accounts: Account[] = [];
     for (const account of state.accounts) {
       const wasmAccount = await client.getAccount(
         // @ts-ignore
-        WasmAccountId.fromHex(account.id)
+        WasmAccountId.fromHex(account.id),
       );
       const consumableNotes = await client.getConsumableNotes(
         // @ts-ignore
-        WasmAccountId.fromHex(account.id)
+        WasmAccountId.fromHex(account.id),
       );
       const noteIds = consumableNotes.map((consumableNote) =>
-        consumableNote.inputNoteRecord().id().toString()
+        consumableNote.inputNoteRecord().id().toString(),
       );
       //consumableNoteIds[account.id] = noteIds;
       if (wasmAccount) {
@@ -82,8 +82,8 @@ const useGlobalContext = () => {
             state.networkId,
             syncSummary.blockNum(),
             noteIds,
-            account.tokenSymbol
-          )
+            account.tokenSymbol,
+          ),
         );
       }
     }
@@ -94,7 +94,7 @@ const useGlobalContext = () => {
         //consumableNoteIds,
         accounts,
         inputNotes: inputNotes.map((inputNoteRecord) =>
-          wasmInputNoteToInputNote(inputNoteRecord, state.networkId)
+          wasmInputNoteToInputNote(inputNoteRecord, state.networkId),
         ),
       },
     });

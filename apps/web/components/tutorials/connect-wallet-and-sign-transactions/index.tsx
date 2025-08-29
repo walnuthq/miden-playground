@@ -65,11 +65,11 @@ const Step2 = {
         fungibleAssets.some(
           ({ faucetId, amount }) =>
             faucetId === "0x43999c9344b31a206a5464ece82b91" &&
-            amount === "100000000"
+            amount === "100000000",
         ) &&
         senderAddress === "mtst1qppen8yngje35gr223jwe6ptjy7gedn9" &&
         state === "Committed" &&
-        type === "Public"
+        type === "Public",
     );
     return (
       <>
@@ -99,11 +99,11 @@ const Step2 = {
         fungibleAssets.some(
           ({ faucetId, amount }) =>
             faucetId === "0x43999c9344b31a206a5464ece82b91" &&
-            amount === "100000000"
+            amount === "100000000",
         ) &&
         senderAddress === "mtst1qppen8yngje35gr223jwe6ptjy7gedn9" &&
         state === "Committed" &&
-        type === "Public"
+        type === "Public",
     );
     return <NextStepButton disabled={!note} />;
   },
@@ -123,7 +123,7 @@ const Step3 = {
         };
         waitForSyncState();
       },
-      wallet && wallet.consumableNoteIds.length > 0 ? 1000 : null
+      wallet && wallet.consumableNoteIds.length > 0 ? 1000 : null,
     );
     return (
       <>
