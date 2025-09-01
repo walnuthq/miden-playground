@@ -1,8 +1,8 @@
+import type { NextConfig } from "next";
 import CopyPlugin from "copy-webpack-plugin";
 import createMDX from "@next/mdx";
 
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+const nextConfig: NextConfig = {
   transpilePackages: ["@workspace/ui"],
   /* webpack(config, { isServer, dev }) {
     // Use the client static directory in the server bundle and prod mode
@@ -39,7 +39,7 @@ const nextConfig = {
           context: ".next/server/chunks",
           from: ".",
           to: dest,
-          filter: (resourcePath) => resourcePath.endsWith(".wasm"),
+          filter: (resourcePath: string) => resourcePath.endsWith(".wasm"),
           noErrorOnMissing: true,
         });
       }

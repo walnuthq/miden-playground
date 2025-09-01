@@ -14,8 +14,8 @@
   "dependencies": {
     "@demox-labs/miden-sdk": "0.10.1",
     "@demox-labs/miden-wallet-adapter": "^0.3.3",
-    "@mdx-js/loader": "^3.1.0",
-    "@mdx-js/react": "^3.1.0",
+    "@mdx-js/loader": "^3.1.1",
+    "@mdx-js/react": "^3.1.1",
     "@monaco-editor/react": "^4.7.0",
     "@next/mdx": "^15.5.2",
     "@tanstack/react-table": "^8.21.3",
