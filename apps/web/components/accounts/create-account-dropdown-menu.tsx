@@ -1,4 +1,4 @@
-import { Plus, Wallet, HandCoins, Import } from "lucide-react";
+import { Plus, Wallet, HandCoins, Download, Upload } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,6 +13,7 @@ const CreateAccountDropdownMenu = () => {
     openCreateWalletDialog,
     openCreateFaucetDialog,
     openImportAccountDialog,
+    openDeployAccountDialog,
   } = useAccounts();
   return (
     <DropdownMenu>
@@ -32,8 +33,12 @@ const CreateAccountDropdownMenu = () => {
           Create new fungible faucet
         </DropdownMenuItem>
         <DropdownMenuItem onClick={openImportAccountDialog}>
-          <Import />
+          <Download />
           Import account
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={openDeployAccountDialog}>
+          <Upload />
+          Deploy account
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

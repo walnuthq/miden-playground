@@ -12,7 +12,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@demox-labs/miden-sdk": "0.10.1",
+    "@demox-labs/miden-sdk": "^0.10.1",
     "@demox-labs/miden-wallet-adapter": "^0.3.3",
     "@mdx-js/loader": "^3.1.1",
     "@mdx-js/react": "^3.1.1",
@@ -36,7 +36,7 @@
   },
   "devDependencies": {
     "@types/lodash": "^4.17.20",
-    "@types/node": "^24.3.0",
+    "@types/node": "^24.3.1",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
     "@workspace/eslint-config": "workspace:^",

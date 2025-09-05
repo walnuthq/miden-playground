@@ -7,8 +7,9 @@ import {
   TabsList,
   TabsTrigger,
 } from "@workspace/ui/components/tabs";
-import ScriptRust from "@/components/script/script-rust";
-import ScriptMASM from "@/components/script/script-masm";
+import Editor from "@/components/lib/editor";
+import EditorConsole from "@/components/script/editor-console";
+import defaultScripts from "@/components/global-context/default-scripts";
 
 const Script = ({ id }: { id: string }) => {
   const isClient = useIsClient();
@@ -17,22 +18,34 @@ const Script = ({ id }: { id: string }) => {
   if (!isClient || !script) {
     return null;
   }
+  const defaultScriptIds = defaultScripts.map(({ id }) => id);
+  const defaultScript = defaultScriptIds.includes(script.id);
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-      <Tabs defaultValue="masm">
+      <Tabs defaultValue="rust">
         <TabsList>
           <TabsTrigger value="rust">Rust</TabsTrigger>
           <TabsTrigger value="masm">MASM</TabsTrigger>
         </TabsList>
-        <TabsContent value="rust">
-          <ScriptRust
-            script={script}
-            readOnly={script.id === "counter-contract"}
-          />
-        </TabsContent>
-        <TabsContent value="masm">
-          <ScriptMASM script={script} />
-        </TabsContent>
+        <div className="flex flex-col gap-4">
+          <TabsContent value="rust">
+            <Editor
+              script={script}
+              language="rust"
+              readOnly={defaultScript}
+              height={defaultScript ? "85vh" : "61vh"}
+            />
+          </TabsContent>
+          <TabsContent value="masm">
+            <Editor
+              script={script}
+              language="masm"
+              readOnly
+              height={defaultScript ? "85vh" : "61vh"}
+            />
+          </TabsContent>
+          {!defaultScript && <EditorConsole script={script} />}
+        </div>
       </Tabs>
     </div>
   );

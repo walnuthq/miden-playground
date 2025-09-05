@@ -24,6 +24,7 @@ import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import useScripts from "@/hooks/use-scripts";
 import { type ScriptType, scriptTypes } from "@/lib/types";
+import { sleep } from "@/lib/utils";
 
 const CreateScriptDialog = () => {
   const router = useRouter();
@@ -31,10 +32,14 @@ const CreateScriptDialog = () => {
     useScripts();
   const [loading, setLoading] = useState(false);
   const [scriptType, setScriptType] = useState<ScriptType>("account");
+  const onClose = () => {
+    setScriptType("account");
+    closeCreateScriptDialog();
+  };
   return (
     <Dialog
       open={createScriptDialogOpen}
-      onOpenChange={(open) => !open && closeCreateScriptDialog()}
+      onOpenChange={(open) => !open && onClose()}
     >
       <DialogContent className="sm:max-w-[640px] z-100">
         <DialogHeader>
@@ -47,11 +52,13 @@ const CreateScriptDialog = () => {
             event.preventDefault();
             const formData = new FormData(event.currentTarget);
             setLoading(true);
+            await sleep(400);
             const script = newScript({
               name: formData.get("name")?.toString() ?? "",
               type: scriptType,
             });
             setLoading(false);
+            onClose();
             toast(`${script.name} has been created.`);
             router.push(`/scripts/${script.id}`);
           }}

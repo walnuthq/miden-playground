@@ -1,10 +1,11 @@
 import { useRouter, usePathname } from "next/navigation";
+import { type Tutorial } from "@/lib/types";
 import useAccounts from "@/hooks/use-accounts";
 import useGlobalContext from "@/components/global-context/hook";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
-import state from "@/components/tutorials/interact-with-the-counter-contract/state.json";
-import storeDump from "@/components/tutorials/interact-with-the-counter-contract/store.json";
+import store from "@/components/tutorials/interact-with-the-counter-contract/store";
+import state from "@/components/tutorials/interact-with-the-counter-contract/state";
 import Step1Content from "@/components/tutorials/interact-with-the-counter-contract/step1.mdx";
 import Step2Content from "@/components/tutorials/interact-with-the-counter-contract/step2.mdx";
 import Step3Content from "@/components/tutorials/interact-with-the-counter-contract/step3.mdx";
@@ -53,7 +54,7 @@ const Step3 = {
     const pathname = usePathname();
     const { accounts } = useAccounts();
     const counter = accounts.find(
-      ({ address }) => address === COUNTER_CONTRACT_ADDRESS,
+      ({ address }) => address === COUNTER_CONTRACT_ADDRESS
     );
     return (
       <>
@@ -136,14 +137,16 @@ const Step5 = {
   },
 };
 
-export default {
+const tutorial: Tutorial = {
   id: "interact-with-the-counter-contract",
   title: "Interact with the Counter Contract",
   tagline: "Increment the count of a Counter Contract on testnet.",
   description:
     "This tutorial will guide you through interacting with a Counter Contract by incrementing its counter on testnet.",
   initialRoute: "/scripts",
-  storeDump: JSON.stringify(storeDump),
-  state: JSON.stringify(state),
+  store,
+  state,
   steps: [Step1, Step2, Step3, Step4, Step5],
 };
+
+export default tutorial;

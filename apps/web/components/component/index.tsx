@@ -1,0 +1,42 @@
+"use client";
+import { useIsClient } from "usehooks-ts";
+import useComponents from "@/hooks/use-components";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@workspace/ui/components/tabs";
+import ComponentInformation from "@/components/component/component-information";
+import ComponentScript from "@/components/component/component-script";
+import UpsertStorageSlotDialog from "@/components/component/upsert-storage-slot-dialog";
+
+const Component = ({ id }: { id: string }) => {
+  const isClient = useIsClient();
+  const { components } = useComponents();
+  const component = components.find((component) => component.id === id);
+  if (!isClient || !component) {
+    return null;
+  }
+  return (
+    <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+      <Tabs defaultValue="information">
+        <div className="flex items-center justify-between">
+          <TabsList>
+            <TabsTrigger value="information">Information</TabsTrigger>
+            <TabsTrigger value="script">Script</TabsTrigger>
+          </TabsList>
+        </div>
+        <TabsContent value="information">
+          <ComponentInformation component={component} />
+        </TabsContent>
+        <TabsContent value="script">
+          <ComponentScript component={component} />
+        </TabsContent>
+      </Tabs>
+      <UpsertStorageSlotDialog />
+    </div>
+  );
+};
+
+export default Component;

@@ -11,7 +11,7 @@ import { type InputNote } from "@/lib/types";
 const NoteScriptRoot = ({ inputNote }: { inputNote: InputNote }) => (
   <Tooltip>
     <TooltipTrigger asChild>
-      <Link href={`/notes/${inputNote.id}?tab=code`}>
+      <Link href={`/notes/${inputNote.id}?tab=script`}>
         <Button className="cursor-pointer -ml-4" variant="link">
           {formatId(inputNote.scriptRoot)}
           {inputNote.wellKnownNote ? ` (${inputNote.wellKnownNote})` : ""}

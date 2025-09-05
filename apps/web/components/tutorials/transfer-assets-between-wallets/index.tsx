@@ -1,11 +1,12 @@
 import { useRouter } from "next/navigation";
+import { type Tutorial } from "@/lib/types";
 import useAccounts from "@/hooks/use-accounts";
 import useTransactions from "@/hooks/use-transactions";
 import useGlobalContext from "@/components/global-context/hook";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
-import state from "@/components/tutorials/transfer-assets-between-wallets/state.json";
-import storeDump from "@/components/tutorials/transfer-assets-between-wallets/store.json";
+import state from "@/components/tutorials/transfer-assets-between-wallets/state";
+import store from "@/components/tutorials/transfer-assets-between-wallets/store";
 import Step1Content from "@/components/tutorials/transfer-assets-between-wallets/step1.mdx";
 import Step2Content from "@/components/tutorials/transfer-assets-between-wallets/step2.mdx";
 import Step3Content from "@/components/tutorials/transfer-assets-between-wallets/step3.mdx";
@@ -41,7 +42,7 @@ const Step2 = {
     const walletB = accounts.find(({ name }) => name === "Wallet B");
     const transaction = transactions.find(
       ({ accountAddress, outputNotes }) =>
-        accountAddress === walletA?.address && outputNotes.length === 1,
+        accountAddress === walletA?.address && outputNotes.length === 1
     );
     return (
       <>
@@ -62,7 +63,7 @@ const Step2 = {
     const walletA = accounts.find(({ name }) => name === "Wallet A");
     const transaction = transactions.find(
       ({ accountAddress, outputNotes }) =>
-        accountAddress === walletA?.address && outputNotes.length === 1,
+        accountAddress === walletA?.address && outputNotes.length === 1
     );
     return <NextStepButton disabled={!transaction} />;
   },
@@ -77,7 +78,7 @@ const Step3 = {
     const walletB = accounts.find(({ name }) => name === "Wallet B");
     const transaction = transactions.find(
       ({ accountAddress, outputNotes }) =>
-        accountAddress === walletA?.address && outputNotes.length === 1,
+        accountAddress === walletA?.address && outputNotes.length === 1
     );
     const note = transaction?.outputNotes[0];
     return (
@@ -93,7 +94,7 @@ const Step4 = {
     const { transactions } = useTransactions();
     const walletB = accounts.find(({ name }) => name === "Wallet B");
     const transaction = transactions.find(
-      ({ accountAddress }) => accountAddress === walletB?.address,
+      ({ accountAddress }) => accountAddress === walletB?.address
     );
     return (
       <>
@@ -117,7 +118,7 @@ const Step4 = {
     const { transactions } = useTransactions();
     const walletB = accounts.find(({ name }) => name === "Wallet B");
     const transaction = transactions.find(
-      ({ accountAddress }) => accountAddress === walletB?.address,
+      ({ accountAddress }) => accountAddress === walletB?.address
     );
     return <NextStepButton disabled={!transaction} />;
   },
@@ -152,14 +153,16 @@ const Step5 = {
   },
 };
 
-export default {
+const tutorial: Tutorial = {
   id: "transfer-assets-between-wallets",
   title: "Transfer assets between wallets",
   tagline: "Transfer tokens between 2 different wallets.",
   description:
     "This tutorial focuses on learning how to transfer assets between 2 wallets.",
   initialRoute: "/accounts",
-  storeDump: JSON.stringify(storeDump),
-  state: JSON.stringify(state),
+  store,
+  state,
   steps: [Step1, Step2, Step3, Step4, Step5],
 };
+
+export default tutorial;

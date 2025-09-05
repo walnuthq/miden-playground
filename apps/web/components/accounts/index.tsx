@@ -6,6 +6,7 @@ import AccountsTable from "@/components/accounts/accounts-table";
 import CreateWalletDialog from "@/components/accounts/create-wallet-dialog";
 import CreateFaucetDialog from "@/components/accounts/create-faucet-dialog";
 import ImportAccountDialog from "@/components/accounts/import-account-dialog";
+import DeployAccountDialog from "@/components/accounts/deploy-account-dialog";
 import useAccounts from "@/hooks/use-accounts";
 import CreateTransactionDialog from "@/components/transactions/create-transaction-dialog";
 import { useWallet } from "@demox-labs/miden-wallet-adapter";
@@ -20,7 +21,7 @@ const Accounts = () => {
   useEffect(() => {
     if (accountId && networkId === "mtst") {
       const connectedWallet = wallets.find(
-        ({ address }) => address === accountId,
+        ({ address }) => address === accountId
       );
       if (!connectedWallet) {
         importConnectedWallet(accountId);
@@ -36,6 +37,7 @@ const Accounts = () => {
       <CreateWalletDialog />
       <CreateFaucetDialog />
       <ImportAccountDialog />
+      <DeployAccountDialog />
       <CreateTransactionDialog />
     </div>
   );

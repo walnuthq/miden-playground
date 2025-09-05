@@ -1,0 +1,15 @@
+services:
+  api:
+    build:
+      context: apps/api
+      additional_contexts:
+        - root=.
+    restart: always
+    #volumes:
+    #- ./apps/api:/home/node/apps/api
+    #- /home/node/apps/www/.next
+    #- /home/node/apps/www/node_modules
+    ports:
+      - 3001:3001
+    #depends_on:
+    #- storage

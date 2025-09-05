@@ -8,9 +8,12 @@ import {
   type Transaction,
   type InputNote,
   type Script,
+  type Component,
   type TransactionType,
   type CreateTransactionDialogStep,
 } from "@/lib/types";
+import defaultScripts from "@/components/global-context/default-scripts";
+import defaultComponents from "@/components/global-context/default-components";
 
 export type State = {
   // GLOBAL
@@ -20,6 +23,7 @@ export type State = {
   createWalletDialogOpen: boolean;
   createFaucetDialogOpen: boolean;
   importAccountDialogOpen: boolean;
+  deployAccountDialogOpen: boolean;
   accounts: Account[];
   // TRANSACTIONS
   createTransactionDialogOpen: boolean;
@@ -35,6 +39,12 @@ export type State = {
   // SCRIPTS
   createScriptDialogOpen: boolean;
   scripts: Script[];
+  // COMPONENTS
+  createComponentDialogOpen: boolean;
+  upsertStorageSlotDialogOpen: boolean;
+  upsertStorageSlotDialogComponentId: string;
+  upsertStorageSlotDialogStorageSlotIndex: number;
+  components: Component[];
   // TUTORIALS
   tutorialId: string;
   tutorialStep: number;
@@ -51,6 +61,7 @@ export const initialState = (): State => ({
   createWalletDialogOpen: false,
   createFaucetDialogOpen: false,
   importAccountDialogOpen: false,
+  deployAccountDialogOpen: false,
   accounts: [],
   // TRANSACTIONS
   createTransactionDialogOpen: false,
@@ -65,7 +76,13 @@ export const initialState = (): State => ({
   inputNotes: [],
   // SCRIPTS
   createScriptDialogOpen: false,
-  scripts: [],
+  scripts: defaultScripts,
+  // COMPONENTS
+  createComponentDialogOpen: false,
+  upsertStorageSlotDialogOpen: false,
+  upsertStorageSlotDialogComponentId: "",
+  upsertStorageSlotDialogStorageSlotIndex: -1,
+  components: defaultComponents,
   // TUTORIALS
   tutorialId: "",
   tutorialStep: 0,
@@ -81,6 +98,7 @@ export const stateSerializer = ({
   transactions,
   inputNotes,
   scripts,
+  components,
   tutorialId,
   tutorialStep,
   tutorialMaxStep,
@@ -100,6 +118,7 @@ export const stateSerializer = ({
       inputs: inputNote.inputs.map((input) => input.toString()),
     })),
     scripts,
+    components,
     tutorialId,
     tutorialStep,
     tutorialMaxStep,
@@ -108,51 +127,64 @@ export const stateSerializer = ({
   });
 
 export const stateDeserializer = (value: string): State => {
-  const {
-    networkId,
-    blockNum,
-    accounts,
-    transactions,
-    inputNotes,
-    scripts,
-    tutorialId,
-    tutorialStep,
-    tutorialMaxStep,
-    tutorialOpen,
-    nextTutorialStepDisabled,
-  } = JSON.parse(value) as {
-    networkId: NetworkId;
-    blockNum: number;
-    accounts: (Omit<Account, "nonce"> & { nonce: string })[];
-    transactions: Transaction[];
-    inputNotes: (Omit<InputNote, "inputs"> & { inputs: string[] })[];
-    scripts: Script[];
-    tutorialId: string;
-    tutorialStep: number;
-    tutorialMaxStep: number;
-    tutorialOpen: boolean;
-    nextTutorialStepDisabled: boolean;
-  };
-  return {
-    ...initialState(),
-    networkId,
-    blockNum,
-    accounts: accounts.map((account) => ({
-      ...account,
-      nonce: BigInt(account.nonce),
-    })),
-    transactions,
-    inputNotes: inputNotes.map((inputNote) => ({
-      ...inputNote,
-      inputs: inputNote.inputs.map((input) => BigInt(input)),
-    })),
-    scripts,
-    tutorialId,
-    tutorialStep,
-    tutorialMaxStep,
-    tutorialOpen,
-    nextTutorialStepDisabled,
-  };
+  try {
+    const {
+      networkId,
+      blockNum,
+      accounts,
+      transactions,
+      inputNotes,
+      scripts,
+      components,
+      tutorialId,
+      tutorialStep,
+      tutorialMaxStep,
+      tutorialOpen,
+      nextTutorialStepDisabled,
+    } = JSON.parse(value) as {
+      networkId: NetworkId;
+      blockNum: number;
+      accounts: (Omit<Account, "nonce"> & { nonce: string })[];
+      transactions: Transaction[];
+      inputNotes: (Omit<InputNote, "inputs"> & { inputs: string[] })[];
+      scripts: Script[];
+      components: Component[];
+      tutorialId: string;
+      tutorialStep: number;
+      tutorialMaxStep: number;
+      tutorialOpen: boolean;
+      nextTutorialStepDisabled: boolean;
+    };
+    const state = initialState();
+    return {
+      ...state,
+      networkId: networkId ?? state.networkId,
+      blockNum: blockNum ?? state.blockNum,
+      accounts: accounts
+        ? accounts.map((account) => ({
+            ...account,
+            nonce: BigInt(account.nonce),
+          }))
+        : state.accounts,
+      transactions: transactions ?? state.transactions,
+      inputNotes: inputNotes
+        ? inputNotes.map((inputNote) => ({
+            ...inputNote,
+            inputs: inputNote.inputs.map((input) => BigInt(input)),
+          }))
+        : state.inputNotes,
+      scripts: scripts ?? state.scripts,
+      components: components ?? state.components,
+      tutorialId: tutorialId ?? state.tutorialId,
+      tutorialStep: tutorialStep ?? state.tutorialStep,
+      tutorialMaxStep: tutorialMaxStep ?? state.tutorialMaxStep,
+      tutorialOpen: tutorialOpen ?? state.tutorialOpen,
+      nextTutorialStepDisabled:
+        nextTutorialStepDisabled ?? state.nextTutorialStepDisabled,
+    };
+  } catch (error) {
+    return initialState();
+  }
 };
 
 export type Action =
@@ -201,6 +233,12 @@ export type Action =
       type: "CLOSE_IMPORT_ACCOUNT_DIALOG";
     }
   | {
+      type: "OPEN_DEPLOY_ACCOUNT_DIALOG";
+    }
+  | {
+      type: "CLOSE_DEPLOY_ACCOUNT_DIALOG";
+    }
+  | {
       type: "OPEN_CREATE_TRANSACTION_DIALOG";
       payload: {
         accountId: string;
@@ -237,6 +275,27 @@ export type Action =
   | {
       type: "UPDATE_SCRIPT";
       payload: { script: Script };
+    }
+  | {
+      type: "OPEN_CREATE_COMPONENT_DIALOG";
+    }
+  | {
+      type: "CLOSE_CREATE_COMPONENT_DIALOG";
+    }
+  | {
+      type: "OPEN_UPSERT_STORAGE_SLOT_DIALOG";
+      payload: { componentId: string; storageSlotIndex: number };
+    }
+  | {
+      type: "CLOSE_UPSERT_STORAGE_SLOT_DIALOG";
+    }
+  | {
+      type: "NEW_COMPONENT";
+      payload: { component: Component };
+    }
+  | {
+      type: "UPDATE_COMPONENT";
+      payload: { component: Component };
     }
   | {
       type: "START_TUTORIAL";
@@ -289,7 +348,7 @@ export const reducer = (state: State, action: Action): State => {
     case "IMPORT_ACCOUNT": {
       const noteIds = state.inputNotes.map(({ id }) => id);
       const filteredInputNotes = action.payload.inputNotes.filter(
-        ({ id }) => !noteIds.includes(id),
+        ({ id }) => !noteIds.includes(id)
       );
       return {
         ...state,
@@ -334,6 +393,18 @@ export const reducer = (state: State, action: Action): State => {
         importAccountDialogOpen: false,
       };
     }
+    case "OPEN_DEPLOY_ACCOUNT_DIALOG": {
+      return {
+        ...state,
+        deployAccountDialogOpen: true,
+      };
+    }
+    case "CLOSE_DEPLOY_ACCOUNT_DIALOG": {
+      return {
+        ...state,
+        deployAccountDialogOpen: false,
+      };
+    }
     case "OPEN_CREATE_TRANSACTION_DIALOG": {
       return {
         ...state,
@@ -361,7 +432,7 @@ export const reducer = (state: State, action: Action): State => {
     }
     case "SUBMIT_TRANSACTION": {
       const index = state.accounts.findIndex(
-        ({ id }) => id === action.payload.account.id,
+        ({ id }) => id === action.payload.account.id
       );
       return {
         ...state,
@@ -403,14 +474,60 @@ export const reducer = (state: State, action: Action): State => {
     }
     case "UPDATE_SCRIPT": {
       const index = state.scripts.findIndex(
-        ({ id }) => id === action.payload.script.id,
+        ({ id }) => id === action.payload.script.id
       );
       return {
         ...state,
         scripts: [
           ...state.scripts.slice(0, index),
-          action.payload.script,
+          { ...action.payload.script, updatedAt: Date.now() },
           ...state.scripts.slice(index + 1),
+        ],
+      };
+    }
+    case "OPEN_CREATE_COMPONENT_DIALOG": {
+      return {
+        ...state,
+        createComponentDialogOpen: true,
+      };
+    }
+    case "CLOSE_CREATE_COMPONENT_DIALOG": {
+      return {
+        ...state,
+        createComponentDialogOpen: false,
+      };
+    }
+    case "OPEN_UPSERT_STORAGE_SLOT_DIALOG": {
+      return {
+        ...state,
+        upsertStorageSlotDialogOpen: true,
+        upsertStorageSlotDialogComponentId: action.payload.componentId,
+        upsertStorageSlotDialogStorageSlotIndex:
+          action.payload.storageSlotIndex,
+      };
+    }
+    case "CLOSE_UPSERT_STORAGE_SLOT_DIALOG": {
+      return {
+        ...state,
+        upsertStorageSlotDialogOpen: false,
+      };
+    }
+    case "NEW_COMPONENT": {
+      return {
+        ...state,
+        components: [...state.components, action.payload.component],
+      };
+    }
+    case "UPDATE_COMPONENT": {
+      const index = state.components.findIndex(
+        ({ id }) => id === action.payload.component.id
+      );
+      return {
+        ...state,
+        components: [
+          ...state.components.slice(0, index),
+          { ...action.payload.component, updatedAt: Date.now() },
+          ...state.components.slice(index + 1),
         ],
       };
     }

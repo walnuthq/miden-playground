@@ -9,6 +9,7 @@ import {
   Wallet,
   Home,
   FileCode,
+  Puzzle,
 } from "lucide-react";
 import { useIsClient } from "usehooks-ts";
 import NavMain from "@/components/lib/nav-main";
@@ -27,6 +28,9 @@ import useAccounts from "@/hooks/use-accounts";
 import useTransactions from "@/hooks/use-transactions";
 import useNotes from "@/hooks/use-notes";
 import useScripts from "@/hooks/use-scripts";
+import useComponents from "@/hooks/use-components";
+import defaultScripts from "@/components/global-context/default-scripts";
+import defaultComponents from "@/components/global-context/default-components";
 
 const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
   const isClient = useIsClient();
@@ -34,6 +38,7 @@ const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
   const { transactions } = useTransactions();
   const { inputNotes } = useNotes();
   const { scripts } = useScripts();
+  const { components } = useComponents();
   const items = [
     {
       title: "Home",
@@ -78,17 +83,33 @@ const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
         })),
     },
   ];
+  const defaultScriptIds = defaultScripts.map(({ id }) => id);
+  const defaultComponentIds = defaultComponents.map(({ id }) => id);
   const editorItems = [
     {
       title: "Scripts",
       url: "/scripts",
       icon: FileCode,
       items: scripts
+        .filter(({ id }) => !defaultScriptIds.includes(id))
         .sort((a, b) => b.updatedAt - a.updatedAt)
         .slice(0, 5)
         .map(({ id, name }) => ({
           title: name,
           url: `/scripts/${id}`,
+        })),
+    },
+    {
+      title: "Components",
+      url: "/components",
+      icon: Puzzle,
+      items: components
+        .filter(({ id }) => !defaultComponentIds.includes(id))
+        .sort((a, b) => b.updatedAt - a.updatedAt)
+        .slice(0, 5)
+        .map(({ id, name }) => ({
+          title: name,
+          url: `/components/${id}`,
         })),
     },
   ];

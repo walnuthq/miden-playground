@@ -1,12 +1,13 @@
 import { useRouter } from "next/navigation";
+import { type Tutorial } from "@/lib/types";
 import useAccounts from "@/hooks/use-accounts";
 import useTransactions from "@/hooks/use-transactions";
 import useNotes from "@/hooks/use-notes";
 import useGlobalContext from "@/components/global-context/hook";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
-import state from "@/components/tutorials/create-and-fund-wallet/state.json";
-import storeDump from "@/components/tutorials/create-and-fund-wallet/store.json";
+import store from "@/components/tutorials/create-and-fund-wallet/store";
+import state from "@/components/tutorials/create-and-fund-wallet/state";
 import Step1Content from "@/components/tutorials/create-and-fund-wallet/step1.mdx";
 import Step2Content from "@/components/tutorials/create-and-fund-wallet/step2.mdx";
 import Step3Content from "@/components/tutorials/create-and-fund-wallet/step3.mdx";
@@ -60,7 +61,7 @@ const Step3 = {
     const { transactions } = useTransactions();
     const faucet = faucets.find(({ name }) => name === "MDN Faucet");
     const transaction = transactions.find(
-      ({ accountAddress }) => accountAddress === faucet?.address,
+      ({ accountAddress }) => accountAddress === faucet?.address
     );
     return (
       <>
@@ -80,7 +81,7 @@ const Step3 = {
     const { transactions } = useTransactions();
     const faucet = faucets.find(({ name }) => name === "MDN Faucet");
     const transaction = transactions.find(
-      ({ accountAddress }) => accountAddress === faucet?.address,
+      ({ accountAddress }) => accountAddress === faucet?.address
     );
     return <NextStepButton disabled={!transaction} />;
   },
@@ -93,7 +94,7 @@ const Step4 = {
     const { transactions } = useTransactions();
     const faucet = faucets.find(({ name }) => name === "MDN Faucet");
     const transaction = transactions.find(
-      ({ accountAddress }) => accountAddress === faucet?.address,
+      ({ accountAddress }) => accountAddress === faucet?.address
     );
     return <Step4Content transaction={transaction} />;
   },
@@ -108,10 +109,10 @@ const Step5 = {
     const wallet = wallets.find(({ isPublic }) => isPublic);
     const faucet = faucets.find(({ name }) => name === "MDN Faucet");
     const transaction = transactions.find(
-      ({ accountAddress }) => accountAddress === wallet?.address,
+      ({ accountAddress }) => accountAddress === wallet?.address
     );
     const note = inputNotes.find(
-      ({ senderAddress }) => senderAddress === faucet?.address,
+      ({ senderAddress }) => senderAddress === faucet?.address
     );
     return (
       <>
@@ -135,7 +136,7 @@ const Step5 = {
     const { transactions } = useTransactions();
     const wallet = wallets.find(({ isPublic }) => isPublic);
     const transaction = transactions.find(
-      ({ accountAddress }) => accountAddress === wallet?.address,
+      ({ accountAddress }) => accountAddress === wallet?.address
     );
     return <NextStepButton disabled={!transaction} />;
   },
@@ -168,14 +169,16 @@ const Step6 = {
   },
 };
 
-export default {
+const tutorial: Tutorial = {
   id: "create-and-fund-wallet",
   title: "Create and fund wallet",
   tagline: "Create a new wallet and fund it using a faucet.",
   description:
     "In this first tutorial, we'll create a new wallet and discover how to fund it by creating your first Miden transactions.",
   initialRoute: "/accounts",
-  storeDump: JSON.stringify(storeDump),
-  state: JSON.stringify(state),
+  store,
+  state,
   steps: [Step1, Step2, Step3, Step4, Step5, Step6],
 };
+
+export default tutorial;

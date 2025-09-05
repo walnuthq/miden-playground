@@ -9,7 +9,9 @@ import {
   NoteScript,
   AccountId,
   type NoteMetadata,
+  AccountType as WasmAccountType,
 } from "@workspace/mock-web-client";
+import { type State } from "@/components/global-context/reducer";
 
 export const networks = {
   mtst: "Testnet",
@@ -19,6 +21,15 @@ export const networks = {
 export type NetworkId = keyof typeof networks;
 
 // ACCOUNTS
+
+export const accountTypes = {
+  [WasmAccountType.FungibleFaucet]: "Fungible Faucet",
+  [WasmAccountType.NonFungibleFaucet]: "Non Fungible Faucet",
+  [WasmAccountType.RegularAccountImmutableCode]: "Regular (immutable)",
+  [WasmAccountType.RegularAccountUpdatableCode]: "Regular (updatable)",
+} as const;
+
+export type AccountType = keyof typeof accountTypes;
 
 export type FungibleAsset = { faucetId: string; amount: string };
 
@@ -34,6 +45,7 @@ export type Account = {
   fungibleAssets: FungibleAsset[];
   storage: string[];
   consumableNoteIds: string[];
+  components: string[];
   tokenSymbol?: string;
   updatedAt: number;
 };
@@ -54,7 +66,7 @@ export const wasmAccountToAccount = (
   networkId: string,
   updatedAt: number,
   consumableNoteIds: string[] = [],
-  tokenSymbol?: string,
+  tokenSymbol?: string
 ): Account => ({
   id: account.id().toString(),
   name,
@@ -76,6 +88,7 @@ export const wasmAccountToAccount = (
     return item ? [...previousValue, item.toHex()] : previousValue;
   }, []),
   consumableNoteIds,
+  components: [],
   tokenSymbol,
   updatedAt,
 });
@@ -100,6 +113,15 @@ const noteStates = {
 
 type NoteState = (typeof noteStates)[keyof typeof noteStates];
 
+const wellKnownNotes = {
+  [NoteScript.p2id().root().toHex()]: "P2ID",
+  [NoteScript.p2ide().root().toHex()]: "P2IDE",
+  [NoteScript.swap().root().toHex()]: "SWAP",
+} as const;
+
+export type WellKnownNote =
+  (typeof wellKnownNotes)[keyof typeof wellKnownNotes];
+
 export type InputNote = {
   id: string;
   type: NoteType;
@@ -112,14 +134,6 @@ export type InputNote = {
   inputs: bigint[];
   updatedAt: number;
 };
-
-const wellKnownNotes = {
-  [NoteScript.p2id().root().toHex()]: "P2ID",
-  [NoteScript.p2ide().root().toHex()]: "P2IDE",
-  [NoteScript.swap().root().toHex()]: "SWAP",
-} as const;
-
-type WellKnownNote = (typeof wellKnownNotes)[keyof typeof wellKnownNotes];
 
 // export const noteSerialNumber = (inputNote: InputNoteRecord) =>
 //   inputNote.details().recipient().serialNum();
@@ -159,7 +173,7 @@ export const noteInputsToAccountId = (noteInputs: bigint[]) => {
 
 export const wasmInputNoteToInputNote = (
   record: InputNoteRecord,
-  networkId: string,
+  networkId: string
 ): InputNote => ({
   id: record.id().toString(),
   type: noteType(record.metadata()),
@@ -262,7 +276,7 @@ const transactionStatus = (transactionRecord: TransactionRecord) => {
 export const wasmTransactionToTransaction = (
   record: TransactionRecord,
   result: TransactionResult,
-  networkId: string,
+  networkId: string
 ): Transaction => ({
   id: record.id().toHex(),
   status: transactionStatus(record),
@@ -272,7 +286,7 @@ export const wasmTransactionToTransaction = (
     (index) => {
       const note = result.executedTransaction().inputNotes().getNote(index);
       return wasmNoteToNote(note.note(), networkId);
-    },
+    }
   ),
   outputNotes: range(result.executedTransaction().outputNotes().numNotes())
     .map((index) => {
@@ -306,8 +320,9 @@ export type Script = {
   name: string;
   type: ScriptType;
   status: ScriptStatus;
-  content: string;
+  rust: string;
   masm: string;
+  error: string;
   updatedAt: number;
 };
 
@@ -320,11 +335,86 @@ export const componentTypes = {
 
 export type ComponentType = keyof typeof componentTypes;
 
+export const storageSlotTypes = { value: "Value", map: "Storage Map" } as const;
+
+export type StorageSlotType = keyof typeof storageSlotTypes;
+
+export type StorageSlot = {
+  name: string;
+  type: StorageSlotType;
+  value: string;
+};
+
 export type Component = {
   id: string;
   name: string;
   type: ComponentType;
   scriptId: string;
+  storageSlots: StorageSlot[];
+  updatedAt: number;
+};
+
+// STORE
+
+type Blob = { __type: "Blob"; data: string };
+
+type AccountCode = { root: string; code: Blob };
+
+type AccountStorage = { root: string; slots: Blob };
+
+type AccountVault = { root: string; assets: Blob };
+
+type AccountAuth = { pubKey: string; secretKey: string };
+
+type StoreAccount = {
+  id: string;
+  codeRoot: string;
+  storageRoot: string;
+  vaultRoot: string;
+  nonce: string;
+  committed: boolean;
+  accountSeed: Blob;
+  accountCommitment: string;
+  locked: boolean;
+};
+
+type StateSync = { id: number; blockNum: string };
+
+type BlockHeader = {
+  blockNum: string;
+  header: Blob;
+  partialBlockchainPeaks: Blob;
+  hasClientNotes: string;
+};
+
+type Tag = {
+  id: number;
+  tag: string;
+  sourceNoteId: string;
+  sourceAccountId: string;
+};
+
+export type Store = {
+  accountCode: AccountCode[];
+  accountStorage: AccountStorage[];
+  accountVaults: AccountVault[];
+  accountAuth: AccountAuth[];
+  accounts: StoreAccount[];
+  // TODO
+  transactions: string[];
+  transactionScripts: string[];
+  inputNotes: string[];
+  outputNotes: string[];
+  notesScripts: string[];
+  //
+  stateSync: StateSync[];
+  blockHeaders: BlockHeader[];
+  // TODO
+  partialBlockchainNodes: string[];
+  //
+  tags: Tag[];
+  // TODO
+  foreignAccountCode: string[];
 };
 
 // TUTORIALS
@@ -341,7 +431,7 @@ export type Tutorial = {
   tagline: string;
   description: string;
   initialRoute: string;
-  storeDump: string;
-  state: string;
+  store: Store;
+  state: State;
   steps: TutorialStep[];
 };

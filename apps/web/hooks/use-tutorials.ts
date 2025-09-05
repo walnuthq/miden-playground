@@ -1,11 +1,8 @@
 import { useRouter } from "next/navigation";
 import useGlobalContext from "@/components/global-context/hook";
+import { storeSerializer } from "@/lib/utils";
 import tutorials from "@/components/tutorials/tutorials";
 import { webClient } from "@/lib/web-client";
-import {
-  stateDeserializer,
-  type State,
-} from "@/components/global-context/reducer";
 import useTransactions from "@/hooks/use-transactions";
 import {
   NoteFilter,
@@ -14,11 +11,12 @@ import {
 } from "@workspace/mock-web-client";
 // import { deleteStore } from "@/lib/utils";
 import useAccounts from "@/hooks/use-accounts";
+import defaultScripts from "@/components/global-context/default-scripts";
+import defaultComponents from "@/components/global-context/default-components";
 
 const useTutorials = () => {
   const router = useRouter();
   const {
-    networkId,
     tutorialId,
     tutorialStep,
     tutorialMaxStep,
@@ -43,15 +41,16 @@ const useTutorials = () => {
     /* console.log("clear");
     await clearStore();
     console.log("clear done"); */
-    const state = JSON.parse(tutorial.state) as State;
-    const client = await webClient(state.networkId);
-    await client.forceImportStore(tutorial.storeDump);
+    const client = await webClient(tutorial.state.networkId);
+    await client.forceImportStore(storeSerializer(tutorial.store));
     const syncSummary = await client.syncState();
     dispatch({
       type: "LOAD_PROJECT",
       payload: {
         state: {
-          ...stateDeserializer(tutorial.state),
+          ...tutorial.state,
+          scripts: [...tutorial.state.scripts, ...defaultScripts],
+          components: [...tutorial.state.components, ...defaultComponents],
           blockNum: syncSummary.blockNum(),
         },
       },

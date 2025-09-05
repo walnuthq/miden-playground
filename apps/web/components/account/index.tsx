@@ -25,7 +25,7 @@ const Account = ({ address }: { address: string }) => {
         <div className="flex items-center justify-between">
           <TabsList>
             <TabsTrigger value="information">Information</TabsTrigger>
-            {address === "mtst1qz43ftxkrzcjsqz3hpw332qwny2ggsp0" && (
+            {account.components.length > 0 && (
               <TabsTrigger value="components">Components</TabsTrigger>
             )}
           </TabsList>
@@ -34,18 +34,11 @@ const Account = ({ address }: { address: string }) => {
         <TabsContent value="information">
           <AccountInformation account={account} />
         </TabsContent>
-        <TabsContent value="components">
-          <AccountComponents
-            components={[
-              {
-                id: "counter-contract",
-                name: "Counter Contract",
-                type: "account",
-                scriptId: "counter-contract",
-              },
-            ]}
-          />
-        </TabsContent>
+        {account.components.length > 0 && (
+          <TabsContent value="components">
+            <AccountComponents account={account} />
+          </TabsContent>
+        )}
       </Tabs>
       <CreateTransactionDialog />
     </div>

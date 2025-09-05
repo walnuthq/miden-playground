@@ -14,7 +14,7 @@ const AccountStorageTable = ({ storage }: { storage: string[] }) => (
         <TableRow>
           <TableHead>Item Slot Index</TableHead>
           <TableHead>Item Slot Type</TableHead>
-          <TableHead>Value/Commitment</TableHead>
+          <TableHead>Value / Commitment</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>

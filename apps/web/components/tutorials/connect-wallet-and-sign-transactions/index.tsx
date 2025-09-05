@@ -2,13 +2,14 @@ import { useRouter, usePathname } from "next/navigation";
 import { EllipsisVertical } from "lucide-react";
 import { useWallet } from "@demox-labs/miden-wallet-adapter";
 import { useInterval } from "usehooks-ts";
+import { type Tutorial } from "@/lib/types";
 import useAccounts from "@/hooks/use-accounts";
 import useNotes from "@/hooks/use-notes";
 import useGlobalContext from "@/components/global-context/hook";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
-import state from "@/components/tutorials/connect-wallet-and-sign-transactions/state.json";
-import storeDump from "@/components/tutorials/connect-wallet-and-sign-transactions/store.json";
+import state from "@/components/tutorials/connect-wallet-and-sign-transactions/state";
+import store from "@/components/tutorials/connect-wallet-and-sign-transactions/store";
 import Step1Content from "@/components/tutorials/connect-wallet-and-sign-transactions/step1.mdx";
 import Step2Content from "@/components/tutorials/connect-wallet-and-sign-transactions/step2.mdx";
 import Step3Content from "@/components/tutorials/connect-wallet-and-sign-transactions/step3.mdx";
@@ -65,11 +66,11 @@ const Step2 = {
         fungibleAssets.some(
           ({ faucetId, amount }) =>
             faucetId === "0x43999c9344b31a206a5464ece82b91" &&
-            amount === "100000000",
+            amount === "100000000"
         ) &&
         senderAddress === "mtst1qppen8yngje35gr223jwe6ptjy7gedn9" &&
         state === "Committed" &&
-        type === "Public",
+        type === "Public"
     );
     return (
       <>
@@ -99,11 +100,11 @@ const Step2 = {
         fungibleAssets.some(
           ({ faucetId, amount }) =>
             faucetId === "0x43999c9344b31a206a5464ece82b91" &&
-            amount === "100000000",
+            amount === "100000000"
         ) &&
         senderAddress === "mtst1qppen8yngje35gr223jwe6ptjy7gedn9" &&
         state === "Committed" &&
-        type === "Public",
+        type === "Public"
     );
     return <NextStepButton disabled={!note} />;
   },
@@ -123,7 +124,7 @@ const Step3 = {
         };
         waitForSyncState();
       },
-      wallet && wallet.consumableNoteIds.length > 0 ? 1000 : null,
+      wallet && wallet.consumableNoteIds.length > 0 ? 1000 : null
     );
     return (
       <>
@@ -235,14 +236,16 @@ const Step6 = {
   },
 };
 
-export default {
+const tutorial: Tutorial = {
   id: "connect-wallet-and-sign-transactions",
   title: "Connect wallet and sign transactions",
   tagline: "Connect your Miden Wallet and sign transactions on testnet.",
   description:
     "This tutorial will walk you through connecting your Miden Wallet to the Miden Playground and confirming transactions on Miden testnet.",
   initialRoute: "/accounts",
-  storeDump: JSON.stringify(storeDump),
-  state: JSON.stringify(state),
+  store,
+  state,
   steps: [Step1, Step2, Step3, Step4, Step5, Step6],
 };
+
+export default tutorial;

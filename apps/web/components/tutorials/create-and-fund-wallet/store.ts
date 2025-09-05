@@ -1,0 +1,88 @@
+import { type Store } from "@/lib/types";
+
+const store: Store = {
+  accountCode: [
+    {
+      root: "0x61dfb7d04da6d96f5f342674cf22e759e0f515e1f21836b06786f753cbfbb925",
+      code: {
+        __type: "Blob",
+        data: "TUFTVAAAAAAHAQcAAAAAAQAAAAIAAAABAAAAAAAAAICvUCqlxqZBbT/vDemLgtrac7Bm+2qchrqpaZD0q5NgvQAAAAAAAACAsNWiMDVY+kBQGgZH8w3TuQ2JsRED3tgugctmm2njcmQAAAAAAAAAgGjbnmt8C6YPrSEPjIa5vdmngCJC/46BiNhwNlOLW2qtAQEBAQEBAQECr1AqpcamQW0/7w3pi4La2nOwZvtqnIa6qWmQ9KuTYL0BAWjbnmt8C6YPrSEPjIa5vdmngCJC/46BiNhwNlOLW2qtAgGw1aIwNVj6QFAaBkfzDdO5DYmxEQPe2C6By2abaeNyZAIB",
+      },
+    },
+  ],
+  accountStorage: [
+    {
+      root: "0x52897fb5e60aa05d9b51cf6cf927b59bb23e588f2be0fc61608becd25ea7630c",
+      slots: {
+        __type: "Blob",
+        data: "AwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACyvgho6PVB1/gT45AQDplhvEG9aYlWrIqVmnuHz1aRegBAQg8AAAAAAAgAAAAAAAAAIUEDAAAAAAAAAAAAAAAAAA==",
+      },
+    },
+  ],
+  accountVaults: [
+    {
+      root: "0x3e128c57f6cfa0d44ab1308994171af13cb513422add28d1916b3ff254fef82d",
+      assets: { __type: "Blob", data: "AQ==" },
+    },
+  ],
+  accountAuth: [
+    {
+      pubKey:
+        "0xb2be0868e8f541d7f813e390100e9961bc41bd698956ac8a959a7b87cf56917a",
+      secretKey:
+        "0059efe100e8203ef7b07bfc808607dfbdfbf0c41071bffbf04208220407d101e43fc2ec2086102143086045f7ff8ae80f7ef41fc7f83ec6ffc0bd0c61830c1041fc7f8103e136fbdf3e04613af4207c03dfc5f3ce81f7ffc1041e89001100f7cfc2e7cefbf7cf800bff780c3e02180086ffffba00513cf04f3c082002f8717ef4713c13efbff860761ff2bb081fc300103f14323f0c0ebf044078f7e243f891c0140180ff9004e80dfe24404203f00400404303be42042fbdfc403cf42fc400117d179040ec000513df811c0ec0ff910110208108320008404204010623bfbee82e83f82f7e103f02f05fbc03d13c0c1f41f820bc101fff000ebdf410bbf7cfff0c0178082003043f820c9e04fb1f7efbc0ff0fdcff03c0c50c0180003ef9002f81043f010c50fc08407cdc1ffbd83f7df7c082f0307dec0201000ec0101003f7c0c40010bf040f4807e1c4005e7fec118403fffa0850f800208423ff3ff07048078081002041f01ec3f04f7f077145206144183fbb1b9141fbfdfb0840bd04a0fb0bd0bd143ffd1fde85fb91851c00ba10207c03c13d20613ef3fec02be13bfc20fb07ef43ec00bdfc8f02ec01befbd0032050bcffb143ec033ff82f42f8303d0c20fff87084ec20c1ffe082005101fc103ff00f4223b1010c2ebd03be87f391beffe1beec2f80101f7d203e42fc70ff0fa1c5f46fff1bae43f38f4907a08607bf3f141fbdfffebc0bdf7effe13ee84ec4ec10b8ebdff9001f3e13cf7e0bd23f07cf810bffbdfbb23d1820060fdf83efeefdcc310503bf46fbfefae8c102fc2f81eff080f8207af84fbff82f41084149ffbfc2142fbcebf07ad81f80ffb0fdfc9f3dfb913e1c00bffbae3b0840c3f83f7e0c2204ec503d281ebe0bbf4120110703fe8208617bfb90bf0400fcf7dffff88f7b13b180081001104fbe07e33f07cfc2fc90c104017e003200e7a0bcf7cf8308003d2be081fc0ffef7c004e87f46ff908b0fff82043f0803eebf046f460410be1fe07c0431440fcec313c043f0407af42081fbdfbf17c1bbf8307d1fdf8207907dffef0007efc2fbd0bcf40076f85003eee61f25fbd0f6e4190a05fe16eb173e0beaec04d8f0010b10e901f81ce7ea1a2402fadd11edfdcd07f51c290401dee4fc10fa170bee150ff4fa2126083df717fb06050edf28ede5f3eceffe1ff7280ae1e008fdfe18e8350e0a1a1df809320925da06e0fc0adfec1aebfdd504eadbd2e23bf8f701ecf5eddceaf2e6fe200f1722f0190ee3f0fcdfd707e9d4f0e51005dcd501ffef0709ddf7183230fa1210041ffa3204abf2e5d6e3d2d328fe13fef8ea11030e0003d8dff5e61ffdcf290e04fffcdb03e40203fb04e3f2ca02e1f51a07d11c1d0600f800f30212f5ef2a0626f21df3f2bafbf3feef0bed01fe2afc040c090232262bee1ef0ebfc0cff0f030e1ee0fceb13f9e93f150cf3d9eb19f52e3915111a010bd0c5e61315f012fae3ea35231401ee1b111e02fe00ec0410042fe40513ca15000919def216e9d51d1110fc11faf922d4f20def15f91710f7e60605b5250d2114d8c5f70902cff1f4e1f2e40a080713411cecf10bf6ec10f306db03dbf2eee3f1c0eef1d338feea2a2c2c0bec2ced0bcf0d01e8f019ef01dd090911f5ff2311f8f0e706e10d2f0509e8070afe35fb1b0a0e07f51efc20fc0406fbd9ef12e206e6142321f705f0eef316112ee31f042a06e807fbf7fa04caede203f0f113fdfb040615f92013071c04f7201113f914112c05d3fa1af4cd2a100a07d4ea2ffa2de1f707fced02e6e3e70825",
+    },
+  ],
+  accounts: [
+    {
+      id: "0xc0321051742c4e203ff6fd1f830a7a",
+      codeRoot:
+        "0x61dfb7d04da6d96f5f342674cf22e759e0f515e1f21836b06786f753cbfbb925",
+      storageRoot:
+        "0x52897fb5e60aa05d9b51cf6cf927b59bb23e588f2be0fc61608becd25ea7630c",
+      vaultRoot:
+        "0x3e128c57f6cfa0d44ab1308994171af13cb513422add28d1916b3ff254fef82d",
+      nonce: "0",
+      committed: true,
+      accountSeed: {
+        __type: "Blob",
+        data: "lyxVCFEPEZzycmudmRWXHyeqS0MfZ/U+Ao9Vibp5sR8=",
+      },
+      accountCommitment:
+        "0x1a33c113fce930065fbb7d308071790198ffc85b90dba9b02ed34aea85834eb2",
+      locked: false,
+    },
+  ],
+  transactions: [],
+  transactionScripts: [],
+  inputNotes: [],
+  outputNotes: [],
+  notesScripts: [],
+  stateSync: [{ id: 1, blockNum: "5" }],
+  blockHeaders: [
+    {
+      blockNum: "5",
+      header: {
+        __type: "Blob",
+        data: "AAAAAEGYafBUzzUpMBBwm6z/28emwGbgfwoClq6KOC5IsqBiBQAAALKLMjSzrWBNUlNTCr9T7Pi5mCC2OZfHHhyyU/85s4IUPhKMV/bPoNRKsTCJlBca8Ty1E0Iq3SjRkWs/8lT++C1e+ugFiPEtKJM950cpQ+wyJJZxnUjRyJGW6beG03eFWv4kh6HI3c6T7TCRLheZMk5gyAgYDp4igHj9t340efQTAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABw4B+Xqp+z0x0UMGi1EtcPBqVuTC+e+MvSaU4qemovLgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMvFTZQ==",
+      },
+      partialBlockchainPeaks: {
+        __type: "Blob",
+        data: "BZ0lAdvw5F3NQzrsu7JJ04ukQdPfCuN50ZfWnw7+rtRCQZhp8FTPNSkwEHCbrP/bx6bAZuB/CgKWroo4LkiyoGI=",
+      },
+      hasClientNotes: "false",
+    },
+  ],
+  partialBlockchainNodes: [],
+  tags: [
+    {
+      tag: "AAAM8A==",
+      sourceNoteId: "",
+      sourceAccountId: "0xc0321051742c4e203ff6fd1f830a7a",
+      id: 1,
+    },
+  ],
+  foreignAccountCode: [],
+};
+
+export default store;

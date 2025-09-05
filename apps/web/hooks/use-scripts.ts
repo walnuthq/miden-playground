@@ -1,4 +1,4 @@
-import { kebabCase, update } from "lodash";
+import { kebabCase } from "lodash";
 import useGlobalContext from "@/components/global-context/hook";
 import { type Script, type ScriptStatus, type ScriptType } from "@/lib/types";
 
@@ -14,8 +14,9 @@ const useScripts = () => {
       name,
       type,
       status: "draft" as ScriptStatus,
-      content: "",
+      rust: "",
       masm: "",
+      error: "",
       updatedAt: Date.now(),
     };
     dispatch({

@@ -1,3 +1,5 @@
+import { type Store } from "@/lib/types";
+
 export const sleep = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -14,3 +16,5 @@ export const deleteStore = () =>
     const deleteRequest = indexedDB.deleteDatabase("MidenClientDB");
     deleteRequest.onsuccess = resolve;
   });
+
+export const storeSerializer = (store: Store) => JSON.stringify(store);

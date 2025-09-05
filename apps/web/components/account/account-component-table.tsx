@@ -2,7 +2,13 @@ import { useState } from "react";
 import Link from "next/link";
 import { RotateCw } from "lucide-react";
 import useScripts from "@/hooks/use-scripts";
-import { type Component, componentTypes } from "@/lib/types";
+import {
+  type Account,
+  type Component,
+  type StorageSlot,
+  componentTypes,
+  storageSlotTypes,
+} from "@/lib/types";
 import {
   Table,
   TableBody,
@@ -17,40 +23,36 @@ import useGlobalContext from "@/components/global-context/hook";
 import { webClient } from "@/lib/web-client";
 // import useTransactions from "@/hooks/use-transactions";
 
-type StorageSlot = { name: string; type: string; value: string };
-
 const StorageSlotsTable = ({
+  storage,
   storageSlots,
 }: {
+  storage: string[];
   storageSlots: StorageSlot[];
-}) => {
-  return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Value</TableHead>
+}) => (
+  <div className="rounded-md border">
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Name</TableHead>
+          <TableHead>Type</TableHead>
+          <TableHead>Value</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {storageSlots.map(({ name, type }, index) => (
+          <TableRow key={name}>
+            <TableCell>{name}</TableCell>
+            <TableCell>{storageSlotTypes[type]}</TableCell>
+            <TableCell>{formatValue(storage[index] ?? "")}</TableCell>
           </TableRow>
-        </TableHeader>
-        <TableBody>
-          {storageSlots.map(({ name, type, value }) => (
-            <TableRow key={name}>
-              <TableCell>{name}</TableCell>
-              <TableCell>{type}</TableCell>
-              <TableCell>{formatValue(value)}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
-  );
-};
+        ))}
+      </TableBody>
+    </Table>
+  </div>
+);
 
-const COUNTER_CONTRACT_ADDRESS = "mtst1qz43ftxkrzcjsqz3hpw332qwny2ggsp0";
-
-const ReadOnlyProceduresTable = () => {
+const ReadOnlyProceduresTable = ({ account }: { account: Account }) => {
   const { networkId } = useGlobalContext();
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState("");
@@ -59,11 +61,11 @@ const ReadOnlyProceduresTable = () => {
     const { AccountId: WasmAccountId } = await import("@demox-labs/miden-sdk");
     const counter = await client.getAccount(
       // @ts-ignore
-      WasmAccountId.fromBech32(COUNTER_CONTRACT_ADDRESS),
+      WasmAccountId.fromBech32(account.address)
     );
-    const count = counter?.storage().getItem(1);
+    const count = counter?.storage().getItem(0);
     const counterValue = BigInt(
-      `0x${count!.toHex().slice(-16).match(/../g)!.reverse().join("")}`,
+      `0x${count!.toHex().slice(-16).match(/../g)!.reverse().join("")}`
     );
     setResult(counterValue.toString());
   };
@@ -149,7 +151,7 @@ begin
 end
 `;
 
-const ReadWriteProceduresTable = () => {
+const ReadWriteProceduresTable = ({ account }: { account: Account }) => {
   const { networkId } = useGlobalContext();
   // const { newCustomTransactionRequest, submitTransaction } = useTransactions();
   const [loading, setLoading] = useState(false);
@@ -185,12 +187,13 @@ const ReadWriteProceduresTable = () => {
     const client = await webClient(networkId);
     const counter = await client.getAccount(
       // @ts-ignore
-      WasmAccountId.fromBech32(COUNTER_CONTRACT_ADDRESS),
+      WasmAccountId.fromBech32(account.address)
     );
-    const count = counter?.storage().getItem(1);
+    const count = counter?.storage().getItem(0);
+    // TODO remove mock
     const counterValue =
       BigInt(
-        `0x${count!.toHex().slice(-16).match(/../g)!.reverse().join("")}`,
+        `0x${count!.toHex().slice(-16).match(/../g)!.reverse().join("")}`
       ) + 1n;
     await sleep(2000);
     setResult(counterValue.toString());
@@ -228,7 +231,13 @@ const ReadWriteProceduresTable = () => {
   );
 };
 
-const AccountComponentTable = ({ component }: { component: Component }) => {
+const AccountComponentTable = ({
+  account,
+  component,
+}: {
+  account: Account;
+  component: Component;
+}) => {
   const { scripts } = useScripts();
   const script = scripts.find(({ id }) => id === component.scriptId);
   return (
@@ -250,33 +259,33 @@ const AccountComponentTable = ({ component }: { component: Component }) => {
               </Link>
             </TableCell>
           </TableRow>
-          <TableRow>
-            <TableCell>Storage Slots</TableCell>
-            <TableCell>
-              <StorageSlotsTable
-                storageSlots={[
-                  {
-                    name: "counter",
-                    type: "Single Value",
-                    value:
-                      "0x0000000000000000000000000000000000000000000000000700000000000000",
-                  },
-                ]}
-              />
-            </TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>Read-only Procedures</TableCell>
-            <TableCell>
-              <ReadOnlyProceduresTable />
-            </TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>Read-write Procedures</TableCell>
-            <TableCell>
-              <ReadWriteProceduresTable />
-            </TableCell>
-          </TableRow>
+          {component.storageSlots.length > 0 && (
+            <TableRow>
+              <TableCell>Storage Slots</TableCell>
+              <TableCell>
+                <StorageSlotsTable
+                  storage={account.storage}
+                  storageSlots={component.storageSlots}
+                />
+              </TableCell>
+            </TableRow>
+          )}
+          {component.id === "counter-contract" && (
+            <TableRow>
+              <TableCell>Read-only Procedures</TableCell>
+              <TableCell>
+                <ReadOnlyProceduresTable account={account} />
+              </TableCell>
+            </TableRow>
+          )}
+          {component.id === "counter-contract" && (
+            <TableRow>
+              <TableCell>Read-write Procedures</TableCell>
+              <TableCell>
+                <ReadWriteProceduresTable account={account} />
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </Table>
     </div>
