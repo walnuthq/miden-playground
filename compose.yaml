@@ -5,6 +5,8 @@ services:
       additional_contexts:
         - root=.
     restart: always
+    environment:
+      - WEB_URL=http://localhost:3000
     #volumes:
     #- ./apps/api:/home/node/apps/api
     #- /home/node/apps/www/.next

@@ -1,17 +1,13 @@
-import { range } from "lodash";
 import { type FunctionComponent } from "react";
-import {
-  type Account as WasmAccount,
-  type Note as WasmNote,
-  type TransactionRecord,
-  type TransactionResult,
-  type InputNoteRecord,
-  NoteScript,
-  AccountId,
-  type NoteMetadata,
-  AccountType as WasmAccountType,
-} from "@workspace/mock-web-client";
 import { type State } from "@/components/global-context/reducer";
+import {
+  type Felt as WasmFelt,
+  type Word as WasmWord,
+  type AccountId as WasmAccountId,
+  type OutputNote as WasmOutputNote,
+  type FungibleAsset as WasmFungibleAsset,
+} from "@demox-labs/miden-sdk";
+import { type Store } from "@/lib/store";
 
 export const networks = {
   mtst: "Testnet",
@@ -23,13 +19,21 @@ export type NetworkId = keyof typeof networks;
 // ACCOUNTS
 
 export const accountTypes = {
-  [WasmAccountType.FungibleFaucet]: "Fungible Faucet",
-  [WasmAccountType.NonFungibleFaucet]: "Non Fungible Faucet",
-  [WasmAccountType.RegularAccountImmutableCode]: "Regular (immutable)",
-  [WasmAccountType.RegularAccountUpdatableCode]: "Regular (updatable)",
+  "fungible-faucet": "Fungible Faucet",
+  "non-fungible-faucet": "Non Fungible Faucet",
+  "regular-account-immutable-code": "Regular (immutable)",
+  "regular-account-updatable-code": "Regular (updatable)",
 } as const;
 
 export type AccountType = keyof typeof accountTypes;
+
+export const accountStorageModes = {
+  private: "Private",
+  public: "Public",
+  network: "Network",
+} as const;
+
+export type AccountStorageMode = keyof typeof accountStorageModes;
 
 export type FungibleAsset = { faucetId: string; amount: string };
 
@@ -37,8 +41,8 @@ export type Account = {
   id: string;
   name: string;
   address: string;
-  type: string;
-  storageMode: "Public" | "Private";
+  type: AccountType;
+  storageMode: AccountStorageMode;
   isFaucet: boolean;
   isPublic: boolean;
   nonce: bigint;
@@ -50,86 +54,37 @@ export type Account = {
   updatedAt: number;
 };
 
-const accountType = (account: WasmAccount, tokenSymbol?: string) => {
-  if (account.isRegularAccount()) {
-    return "Regular (updatable)";
-  } else if (account.isFaucet()) {
-    return `Fungible faucet (token symbol: ${tokenSymbol ?? "Unknown"})`;
-  } else {
-    return "Unknown";
-  }
-};
-
-export const wasmAccountToAccount = (
-  account: WasmAccount,
-  name: string,
-  networkId: string,
-  updatedAt: number,
-  consumableNoteIds: string[] = [],
-  tokenSymbol?: string
-): Account => ({
-  id: account.id().toString(),
-  name,
-  address: account.id().toBech32Custom(networkId),
-  type: accountType(account, tokenSymbol),
-  storageMode: account.isPublic() ? "Public" : "Private",
-  isPublic: account.isPublic(),
-  isFaucet: account.isFaucet(),
-  nonce: account.nonce().asInt(),
-  fungibleAssets: account
-    .vault()
-    .fungibleAssets()
-    .map((fungibleAsset) => ({
-      faucetId: fungibleAsset.faucetId().toString(),
-      amount: fungibleAsset.amount().toString(),
-    })),
-  storage: range(255).reduce<string[]>((previousValue, currentValue) => {
-    const item = account.storage().getItem(currentValue);
-    return item ? [...previousValue, item.toHex()] : previousValue;
-  }, []),
-  consumableNoteIds,
-  components: [],
-  tokenSymbol,
-  updatedAt,
-});
-
 // INPUT NOTES
 
-const noteTypes = { 1: "Public", 2: "Private", 3: "Encrypted" } as const;
-
-type NoteType = (typeof noteTypes)[keyof typeof noteTypes];
-
-const noteStates = {
-  0: "Expected",
-  1: "Unverified",
-  2: "Committed",
-  3: "Invalid",
-  4: "Processing Authenticated",
-  5: "Processing Unauthenticated",
-  6: "Consumed Authenticated Local",
-  7: "Consumed Unauthenticated Local",
-  8: "Consumed External",
+export const noteTypes = {
+  public: "Public",
+  private: "Private",
+  encrypted: "Encrypted",
 } as const;
 
-type NoteState = (typeof noteStates)[keyof typeof noteStates];
+export type NoteType = keyof typeof noteTypes;
 
-const wellKnownNotes = {
-  [NoteScript.p2id().root().toHex()]: "P2ID",
-  [NoteScript.p2ide().root().toHex()]: "P2IDE",
-  [NoteScript.swap().root().toHex()]: "SWAP",
+export const noteStates = {
+  expected: "Expected",
+  unverified: "Unverified",
+  committed: "Committed",
+  invalid: "Invalid",
+  "processing-authenticated": "Processing Authenticated",
+  "processing-unauthenticated": "Processing Unauthenticated",
+  "consumed-authenticated-local": "Consumed Authenticated Local",
+  "consumed-unauthenticated-local": "Consumed Unauthenticated Local",
+  "consumed-external": "Consumed External",
 } as const;
 
-export type WellKnownNote =
-  (typeof wellKnownNotes)[keyof typeof wellKnownNotes];
+type NoteState = keyof typeof noteStates;
 
 export type InputNote = {
   id: string;
   type: NoteType;
   state: NoteState;
   tag: string;
-  senderAddress: string;
+  senderId: string;
   scriptRoot: string;
-  wellKnownNote?: WellKnownNote;
   fungibleAssets: FungibleAsset[];
   inputs: bigint[];
   updatedAt: number;
@@ -137,13 +92,6 @@ export type InputNote = {
 
 // export const noteSerialNumber = (inputNote: InputNoteRecord) =>
 //   inputNote.details().recipient().serialNum();
-
-const noteType = (metadata?: NoteMetadata) => {
-  return metadata ? noteTypes[metadata.noteType()] : noteTypes[1];
-};
-
-// export const noteState = (inputNote: InputNoteRecord) =>
-//   noteStates[inputNote.state()];
 
 // export const noteTag = (inputNote: InputNoteRecord) =>
 //   inputNote.metadata()?.tag().executionMode().toString() ?? "";
@@ -154,73 +102,7 @@ const noteType = (metadata?: NoteMetadata) => {
 // ) => inputNote.metadata()?.sender().toBech32Custom(networkId) ?? "";
 
 export const noteConsumed = ({ state }: InputNote) =>
-  state.includes("Consumed");
-
-// let mut hex_string =
-//   format!("0x{:016x}{:016x}", self.prefix().as_u64(), self.suffix().as_int());
-// hex_string.truncate(32);
-// hex_string
-
-export const noteInputsToAccountId = (noteInputs: bigint[]) => {
-  const [suffix, prefix] = noteInputs;
-  if (!suffix || !prefix) {
-    return AccountId.fromHex("0x000000000000000000000000000000");
-  }
-  const prefixString = prefix.toString(16).padStart(16, "0");
-  const suffixString = suffix.toString(16).padStart(16, "0");
-  return AccountId.fromHex(`0x${prefixString}${suffixString}`.slice(0, 32));
-};
-
-export const wasmInputNoteToInputNote = (
-  record: InputNoteRecord,
-  networkId: string
-): InputNote => ({
-  id: record.id().toString(),
-  type: noteType(record.metadata()),
-  state: noteStates[record.state()],
-  tag: record.metadata()?.tag().executionMode().toString() ?? "",
-  senderAddress:
-    // TODO remove
-    networkId === "mtst"
-      ? (record.metadata()?.sender().toBech32("mtst") ?? "")
-      : (record.metadata()?.sender().toBech32Custom(networkId) ?? ""),
-  // senderAddress: record.metadata()?.sender().toBech32Custom(networkId) ?? "",
-  scriptRoot:
-    networkId === "mtst"
-      ? "0x0"
-      : record.details().recipient().script().root().toHex(),
-  // scriptRoot: record.details().recipient().script().root().toHex(),
-  wellKnownNote:
-    networkId === "mtst"
-      ? undefined
-      : wellKnownNotes[record.details().recipient().script().root().toHex()],
-  // wellKnownNote:
-  //   wellKnownNotes[record.details().recipient().script().root().toHex()],
-  fungibleAssets: record
-    .details()
-    .assets()
-    .fungibleAssets()
-    .map((fungibleAsset) => ({
-      faucetId: fungibleAsset.faucetId().toString(),
-      amount: fungibleAsset.amount().toString(),
-    })),
-  inputs:
-    networkId === "mtst"
-      ? []
-      : record
-          .details()
-          .recipient()
-          .inputs()
-          .values()
-          .map((value) => value.asInt()),
-  // inputs: record
-  //   .details()
-  //   .recipient()
-  //   .inputs()
-  //   .values()
-  //   .map((value) => value.asInt()),
-  updatedAt: record.inclusionProof()?.location().blockNum() ?? 0,
-});
+  state.includes("consumed");
 
 // TRANSACTIONS
 
@@ -232,71 +114,19 @@ export type Note = {
   id: string;
   type: NoteType;
   scriptRoot: string;
-  wellKnownNote?: WellKnownNote;
-  senderAddress: string;
+  senderId: string;
   fungibleAssets: FungibleAsset[];
 };
-
-const wasmNoteToNote = (note: WasmNote, networkId: string): Note => ({
-  id: note.id().toString(),
-  type: noteType(note.metadata()),
-  scriptRoot: note.recipient().script().root().toHex(),
-  wellKnownNote: wellKnownNotes[note.recipient().script().root().toHex()],
-  senderAddress: note.metadata()?.sender().toBech32Custom(networkId) ?? "",
-  fungibleAssets: note
-    .assets()
-    .fungibleAssets()
-    .map((fungibleAsset) => ({
-      faucetId: fungibleAsset.faucetId().toString(),
-      amount: fungibleAsset.amount().toString(),
-    })),
-});
 
 export type Transaction = {
   id: string;
   status: string;
-  accountAddress: string;
+  accountId: string;
   scriptRoot: string;
   inputNotes: Note[];
   outputNotes: Note[];
   updatedAt: number;
 };
-
-const transactionStatus = (transactionRecord: TransactionRecord) => {
-  const status = transactionRecord.transactionStatus();
-  if (status.isPending()) {
-    return "Pending";
-  } else if (status.isCommitted()) {
-    return `Committed (Block: ${status.getBlockNum()})`;
-  } else {
-    return "Discarded";
-  }
-};
-
-export const wasmTransactionToTransaction = (
-  record: TransactionRecord,
-  result: TransactionResult,
-  networkId: string
-): Transaction => ({
-  id: record.id().toHex(),
-  status: transactionStatus(record),
-  accountAddress: record.accountId().toBech32Custom(networkId),
-  scriptRoot: result.transactionArguments().txScript()?.root().toHex() ?? "",
-  inputNotes: range(result.executedTransaction().inputNotes().numNotes()).map(
-    (index) => {
-      const note = result.executedTransaction().inputNotes().getNote(index);
-      return wasmNoteToNote(note.note(), networkId);
-    }
-  ),
-  outputNotes: range(result.executedTransaction().outputNotes().numNotes())
-    .map((index) => {
-      const note = result.executedTransaction().outputNotes().getNote(index);
-      return note.intoFull();
-    })
-    .filter((note) => note !== undefined)
-    .map((note) => wasmNoteToNote(note, networkId)),
-  updatedAt: record.blockNum(),
-});
 
 // SCRIPTS
 
@@ -323,6 +153,7 @@ export type Script = {
   rust: string;
   masm: string;
   error: string;
+  root: string;
   updatedAt: number;
 };
 
@@ -354,69 +185,6 @@ export type Component = {
   updatedAt: number;
 };
 
-// STORE
-
-type Blob = { __type: "Blob"; data: string };
-
-type AccountCode = { root: string; code: Blob };
-
-type AccountStorage = { root: string; slots: Blob };
-
-type AccountVault = { root: string; assets: Blob };
-
-type AccountAuth = { pubKey: string; secretKey: string };
-
-type StoreAccount = {
-  id: string;
-  codeRoot: string;
-  storageRoot: string;
-  vaultRoot: string;
-  nonce: string;
-  committed: boolean;
-  accountSeed: Blob;
-  accountCommitment: string;
-  locked: boolean;
-};
-
-type StateSync = { id: number; blockNum: string };
-
-type BlockHeader = {
-  blockNum: string;
-  header: Blob;
-  partialBlockchainPeaks: Blob;
-  hasClientNotes: string;
-};
-
-type Tag = {
-  id: number;
-  tag: string;
-  sourceNoteId: string;
-  sourceAccountId: string;
-};
-
-export type Store = {
-  accountCode: AccountCode[];
-  accountStorage: AccountStorage[];
-  accountVaults: AccountVault[];
-  accountAuth: AccountAuth[];
-  accounts: StoreAccount[];
-  // TODO
-  transactions: string[];
-  transactionScripts: string[];
-  inputNotes: string[];
-  outputNotes: string[];
-  notesScripts: string[];
-  //
-  stateSync: StateSync[];
-  blockHeaders: BlockHeader[];
-  // TODO
-  partialBlockchainNodes: string[];
-  //
-  tags: Tag[];
-  // TODO
-  foreignAccountCode: string[];
-};
-
 // TUTORIALS
 
 export type TutorialStep = {
@@ -434,4 +202,52 @@ export type Tutorial = {
   store: Store;
   state: State;
   steps: TutorialStep[];
+};
+
+// MISSING TYPES
+
+export type WasmTransactionId = {
+  free(): void;
+  asElements(): WasmFelt[];
+  asBytes(): Uint8Array;
+  toHex(): string;
+  inner(): WasmWord;
+};
+
+type WasmOutputNotes = {
+  free(): void;
+  commitment(): WasmWord;
+  numNotes(): number;
+  isEmpty(): boolean;
+  getNote(index: number): WasmOutputNote;
+  notes(): WasmOutputNote[];
+};
+
+type WasmTransactionStatus = {
+  free(): void;
+  isPending(): boolean;
+  isCommitted(): boolean;
+  isDiscarded(): boolean;
+  getBlockNum(): number | undefined;
+  getCommitTimestamp(): bigint | undefined;
+};
+
+export type WasmTransactionRecord = {
+  free(): void;
+  id(): WasmTransactionId;
+  accountId(): WasmAccountId;
+  initAccountState(): WasmWord;
+  finalAccountState(): WasmWord;
+  inputNoteNullifiers(): WasmWord[];
+  outputNotes(): WasmOutputNotes;
+  blockNum(): number;
+  transactionStatus(): WasmTransactionStatus;
+  creationTimestamp(): bigint;
+};
+
+export type WasmAssetVault = {
+  free(): void;
+  root(): WasmWord;
+  getBalance(faucet_id: WasmAccountId): bigint;
+  fungibleAssets(): WasmFungibleAsset[];
 };

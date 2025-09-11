@@ -1,20 +1,18 @@
 import { type Dispatch, type SetStateAction } from "react";
 import { toast } from "sonner";
 import useTransactions from "@/hooks/use-transactions";
-import {
-  type TransactionResult,
-  type TransactionRecord,
-} from "@workspace/mock-web-client";
 import FungibleAssetsTable from "@/components/lib/fungible-assets-table";
 import AccountAddress from "@/components/lib/account-address";
 import AccountStorageDeltaTable from "@/components/lib/account-storage-delta-table";
 import TransactionId from "@/components/lib/transaction-id";
 import NoteId from "@/components/lib/note-id";
+import { type TransactionResult as WasmTransactionResult } from "@demox-labs/miden-sdk";
+import { type WasmTransactionRecord } from "@/lib/types";
 
 const SubmitTransactionToastDescription = ({
   transactionRecord,
 }: {
-  transactionRecord: TransactionRecord;
+  transactionRecord: WasmTransactionRecord;
 }) => (
   <>
     <p>
@@ -42,7 +40,7 @@ const SubmitTransactionToastDescription = ({
 const TransactionPreview = ({
   transactionResult,
 }: {
-  transactionResult: TransactionResult;
+  transactionResult: WasmTransactionResult;
 }) => {
   const consumedNotes = transactionResult.consumedNotes().numNotes();
   const createdNotes = transactionResult.createdNotes().numNotes();
@@ -130,7 +128,7 @@ const CreateTransactionPreviewForm = ({
   setLoading,
   onClose,
 }: {
-  transactionResult: TransactionResult;
+  transactionResult: WasmTransactionResult;
   setLoading: Dispatch<SetStateAction<boolean>>;
   onClose: () => void;
 }) => {

@@ -1,68 +1,31 @@
 import { partition } from "lodash";
 import {
-  AccountId,
-  AccountStorageMode,
-  NoteFilterTypes,
-  AccountType,
-} from "@workspace/mock-web-client";
-import {
-  getAccountById,
-  getConsumableNotes,
+  clientGetAccountByAddress,
+  clientGetConsumableNotes,
+  wasmAccountToAccount,
+  wasmInputNoteToInputNote,
   webClient,
+  clientNewWallet,
+  clientNewFaucet,
+  clientImportNewWallet,
+  clientDeployAccount,
 } from "@/lib/web-client";
 import useGlobalContext from "@/components/global-context/hook";
 import {
-  wasmAccountToAccount,
-  wasmInputNoteToInputNote,
   type Component,
-  type StorageSlot,
+  type AccountStorageMode,
+  type AccountType,
 } from "@/lib/types";
 import useScripts from "@/hooks/use-scripts";
-
-const wasmStorageSlotFromStorageSlot = async (storageSlot: StorageSlot) => {
-  const { StorageSlot, Felt, RpoDigest, StorageMap, Word } = await import(
-    "@demox-labs/miden-sdk"
-  );
-  const bigintToWord = (value: bigint) =>
-    Word.newFromU64s(
-      BigUint64Array.from(
-        BigInt(value)
-          .toString(16)
-          .padStart(64, "0")
-          .match(/.{1,16}/g)!
-          .map((chunk) => BigInt(`0x${chunk}`))
-      )
-    );
-  const bigintToRpoDigest = (value: bigint) =>
-    new RpoDigest(
-      BigInt(value)
-        .toString(16)
-        .padStart(64, "0")
-        .match(/.{1,16}/g)!
-        .map((chunk) => new Felt(BigInt(`0x${chunk}`)))
-    );
-  if (storageSlot.type === "value") {
-    return StorageSlot.fromValue(bigintToWord(BigInt(storageSlot.value)));
-  } else {
-    const storageMap = new StorageMap();
-    const keyValuePairs = storageSlot.value
-      .trim()
-      .split(",")
-      .map((keyValuePair) => keyValuePair.trim());
-    for (const keyValuePair of keyValuePairs) {
-      const [key, value] = keyValuePair.split(":");
-      storageMap.insert(
-        bigintToRpoDigest(BigInt(key!)),
-        bigintToWord(BigInt(value!))
-      );
-    }
-    return StorageSlot.map(storageMap);
-  }
-};
+import {
+  MIDEN_FAUCET_ADDRESS,
+  COUNTER_CONTRACT_ADDRESS,
+} from "@/lib/constants";
 
 const useAccounts = () => {
   const {
     networkId,
+    serializedMockChain,
     createWalletDialogOpen,
     createFaucetDialogOpen,
     importAccountDialogOpen,
@@ -79,10 +42,13 @@ const useAccounts = () => {
     name: string;
     storageMode: AccountStorageMode;
   }) => {
-    const client = await webClient(networkId);
-    const wallet = await client.newWallet(storageMode, true);
+    const client = await webClient(networkId, serializedMockChain);
+    const wallet = await clientNewWallet(client, {
+      storageMode,
+      mutable: true,
+    });
     const syncSummary = await client.syncState();
-    const account = wasmAccountToAccount(
+    const account = await wasmAccountToAccount(
       wallet,
       name,
       networkId,
@@ -107,16 +73,16 @@ const useAccounts = () => {
     decimals: number;
     maxSupply: bigint;
   }) => {
-    const client = await webClient(networkId);
-    const faucet = await client.newFaucet(
+    const client = await webClient(networkId, serializedMockChain);
+    const faucet = await clientNewFaucet(client, {
       storageMode,
-      false,
+      nonFungible: false,
       tokenSymbol,
       decimals,
-      maxSupply
-    );
+      maxSupply,
+    });
     const syncSummary = await client.syncState();
-    const account = wasmAccountToAccount(
+    const account = await wasmAccountToAccount(
       faucet,
       name,
       networkId,
@@ -137,12 +103,14 @@ const useAccounts = () => {
     name: string;
     address: string;
   }) => {
-    const client = await webClient(networkId);
-    const wasmAccount = await getAccountById(client, address);
-    wasmAccount.id = () => AccountId.fromBech32(address);
+    const client = await webClient(networkId, serializedMockChain);
+    const wasmAccount = await clientGetAccountByAddress(client, address);
     const syncSummary = await client.syncState();
-    const consumableNotes = await getConsumableNotes(client, address);
-    const account = wasmAccountToAccount(
+    const consumableNotes = await clientGetConsumableNotes(
+      client,
+      wasmAccount.id().toString()
+    );
+    const account = await wasmAccountToAccount(
       wasmAccount,
       name,
       networkId,
@@ -151,18 +119,20 @@ const useAccounts = () => {
         consumableNote.inputNoteRecord().id().toString()
       )
     );
-    if (address === "mtst1qppen8yngje35gr223jwe6ptjy7gedn9") {
+    if (address === MIDEN_FAUCET_ADDRESS) {
       // MDN Faucet
       account.components = [];
-    } else if (address === "mtst1qz43ftxkrzcjsqz3hpw332qwny2ggsp0") {
+    } else if (address === COUNTER_CONTRACT_ADDRESS) {
       // Counter Contract
       account.components = ["no-auth", "counter-contract"];
     } else {
       // Basic Wallet
       account.components = ["basic-auth", "basic-wallet"];
     }
-    const inputNotes = consumableNotes.map((consumableNote) =>
-      wasmInputNoteToInputNote(consumableNote.inputNoteRecord(), networkId)
+    const inputNotes = await Promise.all(
+      consumableNotes.map((consumableNote) =>
+        wasmInputNoteToInputNote(consumableNote.inputNoteRecord())
+      )
     );
     dispatch({
       type: "IMPORT_ACCOUNT",
@@ -170,37 +140,19 @@ const useAccounts = () => {
     });
     return account;
   };
-  const importConnectedWallet = async (accountId: string) => {
-    const client = await webClient(networkId);
+  const importConnectedWallet = async (address: string) => {
+    const client = await webClient(networkId, serializedMockChain);
     try {
-      await getAccountById(client, accountId);
+      await clientGetAccountByAddress(client, address);
       return importAccountByAddress({
         name: "Miden Account 1",
-        address: accountId,
+        address,
       });
     } catch (error) {
-      const wallet = await client.newWallet(AccountStorageMode.public(), true);
-      const serializedWallet = wallet.serialize();
-      const fromHexString = (hexString: string) => {
-        const chunks = hexString.match(/.{1,2}/g)!;
-        return Uint8Array.from(chunks.map((byte) => Number.parseInt(byte, 16)));
-      };
-      const serializedImportedWallet = Uint8Array.from([
-        ...fromHexString(AccountId.fromBech32(accountId).toString().slice(2)),
-        ...serializedWallet.slice(15),
-      ]);
-      const { Account: WasmAccount, Word } = await import(
-        "@demox-labs/miden-sdk"
-      );
-      await client.newAccount(
-        // @ts-ignore
-        WasmAccount.deserialize(serializedImportedWallet),
-        Word.newFromU64s(BigUint64Array.from([0n, 0n, 0n, 0n])),
-        true
-      );
+      await clientImportNewWallet(client, address);
       return importAccountByAddress({
         name: "Miden Account 1",
-        address: accountId,
+        address,
       });
     }
   };
@@ -215,52 +167,15 @@ const useAccounts = () => {
     storageMode: AccountStorageMode;
     components: Component[];
   }) => {
-    const client = await webClient(networkId);
-    const {
-      TransactionKernel,
-      AccountBuilder,
-      AccountComponent,
-      StorageSlot,
-      AccountStorageMode: WasmAccountStorageMode,
-    } = await import("@demox-labs/miden-sdk");
-    const assembler = TransactionKernel.assembler();
-    const initSeed = new Uint8Array(32);
-    crypto.getRandomValues(initSeed);
-    let accountBuilder = new AccountBuilder(initSeed)
-      .accountType(accountType)
-      .storageMode(
-        storageMode.asStr() === "public"
-          ? WasmAccountStorageMode.public()
-          : WasmAccountStorageMode.private()
-      );
-    for (const component of components) {
-      const script = scripts.find(({ id }) => id === component.scriptId);
-      if (!script) {
-        continue;
-      }
-      const storageSlots = await Promise.all(
-        component.storageSlots.map(wasmStorageSlotFromStorageSlot)
-      );
-      const compiledComponent = AccountComponent.compile(
-        script.masm,
-        assembler,
-        storageSlots
-      ).withSupportsAllTypes();
-      if (component.type === "auth") {
-        accountBuilder = accountBuilder.withAuthComponent(compiledComponent);
-      } else {
-        accountBuilder = accountBuilder.withComponent(compiledComponent);
-      }
-    }
-    const { account: wasmAccount, seed } = accountBuilder.build();
-    // @ts-ignore
-    await client.newAccount(wasmAccount, seed, true);
+    const client = await webClient(networkId, serializedMockChain);
+    const wasmAccount = await clientDeployAccount(client, {
+      accountType,
+      storageMode,
+      components,
+      scripts,
+    });
     const syncSummary = await client.syncState();
-    const address = wasmAccount.id().toBech32();
-    // @ts-ignore
-    wasmAccount.id = () => AccountId.fromBech32(address);
-    const account = wasmAccountToAccount(
-      // @ts-ignore
+    const account = await wasmAccountToAccount(
       wasmAccount,
       name,
       networkId,

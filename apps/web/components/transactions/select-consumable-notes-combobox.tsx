@@ -17,41 +17,58 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@workspace/ui/components/popover";
-import { type ConsumableNoteRecord } from "@workspace/mock-web-client";
-import useAccounts from "@/hooks/use-accounts";
 import {
-  wasmInputNoteToInputNote,
-  type Account,
-  type InputNote,
-} from "@/lib/types";
-import useGlobalContext from "@/components/global-context/hook";
+  type ConsumableNoteRecord as WasmConsumableNoteRecord,
+  type InputNoteRecord as WasmInputNoteRecord,
+} from "@demox-labs/miden-sdk";
+import useAccounts from "@/hooks/use-accounts";
+import { type Account } from "@/lib/types";
 
-const getConsumableNoteFields = (inputNote: InputNote, faucets: Account[]) => {
-  const noteFungibleAssets = inputNote.fungibleAssets.map(
-    ({ faucetId, amount }) => {
+const getConsumableNoteFields = (
+  inputNoteRecord: WasmInputNoteRecord,
+  faucets: Account[]
+) => {
+  const noteFungibleAssets = inputNoteRecord
+    .details()
+    .assets()
+    .fungibleAssets()
+    .map((fungibleAsset) => {
+      const faucetId = fungibleAsset.faucetId().toString();
+      const amount = fungibleAsset.amount().toString();
       const faucet = faucets.find(({ id }) => id === faucetId);
       return `${amount} ${faucet?.tokenSymbol ?? "Unknown"}`;
-    },
-  );
+    });
+  const metadata = inputNoteRecord.metadata();
+  const wasmNoteTypes = {
+    1: "public",
+    2: "private",
+    3: "encrypted",
+  } as const;
   return {
-    noteId: inputNote.id,
-    noteType: inputNote.type,
+    noteId: inputNoteRecord.id().toString(),
+    noteType: metadata ? wasmNoteTypes[metadata.noteType()] : "public",
     noteFungibleAssets,
   };
 };
 
-const getConsumableNoteValue = (inputNote: InputNote, faucets: Account[]) => {
+const getConsumableNoteValue = (
+  inputNoteRecord: WasmInputNoteRecord,
+  faucets: Account[]
+) => {
   const { noteId, noteType, noteFungibleAssets } = getConsumableNoteFields(
-    inputNote,
-    faucets,
+    inputNoteRecord,
+    faucets
   );
   return [noteId, noteType, noteFungibleAssets.join(",")].join(",");
 };
 
-const getConsumableNoteLabel = (inputNote: InputNote, faucets: Account[]) => {
+const getConsumableNoteLabel = (
+  inputNoteRecord: WasmInputNoteRecord,
+  faucets: Account[]
+) => {
   const { noteId, noteType, noteFungibleAssets } = getConsumableNoteFields(
-    inputNote,
-    faucets,
+    inputNoteRecord,
+    faucets
   );
   return `${noteType} note ${
     noteFungibleAssets.length === 0
@@ -67,9 +84,8 @@ const SelectConsumableNotesCombobox = ({
 }: {
   value: string[];
   onValueChange: Dispatch<SetStateAction<string[]>>;
-  consumableNotes: ConsumableNoteRecord[];
+  consumableNotes: WasmConsumableNoteRecord[];
 }) => {
-  const { networkId } = useGlobalContext();
   const { faucets } = useAccounts();
   const [open, setOpen] = useState(false);
   return (
@@ -100,16 +116,13 @@ const SelectConsumableNotesCombobox = ({
                 <CommandItem
                   key={consumableNote.inputNoteRecord().id().toString()}
                   value={getConsumableNoteValue(
-                    wasmInputNoteToInputNote(
-                      consumableNote.inputNoteRecord(),
-                      networkId,
-                    ),
-                    faucets,
+                    consumableNote.inputNoteRecord(),
+                    faucets
                   )}
                   onSelect={(currentValue) => {
                     const [currentNoteId] = currentValue.split(",") as [string];
                     const index = value.findIndex(
-                      (noteId) => noteId === currentNoteId,
+                      (noteId) => noteId === currentNoteId
                     );
                     const newValue =
                       index === -1
@@ -120,20 +133,17 @@ const SelectConsumableNotesCombobox = ({
                   }}
                 >
                   {getConsumableNoteLabel(
-                    wasmInputNoteToInputNote(
-                      consumableNote.inputNoteRecord(),
-                      networkId,
-                    ),
-                    faucets,
+                    consumableNote.inputNoteRecord(),
+                    faucets
                   )}
                   <Check
                     className={cn(
                       "ml-auto",
                       value.includes(
-                        consumableNote.inputNoteRecord().id().toString(),
+                        consumableNote.inputNoteRecord().id().toString()
                       )
                         ? "opacity-100"
-                        : "opacity-0",
+                        : "opacity-0"
                     )}
                   />
                 </CommandItem>

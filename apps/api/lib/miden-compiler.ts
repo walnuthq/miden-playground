@@ -1,11 +1,23 @@
-import { access, constants, writeFile, readFile } from "node:fs/promises";
+import { access, constants, writeFile, readFile, rm } from "node:fs/promises";
 import { execFile } from "@/lib/utils";
+
+export const cargoMidenVersion = async () => {
+  const { stdout } = await execFile("cargo", ["miden", "--version"]);
+  const [, semver] = stdout.split(" ");
+  return semver!.replaceAll("\n", "");
+};
+
+export const midenCompilerVersion = async () => {
+  const { stdout } = await execFile("midenc", ["--version"]);
+  const [, semver] = stdout.split(" ");
+  return semver!.replaceAll("\n", "");
+};
 
 export const packageExists = async (packageName: string) => {
   try {
     await access(`/tmp/${packageName}`, constants.F_OK);
-    return true;
-  } catch (error) {
+    return true; // eslint-disable-next-line
+  } catch (_) {
     return false;
   }
 };
@@ -13,7 +25,10 @@ export const packageExists = async (packageName: string) => {
 export const newPackage = (packageName: string) =>
   execFile("cargo", ["miden", "new", packageName], { cwd: "/tmp" });
 
-export const updateSource = (packageName: string, source: string) =>
+export const readRust = async (packageName: string) =>
+  readFile(`/tmp/${packageName}/src/lib.rs`, "utf-8");
+
+export const updateRust = (packageName: string, source: string) =>
   writeFile(`/tmp/${packageName}/src/lib.rs`, source);
 
 export const compilePackage = async (packageName: string) => {
@@ -59,3 +74,6 @@ export const readMasm = async (packageName: string) => {
     "utf-8"
   );
 };
+
+export const deletePackage = (packageName: string) =>
+  rm(packageName, { recursive: true, force: true });

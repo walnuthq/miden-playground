@@ -1,6 +1,5 @@
 "use client";
-
-import { type ComponentProps } from "react";
+import { type ComponentProps, useEffect } from "react";
 import {
   UserCircle,
   File,
@@ -31,10 +30,14 @@ import useScripts from "@/hooks/use-scripts";
 import useComponents from "@/hooks/use-components";
 import defaultScripts from "@/components/global-context/default-scripts";
 import defaultComponents from "@/components/global-context/default-components";
+import { useWallet } from "@demox-labs/miden-wallet-adapter";
+import useGlobalContext from "@/components/global-context/hook";
 
 const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
   const isClient = useIsClient();
-  const { accounts } = useAccounts();
+  const { accountId } = useWallet();
+  const { networkId } = useGlobalContext();
+  const { accounts, wallets, importConnectedWallet } = useAccounts();
   const { transactions } = useTransactions();
   const { inputNotes } = useNotes();
   const { scripts } = useScripts();
@@ -113,6 +116,17 @@ const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
         })),
     },
   ];
+  // TODO refactor using onConnect callback?
+  useEffect(() => {
+    if (accountId && networkId === "mtst") {
+      const connectedWallet = wallets.find(
+        ({ address }) => address === accountId
+      );
+      if (!connectedWallet) {
+        importConnectedWallet(accountId);
+      }
+    }
+  }, [accountId, networkId, wallets, importConnectedWallet]);
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>

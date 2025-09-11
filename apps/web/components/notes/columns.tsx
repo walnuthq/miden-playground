@@ -1,10 +1,6 @@
 "use client";
 import { MoreVertical } from "lucide-react";
-import {
-  type InputNote,
-  noteConsumed,
-  noteInputsToAccountId,
-} from "@/lib/types";
+import { type InputNote, noteConsumed, noteStates } from "@/lib/types";
 import { formatId } from "@/lib/utils";
 import { type ColumnDef } from "@tanstack/react-table";
 import { Button } from "@workspace/ui/components/button";
@@ -17,10 +13,14 @@ import {
 } from "@workspace/ui/components/dropdown-menu";
 import useTransactions from "@/hooks/use-transactions";
 import AccountAddress from "@/components/lib/account-address";
+import { noteInputsToAccountId } from "@/lib/utils";
+import useScripts from "@/hooks/use-scripts";
 
 const InputNoteActionsCell = ({ inputNote }: { inputNote: InputNote }) => {
   const { openCreateTransactionDialog, newConsumeTransactionRequest } =
     useTransactions();
+  const { scripts } = useScripts();
+  const script = scripts.find(({ root }) => root === inputNote.scriptRoot);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -30,17 +30,16 @@ const InputNoteActionsCell = ({ inputNote }: { inputNote: InputNote }) => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        {inputNote.wellKnownNote === "P2ID" && !noteConsumed(inputNote) && (
+        {script?.id === "p2id" && !noteConsumed(inputNote) && (
           <DropdownMenuItem
             onClick={async () => {
               const targetAccountId = noteInputsToAccountId(inputNote.inputs);
-              const accountId = targetAccountId.toString();
               const transactionResult = await newConsumeTransactionRequest({
-                accountId,
+                accountId: targetAccountId,
                 noteIds: [inputNote.id],
               });
               openCreateTransactionDialog({
-                accountId,
+                accountId: targetAccountId,
                 transactionType: "consume",
                 step: "preview",
                 transactionResult,
@@ -67,7 +66,8 @@ export const columns: ColumnDef<InputNote>[] = [
     header: "Storage mode",
     cell: ({ row }) => (
       <Badge
-        variant={row.original.type === "Public" ? "default" : "destructive"}
+        variant={row.original.type === "public" ? "default" : "destructive"}
+        className="capitalize"
       >
         {row.original.type}
       </Badge>
@@ -76,15 +76,16 @@ export const columns: ColumnDef<InputNote>[] = [
   {
     accessorKey: "state",
     header: "State",
+    cell: ({ row }) => noteStates[row.original.state],
   },
   {
     accessorKey: "tag",
     header: "Tag",
   },
   {
-    accessorKey: "senderAddress",
+    accessorKey: "senderId",
     header: "Sender ID",
-    cell: ({ row }) => <AccountAddress address={row.original.senderAddress} />,
+    cell: ({ row }) => <AccountAddress id={row.original.senderId} />,
   },
   {
     id: "actions",

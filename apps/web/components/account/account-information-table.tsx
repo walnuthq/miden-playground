@@ -7,6 +7,7 @@ import {
 } from "@workspace/ui/components/table";
 import { Badge } from "@workspace/ui/components/badge";
 import AccountAddress from "@/components/lib/account-address";
+import { accountTypes } from "@/lib/types";
 
 const AccountInformationTable = ({ account }: { account: Account }) => (
   <div className="rounded-md border">
@@ -30,14 +31,16 @@ const AccountInformationTable = ({ account }: { account: Account }) => (
         </TableRow>
         <TableRow>
           <TableCell>Type</TableCell>
-          <TableCell>{account.type}</TableCell>
+          <TableCell className="capitalize">
+            {accountTypes[account.type]}
+          </TableCell>
         </TableRow>
         <TableRow>
           <TableCell>Storage mode</TableCell>
           <TableCell>
             <Badge
               variant={
-                account.storageMode === "Public" ? "default" : "destructive"
+                account.storageMode === "public" ? "default" : "destructive"
               }
               className="capitalize"
             >

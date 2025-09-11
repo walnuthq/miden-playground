@@ -5,7 +5,7 @@ import {
   MidenWalletAdapter,
   WalletProvider,
   WalletModalProvider,
-  DecryptPermission,
+  PrivateDataPermission,
 } from "@demox-labs/miden-wallet-adapter";
 import GlobalContextProvider from "@/components/global-context/provider";
 
@@ -21,7 +21,7 @@ const Providers = ({ children }: { children: ReactNode }) => (
   >
     <WalletProvider
       wallets={[walletAdapter]}
-      decryptPermission={DecryptPermission.UponRequest}
+      privateDataPermission={PrivateDataPermission.UponRequest}
       autoConnect
     >
       <WalletModalProvider>

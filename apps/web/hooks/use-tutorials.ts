@@ -1,18 +1,13 @@
 import { useRouter } from "next/navigation";
 import useGlobalContext from "@/components/global-context/hook";
-import { storeSerializer } from "@/lib/utils";
 import tutorials from "@/components/tutorials/tutorials";
 import { webClient } from "@/lib/web-client";
-import useTransactions from "@/hooks/use-transactions";
-import {
-  NoteFilter,
-  NoteType,
-  NoteFilterTypes,
-} from "@workspace/mock-web-client";
+// import useTransactions from "@/hooks/use-transactions";
 // import { deleteStore } from "@/lib/utils";
 import useAccounts from "@/hooks/use-accounts";
 import defaultScripts from "@/components/global-context/default-scripts";
 import defaultComponents from "@/components/global-context/default-components";
+import { MIDEN_FAUCET_ADDRESS } from "@/lib/constants";
 
 const useTutorials = () => {
   const router = useRouter();
@@ -24,12 +19,12 @@ const useTutorials = () => {
     nextTutorialStepDisabled,
     dispatch,
   } = useGlobalContext();
-  const { accounts, importAccountByAddress } = useAccounts();
-  const {
-    newMintTransactionRequest,
-    newConsumeTransactionRequest,
-    submitTransaction,
-  } = useTransactions();
+  const { /* accounts,*/ importAccountByAddress } = useAccounts();
+  // const {
+  //   newMintTransactionRequest,
+  //   newConsumeTransactionRequest,
+  //   submitTransaction,
+  // } = useTransactions();
   const startTutorial = async (tutorialId: string) => {
     const tutorial = tutorials.find(({ id }) => id === tutorialId);
     if (!tutorial) {
@@ -41,8 +36,11 @@ const useTutorials = () => {
     /* console.log("clear");
     await clearStore();
     console.log("clear done"); */
-    const client = await webClient(tutorial.state.networkId);
-    await client.forceImportStore(storeSerializer(tutorial.store));
+    const client = await webClient(
+      tutorial.state.networkId,
+      tutorial.state.serializedMockChain
+    );
+    await client.forceImportStore(JSON.stringify(tutorial.store));
     const syncSummary = await client.syncState();
     dispatch({
       type: "LOAD_PROJECT",
@@ -153,30 +151,30 @@ const useTutorials = () => {
   };
   const loadTutorial = async (tutorialId: string) => {
     if (tutorialId === "transfer-assets-between-wallets") {
-      console.log("accounts", accounts.length);
-      const faucet = accounts.find(({ name }) => name === "MDN Faucet")!;
-      const wallet = accounts.find(({ name }) => name === "Wallet A")!;
-      const mintTransactionResult = await newMintTransactionRequest({
-        targetAccountId: wallet.id,
-        faucetId: faucet.id,
-        noteType: NoteType.Public,
-        amount: 1000n,
-      });
-      console.log("MINTING...");
-      const transactionRecord = await submitTransaction(mintTransactionResult);
-      console.log("MINT TX OK");
-      const note = transactionRecord.outputNotes().getNote(0);
-      const consumeTransactionResult = await newConsumeTransactionRequest({
-        accountId: wallet.id,
-        noteIds: [note.id().toString()],
-      });
-      console.log("SUBMITTING...");
-      await submitTransaction(consumeTransactionResult);
-      console.log("SUBMIT TX OK");
+      // console.log("accounts", accounts.length);
+      // const faucet = accounts.find(({ name }) => name === "MDN Faucet")!;
+      // const wallet = accounts.find(({ name }) => name === "Wallet A")!;
+      // const mintTransactionResult = await newMintTransactionRequest({
+      //   targetAccountId: wallet.id,
+      //   faucetId: faucet.id,
+      //   noteType: NoteType.Public,
+      //   amount: 1000n,
+      // });
+      // console.log("MINTING...");
+      // const transactionRecord = await submitTransaction(mintTransactionResult);
+      // console.log("MINT TX OK");
+      // const note = transactionRecord.outputNotes().getNote(0);
+      // const consumeTransactionResult = await newConsumeTransactionRequest({
+      //   accountId: wallet.id,
+      //   noteIds: [note.id().toString()],
+      // });
+      // console.log("SUBMITTING...");
+      // await submitTransaction(consumeTransactionResult);
+      // console.log("SUBMIT TX OK");
     } else if (tutorialId === "connect-wallet-and-sign-transactions") {
       await importAccountByAddress({
         name: "Miden Faucet",
-        address: "mtst1qppen8yngje35gr223jwe6ptjy7gedn9",
+        address: MIDEN_FAUCET_ADDRESS,
       });
     }
   };

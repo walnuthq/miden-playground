@@ -1,40 +1,22 @@
 import { useContext } from "react";
 import GlobalContext from "@/components/global-context";
 // import { deleteStore } from "@/lib/utils";
-import { webClient } from "@/lib/web-client";
 import {
-  type NetworkId,
-  wasmInputNoteToInputNote,
-  type Account,
+  webClient,
+  clientGetAllInputNotes,
+  clientGetAccountByAddress,
+  clientGetConsumableNotes,
   wasmAccountToAccount,
-} from "@/lib/types";
-import { NoteFilterTypes, AccountId } from "@workspace/mock-web-client";
-
-const emptyStore = {
-  accountCode: [],
-  accountStorage: [],
-  accountVaults: [],
-  accountAuth: [],
-  accounts: [],
-  transactions: [],
-  transactionScripts: [],
-  inputNotes: [],
-  outputNotes: [],
-  notesScripts: [],
-  stateSync: [{ id: 1, blockNum: "0" }],
-  blockHeaders: [],
-  partialBlockchainNodes: [],
-  tags: [],
-  foreignAccountCode: [],
-};
+  wasmInputNoteToInputNote,
+} from "@/lib/web-client";
+import { type NetworkId, type Account } from "@/lib/types";
+import { defaultStore } from "@/lib/store";
 
 const useGlobalContext = () => {
   const { state, dispatch } = useContext(GlobalContext);
   const resetState = async () => {
-    const client = await webClient(state.networkId);
-    // localStorage.removeItem("serializedMockChain");
-    // const client = await webClient();
-    await client.forceImportStore(JSON.stringify(emptyStore));
+    const client = await webClient(state.networkId, null);
+    await client.forceImportStore(JSON.stringify(defaultStore()));
     // await deleteStore();
     const syncSummary = await client.syncState();
     console.log("blockNum", syncSummary.blockNum());
@@ -44,7 +26,7 @@ const useGlobalContext = () => {
     });
   };
   const switchNetwork = async (networkId: NetworkId) => {
-    const client = await webClient(networkId);
+    const client = await webClient(networkId, state.serializedMockChain);
     const syncSummary = await client.syncState();
     dispatch({
       type: "SWITCH_NETWORK",
@@ -52,50 +34,45 @@ const useGlobalContext = () => {
     });
   };
   const syncState = async () => {
-    const client = await webClient(state.networkId);
+    const client = await webClient(state.networkId, state.serializedMockChain);
     const syncSummary = await client.syncState();
-    const { NoteFilter: WasmNoteFilter, AccountId: WasmAccountId } =
-      await import("@demox-labs/miden-sdk");
-    const inputNotes = await client.getInputNotes(
-      new WasmNoteFilter(NoteFilterTypes.All),
-    );
+    const wasmInputNotes = await clientGetAllInputNotes(client);
     const accounts: Account[] = [];
     for (const account of state.accounts) {
-      const wasmAccount = await client.getAccount(
-        // @ts-ignore
-        WasmAccountId.fromHex(account.id),
+      const wasmAccount = await clientGetAccountByAddress(
+        client,
+        account.address
       );
-      const consumableNotes = await client.getConsumableNotes(
-        // @ts-ignore
-        WasmAccountId.fromHex(account.id),
+      const consumableNotes = await clientGetConsumableNotes(
+        client,
+        account.id
       );
+      console.log(consumableNotes.length);
       const noteIds = consumableNotes.map((consumableNote) =>
-        consumableNote.inputNoteRecord().id().toString(),
+        consumableNote.inputNoteRecord().id().toString()
       );
-      //consumableNoteIds[account.id] = noteIds;
-      if (wasmAccount) {
-        wasmAccount.id = () => AccountId.fromHex(account.id);
-        accounts.push(
-          wasmAccountToAccount(
-            wasmAccount,
-            account.name,
-            state.networkId,
-            syncSummary.blockNum(),
-            noteIds,
-            account.tokenSymbol,
-          ),
-        );
-      }
+      const updatedAccount = await wasmAccountToAccount(
+        wasmAccount,
+        account.name,
+        state.networkId,
+        syncSummary.blockNum(),
+        noteIds,
+        account.tokenSymbol
+      );
+      accounts.push(updatedAccount);
     }
+    const inputNotes = await Promise.all(
+      wasmInputNotes.map((wasmInputNote) =>
+        wasmInputNoteToInputNote(wasmInputNote)
+      )
+    );
     dispatch({
       type: "SYNC_STATE",
       payload: {
         blockNum: syncSummary.blockNum(),
         //consumableNoteIds,
         accounts,
-        inputNotes: inputNotes.map((inputNoteRecord) =>
-          wasmInputNoteToInputNote(inputNoteRecord, state.networkId),
-        ),
+        inputNotes,
       },
     });
   };

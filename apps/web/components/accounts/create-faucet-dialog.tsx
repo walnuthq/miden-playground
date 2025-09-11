@@ -16,7 +16,6 @@ import {
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import useAccounts from "@/hooks/use-accounts";
-import { AccountStorageMode } from "@workspace/mock-web-client";
 import AccountAddress from "@/components/lib/account-address";
 
 const CreateFaucetDialog = () => {
@@ -51,8 +50,8 @@ const CreateFaucetDialog = () => {
             const faucet = await newFaucet({
               name: formData.get("name")!.toString(),
               storageMode: formData.getAll("is-public").includes("on")
-                ? AccountStorageMode.public()
-                : AccountStorageMode.private(),
+                ? "public"
+                : "private",
               tokenSymbol: formData.get("token-symbol")!.toString(),
               decimals: Number(formData.get("decimals")!.toString()),
               maxSupply: BigInt(formData.get("max-supply")!.toString()),

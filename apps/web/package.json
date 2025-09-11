@@ -12,21 +12,21 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@demox-labs/miden-sdk": "^0.10.1",
-    "@demox-labs/miden-wallet-adapter": "^0.3.3",
+    "@demox-labs/miden-sdk": "^0.11.3",
+    "@demox-labs/miden-wallet-adapter": "^0.4.1",
     "@mdx-js/loader": "^3.1.1",
     "@mdx-js/react": "^3.1.1",
     "@monaco-editor/react": "^4.7.0",
-    "@next/mdx": "^15.5.2",
+    "@next/mdx": "^15.5.3",
     "@tanstack/react-table": "^8.21.3",
     "@types/mdx": "^2.0.13",
     "@workspace/mock-web-client": "workspace:*",
     "@workspace/ui": "workspace:*",
     "js-sha3": "^0.9.3",
     "lodash": "^4.17.21",
-    "lucide-react": "^0.542.0",
+    "lucide-react": "^0.544.0",
     "new-github-issue-url": "^1.1.0",
-    "next": "^15.5.2",
+    "next": "^15.5.3",
     "next-themes": "^0.4.6",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
@@ -42,6 +42,7 @@
     "@workspace/eslint-config": "workspace:^",
     "@workspace/typescript-config": "workspace:*",
     "copy-webpack-plugin": "^13.0.1",
+    "eslint": "^9.35.0",
     "typescript": "^5.9.2"
   }
 }

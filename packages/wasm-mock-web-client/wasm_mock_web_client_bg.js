@@ -240,13 +240,6 @@ function takeFromExternrefTable0(idx) {
     return value;
 }
 
-function passArray8ToWasm0(arg, malloc) {
-    const ptr = malloc(arg.length * 1, 1) >>> 0;
-    getUint8ArrayMemory0().set(arg, ptr / 1);
-    WASM_VECTOR_LEN = arg.length;
-    return ptr;
-}
-
 function passArrayJsValueToWasm0(array, malloc) {
     const ptr = malloc(array.length * 4, 4) >>> 0;
     for (let i = 0; i < array.length; i++) {
@@ -273,6 +266,13 @@ function passArray64ToWasm0(arg, malloc) {
     return ptr;
 }
 
+function passArray8ToWasm0(arg, malloc) {
+    const ptr = malloc(arg.length * 1, 1) >>> 0;
+    getUint8ArrayMemory0().set(arg, ptr / 1);
+    WASM_VECTOR_LEN = arg.length;
+    return ptr;
+}
+
 let cachedUint32ArrayMemory0 = null;
 
 function getUint32ArrayMemory0() {
@@ -287,11 +287,11 @@ function getArrayU32FromWasm0(ptr, len) {
     return getUint32ArrayMemory0().subarray(ptr / 4, ptr / 4 + len);
 }
 function __wbg_adapter_54(arg0, arg1, arg2) {
-    wasm.closure2288_externref_shim(arg0, arg1, arg2);
+    wasm.closure2303_externref_shim(arg0, arg1, arg2);
 }
 
-function __wbg_adapter_692(arg0, arg1, arg2, arg3) {
-    wasm.closure2310_externref_shim(arg0, arg1, arg2, arg3);
+function __wbg_adapter_690(arg0, arg1, arg2, arg3) {
+    wasm.closure2325_externref_shim(arg0, arg1, arg2, arg3);
 }
 
 /**
@@ -646,7 +646,7 @@ export class AccountCode {
      * @returns {RpoDigest}
      */
     commitment() {
-        const ret = wasm.accountbuilderresult_seed(this.__wbg_ptr);
+        const ret = wasm.accountcode_commitment(this.__wbg_ptr);
         return RpoDigest.__wrap(ret);
     }
 }
@@ -842,7 +842,7 @@ export class AccountHeader {
      * @returns {RpoDigest}
      */
     vaultCommitment() {
-        const ret = wasm.accountbuilderresult_seed(this.__wbg_ptr);
+        const ret = wasm.accountheader_vaultCommitment(this.__wbg_ptr);
         return RpoDigest.__wrap(ret);
     }
     /**
@@ -1319,7 +1319,7 @@ export class AdviceMap {
         wasm.__wbg_advicemap_free(ptr, 0);
     }
     constructor() {
-        const ret = wasm.accountstoragerequirements_new();
+        const ret = wasm.advicemap_new();
         this.__wbg_ptr = ret >>> 0;
         AdviceMapFinalization.register(this, this.__wbg_ptr, this);
         return this;
@@ -2381,7 +2381,7 @@ export class InputNotes {
      * @returns {RpoDigest}
      */
     commitment() {
-        const ret = wasm.inputnotes_commitment(this.__wbg_ptr);
+        const ret = wasm.blockheader_prevBlockCommitment(this.__wbg_ptr);
         return RpoDigest.__wrap(ret);
     }
     /**
@@ -3724,7 +3724,7 @@ export class NoteRecipient {
      * @returns {Word}
      */
     serialNum() {
-        const ret = wasm.noterecipient_serialNum(this.__wbg_ptr);
+        const ret = wasm.accountcode_commitment(this.__wbg_ptr);
         return Word.__wrap(ret);
     }
     /**
@@ -4008,7 +4008,7 @@ export class OutputNotes {
      * @returns {RpoDigest}
      */
     commitment() {
-        const ret = wasm.accountbuilderresult_seed(this.__wbg_ptr);
+        const ret = wasm.assetvault_root(this.__wbg_ptr);
         return RpoDigest.__wrap(ret);
     }
     /**
@@ -4109,14 +4109,14 @@ export class PartialNote {
      * @returns {NoteMetadata}
      */
     metadata() {
-        const ret = wasm.partialnote_metadata(this.__wbg_ptr);
+        const ret = wasm.note_metadata(this.__wbg_ptr);
         return NoteMetadata.__wrap(ret);
     }
     /**
      * @returns {RpoDigest}
      */
     recipientDigest() {
-        const ret = wasm.assetvault_root(this.__wbg_ptr);
+        const ret = wasm.accountcode_commitment(this.__wbg_ptr);
         return RpoDigest.__wrap(ret);
     }
     /**
@@ -4888,7 +4888,7 @@ export class TransactionRecord {
      * @returns {TransactionId}
      */
     id() {
-        const ret = wasm.transactionrecord_id(this.__wbg_ptr);
+        const ret = wasm.accountheader_vaultCommitment(this.__wbg_ptr);
         return TransactionId.__wrap(ret);
     }
     /**
@@ -4941,24 +4941,6 @@ export class TransactionRecord {
     transactionStatus() {
         const ret = wasm.transactionrecord_transactionStatus(this.__wbg_ptr);
         return TransactionStatus.__wrap(ret);
-    }
-    /**
-     * @returns {Uint8Array}
-     */
-    serialize() {
-        const ret = wasm.transactionrecord_serialize(this.__wbg_ptr);
-        return ret;
-    }
-    /**
-     * @param {Uint8Array} bytes
-     * @returns {TransactionRecord}
-     */
-    static deserialize(bytes) {
-        const ret = wasm.transactionrecord_deserialize(bytes);
-        if (ret[2]) {
-            throw takeFromExternrefTable0(ret[1]);
-        }
-        return TransactionRecord.__wrap(ret[0]);
     }
 }
 
@@ -5331,7 +5313,7 @@ export class TransactionScriptInputPair {
      * @returns {Word}
      */
     word() {
-        const ret = wasm.rpodigest_toWord(this.__wbg_ptr);
+        const ret = wasm.assetvault_root(this.__wbg_ptr);
         return Word.__wrap(ret);
     }
     /**
@@ -5411,7 +5393,7 @@ export class TransactionStatus {
      * @returns {TransactionStatus}
      */
     static pending() {
-        const ret = wasm.noteexecutionhint_none();
+        const ret = wasm.transactionstatus_pending();
         return TransactionStatus.__wrap(ret);
     }
     /**
@@ -5574,72 +5556,6 @@ export class WebClient {
         return TransactionRequest.__wrap(ret[0]);
     }
     /**
-     * @param {NoteFilter} filter
-     * @returns {Promise<InputNoteRecord[]>}
-     */
-    getInputNotes(filter) {
-        _assertClass(filter, NoteFilter);
-        var ptr0 = filter.__destroy_into_raw();
-        const ret = wasm.webclient_getInputNotes(this.__wbg_ptr, ptr0);
-        return ret;
-    }
-    /**
-     * @param {string} note_id
-     * @returns {Promise<InputNoteRecord | undefined>}
-     */
-    getInputNote(note_id) {
-        const ptr0 = passStringToWasm0(note_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.webclient_getInputNote(this.__wbg_ptr, ptr0, len0);
-        return ret;
-    }
-    /**
-     * @param {NoteFilter} filter
-     * @returns {Promise<any>}
-     */
-    getOutputNotes(filter) {
-        _assertClass(filter, NoteFilter);
-        var ptr0 = filter.__destroy_into_raw();
-        const ret = wasm.webclient_getOutputNotes(this.__wbg_ptr, ptr0);
-        return ret;
-    }
-    /**
-     * @param {string} note_id
-     * @returns {Promise<any>}
-     */
-    getOutputNote(note_id) {
-        const ptr0 = passStringToWasm0(note_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.webclient_getOutputNote(this.__wbg_ptr, ptr0, len0);
-        return ret;
-    }
-    /**
-     * @param {string} script
-     * @returns {NoteScript}
-     */
-    compileNoteScript(script) {
-        const ptr0 = passStringToWasm0(script, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.webclient_compileNoteScript(this.__wbg_ptr, ptr0, len0);
-        if (ret[2]) {
-            throw takeFromExternrefTable0(ret[1]);
-        }
-        return NoteScript.__wrap(ret[0]);
-    }
-    /**
-     * @param {AccountId | null} [account_id]
-     * @returns {Promise<ConsumableNoteRecord[]>}
-     */
-    getConsumableNotes(account_id) {
-        let ptr0 = 0;
-        if (!isLikeNone(account_id)) {
-            _assertClass(account_id, AccountId);
-            ptr0 = account_id.__destroy_into_raw();
-        }
-        const ret = wasm.webclient_getConsumableNotes(this.__wbg_ptr, ptr0);
-        return ret;
-    }
-    /**
      * @returns {Promise<SyncSummary>}
      */
     syncState() {
@@ -5671,61 +5587,26 @@ export class WebClient {
         return NoteTag.__wrap(ret[0]);
     }
     /**
-     * @param {TransactionFilter} transaction_filter
-     * @returns {Promise<TransactionRecord[]>}
-     */
-    getTransactions(transaction_filter) {
-        _assertClass(transaction_filter, TransactionFilter);
-        var ptr0 = transaction_filter.__destroy_into_raw();
-        const ret = wasm.webclient_getTransactions(this.__wbg_ptr, ptr0);
-        return ret;
-    }
-    /**
-     * @param {string} script
-     * @returns {TransactionScript}
-     */
-    compileTxScript(script) {
-        const ptr0 = passStringToWasm0(script, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.webclient_compileTxScript(this.__wbg_ptr, ptr0, len0);
-        if (ret[2]) {
-            throw takeFromExternrefTable0(ret[1]);
-        }
-        return TransactionScript.__wrap(ret[0]);
-    }
-    constructor() {
-        const ret = wasm.webclient_new();
-        this.__wbg_ptr = ret >>> 0;
-        WebClientFinalization.register(this, this.__wbg_ptr, this);
-        return this;
-    }
-    /**
-     * @param {string | null} [_node_url]
-     * @param {Uint8Array | null} [seed]
+     * @param {string} note_id
+     * @param {string} export_type
      * @returns {Promise<any>}
      */
-    createClient(_node_url, seed) {
-        var ptr0 = isLikeNone(_node_url) ? 0 : passStringToWasm0(_node_url, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        var len0 = WASM_VECTOR_LEN;
-        var ptr1 = isLikeNone(seed) ? 0 : passArray8ToWasm0(seed, wasm.__wbindgen_malloc);
-        var len1 = WASM_VECTOR_LEN;
-        const ret = wasm.webclient_createClient(this.__wbg_ptr, ptr0, len0, ptr1, len1);
+    exportNote(note_id, export_type) {
+        const ptr0 = passStringToWasm0(note_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passStringToWasm0(export_type, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len1 = WASM_VECTOR_LEN;
+        const ret = wasm.webclient_exportNote(this.__wbg_ptr, ptr0, len0, ptr1, len1);
         return ret;
     }
     /**
-     * @returns {Promise<AccountHeader[]>}
+     * Retrieves the entire underlying web store and returns it as a JsValue
+     *
+     * Meant to be used in conjunction with the force_import_store method
+     * @returns {Promise<any>}
      */
-    getAccounts() {
-        const ret = wasm.webclient_getAccounts(this.__wbg_ptr);
-        return ret;
-    }
-    /**
-     * @param {AccountId} account_id
-     * @returns {Promise<Account | undefined>}
-     */
-    getAccount(account_id) {
-        _assertClass(account_id, AccountId);
-        const ret = wasm.webclient_getAccount(this.__wbg_ptr, account_id.__wbg_ptr);
+    exportStore() {
+        const ret = wasm.webclient_exportStore(this.__wbg_ptr);
         return ret;
     }
     /**
@@ -5826,6 +5707,130 @@ export class WebClient {
         return ret;
     }
     /**
+     * @returns {Promise<AccountHeader[]>}
+     */
+    getAccounts() {
+        const ret = wasm.webclient_getAccounts(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @param {AccountId} account_id
+     * @returns {Promise<Account | undefined>}
+     */
+    getAccount(account_id) {
+        _assertClass(account_id, AccountId);
+        const ret = wasm.webclient_getAccount(this.__wbg_ptr, account_id.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @param {NoteFilter} filter
+     * @returns {Promise<InputNoteRecord[]>}
+     */
+    getInputNotes(filter) {
+        _assertClass(filter, NoteFilter);
+        var ptr0 = filter.__destroy_into_raw();
+        const ret = wasm.webclient_getInputNotes(this.__wbg_ptr, ptr0);
+        return ret;
+    }
+    /**
+     * @param {string} note_id
+     * @returns {Promise<InputNoteRecord | undefined>}
+     */
+    getInputNote(note_id) {
+        const ptr0 = passStringToWasm0(note_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.webclient_getInputNote(this.__wbg_ptr, ptr0, len0);
+        return ret;
+    }
+    /**
+     * @param {NoteFilter} filter
+     * @returns {Promise<any>}
+     */
+    getOutputNotes(filter) {
+        _assertClass(filter, NoteFilter);
+        var ptr0 = filter.__destroy_into_raw();
+        const ret = wasm.webclient_getOutputNotes(this.__wbg_ptr, ptr0);
+        return ret;
+    }
+    /**
+     * @param {string} note_id
+     * @returns {Promise<any>}
+     */
+    getOutputNote(note_id) {
+        const ptr0 = passStringToWasm0(note_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.webclient_getOutputNote(this.__wbg_ptr, ptr0, len0);
+        return ret;
+    }
+    /**
+     * @param {string} script
+     * @returns {NoteScript}
+     */
+    compileNoteScript(script) {
+        const ptr0 = passStringToWasm0(script, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.webclient_compileNoteScript(this.__wbg_ptr, ptr0, len0);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return NoteScript.__wrap(ret[0]);
+    }
+    /**
+     * @param {AccountId | null} [account_id]
+     * @returns {Promise<ConsumableNoteRecord[]>}
+     */
+    getConsumableNotes(account_id) {
+        let ptr0 = 0;
+        if (!isLikeNone(account_id)) {
+            _assertClass(account_id, AccountId);
+            ptr0 = account_id.__destroy_into_raw();
+        }
+        const ret = wasm.webclient_getConsumableNotes(this.__wbg_ptr, ptr0);
+        return ret;
+    }
+    /**
+     * @param {TransactionFilter} transaction_filter
+     * @returns {Promise<TransactionRecord[]>}
+     */
+    getTransactions(transaction_filter) {
+        _assertClass(transaction_filter, TransactionFilter);
+        var ptr0 = transaction_filter.__destroy_into_raw();
+        const ret = wasm.webclient_getTransactions(this.__wbg_ptr, ptr0);
+        return ret;
+    }
+    /**
+     * @param {string} script
+     * @returns {TransactionScript}
+     */
+    compileTxScript(script) {
+        const ptr0 = passStringToWasm0(script, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.webclient_compileTxScript(this.__wbg_ptr, ptr0, len0);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return TransactionScript.__wrap(ret[0]);
+    }
+    constructor() {
+        const ret = wasm.webclient_new();
+        this.__wbg_ptr = ret >>> 0;
+        WebClientFinalization.register(this, this.__wbg_ptr, this);
+        return this;
+    }
+    /**
+     * @param {string | null} [_node_url]
+     * @param {Uint8Array | null} [seed]
+     * @returns {Promise<any>}
+     */
+    createClient(_node_url, seed) {
+        var ptr0 = isLikeNone(_node_url) ? 0 : passStringToWasm0(_node_url, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        var len0 = WASM_VECTOR_LEN;
+        var ptr1 = isLikeNone(seed) ? 0 : passArray8ToWasm0(seed, wasm.__wbindgen_malloc);
+        var len1 = WASM_VECTOR_LEN;
+        const ret = wasm.webclient_createClient(this.__wbg_ptr, ptr0, len0, ptr1, len1);
+        return ret;
+    }
+    /**
      * @param {string} tag
      * @returns {Promise<void>}
      */
@@ -5850,29 +5855,6 @@ export class WebClient {
      */
     listTags() {
         const ret = wasm.webclient_listTags(this.__wbg_ptr);
-        return ret;
-    }
-    /**
-     * @param {string} note_id
-     * @param {string} export_type
-     * @returns {Promise<any>}
-     */
-    exportNote(note_id, export_type) {
-        const ptr0 = passStringToWasm0(note_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        const len0 = WASM_VECTOR_LEN;
-        const ptr1 = passStringToWasm0(export_type, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        const len1 = WASM_VECTOR_LEN;
-        const ret = wasm.webclient_exportNote(this.__wbg_ptr, ptr0, len0, ptr1, len1);
-        return ret;
-    }
-    /**
-     * Retrieves the entire underlying web store and returns it as a JsValue
-     *
-     * Meant to be used in conjunction with the force_import_store method
-     * @returns {Promise<any>}
-     */
-    exportStore() {
-        const ret = wasm.webclient_exportStore(this.__wbg_ptr);
         return ret;
     }
 }
@@ -6590,7 +6572,7 @@ export function __wbg_new_23a2665fac83c611(arg0, arg1) {
             const a = state0.a;
             state0.a = 0;
             try {
-                return __wbg_adapter_692(a, state0.b, arg0, arg1);
+                return __wbg_adapter_690(a, state0.b, arg0, arg1);
             } finally {
                 state0.a = a;
             }
@@ -7097,8 +7079,8 @@ export function __wbindgen_cb_drop(arg0) {
     return ret;
 };
 
-export function __wbindgen_closure_wrapper5948(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 2289, __wbg_adapter_54);
+export function __wbindgen_closure_wrapper5983(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 2304, __wbg_adapter_54);
     return ret;
 };
 

@@ -15,11 +15,11 @@ import {
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import useAccounts from "@/hooks/use-accounts";
-import useGlobalContext from "@/components/global-context/hook";
+// import useGlobalContext from "@/components/global-context/hook";
 import AccountAddress from "@/components/lib/account-address";
 
 const ImportAccountDialog = () => {
-  const { networkId } = useGlobalContext();
+  // const { networkId } = useGlobalContext();
   const {
     importAccountDialogOpen,
     importAccountByAddress,

@@ -1,5 +1,5 @@
 "use client";
-import { type Account } from "@/lib/types";
+import { accountTypes, type Account } from "@/lib/types";
 import { type ColumnDef } from "@tanstack/react-table";
 import { MoreVertical } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
@@ -85,6 +85,7 @@ export const columns: ColumnDef<Account>[] = [
   {
     accessorKey: "type",
     header: "Type",
+    cell: ({ row }) => accountTypes[row.original.type],
   },
   {
     accessorKey: "storageMode",
@@ -92,8 +93,9 @@ export const columns: ColumnDef<Account>[] = [
     cell: ({ row }) => (
       <Badge
         variant={
-          row.original.storageMode === "Public" ? "default" : "destructive"
+          row.original.storageMode === "public" ? "default" : "destructive"
         }
+        className="capitalize"
       >
         {row.original.storageMode}
       </Badge>

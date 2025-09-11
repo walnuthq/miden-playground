@@ -1,5 +1,4 @@
 import { type Component } from "@/lib/types";
-import { Button } from "@workspace/ui/components/button";
 import ComponentInformationTable from "@/components/component/component-information-table";
 import ComponentStorageSlotsTable from "@/components/component/component-storage-slots-table";
 import CreateStorageSlotButton from "@/components/component/create-storage-slot-button";

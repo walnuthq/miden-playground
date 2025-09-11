@@ -1,21 +1,7 @@
-import { type Store } from "@/lib/types";
+import { type Store, defaultStore } from "@/lib/store";
 
 const store: Store = {
-  accountCode: [],
-  accountStorage: [],
-  accountVaults: [],
-  accountAuth: [],
-  accounts: [],
-  transactions: [],
-  transactionScripts: [],
-  inputNotes: [],
-  outputNotes: [],
-  notesScripts: [],
-  stateSync: [{ id: 1, blockNum: "0" }],
-  blockHeaders: [],
-  partialBlockchainNodes: [],
-  tags: [],
-  foreignAccountCode: [],
+  ...defaultStore(),
 };
 
 export default store;

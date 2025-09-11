@@ -16,7 +16,6 @@ import {
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import useAccounts from "@/hooks/use-accounts";
-import { AccountStorageMode } from "@workspace/mock-web-client";
 import AccountAddress from "@/components/lib/account-address";
 // import useTutorials from "@/hooks/use-tutorials";
 
@@ -54,8 +53,8 @@ const CreateWalletDialog = () => {
             const wallet = await newWallet({
               name: formData.get("name")?.toString() ?? walletDefaultName,
               storageMode: formData.getAll("is-public").includes("on")
-                ? AccountStorageMode.public()
-                : AccountStorageMode.private(),
+                ? "public"
+                : "private",
             });
             setLoading(false);
             toast(`${wallet.name} has been created.`, {

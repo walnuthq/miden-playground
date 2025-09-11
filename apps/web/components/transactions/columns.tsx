@@ -15,9 +15,9 @@ export const columns: ColumnDef<Transaction>[] = [
     header: "Status",
   },
   {
-    accessorKey: "accountAddress",
+    accessorKey: "accountId",
     header: "Account ID",
-    cell: ({ row }) => <AccountAddress address={row.original.accountAddress} />,
+    cell: ({ row }) => <AccountAddress id={row.original.accountId} />,
   },
   {
     accessorKey: "scriptRoot",

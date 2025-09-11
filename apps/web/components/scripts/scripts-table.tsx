@@ -17,6 +17,7 @@ import {
   TableRow,
 } from "@workspace/ui/components/table";
 import CreateScriptButton from "@/components/scripts/create-script-button";
+import { cn } from "@workspace/ui/lib/utils";
 
 const ScriptsTable = <TData, TValue>({
   columns,
@@ -56,7 +57,7 @@ const ScriptsTable = <TData, TValue>({
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
-                          header.getContext(),
+                          header.getContext()
                         )}
                   </TableHead>
                 ))}
@@ -73,14 +74,17 @@ const ScriptsTable = <TData, TValue>({
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
-                      className="cursor-pointer"
+                      className={cn({
+                        "cursor-pointer": cell.column.id !== "actions",
+                      })}
                       onClick={() =>
+                        cell.column.id !== "actions" &&
                         router.push(`/scripts/${cell.row.getValue("id")}`)
                       }
                     >
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext(),
+                        cell.getContext()
                       )}
                     </TableCell>
                   ))}

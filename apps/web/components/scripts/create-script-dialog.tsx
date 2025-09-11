@@ -24,7 +24,6 @@ import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import useScripts from "@/hooks/use-scripts";
 import { type ScriptType, scriptTypes } from "@/lib/types";
-import { sleep } from "@/lib/utils";
 
 const CreateScriptDialog = () => {
   const router = useRouter();
@@ -52,8 +51,7 @@ const CreateScriptDialog = () => {
             event.preventDefault();
             const formData = new FormData(event.currentTarget);
             setLoading(true);
-            await sleep(400);
-            const script = newScript({
+            const script = await newScript({
               name: formData.get("name")?.toString() ?? "",
               type: scriptType,
             });

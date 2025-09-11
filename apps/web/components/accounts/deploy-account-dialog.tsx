@@ -24,11 +24,7 @@ import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import useAccounts from "@/hooks/use-accounts";
 import AccountAddress from "@/components/lib/account-address";
-import {
-  AccountStorageMode,
-  AccountType as WasmAccountType,
-} from "@workspace/mock-web-client";
-import { accountTypes } from "@/lib/types";
+import { type AccountType, accountTypes } from "@/lib/types";
 import useComponents from "@/hooks/use-components";
 
 const DeployAccountDialog = () => {
@@ -36,14 +32,14 @@ const DeployAccountDialog = () => {
     useAccounts();
   const { components } = useComponents();
   const [loading, setLoading] = useState(false);
-  const [accountType, setAccountType] = useState(
-    WasmAccountType.RegularAccountUpdatableCode
+  const [accountType, setAccountType] = useState<AccountType>(
+    "regular-account-updatable-code"
   );
   const [isPublic, setIsPublic] = useState(true);
   const [authComponentId, setAuthComponentId] = useState("no-auth");
   const [componentId, setComponentId] = useState("");
   const onClose = () => {
-    setAccountType(WasmAccountType.RegularAccountUpdatableCode);
+    setAccountType("regular-account-updatable-code");
     setIsPublic(true);
     setAuthComponentId("no-auth");
     setComponentId("");
@@ -72,9 +68,7 @@ const DeployAccountDialog = () => {
             const account = await deployAccount({
               name: formData.get("name")?.toString() ?? "",
               accountType,
-              storageMode: isPublic
-                ? AccountStorageMode.public()
-                : AccountStorageMode.private(),
+              storageMode: isPublic ? "public" : "private",
               components: [authComponent, component].filter(
                 (component) => component !== undefined
               ),
@@ -97,7 +91,7 @@ const DeployAccountDialog = () => {
               <Label htmlFor="type">Type</Label>
               <Select
                 onValueChange={(accountType) =>
-                  setAccountType(Number(accountType))
+                  setAccountType(accountType as AccountType)
                 }
                 value={accountType.toString()}
               >
@@ -107,7 +101,7 @@ const DeployAccountDialog = () => {
                 <SelectContent>
                   {Object.keys(accountTypes).map((accountType) => (
                     <SelectItem key={accountType} value={accountType}>
-                      {accountTypes[Number(accountType) as WasmAccountType]}
+                      {accountTypes[accountType as AccountType]}
                     </SelectItem>
                   ))}
                 </SelectContent>

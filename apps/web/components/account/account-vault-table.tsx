@@ -1,4 +1,3 @@
-import { type AssetVault } from "@workspace/mock-web-client";
 import {
   Table,
   TableBody,
@@ -9,8 +8,9 @@ import {
 } from "@workspace/ui/components/table";
 import useAccounts from "@/hooks/use-accounts";
 import AccountAddress from "@/components/lib/account-address";
+import { type WasmAssetVault } from "@/lib/types";
 
-const AccountVaultTable = ({ vault }: { vault: AssetVault }) => {
+const AccountVaultTable = ({ vault }: { vault: WasmAssetVault }) => {
   const { faucets } = useAccounts();
   const fungibleAssets = vault.fungibleAssets();
   return (
@@ -27,7 +27,7 @@ const AccountVaultTable = ({ vault }: { vault: AssetVault }) => {
         <TableBody>
           {fungibleAssets.map((fungibleAsset) => {
             const faucet = faucets.find(
-              ({ id }) => id === fungibleAsset.faucetId().toString(),
+              ({ id }) => id === fungibleAsset.faucetId().toString()
             );
             return (
               <TableRow key={fungibleAsset.faucetId().toString()}>

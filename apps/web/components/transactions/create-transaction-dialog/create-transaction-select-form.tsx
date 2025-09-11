@@ -1,14 +1,11 @@
 import { type Dispatch, type SetStateAction } from "react";
+import { type ConsumableNoteRecord as WasmConsumableNoteRecord } from "@demox-labs/miden-sdk";
 import {
   type CreateTransactionDialogStep,
   type TransactionType,
 } from "@/lib/types";
 import { Label } from "@workspace/ui/components/label";
-import {
-  type ConsumableNoteRecord,
-  AccountId,
-} from "@workspace/mock-web-client";
-import { webClient } from "@/lib/web-client";
+import { webClient, clientGetConsumableNotes } from "@/lib/web-client";
 import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";
 import SelectTransactionTypeDropdownMenu from "@/components/transactions/select-transaction-type-dropdown-menu";
 import useAccounts from "@/hooks/use-accounts";
@@ -29,10 +26,10 @@ const CreateTransactionDialogSelectForm = ({
   transactionType: TransactionType;
   setTransactionType: Dispatch<SetStateAction<TransactionType>>;
   setLoading: Dispatch<SetStateAction<boolean>>;
-  setConsumableNotes: Dispatch<SetStateAction<ConsumableNoteRecord[]>>;
+  setConsumableNotes: Dispatch<SetStateAction<WasmConsumableNoteRecord[]>>;
   setStep: Dispatch<SetStateAction<CreateTransactionDialogStep>>;
 }) => {
-  const { networkId } = useGlobalContext();
+  const { networkId, serializedMockChain } = useGlobalContext();
   const { accounts } = useAccounts();
   const executingAccount = accounts.find(({ id }) => id === executingAccountId);
   // const { createTransactionDialogConsumableNotes } = useTransactions();
@@ -47,9 +44,10 @@ const CreateTransactionDialogSelectForm = ({
           createTransactionDialogConsumableNotes.length === 0*/
         ) {
           setLoading(true);
-          const client = await webClient(networkId);
-          const consumableNotes = await client.getConsumableNotes(
-            AccountId.fromHex(executingAccount.id),
+          const client = await webClient(networkId, serializedMockChain);
+          const consumableNotes = await clientGetConsumableNotes(
+            client,
+            executingAccount.id
           );
           setLoading(false);
           setConsumableNotes(consumableNotes);

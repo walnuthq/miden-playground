@@ -24,30 +24,25 @@ const Note = ({ id }: { id: string }) => {
   if (!isClient || !inputNote) {
     return null;
   }
-  const script =
-    inputNote.wellKnownNote === "P2ID"
-      ? scripts.find(({ id }) => id === "no-auth")
-      : undefined;
+  const script = scripts.find(({ root }) => root === inputNote.scriptRoot);
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
       <Tabs defaultValue={searchParams.get("tab") ?? "information"}>
         <div className="flex items-center justify-between">
           <TabsList>
             <TabsTrigger value="information">Information</TabsTrigger>
-            {inputNote.wellKnownNote && (
-              <TabsTrigger value="script">Script</TabsTrigger>
-            )}
+            {script && <TabsTrigger value="script">Script</TabsTrigger>}
           </TabsList>
-          {inputNote.wellKnownNote && !noteConsumed(inputNote) && (
+          {script && !noteConsumed(inputNote) && (
             <ConsumeNoteButton inputNote={inputNote} />
           )}
         </div>
         <TabsContent value="information">
           <NoteInformation inputNote={inputNote} />
         </TabsContent>
-        {inputNote.wellKnownNote && (
+        {script && (
           <TabsContent value="script">
-            <NoteScript wellKnownNote={inputNote.wellKnownNote} />
+            <NoteScript script={script} />
           </TabsContent>
         )}
       </Tabs>

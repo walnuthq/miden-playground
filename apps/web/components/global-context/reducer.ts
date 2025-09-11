@@ -1,7 +1,7 @@
 import {
-  type TransactionResult,
-  type ConsumableNoteRecord,
-} from "@workspace/mock-web-client";
+  type ConsumableNoteRecord as WasmConsumableNoteRecord,
+  type TransactionResult as WasmTransactionResult,
+} from "@demox-labs/miden-sdk";
 import {
   type NetworkId,
   type Account,
@@ -19,6 +19,7 @@ export type State = {
   // GLOBAL
   networkId: NetworkId;
   blockNum: number;
+  serializedMockChain: Uint8Array | null;
   // ACCOUNTS
   createWalletDialogOpen: boolean;
   createFaucetDialogOpen: boolean;
@@ -29,15 +30,17 @@ export type State = {
   createTransactionDialogOpen: boolean;
   createTransactionDialogAccountId: string;
   createTransactionDialogTransactionType: TransactionType;
-  createTransactionDialogConsumableNotes: ConsumableNoteRecord[];
+  createTransactionDialogConsumableNotes: WasmConsumableNoteRecord[];
   createTransactionDialogNoteIds: string[];
   createTransactionDialogStep: CreateTransactionDialogStep;
-  createTransactionDialogTransactionResult: TransactionResult | null;
+  createTransactionDialogTransactionResult: WasmTransactionResult | null;
   transactions: Transaction[];
   // NOTES
   inputNotes: InputNote[];
   // SCRIPTS
   createScriptDialogOpen: boolean;
+  deleteScriptAlertDialogOpen: boolean;
+  deleteScriptAlertDialogScriptId: string;
   scripts: Script[];
   // COMPONENTS
   createComponentDialogOpen: boolean;
@@ -57,6 +60,7 @@ export const initialState = (): State => ({
   // GLOBAL
   networkId: "mlcl",
   blockNum: 0,
+  serializedMockChain: null,
   // ACCOUNTS
   createWalletDialogOpen: false,
   createFaucetDialogOpen: false,
@@ -76,6 +80,8 @@ export const initialState = (): State => ({
   inputNotes: [],
   // SCRIPTS
   createScriptDialogOpen: false,
+  deleteScriptAlertDialogOpen: false,
+  deleteScriptAlertDialogScriptId: "",
   scripts: defaultScripts,
   // COMPONENTS
   createComponentDialogOpen: false,
@@ -94,6 +100,7 @@ export const initialState = (): State => ({
 export const stateSerializer = ({
   networkId,
   blockNum,
+  serializedMockChain,
   accounts,
   transactions,
   inputNotes,
@@ -108,6 +115,8 @@ export const stateSerializer = ({
   JSON.stringify({
     networkId,
     blockNum,
+    serializedMockChain:
+      serializedMockChain === null ? null : serializedMockChain.toString(),
     accounts: accounts.map((account) => ({
       ...account,
       nonce: account.nonce.toString(),
@@ -131,6 +140,7 @@ export const stateDeserializer = (value: string): State => {
     const {
       networkId,
       blockNum,
+      serializedMockChain,
       accounts,
       transactions,
       inputNotes,
@@ -142,24 +152,29 @@ export const stateDeserializer = (value: string): State => {
       tutorialOpen,
       nextTutorialStepDisabled,
     } = JSON.parse(value) as {
-      networkId: NetworkId;
-      blockNum: number;
-      accounts: (Omit<Account, "nonce"> & { nonce: string })[];
-      transactions: Transaction[];
-      inputNotes: (Omit<InputNote, "inputs"> & { inputs: string[] })[];
-      scripts: Script[];
-      components: Component[];
-      tutorialId: string;
-      tutorialStep: number;
-      tutorialMaxStep: number;
-      tutorialOpen: boolean;
-      nextTutorialStepDisabled: boolean;
+      networkId?: NetworkId;
+      blockNum?: number;
+      serializedMockChain?: string | null;
+      accounts?: (Omit<Account, "nonce"> & { nonce: string })[];
+      transactions?: Transaction[];
+      inputNotes?: (Omit<InputNote, "inputs"> & { inputs: string[] })[];
+      scripts?: Script[];
+      components?: Component[];
+      tutorialId?: string;
+      tutorialStep?: number;
+      tutorialMaxStep?: number;
+      tutorialOpen?: boolean;
+      nextTutorialStepDisabled?: boolean;
     };
     const state = initialState();
     return {
       ...state,
       networkId: networkId ?? state.networkId,
       blockNum: blockNum ?? state.blockNum,
+      serializedMockChain:
+        serializedMockChain === null || serializedMockChain === undefined
+          ? null
+          : new Uint8Array(serializedMockChain.split(",").map(Number)),
       accounts: accounts
         ? accounts.map((account) => ({
             ...account,
@@ -183,6 +198,7 @@ export const stateDeserializer = (value: string): State => {
         nextTutorialStepDisabled ?? state.nextTutorialStepDisabled,
     };
   } catch (error) {
+    console.error(error);
     return initialState();
   }
 };
@@ -243,9 +259,9 @@ export type Action =
       payload: {
         accountId: string;
         transactionType: TransactionType;
-        transactionResult: TransactionResult | null;
+        transactionResult: WasmTransactionResult | null;
         step: CreateTransactionDialogStep;
-        consumableNotes: ConsumableNoteRecord[];
+        consumableNotes: WasmConsumableNoteRecord[];
         noteIds: string[];
       };
     }
@@ -260,6 +276,7 @@ export type Action =
         consumableNoteIds: Record<string, string[]>;
         inputNotes: InputNote[];
         blockNum: number;
+        serializedMockChain: Uint8Array | null;
       };
     }
   | {
@@ -269,12 +286,23 @@ export type Action =
       type: "CLOSE_CREATE_SCRIPT_DIALOG";
     }
   | {
+      type: "OPEN_DELETE_SCRIPT_ALERT_DIALOG";
+      payload: { scriptId: string };
+    }
+  | {
+      type: "CLOSE_DELETE_SCRIPT_ALERT_DIALOG";
+    }
+  | {
       type: "NEW_SCRIPT";
       payload: { script: Script };
     }
   | {
       type: "UPDATE_SCRIPT";
       payload: { script: Script };
+    }
+  | {
+      type: "DELETE_SCRIPT";
+      payload: { scriptId: string };
     }
   | {
       type: "OPEN_CREATE_COMPONENT_DIALOG";
@@ -452,6 +480,7 @@ export const reducer = (state: State, action: Action): State => {
         ],
         inputNotes: action.payload.inputNotes,
         blockNum: action.payload.blockNum,
+        serializedMockChain: action.payload.serializedMockChain,
       };
     }
     case "OPEN_CREATE_SCRIPT_DIALOG": {
@@ -464,6 +493,19 @@ export const reducer = (state: State, action: Action): State => {
       return {
         ...state,
         createScriptDialogOpen: false,
+      };
+    }
+    case "OPEN_DELETE_SCRIPT_ALERT_DIALOG": {
+      return {
+        ...state,
+        deleteScriptAlertDialogOpen: true,
+        deleteScriptAlertDialogScriptId: action.payload.scriptId,
+      };
+    }
+    case "CLOSE_DELETE_SCRIPT_ALERT_DIALOG": {
+      return {
+        ...state,
+        deleteScriptAlertDialogOpen: false,
       };
     }
     case "NEW_SCRIPT": {
@@ -481,6 +523,18 @@ export const reducer = (state: State, action: Action): State => {
         scripts: [
           ...state.scripts.slice(0, index),
           { ...action.payload.script, updatedAt: Date.now() },
+          ...state.scripts.slice(index + 1),
+        ],
+      };
+    }
+    case "DELETE_SCRIPT": {
+      const index = state.scripts.findIndex(
+        ({ id }) => id === action.payload.scriptId
+      );
+      return {
+        ...state,
+        scripts: [
+          ...state.scripts.slice(0, index),
           ...state.scripts.slice(index + 1),
         ],
       };

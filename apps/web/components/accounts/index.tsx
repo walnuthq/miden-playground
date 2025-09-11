@@ -1,5 +1,4 @@
 "use client";
-import { useEffect } from "react";
 import { useIsClient } from "usehooks-ts";
 import { columns } from "@/components/accounts/columns";
 import AccountsTable from "@/components/accounts/accounts-table";
@@ -9,25 +8,10 @@ import ImportAccountDialog from "@/components/accounts/import-account-dialog";
 import DeployAccountDialog from "@/components/accounts/deploy-account-dialog";
 import useAccounts from "@/hooks/use-accounts";
 import CreateTransactionDialog from "@/components/transactions/create-transaction-dialog";
-import { useWallet } from "@demox-labs/miden-wallet-adapter";
-import useGlobalContext from "@/components/global-context/hook";
 
 const Accounts = () => {
-  const { accountId } = useWallet();
-  const { networkId } = useGlobalContext();
-  const { accounts, wallets, importConnectedWallet } = useAccounts();
+  const { accounts } = useAccounts();
   const isClient = useIsClient();
-  // TODO refactor using onConnect callback?
-  useEffect(() => {
-    if (accountId && networkId === "mtst") {
-      const connectedWallet = wallets.find(
-        ({ address }) => address === accountId
-      );
-      if (!connectedWallet) {
-        importConnectedWallet(accountId);
-      }
-    }
-  }, [accountId, networkId, wallets.length]);
   if (!isClient) {
     return null;
   }

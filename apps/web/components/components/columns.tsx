@@ -3,6 +3,12 @@ import { type Component, componentTypes } from "@/lib/types";
 import { type ColumnDef } from "@tanstack/react-table";
 import useScripts from "@/hooks/use-scripts";
 
+const ScriptCell = ({ scriptId }: { scriptId: string }) => {
+  const { scripts } = useScripts();
+  const script = scripts.find(({ id }) => id === scriptId);
+  return script?.name;
+};
+
 export const columns: ColumnDef<Component>[] = [
   {
     accessorKey: "id",
@@ -20,10 +26,6 @@ export const columns: ColumnDef<Component>[] = [
   {
     accessorKey: "script",
     header: "Script",
-    cell: ({ row }) => {
-      const { scripts } = useScripts();
-      const script = scripts.find(({ id }) => id === row.original.scriptId);
-      return script?.name;
-    },
+    cell: ({ row }) => <ScriptCell scriptId={row.original.scriptId} />,
   },
 ];

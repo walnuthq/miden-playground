@@ -38,13 +38,10 @@ const TransactionsTable = <TData, TValue>({
         <Input
           placeholder="Filter by account ID…"
           value={
-            (table.getColumn("accountAddress")?.getFilterValue() as string) ??
-            ""
+            (table.getColumn("accountId")?.getFilterValue() as string) ?? ""
           }
           onChange={(event) =>
-            table
-              .getColumn("accountAddress")
-              ?.setFilterValue(event.target.value)
+            table.getColumn("accountId")?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
         />
@@ -61,7 +58,7 @@ const TransactionsTable = <TData, TValue>({
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
-                          header.getContext(),
+                          header.getContext()
                         )}
                   </TableHead>
                 ))}
@@ -85,7 +82,7 @@ const TransactionsTable = <TData, TValue>({
                     >
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext(),
+                        cell.getContext()
                       )}
                     </TableCell>
                   ))}

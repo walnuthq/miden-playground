@@ -1,22 +1,44 @@
 import { kebabCase } from "lodash";
 import useGlobalContext from "@/components/global-context/hook";
 import { type Script, type ScriptStatus, type ScriptType } from "@/lib/types";
+import { createScript, deleteScript as apiDeleteScript } from "@/lib/api";
 
 const useScripts = () => {
-  const { scripts, createScriptDialogOpen, dispatch } = useGlobalContext();
+  const {
+    scripts,
+    createScriptDialogOpen,
+    deleteScriptAlertDialogOpen,
+    deleteScriptAlertDialogScriptId,
+    dispatch,
+  } = useGlobalContext();
   const openCreateScriptDialog = () =>
     dispatch({ type: "OPEN_CREATE_SCRIPT_DIALOG" });
   const closeCreateScriptDialog = () =>
     dispatch({ type: "CLOSE_CREATE_SCRIPT_DIALOG" });
-  const newScript = ({ name, type }: { name: string; type: ScriptType }) => {
+  const openDeleteScriptAlertDialog = (scriptId: string) =>
+    dispatch({
+      type: "OPEN_DELETE_SCRIPT_ALERT_DIALOG",
+      payload: { scriptId },
+    });
+  const closeDeleteScriptAlertDialog = () =>
+    dispatch({ type: "CLOSE_DELETE_SCRIPT_ALERT_DIALOG" });
+  const newScript = async ({
+    name,
+    type,
+  }: {
+    name: string;
+    type: ScriptType;
+  }) => {
+    const { id, rust } = await createScript(kebabCase(name));
     const script = {
-      id: kebabCase(name),
+      id,
       name,
       type,
       status: "draft" as ScriptStatus,
-      rust: "",
+      rust,
       masm: "",
       error: "",
+      root: "",
       updatedAt: Date.now(),
     };
     dispatch({
@@ -30,13 +52,27 @@ const useScripts = () => {
       type: "UPDATE_SCRIPT",
       payload: { script },
     });
+  const deleteScript = async (scriptId: string) => {
+    const script = scripts.find(({ id }) => id === deletedScriptId);
+    if (!script) {
+      throw new Error("Error: Script not found");
+    }
+    const deletedScriptId = await apiDeleteScript(scriptId);
+    dispatch({ type: "DELETE_SCRIPT", payload: { scriptId: deletedScriptId } });
+    return script;
+  };
   return {
     scripts,
     createScriptDialogOpen,
+    deleteScriptAlertDialogOpen,
+    deleteScriptAlertDialogScriptId,
     openCreateScriptDialog,
     closeCreateScriptDialog,
+    openDeleteScriptAlertDialog,
+    closeDeleteScriptAlertDialog,
     newScript,
     updateScript,
+    deleteScript,
   };
 };
 

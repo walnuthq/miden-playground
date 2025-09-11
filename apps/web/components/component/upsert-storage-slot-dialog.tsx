@@ -47,7 +47,7 @@ const UpsertStorageSlotDialog = () => {
   };
   useEffect(() => {
     setStorageSlotType(storageSlot?.type ?? "value");
-  }, [componentId, storageSlotIndex]);
+  }, [componentId, storageSlotIndex, storageSlot?.type]);
   return (
     <Dialog
       open={upsertStorageSlotDialogOpen}

@@ -1,5 +1,6 @@
 "use client";
-import { useEffect } from "react";
+// import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { ChevronsUpDown } from "lucide-react";
 import {
   DropdownMenu,
@@ -27,36 +28,27 @@ import tutorials from "@/components/tutorials/tutorials";
 import useTutorials from "@/hooks/use-tutorials";
 import useProjects from "@/hooks/use-projects";
 import { useIsClient } from "usehooks-ts";
-import useTransactions from "@/hooks/use-transactions";
-import { networks, type NetworkId } from "@/lib/types";
-import { cn } from "@workspace/ui/lib/utils";
-import useAccounts from "@/hooks/use-accounts";
+import { networks } from "@/lib/types";
+// import { cn } from "@workspace/ui/lib/utils";
+// import useAccounts from "@/hooks/use-accounts";
 
 const ProjectSwitcher = () => {
   const isClient = useIsClient();
   const { isMobile } = useSidebar();
-  const { networkId, blockNum, resetState, switchNetwork } = useGlobalContext();
-  const { tutorial, tutorialId, startTutorial, loadTutorial } = useTutorials();
-  const { faucets } = useAccounts();
-  const { transactions } = useTransactions();
+  const router = useRouter();
+  const { networkId, blockNum, resetState /*, switchNetwork */ } =
+    useGlobalContext();
+  const { startTutorial /* tutorialId, loadTutorial*/ } = useTutorials();
+  // const { faucets } = useAccounts();
   const { saveProject, loadProject } = useProjects();
-  useEffect(() => {
-    // console.log(tutorialId);
-    // console.log(faucets.length);
-    if (
-      tutorialId === "transfer-assets-between-wallets" &&
-      transactions.length === 0
-    ) {
-      console.log("loading", tutorialId);
-      loadTutorial(tutorialId);
-    } else if (
-      tutorialId === "connect-wallet-and-sign-transactions" &&
-      faucets.length === 0
-    ) {
-      console.log("loading", tutorialId);
-      loadTutorial(tutorialId);
-    }
-  }, [tutorialId, transactions.length, blockNum]);
+  // useEffect(() => {
+  //   if (
+  //     tutorialId === "connect-wallet-and-sign-transactions" &&
+  //     faucets.length === 0
+  //   ) {
+  //     loadTutorial(tutorialId);
+  //   }
+  // }, [tutorialId, faucets.length]);
   if (!isClient) {
     return null;
   }
@@ -108,7 +100,12 @@ const ProjectSwitcher = () => {
               </DropdownMenuPortal>
             </DropdownMenuSub>
             <DropdownMenuSeparator /> */}
-            <DropdownMenuItem onClick={() => resetState()}>
+            <DropdownMenuItem
+              onClick={() => {
+                resetState();
+                router.push("/accounts");
+              }}
+            >
               New empty sandbox
             </DropdownMenuItem>
             {/* <DropdownMenuItem
@@ -117,7 +114,7 @@ const ProjectSwitcher = () => {
               Load tutorial
             </DropdownMenuItem> */}
             <DropdownMenuSeparator />
-            {/* <DropdownMenuSub>
+            <DropdownMenuSub>
               <DropdownMenuSubTrigger>Projects</DropdownMenuSubTrigger>
               <DropdownMenuPortal>
                 <DropdownMenuSubContent>
@@ -129,7 +126,7 @@ const ProjectSwitcher = () => {
                   </DropdownMenuItem>
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
-            </DropdownMenuSub> */}
+            </DropdownMenuSub>
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>Tutorials</DropdownMenuSubTrigger>
               <DropdownMenuPortal>

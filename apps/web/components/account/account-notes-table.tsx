@@ -21,13 +21,13 @@ import useTransactions from "@/hooks/use-transactions";
 import useAccounts from "@/hooks/use-accounts";
 import useNotes from "@/hooks/use-notes";
 import NoteId from "@/components/lib/note-id";
-//
 import {
   useWallet,
   ConsumeTransaction,
   type MidenWalletAdapter,
 } from "@demox-labs/miden-wallet-adapter";
 import useGlobalContext from "@/components/global-context/hook";
+import useScripts from "@/hooks/use-scripts";
 
 const NoteActionsCell = ({
   account,
@@ -68,10 +68,10 @@ const NoteActionsCell = ({
                 return;
               }
               const transaction = new ConsumeTransaction(
-                inputNote.senderAddress,
+                inputNote.senderId,
                 inputNote.id,
-                inputNote.type === "Public" ? "public" : "private",
-                Number(fungibleAsset.amount),
+                inputNote.type === "public" ? "public" : "private",
+                Number(fungibleAsset.amount)
               );
               const adapter = wallet.adapter as MidenWalletAdapter;
               const txId = await adapter.requestConsume(transaction);
@@ -89,6 +89,7 @@ const NoteActionsCell = ({
 const AccountNotesTable = ({ account }: { account: Account }) => {
   const { faucets } = useAccounts();
   const { inputNotes } = useNotes();
+  const { scripts } = useScripts();
   const consumableNotes = account.consumableNoteIds
     .map((noteId) => inputNotes.find(({ id }) => id === noteId))
     .filter((note) => note !== undefined);
@@ -106,39 +107,44 @@ const AccountNotesTable = ({ account }: { account: Account }) => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {consumableNotes.map((inputNote) => (
-            <TableRow key={inputNote.id}>
-              <TableCell>
-                <NoteId noteId={inputNote.id} />
-              </TableCell>
-              <TableCell>{inputNote.wellKnownNote ?? "Custom"}</TableCell>
-              <TableCell>
-                <Badge
-                  variant={
-                    inputNote.type === "Public" ? "default" : "destructive"
-                  }
-                >
-                  {inputNote.type}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <AccountAddress address={inputNote.senderAddress} />
-              </TableCell>
-              <TableCell>
-                {inputNote.fungibleAssets.map(({ faucetId, amount }) => {
-                  const faucet = faucets.find(({ id }) => id === faucetId);
-                  return (
-                    <p key={faucetId}>
-                      {amount} {faucet?.tokenSymbol ?? "Unknown"}
-                    </p>
-                  );
-                })}
-              </TableCell>
-              <TableCell>
-                <NoteActionsCell account={account} inputNote={inputNote} />
-              </TableCell>
-            </TableRow>
-          ))}
+          {consumableNotes.map((inputNote) => {
+            const script = scripts.find(
+              ({ root }) => root === inputNote.scriptRoot
+            );
+            return (
+              <TableRow key={inputNote.id}>
+                <TableCell>
+                  <NoteId noteId={inputNote.id} />
+                </TableCell>
+                <TableCell>{script?.name ?? "Custom"}</TableCell>
+                <TableCell>
+                  <Badge
+                    variant={
+                      inputNote.type === "public" ? "default" : "destructive"
+                    }
+                  >
+                    {inputNote.type}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <AccountAddress id={inputNote.senderId} />
+                </TableCell>
+                <TableCell>
+                  {inputNote.fungibleAssets.map(({ faucetId, amount }) => {
+                    const faucet = faucets.find(({ id }) => id === faucetId);
+                    return (
+                      <p key={faucetId}>
+                        {amount} {faucet?.tokenSymbol ?? "Unknown"}
+                      </p>
+                    );
+                  })}
+                </TableCell>
+                <TableCell>
+                  <NoteActionsCell account={account} inputNote={inputNote} />
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </div>

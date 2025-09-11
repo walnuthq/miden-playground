@@ -5,6 +5,7 @@ import ScriptsTable from "@/components/scripts/scripts-table";
 import useScripts from "@/hooks/use-scripts";
 import CreateScriptDialog from "@/components/scripts/create-script-dialog";
 import defaultScripts from "@/components/global-context/default-scripts";
+import DeleteScriptAlertDialog from "@/components/scripts/delete-script-alert-dialog";
 
 const Scripts = () => {
   const { scripts } = useScripts();
@@ -20,6 +21,7 @@ const Scripts = () => {
         data={scripts.filter(({ id }) => !defaultScriptIds.includes(id))}
       />
       <CreateScriptDialog />
+      <DeleteScriptAlertDialog />
     </div>
   );
 };

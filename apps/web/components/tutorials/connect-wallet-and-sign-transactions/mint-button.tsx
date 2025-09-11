@@ -6,6 +6,7 @@ import { Button } from "@workspace/ui/components/button";
 import { sha3_256 } from "js-sha3";
 import { useInterval } from "usehooks-ts";
 import useGlobalContext from "@/components/global-context/hook";
+import { MIDEN_FAUCET_DECIMALS } from "@/lib/constants";
 
 // Function to find a valid nonce for proof of work using the new challenge format
 const findValidNonce = async (challenge: string, target: string) => {
@@ -50,7 +51,7 @@ const findValidNonce = async (challenge: string, target: string) => {
 
 const powChallenge = async (accountId: string) => {
   const powResponse = await fetch(
-    `https://faucet.testnet.miden.io/pow?${new URLSearchParams({ account_id: accountId })}`,
+    `https://faucet.testnet.miden.io/pow?${new URLSearchParams({ account_id: accountId })}`
   );
   if (!powResponse.ok) {
     // const message = await powResponse.text();
@@ -63,8 +64,9 @@ const powChallenge = async (accountId: string) => {
 
 const requestNote = async (
   accountId: string,
+  amount: bigint,
   challenge: string,
-  nonce: number,
+  nonce: number
 ) => {
   try {
     const noteDataRegex = /"data_base64":"([^"]+)"/;
@@ -75,13 +77,13 @@ const requestNote = async (
       `https://faucet.testnet.miden.io/get_tokens?${new URLSearchParams({
         account_id: accountId,
         is_private_note: "false",
-        asset_amount: "100",
+        asset_amount: amount.toString(),
         challenge,
         nonce: nonce.toString(),
       })}`,
       {
         headers: { "Content-Type": "text/event-stream" },
-      },
+      }
     );
     const text = await response.text();
     const noteDataMatch = noteDataRegex.exec(text);
@@ -112,7 +114,7 @@ const MintButton = () => {
       };
       waitForSyncState();
     },
-    noteId === "" || account?.consumableNoteIds.includes(noteId) ? null : 1000,
+    noteId === "" || account?.consumableNoteIds.includes(noteId) ? null : 1000
   );
   useEffect(() => {
     if (account?.consumableNoteIds.includes(noteId)) {
@@ -129,8 +131,14 @@ const MintButton = () => {
         }
         setLoading(true);
         const { challenge, nonce } = await powChallenge(account.id);
-        const noteResponse = await requestNote(account.id, challenge, nonce);
+        const noteResponse = await requestNote(
+          account.id,
+          100n * 10n ** MIDEN_FAUCET_DECIMALS,
+          challenge,
+          nonce
+        );
         setNoteId(noteResponse?.noteId ?? "");
+        setLoading(false); //! TODO
       }}
     >
       {loading ? <RotateCw className="animate-spin" /> : <HandCoins />}

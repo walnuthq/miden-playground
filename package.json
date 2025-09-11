@@ -8,7 +8,7 @@
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "wasm-mock-web-client:dev": "RUSTFLAGS='--cfg getrandom_backend=\"wasm_js\"' wasm-pack build --out-dir ../packages/wasm-mock-web-client --no-opt wasm-mock-web-client && cd packages/wasm-mock-web-client && rm .gitignore",
-    "wasm-mock-web-client:build": "RUSTFLAGS='--cfg getrandom_backend=\"wasm_js\"' wasm-pack build --out-dir ../packages/wasm-mock-web-client --release wasm-mock-web-client && cd packages/wasm-mock-web-client && rm .gitignore && pnpm add dexie"
+    "wasm-mock-web-client:build": "RUSTFLAGS='--cfg getrandom_backend=\"wasm_js\"' wasm-pack build --out-dir ../packages/wasm-mock-web-client --release wasm-mock-web-client && cd packages/wasm-mock-web-client && rm .gitignore && pnpm add dexie@4.0.8"
   },
   "devDependencies": {
     "@workspace/eslint-config": "workspace:*",

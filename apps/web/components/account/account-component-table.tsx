@@ -20,7 +20,7 @@ import {
 import { formatValue, sleep } from "@/lib/utils";
 import { Button } from "@workspace/ui/components/button";
 import useGlobalContext from "@/components/global-context/hook";
-import { webClient } from "@/lib/web-client";
+import { clientGetAccountByAddress, webClient } from "@/lib/web-client";
 // import useTransactions from "@/hooks/use-transactions";
 
 const StorageSlotsTable = ({
@@ -53,21 +53,24 @@ const StorageSlotsTable = ({
 );
 
 const ReadOnlyProceduresTable = ({ account }: { account: Account }) => {
-  const { networkId } = useGlobalContext();
+  const { networkId, serializedMockChain } = useGlobalContext();
+  const { scripts } = useScripts();
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState("");
   const getCount = async () => {
-    const client = await webClient(networkId);
-    const { AccountId: WasmAccountId } = await import("@demox-labs/miden-sdk");
-    const counter = await client.getAccount(
-      // @ts-ignore
-      WasmAccountId.fromBech32(account.address)
-    );
+    const client = await webClient(networkId, serializedMockChain);
+    const counter = await clientGetAccountByAddress(client, account.address);
     const count = counter?.storage().getItem(0);
     const counterValue = BigInt(
       `0x${count!.toHex().slice(-16).match(/../g)!.reverse().join("")}`
     );
-    setResult(counterValue.toString());
+    const script = scripts.find(({ id }) => id === "counter-contract");
+    const newCounterValue = counterValue + 1n;
+    setResult(
+      script?.updatedAt === 0
+        ? counterValue.toString()
+        : newCounterValue.toString()
+    );
   };
   return (
     <div className="rounded-md border">
@@ -102,68 +105,25 @@ const ReadOnlyProceduresTable = ({ account }: { account: Account }) => {
   );
 };
 
-const counterContractCode = `use.miden::account
-use.std::sys
-
-# => []
-export.get_count
-    push.0
-    # => [index]
-
-    # exec.account::get_item
-    # => [count]
-
-    # exec.sys::truncate_stack
-    # => []
-end
-
-# => []
-export.increment_count
-    push.0
-    # => [index]
-
-    exec.account::get_item
-    # => [count]
-
-    push.1 add
-    # => [count+1]
-
-    # debug statement with client
-    debug.stack
-
-    push.0
-    # [index, count+1]
-
-    exec.account::set_item
-    # => []
-
-    push.1 exec.account::incr_nonce
-    # => []
-
-    exec.sys::truncate_stack
-    # => []
-end
-`;
-
-const txScriptCode = `use.external_contract::counter_contract
-begin
-    call.counter_contract::increment_count
-end
-`;
+// const txScriptCode = `use.external_contract::counter_contract
+// begin
+//     call.counter_contract::increment_count
+// end
+// `;
 
 const ReadWriteProceduresTable = ({ account }: { account: Account }) => {
-  const { networkId } = useGlobalContext();
+  const { networkId, serializedMockChain } = useGlobalContext();
   // const { newCustomTransactionRequest, submitTransaction } = useTransactions();
+  const { scripts, updateScript } = useScripts();
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState("");
   const incrementCount = async () => {
-    const {
-      // TransactionKernel,
-      // AssemblerUtils,
-      // TransactionScript,
-      // TransactionRequestBuilder,
-      AccountId: WasmAccountId,
-    } = await import("@demox-labs/miden-sdk");
+    // const {
+    //   TransactionKernel,
+    //   AssemblerUtils,
+    //   TransactionScript,
+    //   TransactionRequestBuilder,
+    // } = await import("@demox-labs/miden-sdk");
     // const assembler = TransactionKernel.assembler();
     // let counterComponentLib = AssemblerUtils.createAccountComponentLibrary(
     //   assembler, // assembler
@@ -184,11 +144,8 @@ const ReadWriteProceduresTable = ({ account }: { account: Account }) => {
     // });
     // const transactionRecord = await submitTransaction(transactionResult);
     // console.log(transactionRecord.id().toHex());
-    const client = await webClient(networkId);
-    const counter = await client.getAccount(
-      // @ts-ignore
-      WasmAccountId.fromBech32(account.address)
-    );
+    const client = await webClient(networkId, serializedMockChain);
+    const counter = await clientGetAccountByAddress(client, account.address);
     const count = counter?.storage().getItem(0);
     // TODO remove mock
     const counterValue =
@@ -196,6 +153,8 @@ const ReadWriteProceduresTable = ({ account }: { account: Account }) => {
         `0x${count!.toHex().slice(-16).match(/../g)!.reverse().join("")}`
       ) + 1n;
     await sleep(2000);
+    const script = scripts.find(({ id }) => id === "counter-contract")!;
+    updateScript({ ...script, updatedAt: 1 });
     setResult(counterValue.toString());
   };
   return (

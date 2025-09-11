@@ -26,7 +26,7 @@ const TransactionInformationTable = ({
         <TableRow>
           <TableCell>Account ID</TableCell>
           <TableCell>
-            <AccountAddress address={transaction.accountAddress} />
+            <AccountAddress id={transaction.accountId} />
           </TableCell>
         </TableRow>
         <TableRow>

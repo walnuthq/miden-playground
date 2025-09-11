@@ -7,6 +7,12 @@
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".next/**", "!.next/cache/**"]
     },
+    "api#build": {
+      "env": ["WEB_URL"]
+    },
+    "web#build": {
+      "env": ["NEXT_PUBLIC_API_URL"]
+    },
     "lint": {
       "dependsOn": ["^lint"]
     },

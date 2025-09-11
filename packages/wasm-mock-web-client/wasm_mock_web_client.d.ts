@@ -89,11 +89,7 @@ export class AccountCode {
 export class AccountComponent {
   private constructor();
   free(): void;
-  static compile(
-    account_code: string,
-    assembler: Assembler,
-    storage_slots: StorageSlot[],
-  ): AccountComponent;
+  static compile(account_code: string, assembler: Assembler, storage_slots: StorageSlot[]): AccountComponent;
   withSupportsAllTypes(): AccountComponent;
   getProcedureHash(procedure_name: string): string;
   static createAuthComponent(secret_key: SecretKey): AccountComponent;
@@ -163,9 +159,7 @@ export class AccountStorageMode {
 export class AccountStorageRequirements {
   free(): void;
   constructor();
-  static fromSlotAndKeysArray(
-    slots_and_keys: SlotAndKeys[],
-  ): AccountStorageRequirements;
+  static fromSlotAndKeysArray(slots_and_keys: SlotAndKeys[]): AccountStorageRequirements;
 }
 export class AccountVaultDelta {
   private constructor();
@@ -194,11 +188,7 @@ export class Assembler {
 export class AssemblerUtils {
   private constructor();
   free(): void;
-  static createAccountComponentLibrary(
-    assembler: Assembler,
-    library_path: string,
-    source_code: string,
-  ): Library;
+  static createAccountComponentLibrary(assembler: Assembler, library_path: string, source_code: string): Library;
 }
 export class AssetVault {
   private constructor();
@@ -232,10 +222,7 @@ export class BlockHeader {
 }
 export class ConsumableNoteRecord {
   free(): void;
-  constructor(
-    input_note_record: InputNoteRecord,
-    note_consumability: NoteConsumability[],
-  );
+  constructor(input_note_record: InputNoteRecord, note_consumability: NoteConsumability[]);
   inputNoteRecord(): InputNoteRecord;
   noteConsumability(): NoteConsumability[];
 }
@@ -273,10 +260,7 @@ export class FlattenedU8Vec {
 export class ForeignAccount {
   private constructor();
   free(): void;
-  static public(
-    account_id: AccountId,
-    storage_requirements: AccountStorageRequirements,
-  ): ForeignAccount;
+  static public(account_id: AccountId, storage_requirements: AccountStorageRequirements): ForeignAccount;
   storage_slot_requirements(): AccountStorageRequirements;
   account_id(): AccountId;
 }
@@ -369,32 +353,13 @@ export class MerklePath {
 }
 export class Note {
   free(): void;
-  constructor(
-    note_assets: NoteAssets,
-    note_metadata: NoteMetadata,
-    note_recipient: NoteRecipient,
-  );
+  constructor(note_assets: NoteAssets, note_metadata: NoteMetadata, note_recipient: NoteRecipient);
   id(): NoteId;
   metadata(): NoteMetadata;
   recipient(): NoteRecipient;
   assets(): NoteAssets;
-  static createP2IDNote(
-    sender: AccountId,
-    target: AccountId,
-    assets: NoteAssets,
-    note_type: NoteType,
-    serial_num: Word,
-    aux: Felt,
-  ): Note;
-  static createP2IDENote(
-    sender: AccountId,
-    target: AccountId,
-    assets: NoteAssets,
-    note_type: NoteType,
-    serial_num: Word,
-    recall_height: number,
-    aux: Felt,
-  ): Note;
+  static createP2IDNote(sender: AccountId, target: AccountId, assets: NoteAssets, note_type: NoteType, serial_num: Word, aux: Felt): Note;
+  static createP2IDENote(sender: AccountId, target: AccountId, assets: NoteAssets, note_type: NoteType, serial_num: Word, recall_height: number, aux: Felt): Note;
 }
 export class NoteAndArgs {
   free(): void;
@@ -446,11 +411,7 @@ export class NoteExecutionHint {
   static none(): NoteExecutionHint;
   static always(): NoteExecutionHint;
   static afterBlock(block_num: number): NoteExecutionHint;
-  static onBlockSlot(
-    epoch_len: number,
-    slot_len: number,
-    slot_offset: number,
-  ): NoteExecutionHint;
+  static onBlockSlot(epoch_len: number, slot_len: number, slot_offset: number): NoteExecutionHint;
   static fromParts(tag: number, payload: number): NoteExecutionHint;
   canBeConsumed(block_num: number): boolean;
 }
@@ -505,13 +466,7 @@ export class NoteLocation {
 }
 export class NoteMetadata {
   free(): void;
-  constructor(
-    sender: AccountId,
-    note_type: NoteType,
-    note_tag: NoteTag,
-    note_execution_hint: NoteExecutionHint,
-    aux?: Felt | null,
-  );
+  constructor(sender: AccountId, note_type: NoteType, note_tag: NoteTag, note_execution_hint: NoteExecutionHint, aux?: Felt | null);
   sender(): AccountId;
   tag(): NoteTag;
   noteType(): NoteType;
@@ -536,11 +491,7 @@ export class NoteTag {
   private constructor();
   free(): void;
   static fromAccountId(account_id: AccountId): NoteTag;
-  static forPublicUseCase(
-    use_case_id: number,
-    payload: number,
-    execution: NoteExecutionMode,
-  ): NoteTag;
+  static forPublicUseCase(use_case_id: number, payload: number, execution: NoteExecutionMode): NoteTag;
   static forLocalUseCase(use_case_id: number, payload: number): NoteTag;
   isSingleTarget(): boolean;
   executionMode(): NoteExecutionMode;
@@ -669,10 +620,7 @@ export class TransactionProver {
   static newLocalProver(): TransactionProver;
   static newRemoteProver(endpoint: string): TransactionProver;
   serialize(): string;
-  static deserialize(
-    prover_type: string,
-    endpoint?: string | null,
-  ): TransactionProver;
+  static deserialize(prover_type: string, endpoint?: string | null): TransactionProver;
   endpoint(): string | undefined;
 }
 export class TransactionRecord {
@@ -686,8 +634,6 @@ export class TransactionRecord {
   outputNotes(): OutputNotes;
   blockNum(): number;
   transactionStatus(): TransactionStatus;
-  serialize(): Uint8Array;
-  static deserialize(bytes: Uint8Array): TransactionRecord;
 }
 export class TransactionRequest {
   private constructor();
@@ -700,24 +646,14 @@ export class TransactionRequest {
 export class TransactionRequestBuilder {
   free(): void;
   constructor();
-  withUnauthenticatedInputNotes(
-    notes: NoteAndArgsArray,
-  ): TransactionRequestBuilder;
-  withAuthenticatedInputNotes(
-    notes: NoteIdAndArgsArray,
-  ): TransactionRequestBuilder;
+  withUnauthenticatedInputNotes(notes: NoteAndArgsArray): TransactionRequestBuilder;
+  withAuthenticatedInputNotes(notes: NoteIdAndArgsArray): TransactionRequestBuilder;
   withOwnOutputNotes(notes: OutputNotesArray): TransactionRequestBuilder;
   withCustomScript(script: TransactionScript): TransactionRequestBuilder;
-  withExpectedOutputRecipients(
-    recipients: RecipientArray,
-  ): TransactionRequestBuilder;
-  withExpectedFutureNotes(
-    note_details_and_tag: NoteDetailsAndTagArray,
-  ): TransactionRequestBuilder;
+  withExpectedOutputRecipients(recipients: RecipientArray): TransactionRequestBuilder;
+  withExpectedFutureNotes(note_details_and_tag: NoteDetailsAndTagArray): TransactionRequestBuilder;
   extendAdviceMap(advice_map: AdviceMap): TransactionRequestBuilder;
-  withForeignAccounts(
-    foreign_accounts: ForeignAccount[],
-  ): TransactionRequestBuilder;
+  withForeignAccounts(foreign_accounts: ForeignAccount[]): TransactionRequestBuilder;
   build(): TransactionRequest;
 }
 export class TransactionResult {
@@ -746,9 +682,7 @@ export class TransactionScriptInputPair {
 }
 export class TransactionScriptInputPairArray {
   free(): void;
-  constructor(
-    transaction_script_input_pairs?: TransactionScriptInputPair[] | null,
-  );
+  constructor(transaction_script_input_pairs?: TransactionScriptInputPair[] | null);
   push(transaction_script_input_pair: TransactionScriptInputPair): void;
 }
 export class TransactionStatus {
@@ -764,95 +698,15 @@ export class TransactionStatus {
 }
 export class WebClient {
   free(): void;
-  newTransaction(
-    account_id: AccountId,
-    transaction_request: TransactionRequest,
-  ): Promise<TransactionResult>;
-  submitTransaction(
-    transaction_result: TransactionResult,
-    prover?: TransactionProver | null,
-  ): Promise<void>;
-  newMintTransactionRequest(
-    target_account_id: AccountId,
-    faucet_id: AccountId,
-    note_type: NoteType,
-    amount: bigint,
-  ): TransactionRequest;
-  newSendTransactionRequest(
-    sender_account_id: AccountId,
-    target_account_id: AccountId,
-    faucet_id: AccountId,
-    note_type: NoteType,
-    amount: bigint,
-    recall_height?: number | null,
-    timelock_height?: number | null,
-  ): TransactionRequest;
+  newTransaction(account_id: AccountId, transaction_request: TransactionRequest): Promise<TransactionResult>;
+  submitTransaction(transaction_result: TransactionResult, prover?: TransactionProver | null): Promise<void>;
+  newMintTransactionRequest(target_account_id: AccountId, faucet_id: AccountId, note_type: NoteType, amount: bigint): TransactionRequest;
+  newSendTransactionRequest(sender_account_id: AccountId, target_account_id: AccountId, faucet_id: AccountId, note_type: NoteType, amount: bigint, recall_height?: number | null, timelock_height?: number | null): TransactionRequest;
   newConsumeTransactionRequest(list_of_note_ids: string[]): TransactionRequest;
-  newSwapTransactionRequest(
-    sender_account_id: AccountId,
-    offered_asset_faucet_id: AccountId,
-    offered_asset_amount: bigint,
-    requested_asset_faucet_id: AccountId,
-    requested_asset_amount: bigint,
-    note_type: NoteType,
-  ): TransactionRequest;
-  getInputNotes(filter: NoteFilter): Promise<InputNoteRecord[]>;
-  getInputNote(note_id: string): Promise<InputNoteRecord | undefined>;
-  getOutputNotes(filter: NoteFilter): Promise<any>;
-  getOutputNote(note_id: string): Promise<any>;
-  compileNoteScript(script: string): NoteScript;
-  getConsumableNotes(
-    account_id?: AccountId | null,
-  ): Promise<ConsumableNoteRecord[]>;
+  newSwapTransactionRequest(sender_account_id: AccountId, offered_asset_faucet_id: AccountId, offered_asset_amount: bigint, requested_asset_faucet_id: AccountId, requested_asset_amount: bigint, note_type: NoteType): TransactionRequest;
   syncState(): Promise<SyncSummary>;
   getSyncHeight(): Promise<number>;
-  static buildSwapTag(
-    note_type: NoteType,
-    offered_asset_faucet_id: AccountId,
-    offered_asset_amount: bigint,
-    requested_asset_faucet_id: AccountId,
-    requested_asset_amount: bigint,
-  ): NoteTag;
-  getTransactions(
-    transaction_filter: TransactionFilter,
-  ): Promise<TransactionRecord[]>;
-  compileTxScript(script: string): TransactionScript;
-  constructor();
-  createClient(
-    _node_url?: string | null,
-    seed?: Uint8Array | null,
-  ): Promise<any>;
-  getAccounts(): Promise<AccountHeader[]>;
-  getAccount(account_id: AccountId): Promise<Account | undefined>;
-  importAccount(account_bytes: any): Promise<any>;
-  importPublicAccountFromSeed(
-    init_seed: Uint8Array,
-    mutable: boolean,
-  ): Promise<Account>;
-  importAccountById(account_id: AccountId): Promise<any>;
-  importNote(note_bytes: any): Promise<any>;
-  forceImportStore(store_dump: any): Promise<any>;
-  newWallet(
-    storage_mode: AccountStorageMode,
-    mutable: boolean,
-    init_seed?: Uint8Array | null,
-  ): Promise<Account>;
-  newFaucet(
-    storage_mode: AccountStorageMode,
-    non_fungible: boolean,
-    token_symbol: string,
-    decimals: number,
-    max_supply: bigint,
-  ): Promise<Account>;
-  newAccount(
-    account: Account,
-    account_seed: Word | null | undefined,
-    overwrite: boolean,
-  ): Promise<void>;
-  addAccountSecretKeyToWebStore(secret_key: SecretKey): Promise<void>;
-  addTag(tag: string): Promise<void>;
-  removeTag(tag: string): Promise<void>;
-  listTags(): Promise<any>;
+  static buildSwapTag(note_type: NoteType, offered_asset_faucet_id: AccountId, offered_asset_amount: bigint, requested_asset_faucet_id: AccountId, requested_asset_amount: bigint): NoteTag;
   exportNote(note_id: string, export_type: string): Promise<any>;
   /**
    * Retrieves the entire underlying web store and returns it as a JsValue
@@ -860,6 +714,30 @@ export class WebClient {
    * Meant to be used in conjunction with the force_import_store method
    */
   exportStore(): Promise<any>;
+  importAccount(account_bytes: any): Promise<any>;
+  importPublicAccountFromSeed(init_seed: Uint8Array, mutable: boolean): Promise<Account>;
+  importAccountById(account_id: AccountId): Promise<any>;
+  importNote(note_bytes: any): Promise<any>;
+  forceImportStore(store_dump: any): Promise<any>;
+  newWallet(storage_mode: AccountStorageMode, mutable: boolean, init_seed?: Uint8Array | null): Promise<Account>;
+  newFaucet(storage_mode: AccountStorageMode, non_fungible: boolean, token_symbol: string, decimals: number, max_supply: bigint): Promise<Account>;
+  newAccount(account: Account, account_seed: Word | null | undefined, overwrite: boolean): Promise<void>;
+  addAccountSecretKeyToWebStore(secret_key: SecretKey): Promise<void>;
+  getAccounts(): Promise<AccountHeader[]>;
+  getAccount(account_id: AccountId): Promise<Account | undefined>;
+  getInputNotes(filter: NoteFilter): Promise<InputNoteRecord[]>;
+  getInputNote(note_id: string): Promise<InputNoteRecord | undefined>;
+  getOutputNotes(filter: NoteFilter): Promise<any>;
+  getOutputNote(note_id: string): Promise<any>;
+  compileNoteScript(script: string): NoteScript;
+  getConsumableNotes(account_id?: AccountId | null): Promise<ConsumableNoteRecord[]>;
+  getTransactions(transaction_filter: TransactionFilter): Promise<TransactionRecord[]>;
+  compileTxScript(script: string): TransactionScript;
+  constructor();
+  createClient(_node_url?: string | null, seed?: Uint8Array | null): Promise<any>;
+  addTag(tag: string): Promise<void>;
+  removeTag(tag: string): Promise<void>;
+  listTags(): Promise<any>;
 }
 export class Word {
   private constructor();
