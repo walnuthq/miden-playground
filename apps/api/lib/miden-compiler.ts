@@ -1,5 +1,5 @@
-import { access, constants, writeFile, readFile, rm } from "node:fs/promises";
-import { execFile } from "@/lib/utils";
+import { cp, writeFile, readFile, rm } from "node:fs/promises";
+import { execFile, fileExists } from "@/lib/utils";
 
 export const cargoMidenVersion = async () => {
   const { stdout } = await execFile("cargo", ["miden", "--version"]);
@@ -13,17 +13,23 @@ export const midenCompilerVersion = async () => {
   return semver!.replaceAll("\n", "");
 };
 
-export const packageExists = async (packageName: string) => {
-  try {
-    await access(`/tmp/${packageName}`, constants.F_OK);
-    return true; // eslint-disable-next-line
-  } catch (_) {
-    return false;
-  }
-};
+export const packageExists = async (packageName: string) =>
+  fileExists(`/tmp/${packageName}`);
 
-export const newPackage = (packageName: string) =>
-  execFile("cargo", ["miden", "new", packageName], { cwd: "/tmp" });
+// export const newPackage = (packageName: string) =>
+//   execFile("cargo", ["miden", "new", packageName], { cwd: "/tmp" });
+
+export const newPackage = async (packageName: string) => {
+  const counterContractExists = await fileExists("/tmp/counter-contract");
+  if (!counterContractExists) {
+    execFile("cargo", ["miden", "example", "counter-contract"], {
+      cwd: "/tmp",
+    });
+  }
+  await cp("/tmp/counter-contract/counter-contract", `/tmp/${packageName}`, {
+    recursive: true,
+  });
+};
 
 export const readRust = async (packageName: string) =>
   readFile(`/tmp/${packageName}/src/lib.rs`, "utf-8");
@@ -53,8 +59,8 @@ export const compileWasmToMasm = (packageName: string) =>
     [
       "compile",
       "--emit",
-      `masm=${packageName}.masm`,
-      `target/wasm32-wasip2/release/${packageName.replaceAll("-", "_")}.wasm`,
+      `masm=${packageName}.masm`, // TODO ignored?
+      `target/wasm32-wasip2/release/counter_contract.wasm`, // TODO hardcoded
     ],
     {
       cwd: `/tmp/${packageName}`,
@@ -70,7 +76,8 @@ export const readMasm = async (packageName: string) => {
   const [, componentName] = matches;
   const [actualPackageName] = packageName.split("-");
   return readFile(
-    `/tmp/${packageName}/${componentName}/${actualPackageName}@0.1.masm`,
+    `/tmp/${packageName}/miden:counter-contract/counter@0.1.masm`,
+    // `/tmp/${packageName}/${componentName}/${actualPackageName}@0.1.masm`,
     "utf-8"
   );
 };

@@ -9,7 +9,12 @@
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy-staging": "opennextjs-cloudflare build && opennextjs-cloudflare deploy --env staging",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
   },
   "dependencies": {
     "@demox-labs/miden-sdk": "^0.11.3",
@@ -18,6 +23,7 @@
     "@mdx-js/react": "^3.1.1",
     "@monaco-editor/react": "^4.7.0",
     "@next/mdx": "^15.5.3",
+    "@opennextjs/cloudflare": "^1.8.2",
     "@tanstack/react-table": "^8.21.3",
     "@types/mdx": "^2.0.13",
     "@workspace/mock-web-client": "workspace:*",
@@ -43,6 +49,7 @@
     "@workspace/typescript-config": "workspace:*",
     "copy-webpack-plugin": "^13.0.1",
     "eslint": "^9.35.0",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "wrangler": "^4.35.0"
   }
 }

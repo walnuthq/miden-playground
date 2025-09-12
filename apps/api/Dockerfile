@@ -1,86 +1,66 @@
-FROM node:22 AS base
+FROM node:22-alpine AS base
 
-# # create system user nodejs:nextjs
-# RUN addgroup --system --gid 1001 nodejs
-# RUN useradd --system -u 1001 -g 1001 --create-home --shell /bin/bash nextjs
-# USER nextjs
+FROM base AS rustup
 
-# RUN addgroup --system --gid 1001 nodejs
-# RUN adduser --system --uid 1001 nextjs
-# USER nextjs
+RUN apk add --no-cache \
+        musl-dev \
+        libressl-dev \
+        pkgconfig \
+        libc6-compat \
+        ca-certificates \
+        gcc \
+        git
 
-FROM base AS midenup
-# install rustup
-ENV RUSTUP_HOME="/usr/local/share/rust"
-ENV CARGO_HOME="/usr/local/share/rust"
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-ENV PATH="/usr/local/share/rust/bin:${PATH}"
-RUN rustup toolchain install nightly-2025-07-20
-# install midenc and cargo-miden
+ENV RUSTUP_HOME=/usr/local/rustup \
+    CARGO_HOME=/usr/local/cargo \
+    PATH=/usr/local/cargo/bin:$PATH \
+    RUST_VERSION=nightly-2025-07-20
+
+RUN set -eux; \
+    apkArch="$(apk --print-arch)"; \
+    case "$apkArch" in \
+        x86_64) rustArch='x86_64-unknown-linux-musl'; rustupSha256='e6599a1c7be58a2d8eaca66a80e0dc006d87bbcf780a58b7343d6e14c1605cb2' ;; \
+        aarch64) rustArch='aarch64-unknown-linux-musl'; rustupSha256='a97c8f56d7462908695348dd8c71ea6740c138ce303715793a690503a94fc9a9' ;; \
+        ppc64le) rustArch='powerpc64le-unknown-linux-musl'; rustupSha256='08423383d36362d93f8d85f208aa5004a7cef77b69b29fb779ba03ed0544e4f1' ;; \
+        *) echo >&2 "unsupported architecture: $apkArch"; exit 1 ;; \
+    esac; \
+    url="https://static.rust-lang.org/rustup/archive/1.28.2/${rustArch}/rustup-init"; \
+    wget "$url"; \
+    echo "${rustupSha256} *rustup-init" | sha256sum -c -; \
+    chmod +x rustup-init; \
+    ./rustup-init -y --no-modify-path --profile minimal --default-toolchain $RUST_VERSION --default-host ${rustArch}; \
+    rm rustup-init; \
+    chmod -R a+w $RUSTUP_HOME $CARGO_HOME; \
+    rustup --version; \
+    cargo --version; \
+    rustc --version;
+
+FROM rustup AS midenup
+
 WORKDIR /home/node
 RUN git clone https://github.com/0xMiden/compiler
 WORKDIR /home/node/compiler
 RUN cargo install --path midenc --locked
 RUN cargo install --path tools/cargo-miden --locked
 
-# Install dependencies only when needed
-FROM midenup AS deps
+FROM rustup AS runner
 
-WORKDIR /home/node/packages/eslint-config
-COPY --from=root packages/eslint-config .
-
-WORKDIR /home/node/packages/typescript-config
-COPY --from=root packages/typescript-config .
-
-WORKDIR /home/node/apps/api
-COPY package.json .
-
-WORKDIR /home/node
-COPY --from=root package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-RUN corepack enable pnpm && pnpm i --frozen-lockfile
-
-# Rebuild the source code only when needed
-FROM midenup AS builder
-
-WORKDIR /home/node
-COPY --from=deps /home/node/node_modules ./node_modules
-COPY --from=root .eslintrc.js package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.json turbo.json ./
-
-WORKDIR /home/node/packages/eslint-config
-COPY --from=deps /home/node/packages/eslint-config/node_modules ./node_modules
-COPY --from=root packages/eslint-config .
-
-WORKDIR /home/node/packages/typescript-config
-COPY --from=root packages/typescript-config .
-
-WORKDIR /home/node/apps/api
-COPY --from=deps /home/node/apps/api/node_modules ./node_modules
-COPY . .
-
-RUN corepack enable pnpm && pnpm --filter api build
-
-# Production image, copy all the files and run next
-FROM midenup AS runner
+# COPY --from=midenup /usr/local/cargo/bin/rustup /usr/local/bin
+# COPY --from=midenup /usr/local/cargo/bin/cargo /usr/local/bin
+COPY --from=midenup /usr/local/cargo/bin/midenc /usr/local/bin
+COPY --from=midenup /usr/local/cargo/bin/cargo-miden /usr/local/bin
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Automatically leverage output traces to reduce image size
-# https://nextjs.org/docs/advanced-features/output-file-tracing
-WORKDIR /home/node
-COPY --from=builder --chown=nextjs:nodejs /home/node/apps/api/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /home/node/apps/api/.next/static ./apps/api/.next/static
-
 USER nextjs
 
-EXPOSE 3001
+EXPOSE 3002
 
 ENV NODE_ENV=production
-ENV PORT=3001
+ENV PORT=3002
 ENV HOSTNAME="0.0.0.0"
 
-# server.js is created by next build from the standalone output
-# https://nextjs.org/docs/pages/api-reference/config/next-config-js/output
-# COPY server2.js .
-# CMD ["node", "server2.js"]
-CMD ["node", "apps/api/server.js"]
+WORKDIR /home/node/app
+COPY server.js .
+CMD ["node", "server.js"]

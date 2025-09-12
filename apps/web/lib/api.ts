@@ -1,7 +1,10 @@
 import { type Script } from "@/lib/types";
 
+const apiUrl =
+  process.env.NEXT_PUBLIC_API_URL ?? "https://playground-api.walnut.dev";
+
 export const createScript = async (packageName: string) => {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/scripts`, {
+  const response = await fetch(`${apiUrl}/scripts`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ packageName }),
@@ -12,14 +15,11 @@ export const createScript = async (packageName: string) => {
 };
 
 export const compileScript = async (script: Script) => {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/scripts/${script.id}`,
-    {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ rust: script.rust }),
-    }
-  );
+  const response = await fetch(`${apiUrl}/scripts/${script.id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ rust: script.rust }),
+  });
   const result = await response.json();
   const { ok, error, masm } = result as {
     ok: boolean;
@@ -30,12 +30,9 @@ export const compileScript = async (script: Script) => {
 };
 
 export const deleteScript = async (scriptId: string) => {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/scripts/${scriptId}`,
-    {
-      method: "DELETE",
-    }
-  );
+  const response = await fetch(`${apiUrl}/scripts/${scriptId}`, {
+    method: "DELETE",
+  });
   const result = await response.json();
   const { id } = result as { id: string };
   return id;

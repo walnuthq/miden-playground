@@ -58,8 +58,12 @@ const powChallenge = async (accountId: string) => {
     return { challenge: "", nonce: 0 };
   }
   const powData = await powResponse.json();
-  const nonce = await findValidNonce(powData.challenge, powData.target);
-  return { challenge: powData.challenge, nonce };
+  const { challenge, target } = powData as {
+    challenge: string;
+    target: string;
+  };
+  const nonce = await findValidNonce(challenge, target);
+  return { challenge, nonce };
 };
 
 const requestNote = async (
