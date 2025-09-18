@@ -33,9 +33,11 @@ const SelectAccountDropdownMenu = ({
   const showWallets = selectWallets && shownWallets.length > 0;
   const shownFaucets = faucets.filter(({ id }) => id !== without);
   const showFaucets = selectFaucets && shownFaucets.length > 0;
+  // const disabled =
+  //   (selectWallets && !selectFaucets && !showWallets) ||
+  //   (selectFaucets && !selectWallets && !showFaucets);
   const disabled =
-    (selectWallets && !selectFaucets && !showWallets) ||
-    (selectFaucets && !selectWallets && !showFaucets);
+    (selectWallets && !showWallets) || (selectFaucets && !showFaucets);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

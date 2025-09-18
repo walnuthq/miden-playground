@@ -10,13 +10,13 @@ use miden_objects::utils::serde::{
     ByteReader, ByteWriter, Deserializable, DeserializationError, Serializable,
 };
 use wasm_bindgen::prelude::*;
-use wasm_bindgen_futures::js_sys::Uint8Array;
+// use wasm_bindgen_futures::js_sys::Uint8Array;
 
 use super::{
     account_id::AccountId, output_notes::OutputNotes, rpo_digest::RpoDigest,
     transaction_id::TransactionId, transaction_status::TransactionStatus,
 };
-use crate::utils::{deserialize_from_uint8array, serialize_to_uint8array};
+// use crate::utils::{deserialize_from_uint8array, serialize_to_uint8array};
 
 #[derive(Clone)]
 #[wasm_bindgen]
@@ -72,13 +72,13 @@ impl TransactionRecord {
         self.0.status.clone().into()
     }
 
-    pub fn serialize(&self) -> Uint8Array {
-        serialize_to_uint8array(&self)
-    }
+    // pub fn serialize(&self) -> Uint8Array {
+    //     serialize_to_uint8array(&self)
+    // }
 
-    pub fn deserialize(bytes: &Uint8Array) -> Result<TransactionRecord, JsValue> {
-        deserialize_from_uint8array::<TransactionRecord>(bytes)
-    }
+    // pub fn deserialize(bytes: &Uint8Array) -> Result<TransactionRecord, JsValue> {
+    //     deserialize_from_uint8array::<TransactionRecord>(bytes)
+    // }
 }
 
 // CONVERSIONS

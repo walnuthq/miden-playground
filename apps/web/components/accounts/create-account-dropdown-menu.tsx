@@ -1,4 +1,4 @@
-import { Plus, Wallet, HandCoins } from "lucide-react";
+import { Plus, Wallet, HandCoins, Download, Upload } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,9 +7,16 @@ import {
 } from "@workspace/ui/components/dropdown-menu";
 import { Button } from "@workspace/ui/components/button";
 import useAccounts from "@/hooks/use-accounts";
+import useGlobalContext from "@/components/global-context/hook";
 
 const CreateAccountDropdownMenu = () => {
-  const { openCreateWalletDialog, openCreateFaucetDialog } = useAccounts();
+  const { networkId } = useGlobalContext();
+  const {
+    openCreateWalletDialog,
+    openCreateFaucetDialog,
+    openImportAccountDialog,
+    openDeployAccountDialog,
+  } = useAccounts();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -19,14 +26,30 @@ const CreateAccountDropdownMenu = () => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuItem onClick={openCreateWalletDialog}>
-          <Wallet />
-          Create new wallet
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={openCreateFaucetDialog}>
-          <HandCoins />
-          Create new fungible faucet
-        </DropdownMenuItem>
+        {networkId === "mlcl" && (
+          <>
+            <DropdownMenuItem onClick={openCreateWalletDialog}>
+              <Wallet />
+              Create new wallet
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={openCreateFaucetDialog}>
+              <HandCoins />
+              Create new fungible faucet
+            </DropdownMenuItem>
+          </>
+        )}
+        {networkId === "mtst" && (
+          <>
+            <DropdownMenuItem onClick={openImportAccountDialog}>
+              <Download />
+              Import account
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={openDeployAccountDialog}>
+              <Upload />
+              Deploy account
+            </DropdownMenuItem>
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

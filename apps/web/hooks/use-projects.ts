@@ -1,16 +1,20 @@
 import useGlobalContext from "@/components/global-context/hook";
-import { mockWebClient } from "@/lib/mock-web-client";
+import { webClient } from "@/lib/web-client";
 
 const useProjects = () => {
-  const { dispatch } = useGlobalContext();
+  const { networkId, serializedMockChain, dispatch } = useGlobalContext();
   const saveProject = async () => {
-    const client = await mockWebClient();
+    const client = await webClient(networkId, serializedMockChain);
     const storeDump = await client.exportStore();
     console.log("STORE_DUMP");
+    console.log(JSON.parse(storeDump));
     console.log(storeDump);
     console.log("STATE");
-    console.log(localStorage.getItem("state"));
-    //dispatch({ type: "SAVE_PROJECT" });
+    const state = JSON.parse(localStorage.getItem("state")!);
+    state.scripts = [];
+    state.components = [];
+    console.log(state);
+    // dispatch({ type: "SAVE_PROJECT" });
   };
   const loadProject = async () => {
     /* const client = await mockWebClient();

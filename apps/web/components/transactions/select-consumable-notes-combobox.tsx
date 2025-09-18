@@ -18,50 +18,56 @@ import {
   PopoverTrigger,
 } from "@workspace/ui/components/popover";
 import {
-  type InputNoteRecord,
-  type ConsumableNoteRecord,
-} from "@workspace/mock-web-client";
+  type ConsumableNoteRecord as WasmConsumableNoteRecord,
+  type InputNoteRecord as WasmInputNoteRecord,
+} from "@demox-labs/miden-sdk";
 import useAccounts from "@/hooks/use-accounts";
-import { type Account, noteType } from "@/lib/types";
+import { type Account } from "@/lib/types/account";
 
 const getConsumableNoteFields = (
-  inputNote: InputNoteRecord,
+  inputNoteRecord: WasmInputNoteRecord,
   faucets: Account[]
 ) => {
-  const noteFungibleAssets = inputNote
+  const noteFungibleAssets = inputNoteRecord
     .details()
     .assets()
     .fungibleAssets()
-    .map((asset) => {
-      const faucet = faucets.find(
-        ({ id }) => id === asset.faucetId().toString()
-      );
-      return `${asset.amount()}::${faucet?.tokenSymbol ?? "Unknown"}`;
+    .map((fungibleAsset) => {
+      const faucetId = fungibleAsset.faucetId().toString();
+      const amount = fungibleAsset.amount().toString();
+      const faucet = faucets.find(({ id }) => id === faucetId);
+      return `${amount} ${faucet?.tokenSymbol ?? "Unknown"}`;
     });
+  const metadata = inputNoteRecord.metadata();
+  const wasmNoteTypes = {
+    1: "public",
+    2: "private",
+    3: "encrypted",
+  } as const;
   return {
-    noteId: inputNote.id().toString(),
-    noteType: noteType(inputNote),
+    noteId: inputNoteRecord.id().toString(),
+    noteType: metadata ? wasmNoteTypes[metadata.noteType()] : "public",
     noteFungibleAssets,
   };
 };
 
 const getConsumableNoteValue = (
-  inputNote: InputNoteRecord,
+  inputNoteRecord: WasmInputNoteRecord,
   faucets: Account[]
 ) => {
   const { noteId, noteType, noteFungibleAssets } = getConsumableNoteFields(
-    inputNote,
+    inputNoteRecord,
     faucets
   );
   return [noteId, noteType, noteFungibleAssets.join(",")].join(",");
 };
 
 const getConsumableNoteLabel = (
-  inputNote: InputNoteRecord,
+  inputNoteRecord: WasmInputNoteRecord,
   faucets: Account[]
 ) => {
   const { noteId, noteType, noteFungibleAssets } = getConsumableNoteFields(
-    inputNote,
+    inputNoteRecord,
     faucets
   );
   return `${noteType} note ${
@@ -78,10 +84,10 @@ const SelectConsumableNotesCombobox = ({
 }: {
   value: string[];
   onValueChange: Dispatch<SetStateAction<string[]>>;
-  consumableNotes: ConsumableNoteRecord[];
+  consumableNotes: WasmConsumableNoteRecord[];
 }) => {
-  const [open, setOpen] = useState(false);
   const { faucets } = useAccounts();
+  const [open, setOpen] = useState(false);
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>

@@ -1,0 +1,16 @@
+import Link from "@/components/tutorials/tutorial-link";
+import AccountAddress from "@/components/lib/account-address";
+
+Now that we understood the implementation of the Counter Contract procedures, let's import it into the Playground to start interacting with the contract.
+
+On the <Link href="/accounts">accounts page</Link>, click on the _"Create new account"_ button on top of the page and select the _"Import account"_ option.
+
+A modal will show up requesting both the name and the address of your newly imported account, enter the Counter Contract details found just below:
+
+- **Name**: Counter Contract
+
+- **Address**:
+
+<AccountAddress account={props.counter} withLink={props.withLink} />
+
+Once the account is imported, {props.withLink ? <Link href={`/accounts/${props.counter.address}`}>click on its ID</Link> : 'click on its ID'} to navigate to the contract details page.

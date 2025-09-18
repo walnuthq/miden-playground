@@ -83,18 +83,6 @@ impl From<&FeltArray> for Vec<NativeFelt> {
     }
 }
 
-/* impl From<Vec<NativeFelt>> for FeltArray {
-    fn from(native_felt_array: Vec<NativeFelt>) -> Self {
-        FeltArray(native_felt_array.iter().map(Into::into).collect())
-    }
-} */
-
-/* impl From<&NativeNoteScript> for NoteScript {
-    fn from(native_note_script: &NativeNoteScript) -> Self {
-        NoteScript(native_note_script.clone())
-    }
-} */
-
 impl From<FeltArray> for Vec<Felt> {
     fn from(felt_array: FeltArray) -> Self {
         felt_array.0

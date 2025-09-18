@@ -7,10 +7,10 @@ use super::models::{
     transaction_filter::TransactionFilter, transaction_record::TransactionRecord,
     transaction_script::TransactionScript,
 };
-use crate::{MockWebClient, js_error_with_context};
+use crate::{WebClient, js_error_with_context};
 
 #[wasm_bindgen]
-impl MockWebClient {
+impl WebClient {
     #[wasm_bindgen(js_name = "getTransactions")]
     pub async fn get_transactions(
         &mut self,
@@ -32,7 +32,7 @@ impl MockWebClient {
     pub fn compile_tx_script(&mut self, script: &str) -> Result<TransactionScript, JsValue> {
         if let Some(client) = self.get_mut_inner() {
             let native_tx_script: NativeTransactionScript =
-                client.compile_tx_script(vec![], script).map_err(|err| {
+                client.script_builder().compile_tx_script(script).map_err(|err| {
                     js_error_with_context(err, "failed to compile transaction script")
                 })?;
             Ok(native_tx_script.into())

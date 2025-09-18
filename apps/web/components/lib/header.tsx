@@ -1,5 +1,7 @@
 "use client";
+import { usePathname } from "next/navigation";
 import { useIsClient } from "usehooks-ts";
+import { WalletMultiButton } from "@demox-labs/miden-wallet-adapter";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,10 +12,11 @@ import {
 } from "@workspace/ui/components/breadcrumb";
 import { Separator } from "@workspace/ui/components/separator";
 import { SidebarTrigger } from "@workspace/ui/components/sidebar";
-import { usePathname } from "next/navigation";
 import TutorialToggle from "@/components/lib/tutorial-toggle";
 import ModeToggle from "@/components/lib/mode-toggle";
 import useTutorials from "@/hooks/use-tutorials";
+import SyncStateButton from "@/components/lib/sync-state-button";
+import useGlobalContext from "@/components/global-context/hook";
 
 const getLink = (pathname: string) => {
   const [, route] = pathname.split("/");
@@ -21,8 +24,11 @@ const getLink = (pathname: string) => {
     accounts: { href: "/accounts", title: "Accounts" },
     transactions: { href: "/transactions", title: "Transactions" },
     notes: { href: "/notes", title: "Notes" },
+    scripts: { href: "/scripts", title: "Scripts" },
+    components: { href: "/components", title: "Components" },
   };
-  return links[route as "accounts" | "transactions" | "notes"];
+
+  return links[route as keyof typeof links];
 };
 
 const getPage = (pathname: string) => {
@@ -49,13 +55,17 @@ const SubLevelPageBreadcrumbs = () => {
 
 const Header = () => {
   const isClient = useIsClient();
+  const { networkId } = useGlobalContext();
   const { tutorialId } = useTutorials();
   const pathname = usePathname();
-  const isTopLevelPage =
-    pathname === "/" ||
-    pathname === "/accounts" ||
-    pathname === "/transactions" ||
-    pathname === "/notes";
+  const isTopLevelPage = [
+    "/",
+    "/accounts",
+    "/transactions",
+    "/notes",
+    "/scripts",
+    "/components",
+  ].includes(pathname);
   return (
     <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
       <div className="flex w-full items-center gap-2 px-4">
@@ -80,6 +90,12 @@ const Header = () => {
         <div className="ml-auto flex items-center gap-2">
           {isClient && tutorialId && <TutorialToggle />}
           <ModeToggle />
+          {isClient && networkId === "mtst" && (
+            <>
+              <SyncStateButton />
+              <WalletMultiButton />
+            </>
+          )}
         </div>
       </div>
     </header>

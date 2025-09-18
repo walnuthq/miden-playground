@@ -1,0 +1,10 @@
+import Link from "@/components/tutorials/tutorial-link";
+
+<Link href={`/notes/${props.note?.id}`}>Click here</Link> to access the output
+note created by the mint transaction.
+
+Each Note has a script that defines the conditions under which it can be consumed. Consumption of a Note can be restricted to certain accounts or entities. For example, the **P2ID (Pay-to-ID)** note script locks a note to a specific account ID, allowing only that account to spend it.
+
+Our note inputs constraint specifies that only our own wallet Account ID can consume the note and receive the embedded assets, which has been enforced during the note creation process by the faucet.
+
+Consumption occurs as part of a transaction. Upon successful consumption a [nullifier](https://0xmiden.github.io/miden-docs/glossary.html#nullifier) is generated for the consumed notes to ensure they can no longer be spent and avoid double-spending.

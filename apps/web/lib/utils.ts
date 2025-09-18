@@ -1,3 +1,5 @@
+import { ZERO_ACCOUNT_ID } from "@/lib/constants";
+
 export const sleep = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -9,8 +11,12 @@ export const formatValue = (value: string) =>
 export const formatAddress = (address: string, networkId: string) =>
   `${networkId}${address.slice(networkId.length).slice(0, 8)}…${address.slice(-8)}`;
 
-export const deleteStore = () =>
-  new Promise((resolve) => {
-    const deleteRequest = indexedDB.deleteDatabase("MidenClientDB");
-    deleteRequest.onsuccess = resolve;
-  });
+export const noteInputsToAccountId = (noteInputs: bigint[]) => {
+  const [suffix, prefix] = noteInputs;
+  if (!suffix || !prefix) {
+    return ZERO_ACCOUNT_ID;
+  }
+  const prefixString = prefix.toString(16).padStart(16, "0");
+  const suffixString = suffix.toString(16).padStart(16, "0");
+  return `0x${prefixString}${suffixString}`.slice(0, 32);
+};

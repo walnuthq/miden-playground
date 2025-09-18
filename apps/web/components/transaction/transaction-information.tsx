@@ -1,25 +1,36 @@
-import { type Transaction, transactionToTableTransaction } from "@/lib/types";
-import useGlobalContext from "@/components/global-context/hook";
+import { type Transaction } from "@/lib/types/transaction";
 import TransactionInformationTable from "@/components/transaction/transaction-information-table";
+import TransactionNoteTable from "@/components/transaction/transaction-note-table";
 
 const TransactionInformation = ({
   transaction,
 }: {
   transaction: Transaction;
-}) => {
-  const { networkId } = useGlobalContext();
-  return (
-    <div className="flex flex-col gap-8">
+}) => (
+  <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-2">
+      <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
+        Transaction Information
+      </h4>
+      <TransactionInformationTable transaction={transaction} />
+    </div>
+    {transaction.inputNotes.length > 0 && (
       <div className="flex flex-col gap-2">
         <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
-          Transaction Information
+          Transaction Input Notes
         </h4>
-        <TransactionInformationTable
-          transaction={transactionToTableTransaction(transaction, networkId)}
-        />
+        <TransactionNoteTable notes={transaction.inputNotes} />
       </div>
-    </div>
-  );
-};
+    )}
+    {transaction.outputNotes.length > 0 && (
+      <div className="flex flex-col gap-2">
+        <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
+          Transaction Output Notes
+        </h4>
+        <TransactionNoteTable notes={transaction.outputNotes} />
+      </div>
+    )}
+  </div>
+);
 
 export default TransactionInformation;

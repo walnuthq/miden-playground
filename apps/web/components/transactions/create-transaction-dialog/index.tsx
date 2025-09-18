@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { RotateCw } from "lucide-react";
 import {
-  type ConsumableNoteRecord,
-  type TransactionResult,
-} from "@workspace/mock-web-client";
+  type ConsumableNoteRecord as WasmConsumableNoteRecord,
+  type TransactionResult as WasmTransactionResult,
+} from "@demox-labs/miden-sdk";
 import {
   Dialog,
   DialogClose,
@@ -44,7 +44,7 @@ const CreateTransactionDialog = () => {
   const targetAccount = accounts.find(({ id }) => id === targetAccountId);
   const [isPublic, setIsPublic] = useState(true);
   const [consumableNotes, setConsumableNotes] = useState<
-    ConsumableNoteRecord[]
+    WasmConsumableNoteRecord[]
   >(createTransactionDialogConsumableNotes);
   const [noteIds, setNoteIds] = useState<string[]>(
     createTransactionDialogNoteIds
@@ -53,7 +53,7 @@ const CreateTransactionDialog = () => {
   const faucetAccount = accounts.find(({ id }) => id === faucetAccountId);
   const [loading, setLoading] = useState(false);
   const [transactionResult, setTransactionResult] =
-    useState<TransactionResult | null>(
+    useState<WasmTransactionResult | null>(
       createTransactionDialogTransactionResult
     );
   const onClose = () => {
@@ -73,13 +73,14 @@ const CreateTransactionDialog = () => {
     setTransactionType(createTransactionDialogTransactionType);
     setStep(createTransactionDialogStep);
     setTransactionResult(createTransactionDialogTransactionResult);
-    //setConsumableNotes(createTransactionDialogConsumableNotes);
+    setConsumableNotes(createTransactionDialogConsumableNotes);
     //setNoteIds(createTransactionDialogNoteIds);
   }, [
     createTransactionDialogAccountId,
     createTransactionDialogTransactionType,
     createTransactionDialogStep,
     createTransactionDialogTransactionResult,
+    createTransactionDialogConsumableNotes,
   ]);
   return (
     <Dialog

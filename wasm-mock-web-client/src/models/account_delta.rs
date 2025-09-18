@@ -24,8 +24,9 @@ impl AccountDelta {
         self.0.vault().into()
     }
 
-    pub fn nonce(&self) -> Option<Felt> {
-        self.0.nonce().map(Into::into)
+    #[wasm_bindgen(js_name = "nonceDelta")]
+    pub fn nonce_delta(&self) -> Felt {
+        self.0.nonce_delta().into()
     }
 
     // TODO: into parts

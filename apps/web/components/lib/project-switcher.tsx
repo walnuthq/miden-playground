@@ -1,5 +1,6 @@
 "use client";
-// import { useEffect } from "react";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { ChevronsUpDown } from "lucide-react";
 import {
   DropdownMenu,
@@ -27,19 +28,36 @@ import tutorials from "@/components/tutorials/tutorials";
 import useTutorials from "@/hooks/use-tutorials";
 // import useProjects from "@/hooks/use-projects";
 import { useIsClient } from "usehooks-ts";
+import { networks } from "@/lib/types/network";
+// import { cn } from "@workspace/ui/lib/utils";
+import useAccounts from "@/hooks/use-accounts";
+import { useWallet } from "@demox-labs/miden-wallet-adapter";
 
 const ProjectSwitcher = () => {
   const isClient = useIsClient();
   const { isMobile } = useSidebar();
-  const { resetState } = useGlobalContext();
-  const { tutorial, startTutorial } = useTutorials();
+  const router = useRouter();
+  const { accountId } = useWallet();
+  const { networkId, blockNum, resetState /*, switchNetwork */ } =
+    useGlobalContext();
+  const { tutorialId, tutorialLoaded, startTutorial, loadTutorial } =
+    useTutorials();
+  const { wallets } = useAccounts();
   // const { saveProject, loadProject } = useProjects();
-  /* useEffect(() => {
-    if (tutorialId) {
-      console.log("loading", tutorialId);
+  useEffect(() => {
+    const connectedWallet = wallets.find(
+      ({ address }) => address === accountId
+    );
+    if (!connectedWallet) {
+      return;
+    }
+    if (!tutorialLoaded) {
       loadTutorial(tutorialId);
     }
-  }, [tutorialId]); */
+  }, [wallets, accountId, tutorialId, tutorialLoaded, loadTutorial]);
+  if (!isClient) {
+    return null;
+  }
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -55,15 +73,7 @@ const ProjectSwitcher = () => {
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">Miden Playground</span>
                 <span className="truncate text-xs">
-                  {isClient ? (
-                    tutorial ? (
-                      tutorial.title
-                    ) : (
-                      "Empty sandbox"
-                    )
-                  ) : (
-                    <>&nbsp;</>
-                  )}
+                  {networks[networkId]} - Block #{blockNum}
                 </span>
               </div>
               <ChevronsUpDown className="ml-auto" />
@@ -75,7 +85,33 @@ const ProjectSwitcher = () => {
             side={isMobile ? "bottom" : "right"}
             sideOffset={4}
           >
-            <DropdownMenuItem onClick={() => resetState()}>
+            {/* <DropdownMenuSub>
+              <DropdownMenuSubTrigger
+                disabled={!!tutorialId}
+                className={cn({ "text-muted-foreground": !!tutorialId })}
+              >
+                Switch network
+              </DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent>
+                  {Object.keys(networks).map((networkId) => (
+                    <DropdownMenuItem
+                      key={networkId}
+                      onClick={() => switchNetwork(networkId as NetworkId)}
+                    >
+                      {networks[networkId as NetworkId]}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
+            <DropdownMenuSeparator /> */}
+            <DropdownMenuItem
+              onClick={() => {
+                resetState();
+                router.push("/accounts");
+              }}
+            >
               New empty sandbox
             </DropdownMenuItem>
             {/* <DropdownMenuItem

@@ -8,7 +8,7 @@ import {
 } from "@workspace/ui/components/card";
 import { Button } from "@workspace/ui/components/button";
 import useTutorials from "@/hooks/use-tutorials";
-import { type Tutorial } from "@/lib/types";
+import { type Tutorial } from "@/lib/types/tutorial";
 
 const StartTutorialCard = ({ tutorial }: { tutorial: Tutorial }) => {
   const { startTutorial } = useTutorials();

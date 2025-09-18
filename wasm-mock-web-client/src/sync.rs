@@ -1,12 +1,16 @@
+use miden_client::note::build_swap_tag as native_build_swap_tag;
+use miden_objects::asset::{Asset as NativeAsset, FungibleAsset as NativeFungibleAsset};
 use wasm_bindgen::prelude::*;
 
 use crate::{
-    MockWebClient, js_error_with_context,
-    models::{block_header::BlockHeader, sync_summary::SyncSummary},
+    WebClient, js_error_with_context,
+    models::{
+        account_id::AccountId, note_tag::NoteTag, note_type::NoteType, sync_summary::SyncSummary,
+    },
 };
 
 #[wasm_bindgen]
-impl MockWebClient {
+impl WebClient {
     #[wasm_bindgen(js_name = "syncState")]
     pub async fn sync_state(&mut self) -> Result<SyncSummary, JsValue> {
         if let Some(client) = self.get_mut_inner() {
@@ -35,17 +39,35 @@ impl MockWebClient {
         }
     }
 
-    #[wasm_bindgen(js_name = "getLatestEpochBlock")]
-    pub async fn get_latest_epoch_block(&mut self) -> Result<BlockHeader, JsValue> {
-        if let Some(client) = self.get_mut_inner() {
-            let block_header = client
-                .get_latest_epoch_block()
-                .await
-                .map_err(|err| js_error_with_context(err, "failed to get latest epoch block"))?;
+    #[wasm_bindgen(js_name = "buildSwapTag")]
+    pub fn build_swap_tag(
+        note_type: NoteType,
+        offered_asset_faucet_id: &AccountId,
+        offered_asset_amount: u64,
+        requested_asset_faucet_id: &AccountId,
+        requested_asset_amount: u64,
+    ) -> Result<NoteTag, JsValue> {
+        let offered_fungible_asset: NativeAsset =
+            NativeFungibleAsset::new(offered_asset_faucet_id.into(), offered_asset_amount)
+                .map_err(|err| {
+                    js_error_with_context(err, "failed to create offered fungible asset")
+                })?
+                .into();
 
-            Ok(block_header.into())
-        } else {
-            Err(JsValue::from_str("Client not initialized"))
-        }
+        let requested_fungible_asset: NativeAsset =
+            NativeFungibleAsset::new(requested_asset_faucet_id.into(), requested_asset_amount)
+                .map_err(|err| {
+                    js_error_with_context(err, "failed to create requested fungible asset")
+                })?
+                .into();
+
+        let native_note_tag = native_build_swap_tag(
+            note_type.into(),
+            &offered_fungible_asset,
+            &requested_fungible_asset,
+        )
+        .map_err(|err| js_error_with_context(err, "failed to build swap tag"))?;
+
+        Ok(native_note_tag.into())
     }
 }

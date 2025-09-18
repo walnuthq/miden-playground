@@ -1,7 +1,16 @@
 "use client";
-
-import { type ComponentProps } from "react";
-import { UserCircle, File, Route, HandCoins, Wallet, Home } from "lucide-react";
+import { type ComponentProps, useEffect } from "react";
+import {
+  UserCircle,
+  File,
+  Route,
+  HandCoins,
+  Wallet,
+  Home,
+  FileCode,
+  Puzzle,
+} from "lucide-react";
+import { useIsClient } from "usehooks-ts";
 import NavMain from "@/components/lib/nav-main";
 import { formatId } from "@/lib/utils";
 import ProjectSwitcher from "@/components/lib/project-switcher";
@@ -13,16 +22,26 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@workspace/ui/components/sidebar";
-import { useIsClient } from "usehooks-ts";
+import { Separator } from "@workspace/ui/components/separator";
 import useAccounts from "@/hooks/use-accounts";
 import useTransactions from "@/hooks/use-transactions";
 import useNotes from "@/hooks/use-notes";
+import useScripts from "@/hooks/use-scripts";
+import useComponents from "@/hooks/use-components";
+import defaultScripts from "@/components/global-context/default-scripts";
+import defaultComponents from "@/components/global-context/default-components";
+import { useWallet } from "@demox-labs/miden-wallet-adapter";
+import useGlobalContext from "@/components/global-context/hook";
 
 const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
   const isClient = useIsClient();
-  const { accounts } = useAccounts();
+  const { accountId } = useWallet();
+  const { networkId } = useGlobalContext();
+  const { accounts, wallets, importConnectedWallet } = useAccounts();
   const { transactions } = useTransactions();
   const { inputNotes } = useNotes();
+  const { scripts } = useScripts();
+  const { components } = useComponents();
   const items = [
     {
       title: "Home",
@@ -36,10 +55,10 @@ const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
       items: accounts
         .sort((a, b) => b.updatedAt - a.updatedAt)
         .slice(0, 5)
-        .map(({ account, name, address }) => ({
+        .map(({ name, address, isFaucet }) => ({
           title: name,
           url: `/accounts/${address}`,
-          icon: account.isFaucet() ? HandCoins : Wallet,
+          icon: isFaucet ? HandCoins : Wallet,
         })),
     },
     {
@@ -49,9 +68,9 @@ const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
       items: transactions
         .sort((a, b) => b.updatedAt - a.updatedAt)
         .slice(0, 5)
-        .map(({ record }) => ({
-          title: formatId(record.id().toHex()),
-          url: `/transactions/${record.id().toHex()}`,
+        .map(({ id }) => ({
+          title: formatId(id),
+          url: `/transactions/${id}`,
         })),
     },
     {
@@ -67,6 +86,47 @@ const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
         })),
     },
   ];
+  const defaultScriptIds = defaultScripts.map(({ id }) => id);
+  const defaultComponentIds = defaultComponents.map(({ id }) => id);
+  const editorItems = [
+    {
+      title: "Scripts",
+      url: "/scripts",
+      icon: FileCode,
+      items: scripts
+        .filter(({ id }) => !defaultScriptIds.includes(id))
+        .sort((a, b) => b.updatedAt - a.updatedAt)
+        .slice(0, 5)
+        .map(({ id, name }) => ({
+          title: name,
+          url: `/scripts/${id}`,
+        })),
+    },
+    {
+      title: "Components",
+      url: "/components",
+      icon: Puzzle,
+      items: components
+        .filter(({ id }) => !defaultComponentIds.includes(id))
+        .sort((a, b) => b.updatedAt - a.updatedAt)
+        .slice(0, 5)
+        .map(({ id, name }) => ({
+          title: name,
+          url: `/components/${id}`,
+        })),
+    },
+  ];
+  // TODO refactor using onConnect callback?
+  useEffect(() => {
+    if (accountId && networkId === "mtst") {
+      const connectedWallet = wallets.find(
+        ({ address }) => address === accountId
+      );
+      if (!connectedWallet) {
+        importConnectedWallet(accountId);
+      }
+    }
+  }, [accountId, networkId, wallets, importConnectedWallet]);
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -74,7 +134,8 @@ const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
       </SidebarHeader>
       <SidebarContent>
         {isClient && <NavMain items={items} />}
-        {/*<NavProjects projects={data.projects} />*/}
+        <Separator />
+        {isClient && <NavMain items={editorItems} />}
       </SidebarContent>
       <SidebarFooter>
         <Footer />

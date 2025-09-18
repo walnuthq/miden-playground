@@ -1,4 +1,4 @@
-import { type TableAccount } from "@/lib/types";
+import { type Account, accountTypes } from "@/lib/types/account";
 import {
   Table,
   TableBody,
@@ -6,8 +6,9 @@ import {
   TableRow,
 } from "@workspace/ui/components/table";
 import { Badge } from "@workspace/ui/components/badge";
+import AccountAddress from "@/components/lib/account-address";
 
-const AccountInformationTable = ({ account }: { account: TableAccount }) => (
+const AccountInformationTable = ({ account }: { account: Account }) => (
   <div className="rounded-md border">
     <Table>
       <TableBody>
@@ -17,18 +18,28 @@ const AccountInformationTable = ({ account }: { account: TableAccount }) => (
         </TableRow>
         <TableRow>
           <TableCell>ID</TableCell>
-          <TableCell>{account.address}</TableCell>
+          <TableCell>
+            <AccountAddress
+              address={account.address}
+              withLink={false}
+              withName={false}
+              formatted={false}
+              withTooltip={false}
+            />
+          </TableCell>
         </TableRow>
         <TableRow>
           <TableCell>Type</TableCell>
-          <TableCell>{account.type}</TableCell>
+          <TableCell className="capitalize">
+            {accountTypes[account.type]}
+          </TableCell>
         </TableRow>
         <TableRow>
           <TableCell>Storage mode</TableCell>
           <TableCell>
             <Badge
               variant={
-                account.storageMode === "Public" ? "default" : "destructive"
+                account.storageMode === "public" ? "default" : "destructive"
               }
               className="capitalize"
             >

@@ -6,28 +6,26 @@ import {
   TooltipTrigger,
 } from "@workspace/ui/components/tooltip";
 import { formatId } from "@/lib/utils";
-import { type InputNote, noteWellKnownNote, noteScriptRoot } from "@/lib/types";
+import { type InputNote } from "@/lib/types/note";
+import useScripts from "@/hooks/use-scripts";
 
-const NoteScriptRoot = ({
-  inputNote: { id, inputNote },
-}: {
-  inputNote: InputNote;
-}) => {
-  const wellKnownNote = noteWellKnownNote(inputNote);
+const NoteScriptRoot = ({ inputNote }: { inputNote: InputNote }) => {
+  const { scripts } = useScripts();
+  const script = scripts.find(({ root }) => root === inputNote.scriptRoot);
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Link href={`/notes/${id}?tab=code`}>
+        <Link href={`/notes/${inputNote.id}?tab=script`}>
           <Button className="cursor-pointer -ml-4" variant="link">
-            {formatId(noteScriptRoot(inputNote))}
-            {wellKnownNote ? ` (${wellKnownNote})` : ""}
+            {formatId(inputNote.scriptRoot)}
+            {script ? ` (${script.name})` : ""}
           </Button>
         </Link>
       </TooltipTrigger>
       <TooltipContent>
         <p>
-          {noteScriptRoot(inputNote)}
-          {wellKnownNote ? ` (${wellKnownNote})` : ""}
+          {inputNote.scriptRoot}
+          {script ? ` (${script.name})` : ""}
         </p>
       </TooltipContent>
     </Tooltip>

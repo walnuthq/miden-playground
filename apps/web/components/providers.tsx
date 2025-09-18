@@ -1,7 +1,15 @@
 "use client";
 import { type ReactNode } from "react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
+import {
+  MidenWalletAdapter,
+  WalletProvider,
+  WalletModalProvider,
+  PrivateDataPermission,
+} from "@demox-labs/miden-wallet-adapter";
 import GlobalContextProvider from "@/components/global-context/provider";
+
+const walletAdapter = new MidenWalletAdapter({ appName: "Miden Playground" });
 
 const Providers = ({ children }: { children: ReactNode }) => (
   <NextThemesProvider
@@ -11,7 +19,15 @@ const Providers = ({ children }: { children: ReactNode }) => (
     disableTransitionOnChange
     enableColorScheme
   >
-    <GlobalContextProvider>{children}</GlobalContextProvider>
+    <WalletProvider
+      wallets={[walletAdapter]}
+      privateDataPermission={PrivateDataPermission.UponRequest}
+      autoConnect
+    >
+      <WalletModalProvider>
+        <GlobalContextProvider>{children}</GlobalContextProvider>
+      </WalletModalProvider>
+    </WalletProvider>
   </NextThemesProvider>
 );
 

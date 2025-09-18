@@ -1,14 +1,15 @@
 import { type Dispatch, type SetStateAction } from "react";
+import { type ConsumableNoteRecord as WasmConsumableNoteRecord } from "@demox-labs/miden-sdk";
 import {
   type CreateTransactionDialogStep,
   type TransactionType,
-} from "@/lib/types";
+} from "@/lib/types/transaction";
 import { Label } from "@workspace/ui/components/label";
-import { type ConsumableNoteRecord } from "@workspace/mock-web-client";
-import { mockWebClient } from "@/lib/mock-web-client";
+import { webClient, clientGetConsumableNotes } from "@/lib/web-client";
 import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";
 import SelectTransactionTypeDropdownMenu from "@/components/transactions/select-transaction-type-dropdown-menu";
 import useAccounts from "@/hooks/use-accounts";
+import useGlobalContext from "@/components/global-context/hook";
 // import useTransactions from "@/hooks/use-transactions";
 
 const CreateTransactionDialogSelectForm = ({
@@ -25,9 +26,10 @@ const CreateTransactionDialogSelectForm = ({
   transactionType: TransactionType;
   setTransactionType: Dispatch<SetStateAction<TransactionType>>;
   setLoading: Dispatch<SetStateAction<boolean>>;
-  setConsumableNotes: Dispatch<SetStateAction<ConsumableNoteRecord[]>>;
+  setConsumableNotes: Dispatch<SetStateAction<WasmConsumableNoteRecord[]>>;
   setStep: Dispatch<SetStateAction<CreateTransactionDialogStep>>;
 }) => {
+  const { networkId, serializedMockChain } = useGlobalContext();
   const { accounts } = useAccounts();
   const executingAccount = accounts.find(({ id }) => id === executingAccountId);
   // const { createTransactionDialogConsumableNotes } = useTransactions();
@@ -42,9 +44,10 @@ const CreateTransactionDialogSelectForm = ({
           createTransactionDialogConsumableNotes.length === 0*/
         ) {
           setLoading(true);
-          const client = await mockWebClient();
-          const consumableNotes = await client.getConsumableNotes(
-            executingAccount.account.id()
+          const client = await webClient(networkId, serializedMockChain);
+          const consumableNotes = await clientGetConsumableNotes(
+            client,
+            executingAccount.id
           );
           setLoading(false);
           setConsumableNotes(consumableNotes);
@@ -60,9 +63,7 @@ const CreateTransactionDialogSelectForm = ({
             onValueChange={(value) => {
               setExecutingAccountId(value);
               const account = accounts.find(({ id }) => id === value);
-              setTransactionType(
-                account?.account.isFaucet() ? "mint" : "consume"
-              );
+              setTransactionType(account?.isFaucet ? "mint" : "consume");
             }}
           />
         </div>
@@ -72,7 +73,7 @@ const CreateTransactionDialogSelectForm = ({
             value={transactionType}
             onValueChange={setTransactionType}
             selectTypes={
-              executingAccount?.account.isFaucet()
+              executingAccount?.isFaucet
                 ? ["mint", "consume"]
                 : ["consume", "send"]
             }

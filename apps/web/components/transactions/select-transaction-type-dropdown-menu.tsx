@@ -8,7 +8,7 @@ import {
   DropdownMenuRadioItem,
 } from "@workspace/ui/components/dropdown-menu";
 import { Button } from "@workspace/ui/components/button";
-import { type TransactionType } from "@/lib/types";
+import { type TransactionType } from "@/lib/types/transaction";
 
 const SelectTransactionTypeDropdownMenu = ({
   value,

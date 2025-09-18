@@ -1,5 +1,5 @@
 "use client";
-import { type TableAccount } from "@/lib/types";
+import { accountTypes, type Account } from "@/lib/types/account";
 import { type ColumnDef } from "@tanstack/react-table";
 import { MoreVertical } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
@@ -11,17 +11,13 @@ import {
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
 import useTransactions from "@/hooks/use-transactions";
-import useAccounts from "@/hooks/use-accounts";
 import AccountAddress from "@/components/lib/account-address";
+import { clientGetConsumableNotes, webClient } from "@/lib/web-client";
+import useGlobalContext from "@/components/global-context/hook";
 
-const AccountActionsCell = ({
-  account: { id: accountId },
-}: {
-  account: TableAccount;
-}) => {
+const AccountActionsCell = ({ account }: { account: Account }) => {
+  const { networkId, serializedMockChain } = useGlobalContext();
   const { openCreateTransactionDialog } = useTransactions();
-  const { accounts } = useAccounts();
-  const account = accounts.find(({ id }) => id === accountId);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -31,11 +27,11 @@ const AccountActionsCell = ({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        {account?.account.isFaucet() ? (
+        {account.isFaucet ? (
           <DropdownMenuItem
             onClick={() =>
               openCreateTransactionDialog({
-                accountId,
+                accountId: account.id,
                 transactionType: "mint",
                 step: "configure",
               })
@@ -46,20 +42,26 @@ const AccountActionsCell = ({
         ) : (
           <>
             <DropdownMenuItem
-              onClick={() =>
+              onClick={async () => {
+                const client = await webClient(networkId, serializedMockChain);
+                const consumableNotes = await clientGetConsumableNotes(
+                  client,
+                  account.id
+                );
                 openCreateTransactionDialog({
-                  accountId,
+                  accountId: account.id,
                   transactionType: "consume",
                   step: "configure",
-                })
-              }
+                  consumableNotes,
+                });
+              }}
             >
               New consume transaction
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() =>
                 openCreateTransactionDialog({
-                  accountId,
+                  accountId: account.id,
                   transactionType: "send",
                   step: "configure",
                 })
@@ -77,7 +79,7 @@ const AccountActionsCell = ({
   );
 };
 
-export const columns: ColumnDef<TableAccount>[] = [
+export const columns: ColumnDef<Account>[] = [
   {
     accessorKey: "name",
     header: "Name",
@@ -85,11 +87,14 @@ export const columns: ColumnDef<TableAccount>[] = [
   {
     accessorKey: "address",
     header: "ID",
-    cell: ({ row }) => <AccountAddress address={row.original.address} />,
+    cell: ({ row }) => (
+      <AccountAddress address={row.original.address} withName={false} />
+    ),
   },
   {
     accessorKey: "type",
     header: "Type",
+    cell: ({ row }) => accountTypes[row.original.type],
   },
   {
     accessorKey: "storageMode",
@@ -97,8 +102,9 @@ export const columns: ColumnDef<TableAccount>[] = [
     cell: ({ row }) => (
       <Badge
         variant={
-          row.original.storageMode === "Public" ? "default" : "destructive"
+          row.original.storageMode === "public" ? "default" : "destructive"
         }
+        className="capitalize"
       >
         {row.original.storageMode}
       </Badge>

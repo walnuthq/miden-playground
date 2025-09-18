@@ -1,0 +1,14 @@
+import Link from "@/components/tutorials/tutorial-link";
+import AccountAddress from "@/components/lib/account-address";
+
+Now that your wallet is funded, we'd like to transfer tokens to another recipient wallet.
+
+To initiate a send transaction and transfer some tokens, you'll need to import a recipient account in the Playground.
+
+This can be another wallet you control or the wallet of a friend. You can also send some tokens to this test wallet:
+
+<AccountAddress account={props.account} withLink={false} />
+
+Head to the <Link href="/accounts">accounts page</Link> and import the recipient wallet by clicking on the _"Create new account"_ button on top of the page and selecting the _"Import account"_ option.
+
+A modal will show up requesting both a name and the address of your newly imported account.

@@ -16,8 +16,11 @@ import {
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import useAccounts from "@/hooks/use-accounts";
-import { AccountStorageMode } from "@workspace/mock-web-client";
 import AccountAddress from "@/components/lib/account-address";
+import {
+  FUNGIBLE_FAUCET_DEFAULT_DECIMALS,
+  FUNGIBLE_FAUCET_DEFAULT_MAX_SUPPLY,
+} from "@/lib/constants";
 
 const CreateFaucetDialog = () => {
   const {
@@ -37,7 +40,7 @@ const CreateFaucetDialog = () => {
       open={createFaucetDialogOpen}
       onOpenChange={(open) => !open && onClose()}
     >
-      <DialogContent className="sm:max-w-[640px]">
+      <DialogContent className="sm:max-w-[640px] z-100">
         <DialogHeader>
           <DialogTitle>Create Fungible Faucet</DialogTitle>
           <DialogDescription>Create a new fungible faucet.</DialogDescription>
@@ -51,8 +54,8 @@ const CreateFaucetDialog = () => {
             const faucet = await newFaucet({
               name: formData.get("name")!.toString(),
               storageMode: formData.getAll("is-public").includes("on")
-                ? AccountStorageMode.public()
-                : AccountStorageMode.private(),
+                ? "public"
+                : "private",
               tokenSymbol: formData.get("token-symbol")!.toString(),
               decimals: Number(formData.get("decimals")!.toString()),
               maxSupply: BigInt(formData.get("max-supply")!.toString()),
@@ -107,7 +110,7 @@ const CreateFaucetDialog = () => {
                 type="number"
                 min="1"
                 max="12"
-                defaultValue={8}
+                defaultValue={FUNGIBLE_FAUCET_DEFAULT_DECIMALS.toString()}
                 required
               />
             </div>
@@ -118,7 +121,7 @@ const CreateFaucetDialog = () => {
                 name="max-supply"
                 type="number"
                 min="1"
-                defaultValue={1_000_000}
+                defaultValue={FUNGIBLE_FAUCET_DEFAULT_MAX_SUPPLY.toString()}
                 required
               />
             </div>

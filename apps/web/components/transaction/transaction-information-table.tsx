@@ -1,4 +1,4 @@
-import { type TableTransaction } from "@/lib/types";
+import { type Transaction } from "@/lib/types/transaction";
 import {
   Table,
   TableBody,
@@ -10,7 +10,7 @@ import AccountAddress from "@/components/lib/account-address";
 const TransactionInformationTable = ({
   transaction,
 }: {
-  transaction: TableTransaction;
+  transaction: Transaction;
 }) => (
   <div className="rounded-md border">
     <Table>
@@ -26,7 +26,7 @@ const TransactionInformationTable = ({
         <TableRow>
           <TableCell>Account ID</TableCell>
           <TableCell>
-            <AccountAddress address={transaction.accountAddress} />
+            <AccountAddress id={transaction.accountId} />
           </TableCell>
         </TableRow>
         <TableRow>
@@ -35,11 +35,11 @@ const TransactionInformationTable = ({
         </TableRow>
         <TableRow>
           <TableCell>Input Notes Count</TableCell>
-          <TableCell>{transaction.inputNotesCount}</TableCell>
+          <TableCell>{transaction.inputNotes.length}</TableCell>
         </TableRow>
         <TableRow>
           <TableCell>Output Notes Count</TableCell>
-          <TableCell>{transaction.outputNotesCount}</TableCell>
+          <TableCell>{transaction.outputNotes.length}</TableCell>
         </TableRow>
       </TableBody>
     </Table>

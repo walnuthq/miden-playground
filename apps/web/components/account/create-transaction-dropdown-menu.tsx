@@ -7,11 +7,13 @@ import {
 } from "@workspace/ui/components/dropdown-menu";
 import { Button } from "@workspace/ui/components/button";
 import useTransactions from "@/hooks/use-transactions";
-import { type Account } from "@/lib/types";
+import { type Account } from "@/lib/types/account";
+import { clientGetConsumableNotes, webClient } from "@/lib/web-client";
+import useGlobalContext from "@/components/global-context/hook";
 
 const CreateTransactionDropdownMenu = ({ account }: { account: Account }) => {
+  const { networkId, serializedMockChain } = useGlobalContext();
   const { openCreateTransactionDialog } = useTransactions();
-  const accountId = account.id;
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -21,11 +23,11 @@ const CreateTransactionDropdownMenu = ({ account }: { account: Account }) => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        {account.account.isFaucet() ? (
+        {account.isFaucet ? (
           <DropdownMenuItem
             onClick={() =>
               openCreateTransactionDialog({
-                accountId,
+                accountId: account.id,
                 transactionType: "mint",
                 step: "configure",
               })
@@ -36,20 +38,26 @@ const CreateTransactionDropdownMenu = ({ account }: { account: Account }) => {
         ) : (
           <>
             <DropdownMenuItem
-              onClick={() =>
+              onClick={async () => {
+                const client = await webClient(networkId, serializedMockChain);
+                const consumableNotes = await clientGetConsumableNotes(
+                  client,
+                  account.id
+                );
                 openCreateTransactionDialog({
-                  accountId,
+                  accountId: account.id,
                   transactionType: "consume",
                   step: "configure",
-                })
-              }
+                  consumableNotes,
+                });
+              }}
             >
               New consume transaction
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() =>
                 openCreateTransactionDialog({
-                  accountId,
+                  accountId: account.id,
                   transactionType: "send",
                   step: "configure",
                 })

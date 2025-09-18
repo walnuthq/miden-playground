@@ -38,10 +38,10 @@ const NotesTable = <TData, TValue>({
         <Input
           placeholder="Filter by sender ID…"
           value={
-            (table.getColumn("senderAddress")?.getFilterValue() as string) ?? ""
+            (table.getColumn("senderId")?.getFilterValue() as string) ?? ""
           }
           onChange={(event) =>
-            table.getColumn("senderAddress")?.setFilterValue(event.target.value)
+            table.getColumn("senderId")?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
         />

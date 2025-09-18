@@ -1,19 +1,34 @@
 import { partition } from "lodash";
-import { AccountStorageMode, NetworkId } from "@workspace/mock-web-client";
-import { mockWebClient } from "@/lib/mock-web-client";
+import {
+  clientGetAccountByAddress,
+  clientGetConsumableNotes,
+  wasmAccountToAccount,
+  wasmInputNoteToInputNote,
+  webClient,
+  clientNewWallet,
+  clientNewFaucet,
+  clientImportNewWallet,
+  clientDeployAccount,
+} from "@/lib/web-client";
 import useGlobalContext from "@/components/global-context/hook";
+import { type AccountStorageMode, type AccountType } from "@/lib/types/account";
+import { type Component } from "@/lib/types/component";
+import useScripts from "@/hooks/use-scripts";
+import { COUNTER_CONTRACT_ADDRESS } from "@/lib/constants";
 
 const useAccounts = () => {
   const {
     networkId,
+    serializedMockChain,
     createWalletDialogOpen,
     createFaucetDialogOpen,
+    importAccountDialogOpen,
+    deployAccountDialogOpen,
     accounts,
     dispatch,
   } = useGlobalContext();
-  const [faucets, wallets] = partition(accounts, (account) =>
-    account.account.isFaucet()
-  );
+  const { scripts } = useScripts();
+  const [faucets, wallets] = partition(accounts, (account) => account.isFaucet);
   const newWallet = async ({
     name,
     storageMode,
@@ -21,23 +36,22 @@ const useAccounts = () => {
     name: string;
     storageMode: AccountStorageMode;
   }) => {
-    const client = await mockWebClient();
-    const wallet = await client.newWallet(storageMode, true);
+    const client = await webClient(networkId, serializedMockChain);
+    const wallet = await clientNewWallet(client, {
+      storageMode,
+      mutable: true,
+    });
     const syncSummary = await client.syncState();
-    // const blockHeader = await client.getLatestEpochBlock();
-    // console.log("commitment:", blockHeader.commitment().toHex());
-    // console.log("chainCommitment:", blockHeader.chainCommitment().toHex());
-    const account = {
-      account: wallet,
+    const account = await wasmAccountToAccount({
+      wasmAccount: wallet,
       name,
-      id: wallet.id().toString(),
-      address: wallet.id().toBech32(NetworkId.tryFromStr(networkId)),
-      consumableNoteIds: [],
+      isWallet: true,
+      networkId,
       updatedAt: syncSummary.blockNum(),
-    };
+    });
     dispatch({
       type: "NEW_ACCOUNT",
-      payload: { account, syncSummary },
+      payload: { account, blockNum: syncSummary.blockNum() },
     });
     return account;
   };
@@ -54,30 +68,120 @@ const useAccounts = () => {
     decimals: number;
     maxSupply: bigint;
   }) => {
-    const client = await mockWebClient();
-    const faucet = await client.newFaucet(
+    const client = await webClient(networkId, serializedMockChain);
+    const faucet = await clientNewFaucet(client, {
       storageMode,
-      false,
+      nonFungible: false,
       tokenSymbol,
       decimals,
-      maxSupply
-    );
+      maxSupply,
+    });
     const syncSummary = await client.syncState();
-    const blockHeader = await client.getLatestEpochBlock();
-    // console.log("commitment:", blockHeader.commitment().toHex());
-    // console.log("chainCommitment:", blockHeader.chainCommitment().toHex());
-    const account = {
-      account: faucet,
+    const account = await wasmAccountToAccount({
+      wasmAccount: faucet,
       name,
-      id: faucet.id().toString(),
-      address: faucet.id().toBech32(NetworkId.tryFromStr(networkId)),
-      consumableNoteIds: [],
-      tokenSymbol,
+      isWallet: false,
+      networkId,
       updatedAt: syncSummary.blockNum(),
-    };
+      tokenSymbol,
+    });
     dispatch({
       type: "NEW_ACCOUNT",
-      payload: { account, syncSummary },
+      payload: { account, blockNum: syncSummary.blockNum() },
+    });
+    return account;
+  };
+  const importAccountByAddress = async ({
+    name,
+    address,
+  }: {
+    name: string;
+    address: string;
+  }) => {
+    const client = await webClient(networkId, serializedMockChain);
+    const wasmAccount = await clientGetAccountByAddress(client, address);
+    const syncSummary = await client.syncState();
+    const consumableNotes = await clientGetConsumableNotes(
+      client,
+      wasmAccount.id().toString()
+    );
+    const account = await wasmAccountToAccount({
+      wasmAccount,
+      name,
+      networkId,
+      updatedAt: syncSummary.blockNum(),
+      consumableNoteIds: consumableNotes.map((consumableNote) =>
+        consumableNote.inputNoteRecord().id().toString()
+      ),
+    });
+    if (account.isFaucet) {
+      // faucets
+      account.components = [];
+    } else if (account.address === COUNTER_CONTRACT_ADDRESS) {
+      // Counter Contract
+      account.components = ["no-auth", "counter-contract"];
+    } else {
+      // Basic Wallet
+      account.components = ["basic-auth", "basic-wallet"];
+    }
+    const inputNotes = await Promise.all(
+      consumableNotes.map((consumableNote) =>
+        wasmInputNoteToInputNote(consumableNote.inputNoteRecord())
+      )
+    );
+    dispatch({
+      type: "IMPORT_ACCOUNT",
+      payload: { account, inputNotes, blockNum: syncSummary.blockNum() },
+    });
+    return account;
+  };
+  const importConnectedWallet = async (address: string) => {
+    const client = await webClient(networkId, serializedMockChain);
+    try {
+      await clientGetAccountByAddress(client, address);
+      return importAccountByAddress({
+        name: "Miden Account 1",
+        address,
+      });
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      await clientImportNewWallet(client, address);
+      return importAccountByAddress({
+        name: "Miden Account 1",
+        address,
+      });
+    }
+  };
+  const deployAccount = async ({
+    name,
+    accountType,
+    storageMode,
+    components,
+  }: {
+    name: string;
+    accountType: AccountType;
+    storageMode: AccountStorageMode;
+    components: Component[];
+  }) => {
+    const client = await webClient(networkId, serializedMockChain);
+    const wasmAccount = await clientDeployAccount(client, {
+      accountType,
+      storageMode,
+      components,
+      scripts,
+    });
+    const syncSummary = await client.syncState();
+    const account = await wasmAccountToAccount({
+      wasmAccount,
+      name,
+      components: components.map(({ id }) => id),
+      isWallet: components.some(({ id }) => id === "basic-wallet"),
+      networkId,
+      updatedAt: syncSummary.blockNum(),
+    });
+    dispatch({
+      type: "NEW_ACCOUNT",
+      payload: { account, blockNum: syncSummary.blockNum() },
     });
     return account;
   };
@@ -97,18 +201,43 @@ const useAccounts = () => {
     dispatch({
       type: "CLOSE_CREATE_FAUCET_DIALOG",
     });
+  const openImportAccountDialog = () =>
+    dispatch({
+      type: "OPEN_IMPORT_ACCOUNT_DIALOG",
+    });
+  const closeImportAccountDialog = () =>
+    dispatch({
+      type: "CLOSE_IMPORT_ACCOUNT_DIALOG",
+    });
+  const openDeployAccountDialog = () =>
+    dispatch({
+      type: "OPEN_DEPLOY_ACCOUNT_DIALOG",
+    });
+  const closeDeployAccountDialog = () =>
+    dispatch({
+      type: "CLOSE_DEPLOY_ACCOUNT_DIALOG",
+    });
   return {
     createWalletDialogOpen,
     createFaucetDialogOpen,
+    importAccountDialogOpen,
+    deployAccountDialogOpen,
     accounts,
     wallets,
     faucets,
     newWallet,
     newFaucet,
-    openCreateFaucetDialog,
-    closeCreateFaucetDialog,
+    importAccountByAddress,
+    importConnectedWallet,
+    deployAccount,
     openCreateWalletDialog,
     closeCreateWalletDialog,
+    openCreateFaucetDialog,
+    closeCreateFaucetDialog,
+    openImportAccountDialog,
+    closeImportAccountDialog,
+    openDeployAccountDialog,
+    closeDeployAccountDialog,
   };
 };
 

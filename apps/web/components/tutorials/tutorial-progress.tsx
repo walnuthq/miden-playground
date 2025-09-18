@@ -3,7 +3,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@workspace/ui/components/tooltip";
-import { type TutorialStep } from "@/lib/types";
+import { type TutorialStep } from "@/lib/types/tutorial";
 import useTutorials from "@/hooks/use-tutorials";
 import { cn } from "@workspace/ui/lib/utils";
 
