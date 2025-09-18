@@ -1,5 +1,5 @@
 "use client";
-import { accountTypes, type Account } from "@/lib/types";
+import { accountTypes, type Account } from "@/lib/types/account";
 import { type ColumnDef } from "@tanstack/react-table";
 import { MoreVertical } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
@@ -12,8 +12,11 @@ import {
 } from "@workspace/ui/components/dropdown-menu";
 import useTransactions from "@/hooks/use-transactions";
 import AccountAddress from "@/components/lib/account-address";
+import { clientGetConsumableNotes, webClient } from "@/lib/web-client";
+import useGlobalContext from "@/components/global-context/hook";
 
 const AccountActionsCell = ({ account }: { account: Account }) => {
+  const { networkId, serializedMockChain } = useGlobalContext();
   const { openCreateTransactionDialog } = useTransactions();
   return (
     <DropdownMenu>
@@ -39,13 +42,19 @@ const AccountActionsCell = ({ account }: { account: Account }) => {
         ) : (
           <>
             <DropdownMenuItem
-              onClick={() =>
+              onClick={async () => {
+                const client = await webClient(networkId, serializedMockChain);
+                const consumableNotes = await clientGetConsumableNotes(
+                  client,
+                  account.id
+                );
                 openCreateTransactionDialog({
                   accountId: account.id,
                   transactionType: "consume",
                   step: "configure",
-                })
-              }
+                  consumableNotes,
+                });
+              }}
             >
               New consume transaction
             </DropdownMenuItem>

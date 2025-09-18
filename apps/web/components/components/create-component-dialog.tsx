@@ -24,7 +24,7 @@ import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import useScripts from "@/hooks/use-scripts";
 import useComponents from "@/hooks/use-components";
-import { type ComponentType, componentTypes } from "@/lib/types";
+import { type ComponentType, componentTypes } from "@/lib/types/component";
 
 const CreateComponentDialog = () => {
   const router = useRouter();

@@ -11,20 +11,22 @@ import {
   type InputNoteState as WasmInputNoteStateType,
 } from "@demox-labs/miden-sdk";
 import {
-  type NetworkId,
-  type StorageSlot,
-  type Account,
-  type InputNote,
-  type Note,
-  type Transaction,
-  type AccountStorageMode,
-  type NoteType,
   type WasmTransactionId,
   type WasmTransactionRecord,
-  type AccountType,
-  type Component,
-  type Script,
 } from "@/lib/types";
+import {
+  type Account,
+  type AccountStorageMode,
+  type AccountType,
+} from "@/lib/types/account";
+import { type NetworkId } from "@/lib/types/network";
+import { type InputNote, type NoteType } from "@/lib/types/note";
+import {
+  type TransactionNote,
+  type Transaction,
+} from "@/lib/types/transaction";
+import { type Script } from "@/lib/types/script";
+import { type StorageSlot, type Component } from "@/lib/types/component";
 
 const globalForWebClient = globalThis as unknown as {
   webClient: WebClientType;
@@ -204,8 +206,8 @@ export const clientGetAccountByAddress = async (
   client: WebClientType,
   address: string
 ) => {
-  const { AccountId: WasmAccountId } = await import("@demox-labs/miden-sdk");
-  const accountId = WasmAccountId.fromBech32(address);
+  const { Address: WasmAddress } = await import("@demox-labs/miden-sdk");
+  const accountId = WasmAddress.fromBech32(address).accountId();
   const account = await client.getAccount(accountId);
   if (account) {
     return account;
@@ -256,11 +258,12 @@ export const clientImportNewWallet = async (
     const chunks = hexString.match(/.{1,2}/g)!;
     return Uint8Array.from(chunks.map((byte) => Number.parseInt(byte, 16)));
   };
-  const { Account: WasmAccount, AccountId: WasmAccountId } = await import(
+  const { Account: WasmAccount, Address: WasmAddress } = await import(
     "@demox-labs/miden-sdk"
   );
+  const accountId = WasmAddress.fromBech32(address).accountId();
   const serializedImportedWallet = Uint8Array.from([
-    ...fromHexString(WasmAccountId.fromBech32(address).toString().slice(2)),
+    ...fromHexString(accountId.toString().slice(2)),
     ...serializedWallet.slice(15),
   ]);
   await clientNewAccount(client, {
@@ -344,29 +347,49 @@ const accountType = (account: WasmAccount /*, tokenSymbol?: string*/) => {
   return "non-fungible-faucet";
 };
 
-export const wasmAccountToAccount = async (
-  account: WasmAccount,
-  name: string,
-  networkId: string,
-  updatedAt: number,
-  consumableNoteIds: string[] = [],
-  tokenSymbol?: string
-): Promise<Account> => {
+export const wasmAccountToAccount = async ({
+  wasmAccount,
+  name,
+  isWallet,
+  tokenSymbol,
+  components,
+  networkId,
+  updatedAt,
+  consumableNoteIds,
+}: {
+  wasmAccount: WasmAccount;
+  name: string;
+  isWallet?: boolean;
+  tokenSymbol?: string;
+  components?: string[];
+  networkId: string;
+  updatedAt: number;
+  consumableNoteIds?: string[];
+}): Promise<Account> => {
   const { AccountInterface: WasmAccountInterface } = await import(
     "@demox-labs/miden-sdk"
   );
   return {
-    id: account.id().toString(),
+    id: wasmAccount.id().toString(),
     name,
-    address: account
+    address: wasmAccount
       .id()
-      .toBech32Custom(networkId, WasmAccountInterface.BasicWallet),
-    type: accountType(account /*, tokenSymbol*/),
-    storageMode: account.isPublic() ? "public" : "private",
-    isPublic: account.isPublic(),
-    isFaucet: account.isFaucet(),
-    nonce: account.nonce().asInt(),
-    fungibleAssets: account
+      .toBech32Custom(
+        networkId,
+        isWallet
+          ? WasmAccountInterface.BasicWallet
+          : WasmAccountInterface.Unspecified
+      ),
+    type: accountType(wasmAccount /*, tokenSymbol*/),
+    storageMode: wasmAccount.isPublic() ? "public" : "private",
+    isPublic: wasmAccount.isPublic(),
+    isUpdatable: wasmAccount.isUpdatable(),
+    isRegularAccount: wasmAccount.isRegularAccount(),
+    isNew: wasmAccount.isNew(),
+    isWallet,
+    isFaucet: wasmAccount.isFaucet(),
+    nonce: wasmAccount.nonce().asInt(),
+    fungibleAssets: wasmAccount
       .vault()
       .fungibleAssets()
       .map((fungibleAsset) => ({
@@ -374,11 +397,11 @@ export const wasmAccountToAccount = async (
         amount: fungibleAsset.amount().toString(),
       })),
     storage: range(255).reduce<string[]>((previousValue, currentValue) => {
-      const item = account.storage().getItem(currentValue);
+      const item = wasmAccount.storage().getItem(currentValue);
       return item ? [...previousValue, item.toHex()] : previousValue;
     }, []),
-    consumableNoteIds,
-    components: [],
+    consumableNoteIds: consumableNoteIds ?? [],
+    components: components ?? [],
     tokenSymbol,
     updatedAt,
   };
@@ -482,7 +505,9 @@ export const wasmTransactionToTransaction = async (
   };
 };
 
-export const wasmNoteToNote = async (note: WasmNote): Promise<Note> => ({
+export const wasmNoteToNote = async (
+  note: WasmNote
+): Promise<TransactionNote> => ({
   id: note.id().toString(),
   type: await noteType(note.metadata()),
   scriptRoot: note.recipient().script().root().toHex(),

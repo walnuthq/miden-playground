@@ -11,16 +11,10 @@ import {
   clientDeployAccount,
 } from "@/lib/web-client";
 import useGlobalContext from "@/components/global-context/hook";
-import {
-  type Component,
-  type AccountStorageMode,
-  type AccountType,
-} from "@/lib/types";
+import { type AccountStorageMode, type AccountType } from "@/lib/types/account";
+import { type Component } from "@/lib/types/component";
 import useScripts from "@/hooks/use-scripts";
-import {
-  MIDEN_FAUCET_ADDRESS,
-  COUNTER_CONTRACT_ADDRESS,
-} from "@/lib/constants";
+import { COUNTER_CONTRACT_ADDRESS } from "@/lib/constants";
 
 const useAccounts = () => {
   const {
@@ -48,12 +42,13 @@ const useAccounts = () => {
       mutable: true,
     });
     const syncSummary = await client.syncState();
-    const account = await wasmAccountToAccount(
-      wallet,
+    const account = await wasmAccountToAccount({
+      wasmAccount: wallet,
       name,
+      isWallet: true,
       networkId,
-      syncSummary.blockNum()
-    );
+      updatedAt: syncSummary.blockNum(),
+    });
     dispatch({
       type: "NEW_ACCOUNT",
       payload: { account, blockNum: syncSummary.blockNum() },
@@ -82,14 +77,14 @@ const useAccounts = () => {
       maxSupply,
     });
     const syncSummary = await client.syncState();
-    const account = await wasmAccountToAccount(
-      faucet,
+    const account = await wasmAccountToAccount({
+      wasmAccount: faucet,
       name,
+      isWallet: false,
       networkId,
-      syncSummary.blockNum(),
-      [],
-      tokenSymbol
-    );
+      updatedAt: syncSummary.blockNum(),
+      tokenSymbol,
+    });
     dispatch({
       type: "NEW_ACCOUNT",
       payload: { account, blockNum: syncSummary.blockNum() },
@@ -110,19 +105,19 @@ const useAccounts = () => {
       client,
       wasmAccount.id().toString()
     );
-    const account = await wasmAccountToAccount(
+    const account = await wasmAccountToAccount({
       wasmAccount,
       name,
       networkId,
-      syncSummary.blockNum(),
-      consumableNotes.map((consumableNote) =>
+      updatedAt: syncSummary.blockNum(),
+      consumableNoteIds: consumableNotes.map((consumableNote) =>
         consumableNote.inputNoteRecord().id().toString()
-      )
-    );
-    if (address === MIDEN_FAUCET_ADDRESS) {
-      // MDN Faucet
+      ),
+    });
+    if (account.isFaucet) {
+      // faucets
       account.components = [];
-    } else if (address === COUNTER_CONTRACT_ADDRESS) {
+    } else if (account.address === COUNTER_CONTRACT_ADDRESS) {
       // Counter Contract
       account.components = ["no-auth", "counter-contract"];
     } else {
@@ -148,6 +143,7 @@ const useAccounts = () => {
         name: "Miden Account 1",
         address,
       });
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       await clientImportNewWallet(client, address);
       return importAccountByAddress({
@@ -175,13 +171,14 @@ const useAccounts = () => {
       scripts,
     });
     const syncSummary = await client.syncState();
-    const account = await wasmAccountToAccount(
+    const account = await wasmAccountToAccount({
       wasmAccount,
       name,
+      components: components.map(({ id }) => id),
+      isWallet: components.some(({ id }) => id === "basic-wallet"),
       networkId,
-      syncSummary.blockNum()
-    );
-    account.components = components.map(({ id }) => id);
+      updatedAt: syncSummary.blockNum(),
+    });
     dispatch({
       type: "NEW_ACCOUNT",
       payload: { account, blockNum: syncSummary.blockNum() },

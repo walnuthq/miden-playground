@@ -1,4 +1,4 @@
-import { type InputNote } from "@/lib/types";
+import { type InputNote } from "@/lib/types/note";
 import NoteInformationTable from "@/components/note/note-information-table";
 import NoteInputsTable from "@/components/note/note-inputs-table";
 import DecodedNoteInputsTable from "@/components/note/decoded-note-inputs-table";

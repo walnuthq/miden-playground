@@ -22,7 +22,7 @@ import {
   type InputNoteRecord as WasmInputNoteRecord,
 } from "@demox-labs/miden-sdk";
 import useAccounts from "@/hooks/use-accounts";
-import { type Account } from "@/lib/types";
+import { type Account } from "@/lib/types/account";
 
 const getConsumableNoteFields = (
   inputNoteRecord: WasmInputNoteRecord,

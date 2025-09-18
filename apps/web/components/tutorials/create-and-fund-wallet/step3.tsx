@@ -1,4 +1,4 @@
-import { type TutorialStep } from "@/lib/types";
+import { type TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
 import Step3Content from "@/components/tutorials/create-and-fund-wallet/step3.mdx";

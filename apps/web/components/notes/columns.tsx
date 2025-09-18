@@ -1,6 +1,6 @@
 "use client";
 import { MoreVertical } from "lucide-react";
-import { type InputNote, noteConsumed, noteStates } from "@/lib/types";
+import { type InputNote, noteConsumed, noteStates } from "@/lib/types/note";
 import { formatId } from "@/lib/utils";
 import { type ColumnDef } from "@tanstack/react-table";
 import { Button } from "@workspace/ui/components/button";

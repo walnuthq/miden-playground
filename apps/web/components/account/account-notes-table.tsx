@@ -1,4 +1,5 @@
-import { type Account, type InputNote } from "@/lib/types";
+import { type Account } from "@/lib/types/account";
+import { type InputNote } from "@/lib/types/note";
 import {
   Table,
   TableBody,

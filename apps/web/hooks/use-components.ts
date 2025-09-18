@@ -1,6 +1,6 @@
 import { kebabCase } from "lodash";
 import useGlobalContext from "@/components/global-context/hook";
-import { type Component, type ComponentType } from "@/lib/types";
+import { type Component, type ComponentType } from "@/lib/types/component";
 
 const useComponents = () => {
   const {
@@ -43,6 +43,7 @@ const useComponents = () => {
       type,
       scriptId,
       storageSlots: [],
+      procedures: [],
       updatedAt: Date.now(),
     };
     dispatch({

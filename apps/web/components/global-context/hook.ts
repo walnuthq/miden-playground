@@ -9,8 +9,11 @@ import {
   wasmAccountToAccount,
   wasmInputNoteToInputNote,
 } from "@/lib/web-client";
-import { type NetworkId, type Account } from "@/lib/types";
-import { defaultStore } from "@/lib/store";
+import { type Account } from "@/lib/types/account";
+import { type NetworkId } from "@/lib/types/network";
+import { defaultStore } from "@/lib/types/store";
+import { noteInputsToAccountId } from "@/lib/utils";
+import { noteConsumed } from "@/lib/types/note";
 
 const useGlobalContext = () => {
   const { state, dispatch } = useContext(GlobalContext);
@@ -37,6 +40,11 @@ const useGlobalContext = () => {
     const client = await webClient(state.networkId, state.serializedMockChain);
     const syncSummary = await client.syncState();
     const wasmInputNotes = await clientGetAllInputNotes(client);
+    const inputNotes = await Promise.all(
+      wasmInputNotes.map((wasmInputNote) =>
+        wasmInputNoteToInputNote(wasmInputNote)
+      )
+    );
     const accounts: Account[] = [];
     for (const account of state.accounts) {
       const wasmAccount = await clientGetAccountByAddress(
@@ -47,25 +55,37 @@ const useGlobalContext = () => {
         client,
         account.id
       );
-      console.log(consumableNotes.length);
       const noteIds = consumableNotes.map((consumableNote) =>
         consumableNote.inputNoteRecord().id().toString()
       );
-      const updatedAccount = await wasmAccountToAccount(
+      // FIXME fix for getConsumableNotes
+      for (const inputNote of inputNotes) {
+        if (
+          inputNote.scriptRoot !=
+            "0x21cd4efe03f8d0db7354bee1a89e41e28fa23a1c5da0918c8afbfef710a91cc3" ||
+          noteConsumed(inputNote)
+        ) {
+          continue;
+        }
+        const targetAccountId = noteInputsToAccountId(inputNote.inputs);
+        if (account.id === targetAccountId && !noteIds.includes(inputNote.id)) {
+          noteIds.push(inputNote.id);
+        }
+      }
+      //
+      const updatedAccount = await wasmAccountToAccount({
         wasmAccount,
-        account.name,
-        state.networkId,
-        syncSummary.blockNum(),
-        noteIds,
-        account.tokenSymbol
-      );
+        name: account.name,
+        isWallet: account.isWallet,
+        tokenSymbol: account.tokenSymbol,
+        components: account.components,
+        networkId: state.networkId,
+        updatedAt: syncSummary.blockNum(),
+        consumableNoteIds: noteIds,
+      });
       accounts.push(updatedAccount);
     }
-    const inputNotes = await Promise.all(
-      wasmInputNotes.map((wasmInputNote) =>
-        wasmInputNoteToInputNote(wasmInputNote)
-      )
-    );
+    //
     dispatch({
       type: "SYNC_STATE",
       payload: {

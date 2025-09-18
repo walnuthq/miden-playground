@@ -1,4 +1,4 @@
-import { type Script } from "@/lib/types";
+import { type Script } from "@/lib/types/script";
 import Editor from "@/components/lib/editor";
 
 const NoteScript = ({ script }: { script: Script }) => (

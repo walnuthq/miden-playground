@@ -1,20 +1,31 @@
-import { type TutorialStep } from "@/lib/types";
+import { useEffect } from "react";
+import { type TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
 import Step4Content from "@/components/tutorials/interact-with-the-counter-contract/step4.mdx";
-import useScripts from "@/hooks/use-scripts";
+import useAccounts from "@/hooks/use-accounts";
+import { COUNTER_CONTRACT_ADDRESS } from "@/lib/constants";
+
+let initialNonce = 0n;
 
 const Step4: TutorialStep = {
   title: "Invoke the Counter Contract procedures.",
   Content: () => {
-    // TODO completed
-    const { scripts } = useScripts();
-    const script = scripts.find(({ id }) => id === "counter-contract");
+    const { accounts } = useAccounts();
+    const counter = accounts.find(
+      ({ address }) => address === COUNTER_CONTRACT_ADDRESS
+    );
+    const currentNonce = counter?.nonce ?? 0n;
+    useEffect(() => {
+      if (initialNonce === 0n) {
+        initialNonce = currentNonce;
+      }
+    }, [currentNonce]);
     return (
       <>
         <Step4Content />
         <TutorialAlert
-          completed={script?.updatedAt !== 0}
+          completed={currentNonce > initialNonce}
           title="Action required: Invoke the procedure."
           titleWhenCompleted="You have invoked the Counter Contract procedures."
           description={
@@ -29,10 +40,17 @@ const Step4: TutorialStep = {
     );
   },
   NextStepButton: () => {
-    // TODO disabled
-    const { scripts } = useScripts();
-    const script = scripts.find(({ id }) => id === "counter-contract");
-    return <NextStepButton disabled={script?.updatedAt === 0} />;
+    const { accounts } = useAccounts();
+    const counter = accounts.find(
+      ({ address }) => address === COUNTER_CONTRACT_ADDRESS
+    );
+    const currentNonce = counter?.nonce ?? 0n;
+    useEffect(() => {
+      if (initialNonce === 0n) {
+        initialNonce = currentNonce;
+      }
+    }, [currentNonce]);
+    return <NextStepButton disabled={currentNonce <= initialNonce} />;
   },
 };
 

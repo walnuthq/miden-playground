@@ -5,7 +5,7 @@ import {
   TableRow,
 } from "@workspace/ui/components/table";
 import { Badge } from "@workspace/ui/components/badge";
-import { type InputNote, noteStates } from "@/lib/types";
+import { type InputNote, noteStates } from "@/lib/types/note";
 import AccountAddress from "@/components/lib/account-address";
 import { CircleCheckBig } from "lucide-react";
 import useScripts from "@/hooks/use-scripts";

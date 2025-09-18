@@ -3,11 +3,11 @@ import {
   type TransactionResult as WasmTransactionResult,
   type TransactionRequest as WasmTransactionRequest,
 } from "@demox-labs/miden-sdk";
+import { type NoteType } from "@/lib/types/note";
 import {
   type CreateTransactionDialogStep,
   type TransactionType,
-  type NoteType,
-} from "@/lib/types";
+} from "@/lib/types/transaction";
 import {
   webClient,
   clientNewMintTransactionRequest,
@@ -196,14 +196,16 @@ const useTransactions = () => {
       transactionRecord,
       transactionResult
     );
-    const account = await wasmAccountToAccount(
-      nextAccount,
-      previousAccount.name,
+    const account = await wasmAccountToAccount({
+      wasmAccount: nextAccount,
+      name: previousAccount.name,
+      isWallet: previousAccount.isWallet,
+      tokenSymbol: previousAccount.tokenSymbol,
+      components: previousAccount.components,
       networkId,
-      syncSummary.blockNum(),
-      consumableNoteIds[previousAccount.id],
-      previousAccount.tokenSymbol
-    );
+      updatedAt: syncSummary.blockNum(),
+      consumableNoteIds: consumableNoteIds[previousAccount.id],
+    });
     const inputNotes = await Promise.all(
       wasmInputNotes.map((inputNoteRecord) =>
         wasmInputNoteToInputNote(inputNoteRecord)

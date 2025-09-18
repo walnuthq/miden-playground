@@ -6,7 +6,7 @@ import {
   TableHeader,
   TableRow,
 } from "@workspace/ui/components/table";
-import { type FungibleAsset } from "@/lib/types";
+import { type FungibleAsset } from "@/lib/types/asset";
 import useAccounts from "@/hooks/use-accounts";
 import AccountAddress from "@/components/lib/account-address";
 import { cn } from "@workspace/ui/lib/utils";
@@ -33,7 +33,7 @@ const FungibleAssetsTable = ({
         <TableBody>
           {fungibleAssets.map((fungibleAsset) => {
             const faucet = faucets.find(
-              ({ id }) => id === fungibleAsset.faucetId,
+              ({ id }) => id === fungibleAsset.faucetId
             );
             return (
               <TableRow key={fungibleAsset.faucetId}>

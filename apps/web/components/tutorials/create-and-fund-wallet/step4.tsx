@@ -1,4 +1,4 @@
-import { type TutorialStep } from "@/lib/types";
+import { type TutorialStep } from "@/lib/types/tutorial";
 import Step4Content from "@/components/tutorials/create-and-fund-wallet/step4.mdx";
 import useAccounts from "@/hooks/use-accounts";
 import useTransactions from "@/hooks/use-transactions";

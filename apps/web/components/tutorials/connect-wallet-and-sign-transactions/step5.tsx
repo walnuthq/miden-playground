@@ -1,5 +1,5 @@
 import { EllipsisVertical } from "lucide-react";
-import { type TutorialStep } from "@/lib/types";
+import { type TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
 import Step5Content from "@/components/tutorials/connect-wallet-and-sign-transactions/step5.mdx";

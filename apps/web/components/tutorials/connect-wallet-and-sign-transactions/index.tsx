@@ -1,4 +1,4 @@
-import { type Tutorial } from "@/lib/types";
+import { type Tutorial } from "@/lib/types/tutorial";
 import state from "@/components/tutorials/connect-wallet-and-sign-transactions/state";
 import store from "@/components/tutorials/connect-wallet-and-sign-transactions/store";
 import Step1 from "@/components/tutorials/connect-wallet-and-sign-transactions/step1";

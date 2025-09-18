@@ -1,5 +1,5 @@
 "use client";
-// import { useEffect } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronsUpDown } from "lucide-react";
 import {
@@ -26,29 +26,35 @@ import Logo from "@/components/lib/logo";
 import useGlobalContext from "@/components/global-context/hook";
 import tutorials from "@/components/tutorials/tutorials";
 import useTutorials from "@/hooks/use-tutorials";
-import useProjects from "@/hooks/use-projects";
+// import useProjects from "@/hooks/use-projects";
 import { useIsClient } from "usehooks-ts";
-import { networks } from "@/lib/types";
+import { networks } from "@/lib/types/network";
 // import { cn } from "@workspace/ui/lib/utils";
-// import useAccounts from "@/hooks/use-accounts";
+import useAccounts from "@/hooks/use-accounts";
+import { useWallet } from "@demox-labs/miden-wallet-adapter";
 
 const ProjectSwitcher = () => {
   const isClient = useIsClient();
   const { isMobile } = useSidebar();
   const router = useRouter();
+  const { accountId } = useWallet();
   const { networkId, blockNum, resetState /*, switchNetwork */ } =
     useGlobalContext();
-  const { startTutorial /* tutorialId, loadTutorial*/ } = useTutorials();
-  // const { faucets } = useAccounts();
-  const { saveProject, loadProject } = useProjects();
-  // useEffect(() => {
-  //   if (
-  //     tutorialId === "connect-wallet-and-sign-transactions" &&
-  //     faucets.length === 0
-  //   ) {
-  //     loadTutorial(tutorialId);
-  //   }
-  // }, [tutorialId, faucets.length]);
+  const { tutorialId, tutorialLoaded, startTutorial, loadTutorial } =
+    useTutorials();
+  const { wallets } = useAccounts();
+  // const { saveProject, loadProject } = useProjects();
+  useEffect(() => {
+    const connectedWallet = wallets.find(
+      ({ address }) => address === accountId
+    );
+    if (!connectedWallet) {
+      return;
+    }
+    if (!tutorialLoaded) {
+      loadTutorial(tutorialId);
+    }
+  }, [wallets, accountId, tutorialId, tutorialLoaded, loadTutorial]);
   if (!isClient) {
     return null;
   }
@@ -114,7 +120,7 @@ const ProjectSwitcher = () => {
               Load tutorial
             </DropdownMenuItem> */}
             <DropdownMenuSeparator />
-            <DropdownMenuSub>
+            {/* <DropdownMenuSub>
               <DropdownMenuSubTrigger>Projects</DropdownMenuSubTrigger>
               <DropdownMenuPortal>
                 <DropdownMenuSubContent>
@@ -126,7 +132,7 @@ const ProjectSwitcher = () => {
                   </DropdownMenuItem>
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
-            </DropdownMenuSub>
+            </DropdownMenuSub> */}
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>Tutorials</DropdownMenuSubTrigger>
               <DropdownMenuPortal>

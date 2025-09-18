@@ -1,5 +1,5 @@
 "use client";
-import { type Component, componentTypes } from "@/lib/types";
+import { type Component, componentTypes } from "@/lib/types/component";
 import { type ColumnDef } from "@tanstack/react-table";
 import useScripts from "@/hooks/use-scripts";
 

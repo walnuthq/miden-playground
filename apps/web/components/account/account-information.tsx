@@ -1,4 +1,4 @@
-import { type Account } from "@/lib/types";
+import { type Account } from "@/lib/types/account";
 import AccountInformationTable from "@/components/account/account-information-table";
 import AccountStorageTable from "@/components/account/account-storage-table";
 import FungibleAssetsTable from "@/components/lib/fungible-assets-table";

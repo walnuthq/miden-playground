@@ -6,7 +6,7 @@ import {
   TooltipTrigger,
 } from "@workspace/ui/components/tooltip";
 import { formatId } from "@/lib/utils";
-import { type InputNote } from "@/lib/types";
+import { type InputNote } from "@/lib/types/note";
 import useScripts from "@/hooks/use-scripts";
 
 const NoteScriptRoot = ({ inputNote }: { inputNote: InputNote }) => {

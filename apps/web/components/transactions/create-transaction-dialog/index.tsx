@@ -73,13 +73,14 @@ const CreateTransactionDialog = () => {
     setTransactionType(createTransactionDialogTransactionType);
     setStep(createTransactionDialogStep);
     setTransactionResult(createTransactionDialogTransactionResult);
-    //setConsumableNotes(createTransactionDialogConsumableNotes);
+    setConsumableNotes(createTransactionDialogConsumableNotes);
     //setNoteIds(createTransactionDialogNoteIds);
   }, [
     createTransactionDialogAccountId,
     createTransactionDialogTransactionType,
     createTransactionDialogStep,
     createTransactionDialogTransactionResult,
+    createTransactionDialogConsumableNotes,
   ]);
   return (
     <Dialog

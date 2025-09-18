@@ -1,4 +1,4 @@
-import { type Script } from "@/lib/types";
+import { type Script } from "@/lib/types/script";
 
 const apiUrl =
   process.env.NEXT_PUBLIC_API_URL ?? "https://playground-api.walnut.dev";

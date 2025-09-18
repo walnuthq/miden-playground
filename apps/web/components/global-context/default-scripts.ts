@@ -1,6 +1,7 @@
-import { type Script } from "@/lib/types";
+import { type Script } from "@/lib/types/script";
 
 export const noAuthMasm = `use.miden::account
+use.std::word
 
 #! Increment the nonce only if the account commitment has changed
 #!
@@ -21,8 +22,7 @@ export.auth__no_auth
     exec.account::compute_current_commitment
     # => [CURRENT_COMMITMENT, INITIAL_COMMITMENT, pad(16)]
 
-    # TODO: use std::word::eq when it becomes available
-    eqw not movdn.8 dropw dropw
+    exec.word::eq not
     # => [has_account_state_changed, pad(16)]
 
     # if the account has been updated, increment the nonce
@@ -290,13 +290,118 @@ export const basicWalletScript: Script = {
   updatedAt: 0,
 };
 
+export const counterContractRust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
+#![no_std]
+
+// However, we could still use some standard library types while
+// remaining no-std compatible, if we uncommented the following lines:
+//
+extern crate alloc;
+
+// Global allocator to use heap memory in no-std environment
+#[global_allocator]
+static ALLOC: miden::BumpAlloc = miden::BumpAlloc::new();
+
+// Define a panic handler as required by the \`no_std\` environment
+#[cfg(not(test))]
+#[panic_handler]
+fn panic(_info: &core::panic::PanicInfo) -> ! {
+    // For now, just loop indefinitely
+    loop {}
+}
+
+mod bindings;
+
+use bindings::exports::miden::counter_contract::counter::Guest;
+use miden::{component, felt, Felt, StorageMap, StorageMapAccess, Word};
+
+/// Main contract structure for the counter example.
+#[component]
+struct CounterContract {
+    /// Storage map holding the counter value.
+    #[storage(slot(0), description = "counter contract storage map")]
+    count_map: StorageMap,
+}
+
+bindings::export!(CounterContract with_types_in bindings);
+
+impl Guest for CounterContract {
+    /// Returns the current counter value stored in the contract's storage map.
+    fn get_count() -> Felt {
+        // Get the instance of the contract
+        let contract = CounterContract::default();
+        // Define a fixed key for the counter value within the map
+        let key = Word::from([felt!(0), felt!(0), felt!(0), felt!(1)]);
+        // Read the value associated with the key from the storage map
+        contract.count_map.get(&key)
+    }
+
+    /// Increments the counter value stored in the contract's storage map by one.
+    fn increment_count() -> Felt {
+        // Get the instance of the contract
+        let contract = CounterContract::default();
+        // Define the same fixed key
+        let key = Word::from([felt!(0), felt!(0), felt!(0), felt!(1)]);
+        // Read the current value
+        let current_value: Felt = contract.count_map.get(&key);
+        // Increment the value by one
+        let new_value = current_value + felt!(1);
+        // Write the new value back to the storage map
+        contract.count_map.set(key, new_value);
+        new_value
+    }
+}
+`;
+
+export const counterContractMasm = `use.miden::account
+use.std::sys
+
+const.COUNTER_SLOT=0
+# => []
+export.get_count
+    push.COUNTER_SLOT
+    # => [index]
+
+    exec.account::get_item
+    # => [count]
+
+    exec.sys::truncate_stack
+    # => []
+end
+
+# => []
+export.increment_count
+    push.COUNTER_SLOT
+    # => [index]
+
+    exec.account::get_item
+    # => [count]
+
+    add.1
+    # => [count+1]
+
+    debug.stack
+
+    push.COUNTER_SLOT
+    # [index, count+1]
+
+    exec.account::set_item
+    # => []
+
+    exec.sys::truncate_stack
+    # => []
+end
+`;
+
 export const counterContractScript: Script = {
   id: "counter-contract",
   name: "Counter Contract",
   type: "account",
   status: "compiled",
-  rust: "// Do not link against libstd (i.e. anything defined in `std::`)\n#![no_std]\n\n// However, we could still use some standard library types while\n// remaining no-std compatible, if we uncommented the following lines:\n//\nextern crate alloc;\n\n// Global allocator to use heap memory in no-std environment\n#[global_allocator]\nstatic ALLOC: miden::BumpAlloc = miden::BumpAlloc::new();\n\n// Define a panic handler as required by the `no_std` environment\n#[cfg(not(test))]\n#[panic_handler]\nfn panic(_info: &core::panic::PanicInfo) -> ! {\n    // For now, just loop indefinitely\n    loop {}\n}\n\nmod bindings;\n\nuse bindings::exports::miden::counter_contract::counter::Guest;\nuse miden::{component, felt, Felt, StorageMap, StorageMapAccess, Word};\n\n/// Main contract structure for the counter example.\n#[component]\nstruct CounterContract {\n    /// Storage map holding the counter value.\n    #[storage(slot(0), description = \"counter contract storage map\")]\n    count_map: StorageMap,\n}\n\nbindings::export!(CounterContract with_types_in bindings);\n\nimpl Guest for CounterContract {\n    /// Returns the current counter value stored in the contract's storage map.\n    fn get_count() -> Felt {\n        // Get the instance of the contract\n        let contract = CounterContract::default();\n        // Define a fixed key for the counter value within the map\n        let key = Word::from([felt!(0), felt!(0), felt!(0), felt!(1)]);\n        // Read the value associated with the key from the storage map\n        contract.count_map.get(&key)\n    }\n\n    /// Increments the counter value stored in the contract's storage map by one.\n    fn increment_count() -> Felt {\n        // Get the instance of the contract\n        let contract = CounterContract::default();\n        // Define the same fixed key\n        let key = Word::from([felt!(0), felt!(0), felt!(0), felt!(1)]);\n        // Read the current value\n        let current_value: Felt = contract.count_map.get(&key);\n        // Increment the value by one\n        let new_value = current_value + felt!(1);\n        // Write the new value back to the storage map\n        contract.count_map.set(key, new_value);\n        new_value\n    }\n}\n",
-  masm: "use.miden::account\nuse.std::sys\n\n# => []\nexport.get_count\n    push.0\n    # => [index]\n\n    # exec.account::get_item\n    # => [count]\n\n    # exec.sys::truncate_stack\n    # => []\nend\n\n# => []\nexport.increment_count\n    push.0\n    # => [index]\n\n    exec.account::get_item\n    # => [count]\n\n    push.1 add\n    # => [count+1]\n\n    # debug statement with client\n    debug.stack\n\n    push.0\n    # [index, count+1]\n\n    exec.account::set_item\n    # => []\n\n    push.1 exec.account::incr_nonce\n    # => []\n\n    exec.sys::truncate_stack\n    # => []\nend\n",
+  //rust: "// Do not link against libstd (i.e. anything defined in `std::`)\n#![no_std]\n\n// However, we could still use some standard library types while\n// remaining no-std compatible, if we uncommented the following lines:\n//\nextern crate alloc;\n\n// Global allocator to use heap memory in no-std environment\n#[global_allocator]\nstatic ALLOC: miden::BumpAlloc = miden::BumpAlloc::new();\n\n// Define a panic handler as required by the `no_std` environment\n#[cfg(not(test))]\n#[panic_handler]\nfn panic(_info: &core::panic::PanicInfo) -> ! {\n    // For now, just loop indefinitely\n    loop {}\n}\n\nmod bindings;\n\nuse bindings::exports::miden::counter_contract::counter::Guest;\nuse miden::{component, felt, Felt, StorageMap, StorageMapAccess, Word};\n\n/// Main contract structure for the counter example.\n#[component]\nstruct CounterContract {\n    /// Storage map holding the counter value.\n    #[storage(slot(0), description = \"counter contract storage map\")]\n    count_map: StorageMap,\n}\n\nbindings::export!(CounterContract with_types_in bindings);\n\nimpl Guest for CounterContract {\n    /// Returns the current counter value stored in the contract's storage map.\n    fn get_count() -> Felt {\n        // Get the instance of the contract\n        let contract = CounterContract::default();\n        // Define a fixed key for the counter value within the map\n        let key = Word::from([felt!(0), felt!(0), felt!(0), felt!(1)]);\n        // Read the value associated with the key from the storage map\n        contract.count_map.get(&key)\n    }\n\n    /// Increments the counter value stored in the contract's storage map by one.\n    fn increment_count() -> Felt {\n        // Get the instance of the contract\n        let contract = CounterContract::default();\n        // Define the same fixed key\n        let key = Word::from([felt!(0), felt!(0), felt!(0), felt!(1)]);\n        // Read the current value\n        let current_value: Felt = contract.count_map.get(&key);\n        // Increment the value by one\n        let new_value = current_value + felt!(1);\n        // Write the new value back to the storage map\n        contract.count_map.set(key, new_value);\n        new_value\n    }\n}\n",
+  //masm: "use.miden::account\nuse.std::sys\n\n# => []\nexport.get_count\n    push.0\n    # => [index]\n\n    # exec.account::get_item\n    # => [count]\n\n    # exec.sys::truncate_stack\n    # => []\nend\n\n# => []\nexport.increment_count\n    push.0\n    # => [index]\n\n    exec.account::get_item\n    # => [count]\n\n    push.1 add\n    # => [count+1]\n\n    # debug statement with client\n    debug.stack\n\n    push.0\n    # [index, count+1]\n\n    exec.account::set_item\n    # => []\n\n    push.1 exec.account::incr_nonce\n    # => []\n\n    exec.sys::truncate_stack\n    # => []\nend\n",
+  rust: counterContractRust,
+  masm: counterContractMasm,
   error: "",
   root: "",
   updatedAt: 0,
@@ -307,7 +412,7 @@ const defaultScripts = [
   basicAuthScript,
   p2idScript,
   basicWalletScript,
-  //counterContractScript,
+  // counterContractScript,
 ];
 
 export default defaultScripts;

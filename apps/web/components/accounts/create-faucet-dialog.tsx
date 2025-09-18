@@ -17,6 +17,10 @@ import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import useAccounts from "@/hooks/use-accounts";
 import AccountAddress from "@/components/lib/account-address";
+import {
+  FUNGIBLE_FAUCET_DEFAULT_DECIMALS,
+  FUNGIBLE_FAUCET_DEFAULT_MAX_SUPPLY,
+} from "@/lib/constants";
 
 const CreateFaucetDialog = () => {
   const {
@@ -106,7 +110,7 @@ const CreateFaucetDialog = () => {
                 type="number"
                 min="1"
                 max="12"
-                defaultValue={8}
+                defaultValue={FUNGIBLE_FAUCET_DEFAULT_DECIMALS.toString()}
                 required
               />
             </div>
@@ -117,7 +121,7 @@ const CreateFaucetDialog = () => {
                 name="max-supply"
                 type="number"
                 min="1"
-                defaultValue={1_000_000}
+                defaultValue={FUNGIBLE_FAUCET_DEFAULT_MAX_SUPPLY.toString()}
                 required
               />
             </div>

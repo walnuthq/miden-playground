@@ -1,5 +1,5 @@
 import { usePathname } from "next/navigation";
-import { type TutorialStep } from "@/lib/types";
+import { type TutorialStep } from "@/lib/types/tutorial";
 import useAccounts from "@/hooks/use-accounts";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
@@ -24,11 +24,7 @@ const Step3: TutorialStep = {
           withLink={!!counter}
         />
         <TutorialAlert
-          //completed={pathname === `/accounts/${COUNTER_CONTRACT_ADDRESS}`}
-          // TODO
-          completed={
-            pathname === "/accounts/mtst1qrhk9zc2au2vxqzaynaz5ddhs4cqzmj67pf"
-          }
+          completed={pathname === `/accounts/${COUNTER_CONTRACT_ADDRESS}`}
           title="Action required: Import the Counter Contract."
           titleWhenCompleted="You have imported the Counter Contract."
           description={
@@ -47,11 +43,7 @@ const Step3: TutorialStep = {
     const pathname = usePathname();
     return (
       <NextStepButton
-        // disabled={pathname !== `/accounts/${COUNTER_CONTRACT_ADDRESS}`}
-        // TODO
-        disabled={
-          pathname !== "/accounts/mtst1qrhk9zc2au2vxqzaynaz5ddhs4cqzmj67pf"
-        }
+        disabled={pathname !== `/accounts/${COUNTER_CONTRACT_ADDRESS}`}
       />
     );
   },

@@ -1,4 +1,4 @@
-import { type Tutorial } from "@/lib/types";
+import { type Tutorial } from "@/lib/types/tutorial";
 import state from "@/components/tutorials/transfer-assets-between-wallets/state";
 import store from "@/components/tutorials/transfer-assets-between-wallets/store";
 import Step1 from "@/components/tutorials/transfer-assets-between-wallets/step1";

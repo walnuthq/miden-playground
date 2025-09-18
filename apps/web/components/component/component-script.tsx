@@ -1,5 +1,5 @@
 import useScripts from "@/hooks/use-scripts";
-import { type Component } from "@/lib/types";
+import { type Component } from "@/lib/types/component";
 import Editor from "@/components/lib/editor";
 
 const ComponentScript = ({ component }: { component: Component }) => {

@@ -1,5 +1,5 @@
 import { useRouter } from "next/navigation";
-import { type TutorialStep } from "@/lib/types";
+import { type TutorialStep } from "@/lib/types/tutorial";
 import useAccounts from "@/hooks/use-accounts";
 import useGlobalContext from "@/components/global-context/hook";
 import NextStepButton from "@/components/tutorials/next-step-button";

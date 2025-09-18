@@ -1,4 +1,4 @@
-import { type Tutorial } from "@/lib/types";
+import { type Tutorial } from "@/lib/types/tutorial";
 import store from "@/components/tutorials/interact-with-the-counter-contract/store";
 import state from "@/components/tutorials/interact-with-the-counter-contract/state";
 import Step1 from "@/components/tutorials/interact-with-the-counter-contract/step1";

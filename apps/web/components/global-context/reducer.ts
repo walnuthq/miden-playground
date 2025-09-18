@@ -2,16 +2,16 @@ import {
   type ConsumableNoteRecord as WasmConsumableNoteRecord,
   type TransactionResult as WasmTransactionResult,
 } from "@demox-labs/miden-sdk";
+import { type Account } from "@/lib/types/account";
+import { type NetworkId } from "@/lib/types/network";
+import { type InputNote } from "@/lib/types/note";
 import {
-  type NetworkId,
-  type Account,
   type Transaction,
-  type InputNote,
-  type Script,
-  type Component,
   type TransactionType,
   type CreateTransactionDialogStep,
-} from "@/lib/types";
+} from "@/lib/types/transaction";
+import { type Script } from "@/lib/types/script";
+import { type Component } from "@/lib/types/component";
 import defaultScripts from "@/components/global-context/default-scripts";
 import defaultComponents from "@/components/global-context/default-components";
 
@@ -50,6 +50,7 @@ export type State = {
   components: Component[];
   // TUTORIALS
   tutorialId: string;
+  tutorialLoaded: boolean;
   tutorialStep: number;
   tutorialMaxStep: number;
   tutorialOpen: boolean;
@@ -58,7 +59,7 @@ export type State = {
 
 export const initialState = (): State => ({
   // GLOBAL
-  networkId: "mlcl",
+  networkId: "mtst",
   blockNum: 0,
   serializedMockChain: null,
   // ACCOUNTS
@@ -91,6 +92,7 @@ export const initialState = (): State => ({
   components: defaultComponents,
   // TUTORIALS
   tutorialId: "",
+  tutorialLoaded: false,
   tutorialStep: 0,
   tutorialMaxStep: 0,
   tutorialOpen: true,
@@ -107,6 +109,7 @@ export const stateSerializer = ({
   scripts,
   components,
   tutorialId,
+  tutorialLoaded,
   tutorialStep,
   tutorialMaxStep,
   tutorialOpen,
@@ -129,6 +132,7 @@ export const stateSerializer = ({
     scripts,
     components,
     tutorialId,
+    tutorialLoaded,
     tutorialStep,
     tutorialMaxStep,
     tutorialOpen,
@@ -147,6 +151,7 @@ export const stateDeserializer = (value: string): State => {
       scripts,
       components,
       tutorialId,
+      tutorialLoaded,
       tutorialStep,
       tutorialMaxStep,
       tutorialOpen,
@@ -161,6 +166,7 @@ export const stateDeserializer = (value: string): State => {
       scripts?: Script[];
       components?: Component[];
       tutorialId?: string;
+      tutorialLoaded?: boolean;
       tutorialStep?: number;
       tutorialMaxStep?: number;
       tutorialOpen?: boolean;
@@ -191,6 +197,7 @@ export const stateDeserializer = (value: string): State => {
       scripts: scripts ?? state.scripts,
       components: components ?? state.components,
       tutorialId: tutorialId ?? state.tutorialId,
+      tutorialLoaded: tutorialLoaded ?? state.tutorialLoaded,
       tutorialStep: tutorialStep ?? state.tutorialStep,
       tutorialMaxStep: tutorialMaxStep ?? state.tutorialMaxStep,
       tutorialOpen: tutorialOpen ?? state.tutorialOpen,
@@ -329,6 +336,9 @@ export type Action =
       type: "START_TUTORIAL";
       payload: { tutorialId: string };
     }
+  | {
+      type: "LOAD_TUTORIAL";
+    }
   | { type: "PREVIOUS_TUTORIAL_STEP" }
   | { type: "NEXT_TUTORIAL_STEP" }
   | { type: "SET_TUTORIAL_STEP"; payload: { tutorialStep: number } }
@@ -344,7 +354,6 @@ export const reducer = (state: State, action: Action): State => {
     case "RESET_STATE": {
       return {
         ...initialState(),
-        networkId: state.networkId,
         blockNum: action.payload.blockNum,
       };
     }
@@ -591,6 +600,12 @@ export const reducer = (state: State, action: Action): State => {
         tutorialId: action.payload.tutorialId,
         tutorialStep: 0,
         tutorialMaxStep: 0,
+      };
+    }
+    case "LOAD_TUTORIAL": {
+      return {
+        ...state,
+        tutorialLoaded: true,
       };
     }
     case "PREVIOUS_TUTORIAL_STEP": {

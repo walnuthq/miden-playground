@@ -3,7 +3,6 @@ import { initialState, type State } from "@/components/global-context/reducer";
 const state: State = {
   ...initialState(),
   networkId: "mlcl",
-  blockNum: 0,
   accounts: [
     {
       id: "0xa10ee8de0c4519207a3c23e3a928ad",
@@ -11,8 +10,12 @@ const state: State = {
       address: "mlcl1qzssa6x7p3z3jgr68s3782fg44cqzaezm5v",
       type: "fungible-faucet",
       storageMode: "public",
-      isPublic: true,
       isFaucet: true,
+      isNew: true,
+      isPublic: true,
+      isRegularAccount: false,
+      isUpdatable: false,
+      isWallet: false,
       nonce: 0n,
       fungibleAssets: [],
       storage: [

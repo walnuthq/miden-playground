@@ -2,7 +2,7 @@ import { useState } from "react";
 import { FileInput, RotateCw } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import useTransactions from "@/hooks/use-transactions";
-import { type InputNote } from "@/lib/types";
+import { type InputNote } from "@/lib/types/note";
 import useAccounts from "@/hooks/use-accounts";
 import { noteInputsToAccountId } from "@/lib/utils";
 import useGlobalContext from "@/components/global-context/hook";

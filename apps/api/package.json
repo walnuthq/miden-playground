@@ -17,8 +17,8 @@
     "uuid": "^13.0.0"
   },
   "devDependencies": {
-    "@types/node": "^24.3.1",
-    "@types/react": "^19.1.12",
+    "@types/node": "^24.5.2",
+    "@types/react": "^19.1.13",
     "@workspace/eslint-config": "workspace:^",
     "@workspace/typescript-config": "workspace:*",
     "eslint": "^9.35.0",

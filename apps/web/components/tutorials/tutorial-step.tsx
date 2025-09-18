@@ -1,5 +1,5 @@
 import useTutorials from "@/hooks/use-tutorials";
-import { type Tutorial } from "@/lib/types";
+import { type Tutorial } from "@/lib/types/tutorial";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import TutorialProgress from "@/components/tutorials/tutorial-progress";

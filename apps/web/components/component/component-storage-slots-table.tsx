@@ -14,7 +14,7 @@ import {
 } from "@workspace/ui/components/dropdown-menu";
 import { MoreVertical } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
-import { type Component, storageSlotTypes } from "@/lib/types";
+import { type Component, storageSlotTypes } from "@/lib/types/component";
 import useComponents from "@/hooks/use-components";
 
 const StorageSlotActionsCell = ({

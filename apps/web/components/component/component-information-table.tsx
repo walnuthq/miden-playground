@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { type Component, componentTypes } from "@/lib/types";
+import { type Component, componentTypes } from "@/lib/types/component";
 import {
   Table,
   TableBody,

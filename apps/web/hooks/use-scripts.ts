@@ -1,6 +1,10 @@
 import { kebabCase } from "lodash";
 import useGlobalContext from "@/components/global-context/hook";
-import { type Script, type ScriptStatus, type ScriptType } from "@/lib/types";
+import {
+  type Script,
+  type ScriptStatus,
+  type ScriptType,
+} from "@/lib/types/script";
 import { createScript, deleteScript as apiDeleteScript } from "@/lib/api";
 
 const useScripts = () => {

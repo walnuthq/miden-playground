@@ -1,7 +1,7 @@
 import { Plus } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import useTransactions from "@/hooks/use-transactions";
-import { type TransactionType } from "@/lib/types";
+import { type TransactionType } from "@/lib/types/transaction";
 
 const CreateTransactionButton = ({
   accountId = "",

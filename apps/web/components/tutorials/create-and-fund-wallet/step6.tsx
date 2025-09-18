@@ -1,5 +1,5 @@
 import { useRouter } from "next/navigation";
-import { type TutorialStep } from "@/lib/types";
+import { type TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import Step6Content from "@/components/tutorials/create-and-fund-wallet/step6.mdx";
 import useGlobalContext from "@/components/global-context/hook";

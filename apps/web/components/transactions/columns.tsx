@@ -1,5 +1,5 @@
 "use client";
-import { type Transaction } from "@/lib/types";
+import { type Transaction } from "@/lib/types/transaction";
 import { formatId } from "@/lib/utils";
 import { type ColumnDef } from "@tanstack/react-table";
 import AccountAddress from "@/components/lib/account-address";

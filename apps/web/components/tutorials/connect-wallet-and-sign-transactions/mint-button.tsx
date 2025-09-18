@@ -6,7 +6,7 @@ import { Button } from "@workspace/ui/components/button";
 import { sha3_256 } from "js-sha3";
 import { useInterval } from "usehooks-ts";
 import useGlobalContext from "@/components/global-context/hook";
-import { MIDEN_FAUCET_DECIMALS } from "@/lib/constants";
+import { FUNGIBLE_FAUCET_DEFAULT_DECIMALS } from "@/lib/constants";
 
 // Function to find a valid nonce for proof of work using the new challenge format
 const findValidNonce = async (challenge: string, target: string) => {
@@ -125,7 +125,7 @@ const MintButton = () => {
       setNoteId("");
       setLoading(false);
     }
-  }, [account?.consumableNoteIds.length]);
+  }, [account?.consumableNoteIds, noteId]);
   return (
     <Button
       disabled={!wallet || !account || loading}
@@ -137,12 +137,11 @@ const MintButton = () => {
         const { challenge, nonce } = await powChallenge(account.id);
         const noteResponse = await requestNote(
           account.id,
-          100n * 10n ** MIDEN_FAUCET_DECIMALS,
+          100n * 10n ** FUNGIBLE_FAUCET_DEFAULT_DECIMALS,
           challenge,
           nonce
         );
         setNoteId(noteResponse?.noteId ?? "");
-        setLoading(false); //! TODO
       }}
     >
       {loading ? <RotateCw className="animate-spin" /> : <HandCoins />}

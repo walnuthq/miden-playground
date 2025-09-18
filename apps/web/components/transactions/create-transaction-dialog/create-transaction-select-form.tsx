@@ -3,7 +3,7 @@ import { type ConsumableNoteRecord as WasmConsumableNoteRecord } from "@demox-la
 import {
   type CreateTransactionDialogStep,
   type TransactionType,
-} from "@/lib/types";
+} from "@/lib/types/transaction";
 import { Label } from "@workspace/ui/components/label";
 import { webClient, clientGetConsumableNotes } from "@/lib/web-client";
 import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";

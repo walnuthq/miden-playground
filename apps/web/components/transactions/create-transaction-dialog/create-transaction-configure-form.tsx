@@ -2,7 +2,7 @@ import { type Dispatch, type SetStateAction } from "react";
 import {
   type CreateTransactionDialogStep,
   type TransactionType,
-} from "@/lib/types";
+} from "@/lib/types/transaction";
 import { Label } from "@workspace/ui/components/label";
 import { Input } from "@workspace/ui/components/input";
 import { Switch } from "@workspace/ui/components/switch";

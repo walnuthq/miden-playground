@@ -12,8 +12,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@demox-labs/miden-sdk": "^0.11.3",
-    "@demox-labs/miden-wallet-adapter": "^0.4.1",
+    "@demox-labs/miden-sdk": "^0.11.6",
+    "@demox-labs/miden-wallet-adapter": "^0.6.1",
     "@mdx-js/loader": "^3.1.1",
     "@mdx-js/react": "^3.1.1",
     "@monaco-editor/react": "^4.7.0",
@@ -30,14 +30,14 @@
     "next-themes": "^0.4.6",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "react-resizable-panels": "^3.0.5",
+    "react-resizable-panels": "^3.0.6",
     "sonner": "^2.0.7",
     "usehooks-ts": "^3.1.1"
   },
   "devDependencies": {
     "@types/lodash": "^4.17.20",
-    "@types/node": "^24.3.1",
-    "@types/react": "^19.1.12",
+    "@types/node": "^24.5.2",
+    "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
     "@workspace/eslint-config": "workspace:^",
     "@workspace/typescript-config": "workspace:*",

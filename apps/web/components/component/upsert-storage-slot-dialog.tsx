@@ -22,7 +22,7 @@ import {
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import useComponents from "@/hooks/use-components";
-import { type StorageSlotType, storageSlotTypes } from "@/lib/types";
+import { type StorageSlotType, storageSlotTypes } from "@/lib/types/component";
 import { sleep } from "@/lib/utils";
 
 const UpsertStorageSlotDialog = () => {

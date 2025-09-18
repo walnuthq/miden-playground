@@ -1,4 +1,4 @@
-import { type Transaction } from "@/lib/types";
+import { type Transaction } from "@/lib/types/transaction";
 import {
   Table,
   TableBody,

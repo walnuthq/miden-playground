@@ -13,7 +13,7 @@ import NoteInformation from "@/components/note/note-information";
 import NoteScript from "@/components/note/note-script";
 import ConsumeNoteButton from "@/components/note/consume-note-button";
 import CreateTransactionDialog from "@/components/transactions/create-transaction-dialog";
-import { noteConsumed } from "@/lib/types";
+import { noteConsumed } from "@/lib/types/note";
 
 const Note = ({ id }: { id: string }) => {
   const isClient = useIsClient();

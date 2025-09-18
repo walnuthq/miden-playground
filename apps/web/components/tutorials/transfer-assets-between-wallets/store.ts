@@ -1,4 +1,4 @@
-import { type Store, defaultStore } from "@/lib/store";
+import { type Store, defaultStore } from "@/lib/types/store";
 
 const store: Store = {
   ...defaultStore(),

@@ -1,4 +1,4 @@
-import { type Component } from "@/lib/types";
+import { type Component } from "@/lib/types/component";
 import ComponentInformationTable from "@/components/component/component-information-table";
 import ComponentStorageSlotsTable from "@/components/component/component-storage-slots-table";
 import CreateStorageSlotButton from "@/components/component/create-storage-slot-button";
