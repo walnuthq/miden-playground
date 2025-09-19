@@ -5,8 +5,8 @@ import { webClient } from "@/lib/web-client";
 import useAccounts from "@/hooks/use-accounts";
 // import useTransactions from "@/hooks/use-transactions";
 // import { deleteStore } from "@/lib/utils";
-import defaultScripts from "@/components/global-context/default-scripts";
-import defaultComponents from "@/components/global-context/default-components";
+// import defaultScripts from "@/components/global-context/default-scripts";
+// import defaultComponents from "@/components/global-context/default-components";
 import { MIDEN_FAUCET_ADDRESS } from "@/lib/constants";
 
 const useTutorials = () => {
@@ -45,8 +45,8 @@ const useTutorials = () => {
       payload: {
         state: {
           ...tutorial.state,
-          scripts: [...tutorial.state.scripts, ...defaultScripts],
-          components: [...tutorial.state.components, ...defaultComponents],
+          // scripts: [...tutorial.state.scripts, ...defaultScripts],
+          // components: [...tutorial.state.components, ...defaultComponents],
           blockNum: syncSummary.blockNum(),
         },
       },

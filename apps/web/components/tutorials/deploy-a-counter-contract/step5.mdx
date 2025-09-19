@@ -1,0 +1,11 @@
+import Link from "@/components/tutorials/tutorial-link";
+
+Now that we both defined our [AccountCode](https://0xmiden.github.io/miden-docs/glossary.html#accountcode) using a script and [AccountStorage](https://0xmiden.github.io/miden-docs/glossary.html#accountstorage) using an account component, it's time to deploy our contract on testnet.
+
+From the <Link href="/accounts">Accounts page</Link>, click on _"Create new account"_ and select the _"Deploy account"_ option.
+
+Give your new contract a name and select **NoAuth** as authentication component: our counter contract doesn't require authentication as we allow any user to interact with it without requiring signature verification.
+
+After selecting your custom **Counter Contract** account component, you will be given the opportunity to overwrite the storage slots default values.
+
+When you're done configuring your contract deployment, click on the _"Deploy"_ button to create your account locally: you will need to perform at least one transaction against it before it is acknowledged by testnet.

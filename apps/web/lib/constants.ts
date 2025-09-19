@@ -2,6 +2,11 @@ export const ZERO_ACCOUNT_ID = "0x000000000000000000000000000000";
 
 export const FUNGIBLE_FAUCET_DEFAULT_DECIMALS = 6n;
 export const FUNGIBLE_FAUCET_DEFAULT_MAX_SUPPLY = 100_000_000_000n;
+export const FUNGIBLE_FAUCET_CODE =
+  "0xe387a2e916e50a367a543134428bb05527bf273d56b4133e3622f894517fb271";
+
+export const BASIC_WALLET_CODE =
+  "0x6a11161925930dae89cc24cbddf0d161cead39b0fe88c262d4e790cff35be01d";
 
 export const MIDEN_FAUCET_ACCOUNT_ID = "0x83592005c13d47203ec1e3124c654d";
 export const MIDEN_FAUCET_ADDRESS = "mtst1qzp4jgq9cy75wgp7c833ynr9f4cqqscqucc";
@@ -10,3 +15,5 @@ export const TEST_WALLET_ADDRESS = "mtst1qpctn2j03x84zyzmyht799ah8acqq2f7y8r";
 
 export const COUNTER_CONTRACT_ADDRESS =
   "mtst1qrhk9zc2au2vxqzaynaz5ddhs4cqqghmajy";
+export const COUNTER_CONTRACT_CODE =
+  "0xee3a0f4e0f736535e8c3a2939dcb053d51636c25d5604fe6bc2b2b60e91e57de";

@@ -71,6 +71,7 @@ const ComponentStorageSlotsTable = ({
     <Table>
       <TableHeader>
         <TableRow>
+          <TableHead>Index</TableHead>
           <TableHead>Name</TableHead>
           <TableHead>Type</TableHead>
           <TableHead>Default Value</TableHead>
@@ -80,6 +81,7 @@ const ComponentStorageSlotsTable = ({
       <TableBody>
         {component.storageSlots.map((storageSlot, index) => (
           <TableRow key={index}>
+            <TableCell>{index}</TableCell>
             <TableCell>{storageSlot.name}</TableCell>
             <TableCell>{storageSlotTypes[storageSlot.type]}</TableCell>
             <TableCell>{storageSlot.value}</TableCell>

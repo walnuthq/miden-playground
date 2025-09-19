@@ -1,7 +1,7 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, type Dispatch, type SetStateAction } from "react";
 import { toast } from "sonner";
-import { RotateCw } from "lucide-react";
+import { RotateCw, Trash } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import {
   Select,
@@ -22,8 +22,114 @@ import {
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import useComponents from "@/hooks/use-components";
-import { type StorageSlotType, storageSlotTypes } from "@/lib/types/component";
+import {
+  type StorageSlotType,
+  storageSlotTypes,
+  stringToKeyValues,
+  keyValuesToString,
+} from "@/lib/types/component";
 import { sleep } from "@/lib/utils";
+
+const StorageSlotInput = ({
+  storageSlotValue,
+  setStorageSlotValue,
+}: {
+  storageSlotValue: string;
+  setStorageSlotValue: Dispatch<SetStateAction<string>>;
+}) => (
+  <div className="grid gap-3 col-span-2">
+    <Label htmlFor="value">Default Value</Label>
+    <Input
+      id="value"
+      name="value"
+      value={storageSlotValue}
+      onChange={(event) => setStorageSlotValue(event.target.value)}
+      required
+    />
+  </div>
+);
+
+const StorageMapInput = ({
+  storageSlotValue,
+  setStorageSlotValue,
+}: {
+  storageSlotValue: string;
+  setStorageSlotValue: Dispatch<SetStateAction<string>>;
+}) => {
+  const keyValues = stringToKeyValues(storageSlotValue);
+  return (
+    <div className="grid gap-3 col-span-2">
+      <Label htmlFor="value">Default Values</Label>
+      {keyValues.map((keyValue, index) => {
+        return (
+          <div key={index} className="flex items-center gap-2">
+            <Input
+              id={`key-${index}`}
+              name={`key-${index}`}
+              placeholder="Key"
+              value={keyValue.key}
+              onChange={(event) =>
+                setStorageSlotValue(
+                  keyValuesToString([
+                    ...keyValues.slice(0, index),
+                    { ...keyValue, key: event.target.value },
+                    ...keyValues.slice(index + 1),
+                  ])
+                )
+              }
+              pattern="\d+"
+              required
+            />
+            <Input
+              id={`value-${index}`}
+              name={`value-${index}`}
+              placeholder="Value"
+              value={keyValue.value}
+              onChange={(event) =>
+                setStorageSlotValue(
+                  keyValuesToString([
+                    ...keyValues.slice(0, index),
+                    { ...keyValue, value: event.target.value },
+                    ...keyValues.slice(index + 1),
+                  ])
+                )
+              }
+              pattern="\d+"
+              required
+            />
+            <Button
+              type="button"
+              variant="destructive"
+              size="icon"
+              className="size-8"
+              onClick={() =>
+                setStorageSlotValue(
+                  keyValuesToString([
+                    ...keyValues.slice(0, index),
+                    ...keyValues.slice(index + 1),
+                  ])
+                )
+              }
+            >
+              <Trash />
+            </Button>
+          </div>
+        );
+      })}
+      <Button
+        type="button"
+        variant="secondary"
+        onClick={() =>
+          setStorageSlotValue(
+            keyValuesToString([...keyValues, { key: "", value: "" }])
+          )
+        }
+      >
+        Add key-value pair
+      </Button>
+    </div>
+  );
+};
 
 const UpsertStorageSlotDialog = () => {
   const {
@@ -41,13 +147,18 @@ const UpsertStorageSlotDialog = () => {
   const [loading, setLoading] = useState(false);
   const [storageSlotType, setStorageSlotType] =
     useState<StorageSlotType>("value");
+  const [storageSlotValue, setStorageSlotValue] = useState(
+    storageSlot?.value ?? ""
+  );
   const onClose = () => {
     setStorageSlotType("value");
+    setStorageSlotValue("");
     closeUpsertStorageSlotDialog();
   };
   useEffect(() => {
     setStorageSlotType(storageSlot?.type ?? "value");
-  }, [componentId, storageSlotIndex, storageSlot?.type]);
+    setStorageSlotValue(storageSlot?.value ?? "");
+  }, [componentId, storageSlotIndex, storageSlot?.type, storageSlot?.value]);
   return (
     <Dialog
       open={upsertStorageSlotDialogOpen}
@@ -73,7 +184,7 @@ const UpsertStorageSlotDialog = () => {
             const upsertedStorageSlot = {
               name: formData.get("name")?.toString() ?? "",
               type: storageSlotType,
-              value: formData.get("value")?.toString() ?? "",
+              value: storageSlotValue,
             };
             setLoading(true);
             await sleep(400);
@@ -122,15 +233,17 @@ const UpsertStorageSlotDialog = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid gap-3 col-span-2">
-              <Label htmlFor="value">Default Value</Label>
-              <Input
-                id="value"
-                name="value"
-                defaultValue={storageSlot?.value}
-                required
+            {storageSlotType === "value" ? (
+              <StorageSlotInput
+                storageSlotValue={storageSlotValue}
+                setStorageSlotValue={setStorageSlotValue}
               />
-            </div>
+            ) : (
+              <StorageMapInput
+                storageSlotValue={storageSlotValue}
+                setStorageSlotValue={setStorageSlotValue}
+              />
+            )}
           </div>
         </form>
         <DialogFooter>

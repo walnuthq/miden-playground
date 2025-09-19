@@ -2,6 +2,7 @@ import { kebabCase } from "lodash";
 import useGlobalContext from "@/components/global-context/hook";
 import {
   type Script,
+  type ScriptExample,
   type ScriptStatus,
   type ScriptType,
 } from "@/lib/types/script";
@@ -29,11 +30,13 @@ const useScripts = () => {
   const newScript = async ({
     name,
     type,
+    example,
   }: {
     name: string;
     type: ScriptType;
+    example: ScriptExample;
   }) => {
-    const { id, rust } = await createScript(kebabCase(name));
+    const { id, rust } = await createScript(kebabCase(name), example);
     const script = {
       id,
       name,

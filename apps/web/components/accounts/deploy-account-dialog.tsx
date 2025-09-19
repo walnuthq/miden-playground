@@ -38,6 +38,8 @@ const DeployAccountDialog = () => {
   const [isPublic, setIsPublic] = useState(true);
   const [authComponentId, setAuthComponentId] = useState("no-auth");
   const [componentId, setComponentId] = useState("");
+  const authComponent = components.find(({ id }) => id === authComponentId);
+  const component = components.find(({ id }) => id === componentId);
   const onClose = () => {
     setAccountType("regular-account-updatable-code");
     setIsPublic(true);
@@ -59,19 +61,25 @@ const DeployAccountDialog = () => {
           id="deploy-account-form"
           onSubmit={async (event) => {
             event.preventDefault();
+            if (!component || !authComponent) {
+              return;
+            }
             const formData = new FormData(event.currentTarget);
-            const authComponent = components.find(
-              ({ id }) => id === authComponentId
-            );
-            const component = components.find(({ id }) => id === componentId);
+            const componentWithInitialValues = {
+              ...component,
+              storageSlots: component.storageSlots.map(
+                (storageSlot, index) => ({
+                  ...storageSlot,
+                  value: formData.get(`slot-${index}`)?.toString() ?? "",
+                })
+              ),
+            };
             setLoading(true);
             const account = await deployAccount({
               name: formData.get("name")?.toString() ?? "",
               accountType,
               storageMode: isPublic ? "public" : "private",
-              components: [authComponent, component].filter(
-                (component) => component !== undefined
-              ),
+              components: [authComponent, componentWithInitialValues],
             });
             setLoading(false);
             toast(`${account.name} has been deployed.`, {
@@ -142,7 +150,7 @@ const DeployAccountDialog = () => {
               </Select>
             </div>
             <div className="grid gap-3">
-              <Label htmlFor="component">Component</Label>
+              <Label htmlFor="component">Account Component</Label>
               <Select onValueChange={setComponentId} value={componentId}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Select component…" />
@@ -158,6 +166,19 @@ const DeployAccountDialog = () => {
                 </SelectContent>
               </Select>
             </div>
+            {component?.storageSlots.map((storageSlot, index) => {
+              return (
+                <div key={index} className="grid gap-3 col-span-2">
+                  <Label htmlFor={`slot-${index}`}>{storageSlot.name}</Label>
+                  <Input
+                    id={`slot-${index}`}
+                    name={`slot-${index}`}
+                    defaultValue={storageSlot.value}
+                    required
+                  />
+                </div>
+              );
+            })}
           </div>
         </form>
         <DialogFooter>

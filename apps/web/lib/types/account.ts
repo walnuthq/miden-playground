@@ -31,6 +31,7 @@ export type Account = {
   isWallet?: boolean;
   nonce: bigint;
   fungibleAssets: FungibleAsset[];
+  code: string;
   storage: string[];
   consumableNoteIds: string[];
   components: string[];

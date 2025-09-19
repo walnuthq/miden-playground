@@ -1,4 +1,5 @@
 import { type State, initialState } from "@/components/global-context/reducer";
+import { BASIC_WALLET_CODE, FUNGIBLE_FAUCET_CODE } from "@/lib/constants";
 
 const state: State = {
   ...initialState(),
@@ -454,6 +455,7 @@ const state: State = {
       isWallet: false,
       nonce: 1n,
       fungibleAssets: [],
+      code: FUNGIBLE_FAUCET_CODE,
       storage: [
         "0x000000000000000000000000000000000000000000000000e803000000000000",
         "0x449669c55353a4f05447de4b04fdf26333fc81675fe0e7eddb3a5ab68e0d913c",
@@ -483,6 +485,7 @@ const state: State = {
           amount: "1000",
         },
       ],
+      code: BASIC_WALLET_CODE,
       storage: [
         "0xcc494911b74a6c85a240ac8029f4ff0f0fe48486e38c8c8b7935ab8e170896e7",
       ],
@@ -504,6 +507,7 @@ const state: State = {
       isWallet: true,
       nonce: 0n,
       fungibleAssets: [],
+      code: BASIC_WALLET_CODE,
       storage: [
         "0xc6c375b09c017c5a64ca4e127d092aa99833706df005f6aa965cdd035fa60f1c",
       ],

@@ -1,0 +1,6 @@
+Designing an Account Component is twofold:
+
+- First we define a library of functions that can read and write to the storage slots of the component using a script written in Rust.
+- Next, we define the storage layout that must specify a contiguous list of slot values that starts at index 0, and can optionally specify initial values for each of the slots.
+
+Let's add a storage slot to our **Counter Contract** component of type **StorageMap** and set an initial default value for the counter at the fixed key **1**.

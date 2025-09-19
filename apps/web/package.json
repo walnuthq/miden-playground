@@ -18,12 +18,12 @@
   },
   "dependencies": {
     "@demox-labs/miden-sdk": "^0.11.6",
-    "@demox-labs/miden-wallet-adapter": "^0.6.1",
+    "@demox-labs/miden-wallet-adapter": "^0.6.2",
     "@mdx-js/loader": "^3.1.1",
     "@mdx-js/react": "^3.1.1",
     "@monaco-editor/react": "^4.7.0",
     "@next/mdx": "^15.5.3",
-    "@opennextjs/cloudflare": "^1.8.2",
+    "@opennextjs/cloudflare": "^1.8.3",
     "@tanstack/react-table": "^8.21.3",
     "@types/mdx": "^2.0.13",
     "@workspace/mock-web-client": "workspace:*",
@@ -50,6 +50,6 @@
     "copy-webpack-plugin": "^13.0.1",
     "eslint": "^9.35.0",
     "typescript": "^5.9.2",
-    "wrangler": "^4.37.1"
+    "wrangler": "^4.38.0"
   }
 }

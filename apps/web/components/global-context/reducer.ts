@@ -11,7 +11,7 @@ import {
   type CreateTransactionDialogStep,
 } from "@/lib/types/transaction";
 import { type Script } from "@/lib/types/script";
-import { type Component } from "@/lib/types/component";
+import { type Component, type Procedure } from "@/lib/types/component";
 import defaultScripts from "@/components/global-context/default-scripts";
 import defaultComponents from "@/components/global-context/default-components";
 
@@ -130,7 +130,20 @@ export const stateSerializer = ({
       inputs: inputNote.inputs.map((input) => input.toString()),
     })),
     scripts,
-    components,
+    components: components.map((component) => ({
+      ...component,
+      procedures: component.procedures.map((procedure) => ({
+        ...procedure,
+        storageRead: procedure.storageRead
+          ? procedure.storageRead.type === "value"
+            ? procedure.storageRead
+            : {
+                ...procedure.storageRead,
+                key: procedure.storageRead.key?.map((k) => k.toString()),
+              }
+          : undefined,
+      })),
+    })),
     tutorialId,
     tutorialLoaded,
     tutorialStep,
@@ -164,7 +177,20 @@ export const stateDeserializer = (value: string): State => {
       transactions?: Transaction[];
       inputNotes?: (Omit<InputNote, "inputs"> & { inputs: string[] })[];
       scripts?: Script[];
-      components?: Component[];
+      components?: (Omit<Component, "procedures"> & {
+        procedures: (Omit<Procedure, "storageRead"> & {
+          storageRead?:
+            | {
+                type: "value";
+                index: number;
+              }
+            | {
+                type: "map";
+                index: number;
+                key: string[];
+              };
+        })[];
+      })[];
       tutorialId?: string;
       tutorialLoaded?: boolean;
       tutorialStep?: number;
@@ -195,7 +221,22 @@ export const stateDeserializer = (value: string): State => {
           }))
         : state.inputNotes,
       scripts: scripts ?? state.scripts,
-      components: components ?? state.components,
+      components: components
+        ? components.map((component) => ({
+            ...component,
+            procedures: component.procedures.map((procedure) => ({
+              ...procedure,
+              storageRead: procedure.storageRead
+                ? procedure.storageRead.type === "value"
+                  ? procedure.storageRead
+                  : {
+                      ...procedure.storageRead,
+                      key: procedure.storageRead.key.map((k) => BigInt(k)),
+                    }
+                : undefined,
+            })),
+          }))
+        : state.components,
       tutorialId: tutorialId ?? state.tutorialId,
       tutorialLoaded: tutorialLoaded ?? state.tutorialLoaded,
       tutorialStep: tutorialStep ?? state.tutorialStep,

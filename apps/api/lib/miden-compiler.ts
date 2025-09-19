@@ -19,14 +19,14 @@ export const packageExists = async (packageName: string) =>
 // export const newPackage = (packageName: string) =>
 //   execFile("cargo", ["miden", "new", packageName], { cwd: "/tmp" });
 
-export const newPackage = async (packageName: string) => {
+export const newPackage = async (packageName: string, example: string) => {
   const counterContractExists = await fileExists("/tmp/counter-contract");
   if (!counterContractExists) {
-    execFile("cargo", ["miden", "example", "counter-contract"], {
+    await execFile("cargo", ["miden", "example", "counter-contract"], {
       cwd: "/tmp",
     });
   }
-  await cp("/tmp/counter-contract/counter-contract", `/tmp/${packageName}`, {
+  await cp(`/tmp/counter-contract/${example}`, `/tmp/${packageName}`, {
     recursive: true,
   });
 };
