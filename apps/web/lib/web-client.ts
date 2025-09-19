@@ -27,6 +27,7 @@ import {
 } from "@/lib/types/transaction";
 import { type Script } from "@/lib/types/script";
 import { type StorageSlot, type Component } from "@/lib/types/component";
+// import { BASIC_WALLET_CODE } from "@/lib/constants";
 
 const globalForWebClient = globalThis as unknown as {
   webClient: WebClientType;
@@ -369,6 +370,8 @@ export const wasmAccountToAccount = async ({
   const { AccountInterface: WasmAccountInterface } = await import(
     "@demox-labs/miden-sdk"
   );
+  const code = wasmAccount.code().commitment().toHex();
+  // const isWallet = code === BASIC_WALLET_CODE;
   return {
     id: wasmAccount.id().toString(),
     name,
@@ -396,6 +399,7 @@ export const wasmAccountToAccount = async ({
         faucetId: fungibleAsset.faucetId().toString(),
         amount: fungibleAsset.amount().toString(),
       })),
+    code,
     storage: range(255).reduce<string[]>((previousValue, currentValue) => {
       const item = wasmAccount.storage().getItem(currentValue);
       return item ? [...previousValue, item.toHex()] : previousValue;
@@ -529,10 +533,7 @@ export const wasmStorageSlotFromStorageSlot = async (
     return StorageSlot.fromValue(await bigintToWord(BigInt(storageSlot.value)));
   } else {
     const storageMap = new StorageMap();
-    const keyValuePairs = storageSlot.value
-      .trim()
-      .split(",")
-      .map((keyValuePair) => keyValuePair.trim());
+    const keyValuePairs = storageSlot.value.split(",");
     for (const keyValuePair of keyValuePairs) {
       const [key, value] = keyValuePair.split(":");
       storageMap.insert(

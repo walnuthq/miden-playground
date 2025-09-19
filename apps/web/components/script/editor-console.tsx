@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { RotateCw } from "lucide-react";
+import { Play, RotateCw } from "lucide-react";
 import {
   Card,
   CardAction,
@@ -33,7 +33,8 @@ const EditorConsole = ({ script }: { script: Script }) => {
         <CardTitle>Editor Console</CardTitle>
         <CardAction>
           <Button disabled={loading} onClick={compile}>
-            {loading && <RotateCw className="animate-spin" />}
+            {loading ? <RotateCw className="animate-spin" /> : <Play />}
+
             {loading ? "Compiling…" : script.error ? "Re-compile" : "Compile"}
           </Button>
         </CardAction>

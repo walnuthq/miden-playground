@@ -1,13 +1,16 @@
-import { type Script } from "@/lib/types/script";
+import { type Script, type ScriptExample } from "@/lib/types/script";
 
 const apiUrl =
   process.env.NEXT_PUBLIC_API_URL ?? "https://playground-api.walnut.dev";
 
-export const createScript = async (packageName: string) => {
+export const createScript = async (
+  packageName: string,
+  example: ScriptExample
+) => {
   const response = await fetch(`${apiUrl}/scripts`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ packageName }),
+    body: JSON.stringify({ packageName, example }),
   });
   const result = await response.json();
   const { id, rust } = result as { id: string; rust: string };

@@ -14,7 +14,12 @@ import useGlobalContext from "@/components/global-context/hook";
 import { type AccountStorageMode, type AccountType } from "@/lib/types/account";
 import { type Component } from "@/lib/types/component";
 import useScripts from "@/hooks/use-scripts";
-import { COUNTER_CONTRACT_ADDRESS } from "@/lib/constants";
+import {
+  BASIC_WALLET_CODE,
+  COUNTER_CONTRACT_CODE,
+  FUNGIBLE_FAUCET_CODE,
+} from "@/lib/constants";
+import { counterMapContractMasm } from "@/components/global-context/default-scripts";
 
 const useAccounts = () => {
   const {
@@ -25,6 +30,7 @@ const useAccounts = () => {
     importAccountDialogOpen,
     deployAccountDialogOpen,
     accounts,
+    tutorialId,
     dispatch,
   } = useGlobalContext();
   const { scripts } = useScripts();
@@ -114,13 +120,13 @@ const useAccounts = () => {
         consumableNote.inputNoteRecord().id().toString()
       ),
     });
-    if (account.isFaucet) {
+    if (account.code === FUNGIBLE_FAUCET_CODE) {
       // faucets
       account.components = [];
-    } else if (account.address === COUNTER_CONTRACT_ADDRESS) {
+    } else if (account.code === COUNTER_CONTRACT_CODE) {
       // Counter Contract
       account.components = ["no-auth", "counter-contract"];
-    } else {
+    } else if (account.code === BASIC_WALLET_CODE) {
       // Basic Wallet
       account.components = ["basic-auth", "basic-wallet"];
     }
@@ -164,11 +170,37 @@ const useAccounts = () => {
     components: Component[];
   }) => {
     const client = await webClient(networkId, serializedMockChain);
+    const componentScriptIds = components.map(({ scriptId }) => scriptId);
+    const componentScripts = scripts.filter(({ id }) =>
+      componentScriptIds.includes(id)
+    );
+    // TODO remove mock
+    if (tutorialId === "deploy-a-counter-contract") {
+      const accountComponent = components.find(
+        ({ type }) => type === "account"
+      )!;
+      const script = componentScripts.find(
+        ({ id }) => id === accountComponent.scriptId
+      )!;
+      const matches = script.rust.matchAll(/felt!\((\d*)\)/g);
+      const lastMatch = Array.from(matches ?? []).at(-1);
+      const incrementValue = Number(lastMatch?.at(1));
+      // const index = componentScripts.findIndex(({ id }) => id === script.id);
+      // componentScripts[index] = {
+      //   ...script,
+      //   masm: counterMapContractMasm.replace("add.1", `add.${incrementValue}`),
+      // };
+      script.masm = counterMapContractMasm.replace(
+        "add.1",
+        `add.${incrementValue}`
+      );
+    }
+    //
     const wasmAccount = await clientDeployAccount(client, {
       accountType,
       storageMode,
       components,
-      scripts,
+      scripts: componentScripts,
     });
     const syncSummary = await client.syncState();
     const account = await wasmAccountToAccount({

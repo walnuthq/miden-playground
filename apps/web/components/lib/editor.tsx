@@ -22,13 +22,16 @@ const Editor = ({
       theme={resolvedTheme === "dark" ? "vs-dark" : "light"}
       defaultLanguage={language === "rust" ? "rust" : "javascript"}
       defaultValue={language === "rust" ? script.rust : script.masm}
+      // line={36}
       onChange={
         readOnly
           ? undefined
           : (content) =>
               updateScript({
                 ...script,
+                status: "draft",
                 rust: content ?? "",
+                masm: "",
               })
       }
       options={{

@@ -2,11 +2,11 @@ import { useRouter } from "next/navigation";
 import { type TutorialStep } from "@/lib/types/tutorial";
 import useGlobalContext from "@/components/global-context/hook";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import Step5Content from "@/components/tutorials/interact-with-the-counter-contract/step5.mdx";
+import Step7Content from "@/components/tutorials/deploy-a-counter-contract/step7.mdx";
 
-const Step5: TutorialStep = {
+const Step7: TutorialStep = {
   title: "Refresh the counter value.",
-  Content: Step5Content,
+  Content: Step7Content,
   NextStepButton: () => {
     const { resetState } = useGlobalContext();
     const router = useRouter();
@@ -22,4 +22,4 @@ const Step5: TutorialStep = {
   },
 };
 
-export default Step5;
+export default Step7;

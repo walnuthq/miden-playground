@@ -17,7 +17,16 @@ const TransactionInformationTable = ({
       <TableBody>
         <TableRow>
           <TableCell>ID</TableCell>
-          <TableCell>{transaction.id}</TableCell>
+          <TableCell>
+            <a
+              href={`https://testnet.midenscan.com/tx/${transaction.id}`}
+              className="text-primary font-medium underline underline-offset-4"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {transaction.id}
+            </a>
+          </TableCell>
         </TableRow>
         <TableRow>
           <TableCell>Status</TableCell>

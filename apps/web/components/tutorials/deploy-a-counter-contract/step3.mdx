@@ -1,0 +1,11 @@
+import Link from "@/components/tutorials/tutorial-link";
+
+[Account components](https://0xmiden.github.io/miden-docs/imported/miden-base/src/account/component.html) are the building blocks that define an account's [code](https://0xmiden.github.io/miden-docs/imported/miden-base/src/account/code.html) and [storage](https://0xmiden.github.io/miden-docs/imported/miden-base/src/account/storage.html).
+Multiple account components can be merged together to deploy a final account on-chain.
+
+As an example, consider a wallet account, capable of holding assets and requiring authentication to move funds. Such an account can be created by merging a **BasicWallet** component with an **RpoFalcon512** authentication component.
+
+The basic wallet contains the code to move assets in and out of the account vault. The authentication component holds a user's public key in storage and additionally contains the code to verify a signature against that public key. Together, these components form a fully functional wallet account.
+
+From the <Link href="/components">Components page</Link>, create a new account component to represent our Counter Contract functionality.
+Select the Counter Contract script created in the first step and choose the **Account Component** type.

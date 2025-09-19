@@ -23,7 +23,12 @@ import {
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import useScripts from "@/hooks/use-scripts";
-import { type ScriptType, scriptTypes } from "@/lib/types/script";
+import {
+  type ScriptType,
+  scriptTypes,
+  type ScriptExample,
+  scriptExamples,
+} from "@/lib/types/script";
 
 const CreateScriptDialog = () => {
   const router = useRouter();
@@ -31,6 +36,8 @@ const CreateScriptDialog = () => {
     useScripts();
   const [loading, setLoading] = useState(false);
   const [scriptType, setScriptType] = useState<ScriptType>("account");
+  const [scriptExample, setScriptExample] =
+    useState<ScriptExample>("counter-contract");
   const onClose = () => {
     setScriptType("account");
     closeCreateScriptDialog();
@@ -54,6 +61,7 @@ const CreateScriptDialog = () => {
             const script = await newScript({
               name: formData.get("name")?.toString() ?? "",
               type: scriptType,
+              example: scriptExample,
             });
             setLoading(false);
             onClose();
@@ -66,7 +74,7 @@ const CreateScriptDialog = () => {
               <Label htmlFor="name">Name</Label>
               <Input id="name" name="name" required />
             </div>
-            <div className="grid gap-3 col-span-2">
+            <div className="grid gap-3">
               <Label htmlFor="type">Type</Label>
               <Select
                 onValueChange={(type) => setScriptType(type as ScriptType)}
@@ -81,6 +89,32 @@ const CreateScriptDialog = () => {
                       {scriptTypes[type as ScriptType]}
                     </SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-3">
+              <Label htmlFor="component">Example</Label>
+              <Select
+                onValueChange={(value) =>
+                  setScriptExample(value as ScriptExample)
+                }
+                value={scriptExample}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Select example" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.keys(scriptExamples)
+                    .map(
+                      (scriptExample) =>
+                        scriptExamples[scriptExample as ScriptExample]
+                    )
+                    .filter(({ type }) => type === scriptType)
+                    .map(({ name }) => (
+                      <SelectItem key={scriptExample} value={scriptExample}>
+                        {name}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>

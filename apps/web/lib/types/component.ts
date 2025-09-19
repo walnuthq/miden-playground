@@ -21,11 +21,16 @@ export const procedureTypes = { felt: "Felt" } as const;
 
 export type ProcedureType = keyof typeof procedureTypes;
 
-export type StorageRead = {
-  type: StorageSlotType;
-  index: number;
-  key?: bigint[];
-};
+export type StorageRead =
+  | {
+      type: "value";
+      index: number;
+    }
+  | {
+      type: "map";
+      index: number;
+      key: bigint[];
+    };
 
 export type Procedure = {
   name: string;
@@ -44,6 +49,20 @@ export type Component = {
   procedures: Procedure[];
   updatedAt: number;
 };
+
+export const stringToKeyValues = (value: string) => {
+  if (value === "") {
+    return [];
+  }
+  const keyValuePairs = value.split(",");
+  return keyValuePairs.map((pair) => {
+    const [key, value] = pair.split(":");
+    return { key: key!, value: value! };
+  });
+};
+
+export const keyValuesToString = (value: { key: string; value: string }[]) =>
+  value.map(({ key, value }) => `${key}:${value}`).join(",");
 
 export const getStorageRead = async (
   wasmAccount: WasmAccount,

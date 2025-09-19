@@ -1,6 +1,7 @@
 import { kebabCase } from "lodash";
 import useGlobalContext from "@/components/global-context/hook";
 import { type Component, type ComponentType } from "@/lib/types/component";
+import { counterMapContractComponent } from "@/components/global-context/default-components";
 
 const useComponents = () => {
   const {
@@ -43,7 +44,8 @@ const useComponents = () => {
       type,
       scriptId,
       storageSlots: [],
-      procedures: [],
+      // TODO remove mock
+      procedures: counterMapContractComponent.procedures,
       updatedAt: Date.now(),
     };
     dispatch({
