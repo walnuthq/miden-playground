@@ -15,7 +15,6 @@ import {
   clientNewSendTransactionRequest,
   clientNewTransaction,
   wasmAccountToAccount,
-  wasmInputNoteToInputNote,
   wasmTransactionToTransaction,
   clientGetAllInputNotes,
   clientGetConsumableNotes,
@@ -179,7 +178,7 @@ const useTransactions = () => {
     if (!transactionRecord || !nextAccount || !previousAccount) {
       throw new Error("Transaction record or account not found");
     }
-    const wasmInputNotes = await clientGetAllInputNotes(client);
+    const inputNotes = await clientGetAllInputNotes(client);
     // console.log("inputNotes.length", inputNotes.length);
     const consumableNoteIds: Record<string, string[]> = {};
     for (const account of accounts) {
@@ -199,18 +198,12 @@ const useTransactions = () => {
     const account = await wasmAccountToAccount({
       wasmAccount: nextAccount,
       name: previousAccount.name,
-      isWallet: previousAccount.isWallet,
       tokenSymbol: previousAccount.tokenSymbol,
       components: previousAccount.components,
       networkId,
       updatedAt: syncSummary.blockNum(),
       consumableNoteIds: consumableNoteIds[previousAccount.id],
     });
-    const inputNotes = await Promise.all(
-      wasmInputNotes.map((inputNoteRecord) =>
-        wasmInputNoteToInputNote(inputNoteRecord)
-      )
-    );
     dispatch({
       type: "SUBMIT_TRANSACTION",
       payload: {

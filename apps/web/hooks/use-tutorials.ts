@@ -1,13 +1,17 @@
 import { useRouter } from "next/navigation";
 import useGlobalContext from "@/components/global-context/hook";
-import tutorials from "@/components/tutorials/tutorials";
+import tutorials from "@/components/tutorials";
 import { webClient } from "@/lib/web-client";
 import useAccounts from "@/hooks/use-accounts";
+import { deleteStore } from "@/lib/types/store";
 // import useTransactions from "@/hooks/use-transactions";
-// import { deleteStore } from "@/lib/utils";
 // import defaultScripts from "@/components/global-context/default-scripts";
 // import defaultComponents from "@/components/global-context/default-components";
-import { MIDEN_FAUCET_ADDRESS } from "@/lib/constants";
+import {
+  COUNTER_CONTRACT_ADDRESS,
+  MIDEN_FAUCET_ADDRESS,
+  TEST_WALLET_ADDRESS,
+} from "@/lib/constants";
 
 const useTutorials = () => {
   const router = useRouter();
@@ -33,7 +37,7 @@ const useTutorials = () => {
     }
     // dispatch({ type: "RESET_STATE" });
     router.push(tutorial.initialRoute);
-    // await deleteStore();
+    await deleteStore();
     const client = await webClient(
       tutorial.state.networkId,
       tutorial.state.serializedMockChain
@@ -68,6 +72,20 @@ const useTutorials = () => {
       await importAccountByAddress({
         name: "Miden Faucet",
         address: MIDEN_FAUCET_ADDRESS,
+      });
+    } else if (tutorialId === "timelock-p2id-note") {
+      await importAccountByAddress({
+        name: "Miden Faucet",
+        address: MIDEN_FAUCET_ADDRESS,
+      });
+      await importAccountByAddress({
+        name: "Test Wallet",
+        address: TEST_WALLET_ADDRESS,
+      });
+    } else if (tutorialId === "foreign-procedure-invocation") {
+      await importAccountByAddress({
+        name: "Counter Contract",
+        address: COUNTER_CONTRACT_ADDRESS,
       });
     }
     dispatch({ type: "LOAD_TUTORIAL" });

@@ -3,16 +3,15 @@ import { type ReactNode, useCallback, useReducer } from "react";
 import { useLocalStorage } from "usehooks-ts";
 import GlobalContext from "@/components/global-context";
 import {
-  initialState,
+  type State,
+  defaultState,
   stateDeserializer,
   stateSerializer,
-  reducer,
-  type State,
-  type Action,
-} from "@/components/global-context/reducer";
+} from "@/lib/types/state";
+import reducer, { type Action } from "@/components/global-context/reducer";
 
 const usePersistedReducer = () => {
-  const [state, setState] = useLocalStorage("state", initialState(), {
+  const [state, setState] = useLocalStorage("state", defaultState(), {
     serializer: stateSerializer,
     deserializer: stateDeserializer,
   });
@@ -22,7 +21,7 @@ const usePersistedReducer = () => {
       setState(nextState);
       return nextState;
     },
-    [setState],
+    [setState]
   );
   return useReducer(persistedReducer, state);
 };

@@ -1,6 +1,11 @@
 "use client";
 import { MoreVertical } from "lucide-react";
-import { type InputNote, noteConsumed, noteStates } from "@/lib/types/note";
+import {
+  type InputNote,
+  noteConsumed,
+  noteStates,
+  noteInputsToAccountId,
+} from "@/lib/types/note";
 import { formatId } from "@/lib/utils";
 import { type ColumnDef } from "@tanstack/react-table";
 import { Button } from "@workspace/ui/components/button";
@@ -13,7 +18,6 @@ import {
 } from "@workspace/ui/components/dropdown-menu";
 import useTransactions from "@/hooks/use-transactions";
 import AccountAddress from "@/components/lib/account-address";
-import { noteInputsToAccountId } from "@/lib/utils";
 import useScripts from "@/hooks/use-scripts";
 
 const InputNoteActionsCell = ({ inputNote }: { inputNote: InputNote }) => {
@@ -49,7 +53,9 @@ const InputNoteActionsCell = ({ inputNote }: { inputNote: InputNote }) => {
             Consume note
           </DropdownMenuItem>
         )}
-        <DropdownMenuItem onClick={() => {}}>Export note</DropdownMenuItem>
+        <DropdownMenuItem disabled onClick={() => {}}>
+          Export note
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

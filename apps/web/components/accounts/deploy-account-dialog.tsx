@@ -50,9 +50,14 @@ const DeployAccountDialog = () => {
   return (
     <Dialog
       open={deployAccountDialogOpen}
+      modal={false}
       onOpenChange={(open) => !open && onClose()}
     >
-      <DialogContent className="sm:max-w-[640px] z-100">
+      <DialogContent
+        className="sm:max-w-[640px] z-100"
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle>Deploy Account</DialogTitle>
           <DialogDescription>Deploy a new custom account.</DialogDescription>
@@ -168,7 +173,10 @@ const DeployAccountDialog = () => {
             </div>
             {component?.storageSlots.map((storageSlot, index) => {
               return (
-                <div key={index} className="grid gap-3 col-span-2">
+                <div
+                  key={`${index}-${storageSlot.name}-${storageSlot.type}-${storageSlot.value}`}
+                  className="grid gap-3 col-span-2"
+                >
                   <Label htmlFor={`slot-${index}`}>{storageSlot.name}</Label>
                   <Input
                     id={`slot-${index}`}

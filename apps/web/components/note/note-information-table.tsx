@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   Table,
   TableBody,
@@ -9,8 +10,10 @@ import { type InputNote, noteStates } from "@/lib/types/note";
 import AccountAddress from "@/components/lib/account-address";
 import { CircleCheckBig } from "lucide-react";
 import useScripts from "@/hooks/use-scripts";
+import useGlobalContext from "@/components/global-context/hook";
 
 const NoteInformationTable = ({ inputNote }: { inputNote: InputNote }) => {
+  const { networkId } = useGlobalContext();
   const { scripts } = useScripts();
   const script = scripts.find(({ root }) => root === inputNote.scriptRoot);
   return (
@@ -19,7 +22,20 @@ const NoteInformationTable = ({ inputNote }: { inputNote: InputNote }) => {
         <TableBody>
           <TableRow>
             <TableCell>ID</TableCell>
-            <TableCell>{inputNote.id}</TableCell>
+            <TableCell>
+              {networkId === "mtst" ? (
+                <a
+                  href={`https://testnet.midenscan.com/note/${inputNote.id}`}
+                  className="text-primary font-medium underline underline-offset-4"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {inputNote.id}
+                </a>
+              ) : (
+                inputNote.id
+              )}
+            </TableCell>
           </TableRow>
           <TableRow>
             <TableCell>Script Root</TableCell>
@@ -31,15 +47,18 @@ const NoteInformationTable = ({ inputNote }: { inputNote: InputNote }) => {
         </TableRow> */}
           {script && (
             <TableRow>
-              <TableCell>Type</TableCell>
+              <TableCell>Script</TableCell>
               <TableCell>
-                <div className="flex items-center gap-2">
-                  {script.id === "p2id" && "P2ID (Pay-to-ID) Verified Note"}
+                <Link
+                  className="text-primary font-medium underline underline-offset-4 flex items-center gap-2"
+                  href={`/scripts/${script.id}`}
+                >
+                  {script.name}
                   <CircleCheckBig
                     color="var(--color-green-500)"
                     className="size-4"
                   />
-                </div>
+                </Link>
               </TableCell>
             </TableRow>
           )}
@@ -59,6 +78,10 @@ const NoteInformationTable = ({ inputNote }: { inputNote: InputNote }) => {
           <TableRow>
             <TableCell>State</TableCell>
             <TableCell>{noteStates[inputNote.state]}</TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell>Nullifier</TableCell>
+            <TableCell>{inputNote.nullifier}</TableCell>
           </TableRow>
           <TableRow>
             <TableCell>Tag</TableCell>

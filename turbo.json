@@ -8,7 +8,7 @@
       "outputs": [".next/**", "!.next/cache/**"]
     },
     "api#build": {
-      "env": ["WEB_URL"]
+      "env": ["WEB_URL", "PACKAGES_PATH"]
     },
     "web#build": {
       "env": ["ENVIRONMENT", "NEXT_PUBLIC_API_URL"]

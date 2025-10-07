@@ -65,14 +65,14 @@ const NoteActionsCell = ({
               });
             } else {
               const [fungibleAsset] = inputNote.fungibleAssets;
-              if (!wallet || !fungibleAsset) {
+              if (!wallet /* || !fungibleAsset*/) {
                 return;
               }
               const transaction = new ConsumeTransaction(
                 inputNote.senderId,
                 inputNote.id,
                 inputNote.type === "public" ? "public" : "private",
-                Number(fungibleAsset.amount)
+                Number(fungibleAsset?.amount ?? "0")
               );
               const adapter = wallet.adapter as MidenWalletAdapter;
               const txId = await adapter.requestConsume(transaction);
@@ -123,6 +123,7 @@ const AccountNotesTable = ({ account }: { account: Account }) => {
                     variant={
                       inputNote.type === "public" ? "default" : "destructive"
                     }
+                    className="capitalize"
                   >
                     {inputNote.type}
                   </Badge>

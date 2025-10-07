@@ -1,5 +1,3 @@
-import { type Account as WasmAccount } from "@demox-labs/miden-sdk";
-
 export const componentTypes = {
   account: "Account Component",
   auth: "Auth Component",
@@ -17,38 +15,23 @@ export type StorageSlot = {
   value: string;
 };
 
-export const procedureTypes = { felt: "Felt" } as const;
-
-export type ProcedureType = keyof typeof procedureTypes;
-
-export type StorageRead =
-  | {
-      type: "value";
-      index: number;
-    }
-  | {
-      type: "map";
-      index: number;
-      key: bigint[];
-    };
-
-export type Procedure = {
-  name: string;
-  args: ProcedureType[];
-  returnType: ProcedureType;
-  readOnly: boolean;
-  storageRead?: StorageRead;
-};
-
 export type Component = {
   id: string;
   name: string;
   type: ComponentType;
   scriptId: string;
   storageSlots: StorageSlot[];
-  procedures: Procedure[];
   updatedAt: number;
 };
+
+export const defaultComponent = (): Component => ({
+  id: "",
+  name: "",
+  type: "account",
+  scriptId: "",
+  storageSlots: [],
+  updatedAt: 0,
+});
 
 export const stringToKeyValues = (value: string) => {
   if (value === "") {
@@ -63,20 +46,3 @@ export const stringToKeyValues = (value: string) => {
 
 export const keyValuesToString = (value: { key: string; value: string }[]) =>
   value.map(({ key, value }) => `${key}:${value}`).join(",");
-
-export const getStorageRead = async (
-  wasmAccount: WasmAccount,
-  storageRead: StorageRead
-) => {
-  if (storageRead.type === "map" && storageRead.key) {
-    const { Word: WasmWord } = await import("@demox-labs/miden-sdk");
-    return wasmAccount
-      .storage()
-      .getMapItem(
-        storageRead.index,
-        new WasmWord(BigUint64Array.from(storageRead.key))
-      );
-  } else {
-    return wasmAccount.storage().getItem(storageRead.index);
-  }
-};

@@ -17,6 +17,7 @@ import {
   TableRow,
 } from "@workspace/ui/components/table";
 import { cn } from "@workspace/ui/lib/utils";
+import AddNoteDropdownMenu from "@/components/notes/add-note-dropdown-menu";
 
 const NotesTable = <TData, TValue>({
   columns,
@@ -45,7 +46,7 @@ const NotesTable = <TData, TValue>({
           }
           className="max-w-sm"
         />
-        {/*<CreateTransactionButton />*/}
+        <AddNoteDropdownMenu />
       </div>
       <div className="rounded-md border">
         <Table>

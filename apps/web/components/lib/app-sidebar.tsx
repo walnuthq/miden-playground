@@ -28,15 +28,15 @@ import useTransactions from "@/hooks/use-transactions";
 import useNotes from "@/hooks/use-notes";
 import useScripts from "@/hooks/use-scripts";
 import useComponents from "@/hooks/use-components";
-import defaultScripts from "@/components/global-context/default-scripts";
-import defaultComponents from "@/components/global-context/default-components";
+import defaultScripts from "@/lib/types/default-scripts";
+import defaultComponents from "@/lib/types/default-components";
 import { useWallet } from "@demox-labs/miden-wallet-adapter";
-import useGlobalContext from "@/components/global-context/hook";
+import useTutorials from "@/hooks/use-tutorials";
 
 const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
   const isClient = useIsClient();
   const { accountId } = useWallet();
-  const { networkId } = useGlobalContext();
+  const { tutorialLoaded } = useTutorials();
   const { accounts, wallets, importConnectedWallet } = useAccounts();
   const { transactions } = useTransactions();
   const { inputNotes } = useNotes();
@@ -118,15 +118,13 @@ const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
   ];
   // TODO refactor using onConnect callback?
   useEffect(() => {
-    if (accountId && networkId === "mtst") {
-      const connectedWallet = wallets.find(
-        ({ address }) => address === accountId
-      );
-      if (!connectedWallet) {
-        importConnectedWallet(accountId);
-      }
+    const connectedWallet = wallets.find(
+      ({ address }) => address === accountId
+    );
+    if (!connectedWallet && tutorialLoaded) {
+      importConnectedWallet();
     }
-  }, [accountId, networkId, wallets, importConnectedWallet]);
+  }, [accountId, wallets, tutorialLoaded, importConnectedWallet]);
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>

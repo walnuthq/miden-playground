@@ -1,0 +1,22 @@
+import Link from "@/components/tutorials/tutorial-link";
+import {
+  TEST_WALLET_ADDRESS,
+  TEST_WALLET_ACCOUNT_ID_PREFIX,
+  TEST_WALLET_ACCOUNT_ID_SUFFIX,
+} from "@/lib/constants";
+
+Now that our custom note script is compiled, let's create the note by executing a custom transaction.
+You will need a connected wallet to sign the transaction so make sure your Miden Wallet is connected to the playground before continuing.
+
+From the <Link href="/notes">notes page</Link>, click on the _"Add note"_ button and select the _"Create note"_ option.
+
+A _"Create Note"_ dialog will show up to help you configure the note creation transaction.
+Select your connected wallet as sender account and pick the timelock script, leave the note type as public.
+
+The final step is to add the correct note inputs to configure your custom note.
+
+The first two inputs are the target account ID prefix and suffix, you can use the <Link href={`/accounts/${TEST_WALLET_ADDRESS}`}>Test Wallet</Link> account ID prefix **{TEST_WALLET_ACCOUNT_ID_PREFIX}** and suffix **{TEST_WALLET_ACCOUNT_ID_SUFFIX}**.
+
+The third input is the timelock block height, you can set it to any future block height eg. **500000**.
+
+Once you're done configuring your note creation, click on the _"Create"_ button and sign the resulting transaction.

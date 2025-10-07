@@ -30,10 +30,14 @@ const AccountInformationTable = ({ account }: { account: Account }) => (
         </TableRow>
         <TableRow>
           <TableCell>Type</TableCell>
-          <TableCell className="capitalize">
-            {accountTypes[account.type]}
-          </TableCell>
+          <TableCell>{accountTypes[account.type]}</TableCell>
         </TableRow>
+        {account.isFaucet && (
+          <TableRow>
+            <TableCell>Token symbol</TableCell>
+            <TableCell>{account.tokenSymbol ?? "Unknown"}</TableCell>
+          </TableRow>
+        )}
         <TableRow>
           <TableCell>Storage mode</TableCell>
           <TableCell>

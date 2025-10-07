@@ -139,7 +139,7 @@ const CreateTransactionConfigureForm = ({
               <SelectAccountDropdownMenu
                 value={targetAccountId}
                 onValueChange={setTargetAccountId}
-                selectFaucets={false}
+                selectWallets
               />
             </div>
             <div className="grid gap-3">
@@ -186,7 +186,7 @@ const CreateTransactionConfigureForm = ({
               <SelectAccountDropdownMenu
                 value={targetAccountId}
                 onValueChange={setTargetAccountId}
-                selectFaucets={false}
+                selectWallets
                 without={executingAccountId}
               />
             </div>
@@ -195,7 +195,7 @@ const CreateTransactionConfigureForm = ({
               <SelectAccountDropdownMenu
                 value={faucetAccountId}
                 onValueChange={setFaucetAccountId}
-                selectWallets={false}
+                selectFaucets
                 showFaucetsAsAssets
               />
             </div>

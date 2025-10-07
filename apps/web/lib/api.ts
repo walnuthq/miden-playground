@@ -1,11 +1,13 @@
 import { type Script, type ScriptExample } from "@/lib/types/script";
 
-const apiUrl =
-  process.env.NEXT_PUBLIC_API_URL ?? "https://playground-api.walnut.dev";
+// const apiUrl =
+//   process.env.NEXT_PUBLIC_API_URL ?? "https://playground-api.walnut.dev";
+
+const apiUrl = "/api";
 
 export const createScript = async (
   packageName: string,
-  example: ScriptExample
+  example?: ScriptExample
 ) => {
   const response = await fetch(`${apiUrl}/scripts`, {
     method: "POST",

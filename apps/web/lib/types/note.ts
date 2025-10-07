@@ -1,4 +1,5 @@
 import { type FungibleAsset } from "@/lib/types/asset";
+import { P2ID_NOTE_CODE, ZERO_ACCOUNT_ID } from "@/lib/constants";
 
 export const noteTypes = {
   public: "Public",
@@ -31,6 +32,7 @@ export type InputNote = {
   scriptRoot: string;
   fungibleAssets: FungibleAsset[];
   inputs: bigint[];
+  nullifier: string;
   updatedAt: number;
 };
 
@@ -47,3 +49,33 @@ export type InputNote = {
 
 export const noteConsumed = ({ state }: InputNote) =>
   state.includes("consumed");
+
+export const noteConsumable = ({
+  inputNote,
+  networkId,
+  accountId,
+}: {
+  inputNote: InputNote;
+  networkId: string;
+  accountId?: string;
+}) => {
+  if (noteConsumed(inputNote) || inputNote.scriptRoot !== P2ID_NOTE_CODE) {
+    return false;
+  }
+  if (networkId === "mtst") {
+    const recipientAccountId = noteInputsToAccountId(inputNote.inputs);
+    return accountId === recipientAccountId;
+  } else {
+    return true;
+  }
+};
+
+export const noteInputsToAccountId = (noteInputs: bigint[]) => {
+  const [suffix, prefix] = noteInputs;
+  if (!suffix || !prefix) {
+    return ZERO_ACCOUNT_ID;
+  }
+  const prefixString = prefix.toString(16).padStart(16, "0");
+  const suffixString = suffix.toString(16).padStart(16, "0");
+  return `0x${prefixString}${suffixString}`.slice(0, 32);
+};

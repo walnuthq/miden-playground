@@ -37,9 +37,14 @@ const CreateWalletDialog = () => {
   return (
     <Dialog
       open={createWalletDialogOpen}
+      modal={false}
       onOpenChange={(open) => !open && onClose()}
     >
-      <DialogContent className="sm:max-w-[640px] z-100">
+      <DialogContent
+        className="sm:max-w-[640px] z-100"
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle>Create Wallet</DialogTitle>
           <DialogDescription>Create a new wallet.</DialogDescription>

@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { RotateCw } from "lucide-react";
@@ -38,16 +38,29 @@ const CreateScriptDialog = () => {
   const [scriptType, setScriptType] = useState<ScriptType>("account");
   const [scriptExample, setScriptExample] =
     useState<ScriptExample>("counter-contract");
+  useEffect(() => {
+    if (scriptType === "account") {
+      setScriptExample("counter-contract");
+    } else if (scriptType === "note") {
+      setScriptExample("p2id-note");
+    }
+  }, [scriptType]);
   const onClose = () => {
     setScriptType("account");
+    setScriptExample("counter-contract");
     closeCreateScriptDialog();
   };
   return (
     <Dialog
       open={createScriptDialogOpen}
+      modal={false}
       onOpenChange={(open) => !open && onClose()}
     >
-      <DialogContent className="sm:max-w-[640px] z-100">
+      <DialogContent
+        className="sm:max-w-[640px] z-100"
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle>Create Script</DialogTitle>
           <DialogDescription>Create a new script.</DialogDescription>
@@ -93,7 +106,7 @@ const CreateScriptDialog = () => {
               </Select>
             </div>
             <div className="grid gap-3">
-              <Label htmlFor="component">Example</Label>
+              <Label htmlFor="example">Example</Label>
               <Select
                 onValueChange={(value) =>
                   setScriptExample(value as ScriptExample)
@@ -105,13 +118,13 @@ const CreateScriptDialog = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {Object.keys(scriptExamples)
-                    .map(
-                      (scriptExample) =>
-                        scriptExamples[scriptExample as ScriptExample]
-                    )
+                    .map((id) => ({
+                      id,
+                      ...scriptExamples[id as ScriptExample],
+                    }))
                     .filter(({ type }) => type === scriptType)
-                    .map(({ name }) => (
-                      <SelectItem key={scriptExample} value={scriptExample}>
+                    .map(({ id, name }) => (
+                      <SelectItem key={id} value={id}>
                         {name}
                       </SelectItem>
                     ))}

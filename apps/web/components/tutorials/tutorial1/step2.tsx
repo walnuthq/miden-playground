@@ -1,0 +1,14 @@
+import { type TutorialStep } from "@/lib/types/tutorial";
+import Step2Content from "@/components/tutorials/tutorial1/step2.mdx";
+import useAccounts from "@/hooks/use-accounts";
+
+const Step2: TutorialStep = {
+  title: "Discover your new wallet details.",
+  Content: () => {
+    const { wallets } = useAccounts();
+    const wallet = wallets.find(({ isPublic }) => isPublic);
+    return <Step2Content wallet={wallet} />;
+  },
+};
+
+export default Step2;

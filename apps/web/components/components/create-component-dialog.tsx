@@ -50,9 +50,14 @@ const CreateComponentDialog = () => {
   return (
     <Dialog
       open={createComponentDialogOpen}
+      modal={false}
       onOpenChange={(open) => !open && onClose()}
     >
-      <DialogContent className="sm:max-w-[640px] z-100">
+      <DialogContent
+        className="sm:max-w-[640px] z-100"
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle>Create Component</DialogTitle>
           <DialogDescription>Create a new component.</DialogDescription>
