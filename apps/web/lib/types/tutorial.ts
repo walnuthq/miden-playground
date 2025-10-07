@@ -1,5 +1,5 @@
 import { type FunctionComponent } from "react";
-import { type State } from "@/components/global-context/reducer";
+import { type State } from "@/lib/types/state";
 import { type Store } from "@/lib/types/store";
 
 export type TutorialStep = {
@@ -10,6 +10,7 @@ export type TutorialStep = {
 
 export type Tutorial = {
   id: string;
+  number: number;
   title: string;
   tagline: string;
   description: string;

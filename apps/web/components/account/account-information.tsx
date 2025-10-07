@@ -1,6 +1,6 @@
 import { type Account } from "@/lib/types/account";
 import AccountInformationTable from "@/components/account/account-information-table";
-import AccountStorageTable from "@/components/account/account-storage-table";
+// import AccountStorageTable from "@/components/account/account-storage-table";
 import FungibleAssetsTable from "@/components/lib/fungible-assets-table";
 import AccountNotesTable from "@/components/account/account-notes-table";
 import { Separator } from "@workspace/ui/components/separator";
@@ -37,12 +37,12 @@ const AccountInformation = ({ account }: { account: Account }) => {
           <FungibleAssetsTable fungibleAssets={account.fungibleAssets} />
         )}
       </div>
-      <div className="flex flex-col gap-2">
+      {/* <div className="flex flex-col gap-2">
         <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
           Storage
         </h4>
         <AccountStorageTable storage={account.storage} />
-      </div>
+      </div> */}
       {account.consumableNoteIds.length > 0 && (
         <>
           <Separator />

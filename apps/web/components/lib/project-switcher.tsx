@@ -24,7 +24,7 @@ import {
 } from "@workspace/ui/components/sidebar";
 import Logo from "@/components/lib/logo";
 import useGlobalContext from "@/components/global-context/hook";
-import tutorials from "@/components/tutorials/tutorials";
+import tutorials from "@/components/tutorials";
 import useTutorials from "@/hooks/use-tutorials";
 // import useProjects from "@/hooks/use-projects";
 import { useIsClient } from "usehooks-ts";
@@ -45,12 +45,12 @@ const ProjectSwitcher = () => {
   const { wallets } = useAccounts();
   // const { saveProject, loadProject } = useProjects();
   useEffect(() => {
-    const connectedWallet = wallets.find(
+    /* const connectedWallet = wallets.find(
       ({ address }) => address === accountId
     );
     if (!connectedWallet) {
       return;
-    }
+    } */
     if (!tutorialLoaded) {
       loadTutorial(tutorialId);
     }
@@ -108,11 +108,19 @@ const ProjectSwitcher = () => {
             <DropdownMenuSeparator /> */}
             <DropdownMenuItem
               onClick={() => {
-                resetState();
+                resetState("mtst");
                 router.push("/accounts");
               }}
             >
-              New empty sandbox
+              New testnet sandbox
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => {
+                resetState("mlcl");
+                router.push("/accounts");
+              }}
+            >
+              New local sandbox
             </DropdownMenuItem>
             {/* <DropdownMenuItem
               onClick={() => loadTutorial("transfer-assets-between-wallets")}
@@ -149,7 +157,7 @@ const ProjectSwitcher = () => {
                         });*/
                       }}
                     >
-                      {tutorial.title}
+                      {tutorial.number}. {tutorial.title}
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuSubContent>

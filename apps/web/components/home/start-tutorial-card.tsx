@@ -15,7 +15,9 @@ const StartTutorialCard = ({ tutorial }: { tutorial: Tutorial }) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{tutorial.title}</CardTitle>
+        <CardTitle>
+          {tutorial.number}. {tutorial.title}
+        </CardTitle>
         <CardDescription>{tutorial.tagline}</CardDescription>
       </CardHeader>
       <CardContent className="h-full">

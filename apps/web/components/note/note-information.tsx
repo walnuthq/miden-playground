@@ -1,10 +1,9 @@
-import { type InputNote } from "@/lib/types/note";
+import { type InputNote, noteInputsToAccountId } from "@/lib/types/note";
 import NoteInformationTable from "@/components/note/note-information-table";
 import NoteInputsTable from "@/components/note/note-inputs-table";
 import DecodedNoteInputsTable from "@/components/note/decoded-note-inputs-table";
 import AccountAddress from "@/components/lib/account-address";
 import FungibleAssetsTable from "@/components/lib/fungible-assets-table";
-import { noteInputsToAccountId } from "@/lib/utils";
 import useScripts from "@/hooks/use-scripts";
 
 const NoteInformation = ({ inputNote }: { inputNote: InputNote }) => {

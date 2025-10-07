@@ -6,7 +6,10 @@ export const GET = async () => {
     await Promise.all([cargoMidenVersion(), midenCompilerVersion()]);
   return NextResponse.json({
     timestamp: Date.now(),
-    env: { WEB_URL: process.env.WEB_URL },
+    env: {
+      WEB_URL: process.env.WEB_URL,
+      PACKAGES_PATH: process.env.PACKAGES_PATH,
+    },
     cargoMidenVersion: cargoMidenVersionResult,
     midenCompilerVersion: midenCompilerVersionResult,
   });

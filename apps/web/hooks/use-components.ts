@@ -1,7 +1,10 @@
 import { kebabCase } from "lodash";
 import useGlobalContext from "@/components/global-context/hook";
-import { type Component, type ComponentType } from "@/lib/types/component";
-import { counterMapContractComponent } from "@/components/global-context/default-components";
+import {
+  type Component,
+  type ComponentType,
+  defaultComponent,
+} from "@/lib/types/component";
 
 const useComponents = () => {
   const {
@@ -38,14 +41,12 @@ const useComponents = () => {
     type: ComponentType;
     scriptId: string;
   }) => {
-    const component = {
+    const component: Component = {
+      ...defaultComponent(),
       id: kebabCase(name),
       name,
       type,
       scriptId,
-      storageSlots: [],
-      // TODO remove mock
-      procedures: counterMapContractComponent.procedures,
       updatedAt: Date.now(),
     };
     dispatch({

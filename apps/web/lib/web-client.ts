@@ -27,7 +27,7 @@ import {
 } from "@/lib/types/transaction";
 import { type Script } from "@/lib/types/script";
 import { type StorageSlot, type Component } from "@/lib/types/component";
-// import { BASIC_WALLET_CODE } from "@/lib/constants";
+import { BASIC_WALLET_CODE } from "@/lib/constants";
 
 const globalForWebClient = globalThis as unknown as {
   webClient: WebClientType;
@@ -40,7 +40,7 @@ export const webClient = async (
   if (networkId === "mlcl") {
     // @ts-expect-error MockWebClient not exported
     const { MockWebClient } = await import("@demox-labs/miden-sdk");
-    return MockWebClient.createClient(serializedMockChain);
+    return MockWebClient.createClient(serializedMockChain) as WebClientType;
   }
   const { WebClient } = await import("@demox-labs/miden-sdk");
   if (!globalForWebClient.webClient) {
@@ -231,9 +231,36 @@ export const clientGetConsumableNotes = async (
 };
 
 export const clientGetAllInputNotes = async (client: WebClientType) => {
-  const { NoteFilter: WasmNoteFilter, NoteFilterTypes: WasmNoteFilterTypes } =
-    await import("@demox-labs/miden-sdk");
-  return client.getInputNotes(new WasmNoteFilter(WasmNoteFilterTypes.All));
+  const {
+    NoteFilter: WasmNoteFilter,
+    NoteFilterTypes: WasmNoteFilterTypes,
+    RpcClient: WasmRpcClient,
+    Endpoint: WasmEndpoint,
+  } = await import("@demox-labs/miden-sdk");
+  const wasmInputNotes = await client.getInputNotes(
+    new WasmNoteFilter(WasmNoteFilterTypes.All)
+  );
+  if (client.usesMockChain()) {
+    return Promise.all(
+      wasmInputNotes.map((wasmInputNote) =>
+        wasmInputNoteToInputNote(wasmInputNote)
+      )
+    );
+  } else {
+    const rpcClient = new WasmRpcClient(WasmEndpoint.testnet());
+    const wasmFetchedNotes = await rpcClient.getNotesById(
+      wasmInputNotes.map((wasmInputNote) => wasmInputNote.id())
+    );
+    const patchedWasmInputNotes = wasmInputNotes.map((wasmInputNote, index) => {
+      wasmInputNote.metadata = () => wasmFetchedNotes[index]?.metadata;
+      return wasmInputNote;
+    });
+    return Promise.all(
+      patchedWasmInputNotes.map((wasmInputNote) =>
+        wasmInputNoteToInputNote(wasmInputNote)
+      )
+    );
+  }
 };
 
 export const clientGetTransactionsByIds = async (
@@ -337,6 +364,114 @@ export const clientDeployAccount = async (
   return account;
 };
 
+export const createNoteFromScript = async ({
+  senderAccountId,
+  recipientAccountId,
+  type,
+  script,
+  scripts,
+}: {
+  senderAccountId: string;
+  recipientAccountId: string;
+  type: NoteType;
+  script: Script;
+  scripts: Script[];
+}) => {
+  const {
+    TransactionKernel: WasmTransactionKernel,
+    AssemblerUtils: WasmAssemblerUtils,
+    NoteInputs: WasmNoteInputs,
+    FeltArray: WasmFeltArray,
+    Word: WasmWord,
+    NoteRecipient: WasmNoteRecipient,
+    NoteAssets: WasmNoteAssets,
+    NoteType: WasmNoteType,
+    NoteTag: WasmNoteTag,
+    NoteExecutionHint: WasmNoteExecutionHint,
+    NoteMetadata: WasmNoteMetadata,
+    Note: WasmNote,
+    AccountId: WasmAccountId,
+    // FungibleAsset: WasmFungibleAsset,
+  } = await import("@demox-labs/miden-sdk");
+  let assembler = WasmTransactionKernel.assembler().withDebugMode(true);
+  const dependencies = script.dependencies
+    .map((scriptId) => scripts.find(({ id }) => id === scriptId))
+    .filter((dependency) => dependency !== undefined);
+  console.log(dependencies);
+  for (const dependency of dependencies) {
+    const contractName = dependency.id.replaceAll("-", "_");
+    const accountComponentLibrary =
+      WasmAssemblerUtils.createAccountComponentLibrary(
+        assembler,
+        `external_contract::${contractName}`,
+        dependency.masm
+      );
+    assembler = assembler.withLibrary(accountComponentLibrary);
+  }
+  // const accountComponents = senderAccount.components
+  //   .map((componentId) => components.find(({ id }) => id === componentId))
+  //   .filter((component) => component !== undefined)
+  //   // TODO
+  //   .filter(({ id }) => id === "counter-contract");
+  // console.log("components", accountComponents);
+  // for (const component of accountComponents) {
+  //   const componentScript = scripts.find(({ id }) => id === component.scriptId);
+  //   if (!componentScript) {
+  //     throw new Error("Script not found");
+  //   }
+  //   const contractName = componentScript.id.replaceAll("-", "_");
+  //   console.log("contractName", contractName);
+  //   const accountComponentLibrary =
+  //     WasmAssemblerUtils.createAccountComponentLibrary(
+  //       assembler,
+  //       `external_contract::${contractName}`,
+  //       componentScript.masm
+  //     );
+  //   assembler = assembler.withLibrary(accountComponentLibrary);
+  // }
+  console.log(script.masm);
+  const compiledNoteScript = assembler.compileNoteScript(script.masm);
+  console.log("OK");
+  const noteAssets = new WasmNoteAssets([]);
+  // const noteAssets = new WasmNoteAssets([
+  //   new WasmFungibleAsset(
+  //     WasmAccountId.fromHex("0x83592005c13d47203ec1e3124c654d"),
+  //     100n
+  //   ),
+  // ]);
+  const noteMetadata = new WasmNoteMetadata(
+    WasmAccountId.fromHex(senderAccountId),
+    type === "public" ? WasmNoteType.Public : WasmNoteType.Private,
+    WasmNoteTag.fromAccountId(WasmAccountId.fromHex(recipientAccountId)),
+    //WasmNoteTag.forLocalUseCase(0, 0),
+    WasmNoteExecutionHint.none()
+  );
+  const randomBigUints = new BigUint64Array(4);
+  crypto.getRandomValues(randomBigUints);
+  const serialNum = new WasmWord(randomBigUints);
+  const noteInputs = new WasmNoteInputs(new WasmFeltArray([]));
+  const noteRecipient = new WasmNoteRecipient(
+    serialNum,
+    compiledNoteScript,
+    noteInputs
+  );
+  return new WasmNote(noteAssets, noteMetadata, noteRecipient);
+};
+
+/* export const createAccountComponentLibrary = async (script: Script) => {
+  const {
+    TransactionKernel: WasmTransactionKernel,
+    AssemblerUtils: WasmAssemblerUtils,
+  } = await import("@demox-labs/miden-sdk");
+  const assembler = WasmTransactionKernel.assembler();
+  const contractName = script.id.replaceAll("-", "_");
+  return WasmAssemblerUtils.createAccountComponentLibrary(
+    assembler,
+    `external_contract::${contractName}`,
+    script.masm
+  );
+}; */
+
 const accountType = (account: WasmAccount /*, tokenSymbol?: string*/) => {
   if (account.isFaucet()) {
     return "fungible-faucet";
@@ -351,7 +486,6 @@ const accountType = (account: WasmAccount /*, tokenSymbol?: string*/) => {
 export const wasmAccountToAccount = async ({
   wasmAccount,
   name,
-  isWallet,
   tokenSymbol,
   components,
   networkId,
@@ -360,7 +494,6 @@ export const wasmAccountToAccount = async ({
 }: {
   wasmAccount: WasmAccount;
   name: string;
-  isWallet?: boolean;
   tokenSymbol?: string;
   components?: string[];
   networkId: string;
@@ -371,25 +504,19 @@ export const wasmAccountToAccount = async ({
     "@demox-labs/miden-sdk"
   );
   const code = wasmAccount.code().commitment().toHex();
-  // const isWallet = code === BASIC_WALLET_CODE;
   return {
     id: wasmAccount.id().toString(),
     name,
     address: wasmAccount
       .id()
-      .toBech32Custom(
-        networkId,
-        isWallet
-          ? WasmAccountInterface.BasicWallet
-          : WasmAccountInterface.Unspecified
-      ),
+      .toBech32Custom(networkId, WasmAccountInterface.Unspecified),
     type: accountType(wasmAccount /*, tokenSymbol*/),
     storageMode: wasmAccount.isPublic() ? "public" : "private",
     isPublic: wasmAccount.isPublic(),
     isUpdatable: wasmAccount.isUpdatable(),
     isRegularAccount: wasmAccount.isRegularAccount(),
     isNew: wasmAccount.isNew(),
-    isWallet,
+    isWallet: code === BASIC_WALLET_CODE,
     isFaucet: wasmAccount.isFaucet(),
     nonce: wasmAccount.nonce().asInt(),
     fungibleAssets: wasmAccount
@@ -448,7 +575,7 @@ export const wasmInputNoteToInputNote = async (
   id: record.id().toString(),
   type: await noteType(record.metadata()),
   state: await noteState(record.state()),
-  tag: record.metadata()?.tag().executionMode().toString() ?? "",
+  tag: record.metadata()?.tag().asU32().toString() ?? "",
   senderId: record.metadata()?.sender().toString() ?? "",
   scriptRoot: record.details().recipient().script().root().toHex(),
   fungibleAssets: record
@@ -465,6 +592,7 @@ export const wasmInputNoteToInputNote = async (
     .inputs()
     .values()
     .map((value) => value.asInt()),
+  nullifier: record.nullifier(),
   updatedAt: record.inclusionProof()?.location().blockNum() ?? 0,
 });
 

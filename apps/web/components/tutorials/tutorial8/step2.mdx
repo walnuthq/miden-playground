@@ -1,0 +1,11 @@
+import Image from "next/image";
+
+<Image
+  className="max-h-96 object-contain"
+  src="/img/count-copy-fpi-diagram.png"
+  alt="Count copy FPI diagram"
+  width={1100}
+  height={744}
+/>
+
+The diagram above depicts the **Count Reader** smart contract using foreign procedure invocation to read the count state of the counter contract. After reading the state via FPI, the **Count Reader** smart contract writes the value returned from the counter contract to storage.

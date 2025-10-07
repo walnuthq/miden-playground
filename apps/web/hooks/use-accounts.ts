@@ -1,4 +1,4 @@
-import { partition } from "lodash";
+import { useWallet } from "@demox-labs/miden-wallet-adapter";
 import {
   clientGetAccountByAddress,
   clientGetConsumableNotes,
@@ -18,8 +18,9 @@ import {
   BASIC_WALLET_CODE,
   COUNTER_CONTRACT_CODE,
   FUNGIBLE_FAUCET_CODE,
+  MIDEN_FAUCET_ADDRESS,
 } from "@/lib/constants";
-import { counterMapContractMasm } from "@/components/global-context/default-scripts";
+import { counterMapContractMasm } from "@/lib/types/default-scripts/counter-map-contract";
 
 const useAccounts = () => {
   const {
@@ -33,8 +34,10 @@ const useAccounts = () => {
     tutorialId,
     dispatch,
   } = useGlobalContext();
+  const { accountId: connectedWalletAddress } = useWallet();
   const { scripts } = useScripts();
-  const [faucets, wallets] = partition(accounts, (account) => account.isFaucet);
+  const wallets = accounts.filter((account) => account.isWallet);
+  const faucets = accounts.filter((account) => account.isFaucet);
   const newWallet = async ({
     name,
     storageMode,
@@ -51,7 +54,6 @@ const useAccounts = () => {
     const account = await wasmAccountToAccount({
       wasmAccount: wallet,
       name,
-      isWallet: true,
       networkId,
       updatedAt: syncSummary.blockNum(),
     });
@@ -86,7 +88,6 @@ const useAccounts = () => {
     const account = await wasmAccountToAccount({
       wasmAccount: faucet,
       name,
-      isWallet: false,
       networkId,
       updatedAt: syncSummary.blockNum(),
       tokenSymbol,
@@ -122,11 +123,16 @@ const useAccounts = () => {
     });
     if (account.code === FUNGIBLE_FAUCET_CODE) {
       // faucets
-      account.components = [];
+      account.components = ["basic-fungible-faucet"];
+      if (account.address === MIDEN_FAUCET_ADDRESS) {
+        account.tokenSymbol = "MIDEN";
+      }
     } else if (account.code === COUNTER_CONTRACT_CODE) {
       // Counter Contract
       account.components = ["no-auth", "counter-contract"];
-    } else if (account.code === BASIC_WALLET_CODE) {
+    } /* else if (account.address === "mtst1qqtzp4x9c9gv6yp7qm8uzzr7y3cqqua4clw") {
+      account.components = ["no-auth", "counter-map-contract"];
+    }*/ else if (account.code === BASIC_WALLET_CODE) {
       // Basic Wallet
       account.components = ["basic-auth", "basic-wallet"];
     }
@@ -141,20 +147,26 @@ const useAccounts = () => {
     });
     return account;
   };
-  const importConnectedWallet = async (address: string) => {
+  const importConnectedWallet = async () => {
+    const connectedWallet = wallets.find(
+      ({ address }) => address === connectedWalletAddress
+    );
+    if (!connectedWalletAddress || connectedWallet || networkId !== "mtst") {
+      return;
+    }
     const client = await webClient(networkId, serializedMockChain);
     try {
-      await clientGetAccountByAddress(client, address);
-      return importAccountByAddress({
+      await clientGetAccountByAddress(client, connectedWalletAddress);
+      await importAccountByAddress({
         name: "Miden Account 1",
-        address,
+        address: connectedWalletAddress,
       });
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      await clientImportNewWallet(client, address);
-      return importAccountByAddress({
+      await clientImportNewWallet(client, connectedWalletAddress);
+      await importAccountByAddress({
         name: "Miden Account 1",
-        address,
+        address: connectedWalletAddress,
       });
     }
   };
@@ -207,7 +219,6 @@ const useAccounts = () => {
       wasmAccount,
       name,
       components: components.map(({ id }) => id),
-      isWallet: components.some(({ id }) => id === "basic-wallet"),
       networkId,
       updatedAt: syncSummary.blockNum(),
     });

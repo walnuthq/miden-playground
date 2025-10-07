@@ -4,7 +4,7 @@ import { columns } from "@/components/scripts/columns";
 import ScriptsTable from "@/components/scripts/scripts-table";
 import useScripts from "@/hooks/use-scripts";
 import CreateScriptDialog from "@/components/scripts/create-script-dialog";
-import defaultScripts from "@/components/global-context/default-scripts";
+import defaultScripts from "@/lib/types/default-scripts";
 import DeleteScriptAlertDialog from "@/components/scripts/delete-script-alert-dialog";
 
 const Scripts = () => {

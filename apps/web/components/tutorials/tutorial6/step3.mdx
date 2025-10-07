@@ -1,0 +1,22 @@
+We assume the timelock block height will be appended as the 3rd item in the note inputs, let's store it in a variable for future use:
+
+```rust
+let timelock_block_height = inputs[2];
+```
+
+To get the current block height, we'll use the transaction kernel `get_block_number` call:
+
+```rust
+let current_block_height = tx::get_block_number();
+```
+
+Finally, we must check that `timelock_block_height` ≤ `current_block_height`:
+
+```rust
+assert_lte(
+  timelock_block_height,
+  current_block_height
+);
+```
+
+After adding the timelock logic to your script, compile it and proceed to the next step.

@@ -1,193 +1,15 @@
-import { useState } from "react";
 import Link from "next/link";
-import { toast } from "sonner";
-import { RotateCw } from "lucide-react";
 import useScripts from "@/hooks/use-scripts";
 import { type Account } from "@/lib/types/account";
-import {
-  type Component,
-  type StorageSlot,
-  type Procedure,
-  componentTypes,
-  storageSlotTypes,
-  getStorageRead,
-} from "@/lib/types/component";
+import { type Component, componentTypes } from "@/lib/types/component";
 import {
   Table,
   TableBody,
   TableCell,
-  TableHeader,
-  TableHead,
   TableRow,
 } from "@workspace/ui/components/table";
-import { formatValue } from "@/lib/utils";
-import { Button } from "@workspace/ui/components/button";
-import useGlobalContext from "@/components/global-context/hook";
-import { clientGetAccountByAddress, webClient } from "@/lib/web-client";
-import useTransactions from "@/hooks/use-transactions";
-
-const StorageSlotsTable = ({
-  storage,
-  storageSlots,
-}: {
-  storage: string[];
-  storageSlots: StorageSlot[];
-}) => (
-  <div className="rounded-md border">
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Name</TableHead>
-          <TableHead>Type</TableHead>
-          <TableHead>Value</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {storageSlots.map(({ name, type }, index) => (
-          <TableRow key={name}>
-            <TableCell>{name}</TableCell>
-            <TableCell>{storageSlotTypes[type]}</TableCell>
-            <TableCell>{formatValue(storage[index] ?? "")}</TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  </div>
-);
-
-const invokeProcedureCustomTransactionScript = (
-  contractName: string,
-  procedureName: string
-) => `use.external_contract::${contractName}
-begin
-    call.${contractName}::${procedureName}
-end
-`;
-
-const ProcedureItem = ({
-  account,
-  component,
-  procedure,
-}: {
-  account: Account;
-  component: Component;
-  procedure: Procedure;
-}) => {
-  const { networkId, serializedMockChain } = useGlobalContext();
-  const { scripts } = useScripts();
-  const { newCustomTransactionRequest, submitTransaction } = useTransactions();
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState("");
-  const invokeProcedure = async () => {
-    const script = scripts.find(({ id }) => id === component.scriptId);
-    if (!script) {
-      return;
-    }
-    const {
-      TransactionKernel: WasmTransactionKernel,
-      AssemblerUtils: WasmAssemblerUtils,
-      TransactionScript: WasmTransactionScript,
-      TransactionRequestBuilder: WasmTransactionRequestBuilder,
-    } = await import("@demox-labs/miden-sdk");
-    const assembler = WasmTransactionKernel.assembler();
-    const contractName = script.id.replaceAll("-", "_");
-    const accountComponentLibrary =
-      WasmAssemblerUtils.createAccountComponentLibrary(
-        assembler,
-        `external_contract::${contractName}`,
-        script.masm
-      );
-    const transactionScript = WasmTransactionScript.compile(
-      invokeProcedureCustomTransactionScript(contractName, procedure.name),
-      assembler.withLibrary(accountComponentLibrary)
-    );
-    const transactionRequest = new WasmTransactionRequestBuilder()
-      .withCustomScript(transactionScript)
-      .build();
-    const transactionResult = await newCustomTransactionRequest({
-      senderAccountId: account.id,
-      transactionRequest,
-    });
-    const transactionRecord = await submitTransaction(transactionResult);
-    toast("Transaction submitted.", {
-      action: {
-        label: "View on MidenScan",
-        onClick: () =>
-          window.open(
-            `https://testnet.midenscan.com/tx/${transactionRecord.id().toHex()}`,
-            "_blank",
-            "noopener noreferrer"
-          ),
-      },
-    });
-  };
-  return (
-    <TableRow key={procedure.name}>
-      <TableCell>{procedure.name}</TableCell>
-      <TableCell className="flex items-center justify-between gap-2">
-        <span>{result}</span>
-        <Button
-          disabled={loading}
-          onClick={async () => {
-            setLoading(true);
-            if (procedure.readOnly && procedure.storageRead) {
-              const client = await webClient(networkId, serializedMockChain);
-              const wasmAccount = await clientGetAccountByAddress(
-                client,
-                account.address
-              );
-              const word = await getStorageRead(
-                wasmAccount,
-                procedure.storageRead
-              );
-              if (word) {
-                const felt = BigInt(
-                  `0x${word!.toHex().slice(-16).match(/../g)!.reverse().join("")}`
-                );
-                setResult(felt.toString());
-              }
-            } else {
-              await invokeProcedure();
-            }
-            setLoading(false);
-          }}
-        >
-          {loading && <RotateCw className="animate-spin" />}
-          {loading ? "Invoking…" : "Invoke"}
-        </Button>
-      </TableCell>
-    </TableRow>
-  );
-};
-
-const ProceduresTable = ({
-  account,
-  component,
-}: {
-  account: Account;
-  component: Component;
-}) => (
-  <div className="rounded-md border">
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="w-[180px]">Name</TableHead>
-          <TableHead>Result</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {component.procedures.map((procedure) => (
-          <ProcedureItem
-            key={procedure.name}
-            account={account}
-            component={component}
-            procedure={procedure}
-          />
-        ))}
-      </TableBody>
-    </Table>
-  </div>
-);
+import StorageSlotsTable from "@/components/account/storage-slots-table";
+import ProceduresTable from "@/components/account/procedures-table";
 
 const AccountComponentTable = ({
   account,
@@ -198,6 +20,9 @@ const AccountComponentTable = ({
 }) => {
   const { scripts } = useScripts();
   const script = scripts.find(({ id }) => id === component.scriptId);
+  if (!script) {
+    return null;
+  }
   return (
     <div className="rounded-md border">
       <Table>
@@ -213,7 +38,7 @@ const AccountComponentTable = ({
                 className="text-primary font-medium underline underline-offset-4"
                 href={`/scripts/${component.scriptId}`}
               >
-                {script?.name}
+                {script.name}
               </Link>
             </TableCell>
           </TableRow>
@@ -228,11 +53,15 @@ const AccountComponentTable = ({
               </TableCell>
             </TableRow>
           )}
-          {component.procedures.length > 0 && (
+          {script.procedures.length > 0 && (
             <TableRow>
               <TableCell>Procedures</TableCell>
               <TableCell>
-                <ProceduresTable account={account} component={component} />
+                <ProceduresTable
+                  account={account}
+                  script={script}
+                  component={component}
+                />
               </TableCell>
             </TableRow>
           )}

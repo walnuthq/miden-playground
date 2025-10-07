@@ -12,16 +12,16 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "next": "^15.5.3",
-    "react": "^19.1.1",
+    "next": "^15.5.4",
+    "react": "^19.2.0",
     "uuid": "^13.0.0"
   },
   "devDependencies": {
-    "@types/node": "^24.5.2",
-    "@types/react": "^19.1.13",
+    "@types/node": "^24.7.0",
+    "@types/react": "^19.2.2",
     "@workspace/eslint-config": "workspace:^",
     "@workspace/typescript-config": "workspace:*",
-    "eslint": "^9.35.0",
-    "typescript": "^5.9.2"
+    "eslint": "^9.37.0",
+    "typescript": "^5.9.3"
   }
 }

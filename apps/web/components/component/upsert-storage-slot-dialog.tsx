@@ -60,62 +60,60 @@ const StorageMapInput = ({
   return (
     <div className="grid gap-3 col-span-2">
       <Label htmlFor="value">Default Values</Label>
-      {keyValues.map((keyValue, index) => {
-        return (
-          <div key={index} className="flex items-center gap-2">
-            <Input
-              id={`key-${index}`}
-              name={`key-${index}`}
-              placeholder="Key"
-              value={keyValue.key}
-              onChange={(event) =>
-                setStorageSlotValue(
-                  keyValuesToString([
-                    ...keyValues.slice(0, index),
-                    { ...keyValue, key: event.target.value },
-                    ...keyValues.slice(index + 1),
-                  ])
-                )
-              }
-              pattern="\d+"
-              required
-            />
-            <Input
-              id={`value-${index}`}
-              name={`value-${index}`}
-              placeholder="Value"
-              value={keyValue.value}
-              onChange={(event) =>
-                setStorageSlotValue(
-                  keyValuesToString([
-                    ...keyValues.slice(0, index),
-                    { ...keyValue, value: event.target.value },
-                    ...keyValues.slice(index + 1),
-                  ])
-                )
-              }
-              pattern="\d+"
-              required
-            />
-            <Button
-              type="button"
-              variant="destructive"
-              size="icon"
-              className="size-8"
-              onClick={() =>
-                setStorageSlotValue(
-                  keyValuesToString([
-                    ...keyValues.slice(0, index),
-                    ...keyValues.slice(index + 1),
-                  ])
-                )
-              }
-            >
-              <Trash />
-            </Button>
-          </div>
-        );
-      })}
+      {keyValues.map((keyValue, index) => (
+        <div key={index} className="flex items-center gap-2">
+          <Input
+            id={`key-${index}`}
+            name={`key-${index}`}
+            placeholder="Key"
+            value={keyValue.key}
+            onChange={(event) =>
+              setStorageSlotValue(
+                keyValuesToString([
+                  ...keyValues.slice(0, index),
+                  { ...keyValue, key: event.target.value },
+                  ...keyValues.slice(index + 1),
+                ])
+              )
+            }
+            pattern="\d+"
+            required
+          />
+          <Input
+            id={`value-${index}`}
+            name={`value-${index}`}
+            placeholder="Value"
+            value={keyValue.value}
+            onChange={(event) =>
+              setStorageSlotValue(
+                keyValuesToString([
+                  ...keyValues.slice(0, index),
+                  { ...keyValue, value: event.target.value },
+                  ...keyValues.slice(index + 1),
+                ])
+              )
+            }
+            pattern="\d+"
+            required
+          />
+          <Button
+            type="button"
+            variant="destructive"
+            size="icon"
+            className="size-8"
+            onClick={() =>
+              setStorageSlotValue(
+                keyValuesToString([
+                  ...keyValues.slice(0, index),
+                  ...keyValues.slice(index + 1),
+                ])
+              )
+            }
+          >
+            <Trash />
+          </Button>
+        </div>
+      ))}
       <Button
         type="button"
         variant="secondary"
@@ -158,13 +156,21 @@ const UpsertStorageSlotDialog = () => {
   useEffect(() => {
     setStorageSlotType(storageSlot?.type ?? "value");
     setStorageSlotValue(storageSlot?.value ?? "");
-  }, [componentId, storageSlotIndex, storageSlot?.type, storageSlot?.value]);
+  }, [
+    /*componentId, storageSlotIndex,*/ storageSlot?.type,
+    storageSlot?.value,
+  ]);
   return (
     <Dialog
       open={upsertStorageSlotDialogOpen}
+      modal={false}
       onOpenChange={(open) => !open && onClose()}
     >
-      <DialogContent className="sm:max-w-[640px] z-100">
+      <DialogContent
+        className="sm:max-w-[640px] z-100"
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle>
             {storageSlot ? "Edit" : "Create"} Storage Slot

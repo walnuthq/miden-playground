@@ -11,6 +11,7 @@ import AccountInformation from "@/components/account/account-information";
 import AccountComponents from "@/components/account/account-components";
 import CreateTransactionDialog from "@/components/transactions/create-transaction-dialog";
 import CreateTransactionDropdownMenu from "@/components/account/create-transaction-dropdown-menu";
+import InvokeProcedureArgumentsDialog from "@/components/account/invoke-procedure-arguments-dialog";
 
 const Account = ({ address }: { address: string }) => {
   const isClient = useIsClient();
@@ -41,6 +42,7 @@ const Account = ({ address }: { address: string }) => {
         )}
       </Tabs>
       <CreateTransactionDialog />
+      <InvokeProcedureArgumentsDialog />
     </div>
   );
 };

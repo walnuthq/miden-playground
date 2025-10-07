@@ -1,0 +1,13 @@
+In this tutorial, we will create a custom time locked note on Miden that is an extended version of the **P2ID (Pay-to-ID)** note.
+Using custom note logic, you will learn how to program a note that can only be consumed if the transaction's reference block number is greater than or equal to our note's timelock block height.
+
+Creating a custom note is a two step process:
+
+- First, you develop the note script using a **Rust program** and compile it to **MASM (Miden Assembly)**.
+- Then you perform a transaction on your wallet that is responsible for creating the note on the network.
+
+When creating a note, you can pass arbitrary parameters called [Note Inputs](https://0xmiden.github.io/miden-docs/imported/miden-base/src/note.html#inputs) and the [Note Script](https://0xmiden.github.io/miden-docs/imported/miden-base/src/note.html#script) can access these inputs.
+
+In our timelock example, we have 2 note inputs: the recipient account ID and the minimal block height before the note can be consumed.
+
+Let's get started by clicking on _"Create new script"_ then choose a name and make sure to select a **Note Script** using the **P2ID Note** example.

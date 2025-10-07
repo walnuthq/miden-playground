@@ -1,5 +1,7 @@
-import { cp, writeFile, readFile, rm } from "node:fs/promises";
+import { cp, writeFile, readFile, rm, rename } from "node:fs/promises";
 import { execFile, fileExists } from "@/lib/utils";
+
+const packagesPath = process.env.PACKAGES_PATH ?? "/tmp";
 
 export const cargoMidenVersion = async () => {
   const { stdout } = await execFile("cargo", ["miden", "--version"]);
@@ -13,37 +15,94 @@ export const midenCompilerVersion = async () => {
   return semver!.replaceAll("\n", "");
 };
 
-export const packageExists = async (packageName: string) =>
-  fileExists(`/tmp/${packageName}`);
+export const packageExists = async (packageDir: string) =>
+  fileExists(`${packagesPath}/${packageDir}`);
 
 // export const newPackage = (packageName: string) =>
 //   execFile("cargo", ["miden", "new", packageName], { cwd: "/tmp" });
 
-export const newPackage = async (packageName: string, example: string) => {
-  const counterContractExists = await fileExists("/tmp/counter-contract");
-  if (!counterContractExists) {
-    await execFile("cargo", ["miden", "example", "counter-contract"], {
-      cwd: "/tmp",
-    });
+export const newPackage = async (
+  packageDir: string,
+  packageName: string,
+  example?: string
+) => {
+  if (example) {
+    const examplesDirExists = await fileExists(`${packagesPath}/examples`);
+    if (!examplesDirExists) {
+      await execFile("cargo", ["miden", "example", "p2id-note"], {
+        cwd: packagesPath,
+      });
+      await execFile("cargo", ["miden", "example", "counter-contract"], {
+        cwd: packagesPath,
+      });
+      await rename(`${packagesPath}/p2id-note`, `${packagesPath}/examples`);
+      await cp(
+        `${packagesPath}/counter-contract/counter-contract`,
+        `${packagesPath}/examples/counter-contract`,
+        { recursive: true }
+      );
+      await cp(
+        `${packagesPath}/counter-contract/counter-note`,
+        `${packagesPath}/examples/counter-note`,
+        { recursive: true }
+      );
+    }
+    console.info(
+      `cp ${packagesPath}/examples/${example} ${packagesPath}/${packageDir}`
+    );
+    await cp(
+      `${packagesPath}/examples/${example}`,
+      `${packagesPath}/${packageDir}`,
+      {
+        recursive: true,
+      }
+    );
+    if (example === "counter-note") {
+      const cargoToml = await readFile(
+        `${packagesPath}/${packageDir}/Cargo.toml`,
+        "utf-8"
+      );
+      await writeFile(
+        `${packagesPath}/${packageDir}/Cargo.toml`,
+        cargoToml.replaceAll(
+          "../counter-contract",
+          `${packagesPath}/examples/counter-contract`
+        )
+      );
+    } else if (example === "p2id-note") {
+      const cargoToml = await readFile(
+        `${packagesPath}/${packageDir}/Cargo.toml`,
+        "utf-8"
+      );
+      await writeFile(
+        `${packagesPath}/${packageDir}/Cargo.toml`,
+        cargoToml.replaceAll(
+          "../basic-wallet",
+          `${packagesPath}/examples/basic-wallet`
+        )
+      );
+    }
   }
-  await cp(`/tmp/counter-contract/${example}`, `/tmp/${packageName}`, {
-    recursive: true,
-  });
 };
 
-export const readRust = async (packageName: string) =>
-  readFile(`/tmp/${packageName}/src/lib.rs`, "utf-8");
+export const readRust = async (packageDir: string) => {
+  console.info(`cat ${packagesPath}/${packageDir}/src/lib.rs`);
+  return readFile(`${packagesPath}/${packageDir}/src/lib.rs`, "utf-8");
+};
 
-export const updateRust = (packageName: string, source: string) =>
-  writeFile(`/tmp/${packageName}/src/lib.rs`, source);
+export const updateRust = (packageDir: string, rust: string) => {
+  console.info(`cp rust ${packagesPath}/${packageDir}/src/lib.rs`);
+  writeFile(`${packagesPath}/${packageDir}/src/lib.rs`, rust);
+};
 
-export const compilePackage = async (packageName: string) => {
+export const compilePackage = async (packageDir: string) => {
   try {
+    console.info("cargo miden build --release");
     const { stdout } = await execFile(
       "cargo",
       ["miden", "build", "--release"],
       {
-        cwd: `/tmp/${packageName}`,
+        cwd: `${packagesPath}/${packageDir}`,
       }
     );
     return { stdout, stderr: "" };
@@ -53,34 +112,39 @@ export const compilePackage = async (packageName: string) => {
   }
 };
 
-export const compileWasmToMasm = (packageName: string) =>
-  execFile(
+export const compileWasmToMasm = async (packageDir: string) => {
+  const cargoToml = await readFile(
+    `${packagesPath}/${packageDir}/Cargo.toml`,
+    "utf-8"
+  );
+  const matches = cargoToml.match(/name\s+=\s+"(.*)"/);
+  if (!matches) {
+    throw new Error("Cannot read package name");
+  }
+  const [, packageName] = matches;
+  if (!packageName) {
+    throw new Error("Cannot read package name");
+  }
+  const name = packageName.replaceAll("-", "_");
+  console.info(
+    `midenc compile --emit masm=- target/wasm32-wasip2/release/${name}.wasm`
+  );
+  const { stdout: masm } = await execFile(
     "midenc",
     [
       "compile",
       "--emit",
-      `masm=${packageName}.masm`, // TODO ignored?
-      `target/wasm32-wasip2/release/counter_contract.wasm`, // TODO hardcoded
+      "masm=-",
+      `target/wasm32-wasip2/release/${name}.wasm`,
     ],
     {
-      cwd: `/tmp/${packageName}`,
+      cwd: `${packagesPath}/${packageDir}`,
     }
   );
-
-export const readMasm = async (packageName: string) => {
-  const packageFile = await readFile(`/tmp/${packageName}/Cargo.toml`, "utf-8");
-  const matches = packageFile.match(/package\s+=\s+"(.*)"/);
-  if (!matches) {
-    return "";
-  }
-  const [, componentName] = matches;
-  const [actualPackageName] = packageName.split("-");
-  return readFile(
-    `/tmp/${packageName}/miden:counter-contract/counter@0.1.masm`,
-    // `/tmp/${packageName}/${componentName}/${actualPackageName}@0.1.masm`,
-    "utf-8"
-  );
+  return masm;
 };
 
-export const deletePackage = (packageName: string) =>
-  rm(packageName, { recursive: true, force: true });
+export const deletePackage = (packageDir: string) => {
+  console.info(`rm -rf ${packagesPath}/${packageDir}`);
+  return rm(`${packagesPath}/${packageDir}`, { recursive: true, force: true });
+};

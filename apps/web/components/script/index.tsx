@@ -9,7 +9,8 @@ import {
 } from "@workspace/ui/components/tabs";
 import Editor from "@/components/lib/editor";
 import EditorConsole from "@/components/script/editor-console";
-import defaultScripts from "@/components/global-context/default-scripts";
+import DependenciesTable from "@/components/script/dependencies-table";
+import defaultScripts from "@/lib/types/default-scripts";
 
 const Script = ({ id }: { id: string }) => {
   const isClient = useIsClient();
@@ -26,6 +27,9 @@ const Script = ({ id }: { id: string }) => {
         <TabsList>
           <TabsTrigger value="rust">Rust</TabsTrigger>
           <TabsTrigger value="masm">MASM</TabsTrigger>
+          {script.dependencies.length > 0 && (
+            <TabsTrigger value="dependencies">Dependencies</TabsTrigger>
+          )}
         </TabsList>
         <div className="flex flex-col gap-4">
           <TabsContent value="rust">
@@ -44,6 +48,13 @@ const Script = ({ id }: { id: string }) => {
               height={defaultScript ? "85vh" : "61vh"}
             />
           </TabsContent>
+          {script.dependencies.length > 0 && (
+            <TabsContent value="dependencies">
+              <div className={defaultScript ? "h-[85vh]" : "h-[61vh]"}>
+                <DependenciesTable script={script} />
+              </div>
+            </TabsContent>
+          )}
           {!defaultScript && <EditorConsole script={script} />}
         </div>
       </Tabs>
