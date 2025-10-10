@@ -1,4 +1,7 @@
-import { type Account } from "@/lib/types/account";
+import {
+  decodeFungibleFaucetMetadata,
+  type Account,
+} from "@/lib/types/account";
 import { type InputNote } from "@/lib/types/note";
 import {
   Table,
@@ -134,9 +137,11 @@ const AccountNotesTable = ({ account }: { account: Account }) => {
                 <TableCell>
                   {inputNote.fungibleAssets.map(({ faucetId, amount }) => {
                     const faucet = faucets.find(({ id }) => id === faucetId);
+                    const { tokenSymbol } =
+                      decodeFungibleFaucetMetadata(faucet);
                     return (
                       <p key={faucetId}>
-                        {amount} {faucet?.tokenSymbol ?? "Unknown"}
+                        {amount} {tokenSymbol}
                       </p>
                     );
                   })}

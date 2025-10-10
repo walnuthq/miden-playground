@@ -117,12 +117,7 @@ const MintButton = () => {
   const [loading, setLoading] = useState(false);
   const [noteId, setNoteId] = useState("");
   useInterval(
-    () => {
-      const waitForSyncState = async () => {
-        await syncState();
-      };
-      waitForSyncState();
-    },
+    syncState,
     noteId === "" || account?.consumableNoteIds.includes(noteId) ? null : 1000
   );
   useEffect(() => {

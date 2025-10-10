@@ -123,6 +123,7 @@ const basicWallet: Script = {
   packageName: "basic-wallet",
   type: "account",
   status: "compiled",
+  readOnly: true,
   rust: basicWalletRust,
   masm: basicWalletMasm,
 };

@@ -125,6 +125,7 @@ const basicFungibleFaucet: Script = {
   packageName: "basic-fungible-faucet",
   type: "account",
   status: "compiled",
+  readOnly: true,
   rust: basicFungibleFaucetRust,
   masm: basicFungibleFaucetMasm,
 };

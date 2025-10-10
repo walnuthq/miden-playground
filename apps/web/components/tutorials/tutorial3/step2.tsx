@@ -6,7 +6,7 @@ import Step2Content from "@/components/tutorials/tutorial3/step2.mdx";
 import { useWallet } from "@demox-labs/miden-wallet-adapter";
 import useAccounts from "@/hooks/use-accounts";
 import { MIDEN_FAUCET_ACCOUNT_ID, P2ID_NOTE_CODE } from "@/lib/constants";
-import { noteInputsToAccountId } from "@/lib/types/note";
+import { accountIdFromPrefixSuffix } from "@/lib/types/account";
 
 const useCompleted = () => {
   const { accountId } = useWallet();
@@ -21,7 +21,7 @@ const useCompleted = () => {
       ) &&
       senderId === MIDEN_FAUCET_ACCOUNT_ID &&
       scriptRoot === P2ID_NOTE_CODE &&
-      noteInputsToAccountId(inputs) === wallet?.id &&
+      accountIdFromPrefixSuffix(inputs[1]!, inputs[0]!) === wallet?.id &&
       state === "committed" &&
       type === "public"
   );

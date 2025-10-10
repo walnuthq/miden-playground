@@ -41,10 +41,14 @@ const reducer = (state: State, action: TutorialAction): State => {
       };
     }
     case "NEXT_TUTORIAL_STEP": {
+      const nextTutorialStep = state.tutorialStep + 1;
       return {
         ...state,
-        tutorialStep: state.tutorialStep + 1,
-        tutorialMaxStep: state.tutorialStep + 1,
+        tutorialStep: nextTutorialStep,
+        tutorialMaxStep:
+          nextTutorialStep > state.tutorialMaxStep
+            ? nextTutorialStep
+            : state.tutorialMaxStep,
       };
     }
     case "SET_TUTORIAL_STEP": {

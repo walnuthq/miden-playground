@@ -1,5 +1,6 @@
 import { type FungibleAsset } from "@/lib/types/asset";
-import { P2ID_NOTE_CODE, ZERO_ACCOUNT_ID } from "@/lib/constants";
+import { P2ID_NOTE_CODE } from "@/lib/constants";
+import { accountIdFromPrefixSuffix } from "@/lib/types/account";
 
 export const noteTypes = {
   public: "Public",
@@ -63,19 +64,12 @@ export const noteConsumable = ({
     return false;
   }
   if (networkId === "mtst") {
-    const recipientAccountId = noteInputsToAccountId(inputNote.inputs);
+    const recipientAccountId = accountIdFromPrefixSuffix(
+      inputNote.inputs[1]!,
+      inputNote.inputs[0]!
+    );
     return accountId === recipientAccountId;
   } else {
     return true;
   }
-};
-
-export const noteInputsToAccountId = (noteInputs: bigint[]) => {
-  const [suffix, prefix] = noteInputs;
-  if (!suffix || !prefix) {
-    return ZERO_ACCOUNT_ID;
-  }
-  const prefixString = prefix.toString(16).padStart(16, "0");
-  const suffixString = suffix.toString(16).padStart(16, "0");
-  return `0x${prefixString}${suffixString}`.slice(0, 32);
 };

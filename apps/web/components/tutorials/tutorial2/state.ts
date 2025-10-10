@@ -446,10 +446,7 @@ const state: State = {
   ]),
   accounts: [
     {
-      ...basicFungibleFaucetAccount({
-        storageMode: "public",
-        tokenSymbol: "MDN",
-      }),
+      ...basicFungibleFaucetAccount({ storageMode: "public" }),
       id: "0x7df63c65436918201c79cdc04a2d70",
       name: "MDN Faucet",
       address: "mlcl1qp7lv0r9gd53sgqu08xuqj3dwpcqzk9jt6y",
