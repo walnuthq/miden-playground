@@ -121,7 +121,7 @@ const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
     const connectedWallet = wallets.find(
       ({ address }) => address === accountId
     );
-    if (!connectedWallet && tutorialId === "" ? true : tutorialLoaded) {
+    if (!connectedWallet && (tutorialId === "" ? true : tutorialLoaded)) {
       importConnectedWallet();
     }
   }, [accountId, wallets, tutorialId, tutorialLoaded, importConnectedWallet]);

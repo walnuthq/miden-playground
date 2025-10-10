@@ -13,7 +13,7 @@ const NetworkBadge = () => {
   const { tutorialId, tutorialLoaded } = useTutorials();
   const [loading, setLoading] = useState(false);
   const useIntervalTriggered =
-    networkId === "mtst" && tutorialId === "" ? true : tutorialLoaded;
+    networkId === "mtst" && (tutorialId === "" ? true : tutorialLoaded);
   useInterval(
     () => {
       const sync = async () => {
