@@ -26,19 +26,23 @@ import useScripts from "@/hooks/use-scripts";
 import { noteTypes, type NoteType } from "@/lib/types/note";
 import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";
 import { accountIdFromPrefixSuffix } from "@/lib/types/account";
+import { useWallet } from "@demox-labs/miden-wallet-adapter";
+import useAccounts from "@/hooks/use-accounts";
 
 const CreateNoteDialog = () => {
+  const { accountId } = useWallet();
+  const { wallets } = useAccounts();
   const { createNoteDialogOpen, closeCreateNoteDialog, newNote } = useNotes();
   const { scripts } = useScripts();
   const [loading, setLoading] = useState(false);
-  const [senderAccountId, setSenderAccountId] = useState("");
+  // const [senderAccountId, setSenderAccountId] = useState("");
   const [scriptId, setScriptId] = useState("");
   const [noteType, setNoteType] = useState<NoteType>("public");
   const [faucetAccountId, setFaucetAccountId] = useState("");
   const [noteInputs, setNoteInputs] = useState<string[]>([]);
   const shownScripts = scripts.filter(({ type }) => type === "note");
   const onClose = () => {
-    setSenderAccountId("");
+    // setSenderAccountId("");
     setScriptId("");
     setNoteType("public");
     setFaucetAccountId("");
@@ -68,6 +72,9 @@ const CreateNoteDialog = () => {
             event.preventDefault();
             const formData = new FormData(event.currentTarget);
             const amount = BigInt(formData.get("amount")?.toString() ?? "0");
+            const senderAccount = wallets.find(
+              ({ address }) => address === accountId
+            );
             const recipientAccountId =
               noteInputs.length >= 2
                 ? accountIdFromPrefixSuffix(
@@ -77,7 +84,7 @@ const CreateNoteDialog = () => {
                 : "";
             setLoading(true);
             /*const transactionRecord = */ await newNote({
-              senderAccountId,
+              senderAccountId: senderAccount?.id ?? "",
               recipientAccountId,
               scriptId,
               type: noteType,
@@ -101,14 +108,14 @@ const CreateNoteDialog = () => {
           }}
         >
           <div className="grid grid-cols-2 gap-4">
-            <div className="grid gap-3 col-span-2">
+            {/* <div className="grid gap-3 col-span-2">
               <Label>Sender account</Label>
               <SelectAccountDropdownMenu
                 value={senderAccountId}
                 onValueChange={setSenderAccountId}
                 selectWallets
               />
-            </div>
+            </div> */}
             <div className="grid gap-3">
               <Label htmlFor="script">Script</Label>
               <Select onValueChange={setScriptId} value={scriptId}>
@@ -156,14 +163,7 @@ const CreateNoteDialog = () => {
             </div>
             <div className="grid gap-3">
               <Label htmlFor="amount">Amount</Label>
-              <Input
-                id="amount"
-                name="amount"
-                type="number"
-                min="1"
-                defaultValue={100000000}
-                required
-              />
+              <Input id="amount" name="amount" type="number" min="1" required />
             </div>
             <div className="grid gap-3 col-span-2">
               <Label htmlFor="inputs">Note inputs</Label>
@@ -220,7 +220,7 @@ const CreateNoteDialog = () => {
             type="submit"
             disabled={
               loading ||
-              senderAccountId === "" ||
+              // senderAccountId === "" ||
               scriptId === "" ||
               faucetAccountId === ""
             }

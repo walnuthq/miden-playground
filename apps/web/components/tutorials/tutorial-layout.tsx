@@ -10,11 +10,13 @@ import { type ImperativePanelHandle } from "react-resizable-panels";
 import { useIsClient } from "usehooks-ts";
 import TutorialStep from "@/components/tutorials/tutorial-step";
 import { useIsMobile } from "@workspace/ui/hooks/use-mobile";
+import tutorials from "@/components/tutorials";
 
-const TutorialLayout = ({ children }: { children: ReactNode }) => {
+const InnerTutorialLayout = ({ children }: { children: ReactNode }) => {
   const tutorialRef = useRef<ImperativePanelHandle | null>(null);
-  const { tutorial, tutorialOpen } = useTutorials();
+  const { tutorialId, tutorialOpen } = useTutorials();
   const isMobile = useIsMobile();
+  const tutorial = tutorials.find(({ id }) => id === tutorialId);
   useEffect(() => {
     tutorialRef?.current?.resize(tutorialOpen ? 33 : 0);
   }, [tutorialOpen]);
@@ -34,7 +36,7 @@ const TutorialLayout = ({ children }: { children: ReactNode }) => {
         ref={tutorialRef}
         order={2}
         defaultSize={tutorialOpen ? 33 : 0}
-        className="bg-sidebar border rounded-md z-60"
+        className="bg-sidebar border z-60 shadow-2xl"
       >
         {tutorial && <TutorialStep tutorial={tutorial} />}
       </ResizablePanel>
@@ -42,13 +44,17 @@ const TutorialLayout = ({ children }: { children: ReactNode }) => {
   );
 };
 
-const Layout = ({ children }: { children: ReactNode }) => {
+const TutorialLayout = ({ children }: { children: ReactNode }) => {
   const { tutorialId } = useTutorials();
   const isClient = useIsClient();
   if (!isClient) {
     return null;
   }
-  return tutorialId ? <TutorialLayout>{children}</TutorialLayout> : children;
+  return tutorialId ? (
+    <InnerTutorialLayout>{children}</InnerTutorialLayout>
+  ) : (
+    children
+  );
 };
 
-export default Layout;
+export default TutorialLayout;

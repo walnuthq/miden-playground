@@ -1,9 +1,7 @@
 import { EllipsisVertical } from "lucide-react";
 import { useWallet } from "@demox-labs/miden-wallet-adapter";
-import { useInterval } from "usehooks-ts";
 import { type TutorialStep } from "@/lib/types/tutorial";
 import useAccounts from "@/hooks/use-accounts";
-import useGlobalContext from "@/components/global-context/hook";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
 import Step3Content from "@/components/tutorials/tutorial3/step3.mdx";
@@ -18,14 +16,6 @@ const useCompleted = () => {
 const Step3: TutorialStep = {
   title: "Consume the requested tokens note.",
   Content: () => {
-    const { accountId } = useWallet();
-    const { syncState } = useGlobalContext();
-    const { wallets } = useAccounts();
-    const wallet = wallets.find(({ address }) => address === accountId);
-    useInterval(
-      syncState,
-      wallet && wallet.consumableNoteIds.length > 0 ? 1000 : null
-    );
     const completed = useCompleted();
     return (
       <>

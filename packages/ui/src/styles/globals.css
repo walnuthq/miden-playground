@@ -129,6 +129,7 @@
 .wallet-adapter-button-trigger {
   color: inherit;
   border-color: var(--color-border);
+  @apply whitespace-nowrap;
   @apply rounded-md;
   @apply text-sm;
   @apply font-medium;

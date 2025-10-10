@@ -1,25 +1,11 @@
-import { useRouter } from "next/navigation";
 import { type TutorialStep } from "@/lib/types/tutorial";
-import useGlobalContext from "@/components/global-context/hook";
-import NextStepButton from "@/components/tutorials/next-step-button";
+import NextTutorialButton from "@/components/tutorials/next-tutorial-button";
 import Step5Content from "@/components/tutorials/tutorial6/step5.mdx";
 
 const Step5: TutorialStep = {
   title: "Check the Test Wallet consumable notes.",
   Content: () => <Step5Content />,
-  NextStepButton: () => {
-    const { networkId, resetState } = useGlobalContext();
-    const router = useRouter();
-    return (
-      <NextStepButton
-        text="Back to tutorials list"
-        onClick={() => {
-          resetState(networkId);
-          router.push("/");
-        }}
-      />
-    );
-  },
+  NextStepButton: NextTutorialButton,
 };
 
 export default Step5;

@@ -15,7 +15,7 @@ import { SidebarTrigger } from "@workspace/ui/components/sidebar";
 import TutorialToggle from "@/components/lib/tutorial-toggle";
 import ModeToggle from "@/components/lib/mode-toggle";
 import useTutorials from "@/hooks/use-tutorials";
-import SyncStateButton from "@/components/lib/sync-state-button";
+import NetworkBadge from "@/components/lib/network-badge";
 import useGlobalContext from "@/components/global-context/hook";
 
 const getLink = (pathname: string) => {
@@ -27,7 +27,6 @@ const getLink = (pathname: string) => {
     scripts: { href: "/scripts", title: "Scripts" },
     components: { href: "/components", title: "Components" },
   };
-
   return links[route as keyof typeof links];
 };
 
@@ -88,14 +87,10 @@ const Header = () => {
           </BreadcrumbList>
         </Breadcrumb>
         <div className="ml-auto flex items-center gap-2">
+          {isClient && <NetworkBadge />}
           {isClient && tutorialId && <TutorialToggle />}
           <ModeToggle />
-          {isClient && networkId === "mtst" && (
-            <>
-              <SyncStateButton />
-              <WalletMultiButton />
-            </>
-          )}
+          {isClient && networkId === "mtst" && <WalletMultiButton />}
         </div>
       </div>
     </header>

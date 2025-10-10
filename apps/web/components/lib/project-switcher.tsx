@@ -1,7 +1,7 @@
 "use client";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronsUpDown } from "lucide-react";
+import { ChevronsUpDown, BadgeCheck } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,16 +32,21 @@ import { networks } from "@/lib/types/network";
 // import { cn } from "@workspace/ui/lib/utils";
 import useAccounts from "@/hooks/use-accounts";
 import { useWallet } from "@demox-labs/miden-wallet-adapter";
+import { cn } from "@workspace/ui/lib/utils";
 
 const ProjectSwitcher = () => {
   const isClient = useIsClient();
   const { isMobile } = useSidebar();
   const router = useRouter();
   const { accountId } = useWallet();
-  const { networkId, blockNum, resetState /*, switchNetwork */ } =
-    useGlobalContext();
-  const { tutorialId, tutorialLoaded, startTutorial, loadTutorial } =
-    useTutorials();
+  const { networkId, resetState /*, switchNetwork */ } = useGlobalContext();
+  const {
+    tutorialId,
+    tutorialLoaded,
+    completedTutorials,
+    startTutorial,
+    loadTutorial,
+  } = useTutorials();
   const { wallets } = useAccounts();
   // const { saveProject, loadProject } = useProjects();
   useEffect(() => {
@@ -55,6 +60,7 @@ const ProjectSwitcher = () => {
       loadTutorial(tutorialId);
     }
   }, [wallets, accountId, tutorialId, tutorialLoaded, loadTutorial]);
+  const tutorial = tutorials.find(({ id }) => id === tutorialId);
   if (!isClient) {
     return null;
   }
@@ -73,7 +79,9 @@ const ProjectSwitcher = () => {
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">Miden Playground</span>
                 <span className="truncate text-xs">
-                  {networks[networkId]} - Block #{blockNum}
+                  {tutorial
+                    ? `${tutorial.title}`
+                    : `${networks[networkId]} sandbox`}
                 </span>
               </div>
               <ChevronsUpDown className="ml-auto" />
@@ -157,6 +165,13 @@ const ProjectSwitcher = () => {
                         });*/
                       }}
                     >
+                      <BadgeCheck
+                        className={cn("size-4 text-transparent", {
+                          "text-green-500": completedTutorials.has(
+                            tutorial.number
+                          ),
+                        })}
+                      />{" "}
                       {tutorial.number}. {tutorial.title}
                     </DropdownMenuItem>
                   ))}

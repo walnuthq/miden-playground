@@ -62,6 +62,7 @@ export type State = {
   tutorialMaxStep: number;
   tutorialOpen: boolean;
   nextTutorialStepDisabled: boolean;
+  completedTutorials: Set<number>;
 };
 
 export const defaultState = (): State => ({
@@ -111,6 +112,7 @@ export const defaultState = (): State => ({
   tutorialMaxStep: 0,
   tutorialOpen: true,
   nextTutorialStepDisabled: true,
+  completedTutorials: new Set([]),
 });
 
 export const stateSerializer = ({
@@ -128,6 +130,7 @@ export const stateSerializer = ({
   tutorialMaxStep,
   tutorialOpen,
   nextTutorialStepDisabled,
+  completedTutorials,
 }: State) =>
   JSON.stringify({
     networkId,
@@ -164,6 +167,7 @@ export const stateSerializer = ({
     tutorialMaxStep,
     tutorialOpen,
     nextTutorialStepDisabled,
+    completedTutorials: [...completedTutorials],
   });
 
 export const stateDeserializer = (value: string): State => {
@@ -183,6 +187,7 @@ export const stateDeserializer = (value: string): State => {
       tutorialMaxStep,
       tutorialOpen,
       nextTutorialStepDisabled,
+      completedTutorials,
     } = JSON.parse(value) as {
       networkId?: NetworkId;
       blockNum?: number;
@@ -211,6 +216,7 @@ export const stateDeserializer = (value: string): State => {
       tutorialMaxStep?: number;
       tutorialOpen?: boolean;
       nextTutorialStepDisabled?: boolean;
+      completedTutorials: number[];
     };
     const initialState = defaultState();
     return {
@@ -258,6 +264,9 @@ export const stateDeserializer = (value: string): State => {
       tutorialOpen: tutorialOpen ?? initialState.tutorialOpen,
       nextTutorialStepDisabled:
         nextTutorialStepDisabled ?? initialState.nextTutorialStepDisabled,
+      completedTutorials: completedTutorials
+        ? new Set(completedTutorials)
+        : initialState.completedTutorials,
     };
   } catch (error) {
     console.error(error);

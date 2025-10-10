@@ -35,7 +35,7 @@ const reducer = (state: State, action: Action): State => {
     case "RESET_STATE":
     case "SWITCH_NETWORK":
     case "SYNC_STATE":
-    case "LOAD_PROJECT": {
+    case "LOAD_STATE": {
       return globalReducer(state, action);
     }
     case "NEW_ACCOUNT":
@@ -82,7 +82,6 @@ const reducer = (state: State, action: Action): State => {
     case "UPDATE_COMPONENT": {
       return componentReducer(state, action);
     }
-    case "START_TUTORIAL":
     case "LOAD_TUTORIAL":
     case "PREVIOUS_TUTORIAL_STEP":
     case "NEXT_TUTORIAL_STEP":

@@ -23,7 +23,7 @@
     "@mdx-js/react": "^3.1.1",
     "@monaco-editor/react": "^4.7.0",
     "@next/mdx": "^15.5.4",
-    "@opennextjs/cloudflare": "^1.10.0",
+    "@opennextjs/cloudflare": "^1.10.1",
     "@tanstack/react-table": "^8.21.3",
     "@types/mdx": "^2.0.13",
     "@workspace/ui": "workspace:*",

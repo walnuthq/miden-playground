@@ -3,7 +3,8 @@ import useGlobalContext from "@/components/global-context/hook";
 import tutorials from "@/components/tutorials";
 import { webClient } from "@/lib/web-client";
 import useAccounts from "@/hooks/use-accounts";
-import { deleteStore } from "@/lib/types/store";
+import { defaultStore, deleteStore } from "@/lib/types/store";
+import { defaultState } from "@/lib/types/state";
 // import useTransactions from "@/hooks/use-transactions";
 // import defaultScripts from "@/components/global-context/default-scripts";
 // import defaultComponents from "@/components/global-context/default-components";
@@ -22,6 +23,7 @@ const useTutorials = () => {
     tutorialMaxStep,
     tutorialOpen,
     nextTutorialStepDisabled,
+    completedTutorials,
     dispatch,
   } = useGlobalContext();
   const { importAccountByAddress } = useAccounts();
@@ -35,7 +37,6 @@ const useTutorials = () => {
     if (!tutorial) {
       return;
     }
-    // dispatch({ type: "RESET_STATE" });
     router.push(tutorial.initialRoute);
     await deleteStore();
     const client = await webClient(
@@ -45,30 +46,18 @@ const useTutorials = () => {
     await client.forceImportStore(JSON.stringify(tutorial.store));
     const syncSummary = await client.syncState();
     dispatch({
-      type: "LOAD_PROJECT",
+      type: "LOAD_STATE",
       payload: {
         state: {
           ...tutorial.state,
-          // scripts: [...tutorial.state.scripts, ...defaultScripts],
-          // components: [...tutorial.state.components, ...defaultComponents],
           blockNum: syncSummary.blockNum(),
+          completedTutorials,
         },
       },
     });
-    if (tutorialId === "transfer-assets-between-wallets") {
-      //
-    }
-    if (tutorialId === "connect-wallet-and-sign-transactions") {
-      // await importAccountByAddress({
-      //   name: "Miden Faucet",
-      //   address: MIDEN_FAUCET_ADDRESS,
-      // });
-    }
   };
   const loadTutorial = async (tutorialId: string) => {
-    if (tutorialId === "transfer-assets-between-wallets") {
-      //
-    } else if (tutorialId === "connect-wallet-and-sign-transactions") {
+    if (tutorialId === "connect-wallet-and-sign-transactions") {
       await importAccountByAddress({
         name: "Miden Faucet",
         address: MIDEN_FAUCET_ADDRESS,
@@ -90,6 +79,37 @@ const useTutorials = () => {
     }
     dispatch({ type: "LOAD_TUTORIAL" });
   };
+  const nextTutorial = async () => {
+    const tutorial = tutorials.find(({ id }) => id === tutorialId);
+    if (!tutorial) {
+      return;
+    }
+    const nextTutorial = tutorials[tutorial.number] ?? {
+      initialRoute: "/",
+      state: defaultState(),
+      store: defaultStore(),
+    };
+    router.push(nextTutorial.initialRoute);
+    await deleteStore();
+    const client = await webClient(
+      nextTutorial.state.networkId,
+      nextTutorial.state.serializedMockChain
+    );
+    await client.forceImportStore(JSON.stringify(nextTutorial.store));
+    const syncSummary = await client.syncState();
+    const newCompletedTutorials = new Set([...completedTutorials]);
+    newCompletedTutorials.add(tutorial.number);
+    dispatch({
+      type: "LOAD_STATE",
+      payload: {
+        state: {
+          ...nextTutorial.state,
+          blockNum: syncSummary.blockNum(),
+          completedTutorials: newCompletedTutorials,
+        },
+      },
+    });
+  };
   const previousTutorialStep = () =>
     dispatch({ type: "PREVIOUS_TUTORIAL_STEP" });
   const nextTutorialStep = () => dispatch({ type: "NEXT_TUTORIAL_STEP" });
@@ -109,9 +129,11 @@ const useTutorials = () => {
     tutorialMaxStep,
     tutorialOpen,
     nextTutorialStepDisabled,
-    tutorial: tutorials.find(({ id }) => id === tutorialId),
+    completedTutorials,
+    // tutorial: tutorials.find(({ id }) => id === tutorialId),
     startTutorial,
     loadTutorial,
+    nextTutorial,
     previousTutorialStep,
     setTutorialStep,
     nextTutorialStep,

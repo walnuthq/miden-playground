@@ -4,8 +4,6 @@ import useAccounts from "@/hooks/use-accounts";
 import { useWallet } from "@demox-labs/miden-wallet-adapter";
 import { Button } from "@workspace/ui/components/button";
 import { sha3_256 } from "js-sha3";
-import { useInterval } from "usehooks-ts";
-import useGlobalContext from "@/components/global-context/hook";
 import { FUNGIBLE_FAUCET_DEFAULT_DECIMALS } from "@/lib/constants";
 
 // Function to find a valid nonce for proof of work using the new challenge format
@@ -111,15 +109,10 @@ const requestNote = async ({
 
 const MintButton = () => {
   const { wallet, accountId } = useWallet();
-  const { syncState } = useGlobalContext();
   const { accounts } = useAccounts();
   const account = accounts.find(({ address }) => address === accountId);
   const [loading, setLoading] = useState(false);
   const [noteId, setNoteId] = useState("");
-  useInterval(
-    syncState,
-    noteId === "" || account?.consumableNoteIds.includes(noteId) ? null : 1000
-  );
   useEffect(() => {
     if (account?.consumableNoteIds.includes(noteId)) {
       setNoteId("");

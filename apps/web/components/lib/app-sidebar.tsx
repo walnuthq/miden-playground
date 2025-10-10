@@ -36,7 +36,7 @@ import useTutorials from "@/hooks/use-tutorials";
 const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
   const isClient = useIsClient();
   const { accountId } = useWallet();
-  const { tutorialLoaded } = useTutorials();
+  const { tutorialId, tutorialLoaded } = useTutorials();
   const { accounts, wallets, importConnectedWallet } = useAccounts();
   const { transactions } = useTransactions();
   const { inputNotes } = useNotes();
@@ -121,10 +121,10 @@ const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
     const connectedWallet = wallets.find(
       ({ address }) => address === accountId
     );
-    if (!connectedWallet && tutorialLoaded) {
+    if (!connectedWallet && tutorialId === "" ? true : tutorialLoaded) {
       importConnectedWallet();
     }
-  }, [accountId, wallets, tutorialLoaded, importConnectedWallet]);
+  }, [accountId, wallets, tutorialId, tutorialLoaded, importConnectedWallet]);
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>

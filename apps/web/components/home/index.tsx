@@ -8,14 +8,14 @@ const Home = () => (
     <h3 className="scroll-m-20 border-b pb-2 text-2xl font-semibold tracking-tight">
       Sandbox environments
     </h3>
-    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       <NewSandboxCard networkId="mtst" />
       <NewSandboxCard networkId="mlcl" />
     </div>
     <h3 className="scroll-m-20 border-b pb-2 text-2xl font-semibold tracking-tight">
       Tutorials
     </h3>
-    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       {tutorials.map((tutorial) => (
         <StartTutorialCard key={tutorial.id} tutorial={tutorial} />
       ))}

@@ -11,12 +11,14 @@ You will need a connected wallet to sign the transaction so make sure your Miden
 From the <Link href="/notes">notes page</Link>, click on the _"Add note"_ button and select the _"Create note"_ option.
 
 A _"Create Note"_ dialog will show up to help you configure the note creation transaction.
-Select your connected wallet as sender account and pick the timelock script, leave the note type as public.
+Select the timelock script and leave the note type as public.
+
+The note will be created through your wallet so you can include some of your assets in the note, try sending **100 MIDEN** tokens.
 
 The final step is to add the correct note inputs to configure your custom note.
 
 The first two inputs are the target account ID suffix and prefix, you can use the <Link href={`/accounts/${TEST_WALLET_ADDRESS}`}>Test Wallet</Link> account ID suffix **{TEST_WALLET_ACCOUNT_ID_SUFFIX}** and prefix **{TEST_WALLET_ACCOUNT_ID_PREFIX}**.
 
-The third input is the timelock block height, you can set it to any future block height eg. **500000**.
+The third input is the timelock block height, you can set it to any future block height eg. **{props.blockNum}**.
 
 Once you're done configuring your note creation, click on the _"Create"_ button and sign the resulting transaction.
