@@ -34,7 +34,6 @@ const EditorConsole = ({ script }: { script: Script }) => {
         <CardAction>
           <Button disabled={loading} onClick={compile}>
             {loading ? <RotateCw className="animate-spin" /> : <Play />}
-
             {loading ? "Compiling…" : script.error ? "Re-compile" : "Compile"}
           </Button>
         </CardAction>

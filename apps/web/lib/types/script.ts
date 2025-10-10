@@ -69,6 +69,7 @@ export type Script = {
   packageName: string;
   type: ScriptType;
   status: ScriptStatus;
+  readOnly: boolean;
   rust: string;
   masm: string;
   error: string;
@@ -85,6 +86,7 @@ export const defaultScript = (): Script => ({
   packageName: "",
   type: "account",
   status: "draft",
+  readOnly: false,
   rust: "",
   masm: "",
   error: "",

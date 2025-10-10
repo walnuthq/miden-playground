@@ -4,14 +4,14 @@ import {
   webClient,
   clientGetAllInputNotes,
   clientGetAccountByAddress,
-  clientGetConsumableNotes,
+  // clientGetConsumableNotes,
   wasmAccountToAccount,
 } from "@/lib/web-client";
-import { type Account } from "@/lib/types/account";
+import { accountIdFromPrefixSuffix, type Account } from "@/lib/types/account";
 import { type NetworkId } from "@/lib/types/network";
 import { defaultStore, deleteStore } from "@/lib/types/store";
-import { noteConsumed, noteInputsToAccountId } from "@/lib/types/note";
-import { P2ID_NOTE_CODE } from "@/lib/constants";
+import { noteConsumed } from "@/lib/types/note";
+// import { P2ID_NOTE_CODE } from "@/lib/constants";
 
 const useGlobalContext = () => {
   const { state, dispatch } = useContext(GlobalContext);
@@ -44,31 +44,33 @@ const useGlobalContext = () => {
         client,
         account.address
       );
-      const consumableNotes = await clientGetConsumableNotes(
-        client,
-        account.id
-      );
-      const noteIds = consumableNotes.map((consumableNote) =>
-        consumableNote.inputNoteRecord().id().toString()
-      );
+      // const consumableNotes = await clientGetConsumableNotes(
+      //   client,
+      //   account.id
+      // );
+      // const noteIds = consumableNotes.map((consumableNote) =>
+      //   consumableNote.inputNoteRecord().id().toString()
+      // );
       // TODO fix for getConsumableNotes
+      const noteIds: string[] = [];
       for (const inputNote of inputNotes) {
         if (
-          inputNote.scriptRoot !== P2ID_NOTE_CODE ||
+          // inputNote.scriptRoot !== P2ID_NOTE_CODE ||
           noteConsumed(inputNote)
         ) {
           continue;
         }
-        const targetAccountId = noteInputsToAccountId(inputNote.inputs);
+        const targetAccountId = accountIdFromPrefixSuffix(
+          inputNote.inputs[1]!,
+          inputNote.inputs[0]!
+        );
         if (account.id === targetAccountId && !noteIds.includes(inputNote.id)) {
           noteIds.push(inputNote.id);
         }
       }
-      //
       const updatedAccount = await wasmAccountToAccount({
         wasmAccount,
         name: account.name,
-        tokenSymbol: account.tokenSymbol,
         components: account.components,
         networkId: state.networkId,
         updatedAt: syncSummary.blockNum(),

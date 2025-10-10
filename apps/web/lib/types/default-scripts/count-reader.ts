@@ -32,6 +32,7 @@ const countReader: Script = {
   packageName: "count-reader",
   type: "account",
   status: "compiled",
+  readOnly: true,
   rust: countReaderRust,
   masm: countReaderMasm,
   procedures: [

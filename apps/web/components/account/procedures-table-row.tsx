@@ -40,20 +40,13 @@ const ProceduresTableRow = ({
                 client,
                 account.address
               );
-              // const word = await getStorageRead(wasmAccount, {
-              //   type: "map",
-              //   index: 1,
-              //   key: [0n, 0n, 0n, 1n],
-              // });
               const word = await getStorageRead(
                 wasmAccount,
                 procedure.storageRead
               );
               if (word) {
-                const felt = BigInt(
-                  `0x${word!.toHex().slice(-16).match(/../g)!.reverse().join("")}`
-                );
-                setResult(felt.toString());
+                const [, , , felt] = word.toU64s();
+                setResult(felt!.toString());
               }
             } else if (procedure.inputs.length === 0) {
               const transactionRecord = await invokeProcedure({

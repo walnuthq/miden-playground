@@ -22,7 +22,10 @@ import {
   type InputNoteRecord as WasmInputNoteRecord,
 } from "@demox-labs/miden-sdk";
 import useAccounts from "@/hooks/use-accounts";
-import { type Account } from "@/lib/types/account";
+import {
+  decodeFungibleFaucetMetadata,
+  type Account,
+} from "@/lib/types/account";
 
 const getConsumableNoteFields = (
   inputNoteRecord: WasmInputNoteRecord,
@@ -36,7 +39,8 @@ const getConsumableNoteFields = (
       const faucetId = fungibleAsset.faucetId().toString();
       const amount = fungibleAsset.amount().toString();
       const faucet = faucets.find(({ id }) => id === faucetId);
-      return `${amount} ${faucet?.tokenSymbol ?? "Unknown"}`;
+      const { tokenSymbol } = decodeFungibleFaucetMetadata(faucet);
+      return `${amount} ${tokenSymbol}`;
     });
   const metadata = inputNoteRecord.metadata();
   const wasmNoteTypes = {

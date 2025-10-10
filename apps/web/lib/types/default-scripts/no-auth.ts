@@ -84,6 +84,7 @@ const noAuth: Script = {
   packageName: "no-auth",
   type: "account",
   status: "compiled",
+  readOnly: true,
   rust: noAuthRust,
   masm: noAuthMasm,
 };

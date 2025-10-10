@@ -9,6 +9,7 @@ import {
 import useAccounts from "@/hooks/use-accounts";
 import AccountAddress from "@/components/lib/account-address";
 import { type WasmAssetVault } from "@/lib/types";
+import { decodeFungibleFaucetMetadata } from "@/lib/types/account";
 
 const AccountVaultTable = ({ vault }: { vault: WasmAssetVault }) => {
   const { faucets } = useAccounts();
@@ -29,13 +30,14 @@ const AccountVaultTable = ({ vault }: { vault: WasmAssetVault }) => {
             const faucet = faucets.find(
               ({ id }) => id === fungibleAsset.faucetId().toString()
             );
+            const { tokenSymbol } = decodeFungibleFaucetMetadata(faucet);
             return (
               <TableRow key={fungibleAsset.faucetId().toString()}>
                 <TableCell>Fungible Asset</TableCell>
                 <TableCell>
                   <AccountAddress address={faucet?.address} />
                 </TableCell>
-                <TableCell>{faucet?.tokenSymbol ?? "Unknown"}</TableCell>
+                <TableCell>{tokenSymbol}</TableCell>
                 <TableCell>{fungibleAsset.amount()}</TableCell>
               </TableRow>
             );

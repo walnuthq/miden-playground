@@ -10,7 +10,6 @@ import {
 import Editor from "@/components/lib/editor";
 import EditorConsole from "@/components/script/editor-console";
 import DependenciesTable from "@/components/script/dependencies-table";
-import defaultScripts from "@/lib/types/default-scripts";
 
 const Script = ({ id }: { id: string }) => {
   const isClient = useIsClient();
@@ -19,8 +18,6 @@ const Script = ({ id }: { id: string }) => {
   if (!isClient || !script) {
     return null;
   }
-  const defaultScriptIds = defaultScripts.map(({ id }) => id);
-  const defaultScript = defaultScriptIds.includes(script.id);
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
       <Tabs defaultValue="rust">
@@ -36,8 +33,8 @@ const Script = ({ id }: { id: string }) => {
             <Editor
               script={script}
               language="rust"
-              readOnly={defaultScript}
-              height={defaultScript ? "85vh" : "61vh"}
+              readOnly={script.readOnly}
+              height={script.readOnly ? "85vh" : "61vh"}
             />
           </TabsContent>
           <TabsContent value="masm">
@@ -45,17 +42,17 @@ const Script = ({ id }: { id: string }) => {
               script={script}
               language="masm"
               readOnly
-              height={defaultScript ? "85vh" : "61vh"}
+              height={script.readOnly ? "85vh" : "61vh"}
             />
           </TabsContent>
           {script.dependencies.length > 0 && (
             <TabsContent value="dependencies">
-              <div className={defaultScript ? "h-[85vh]" : "h-[61vh]"}>
+              <div className={script.readOnly ? "h-[85vh]" : "h-[61vh]"}>
                 <DependenciesTable script={script} />
               </div>
             </TabsContent>
           )}
-          {!defaultScript && <EditorConsole script={script} />}
+          {!script.readOnly && <EditorConsole script={script} />}
         </div>
       </Tabs>
     </div>

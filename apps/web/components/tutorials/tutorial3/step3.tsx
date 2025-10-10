@@ -23,12 +23,7 @@ const Step3: TutorialStep = {
     const { wallets } = useAccounts();
     const wallet = wallets.find(({ address }) => address === accountId);
     useInterval(
-      () => {
-        const waitForSyncState = async () => {
-          await syncState();
-        };
-        waitForSyncState();
-      },
+      syncState,
       wallet && wallet.consumableNoteIds.length > 0 ? 1000 : null
     );
     const completed = useCompleted();

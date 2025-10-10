@@ -112,11 +112,15 @@ const DeployAccountDialog = () => {
                   <SelectValue placeholder="Select type…" />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.keys(accountTypes).map((accountType) => (
-                    <SelectItem key={accountType} value={accountType}>
-                      {accountTypes[accountType as AccountType]}
-                    </SelectItem>
-                  ))}
+                  {Object.keys(accountTypes)
+                    .filter((accountType) =>
+                      accountType.startsWith("regular-account")
+                    )
+                    .map((accountType) => (
+                      <SelectItem key={accountType} value={accountType}>
+                        {accountTypes[accountType as AccountType]}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>

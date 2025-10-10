@@ -149,8 +149,16 @@ const useTransactions = () => {
   const submitTransaction = async (
     transactionResult: WasmTransactionResult
   ) => {
+    // const { TransactionProver: WasmTransactionProver } = await import(
+    //   "@demox-labs/miden-sdk"
+    // );
     const client = await webClient(networkId, serializedMockChain);
-    await client.submitTransaction(transactionResult);
+    await client.submitTransaction(
+      transactionResult
+      // WasmTransactionProver.newRemoteProver(
+      //   "https://tx-prover.testnet.miden.io"
+      // )
+    );
     let newSerializedMockChain = null;
     if (client.usesMockChain()) {
       await client.proveBlock();
@@ -198,7 +206,6 @@ const useTransactions = () => {
     const account = await wasmAccountToAccount({
       wasmAccount: nextAccount,
       name: previousAccount.name,
-      tokenSymbol: previousAccount.tokenSymbol,
       components: previousAccount.components,
       networkId,
       updatedAt: syncSummary.blockNum(),

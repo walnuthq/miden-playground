@@ -6,6 +6,7 @@ import Step2 from "@/components/tutorials/tutorial4/step2";
 import Step3 from "@/components/tutorials/tutorial4/step3";
 import Step4 from "@/components/tutorials/tutorial4/step4";
 import Step5 from "@/components/tutorials/tutorial4/step5";
+import Step6 from "@/components/tutorials/tutorial4/step6";
 
 const tutorial: Tutorial = {
   id: "interact-with-the-counter-contract",
@@ -17,7 +18,7 @@ const tutorial: Tutorial = {
   initialRoute: "/scripts",
   store,
   state,
-  steps: [Step1, Step2, Step3, Step4, Step5],
+  steps: [Step1, Step2, Step3, Step4, Step5, Step6],
 };
 
 export default tutorial;

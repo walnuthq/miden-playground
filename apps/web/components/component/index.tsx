@@ -13,7 +13,11 @@ import UpsertStorageSlotDialog from "@/components/component/upsert-storage-slot-
 
 const Component = ({ id }: { id: string }) => {
   const isClient = useIsClient();
-  const { components } = useComponents();
+  const {
+    components,
+    upsertStorageSlotDialogComponentId: componentId,
+    upsertStorageSlotDialogStorageSlotIndex: storageSlotIndex,
+  } = useComponents();
   const component = components.find((component) => component.id === id);
   if (!isClient || !component) {
     return null;
@@ -34,7 +38,10 @@ const Component = ({ id }: { id: string }) => {
           <ComponentScript component={component} />
         </TabsContent>
       </Tabs>
-      <UpsertStorageSlotDialog />
+      <UpsertStorageSlotDialog
+        componentId={componentId}
+        storageSlotIndex={storageSlotIndex}
+      />
     </div>
   );
 };

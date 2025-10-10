@@ -9,7 +9,7 @@ import useGlobalContext from "@/components/global-context/hook";
 import useAccounts from "@/hooks/use-accounts";
 import useNotes from "@/hooks/use-notes";
 import { P2ID_NOTE_CODE } from "@/lib/constants";
-import { noteInputsToAccountId } from "@/lib/types/note";
+import { accountIdFromPrefixSuffix } from "@/lib/types/account";
 
 const useCompleted = () => {
   const { accountId } = useWallet();
@@ -22,19 +22,12 @@ const useCompleted = () => {
     ({ senderId, scriptRoot, inputs, state, type }) =>
       senderId === senderAccount?.id &&
       scriptRoot === P2ID_NOTE_CODE &&
-      noteInputsToAccountId(inputs) === recipientAccount?.id &&
+      accountIdFromPrefixSuffix(inputs[1]!, inputs[0]!) ===
+        recipientAccount?.id &&
       state === "committed" &&
       type === "public"
   );
-  useInterval(
-    () => {
-      const waitForSyncState = async () => {
-        await syncState();
-      };
-      waitForSyncState();
-    },
-    note ? null : 1000
-  );
+  useInterval(syncState, note ? null : 1000);
   return !!note;
 };
 

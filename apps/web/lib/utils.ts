@@ -8,3 +8,14 @@ export const formatValue = (value: string) =>
 
 export const formatAddress = (address: string, networkId: string) =>
   `${networkId}${address.slice(networkId.length).slice(0, 8)}…${address.slice(-8)}`;
+
+export const stringToFeltArray = (word: string): BigUint64Array => {
+  const [, felt0, felt1, felt2, felt3] = word.match(
+    /0x([0-9a-f]{16})([0-9a-f]{16})([0-9a-f]{16})([0-9a-f]{16})/
+  )!;
+  return new BigUint64Array(
+    [felt0!, felt1!, felt2!, felt3!].map((felt) =>
+      BigInt(`0x${felt!.match(/../g)!.reverse().join("")}`)
+    )
+  );
+};

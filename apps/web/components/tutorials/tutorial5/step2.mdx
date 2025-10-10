@@ -1,5 +1,5 @@
 Let's focus on lines _26-32_ in the Rust source code of the Counter Contract script, where the contract structure is defined.
-This contract uses a **StorageMap** to store the counter value, a map holds key-value pairs and both keys and values are of type [Word](https://0xmiden.github.io/miden-docs/glossary.html#word).
+This contract uses a [Map Slot](https://0xmiden.github.io/miden-docs/imported/miden-base/src/account/storage.html#map-slots) to store the counter value, a **StorageMap** holds key-value pairs and both keys and values are of type [Word](https://0xmiden.github.io/miden-docs/glossary.html#word).
 
 The **get_count** procedure defined at lines _38-45_ returns the current counter stored in the contract [AccountStorage](https://0xmiden.github.io/miden-docs/glossary.html#accountstorage) as a [Felt](https://0xmiden.github.io/miden-docs/glossary.html#felt).
 A fixed key is predefined using the Word constant value 1 and the corresponding value is retrieved within the map and truncated to a single Felt.

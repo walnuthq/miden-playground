@@ -25,6 +25,7 @@ import useNotes from "@/hooks/use-notes";
 import useScripts from "@/hooks/use-scripts";
 import { noteTypes, type NoteType } from "@/lib/types/note";
 import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";
+import { accountIdFromPrefixSuffix } from "@/lib/types/account";
 
 const CreateNoteDialog = () => {
   const { createNoteDialogOpen, closeCreateNoteDialog, newNote } = useNotes();
@@ -66,11 +67,18 @@ const CreateNoteDialog = () => {
           onSubmit={async (event) => {
             event.preventDefault();
             const formData = new FormData(event.currentTarget);
-            const amount = BigInt(formData.get("name")?.toString() ?? "0");
+            const amount = BigInt(formData.get("amount")?.toString() ?? "0");
+            const recipientAccountId =
+              noteInputs.length >= 2
+                ? accountIdFromPrefixSuffix(
+                    BigInt(noteInputs[1] ?? "0"),
+                    BigInt(noteInputs[0] ?? "0")
+                  )
+                : "";
             setLoading(true);
             /*const transactionRecord = */ await newNote({
               senderAccountId,
-              recipientAccountId: senderAccountId,
+              recipientAccountId,
               scriptId,
               type: noteType,
               faucetAccountId,
@@ -165,6 +173,8 @@ const CreateNoteDialog = () => {
                     id={`input-${index}`}
                     name={`input-${index}`}
                     placeholder={`Note input #${index}`}
+                    type="number"
+                    min="0"
                     value={noteInput}
                     onChange={(event) =>
                       setNoteInputs([
@@ -173,7 +183,6 @@ const CreateNoteDialog = () => {
                         ...noteInputs.slice(index + 1),
                       ])
                     }
-                    pattern="\d+"
                     required
                   />
                   <Button

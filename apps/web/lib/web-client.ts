@@ -486,7 +486,6 @@ const accountType = (account: WasmAccount /*, tokenSymbol?: string*/) => {
 export const wasmAccountToAccount = async ({
   wasmAccount,
   name,
-  tokenSymbol,
   components,
   networkId,
   updatedAt,
@@ -494,7 +493,6 @@ export const wasmAccountToAccount = async ({
 }: {
   wasmAccount: WasmAccount;
   name: string;
-  tokenSymbol?: string;
   components?: string[];
   networkId: string;
   updatedAt: number;
@@ -533,7 +531,6 @@ export const wasmAccountToAccount = async ({
     }, []),
     consumableNoteIds: consumableNoteIds ?? [],
     components: components ?? [],
-    tokenSymbol,
     updatedAt,
   };
 };

@@ -51,6 +51,8 @@ const reducer = (state: State, action: ComponentAction): State => {
       return {
         ...state,
         upsertStorageSlotDialogOpen: false,
+        upsertStorageSlotDialogComponentId: "",
+        upsertStorageSlotDialogStorageSlotIndex: -1,
       };
     }
     case "NEW_COMPONENT": {

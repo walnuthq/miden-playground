@@ -136,6 +136,7 @@ const basicAuth: Script = {
   packageName: "basic-auth",
   type: "account",
   status: "compiled",
+  readOnly: true,
   rust: basicAuthRust,
   masm: basicAuthMasm,
 };

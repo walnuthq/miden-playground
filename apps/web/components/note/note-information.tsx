@@ -1,4 +1,5 @@
-import { type InputNote, noteInputsToAccountId } from "@/lib/types/note";
+import { type InputNote } from "@/lib/types/note";
+import { accountIdFromPrefixSuffix } from "@/lib/types/account";
 import NoteInformationTable from "@/components/note/note-information-table";
 import NoteInputsTable from "@/components/note/note-inputs-table";
 import DecodedNoteInputsTable from "@/components/note/decoded-note-inputs-table";
@@ -40,7 +41,10 @@ const NoteInformation = ({ inputNote }: { inputNote: InputNote }) => {
                 key: "Target Account ID",
                 value: (
                   <AccountAddress
-                    id={noteInputsToAccountId(inputNote.inputs)}
+                    id={accountIdFromPrefixSuffix(
+                      inputNote.inputs[1]!,
+                      inputNote.inputs[0]!
+                    )}
                   />
                 ),
               },
