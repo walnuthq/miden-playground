@@ -1,10 +1,6 @@
-import { type State, defaultState } from "@/lib/types/state";
+import { type State } from "@/lib/types/state";
 
 export type TutorialAction =
-  | {
-      type: "START_TUTORIAL";
-      payload: { tutorialId: string };
-    }
   | {
       type: "LOAD_TUTORIAL";
     }
@@ -20,14 +16,6 @@ export type TutorialAction =
 
 const reducer = (state: State, action: TutorialAction): State => {
   switch (action.type) {
-    case "START_TUTORIAL": {
-      return {
-        ...defaultState(),
-        tutorialId: action.payload.tutorialId,
-        tutorialStep: 0,
-        tutorialMaxStep: 0,
-      };
-    }
     case "LOAD_TUTORIAL": {
       return {
         ...state,
@@ -41,10 +29,14 @@ const reducer = (state: State, action: TutorialAction): State => {
       };
     }
     case "NEXT_TUTORIAL_STEP": {
+      const nextTutorialStep = state.tutorialStep + 1;
       return {
         ...state,
-        tutorialStep: state.tutorialStep + 1,
-        tutorialMaxStep: state.tutorialStep + 1,
+        tutorialStep: nextTutorialStep,
+        tutorialMaxStep:
+          nextTutorialStep > state.tutorialMaxStep
+            ? nextTutorialStep
+            : state.tutorialMaxStep,
       };
     }
     case "SET_TUTORIAL_STEP": {

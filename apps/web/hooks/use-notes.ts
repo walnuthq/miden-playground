@@ -7,6 +7,7 @@ import {
   CustomTransaction,
   TransactionType,
 } from "@demox-labs/miden-wallet-adapter";
+import { TEST_WALLET_ACCOUNT_ID } from "@/lib/constants";
 
 const useNotes = () => {
   const {

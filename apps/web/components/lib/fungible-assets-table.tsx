@@ -10,6 +10,7 @@ import { type FungibleAsset } from "@/lib/types/asset";
 import useAccounts from "@/hooks/use-accounts";
 import AccountAddress from "@/components/lib/account-address";
 import { cn } from "@workspace/ui/lib/utils";
+import { decodeFungibleFaucetMetadata } from "@/lib/types/account";
 
 const FungibleAssetsTable = ({
   fungibleAssets,
@@ -35,6 +36,7 @@ const FungibleAssetsTable = ({
             const faucet = faucets.find(
               ({ id }) => id === fungibleAsset.faucetId
             );
+            const { tokenSymbol } = decodeFungibleFaucetMetadata(faucet);
             return (
               <TableRow key={fungibleAsset.faucetId}>
                 <TableCell>Fungible Asset</TableCell>
@@ -46,7 +48,7 @@ const FungibleAssetsTable = ({
                     withLink={withAccountAddress}
                   />
                 </TableCell>
-                <TableCell>{faucet?.tokenSymbol ?? "Unknown"}</TableCell>
+                <TableCell>{tokenSymbol}</TableCell>
                 <TableCell
                   className={cn({
                     "text-green-500": fungibleAsset.amount.startsWith("+"),

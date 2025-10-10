@@ -125,3 +125,31 @@
     @apply bg-background text-foreground;
   }
 }
+
+.wallet-adapter-button-trigger {
+  color: inherit;
+  border-color: var(--color-border);
+  @apply whitespace-nowrap;
+  @apply rounded-md;
+  @apply text-sm;
+  @apply font-medium;
+  @apply transition-all;
+  @apply border;
+  @apply bg-background;
+  @apply shadow-xs;
+  @apply dark:bg-input/30;
+  @apply dark:border-input;
+  @apply h-9;
+  @apply px-4;
+}
+
+.wallet-adapter-button-trigger:hover {
+  background-color: var(--accent) !important;
+  &:is(.dark *) {
+    background-color: color-mix(
+      in oklab,
+      var(--input) 50%,
+      transparent
+    ) !important;
+  }
+}

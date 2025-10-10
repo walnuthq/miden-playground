@@ -11,6 +11,7 @@ import {
 } from "@workspace/ui/components/dropdown-menu";
 import { Button } from "@workspace/ui/components/button";
 import useAccounts from "@/hooks/use-accounts";
+import { decodeFungibleFaucetMetadata } from "@/lib/types/account";
 
 const SelectAccountDropdownMenu = ({
   value,
@@ -29,6 +30,7 @@ const SelectAccountDropdownMenu = ({
 }) => {
   const { accounts, wallets, faucets } = useAccounts();
   const account = accounts.find(({ id }) => id === value);
+  const { tokenSymbol } = decodeFungibleFaucetMetadata(account);
   const shownAccounts = accounts.filter(({ id }) => id !== without);
   const shownWallets = wallets.filter(({ id }) => id !== without);
   const showWallets = selectWallets && shownWallets.length > 0;
@@ -49,7 +51,7 @@ const SelectAccountDropdownMenu = ({
         >
           {account
             ? showFaucetsAsAssets
-              ? (account.tokenSymbol ?? account.name)
+              ? tokenSymbol
               : account.name
             : disabled
               ? "No accounts found."
@@ -91,13 +93,18 @@ const SelectAccountDropdownMenu = ({
                       <HandCoins className="size-4" /> Faucets
                     </DropdownMenuLabel>
                   )}
-                  {shownFaucets.map((faucet) => (
-                    <DropdownMenuRadioItem key={faucet.name} value={faucet.id}>
-                      {showFaucetsAsAssets
-                        ? (faucet.tokenSymbol ?? faucet.name)
-                        : faucet.name}
-                    </DropdownMenuRadioItem>
-                  ))}
+                  {shownFaucets.map((faucet) => {
+                    const { tokenSymbol } =
+                      decodeFungibleFaucetMetadata(faucet);
+                    return (
+                      <DropdownMenuRadioItem
+                        key={faucet.name}
+                        value={faucet.id}
+                      >
+                        {showFaucetsAsAssets ? tokenSymbol : faucet.name}
+                      </DropdownMenuRadioItem>
+                    );
+                  })}
                 </>
               )}
             </>

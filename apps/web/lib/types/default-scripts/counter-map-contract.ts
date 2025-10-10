@@ -113,6 +113,7 @@ const counterMapContract: Script = {
   packageName: "counter-map-contract",
   type: "account",
   status: "compiled",
+  readOnly: true,
   rust: counterMapContractRust,
   masm: counterMapContractMasm,
   procedures: [

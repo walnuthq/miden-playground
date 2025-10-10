@@ -1,11 +1,7 @@
 "use client";
 import { MoreVertical } from "lucide-react";
-import {
-  type InputNote,
-  noteConsumed,
-  noteStates,
-  noteInputsToAccountId,
-} from "@/lib/types/note";
+import { type InputNote, noteConsumed, noteStates } from "@/lib/types/note";
+import { accountIdFromPrefixSuffix } from "@/lib/types/account";
 import { formatId } from "@/lib/utils";
 import { type ColumnDef } from "@tanstack/react-table";
 import { Button } from "@workspace/ui/components/button";
@@ -37,7 +33,10 @@ const InputNoteActionsCell = ({ inputNote }: { inputNote: InputNote }) => {
         {script?.id === "p2id" && !noteConsumed(inputNote) && (
           <DropdownMenuItem
             onClick={async () => {
-              const targetAccountId = noteInputsToAccountId(inputNote.inputs);
+              const targetAccountId = accountIdFromPrefixSuffix(
+                inputNote.inputs[1]!,
+                inputNote.inputs[0]!
+              );
               const transactionResult = await newConsumeTransactionRequest({
                 accountId: targetAccountId,
                 noteIds: [inputNote.id],

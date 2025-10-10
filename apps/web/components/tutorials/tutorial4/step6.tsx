@@ -1,9 +1,9 @@
 import { type TutorialStep } from "@/lib/types/tutorial";
 import NextTutorialButton from "@/components/tutorials/next-tutorial-button";
-import Step6Content from "@/components/tutorials/tutorial1/step6.mdx";
+import Step6Content from "@/components/tutorials/tutorial4/step6.mdx";
 
 const Step6: TutorialStep = {
-  title: "Confirm your wallet is funded.",
+  title: "Refresh the counter value.",
   Content: Step6Content,
   NextStepButton: NextTutorialButton,
 };

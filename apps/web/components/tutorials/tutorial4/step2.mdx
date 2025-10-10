@@ -1,17 +1,9 @@
-Here's a breakdown of what the **get_count** procedure does:
+Let's focus on lines _26-32_ in the Rust source code of the Counter Contract script, where the contract structure is defined.
+This contract uses a [Value Slot](https://0xmiden.github.io/miden-docs/imported/miden-base/src/account/storage.html#value-slots) to store the counter in its first storage slot, a **Value** represents a single [Word](https://0xmiden.github.io/miden-docs/glossary.html#word) of storage data.
 
-- Pushes 0 onto the stack, representing the index of the storage slot to read.
-- Calls **account::get_item** with the index of 0.
-- Calls **sys::truncate_stack** to truncate the stack to size 16.
-- The value returned from **account::get_item** is still on the stack and will be returned when this procedure is called.
+The **get_count** procedure defined at lines _38-43_ returns the current counter stored in the contract [AccountStorage](https://0xmiden.github.io/miden-docs/glossary.html#accountstorage) as a [Felt](https://0xmiden.github.io/miden-docs/glossary.html#felt).
+We simply return the Word value stored in the count storage slot truncated to a single Felt.
 
-Here's a breakdown of what the **increment_count** procedure does:
+Finally, the **increment_count** procedure at lines _46-56_ is responsible for incrementing the counter value and returning it, using similar code as the getter method.
 
-- Pushes 0 onto the stack, representing the index of the storage slot to read.
-- Calls **account::get_item** with the index of 0.
-- Pushes 1 onto the stack.
-- Adds 1 to the count value returned from **account::get_item**.
-- For demonstration purposes, calls **debug.stack** to see the state of the stack
-- Pushes 0 onto the stack, which is the index of the storage slot we want to write to.
-- Calls **account::set_item** which saves the incremented count to storage at index 0
-- Calls **sys::truncate_stack** to truncate the stack to size 16.
+In the next step, we'll focus on the compiled **MASM** code so if you want to deep dive into the underlying Miden VM architecture click on the _"MASM"_ tab, otherwise feel free to skip this step.

@@ -26,6 +26,7 @@ import useAccounts from "@/hooks/use-accounts";
 import AccountAddress from "@/components/lib/account-address";
 import { type AccountType, accountTypes } from "@/lib/types/account";
 import useComponents from "@/hooks/use-components";
+import defaultComponents from "@/lib/types/default-components";
 
 const DeployAccountDialog = () => {
   const { deployAccountDialogOpen, deployAccount, closeDeployAccountDialog } =
@@ -40,6 +41,7 @@ const DeployAccountDialog = () => {
   const [componentId, setComponentId] = useState("");
   const authComponent = components.find(({ id }) => id === authComponentId);
   const component = components.find(({ id }) => id === componentId);
+  const defaultComponentIds = defaultComponents.map(({ id }) => id);
   const onClose = () => {
     setAccountType("regular-account-updatable-code");
     setIsPublic(true);
@@ -112,11 +114,15 @@ const DeployAccountDialog = () => {
                   <SelectValue placeholder="Select type…" />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.keys(accountTypes).map((accountType) => (
-                    <SelectItem key={accountType} value={accountType}>
-                      {accountTypes[accountType as AccountType]}
-                    </SelectItem>
-                  ))}
+                  {Object.keys(accountTypes)
+                    .filter((accountType) =>
+                      accountType.startsWith("regular-account")
+                    )
+                    .map((accountType) => (
+                      <SelectItem key={accountType} value={accountType}>
+                        {accountTypes[accountType as AccountType]}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>
@@ -162,7 +168,10 @@ const DeployAccountDialog = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {components
-                    .filter(({ type }) => type === "account")
+                    .filter(
+                      ({ id, type }) =>
+                        !defaultComponentIds.includes(id) && type === "account"
+                    )
                     .map(({ id, name }) => (
                       <SelectItem key={id} value={id}>
                         {name}

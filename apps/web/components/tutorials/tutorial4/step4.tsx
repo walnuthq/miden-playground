@@ -1,43 +1,43 @@
-import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { type TutorialStep } from "@/lib/types/tutorial";
+import useAccounts from "@/hooks/use-accounts";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
 import Step4Content from "@/components/tutorials/tutorial4/step4.mdx";
-import useAccounts from "@/hooks/use-accounts";
 import { COUNTER_CONTRACT_ADDRESS } from "@/lib/constants";
 
-let initialNonce = 0n;
-
 const useCompleted = () => {
-  const { accounts } = useAccounts();
-  const counter = accounts.find(
-    ({ address }) => address === COUNTER_CONTRACT_ADDRESS
-  );
-  const currentNonce = counter?.nonce ?? 0n;
-  useEffect(() => {
-    if (initialNonce === 0n) {
-      initialNonce = currentNonce;
-    }
-  }, [currentNonce]);
-  return currentNonce > initialNonce;
+  const pathname = usePathname();
+  return pathname === `/accounts/${COUNTER_CONTRACT_ADDRESS}`;
 };
 
 const Step4: TutorialStep = {
-  title: "Invoke the Counter Contract procedures.",
+  title: "Import the Counter Contract.",
   Content: () => {
+    const { accounts } = useAccounts();
+    const counter = accounts.find(
+      ({ address }) => address === COUNTER_CONTRACT_ADDRESS
+    );
     const completed = useCompleted();
     return (
       <>
-        <Step4Content />
+        <Step4Content
+          counter={{
+            name: "Counter Contract",
+            address: COUNTER_CONTRACT_ADDRESS,
+          }}
+          withLink={!!counter}
+        />
         <TutorialAlert
           completed={completed}
-          title="Action required: Invoke the procedure."
-          titleWhenCompleted="You have invoked the Counter Contract procedures."
+          title="Action required: Import the Counter Contract."
+          titleWhenCompleted="You have imported the Counter Contract."
           description={
             <p>
-              Click on the <em>"Invoke"</em> button in the <em>"Components"</em>{" "}
-              section of the account details page to invoke the{" "}
-              <strong>increment_count</strong> procedure.
+              Click on the <em>"Create new account"</em> button on top of the
+              accounts page and select the <em>"Import account"</em> option to
+              import the Counter Contract in the Playground, then navigate to
+              the account details page.
             </p>
           }
         />

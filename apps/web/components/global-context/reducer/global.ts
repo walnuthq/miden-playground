@@ -17,7 +17,7 @@ export type GlobalAction =
         inputNotes: InputNote[];
       };
     }
-  | { type: "LOAD_PROJECT"; payload: { state: State } };
+  | { type: "LOAD_STATE"; payload: { state: State } };
 
 const reducer = (state: State, action: GlobalAction): State => {
   switch (action.type) {
@@ -26,6 +26,7 @@ const reducer = (state: State, action: GlobalAction): State => {
         ...defaultState(),
         networkId: action.payload.networkId,
         blockNum: action.payload.blockNum,
+        completedTutorials: state.completedTutorials,
       };
     }
     case "SWITCH_NETWORK": {
@@ -43,7 +44,7 @@ const reducer = (state: State, action: GlobalAction): State => {
         inputNotes: action.payload.inputNotes,
       };
     }
-    case "LOAD_PROJECT": {
+    case "LOAD_STATE": {
       return action.payload.state;
     }
   }

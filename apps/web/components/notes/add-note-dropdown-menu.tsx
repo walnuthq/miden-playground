@@ -8,8 +8,10 @@ import {
 import { Button } from "@workspace/ui/components/button";
 import useNotes from "@/hooks/use-notes";
 import useGlobalContext from "@/components/global-context/hook";
+import { useWallet } from "@demox-labs/miden-wallet-adapter";
 
 const AddNoteDropdownMenu = () => {
+  const { connected } = useWallet();
   const { networkId } = useGlobalContext();
   const { openImportNoteDialog, openCreateNoteDialog } = useNotes();
   return (
@@ -26,7 +28,10 @@ const AddNoteDropdownMenu = () => {
           Import note
         </DropdownMenuItem>
         {networkId === "mtst" && (
-          <DropdownMenuItem onClick={openCreateNoteDialog}>
+          <DropdownMenuItem
+            disabled={!connected}
+            onClick={openCreateNoteDialog}
+          >
             <FilePlus />
             Create note
           </DropdownMenuItem>

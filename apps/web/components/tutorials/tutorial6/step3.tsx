@@ -20,7 +20,9 @@ const useCompleted = () => {
   const thirdMatches = script?.rust.match(
     /assert_lte\s*\(\s*timelock_block_height\s*,\s*current_block_height\s*\);/
   );
-  return !!firstMatches && !!secondMatches && !!thirdMatches;
+  return (
+    script?.masm !== "" && !!firstMatches && !!secondMatches && !!thirdMatches
+  );
 };
 
 const Step3: TutorialStep = {

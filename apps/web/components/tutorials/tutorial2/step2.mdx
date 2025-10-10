@@ -4,6 +4,11 @@ Navigate to <Link href={`/accounts/${props.walletA?.address}`}>Wallet A</Link> a
 
 To initiate a transfer, you first need to create a send transaction from **Wallet A** to **Wallet B**. From **Wallet A** page, click on the _"Create new transaction"_ then _"New send transaction"_.
 
-A _"Configure send transaction"_ dialog will show up where you can select the recipient account (**Wallet B**), the asset you want to transfer out (**MDN tokens**) and the amount to send eg. 1000 tokens.
+A _"Configure send transaction"_ dialog will show up where you can select the recipient account (**Wallet B**), the asset you want to transfer out (**MDN tokens**) and the amount to send eg. **1000** tokens.
 
-The preview step shows a quick summary of the changes about to be performed on **Wallet A**. When you're ready to execute the transaction click on _"Submit"_.
+As with [Accounts](https://0xmiden.github.io/miden-docs/imported/miden-base/src/account/storage.html), notes can be stored either publicly or privately:
+
+- **Public mode**: The Note data is stored in the [note database](https://0xmiden.github.io/miden-docs/imported/miden-base/src/state.html#note-database), making it fully visible on-chain.
+- **Private mode**: Only the Note’s hash is stored publicly. The Note’s actual data remains off-chain, enhancing privacy.
+
+The preview step shows a quick summary of the changes about to be performed on **Wallet A**. When you're ready to execute the transaction click on _"Submit"_ and wait a few seconds until the proof generation is complete.

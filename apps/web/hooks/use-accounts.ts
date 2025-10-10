@@ -18,7 +18,6 @@ import {
   BASIC_WALLET_CODE,
   COUNTER_CONTRACT_CODE,
   FUNGIBLE_FAUCET_CODE,
-  MIDEN_FAUCET_ADDRESS,
 } from "@/lib/constants";
 import { counterMapContractMasm } from "@/lib/types/default-scripts/counter-map-contract";
 
@@ -90,7 +89,6 @@ const useAccounts = () => {
       name,
       networkId,
       updatedAt: syncSummary.blockNum(),
-      tokenSymbol,
     });
     dispatch({
       type: "NEW_ACCOUNT",
@@ -124,9 +122,6 @@ const useAccounts = () => {
     if (account.code === FUNGIBLE_FAUCET_CODE) {
       // faucets
       account.components = ["basic-fungible-faucet"];
-      if (account.address === MIDEN_FAUCET_ADDRESS) {
-        account.tokenSymbol = "MIDEN";
-      }
     } else if (account.code === COUNTER_CONTRACT_CODE) {
       // Counter Contract
       account.components = ["no-auth", "counter-contract"];

@@ -42,6 +42,8 @@ const StorageSlotInput = ({
     <Input
       id="value"
       name="value"
+      type="number"
+      min="0"
       value={storageSlotValue}
       onChange={(event) => setStorageSlotValue(event.target.value)}
       required
@@ -66,6 +68,8 @@ const StorageMapInput = ({
             id={`key-${index}`}
             name={`key-${index}`}
             placeholder="Key"
+            type="number"
+            min="0"
             value={keyValue.key}
             onChange={(event) =>
               setStorageSlotValue(
@@ -76,13 +80,14 @@ const StorageMapInput = ({
                 ])
               )
             }
-            pattern="\d+"
             required
           />
           <Input
             id={`value-${index}`}
             name={`value-${index}`}
             placeholder="Value"
+            type="number"
+            min="0"
             value={keyValue.value}
             onChange={(event) =>
               setStorageSlotValue(
@@ -93,7 +98,6 @@ const StorageMapInput = ({
                 ])
               )
             }
-            pattern="\d+"
             required
           />
           <Button
@@ -129,12 +133,16 @@ const StorageMapInput = ({
   );
 };
 
-const UpsertStorageSlotDialog = () => {
+const UpsertStorageSlotDialog = ({
+  componentId,
+  storageSlotIndex,
+}: {
+  componentId: string;
+  storageSlotIndex: number;
+}) => {
   const {
     components,
     upsertStorageSlotDialogOpen,
-    upsertStorageSlotDialogComponentId: componentId,
-    upsertStorageSlotDialogStorageSlotIndex: storageSlotIndex,
     closeUpsertStorageSlotDialog,
     updateComponent,
   } = useComponents();
@@ -143,8 +151,9 @@ const UpsertStorageSlotDialog = () => {
     (_, index) => index === storageSlotIndex
   );
   const [loading, setLoading] = useState(false);
-  const [storageSlotType, setStorageSlotType] =
-    useState<StorageSlotType>("value");
+  const [storageSlotType, setStorageSlotType] = useState<StorageSlotType>(
+    storageSlot?.type ?? "value"
+  );
   const [storageSlotValue, setStorageSlotValue] = useState(
     storageSlot?.value ?? ""
   );
@@ -156,10 +165,7 @@ const UpsertStorageSlotDialog = () => {
   useEffect(() => {
     setStorageSlotType(storageSlot?.type ?? "value");
     setStorageSlotValue(storageSlot?.value ?? "");
-  }, [
-    /*componentId, storageSlotIndex,*/ storageSlot?.type,
-    storageSlot?.value,
-  ]);
+  }, [storageSlot?.type, storageSlot?.value]);
   return (
     <Dialog
       open={upsertStorageSlotDialogOpen}

@@ -1,6 +1,10 @@
-An [Account](https://0xmiden.github.io/miden-docs/imported/miden-base/src/account/overview.html) is the primary entity in the Miden protocol. It can hold assets, store data, and execute custom code. In many cases, such as when used to manage your funds, it acts like a wallet. However, accounts are more powerful than traditional wallets, as each one is a specialized smart contract with a programmable interface for managing its state and assets.
+An [Account](https://0xmiden.github.io/miden-docs/imported/miden-base/src/account/overview.html) is the primary entity in the Miden protocol.
+It can hold assets, store data, and execute custom code.
+An account is very similar to an Ethereum smart contract.
+If users use it to manage their funds, it acts like a wallet with a programmable interface.
 
-Users can choose whether their Accounts are stored **publicly** or **privately**. The [storage mode](https://0xmiden.github.io/miden-docs/imported/miden-base/src/account/id.html#account-storage-mode) is chosen during Account creation, it cannot be changed later.
+Users can choose whether their Accounts are stored **publicly** or **privately**.
+The [storage mode](https://0xmiden.github.io/miden-docs/imported/miden-base/src/account/id.html#account-storage-mode) is chosen during Account creation, it cannot be changed later.
 
 - **Public Accounts**: The account's state is stored on-chain, similar to how accounts are stored in public blockchains like Ethereum.
 - **Private Accounts**: Only a commitment (hash) to the account's state is stored on-chain. This mode is suitable for users who prioritize privacy or plan to store a large amount of data in their Account.

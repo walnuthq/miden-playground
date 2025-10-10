@@ -155,6 +155,7 @@ const p2ide: Script = {
   packageName: "p2ide",
   type: "note",
   status: "compiled",
+  readOnly: true,
   rust: p2ideRust,
   masm: p2ideMasm,
   root: P2IDE_NOTE_CODE,

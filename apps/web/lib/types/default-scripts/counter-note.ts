@@ -95,6 +95,7 @@ const counterNote: Script = {
   packageName: "counter-note",
   type: "note",
   status: "compiled",
+  readOnly: true,
   rust: counterNoteRust,
   masm: counterNoteMasm,
   dependencies: ["counter-contract"],
