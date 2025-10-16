@@ -117,9 +117,7 @@ export const clientNewAccount = async (
     accountSeed,
     overwrite,
   }: { account: WasmAccount; accountSeed: bigint; overwrite: boolean }
-) => {
-  return client.newAccount(account, await bigintToWord(accountSeed), overwrite);
-};
+) => client.newAccount(account, await bigintToWord(accountSeed), overwrite);
 
 export const clientNewMintTransactionRequest = async (
   client: WebClientType,

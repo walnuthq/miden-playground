@@ -12,12 +12,12 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "next": "^15.5.4",
+    "next": "^15.5.5",
     "react": "^19.2.0",
     "uuid": "^13.0.0"
   },
   "devDependencies": {
-    "@types/node": "^24.7.1",
+    "@types/node": "^24.7.2",
     "@types/react": "^19.2.2",
     "@workspace/eslint-config": "workspace:^",
     "@workspace/typescript-config": "workspace:*",

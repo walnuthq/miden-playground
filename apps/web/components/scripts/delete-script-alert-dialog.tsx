@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { RotateCw } from "lucide-react";
+import { Spinner } from "@workspace/ui/components/spinner";
 import { toast } from "sonner";
 import useScripts from "@/hooks/use-scripts";
 import {
@@ -47,7 +47,7 @@ const DeleteScriptAlertDialog = () => {
               toast(`${script.name} has been deleted.`);
             }}
           >
-            {loading && <RotateCw className="animate-spin" />}
+            {loading && <Spinner />}
             {loading ? "Deleting…" : "Delete"}
           </AlertDialogAction>
         </AlertDialogFooter>

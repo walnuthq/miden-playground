@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { HandCoins, RotateCw } from "lucide-react";
+import { HandCoins } from "lucide-react";
+import { Spinner } from "@workspace/ui/components/spinner";
 import useAccounts from "@/hooks/use-accounts";
 import { useWallet } from "@demox-labs/miden-wallet-adapter";
 import { Button } from "@workspace/ui/components/button";
@@ -137,7 +138,7 @@ const MintButton = () => {
         setNoteId(noteResponse?.noteId ?? "");
       }}
     >
-      {loading ? <RotateCw className="animate-spin" /> : <HandCoins />}
+      {loading ? <Spinner /> : <HandCoins />}
       {loading ? "Minting…" : "Mint"}
     </Button>
   );
