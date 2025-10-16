@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import { RotateCw } from "lucide-react";
+import { Spinner } from "@workspace/ui/components/spinner";
 import { TableRow, TableCell } from "@workspace/ui/components/table";
 import { type Account } from "@/lib/types/account";
 import { type Procedure, getStorageRead } from "@/lib/types/script";
@@ -75,7 +75,7 @@ const ProceduresTableRow = ({
             setLoading(false);
           }}
         >
-          {loading && <RotateCw className="animate-spin" />}
+          {loading && <Spinner />}
           {loading ? "Invoking…" : "Invoke"}
         </Button>
       </TableCell>

@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { RotateCw } from "lucide-react";
+import { Spinner } from "@workspace/ui/components/spinner";
 import { Button } from "@workspace/ui/components/button";
 import {
   Select,
@@ -138,7 +138,7 @@ const CreateScriptDialog = () => {
             <Button variant="outline">Cancel</Button>
           </DialogClose>
           <Button form="create-script-form" type="submit" disabled={loading}>
-            {loading && <RotateCw className="animate-spin" />}
+            {loading && <Spinner />}
             {loading ? "Creating…" : "Create"}
           </Button>
         </DialogFooter>

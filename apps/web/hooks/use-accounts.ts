@@ -10,6 +10,7 @@ import {
   clientImportNewWallet,
   clientDeployAccount,
 } from "@/lib/web-client";
+import { type Account as WasmAccount } from "@demox-labs/miden-sdk";
 import useGlobalContext from "@/components/global-context/hook";
 import { type AccountStorageMode, type AccountType } from "@/lib/types/account";
 import { type Component } from "@/lib/types/component";
@@ -104,7 +105,17 @@ const useAccounts = () => {
     address: string;
   }) => {
     const client = await webClient(networkId, serializedMockChain);
-    const wasmAccount = await clientGetAccountByAddress(client, address);
+    let wasmAccount: WasmAccount | null = null;
+    try {
+      wasmAccount = await clientGetAccountByAddress(client, address);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      await clientImportNewWallet(client, address);
+      wasmAccount = await clientGetAccountByAddress(client, address);
+    }
+    if (!wasmAccount) {
+      throw new Error("Account not found");
+    }
     const syncSummary = await client.syncState();
     const consumableNotes = await clientGetConsumableNotes(
       client,
@@ -149,21 +160,10 @@ const useAccounts = () => {
     if (!connectedWalletAddress || connectedWallet || networkId !== "mtst") {
       return;
     }
-    const client = await webClient(networkId, serializedMockChain);
-    try {
-      await clientGetAccountByAddress(client, connectedWalletAddress);
-      await importAccountByAddress({
-        name: "Miden Account 1",
-        address: connectedWalletAddress,
-      });
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
-      await clientImportNewWallet(client, connectedWalletAddress);
-      await importAccountByAddress({
-        name: "Miden Account 1",
-        address: connectedWalletAddress,
-      });
-    }
+    await importAccountByAddress({
+      name: "Miden Account 1",
+      address: connectedWalletAddress,
+    });
   };
   const deployAccount = async ({
     name,

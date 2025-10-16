@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { toast } from "sonner";
-import { RotateCw } from "lucide-react";
+import { Spinner } from "@workspace/ui/components/spinner";
 import { Button } from "@workspace/ui/components/button";
 import { Switch } from "@workspace/ui/components/switch";
 import {
@@ -207,7 +207,7 @@ const DeployAccountDialog = () => {
             type="submit"
             disabled={loading || !componentId}
           >
-            {loading && <RotateCw className="animate-spin" />}
+            {loading && <Spinner />}
             {loading ? "Deploying…" : "Deploy"}
           </Button>
         </DialogFooter>
