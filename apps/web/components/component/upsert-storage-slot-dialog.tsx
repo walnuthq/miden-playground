@@ -1,7 +1,8 @@
 "use client";
 import { useState, useEffect, type Dispatch, type SetStateAction } from "react";
 import { toast } from "sonner";
-import { RotateCw, Trash } from "lucide-react";
+import { Trash } from "lucide-react";
+import { Spinner } from "@workspace/ui/components/spinner";
 import { Button } from "@workspace/ui/components/button";
 import {
   Select,
@@ -267,7 +268,7 @@ const UpsertStorageSlotDialog = ({
             type="submit"
             disabled={loading}
           >
-            {loading && <RotateCw className="animate-spin" />}
+            {loading && <Spinner />}
             {storageSlot
               ? loading
                 ? "Editing…"

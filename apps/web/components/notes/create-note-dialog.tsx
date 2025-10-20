@@ -1,7 +1,8 @@
 "use client";
 import { useState } from "react";
 // import { toast } from "sonner";
-import { RotateCw, Trash } from "lucide-react";
+import { Trash } from "lucide-react";
+import { Spinner } from "@workspace/ui/components/spinner";
 import { Button } from "@workspace/ui/components/button";
 import {
   Select,
@@ -225,7 +226,7 @@ const CreateNoteDialog = () => {
               faucetAccountId === ""
             }
           >
-            {loading && <RotateCw className="animate-spin" />}
+            {loading && <Spinner />}
             {loading ? "Creating…" : "Create"}
           </Button>
         </DialogFooter>

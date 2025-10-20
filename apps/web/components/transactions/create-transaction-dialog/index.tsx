@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { RotateCw } from "lucide-react";
+import { Spinner } from "@workspace/ui/components/spinner";
 import {
   type ConsumableNoteRecord as WasmConsumableNoteRecord,
   type TransactionResult as WasmTransactionResult,
@@ -175,7 +175,7 @@ const CreateTransactionDialog = () => {
                     loading
                   }
                 >
-                  {loading && <RotateCw className="animate-spin" />}
+                  {loading && <Spinner />}
                   {loading ? "Previewing…" : "Preview"}
                 </Button>
               </div>
@@ -195,7 +195,7 @@ const CreateTransactionDialog = () => {
                   type="submit"
                   disabled={loading}
                 >
-                  {loading && <RotateCw className="animate-spin" />}
+                  {loading && <Spinner />}
                   {loading ? "Submitting…" : "Submit"}
                 </Button>
               </div>

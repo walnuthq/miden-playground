@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { toast } from "sonner";
-import { RotateCw } from "lucide-react";
+import { Spinner } from "@workspace/ui/components/spinner";
 import { Button } from "@workspace/ui/components/button";
 import { Switch } from "@workspace/ui/components/switch";
 import {
@@ -137,7 +137,7 @@ const CreateFaucetDialog = () => {
             <Button variant="outline">Cancel</Button>
           </DialogClose>
           <Button form="create-faucet-form" type="submit" disabled={loading}>
-            {loading && <RotateCw className="animate-spin" />}
+            {loading && <Spinner />}
             {loading ? "Creating…" : "Create"}
           </Button>
         </DialogFooter>

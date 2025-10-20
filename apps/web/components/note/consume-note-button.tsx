@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { FileInput, RotateCw } from "lucide-react";
+import { FileInput } from "lucide-react";
+import { Spinner } from "@workspace/ui/components/spinner";
 import { Button } from "@workspace/ui/components/button";
 import useTransactions from "@/hooks/use-transactions";
 import { accountIdFromPrefixSuffix } from "@/lib/types/account";
@@ -59,7 +60,7 @@ const ConsumeNoteButton = ({ inputNote }: { inputNote: InputNote }) => {
       }}
       disabled={loading}
     >
-      {loading ? <RotateCw className="animate-spin" /> : <FileInput />}
+      {loading ? <Spinner /> : <FileInput />}
       <span className="hidden lg:inline">
         {loading
           ? "Consuming note…"

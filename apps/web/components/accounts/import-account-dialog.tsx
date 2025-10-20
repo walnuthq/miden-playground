@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { toast } from "sonner";
-import { RotateCw } from "lucide-react";
+import { Spinner } from "@workspace/ui/components/spinner";
 import { Button } from "@workspace/ui/components/button";
 import {
   Dialog,
@@ -81,7 +81,7 @@ const ImportAccountDialog = () => {
             <Button variant="outline">Cancel</Button>
           </DialogClose>
           <Button form="import-account-form" type="submit" disabled={loading}>
-            {loading && <RotateCw className="animate-spin" />}
+            {loading && <Spinner />}
             {loading ? "Importing…" : "Import"}
           </Button>
         </DialogFooter>

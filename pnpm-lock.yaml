@@ -73,10 +73,10 @@ importers:
         specifier: ^4.7.0
         version: 4.7.0(monaco-editor@0.54.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       '@next/mdx':
-        specifier: ^15.5.4
+        specifier: ^15.5.5
         version: 15.5.6(@mdx-js/loader@3.1.1(webpack@5.102.1))(@mdx-js/react@3.1.1(@types/react@19.2.2)(react@19.2.0))
       '@opennextjs/cloudflare':
-        specifier: ^1.10.1
+        specifier: ^1.11.0
         version: 1.11.0(wrangler@4.43.0)
       '@tanstack/react-table':
         specifier: ^8.21.3
@@ -100,7 +100,7 @@ importers:
         specifier: ^1.1.0
         version: 1.1.0
       next:
-        specifier: ^15.5.4
+        specifier: ^15.5.5
         version: 15.5.6(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       next-themes:
         specifier: ^0.4.6
@@ -128,13 +128,13 @@ importers:
         specifier: ^4.17.20
         version: 4.17.20
       '@types/node':
-        specifier: ^24.7.1
+        specifier: ^24.7.2
         version: 24.8.1
       '@types/react':
         specifier: ^19.2.2
         version: 19.2.2
       '@types/react-dom':
-        specifier: ^19.2.1
+        specifier: ^19.2.2
         version: 19.2.2(@types/react@19.2.2)
       '@workspace/eslint-config':
         specifier: workspace:^
@@ -152,7 +152,7 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
       wrangler:
-        specifier: ^4.42.2
+        specifier: ^4.43.0
         version: 4.43.0
 
   packages/eslint-config:
@@ -161,13 +161,13 @@ importers:
         specifier: ^9.37.0
         version: 9.38.0
       '@next/eslint-plugin-next':
-        specifier: ^15.5.4
+        specifier: ^15.5.5
         version: 15.5.6
       '@typescript-eslint/eslint-plugin':
-        specifier: ^8.46.0
+        specifier: ^8.46.1
         version: 8.46.1(@typescript-eslint/parser@8.46.1(eslint@9.38.0(jiti@2.6.1))(typescript@5.9.3))(eslint@9.38.0(jiti@2.6.1))(typescript@5.9.3)
       '@typescript-eslint/parser':
-        specifier: ^8.46.0
+        specifier: ^8.46.1
         version: 8.46.1(eslint@9.38.0(jiti@2.6.1))(typescript@5.9.3)
       eslint:
         specifier: ^9.37.0
@@ -194,7 +194,7 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
       typescript-eslint:
-        specifier: ^8.46.0
+        specifier: ^8.46.1
         version: 8.46.1(eslint@9.38.0(jiti@2.6.1))(typescript@5.9.3)
 
   packages/typescript-config: {}
@@ -254,13 +254,13 @@ importers:
         specifier: ^2.5.8
         version: 2.5.8(@types/node@24.8.1)(typescript@5.9.3)
       '@types/node':
-        specifier: ^24.7.1
+        specifier: ^24.7.2
         version: 24.8.1
       '@types/react':
         specifier: ^19.2.2
         version: 19.2.2
       '@types/react-dom':
-        specifier: ^19.2.1
+        specifier: ^19.2.2
         version: 19.2.2(@types/react@19.2.2)
       '@workspace/eslint-config':
         specifier: workspace:*
@@ -5870,7 +5870,7 @@ snapshots:
       '@aws-crypto/sha256-js': 3.0.0
       '@aws-crypto/supports-web-crypto': 3.0.0
       '@aws-crypto/util': 3.0.0
-      '@aws-sdk/types': 3.398.0
+      '@aws-sdk/types': 3.910.0
       '@aws-sdk/util-locate-window': 3.893.0
       '@aws-sdk/util-utf8-browser': 3.259.0
       tslib: 1.14.1
@@ -5888,7 +5888,7 @@ snapshots:
   '@aws-crypto/sha256-js@3.0.0':
     dependencies:
       '@aws-crypto/util': 3.0.0
-      '@aws-sdk/types': 3.398.0
+      '@aws-sdk/types': 3.910.0
       tslib: 1.14.1
 
   '@aws-crypto/sha256-js@5.2.0':
@@ -5907,7 +5907,7 @@ snapshots:
 
   '@aws-crypto/util@3.0.0':
     dependencies:
-      '@aws-sdk/types': 3.398.0
+      '@aws-sdk/types': 3.910.0
       '@aws-sdk/util-utf8-browser': 3.259.0
       tslib: 1.14.1
 
@@ -12058,7 +12058,7 @@ snapshots:
 
   send@1.2.0:
     dependencies:
-      debug: 4.3.6
+      debug: 4.4.3
       encodeurl: 2.0.0
       escape-html: 1.0.3
       etag: 1.8.1
