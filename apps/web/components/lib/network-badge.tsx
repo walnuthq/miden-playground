@@ -13,7 +13,9 @@ const NetworkBadge = () => {
   const { tutorialId, tutorialLoaded } = useTutorials();
   const [loading, setLoading] = useState(false);
   const useIntervalTriggered =
-    networkId === "mtst" && (tutorialId === "" ? true : tutorialLoaded);
+    !loading &&
+    networkId === "mtst" &&
+    (tutorialId === "" ? true : tutorialLoaded);
   useInterval(
     () => {
       const sync = async () => {
@@ -23,7 +25,7 @@ const NetworkBadge = () => {
       };
       sync();
     },
-    useIntervalTriggered ? 2000 : null
+    useIntervalTriggered ? 5000 : null
   );
   return (
     <Badge className={cn({ "bg-[#f50] text-white": networkId === "mlcl" })}>
