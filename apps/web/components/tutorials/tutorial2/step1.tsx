@@ -16,7 +16,7 @@ const Step1: TutorialStep = {
         <TutorialAlert
           title="Explore the accounts"
           description="Click on each account to explore its current state. Confirm that
-            Wallet A holds 1000 MDN tokens and Wallet B has no assets."
+            Wallet A holds 100 MDN tokens and Wallet B has no assets."
         />
       </>
     );

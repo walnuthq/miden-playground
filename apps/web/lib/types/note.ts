@@ -31,6 +31,7 @@ export type InputNote = {
   tag: string;
   senderId: string;
   scriptRoot: string;
+  scriptId: string;
   fungibleAssets: FungibleAsset[];
   inputs: bigint[];
   nullifier: string;

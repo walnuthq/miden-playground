@@ -26,6 +26,7 @@ import {
   decodeFungibleFaucetMetadata,
   type Account,
 } from "@/lib/types/account";
+import { formatAmount } from "@/lib/utils";
 
 const getConsumableNoteFields = (
   inputNoteRecord: WasmInputNoteRecord,
@@ -39,8 +40,8 @@ const getConsumableNoteFields = (
       const faucetId = fungibleAsset.faucetId().toString();
       const amount = fungibleAsset.amount().toString();
       const faucet = faucets.find(({ id }) => id === faucetId);
-      const { tokenSymbol } = decodeFungibleFaucetMetadata(faucet);
-      return `${amount} ${tokenSymbol}`;
+      const { decimals, tokenSymbol } = decodeFungibleFaucetMetadata(faucet);
+      return `${formatAmount(amount, decimals)} ${tokenSymbol}`;
     });
   const metadata = inputNoteRecord.metadata();
   const wasmNoteTypes = {

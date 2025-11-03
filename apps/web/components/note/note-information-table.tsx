@@ -6,16 +6,19 @@ import {
   TableRow,
 } from "@workspace/ui/components/table";
 import { Badge } from "@workspace/ui/components/badge";
+// import { Button } from "@workspace/ui/components/button";
 import { type InputNote, noteStates } from "@/lib/types/note";
 import AccountAddress from "@/components/lib/account-address";
 import { CircleCheckBig } from "lucide-react";
+// import useNotes from "@/hooks/use-notes";
 import useScripts from "@/hooks/use-scripts";
 import useGlobalContext from "@/components/global-context/hook";
 
 const NoteInformationTable = ({ inputNote }: { inputNote: InputNote }) => {
   const { networkId } = useGlobalContext();
+  // const { openVerifyNoteScriptDialog } = useNotes();
   const { scripts } = useScripts();
-  const script = scripts.find(({ root }) => root === inputNote.scriptRoot);
+  const script = scripts.find(({ id }) => id === inputNote.scriptId);
   return (
     <div className="rounded-md border">
       <Table>
@@ -42,13 +45,13 @@ const NoteInformationTable = ({ inputNote }: { inputNote: InputNote }) => {
             <TableCell>{inputNote.scriptRoot}</TableCell>
           </TableRow>
           {/* <TableRow>
-          <TableCell>Serial Number</TableCell>
-          <TableCell>{noteSerialNumber(inputNote)}</TableCell>
-        </TableRow> */}
-          {script && (
-            <TableRow>
-              <TableCell>Script</TableCell>
-              <TableCell>
+            <TableCell>Serial Number</TableCell>
+            <TableCell>{noteSerialNumber(inputNote)}</TableCell>
+          </TableRow> */}
+          <TableRow>
+            <TableCell>Script</TableCell>
+            <TableCell>
+              {script ? (
                 <Link
                   className="text-primary font-medium underline underline-offset-4 flex items-center gap-2"
                   href={`/scripts/${script.id}`}
@@ -59,9 +62,21 @@ const NoteInformationTable = ({ inputNote }: { inputNote: InputNote }) => {
                     className="size-4"
                   />
                 </Link>
-              </TableCell>
-            </TableRow>
-          )}
+              ) : (
+                <div className="flex items-center gap-2">
+                  <span className="text-muted-foreground">
+                    Unknown note script
+                  </span>
+                  {/* <Button
+                    size="sm"
+                    onClick={() => openVerifyNoteScriptDialog(inputNote.id)}
+                  >
+                    Verify note script
+                  </Button> */}
+                </div>
+              )}
+            </TableCell>
+          </TableRow>
           <TableRow>
             <TableCell>Storage mode</TableCell>
             <TableCell>

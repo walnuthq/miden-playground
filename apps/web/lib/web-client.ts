@@ -28,6 +28,7 @@ import {
 import { type Script } from "@/lib/types/script";
 import { type StorageSlot, type Component } from "@/lib/types/component";
 import { BASIC_WALLET_CODE } from "@/lib/constants";
+import defaultScripts from "@/lib/types/default-scripts";
 
 const globalForWebClient = globalThis as unknown as {
   webClient: WebClientType;
@@ -228,7 +229,10 @@ export const clientGetConsumableNotes = async (
   return client.getConsumableNotes(wasmAccountId);
 };
 
-export const clientGetAllInputNotes = async (client: WebClientType) => {
+export const clientGetAllInputNotes = async (
+  client: WebClientType,
+  previousInputNotes: InputNote[]
+) => {
   const {
     NoteFilter: WasmNoteFilter,
     NoteFilterTypes: WasmNoteFilterTypes,
@@ -241,7 +245,12 @@ export const clientGetAllInputNotes = async (client: WebClientType) => {
   if (client.usesMockChain()) {
     return Promise.all(
       wasmInputNotes.map((wasmInputNote) =>
-        wasmInputNoteToInputNote(wasmInputNote)
+        wasmInputNoteToInputNote(
+          wasmInputNote,
+          previousInputNotes.find(
+            ({ id }) => id === wasmInputNote.id().toString()
+          )
+        )
       )
     );
   } else {
@@ -255,7 +264,12 @@ export const clientGetAllInputNotes = async (client: WebClientType) => {
     });
     return Promise.all(
       patchedWasmInputNotes.map((wasmInputNote) =>
-        wasmInputNoteToInputNote(wasmInputNote)
+        wasmInputNoteToInputNote(
+          wasmInputNote,
+          previousInputNotes.find(
+            ({ id }) => id === wasmInputNote.id().toString()
+          )
+        )
       )
     );
   }
@@ -565,31 +579,43 @@ const noteState = async (state: WasmInputNoteStateType) => {
 };
 
 export const wasmInputNoteToInputNote = async (
-  record: WasmInputNoteRecord
-): Promise<InputNote> => ({
-  id: record.id().toString(),
-  type: await noteType(record.metadata()),
-  state: await noteState(record.state()),
-  tag: record.metadata()?.tag().asU32().toString() ?? "",
-  senderId: record.metadata()?.sender().toString() ?? "",
-  scriptRoot: record.details().recipient().script().root().toHex(),
-  fungibleAssets: record
-    .details()
-    .assets()
-    .fungibleAssets()
-    .map((fungibleAsset) => ({
-      faucetId: fungibleAsset.faucetId().toString(),
-      amount: fungibleAsset.amount().toString(),
-    })),
-  inputs: record
-    .details()
-    .recipient()
-    .inputs()
-    .values()
-    .map((value) => value.asInt()),
-  nullifier: record.nullifier(),
-  updatedAt: record.inclusionProof()?.location().blockNum() ?? 0,
-});
+  record: WasmInputNoteRecord,
+  previousInputNote?: InputNote
+): Promise<InputNote> => {
+  const [type, state] = await Promise.all([
+    noteType(record.metadata()),
+    noteState(record.state()),
+  ]);
+  const scriptRoot = record.details().recipient().script().root().toHex();
+  const script = defaultScripts.find(({ root }) => root === scriptRoot);
+  return {
+    id: record.id().toString(),
+    type,
+    state,
+    tag: record.metadata()?.tag().asU32().toString() ?? "",
+    senderId: record.metadata()?.sender().toString() ?? "",
+    scriptRoot,
+    scriptId: previousInputNote
+      ? previousInputNote.scriptId
+      : (script?.id ?? ""),
+    fungibleAssets: record
+      .details()
+      .assets()
+      .fungibleAssets()
+      .map((fungibleAsset) => ({
+        faucetId: fungibleAsset.faucetId().toString(),
+        amount: fungibleAsset.amount().toString(),
+      })),
+    inputs: record
+      .details()
+      .recipient()
+      .inputs()
+      .values()
+      .map((value) => value.asInt()),
+    nullifier: record.nullifier(),
+    updatedAt: record.inclusionProof()?.location().blockNum() ?? 0,
+  };
+};
 
 const transactionStatus = (transactionRecord: WasmTransactionRecord) => {
   const status = transactionRecord.transactionStatus();

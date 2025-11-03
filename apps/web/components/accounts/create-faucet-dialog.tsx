@@ -21,6 +21,7 @@ import {
   FUNGIBLE_FAUCET_DEFAULT_DECIMALS,
   FUNGIBLE_FAUCET_DEFAULT_MAX_SUPPLY,
 } from "@/lib/constants";
+import { parseAmount } from "@/lib/utils";
 
 const CreateFaucetDialog = () => {
   const {
@@ -30,6 +31,7 @@ const CreateFaucetDialog = () => {
     faucets,
   } = useAccounts();
   const [isPublic, setIsPublic] = useState(true);
+  const [decimals, setDecimals] = useState(FUNGIBLE_FAUCET_DEFAULT_DECIMALS);
   const [loading, setLoading] = useState(false);
   const onClose = () => {
     setIsPublic(true);
@@ -62,8 +64,11 @@ const CreateFaucetDialog = () => {
                 ? "public"
                 : "private",
               tokenSymbol: formData.get("token-symbol")!.toString(),
-              decimals: Number(formData.get("decimals")!.toString()),
-              maxSupply: BigInt(formData.get("max-supply")!.toString()),
+              decimals: Number(decimals),
+              maxSupply: parseAmount(
+                formData.get("max-supply")?.toString() ?? "0",
+                decimals
+              ),
             });
             setLoading(false);
             toast(`${faucet.name} has been created.`, {
@@ -115,7 +120,8 @@ const CreateFaucetDialog = () => {
                 type="number"
                 min="1"
                 max="12"
-                defaultValue={FUNGIBLE_FAUCET_DEFAULT_DECIMALS.toString()}
+                value={decimals.toString()}
+                onChange={(event) => setDecimals(BigInt(event.target.value))}
                 required
               />
             </div>
@@ -125,7 +131,8 @@ const CreateFaucetDialog = () => {
                 id="max-supply"
                 name="max-supply"
                 type="number"
-                min="1"
+                min={1 / 10 ** Number(decimals)}
+                step={1 / 10 ** Number(decimals)}
                 defaultValue={FUNGIBLE_FAUCET_DEFAULT_MAX_SUPPLY.toString()}
                 required
               />

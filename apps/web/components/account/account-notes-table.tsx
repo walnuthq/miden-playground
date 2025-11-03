@@ -32,6 +32,7 @@ import {
 } from "@demox-labs/miden-wallet-adapter";
 import useGlobalContext from "@/components/global-context/hook";
 import useScripts from "@/hooks/use-scripts";
+import { formatAmount } from "@/lib/utils";
 
 const NoteActionsCell = ({
   account,
@@ -137,11 +138,11 @@ const AccountNotesTable = ({ account }: { account: Account }) => {
                 <TableCell>
                   {inputNote.fungibleAssets.map(({ faucetId, amount }) => {
                     const faucet = faucets.find(({ id }) => id === faucetId);
-                    const { tokenSymbol } =
+                    const { tokenSymbol, decimals } =
                       decodeFungibleFaucetMetadata(faucet);
                     return (
                       <p key={faucetId}>
-                        {amount} {tokenSymbol}
+                        {formatAmount(amount, decimals)} {tokenSymbol}
                       </p>
                     );
                   })}

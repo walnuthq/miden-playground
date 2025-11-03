@@ -167,6 +167,7 @@ const useScripts = () => {
     invokeProcedureArgumentsDialogSenderAccountId,
     invokeProcedureArgumentsDialogScriptId,
     invokeProcedureArgumentsDialogProcedure,
+
     openCreateScriptDialog,
     closeCreateScriptDialog,
     openDeleteScriptAlertDialog,

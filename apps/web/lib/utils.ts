@@ -1,3 +1,5 @@
+import { formatUnits, parseUnits } from "viem";
+
 export const sleep = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -8,6 +10,16 @@ export const formatValue = (value: string) =>
 
 export const formatAddress = (address: string, networkId: string) =>
   `${networkId}${address.slice(networkId.length).slice(0, 8)}…${address.slice(-8)}`;
+
+export const formatAmount = (amount: string, decimals: bigint) =>
+  new Intl.NumberFormat("en-US", {
+    style: "decimal",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: Number(decimals),
+  }).format(Number(formatUnits(BigInt(amount), Number(decimals))));
+
+export const parseAmount = (amount: string, decimals: bigint) =>
+  parseUnits(amount, Number(decimals));
 
 export const stringToFeltArray = (word: string): BigUint64Array => {
   const [, felt0, felt1, felt2, felt3] = word.match(

@@ -11,7 +11,6 @@ import useAccounts from "@/hooks/use-accounts";
 import SelectConsumableNotesCombobox from "@/components/transactions/select-consumable-notes-combobox";
 import useGlobalContext from "@/components/global-context/hook";
 import useTransactions from "@/hooks/use-transactions";
-import useTutorials from "@/hooks/use-tutorials";
 import {
   type ConsumableNoteRecord as WasmConsumableNoteRecord,
   type TransactionResult as WasmTransactionResult,
@@ -21,6 +20,8 @@ import {
   SendTransaction,
   type MidenWalletAdapter,
 } from "@demox-labs/miden-wallet-adapter";
+import { decodeFungibleFaucetMetadata } from "@/lib/types/account";
+import { parseAmount } from "@/lib/utils";
 
 const CreateTransactionConfigureForm = ({
   transactionType,
@@ -62,10 +63,12 @@ const CreateTransactionConfigureForm = ({
     newSendTransactionRequest,
     closeCreateTransactionDialog,
   } = useTransactions();
-  const { tutorialId } = useTutorials();
   const executingAccount = accounts.find(({ id }) => id === executingAccountId);
   const targetAccount = accounts.find(({ id }) => id === targetAccountId);
   const faucetAccount = accounts.find(({ id }) => id === faucetAccountId);
+  const { decimals } = decodeFungibleFaucetMetadata(
+    transactionType === "mint" ? executingAccount : faucetAccount
+  );
   return (
     <form
       id="create-transaction-configure-form"
@@ -80,7 +83,10 @@ const CreateTransactionConfigureForm = ({
             noteType: formData.getAll("is-public").includes("on")
               ? "public"
               : "private",
-            amount: BigInt(formData.get("amount")!.toString()),
+            amount: parseAmount(
+              formData.get("amount")?.toString() ?? "0",
+              decimals
+            ),
           });
           setTransactionResult(transactionResult);
         }
@@ -105,7 +111,10 @@ const CreateTransactionConfigureForm = ({
               noteType: formData.getAll("is-public").includes("on")
                 ? "public"
                 : "private",
-              amount: BigInt(formData.get("amount")!.toString()),
+              amount: parseAmount(
+                formData.get("amount")?.toString() ?? "0",
+                decimals
+              ),
             });
             setTransactionResult(transactionResult);
           } else {
@@ -119,7 +128,9 @@ const CreateTransactionConfigureForm = ({
               formData.getAll("is-public").includes("on")
                 ? "public"
                 : "private",
-              Number(formData.get("amount")!.toString())
+              Number(
+                parseAmount(formData.get("amount")?.toString() ?? "0", decimals)
+              )
             );
             const adapter = wallet.adapter as MidenWalletAdapter;
             const txId = await adapter.requestSend(transaction);
@@ -148,8 +159,8 @@ const CreateTransactionConfigureForm = ({
                 id="amount"
                 name="amount"
                 type="number"
-                min="1"
-                defaultValue={tutorialId ? 1000 : 0}
+                min={1 / 10 ** Number(decimals)}
+                step={1 / 10 ** Number(decimals)}
                 required
               />
             </div>
@@ -205,8 +216,8 @@ const CreateTransactionConfigureForm = ({
                 id="amount"
                 name="amount"
                 type="number"
-                min="1"
-                defaultValue={1000}
+                min={1 / 10 ** Number(decimals)}
+                step={1 / 10 ** Number(decimals)}
                 required
               />
             </div>

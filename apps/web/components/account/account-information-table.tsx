@@ -11,6 +11,7 @@ import {
 } from "@workspace/ui/components/table";
 import { Badge } from "@workspace/ui/components/badge";
 import AccountAddress from "@/components/lib/account-address";
+import { formatAmount } from "@/lib/utils";
 
 const AccountInformationTable = ({ account }: { account: Account }) => {
   const { totalSupply, maxSupply, decimals, tokenSymbol } =
@@ -43,15 +44,19 @@ const AccountInformationTable = ({ account }: { account: Account }) => {
             <>
               <TableRow>
                 <TableCell>Total supply</TableCell>
-                <TableCell>{totalSupply.toString()}</TableCell>
+                <TableCell>
+                  {formatAmount(totalSupply.toString(), decimals)}
+                </TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>Max supply</TableCell>
-                <TableCell>{maxSupply.toString()}</TableCell>
+                <TableCell>
+                  {formatAmount(maxSupply.toString(), decimals)}
+                </TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>Decimals</TableCell>
-                <TableCell>{decimals?.toString()}</TableCell>
+                <TableCell>{decimals}</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>Token symbol</TableCell>

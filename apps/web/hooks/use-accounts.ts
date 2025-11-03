@@ -15,12 +15,14 @@ import useGlobalContext from "@/components/global-context/hook";
 import { type AccountStorageMode, type AccountType } from "@/lib/types/account";
 import { type Component } from "@/lib/types/component";
 import useScripts from "@/hooks/use-scripts";
+import useComponents from "@/hooks/use-components";
 import {
   BASIC_WALLET_CODE,
   COUNTER_CONTRACT_CODE,
   FUNGIBLE_FAUCET_CODE,
 } from "@/lib/constants";
 import { counterMapContractMasm } from "@/lib/types/default-scripts/counter-map-contract";
+import { sleep } from "@/lib/utils";
 
 const useAccounts = () => {
   const {
@@ -30,12 +32,15 @@ const useAccounts = () => {
     createFaucetDialogOpen,
     importAccountDialogOpen,
     deployAccountDialogOpen,
+    verifyAccountComponentDialogOpen,
+    verifyAccountComponentDialogAccountId,
     accounts,
     tutorialId,
     dispatch,
   } = useGlobalContext();
   const { accountId: connectedWalletAddress } = useWallet();
   const { scripts } = useScripts();
+  const { components } = useComponents();
   const wallets = accounts.filter((account) => account.isWallet);
   const faucets = accounts.filter((account) => account.isFaucet);
   const newWallet = async ({
@@ -135,7 +140,10 @@ const useAccounts = () => {
       account.components = ["basic-fungible-faucet"];
     } else if (account.code === COUNTER_CONTRACT_CODE) {
       // Counter Contract
-      account.components = ["no-auth", "counter-contract"];
+      account.components = ["no-auth"];
+      if (tutorialId === "interact-with-the-counter-contract") {
+        account.components.push("counter-contract");
+      }
     } /* else if (account.address === "mtst1qqtzp4x9c9gv6yp7qm8uzzr7y3cqqua4clw") {
       account.components = ["no-auth", "counter-map-contract"];
     }*/ else if (account.code === BASIC_WALLET_CODE) {
@@ -255,11 +263,51 @@ const useAccounts = () => {
     dispatch({
       type: "CLOSE_DEPLOY_ACCOUNT_DIALOG",
     });
+  const openVerifyAccountComponentDialog = (accountId: string) =>
+    dispatch({
+      type: "OPEN_VERIFY_ACCOUNT_COMPONENT_DIALOG",
+      payload: { accountId },
+    });
+  const closeVerifyAccountComponentDialog = () =>
+    dispatch({
+      type: "CLOSE_VERIFY_ACCOUNT_COMPONENT_DIALOG",
+    });
+  const verifyAccountComponent = async ({
+    accountId,
+    componentId,
+  }: {
+    accountId: string;
+    componentId: string;
+  }) => {
+    const account = accounts.find(({ id }) => id === accountId);
+    if (!account) {
+      throw new Error("Account not found");
+    }
+    if (account.components.includes(componentId)) {
+      // already verified
+      return false;
+    }
+    const component = components.find(({ id }) => id === componentId);
+    if (!component) {
+      throw new Error("Component not found");
+    }
+    // TODO mocked atm, check if account component code is included in AccountCode using procedure
+    // digests and AccountCode::has_procedure
+    const verified = true;
+    await sleep(400);
+    dispatch({
+      type: "VERIFY_ACCOUNT_COMPONENT",
+      payload: { accountId, componentId },
+    });
+    return verified;
+  };
   return {
     createWalletDialogOpen,
     createFaucetDialogOpen,
     importAccountDialogOpen,
     deployAccountDialogOpen,
+    verifyAccountComponentDialogOpen,
+    verifyAccountComponentDialogAccountId,
     accounts,
     wallets,
     faucets,
@@ -276,6 +324,9 @@ const useAccounts = () => {
     closeImportAccountDialog,
     openDeployAccountDialog,
     closeDeployAccountDialog,
+    openVerifyAccountComponentDialog,
+    closeVerifyAccountComponentDialog,
+    verifyAccountComponent,
   };
 };
 

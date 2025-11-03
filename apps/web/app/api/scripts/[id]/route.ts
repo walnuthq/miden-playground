@@ -13,8 +13,11 @@ export const PATCH = async (
   const masm = id.startsWith("counter-contract")
     ? counterMapContractMasm
     : p2idMasm;
+  const root = id.startsWith("counter-contract")
+    ? "0x0"
+    : "0x94377a3ed496ef4282bb98b1df09f14be986f5ffed1ac5dd2f7e23e01d9c3bce";
   await sleep(1000);
-  return NextResponse.json({ ok: true, error: "", masm });
+  return NextResponse.json({ ok: true, error: "", masm, root });
 };
 
 export const DELETE = async (

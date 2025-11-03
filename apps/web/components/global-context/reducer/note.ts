@@ -6,7 +6,16 @@ export type NoteAction =
   | { type: "OPEN_IMPORT_NOTE_DIALOG" }
   | { type: "CLOSE_IMPORT_NOTE_DIALOG" }
   | { type: "OPEN_CREATE_NOTE_DIALOG" }
-  | { type: "CLOSE_CREATE_NOTE_DIALOG" };
+  | { type: "CLOSE_CREATE_NOTE_DIALOG" }
+  | {
+      type: "OPEN_VERIFY_NOTE_SCRIPT_DIALOG";
+      payload: { noteId: string };
+    }
+  | { type: "CLOSE_VERIFY_NOTE_SCRIPT_DIALOG" }
+  | {
+      type: "VERIFY_NOTE_SCRIPT";
+      payload: { noteId: string; scriptId: string };
+    };
 
 const reducer = (state: State, action: NoteAction): State => {
   switch (action.type) {
@@ -44,6 +53,34 @@ const reducer = (state: State, action: NoteAction): State => {
       return {
         ...state,
         createNoteDialogOpen: false,
+      };
+    }
+    case "OPEN_VERIFY_NOTE_SCRIPT_DIALOG": {
+      return {
+        ...state,
+        verifyNoteScriptDialogOpen: true,
+        verifyNoteScriptDialogNoteId: action.payload.noteId,
+      };
+    }
+    case "CLOSE_VERIFY_NOTE_SCRIPT_DIALOG": {
+      return {
+        ...state,
+        verifyNoteScriptDialogOpen: false,
+        verifyNoteScriptDialogNoteId: "",
+      };
+    }
+    case "VERIFY_NOTE_SCRIPT": {
+      const index = state.inputNotes.findIndex(
+        ({ id }) => id === action.payload.noteId
+      );
+      const note = state.inputNotes[index]!;
+      return {
+        ...state,
+        inputNotes: [
+          ...state.inputNotes.slice(0, index),
+          { ...note, scriptId: action.payload.scriptId },
+          ...state.inputNotes.slice(index + 1),
+        ],
       };
     }
   }

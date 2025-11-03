@@ -37,7 +37,7 @@ const useGlobalContext = () => {
   const syncState = async () => {
     const client = await webClient(state.networkId, state.serializedMockChain);
     const syncSummary = await client.syncState();
-    const inputNotes = await clientGetAllInputNotes(client);
+    const inputNotes = await clientGetAllInputNotes(client, state.inputNotes);
     const accounts: Account[] = [];
     for (const account of state.accounts) {
       const wasmAccount = await clientGetAccountByAddress(

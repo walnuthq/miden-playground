@@ -11,6 +11,7 @@ import useAccounts from "@/hooks/use-accounts";
 import AccountAddress from "@/components/lib/account-address";
 import { cn } from "@workspace/ui/lib/utils";
 import { decodeFungibleFaucetMetadata } from "@/lib/types/account";
+import { formatAmount } from "@/lib/utils";
 
 const FungibleAssetsTable = ({
   fungibleAssets,
@@ -36,7 +37,8 @@ const FungibleAssetsTable = ({
             const faucet = faucets.find(
               ({ id }) => id === fungibleAsset.faucetId
             );
-            const { tokenSymbol } = decodeFungibleFaucetMetadata(faucet);
+            const { tokenSymbol, decimals } =
+              decodeFungibleFaucetMetadata(faucet);
             return (
               <TableRow key={fungibleAsset.faucetId}>
                 <TableCell>Fungible Asset</TableCell>
@@ -55,7 +57,7 @@ const FungibleAssetsTable = ({
                     "text-red-500": fungibleAsset.amount.startsWith("-"),
                   })}
                 >
-                  {fungibleAsset.amount}
+                  {formatAmount(fungibleAsset.amount, decimals)}
                 </TableCell>
               </TableRow>
             );

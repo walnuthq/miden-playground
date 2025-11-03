@@ -18,38 +18,39 @@
   },
   "dependencies": {
     "@demox-labs/miden-sdk": "^0.11.9",
-    "@demox-labs/miden-wallet-adapter": "^0.8.0",
+    "@demox-labs/miden-wallet-adapter": "^0.8.2",
     "@mdx-js/loader": "^3.1.1",
     "@mdx-js/react": "^3.1.1",
     "@monaco-editor/react": "^4.7.0",
-    "@next/mdx": "^15.5.5",
+    "@next/mdx": "^15.5.6",
     "@opennextjs/cloudflare": "^1.11.0",
     "@tanstack/react-table": "^8.21.3",
     "@types/mdx": "^2.0.13",
     "@workspace/ui": "workspace:*",
     "js-sha3": "^0.9.3",
     "lodash": "^4.17.21",
-    "lucide-react": "^0.546.0",
+    "lucide-react": "^0.552.0",
     "new-github-issue-url": "^1.1.0",
-    "next": "^15.5.5",
+    "next": "^15.5.6",
     "next-themes": "^0.4.6",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-resizable-panels": "^3.0.6",
     "sonner": "^2.0.7",
     "usehooks-ts": "^3.1.1",
-    "uuid": "^13.0.0"
+    "uuid": "^13.0.0",
+    "viem": "^2.38.6"
   },
   "devDependencies": {
     "@types/lodash": "^4.17.20",
-    "@types/node": "^24.7.2",
+    "@types/node": "^24.9.2",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "@workspace/eslint-config": "workspace:^",
     "@workspace/typescript-config": "workspace:*",
     "copy-webpack-plugin": "^13.0.1",
-    "eslint": "^9.37.0",
+    "eslint": "^9.39.0",
     "typescript": "^5.9.3",
-    "wrangler": "^4.43.0"
+    "wrangler": "^4.45.3"
   }
 }

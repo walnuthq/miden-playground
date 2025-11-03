@@ -19,7 +19,7 @@ const useCompleted = () => {
       initialNonce = currentNonce;
     }
   }, [currentNonce]);
-  return currentNonce > initialNonce;
+  return initialNonce !== 0n && currentNonce > initialNonce;
 };
 
 const Step5: TutorialStep = {
