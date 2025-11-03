@@ -7,7 +7,7 @@ import {
   CustomTransaction,
   TransactionType,
 } from "@demox-labs/miden-wallet-adapter";
-import { TEST_WALLET_ACCOUNT_ID } from "@/lib/constants";
+import { sleep } from "@/lib/utils";
 
 const useNotes = () => {
   const {
@@ -15,6 +15,8 @@ const useNotes = () => {
     exportNoteDialogOpen,
     importNoteDialogOpen,
     createNoteDialogOpen,
+    verifyNoteScriptDialogOpen,
+    verifyNoteScriptDialogNoteId,
     dispatch,
   } = useGlobalContext();
   const { accounts } = useAccounts();
@@ -116,11 +118,44 @@ const useNotes = () => {
     // const executedTransaction = transactionResult.executedTransaction();
     // console.log(executedTransaction.outputNotes().numNotes());
   };
+  const openVerifyNoteScriptDialog = (noteId: string) =>
+    dispatch({
+      type: "OPEN_VERIFY_NOTE_SCRIPT_DIALOG",
+      payload: { noteId },
+    });
+  const closeVerifyNoteScriptDialog = () =>
+    dispatch({
+      type: "CLOSE_VERIFY_NOTE_SCRIPT_DIALOG",
+    });
+  const verifyNoteScript = async ({
+    noteId,
+    scriptId,
+  }: {
+    noteId: string;
+    scriptId: string;
+  }) => {
+    const note = inputNotes.find(({ id }) => id === noteId);
+    if (!note) {
+      throw new Error("Note not found");
+    }
+    const script = scripts.find(({ id }) => id === scriptId);
+    if (!script) {
+      throw new Error("Script not found");
+    }
+    await sleep(400);
+    const verified = note.scriptRoot === script.root;
+    if (verified) {
+      dispatch({ type: "VERIFY_NOTE_SCRIPT", payload: { noteId, scriptId } });
+    }
+    return verified;
+  };
   return {
     inputNotes,
     exportNoteDialogOpen,
     importNoteDialogOpen,
     createNoteDialogOpen,
+    verifyNoteScriptDialogOpen,
+    verifyNoteScriptDialogNoteId,
     openExportNoteDialog,
     closeExportNoteDialog,
     openImportNoteDialog,
@@ -128,6 +163,9 @@ const useNotes = () => {
     openCreateNoteDialog,
     closeCreateNoteDialog,
     newNote,
+    openVerifyNoteScriptDialog,
+    closeVerifyNoteScriptDialog,
+    verifyNoteScript,
   };
 };
 

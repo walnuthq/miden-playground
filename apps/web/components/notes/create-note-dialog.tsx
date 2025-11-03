@@ -26,13 +26,17 @@ import useNotes from "@/hooks/use-notes";
 import useScripts from "@/hooks/use-scripts";
 import { noteTypes, type NoteType } from "@/lib/types/note";
 import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";
-import { accountIdFromPrefixSuffix } from "@/lib/types/account";
+import {
+  accountIdFromPrefixSuffix,
+  decodeFungibleFaucetMetadata,
+} from "@/lib/types/account";
 import { useWallet } from "@demox-labs/miden-wallet-adapter";
 import useAccounts from "@/hooks/use-accounts";
+import { parseAmount } from "@/lib/utils";
 
 const CreateNoteDialog = () => {
   const { accountId } = useWallet();
-  const { wallets } = useAccounts();
+  const { wallets, faucets } = useAccounts();
   const { createNoteDialogOpen, closeCreateNoteDialog, newNote } = useNotes();
   const { scripts } = useScripts();
   const [loading, setLoading] = useState(false);
@@ -50,6 +54,8 @@ const CreateNoteDialog = () => {
     setNoteInputs([]);
     closeCreateNoteDialog();
   };
+  const faucetAccount = faucets.find(({ id }) => id === faucetAccountId);
+  const { decimals } = decodeFungibleFaucetMetadata(faucetAccount);
   return (
     <Dialog
       open={createNoteDialogOpen}
@@ -72,7 +78,6 @@ const CreateNoteDialog = () => {
           onSubmit={async (event) => {
             event.preventDefault();
             const formData = new FormData(event.currentTarget);
-            const amount = BigInt(formData.get("amount")?.toString() ?? "0");
             const senderAccount = wallets.find(
               ({ address }) => address === accountId
             );
@@ -83,8 +88,13 @@ const CreateNoteDialog = () => {
                     BigInt(noteInputs[0] ?? "0")
                   )
                 : "";
+            const amount = parseAmount(
+              formData.get("amount")?.toString() ?? "0",
+              decimals
+            );
             setLoading(true);
-            /*const transactionRecord = */ await newNote({
+            // const transactionRecord =
+            await newNote({
               senderAccountId: senderAccount?.id ?? "",
               recipientAccountId,
               scriptId,
@@ -164,7 +174,14 @@ const CreateNoteDialog = () => {
             </div>
             <div className="grid gap-3">
               <Label htmlFor="amount">Amount</Label>
-              <Input id="amount" name="amount" type="number" min="1" required />
+              <Input
+                id="amount"
+                name="amount"
+                type="number"
+                min={1 / 10 ** Number(decimals)}
+                step={1 / 10 ** Number(decimals)}
+                required
+              />
             </div>
             <div className="grid gap-3 col-span-2">
               <Label htmlFor="inputs">Note inputs</Label>

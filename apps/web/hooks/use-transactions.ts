@@ -32,6 +32,7 @@ const useTransactions = () => {
     createTransactionDialogConsumableNotes,
     createTransactionDialogNoteIds,
     createTransactionDialogTransactionResult,
+    inputNotes,
     transactions,
     networkId,
     serializedMockChain,
@@ -186,7 +187,7 @@ const useTransactions = () => {
     if (!transactionRecord || !nextAccount || !previousAccount) {
       throw new Error("Transaction record or account not found");
     }
-    const inputNotes = await clientGetAllInputNotes(client);
+    const newInputNotes = await clientGetAllInputNotes(client, inputNotes);
     // console.log("inputNotes.length", inputNotes.length);
     const consumableNoteIds: Record<string, string[]> = {};
     for (const account of accounts) {
@@ -217,7 +218,7 @@ const useTransactions = () => {
         transaction,
         account,
         consumableNoteIds,
-        inputNotes,
+        inputNotes: newInputNotes,
         blockNum: syncSummary.blockNum(),
         serializedMockChain: newSerializedMockChain,
       },

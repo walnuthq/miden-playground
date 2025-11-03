@@ -15,6 +15,7 @@ import { noteConsumable } from "@/lib/types/note";
 import { useWallet } from "@demox-labs/miden-wallet-adapter";
 import useAccounts from "@/hooks/use-accounts";
 import useGlobalContext from "@/components/global-context/hook";
+import VerifyNoteScriptDialog from "@/components/note/verify-note-script-dialog";
 
 const Note = ({ id }: { id: string }) => {
   const isClient = useIsClient();
@@ -45,6 +46,7 @@ const Note = ({ id }: { id: string }) => {
         </TabsContent>
       </Tabs>
       <CreateTransactionDialog />
+      <VerifyNoteScriptDialog />
     </div>
   );
 };

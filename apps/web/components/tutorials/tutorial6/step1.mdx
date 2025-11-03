@@ -6,7 +6,7 @@ Creating a custom note is a two step process:
 - First, you develop the note script using a **Rust program** and compile it to **MASM (Miden Assembly)**.
 - Then you perform a transaction on your wallet that is responsible for creating the note on the network.
 
-When creating a note, you can pass arbitrary parameters called [Note Inputs](https://0xmiden.github.io/miden-docs/imported/miden-base/src/note.html#inputs) and the [Note Script](https://0xmiden.github.io/miden-docs/imported/miden-base/src/note.html#script) can access these inputs.
+When creating a note, you can pass arbitrary parameters called [Note Inputs](https://docs.miden.xyz/miden-base/note#inputs) and the [Note Script](https://docs.miden.xyz/miden-base/note#script) can access these inputs.
 
 In our timelock example, we have 2 note inputs: the recipient account ID and the minimal block height before the note can be consumed.
 

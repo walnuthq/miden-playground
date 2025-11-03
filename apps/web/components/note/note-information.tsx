@@ -30,6 +30,7 @@ const NoteInformation = ({ inputNote }: { inputNote: InputNote }) => {
         </h4>
         <NoteInputsTable inputs={inputNote.inputs} />
       </div>
+      {/* TODO: better decoded note inputs using inputNote.scriptId */}
       {script?.id === "p2id" && (
         <div className="flex flex-col gap-2">
           <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">

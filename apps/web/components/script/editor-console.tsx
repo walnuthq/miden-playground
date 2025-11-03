@@ -19,12 +19,13 @@ const EditorConsole = ({ script }: { script: Script }) => {
   const [loading, setLoading] = useState(false);
   const compile = async () => {
     setLoading(true);
-    const { error, masm } = await compileScript(script);
+    const { error, masm, root } = await compileScript(script);
     updateScript({
       ...script,
       error,
       masm,
       status: masm ? "compiled" : "draft",
+      root,
     });
     setLoading(false);
   };

@@ -26,12 +26,13 @@ export const compileScript = async (script: Script) => {
     body: JSON.stringify({ rust: script.rust }),
   });
   const result = await response.json();
-  const { ok, error, masm } = result as {
+  const { ok, error, masm, root } = result as {
     ok: boolean;
     error: string;
     masm: string;
+    root: string;
   };
-  return { ok, error, masm };
+  return { ok, error, masm, root };
 };
 
 export const deleteScript = async (scriptId: string) => {

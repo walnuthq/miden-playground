@@ -25,6 +25,8 @@ export type State = {
   createFaucetDialogOpen: boolean;
   importAccountDialogOpen: boolean;
   deployAccountDialogOpen: boolean;
+  verifyAccountComponentDialogOpen: boolean;
+  verifyAccountComponentDialogAccountId: string;
   accounts: Account[];
   // TRANSACTIONS
   createTransactionDialogOpen: boolean;
@@ -40,6 +42,8 @@ export type State = {
   exportNoteDialogOpen: boolean;
   importNoteDialogOpen: boolean;
   createNoteDialogOpen: boolean;
+  verifyNoteScriptDialogOpen: boolean;
+  verifyNoteScriptDialogNoteId: string;
   // SCRIPTS
   createScriptDialogOpen: boolean;
   deleteScriptAlertDialogOpen: boolean;
@@ -75,6 +79,8 @@ export const defaultState = (): State => ({
   createFaucetDialogOpen: false,
   importAccountDialogOpen: false,
   deployAccountDialogOpen: false,
+  verifyAccountComponentDialogOpen: false,
+  verifyAccountComponentDialogAccountId: "",
   accounts: [],
   // TRANSACTIONS
   createTransactionDialogOpen: false,
@@ -90,6 +96,8 @@ export const defaultState = (): State => ({
   exportNoteDialogOpen: false,
   importNoteDialogOpen: false,
   createNoteDialogOpen: false,
+  verifyNoteScriptDialogOpen: false,
+  verifyNoteScriptDialogNoteId: "",
   // SCRIPTS
   createScriptDialogOpen: false,
   deleteScriptAlertDialogOpen: false,
