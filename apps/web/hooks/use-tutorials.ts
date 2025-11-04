@@ -37,12 +37,13 @@ const useTutorials = () => {
     if (!tutorial) {
       return;
     }
-    router.push(tutorial.initialRoute);
-    await deleteStore();
     const client = await webClient(
       tutorial.state.networkId,
       tutorial.state.serializedMockChain
     );
+    await client.syncState();
+    await deleteStore();
+    router.push(tutorial.initialRoute);
     await client.forceImportStore(JSON.stringify(tutorial.store));
     const syncSummary = await client.syncState();
     dispatch({
@@ -90,11 +91,12 @@ const useTutorials = () => {
       store: defaultStore(),
     };
     router.push(nextTutorial.initialRoute);
-    await deleteStore();
     const client = await webClient(
       nextTutorial.state.networkId,
       nextTutorial.state.serializedMockChain
     );
+    await client.syncState();
+    await deleteStore();
     await client.forceImportStore(JSON.stringify(nextTutorial.store));
     const syncSummary = await client.syncState();
     const newCompletedTutorials = new Set([...completedTutorials]);

@@ -26,12 +26,12 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.16",
     "@turbo/gen": "^2.6.0",
-    "@types/node": "^24.9.2",
+    "@types/node": "^24.10.0",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
-    "eslint": "^9.39.0",
+    "eslint": "^9.39.1",
     "tailwindcss": "^4.1.16",
     "typescript": "^5.9.3"
   },

@@ -202,6 +202,14 @@ export const clientNewTransaction = async (
   );
 };
 
+// export const clientGetAccounts = async (client: WebClientType) => {
+//   const accountHeaders = await client.getAccounts();
+//   const accounts = await Promise.all(
+//     accountHeaders.map((accountHeader) => client.getAccount(accountHeader.id()))
+//   );
+//   return accounts.filter((account) => account !== undefined);
+// };
+
 export const clientGetAccountByAddress = async (
   client: WebClientType,
   address: string
@@ -611,7 +619,7 @@ export const wasmInputNoteToInputNote = async (
       .recipient()
       .inputs()
       .values()
-      .map((value) => value.asInt()),
+      .map((value) => value.toString()),
     nullifier: record.nullifier(),
     updatedAt: record.inclusionProof()?.location().blockNum() ?? 0,
   };

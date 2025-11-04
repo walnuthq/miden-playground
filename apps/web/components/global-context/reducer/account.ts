@@ -5,7 +5,7 @@ import { type State } from "@/lib/types/state";
 export type AccountAction =
   | {
       type: "NEW_ACCOUNT";
-      payload: { account: Account; blockNum: number };
+      payload: { account: Account };
     }
   | {
       type: "IMPORT_ACCOUNT";
@@ -57,7 +57,6 @@ const reducer = (state: State, action: AccountAction): State => {
       return {
         ...state,
         accounts: [...state.accounts, action.payload.account],
-        blockNum: action.payload.blockNum,
       };
     }
     case "IMPORT_ACCOUNT": {

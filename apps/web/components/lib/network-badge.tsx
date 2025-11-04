@@ -25,7 +25,7 @@ const NetworkBadge = () => {
       };
       sync();
     },
-    useIntervalTriggered ? 5000 : null
+    useIntervalTriggered ? 4000 : null
   );
   return (
     <Badge className={cn({ "bg-[#f50] text-white": networkId === "mlcl" })}>

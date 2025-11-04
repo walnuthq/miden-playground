@@ -7,7 +7,7 @@ import {
   TableHead,
 } from "@workspace/ui/components/table";
 
-const NoteInputsTable = ({ inputs }: { inputs: bigint[] }) => (
+const NoteInputsTable = ({ inputs }: { inputs: string[] }) => (
   <div className="rounded-md border">
     <Table>
       <TableHeader>
@@ -21,7 +21,7 @@ const NoteInputsTable = ({ inputs }: { inputs: bigint[] }) => (
         {inputs.slice(0, 3).map((value, index) => (
           <TableRow key={index}>
             <TableCell>{index}</TableCell>
-            <TableCell>{value}</TableCell>
+            <TableCell>{BigInt(value)}</TableCell>
           </TableRow>
         ))}
       </TableBody>

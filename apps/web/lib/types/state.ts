@@ -150,10 +150,7 @@ export const stateSerializer = ({
       nonce: account.nonce.toString(),
     })),
     transactions,
-    inputNotes: inputNotes.map((inputNote) => ({
-      ...inputNote,
-      inputs: inputNote.inputs.map((input) => input.toString()),
-    })),
+    inputNotes,
     scripts: scripts.map((script) => ({
       ...script,
       procedures: script.procedures.map((procedure) => ({
@@ -202,7 +199,7 @@ export const stateDeserializer = (value: string): State => {
       serializedMockChain?: string | null;
       accounts?: (Omit<Account, "nonce"> & { nonce: string })[];
       transactions?: Transaction[];
-      inputNotes?: (Omit<InputNote, "inputs"> & { inputs: string[] })[];
+      inputNotes?: InputNote[];
       scripts?: (Omit<Script, "procedures"> & {
         procedures: (Omit<Procedure, "storageRead"> & {
           storageRead?:
@@ -242,12 +239,7 @@ export const stateDeserializer = (value: string): State => {
           }))
         : initialState.accounts,
       transactions: transactions ?? initialState.transactions,
-      inputNotes: inputNotes
-        ? inputNotes.map((inputNote) => ({
-            ...inputNote,
-            inputs: inputNote.inputs.map((input) => BigInt(input)),
-          }))
-        : initialState.inputNotes,
+      inputNotes: inputNotes ?? initialState.inputNotes,
       scripts: scripts
         ? scripts.map((script) => ({
             ...script,

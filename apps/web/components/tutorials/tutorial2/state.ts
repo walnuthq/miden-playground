@@ -550,7 +550,7 @@ const state: State = {
           amount: "100000000",
         },
       ],
-      inputs: [465679682904581120n, 17530027376186231824n],
+      inputs: ["0x6766d344ea4e400", "0xf3472b0544740c10"],
       nullifier:
         "0xbe1e521550e11d5696f9880ca3b9553c6a637e497f87952b48dff3bd3826876e",
       updatedAt: 1,
