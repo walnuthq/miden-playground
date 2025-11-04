@@ -16,9 +16,16 @@ import { noteConsumed } from "@/lib/types/note";
 const useGlobalContext = () => {
   const { state, dispatch } = useContext(GlobalContext);
   const resetState = async (networkId: NetworkId) => {
-    const client = await webClient(networkId, null);
-    await client.syncState();
+    if (state.networkId !== "mlcl") {
+      const previousWebClient = await webClient(
+        state.networkId,
+        state.serializedMockChain
+      );
+      await previousWebClient.syncState();
+    }
+    //
     await deleteStore();
+    const client = await webClient(networkId, null);
     await client.forceImportStore(JSON.stringify(defaultStore()));
     const syncSummary = await client.syncState();
     console.log("blockNum", syncSummary.blockNum());

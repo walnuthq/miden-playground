@@ -17,6 +17,7 @@ import {
 const useTutorials = () => {
   const router = useRouter();
   const {
+    networkId,
     tutorialId,
     tutorialLoaded,
     tutorialStep,
@@ -37,12 +38,15 @@ const useTutorials = () => {
     if (!tutorial) {
       return;
     }
+    if (networkId !== "mlcl") {
+      const previousWebClient = await webClient(networkId, null);
+      await previousWebClient.syncState();
+    }
+    await deleteStore();
     const client = await webClient(
       tutorial.state.networkId,
       tutorial.state.serializedMockChain
     );
-    await client.syncState();
-    await deleteStore();
     router.push(tutorial.initialRoute);
     await client.forceImportStore(JSON.stringify(tutorial.store));
     const syncSummary = await client.syncState();
