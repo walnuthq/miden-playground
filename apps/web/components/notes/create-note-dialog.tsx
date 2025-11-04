@@ -84,8 +84,8 @@ const CreateNoteDialog = () => {
             const recipientAccountId =
               noteInputs.length >= 2
                 ? accountIdFromPrefixSuffix(
-                    BigInt(noteInputs[1] ?? "0"),
-                    BigInt(noteInputs[0] ?? "0")
+                    noteInputs[1] ?? "0x0",
+                    noteInputs[0] ?? "0x0"
                   )
                 : "";
             const amount = parseAmount(

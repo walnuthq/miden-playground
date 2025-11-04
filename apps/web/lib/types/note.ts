@@ -33,7 +33,7 @@ export type InputNote = {
   scriptRoot: string;
   scriptId: string;
   fungibleAssets: FungibleAsset[];
-  inputs: bigint[];
+  inputs: string[];
   nullifier: string;
   updatedAt: number;
 };

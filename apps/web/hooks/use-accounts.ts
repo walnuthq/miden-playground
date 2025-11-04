@@ -36,6 +36,7 @@ const useAccounts = () => {
     verifyAccountComponentDialogAccountId,
     accounts,
     tutorialId,
+    blockNum,
     dispatch,
   } = useGlobalContext();
   const { accountId: connectedWalletAddress } = useWallet();
@@ -55,16 +56,15 @@ const useAccounts = () => {
       storageMode,
       mutable: true,
     });
-    const syncSummary = await client.syncState();
     const account = await wasmAccountToAccount({
       wasmAccount: wallet,
       name,
       networkId,
-      updatedAt: syncSummary.blockNum(),
+      updatedAt: blockNum,
     });
     dispatch({
       type: "NEW_ACCOUNT",
-      payload: { account, blockNum: syncSummary.blockNum() },
+      payload: { account },
     });
     return account;
   };
@@ -89,16 +89,15 @@ const useAccounts = () => {
       decimals,
       maxSupply,
     });
-    const syncSummary = await client.syncState();
     const account = await wasmAccountToAccount({
       wasmAccount: faucet,
       name,
       networkId,
-      updatedAt: syncSummary.blockNum(),
+      updatedAt: blockNum,
     });
     dispatch({
       type: "NEW_ACCOUNT",
-      payload: { account, blockNum: syncSummary.blockNum() },
+      payload: { account },
     });
     return account;
   };
@@ -110,6 +109,7 @@ const useAccounts = () => {
     address: string;
   }) => {
     const client = await webClient(networkId, serializedMockChain);
+    const syncSummary = await client.syncState();
     let wasmAccount: WasmAccount | null = null;
     try {
       wasmAccount = await clientGetAccountByAddress(client, address);
@@ -121,7 +121,6 @@ const useAccounts = () => {
     if (!wasmAccount) {
       throw new Error("Account not found");
     }
-    const syncSummary = await client.syncState();
     const consumableNotes = await clientGetConsumableNotes(
       client,
       wasmAccount.id().toString()
@@ -144,9 +143,7 @@ const useAccounts = () => {
       if (tutorialId === "interact-with-the-counter-contract") {
         account.components.push("counter-contract");
       }
-    } /* else if (account.address === "mtst1qqtzp4x9c9gv6yp7qm8uzzr7y3cqqua4clw") {
-      account.components = ["no-auth", "counter-map-contract"];
-    }*/ else if (account.code === BASIC_WALLET_CODE) {
+    } else if (account.code === BASIC_WALLET_CODE) {
       // Basic Wallet
       account.components = ["basic-auth", "basic-wallet"];
     }
@@ -217,17 +214,16 @@ const useAccounts = () => {
       components,
       scripts: componentScripts,
     });
-    const syncSummary = await client.syncState();
     const account = await wasmAccountToAccount({
       wasmAccount,
       name,
       components: components.map(({ id }) => id),
       networkId,
-      updatedAt: syncSummary.blockNum(),
+      updatedAt: blockNum,
     });
     dispatch({
       type: "NEW_ACCOUNT",
-      payload: { account, blockNum: syncSummary.blockNum() },
+      payload: { account },
     });
     return account;
   };

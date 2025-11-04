@@ -92,9 +92,9 @@ export const basicFungibleFaucetAccount = ({
   components: ["basic-fungible-faucet"],
 });
 
-export const accountIdFromPrefixSuffix = (prefix: bigint, suffix: bigint) => {
-  const prefixString = prefix.toString(16).padStart(16, "0");
-  const suffixString = suffix.toString(16).padStart(16, "0");
+export const accountIdFromPrefixSuffix = (prefix: string, suffix: string) => {
+  const prefixString = BigInt(prefix).toString(16).padStart(16, "0");
+  const suffixString = BigInt(suffix).toString(16).padStart(16, "0");
   return `0x${prefixString}${suffixString}`.slice(0, 32);
 };
 

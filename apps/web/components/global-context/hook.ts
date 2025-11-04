@@ -16,8 +16,9 @@ import { noteConsumed } from "@/lib/types/note";
 const useGlobalContext = () => {
   const { state, dispatch } = useContext(GlobalContext);
   const resetState = async (networkId: NetworkId) => {
-    await deleteStore();
     const client = await webClient(networkId, null);
+    await client.syncState();
+    await deleteStore();
     await client.forceImportStore(JSON.stringify(defaultStore()));
     const syncSummary = await client.syncState();
     console.log("blockNum", syncSummary.blockNum());
@@ -35,59 +36,69 @@ const useGlobalContext = () => {
     });
   };
   const syncState = async () => {
-    const client = await webClient(state.networkId, state.serializedMockChain);
-    const syncSummary = await client.syncState();
-    const inputNotes = await clientGetAllInputNotes(client, state.inputNotes);
-    const accounts: Account[] = [];
-    for (const account of state.accounts) {
-      const wasmAccount = await clientGetAccountByAddress(
-        client,
-        account.address
+    try {
+      const client = await webClient(
+        state.networkId,
+        state.serializedMockChain
       );
-      // const consumableNotes = await clientGetConsumableNotes(
-      //   client,
-      //   account.id
-      // );
-      // const noteIds = consumableNotes.map((consumableNote) =>
-      //   consumableNote.inputNoteRecord().id().toString()
-      // );
-      // TODO fix for getConsumableNotes
-      const noteIds: string[] = [];
-      for (const inputNote of inputNotes) {
-        if (
-          // inputNote.scriptRoot !== P2ID_NOTE_CODE ||
-          noteConsumed(inputNote)
-        ) {
-          continue;
-        }
-        const targetAccountId = accountIdFromPrefixSuffix(
-          inputNote.inputs[1]!,
-          inputNote.inputs[0]!
+      const syncSummary = await client.syncState();
+      const inputNotes = await clientGetAllInputNotes(client, state.inputNotes);
+      const accounts: Account[] = [];
+      for (const account of state.accounts) {
+        const wasmAccount = await clientGetAccountByAddress(
+          client,
+          account.address
         );
-        if (account.id === targetAccountId && !noteIds.includes(inputNote.id)) {
-          noteIds.push(inputNote.id);
+        // const consumableNotes = await clientGetConsumableNotes(
+        //   client,
+        //   account.id
+        // );
+        // const noteIds = consumableNotes.map((consumableNote) =>
+        //   consumableNote.inputNoteRecord().id().toString()
+        // );
+        // TODO fix for getConsumableNotes
+        const noteIds: string[] = [];
+        for (const inputNote of inputNotes) {
+          if (
+            // inputNote.scriptRoot !== P2ID_NOTE_CODE ||
+            noteConsumed(inputNote)
+          ) {
+            continue;
+          }
+          const targetAccountId = accountIdFromPrefixSuffix(
+            inputNote.inputs[1]!,
+            inputNote.inputs[0]!
+          );
+          if (
+            account.id === targetAccountId &&
+            !noteIds.includes(inputNote.id)
+          ) {
+            noteIds.push(inputNote.id);
+          }
         }
+        const updatedAccount = await wasmAccountToAccount({
+          wasmAccount,
+          name: account.name,
+          components: account.components,
+          networkId: state.networkId,
+          updatedAt: syncSummary.blockNum(),
+          consumableNoteIds: noteIds,
+        });
+        accounts.push(updatedAccount);
       }
-      const updatedAccount = await wasmAccountToAccount({
-        wasmAccount,
-        name: account.name,
-        components: account.components,
-        networkId: state.networkId,
-        updatedAt: syncSummary.blockNum(),
-        consumableNoteIds: noteIds,
+      //
+      dispatch({
+        type: "SYNC_STATE",
+        payload: {
+          blockNum: syncSummary.blockNum(),
+          //consumableNoteIds,
+          accounts,
+          inputNotes,
+        },
       });
-      accounts.push(updatedAccount);
+    } catch (error) {
+      console.error(error);
     }
-    //
-    dispatch({
-      type: "SYNC_STATE",
-      payload: {
-        blockNum: syncSummary.blockNum(),
-        //consumableNoteIds,
-        accounts,
-        inputNotes,
-      },
-    });
   };
   return {
     ...state,
