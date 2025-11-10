@@ -182,6 +182,7 @@ const useAccounts = () => {
     components: Component[];
   }) => {
     const client = await webClient(networkId, serializedMockChain);
+    const syncSummary = await client.syncState();
     const componentScriptIds = components.map(({ scriptId }) => scriptId);
     const componentScripts = scripts.filter(({ id }) =>
       componentScriptIds.includes(id)
@@ -219,7 +220,7 @@ const useAccounts = () => {
       name,
       components: components.map(({ id }) => id),
       networkId,
-      updatedAt: blockNum,
+      updatedAt: syncSummary.blockNum(),
     });
     dispatch({
       type: "NEW_ACCOUNT",

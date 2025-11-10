@@ -69,7 +69,11 @@ const AccountInformationTable = ({ account }: { account: Account }) => {
             <TableCell>
               <Badge
                 variant={
-                  account.storageMode === "public" ? "default" : "destructive"
+                  account.storageMode === "public"
+                    ? "default"
+                    : account.storageMode === "network"
+                      ? "secondary"
+                      : "destructive"
                 }
                 className="capitalize"
               >

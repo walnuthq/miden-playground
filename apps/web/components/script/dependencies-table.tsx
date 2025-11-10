@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   Table,
   TableBody,
@@ -28,7 +29,14 @@ const DependenciesTable = ({ script }: { script: Script }) => {
         <TableBody>
           {dependencies.map((dependency) => (
             <TableRow key={dependency.id}>
-              <TableCell>{dependency.name}</TableCell>
+              <TableCell>
+                <Link
+                  href={`/scripts/${dependency.id}`}
+                  className="text-primary font-medium underline underline-offset-4"
+                >
+                  {dependency.name}
+                </Link>
+              </TableCell>
               <TableCell>{dependency.packageName}</TableCell>
               <TableCell>{scriptTypes[dependency.type]}</TableCell>
               <TableCell>

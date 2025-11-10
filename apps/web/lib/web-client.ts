@@ -353,13 +353,14 @@ export const clientDeployAccount = async (
     "regular-account-updatable-code":
       WasmAccountType.RegularAccountUpdatableCode,
   } as const;
+  const accountStorageModes = {
+    public: WasmAccountStorageMode.public(),
+    network: WasmAccountStorageMode.network(),
+    private: WasmAccountStorageMode.private(),
+  } as const;
   let accountBuilder = new WasmAccountBuilder(initSeed)
     .accountType(accountTypes[accountType])
-    .storageMode(
-      storageMode === "public"
-        ? WasmAccountStorageMode.public()
-        : WasmAccountStorageMode.private()
-    );
+    .storageMode(accountStorageModes[storageMode]);
   for (const component of components) {
     const script = scripts.find(({ id }) => id === component.scriptId);
     if (!script) {
@@ -411,13 +412,11 @@ export const createNoteFromScript = async ({
     NoteMetadata: WasmNoteMetadata,
     Note: WasmNote,
     AccountId: WasmAccountId,
-    // FungibleAsset: WasmFungibleAsset,
   } = await import("@demox-labs/miden-sdk");
   let assembler = WasmTransactionKernel.assembler().withDebugMode(true);
   const dependencies = script.dependencies
     .map((scriptId) => scripts.find(({ id }) => id === scriptId))
     .filter((dependency) => dependency !== undefined);
-  console.log(dependencies);
   for (const dependency of dependencies) {
     const contractName = dependency.id.replaceAll("-", "_");
     const accountComponentLibrary =
@@ -428,41 +427,15 @@ export const createNoteFromScript = async ({
       );
     assembler = assembler.withLibrary(accountComponentLibrary);
   }
-  // const accountComponents = senderAccount.components
-  //   .map((componentId) => components.find(({ id }) => id === componentId))
-  //   .filter((component) => component !== undefined)
-  //   // TODO
-  //   .filter(({ id }) => id === "counter-contract");
-  // console.log("components", accountComponents);
-  // for (const component of accountComponents) {
-  //   const componentScript = scripts.find(({ id }) => id === component.scriptId);
-  //   if (!componentScript) {
-  //     throw new Error("Script not found");
-  //   }
-  //   const contractName = componentScript.id.replaceAll("-", "_");
-  //   console.log("contractName", contractName);
-  //   const accountComponentLibrary =
-  //     WasmAssemblerUtils.createAccountComponentLibrary(
-  //       assembler,
-  //       `external_contract::${contractName}`,
-  //       componentScript.masm
-  //     );
-  //   assembler = assembler.withLibrary(accountComponentLibrary);
-  // }
-  console.log(script.masm);
   const compiledNoteScript = assembler.compileNoteScript(script.masm);
-  console.log("OK");
   const noteAssets = new WasmNoteAssets([]);
-  // const noteAssets = new WasmNoteAssets([
-  //   new WasmFungibleAsset(
-  //     WasmAccountId.fromHex("0x83592005c13d47203ec1e3124c654d"),
-  //     100n
-  //   ),
-  // ]);
+  const noteTag = WasmNoteTag.fromAccountId(
+    WasmAccountId.fromHex(recipientAccountId)
+  );
   const noteMetadata = new WasmNoteMetadata(
     WasmAccountId.fromHex(senderAccountId),
     type === "public" ? WasmNoteType.Public : WasmNoteType.Private,
-    WasmNoteTag.fromAccountId(WasmAccountId.fromHex(recipientAccountId)),
+    noteTag,
     //WasmNoteTag.forLocalUseCase(0, 0),
     WasmNoteExecutionHint.none()
   );
@@ -529,7 +502,8 @@ export const wasmAccountToAccount = async ({
       .id()
       .toBech32Custom(networkId, WasmAccountInterface.Unspecified),
     type: accountType(wasmAccount /*, tokenSymbol*/),
-    storageMode: wasmAccount.isPublic() ? "public" : "private",
+    // TODO need a storageMode getter
+    storageMode: wasmAccount.isPublic() ? "public" : "network",
     isPublic: wasmAccount.isPublic(),
     isUpdatable: wasmAccount.isUpdatable(),
     isRegularAccount: wasmAccount.isRegularAccount(),

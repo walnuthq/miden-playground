@@ -6,7 +6,7 @@ const counterContract: Component = {
   name: "Counter Contract",
   type: "account",
   scriptId: "counter-contract",
-  storageSlots: [{ name: "Counter", type: "value", value: "1" }],
+  storageSlots: [{ name: "Counter", type: "value", value: "0" }],
 };
 
 export default counterContract;

@@ -12,9 +12,9 @@ export const accountTypes = {
 export type AccountType = keyof typeof accountTypes;
 
 export const accountStorageModes = {
-  private: "Private",
   public: "Public",
   network: "Network",
+  private: "Private",
 } as const;
 
 export type AccountStorageMode = keyof typeof accountStorageModes;

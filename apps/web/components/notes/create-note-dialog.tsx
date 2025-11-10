@@ -26,10 +26,7 @@ import useNotes from "@/hooks/use-notes";
 import useScripts from "@/hooks/use-scripts";
 import { noteTypes, type NoteType } from "@/lib/types/note";
 import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";
-import {
-  accountIdFromPrefixSuffix,
-  decodeFungibleFaucetMetadata,
-} from "@/lib/types/account";
+import { decodeFungibleFaucetMetadata } from "@/lib/types/account";
 import { useWallet } from "@demox-labs/miden-wallet-adapter";
 import useAccounts from "@/hooks/use-accounts";
 import { parseAmount } from "@/lib/utils";
@@ -40,14 +37,15 @@ const CreateNoteDialog = () => {
   const { createNoteDialogOpen, closeCreateNoteDialog, newNote } = useNotes();
   const { scripts } = useScripts();
   const [loading, setLoading] = useState(false);
-  // const [senderAccountId, setSenderAccountId] = useState("");
+  const [recipientAccountId, setRecipientAccountId] = useState("");
   const [scriptId, setScriptId] = useState("");
   const [noteType, setNoteType] = useState<NoteType>("public");
+  const [hasAssets, setHasAssets] = useState(false);
   const [faucetAccountId, setFaucetAccountId] = useState("");
   const [noteInputs, setNoteInputs] = useState<string[]>([]);
   const shownScripts = scripts.filter(({ type }) => type === "note");
   const onClose = () => {
-    // setSenderAccountId("");
+    setRecipientAccountId("");
     setScriptId("");
     setNoteType("public");
     setFaucetAccountId("");
@@ -81,13 +79,13 @@ const CreateNoteDialog = () => {
             const senderAccount = wallets.find(
               ({ address }) => address === accountId
             );
-            const recipientAccountId =
-              noteInputs.length >= 2
-                ? accountIdFromPrefixSuffix(
-                    noteInputs[1] ?? "0x0",
-                    noteInputs[0] ?? "0x0"
-                  )
-                : "";
+            // const recipientAccountId =
+            //   noteInputs.length >= 2
+            //     ? accountIdFromPrefixSuffix(
+            //         noteInputs[1] ?? "0x0",
+            //         noteInputs[0] ?? "0x0"
+            //       )
+            //     : "";
             const amount = parseAmount(
               formData.get("amount")?.toString() ?? "0",
               decimals
@@ -119,14 +117,13 @@ const CreateNoteDialog = () => {
           }}
         >
           <div className="grid grid-cols-2 gap-4">
-            {/* <div className="grid gap-3 col-span-2">
-              <Label>Sender account</Label>
+            <div className="grid gap-3 col-span-2">
+              <Label>Recipient account</Label>
               <SelectAccountDropdownMenu
-                value={senderAccountId}
-                onValueChange={setSenderAccountId}
-                selectWallets
+                value={recipientAccountId}
+                onValueChange={setRecipientAccountId}
               />
-            </div> */}
+            </div>
             <div className="grid gap-3">
               <Label htmlFor="script">Script</Label>
               <Select onValueChange={setScriptId} value={scriptId}>
@@ -165,23 +162,36 @@ const CreateNoteDialog = () => {
             </div>
             <div className="grid gap-3">
               <Label>Note assets</Label>
-              <SelectAccountDropdownMenu
-                value={faucetAccountId}
-                onValueChange={setFaucetAccountId}
-                selectFaucets
-                showFaucetsAsAssets
-              />
+              {hasAssets && (
+                <SelectAccountDropdownMenu
+                  value={faucetAccountId}
+                  onValueChange={setFaucetAccountId}
+                  selectFaucets
+                  showFaucetsAsAssets
+                />
+              )}
             </div>
-            <div className="grid gap-3">
-              <Label htmlFor="amount">Amount</Label>
-              <Input
-                id="amount"
-                name="amount"
-                type="number"
-                min={1 / 10 ** Number(decimals)}
-                step={1 / 10 ** Number(decimals)}
-                required
-              />
+            {hasAssets && (
+              <div className="grid gap-3">
+                <Label htmlFor="amount">Amount</Label>
+                <Input
+                  id="amount"
+                  name="amount"
+                  type="number"
+                  min={1 / 10 ** Number(decimals)}
+                  step={1 / 10 ** Number(decimals)}
+                  required
+                />
+              </div>
+            )}
+            <div className="grid gap-3 col-span-2">
+              <Button
+                type="button"
+                variant={hasAssets ? "destructive" : "secondary"}
+                onClick={() => setHasAssets(!hasAssets)}
+              >
+                {hasAssets ? "Remove" : "Add"} note assets
+              </Button>
             </div>
             <div className="grid gap-3 col-span-2">
               <Label htmlFor="inputs">Note inputs</Label>
@@ -238,9 +248,9 @@ const CreateNoteDialog = () => {
             type="submit"
             disabled={
               loading ||
-              // senderAccountId === "" ||
+              recipientAccountId === "" ||
               scriptId === "" ||
-              faucetAccountId === ""
+              (hasAssets ? faucetAccountId === "" : false)
             }
           >
             {loading && <Spinner />}

@@ -1,7 +1,7 @@
 import { type TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
-import Step2Content from "@/components/tutorials/tutorial7/step2.mdx";
+import Step3Content from "@/components/tutorials/tutorial7/step3.mdx";
 import useAccounts from "@/hooks/use-accounts";
 import useComponents from "@/hooks/use-components";
 import defaultComponents from "@/lib/types/default-components";
@@ -17,26 +17,35 @@ const useCompleted = () => {
     ({ components, storageMode }) =>
       components.includes(component?.id ?? "") && storageMode === "network"
   );
-  return !!counter;
+  const nonce = counter?.nonce ?? 0n;
+  return nonce > 0n;
 };
 
-const Step2: TutorialStep = {
-  title: "Deploy a network Counter smart contract.",
+const Step3: TutorialStep = {
+  title: "Register your network Counter on-chain.",
   Content: () => {
+    const { accounts } = useAccounts();
+    const { components } = useComponents();
+    const defaultComponentIds = defaultComponents.map(({ id }) => id);
+    const component = components.find(
+      ({ id, type }) => !defaultComponentIds.includes(id) && type === "account"
+    );
+    const counter = accounts.find(
+      ({ components, storageMode }) =>
+        components.includes(component?.id ?? "") && storageMode === "network"
+    );
     const completed = useCompleted();
     return (
       <>
-        <Step2Content />
+        <Step3Content counter={counter} />
         <TutorialAlert
           completed={completed}
-          title="Action required: Deploy a network Counter."
-          titleWhenCompleted="You deployed a network Counter."
+          title="Action required: Register the network account on-chain."
+          titleWhenCompleted="You registered the network account."
           description={
             <p>
-              Click on the <em>"Create new account"</em> button and deploy a
-              network account by selecting the <strong>Network</strong> storage
-              mode. Use the <strong>NoAuth</strong> authentication scheme and
-              the <strong>Counter Contract</strong> component.
+              Click on the <em>"Invoke"</em> button from your newly deployed
+              network account to register and commit its state on-chain.
             </p>
           }
         />
@@ -49,4 +58,4 @@ const Step2: TutorialStep = {
   },
 };
 
-export default Step2;
+export default Step3;

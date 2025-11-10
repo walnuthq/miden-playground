@@ -1,5 +1,14 @@
-In this tutorial, we will create a simple counter note
+Unlike local transactions that require users to execute and prove, network transactions are executed and proven by a network transaction builder.
 
-Using a script, we will invoke the increment function within the counter contract to update the count. This tutorial provides a foundational understanding of developing and deploying custom smart contracts on Miden.
+We'll build a network counter smart contract using the same code as the regular counter, but with different [storage configuration](https://docs.miden.xyz/miden-base/account/id#account-storage-mode) to enable network execution.
 
-Let's get started by clicking on _"Create new script"_ then choose a name and make sure to select a **Note Script** using the **Counter Note** example.
+Then we'll create a note interacting with the network counter and let the network transaction builder actually consume and process the note.
+
+Network transactions are executed and proven by the Miden operator rather than the client. They are useful for:
+
+- **Public shared state**: Multiple users can interact with the same contract state without race conditions.
+- **Autonomous execution**: Smart contracts can execute when conditions are met without user intervention.
+- **Resource-constrained devices**: Clients that can't generate ZK proofs efficiently.
+- **AMM applications**: Using network notes, you can build sophisticated AMMs where trades execute automatically.
+
+The main trade-off is reduced privacy since the operator can see transaction inputs.

@@ -1,10 +1,13 @@
+import { useEffect } from "react";
 import { type TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
-import Step2Content from "@/components/tutorials/tutorial7/step2.mdx";
+import Step5Content from "@/components/tutorials/tutorial7/step5.mdx";
 import useAccounts from "@/hooks/use-accounts";
 import useComponents from "@/hooks/use-components";
 import defaultComponents from "@/lib/types/default-components";
+
+let initialNonce = 0n;
 
 const useCompleted = () => {
   const { accounts } = useAccounts();
@@ -17,27 +20,28 @@ const useCompleted = () => {
     ({ components, storageMode }) =>
       components.includes(component?.id ?? "") && storageMode === "network"
   );
-  return !!counter;
+  const currentNonce = counter?.nonce ?? 0n;
+  useEffect(() => {
+    if (initialNonce === 0n) {
+      initialNonce = currentNonce;
+    }
+  }, [currentNonce]);
+  return initialNonce !== 0n && currentNonce > initialNonce;
 };
 
-const Step2: TutorialStep = {
-  title: "Deploy a network Counter smart contract.",
+const Step5: TutorialStep = {
+  title: "Create a network note by executing a transaction.",
   Content: () => {
     const completed = useCompleted();
     return (
       <>
-        <Step2Content />
+        <Step5Content />
         <TutorialAlert
           completed={completed}
-          title="Action required: Deploy a network Counter."
-          titleWhenCompleted="You deployed a network Counter."
+          title="Action required: Create the network note."
+          titleWhenCompleted="You created the network note."
           description={
-            <p>
-              Click on the <em>"Create new account"</em> button and deploy a
-              network account by selecting the <strong>Network</strong> storage
-              mode. Use the <strong>NoAuth</strong> authentication scheme and
-              the <strong>Counter Contract</strong> component.
-            </p>
+            <p>Follow the instructions to create your custom network note.</p>
           }
         />
       </>
@@ -49,4 +53,4 @@ const Step2: TutorialStep = {
   },
 };
 
-export default Step2;
+export default Step5;

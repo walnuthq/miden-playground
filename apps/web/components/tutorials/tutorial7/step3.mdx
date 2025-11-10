@@ -1,0 +1,8 @@
+import Link from "@/components/tutorials/tutorial-link";
+
+Now that our network account is deployed, we must execute a transaction performing a procedure invocation (**increment_count**) that creates a necessary state change for our contract to be deployed and stored on the network on-chain.
+In Miden, network contracts must have their state modified through a transaction to be properly registered and committed to the blockchain - simply creating the account isn't sufficient for network storage mode.
+
+Navigate to your network account by <Link href={`/accounts/${props.counter?.address}`}>clicking on its ID</Link>, on the _"Components"_ tab, you can access the account components to perform an initial transaction on this newly created smart contract.
+
+Click on the _"Invoke"_ button of **increment_count** to trigger a custom transaction and increment the counter.

@@ -102,7 +102,11 @@ export const columns: ColumnDef<Account>[] = [
     cell: ({ row }) => (
       <Badge
         variant={
-          row.original.storageMode === "public" ? "default" : "destructive"
+          row.original.storageMode === "public"
+            ? "default"
+            : row.original.storageMode === "network"
+              ? "secondary"
+              : "destructive"
         }
         className="capitalize"
       >
