@@ -44,6 +44,9 @@ const useAccounts = () => {
   const { components } = useComponents();
   const wallets = accounts.filter((account) => account.isWallet);
   const faucets = accounts.filter((account) => account.isFaucet);
+  const connectedWallet = wallets.find(
+    ({ address }) => address === connectedWalletAddress
+  );
   const newWallet = async ({
     name,
     storageMode,
@@ -159,10 +162,7 @@ const useAccounts = () => {
     return account;
   };
   const importConnectedWallet = async () => {
-    const connectedWallet = wallets.find(
-      ({ address }) => address === connectedWalletAddress
-    );
-    if (!connectedWalletAddress || connectedWallet || networkId !== "mtst") {
+    if (networkId !== "mtst" || !connectedWalletAddress || connectedWallet) {
       return;
     }
     await importAccountByAddress({
@@ -308,6 +308,7 @@ const useAccounts = () => {
     accounts,
     wallets,
     faucets,
+    connectedWallet: networkId !== "mlcl" ? connectedWallet : undefined,
     newWallet,
     newFaucet,
     importAccountByAddress,

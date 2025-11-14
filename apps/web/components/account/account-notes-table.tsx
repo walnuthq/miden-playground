@@ -1,7 +1,4 @@
-import {
-  decodeFungibleFaucetMetadata,
-  type Account,
-} from "@/lib/types/account";
+import { type Account } from "@/lib/types/account";
 import { type InputNote } from "@/lib/types/note";
 import {
   Table,
@@ -92,12 +89,14 @@ const NoteActionsCell = ({
 };
 
 const AccountNotesTable = ({ account }: { account: Account }) => {
-  const { faucets } = useAccounts();
+  const { faucets, connectedWallet } = useAccounts();
   const { inputNotes } = useNotes();
   const { scripts } = useScripts();
   const consumableNotes = account.consumableNoteIds
     .map((noteId) => inputNotes.find(({ id }) => id === noteId))
     .filter((note) => note !== undefined);
+  const showNoteActions =
+    connectedWallet && connectedWallet.address === account.address;
   return (
     <div className="rounded-md border">
       <Table>
@@ -108,7 +107,7 @@ const AccountNotesTable = ({ account }: { account: Account }) => {
             <TableHead>Storage mode</TableHead>
             <TableHead>Sender ID</TableHead>
             <TableHead>Assets</TableHead>
-            <TableHead />
+            {showNoteActions && <TableHead />}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -138,18 +137,19 @@ const AccountNotesTable = ({ account }: { account: Account }) => {
                 <TableCell>
                   {inputNote.fungibleAssets.map(({ faucetId, amount }) => {
                     const faucet = faucets.find(({ id }) => id === faucetId);
-                    const { tokenSymbol, decimals } =
-                      decodeFungibleFaucetMetadata(faucet);
                     return (
                       <p key={faucetId}>
-                        {formatAmount(amount, decimals)} {tokenSymbol}
+                        {formatAmount(amount, faucet?.decimals)}{" "}
+                        {faucet?.symbol}
                       </p>
                     );
                   })}
                 </TableCell>
-                <TableCell>
-                  <NoteActionsCell account={account} inputNote={inputNote} />
-                </TableCell>
+                {showNoteActions && (
+                  <TableCell>
+                    <NoteActionsCell account={account} inputNote={inputNote} />
+                  </TableCell>
+                )}
               </TableRow>
             );
           })}

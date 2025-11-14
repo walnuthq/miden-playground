@@ -14,10 +14,15 @@ import useTransactions from "@/hooks/use-transactions";
 import AccountAddress from "@/components/lib/account-address";
 import { clientGetConsumableNotes, webClient } from "@/lib/web-client";
 import useGlobalContext from "@/components/global-context/hook";
+import useAccounts from "@/hooks/use-accounts";
 
 const AccountActionsCell = ({ account }: { account: Account }) => {
   const { networkId, serializedMockChain } = useGlobalContext();
+  const { connectedWallet } = useAccounts();
   const { openCreateTransactionDialog } = useTransactions();
+  if (!connectedWallet || connectedWallet.address !== account.address) {
+    return null;
+  }
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

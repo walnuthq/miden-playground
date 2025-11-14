@@ -17,6 +17,7 @@ import {
   TableRow,
 } from "@workspace/ui/components/table";
 import CreateTransactionButton from "@/components/transactions/create-transaction-button";
+import useAccounts from "@/hooks/use-accounts";
 
 const TransactionsTable = <TData, TValue>({
   columns,
@@ -25,6 +26,7 @@ const TransactionsTable = <TData, TValue>({
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
 }) => {
+  const { connectedWallet } = useAccounts();
   const router = useRouter();
   const table = useReactTable({
     data,
@@ -45,7 +47,7 @@ const TransactionsTable = <TData, TValue>({
           }
           className="max-w-sm"
         />
-        <CreateTransactionButton />
+        <CreateTransactionButton accountId={connectedWallet?.id} />
       </div>
       <div className="rounded-md border">
         <Table>

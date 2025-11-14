@@ -22,10 +22,7 @@ import {
   type InputNoteRecord as WasmInputNoteRecord,
 } from "@demox-labs/miden-sdk";
 import useAccounts from "@/hooks/use-accounts";
-import {
-  decodeFungibleFaucetMetadata,
-  type Account,
-} from "@/lib/types/account";
+import { type Account } from "@/lib/types/account";
 import { formatAmount } from "@/lib/utils";
 
 const getConsumableNoteFields = (
@@ -40,8 +37,7 @@ const getConsumableNoteFields = (
       const faucetId = fungibleAsset.faucetId().toString();
       const amount = fungibleAsset.amount().toString();
       const faucet = faucets.find(({ id }) => id === faucetId);
-      const { decimals, tokenSymbol } = decodeFungibleFaucetMetadata(faucet);
-      return `${formatAmount(amount, decimals)} ${tokenSymbol}`;
+      return `${formatAmount(amount, faucet?.decimals)} ${faucet?.symbol}`;
     });
   const metadata = inputNoteRecord.metadata();
   const wasmNoteTypes = {

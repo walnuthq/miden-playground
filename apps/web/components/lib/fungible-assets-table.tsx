@@ -10,7 +10,6 @@ import { type FungibleAsset } from "@/lib/types/asset";
 import useAccounts from "@/hooks/use-accounts";
 import AccountAddress from "@/components/lib/account-address";
 import { cn } from "@workspace/ui/lib/utils";
-import { decodeFungibleFaucetMetadata } from "@/lib/types/account";
 import { formatAmount } from "@/lib/utils";
 
 const FungibleAssetsTable = ({
@@ -37,8 +36,6 @@ const FungibleAssetsTable = ({
             const faucet = faucets.find(
               ({ id }) => id === fungibleAsset.faucetId
             );
-            const { tokenSymbol, decimals } =
-              decodeFungibleFaucetMetadata(faucet);
             return (
               <TableRow key={fungibleAsset.faucetId}>
                 <TableCell>Fungible Asset</TableCell>
@@ -50,14 +47,14 @@ const FungibleAssetsTable = ({
                     withLink={withAccountAddress}
                   />
                 </TableCell>
-                <TableCell>{tokenSymbol}</TableCell>
+                <TableCell>{faucet?.symbol}</TableCell>
                 <TableCell
                   className={cn({
                     "text-green-500": fungibleAsset.amount.startsWith("+"),
                     "text-red-500": fungibleAsset.amount.startsWith("-"),
                   })}
                 >
-                  {formatAmount(fungibleAsset.amount, decimals)}
+                  {formatAmount(fungibleAsset.amount, faucet?.decimals)}
                 </TableCell>
               </TableRow>
             );

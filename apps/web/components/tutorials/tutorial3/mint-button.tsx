@@ -6,6 +6,7 @@ import { useWallet } from "@demox-labs/miden-wallet-adapter";
 import { Button } from "@workspace/ui/components/button";
 import { sha3_256 } from "js-sha3";
 import { FUNGIBLE_FAUCET_DEFAULT_DECIMALS } from "@/lib/constants";
+import { parseAmount } from "@/lib/utils";
 
 // Function to find a valid nonce for proof of work using the new challenge format
 const findValidNonce = async (challenge: string, target: string) => {
@@ -109,29 +110,30 @@ const requestNote = async ({
 };
 
 const MintButton = () => {
-  const { wallet, accountId } = useWallet();
-  const { accounts } = useAccounts();
-  const account = accounts.find(({ address }) => address === accountId);
+  const { wallet } = useWallet();
+  const { connectedWallet } = useAccounts();
   const [loading, setLoading] = useState(false);
   const [noteId, setNoteId] = useState("");
   useEffect(() => {
-    if (account?.consumableNoteIds.includes(noteId)) {
+    if (connectedWallet?.consumableNoteIds.includes(noteId)) {
       setNoteId("");
       setLoading(false);
     }
-  }, [account?.consumableNoteIds, noteId]);
+  }, [connectedWallet?.consumableNoteIds, noteId]);
   return (
     <Button
-      disabled={!wallet || !account || loading}
+      disabled={!wallet || !connectedWallet || loading}
       onClick={async () => {
-        if (!wallet || !account) {
+        if (!wallet || !connectedWallet) {
           return;
         }
         setLoading(true);
-        const { challenge, nonce } = await powChallenge(account.address);
+        const { challenge, nonce } = await powChallenge(
+          connectedWallet.address
+        );
         const noteResponse = await requestNote({
-          accountId: account.address,
-          amount: 100n * 10n ** FUNGIBLE_FAUCET_DEFAULT_DECIMALS,
+          accountId: connectedWallet.address,
+          amount: parseAmount("100", FUNGIBLE_FAUCET_DEFAULT_DECIMALS),
           challenge,
           nonce,
         });

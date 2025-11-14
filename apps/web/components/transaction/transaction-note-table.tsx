@@ -12,12 +12,11 @@ import { type TransactionNote } from "@/lib/types/transaction";
 import AccountAddress from "@/components/lib/account-address";
 import useAccounts from "@/hooks/use-accounts";
 import useScripts from "@/hooks/use-scripts";
-import { decodeFungibleFaucetMetadata } from "@/lib/types/account";
+import { formatAmount } from "@/lib/utils";
 
 const TransactionNoteTable = ({ notes }: { notes: TransactionNote[] }) => {
   const { faucets } = useAccounts();
   const { scripts } = useScripts();
-
   return (
     <div className="rounded-md border">
       <Table>
@@ -53,11 +52,10 @@ const TransactionNoteTable = ({ notes }: { notes: TransactionNote[] }) => {
                 <TableCell>
                   {note.fungibleAssets.map(({ faucetId, amount }) => {
                     const faucet = faucets.find(({ id }) => id === faucetId);
-                    const { tokenSymbol } =
-                      decodeFungibleFaucetMetadata(faucet);
                     return (
                       <p key={faucetId}>
-                        {amount} {tokenSymbol}
+                        {formatAmount(amount, faucet?.decimals)}{" "}
+                        {faucet?.symbol}
                       </p>
                     );
                   })}

@@ -6,7 +6,13 @@ const state: State = {
   networkId: "mlcl",
   accounts: [
     {
-      ...basicFungibleFaucetAccount({ storageMode: "public" }),
+      ...basicFungibleFaucetAccount({
+        storageMode: "public",
+        symbol: "MDN",
+        decimals: 6,
+        maxSupply: "100000000000000000",
+        totalSupply: "0",
+      }),
       id: "0xff917bfe09b602200c70547535fc37",
       name: "MDN Faucet",
       address: "mlcl1qrlez7l7pxmqygqvwp282d0uxacqqel3pc6",

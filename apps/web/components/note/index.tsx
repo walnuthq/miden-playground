@@ -12,7 +12,6 @@ import NoteInformation from "@/components/note/note-information";
 import ConsumeNoteButton from "@/components/note/consume-note-button";
 import CreateTransactionDialog from "@/components/transactions/create-transaction-dialog";
 import { noteConsumable } from "@/lib/types/note";
-import { useWallet } from "@demox-labs/miden-wallet-adapter";
 import useAccounts from "@/hooks/use-accounts";
 import useGlobalContext from "@/components/global-context/hook";
 import VerifyNoteScriptDialog from "@/components/note/verify-note-script-dialog";
@@ -20,9 +19,8 @@ import VerifyNoteScriptDialog from "@/components/note/verify-note-script-dialog"
 const Note = ({ id }: { id: string }) => {
   const isClient = useIsClient();
   const searchParams = useSearchParams();
-  const { accountId } = useWallet();
   const { networkId } = useGlobalContext();
-  const { wallets } = useAccounts();
+  const { connectedWallet } = useAccounts();
   const { inputNotes } = useNotes();
   const inputNote = inputNotes.find((inputNote) => inputNote.id === id);
   if (!isClient || !inputNote) {
@@ -38,7 +36,7 @@ const Note = ({ id }: { id: string }) => {
           {noteConsumable({
             inputNote,
             networkId,
-            accountId: wallets.find(({ address }) => address === accountId)?.id,
+            accountId: connectedWallet?.id,
           }) && <ConsumeNoteButton inputNote={inputNote} />}
         </div>
         <TabsContent value="information">

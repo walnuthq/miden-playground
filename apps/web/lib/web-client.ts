@@ -18,6 +18,7 @@ import {
   type Account,
   type AccountStorageMode,
   type AccountType,
+  defaultAccount,
 } from "@/lib/types/account";
 import { type NetworkId } from "@/lib/types/network";
 import { type InputNote, type NoteType } from "@/lib/types/note";
@@ -29,6 +30,7 @@ import { type Script } from "@/lib/types/script";
 import { type StorageSlot, type Component } from "@/lib/types/component";
 import { BASIC_WALLET_CODE } from "@/lib/constants";
 import defaultScripts from "@/lib/types/default-scripts";
+import { stringToFeltArray } from "@/lib/utils";
 
 const globalForWebClient = globalThis as unknown as {
   webClient: WebClientType;
@@ -491,17 +493,19 @@ export const wasmAccountToAccount = async ({
   updatedAt: number;
   consumableNoteIds?: string[];
 }): Promise<Account> => {
-  const { AccountInterface: WasmAccountInterface } = await import(
-    "@demox-labs/miden-sdk"
-  );
+  const {
+    AccountInterface: WasmAccountInterface,
+    BasicFungibleFaucetComponent: WasmBasicFungibleFaucetComponent,
+  } = await import("@demox-labs/miden-sdk");
   const code = wasmAccount.code().commitment().toHex();
-  return {
+  const account: Account = {
+    ...defaultAccount(),
     id: wasmAccount.id().toString(),
     name,
     address: wasmAccount
       .id()
       .toBech32Custom(networkId, WasmAccountInterface.Unspecified),
-    type: accountType(wasmAccount /*, tokenSymbol*/),
+    type: accountType(wasmAccount),
     // TODO need a storageMode getter
     storageMode: wasmAccount.isPublic() ? "public" : "network",
     isPublic: wasmAccount.isPublic(),
@@ -527,6 +531,16 @@ export const wasmAccountToAccount = async ({
     components: components ?? [],
     updatedAt,
   };
+  if (wasmAccount.isFaucet()) {
+    const basicFungibleFaucetComponent =
+      WasmBasicFungibleFaucetComponent.fromAccount(wasmAccount);
+    account.symbol = basicFungibleFaucetComponent.symbol().toString();
+    account.decimals = basicFungibleFaucetComponent.decimals();
+    account.maxSupply = basicFungibleFaucetComponent.maxSupply().toString();
+    const [, , , totalSupply] = stringToFeltArray(account.storage[0]!);
+    account.totalSupply = totalSupply!.toString();
+  }
+  return account;
 };
 
 const noteType = async (metadata?: WasmNoteMetadata) => {

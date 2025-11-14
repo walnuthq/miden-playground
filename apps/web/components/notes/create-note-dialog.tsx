@@ -26,14 +26,11 @@ import useNotes from "@/hooks/use-notes";
 import useScripts from "@/hooks/use-scripts";
 import { noteTypes, type NoteType } from "@/lib/types/note";
 import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";
-import { decodeFungibleFaucetMetadata } from "@/lib/types/account";
-import { useWallet } from "@demox-labs/miden-wallet-adapter";
 import useAccounts from "@/hooks/use-accounts";
-import { parseAmount } from "@/lib/utils";
+import { parseAmount, formatAmount } from "@/lib/utils";
 
 const CreateNoteDialog = () => {
-  const { accountId } = useWallet();
-  const { wallets, faucets } = useAccounts();
+  const { connectedWallet, faucets } = useAccounts();
   const { createNoteDialogOpen, closeCreateNoteDialog, newNote } = useNotes();
   const { scripts } = useScripts();
   const [loading, setLoading] = useState(false);
@@ -53,7 +50,6 @@ const CreateNoteDialog = () => {
     closeCreateNoteDialog();
   };
   const faucetAccount = faucets.find(({ id }) => id === faucetAccountId);
-  const { decimals } = decodeFungibleFaucetMetadata(faucetAccount);
   return (
     <Dialog
       open={createNoteDialogOpen}
@@ -76,24 +72,14 @@ const CreateNoteDialog = () => {
           onSubmit={async (event) => {
             event.preventDefault();
             const formData = new FormData(event.currentTarget);
-            const senderAccount = wallets.find(
-              ({ address }) => address === accountId
-            );
-            // const recipientAccountId =
-            //   noteInputs.length >= 2
-            //     ? accountIdFromPrefixSuffix(
-            //         noteInputs[1] ?? "0x0",
-            //         noteInputs[0] ?? "0x0"
-            //       )
-            //     : "";
             const amount = parseAmount(
               formData.get("amount")?.toString() ?? "0",
-              decimals
+              faucetAccount?.decimals
             );
             setLoading(true);
             // const transactionRecord =
             await newNote({
-              senderAccountId: senderAccount?.id ?? "",
+              senderAccountId: connectedWallet?.id ?? "",
               recipientAccountId,
               scriptId,
               type: noteType,
@@ -178,8 +164,14 @@ const CreateNoteDialog = () => {
                   id="amount"
                   name="amount"
                   type="number"
-                  min={1 / 10 ** Number(decimals)}
-                  step={1 / 10 ** Number(decimals)}
+                  step={formatAmount("1", faucetAccount?.decimals).replaceAll(
+                    ",",
+                    ""
+                  )}
+                  min={formatAmount("1", faucetAccount?.decimals).replaceAll(
+                    ",",
+                    ""
+                  )}
                   required
                 />
               </div>

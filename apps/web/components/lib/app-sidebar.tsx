@@ -30,14 +30,19 @@ import useScripts from "@/hooks/use-scripts";
 import useComponents from "@/hooks/use-components";
 import defaultScripts from "@/lib/types/default-scripts";
 import defaultComponents from "@/lib/types/default-components";
-import { useWallet } from "@demox-labs/miden-wallet-adapter";
 import useTutorials from "@/hooks/use-tutorials";
+import { MIDEN_FAUCET_ADDRESS } from "@/lib/constants";
 
 const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
   const isClient = useIsClient();
-  const { accountId } = useWallet();
   const { tutorialId, tutorialLoaded } = useTutorials();
-  const { accounts, wallets, importConnectedWallet } = useAccounts();
+  const {
+    accounts,
+    faucets,
+    connectedWallet,
+    importConnectedWallet,
+    importAccountByAddress,
+  } = useAccounts();
   const { transactions } = useTransactions();
   const { inputNotes } = useNotes();
   const { scripts } = useScripts();
@@ -118,13 +123,26 @@ const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
   ];
   // TODO refactor using onConnect callback?
   useEffect(() => {
-    const connectedWallet = wallets.find(
-      ({ address }) => address === accountId
-    );
     if (!connectedWallet && (tutorialId === "" ? true : tutorialLoaded)) {
       importConnectedWallet();
     }
-  }, [accountId, wallets, tutorialId, tutorialLoaded, importConnectedWallet]);
+    const midenFaucet = faucets.find(
+      ({ address }) => address === MIDEN_FAUCET_ADDRESS
+    );
+    if (!midenFaucet && (tutorialId === "" ? true : tutorialLoaded)) {
+      importAccountByAddress({
+        name: "Miden Faucet",
+        address: MIDEN_FAUCET_ADDRESS,
+      });
+    }
+  }, [
+    connectedWallet,
+    faucets,
+    tutorialId,
+    tutorialLoaded,
+    importConnectedWallet,
+    importAccountByAddress,
+  ]);
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>

@@ -14,10 +14,10 @@
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
     "prettier": "^3.6.2",
-    "turbo": "^2.6.0",
+    "turbo": "^2.6.1",
     "typescript": "^5.9.3"
   },
-  "packageManager": "pnpm@10.21.0",
+  "packageManager": "pnpm@10.22.0",
   "engines": {
     "node": ">=22"
   }

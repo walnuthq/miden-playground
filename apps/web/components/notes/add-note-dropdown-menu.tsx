@@ -8,11 +8,11 @@ import {
 import { Button } from "@workspace/ui/components/button";
 import useNotes from "@/hooks/use-notes";
 import useGlobalContext from "@/components/global-context/hook";
-import { useWallet } from "@demox-labs/miden-wallet-adapter";
+import useAccounts from "@/hooks/use-accounts";
 
 const AddNoteDropdownMenu = () => {
-  const { connected } = useWallet();
   const { networkId } = useGlobalContext();
+  const { connectedWallet } = useAccounts();
   const { openImportNoteDialog, openCreateNoteDialog } = useNotes();
   return (
     <DropdownMenu>
@@ -29,7 +29,7 @@ const AddNoteDropdownMenu = () => {
         </DropdownMenuItem>
         {networkId === "mtst" && (
           <DropdownMenuItem
-            disabled={!connected}
+            disabled={!connectedWallet}
             onClick={openCreateNoteDialog}
           >
             <FilePlus />

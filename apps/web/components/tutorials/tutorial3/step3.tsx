@@ -1,5 +1,4 @@
 import { EllipsisVertical } from "lucide-react";
-import { useWallet } from "@demox-labs/miden-wallet-adapter";
 import { type TutorialStep } from "@/lib/types/tutorial";
 import useAccounts from "@/hooks/use-accounts";
 import NextStepButton from "@/components/tutorials/next-step-button";
@@ -7,10 +6,8 @@ import TutorialAlert from "@/components/tutorials/tutorial-alert";
 import Step3Content from "@/components/tutorials/tutorial3/step3.mdx";
 
 const useCompleted = () => {
-  const { accountId } = useWallet();
-  const { wallets } = useAccounts();
-  const wallet = wallets.find(({ address }) => address === accountId);
-  return wallet?.consumableNoteIds.length === 0;
+  const { connectedWallet } = useAccounts();
+  return connectedWallet?.consumableNoteIds.length === 0;
 };
 
 const Step3: TutorialStep = {

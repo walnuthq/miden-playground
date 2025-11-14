@@ -16,7 +16,7 @@ import VerifyAccountComponentDialog from "@/components/account/verify-account-co
 
 const Account = ({ address }: { address: string }) => {
   const isClient = useIsClient();
-  const { accounts } = useAccounts();
+  const { accounts, connectedWallet } = useAccounts();
   const account = accounts.find((account) => account.address === address);
   if (!isClient || !account) {
     return null;
@@ -31,7 +31,9 @@ const Account = ({ address }: { address: string }) => {
               <TabsTrigger value="components">Components</TabsTrigger>
             )}
           </TabsList>
-          <CreateTransactionDropdownMenu account={account} />
+          {connectedWallet && connectedWallet.address === address && (
+            <CreateTransactionDropdownMenu account={account} />
+          )}
         </div>
         <TabsContent value="information">
           <AccountInformation account={account} />

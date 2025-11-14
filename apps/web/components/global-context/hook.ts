@@ -34,14 +34,6 @@ const useGlobalContext = () => {
       payload: { networkId, blockNum: syncSummary.blockNum() },
     });
   };
-  const switchNetwork = async (networkId: NetworkId) => {
-    const client = await webClient(networkId, state.serializedMockChain);
-    const syncSummary = await client.syncState();
-    dispatch({
-      type: "SWITCH_NETWORK",
-      payload: { networkId, blockNum: syncSummary.blockNum() },
-    });
-  };
   const syncState = async () => {
     try {
       const client = await webClient(
@@ -111,7 +103,6 @@ const useGlobalContext = () => {
     ...state,
     dispatch,
     resetState,
-    switchNetwork,
     syncState,
   };
 };

@@ -1,15 +1,14 @@
 import { type Account } from "@/lib/types/account";
 import AccountInformationTable from "@/components/account/account-information-table";
-// import AccountStorageTable from "@/components/account/account-storage-table";
 import FungibleAssetsTable from "@/components/lib/fungible-assets-table";
 import AccountNotesTable from "@/components/account/account-notes-table";
 import { Separator } from "@workspace/ui/components/separator";
 import { Button } from "@workspace/ui/components/button";
 import useTransactions from "@/hooks/use-transactions";
-import useGlobalContext from "@/components/global-context/hook";
+import useAccounts from "@/hooks/use-accounts";
 
 const AccountInformation = ({ account }: { account: Account }) => {
-  const { networkId } = useGlobalContext();
+  const { connectedWallet } = useAccounts();
   const { openCreateTransactionDialog, newConsumeTransactionRequest } =
     useTransactions();
   return (
@@ -37,12 +36,6 @@ const AccountInformation = ({ account }: { account: Account }) => {
           <FungibleAssetsTable fungibleAssets={account.fungibleAssets} />
         )}
       </div>
-      {/* <div className="flex flex-col gap-2">
-        <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
-          Storage
-        </h4>
-        <AccountStorageTable storage={account.storage} />
-      </div> */}
       {account.consumableNoteIds.length > 0 && (
         <>
           <Separator />
@@ -56,26 +49,27 @@ const AccountInformation = ({ account }: { account: Account }) => {
                   This account has pending notes that can be consumed.
                 </p>
               </div>
-              {networkId === "mlcl" && (
-                <Button
-                  variant="outline"
-                  onClick={async () => {
-                    const transactionResult =
-                      await newConsumeTransactionRequest({
+              {connectedWallet &&
+                connectedWallet.address === account.address && (
+                  <Button
+                    variant="outline"
+                    onClick={async () => {
+                      const transactionResult =
+                        await newConsumeTransactionRequest({
+                          accountId: account.id,
+                          noteIds: account.consumableNoteIds,
+                        });
+                      openCreateTransactionDialog({
                         accountId: account.id,
-                        noteIds: account.consumableNoteIds,
+                        transactionType: "consume",
+                        step: "preview",
+                        transactionResult,
                       });
-                    openCreateTransactionDialog({
-                      accountId: account.id,
-                      transactionType: "consume",
-                      step: "preview",
-                      transactionResult,
-                    });
-                  }}
-                >
-                  Consume all notes
-                </Button>
-              )}
+                    }}
+                  >
+                    Consume all notes
+                  </Button>
+                )}
             </div>
             <AccountNotesTable account={account} />
           </div>

@@ -20,8 +20,7 @@ import {
   SendTransaction,
   type MidenWalletAdapter,
 } from "@demox-labs/miden-wallet-adapter";
-import { decodeFungibleFaucetMetadata } from "@/lib/types/account";
-import { parseAmount } from "@/lib/utils";
+import { formatAmount, parseAmount } from "@/lib/utils";
 
 const CreateTransactionConfigureForm = ({
   transactionType,
@@ -66,9 +65,14 @@ const CreateTransactionConfigureForm = ({
   const executingAccount = accounts.find(({ id }) => id === executingAccountId);
   const targetAccount = accounts.find(({ id }) => id === targetAccountId);
   const faucetAccount = accounts.find(({ id }) => id === faucetAccountId);
-  const { decimals } = decodeFungibleFaucetMetadata(
-    transactionType === "mint" ? executingAccount : faucetAccount
-  );
+  const decimals =
+    transactionType === "mint"
+      ? executingAccount?.decimals
+      : faucetAccount?.decimals;
+  const balance =
+    executingAccount?.fungibleAssets.find(
+      ({ faucetId }) => faucetId === faucetAccountId
+    )?.amount ?? "0";
   return (
     <form
       id="create-transaction-configure-form"
@@ -159,8 +163,8 @@ const CreateTransactionConfigureForm = ({
                 id="amount"
                 name="amount"
                 type="number"
-                min={1 / 10 ** Number(decimals)}
-                step={1 / 10 ** Number(decimals)}
+                step={formatAmount("1", decimals).replaceAll(",", "")}
+                min={formatAmount("1", decimals).replaceAll(",", "")}
                 required
               />
             </div>
@@ -216,8 +220,9 @@ const CreateTransactionConfigureForm = ({
                 id="amount"
                 name="amount"
                 type="number"
-                min={1 / 10 ** Number(decimals)}
-                step={1 / 10 ** Number(decimals)}
+                step={formatAmount("1", decimals).replaceAll(",", "")}
+                min={formatAmount("1", decimals).replaceAll(",", "")}
+                max={formatAmount(balance, decimals).replaceAll(",", "")}
                 required
               />
             </div>

@@ -1,6 +1,5 @@
 import { type FungibleAsset } from "@/lib/types/asset";
 import { FUNGIBLE_FAUCET_CODE, BASIC_WALLET_CODE } from "@/lib/constants";
-import { stringToFeltArray } from "@/lib/utils";
 
 export const accountTypes = {
   "fungible-faucet": "Fungible Faucet",
@@ -26,6 +25,10 @@ export type Account = {
   type: AccountType;
   storageMode: AccountStorageMode;
   isFaucet: boolean;
+  symbol: string;
+  decimals: number;
+  maxSupply: string;
+  totalSupply: string;
   isPublic: boolean;
   isUpdatable: boolean;
   isRegularAccount: boolean;
@@ -47,6 +50,10 @@ export const defaultAccount = (): Account => ({
   type: "fungible-faucet",
   storageMode: "private",
   isFaucet: false,
+  symbol: "",
+  decimals: 0,
+  maxSupply: "",
+  totalSupply: "",
   isPublic: false,
   isUpdatable: false,
   isRegularAccount: false,
@@ -79,13 +86,25 @@ export const basicWalletAccount = ({
 
 export const basicFungibleFaucetAccount = ({
   storageMode,
+  symbol,
+  decimals,
+  maxSupply,
+  totalSupply,
 }: {
   storageMode: AccountStorageMode;
+  symbol: string;
+  decimals: number;
+  maxSupply: string;
+  totalSupply: string;
 }): Account => ({
   ...defaultAccount(),
   type: "fungible-faucet",
   storageMode,
   isFaucet: true,
+  symbol,
+  decimals,
+  maxSupply,
+  totalSupply,
   isPublic: storageMode === "public",
   isNew: true,
   code: FUNGIBLE_FAUCET_CODE,
@@ -96,40 +115,4 @@ export const accountIdFromPrefixSuffix = (prefix: string, suffix: string) => {
   const prefixString = BigInt(prefix).toString(16).padStart(16, "0");
   const suffixString = BigInt(suffix).toString(16).padStart(16, "0");
   return `0x${prefixString}${suffixString}`.slice(0, 32);
-};
-
-export const decodeFeltToSymbol = (encodedFelt: bigint) => {
-  const ALPHABET_LENGTH = 26n;
-  let decodedString = "";
-  let remainingValue = encodedFelt;
-  const tokenLen = remainingValue % ALPHABET_LENGTH;
-  remainingValue /= ALPHABET_LENGTH;
-  for (let i = 0; i < tokenLen; i++) {
-    const digit = Number(remainingValue % ALPHABET_LENGTH);
-    const char = digit + "A".charCodeAt(0);
-    decodedString += String.fromCharCode(char);
-    remainingValue /= ALPHABET_LENGTH;
-  }
-  return decodedString.split("").reverse().join("");
-};
-
-export const decodeFungibleFaucetMetadata = (account?: Account) => {
-  if (!account || !account.isFaucet) {
-    return {
-      totalSupply: 0n,
-      maxSupply: 0n,
-      decimals: 0n,
-      tokenSymbol: "",
-    };
-  }
-  const [, , , totalSupply] = stringToFeltArray(account.storage[0]!);
-  const [maxSupply, decimals, tokenSymbol] = stringToFeltArray(
-    account.storage[2]!
-  );
-  return {
-    totalSupply: totalSupply!,
-    maxSupply: maxSupply!,
-    decimals: decimals!,
-    tokenSymbol: decodeFeltToSymbol(tokenSymbol!),
-  };
 };
