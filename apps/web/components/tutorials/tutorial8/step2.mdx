@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "@/components/tutorials/tutorial-link";
 
 <Image
   className="max-h-96 object-contain"
@@ -9,3 +10,11 @@ import Image from "next/image";
 />
 
 The diagram above depicts the **Count Reader** smart contract using foreign procedure invocation to read the count state of the counter contract. After reading the state via FPI, the **Count Reader** smart contract writes the value returned from the counter contract to storage.
+
+What we'll cover:
+
+- **Foreign Procedure Invocation** (FPI) with the Playground.
+- Building a **Count Reader** smart contract.
+- Executing **cross-contract calls** in the browser.
+
+First, let's discover the <Link href="/scripts/count-reader">Count Reader</Link> script logic.

@@ -1,5 +1,5 @@
 import useTutorials from "@/hooks/use-tutorials";
-import { type Tutorial } from "@/lib/types/tutorial";
+import { type Tutorial, defaultTutorialStep } from "@/lib/types/tutorial";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import TutorialProgress from "@/components/tutorials/tutorial-progress";
@@ -15,10 +15,7 @@ const TutorialStep = ({ tutorial }: { tutorial: Tutorial }) => {
   const isMobile = useIsMobile();
   const { networkId } = useGlobalContext();
   const { tutorialStep, tutorialOpen, previousTutorialStep } = useTutorials();
-  const step = tutorial.steps[tutorialStep];
-  if (!step) {
-    return null;
-  }
+  const step = tutorial.steps[tutorialStep] ?? defaultTutorialStep();
   const NextStepButton = step.NextStepButton ?? DefaultNextStepButton;
   return (
     <div
@@ -55,7 +52,7 @@ const TutorialStep = ({ tutorial }: { tutorial: Tutorial }) => {
       <div className="flex items-center gap-4">
         {tutorialStep > 0 && (
           <Button
-            className="grow-1"
+            className="grow"
             variant="outline"
             onClick={previousTutorialStep}
           >

@@ -6,8 +6,31 @@ import {
   TableHead,
   TableRow,
 } from "@workspace/ui/components/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@workspace/ui/components/tooltip";
+import { Button } from "@workspace/ui/components/button";
 import { type StorageSlot, storageSlotTypes } from "@/lib/types/component";
-import { formatValue } from "@/lib/utils";
+import { formatValue, stringToFeltArray } from "@/lib/utils";
+
+const StorageSlotValueTooltip = ({ value }: { value: string }) => {
+  const [, , , dec] = stringToFeltArray(value);
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button variant="ghost" className="-ml-4">
+          {formatValue(value)}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>
+        <p>Hex: {value}</p>
+        <p>Dec: {dec}</p>
+      </TooltipContent>
+    </Tooltip>
+  );
+};
 
 const StorageSlotsTable = ({
   storage,
@@ -30,7 +53,9 @@ const StorageSlotsTable = ({
           <TableRow key={name}>
             <TableCell>{name}</TableCell>
             <TableCell>{storageSlotTypes[type]}</TableCell>
-            <TableCell>{formatValue(storage[index] ?? "")}</TableCell>
+            <TableCell>
+              <StorageSlotValueTooltip value={storage[index] ?? ""} />
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>

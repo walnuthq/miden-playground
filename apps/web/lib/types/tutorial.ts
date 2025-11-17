@@ -8,6 +8,12 @@ export type TutorialStep = {
   NextStepButton?: FunctionComponent;
 };
 
+export const defaultTutorialStep = (): TutorialStep => ({
+  title: "",
+  Content: () => null,
+  NextStepButton: undefined,
+});
+
 export type Tutorial = {
   id: string;
   number: number;

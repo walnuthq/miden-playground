@@ -143,7 +143,12 @@ const useAccounts = () => {
     } else if (account.code === COUNTER_CONTRACT_CODE) {
       // Counter Contract
       account.components = ["no-auth"];
-      if (tutorialId === "interact-with-the-counter-contract") {
+      if (
+        [
+          "interact-with-the-counter-contract",
+          "foreign-procedure-invocation",
+        ].includes(tutorialId)
+      ) {
         account.components.push("counter-contract");
       }
     } else if (account.code === BASIC_WALLET_CODE) {

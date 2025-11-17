@@ -1,0 +1,15 @@
+import CopyButton from "@/components/lib/copy-button";
+import { COUNTER_CONTRACT_GET_COUNT_PROC_HASH } from "@/lib/constants";
+
+On the _"Components"_ tab, you can access the **Count Reader** component to invoke the **copy_count** procedure.
+
+You can read the initial counter value by hovering the **Counter** _"Value"_ column in the _"Storage Slots"_ table and confirm it was initialized to zero.
+
+Click on the _"Invoke"_ button of **copy_count** to open a modal that will let you configure the procedure arguments.
+
+We need to select the **Counter Contract** account as the first parameter which is the source account from which to copy the counter value.
+
+The **get_count** procedure hash can be obtained from the **Counter Contract** account component page by clicking on the _"Copy Procedure Hash"_ button next to the procedure name.
+For convenience, you can also copy it from here: <CopyButton content="Copy Procedure Hash" copy={COUNTER_CONTRACT_GET_COUNT_PROC_HASH} />
+
+After setting the procedure parameters, click on the _"Invoke"_ button to trigger a new custom transaction calling **copy_count**, check the storage slot value again and confirm it now holds a copy of the **Counter Contract** counter value.

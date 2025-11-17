@@ -56,6 +56,7 @@ type StorageRead =
 
 export type Procedure = {
   name: string;
+  hash: string;
   inputs: MidenInput[];
   returnType: MidenType;
   readOnly: boolean;

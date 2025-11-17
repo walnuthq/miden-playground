@@ -1,3 +1,7 @@
+import {
+  COUNTER_CONTRACT_GET_COUNT_PROC_HASH,
+  COUNTER_CONTRACT_INCREMENT_COUNT_PROC_HASH,
+} from "@/lib/constants";
 import { type Script, defaultScript } from "@/lib/types/script";
 
 export const counterContractRust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
@@ -113,6 +117,7 @@ const counterContract: Script = {
   procedures: [
     {
       name: "get_count",
+      hash: COUNTER_CONTRACT_GET_COUNT_PROC_HASH,
       inputs: [],
       returnType: "felt",
       readOnly: true,
@@ -120,6 +125,7 @@ const counterContract: Script = {
     },
     {
       name: "increment_count",
+      hash: COUNTER_CONTRACT_INCREMENT_COUNT_PROC_HASH,
       inputs: [],
       returnType: "felt",
       readOnly: false,

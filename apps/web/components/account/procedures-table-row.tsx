@@ -9,6 +9,7 @@ import { Button } from "@workspace/ui/components/button";
 import useGlobalContext from "@/components/global-context/hook";
 import { clientGetAccountByAddress, webClient } from "@/lib/web-client";
 import useScripts from "@/hooks/use-scripts";
+import CopyButton from "@/components/lib/copy-button";
 
 const ProceduresTableRow = ({
   account,
@@ -27,7 +28,12 @@ const ProceduresTableRow = ({
   const [result, setResult] = useState("");
   return (
     <TableRow key={procedure.name}>
-      <TableCell>{procedure.name}</TableCell>
+      <TableCell>
+        <div className="flex items-center gap-2">
+          {procedure.name}
+          <CopyButton content="Copy Procedure Hash" copy={procedure.hash} />
+        </div>
+      </TableCell>
       <TableCell className="flex items-center justify-between gap-2">
         <span>{result}</span>
         <Button
