@@ -1,4 +1,8 @@
-import { type Script, defaultScript } from "@/lib/types/script";
+import {
+  type Script,
+  defaultScript,
+  defaultProcedure,
+} from "@/lib/types/script";
 import {
   COUNTER_CONTRACT_GET_COUNT_PROC_HASH,
   COUNT_READER_COPY_COUNT_PROC_HASH,
@@ -75,6 +79,7 @@ const countReader: Script = {
   masm: countReaderMasm,
   procedures: [
     {
+      ...defaultProcedure(),
       name: "copy_count",
       hash: COUNT_READER_COPY_COUNT_PROC_HASH,
       inputs: [
@@ -85,8 +90,6 @@ const countReader: Script = {
           value: COUNTER_CONTRACT_GET_COUNT_PROC_HASH,
         },
       ],
-      returnType: "void",
-      readOnly: false,
     },
   ],
 };

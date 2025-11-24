@@ -112,16 +112,7 @@ const InvokeProcedureArgumentsDialog = () => {
             </div>
             <div className="grid gap-3 col-span-2">
               <Label htmlFor="procHash">get_count_proc_hash</Label>
-              <Input
-                id="procHash"
-                name="procHash"
-                /* defaultValue={
-                  invokeProcedureArgumentsDialogProcedure.inputs.find(
-                    ({ name }) => name === "get_count_proc_hash"
-                  )?.value ?? ""
-                } */
-                required
-              />
+              <Input id="procHash" name="procHash" required />
             </div>
           </div>
         </form>

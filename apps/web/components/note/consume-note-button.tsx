@@ -12,11 +12,12 @@ import {
   ConsumeTransaction,
   type MidenWalletAdapter,
 } from "@demox-labs/miden-wallet-adapter";
+import { getAddressPart } from "@/lib/utils";
 
 const ConsumeNoteButton = ({ inputNote }: { inputNote: InputNote }) => {
-  const { networkId } = useGlobalContext();
   const { wallet } = useWallet();
-  const { accounts } = useAccounts();
+  const { networkId } = useGlobalContext();
+  const { faucets, accounts } = useAccounts();
   const { openCreateTransactionDialog, newConsumeTransactionRequest } =
     useTransactions();
   const [loading, setLoading] = useState(false);
@@ -31,31 +32,39 @@ const ConsumeNoteButton = ({ inputNote }: { inputNote: InputNote }) => {
       onClick={async () => {
         if (networkId === "mlcl") {
           setLoading(true);
-          const transactionResult = await newConsumeTransactionRequest({
-            accountId: targetAccountId,
-            noteIds: [inputNote.id],
-          });
+          const { transactionRequest, transactionResult } =
+            await newConsumeTransactionRequest({
+              accountId: targetAccountId,
+              noteIds: [inputNote.id],
+            });
           setLoading(false);
           openCreateTransactionDialog({
             accountId: targetAccountId,
             transactionType: "consume",
             step: "preview",
+            transactionRequest,
             transactionResult,
           });
         } else {
+          const faucet = faucets.find(({ id }) => id === inputNote.senderId);
           const [fungibleAsset] = inputNote.fungibleAssets;
-          if (!wallet || !fungibleAsset) {
+          if (!wallet || !fungibleAsset || !faucet) {
             return;
           }
           const transaction = new ConsumeTransaction(
-            inputNote.senderId,
+            getAddressPart(faucet.address),
             inputNote.id,
             inputNote.type === "public" ? "public" : "private",
             Number(fungibleAsset.amount)
           );
           const adapter = wallet.adapter as MidenWalletAdapter;
-          const txId = await adapter.requestConsume(transaction);
-          console.log({ txId });
+          try {
+            const txId = await adapter.requestConsume(transaction);
+            console.log({ txId });
+          } catch (error) {
+            console.error("ERROR");
+            console.error(error);
+          }
         }
       }}
       disabled={loading}

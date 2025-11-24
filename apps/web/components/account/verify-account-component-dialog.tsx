@@ -35,6 +35,9 @@ const VerifyAccountComponentDialog = () => {
   const [loading, setLoading] = useState(false);
   const [componentId, setComponentId] = useState("");
   const defaultComponentIds = defaultComponents.map(({ id }) => id);
+  const shownComponents = components.filter(
+    ({ id, type }) => !defaultComponentIds.includes(id) && type === "account"
+  );
   const onClose = () => {
     setComponentId("");
     closeVerifyAccountComponentDialog();
@@ -78,20 +81,18 @@ const VerifyAccountComponentDialog = () => {
             <div className="grid gap-3">
               <Label htmlFor="component">Account Component</Label>
               <Select onValueChange={setComponentId} value={componentId}>
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger
+                  className="w-[180px]"
+                  disabled={shownComponents.length === 0}
+                >
                   <SelectValue placeholder="Select component…" />
                 </SelectTrigger>
                 <SelectContent>
-                  {components
-                    .filter(
-                      ({ id, type }) =>
-                        !defaultComponentIds.includes(id) && type === "account"
-                    )
-                    .map(({ id, name }) => (
-                      <SelectItem key={id} value={id}>
-                        {name}
-                      </SelectItem>
-                    ))}
+                  {shownComponents.map(({ id, name }) => (
+                    <SelectItem key={id} value={id}>
+                      {name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

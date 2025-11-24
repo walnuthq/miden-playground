@@ -37,14 +37,16 @@ const InputNoteActionsCell = ({ inputNote }: { inputNote: InputNote }) => {
                 inputNote.inputs[1]!,
                 inputNote.inputs[0]!
               );
-              const transactionResult = await newConsumeTransactionRequest({
-                accountId: targetAccountId,
-                noteIds: [inputNote.id],
-              });
+              const { transactionRequest, transactionResult } =
+                await newConsumeTransactionRequest({
+                  accountId: targetAccountId,
+                  noteIds: [inputNote.id],
+                });
               openCreateTransactionDialog({
                 accountId: targetAccountId,
                 transactionType: "consume",
                 step: "preview",
+                transactionRequest,
                 transactionResult,
               });
             }}

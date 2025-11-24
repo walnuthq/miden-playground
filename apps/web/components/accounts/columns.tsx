@@ -20,7 +20,7 @@ const AccountActionsCell = ({ account }: { account: Account }) => {
   const { networkId, serializedMockChain } = useGlobalContext();
   const { connectedWallet } = useAccounts();
   const { openCreateTransactionDialog } = useTransactions();
-  if (!connectedWallet || connectedWallet.address !== account.address) {
+  if (networkId === "mtst" && connectedWallet?.address !== account.address) {
     return null;
   }
   return (

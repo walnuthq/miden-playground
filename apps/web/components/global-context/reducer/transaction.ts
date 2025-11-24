@@ -1,6 +1,7 @@
 import {
-  type ConsumableNoteRecord as WasmConsumableNoteRecord,
-  type TransactionResult as WasmTransactionResult,
+  type ConsumableNoteRecord as WasmConsumableNoteRecordType,
+  type TransactionRequest as WasmTransactionRequestType,
+  type TransactionResult as WasmTransactionResultType,
 } from "@demox-labs/miden-sdk";
 import { type Account } from "@/lib/types/account";
 import { type InputNote } from "@/lib/types/note";
@@ -17,10 +18,11 @@ export type TransactionAction =
       payload: {
         accountId: string;
         transactionType: TransactionType;
-        transactionResult: WasmTransactionResult | null;
         step: CreateTransactionDialogStep;
-        consumableNotes: WasmConsumableNoteRecord[];
+        consumableNotes: WasmConsumableNoteRecordType[];
         noteIds: string[];
+        transactionRequest: WasmTransactionRequestType | null;
+        transactionResult: WasmTransactionResultType | null;
       };
     }
   | {
@@ -49,6 +51,8 @@ const reducer = (state: State, action: TransactionAction): State => {
         createTransactionDialogStep: action.payload.step,
         createTransactionDialogConsumableNotes: action.payload.consumableNotes,
         createTransactionDialogNoteIds: action.payload.noteIds,
+        createTransactionDialogTransactionRequest:
+          action.payload.transactionRequest,
         createTransactionDialogTransactionResult:
           action.payload.transactionResult,
       };

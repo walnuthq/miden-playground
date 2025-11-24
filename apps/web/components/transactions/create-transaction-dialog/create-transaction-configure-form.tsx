@@ -12,8 +12,9 @@ import SelectConsumableNotesCombobox from "@/components/transactions/select-cons
 import useGlobalContext from "@/components/global-context/hook";
 import useTransactions from "@/hooks/use-transactions";
 import {
-  type ConsumableNoteRecord as WasmConsumableNoteRecord,
-  type TransactionResult as WasmTransactionResult,
+  type ConsumableNoteRecord as WasmConsumableNoteRecordType,
+  type TransactionResult as WasmTransactionResultType,
+  type TransactionRequest as WasmTransactionRequestType,
 } from "@demox-labs/miden-sdk";
 import {
   useWallet,
@@ -34,6 +35,7 @@ const CreateTransactionConfigureForm = ({
   executingAccountId,
   faucetAccountId,
   setFaucetAccountId,
+  setTransactionRequest,
   setTransactionResult,
   setLoading,
   setStep,
@@ -45,16 +47,21 @@ const CreateTransactionConfigureForm = ({
   setIsPublic: Dispatch<SetStateAction<boolean>>;
   noteIds: string[];
   setNoteIds: Dispatch<SetStateAction<string[]>>;
-  consumableNotes: WasmConsumableNoteRecord[];
+  consumableNotes: WasmConsumableNoteRecordType[];
   executingAccountId: string;
   faucetAccountId: string;
   setFaucetAccountId: Dispatch<SetStateAction<string>>;
-  setTransactionResult: Dispatch<SetStateAction<WasmTransactionResult | null>>;
+  setTransactionRequest: Dispatch<
+    SetStateAction<WasmTransactionRequestType | null>
+  >;
+  setTransactionResult: Dispatch<
+    SetStateAction<WasmTransactionResultType | null>
+  >;
   setLoading: Dispatch<SetStateAction<boolean>>;
   setStep: Dispatch<SetStateAction<CreateTransactionDialogStep>>;
 }) => {
-  const { networkId } = useGlobalContext();
   const { wallet } = useWallet();
+  const { networkId } = useGlobalContext();
   const { accounts } = useAccounts();
   const {
     newMintTransactionRequest,
@@ -81,24 +88,28 @@ const CreateTransactionConfigureForm = ({
         const formData = new FormData(event.currentTarget);
         setLoading(true);
         if (transactionType === "mint" && executingAccount && targetAccount) {
-          const transactionResult = await newMintTransactionRequest({
-            targetAccountId: targetAccount.id,
-            faucetId: executingAccount.id,
-            noteType: formData.getAll("is-public").includes("on")
-              ? "public"
-              : "private",
-            amount: parseAmount(
-              formData.get("amount")?.toString() ?? "0",
-              decimals
-            ),
-          });
+          const { transactionRequest, transactionResult } =
+            await newMintTransactionRequest({
+              targetAccountId: targetAccount.id,
+              faucetId: executingAccount.id,
+              noteType: formData.getAll("is-public").includes("on")
+                ? "public"
+                : "private",
+              amount: parseAmount(
+                formData.get("amount")?.toString() ?? "0",
+                decimals
+              ),
+            });
+          setTransactionRequest(transactionRequest);
           setTransactionResult(transactionResult);
         }
         if (transactionType === "consume" && executingAccount) {
-          const transactionResult = await newConsumeTransactionRequest({
-            accountId: executingAccount.id,
-            noteIds,
-          });
+          const { transactionRequest, transactionResult } =
+            await newConsumeTransactionRequest({
+              accountId: executingAccount.id,
+              noteIds,
+            });
+          setTransactionRequest(transactionRequest);
           setTransactionResult(transactionResult);
         }
         if (
@@ -108,18 +119,20 @@ const CreateTransactionConfigureForm = ({
           faucetAccount
         ) {
           if (networkId === "mlcl") {
-            const transactionResult = await newSendTransactionRequest({
-              senderAccountId: executingAccount.id,
-              targetAccountId: targetAccount.id,
-              faucetId: faucetAccount.id,
-              noteType: formData.getAll("is-public").includes("on")
-                ? "public"
-                : "private",
-              amount: parseAmount(
-                formData.get("amount")?.toString() ?? "0",
-                decimals
-              ),
-            });
+            const { transactionRequest, transactionResult } =
+              await newSendTransactionRequest({
+                senderAccountId: executingAccount.id,
+                targetAccountId: targetAccount.id,
+                faucetId: faucetAccount.id,
+                noteType: formData.getAll("is-public").includes("on")
+                  ? "public"
+                  : "private",
+                amount: parseAmount(
+                  formData.get("amount")?.toString() ?? "0",
+                  decimals
+                ),
+              });
+            setTransactionRequest(transactionRequest);
             setTransactionResult(transactionResult);
           } else {
             if (!wallet) {
@@ -137,8 +150,13 @@ const CreateTransactionConfigureForm = ({
               )
             );
             const adapter = wallet.adapter as MidenWalletAdapter;
-            const txId = await adapter.requestSend(transaction);
-            console.log({ txId });
+            try {
+              const txId = await adapter.requestSend(transaction);
+              console.log({ txId });
+            } catch (error) {
+              console.error("ERROR");
+              console.error(error);
+            }
             closeCreateTransactionDialog();
           }
         }

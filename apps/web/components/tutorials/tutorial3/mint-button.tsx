@@ -2,35 +2,47 @@ import { useState, useEffect } from "react";
 import { HandCoins } from "lucide-react";
 import { Spinner } from "@workspace/ui/components/spinner";
 import useAccounts from "@/hooks/use-accounts";
-import { useWallet } from "@demox-labs/miden-wallet-adapter";
 import { Button } from "@workspace/ui/components/button";
-import { sha3_256 } from "js-sha3";
-import { FUNGIBLE_FAUCET_DEFAULT_DECIMALS } from "@/lib/constants";
+import {
+  MIDEN_FAUCET_API_URL,
+  FUNGIBLE_FAUCET_DEFAULT_DECIMALS,
+} from "@/lib/constants";
 import { parseAmount } from "@/lib/utils";
+import { fromHex } from "viem";
 
+// https://github.com/0xMiden/miden-faucet/blob/next/bin/faucet/frontend/app.js
 // Function to find a valid nonce for proof of work using the new challenge format
-const findValidNonce = async (challenge: string, target: string) => {
+const findValidNonce = async (challenge: string, target: number) => {
   let nonce = 0;
   const targetNum = BigInt(target);
+  const challengeBytes = fromHex(`0x${challenge}`, "bytes");
 
   while (true) {
     // Generate a random nonce
     nonce = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
 
     try {
-      // Compute hash using SHA3 with the challenge and nonce
-      const hash = sha3_256.create();
-      hash.update(challenge); // Use the hex-encoded challenge string directly
-
       // Convert nonce to 8-byte big-endian format to match backend
       const nonceBytes = new ArrayBuffer(8);
       const nonceView = new DataView(nonceBytes);
       nonceView.setBigUint64(0, BigInt(nonce), false); // false = big-endian
       const nonceByteArray = new Uint8Array(nonceBytes);
-      hash.update(nonceByteArray);
+
+      // Combine challenge and nonce
+      const combined = new Uint8Array(
+        challengeBytes.length + nonceByteArray.length
+      );
+      combined.set(challengeBytes);
+      combined.set(nonceByteArray, challengeBytes.length);
+
+      // Compute SHA-256 hash using Web Crypto API
+      const hashBuffer = await crypto.subtle.digest("SHA-256", combined);
+      const hashArray = new Uint8Array(hashBuffer);
 
       // Take the first 8 bytes of the hash and parse them as u64 in big-endian
-      const digest = BigInt(`0x${hash.hex().slice(0, 16)}`);
+      const first8Bytes = hashArray.slice(0, 8);
+      const dataView = new DataView(first8Bytes.buffer);
+      const digest = dataView.getBigUint64(0, false); // false = big-endian
 
       // Check if the hash is less than the target
       if (digest < targetNum) {
@@ -38,7 +50,6 @@ const findValidNonce = async (challenge: string, target: string) => {
       }
     } catch (error) {
       console.error("Error computing hash:", error);
-      // throw new Error("Failed to compute hash: " + error.message);
       throw new Error("Failed to compute hash");
     }
 
@@ -49,68 +60,56 @@ const findValidNonce = async (challenge: string, target: string) => {
   }
 };
 
-const powChallenge = async (accountId: string) => {
-  const powResponse = await fetch(
-    `https://faucet.testnet.miden.io/pow?${new URLSearchParams({ account_id: accountId })}`
+const getPowChallenge = async (
+  backendUrl: string,
+  recipient: string,
+  amount: string
+) => {
+  const response = await fetch(
+    `${backendUrl}/pow?${new URLSearchParams({ amount, account_id: recipient })}`
   );
-  if (!powResponse.ok) {
-    // const message = await powResponse.text();
-    return { challenge: "", nonce: 0 };
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(`Failed to get PoW challenge: ${message}`);
   }
-  const powData = await powResponse.json();
-  const { challenge, target } = powData as {
+  const result = await response.json();
+  const { challenge, target } = result as {
     challenge: string;
-    target: string;
+    target: number;
   };
-  const nonce = await findValidNonce(challenge, target);
-  return { challenge, nonce };
+  return { challenge, target };
 };
 
-const requestNote = async ({
-  accountId,
-  amount,
-  challenge,
-  nonce,
-}: {
-  accountId: string;
-  amount: bigint;
-  challenge: string;
-  nonce: number;
-}) => {
-  try {
-    const noteDataRegex = /"data_base64":"([^"]+)"/;
-    const noteIdRegex = /"note_id":"([^"]+)"/;
-    let noteData = "";
-    let noteId = "";
-    const response = await fetch(
-      `https://faucet.testnet.miden.io/get_tokens?${new URLSearchParams({
-        account_id: accountId,
-        is_private_note: "false",
-        asset_amount: amount.toString(),
-        challenge,
-        nonce: nonce.toString(),
-      })}`,
-      {
-        headers: { "Content-Type": "text/event-stream" },
-      }
-    );
-    const text = await response.text();
-    const noteDataMatch = noteDataRegex.exec(text);
-    const noteIdMatch = noteIdRegex.exec(text);
-    if (noteDataMatch) {
-      noteData = noteDataMatch[1]!;
-    }
-    if (noteIdMatch) {
-      noteId = noteIdMatch[1]!;
-    }
-    return { noteData, noteId };
-  } catch (error) {
-    console.error("Error:", error);
+const getTokens = async (
+  backendUrl: string,
+  challenge: string,
+  nonce: number,
+  recipient: string,
+  amount: string,
+  isPrivateNote: boolean
+) => {
+  const response = await fetch(
+    `${backendUrl}/get_tokens?${new URLSearchParams({
+      account_id: recipient,
+      is_private_note: isPrivateNote ? "true" : "false",
+      asset_amount: amount,
+      challenge,
+      nonce: nonce.toString(),
+    })}`
+  );
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(`Failed to receive tokens: ${message}`);
   }
+  const result = await response.json();
+  const { note_id: noteId, tx_id: txId } = result as {
+    note_id: string;
+    tx_id: string;
+  };
+  return { noteId, txId };
 };
 
 const MintButton = () => {
-  const { wallet } = useWallet();
   const { connectedWallet } = useAccounts();
   const [loading, setLoading] = useState(false);
   const [noteId, setNoteId] = useState("");
@@ -122,22 +121,32 @@ const MintButton = () => {
   }, [connectedWallet?.consumableNoteIds, noteId]);
   return (
     <Button
-      disabled={!wallet || !connectedWallet || loading}
+      disabled={!connectedWallet || loading}
       onClick={async () => {
-        if (!wallet || !connectedWallet) {
+        if (!connectedWallet) {
           return;
         }
         setLoading(true);
-        const { challenge, nonce } = await powChallenge(
-          connectedWallet.address
+        const amount = parseAmount(
+          "100",
+          FUNGIBLE_FAUCET_DEFAULT_DECIMALS
+        ).toString();
+        const { challenge, target } = await getPowChallenge(
+          MIDEN_FAUCET_API_URL,
+          connectedWallet.address,
+          amount
         );
-        const noteResponse = await requestNote({
-          accountId: connectedWallet.address,
-          amount: parseAmount("100", FUNGIBLE_FAUCET_DEFAULT_DECIMALS),
+        const nonce = await findValidNonce(challenge, target);
+        const { noteId, txId } = await getTokens(
+          MIDEN_FAUCET_API_URL,
           challenge,
           nonce,
-        });
-        setNoteId(noteResponse?.noteId ?? "");
+          connectedWallet.address,
+          amount,
+          false
+        );
+        setNoteId(noteId);
+        console.log({ txId });
       }}
     >
       {loading ? <Spinner /> : <HandCoins />}

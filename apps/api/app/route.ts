@@ -1,16 +1,12 @@
-import { cargoMidenVersion, midenCompilerVersion } from "@/lib/miden-compiler";
+import { cargoMidenVersion } from "@/lib/miden-compiler";
 import { NextResponse } from "next/server";
 
-export const GET = async () => {
-  const [cargoMidenVersionResult, midenCompilerVersionResult] =
-    await Promise.all([cargoMidenVersion(), midenCompilerVersion()]);
-  return NextResponse.json({
+export const GET = async () =>
+  NextResponse.json({
     timestamp: Date.now(),
     env: {
       WEB_URL: process.env.WEB_URL,
       PACKAGES_PATH: process.env.PACKAGES_PATH,
     },
-    cargoMidenVersion: cargoMidenVersionResult,
-    midenCompilerVersion: midenCompilerVersionResult,
+    cargoMidenVersion: await cargoMidenVersion(),
   });
-};

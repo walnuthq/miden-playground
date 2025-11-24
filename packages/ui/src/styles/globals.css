@@ -127,8 +127,8 @@
 }
 
 .wallet-adapter-button-trigger {
-  color: inherit;
-  border-color: var(--color-border);
+  border-color: var(--color-border) !important;
+  @apply text-foreground!;
   @apply whitespace-nowrap;
   @apply rounded-md;
   @apply text-sm;
@@ -141,10 +141,17 @@
   @apply dark:border-input;
   @apply h-9;
   @apply px-4;
+  &:is(.dark *) {
+    background-color: color-mix(
+      in oklab,
+      var(--input) 30%,
+      transparent
+    ) !important;
+  }
 }
 
 .wallet-adapter-button-trigger:hover {
-  background-color: var(--accent) !important;
+  @apply bg-accent!;
   &:is(.dark *) {
     background-color: color-mix(
       in oklab,

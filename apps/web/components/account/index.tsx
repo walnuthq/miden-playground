@@ -13,14 +13,18 @@ import CreateTransactionDialog from "@/components/transactions/create-transactio
 import CreateTransactionDropdownMenu from "@/components/account/create-transaction-dropdown-menu";
 import InvokeProcedureArgumentsDialog from "@/components/account/invoke-procedure-arguments-dialog";
 import VerifyAccountComponentDialog from "@/components/account/verify-account-component-dialog";
+import useGlobalContext from "@/components/global-context/hook";
 
 const Account = ({ address }: { address: string }) => {
+  const { networkId } = useGlobalContext();
   const isClient = useIsClient();
   const { accounts, connectedWallet } = useAccounts();
   const account = accounts.find((account) => account.address === address);
   if (!isClient || !account) {
     return null;
   }
+  const showCreateTransactionButton =
+    networkId === "mlcl" || connectedWallet?.address === account.address;
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
       <Tabs defaultValue="information">
@@ -31,7 +35,7 @@ const Account = ({ address }: { address: string }) => {
               <TabsTrigger value="components">Components</TabsTrigger>
             )}
           </TabsList>
-          {connectedWallet && connectedWallet.address === address && (
+          {showCreateTransactionButton && (
             <CreateTransactionDropdownMenu account={account} />
           )}
         </div>

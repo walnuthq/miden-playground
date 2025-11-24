@@ -9,8 +9,20 @@ export const formatId = (id: string) => `${id.slice(0, 10)}…${id.slice(-8)}`;
 export const formatValue = (value: string) =>
   `${value.slice(0, 18)}…${value.slice(-16)}`;
 
-export const formatAddress = (address: string, networkId: string) =>
-  `${networkId}${address.slice(networkId.length).slice(0, 8)}…${address.slice(-8)}`;
+export const getAddressPart = (address: string) => {
+  const [addressPart = ""] = address.split("_");
+  return addressPart;
+};
+
+export const getRoutingParametersPart = (address: string) => {
+  const [, routingParametersPart = ""] = address.split("_");
+  return routingParametersPart;
+};
+
+export const formatAddress = (address: string, networkId: string) => {
+  const addressPart = getAddressPart(address);
+  return `${networkId}${addressPart.slice(networkId.length).slice(0, 8)}…${addressPart.slice(-8)}`;
+};
 
 export const formatAmount = (
   amount: string,

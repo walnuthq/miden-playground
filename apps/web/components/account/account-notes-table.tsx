@@ -29,7 +29,7 @@ import {
 } from "@demox-labs/miden-wallet-adapter";
 import useGlobalContext from "@/components/global-context/hook";
 import useScripts from "@/hooks/use-scripts";
-import { formatAmount } from "@/lib/utils";
+import { formatAmount, getAddressPart } from "@/lib/utils";
 
 const NoteActionsCell = ({
   account,
@@ -38,8 +38,9 @@ const NoteActionsCell = ({
   account: Account;
   inputNote: InputNote;
 }) => {
-  const { networkId } = useGlobalContext();
   const { wallet } = useWallet();
+  const { networkId } = useGlobalContext();
+  const { faucets } = useAccounts();
   const { openCreateTransactionDialog, newConsumeTransactionRequest } =
     useTransactions();
   return (
@@ -54,30 +55,40 @@ const NoteActionsCell = ({
         <DropdownMenuItem
           onClick={async () => {
             if (networkId === "mlcl") {
-              const transactionResult = await newConsumeTransactionRequest({
-                accountId: account.id,
-                noteIds: [inputNote.id],
-              });
+              const { transactionRequest, transactionResult } =
+                await newConsumeTransactionRequest({
+                  accountId: account.id,
+                  noteIds: [inputNote.id],
+                });
               openCreateTransactionDialog({
                 accountId: account.id,
                 transactionType: "consume",
                 step: "preview",
+                transactionRequest,
                 transactionResult,
               });
             } else {
+              const faucet = faucets.find(
+                ({ id }) => id === inputNote.senderId
+              );
               const [fungibleAsset] = inputNote.fungibleAssets;
-              if (!wallet /* || !fungibleAsset*/) {
+              if (!wallet || !fungibleAsset || !faucet) {
                 return;
               }
               const transaction = new ConsumeTransaction(
-                inputNote.senderId,
+                getAddressPart(faucet.address),
                 inputNote.id,
                 inputNote.type === "public" ? "public" : "private",
-                Number(fungibleAsset?.amount ?? "0")
+                Number(fungibleAsset.amount)
               );
               const adapter = wallet.adapter as MidenWalletAdapter;
-              const txId = await adapter.requestConsume(transaction);
-              console.log({ txId });
+              try {
+                const txId = await adapter.requestConsume(transaction);
+                console.log({ txId });
+              } catch (error) {
+                console.error("ERROR");
+                console.error(error);
+              }
             }
           }}
         >
@@ -89,6 +100,7 @@ const NoteActionsCell = ({
 };
 
 const AccountNotesTable = ({ account }: { account: Account }) => {
+  const { networkId } = useGlobalContext();
   const { faucets, connectedWallet } = useAccounts();
   const { inputNotes } = useNotes();
   const { scripts } = useScripts();
@@ -96,7 +108,7 @@ const AccountNotesTable = ({ account }: { account: Account }) => {
     .map((noteId) => inputNotes.find(({ id }) => id === noteId))
     .filter((note) => note !== undefined);
   const showNoteActions =
-    connectedWallet && connectedWallet.address === account.address;
+    networkId === "mlcl" || connectedWallet?.address === account.address;
   return (
     <div className="rounded-md border">
       <Table>

@@ -48,6 +48,8 @@ const useGlobalContext = () => {
           client,
           account.address
         );
+        // console.log(wasmAccount.id().toString());
+        // console.log(wasmAccount.serialize());
         // const consumableNotes = await clientGetConsumableNotes(
         //   client,
         //   account.id
@@ -82,6 +84,7 @@ const useGlobalContext = () => {
           networkId: state.networkId,
           updatedAt: syncSummary.blockNum(),
           consumableNoteIds: noteIds,
+          scripts: state.scripts,
         });
         accounts.push(updatedAccount);
       }

@@ -6,11 +6,15 @@ import { Separator } from "@workspace/ui/components/separator";
 import { Button } from "@workspace/ui/components/button";
 import useTransactions from "@/hooks/use-transactions";
 import useAccounts from "@/hooks/use-accounts";
+import useGlobalContext from "@/components/global-context/hook";
 
 const AccountInformation = ({ account }: { account: Account }) => {
+  const { networkId } = useGlobalContext();
   const { connectedWallet } = useAccounts();
   const { openCreateTransactionDialog, newConsumeTransactionRequest } =
     useTransactions();
+  const showConsumeAllNotesButton =
+    networkId === "mlcl" || connectedWallet?.address === account.address;
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-2">
@@ -49,27 +53,27 @@ const AccountInformation = ({ account }: { account: Account }) => {
                   This account has pending notes that can be consumed.
                 </p>
               </div>
-              {connectedWallet &&
-                connectedWallet.address === account.address && (
-                  <Button
-                    variant="outline"
-                    onClick={async () => {
-                      const transactionResult =
-                        await newConsumeTransactionRequest({
-                          accountId: account.id,
-                          noteIds: account.consumableNoteIds,
-                        });
-                      openCreateTransactionDialog({
+              {showConsumeAllNotesButton && (
+                <Button
+                  variant="outline"
+                  onClick={async () => {
+                    const { transactionRequest, transactionResult } =
+                      await newConsumeTransactionRequest({
                         accountId: account.id,
-                        transactionType: "consume",
-                        step: "preview",
-                        transactionResult,
+                        noteIds: account.consumableNoteIds,
                       });
-                    }}
-                  >
-                    Consume all notes
-                  </Button>
-                )}
+                    openCreateTransactionDialog({
+                      accountId: account.id,
+                      transactionType: "consume",
+                      step: "preview",
+                      transactionRequest,
+                      transactionResult,
+                    });
+                  }}
+                >
+                  Consume all notes
+                </Button>
+              )}
             </div>
             <AccountNotesTable account={account} />
           </div>

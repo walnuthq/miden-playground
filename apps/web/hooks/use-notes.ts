@@ -8,10 +8,12 @@ import {
   TransactionType,
 } from "@demox-labs/miden-wallet-adapter";
 import { sleep } from "@/lib/utils";
-import { createNoteFromScript } from "@/lib/web-client";
+import { clientCreateNoteFromScript, webClient } from "@/lib/web-client";
 
 const useNotes = () => {
   const {
+    networkId,
+    serializedMockChain,
     inputNotes,
     exportNoteDialogOpen,
     importNoteDialogOpen,
@@ -72,17 +74,19 @@ const useNotes = () => {
     const {
       AccountId: WasmAccountId,
       TransactionRequestBuilder: WasmTransactionRequestBuilder,
-      OutputNotesArray: WasmOutputNotesArray,
       OutputNote: WasmOutputNote,
       Note: WasmNote,
       NoteAssets: WasmNoteAssets,
       FungibleAsset: WasmFungibleAsset,
       NoteType: WasmNoteType,
       Felt: WasmFelt,
+      MidenArrays: WasmMidenArrays,
     } = await import("@demox-labs/miden-sdk");
+    const client = await webClient(networkId, serializedMockChain);
     const note =
       scriptId === "counter-note"
-        ? await createNoteFromScript({
+        ? await clientCreateNoteFromScript({
+            client,
             senderAccountId,
             recipientAccountId,
             type,
@@ -104,7 +108,9 @@ const useNotes = () => {
             new WasmFelt(0n)
           );
     const transactionRequest = new WasmTransactionRequestBuilder()
-      .withOwnOutputNotes(new WasmOutputNotesArray([WasmOutputNote.full(note)]))
+      .withOwnOutputNotes(
+        new WasmMidenArrays.OutputNoteArray([WasmOutputNote.full(note)])
+      )
       .build();
     const customTransaction = new CustomTransaction(
       senderAccount.address,

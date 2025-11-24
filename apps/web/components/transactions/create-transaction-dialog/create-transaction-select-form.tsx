@@ -1,5 +1,5 @@
 import { type Dispatch, type SetStateAction } from "react";
-import { type ConsumableNoteRecord as WasmConsumableNoteRecord } from "@demox-labs/miden-sdk";
+import { type ConsumableNoteRecord as WasmConsumableNoteRecordType } from "@demox-labs/miden-sdk";
 import {
   type CreateTransactionDialogStep,
   type TransactionType,
@@ -26,7 +26,7 @@ const CreateTransactionDialogSelectForm = ({
   transactionType: TransactionType;
   setTransactionType: Dispatch<SetStateAction<TransactionType>>;
   setLoading: Dispatch<SetStateAction<boolean>>;
-  setConsumableNotes: Dispatch<SetStateAction<WasmConsumableNoteRecord[]>>;
+  setConsumableNotes: Dispatch<SetStateAction<WasmConsumableNoteRecordType[]>>;
   setStep: Dispatch<SetStateAction<CreateTransactionDialogStep>>;
 }) => {
   const { networkId, serializedMockChain } = useGlobalContext();

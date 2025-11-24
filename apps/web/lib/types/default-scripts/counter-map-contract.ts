@@ -1,4 +1,8 @@
-import { type Script, defaultScript } from "@/lib/types/script";
+import {
+  type Script,
+  defaultScript,
+  defaultProcedure,
+} from "@/lib/types/script";
 
 export const counterMapContractRust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
 #![no_std]
@@ -6,24 +10,14 @@ export const counterMapContractRust = `// Do not link against libstd (i.e. anyth
 // However, we could still use some standard library types while
 // remaining no-std compatible, if we uncommented the following lines:
 //
-extern crate alloc;
+// extern crate alloc;
 
-// Global allocator to use heap memory in no-std environment
-#[global_allocator]
-static ALLOC: miden::BumpAlloc = miden::BumpAlloc::new();
-
-// Define a panic handler as required by the \`no_std\` environment
-#[cfg(not(test))]
-#[panic_handler]
-fn panic(_info: &core::panic::PanicInfo) -> ! {
-    // For now, just loop indefinitely
-    loop {}
-}
-
-mod bindings;
-
-use bindings::exports::miden::counter_contract::counter::Guest;
 use miden::{component, felt, Felt, StorageMap, StorageMapAccess, Word};
+
+use crate::bindings::exports::miden::counter_contract::counter::Guest;
+
+miden::generate!();
+bindings::export!(CounterContract);
 
 /// Main contract structure for the counter example.
 #[component]
@@ -32,8 +26,6 @@ struct CounterContract {
     #[storage(slot(0), description = "counter contract storage map")]
     count_map: StorageMap,
 }
-
-bindings::export!(CounterContract with_types_in bindings);
 
 impl Guest for CounterContract {
     /// Returns the current counter value stored in the contract's storage map.
@@ -63,7 +55,8 @@ impl Guest for CounterContract {
 }
 `;
 
-export const counterMapContractMasm = `use.miden::account
+export const counterMapContractMasm = `use.miden::active_account
+use.miden::native_account
 use.std::sys
 
 # => []
@@ -74,7 +67,7 @@ export.get_count
     push.0
     # => [index, key]
 
-    exec.account::get_map_item
+    exec.active_account::get_map_item
     # => [count]
 end
 
@@ -86,7 +79,7 @@ export.increment_count
     push.0
     # => [index, key]
 
-    exec.account::get_map_item
+    exec.active_account::get_map_item
     # => [count]
 
     add.1
@@ -98,7 +91,7 @@ export.increment_count
     push.0
     # => [index, key, count+1]
 
-    exec.account::set_map_item
+    exec.native_account::set_map_item
     # => [OLD_MAP_ROOT, OLD_MAP_VALUE]
 
     exec.sys::truncate_stack
@@ -118,17 +111,18 @@ const counterMapContract: Script = {
   masm: counterMapContractMasm,
   procedures: [
     {
+      ...defaultProcedure(),
       name: "get_count",
-      inputs: [],
+      hash: "",
       returnType: "felt",
       readOnly: true,
-      storageRead: { type: "map", index: 0, key: [0n, 0n, 0n, 1n] },
+      storageRead: { type: "map", index: 0, key: ["0", "0", "0", "1"] },
     },
     {
+      ...defaultProcedure(),
       name: "increment_count",
-      inputs: [],
+      hash: "",
       returnType: "felt",
-      readOnly: false,
     },
   ],
 };

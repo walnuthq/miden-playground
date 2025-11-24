@@ -18,15 +18,15 @@ import {
   PopoverTrigger,
 } from "@workspace/ui/components/popover";
 import {
-  type ConsumableNoteRecord as WasmConsumableNoteRecord,
-  type InputNoteRecord as WasmInputNoteRecord,
+  type ConsumableNoteRecord as WasmConsumableNoteRecordType,
+  type InputNoteRecord as WasmInputNoteRecordType,
 } from "@demox-labs/miden-sdk";
 import useAccounts from "@/hooks/use-accounts";
 import { type Account } from "@/lib/types/account";
 import { formatAmount } from "@/lib/utils";
 
 const getConsumableNoteFields = (
-  inputNoteRecord: WasmInputNoteRecord,
+  inputNoteRecord: WasmInputNoteRecordType,
   faucets: Account[]
 ) => {
   const noteFungibleAssets = inputNoteRecord
@@ -53,7 +53,7 @@ const getConsumableNoteFields = (
 };
 
 const getConsumableNoteValue = (
-  inputNoteRecord: WasmInputNoteRecord,
+  inputNoteRecord: WasmInputNoteRecordType,
   faucets: Account[]
 ) => {
   const { noteId, noteType, noteFungibleAssets } = getConsumableNoteFields(
@@ -64,7 +64,7 @@ const getConsumableNoteValue = (
 };
 
 const getConsumableNoteLabel = (
-  inputNoteRecord: WasmInputNoteRecord,
+  inputNoteRecord: WasmInputNoteRecordType,
   faucets: Account[]
 ) => {
   const { noteId, noteType, noteFungibleAssets } = getConsumableNoteFields(
@@ -85,7 +85,7 @@ const SelectConsumableNotesCombobox = ({
 }: {
   value: string[];
   onValueChange: Dispatch<SetStateAction<string[]>>;
-  consumableNotes: WasmConsumableNoteRecord[];
+  consumableNotes: WasmConsumableNoteRecordType[];
 }) => {
   const { faucets } = useAccounts();
   const [open, setOpen] = useState(false);
