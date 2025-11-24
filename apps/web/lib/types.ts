@@ -1,31 +1,22 @@
 import {
-  type Felt as WasmFelt,
-  type Word as WasmWord,
-  type AccountId as WasmAccountId,
-  type OutputNote as WasmOutputNote,
-  type FungibleAsset as WasmFungibleAsset,
+  type Word as WasmWordType,
+  type AccountId as WasmAccountIdType,
+  type OutputNote as WasmOutputNoteType,
+  type TransactionId as WasmTransactionIdType,
 } from "@demox-labs/miden-sdk";
 
 // MISSING TYPES
 
-export type WasmTransactionId = {
+type WasmOutputNotesType = {
   free(): void;
-  asElements(): WasmFelt[];
-  asBytes(): Uint8Array;
-  toHex(): string;
-  inner(): WasmWord;
-};
-
-type WasmOutputNotes = {
-  free(): void;
-  commitment(): WasmWord;
+  commitment(): WasmWordType;
   numNotes(): number;
   isEmpty(): boolean;
-  getNote(index: number): WasmOutputNote;
-  notes(): WasmOutputNote[];
+  getNote(index: number): WasmOutputNoteType;
+  notes(): WasmOutputNoteType[];
 };
 
-type WasmTransactionStatus = {
+type WasmTransactionStatusType = {
   free(): void;
   isPending(): boolean;
   isCommitted(): boolean;
@@ -34,22 +25,15 @@ type WasmTransactionStatus = {
   getCommitTimestamp(): bigint | undefined;
 };
 
-export type WasmTransactionRecord = {
+export type WasmTransactionRecordType = {
   free(): void;
-  id(): WasmTransactionId;
-  accountId(): WasmAccountId;
-  initAccountState(): WasmWord;
-  finalAccountState(): WasmWord;
-  inputNoteNullifiers(): WasmWord[];
-  outputNotes(): WasmOutputNotes;
+  id(): WasmTransactionIdType;
+  accountId(): WasmAccountIdType;
+  initAccountState(): WasmWordType;
+  finalAccountState(): WasmWordType;
+  inputNoteNullifiers(): WasmWordType[];
+  outputNotes(): WasmOutputNotesType;
   blockNum(): number;
-  transactionStatus(): WasmTransactionStatus;
+  transactionStatus(): WasmTransactionStatusType;
   creationTimestamp(): bigint;
-};
-
-export type WasmAssetVault = {
-  free(): void;
-  root(): WasmWord;
-  getBalance(faucet_id: WasmAccountId): bigint;
-  fungibleAssets(): WasmFungibleAsset[];
 };

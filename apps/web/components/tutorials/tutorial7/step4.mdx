@@ -1,0 +1,11 @@
+import Link from "@/components/tutorials/tutorial-link";
+
+Our network counter being registered on-chain, let's create a public note that the network operator can consume to execute the increment function.
+This will increment the counter from 1 to 2.
+
+Take some time to get familiar with the <Link href="/scripts/counter-note">counter note script</Link> which is very basic: we simply call the network counter **increment_count** procedure within the note script.
+
+The next step will be to create a custom network note with this script and register it on the network by signing a transaction.
+
+A network note is a public note targetting a network account.
+Once it's acknowledged by the network transaction builder, it will be automatically consumed by executing a transaction against the targetted network account.

@@ -1,4 +1,3 @@
-import { useWallet } from "@demox-labs/miden-wallet-adapter";
 import { type TutorialStep } from "@/lib/types/tutorial";
 import useAccounts from "@/hooks/use-accounts";
 import NextStepButton from "@/components/tutorials/next-step-button";
@@ -7,9 +6,10 @@ import Step4Content from "@/components/tutorials/tutorial3/step4.mdx";
 import { TEST_WALLET_ADDRESS } from "@/lib/constants";
 
 const useCompleted = () => {
-  const { accountId } = useWallet();
-  const { wallets } = useAccounts();
-  const recipient = wallets.find(({ address }) => address !== accountId);
+  const { wallets, connectedWallet } = useAccounts();
+  const recipient = wallets.find(
+    ({ address }) => address !== connectedWallet?.address
+  );
   return !!recipient;
 };
 

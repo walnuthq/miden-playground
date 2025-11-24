@@ -1,4 +1,12 @@
-import { type Script, defaultScript } from "@/lib/types/script";
+import {
+  COUNTER_CONTRACT_GET_COUNT_PROC_HASH,
+  COUNTER_CONTRACT_INCREMENT_COUNT_PROC_HASH,
+} from "@/lib/constants";
+import {
+  type Script,
+  defaultProcedure,
+  defaultScript,
+} from "@/lib/types/script";
 
 export const counterContractRust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
 #![no_std]
@@ -8,22 +16,12 @@ export const counterContractRust = `// Do not link against libstd (i.e. anything
 //
 // extern crate alloc;
 
-// Global allocator to use heap memory in no-std environment
-#[global_allocator]
-static ALLOC: miden::BumpAlloc = miden::BumpAlloc::new();
-
-// Define a panic handler as required by the \`no_std\` environment
-#[cfg(not(test))]
-#[panic_handler]
-fn panic(_info: &core::panic::PanicInfo) -> ! {
-    // For now, just loop indefinitely
-    loop {}
-}
-
-mod bindings;
-
-use bindings::exports::miden::counter_contract::counter::Guest;
 use miden::{component, felt, Felt, Value, ValueAccess};
+
+use crate::bindings::exports::miden::counter_contract::counter::Guest;
+
+miden::generate!();
+bindings::export!(CounterContract);
 
 /// Main contract structure for the counter example.
 #[component]
@@ -32,8 +30,6 @@ struct CounterContract {
     #[storage(slot(0), description = "counter contract storage value")]
     count: Value,
 }
-
-bindings::export!(CounterContract with_types_in bindings);
 
 impl Guest for CounterContract {
     /// Returns the current counter value stored in the contract's storage value.
@@ -59,7 +55,8 @@ impl Guest for CounterContract {
 }
 `;
 
-export const counterContractMasm = `use.miden::account
+export const counterContractMasm = `use.miden::active_account
+use.miden::native_account
 use.std::sys
 
 const.COUNTER_SLOT=0
@@ -69,7 +66,7 @@ export.get_count
     push.COUNTER_SLOT
     # => [index]
 
-    exec.account::get_item
+    exec.active_account::get_item
     # => [count]
 
     exec.sys::truncate_stack
@@ -81,7 +78,7 @@ export.increment_count
     push.COUNTER_SLOT
     # => [index]
 
-    exec.account::get_item
+    exec.active_account::get_item
     # => [count]
 
     add.1
@@ -92,7 +89,7 @@ export.increment_count
     push.COUNTER_SLOT
     # [index, count+1]
 
-    exec.account::set_item
+    exec.native_account::set_item
     # => []
 
     exec.sys::truncate_stack
@@ -112,17 +109,18 @@ const counterContract: Script = {
   masm: counterContractMasm,
   procedures: [
     {
+      ...defaultProcedure(),
       name: "get_count",
-      inputs: [],
+      hash: COUNTER_CONTRACT_GET_COUNT_PROC_HASH,
       returnType: "felt",
       readOnly: true,
       storageRead: { type: "value", index: 0 },
     },
     {
+      ...defaultProcedure(),
       name: "increment_count",
-      inputs: [],
+      hash: COUNTER_CONTRACT_INCREMENT_COUNT_PROC_HASH,
       returnType: "felt",
-      readOnly: false,
     },
   ],
 };

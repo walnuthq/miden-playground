@@ -1,6 +1,7 @@
 import {
-  type ConsumableNoteRecord as WasmConsumableNoteRecord,
-  type TransactionResult as WasmTransactionResult,
+  type ConsumableNoteRecord as WasmConsumableNoteRecordType,
+  type TransactionRequest as WasmTransactionRequestType,
+  type TransactionResult as WasmTransactionResultType,
 } from "@demox-labs/miden-sdk";
 import { type Account } from "@/lib/types/account";
 import { type NetworkId } from "@/lib/types/network";
@@ -32,10 +33,11 @@ export type State = {
   createTransactionDialogOpen: boolean;
   createTransactionDialogAccountId: string;
   createTransactionDialogTransactionType: TransactionType;
-  createTransactionDialogConsumableNotes: WasmConsumableNoteRecord[];
+  createTransactionDialogConsumableNotes: WasmConsumableNoteRecordType[];
   createTransactionDialogNoteIds: string[];
   createTransactionDialogStep: CreateTransactionDialogStep;
-  createTransactionDialogTransactionResult: WasmTransactionResult | null;
+  createTransactionDialogTransactionRequest: WasmTransactionRequestType | null;
+  createTransactionDialogTransactionResult: WasmTransactionResultType | null;
   transactions: Transaction[];
   // NOTES
   inputNotes: InputNote[];
@@ -89,6 +91,7 @@ export const defaultState = (): State => ({
   createTransactionDialogStep: "select",
   createTransactionDialogConsumableNotes: [],
   createTransactionDialogNoteIds: [],
+  createTransactionDialogTransactionRequest: null,
   createTransactionDialogTransactionResult: null,
   transactions: [],
   // NOTES
@@ -151,20 +154,7 @@ export const stateSerializer = ({
     })),
     transactions,
     inputNotes,
-    scripts: scripts.map((script) => ({
-      ...script,
-      procedures: script.procedures.map((procedure) => ({
-        ...procedure,
-        storageRead: procedure.storageRead
-          ? procedure.storageRead.type === "value"
-            ? procedure.storageRead
-            : {
-                ...procedure.storageRead,
-                key: procedure.storageRead.key?.map((k) => k.toString()),
-              }
-          : undefined,
-      })),
-    })),
+    scripts,
     components,
     tutorialId,
     tutorialLoaded,
@@ -240,22 +230,7 @@ export const stateDeserializer = (value: string): State => {
         : initialState.accounts,
       transactions: transactions ?? initialState.transactions,
       inputNotes: inputNotes ?? initialState.inputNotes,
-      scripts: scripts
-        ? scripts.map((script) => ({
-            ...script,
-            procedures: script.procedures.map((procedure) => ({
-              ...procedure,
-              storageRead: procedure.storageRead
-                ? procedure.storageRead.type === "value"
-                  ? procedure.storageRead
-                  : {
-                      ...procedure.storageRead,
-                      key: procedure.storageRead.key.map((key) => BigInt(key)),
-                    }
-                : undefined,
-            })),
-          }))
-        : initialState.scripts,
+      scripts: scripts ?? initialState.scripts,
       components: components ?? initialState.components,
       tutorialId: tutorialId ?? initialState.tutorialId,
       tutorialLoaded: tutorialLoaded ?? initialState.tutorialLoaded,

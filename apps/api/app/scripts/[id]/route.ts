@@ -2,9 +2,9 @@ import { type NextRequest, NextResponse } from "next/server";
 import {
   updateRust,
   compilePackage,
-  compileWasmToMasm,
   deletePackage,
   packageExists,
+  readPackage,
 } from "@/lib/miden-compiler";
 
 type CompileScriptRequestBody = { rust: string };
@@ -16,17 +16,41 @@ export const PATCH = async (
   const { id } = await params;
   const exists = await packageExists(id);
   if (!exists) {
-    return NextResponse.json({ ok: false, error: "ENOENT", masm: "" });
+    console.error("ENOENT", id);
+    return NextResponse.json({
+      ok: false,
+      error: "ENOENT",
+      masm: "",
+      root: "",
+      package: { type: "Buffer", data: [] },
+      procedures: [],
+    });
   }
   const body = await request.json();
   const { rust } = body as CompileScriptRequestBody;
   await updateRust(id, rust);
   const { stderr } = await compilePackage(id);
   if (stderr) {
-    return NextResponse.json({ ok: false, error: stderr, masm: "" });
+    console.error(stderr);
+    return NextResponse.json({
+      ok: false,
+      error: stderr,
+      masm: "",
+      root: "",
+      package: { type: "Buffer", data: [] },
+      procedures: [],
+    });
   }
-  const masm = await compileWasmToMasm(id);
-  return NextResponse.json({ ok: true, error: "", masm });
+  // const masm = await compileWasmToMasm(id);
+  const { packageBuffer, procedures } = await readPackage(id);
+  return NextResponse.json({
+    ok: true,
+    error: "",
+    masm: "",
+    root: "",
+    package: packageBuffer,
+    procedures,
+  });
 };
 
 export const DELETE = async (

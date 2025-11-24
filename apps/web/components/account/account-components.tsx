@@ -1,11 +1,11 @@
 import { type Account } from "@/lib/types/account";
 import AccountComponentTable from "@/components/account/account-component-table";
-// import useAccounts from "@/hooks/use-accounts";
+import useAccounts from "@/hooks/use-accounts";
 import useComponents from "@/hooks/use-components";
-// import { Button } from "@workspace/ui/components/button";
+import { Button } from "@workspace/ui/components/button";
 
 const AccountComponents = ({ account }: { account: Account }) => {
-  // const { openVerifyAccountComponentDialog } = useAccounts();
+  const { openVerifyAccountComponentDialog } = useAccounts();
   const { components } = useComponents();
   const accountComponents = account.components
     .map((componentId) => components.find(({ id }) => id === componentId))
@@ -22,9 +22,9 @@ const AccountComponents = ({ account }: { account: Account }) => {
           </div>
         ))}
       </div>
-      {/* <Button onClick={() => openVerifyAccountComponentDialog(account.id)}>
+      <Button onClick={() => openVerifyAccountComponentDialog(account.id)}>
         Verify account component
-      </Button> */}
+      </Button>
     </div>
   );
 };

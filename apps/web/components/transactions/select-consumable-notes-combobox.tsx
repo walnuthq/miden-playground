@@ -18,18 +18,15 @@ import {
   PopoverTrigger,
 } from "@workspace/ui/components/popover";
 import {
-  type ConsumableNoteRecord as WasmConsumableNoteRecord,
-  type InputNoteRecord as WasmInputNoteRecord,
+  type ConsumableNoteRecord as WasmConsumableNoteRecordType,
+  type InputNoteRecord as WasmInputNoteRecordType,
 } from "@demox-labs/miden-sdk";
 import useAccounts from "@/hooks/use-accounts";
-import {
-  decodeFungibleFaucetMetadata,
-  type Account,
-} from "@/lib/types/account";
+import { type Account } from "@/lib/types/account";
 import { formatAmount } from "@/lib/utils";
 
 const getConsumableNoteFields = (
-  inputNoteRecord: WasmInputNoteRecord,
+  inputNoteRecord: WasmInputNoteRecordType,
   faucets: Account[]
 ) => {
   const noteFungibleAssets = inputNoteRecord
@@ -40,8 +37,7 @@ const getConsumableNoteFields = (
       const faucetId = fungibleAsset.faucetId().toString();
       const amount = fungibleAsset.amount().toString();
       const faucet = faucets.find(({ id }) => id === faucetId);
-      const { decimals, tokenSymbol } = decodeFungibleFaucetMetadata(faucet);
-      return `${formatAmount(amount, decimals)} ${tokenSymbol}`;
+      return `${formatAmount(amount, faucet?.decimals)} ${faucet?.symbol}`;
     });
   const metadata = inputNoteRecord.metadata();
   const wasmNoteTypes = {
@@ -57,7 +53,7 @@ const getConsumableNoteFields = (
 };
 
 const getConsumableNoteValue = (
-  inputNoteRecord: WasmInputNoteRecord,
+  inputNoteRecord: WasmInputNoteRecordType,
   faucets: Account[]
 ) => {
   const { noteId, noteType, noteFungibleAssets } = getConsumableNoteFields(
@@ -68,7 +64,7 @@ const getConsumableNoteValue = (
 };
 
 const getConsumableNoteLabel = (
-  inputNoteRecord: WasmInputNoteRecord,
+  inputNoteRecord: WasmInputNoteRecordType,
   faucets: Account[]
 ) => {
   const { noteId, noteType, noteFungibleAssets } = getConsumableNoteFields(
@@ -89,7 +85,7 @@ const SelectConsumableNotesCombobox = ({
 }: {
   value: string[];
   onValueChange: Dispatch<SetStateAction<string[]>>;
-  consumableNotes: WasmConsumableNoteRecord[];
+  consumableNotes: WasmConsumableNoteRecordType[];
 }) => {
   const { faucets } = useAccounts();
   const [open, setOpen] = useState(false);

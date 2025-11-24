@@ -14,10 +14,15 @@ import useTransactions from "@/hooks/use-transactions";
 import AccountAddress from "@/components/lib/account-address";
 import { clientGetConsumableNotes, webClient } from "@/lib/web-client";
 import useGlobalContext from "@/components/global-context/hook";
+import useAccounts from "@/hooks/use-accounts";
 
 const AccountActionsCell = ({ account }: { account: Account }) => {
   const { networkId, serializedMockChain } = useGlobalContext();
+  const { connectedWallet } = useAccounts();
   const { openCreateTransactionDialog } = useTransactions();
+  if (networkId === "mtst" && connectedWallet?.address !== account.address) {
+    return null;
+  }
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -102,7 +107,11 @@ export const columns: ColumnDef<Account>[] = [
     cell: ({ row }) => (
       <Badge
         variant={
-          row.original.storageMode === "public" ? "default" : "destructive"
+          row.original.storageMode === "public"
+            ? "default"
+            : row.original.storageMode === "network"
+              ? "secondary"
+              : "destructive"
         }
         className="capitalize"
       >

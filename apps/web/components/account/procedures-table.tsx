@@ -24,7 +24,7 @@ const ProceduresTable = ({
       <TableHeader>
         <TableRow>
           <TableHead className="w-[180px]">Name</TableHead>
-          <TableHead>Result</TableHead>
+          {component.type === "account" && <TableHead>Result</TableHead>}
         </TableRow>
       </TableHeader>
       <TableBody>

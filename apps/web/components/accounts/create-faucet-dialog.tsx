@@ -21,7 +21,7 @@ import {
   FUNGIBLE_FAUCET_DEFAULT_DECIMALS,
   FUNGIBLE_FAUCET_DEFAULT_MAX_SUPPLY,
 } from "@/lib/constants";
-import { parseAmount } from "@/lib/utils";
+import { parseAmount, formatAmount } from "@/lib/utils";
 
 const CreateFaucetDialog = () => {
   const {
@@ -121,7 +121,7 @@ const CreateFaucetDialog = () => {
                 min="1"
                 max="12"
                 value={decimals.toString()}
-                onChange={(event) => setDecimals(BigInt(event.target.value))}
+                onChange={(event) => setDecimals(Number(event.target.value))}
                 required
               />
             </div>
@@ -131,8 +131,8 @@ const CreateFaucetDialog = () => {
                 id="max-supply"
                 name="max-supply"
                 type="number"
-                min={1 / 10 ** Number(decimals)}
-                step={1 / 10 ** Number(decimals)}
+                step={formatAmount("1", decimals).replaceAll(",", "")}
+                min={formatAmount("1", decimals).replaceAll(",", "")}
                 defaultValue={FUNGIBLE_FAUCET_DEFAULT_MAX_SUPPLY.toString()}
                 required
               />

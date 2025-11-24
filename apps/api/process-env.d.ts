@@ -5,6 +5,7 @@ declare global {
       readonly NODE_ENV: "development" | "production" | "test";
       // private
       readonly WEB_URL: string;
+      readonly PACKAGES_PATH: string;
       // public
     }
   }

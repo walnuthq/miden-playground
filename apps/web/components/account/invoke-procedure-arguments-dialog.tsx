@@ -76,7 +76,7 @@ const InvokeProcedureArgumentsDialog = () => {
                   (input) => ({
                     ...input,
                     value:
-                      input.name === "account_id"
+                      input.name === "counter_account_id"
                         ? JSON.stringify({
                             prefix: wasmAccountId.prefix().toString(),
                             suffix: wasmAccountId.suffix().toString(),
@@ -104,24 +104,15 @@ const InvokeProcedureArgumentsDialog = () => {
         >
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-3 col-span-2">
-              <Label>Account ID</Label>
+              <Label>counter_account_id</Label>
               <SelectAccountDropdownMenu
                 value={accountId}
                 onValueChange={setAccountId}
               />
             </div>
             <div className="grid gap-3 col-span-2">
-              <Label htmlFor="procHash">Procedure Hash</Label>
-              <Input
-                id="procHash"
-                name="procHash"
-                defaultValue={
-                  invokeProcedureArgumentsDialogProcedure.inputs.find(
-                    ({ name }) => name === "proc_hash"
-                  )?.value ?? ""
-                }
-                required
-              />
+              <Label htmlFor="procHash">get_count_proc_hash</Label>
+              <Input id="procHash" name="procHash" required />
             </div>
           </div>
         </form>

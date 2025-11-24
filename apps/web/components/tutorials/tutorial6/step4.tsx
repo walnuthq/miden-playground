@@ -1,4 +1,3 @@
-import { useWallet } from "@demox-labs/miden-wallet-adapter";
 import { type TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
@@ -10,9 +9,10 @@ import { accountIdFromPrefixSuffix } from "@/lib/types/account";
 import useGlobalContext from "@/components/global-context/hook";
 
 const useCompleted = () => {
-  const { accountId } = useWallet();
-  const { wallets } = useAccounts();
-  const senderAccount = wallets.find(({ address }) => address === accountId);
+  const { wallets, connectedWallet } = useAccounts();
+  const senderAccount = wallets.find(
+    ({ address }) => address === connectedWallet?.address
+  );
   const { inputNotes } = useNotes();
   const note = inputNotes.find(
     ({ senderId, scriptRoot, inputs, state, type }) =>

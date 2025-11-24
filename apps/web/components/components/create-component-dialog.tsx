@@ -39,9 +39,12 @@ const CreateComponentDialog = () => {
   const [scriptId, setScriptId] = useState("");
   const [componentType, setComponentType] = useState<ComponentType>("account");
   const componentScriptIds = components.map(({ scriptId }) => scriptId);
-  const shownScripts = scripts
-    .filter(({ type }) => type === "account")
-    .filter(({ id }) => !componentScriptIds.includes(id));
+  const shownScripts = scripts.filter(
+    ({ id, type, status }) =>
+      !componentScriptIds.includes(id) &&
+      type === "account" &&
+      status === "compiled"
+  );
   const onClose = () => {
     setScriptId("");
     setComponentType("account");

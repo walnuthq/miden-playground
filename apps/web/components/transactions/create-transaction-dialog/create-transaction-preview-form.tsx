@@ -6,13 +6,17 @@ import AccountAddress from "@/components/lib/account-address";
 import AccountStorageDeltaTable from "@/components/lib/account-storage-delta-table";
 import TransactionId from "@/components/lib/transaction-id";
 import NoteId from "@/components/lib/note-id";
-import { type TransactionResult as WasmTransactionResult } from "@demox-labs/miden-sdk";
-import { type WasmTransactionRecord } from "@/lib/types";
+import {
+  type TransactionResult as WasmTransactionResultType,
+  type TransactionRequest as WasmTransactionRequestType,
+} from "@demox-labs/miden-sdk";
+import { type WasmTransactionRecordType } from "@/lib/types";
+import useAccounts from "@/hooks/use-accounts";
 
 const SubmitTransactionToastDescription = ({
   transactionRecord,
 }: {
-  transactionRecord: WasmTransactionRecord;
+  transactionRecord: WasmTransactionRecordType;
 }) => (
   <>
     <p>
@@ -40,19 +44,31 @@ const SubmitTransactionToastDescription = ({
 const TransactionPreview = ({
   transactionResult,
 }: {
-  transactionResult: WasmTransactionResult;
+  transactionResult: WasmTransactionResultType;
 }) => {
-  const consumedNotes = transactionResult.consumedNotes().numNotes();
-  const createdNotes = transactionResult.createdNotes().numNotes();
-  const accountStorageDelta = transactionResult.accountDelta().storage();
-  const accountVaultDelta = transactionResult.accountDelta().vault();
+  const { accounts } = useAccounts();
+  const executedTransaction = transactionResult.executedTransaction();
+  const accountId = executedTransaction.accountId().toString();
+  const consumedNotes = executedTransaction.inputNotes().numNotes();
+  const createdNotes = executedTransaction.outputNotes().numNotes();
+  const accountStorageDelta = executedTransaction.accountDelta().storage();
+  const accountVaultDelta = executedTransaction.accountDelta().vault();
   const fungibleAssetDelta = accountVaultDelta.fungible();
-  const nonceDelta = transactionResult.accountDelta().nonceDelta()?.asInt();
-  // const consumedNotes = 0;
-  // const createdNotes = 1;
-  // const accountStorageDelta = { isEmpty: () => true };
-  // const fungibleAssetDelta = { isEmpty: () => true };
-  // const nonceDelta = 1;
+  const nonceDelta = executedTransaction.accountDelta().nonceDelta()?.asInt();
+  const account = accounts.find(({ id }) => id === accountId);
+  const accountNonce = account?.nonce ?? 0n;
+  const accountStorage = account?.storage ?? [];
+  const storageDeltaValues = accountStorageDelta
+    .values()
+    .map((word) => word.toHex());
+  const storageDelta = accountStorage
+    .map((before, index) =>
+      storageDeltaValues[index] !== undefined &&
+      before !== storageDeltaValues[index]
+        ? { index, before, after: storageDeltaValues[index] }
+        : { index, before: "", after: "" }
+    )
+    .filter(({ after }) => after !== "");
   return (
     <div className="flex flex-col gap-2 text-sm">
       <h5 className="font-semibold">
@@ -93,14 +109,12 @@ const TransactionPreview = ({
         will be modified as follows:
       </h5>
       <h5 className="font-semibold">Storage changes:</h5>
-      {accountStorageDelta.isEmpty() ? (
+      {storageDelta.length === 0 ? (
         <p className="text-muted-foreground text-sm">
           Storage will not be changed.
         </p>
       ) : (
-        <AccountStorageDeltaTable
-          values={accountStorageDelta.values().map((word) => word.toHex())}
-        />
+        <AccountStorageDeltaTable storageDelta={storageDelta} />
       )}
       <h5 className="font-semibold">Vault changes:</h5>
       {fungibleAssetDelta.isEmpty() ? (
@@ -118,28 +132,36 @@ const TransactionPreview = ({
           withAccountAddress={false}
         />
       )}
-      <strong>New nonce: {nonceDelta}.</strong>
+      <strong>New nonce: {accountNonce + nonceDelta}.</strong>
     </div>
   );
 };
 
 const CreateTransactionPreviewForm = ({
+  executingAccountId,
+  transactionRequest,
   transactionResult,
   setLoading,
   onClose,
 }: {
-  transactionResult: WasmTransactionResult;
+  executingAccountId: string;
+  transactionRequest: WasmTransactionRequestType;
+  transactionResult: WasmTransactionResultType;
   setLoading: Dispatch<SetStateAction<boolean>>;
   onClose: () => void;
 }) => {
-  const { submitTransaction } = useTransactions();
+  const { submitNewTransaction } = useTransactions();
   return (
     <form
       id="create-transaction-preview-form"
       onSubmit={async (event) => {
         event.preventDefault();
         setLoading(true);
-        const transactionRecord = await submitTransaction(transactionResult);
+        const transactionRecord = await submitNewTransaction({
+          accountId: executingAccountId,
+          transactionRequest,
+          transactionResult,
+        });
         toast("Successfully created transaction.", {
           description: (
             <SubmitTransactionToastDescription

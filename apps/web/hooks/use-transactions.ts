@@ -1,7 +1,7 @@
 import {
-  type ConsumableNoteRecord as WasmConsumableNoteRecord,
-  type TransactionResult as WasmTransactionResult,
-  type TransactionRequest as WasmTransactionRequest,
+  type ConsumableNoteRecord as WasmConsumableNoteRecordType,
+  type TransactionResult as WasmTransactionResultType,
+  type TransactionRequest as WasmTransactionRequestType,
 } from "@demox-labs/miden-sdk";
 import { type NoteType } from "@/lib/types/note";
 import {
@@ -10,10 +10,10 @@ import {
 } from "@/lib/types/transaction";
 import {
   webClient,
+  clientExecuteTransaction,
   clientNewMintTransactionRequest,
   clientNewConsumeTransactionRequest,
   clientNewSendTransactionRequest,
-  clientNewTransaction,
   wasmAccountToAccount,
   wasmTransactionToTransaction,
   clientGetAllInputNotes,
@@ -31,6 +31,7 @@ const useTransactions = () => {
     createTransactionDialogStep,
     createTransactionDialogConsumableNotes,
     createTransactionDialogNoteIds,
+    createTransactionDialogTransactionRequest,
     createTransactionDialogTransactionResult,
     inputNotes,
     transactions,
@@ -44,14 +45,16 @@ const useTransactions = () => {
     step = "select",
     consumableNotes = [],
     noteIds = [],
+    transactionRequest = null,
     transactionResult = null,
   }: {
     accountId?: string;
     transactionType?: TransactionType;
     step?: CreateTransactionDialogStep;
-    consumableNotes?: WasmConsumableNoteRecord[];
+    consumableNotes?: WasmConsumableNoteRecordType[];
     noteIds?: string[];
-    transactionResult?: WasmTransactionResult | null;
+    transactionRequest?: WasmTransactionRequestType | null;
+    transactionResult?: WasmTransactionResultType | null;
   }) =>
     dispatch({
       type: "OPEN_CREATE_TRANSACTION_DIALOG",
@@ -61,6 +64,7 @@ const useTransactions = () => {
         step,
         consumableNotes,
         noteIds,
+        transactionRequest,
         transactionResult,
       },
     });
@@ -86,10 +90,11 @@ const useTransactions = () => {
       noteType,
       amount,
     });
-    return clientNewTransaction(client, {
+    const transactionResult = await clientExecuteTransaction(client, {
       accountId: faucetId,
       transactionRequest,
     });
+    return { transactionRequest, transactionResult };
   };
   const newConsumeTransactionRequest = async ({
     accountId,
@@ -103,10 +108,11 @@ const useTransactions = () => {
       client,
       noteIds
     );
-    return clientNewTransaction(client, {
+    const transactionResult = await clientExecuteTransaction(client, {
       accountId,
       transactionRequest,
     });
+    return { transactionRequest, transactionResult };
   };
   const newSendTransactionRequest = async ({
     senderAccountId,
@@ -129,36 +135,40 @@ const useTransactions = () => {
       noteType,
       amount,
     });
-    return clientNewTransaction(client, {
+    const transactionResult = await clientExecuteTransaction(client, {
       accountId: senderAccountId,
       transactionRequest,
     });
+    return { transactionRequest, transactionResult };
   };
   const newCustomTransactionRequest = async ({
     senderAccountId,
     transactionRequest,
   }: {
     senderAccountId: string;
-    transactionRequest: WasmTransactionRequest;
+    transactionRequest: WasmTransactionRequestType;
   }) => {
     const client = await webClient(networkId, serializedMockChain);
-    return clientNewTransaction(client, {
+    const transactionResult = await clientExecuteTransaction(client, {
       accountId: senderAccountId,
       transactionRequest,
     });
+    return { transactionRequest, transactionResult };
   };
-  const submitTransaction = async (
-    transactionResult: WasmTransactionResult
-  ) => {
-    // const { TransactionProver: WasmTransactionProver } = await import(
-    //   "@demox-labs/miden-sdk"
-    // );
+  const submitNewTransaction = async ({
+    accountId,
+    transactionRequest,
+    transactionResult,
+  }: {
+    accountId: string;
+    transactionRequest: WasmTransactionRequestType;
+    transactionResult: WasmTransactionResultType;
+  }) => {
+    const { AccountId: WasmAccountId } = await import("@demox-labs/miden-sdk");
     const client = await webClient(networkId, serializedMockChain);
-    await client.submitTransaction(
-      transactionResult
-      // WasmTransactionProver.newRemoteProver(
-      //   "https://tx-prover.testnet.miden.io"
-      // )
+    const transactionId = await client.submitNewTransaction(
+      WasmAccountId.fromHex(accountId),
+      transactionRequest
     );
     let newSerializedMockChain = null;
     if (client.usesMockChain()) {
@@ -166,20 +176,15 @@ const useTransactions = () => {
       newSerializedMockChain = client.serializeMockChain();
     }
     const syncSummary = await client.syncState();
-    console.log("blockNum", syncSummary.blockNum());
-    const transactionId = transactionResult.executedTransaction().id();
-    /* const transactions = await client.getTransactions(
-      WasmTransactionFilter.ids([transactionResult.executedTransaction().id()])
-    ); */
+    const transactionIdHex = transactionId.toHex();
     const transactions = await clientGetTransactionsByIds(client, [
-      transactionResult.executedTransaction().id(),
+      transactionId,
     ]);
-    // console.log('Transactions:', transactions.length);
     const transactionRecord = transactions.find(
-      (tx) => tx.id().toHex() === transactionId.toHex()
+      (tx) => tx.id().toHex() === transactionIdHex
     );
     const nextAccount = await client.getAccount(
-      transactionResult.executedTransaction().accountId()
+      WasmAccountId.fromHex(accountId)
     );
     const previousAccount = accounts.find(
       ({ id }) => id === nextAccount?.id().toString()
@@ -188,7 +193,6 @@ const useTransactions = () => {
       throw new Error("Transaction record or account not found");
     }
     const newInputNotes = await clientGetAllInputNotes(client, inputNotes);
-    // console.log("inputNotes.length", inputNotes.length);
     const consumableNoteIds: Record<string, string[]> = {};
     for (const account of accounts) {
       const consumableNotes = await clientGetConsumableNotes(
@@ -232,6 +236,7 @@ const useTransactions = () => {
     createTransactionDialogStep,
     createTransactionDialogConsumableNotes,
     createTransactionDialogNoteIds,
+    createTransactionDialogTransactionRequest,
     createTransactionDialogTransactionResult,
     transactions,
     openCreateTransactionDialog,
@@ -240,7 +245,7 @@ const useTransactions = () => {
     newConsumeTransactionRequest,
     newSendTransactionRequest,
     newCustomTransactionRequest,
-    submitTransaction,
+    submitNewTransaction,
   };
 };
 

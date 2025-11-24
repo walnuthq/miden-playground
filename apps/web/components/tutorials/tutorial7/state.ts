@@ -1,15 +1,16 @@
 import { type State, defaultState } from "@/lib/types/state";
 import defaultScripts from "@/lib/types/default-scripts";
-import counterMapContractScript from "@/lib/types/default-scripts/counter-map-contract";
+import counterContractScript from "@/lib/types/default-scripts/counter-contract";
+import counterNoteScript from "@/lib/types/default-scripts/counter-note";
 import defaultComponents from "@/lib/types/default-components";
-import counterMapContractComponent from "@/lib/types/default-components/counter-map-contract";
+import counterContractComponent from "@/lib/types/default-components/counter-contract";
 
 const state: State = {
   ...defaultState(),
   networkId: "mtst",
-  scripts: [...defaultScripts, counterMapContractScript],
-  components: [...defaultComponents, counterMapContractComponent],
-  tutorialId: "create-a-counter-note",
+  scripts: [...defaultScripts, counterContractScript, counterNoteScript],
+  components: [...defaultComponents, counterContractComponent],
+  tutorialId: "network-transactions",
 };
 
 export default state;

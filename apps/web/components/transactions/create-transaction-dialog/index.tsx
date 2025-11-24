@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { Spinner } from "@workspace/ui/components/spinner";
 import {
-  type ConsumableNoteRecord as WasmConsumableNoteRecord,
-  type TransactionResult as WasmTransactionResult,
+  type ConsumableNoteRecord as WasmConsumableNoteRecordType,
+  type TransactionRequest as WasmTransactionRequestType,
+  type TransactionResult as WasmTransactionResultType,
 } from "@demox-labs/miden-sdk";
 import {
   Dialog,
@@ -29,6 +30,7 @@ const CreateTransactionDialog = () => {
     createTransactionDialogStep,
     createTransactionDialogConsumableNotes,
     createTransactionDialogNoteIds,
+    createTransactionDialogTransactionRequest,
     createTransactionDialogTransactionResult,
     closeCreateTransactionDialog,
   } = useTransactions();
@@ -44,7 +46,7 @@ const CreateTransactionDialog = () => {
   const targetAccount = accounts.find(({ id }) => id === targetAccountId);
   const [isPublic, setIsPublic] = useState(true);
   const [consumableNotes, setConsumableNotes] = useState<
-    WasmConsumableNoteRecord[]
+    WasmConsumableNoteRecordType[]
   >(createTransactionDialogConsumableNotes);
   const [noteIds, setNoteIds] = useState<string[]>(
     createTransactionDialogNoteIds
@@ -52,8 +54,12 @@ const CreateTransactionDialog = () => {
   const [faucetAccountId, setFaucetAccountId] = useState("");
   const faucetAccount = accounts.find(({ id }) => id === faucetAccountId);
   const [loading, setLoading] = useState(false);
+  const [transactionRequest, setTransactionRequest] =
+    useState<WasmTransactionRequestType | null>(
+      createTransactionDialogTransactionRequest
+    );
   const [transactionResult, setTransactionResult] =
-    useState<WasmTransactionResult | null>(
+    useState<WasmTransactionResultType | null>(
       createTransactionDialogTransactionResult
     );
   const onClose = () => {
@@ -64,6 +70,7 @@ const CreateTransactionDialog = () => {
     setIsPublic(true);
     setConsumableNotes([]);
     setNoteIds([]);
+    setTransactionRequest(null);
     setTransactionResult(null);
     setFaucetAccountId("");
     closeCreateTransactionDialog();
@@ -72,13 +79,14 @@ const CreateTransactionDialog = () => {
     setExecutingAccountId(createTransactionDialogAccountId);
     setTransactionType(createTransactionDialogTransactionType);
     setStep(createTransactionDialogStep);
+    setTransactionRequest(createTransactionDialogTransactionRequest);
     setTransactionResult(createTransactionDialogTransactionResult);
     setConsumableNotes(createTransactionDialogConsumableNotes);
-    //setNoteIds(createTransactionDialogNoteIds);
   }, [
     createTransactionDialogAccountId,
     createTransactionDialogTransactionType,
     createTransactionDialogStep,
+    createTransactionDialogTransactionRequest,
     createTransactionDialogTransactionResult,
     createTransactionDialogConsumableNotes,
   ]);
@@ -131,13 +139,16 @@ const CreateTransactionDialog = () => {
             executingAccountId={executingAccountId}
             faucetAccountId={faucetAccountId}
             setFaucetAccountId={setFaucetAccountId}
+            setTransactionRequest={setTransactionRequest}
             setTransactionResult={setTransactionResult}
             setLoading={setLoading}
             setStep={setStep}
           />
         )}
-        {step === "preview" && transactionResult && (
+        {step === "preview" && transactionRequest && transactionResult && (
           <CreateTransactionPreviewForm
+            executingAccountId={executingAccountId}
+            transactionRequest={transactionRequest}
             transactionResult={transactionResult}
             setLoading={setLoading}
             onClose={onClose}

@@ -3,25 +3,30 @@ import useNotes from "@/hooks/use-notes";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
 import Step2Content from "@/components/tutorials/tutorial3/step2.mdx";
-import { useWallet } from "@demox-labs/miden-wallet-adapter";
 import useAccounts from "@/hooks/use-accounts";
-import { MIDEN_FAUCET_ACCOUNT_ID, P2ID_NOTE_CODE } from "@/lib/constants";
+import {
+  MIDEN_FAUCET_ACCOUNT_ID,
+  P2ID_NOTE_CODE,
+  FUNGIBLE_FAUCET_DEFAULT_DECIMALS,
+} from "@/lib/constants";
 import { accountIdFromPrefixSuffix } from "@/lib/types/account";
+import { parseAmount } from "@/lib/utils";
 
 const useCompleted = () => {
-  const { accountId } = useWallet();
-  const { wallets } = useAccounts();
-  const wallet = wallets.find(({ address }) => address === accountId);
+  const { connectedWallet } = useAccounts();
   const { inputNotes } = useNotes();
   const note = inputNotes.find(
     ({ fungibleAssets, senderId, scriptRoot, inputs, state, type }) =>
       fungibleAssets.some(
         ({ faucetId, amount }) =>
-          faucetId === MIDEN_FAUCET_ACCOUNT_ID && amount === "100000000"
+          faucetId === MIDEN_FAUCET_ACCOUNT_ID &&
+          amount ===
+            parseAmount("100", FUNGIBLE_FAUCET_DEFAULT_DECIMALS).toString()
       ) &&
       senderId === MIDEN_FAUCET_ACCOUNT_ID &&
       scriptRoot === P2ID_NOTE_CODE &&
-      accountIdFromPrefixSuffix(inputs[1]!, inputs[0]!) === wallet?.id &&
+      accountIdFromPrefixSuffix(inputs[1]!, inputs[0]!) ===
+        connectedWallet?.id &&
       state === "committed" &&
       type === "public"
   );

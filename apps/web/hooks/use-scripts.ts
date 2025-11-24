@@ -8,13 +8,15 @@ import {
   defaultScript,
   invokeProcedureCustomTransactionScript,
 } from "@/lib/types/script";
+import { webClient, clientExecuteTransaction } from "@/lib/web-client";
 import { createScript, deleteScript as apiDeleteScript } from "@/lib/api";
-import counterMapContract from "@/lib/types/default-scripts/counter-map-contract";
 import useTransactions from "@/hooks/use-transactions";
 import { COUNTER_CONTRACT_ID } from "@/lib/constants";
 
 const useScripts = () => {
   const {
+    networkId,
+    serializedMockChain,
     scripts,
     createScriptDialogOpen,
     deleteScriptAlertDialogOpen,
@@ -25,7 +27,7 @@ const useScripts = () => {
     invokeProcedureArgumentsDialogProcedure,
     dispatch,
   } = useGlobalContext();
-  const { newCustomTransactionRequest, submitTransaction } = useTransactions();
+  const { submitNewTransaction } = useTransactions();
   const openCreateScriptDialog = () =>
     dispatch({ type: "OPEN_CREATE_SCRIPT_DIALOG" });
   const closeCreateScriptDialog = () =>
@@ -55,10 +57,6 @@ const useScripts = () => {
       packageName,
       type,
       rust,
-      dependencies: example === "p2id-note" ? ["basic-wallet"] : [],
-      // TODO remove mock
-      procedures:
-        example === "counter-contract" ? counterMapContract.procedures : [],
       updatedAt: Date.now(),
     };
     dispatch({
@@ -95,51 +93,54 @@ const useScripts = () => {
       throw new Error("Script not found");
     }
     const {
-      TransactionKernel: WasmTransactionKernel,
-      AssemblerUtils: WasmAssemblerUtils,
-      TransactionScript: WasmTransactionScript,
       TransactionRequestBuilder: WasmTransactionRequestBuilder,
       AccountStorageRequirements: WasmAccountStorageRequirements,
       ForeignAccount: WasmForeignAccount,
       AccountId: WasmAccountId,
+      MidenArrays: WasmMidenArrays,
     } = await import("@demox-labs/miden-sdk");
-    const assembler = WasmTransactionKernel.assembler();
+    const client = await webClient(networkId, serializedMockChain);
+    const builder = client.createScriptBuilder();
     const contractName = script.id.replaceAll("-", "_");
-    const accountComponentLibrary =
-      WasmAssemblerUtils.createAccountComponentLibrary(
-        assembler,
-        `external_contract::${contractName}`,
-        script.masm
-      );
-    const transactionScript = WasmTransactionScript.compile(
-      invokeProcedureCustomTransactionScript(contractName, procedure),
-      assembler.withLibrary(accountComponentLibrary)
+    const accountComponentLibrary = builder.buildLibrary(
+      `external_contract::${contractName}`,
+      script.masm
+    );
+    builder.linkDynamicLibrary(accountComponentLibrary);
+    const transactionScript = builder.compileTxScript(
+      invokeProcedureCustomTransactionScript(contractName, procedure)
     );
     let transactionRequestBuilder =
       new WasmTransactionRequestBuilder().withCustomScript(transactionScript);
     if (procedure.foreignAccounts) {
       transactionRequestBuilder = transactionRequestBuilder.withForeignAccounts(
-        procedure.foreignAccounts.map((foreignAccountId) =>
-          WasmForeignAccount.public(
-            WasmAccountId.fromHex(foreignAccountId),
-            new WasmAccountStorageRequirements()
+        new WasmMidenArrays.ForeignAccountArray(
+          procedure.foreignAccounts.map((foreignAccountId) =>
+            WasmForeignAccount.public(
+              WasmAccountId.fromHex(foreignAccountId),
+              new WasmAccountStorageRequirements()
+            )
           )
         )
       );
     }
-    const storageRequirements = new WasmAccountStorageRequirements();
-    transactionRequestBuilder = transactionRequestBuilder.withForeignAccounts([
-      WasmForeignAccount.public(
-        WasmAccountId.fromHex(COUNTER_CONTRACT_ID),
-        storageRequirements
-      ),
-    ]);
+    // const storageRequirements = new WasmAccountStorageRequirements();
+    // transactionRequestBuilder = transactionRequestBuilder.withForeignAccounts([
+    //   WasmForeignAccount.public(
+    //     WasmAccountId.fromHex(COUNTER_CONTRACT_ID),
+    //     storageRequirements
+    //   ),
+    // ]);
     const transactionRequest = transactionRequestBuilder.build();
-    const transactionResult = await newCustomTransactionRequest({
-      senderAccountId,
+    const transactionResult = await clientExecuteTransaction(client, {
+      accountId: senderAccountId,
       transactionRequest,
     });
-    return submitTransaction(transactionResult);
+    return submitNewTransaction({
+      accountId: senderAccountId,
+      transactionRequest,
+      transactionResult,
+    });
   };
   const openInvokeProcedureArgumentsDialog = ({
     senderAccountId,
@@ -167,7 +168,6 @@ const useScripts = () => {
     invokeProcedureArgumentsDialogSenderAccountId,
     invokeProcedureArgumentsDialogScriptId,
     invokeProcedureArgumentsDialogProcedure,
-
     openCreateScriptDialog,
     closeCreateScriptDialog,
     openDeleteScriptAlertDialog,

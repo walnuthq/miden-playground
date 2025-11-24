@@ -1,4 +1,4 @@
-import { type Account as WasmAccount } from "@demox-labs/miden-sdk";
+import { type Account as WasmAccountType } from "@demox-labs/miden-sdk";
 
 export const scriptTypes = {
   account: "Account Script",
@@ -51,17 +51,26 @@ type StorageRead =
   | {
       type: "map";
       index: number;
-      key: bigint[];
+      key: string[];
     };
 
 export type Procedure = {
   name: string;
+  hash: string;
   inputs: MidenInput[];
   returnType: MidenType;
   readOnly: boolean;
   storageRead?: StorageRead;
   foreignAccounts?: string[];
 };
+
+export const defaultProcedure = (): Procedure => ({
+  name: "",
+  hash: "",
+  inputs: [],
+  returnType: "void",
+  readOnly: false,
+});
 
 export type Script = {
   id: string;
@@ -74,6 +83,7 @@ export type Script = {
   masm: string;
   error: string;
   root: string;
+  packageBytes: number[];
   dependencies: string[];
   procedures: Procedure[];
   inputs: MidenInput[];
@@ -91,6 +101,7 @@ export const defaultScript = (): Script => ({
   masm: "",
   error: "",
   root: "",
+  packageBytes: [],
   dependencies: [],
   procedures: [],
   inputs: [],
@@ -98,7 +109,7 @@ export const defaultScript = (): Script => ({
 });
 
 export const getStorageRead = async (
-  wasmAccount: WasmAccount,
+  wasmAccount: WasmAccountType,
   storageRead: StorageRead
 ) => {
   if (storageRead.type === "map" && storageRead.key) {

@@ -3,7 +3,6 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Spinner } from "@workspace/ui/components/spinner";
 import { Button } from "@workspace/ui/components/button";
-import { Switch } from "@workspace/ui/components/switch";
 import {
   Select,
   SelectContent,
@@ -24,7 +23,12 @@ import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import useAccounts from "@/hooks/use-accounts";
 import AccountAddress from "@/components/lib/account-address";
-import { type AccountType, accountTypes } from "@/lib/types/account";
+import {
+  type AccountStorageMode,
+  type AccountType,
+  accountStorageModes,
+  accountTypes,
+} from "@/lib/types/account";
 import useComponents from "@/hooks/use-components";
 import defaultComponents from "@/lib/types/default-components";
 
@@ -36,7 +40,7 @@ const DeployAccountDialog = () => {
   const [accountType, setAccountType] = useState<AccountType>(
     "regular-account-updatable-code"
   );
-  const [isPublic, setIsPublic] = useState(true);
+  const [storageMode, setStorageMode] = useState<AccountStorageMode>("public");
   const [authComponentId, setAuthComponentId] = useState("no-auth");
   const [componentId, setComponentId] = useState("");
   const authComponent = components.find(({ id }) => id === authComponentId);
@@ -44,7 +48,7 @@ const DeployAccountDialog = () => {
   const defaultComponentIds = defaultComponents.map(({ id }) => id);
   const onClose = () => {
     setAccountType("regular-account-updatable-code");
-    setIsPublic(true);
+    setStorageMode("public");
     setAuthComponentId("no-auth");
     setComponentId("");
     closeDeployAccountDialog();
@@ -85,7 +89,7 @@ const DeployAccountDialog = () => {
             const account = await deployAccount({
               name: formData.get("name")?.toString() ?? "",
               accountType,
-              storageMode: isPublic ? "public" : "private",
+              storageMode,
               components: [authComponent, componentWithInitialValues],
             });
             setLoading(false);
@@ -127,18 +131,33 @@ const DeployAccountDialog = () => {
               </Select>
             </div>
             <div className="grid gap-3">
-              <Label htmlFor="is-public">Storage mode</Label>
-              <div className="flex items-center gap-2">
-                <Switch
-                  id="is-public"
-                  name="is-public"
-                  defaultChecked={isPublic}
-                  onCheckedChange={(checked) => setIsPublic(checked)}
-                />
-                <Label htmlFor="is-public">
-                  {isPublic ? "Public" : "Private"}
-                </Label>
-              </div>
+              <Label htmlFor="storage-mode">Storage mode</Label>
+              <Select
+                onValueChange={(storageMode) =>
+                  setStorageMode(storageMode as AccountStorageMode)
+                }
+                value={storageMode}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Select storage mode…" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.keys(accountStorageModes).map(
+                    (accountStorageMode) => (
+                      <SelectItem
+                        key={accountStorageMode}
+                        value={accountStorageMode}
+                      >
+                        {
+                          accountStorageModes[
+                            accountStorageMode as AccountStorageMode
+                          ]
+                        }
+                      </SelectItem>
+                    )
+                  )}
+                </SelectContent>
+              </Select>
             </div>
             <div className="grid gap-3">
               <Label htmlFor="auth-component">Auth Component</Label>

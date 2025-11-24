@@ -34,14 +34,6 @@ const useGlobalContext = () => {
       payload: { networkId, blockNum: syncSummary.blockNum() },
     });
   };
-  const switchNetwork = async (networkId: NetworkId) => {
-    const client = await webClient(networkId, state.serializedMockChain);
-    const syncSummary = await client.syncState();
-    dispatch({
-      type: "SWITCH_NETWORK",
-      payload: { networkId, blockNum: syncSummary.blockNum() },
-    });
-  };
   const syncState = async () => {
     try {
       const client = await webClient(
@@ -56,6 +48,8 @@ const useGlobalContext = () => {
           client,
           account.address
         );
+        // console.log(wasmAccount.id().toString());
+        // console.log(wasmAccount.serialize());
         // const consumableNotes = await clientGetConsumableNotes(
         //   client,
         //   account.id
@@ -90,6 +84,7 @@ const useGlobalContext = () => {
           networkId: state.networkId,
           updatedAt: syncSummary.blockNum(),
           consumableNoteIds: noteIds,
+          scripts: state.scripts,
         });
         accounts.push(updatedAccount);
       }
@@ -111,7 +106,6 @@ const useGlobalContext = () => {
     ...state,
     dispatch,
     resetState,
-    switchNetwork,
     syncState,
   };
 };

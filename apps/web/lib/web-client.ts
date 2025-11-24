@@ -1,23 +1,22 @@
 import { range } from "lodash";
 import {
-  type Account as WasmAccount,
+  type Account as WasmAccountType,
   type WebClient as WebClientType,
-  type InputNoteRecord as WasmInputNoteRecord,
-  type NoteMetadata as WasmNoteMetadata,
-  type Note as WasmNote,
-  // type TransactionRecord as WasmTransactionRecord,
-  type TransactionResult as WasmTransactionResult,
-  type TransactionRequest as WasmTransactionRequest,
+  type InputNoteRecord as WasmInputNoteRecordType,
+  type NoteMetadata as WasmNoteMetadataType,
+  type Note as WasmNoteType,
+  type TransactionResult as WasmTransactionResultType,
   type InputNoteState as WasmInputNoteStateType,
+  type TransactionId as WasmTransactionIdType,
+  type TransactionRequest as WasmTransactionRequestType,
 } from "@demox-labs/miden-sdk";
-import {
-  type WasmTransactionId,
-  type WasmTransactionRecord,
-} from "@/lib/types";
+import { type WasmTransactionRecordType } from "@/lib/types";
 import {
   type Account,
   type AccountStorageMode,
   type AccountType,
+  defaultAccount,
+  newWallet,
 } from "@/lib/types/account";
 import { type NetworkId } from "@/lib/types/network";
 import { type InputNote, type NoteType } from "@/lib/types/note";
@@ -27,8 +26,9 @@ import {
 } from "@/lib/types/transaction";
 import { type Script } from "@/lib/types/script";
 import { type StorageSlot, type Component } from "@/lib/types/component";
-import { BASIC_WALLET_CODE } from "@/lib/constants";
 import defaultScripts from "@/lib/types/default-scripts";
+import { stringToFeltArray } from "@/lib/utils";
+import { fromHex } from "viem";
 
 const globalForWebClient = globalThis as unknown as {
   webClient: WebClientType;
@@ -68,7 +68,12 @@ export const clientNewWallet = async (
   {
     storageMode,
     mutable,
-  }: { storageMode: AccountStorageMode; mutable: boolean }
+    initSeed,
+  }: {
+    storageMode: AccountStorageMode;
+    mutable: boolean;
+    initSeed?: Uint8Array;
+  }
 ) => {
   const { AccountStorageMode: WasmAccountStorageMode } = await import(
     "@demox-labs/miden-sdk"
@@ -77,7 +82,9 @@ export const clientNewWallet = async (
     storageMode === "public"
       ? WasmAccountStorageMode.public()
       : WasmAccountStorageMode.private(),
-    mutable
+    mutable,
+    0,
+    initSeed
   );
 };
 
@@ -107,18 +114,29 @@ export const clientNewFaucet = async (
     nonFungible,
     tokenSymbol,
     decimals,
-    maxSupply
+    maxSupply,
+    0
   );
 };
 
-export const clientNewAccount = async (
+export const clientNewAccount = (
+  client: WebClientType,
+  { account, overwrite }: { account: WasmAccountType; overwrite: boolean }
+) => client.newAccount(account, overwrite);
+
+export const clientExecuteTransaction = async (
   client: WebClientType,
   {
-    account,
-    accountSeed,
-    overwrite,
-  }: { account: WasmAccount; accountSeed: bigint; overwrite: boolean }
-) => client.newAccount(account, await bigintToWord(accountSeed), overwrite);
+    accountId,
+    transactionRequest,
+  }: { accountId: string; transactionRequest: WasmTransactionRequestType }
+) => {
+  const { AccountId: WasmAccountId } = await import("@demox-labs/miden-sdk");
+  return client.executeTransaction(
+    WasmAccountId.fromHex(accountId),
+    transactionRequest
+  );
+};
 
 export const clientNewMintTransactionRequest = async (
   client: WebClientType,
@@ -188,28 +206,6 @@ export const clientNewSendTransactionRequest = async (
   );
 };
 
-export const clientNewTransaction = async (
-  client: WebClientType,
-  {
-    accountId,
-    transactionRequest,
-  }: { accountId: string; transactionRequest: WasmTransactionRequest }
-) => {
-  const { AccountId: WasmAccountId } = await import("@demox-labs/miden-sdk");
-  return client.newTransaction(
-    WasmAccountId.fromHex(accountId),
-    transactionRequest
-  );
-};
-
-// export const clientGetAccounts = async (client: WebClientType) => {
-//   const accountHeaders = await client.getAccounts();
-//   const accounts = await Promise.all(
-//     accountHeaders.map((accountHeader) => client.getAccount(accountHeader.id()))
-//   );
-//   return accounts.filter((account) => account !== undefined);
-// };
-
 export const clientGetAccountByAddress = async (
   client: WebClientType,
   address: string
@@ -221,6 +217,7 @@ export const clientGetAccountByAddress = async (
     return account;
   }
   await client.importAccountById(accountId);
+  await client.syncState();
   const importedAccount = await client.getAccount(accountId);
   if (!importedAccount) {
     throw new Error("Error importing account");
@@ -285,8 +282,8 @@ export const clientGetAllInputNotes = async (
 
 export const clientGetTransactionsByIds = async (
   client: WebClientType,
-  transactionIds: WasmTransactionId[]
-): Promise<WasmTransactionRecord[]> => {
+  transactionIds: WasmTransactionIdType[]
+): Promise<WasmTransactionRecordType[]> => {
   const { TransactionFilter: WasmTransactionFilter } = await import(
     "@demox-labs/miden-sdk"
   );
@@ -297,28 +294,23 @@ export const clientImportNewWallet = async (
   client: WebClientType,
   address: string
 ) => {
-  const wallet = await clientNewWallet(client, {
-    storageMode: "public",
-    mutable: true,
-  });
-  const serializedWallet = wallet.serialize();
-  const fromHexString = (hexString: string) => {
-    const chunks = hexString.match(/.{1,2}/g)!;
-    return Uint8Array.from(chunks.map((byte) => Number.parseInt(byte, 16)));
-  };
   const { Account: WasmAccount, Address: WasmAddress } = await import(
     "@demox-labs/miden-sdk"
   );
   const accountId = WasmAddress.fromBech32(address).accountId();
   const serializedImportedWallet = Uint8Array.from([
-    ...fromHexString(accountId.toString().slice(2)),
-    ...serializedWallet.slice(15),
+    ...fromHex(accountId.toString() as `0x${string}`, "bytes"),
+    ...newWallet.slice(15),
   ]);
-  await clientNewAccount(client, {
-    account: WasmAccount.deserialize(serializedImportedWallet),
-    accountSeed: 0n,
-    overwrite: true,
-  });
+  try {
+    await clientNewAccount(client, {
+      account: WasmAccount.deserialize(serializedImportedWallet),
+      overwrite: true,
+    });
+    //  eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (error) {
+    //
+  }
 };
 
 export const clientDeployAccount = async (
@@ -336,13 +328,14 @@ export const clientDeployAccount = async (
   }
 ) => {
   const {
-    TransactionKernel: WasmTransactionKernel,
     AccountBuilder: WasmAccountBuilder,
     AccountComponent: WasmAccountComponent,
     AccountStorageMode: WasmAccountStorageMode,
     AccountType: WasmAccountType,
+    Package: WasmPackage,
+    MidenArrays: WasmMidenArrays,
   } = await import("@demox-labs/miden-sdk");
-  const assembler = WasmTransactionKernel.assembler();
+  const builder = client.createScriptBuilder();
   const initSeed = new Uint8Array(32);
   crypto.getRandomValues(initSeed);
   const accountTypes = {
@@ -353,14 +346,19 @@ export const clientDeployAccount = async (
     "regular-account-updatable-code":
       WasmAccountType.RegularAccountUpdatableCode,
   } as const;
+  const accountStorageModes = {
+    public: WasmAccountStorageMode.public(),
+    network: WasmAccountStorageMode.network(),
+    private: WasmAccountStorageMode.private(),
+  } as const;
   let accountBuilder = new WasmAccountBuilder(initSeed)
     .accountType(accountTypes[accountType])
-    .storageMode(
-      storageMode === "public"
-        ? WasmAccountStorageMode.public()
-        : WasmAccountStorageMode.private()
-    );
+    .storageMode(accountStorageModes[storageMode]);
   for (const component of components) {
+    if (component.scriptId === "no-auth") {
+      accountBuilder = accountBuilder.withNoAuthComponent();
+      continue;
+    }
     const script = scripts.find(({ id }) => id === component.scriptId);
     if (!script) {
       continue;
@@ -368,29 +366,33 @@ export const clientDeployAccount = async (
     const storageSlots = await Promise.all(
       component.storageSlots.map(wasmStorageSlotFromStorageSlot)
     );
-    const compiledComponent = WasmAccountComponent.compile(
-      script.masm,
-      assembler,
-      storageSlots
-    ).withSupportsAllTypes();
+    let accountComponent = script.masm
+      ? WasmAccountComponent.compile(script.masm, builder, storageSlots)
+      : WasmAccountComponent.fromPackage(
+          WasmPackage.deserialize(new Uint8Array(script.packageBytes)),
+          new WasmMidenArrays.StorageSlotArray(storageSlots)
+        );
+    accountComponent = accountComponent.withSupportsAllTypes();
     if (component.type === "auth") {
-      accountBuilder = accountBuilder.withAuthComponent(compiledComponent);
+      accountBuilder = accountBuilder.withAuthComponent(accountComponent);
     } else {
-      accountBuilder = accountBuilder.withComponent(compiledComponent);
+      accountBuilder = accountBuilder.withComponent(accountComponent);
     }
   }
-  const { account, seed } = accountBuilder.build();
-  await client.newAccount(account, seed, true);
+  const { account } = accountBuilder.build();
+  await client.newAccount(account, true);
   return account;
 };
 
-export const createNoteFromScript = async ({
+export const clientCreateNoteFromScript = async ({
+  client,
   senderAccountId,
   recipientAccountId,
   type,
   script,
   scripts,
 }: {
+  client: WebClientType;
   senderAccountId: string;
   recipientAccountId: string;
   type: NoteType;
@@ -398,8 +400,6 @@ export const createNoteFromScript = async ({
   scripts: Script[];
 }) => {
   const {
-    TransactionKernel: WasmTransactionKernel,
-    AssemblerUtils: WasmAssemblerUtils,
     NoteInputs: WasmNoteInputs,
     FeltArray: WasmFeltArray,
     Word: WasmWord,
@@ -411,58 +411,28 @@ export const createNoteFromScript = async ({
     NoteMetadata: WasmNoteMetadata,
     Note: WasmNote,
     AccountId: WasmAccountId,
-    // FungibleAsset: WasmFungibleAsset,
   } = await import("@demox-labs/miden-sdk");
-  let assembler = WasmTransactionKernel.assembler().withDebugMode(true);
+  const builder = client.createScriptBuilder();
   const dependencies = script.dependencies
     .map((scriptId) => scripts.find(({ id }) => id === scriptId))
     .filter((dependency) => dependency !== undefined);
-  console.log(dependencies);
   for (const dependency of dependencies) {
     const contractName = dependency.id.replaceAll("-", "_");
-    const accountComponentLibrary =
-      WasmAssemblerUtils.createAccountComponentLibrary(
-        assembler,
-        `external_contract::${contractName}`,
-        dependency.masm
-      );
-    assembler = assembler.withLibrary(accountComponentLibrary);
+    const accountComponentLibrary = builder.buildLibrary(
+      `external_contract::${contractName}`,
+      dependency.masm
+    );
+    builder.linkDynamicLibrary(accountComponentLibrary);
   }
-  // const accountComponents = senderAccount.components
-  //   .map((componentId) => components.find(({ id }) => id === componentId))
-  //   .filter((component) => component !== undefined)
-  //   // TODO
-  //   .filter(({ id }) => id === "counter-contract");
-  // console.log("components", accountComponents);
-  // for (const component of accountComponents) {
-  //   const componentScript = scripts.find(({ id }) => id === component.scriptId);
-  //   if (!componentScript) {
-  //     throw new Error("Script not found");
-  //   }
-  //   const contractName = componentScript.id.replaceAll("-", "_");
-  //   console.log("contractName", contractName);
-  //   const accountComponentLibrary =
-  //     WasmAssemblerUtils.createAccountComponentLibrary(
-  //       assembler,
-  //       `external_contract::${contractName}`,
-  //       componentScript.masm
-  //     );
-  //   assembler = assembler.withLibrary(accountComponentLibrary);
-  // }
-  console.log(script.masm);
-  const compiledNoteScript = assembler.compileNoteScript(script.masm);
-  console.log("OK");
+  const compiledNoteScript = builder.compileNoteScript(script.masm);
   const noteAssets = new WasmNoteAssets([]);
-  // const noteAssets = new WasmNoteAssets([
-  //   new WasmFungibleAsset(
-  //     WasmAccountId.fromHex("0x83592005c13d47203ec1e3124c654d"),
-  //     100n
-  //   ),
-  // ]);
+  const noteTag = WasmNoteTag.fromAccountId(
+    WasmAccountId.fromHex(recipientAccountId)
+  );
   const noteMetadata = new WasmNoteMetadata(
     WasmAccountId.fromHex(senderAccountId),
     type === "public" ? WasmNoteType.Public : WasmNoteType.Private,
-    WasmNoteTag.fromAccountId(WasmAccountId.fromHex(recipientAccountId)),
+    noteTag,
     //WasmNoteTag.forLocalUseCase(0, 0),
     WasmNoteExecutionHint.none()
   );
@@ -478,21 +448,7 @@ export const createNoteFromScript = async ({
   return new WasmNote(noteAssets, noteMetadata, noteRecipient);
 };
 
-/* export const createAccountComponentLibrary = async (script: Script) => {
-  const {
-    TransactionKernel: WasmTransactionKernel,
-    AssemblerUtils: WasmAssemblerUtils,
-  } = await import("@demox-labs/miden-sdk");
-  const assembler = WasmTransactionKernel.assembler();
-  const contractName = script.id.replaceAll("-", "_");
-  return WasmAssemblerUtils.createAccountComponentLibrary(
-    assembler,
-    `external_contract::${contractName}`,
-    script.masm
-  );
-}; */
-
-const accountType = (account: WasmAccount /*, tokenSymbol?: string*/) => {
+const accountType = (account: WasmAccountType) => {
   if (account.isFaucet()) {
     return "fungible-faucet";
   } else if (account.isRegularAccount()) {
@@ -503,6 +459,26 @@ const accountType = (account: WasmAccount /*, tokenSymbol?: string*/) => {
   return "non-fungible-faucet";
 };
 
+const storageMode = (account: WasmAccountType) =>
+  account.isPublic() ? "public" : account.isNetwork() ? "network" : "private";
+
+const verifyDefaultComponents = async (
+  wasmAccount: WasmAccountType,
+  scripts: Script[]
+) => {
+  const { Word: WasmWord } = await import("@demox-labs/miden-sdk");
+  const code = wasmAccount.code();
+  return scripts
+    .filter(
+      ({ procedures }) =>
+        procedures.length > 0 &&
+        procedures.every(({ hash }) =>
+          code.hasProcedure(WasmWord.fromHex(hash))
+        )
+    )
+    .map(({ id }) => id);
+};
+
 export const wasmAccountToAccount = async ({
   wasmAccount,
   name,
@@ -510,31 +486,37 @@ export const wasmAccountToAccount = async ({
   networkId,
   updatedAt,
   consumableNoteIds,
+  scripts = [],
 }: {
-  wasmAccount: WasmAccount;
+  wasmAccount: WasmAccountType;
   name: string;
   components?: string[];
   networkId: string;
   updatedAt: number;
   consumableNoteIds?: string[];
+  scripts?: Script[];
 }): Promise<Account> => {
-  const { AccountInterface: WasmAccountInterface } = await import(
-    "@demox-labs/miden-sdk"
-  );
+  const {
+    AccountInterface: WasmAccountInterface,
+    BasicFungibleFaucetComponent: WasmBasicFungibleFaucetComponent,
+  } = await import("@demox-labs/miden-sdk");
   const code = wasmAccount.code().commitment().toHex();
-  return {
+  const verifiedComponents = components
+    ? components
+    : await verifyDefaultComponents(wasmAccount, scripts);
+  const account: Account = {
+    ...defaultAccount(),
     id: wasmAccount.id().toString(),
     name,
     address: wasmAccount
       .id()
-      .toBech32Custom(networkId, WasmAccountInterface.Unspecified),
-    type: accountType(wasmAccount /*, tokenSymbol*/),
-    storageMode: wasmAccount.isPublic() ? "public" : "private",
+      .toBech32Custom(networkId, WasmAccountInterface.BasicWallet),
+    type: accountType(wasmAccount),
+    storageMode: storageMode(wasmAccount),
     isPublic: wasmAccount.isPublic(),
     isUpdatable: wasmAccount.isUpdatable(),
     isRegularAccount: wasmAccount.isRegularAccount(),
     isNew: wasmAccount.isNew(),
-    isWallet: code === BASIC_WALLET_CODE,
     isFaucet: wasmAccount.isFaucet(),
     nonce: wasmAccount.nonce().asInt(),
     fungibleAssets: wasmAccount
@@ -550,12 +532,22 @@ export const wasmAccountToAccount = async ({
       return item ? [...previousValue, item.toHex()] : previousValue;
     }, []),
     consumableNoteIds: consumableNoteIds ?? [],
-    components: components ?? [],
+    components: verifiedComponents,
     updatedAt,
   };
+  if (wasmAccount.isFaucet()) {
+    const basicFungibleFaucetComponent =
+      WasmBasicFungibleFaucetComponent.fromAccount(wasmAccount);
+    account.symbol = basicFungibleFaucetComponent.symbol().toString();
+    account.decimals = basicFungibleFaucetComponent.decimals();
+    account.maxSupply = basicFungibleFaucetComponent.maxSupply().toString();
+    const [, , , totalSupply] = stringToFeltArray(account.storage[0]!);
+    account.totalSupply = totalSupply!.toString();
+  }
+  return account;
 };
 
-const noteType = async (metadata?: WasmNoteMetadata) => {
+const noteType = async (metadata?: WasmNoteMetadataType) => {
   const { NoteType: WasmNoteType } = await import("@demox-labs/miden-sdk");
   const wasmNoteTypes = {
     [WasmNoteType.Public]: "public",
@@ -587,7 +579,7 @@ const noteState = async (state: WasmInputNoteStateType) => {
 };
 
 export const wasmInputNoteToInputNote = async (
-  record: WasmInputNoteRecord,
+  record: WasmInputNoteRecordType,
   previousInputNote?: InputNote
 ): Promise<InputNote> => {
   const [type, state] = await Promise.all([
@@ -625,7 +617,7 @@ export const wasmInputNoteToInputNote = async (
   };
 };
 
-const transactionStatus = (transactionRecord: WasmTransactionRecord) => {
+const transactionStatus = (transactionRecord: WasmTransactionRecordType) => {
   const status = transactionRecord.transactionStatus();
   if (status.isPending()) {
     return "Pending";
@@ -637,8 +629,8 @@ const transactionStatus = (transactionRecord: WasmTransactionRecord) => {
 };
 
 export const wasmTransactionToTransaction = async (
-  record: WasmTransactionRecord,
-  result: WasmTransactionResult
+  record: WasmTransactionRecordType,
+  result: WasmTransactionResultType
 ): Promise<Transaction> => {
   const inputNotes = await Promise.all(
     range(result.executedTransaction().inputNotes().numNotes()).map((index) => {
@@ -659,7 +651,8 @@ export const wasmTransactionToTransaction = async (
     id: record.id().toHex(),
     status: transactionStatus(record),
     accountId: record.accountId().toString(),
-    scriptRoot: result.transactionArguments().txScript()?.root().toHex() ?? "",
+    scriptRoot:
+      result.executedTransaction().txArgs().txScript()?.root().toHex() ?? "",
     inputNotes,
     outputNotes,
     updatedAt: record.blockNum(),
@@ -667,7 +660,7 @@ export const wasmTransactionToTransaction = async (
 };
 
 export const wasmNoteToNote = async (
-  note: WasmNote
+  note: WasmNoteType
 ): Promise<TransactionNote> => ({
   id: note.id().toString(),
   type: await noteType(note.metadata()),

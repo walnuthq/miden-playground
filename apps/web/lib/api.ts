@@ -1,8 +1,6 @@
 import { type Script, type ScriptExample } from "@/lib/types/script";
 
-// const apiUrl =
-//   process.env.NEXT_PUBLIC_API_URL ?? "https://playground-api.walnut.dev";
-
+// const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 const apiUrl = "/api";
 
 export const createScript = async (
@@ -26,13 +24,32 @@ export const compileScript = async (script: Script) => {
     body: JSON.stringify({ rust: script.rust }),
   });
   const result = await response.json();
-  const { ok, error, masm, root } = result as {
+  const {
+    ok,
+    error,
+    masm,
+    root,
+    package: packageBuffer,
+    dependencies,
+    procedures,
+  } = result as {
     ok: boolean;
     error: string;
     masm: string;
     root: string;
+    package: { type: "Buffer"; data: number[] };
+    dependencies: string[];
+    procedures: { name: string; hash: string }[];
   };
-  return { ok, error, masm, root };
+  return {
+    ok,
+    error,
+    masm,
+    root,
+    packageBytes: packageBuffer.data,
+    dependencies,
+    procedures,
+  };
 };
 
 export const deleteScript = async (scriptId: string) => {

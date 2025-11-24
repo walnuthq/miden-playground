@@ -17,31 +17,42 @@ import { formatValue } from "@/lib/utils";
 const ValueTooltip = ({ value }: { value: string }) => (
   <Tooltip>
     <TooltipTrigger asChild>
-      <Button variant="ghost" className="-ml-4">
-        Updated ({formatValue(value)})
+      <Button type="button" variant="ghost">
+        {formatValue(value)}
       </Button>
     </TooltipTrigger>
     <TooltipContent>
-      <p>Updated ({value})</p>
+      <p>{value}</p>
     </TooltipContent>
   </Tooltip>
 );
 
-const AccountStorageDeltaTable = ({ values }: { values: string[] }) => (
+const AccountStorageDeltaTable = ({
+  storageDelta,
+}: {
+  storageDelta: { index: number; before: string; after: string }[];
+}) => (
   <div className="rounded-md border">
     <Table>
       <TableHeader>
         <TableRow>
           <TableHead>Storage Slot</TableHead>
-          <TableHead>Effect</TableHead>
+          <TableHead>Storage Change</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {values.map((value, index) => (
+        {storageDelta.map(({ index, before, after }) => (
           <TableRow key={index}>
             <TableCell>{index}</TableCell>
-            <TableCell>
-              <ValueTooltip value={value} />
+            <TableCell className="space-y-2.5">
+              <p>
+                Before:
+                <ValueTooltip value={before} />
+              </p>
+              <p>
+                After:
+                <ValueTooltip value={after} />
+              </p>
             </TableCell>
           </TableRow>
         ))}

@@ -9,23 +9,53 @@ import {
   CardTitle,
 } from "@workspace/ui/components/card";
 import { Button } from "@workspace/ui/components/button";
-import { type Script } from "@/lib/types/script";
+import { defaultProcedure, type Script } from "@/lib/types/script";
 import useScripts from "@/hooks/use-scripts";
 import { cn } from "@workspace/ui/lib/utils";
 import { compileScript } from "@/lib/api";
+
+// const getProcedures = async (packageBytes: number[]) => {
+//   const {
+//     Package: WasmPackage,
+//     AccountComponent: WasmAccountComponent,
+//     MidenArrays: WasmMidenArrays,
+//   } = await import("@demox-labs/miden-sdk");
+//   const accountComponent = WasmAccountComponent.fromPackage(
+//     WasmPackage.deserialize(new Uint8Array(packageBytes)),
+//     new WasmMidenArrays.StorageSlotArray([])
+//   );
+//   const procedures = accountComponent.getProcedures().map();
+//   console.log(accountComponent.getProcedures());
+//   return [];
+// };
 
 const EditorConsole = ({ script }: { script: Script }) => {
   const { updateScript } = useScripts();
   const [loading, setLoading] = useState(false);
   const compile = async () => {
     setLoading(true);
-    const { error, masm, root } = await compileScript(script);
+    const { error, masm, root, packageBytes, procedures } =
+      await compileScript(script);
     updateScript({
       ...script,
       error,
       masm,
-      status: masm ? "compiled" : "draft",
+      status: masm
+        ? "compiled"
+        : packageBytes.length > 0
+          ? "compiled"
+          : "draft",
       root,
+      packageBytes,
+      procedures: procedures.map((procedure) => ({
+        ...defaultProcedure(),
+        ...procedure,
+        // readOnly: procedure.name === "get_count",
+        // storageRead:
+        //   procedure.name === "get_count"
+        //     ? { type: "value", index: 0 }
+        //     : undefined,
+      })),
     });
     setLoading(false);
   };
@@ -50,7 +80,9 @@ const EditorConsole = ({ script }: { script: Script }) => {
             ? script.error
             : script.masm
               ? "Script compiled to MASM."
-              : ""}
+              : script.packageBytes.length > 0
+                ? "Script compiled successfully."
+                : ""}
         </pre>
       </CardContent>
     </Card>

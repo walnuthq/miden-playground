@@ -26,20 +26,17 @@ import Logo from "@/components/lib/logo";
 import useGlobalContext from "@/components/global-context/hook";
 import tutorials from "@/components/tutorials";
 import useTutorials from "@/hooks/use-tutorials";
-// import useProjects from "@/hooks/use-projects";
+import useProjects from "@/hooks/use-projects";
 import { useIsClient } from "usehooks-ts";
 import { networks } from "@/lib/types/network";
 // import { cn } from "@workspace/ui/lib/utils";
-import useAccounts from "@/hooks/use-accounts";
-import { useWallet } from "@demox-labs/miden-wallet-adapter";
 import { cn } from "@workspace/ui/lib/utils";
 
 const ProjectSwitcher = () => {
   const isClient = useIsClient();
   const { isMobile } = useSidebar();
   const router = useRouter();
-  const { accountId } = useWallet();
-  const { networkId, resetState /*, switchNetwork */ } = useGlobalContext();
+  const { networkId, resetState } = useGlobalContext();
   const {
     tutorialId,
     tutorialLoaded,
@@ -47,19 +44,12 @@ const ProjectSwitcher = () => {
     startTutorial,
     loadTutorial,
   } = useTutorials();
-  const { wallets } = useAccounts();
-  // const { saveProject, loadProject } = useProjects();
+  const { saveProject, loadProject } = useProjects();
   useEffect(() => {
-    /* const connectedWallet = wallets.find(
-      ({ address }) => address === accountId
-    );
-    if (!connectedWallet) {
-      return;
-    } */
     if (!tutorialLoaded) {
       loadTutorial(tutorialId);
     }
-  }, [wallets, accountId, tutorialId, tutorialLoaded, loadTutorial]);
+  }, [tutorialId, tutorialLoaded, loadTutorial]);
   const tutorial = tutorials.find(({ id }) => id === tutorialId);
   if (!isClient) {
     return null;
@@ -93,27 +83,6 @@ const ProjectSwitcher = () => {
             side={isMobile ? "bottom" : "right"}
             sideOffset={4}
           >
-            {/* <DropdownMenuSub>
-              <DropdownMenuSubTrigger
-                disabled={!!tutorialId}
-                className={cn({ "text-muted-foreground": !!tutorialId })}
-              >
-                Switch network
-              </DropdownMenuSubTrigger>
-              <DropdownMenuPortal>
-                <DropdownMenuSubContent>
-                  {Object.keys(networks).map((networkId) => (
-                    <DropdownMenuItem
-                      key={networkId}
-                      onClick={() => switchNetwork(networkId as NetworkId)}
-                    >
-                      {networks[networkId as NetworkId]}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuSubContent>
-              </DropdownMenuPortal>
-            </DropdownMenuSub>
-            <DropdownMenuSeparator /> */}
             <DropdownMenuItem
               onClick={() => {
                 resetState("mtst");
@@ -136,7 +105,7 @@ const ProjectSwitcher = () => {
               Load tutorial
             </DropdownMenuItem> */}
             <DropdownMenuSeparator />
-            {/* <DropdownMenuSub>
+            <DropdownMenuSub>
               <DropdownMenuSubTrigger>Projects</DropdownMenuSubTrigger>
               <DropdownMenuPortal>
                 <DropdownMenuSubContent>
@@ -148,7 +117,7 @@ const ProjectSwitcher = () => {
                   </DropdownMenuItem>
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
-            </DropdownMenuSub> */}
+            </DropdownMenuSub>
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>Tutorials</DropdownMenuSubTrigger>
               <DropdownMenuPortal>

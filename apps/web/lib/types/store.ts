@@ -1,12 +1,20 @@
-type StoreBlob = { __type: "Blob"; data: string };
+type StoreAccountAsset = {
+  root: string;
+  vaultKey: string;
+  faucetIdPrefix: string;
+  asset: string;
+};
+
+type StoreAccountAuth = { pubKey: string; secretKey: string };
 
 type StoreAccountCode = { root: string; code: number[] };
 
-type StoreAccountStorage = { root: string; slots: StoreBlob };
-
-type StoreAccountVault = { root: string; assets: StoreBlob };
-
-type StoreAccountAuth = { pubKey: string; secretKey: string };
+type StoreAccountStorage = {
+  commitment: string;
+  slotIndex: number;
+  slotValue: string;
+  slotType: number;
+};
 
 type StoreAccount = {
   id: string;
@@ -20,95 +28,112 @@ type StoreAccount = {
   locked: boolean;
 };
 
-type StoreStateSync = { id: number; blockNum: string };
+type StoreAddress = { address: number[]; id: string };
 
 type StoreBlockHeader = {
   blockNum: string;
-  header: StoreBlob;
-  partialBlockchainPeaks: StoreBlob;
+  header: number[];
+  partialBlockchainPeaks: number[];
   hasClientNotes: string;
 };
 
-type StoreTransaction = {
-  id: string;
-  details: StoreBlob;
-  scriptRoot: string;
-  blockNum: number;
-  statusVariant: number;
-  status: StoreBlob;
-};
-
-type StoreTransactionScript = { scriptRoot: string; txScript: StoreBlob };
+type StoreForeignAccountCode = { accountId: string; codeRoot: string };
 
 type StoreInputNote = {
   noteId: string;
-  assets: StoreBlob;
-  serialNumber: StoreBlob;
-  inputs: StoreBlob;
+  stateDiscriminant: number;
+  assets: number[];
+  serialNumber: number[];
+  inputs: number[];
   scriptRoot: string;
   nullifier: string;
-  state: StoreBlob;
-  stateDiscriminant: number;
   serializedCreatedAt: string;
+  state: number[];
 };
+
+type StoreNoteScript = { scriptRoot: string; serializedNoteScript: number[] };
 
 type StoreOutputNote = {
   noteId: string;
-  assets: StoreBlob;
   recipientDigest: string;
-  metadata: StoreBlob;
-  nullifier: string;
-  expectedHeight: number;
+  assets: number[];
+  metadata: number[];
   stateDiscriminant: number;
-  state: StoreBlob;
+  nullifier?: string;
+  expectedHeight: number;
+  state: number[];
 };
-
-type StoreNoteScript = { scriptRoot: string; serializedNoteScript: StoreBlob };
 
 type StorePartialBlockchainNode = { id: string; node: string };
 
+type StoreSetting = { key: string; value: number[] };
+
+type StoreStateSync = { id: number; blockNum: string };
+
+type StoreStorageMapEntry = { root: string; key: string; value: string };
+
 type StoreTag = {
-  id: number;
+  id?: number;
   tag: string;
-  sourceNoteId: string;
-  sourceAccountId: string;
+  sourceNoteId?: string;
+  sourceAccountId?: string;
+};
+
+type StoreTrackedAccount = { id: string };
+
+type StoreTransactionScript = { scriptRoot: string; txScript?: number[] };
+
+type StoreTransaction = {
+  id: string;
+  details: number[];
+  blockNum: number;
+  scriptRoot?: string;
+  statusVariant: number;
+  status: number[];
 };
 
 export type Store = {
+  accountAssets: StoreAccountAsset[];
+  accountAuth: StoreAccountAuth[];
   accountCode: StoreAccountCode[];
   accountStorage: StoreAccountStorage[];
-  accountVaults: StoreAccountVault[];
-  accountAuth: StoreAccountAuth[];
   accounts: StoreAccount[];
-  transactions: StoreTransaction[];
-  transactionScripts: StoreTransactionScript[];
-  inputNotes: StoreInputNote[];
-  outputNotes: StoreOutputNote[];
-  notesScripts: StoreNoteScript[];
-  stateSync: StoreStateSync[];
+  addresses: StoreAddress[];
   blockHeaders: StoreBlockHeader[];
+  foreignAccountCode: StoreForeignAccountCode[];
+  inputNotes: StoreInputNote[];
+  notesScripts: StoreNoteScript[];
+  outputNotes: StoreOutputNote[];
   partialBlockchainNodes: StorePartialBlockchainNode[];
+  settings: StoreSetting[];
+  stateSync: StoreStateSync[];
+  storageMapEntries: StoreStorageMapEntry[];
   tags: StoreTag[];
-  // TODO
-  foreignAccountCode: string[];
+  trackedAccounts: StoreTrackedAccount[];
+  transactionScripts: StoreTransactionScript[];
+  transactions: StoreTransaction[];
 };
 
 export const defaultStore = (): Store => ({
+  accountAssets: [],
+  accountAuth: [],
   accountCode: [],
   accountStorage: [],
-  accountVaults: [],
-  accountAuth: [],
   accounts: [],
-  transactions: [],
-  transactionScripts: [],
-  inputNotes: [],
-  outputNotes: [],
-  notesScripts: [],
-  stateSync: [{ id: 1, blockNum: "0" }],
+  addresses: [],
   blockHeaders: [],
-  partialBlockchainNodes: [],
-  tags: [],
   foreignAccountCode: [],
+  inputNotes: [],
+  notesScripts: [],
+  outputNotes: [],
+  partialBlockchainNodes: [],
+  settings: [],
+  stateSync: [{ id: 1, blockNum: "0" }],
+  storageMapEntries: [],
+  tags: [],
+  trackedAccounts: [],
+  transactionScripts: [],
+  transactions: [],
 });
 
 export const deleteStore = () =>

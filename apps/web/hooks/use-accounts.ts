@@ -10,7 +10,7 @@ import {
   clientImportNewWallet,
   clientDeployAccount,
 } from "@/lib/web-client";
-import { type Account as WasmAccount } from "@demox-labs/miden-sdk";
+import { type Account as WasmAccountType } from "@demox-labs/miden-sdk";
 import useGlobalContext from "@/components/global-context/hook";
 import { type AccountStorageMode, type AccountType } from "@/lib/types/account";
 import { type Component } from "@/lib/types/component";
@@ -42,8 +42,13 @@ const useAccounts = () => {
   const { accountId: connectedWalletAddress } = useWallet();
   const { scripts } = useScripts();
   const { components } = useComponents();
-  const wallets = accounts.filter((account) => account.isWallet);
+  const wallets = accounts.filter(
+    (account) => account.code === BASIC_WALLET_CODE
+  );
   const faucets = accounts.filter((account) => account.isFaucet);
+  const connectedWallet = wallets.find(
+    ({ address }) => address === connectedWalletAddress
+  );
   const newWallet = async ({
     name,
     storageMode,
@@ -110,7 +115,7 @@ const useAccounts = () => {
   }) => {
     const client = await webClient(networkId, serializedMockChain);
     const syncSummary = await client.syncState();
-    let wasmAccount: WasmAccount | null = null;
+    let wasmAccount: WasmAccountType | null = null;
     try {
       wasmAccount = await clientGetAccountByAddress(client, address);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -133,6 +138,7 @@ const useAccounts = () => {
       consumableNoteIds: consumableNotes.map((consumableNote) =>
         consumableNote.inputNoteRecord().id().toString()
       ),
+      scripts,
     });
     if (account.code === FUNGIBLE_FAUCET_CODE) {
       // faucets
@@ -140,7 +146,12 @@ const useAccounts = () => {
     } else if (account.code === COUNTER_CONTRACT_CODE) {
       // Counter Contract
       account.components = ["no-auth"];
-      if (tutorialId === "interact-with-the-counter-contract") {
+      if (
+        [
+          "interact-with-the-counter-contract",
+          "foreign-procedure-invocation",
+        ].includes(tutorialId)
+      ) {
         account.components.push("counter-contract");
       }
     } else if (account.code === BASIC_WALLET_CODE) {
@@ -159,10 +170,7 @@ const useAccounts = () => {
     return account;
   };
   const importConnectedWallet = async () => {
-    const connectedWallet = wallets.find(
-      ({ address }) => address === connectedWalletAddress
-    );
-    if (!connectedWalletAddress || connectedWallet || networkId !== "mtst") {
+    if (networkId !== "mtst" || !connectedWalletAddress || connectedWallet) {
       return;
     }
     await importAccountByAddress({
@@ -182,6 +190,7 @@ const useAccounts = () => {
     components: Component[];
   }) => {
     const client = await webClient(networkId, serializedMockChain);
+    const syncSummary = await client.syncState();
     const componentScriptIds = components.map(({ scriptId }) => scriptId);
     const componentScripts = scripts.filter(({ id }) =>
       componentScriptIds.includes(id)
@@ -219,7 +228,7 @@ const useAccounts = () => {
       name,
       components: components.map(({ id }) => id),
       networkId,
-      updatedAt: blockNum,
+      updatedAt: syncSummary.blockNum(),
     });
     dispatch({
       type: "NEW_ACCOUNT",
@@ -275,6 +284,11 @@ const useAccounts = () => {
     accountId: string;
     componentId: string;
   }) => {
+    const {
+      AccountComponent: WasmAccountComponent,
+      Package: WasmPackage,
+      MidenArrays: WasmMidenArrays,
+    } = await import("@demox-labs/miden-sdk");
     const account = accounts.find(({ id }) => id === accountId);
     if (!account) {
       throw new Error("Account not found");
@@ -287,14 +301,30 @@ const useAccounts = () => {
     if (!component) {
       throw new Error("Component not found");
     }
-    // TODO mocked atm, check if account component code is included in AccountCode using procedure
-    // digests and AccountCode::has_procedure
-    const verified = true;
+    const script = scripts.find(({ id }) => id === component.scriptId);
+    if (!script) {
+      throw new Error("Script not found");
+    }
+    const client = await webClient(networkId, serializedMockChain);
+    const accountComponent = WasmAccountComponent.fromPackage(
+      WasmPackage.deserialize(new Uint8Array(script.packageBytes)),
+      new WasmMidenArrays.StorageSlotArray([])
+    );
+    const wasmAccount = await clientGetAccountByAddress(
+      client,
+      account.address
+    );
+    const code = wasmAccount.code();
+    const verified = accountComponent
+      .getProcedures()
+      .every((procedure) => code.hasProcedure(procedure.digest));
     await sleep(400);
-    dispatch({
-      type: "VERIFY_ACCOUNT_COMPONENT",
-      payload: { accountId, componentId },
-    });
+    if (verified) {
+      dispatch({
+        type: "VERIFY_ACCOUNT_COMPONENT",
+        payload: { accountId, componentId },
+      });
+    }
     return verified;
   };
   return {
@@ -307,6 +337,7 @@ const useAccounts = () => {
     accounts,
     wallets,
     faucets,
+    connectedWallet: networkId !== "mlcl" ? connectedWallet : undefined,
     newWallet,
     newFaucet,
     importAccountByAddress,

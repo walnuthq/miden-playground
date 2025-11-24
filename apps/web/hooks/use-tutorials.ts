@@ -8,11 +8,7 @@ import { defaultState } from "@/lib/types/state";
 // import useTransactions from "@/hooks/use-transactions";
 // import defaultScripts from "@/components/global-context/default-scripts";
 // import defaultComponents from "@/components/global-context/default-components";
-import {
-  COUNTER_CONTRACT_ADDRESS,
-  MIDEN_FAUCET_ADDRESS,
-  TEST_WALLET_ADDRESS,
-} from "@/lib/constants";
+import { COUNTER_CONTRACT_ADDRESS, TEST_WALLET_ADDRESS } from "@/lib/constants";
 
 const useTutorials = () => {
   const router = useRouter();
@@ -62,16 +58,7 @@ const useTutorials = () => {
     });
   };
   const loadTutorial = async (tutorialId: string) => {
-    if (tutorialId === "connect-wallet-and-sign-transactions") {
-      await importAccountByAddress({
-        name: "Miden Faucet",
-        address: MIDEN_FAUCET_ADDRESS,
-      });
-    } else if (tutorialId === "timelock-p2id-note") {
-      await importAccountByAddress({
-        name: "Miden Faucet",
-        address: MIDEN_FAUCET_ADDRESS,
-      });
+    if (tutorialId === "timelock-p2id-note") {
       await importAccountByAddress({
         name: "Test Wallet",
         address: TEST_WALLET_ADDRESS,

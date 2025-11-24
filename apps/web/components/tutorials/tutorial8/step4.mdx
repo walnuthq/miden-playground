@@ -1,0 +1,7 @@
+import Link from "@/components/tutorials/tutorial-link";
+
+From the <Link href="/accounts">Accounts page</Link>, click on _"Create new account"_ and select the _"Deploy account"_ option.
+
+Give your new contract a name and select the **Count Reader** account component, leave all the other parameters with their default values.
+
+Click on the _"Deploy"_ button to create your **Count Reader** contract, when your contract is deployed {props.countReader ? <Link href={`/accounts/${props.countReader.address}`}>click on its ID</Link> : 'click on its ID'} to continue.
