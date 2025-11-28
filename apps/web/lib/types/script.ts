@@ -4,7 +4,7 @@ import { type MidenSdk } from "@/lib/types";
 export const scriptTypes = {
   account: "Account Script",
   note: "Note Script",
-  // transaction: "Transaction Script",
+  transaction: "Transaction Script",
 } as const;
 
 export type ScriptType = keyof typeof scriptTypes;
