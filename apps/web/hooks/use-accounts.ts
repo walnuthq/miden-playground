@@ -1,10 +1,11 @@
 import { useWallet } from "@demox-labs/miden-wallet-adapter";
 import {
+  clientGetAccountById,
   clientGetAccountByAddress,
   clientGetConsumableNotes,
   wasmAccountToAccount,
   wasmInputNoteToInputNote,
-  webClient,
+  //webClient,
   clientNewWallet,
   clientNewFaucet,
   clientImportNewWallet,
@@ -12,7 +13,11 @@ import {
 } from "@/lib/web-client";
 import { type Account as WasmAccountType } from "@demox-labs/miden-sdk";
 import useGlobalContext from "@/components/global-context/hook";
-import { type AccountStorageMode, type AccountType } from "@/lib/types/account";
+import {
+  type AccountStorageMode,
+  type AccountType,
+  midenFaucetAccount,
+} from "@/lib/types/account";
 import { type Component } from "@/lib/types/component";
 import useScripts from "@/hooks/use-scripts";
 import useComponents from "@/hooks/use-components";
@@ -20,14 +25,18 @@ import {
   BASIC_WALLET_CODE,
   COUNTER_CONTRACT_CODE,
   FUNGIBLE_FAUCET_CODE,
+  MIDEN_FAUCET_ADDRESS,
 } from "@/lib/constants";
 import { counterMapContractMasm } from "@/lib/types/default-scripts/counter-map-contract";
 import { sleep } from "@/lib/utils";
+import useWebClient from "@/hooks/use-web-client";
+import useMidenSdk from "@/hooks/use-miden-sdk";
 
 const useAccounts = () => {
+  const { address: connectedWalletAddress } = useWallet();
+  const { midenSdk } = useMidenSdk();
   const {
     networkId,
-    serializedMockChain,
     createWalletDialogOpen,
     createFaucetDialogOpen,
     importAccountDialogOpen,
@@ -39,7 +48,7 @@ const useAccounts = () => {
     blockNum,
     dispatch,
   } = useGlobalContext();
-  const { accountId: connectedWalletAddress } = useWallet();
+  const { client } = useWebClient();
   const { scripts } = useScripts();
   const { components } = useComponents();
   const wallets = accounts.filter(
@@ -56,16 +65,18 @@ const useAccounts = () => {
     name: string;
     storageMode: AccountStorageMode;
   }) => {
-    const client = await webClient(networkId, serializedMockChain);
-    const wallet = await clientNewWallet(client, {
+    const wallet = await clientNewWallet({
+      client,
       storageMode,
       mutable: true,
+      midenSdk,
     });
-    const account = await wasmAccountToAccount({
+    const account = wasmAccountToAccount({
       wasmAccount: wallet,
       name,
       networkId,
       updatedAt: blockNum,
+      midenSdk,
     });
     dispatch({
       type: "NEW_ACCOUNT",
@@ -86,19 +97,21 @@ const useAccounts = () => {
     decimals: number;
     maxSupply: bigint;
   }) => {
-    const client = await webClient(networkId, serializedMockChain);
-    const faucet = await clientNewFaucet(client, {
+    const faucet = await clientNewFaucet({
+      client,
       storageMode,
       nonFungible: false,
       tokenSymbol,
       decimals,
       maxSupply,
+      midenSdk,
     });
-    const account = await wasmAccountToAccount({
+    const account = wasmAccountToAccount({
       wasmAccount: faucet,
       name,
       networkId,
       updatedAt: blockNum,
+      midenSdk,
     });
     dispatch({
       type: "NEW_ACCOUNT",
@@ -113,24 +126,41 @@ const useAccounts = () => {
     name: string;
     address: string;
   }) => {
-    const client = await webClient(networkId, serializedMockChain);
+    // TODO mock importing Miden Faucet
+    if (address === MIDEN_FAUCET_ADDRESS) {
+      const account = midenFaucetAccount();
+      dispatch({
+        type: "IMPORT_ACCOUNT",
+        payload: { account, inputNotes: [], blockNum },
+      });
+      return account;
+    }
     const syncSummary = await client.syncState();
     let wasmAccount: WasmAccountType | null = null;
     try {
-      wasmAccount = await clientGetAccountByAddress(client, address);
+      wasmAccount = await clientGetAccountByAddress({
+        client,
+        address,
+        midenSdk,
+      });
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      await clientImportNewWallet(client, address);
-      wasmAccount = await clientGetAccountByAddress(client, address);
+      await clientImportNewWallet({ client, address, midenSdk });
+      wasmAccount = await clientGetAccountByAddress({
+        client,
+        address,
+        midenSdk,
+      });
     }
     if (!wasmAccount) {
       throw new Error("Account not found");
     }
-    const consumableNotes = await clientGetConsumableNotes(
+    const consumableNotes = await clientGetConsumableNotes({
       client,
-      wasmAccount.id().toString()
-    );
-    const account = await wasmAccountToAccount({
+      accountId: wasmAccount.id().toString(),
+      midenSdk,
+    });
+    const account = wasmAccountToAccount({
       wasmAccount,
       name,
       networkId,
@@ -139,6 +169,7 @@ const useAccounts = () => {
         consumableNote.inputNoteRecord().id().toString()
       ),
       scripts,
+      midenSdk,
     });
     if (account.code === FUNGIBLE_FAUCET_CODE) {
       // faucets
@@ -158,14 +189,19 @@ const useAccounts = () => {
       // Basic Wallet
       account.components = ["basic-auth", "basic-wallet"];
     }
-    const inputNotes = await Promise.all(
-      consumableNotes.map((consumableNote) =>
-        wasmInputNoteToInputNote(consumableNote.inputNoteRecord())
-      )
+    const inputNotes = consumableNotes.map((consumableNote) =>
+      wasmInputNoteToInputNote({
+        record: consumableNote.inputNoteRecord(),
+        midenSdk,
+      })
     );
     dispatch({
       type: "IMPORT_ACCOUNT",
-      payload: { account, inputNotes, blockNum: syncSummary.blockNum() },
+      payload: {
+        account,
+        inputNotes,
+        blockNum: syncSummary.blockNum(),
+      },
     });
     return account;
   };
@@ -189,7 +225,6 @@ const useAccounts = () => {
     storageMode: AccountStorageMode;
     components: Component[];
   }) => {
-    const client = await webClient(networkId, serializedMockChain);
     const syncSummary = await client.syncState();
     const componentScriptIds = components.map(({ scriptId }) => scriptId);
     const componentScripts = scripts.filter(({ id }) =>
@@ -217,18 +252,21 @@ const useAccounts = () => {
       );
     }
     //
-    const wasmAccount = await clientDeployAccount(client, {
+    const wasmAccount = await clientDeployAccount({
+      client,
       accountType,
       storageMode,
       components,
       scripts: componentScripts,
+      midenSdk,
     });
-    const account = await wasmAccountToAccount({
+    const account = wasmAccountToAccount({
       wasmAccount,
       name,
       components: components.map(({ id }) => id),
       networkId,
       updatedAt: syncSummary.blockNum(),
+      midenSdk,
     });
     dispatch({
       type: "NEW_ACCOUNT",
@@ -284,11 +322,7 @@ const useAccounts = () => {
     accountId: string;
     componentId: string;
   }) => {
-    const {
-      AccountComponent: WasmAccountComponent,
-      Package: WasmPackage,
-      MidenArrays: WasmMidenArrays,
-    } = await import("@demox-labs/miden-sdk");
+    const { AccountComponent, Package, MidenArrays } = midenSdk;
     const account = accounts.find(({ id }) => id === accountId);
     if (!account) {
       throw new Error("Account not found");
@@ -305,15 +339,15 @@ const useAccounts = () => {
     if (!script) {
       throw new Error("Script not found");
     }
-    const client = await webClient(networkId, serializedMockChain);
-    const accountComponent = WasmAccountComponent.fromPackage(
-      WasmPackage.deserialize(new Uint8Array(script.packageBytes)),
-      new WasmMidenArrays.StorageSlotArray([])
+    const accountComponent = AccountComponent.fromPackage(
+      Package.deserialize(new Uint8Array(script.packageBytes)),
+      new MidenArrays.StorageSlotArray([])
     );
-    const wasmAccount = await clientGetAccountByAddress(
+    const wasmAccount = await clientGetAccountById({
       client,
-      account.address
-    );
+      accountId: account.id,
+      midenSdk,
+    });
     const code = wasmAccount.code();
     const verified = accountComponent
       .getProcedures()

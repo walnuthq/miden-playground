@@ -1,7 +1,14 @@
 import { type FungibleAsset } from "@/lib/types/asset";
 import { type NoteType } from "@/lib/types/note";
 
-export type TransactionType = "consume" | "send" | "mint";
+export const transactionTypes = {
+  mint: "Mint",
+  consume: "Consume notes",
+  send: "Send",
+  custom: "Custom",
+} as const;
+
+export type TransactionType = keyof typeof transactionTypes;
 
 export type CreateTransactionDialogStep = "select" | "configure" | "preview";
 

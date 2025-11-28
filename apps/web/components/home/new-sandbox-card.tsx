@@ -8,12 +8,12 @@ import {
   CardTitle,
 } from "@workspace/ui/components/card";
 import { Button } from "@workspace/ui/components/button";
-import useGlobalContext from "@/components/global-context/hook";
 import type { NetworkId } from "@/lib/types/network";
+import useWebClient from "@/hooks/use-web-client";
 
 const NewSandboxCard = ({ networkId }: { networkId: NetworkId }) => {
   const router = useRouter();
-  const { resetState } = useGlobalContext();
+  const { resetState } = useWebClient();
   return (
     <Card>
       <CardHeader>

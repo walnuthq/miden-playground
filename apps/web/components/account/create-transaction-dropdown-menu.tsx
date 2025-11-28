@@ -8,11 +8,13 @@ import {
 import { Button } from "@workspace/ui/components/button";
 import useTransactions from "@/hooks/use-transactions";
 import { type Account } from "@/lib/types/account";
-import { clientGetConsumableNotes, webClient } from "@/lib/web-client";
-import useGlobalContext from "@/components/global-context/hook";
+import { clientGetConsumableNotes } from "@/lib/web-client";
+import useMidenSdk from "@/hooks/use-miden-sdk";
+import useWebClient from "@/hooks/use-web-client";
 
 const CreateTransactionDropdownMenu = ({ account }: { account: Account }) => {
-  const { networkId, serializedMockChain } = useGlobalContext();
+  const { midenSdk } = useMidenSdk();
+  const { client } = useWebClient();
   const { openCreateTransactionDialog } = useTransactions();
   return (
     <DropdownMenu>
@@ -39,11 +41,11 @@ const CreateTransactionDropdownMenu = ({ account }: { account: Account }) => {
           <>
             <DropdownMenuItem
               onClick={async () => {
-                const client = await webClient(networkId, serializedMockChain);
-                const consumableNotes = await clientGetConsumableNotes(
+                const consumableNotes = await clientGetConsumableNotes({
                   client,
-                  account.id
-                );
+                  accountId: account.id,
+                  midenSdk,
+                });
                 openCreateTransactionDialog({
                   accountId: account.id,
                   transactionType: "consume",

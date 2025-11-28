@@ -11,11 +11,11 @@ export const counterNoteRust = `// Do not link against libstd (i.e. anything def
 
 use miden::*;
 
-use crate::bindings::miden::counter_contract::counter;
+use crate::bindings::miden::counter_contract::counter_contract;
 
 #[note_script]
 fn run(_arg: Word) {
-    counter::increment_count();
+    counter_contract::increment_count();
 }
 `;
 
@@ -36,7 +36,7 @@ const counterNote: Script = {
   readOnly: true,
   rust: counterNoteRust,
   masm: counterNoteMasm,
-  dependencies: ["counter-contract"],
+  dependencies: [{ name: "counter-contract", digest: "" }],
 };
 
 export default counterNote;

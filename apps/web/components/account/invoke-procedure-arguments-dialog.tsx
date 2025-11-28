@@ -16,8 +16,10 @@ import {
 import { Label } from "@workspace/ui/components/label";
 import useScripts from "@/hooks/use-scripts";
 import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";
+import useMidenSdk from "@/hooks/use-miden-sdk";
 
 const InvokeProcedureArgumentsDialog = () => {
+  const { midenSdk } = useMidenSdk();
   const {
     invokeProcedureArgumentsDialogOpen,
     invokeProcedureArgumentsDialogSenderAccountId,
@@ -62,30 +64,31 @@ const InvokeProcedureArgumentsDialog = () => {
             event.preventDefault();
             const formData = new FormData(event.currentTarget);
             setLoading(true);
-            const { AccountId: WasmAccountId } = await import(
-              "@demox-labs/miden-sdk"
-            );
-            const wasmAccountId = WasmAccountId.fromHex(accountId);
-            // console.log(accountId);
+            const { AccountId } = midenSdk;
+            const wasmAccountId = AccountId.fromHex(accountId);
             const transactionRecord = await invokeProcedure({
               senderAccountId: invokeProcedureArgumentsDialogSenderAccountId,
               scriptId: invokeProcedureArgumentsDialogScriptId,
-              procedure: {
-                ...invokeProcedureArgumentsDialogProcedure,
-                inputs: invokeProcedureArgumentsDialogProcedure.inputs.map(
-                  (input) => ({
-                    ...input,
-                    value:
-                      input.name === "counter_account_id"
-                        ? JSON.stringify({
+              procedureExport: invokeProcedureArgumentsDialogProcedure,
+              procedureInputs:
+                invokeProcedureArgumentsDialogProcedure.signature.params.map(
+                  (param) =>
+                    param === "AccountId"
+                      ? {
+                          name: "counter_account_id",
+                          type: param,
+                          value: JSON.stringify({
                             prefix: wasmAccountId.prefix().toString(),
                             suffix: wasmAccountId.suffix().toString(),
-                          })
-                        : formData.get("procHash")!.toString(),
-                  })
+                          }),
+                        }
+                      : {
+                          name: "proc_hash",
+                          type: param,
+                          value: formData.get("procHash")!.toString(),
+                        }
                 ),
-                foreignAccounts: [accountId],
-              },
+              foreignAccounts: [accountId],
             });
             setLoading(false);
             toast("Transaction submitted.", {

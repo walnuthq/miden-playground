@@ -3,9 +3,13 @@ import { v4 } from "uuid";
 import { counterMapContractRust } from "@/lib/types/default-scripts/counter-map-contract";
 import { p2idRust } from "@/lib/types/default-scripts/p2id";
 import { sleep } from "@/lib/utils";
-import type { ScriptExample } from "@/lib/types/script";
+import type { ScriptType, ScriptExample } from "@/lib/types/script";
 
-type CreateScriptRequestBody = { packageName: string; example: ScriptExample };
+type CreateScriptRequestBody = {
+  packageName: string;
+  type: ScriptType;
+  example: ScriptExample;
+};
 
 const scriptsRust = {
   "counter-contract": counterMapContractRust,

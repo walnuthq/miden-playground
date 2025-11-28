@@ -3,8 +3,7 @@ import useTutorials from "@/hooks/use-tutorials";
 import tutorials from "@/components/tutorials";
 
 const NextTutorialButton = ({ disabled = false }: { disabled?: boolean }) => {
-  const { tutorialId, nextTutorial } = useTutorials();
-  const tutorial = tutorials.find(({ id }) => id === tutorialId);
+  const { tutorial, nextTutorial } = useTutorials();
   if (!tutorial) {
     return null;
   }

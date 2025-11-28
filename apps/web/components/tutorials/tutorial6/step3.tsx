@@ -12,13 +12,13 @@ const useCompleted = () => {
     ({ id, type }) => !defaultScriptIds.includes(id) && type === "note"
   );
   const firstMatches = script?.rust.match(
-    /let\s+timelock_block_height\s*=\s*inputs\[2\];/
+    /let\s+timelock_height\s*=\s*inputs\[2\];/
   );
   const secondMatches = script?.rust.match(
-    /let\s+current_block_height\s*=\s*tx::get_block_number\(\);/
+    /let\s+block_number\s*=\s*tx::get_block_number\(\);/
   );
   const thirdMatches = script?.rust.match(
-    /assert_lte\s*\(\s*timelock_block_height\s*,\s*current_block_height\s*\);/
+    /assert!\s*\(\s*block_number\s*>=\s*timelock_height\s*\);/
   );
   return (
     script?.masm !== "" && !!firstMatches && !!secondMatches && !!thirdMatches

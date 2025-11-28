@@ -7,7 +7,7 @@ import useAccounts from "@/hooks/use-accounts";
 import useComponents from "@/hooks/use-components";
 import defaultComponents from "@/lib/types/default-components";
 
-let initialNonce = 0n;
+let initialNonce = 0;
 
 const useCompleted = () => {
   const { accounts } = useAccounts();
@@ -20,13 +20,13 @@ const useCompleted = () => {
     ({ components, storageMode }) =>
       components.includes(component?.id ?? "") && storageMode === "network"
   );
-  const currentNonce = counter?.nonce ?? 0n;
+  const currentNonce = counter?.nonce ?? 0;
   useEffect(() => {
-    if (initialNonce === 0n) {
+    if (initialNonce === 0) {
       initialNonce = currentNonce;
     }
   }, [currentNonce]);
-  return initialNonce !== 0n && currentNonce > initialNonce;
+  return initialNonce !== 0 && currentNonce > initialNonce;
 };
 
 const Step5: TutorialStep = {

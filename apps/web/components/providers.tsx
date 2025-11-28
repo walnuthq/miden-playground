@@ -7,7 +7,9 @@ import {
   WalletModalProvider,
   PrivateDataPermission,
 } from "@demox-labs/miden-wallet-adapter";
+import { MidenSdkProvider } from "@/components/miden-sdk-context";
 import GlobalContextProvider from "@/components/global-context/provider";
+import { WebClientProvider } from "@/components/web-client-context";
 
 const walletAdapter = new MidenWalletAdapter({ appName: "Miden Playground" });
 
@@ -25,7 +27,11 @@ const Providers = ({ children }: { children: ReactNode }) => (
       autoConnect
     >
       <WalletModalProvider>
-        <GlobalContextProvider>{children}</GlobalContextProvider>
+        <MidenSdkProvider>
+          <GlobalContextProvider>
+            <WebClientProvider>{children}</WebClientProvider>
+          </GlobalContextProvider>
+        </MidenSdkProvider>
       </WalletModalProvider>
     </WalletProvider>
   </NextThemesProvider>

@@ -1,4 +1,5 @@
 "use client";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useIsClient } from "usehooks-ts";
 import useScripts from "@/hooks/use-scripts";
 import {
@@ -9,9 +10,12 @@ import {
 } from "@workspace/ui/components/tabs";
 import Editor from "@/components/lib/editor";
 import EditorConsole from "@/components/script/editor-console";
-import DependenciesTable from "@/components/script/dependencies-table";
+import ScriptMetadata from "@/components/script/script-metadata";
 
 const Script = ({ id }: { id: string }) => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const isClient = useIsClient();
   const { scripts } = useScripts();
   const script = scripts.find((script) => script.id === id);
@@ -20,12 +24,21 @@ const Script = ({ id }: { id: string }) => {
   }
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-      <Tabs defaultValue="rust">
+      <Tabs
+        defaultValue={searchParams.get("tab") ?? "rust"}
+        onValueChange={(value) =>
+          router.push(
+            value === "rust"
+              ? pathname
+              : `${pathname}?${new URLSearchParams({ tab: value })}`
+          )
+        }
+      >
         <TabsList>
           <TabsTrigger value="rust">Rust</TabsTrigger>
-          <TabsTrigger value="masm">MASM</TabsTrigger>
-          {script.dependencies.length > 0 && (
-            <TabsTrigger value="dependencies">Dependencies</TabsTrigger>
+          {script.masm && <TabsTrigger value="masm">MASM</TabsTrigger>}
+          {script.status === "compiled" && (
+            <TabsTrigger value="metadata">Metadata</TabsTrigger>
           )}
         </TabsList>
         <div className="flex flex-col gap-4">
@@ -37,18 +50,20 @@ const Script = ({ id }: { id: string }) => {
               height={script.readOnly ? "85vh" : "61vh"}
             />
           </TabsContent>
-          <TabsContent value="masm">
-            <Editor
-              script={script}
-              language="masm"
-              readOnly
-              height={script.readOnly ? "85vh" : "61vh"}
-            />
-          </TabsContent>
-          {script.dependencies.length > 0 && (
-            <TabsContent value="dependencies">
+          {script.masm && (
+            <TabsContent value="masm">
+              <Editor
+                script={script}
+                language="masm"
+                readOnly
+                height={script.readOnly ? "85vh" : "61vh"}
+              />
+            </TabsContent>
+          )}
+          {script.status === "compiled" && (
+            <TabsContent value="metadata">
               <div className={script.readOnly ? "h-[85vh]" : "h-[61vh]"}>
-                <DependenciesTable script={script} />
+                <ScriptMetadata script={script} />
               </div>
             </TabsContent>
           )}

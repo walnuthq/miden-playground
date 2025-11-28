@@ -3,36 +3,41 @@ import { toast } from "sonner";
 import { Spinner } from "@workspace/ui/components/spinner";
 import { TableRow, TableCell } from "@workspace/ui/components/table";
 import { type Account } from "@/lib/types/account";
-import { type Procedure, getStorageRead } from "@/lib/types/script";
+import { type Export, getStorageRead } from "@/lib/types/script";
 import { type Component } from "@/lib/types/component";
 import { Button } from "@workspace/ui/components/button";
-import useGlobalContext from "@/components/global-context/hook";
-import { clientGetAccountByAddress, webClient } from "@/lib/web-client";
+import { clientGetAccountById } from "@/lib/web-client";
 import useScripts from "@/hooks/use-scripts";
 import CopyButton from "@/components/lib/copy-button";
+import useMidenSdk from "@/hooks/use-miden-sdk";
+import useWebClient from "@/hooks/use-web-client";
 
 const ProceduresTableRow = ({
   account,
   component,
   scriptId,
-  procedure,
+  procedureExport,
 }: {
   account: Account;
   component: Component;
   scriptId: string;
-  procedure: Procedure;
+  procedureExport: Export;
 }) => {
-  const { networkId, serializedMockChain } = useGlobalContext();
+  const { midenSdk } = useMidenSdk();
+  const { client } = useWebClient();
   const { openInvokeProcedureArgumentsDialog } = useScripts();
   const { invokeProcedure } = useScripts();
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState("");
   return (
-    <TableRow key={procedure.name}>
+    <TableRow key={procedureExport.name}>
       <TableCell>
         <div className="flex items-center gap-2">
-          {procedure.name}
-          <CopyButton content="Copy Procedure Hash" copy={procedure.hash} />
+          {procedureExport.name}
+          <CopyButton
+            content="Copy Procedure Digest"
+            copy={procedureExport.digest}
+          />
         </div>
       </TableCell>
       {component.type === "account" && (
@@ -42,25 +47,26 @@ const ProceduresTableRow = ({
             disabled={loading}
             onClick={async () => {
               setLoading(true);
-              if (procedure.readOnly && procedure.storageRead) {
-                const client = await webClient(networkId, serializedMockChain);
-                const wasmAccount = await clientGetAccountByAddress(
+              if (procedureExport.readOnly && procedureExport.storageRead) {
+                const wasmAccount = await clientGetAccountById({
                   client,
-                  account.address
-                );
-                const word = await getStorageRead(
+                  accountId: account.id,
+                  midenSdk,
+                });
+                const word = getStorageRead({
                   wasmAccount,
-                  procedure.storageRead
-                );
+                  storageRead: procedureExport.storageRead,
+                  midenSdk,
+                });
                 if (word) {
                   const [, , , felt] = word.toU64s();
                   setResult(felt!.toString());
                 }
-              } else if (procedure.inputs.length === 0) {
+              } else if (procedureExport.signature.params.length === 0) {
                 const transactionRecord = await invokeProcedure({
                   senderAccountId: account.id,
                   scriptId,
-                  procedure,
+                  procedureExport,
                 });
                 toast("Transaction submitted.", {
                   action: {
@@ -77,7 +83,7 @@ const ProceduresTableRow = ({
                 openInvokeProcedureArgumentsDialog({
                   senderAccountId: account.id,
                   scriptId,
-                  procedure,
+                  procedureExport,
                 });
               }
               setLoading(false);

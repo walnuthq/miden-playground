@@ -1,21 +1,17 @@
 import { useRouter } from "next/navigation";
 import useGlobalContext from "@/components/global-context/hook";
 import tutorials from "@/components/tutorials";
-import { webClient } from "@/lib/web-client";
-import useAccounts from "@/hooks/use-accounts";
-import { defaultStore, deleteStore } from "@/lib/types/store";
+import { defaultStore } from "@/lib/types/store";
 import { defaultState } from "@/lib/types/state";
-// import useTransactions from "@/hooks/use-transactions";
-// import defaultScripts from "@/components/global-context/default-scripts";
-// import defaultComponents from "@/components/global-context/default-components";
-import { COUNTER_CONTRACT_ADDRESS, TEST_WALLET_ADDRESS } from "@/lib/constants";
+import { createClient } from "@/components/web-client-context";
+import useWebClient from "@/hooks/use-web-client";
+import useMidenSdk from "@/hooks/use-miden-sdk";
 
 const useTutorials = () => {
   const router = useRouter();
+  const { midenSdk } = useMidenSdk();
   const {
-    networkId,
     tutorialId,
-    tutorialLoaded,
     tutorialStep,
     tutorialMaxStep,
     tutorialOpen,
@@ -23,29 +19,20 @@ const useTutorials = () => {
     completedTutorials,
     dispatch,
   } = useGlobalContext();
-  const { importAccountByAddress } = useAccounts();
-  // const {
-  //   newMintTransactionRequest,
-  //   newConsumeTransactionRequest,
-  //   submitTransaction,
-  // } = useTransactions();
+  const { resetState } = useWebClient();
   const startTutorial = async (tutorialId: string) => {
     const tutorial = tutorials.find(({ id }) => id === tutorialId);
     if (!tutorial) {
       return;
     }
-    if (networkId !== "mlcl") {
-      const previousWebClient = await webClient(networkId, null);
-      await previousWebClient.syncState();
-    }
-    await deleteStore();
-    const client = await webClient(
-      tutorial.state.networkId,
-      tutorial.state.serializedMockChain
-    );
-    router.push(tutorial.initialRoute);
-    await client.forceImportStore(JSON.stringify(tutorial.store));
-    const syncSummary = await client.syncState();
+    await resetState(tutorial.state.networkId);
+    const newClient = await createClient({
+      networkId: tutorial.state.networkId,
+      serializedMockChain: tutorial.state.serializedMockChain,
+      midenSdk,
+    });
+    await newClient.forceImportStore(JSON.stringify(tutorial.store));
+    const syncSummary = await newClient.syncState();
     dispatch({
       type: "LOAD_STATE",
       payload: {
@@ -56,43 +43,26 @@ const useTutorials = () => {
         },
       },
     });
-  };
-  const loadTutorial = async (tutorialId: string) => {
-    if (tutorialId === "timelock-p2id-note") {
-      await importAccountByAddress({
-        name: "Test Wallet",
-        address: TEST_WALLET_ADDRESS,
-      });
-    } else if (tutorialId === "foreign-procedure-invocation") {
-      await importAccountByAddress({
-        name: "Counter Contract",
-        address: COUNTER_CONTRACT_ADDRESS,
-      });
-    }
-    dispatch({ type: "LOAD_TUTORIAL" });
+    router.push(tutorial.initialRoute);
   };
   const nextTutorial = async () => {
     const tutorial = tutorials.find(({ id }) => id === tutorialId);
     if (!tutorial) {
       return;
     }
-    if (networkId !== "mlcl") {
-      const previousWebClient = await webClient(networkId, null);
-      await previousWebClient.syncState();
-    }
-    await deleteStore();
     const nextTutorial = tutorials[tutorial.number] ?? {
       initialRoute: "/",
       state: defaultState(),
       store: defaultStore(),
     };
-    const client = await webClient(
-      nextTutorial.state.networkId,
-      nextTutorial.state.serializedMockChain
-    );
-    router.push(nextTutorial.initialRoute);
-    await client.forceImportStore(JSON.stringify(nextTutorial.store));
-    const syncSummary = await client.syncState();
+    await resetState(nextTutorial.state.networkId);
+    const newClient = await createClient({
+      networkId: nextTutorial.state.networkId,
+      serializedMockChain: nextTutorial.state.serializedMockChain,
+      midenSdk,
+    });
+    await newClient.forceImportStore(JSON.stringify(nextTutorial.store));
+    const syncSummary = await newClient.syncState();
     const newCompletedTutorials = new Set([...completedTutorials]);
     newCompletedTutorials.add(tutorial.number);
     dispatch({
@@ -105,6 +75,7 @@ const useTutorials = () => {
         },
       },
     });
+    router.push(nextTutorial.initialRoute);
   };
   const previousTutorialStep = () =>
     dispatch({ type: "PREVIOUS_TUTORIAL_STEP" });
@@ -120,15 +91,13 @@ const useTutorials = () => {
     });
   return {
     tutorialId,
-    tutorialLoaded,
     tutorialStep,
     tutorialMaxStep,
     tutorialOpen,
     nextTutorialStepDisabled,
     completedTutorials,
-    // tutorial: tutorials.find(({ id }) => id === tutorialId),
+    tutorial: tutorials.find(({ id }) => id === tutorialId),
     startTutorial,
-    loadTutorial,
     nextTutorial,
     previousTutorialStep,
     setTutorialStep,

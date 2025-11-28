@@ -1,19 +1,16 @@
-import {
-  type Word as WasmWordType,
-  type AccountId as WasmAccountIdType,
-  type OutputNote as WasmOutputNoteType,
-  type TransactionId as WasmTransactionIdType,
-} from "@demox-labs/miden-sdk";
+import type * as MidenSdkNs from "@demox-labs/miden-sdk";
+
+export type MidenSdk = typeof MidenSdkNs;
 
 // MISSING TYPES
 
 type WasmOutputNotesType = {
   free(): void;
-  commitment(): WasmWordType;
+  commitment(): MidenSdkNs.Word;
   numNotes(): number;
   isEmpty(): boolean;
-  getNote(index: number): WasmOutputNoteType;
-  notes(): WasmOutputNoteType[];
+  getNote(index: number): MidenSdkNs.OutputNote;
+  notes(): MidenSdkNs.OutputNote[];
 };
 
 type WasmTransactionStatusType = {
@@ -27,11 +24,11 @@ type WasmTransactionStatusType = {
 
 export type WasmTransactionRecordType = {
   free(): void;
-  id(): WasmTransactionIdType;
-  accountId(): WasmAccountIdType;
-  initAccountState(): WasmWordType;
-  finalAccountState(): WasmWordType;
-  inputNoteNullifiers(): WasmWordType[];
+  id(): MidenSdkNs.TransactionId;
+  accountId(): MidenSdkNs.AccountId;
+  initAccountState(): MidenSdkNs.Word;
+  finalAccountState(): MidenSdkNs.Word;
+  inputNoteNullifiers(): MidenSdkNs.Word[];
   outputNotes(): WasmOutputNotesType;
   blockNum(): number;
   transactionStatus(): WasmTransactionStatusType;

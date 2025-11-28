@@ -5,12 +5,13 @@ import {
   type TransactionType,
 } from "@/lib/types/transaction";
 import { Label } from "@workspace/ui/components/label";
-import { webClient, clientGetConsumableNotes } from "@/lib/web-client";
+import { clientGetConsumableNotes } from "@/lib/web-client";
 import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";
 import SelectTransactionTypeDropdownMenu from "@/components/transactions/select-transaction-type-dropdown-menu";
 import useAccounts from "@/hooks/use-accounts";
-import useGlobalContext from "@/components/global-context/hook";
 import useTransactions from "@/hooks/use-transactions";
+import useMidenSdk from "@/hooks/use-miden-sdk";
+import useWebClient from "@/hooks/use-web-client";
 
 const CreateTransactionDialogSelectForm = ({
   executingAccountId,
@@ -29,7 +30,8 @@ const CreateTransactionDialogSelectForm = ({
   setConsumableNotes: Dispatch<SetStateAction<WasmConsumableNoteRecordType[]>>;
   setStep: Dispatch<SetStateAction<CreateTransactionDialogStep>>;
 }) => {
-  const { networkId, serializedMockChain } = useGlobalContext();
+  const { midenSdk } = useMidenSdk();
+  const { client } = useWebClient();
   const { createTransactionDialogAccountId } = useTransactions();
   const { accounts } = useAccounts();
   const executingAccount = accounts.find(({ id }) => id === executingAccountId);
@@ -40,11 +42,11 @@ const CreateTransactionDialogSelectForm = ({
         event.preventDefault();
         if (transactionType === "consume" && executingAccount) {
           setLoading(true);
-          const client = await webClient(networkId, serializedMockChain);
-          const consumableNotes = await clientGetConsumableNotes(
+          const consumableNotes = await clientGetConsumableNotes({
             client,
-            executingAccount.id
-          );
+            accountId: executingAccount.id,
+            midenSdk,
+          });
           setLoading(false);
           setConsumableNotes(consumableNotes);
         }
@@ -60,7 +62,13 @@ const CreateTransactionDialogSelectForm = ({
               onValueChange={(value) => {
                 setExecutingAccountId(value);
                 const account = accounts.find(({ id }) => id === value);
-                setTransactionType(account?.isFaucet ? "mint" : "consume");
+                setTransactionType(
+                  account?.isFaucet
+                    ? "mint"
+                    : account?.components.includes("basic-wallet")
+                      ? "consume"
+                      : "custom"
+                );
               }}
             />
           </div>
@@ -72,8 +80,10 @@ const CreateTransactionDialogSelectForm = ({
             onValueChange={setTransactionType}
             selectTypes={
               executingAccount?.isFaucet
-                ? ["mint", "consume"]
-                : ["consume", "send"]
+                ? ["mint"]
+                : executingAccount?.components.includes("basic-wallet")
+                  ? ["consume", "send"]
+                  : ["custom"]
             }
           />
         </div>

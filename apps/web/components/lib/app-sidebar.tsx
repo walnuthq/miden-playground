@@ -37,7 +37,7 @@ import useGlobalContext from "@/components/global-context/hook";
 const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
   const isClient = useIsClient();
   const { networkId } = useGlobalContext();
-  const { tutorialId, tutorialLoaded } = useTutorials();
+  const { tutorialId } = useTutorials();
   const {
     accounts,
     faucets,
@@ -125,36 +125,22 @@ const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
   ];
   // TODO refactor using onConnect callback?
   useEffect(() => {
-    if (
-      networkId === "mtst" &&
-      !connectedWallet &&
-      (tutorialId === "" ? true : tutorialLoaded)
-    ) {
+    if (networkId === "mtst" && !connectedWallet) {
       importConnectedWallet();
     }
-  }, [
-    networkId,
-    connectedWallet,
-    tutorialId,
-    tutorialLoaded,
-    importConnectedWallet,
-  ]);
+  }, [networkId, connectedWallet, tutorialId, importConnectedWallet]);
   // automatically import Miden Faucet on testnet
   useEffect(() => {
     const midenFaucet = faucets.find(
       ({ address }) => address === MIDEN_FAUCET_ADDRESS
     );
-    if (
-      networkId === "mtst" &&
-      !midenFaucet &&
-      (tutorialId === "" ? true : tutorialLoaded)
-    ) {
+    if (networkId === "mtst" && !midenFaucet) {
       importAccountByAddress({
         name: "Miden Faucet",
         address: MIDEN_FAUCET_ADDRESS,
       });
     }
-  }, [networkId, faucets, tutorialId, tutorialLoaded, importAccountByAddress]);
+  }, [networkId, faucets, tutorialId, importAccountByAddress]);
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>

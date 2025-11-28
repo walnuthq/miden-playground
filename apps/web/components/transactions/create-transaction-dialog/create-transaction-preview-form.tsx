@@ -56,7 +56,7 @@ const TransactionPreview = ({
   const fungibleAssetDelta = accountVaultDelta.fungible();
   const nonceDelta = executedTransaction.accountDelta().nonceDelta()?.asInt();
   const account = accounts.find(({ id }) => id === accountId);
-  const accountNonce = account?.nonce ?? 0n;
+  const accountNonce = account?.nonce ?? 0;
   const accountStorage = account?.storage ?? [];
   const storageDeltaValues = accountStorageDelta
     .values()
@@ -132,7 +132,7 @@ const TransactionPreview = ({
           withAccountAddress={false}
         />
       )}
-      <strong>New nonce: {accountNonce + nonceDelta}.</strong>
+      <strong>New nonce: {accountNonce + Number(nonceDelta)}.</strong>
     </div>
   );
 };

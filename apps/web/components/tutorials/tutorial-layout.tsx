@@ -10,13 +10,11 @@ import { type ImperativePanelHandle } from "react-resizable-panels";
 import { useIsClient } from "usehooks-ts";
 import TutorialStep from "@/components/tutorials/tutorial-step";
 import { useIsMobile } from "@workspace/ui/hooks/use-mobile";
-import tutorials from "@/components/tutorials";
 
 const InnerTutorialLayout = ({ children }: { children: ReactNode }) => {
   const tutorialRef = useRef<ImperativePanelHandle | null>(null);
-  const { tutorialId, tutorialOpen } = useTutorials();
+  const { tutorial, tutorialOpen } = useTutorials();
   const isMobile = useIsMobile();
-  const tutorial = tutorials.find(({ id }) => id === tutorialId);
   useEffect(() => {
     tutorialRef?.current?.resize(tutorialOpen ? 33 : 0);
   }, [tutorialOpen]);

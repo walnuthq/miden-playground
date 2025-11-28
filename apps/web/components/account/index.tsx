@@ -1,4 +1,5 @@
 "use client";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useIsClient } from "usehooks-ts";
 import useAccounts from "@/hooks/use-accounts";
 import {
@@ -16,6 +17,9 @@ import VerifyAccountComponentDialog from "@/components/account/verify-account-co
 import useGlobalContext from "@/components/global-context/hook";
 
 const Account = ({ address }: { address: string }) => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { networkId } = useGlobalContext();
   const isClient = useIsClient();
   const { accounts, connectedWallet } = useAccounts();
@@ -27,7 +31,16 @@ const Account = ({ address }: { address: string }) => {
     networkId === "mlcl" || connectedWallet?.address === account.address;
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-      <Tabs defaultValue="information">
+      <Tabs
+        defaultValue={searchParams.get("tab") ?? "information"}
+        onValueChange={(value) =>
+          router.push(
+            value === "information"
+              ? pathname
+              : `${pathname}?${new URLSearchParams({ tab: value })}`
+          )
+        }
+      >
         <div className="flex items-center justify-between">
           <TabsList>
             <TabsTrigger value="information">Information</TabsTrigger>

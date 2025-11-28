@@ -1,8 +1,4 @@
-import {
-  type Script,
-  defaultProcedure,
-  defaultScript,
-} from "@/lib/types/script";
+import { type Script, defaultExport, defaultScript } from "@/lib/types/script";
 import { NO_AUTH_PROC_HASH } from "@/lib/constants";
 
 export const noAuthRust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
@@ -50,8 +46,9 @@ impl Guest for AuthComponent {
 }
 `;
 
-export const noAuthMasm = `use.miden::account
-use.std::word
+export const noAuthMasm = `use miden::active_account
+use miden::native_account
+use std::word
 
 #! Increment the nonce only if the account commitment has changed
 #!
@@ -63,21 +60,31 @@ use.std::word
 #!
 #! Inputs:  [pad(16)]
 #! Outputs: [pad(16)]
-export.auth__no_auth
+pub proc auth_no_auth
     # check if the account state has changed by comparing initial and final commitments
 
-    exec.account::get_initial_commitment
+    exec.active_account::get_initial_commitment
     # => [INITIAL_COMMITMENT, pad(16)]
 
-    exec.account::compute_current_commitment
+    exec.active_account::compute_commitment
     # => [CURRENT_COMMITMENT, INITIAL_COMMITMENT, pad(16)]
 
     exec.word::eq not
     # => [has_account_state_changed, pad(16)]
 
-    # if the account has been updated, increment the nonce
+    # check if this is a new account (i.e., nonce == 0); this check is needed because new
+    # accounts are initialized with a non-empty state, and thus, unless the account was modified
+    # during the transaction, the initial and current state commitments will be the same
+
+    exec.active_account::get_nonce eq.0
+    # => [is_new_account, has_account_state_changed, pad(16)]
+
+    or
+    # => [should_increment_nonce, pad(16)]
+
+    # if the account has been updated or we are creating a new account, increment the nonce
     if.true
-        exec.account::incr_nonce drop
+        exec.native_account::incr_nonce drop
     end
 end
 `;
@@ -92,11 +99,11 @@ const noAuth: Script = {
   readOnly: true,
   rust: noAuthRust,
   masm: noAuthMasm,
-  procedures: [
+  exports: [
     {
-      ...defaultProcedure(),
+      ...defaultExport(),
       name: "auth_no_auth",
-      hash: NO_AUTH_PROC_HASH,
+      digest: NO_AUTH_PROC_HASH,
     },
   ],
 };

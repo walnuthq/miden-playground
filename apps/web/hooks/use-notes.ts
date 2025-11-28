@@ -8,12 +8,13 @@ import {
   TransactionType,
 } from "@demox-labs/miden-wallet-adapter";
 import { sleep } from "@/lib/utils";
-import { clientCreateNoteFromScript, webClient } from "@/lib/web-client";
+import { clientCreateNoteFromScript } from "@/lib/web-client";
+import useMidenSdk from "@/hooks/use-miden-sdk";
+import useWebClient from "@/hooks/use-web-client";
 
 const useNotes = () => {
+  const { midenSdk } = useMidenSdk();
   const {
-    networkId,
-    serializedMockChain,
     inputNotes,
     exportNoteDialogOpen,
     importNoteDialogOpen,
@@ -22,6 +23,7 @@ const useNotes = () => {
     verifyNoteScriptDialogNoteId,
     dispatch,
   } = useGlobalContext();
+  const { client } = useWebClient();
   const { accounts } = useAccounts();
   const { scripts } = useScripts();
   const { requestTransaction } = useWallet();
@@ -72,17 +74,16 @@ const useNotes = () => {
       throw new Error("Script not found");
     }
     const {
-      AccountId: WasmAccountId,
-      TransactionRequestBuilder: WasmTransactionRequestBuilder,
-      OutputNote: WasmOutputNote,
-      Note: WasmNote,
-      NoteAssets: WasmNoteAssets,
-      FungibleAsset: WasmFungibleAsset,
-      NoteType: WasmNoteType,
-      Felt: WasmFelt,
-      MidenArrays: WasmMidenArrays,
-    } = await import("@demox-labs/miden-sdk");
-    const client = await webClient(networkId, serializedMockChain);
+      AccountId,
+      TransactionRequestBuilder,
+      OutputNote,
+      Note,
+      NoteAssets,
+      FungibleAsset,
+      NoteType,
+      Felt,
+      MidenArrays,
+    } = midenSdk;
     const note =
       scriptId === "counter-note"
         ? await clientCreateNoteFromScript({
@@ -92,24 +93,22 @@ const useNotes = () => {
             type,
             script,
             scripts,
+            midenSdk,
           })
-        : WasmNote.createP2IDENote(
-            WasmAccountId.fromHex(senderAccountId),
-            WasmAccountId.fromHex(recipientAccountId),
-            new WasmNoteAssets([
-              new WasmFungibleAsset(
-                WasmAccountId.fromHex(faucetAccountId),
-                amount
-              ),
+        : Note.createP2IDENote(
+            AccountId.fromHex(senderAccountId),
+            AccountId.fromHex(recipientAccountId),
+            new NoteAssets([
+              new FungibleAsset(AccountId.fromHex(faucetAccountId), amount),
             ]),
             Number(noteInputs[2]),
             Number(noteInputs[2]),
-            type === "public" ? WasmNoteType.Public : WasmNoteType.Private,
-            new WasmFelt(0n)
+            type === "public" ? NoteType.Public : NoteType.Private,
+            new Felt(0n)
           );
-    const transactionRequest = new WasmTransactionRequestBuilder()
+    const transactionRequest = new TransactionRequestBuilder()
       .withOwnOutputNotes(
-        new WasmMidenArrays.OutputNoteArray([WasmOutputNote.full(note)])
+        new MidenArrays.OutputNoteArray([OutputNote.full(note)])
       )
       .build();
     const customTransaction = new CustomTransaction(

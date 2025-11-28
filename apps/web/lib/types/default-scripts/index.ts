@@ -1,3 +1,5 @@
+import std from "@/lib/types/default-scripts/std";
+import base from "@/lib/types/default-scripts/base";
 import noAuth from "@/lib/types/default-scripts/no-auth";
 import basicAuth from "@/lib/types/default-scripts/basic-auth";
 import p2id from "@/lib/types/default-scripts/p2id";
@@ -6,6 +8,8 @@ import basicFungibleFaucet from "@/lib/types/default-scripts/basic-fungible-fauc
 import basicWallet from "@/lib/types/default-scripts/basic-wallet";
 
 const defaultScripts = [
+  std,
+  base,
   noAuth,
   basicAuth,
   p2id,

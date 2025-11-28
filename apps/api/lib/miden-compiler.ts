@@ -45,26 +45,33 @@ const createExamplesDir = async () => {
   });
 };
 
-export const newPackage = async (
-  packageDir: string,
-  packageName: string,
-  example?: string
-) => {
-  if (example) {
+export const newPackage = async ({
+  packageDir,
+  packageName,
+  type,
+  example,
+}: {
+  packageDir: string;
+  packageName: string;
+  type: string;
+  example: string;
+}) => {
+  if (example !== "none") {
     const examplesDirExists = await fileExists(`${packagesPath}/examples`);
     if (!examplesDirExists) {
-      await createExamplesDir();
-    }
-    console.info(
-      `cp ${packagesPath}/examples/${example} ${packagesPath}/${packageDir}`
-    );
-    await cp(
-      `${packagesPath}/examples/${example}`,
-      `${packagesPath}/${packageDir}`,
-      {
+      console.info(`cp -r examples ${packagesPath}/examples`);
+      await cp("examples", `${packagesPath}/examples`, {
         recursive: true,
-      }
-    );
+      });
+      console.info("cargo miden build --release");
+      await execFile("cargo", ["miden", "build", "--release"], {
+        cwd: `${packagesPath}/examples/counter-contract`,
+      });
+    }
+    console.info(`cp -r examples/${example} ${packagesPath}/${packageDir}`);
+    await cp(`examples/${example}`, `${packagesPath}/${packageDir}`, {
+      recursive: true,
+    });
     // if (example === "counter-note") {
     //   const cargoToml = await readFile(
     //     `${packagesPath}/${packageDir}/Cargo.toml`,
@@ -120,19 +127,27 @@ export const compilePackage = async (packageDir: string) => {
   }
 };
 
-const readPackageProcedures = async (maspPath: string) => {
+const readPackageMetadata = async (maspPath: string) => {
   const { stdout } = await execFile(
     "cargo",
     ["run", "--release", "--bin", "miden_package_introspection", maspPath],
     { cwd: "miden-package-introspection" }
   );
-  const { procedures } = JSON.parse(stdout) as {
-    procedures: { name: string; hash: string }[];
+  const { exports, dependencies } = JSON.parse(stdout) as {
+    exports: {
+      name: string;
+      digest: string;
+      signature: { abi: number; params: string[]; results: string[] };
+    }[];
+    dependencies: { name: string; digest: string }[];
   };
-  return procedures.map((procedure) => ({
-    ...procedure,
-    name: procedure.name.replaceAll("-", "_"),
-  }));
+  return {
+    exports: exports.map((procedureExport) => {
+      const [, name = ""] = procedureExport.name.split("::");
+      return { ...procedureExport, name };
+    }),
+    dependencies,
+  };
 };
 
 export const readPackage = async (packageDir: string) => {
@@ -151,8 +166,8 @@ export const readPackage = async (packageDir: string) => {
   const name = packageName.replaceAll("-", "_");
   const maspPath = `${packagesPath}/${packageDir}/target/miden/release/${name}.masp`;
   const packageBuffer = await readFile(maspPath);
-  const procedures = await readPackageProcedures(maspPath);
-  return { packageBuffer, procedures };
+  const { exports, dependencies } = await readPackageMetadata(maspPath);
+  return { packageBuffer, exports, dependencies };
 };
 
 // export const compileWasmToMasm = async (packageDir: string) => {

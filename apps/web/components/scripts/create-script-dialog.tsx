@@ -36,18 +36,21 @@ const CreateScriptDialog = () => {
     useScripts();
   const [loading, setLoading] = useState(false);
   const [scriptType, setScriptType] = useState<ScriptType>("account");
-  const [scriptExample, setScriptExample] =
-    useState<ScriptExample>("counter-contract");
+  const [scriptExample, setScriptExample] = useState<ScriptExample | "none">(
+    //"none"
+    "counter-contract"
+  );
   useEffect(() => {
     if (scriptType === "account") {
       setScriptExample("counter-contract");
     } else if (scriptType === "note") {
       setScriptExample("p2id-note");
     }
+    // setScriptExample("none");
   }, [scriptType]);
   const onClose = () => {
     setScriptType("account");
-    setScriptExample("counter-contract");
+    setScriptExample("none");
     closeCreateScriptDialog();
   };
   return (
@@ -117,6 +120,9 @@ const CreateScriptDialog = () => {
                   <SelectValue placeholder="Select example" />
                 </SelectTrigger>
                 <SelectContent>
+                  {/*<SelectItem key="none" value="none">
+                    None
+                  </SelectItem>*/}
                   {Object.keys(scriptExamples)
                     .map((id) => ({
                       id,

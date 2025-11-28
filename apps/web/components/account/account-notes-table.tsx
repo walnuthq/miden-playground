@@ -81,14 +81,15 @@ const NoteActionsCell = ({
                 inputNote.type === "public" ? "public" : "private",
                 Number(fungibleAsset.amount)
               );
+              // console.log({
+              //   faucetId: getAddressPart(faucet.address),
+              //   noteId: inputNote.id,
+              //   noteType: inputNote.type === "public" ? "public" : "private",
+              //   amount: Number(fungibleAsset.amount),
+              // });
               const adapter = wallet.adapter as MidenWalletAdapter;
-              try {
-                const txId = await adapter.requestConsume(transaction);
-                console.log({ txId });
-              } catch (error) {
-                console.error("ERROR");
-                console.error(error);
-              }
+              const txId = await adapter.requestConsume(transaction);
+              console.log({ txId });
             }
           }}
         >

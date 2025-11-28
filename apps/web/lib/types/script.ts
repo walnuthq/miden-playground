@@ -1,4 +1,5 @@
 import { type Account as WasmAccountType } from "@demox-labs/miden-sdk";
+import { type MidenSdk } from "@/lib/types";
 
 export const scriptTypes = {
   account: "Account Script",
@@ -28,21 +29,6 @@ export const scriptStatuses = {
 
 export type ScriptStatus = keyof typeof scriptStatuses;
 
-export const midenTypes = {
-  void: "void",
-  felt: "Felt",
-  word: "Word",
-  account_id: "AccountId",
-} as const;
-
-type MidenType = keyof typeof midenTypes;
-
-type MidenInput = {
-  name: string;
-  type: MidenType;
-  value?: string;
-};
-
 type StorageRead =
   | {
       type: "value";
@@ -54,23 +40,41 @@ type StorageRead =
       key: string[];
     };
 
-export type Procedure = {
+type MidenType = "Felt" | "Word" | "AccountId";
+
+export type MidenInput = {
   name: string;
-  hash: string;
-  inputs: MidenInput[];
-  returnType: MidenType;
-  readOnly: boolean;
-  storageRead?: StorageRead;
-  foreignAccounts?: string[];
+  type: MidenType;
+  value: string;
 };
 
-export const defaultProcedure = (): Procedure => ({
+type Signature = { abi: number; params: MidenType[]; results: MidenType[] };
+
+export const defaultSignature = (): Signature => ({
+  abi: 0,
+  params: [],
+  results: [],
+});
+
+export type Export = {
+  name: string;
+  digest: string;
+  signature: Signature;
+  readOnly: boolean;
+  storageRead?: StorageRead;
+};
+
+export const defaultExport = (): Export => ({
   name: "",
-  hash: "",
-  inputs: [],
-  returnType: "void",
+  digest: "",
+  signature: defaultSignature(),
   readOnly: false,
 });
+
+export type Dependency = {
+  name: string;
+  digest: string;
+};
 
 export type Script = {
   id: string;
@@ -84,9 +88,9 @@ export type Script = {
   error: string;
   root: string;
   packageBytes: number[];
-  dependencies: string[];
-  procedures: Procedure[];
-  inputs: MidenInput[];
+  exports: Export[];
+  dependencies: Dependency[];
+  // inputs: MidenInput[];
   updatedAt: number;
 };
 
@@ -102,23 +106,27 @@ export const defaultScript = (): Script => ({
   error: "",
   root: "",
   packageBytes: [],
+  exports: [],
   dependencies: [],
-  procedures: [],
-  inputs: [],
+  // inputs: [],
   updatedAt: 0,
 });
 
-export const getStorageRead = async (
-  wasmAccount: WasmAccountType,
-  storageRead: StorageRead
-) => {
+export const getStorageRead = ({
+  wasmAccount,
+  storageRead,
+  midenSdk: { Word },
+}: {
+  wasmAccount: WasmAccountType;
+  storageRead: StorageRead;
+  midenSdk: MidenSdk;
+}) => {
   if (storageRead.type === "map" && storageRead.key) {
-    const { Word: WasmWord } = await import("@demox-labs/miden-sdk");
     return wasmAccount
       .storage()
       .getMapItem(
         storageRead.index,
-        new WasmWord(BigUint64Array.from(storageRead.key))
+        new Word(BigUint64Array.from(storageRead.key))
       );
   } else {
     return wasmAccount.storage().getItem(storageRead.index);
@@ -130,11 +138,11 @@ const formatProcedureInputs = (inputs: MidenInput[]) => {
   return reversed
     .map((arg) => {
       switch (arg.type) {
-        case "felt":
-        case "word": {
+        case "Felt":
+        case "Word": {
           return `push.${arg.value}`;
         }
-        case "account_id": {
+        case "AccountId": {
           const { prefix, suffix } = JSON.parse(arg.value ?? "") as {
             prefix: string;
             suffix: string;
@@ -149,15 +157,20 @@ const formatProcedureInputs = (inputs: MidenInput[]) => {
     .join("\n");
 };
 
-export const invokeProcedureCustomTransactionScript = (
-  contractName: string,
-  procedure: Procedure
-) => `use.external_contract::${contractName}
+export const invokeProcedureCustomTransactionScript = ({
+  contractName,
+  procedureExport,
+  procedureInputs,
+}: {
+  contractName: string;
+  procedureExport: Export;
+  procedureInputs: MidenInput[];
+}) => `use.external_contract::${contractName}
 use.std::sys
 
 begin
-    ${formatProcedureInputs(procedure.inputs)}
-    call.${contractName}::${procedure.name}
+    ${formatProcedureInputs(procedureInputs)}
+    call.${contractName}::${procedureExport.name}
     exec.sys::truncate_stack
 end
 `;
