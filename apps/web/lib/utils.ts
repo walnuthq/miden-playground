@@ -9,6 +9,9 @@ export const formatId = (id: string) => `${id.slice(0, 10)}…${id.slice(-8)}`;
 export const formatValue = (value: string) =>
   `${value.slice(0, 18)}…${value.slice(-16)}`;
 
+export const formatDigest = (value: string) =>
+  `${value.slice(0, 10)}…${value.slice(-8)}`;
+
 export const getAddressPart = (address: string) => {
   const [addressPart = ""] = address.split("_");
   return addressPart;

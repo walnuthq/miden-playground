@@ -28,13 +28,13 @@ const ProceduresTable = ({
         </TableRow>
       </TableHeader>
       <TableBody>
-        {script.procedures.map((procedure) => (
+        {script.exports.map((procedureExport) => (
           <ProceduresTableRow
-            key={procedure.name}
+            key={procedureExport.name}
             account={account}
             component={component}
             scriptId={script.id}
-            procedure={procedure}
+            procedureExport={procedureExport}
           />
         ))}
       </TableBody>

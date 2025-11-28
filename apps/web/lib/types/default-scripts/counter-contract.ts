@@ -4,8 +4,9 @@ import {
 } from "@/lib/constants";
 import {
   type Script,
-  defaultProcedure,
+  defaultExport,
   defaultScript,
+  defaultSignature,
 } from "@/lib/types/script";
 
 export const counterContractRust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
@@ -18,11 +19,6 @@ export const counterContractRust = `// Do not link against libstd (i.e. anything
 
 use miden::{component, felt, Felt, Value, ValueAccess};
 
-use crate::bindings::exports::miden::counter_contract::counter::Guest;
-
-miden::generate!();
-bindings::export!(CounterContract);
-
 /// Main contract structure for the counter example.
 #[component]
 struct CounterContract {
@@ -31,25 +27,18 @@ struct CounterContract {
     count: Value,
 }
 
-impl Guest for CounterContract {
+#[component]
+impl CounterContract {
     /// Returns the current counter value stored in the contract's storage value.
-    fn get_count() -> Felt {
-        // Get the instance of the contract
-        let contract = CounterContract::default();
-        // Read the value from storage and return it
-        contract.count.read()
+    pub fn get_count(&self) -> Felt {
+        self.count.read()
     }
 
     /// Increments the counter value stored in the contract's storage by one.
-    fn increment_count() -> Felt {
-        // Get the instance of the contract
-        let contract = CounterContract::default();
-        // Read the current value
-        let current_value: Felt = contract.count.read();
-        // Increment the value by one
+    pub fn increment_count(&self) -> Felt {
+        let current_value: Felt = self.count.read();
         let new_value = current_value + felt!(1);
-        // Write the new value back to storage
-        contract.count.write(new_value);
+        self.count.write(new_value);
         new_value
     }
 }
@@ -107,20 +96,26 @@ const counterContract: Script = {
   readOnly: true,
   rust: counterContractRust,
   masm: counterContractMasm,
-  procedures: [
+  exports: [
     {
-      ...defaultProcedure(),
+      ...defaultExport(),
       name: "get_count",
-      hash: COUNTER_CONTRACT_GET_COUNT_PROC_HASH,
-      returnType: "felt",
+      digest: COUNTER_CONTRACT_GET_COUNT_PROC_HASH,
+      signature: {
+        ...defaultSignature(),
+        results: ["Felt"],
+      },
       readOnly: true,
       storageRead: { type: "value", index: 0 },
     },
     {
-      ...defaultProcedure(),
+      ...defaultExport(),
       name: "increment_count",
-      hash: COUNTER_CONTRACT_INCREMENT_COUNT_PROC_HASH,
-      returnType: "felt",
+      digest: COUNTER_CONTRACT_INCREMENT_COUNT_PROC_HASH,
+      signature: {
+        ...defaultSignature(),
+        results: ["Felt"],
+      },
     },
   ],
 };

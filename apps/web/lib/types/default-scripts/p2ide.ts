@@ -1,9 +1,70 @@
 import { type Script, defaultScript } from "@/lib/types/script";
 import { P2IDE_NOTE_CODE } from "@/lib/constants";
 
-export const p2ideRust = ``;
+export const p2ideRust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
+#![no_std]
 
-export const p2ideMasm = `use.miden::account
+// However, we could still use some standard library types while
+// remaining no-std compatible, if we uncommented the following lines:
+//
+// extern crate alloc;
+// use alloc::vec::Vec;
+
+use miden::*;
+
+use crate::bindings::miden::basic_wallet::basic_wallet::receive_asset;
+
+fn consume_assets() {
+    let assets = active_note::get_assets();
+    for asset in assets {
+        receive_asset(asset);
+    }
+}
+
+fn reclaim_assets(consuming_account: AccountId) {
+    let creator_account = active_note::get_sender();
+
+    if consuming_account == creator_account {
+        consume_assets();
+    } else {
+        panic!();
+    }
+}
+
+#[note_script]
+fn run(_arg: Word) {
+    let inputs = active_note::get_inputs();
+
+    // make sure the number of inputs is 4
+    assert_eq((inputs.len() as u32).into(), felt!(4));
+
+    let target_account_id_prefix = inputs[0];
+    let target_account_id_suffix = inputs[1];
+
+    let timelock_height = inputs[2];
+    let reclaim_height = inputs[3];
+
+    // get block number
+    let block_number = tx::get_block_number();
+    assert!(block_number >= timelock_height);
+
+    // get consuming account id
+    let consuming_account_id = active_account::get_id();
+
+    // target account id
+    let target_account_id = AccountId::from(target_account_id_prefix, target_account_id_suffix);
+
+    let is_target = target_account_id == consuming_account_id;
+    if is_target {
+        consume_assets();
+    } else {
+        assert!(reclaim_height >= block_number);
+        reclaim_assets(consuming_account_id);
+    }
+}
+`;
+
+export const p2ideMasm = `use.miden::active_account
 use.miden::account_id
 use.miden::active_note
 use.miden::tx
@@ -60,11 +121,11 @@ proc.reclaim_note
     lte assert.err=ERR_P2IDE_RECLAIM_HEIGHT_NOT_REACHED
     # => [account_id_prefix, account_id_suffix]
 
-    # if current account is not the target, we need to ensure it is the sender
+    # if active account is not the target, we need to ensure it is the sender
     exec.active_note::get_sender
     # => [sender_account_id_prefix, sender_account_id_suffix, account_id_prefix, account_id_suffix]
 
-    # ensure current account ID = sender account ID
+    # ensure active account ID = sender account ID
     exec.account_id::is_equal assert.err=ERR_P2IDE_RECLAIM_ACCT_IS_NOT_SENDER
     # => []
 
@@ -114,7 +175,7 @@ begin
     # => [inputs_ptr]
 
     # read the reclaim block height, timelock_block_height, and target account ID from the note inputs
-    mem_loadw
+    mem_loadw_be
     # => [timelock_block_height, reclaim_block_height, target_account_id_prefix, target_account_id_suffix]
 
     # read the current block number
@@ -125,21 +186,21 @@ begin
     exec.verify_unlocked
     # => [current_block_height, reclaim_block_height, target_account_id_prefix, target_account_id_suffix]
 
-    # get current account id
-    exec.account::get_id dup.1 dup.1
+    # get active account id
+    exec.active_account::get_id dup.1 dup.1
     # => [account_id_prefix, account_id_suffix, account_id_prefix, account_id_suffix, current_block_height, reclaim_block_height, target_account_id_prefix, target_account_id_suffix]
 
-    # determine if the current account is the target account
+    # determine if the active account is the target account
     movup.7 movup.7 exec.account_id::is_equal
     # => [is_target, account_id_prefix, account_id_suffix, current_block_height, reclaim_block_height]
 
     if.true
-        # we can safely consume the note since the current account is the target of the note
+        # we can safely consume the note since the active account is the target of the note
         dropw exec.active_note::add_assets_to_account
         # => []
 
     else
-        # checks if current account is sender and if reclaim is enabled
+        # checks if active account is sender and if reclaim is enabled
         exec.reclaim_note
         # => []
     end

@@ -6,20 +6,20 @@ import Step5Content from "@/components/tutorials/tutorial4/step5.mdx";
 import useAccounts from "@/hooks/use-accounts";
 import { COUNTER_CONTRACT_ADDRESS } from "@/lib/constants";
 
-let initialNonce = 0n;
+let initialNonce = 0;
 
 const useCompleted = () => {
   const { accounts } = useAccounts();
   const counter = accounts.find(
     ({ address }) => address === COUNTER_CONTRACT_ADDRESS
   );
-  const currentNonce = counter?.nonce ?? 0n;
+  const currentNonce = counter?.nonce ?? 0;
   useEffect(() => {
-    if (initialNonce === 0n) {
+    if (initialNonce === 0) {
       initialNonce = currentNonce;
     }
   }, [currentNonce]);
-  return initialNonce !== 0n && currentNonce > initialNonce;
+  return initialNonce !== 0 && currentNonce > initialNonce;
 };
 
 const Step5: TutorialStep = {

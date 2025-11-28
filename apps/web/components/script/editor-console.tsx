@@ -9,32 +9,17 @@ import {
   CardTitle,
 } from "@workspace/ui/components/card";
 import { Button } from "@workspace/ui/components/button";
-import { defaultProcedure, type Script } from "@/lib/types/script";
+import { defaultExport, type Script } from "@/lib/types/script";
 import useScripts from "@/hooks/use-scripts";
 import { cn } from "@workspace/ui/lib/utils";
 import { compileScript } from "@/lib/api";
-
-// const getProcedures = async (packageBytes: number[]) => {
-//   const {
-//     Package: WasmPackage,
-//     AccountComponent: WasmAccountComponent,
-//     MidenArrays: WasmMidenArrays,
-//   } = await import("@demox-labs/miden-sdk");
-//   const accountComponent = WasmAccountComponent.fromPackage(
-//     WasmPackage.deserialize(new Uint8Array(packageBytes)),
-//     new WasmMidenArrays.StorageSlotArray([])
-//   );
-//   const procedures = accountComponent.getProcedures().map();
-//   console.log(accountComponent.getProcedures());
-//   return [];
-// };
 
 const EditorConsole = ({ script }: { script: Script }) => {
   const { updateScript } = useScripts();
   const [loading, setLoading] = useState(false);
   const compile = async () => {
     setLoading(true);
-    const { error, masm, root, packageBytes, procedures } =
+    const { error, masm, root, packageBytes, exports, dependencies } =
       await compileScript(script);
     updateScript({
       ...script,
@@ -47,15 +32,17 @@ const EditorConsole = ({ script }: { script: Script }) => {
           : "draft",
       root,
       packageBytes,
-      procedures: procedures.map((procedure) => ({
-        ...defaultProcedure(),
-        ...procedure,
-        // readOnly: procedure.name === "get_count",
-        // storageRead:
-        //   procedure.name === "get_count"
-        //     ? { type: "value", index: 0 }
-        //     : undefined,
+      exports: exports.map((procedureExport) => ({
+        ...defaultExport(),
+        ...procedureExport,
+        readOnly: procedureExport.name.startsWith("get"),
+        storageRead:
+          procedureExport.name.startsWith("get") &&
+          script.rust.includes("StorageMap")
+            ? { type: "map", index: 0, key: ["0", "0", "0", "1"] }
+            : { type: "value", index: 0 },
       })),
+      dependencies,
     });
     setLoading(false);
   };

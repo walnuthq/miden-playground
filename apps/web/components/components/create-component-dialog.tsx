@@ -88,7 +88,7 @@ const CreateComponentDialog = () => {
               <Input id="name" name="name" required />
             </div>
             <div className="grid gap-3">
-              <Label htmlFor="type">Script</Label>
+              <Label htmlFor="script">Script</Label>
               <Select onValueChange={setScriptId} value={scriptId}>
                 <SelectTrigger
                   className="w-[180px]"

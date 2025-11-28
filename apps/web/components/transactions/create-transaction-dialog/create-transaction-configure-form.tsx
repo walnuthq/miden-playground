@@ -3,6 +3,13 @@ import {
   type CreateTransactionDialogStep,
   type TransactionType,
 } from "@/lib/types/transaction";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select";
 import { Label } from "@workspace/ui/components/label";
 import { Input } from "@workspace/ui/components/input";
 import { Switch } from "@workspace/ui/components/switch";
@@ -22,6 +29,9 @@ import {
   type MidenWalletAdapter,
 } from "@demox-labs/miden-wallet-adapter";
 import { formatAmount, parseAmount } from "@/lib/utils";
+import useScripts from "@/hooks/use-scripts";
+import { clientCreateTransactionFromScript } from "@/lib/web-client";
+import useMidenSdk from "@/hooks/use-miden-sdk";
 
 const CreateTransactionConfigureForm = ({
   transactionType,
@@ -32,6 +42,8 @@ const CreateTransactionConfigureForm = ({
   noteIds,
   setNoteIds,
   consumableNotes,
+  scriptId,
+  setScriptId,
   executingAccountId,
   faucetAccountId,
   setFaucetAccountId,
@@ -48,6 +60,8 @@ const CreateTransactionConfigureForm = ({
   noteIds: string[];
   setNoteIds: Dispatch<SetStateAction<string[]>>;
   consumableNotes: WasmConsumableNoteRecordType[];
+  scriptId: string;
+  setScriptId: Dispatch<SetStateAction<string>>;
   executingAccountId: string;
   faucetAccountId: string;
   setFaucetAccountId: Dispatch<SetStateAction<string>>;
@@ -60,13 +74,16 @@ const CreateTransactionConfigureForm = ({
   setLoading: Dispatch<SetStateAction<boolean>>;
   setStep: Dispatch<SetStateAction<CreateTransactionDialogStep>>;
 }) => {
+  const { midenSdk } = useMidenSdk();
   const { wallet } = useWallet();
   const { networkId } = useGlobalContext();
   const { accounts } = useAccounts();
+  const { scripts } = useScripts();
   const {
     newMintTransactionRequest,
     newConsumeTransactionRequest,
     newSendTransactionRequest,
+    newCustomTransactionRequest,
     closeCreateTransactionDialog,
   } = useTransactions();
   const executingAccount = accounts.find(({ id }) => id === executingAccountId);
@@ -80,6 +97,10 @@ const CreateTransactionConfigureForm = ({
     executingAccount?.fungibleAssets.find(
       ({ faucetId }) => faucetId === faucetAccountId
     )?.amount ?? "0";
+  const shownScripts = scripts.filter(
+    ({ type, status }) => type === "transaction" && status === "compiled"
+  );
+  const script = scripts.find(({ id }) => id === scriptId);
   return (
     <form
       id="create-transaction-configure-form"
@@ -150,15 +171,23 @@ const CreateTransactionConfigureForm = ({
               )
             );
             const adapter = wallet.adapter as MidenWalletAdapter;
-            try {
-              const txId = await adapter.requestSend(transaction);
-              console.log({ txId });
-            } catch (error) {
-              console.error("ERROR");
-              console.error(error);
-            }
+            const txId = await adapter.requestSend(transaction);
+            console.log({ txId });
             closeCreateTransactionDialog();
           }
+        }
+        if (transactionType === "custom" && executingAccount && script) {
+          const customTransactionRequest = clientCreateTransactionFromScript({
+            script,
+            midenSdk,
+          });
+          const { transactionRequest, transactionResult } =
+            await newCustomTransactionRequest({
+              senderAccountId: executingAccount.id,
+              transactionRequest: customTransactionRequest,
+            });
+          setTransactionRequest(transactionRequest);
+          setTransactionResult(transactionResult);
         }
         setLoading(false);
         setStep("preview");
@@ -259,6 +288,26 @@ const CreateTransactionConfigureForm = ({
               </div>
             </div>
           </>
+        )}
+        {transactionType === "custom" && (
+          <div className="grid gap-3 col-span-2">
+            <Label>Transaction script</Label>
+            <Select onValueChange={setScriptId} value={scriptId}>
+              <SelectTrigger
+                className="w-[180px]"
+                disabled={shownScripts.length === 0}
+              >
+                <SelectValue placeholder="Select script…" />
+              </SelectTrigger>
+              <SelectContent>
+                {shownScripts.map((script) => (
+                  <SelectItem key={script.id} value={script.id}>
+                    {script.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         )}
       </div>
     </form>

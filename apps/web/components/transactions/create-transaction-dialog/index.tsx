@@ -51,6 +51,7 @@ const CreateTransactionDialog = () => {
   const [noteIds, setNoteIds] = useState<string[]>(
     createTransactionDialogNoteIds
   );
+  const [scriptId, setScriptId] = useState("");
   const [faucetAccountId, setFaucetAccountId] = useState("");
   const faucetAccount = accounts.find(({ id }) => id === faucetAccountId);
   const [loading, setLoading] = useState(false);
@@ -135,6 +136,8 @@ const CreateTransactionDialog = () => {
             setIsPublic={setIsPublic}
             noteIds={noteIds}
             setNoteIds={setNoteIds}
+            scriptId={scriptId}
+            setScriptId={setScriptId}
             consumableNotes={consumableNotes}
             executingAccountId={executingAccountId}
             faucetAccountId={faucetAccountId}
@@ -183,6 +186,7 @@ const CreateTransactionDialog = () => {
                     (transactionType === "consume" && noteIds.length === 0) ||
                     (transactionType === "send" &&
                       (!targetAccount || !faucetAccount)) ||
+                    (transactionType === "custom" && !scriptId) ||
                     loading
                   }
                 >

@@ -58,13 +58,8 @@ const ConsumeNoteButton = ({ inputNote }: { inputNote: InputNote }) => {
             Number(fungibleAsset.amount)
           );
           const adapter = wallet.adapter as MidenWalletAdapter;
-          try {
-            const txId = await adapter.requestConsume(transaction);
-            console.log({ txId });
-          } catch (error) {
-            console.error("ERROR");
-            console.error(error);
-          }
+          const txId = await adapter.requestConsume(transaction);
+          console.log({ txId });
         }
       }}
       disabled={loading}

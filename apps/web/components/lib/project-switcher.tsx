@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+// import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronsUpDown, BadgeCheck } from "lucide-react";
 import {
@@ -26,31 +26,21 @@ import Logo from "@/components/lib/logo";
 import useGlobalContext from "@/components/global-context/hook";
 import tutorials from "@/components/tutorials";
 import useTutorials from "@/hooks/use-tutorials";
-import useProjects from "@/hooks/use-projects";
+// import useProjects from "@/hooks/use-projects";
 import { useIsClient } from "usehooks-ts";
 import { networks } from "@/lib/types/network";
 // import { cn } from "@workspace/ui/lib/utils";
 import { cn } from "@workspace/ui/lib/utils";
+import useWebClient from "@/hooks/use-web-client";
 
 const ProjectSwitcher = () => {
   const isClient = useIsClient();
   const { isMobile } = useSidebar();
   const router = useRouter();
-  const { networkId, resetState } = useGlobalContext();
-  const {
-    tutorialId,
-    tutorialLoaded,
-    completedTutorials,
-    startTutorial,
-    loadTutorial,
-  } = useTutorials();
-  const { saveProject, loadProject } = useProjects();
-  useEffect(() => {
-    if (!tutorialLoaded) {
-      loadTutorial(tutorialId);
-    }
-  }, [tutorialId, tutorialLoaded, loadTutorial]);
-  const tutorial = tutorials.find(({ id }) => id === tutorialId);
+  const { networkId } = useGlobalContext();
+  const { resetState } = useWebClient();
+  const { tutorial, completedTutorials, startTutorial } = useTutorials();
+  // const { saveProject, loadProject } = useProjects();
   if (!isClient) {
     return null;
   }
@@ -105,7 +95,7 @@ const ProjectSwitcher = () => {
               Load tutorial
             </DropdownMenuItem> */}
             <DropdownMenuSeparator />
-            <DropdownMenuSub>
+            {/* <DropdownMenuSub>
               <DropdownMenuSubTrigger>Projects</DropdownMenuSubTrigger>
               <DropdownMenuPortal>
                 <DropdownMenuSubContent>
@@ -117,7 +107,7 @@ const ProjectSwitcher = () => {
                   </DropdownMenuItem>
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
-            </DropdownMenuSub>
+            </DropdownMenuSub> */}
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>Tutorials</DropdownMenuSubTrigger>
               <DropdownMenuPortal>

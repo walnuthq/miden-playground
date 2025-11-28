@@ -53,7 +53,7 @@ const AccountComponentTable = ({
               </TableCell>
             </TableRow>
           )}
-          {script.procedures.length > 0 && (
+          {script.exports.length > 0 && (
             <TableRow>
               <TableCell>Procedures</TableCell>
               <TableCell>

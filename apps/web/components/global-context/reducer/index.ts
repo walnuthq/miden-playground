@@ -88,7 +88,6 @@ const reducer = (state: State, action: Action): State => {
     case "UPDATE_COMPONENT": {
       return componentReducer(state, action);
     }
-    case "LOAD_TUTORIAL":
     case "PREVIOUS_TUTORIAL_STEP":
     case "NEXT_TUTORIAL_STEP":
     case "SET_TUTORIAL_STEP":

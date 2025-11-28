@@ -1,5 +1,13 @@
+import { parseAmount } from "@/lib/utils";
 import { type FungibleAsset } from "@/lib/types/asset";
-import { FUNGIBLE_FAUCET_CODE, BASIC_WALLET_CODE } from "@/lib/constants";
+import {
+  FUNGIBLE_FAUCET_CODE,
+  BASIC_WALLET_CODE,
+  FUNGIBLE_FAUCET_DEFAULT_DECIMALS,
+  FUNGIBLE_FAUCET_DEFAULT_MAX_SUPPLY,
+  MIDEN_FAUCET_ACCOUNT_ID,
+  MIDEN_FAUCET_ADDRESS,
+} from "@/lib/constants";
 
 export const accountTypes = {
   "fungible-faucet": "Fungible Faucet",
@@ -33,7 +41,7 @@ export type Account = {
   isUpdatable: boolean;
   isRegularAccount: boolean;
   isNew: boolean;
-  nonce: bigint;
+  nonce: number;
   fungibleAssets: FungibleAsset[];
   code: string;
   storage: string[];
@@ -57,7 +65,7 @@ export const defaultAccount = (): Account => ({
   isUpdatable: false,
   isRegularAccount: false,
   isNew: false,
-  nonce: 0n,
+  nonce: 0,
   fungibleAssets: [],
   code: "",
   storage: [],
@@ -113,6 +121,22 @@ export const accountIdFromPrefixSuffix = (prefix: string, suffix: string) => {
   const suffixString = BigInt(suffix).toString(16).padStart(16, "0");
   return `0x${prefixString}${suffixString}`.slice(0, 32);
 };
+
+export const midenFaucetAccount = () => ({
+  ...basicFungibleFaucetAccount({
+    storageMode: "public",
+    symbol: "MIDEN",
+    decimals: FUNGIBLE_FAUCET_DEFAULT_DECIMALS,
+    maxSupply: parseAmount(
+      FUNGIBLE_FAUCET_DEFAULT_MAX_SUPPLY.toString(),
+      FUNGIBLE_FAUCET_DEFAULT_DECIMALS
+    ).toString(),
+    totalSupply: "0",
+  }),
+  id: MIDEN_FAUCET_ACCOUNT_ID,
+  name: "Miden Faucet",
+  address: MIDEN_FAUCET_ADDRESS,
+});
 
 export const newWallet = [
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 15, 166, 136, 15, 130,

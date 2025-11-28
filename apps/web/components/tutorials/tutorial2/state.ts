@@ -4,178 +4,6 @@ import {
   basicFungibleFaucetAccount,
 } from "@/lib/types/account";
 
-/*
-
-{
-    "networkId": "mlcl",
-    "blockNum": 2,
-    "serializedMockChain": "",
-    "accounts": [
-        {
-            "id": "0xf19d0f4c1d78fb2008194697fdb242",
-            "name": "MDN Faucet",
-            "address": "mlcl1arce6r6vr4u0kgqgr9rf0ldjggzl35zz_qruqqypuyph",
-            "type": "fungible-faucet",
-            "storageMode": "public",
-            "isFaucet": true,
-            "symbol": "MDN",
-            "decimals": 6,
-            "maxSupply": "100000000000000000",
-            "totalSupply": "100000000",
-            "isPublic": true,
-            "isUpdatable": false,
-            "isRegularAccount": false,
-            "isNew": false,
-            "nonce": "1",
-            "fungibleAssets": [],
-            "code": "0xa27a5cdb0d50add0a3e141c6c14034c1852f59ded9826aeb43bc341c22cf1045",
-            "storage": [
-                "0x00000000000000000000000000000000000000000000000000e1f50500000000",
-                "0xf8f41acd38a25f4c0c087f00a02843b2eaa6ca0734f9e63274072b8587d4ea5f",
-                "0x00008a5d78456301060000000000000021410300000000000000000000000000"
-            ],
-            "consumableNoteIds": [],
-            "components": [],
-            "updatedAt": 1
-        },
-        {
-            "id": "0xa543524e3475f6107ee0b8fb13ce35",
-            "name": "Wallet A",
-            "address": "mlcl1azj5x5jwx36lvyr7uzu0ky7wx58zjvzp_qruqqypuyph",
-            "type": "regular-account-updatable-code",
-            "storageMode": "public",
-            "isFaucet": false,
-            "symbol": "",
-            "decimals": 0,
-            "maxSupply": "",
-            "totalSupply": "",
-            "isPublic": true,
-            "isUpdatable": true,
-            "isRegularAccount": true,
-            "isNew": false,
-            "nonce": "1",
-            "fungibleAssets": [
-                {
-                    "faucetId": "0xf19d0f4c1d78fb2008194697fdb242",
-                    "amount": "100000000"
-                }
-            ],
-            "code": "0x91b7426f61f0b17d409919f19c69131a7f658c430df38168b87b082b6ff209c2",
-            "storage": [
-                "0x937a4da3ff9434b14dc29222a38293b6de917565432eaa9a37f17ef4ec57cab2"
-            ],
-            "consumableNoteIds": [],
-            "components": [],
-            "updatedAt": 2
-        },
-        {
-            "id": "0x7cbe8ac73d1868107e15a4bb365401",
-            "name": "Wallet B",
-            "address": "mlcl1ap7tazk885vxsyr7zkjtkdj5qycflg6e_qruqqypuyph",
-            "type": "regular-account-updatable-code",
-            "storageMode": "public",
-            "isFaucet": false,
-            "symbol": "",
-            "decimals": 0,
-            "maxSupply": "",
-            "totalSupply": "",
-            "isPublic": true,
-            "isUpdatable": true,
-            "isRegularAccount": true,
-            "isNew": true,
-            "nonce": "0",
-            "fungibleAssets": [],
-            "code": "0x91b7426f61f0b17d409919f19c69131a7f658c430df38168b87b082b6ff209c2",
-            "storage": [
-                "0xeb309850f8f765fe618258c9acdee219c9b673e2109495082621074311565dd3"
-            ],
-            "consumableNoteIds": [],
-            "components": [],
-            "updatedAt": 0
-        }
-    ],
-    "transactions": [
-        {
-            "id": "0xf8a154d284f1352b46f7c557fcc6fb1a981d603c92fee7caf625f04280d8f46a",
-            "status": "Committed (Block: 1)",
-            "accountId": "0xf19d0f4c1d78fb2008194697fdb242",
-            "scriptRoot": "0x01db86f93af470d80818bb6d6c32291782f12553c6bb77d791948c5e73a92baa",
-            "inputNotes": [],
-            "outputNotes": [
-                {
-                    "id": "0xbd3904c41548faf11565b0f21f417d1952ab6bd3e1634101a248b0ea6779dc9d",
-                    "type": "public",
-                    "scriptRoot": "0x638ae99901ba0adbb0998937e075bf66f651191a6521c5d9c3c324c80bf55290",
-                    "senderId": "0xf19d0f4c1d78fb2008194697fdb242",
-                    "fungibleAssets": [
-                        {
-                            "faucetId": "0xf19d0f4c1d78fb2008194697fdb242",
-                            "amount": "100000000"
-                        }
-                    ]
-                }
-            ],
-            "updatedAt": 0
-        },
-        {
-            "id": "0x572c6758b3ce91193cffcc32d0f9f4f3f5912a1ed1cc2f2298fb862d145f1c31",
-            "status": "Committed (Block: 2)",
-            "accountId": "0xa543524e3475f6107ee0b8fb13ce35",
-            "scriptRoot": "0x3bf7b08490b7f08c1a58d9707e62ab5c77f359569fca5d69dcba7982cb015f89",
-            "inputNotes": [
-                {
-                    "id": "0xbd3904c41548faf11565b0f21f417d1952ab6bd3e1634101a248b0ea6779dc9d",
-                    "type": "public",
-                    "scriptRoot": "0x638ae99901ba0adbb0998937e075bf66f651191a6521c5d9c3c324c80bf55290",
-                    "senderId": "0xf19d0f4c1d78fb2008194697fdb242",
-                    "fungibleAssets": [
-                        {
-                            "faucetId": "0xf19d0f4c1d78fb2008194697fdb242",
-                            "amount": "100000000"
-                        }
-                    ]
-                }
-            ],
-            "outputNotes": [],
-            "updatedAt": 1
-        }
-    ],
-    "inputNotes": [
-        {
-            "id": "0xbd3904c41548faf11565b0f21f417d1952ab6bd3e1634101a248b0ea6779dc9d",
-            "type": "public",
-            "state": "consumed-authenticated-local",
-            "tag": "3914334208",
-            "senderId": "0xf19d0f4c1d78fb2008194697fdb242",
-            "scriptRoot": "0x638ae99901ba0adbb0998937e075bf66f651191a6521c5d9c3c324c80bf55290",
-            "scriptId": "p2id",
-            "fungibleAssets": [
-                {
-                    "faucetId": "0xf19d0f4c1d78fb2008194697fdb242",
-                    "amount": "100000000"
-                }
-            ],
-            "inputs": [
-                "9142510632070690048",
-                "11908452335538796048"
-            ],
-            "nullifier": "0x6792d794a1ae2a6a6700ab8d1b07339c3860779bb8c75359a89cedb73b216d00",
-            "updatedAt": 1
-        }
-    ],
-    "scripts": [],
-    "components": [],
-    "tutorialId": "",
-    "tutorialLoaded": true,
-    "tutorialStep": 0,
-    "tutorialMaxStep": 0,
-    "tutorialOpen": true,
-    "nextTutorialStepDisabled": true,
-    "completedTutorials": []
-}
-
-*/
-
 const state: State = {
   ...defaultState(),
   networkId: "mlcl",
@@ -497,7 +325,7 @@ const state: State = {
       id: "0xf19d0f4c1d78fb2008194697fdb242",
       name: "MDN Faucet",
       address: "mlcl1arce6r6vr4u0kgqgr9rf0ldjggzl35zz_qruqqypuyph",
-      nonce: 1n,
+      nonce: 1,
       storage: [
         "0x00000000000000000000000000000000000000000000000000e1f50500000000",
         "0xf8f41acd38a25f4c0c087f00a02843b2eaa6ca0734f9e63274072b8587d4ea5f",
@@ -510,7 +338,7 @@ const state: State = {
       id: "0xa543524e3475f6107ee0b8fb13ce35",
       name: "Wallet A",
       address: "mlcl1azj5x5jwx36lvyr7uzu0ky7wx58zjvzp_qruqqypuyph",
-      nonce: 1n,
+      nonce: 1,
       fungibleAssets: [
         {
           faucetId: "0xf19d0f4c1d78fb2008194697fdb242",

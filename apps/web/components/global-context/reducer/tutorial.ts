@@ -1,9 +1,6 @@
 import { type State } from "@/lib/types/state";
 
 export type TutorialAction =
-  | {
-      type: "LOAD_TUTORIAL";
-    }
   | { type: "PREVIOUS_TUTORIAL_STEP" }
   | { type: "NEXT_TUTORIAL_STEP" }
   | { type: "SET_TUTORIAL_STEP"; payload: { tutorialStep: number } }
@@ -16,12 +13,6 @@ export type TutorialAction =
 
 const reducer = (state: State, action: TutorialAction): State => {
   switch (action.type) {
-    case "LOAD_TUTORIAL": {
-      return {
-        ...state,
-        tutorialLoaded: true,
-      };
-    }
     case "PREVIOUS_TUTORIAL_STEP": {
       return {
         ...state,

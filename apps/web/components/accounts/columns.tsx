@@ -12,12 +12,16 @@ import {
 } from "@workspace/ui/components/dropdown-menu";
 import useTransactions from "@/hooks/use-transactions";
 import AccountAddress from "@/components/lib/account-address";
-import { clientGetConsumableNotes, webClient } from "@/lib/web-client";
+import { clientGetConsumableNotes } from "@/lib/web-client";
 import useGlobalContext from "@/components/global-context/hook";
 import useAccounts from "@/hooks/use-accounts";
+import useMidenSdk from "@/hooks/use-miden-sdk";
+import useWebClient from "@/hooks/use-web-client";
 
 const AccountActionsCell = ({ account }: { account: Account }) => {
-  const { networkId, serializedMockChain } = useGlobalContext();
+  const { midenSdk } = useMidenSdk();
+  const { networkId } = useGlobalContext();
+  const { client } = useWebClient();
   const { connectedWallet } = useAccounts();
   const { openCreateTransactionDialog } = useTransactions();
   if (networkId === "mtst" && connectedWallet?.address !== account.address) {
@@ -48,11 +52,11 @@ const AccountActionsCell = ({ account }: { account: Account }) => {
           <>
             <DropdownMenuItem
               onClick={async () => {
-                const client = await webClient(networkId, serializedMockChain);
-                const consumableNotes = await clientGetConsumableNotes(
+                const consumableNotes = await clientGetConsumableNotes({
                   client,
-                  account.id
-                );
+                  accountId: account.id,
+                  midenSdk,
+                });
                 openCreateTransactionDialog({
                   accountId: account.id,
                   transactionType: "consume",

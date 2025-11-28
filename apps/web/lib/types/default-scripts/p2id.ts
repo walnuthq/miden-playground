@@ -10,47 +10,30 @@ export const p2idRust = `// Do not link against libstd (i.e. anything defined in
 // extern crate alloc;
 // use alloc::vec::Vec;
 
-// Global allocator to use heap memory in no-std environment
-#[global_allocator]
-static ALLOC: miden::BumpAlloc = miden::BumpAlloc::new();
-
-// Required for no-std crates
-#[cfg(not(test))]
-#[panic_handler]
-fn my_panic(_info: &core::panic::PanicInfo) -> ! {
-    loop {}
-}
-
-bindings::export!(MyNote with_types_in bindings);
-
-mod bindings;
-
-use bindings::{
-    exports::miden::base::note_script::Guest, miden::basic_wallet::basic_wallet::receive_asset,
-};
 use miden::*;
 
-struct MyNote;
+use crate::bindings::miden::basic_wallet::basic_wallet::receive_asset;
 
-impl Guest for MyNote {
-    fn run(_arg: Word) {
-        let inputs = miden::note::get_inputs();
-        let target_account_id_prefix = inputs[0];
-        let target_account_id_suffix = inputs[1];
-        let account_id = miden::account::get_id();
-        assert_eq(account_id.prefix, target_account_id_prefix);
-        assert_eq(account_id.suffix, target_account_id_suffix);
-        let assets = miden::note::get_assets();
-        for asset in assets {
-            receive_asset(asset);
-        }
+#[note_script]
+fn run(_arg: Word) {
+    let inputs = active_note::get_inputs();
+    let target_account_id_prefix = inputs[0];
+    let target_account_id_suffix = inputs[1];
+
+    let target_account = AccountId::from(target_account_id_prefix, target_account_id_suffix);
+    let current_account = active_account::get_id();
+    assert_eq!(current_account, target_account);
+
+    let assets = active_note::get_assets();
+    for asset in assets {
+        receive_asset(asset);
     }
 }
 `;
 
-export const p2idMasm = `use.miden::account
+export const p2idMasm = `use.miden::active_account
 use.miden::account_id
-use.miden::note
+use.miden::active_note
 
 # ERRORS
 # =================================================================================================
@@ -79,7 +62,7 @@ const.ERR_P2ID_TARGET_ACCT_MISMATCH="P2ID's target account address and transacti
 #!   greater than 2^63.
 begin
     # store the note inputs to memory starting at address 0
-    padw push.0 exec.note::get_inputs
+    padw push.0 exec.active_note::get_inputs
     # => [num_inputs, inputs_ptr, EMPTY_WORD]
 
     # make sure the number of inputs is 2
@@ -87,17 +70,17 @@ begin
     # => [inputs_ptr, EMPTY_WORD]
 
     # read the target account ID from the note inputs
-    mem_loadw drop drop
+    mem_loadw_be drop drop
     # => [target_account_id_prefix, target_account_id_suffix]
 
-    exec.account::get_id
+    exec.active_account::get_id
     # => [account_id_prefix, account_id_suffix, target_account_id_prefix, target_account_id_suffix, ...]
 
     # ensure account_id = target_account_id, fails otherwise
     exec.account_id::is_equal assert.err=ERR_P2ID_TARGET_ACCT_MISMATCH
     # => []
 
-    exec.note::add_assets_to_account
+    exec.active_note::add_assets_to_account
     # => []
 end
 `;

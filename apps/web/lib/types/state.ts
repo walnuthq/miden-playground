@@ -12,7 +12,7 @@ import {
   type TransactionType,
   type CreateTransactionDialogStep,
 } from "@/lib/types/transaction";
-import { type Script, type Procedure } from "@/lib/types/script";
+import { type Script, type Export } from "@/lib/types/script";
 import defaultScripts from "@/lib/types/default-scripts";
 import defaultComponents from "@/lib/types/default-components";
 
@@ -53,7 +53,7 @@ export type State = {
   invokeProcedureArgumentsDialogOpen: boolean;
   invokeProcedureArgumentsDialogSenderAccountId: string;
   invokeProcedureArgumentsDialogScriptId: string;
-  invokeProcedureArgumentsDialogProcedure: Procedure | null;
+  invokeProcedureArgumentsDialogProcedure: Export | null;
   scripts: Script[];
   // COMPONENTS
   createComponentDialogOpen: boolean;
@@ -63,7 +63,6 @@ export type State = {
   components: Component[];
   // TUTORIALS
   tutorialId: string;
-  tutorialLoaded: boolean;
   tutorialStep: number;
   tutorialMaxStep: number;
   tutorialOpen: boolean;
@@ -118,7 +117,6 @@ export const defaultState = (): State => ({
   components: defaultComponents,
   // TUTORIALS
   tutorialId: "",
-  tutorialLoaded: false,
   tutorialStep: 0,
   tutorialMaxStep: 0,
   tutorialOpen: true,
@@ -136,7 +134,6 @@ export const stateSerializer = ({
   scripts,
   components,
   tutorialId,
-  tutorialLoaded,
   tutorialStep,
   tutorialMaxStep,
   tutorialOpen,
@@ -148,16 +145,12 @@ export const stateSerializer = ({
     blockNum,
     serializedMockChain:
       serializedMockChain === null ? null : serializedMockChain.toString(),
-    accounts: accounts.map((account) => ({
-      ...account,
-      nonce: account.nonce.toString(),
-    })),
+    accounts,
     transactions,
     inputNotes,
     scripts,
     components,
     tutorialId,
-    tutorialLoaded,
     tutorialStep,
     tutorialMaxStep,
     tutorialOpen,
@@ -177,7 +170,6 @@ export const stateDeserializer = (value: string): State => {
       scripts,
       components,
       tutorialId,
-      tutorialLoaded,
       tutorialStep,
       tutorialMaxStep,
       tutorialOpen,
@@ -187,31 +179,17 @@ export const stateDeserializer = (value: string): State => {
       networkId?: NetworkId;
       blockNum?: number;
       serializedMockChain?: string | null;
-      accounts?: (Omit<Account, "nonce"> & { nonce: string })[];
+      accounts?: Account[];
       transactions?: Transaction[];
       inputNotes?: InputNote[];
-      scripts?: (Omit<Script, "procedures"> & {
-        procedures: (Omit<Procedure, "storageRead"> & {
-          storageRead?:
-            | {
-                type: "value";
-                index: number;
-              }
-            | {
-                type: "map";
-                index: number;
-                key: string[];
-              };
-        })[];
-      })[];
+      scripts?: Script[];
       components?: Component[];
       tutorialId?: string;
-      tutorialLoaded?: boolean;
       tutorialStep?: number;
       tutorialMaxStep?: number;
       tutorialOpen?: boolean;
       nextTutorialStepDisabled?: boolean;
-      completedTutorials: number[];
+      completedTutorials?: number[];
     };
     const initialState = defaultState();
     return {
@@ -222,18 +200,12 @@ export const stateDeserializer = (value: string): State => {
         serializedMockChain === null || serializedMockChain === undefined
           ? null
           : new Uint8Array(serializedMockChain.split(",").map(Number)),
-      accounts: accounts
-        ? accounts.map((account) => ({
-            ...account,
-            nonce: BigInt(account.nonce),
-          }))
-        : initialState.accounts,
+      accounts: accounts ?? initialState.accounts,
       transactions: transactions ?? initialState.transactions,
       inputNotes: inputNotes ?? initialState.inputNotes,
       scripts: scripts ?? initialState.scripts,
       components: components ?? initialState.components,
       tutorialId: tutorialId ?? initialState.tutorialId,
-      tutorialLoaded: tutorialLoaded ?? initialState.tutorialLoaded,
       tutorialStep: tutorialStep ?? initialState.tutorialStep,
       tutorialMaxStep: tutorialMaxStep ?? initialState.tutorialMaxStep,
       tutorialOpen: tutorialOpen ?? initialState.tutorialOpen,

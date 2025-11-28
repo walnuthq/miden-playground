@@ -1,5 +1,5 @@
 "use client";
-import { useSearchParams } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useIsClient } from "usehooks-ts";
 import {
   Tabs,
@@ -17,8 +17,10 @@ import useGlobalContext from "@/components/global-context/hook";
 import VerifyNoteScriptDialog from "@/components/note/verify-note-script-dialog";
 
 const Note = ({ id }: { id: string }) => {
-  const isClient = useIsClient();
+  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
+  const isClient = useIsClient();
   const { networkId } = useGlobalContext();
   const { connectedWallet } = useAccounts();
   const { inputNotes } = useNotes();
@@ -28,7 +30,16 @@ const Note = ({ id }: { id: string }) => {
   }
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-      <Tabs defaultValue={searchParams.get("tab") ?? "information"}>
+      <Tabs
+        defaultValue={searchParams.get("tab") ?? "information"}
+        onValueChange={(value) =>
+          router.push(
+            value === "information"
+              ? pathname
+              : `${pathname}?${new URLSearchParams({ tab: value })}`
+          )
+        }
+      >
         <div className="flex items-center justify-between">
           <TabsList>
             <TabsTrigger value="information">Information</TabsTrigger>

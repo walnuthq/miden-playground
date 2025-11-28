@@ -4,7 +4,7 @@ import p2id from "@/lib/types/default-scripts/p2id";
 // import counterMapContractMasm from "@/app/api/scripts/[id]/counter-masm";
 // import p2idMasm from "@/app/api/scripts/[id]/p2id-masm";
 import { sleep } from "@/lib/utils";
-import type { ScriptExample, Procedure } from "@/lib/types/script";
+import type { ScriptExample, Export, Dependency } from "@/lib/types/script";
 
 const scriptsMasm = {
   "counter-contract": counterMapContract.masm,
@@ -22,14 +22,14 @@ const scriptsPackages: Record<string, { type: "Buffer"; data: number[] }> = {
   "p2id-note": { type: "Buffer", data: [] },
 } as const;
 
-const scriptsDependencies = {
-  "counter-contract": [],
-  "p2id-note": ["basic-wallet"],
+const scriptsExports: Record<string, Export[]> = {
+  "counter-contract": counterMapContract.exports,
+  "p2id-note": [],
 } as const;
 
-const scriptsProcedures: Record<string, Procedure[]> = {
-  "counter-contract": counterMapContract.procedures,
-  "p2id-note": [],
+const scriptsDependencies: Record<string, Dependency[]> = {
+  "counter-contract": [],
+  "p2id-note": [{ name: "basic-wallet", digest: "" }],
 } as const;
 
 export const PATCH = async (
@@ -42,8 +42,8 @@ export const PATCH = async (
   const masm = scriptsMasm[example];
   const root = scriptsRoot[example];
   const packageBuffer = scriptsPackages[example];
+  const exports = scriptsExports[example];
   const dependencies = scriptsDependencies[example];
-  const procedures = scriptsProcedures[example];
   await sleep(1000);
   return NextResponse.json({
     ok: true,
@@ -51,8 +51,8 @@ export const PATCH = async (
     masm,
     root,
     package: packageBuffer,
+    exports,
     dependencies,
-    procedures,
   });
 };
 

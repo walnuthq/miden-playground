@@ -6,16 +6,13 @@ import { Spinner } from "@workspace/ui/components/spinner";
 import useGlobalContext from "@/components/global-context/hook";
 import { networks } from "@/lib/types/network";
 import { cn } from "@workspace/ui/lib/utils";
-import useTutorials from "@/hooks/use-tutorials";
+import useWebClient from "@/hooks/use-web-client";
 
 const NetworkBadge = () => {
-  const { networkId, blockNum, syncState } = useGlobalContext();
-  const { tutorialId, tutorialLoaded } = useTutorials();
+  const { networkId, blockNum } = useGlobalContext();
+  const { syncState } = useWebClient();
   const [loading, setLoading] = useState(false);
-  const useIntervalTriggered =
-    !loading &&
-    networkId === "mtst" &&
-    (tutorialId === "" ? true : tutorialLoaded);
+  const useIntervalTriggered = !loading && networkId === "mtst";
   useInterval(
     () => {
       const sync = async () => {

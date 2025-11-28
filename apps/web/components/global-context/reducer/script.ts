@@ -1,4 +1,4 @@
-import { type Script, type Procedure } from "@/lib/types/script";
+import { type Script, type Export } from "@/lib/types/script";
 import { type State } from "@/lib/types/state";
 
 export type ScriptAction =
@@ -32,7 +32,7 @@ export type ScriptAction =
       payload: {
         senderAccountId: string;
         scriptId: string;
-        procedure: Procedure;
+        procedureExport: Export;
       };
     }
   | { type: "CLOSE_INVOKE_PROCEDURE_ARGUMENTS_DIALOG" };
@@ -102,7 +102,7 @@ const reducer = (state: State, action: ScriptAction): State => {
         invokeProcedureArgumentsDialogSenderAccountId:
           action.payload.senderAccountId,
         invokeProcedureArgumentsDialogScriptId: action.payload.scriptId,
-        invokeProcedureArgumentsDialogProcedure: action.payload.procedure,
+        invokeProcedureArgumentsDialogProcedure: action.payload.procedureExport,
       };
     }
     case "CLOSE_INVOKE_PROCEDURE_ARGUMENTS_DIALOG": {

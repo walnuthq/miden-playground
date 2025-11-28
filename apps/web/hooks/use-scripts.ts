@@ -4,19 +4,20 @@ import {
   type Script,
   type ScriptExample,
   type ScriptType,
-  type Procedure,
+  type Export,
+  type MidenInput,
   defaultScript,
   invokeProcedureCustomTransactionScript,
 } from "@/lib/types/script";
-import { webClient, clientExecuteTransaction } from "@/lib/web-client";
+import { clientExecuteTransaction } from "@/lib/web-client";
 import { createScript, deleteScript as apiDeleteScript } from "@/lib/api";
+import useMidenSdk from "@/hooks/use-miden-sdk";
 import useTransactions from "@/hooks/use-transactions";
-import { COUNTER_CONTRACT_ID } from "@/lib/constants";
+import useWebClient from "@/hooks/use-web-client";
 
 const useScripts = () => {
+  const { midenSdk } = useMidenSdk();
   const {
-    networkId,
-    serializedMockChain,
     scripts,
     createScriptDialogOpen,
     deleteScriptAlertDialogOpen,
@@ -27,6 +28,7 @@ const useScripts = () => {
     invokeProcedureArgumentsDialogProcedure,
     dispatch,
   } = useGlobalContext();
+  const { client } = useWebClient();
   const { submitNewTransaction } = useTransactions();
   const openCreateScriptDialog = () =>
     dispatch({ type: "OPEN_CREATE_SCRIPT_DIALOG" });
@@ -46,10 +48,10 @@ const useScripts = () => {
   }: {
     name: string;
     type: ScriptType;
-    example?: ScriptExample;
+    example: ScriptExample | "none";
   }) => {
     const packageName = example ?? kebabCase(name);
-    const { id, rust } = await createScript(packageName, example);
+    const { id, rust } = await createScript({ packageName, type, example });
     const script: Script = {
       ...defaultScript(),
       id,
@@ -82,24 +84,27 @@ const useScripts = () => {
   const invokeProcedure = async ({
     senderAccountId,
     scriptId,
-    procedure,
+    procedureExport,
+    procedureInputs = [],
+    foreignAccounts = [],
   }: {
     senderAccountId: string;
     scriptId: string;
-    procedure: Procedure;
+    procedureExport: Export;
+    procedureInputs?: MidenInput[];
+    foreignAccounts?: string[];
   }) => {
     const script = scripts.find(({ id }) => id === scriptId);
     if (!script) {
       throw new Error("Script not found");
     }
     const {
-      TransactionRequestBuilder: WasmTransactionRequestBuilder,
-      AccountStorageRequirements: WasmAccountStorageRequirements,
-      ForeignAccount: WasmForeignAccount,
-      AccountId: WasmAccountId,
-      MidenArrays: WasmMidenArrays,
-    } = await import("@demox-labs/miden-sdk");
-    const client = await webClient(networkId, serializedMockChain);
+      TransactionRequestBuilder,
+      AccountStorageRequirements,
+      ForeignAccount,
+      AccountId,
+      MidenArrays,
+    } = midenSdk;
     const builder = client.createScriptBuilder();
     const contractName = script.id.replaceAll("-", "_");
     const accountComponentLibrary = builder.buildLibrary(
@@ -108,33 +113,32 @@ const useScripts = () => {
     );
     builder.linkDynamicLibrary(accountComponentLibrary);
     const transactionScript = builder.compileTxScript(
-      invokeProcedureCustomTransactionScript(contractName, procedure)
+      invokeProcedureCustomTransactionScript({
+        contractName,
+        procedureExport,
+        procedureInputs,
+      })
     );
     let transactionRequestBuilder =
-      new WasmTransactionRequestBuilder().withCustomScript(transactionScript);
-    if (procedure.foreignAccounts) {
+      new TransactionRequestBuilder().withCustomScript(transactionScript);
+    if (foreignAccounts.length > 0) {
       transactionRequestBuilder = transactionRequestBuilder.withForeignAccounts(
-        new WasmMidenArrays.ForeignAccountArray(
-          procedure.foreignAccounts.map((foreignAccountId) =>
-            WasmForeignAccount.public(
-              WasmAccountId.fromHex(foreignAccountId),
-              new WasmAccountStorageRequirements()
+        new MidenArrays.ForeignAccountArray(
+          foreignAccounts.map((foreignAccountId) =>
+            ForeignAccount.public(
+              AccountId.fromHex(foreignAccountId),
+              new AccountStorageRequirements()
             )
           )
         )
       );
     }
-    // const storageRequirements = new WasmAccountStorageRequirements();
-    // transactionRequestBuilder = transactionRequestBuilder.withForeignAccounts([
-    //   WasmForeignAccount.public(
-    //     WasmAccountId.fromHex(COUNTER_CONTRACT_ID),
-    //     storageRequirements
-    //   ),
-    // ]);
     const transactionRequest = transactionRequestBuilder.build();
-    const transactionResult = await clientExecuteTransaction(client, {
+    const transactionResult = await clientExecuteTransaction({
+      client,
       accountId: senderAccountId,
       transactionRequest,
+      midenSdk,
     });
     return submitNewTransaction({
       accountId: senderAccountId,
@@ -145,15 +149,15 @@ const useScripts = () => {
   const openInvokeProcedureArgumentsDialog = ({
     senderAccountId,
     scriptId,
-    procedure,
+    procedureExport,
   }: {
     senderAccountId: string;
     scriptId: string;
-    procedure: Procedure;
+    procedureExport: Export;
   }) =>
     dispatch({
       type: "OPEN_INVOKE_PROCEDURE_ARGUMENTS_DIALOG",
-      payload: { senderAccountId, scriptId, procedure },
+      payload: { senderAccountId, scriptId, procedureExport },
     });
   const closeInvokeProcedureArgumentsDialog = () =>
     dispatch({

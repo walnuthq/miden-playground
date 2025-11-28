@@ -6,40 +6,23 @@ export const basicWalletRust = `// Do not link against libstd (i.e. anything def
 // However, we could still use some standard library types while
 // remaining no-std compatible, if we uncommented the following lines:
 //
-extern crate alloc;
+// extern crate alloc;
 
-// Global allocator to use heap memory in no-std environment
-#[global_allocator]
-static ALLOC: miden::BumpAlloc = miden::BumpAlloc::new();
-
-// Required for no-std crates
-#[cfg(not(test))]
-#[panic_handler]
-fn my_panic(_info: &core::panic::PanicInfo) -> ! {
-    loop {}
-}
-
-mod bindings;
-
-use bindings::exports::miden::basic_wallet::*;
-use miden::NoteIdx;
-
-bindings::export!(MyAccount with_types_in bindings);
-
-use miden::{component, Asset};
+use miden::{component, native_account, output_note, Asset, NoteIdx};
 
 #[component]
 struct MyAccount;
 
-impl basic_wallet::Guest for MyAccount {
+#[component]
+impl MyAccount {
     /// Adds an asset to the account.
     ///
     /// This function adds the specified asset to the account's asset list.
     ///
     /// # Arguments
     /// * \`asset\` - The asset to be added to the account
-    fn receive_asset(asset: Asset) {
-        miden::account::add_asset(asset);
+    pub fn receive_asset(&self, asset: Asset) {
+        native_account::add_asset(asset);
     }
 
     /// Moves an asset from the account to a note.
@@ -50,21 +33,21 @@ impl basic_wallet::Guest for MyAccount {
     /// # Arguments
     /// * \`asset\` - The asset to move from the account to the note
     /// * \`note_idx\` - The index of the note to receive the asset
-    fn move_asset_to_note(asset: Asset, note_idx: NoteIdx) {
-        let asset = miden::account::remove_asset(asset);
-        miden::tx::add_asset_to_note(asset, note_idx);
+    pub fn move_asset_to_note(&self, asset: Asset, note_idx: NoteIdx) {
+        let asset = native_account::remove_asset(asset);
+        output_note::add_asset(asset, note_idx);
     }
 }
 `;
 
-export const basicWalletMasm = `use.miden::account
-use.miden::tx
+export const basicWalletMasm = `use.miden::native_account
+use.miden::output_note
 
 # CONSTANTS
 # =================================================================================================
 const.PUBLIC_NOTE=1
 
-#! Adds the provided asset to the current account.
+#! Adds the provided asset to the active account.
 #!
 #! Inputs:  [ASSET, pad(12)]
 #! Outputs: [pad(16)]
@@ -79,7 +62,7 @@ const.PUBLIC_NOTE=1
 #!
 #! Invocation: call
 export.receive_asset
-    exec.account::add_asset
+    exec.native_account::add_asset
     # => [ASSET', pad(12)]
 
     # drop the final asset
@@ -109,12 +92,16 @@ end
 #! Invocation: call
 export.move_asset_to_note
     # remove the asset from the account
-    exec.account::remove_asset
+    exec.native_account::remove_asset
     # => [ASSET, note_idx, pad(11)]
 
-    exec.tx::add_asset_to_note
-    # => [ASSET, note_idx, pad(11) ...]
-end`;
+    dupw dup.8 movdn.4
+    # => [ASSET, note_idx, ASSET, note_idx, pad(11)]
+
+    exec.output_note::add_asset
+    # => [ASSET, note_idx, pad(11)]
+end
+`;
 
 const basicWallet: Script = {
   ...defaultScript(),

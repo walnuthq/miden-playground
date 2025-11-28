@@ -42,14 +42,15 @@ export const PATCH = async (
     });
   }
   // const masm = await compileWasmToMasm(id);
-  const { packageBuffer, procedures } = await readPackage(id);
+  const { packageBuffer, exports, dependencies } = await readPackage(id);
   return NextResponse.json({
     ok: true,
     error: "",
     masm: "",
     root: "",
     package: packageBuffer,
-    procedures,
+    exports,
+    dependencies,
   });
 };
 
