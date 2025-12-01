@@ -424,7 +424,8 @@ export const clientCreateTransactionFromScript = ({
   // const transactionScript = TransactionScript.fromPackage(
   //   Package.deserialize(new Uint8Array(script.packageBytes))
   // );
-  const transactionRequestBuilder = new TransactionRequestBuilder(); //.withCustomScript(transactionScript);
+  const transactionRequestBuilder =
+    new TransactionRequestBuilder(); /*.withCustomScript(transactionScript)*/
   return transactionRequestBuilder.build();
 };
 

@@ -3,13 +3,10 @@ import useGlobalContext from "@/components/global-context/hook";
 import tutorials from "@/components/tutorials";
 import { defaultStore } from "@/lib/types/store";
 import { defaultState } from "@/lib/types/state";
-import { createClient } from "@/components/web-client-context";
 import useWebClient from "@/hooks/use-web-client";
-import useMidenSdk from "@/hooks/use-miden-sdk";
 
 const useTutorials = () => {
   const router = useRouter();
-  const { midenSdk } = useMidenSdk();
   const {
     tutorialId,
     tutorialStep,
@@ -19,29 +16,15 @@ const useTutorials = () => {
     completedTutorials,
     dispatch,
   } = useGlobalContext();
-  const { resetState } = useWebClient();
+  const { pushState } = useWebClient();
   const startTutorial = async (tutorialId: string) => {
     const tutorial = tutorials.find(({ id }) => id === tutorialId);
     if (!tutorial) {
       return;
     }
-    await resetState(tutorial.state.networkId);
-    const newClient = await createClient({
-      networkId: tutorial.state.networkId,
-      serializedMockChain: tutorial.state.serializedMockChain,
-      midenSdk,
-    });
-    await newClient.forceImportStore(JSON.stringify(tutorial.store));
-    const syncSummary = await newClient.syncState();
-    dispatch({
-      type: "LOAD_STATE",
-      payload: {
-        state: {
-          ...tutorial.state,
-          blockNum: syncSummary.blockNum(),
-          completedTutorials,
-        },
-      },
+    pushState({
+      pushedState: { ...tutorial.state, completedTutorials },
+      pushedStore: tutorial.store,
     });
     router.push(tutorial.initialRoute);
   };
@@ -55,25 +38,14 @@ const useTutorials = () => {
       state: defaultState(),
       store: defaultStore(),
     };
-    await resetState(nextTutorial.state.networkId);
-    const newClient = await createClient({
-      networkId: nextTutorial.state.networkId,
-      serializedMockChain: nextTutorial.state.serializedMockChain,
-      midenSdk,
-    });
-    await newClient.forceImportStore(JSON.stringify(nextTutorial.store));
-    const syncSummary = await newClient.syncState();
     const newCompletedTutorials = new Set([...completedTutorials]);
     newCompletedTutorials.add(tutorial.number);
-    dispatch({
-      type: "LOAD_STATE",
-      payload: {
-        state: {
-          ...nextTutorial.state,
-          blockNum: syncSummary.blockNum(),
-          completedTutorials: newCompletedTutorials,
-        },
+    pushState({
+      pushedState: {
+        ...nextTutorial.state,
+        completedTutorials: newCompletedTutorials,
       },
+      pushedStore: nextTutorial.store,
     });
     router.push(nextTutorial.initialRoute);
   };

@@ -1,14 +1,15 @@
 import { type Account } from "@/lib/types/account";
 import { type NetworkId } from "@/lib/types/network";
 import { type InputNote } from "@/lib/types/note";
-import { type State, defaultState } from "@/lib/types/state";
+import { type State } from "@/lib/types/state";
+import { type Store } from "@/lib/types/store";
 
 export type GlobalAction =
-  | { type: "RESET_STATE"; payload: { networkId: NetworkId; blockNum: number } }
   | {
       type: "SWITCH_NETWORK";
       payload: { networkId: NetworkId; blockNum: number };
     }
+  | { type: "SYNCING_STATE"; payload: { syncingState: boolean } }
   | {
       type: "SYNC_STATE";
       payload: {
@@ -17,23 +18,22 @@ export type GlobalAction =
         inputNotes: InputNote[];
       };
     }
-  | { type: "LOAD_STATE"; payload: { state: State } };
+  | { type: "PUSH_STATE"; payload: { nextState: State; nextStore: Store } }
+  | { type: "POP_STATE"; payload: { blockNum: number } };
 
 const reducer = (state: State, action: GlobalAction): State => {
   switch (action.type) {
-    case "RESET_STATE": {
-      return {
-        ...defaultState(),
-        networkId: action.payload.networkId,
-        blockNum: action.payload.blockNum,
-        completedTutorials: state.completedTutorials,
-      };
-    }
     case "SWITCH_NETWORK": {
       return {
         ...state,
         networkId: action.payload.networkId,
         blockNum: action.payload.blockNum,
+      };
+    }
+    case "SYNCING_STATE": {
+      return {
+        ...state,
+        syncingState: action.payload.syncingState,
       };
     }
     case "SYNC_STATE": {
@@ -42,10 +42,26 @@ const reducer = (state: State, action: GlobalAction): State => {
         blockNum: action.payload.blockNum,
         accounts: action.payload.accounts,
         inputNotes: action.payload.inputNotes,
+        syncingState: false,
       };
     }
-    case "LOAD_STATE": {
-      return action.payload.state;
+    case "PUSH_STATE": {
+      return {
+        ...state,
+        nextState: action.payload.nextState,
+        nextStore: action.payload.nextStore,
+      };
+    }
+    case "POP_STATE": {
+      if (!state.nextState) {
+        return state;
+      }
+      return {
+        ...state.nextState,
+        blockNum: action.payload.blockNum,
+        nextState: null,
+        nextStore: null,
+      };
     }
   }
 };
