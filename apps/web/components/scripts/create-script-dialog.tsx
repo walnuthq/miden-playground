@@ -37,8 +37,7 @@ const CreateScriptDialog = () => {
   const [loading, setLoading] = useState(false);
   const [scriptType, setScriptType] = useState<ScriptType>("account");
   const [scriptExample, setScriptExample] = useState<ScriptExample | "none">(
-    //"none"
-    "counter-contract"
+    "counter-contract" // "none"
   );
   useEffect(() => {
     if (scriptType === "account") {
@@ -50,7 +49,8 @@ const CreateScriptDialog = () => {
   }, [scriptType]);
   const onClose = () => {
     setScriptType("account");
-    setScriptExample("none");
+    setScriptExample("counter-contract");
+    // setScriptExample("none");
     closeCreateScriptDialog();
   };
   return (
@@ -120,9 +120,9 @@ const CreateScriptDialog = () => {
                   <SelectValue placeholder="Select example" />
                 </SelectTrigger>
                 <SelectContent>
-                  {/*<SelectItem key="none" value="none">
+                  {/* <SelectItem key="none" value="none">
                     None
-                  </SelectItem>*/}
+                  </SelectItem> */}
                   {Object.keys(scriptExamples)
                     .map((id) => ({
                       id,

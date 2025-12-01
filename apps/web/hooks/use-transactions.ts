@@ -38,7 +38,7 @@ const useTransactions = () => {
     createTransactionDialogNoteIds,
     createTransactionDialogTransactionRequest,
     createTransactionDialogTransactionResult,
-    inputNotes,
+    inputNotes: previousInputNotes,
     transactions,
     networkId,
     dispatch,
@@ -209,9 +209,9 @@ const useTransactions = () => {
     if (!transactionRecord || !nextAccount || !previousAccount) {
       throw new Error("Transaction record or account not found");
     }
-    const newInputNotes = await clientGetAllInputNotes({
+    const inputNotes = await clientGetAllInputNotes({
       client,
-      previousInputNotes: inputNotes,
+      previousInputNotes,
       midenSdk,
     });
     const consumableNoteIds: Record<string, string[]> = {};
@@ -246,7 +246,7 @@ const useTransactions = () => {
         transaction,
         account,
         consumableNoteIds,
-        inputNotes: newInputNotes,
+        inputNotes,
         blockNum: syncSummary.blockNum(),
         serializedMockChain: newSerializedMockChain,
       },

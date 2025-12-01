@@ -13,7 +13,8 @@ import useMidenSdk from "@/hooks/use-miden-sdk";
 import { type Account } from "@/lib/types/account";
 import { type NetworkId } from "@/lib/types/network";
 import useGlobalContext from "@/components/global-context/hook";
-import { deleteStore, defaultStore } from "@/lib/types/store";
+import { type State, defaultState } from "@/lib/types/state";
+import { type Store, deleteStore, defaultStore } from "@/lib/types/store";
 import { MIDEN_FAUCET_ADDRESS } from "@/lib/constants";
 
 const useWebClient = () => {
@@ -22,15 +23,20 @@ const useWebClient = () => {
   const {
     networkId,
     accounts: previousAccounts,
+    inputNotes: previousInputNotes,
+    nextState,
+    nextStore,
     scripts,
+    completedTutorials,
     dispatch,
   } = useGlobalContext();
   const syncState = async () => {
+    dispatch({ type: "SYNCING_STATE", payload: { syncingState: true } });
     try {
       const syncSummary = await client.syncState();
       const inputNotes = await clientGetAllInputNotes({
         client,
-        previousInputNotes: [],
+        previousInputNotes,
         midenSdk,
       });
       const accounts: Account[] = [];
@@ -74,26 +80,46 @@ const useWebClient = () => {
       });
     } catch (error) {
       console.error("ERROR: SyncState", error);
+      dispatch({ type: "SYNCING_STATE", payload: { syncingState: false } });
     }
   };
-  const resetState = async (newNetworkId: NetworkId) => {
+  const pushState = ({
+    pushedState,
+    pushedStore = defaultStore(),
+  }: {
+    pushedState: State;
+    pushedStore?: Store;
+  }) =>
+    dispatch({
+      type: "PUSH_STATE",
+      payload: { nextState: pushedState, nextStore: pushedStore },
+    });
+  const popState = async () => {
+    if (!nextState || !nextStore) {
+      return;
+    }
     await deleteStore();
     const newClient = await createClient({
-      networkId: newNetworkId,
-      serializedMockChain: null,
+      networkId: nextState.networkId,
+      serializedMockChain: nextState.serializedMockChain,
       midenSdk,
     });
-    await newClient.forceImportStore(JSON.stringify(defaultStore()));
+    await newClient.forceImportStore(JSON.stringify(nextStore));
     const syncSummary = await newClient.syncState();
     dispatch({
-      type: "RESET_STATE",
-      payload: {
-        networkId: newNetworkId,
-        blockNum: syncSummary.blockNum(),
-      },
+      type: "POP_STATE",
+      payload: { blockNum: syncSummary.blockNum() },
     });
   };
-  return { client, syncState, resetState };
+  const resetState = async (newNetworkId: NetworkId) =>
+    pushState({
+      pushedState: {
+        ...defaultState(),
+        networkId: newNetworkId,
+        completedTutorials,
+      },
+    });
+  return { client, syncState, pushState, popState, resetState };
 };
 
 export default useWebClient;

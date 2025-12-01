@@ -32,10 +32,11 @@ export type Action =
 
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
-    case "RESET_STATE":
     case "SWITCH_NETWORK":
+    case "SYNCING_STATE":
     case "SYNC_STATE":
-    case "LOAD_STATE": {
+    case "PUSH_STATE":
+    case "POP_STATE": {
       return globalReducer(state, action);
     }
     case "NEW_ACCOUNT":

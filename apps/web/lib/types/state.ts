@@ -13,6 +13,7 @@ import {
   type CreateTransactionDialogStep,
 } from "@/lib/types/transaction";
 import { type Script, type Export } from "@/lib/types/script";
+import { type Store } from "@/lib/types/store";
 import defaultScripts from "@/lib/types/default-scripts";
 import defaultComponents from "@/lib/types/default-components";
 
@@ -21,6 +22,9 @@ export type State = {
   networkId: NetworkId;
   blockNum: number;
   serializedMockChain: Uint8Array | null;
+  syncingState: boolean;
+  nextState: State | null;
+  nextStore: Store | null;
   // ACCOUNTS
   createWalletDialogOpen: boolean;
   createFaucetDialogOpen: boolean;
@@ -75,6 +79,9 @@ export const defaultState = (): State => ({
   networkId: "mtst",
   blockNum: 0,
   serializedMockChain: null,
+  syncingState: false,
+  nextState: null,
+  nextStore: null,
   // ACCOUNTS
   createWalletDialogOpen: false,
   createFaucetDialogOpen: false,
