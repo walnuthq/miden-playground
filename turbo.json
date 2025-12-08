@@ -11,7 +11,7 @@
       "env": ["WEB_URL", "PACKAGES_PATH"]
     },
     "web#build": {
-      "env": ["ENVIRONMENT", "NEXT_PUBLIC_API_URL"]
+      "env": ["NEXT_PUBLIC_API_URL"]
     },
     "lint": {
       "dependsOn": ["^lint"]
