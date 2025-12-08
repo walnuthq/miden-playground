@@ -2,6 +2,8 @@ import { cp, writeFile, readFile, rm, readdir, mkdir } from "node:fs/promises";
 import { execFile, fileExists } from "@/lib/utils";
 import { defaultDependencies, type Export, type Dependency } from "@/lib/types";
 
+const projectRoot = process.env.NODE_ENV !== "production" ? "." : "../../../..";
+
 const packagesPath = process.env.PACKAGES_PATH ?? "/tmp";
 
 export const cargoMidenVersion = async () => {
@@ -50,7 +52,7 @@ export const newPackage = async ({
   const dependencies = defaultDependencies();
   if (example === "none") {
     // await setupDefaultPackagesDir();
-    const rust = await readFile(`templates/${type}.rs`, "utf-8");
+    const rust = await readFile(`${projectRoot}/templates/${type}.rs`, "utf-8");
     await generatePackageDir({
       packageDir,
       name,
@@ -60,9 +62,13 @@ export const newPackage = async ({
     });
   } else {
     console.info(`cp -r examples/${example} ${packagesPath}/${packageDir}`);
-    await cp(`examples/${example}`, `${packagesPath}/${packageDir}`, {
-      recursive: true,
-    });
+    await cp(
+      `${projectRoot}/examples/${example}`,
+      `${packagesPath}/${packageDir}`,
+      {
+        recursive: true,
+      }
+    );
   }
   compilePackage(packageDir);
   const rust = await readRust(packageDir);
@@ -102,7 +108,7 @@ export const generatePackageDir = async ({
   await Promise.all([
     mkdir(`${packagesPath}/${packageDir}/src`),
     cp(
-      "default-packages/counter-contract/cargo-generate.toml",
+      `${projectRoot}/default-packages/counter-contract/cargo-generate.toml`,
       `${packagesPath}/${packageDir}/cargo-generate.toml`
     ),
     generateCargoToml({
@@ -112,7 +118,7 @@ export const generatePackageDir = async ({
       dependencies,
     }),
     cp(
-      "default-packages/counter-contract/rust-toolchain.toml",
+      `${projectRoot}/default-packages/counter-contract/rust-toolchain.toml`,
       `${packagesPath}/${packageDir}/rust-toolchain.toml`
     ),
   ]);
@@ -203,7 +209,7 @@ const readPackageMetadata = async (maspPath: string) => {
     "./miden_package_introspection",
     [maspPath],
     {
-      cwd: "miden-package-introspection/target/release",
+      cwd: `${projectRoot}/miden-package-introspection/target/release`,
     }
   );
   const { exports, dependencies } = JSON.parse(stdout) as {

@@ -6,13 +6,13 @@
   "scripts": {
     "dev": "next dev --turbopack -p 3001",
     "build": "next build",
-    "start": "node .next/standalone/apps/api/server.js",
+    "start": "PORT=3001 node .next/standalone/apps/api/server.js",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "next": "^16.0.7",
+    "next": "^16.0.8",
     "react": "^19.2.1",
     "uuid": "^13.0.0"
   },

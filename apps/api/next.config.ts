@@ -10,8 +10,7 @@ const nextConfig: NextConfig = {
           { key: "Access-Control-Allow-Credentials", value: "true" },
           {
             key: "Access-Control-Allow-Origin",
-            // value: process.env.WEB_URL,
-            value: "*",
+            value: process.env.WEB_URL,
           },
           {
             key: "Access-Control-Allow-Methods",

@@ -9,4 +9,5 @@ export const GET = async () =>
       PACKAGES_PATH: process.env.PACKAGES_PATH,
     },
     cargoMidenVersion: await cargoMidenVersion(),
+    cwd: process.cwd(),
   });
