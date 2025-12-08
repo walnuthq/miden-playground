@@ -89,8 +89,7 @@ end
 const counterContract: Script = {
   ...defaultScript(),
   id: "counter-contract",
-  name: "Counter Contract",
-  packageName: "counter-contract",
+  name: "counter-contract",
   type: "account",
   status: "compiled",
   readOnly: true,
@@ -106,7 +105,6 @@ const counterContract: Script = {
         results: ["Felt"],
       },
       readOnly: true,
-      storageRead: { type: "value", index: 0 },
     },
     {
       ...defaultExport(),

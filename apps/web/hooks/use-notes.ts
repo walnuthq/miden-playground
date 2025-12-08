@@ -15,6 +15,7 @@ import useWebClient from "@/hooks/use-web-client";
 const useNotes = () => {
   const { midenSdk } = useMidenSdk();
   const {
+    tutorialId, // TODO
     inputNotes,
     exportNoteDialogOpen,
     importNoteDialogOpen,
@@ -85,17 +86,8 @@ const useNotes = () => {
       MidenArrays,
     } = midenSdk;
     const note =
-      scriptId === "counter-note"
-        ? await clientCreateNoteFromScript({
-            client,
-            senderAccountId,
-            recipientAccountId,
-            type,
-            script,
-            scripts,
-            midenSdk,
-          })
-        : Note.createP2IDENote(
+      tutorialId === "timelock-p2id-note"
+        ? Note.createP2IDENote(
             AccountId.fromHex(senderAccountId),
             AccountId.fromHex(recipientAccountId),
             new NoteAssets([
@@ -105,7 +97,19 @@ const useNotes = () => {
             Number(noteInputs[2]),
             type === "public" ? NoteType.Public : NoteType.Private,
             new Felt(0n)
-          );
+          )
+        : clientCreateNoteFromScript({
+            client,
+            senderAccountId,
+            recipientAccountId,
+            script,
+            type,
+            faucetAccountId,
+            amount,
+            noteInputs,
+            scripts,
+            midenSdk,
+          });
     const transactionRequest = new TransactionRequestBuilder()
       .withOwnOutputNotes(
         new MidenArrays.OutputNoteArray([OutputNote.full(note)])

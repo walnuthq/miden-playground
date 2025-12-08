@@ -3,13 +3,12 @@ import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
 import Step3Content from "@/components/tutorials/tutorial6/step3.mdx";
 import useScripts from "@/hooks/use-scripts";
-import defaultScripts from "@/lib/types/default-scripts";
+import { defaultScriptIds } from "@/lib/types/default-scripts";
 
 const useCompleted = () => {
   const { scripts } = useScripts();
-  const defaultScriptIds = defaultScripts.map(({ id }) => id);
   const script = scripts.find(
-    ({ id, type }) => !defaultScriptIds.includes(id) && type === "note"
+    ({ id, type }) => !defaultScriptIds.includes(id) && type === "note-script"
   );
   const firstMatches = script?.rust.match(
     /let\s+timelock_height\s*=\s*inputs\[2\];/

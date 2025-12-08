@@ -2,6 +2,8 @@ import type * as MidenSdkNs from "@demox-labs/miden-sdk";
 
 export type MidenSdk = typeof MidenSdkNs;
 
+export type Buffer = { type: "Buffer"; data: number[] };
+
 // MISSING TYPES
 
 type WasmOutputNotesType = {

@@ -88,9 +88,8 @@ end
 const p2id: Script = {
   ...defaultScript(),
   id: "p2id",
-  name: "P2ID",
-  packageName: "p2id",
-  type: "note",
+  name: "p2id",
+  type: "note-script",
   status: "compiled",
   readOnly: true,
   rust: p2idRust,

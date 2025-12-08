@@ -9,12 +9,20 @@ import {
 import CopyButton from "@/components/lib/copy-button";
 import { type Script, type Export } from "@/lib/types/script";
 
-const procedureSignature = (procedureExport: Export) => {
-  let result = `fn ${procedureExport.name.replaceAll("-", "_")}(`;
-  result += procedureExport.signature.params.map((param) => param).join(", ");
+const procedureSignature = ({
+  name,
+  signature: { params, results },
+}: Export) => {
+  let result = `fn ${name.replaceAll("-", "_")}(`;
+  result += params.map((param) => param).join(", ");
   result += ")";
-  if (procedureExport.signature.results.length > 0) {
-    result += ` -> ${procedureExport.signature.results[0]}`;
+  if (results.length > 0) {
+    result += ` -> `;
+    if (results.length === 1) {
+      result += "Felt";
+    } else if (results.length === 4) {
+      result += "Word";
+    }
   }
   return result;
 };

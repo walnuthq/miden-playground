@@ -19,16 +19,38 @@ const NoteInformation = ({ inputNote }: { inputNote: InputNote }) => {
         <NoteInformationTable inputNote={inputNote} />
       </div>
       <div className="flex flex-col gap-2">
-        <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
-          Note Assets
-        </h4>
-        <FungibleAssetsTable fungibleAssets={inputNote.fungibleAssets} />
+        <div className="flex items-center">
+          <div>
+            <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
+              Note Assets
+            </h4>
+            {inputNote.fungibleAssets.length === 0 && (
+              <p className="text-muted-foreground text-sm">
+                This note has no assets.
+              </p>
+            )}
+          </div>
+        </div>
+        {inputNote.fungibleAssets.length > 0 && (
+          <FungibleAssetsTable fungibleAssets={inputNote.fungibleAssets} />
+        )}
       </div>
       <div className="flex flex-col gap-2">
-        <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
-          Raw Note Inputs
-        </h4>
-        <NoteInputsTable inputs={inputNote.inputs} />
+        <div className="flex items-center">
+          <div>
+            <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
+              Raw Note Inputs
+            </h4>
+            {inputNote.fungibleAssets.length === 0 && (
+              <p className="text-muted-foreground text-sm">
+                This note has no inputs.
+              </p>
+            )}
+          </div>
+        </div>
+        {inputNote.inputs.length > 0 && (
+          <NoteInputsTable inputs={inputNote.inputs} />
+        )}
       </div>
       {/* TODO: better decoded note inputs using inputNote.scriptId */}
       {script?.id === "p2id" && (

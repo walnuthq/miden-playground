@@ -34,6 +34,7 @@ export type State = {
   verifyAccountComponentDialogAccountId: string;
   accounts: Account[];
   // TRANSACTIONS
+  submittingTransaction: boolean;
   createTransactionDialogOpen: boolean;
   createTransactionDialogAccountId: string;
   createTransactionDialogTransactionType: TransactionType;
@@ -58,6 +59,8 @@ export type State = {
   invokeProcedureArgumentsDialogSenderAccountId: string;
   invokeProcedureArgumentsDialogScriptId: string;
   invokeProcedureArgumentsDialogProcedure: Export | null;
+  addDependencyDialogOpen: boolean;
+  addDependencyDialogScriptId: string;
   scripts: Script[];
   // COMPONENTS
   createComponentDialogOpen: boolean;
@@ -91,6 +94,7 @@ export const defaultState = (): State => ({
   verifyAccountComponentDialogAccountId: "",
   accounts: [],
   // TRANSACTIONS
+  submittingTransaction: false,
   createTransactionDialogOpen: false,
   createTransactionDialogAccountId: "",
   createTransactionDialogTransactionType: "consume",
@@ -115,6 +119,8 @@ export const defaultState = (): State => ({
   invokeProcedureArgumentsDialogSenderAccountId: "",
   invokeProcedureArgumentsDialogScriptId: "",
   invokeProcedureArgumentsDialogProcedure: null,
+  addDependencyDialogOpen: false,
+  addDependencyDialogScriptId: "",
   scripts: defaultScripts,
   // COMPONENTS
   createComponentDialogOpen: false,

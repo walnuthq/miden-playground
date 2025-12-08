@@ -1,7 +1,8 @@
 "use client";
+import { type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronRight, type LucideIcon } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
@@ -25,11 +26,12 @@ const NavMain = ({
   items: {
     title: string;
     url: string;
-    icon: LucideIcon;
+    icon: ReactNode;
     items?: {
       title: string;
       url: string;
-      icon?: LucideIcon;
+      icon?: ReactNode;
+      leftIcon?: ReactNode;
     }[];
   }[];
 }) => {
@@ -56,7 +58,7 @@ const NavMain = ({
                 }
               >
                 <Link href={item.url}>
-                  <item.icon />
+                  {item.icon}
                   <span>{item.title}</span>
                 </Link>
               </SidebarMenuButton>
@@ -75,9 +77,15 @@ const NavMain = ({
                         asChild
                         isActive={pathname === subItem.url}
                       >
-                        <Link href={subItem.url}>
-                          {subItem.icon && <subItem.icon />}
-                          <span>{subItem.title}</span>
+                        <Link
+                          href={subItem.url}
+                          className="flex items-center justify-between"
+                        >
+                          <div className="flex items-center gap-1">
+                            {subItem.icon}
+                            <span>{subItem.title}</span>
+                          </div>
+                          {subItem.leftIcon}
                         </Link>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>

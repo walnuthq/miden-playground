@@ -108,9 +108,8 @@ end
 const basicAuth: Script = {
   ...defaultScript(),
   id: "basic-auth",
-  name: "Basic Auth",
-  packageName: "basic-auth",
-  type: "account",
+  name: "basic-auth",
+  type: "authentication-component",
   status: "compiled",
   readOnly: true,
   rust: basicAuthRust,
@@ -120,7 +119,7 @@ const basicAuth: Script = {
       ...defaultExport(),
       name: "auth_tx_rpo_falcon512",
       digest:
-        "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "0x97271c437f9715b37fe022de0283a093a3f89f5dbc918970c93c5ab398b863d3",
     },
   ],
 };

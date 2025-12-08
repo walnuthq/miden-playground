@@ -30,7 +30,7 @@ import {
   accountTypes,
 } from "@/lib/types/account";
 import useComponents from "@/hooks/use-components";
-import defaultComponents from "@/lib/types/default-components";
+import { defaultComponentIds } from "@/lib/types/default-components";
 
 const DeployAccountDialog = () => {
   const { deployAccountDialogOpen, deployAccount, closeDeployAccountDialog } =
@@ -45,7 +45,6 @@ const DeployAccountDialog = () => {
   const [componentId, setComponentId] = useState("");
   const authComponent = components.find(({ id }) => id === authComponentId);
   const component = components.find(({ id }) => id === componentId);
-  const defaultComponentIds = defaultComponents.map(({ id }) => id);
   const onClose = () => {
     setAccountType("regular-account-updatable-code");
     setStorageMode("public");
@@ -170,7 +169,7 @@ const DeployAccountDialog = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {components
-                    .filter(({ type }) => type === "auth")
+                    .filter(({ type }) => type === "authentication-component")
                     .map(({ id, name }) => (
                       <SelectItem key={id} value={id}>
                         {name}

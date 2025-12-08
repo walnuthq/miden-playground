@@ -20,6 +20,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@workspace/ui/components/dialog";
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+  FieldSet,
+} from "@workspace/ui/components/field";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import useScripts from "@/hooks/use-scripts";
@@ -37,20 +44,21 @@ const CreateScriptDialog = () => {
   const [loading, setLoading] = useState(false);
   const [scriptType, setScriptType] = useState<ScriptType>("account");
   const [scriptExample, setScriptExample] = useState<ScriptExample | "none">(
-    "counter-contract" // "none"
+    // "counter-contract"
+    "none"
   );
   useEffect(() => {
-    if (scriptType === "account") {
-      setScriptExample("counter-contract");
-    } else if (scriptType === "note") {
-      setScriptExample("p2id-note");
-    }
-    // setScriptExample("none");
+    // if (scriptType === "account") {
+    //   setScriptExample("counter-contract");
+    // } else if (scriptType === "note") {
+    //   setScriptExample("p2id-note");
+    // }
+    setScriptExample("none");
   }, [scriptType]);
   const onClose = () => {
     setScriptType("account");
-    setScriptExample("counter-contract");
-    // setScriptExample("none");
+    // setScriptExample("counter-contract");
+    setScriptExample("none");
     closeCreateScriptDialog();
   };
   return (
@@ -85,59 +93,69 @@ const CreateScriptDialog = () => {
             router.push(`/scripts/${script.id}`);
           }}
         >
-          <div className="grid grid-cols-2 gap-4">
-            <div className="grid gap-3 col-span-2">
-              <Label htmlFor="name">Name</Label>
-              <Input id="name" name="name" required />
-            </div>
-            <div className="grid gap-3">
-              <Label htmlFor="type">Type</Label>
-              <Select
-                onValueChange={(type) => setScriptType(type as ScriptType)}
-                value={scriptType}
-              >
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Select type…" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.keys(scriptTypes).map((type) => (
-                    <SelectItem key={type} value={type}>
-                      {scriptTypes[type as ScriptType]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-3">
-              <Label htmlFor="example">Example</Label>
-              <Select
-                onValueChange={(value) =>
-                  setScriptExample(value as ScriptExample)
-                }
-                value={scriptExample}
-              >
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Select example" />
-                </SelectTrigger>
-                <SelectContent>
-                  {/* <SelectItem key="none" value="none">
-                    None
-                  </SelectItem> */}
-                  {Object.keys(scriptExamples)
-                    .map((id) => ({
-                      id,
-                      ...scriptExamples[id as ScriptExample],
-                    }))
-                    .filter(({ type }) => type === scriptType)
-                    .map(({ id, name }) => (
-                      <SelectItem key={id} value={id}>
-                        {name}
+          <FieldSet>
+            <FieldGroup className="grid grid-cols-2 gap-4">
+              <Field className="grid col-span-2">
+                <FieldLabel htmlFor="name">Name</FieldLabel>
+                <Input
+                  id="name"
+                  name="name"
+                  required
+                  pattern="^[a-z]+[a-z0-9\-]*[a-z0-9]+$"
+                />
+                <FieldDescription>
+                  Package name, 2 characters minimum.
+                </FieldDescription>
+              </Field>
+              <Field className="grid gap-3">
+                <Label htmlFor="type">Type</Label>
+                <Select
+                  onValueChange={(type) => setScriptType(type as ScriptType)}
+                  value={scriptType}
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select type…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.keys(scriptTypes).map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {scriptTypes[type as ScriptType]}
                       </SelectItem>
                     ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field className="grid gap-3">
+                <Label htmlFor="example">Example</Label>
+                <Select
+                  onValueChange={(value) =>
+                    setScriptExample(value as ScriptExample)
+                  }
+                  value={scriptExample}
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select example" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem key="none" value="none">
+                      None
+                    </SelectItem>
+                    {Object.keys(scriptExamples)
+                      .map((id) => ({
+                        id,
+                        ...scriptExamples[id as ScriptExample],
+                      }))
+                      .filter(({ type }) => type === scriptType)
+                      .map(({ id, name }) => (
+                        <SelectItem key={id} value={id}>
+                          {name}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+            </FieldGroup>
+          </FieldSet>
         </form>
         <DialogFooter>
           <DialogClose asChild>

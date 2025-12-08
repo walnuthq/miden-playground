@@ -17,6 +17,7 @@ const SelectAccountDropdownMenu = ({
   onValueChange,
   selectWallets = false,
   selectFaucets = false,
+  withoutFaucets = false,
   without = "",
   showFaucetsAsAssets = false,
 }: {
@@ -24,16 +25,21 @@ const SelectAccountDropdownMenu = ({
   onValueChange: Dispatch<SetStateAction<string>>;
   selectWallets?: boolean;
   selectFaucets?: boolean;
+  withoutFaucets?: boolean;
   without?: string;
   showFaucetsAsAssets?: boolean;
 }) => {
   const { accounts, wallets, faucets } = useAccounts();
   const account = accounts.find(({ id }) => id === value);
-  const shownAccounts = accounts.filter(({ id }) => id !== without);
   const shownWallets = wallets.filter(({ id }) => id !== without);
   const showWallets = selectWallets && shownWallets.length > 0;
   const shownFaucets = faucets.filter(({ id }) => id !== without);
-  const showFaucets = selectFaucets && shownFaucets.length > 0;
+  const showFaucets =
+    selectFaucets && shownFaucets.length > 0 && !withoutFaucets;
+  const faucetIds = faucets.map(({ id }) => id);
+  const shownAccounts = accounts.filter(({ id }) =>
+    id !== without && withoutFaucets ? !faucetIds.includes(id) : true
+  );
   const disabled =
     (selectWallets && !showWallets) || (selectFaucets && !showFaucets);
   return (

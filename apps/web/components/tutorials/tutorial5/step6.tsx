@@ -4,12 +4,11 @@ import TutorialAlert from "@/components/tutorials/tutorial-alert";
 import Step6Content from "@/components/tutorials/tutorial5/step6.mdx";
 import useAccounts from "@/hooks/use-accounts";
 import useComponents from "@/hooks/use-components";
-import defaultComponents from "@/lib/types/default-components";
+import { defaultComponentIds } from "@/lib/types/default-components";
 
 const useCompleted = () => {
   const { accounts } = useAccounts();
   const { components } = useComponents();
-  const defaultComponentIds = defaultComponents.map(({ id }) => id);
   const component = components.find(
     ({ id, type }) => !defaultComponentIds.includes(id) && type === "account"
   );
@@ -25,7 +24,6 @@ const Step6: TutorialStep = {
   Content: () => {
     const { accounts } = useAccounts();
     const { components } = useComponents();
-    const defaultComponentIds = defaultComponents.map(({ id }) => id);
     const component = components.find(
       ({ id, type }) => !defaultComponentIds.includes(id) && type === "account"
     );

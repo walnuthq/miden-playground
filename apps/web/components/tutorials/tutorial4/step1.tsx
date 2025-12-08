@@ -6,7 +6,7 @@ import Step1Content from "@/components/tutorials/tutorial4/step1.mdx";
 
 const useCompleted = () => {
   const pathname = usePathname();
-  return pathname === "/scripts/counter-contract";
+  return pathname === "/scripts/counter-value-contract";
 };
 
 const Step1: TutorialStep = {

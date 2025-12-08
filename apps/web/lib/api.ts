@@ -5,16 +5,14 @@ import {
   type Dependency,
   type ScriptType,
 } from "@/lib/types/script";
-
-// const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-// const apiUrl = "/api";
+import { type Buffer } from "@/lib/types";
 
 export const createScript = async ({
-  packageName,
+  name,
   type,
   example,
 }: {
-  packageName: string;
+  name: string;
   type: ScriptType;
   example: ScriptExample | "none";
 }) => {
@@ -22,11 +20,15 @@ export const createScript = async ({
   const response = await fetch(`${apiUrl}/scripts`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ packageName, type, example }),
+    body: JSON.stringify({ name, type, example }),
   });
   const result = await response.json();
-  const { id, rust } = result as { id: string; rust: string };
-  return { id, rust };
+  const { id, rust, dependencies } = result as {
+    id: string;
+    rust: string;
+    dependencies: Dependency[];
+  };
+  return { id, rust, dependencies };
 };
 
 export const compileScript = async (script: Script) => {
@@ -37,7 +39,12 @@ export const compileScript = async (script: Script) => {
   const response = await fetch(`${apiUrl}/scripts/${script.id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ rust: script.rust }),
+    body: JSON.stringify({
+      name: script.name,
+      type: script.type,
+      rust: script.rust,
+      dependencies: script.dependencies,
+    }),
   });
   const result = await response.json();
   const {
@@ -53,7 +60,7 @@ export const compileScript = async (script: Script) => {
     error: string;
     masm: string;
     root: string;
-    package: { type: "Buffer"; data: number[] };
+    package: Buffer;
     exports: Export[];
     dependencies: Dependency[];
   };
@@ -62,7 +69,7 @@ export const compileScript = async (script: Script) => {
     error,
     masm,
     root,
-    packageBytes: packageBuffer.data,
+    packageBytes: packageBuffer?.data,
     exports,
     dependencies,
   };

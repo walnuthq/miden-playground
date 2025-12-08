@@ -9,6 +9,12 @@ import {
   Home,
   FileCode,
   Puzzle,
+  CircleX,
+  CircleDashed,
+  CircleCheckBig,
+  FileText,
+  Key,
+  ReceiptText,
 } from "lucide-react";
 import { useIsClient } from "usehooks-ts";
 import NavMain from "@/components/lib/nav-main";
@@ -28,10 +34,10 @@ import useTransactions from "@/hooks/use-transactions";
 import useNotes from "@/hooks/use-notes";
 import useScripts from "@/hooks/use-scripts";
 import useComponents from "@/hooks/use-components";
-import defaultScripts from "@/lib/types/default-scripts";
-import defaultComponents from "@/lib/types/default-components";
+import { defaultScriptIds } from "@/lib/types/default-scripts";
+import { defaultComponentIds } from "@/lib/types/default-components";
 import useTutorials from "@/hooks/use-tutorials";
-import { MIDEN_FAUCET_ADDRESS } from "@/lib/constants";
+import { BASIC_WALLET_CODE, MIDEN_FAUCET_ADDRESS } from "@/lib/constants";
 import useGlobalContext from "@/components/global-context/hook";
 
 const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
@@ -53,25 +59,31 @@ const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
     {
       title: "Home",
       url: "/",
-      icon: Home,
+      icon: <Home />,
     },
     {
       title: "Accounts",
       url: "/accounts",
-      icon: UserCircle,
+      icon: <UserCircle />,
       items: accounts
         .sort((a, b) => b.updatedAt - a.updatedAt)
         .slice(0, 5)
-        .map(({ name, address, isFaucet }) => ({
+        .map(({ name, address, isFaucet, code }) => ({
           title: name,
           url: `/accounts/${address}`,
-          icon: isFaucet ? HandCoins : Wallet,
+          icon: isFaucet ? (
+            <HandCoins className="size-4" />
+          ) : code === BASIC_WALLET_CODE ? (
+            <Wallet className="size-4" />
+          ) : (
+            <FileText className="size-4" />
+          ),
         })),
     },
     {
       title: "Transactions",
       url: "/transactions",
-      icon: Route,
+      icon: <Route />,
       items: transactions
         .sort((a, b) => b.updatedAt - a.updatedAt)
         .slice(0, 5)
@@ -83,7 +95,7 @@ const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
     {
       title: "Notes",
       url: "/notes",
-      icon: File,
+      icon: <ReceiptText />,
       items: inputNotes
         .sort((a, b) => b.updatedAt - a.updatedAt)
         .slice(0, 5)
@@ -93,26 +105,42 @@ const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
         })),
     },
   ];
-  const defaultScriptIds = defaultScripts.map(({ id }) => id);
-  const defaultComponentIds = defaultComponents.map(({ id }) => id);
   const editorItems = [
     {
       title: "Scripts",
       url: "/scripts",
-      icon: FileCode,
+      icon: <FileCode />,
       items: scripts
         .filter(({ id }) => !defaultScriptIds.includes(id))
         .sort((a, b) => b.updatedAt - a.updatedAt)
         .slice(0, 5)
-        .map(({ id, name }) => ({
+        .map(({ id, name, type, status }) => ({
           title: name,
           url: `/scripts/${id}`,
+          icon:
+            type === "account" ? (
+              <UserCircle className="size-4" />
+            ) : type === "note-script" ? (
+              <File className="size-4" />
+            ) : type === "transaction-script" ? (
+              <Route className="size-4" />
+            ) : (
+              <Key className="size-4" />
+            ),
+          leftIcon:
+            status === "draft" ? (
+              <CircleDashed />
+            ) : status === "compiled" ? (
+              <CircleCheckBig className="text-green-500!" />
+            ) : (
+              <CircleX className="text-red-500!" />
+            ),
         })),
     },
     {
       title: "Components",
       url: "/components",
-      icon: Puzzle,
+      icon: <Puzzle />,
       items: components
         .filter(({ id }) => !defaultComponentIds.includes(id))
         .sort((a, b) => b.updatedAt - a.updatedAt)

@@ -1,4 +1,3 @@
-import { kebabCase } from "lodash";
 import useGlobalContext from "@/components/global-context/hook";
 import {
   type Script,
@@ -26,6 +25,8 @@ const useScripts = () => {
     invokeProcedureArgumentsDialogSenderAccountId,
     invokeProcedureArgumentsDialogScriptId,
     invokeProcedureArgumentsDialogProcedure,
+    addDependencyDialogOpen,
+    addDependencyDialogScriptId,
     dispatch,
   } = useGlobalContext();
   const { client } = useWebClient();
@@ -50,15 +51,18 @@ const useScripts = () => {
     type: ScriptType;
     example: ScriptExample | "none";
   }) => {
-    const packageName = example ?? kebabCase(name);
-    const { id, rust } = await createScript({ packageName, type, example });
+    const { id, rust, dependencies } = await createScript({
+      name,
+      type,
+      example,
+    });
     const script: Script = {
       ...defaultScript(),
       id,
       name,
-      packageName,
       type,
       rust,
+      dependencies,
       updatedAt: Date.now(),
     };
     dispatch({
@@ -104,17 +108,16 @@ const useScripts = () => {
       ForeignAccount,
       AccountId,
       MidenArrays,
+      Package,
     } = midenSdk;
     const builder = client.createScriptBuilder();
-    const contractName = script.id.replaceAll("-", "_");
-    const accountComponentLibrary = builder.buildLibrary(
-      `external_contract::${contractName}`,
-      script.masm
-    );
+    const contractName = script.name.replaceAll("-", "_");
+    const accountComponentLibrary = script.masm
+      ? builder.buildLibrary(`external_contract::${contractName}`, script.masm)
+      : Package.deserialize(new Uint8Array(script.packageBytes)).asLibrary();
     builder.linkDynamicLibrary(accountComponentLibrary);
     const transactionScript = builder.compileTxScript(
       invokeProcedureCustomTransactionScript({
-        contractName,
         procedureExport,
         procedureInputs,
       })
@@ -163,6 +166,15 @@ const useScripts = () => {
     dispatch({
       type: "CLOSE_INVOKE_PROCEDURE_ARGUMENTS_DIALOG",
     });
+  const openAddDependencyDialog = ({ scriptId }: { scriptId: string }) =>
+    dispatch({
+      type: "OPEN_ADD_DEPENDENCY_DIALOG",
+      payload: { scriptId },
+    });
+  const closeAddDependencyDialog = () =>
+    dispatch({
+      type: "CLOSE_ADD_DEPENDENCY_DIALOG",
+    });
   return {
     scripts,
     createScriptDialogOpen,
@@ -172,6 +184,8 @@ const useScripts = () => {
     invokeProcedureArgumentsDialogSenderAccountId,
     invokeProcedureArgumentsDialogScriptId,
     invokeProcedureArgumentsDialogProcedure,
+    addDependencyDialogOpen,
+    addDependencyDialogScriptId,
     openCreateScriptDialog,
     closeCreateScriptDialog,
     openDeleteScriptAlertDialog,
@@ -182,6 +196,8 @@ const useScripts = () => {
     invokeProcedure,
     openInvokeProcedureArgumentsDialog,
     closeInvokeProcedureArgumentsDialog,
+    openAddDependencyDialog,
+    closeAddDependencyDialog,
   };
 };
 

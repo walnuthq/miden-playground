@@ -22,10 +22,9 @@ import { type Component } from "@/lib/types/component";
 import useScripts from "@/hooks/use-scripts";
 import useComponents from "@/hooks/use-components";
 import {
-  BASIC_WALLET_CODE,
-  COUNTER_CONTRACT_CODE,
-  FUNGIBLE_FAUCET_CODE,
   MIDEN_FAUCET_ADDRESS,
+  BASIC_WALLET_CODE,
+  COUNTER_CONTRACT_ADDRESS,
 } from "@/lib/constants";
 import { counterMapContractMasm } from "@/lib/types/default-scripts/counter-map-contract";
 import { sleep } from "@/lib/utils";
@@ -168,26 +167,14 @@ const useAccounts = () => {
       consumableNoteIds: consumableNotes.map((consumableNote) =>
         consumableNote.inputNoteRecord().id().toString()
       ),
-      scripts,
+      // scripts,
       midenSdk,
     });
-    if (account.code === FUNGIBLE_FAUCET_CODE) {
-      // faucets
-      account.components = ["basic-fungible-faucet"];
-    } else if (account.code === COUNTER_CONTRACT_CODE) {
-      // Counter Contract
-      account.components = ["no-auth"];
-      if (
-        [
-          "interact-with-the-counter-contract",
-          "foreign-procedure-invocation",
-        ].includes(tutorialId)
-      ) {
-        account.components.push("counter-contract");
-      }
-    } else if (account.code === BASIC_WALLET_CODE) {
-      // Basic Wallet
-      account.components = ["basic-auth", "basic-wallet"];
+    if (
+      address === COUNTER_CONTRACT_ADDRESS &&
+      tutorialId === "interact-with-the-counter-contract"
+    ) {
+      account.components = ["no-auth", "counter-value-contract"];
     }
     const inputNotes = consumableNotes.map((consumableNote) =>
       wasmInputNoteToInputNote({
@@ -225,6 +212,7 @@ const useAccounts = () => {
     storageMode: AccountStorageMode;
     components: Component[];
   }) => {
+    dispatch({ type: "SUBMITTING_TRANSACTION" });
     const syncSummary = await client.syncState();
     const componentScriptIds = components.map(({ scriptId }) => scriptId);
     const componentScripts = scripts.filter(({ id }) =>

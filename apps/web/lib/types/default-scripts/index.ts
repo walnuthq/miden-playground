@@ -6,6 +6,7 @@ import p2id from "@/lib/types/default-scripts/p2id";
 // import p2ide from "@/lib/types/default-scripts/p2ide";
 import basicFungibleFaucet from "@/lib/types/default-scripts/basic-fungible-faucet";
 import basicWallet from "@/lib/types/default-scripts/basic-wallet";
+import counterContract from "@/lib/types/default-scripts/counter-contract";
 
 const defaultScripts = [
   std,
@@ -16,7 +17,9 @@ const defaultScripts = [
   // p2ide,
   basicFungibleFaucet,
   basicWallet,
-  // counterContractScript,
+  counterContract,
 ];
+
+export const defaultScriptIds = defaultScripts.map(({ id }) => id);
 
 export default defaultScripts;

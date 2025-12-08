@@ -212,9 +212,8 @@ end
 const p2ide: Script = {
   ...defaultScript(),
   id: "p2ide",
-  name: "P2IDE",
-  packageName: "p2ide",
-  type: "note",
+  name: "p2ide",
+  type: "note-script",
   status: "compiled",
   readOnly: true,
   rust: p2ideRust,

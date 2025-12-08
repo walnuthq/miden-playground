@@ -3,11 +3,10 @@ import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
 import Step4Content from "@/components/tutorials/tutorial5/step4.mdx";
 import useComponents from "@/hooks/use-components";
-import defaultComponents from "@/lib/types/default-components";
+import { defaultComponentIds } from "@/lib/types/default-components";
 
 const useCompleted = () => {
   const { components } = useComponents();
-  const defaultComponentIds = defaultComponents.map(({ id }) => id);
   const component = components.find(
     ({ id, type }) => !defaultComponentIds.includes(id) && type === "account"
   );

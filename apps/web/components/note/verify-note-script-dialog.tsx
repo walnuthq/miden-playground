@@ -33,7 +33,7 @@ const VerifyNoteScriptDialog = () => {
   const { scripts } = useScripts();
   const [loading, setLoading] = useState(false);
   const [scriptId, setScriptId] = useState("");
-  const shownScripts = scripts.filter(({ type }) => type === "note");
+  const shownScripts = scripts.filter(({ type }) => type === "note-script");
   const onClose = () => {
     setScriptId("");
     closeVerifyNoteScriptDialog();
@@ -64,9 +64,9 @@ const VerifyNoteScriptDialog = () => {
             });
             setLoading(false);
             if (verified) {
-              toast.success("Note script verified");
+              toast.success("Note script verified.");
             } else {
-              toast.error("Note script couldn't be verified");
+              toast.error("Note script couldn't be verified.");
             }
             onClose();
           }}

@@ -3,17 +3,30 @@ import { v4 } from "uuid";
 import { counterMapContractRust } from "@/lib/types/default-scripts/counter-map-contract";
 import { p2idRust } from "@/lib/types/default-scripts/p2id";
 import { sleep } from "@/lib/utils";
-import type { ScriptType, ScriptExample } from "@/lib/types/script";
+import {
+  type ScriptType,
+  type ScriptExample,
+  type Dependency,
+  defaultDependencies,
+} from "@/lib/types/script";
 
 type CreateScriptRequestBody = {
-  packageName: string;
+  name: string;
   type: ScriptType;
   example: ScriptExample;
 };
 
-const scriptsRust = {
+const scriptsRust: Record<ScriptExample, string> = {
   "counter-contract": counterMapContractRust,
   "p2id-note": p2idRust,
+} as const;
+
+const scriptsDependencies: Record<ScriptExample, Dependency[]> = {
+  "counter-contract": defaultDependencies(),
+  "p2id-note": [
+    ...defaultDependencies(),
+    { id: "basic-wallet", name: "basic-wallet", digest: "" },
+  ],
 } as const;
 
 export const POST = async (request: NextRequest) => {
@@ -21,6 +34,7 @@ export const POST = async (request: NextRequest) => {
   const { example } = body as CreateScriptRequestBody;
   const id = `${example}_${v4()}`;
   const rust = scriptsRust[example];
+  const dependencies = scriptsDependencies[example];
   await sleep(1000);
-  return NextResponse.json({ id, rust });
+  return NextResponse.json({ id, rust, dependencies });
 };

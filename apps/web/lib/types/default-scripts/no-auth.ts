@@ -92,9 +92,8 @@ end
 const noAuth: Script = {
   ...defaultScript(),
   id: "no-auth",
-  name: "No Auth",
-  packageName: "no-auth",
-  type: "account",
+  name: "no-auth",
+  type: "authentication-component",
   status: "compiled",
   readOnly: true,
   rust: noAuthRust,

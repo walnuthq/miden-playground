@@ -56,6 +56,8 @@ const reducer = (state: State, action: Action): State => {
     }
     case "OPEN_CREATE_TRANSACTION_DIALOG":
     case "CLOSE_CREATE_TRANSACTION_DIALOG":
+    case "SUBMITTING_TRANSACTION":
+    case "TRANSACTION_SUBMITTED":
     case "SUBMIT_TRANSACTION": {
       return transactionReducer(state, action);
     }
@@ -78,7 +80,9 @@ const reducer = (state: State, action: Action): State => {
     case "UPDATE_SCRIPT":
     case "DELETE_SCRIPT":
     case "OPEN_INVOKE_PROCEDURE_ARGUMENTS_DIALOG":
-    case "CLOSE_INVOKE_PROCEDURE_ARGUMENTS_DIALOG": {
+    case "CLOSE_INVOKE_PROCEDURE_ARGUMENTS_DIALOG":
+    case "OPEN_ADD_DEPENDENCY_DIALOG":
+    case "CLOSE_ADD_DEPENDENCY_DIALOG": {
       return scriptReducer(state, action);
     }
     case "OPEN_CREATE_COMPONENT_DIALOG":

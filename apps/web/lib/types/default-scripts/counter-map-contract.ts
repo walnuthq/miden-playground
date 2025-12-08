@@ -89,8 +89,7 @@ end
 const counterMapContract: Script = {
   ...defaultScript(),
   id: "counter-map-contract",
-  name: "Counter Map Contract",
-  packageName: "counter-map-contract",
+  name: "counter-map-contract",
   type: "account",
   status: "compiled",
   readOnly: true,
@@ -107,7 +106,6 @@ const counterMapContract: Script = {
         results: ["Felt"],
       },
       readOnly: true,
-      storageRead: { type: "map", index: 0, key: ["0", "0", "0", "1"] },
     },
     {
       ...defaultExport(),

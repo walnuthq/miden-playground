@@ -35,7 +35,14 @@ export type ScriptAction =
         procedureExport: Export;
       };
     }
-  | { type: "CLOSE_INVOKE_PROCEDURE_ARGUMENTS_DIALOG" };
+  | { type: "CLOSE_INVOKE_PROCEDURE_ARGUMENTS_DIALOG" }
+  | {
+      type: "OPEN_ADD_DEPENDENCY_DIALOG";
+      payload: {
+        scriptId: string;
+      };
+    }
+  | { type: "CLOSE_ADD_DEPENDENCY_DIALOG" };
 
 const reducer = (state: State, action: ScriptAction): State => {
   switch (action.type) {
@@ -112,6 +119,20 @@ const reducer = (state: State, action: ScriptAction): State => {
         invokeProcedureArgumentsDialogSenderAccountId: "",
         invokeProcedureArgumentsDialogScriptId: "",
         invokeProcedureArgumentsDialogProcedure: null,
+      };
+    }
+    case "OPEN_ADD_DEPENDENCY_DIALOG": {
+      return {
+        ...state,
+        addDependencyDialogOpen: true,
+        addDependencyDialogScriptId: action.payload.scriptId,
+      };
+    }
+    case "CLOSE_ADD_DEPENDENCY_DIALOG": {
+      return {
+        ...state,
+        addDependencyDialogOpen: false,
+        addDependencyDialogScriptId: "",
       };
     }
   }
