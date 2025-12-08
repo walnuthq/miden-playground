@@ -198,22 +198,20 @@ const DeployAccountDialog = () => {
                 </SelectContent>
               </Select>
             </div>
-            {component?.storageSlots.map((storageSlot, index) => {
-              return (
-                <div
-                  key={`${index}-${storageSlot.name}-${storageSlot.type}-${storageSlot.value}`}
-                  className="grid gap-3 col-span-2"
-                >
-                  <Label htmlFor={`slot-${index}`}>{storageSlot.name}</Label>
-                  <Input
-                    id={`slot-${index}`}
-                    name={`slot-${index}`}
-                    defaultValue={storageSlot.value}
-                    required
-                  />
-                </div>
-              );
-            })}
+            {component?.storageSlots.map((storageSlot, index) => (
+              <div
+                key={`${index}-${storageSlot.name}-${storageSlot.type}-${storageSlot.value}`}
+                className="grid gap-3 col-span-2"
+              >
+                <Label htmlFor={`slot-${index}`}>{storageSlot.name}</Label>
+                <Input
+                  id={`slot-${index}`}
+                  name={`slot-${index}`}
+                  defaultValue={storageSlot.value}
+                  required
+                />
+              </div>
+            ))}
           </div>
         </form>
         <DialogFooter>

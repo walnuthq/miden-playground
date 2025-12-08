@@ -45,39 +45,49 @@ const ProceduresTableRow = ({
           <TableCell className="flex items-center justify-between gap-2">
             <span>{result}</span>
             <Button
-              disabled={loading}
+              disabled={loading || (account.isNew && procedureExport.readOnly)}
               onClick={async () => {
                 setLoading(true);
                 if (procedureExport.readOnly) {
-                  const word = await clientReadWord({
-                    client,
-                    accountId: account.id,
-                    procedureExport,
-                    midenSdk,
-                  });
-                  if (procedureExport.signature.results.length === 1) {
-                    const [, , , felt = 0n] = word.toU64s();
-                    setResult(felt.toString());
-                  } else if (procedureExport.signature.results.length === 4) {
-                    setResult(word.toHex());
+                  try {
+                    const word = await clientReadWord({
+                      client,
+                      accountId: account.id,
+                      procedureExport,
+                      midenSdk,
+                    });
+                    if (procedureExport.signature.results.length === 1) {
+                      const [, , , felt = 0n] = word.toU64s();
+                      setResult(felt.toString());
+                    } else if (procedureExport.signature.results.length === 4) {
+                      setResult(word.toHex());
+                    }
+                  } catch (error) {
+                    setResult("ERROR");
+                    console.error(error);
                   }
                 } else if (procedureExport.signature.params.length === 0) {
-                  const transactionRecord = await invokeProcedure({
-                    senderAccountId: account.id,
-                    scriptId: script.id,
-                    procedureExport,
-                  });
-                  toast("Transaction submitted.", {
-                    action: {
-                      label: "View on MidenScan",
-                      onClick: () =>
-                        window.open(
-                          `https://testnet.midenscan.com/tx/${transactionRecord.id().toHex()}`,
-                          "_blank",
-                          "noopener noreferrer"
-                        ),
-                    },
-                  });
+                  try {
+                    const transactionRecord = await invokeProcedure({
+                      senderAccountId: account.id,
+                      scriptId: script.id,
+                      procedureExport,
+                    });
+                    toast("Transaction submitted.", {
+                      action: {
+                        label: "View on MidenScan",
+                        onClick: () =>
+                          window.open(
+                            `https://testnet.midenscan.com/tx/${transactionRecord.id().toHex()}`,
+                            "_blank",
+                            "noopener noreferrer"
+                          ),
+                      },
+                    });
+                  } catch (error) {
+                    setResult("ERROR");
+                    console.error(error);
+                  }
                 } else {
                   openInvokeProcedureArgumentsDialog({
                     senderAccountId: account.id,
