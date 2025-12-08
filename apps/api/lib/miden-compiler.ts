@@ -50,14 +50,12 @@ export const newPackage = async ({
   const dependencies = defaultDependencies();
   if (example === "none") {
     // await setupDefaultPackagesDir();
-    console.info(`cp -r templates/${type} ${packagesPath}/${packageDir}`);
-    await cp(`templates/${type}`, `${packagesPath}/${packageDir}`, {
-      recursive: true,
-    });
-    await generateCargoToml({
+    const rust = await readFile(`templates/${type}.rs`, "utf-8");
+    await generatePackageDir({
       packageDir,
       name,
       type,
+      rust,
       dependencies,
     });
   } else {
@@ -202,9 +200,11 @@ export const compilePackage = async (packageDir: string) => {
 
 const readPackageMetadata = async (maspPath: string) => {
   const { stdout } = await execFile(
-    "cargo",
-    ["run", "--release", "--bin", "miden_package_introspection", maspPath],
-    { cwd: "miden-package-introspection" }
+    "./miden_package_introspection",
+    [maspPath],
+    {
+      cwd: "miden-package-introspection/target/release",
+    }
   );
   const { exports, dependencies } = JSON.parse(stdout) as {
     exports: Export[];
