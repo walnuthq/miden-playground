@@ -5,44 +5,97 @@ import {
   deletePackage,
   packageExists,
   readPackage,
+  generateCargoToml,
+  generatePackageDir,
 } from "@/lib/miden-compiler";
+import { type Export, type Dependency } from "@/lib/types";
 
-type CompileScriptRequestBody = { rust: string };
+type CompileScriptRequestBody = {
+  name: string;
+  type: string;
+  rust: string;
+  dependencies: Dependency[];
+};
+
+type CompileScriptResponse = {
+  ok: boolean;
+  error: string;
+  masm: string;
+  root: string;
+  package: { type: "Buffer"; data: number[] };
+  exports: Export[];
+  dependencies: Dependency[];
+};
+
+const compileScriptResponseError = ({
+  error,
+  dependencies,
+}: {
+  error: string;
+  dependencies: Dependency[];
+}): CompileScriptResponse => ({
+  ok: false,
+  error,
+  masm: "",
+  root: "",
+  package: { type: "Buffer", data: [] },
+  exports: [],
+  dependencies,
+});
 
 export const PATCH = async (
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) => {
-  const { id } = await params;
-  const exists = await packageExists(id);
-  if (!exists) {
-    console.error("ENOENT", id);
-    return NextResponse.json({
-      ok: false,
-      error: "ENOENT",
-      masm: "",
-      root: "",
-      package: { type: "Buffer", data: [] },
-      procedures: [],
-    });
-  }
+  const { id: packageDir } = await params;
   const body = await request.json();
-  const { rust } = body as CompileScriptRequestBody;
-  await updateRust(id, rust);
-  const { stderr } = await compilePackage(id);
+  const {
+    name,
+    type,
+    rust: updatedRust,
+    dependencies: updatedDependencies,
+  } = body as CompileScriptRequestBody;
+  const exists = await packageExists(packageDir);
+  if (!exists) {
+    await generatePackageDir({
+      packageDir,
+      name,
+      type,
+      rust: updatedRust,
+      dependencies: updatedDependencies,
+    });
+    // console.error("ENOENT", packageDir);
+    // return NextResponse.json(
+    //   compileScriptResponseError({
+    //     error: "ENOENT",
+    //     dependencies: updatedDependencies,
+    //   })
+    // );
+  }
+  await Promise.all([
+    updateRust({ packageDir, rust: updatedRust }),
+    generateCargoToml({
+      packageDir,
+      name,
+      type,
+      dependencies: updatedDependencies,
+    }),
+  ]);
+  const { stderr } = await compilePackage(packageDir);
   if (stderr) {
     console.error(stderr);
-    return NextResponse.json({
-      ok: false,
-      error: stderr,
-      masm: "",
-      root: "",
-      package: { type: "Buffer", data: [] },
-      procedures: [],
-    });
+    return NextResponse.json(
+      compileScriptResponseError({
+        error: stderr,
+        dependencies: updatedDependencies,
+      })
+    );
   }
   // const masm = await compileWasmToMasm(id);
-  const { packageBuffer, exports, dependencies } = await readPackage(id);
+  const { packageBuffer, exports, dependencies } = await readPackage({
+    packageDir,
+    name,
+  });
   return NextResponse.json({
     ok: true,
     error: "",

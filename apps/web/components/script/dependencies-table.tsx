@@ -7,13 +7,77 @@ import {
   TableHeader,
   TableRow,
 } from "@workspace/ui/components/table";
-import { scriptTypes, type Script } from "@/lib/types/script";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@workspace/ui/components/dropdown-menu";
+import { MoreVertical } from "lucide-react";
+import { Button } from "@workspace/ui/components/button";
+import {
+  defaultDependencies,
+  scriptTypes,
+  type Script,
+} from "@/lib/types/script";
 import useScripts from "@/hooks/use-scripts";
+import { formatDigest } from "@/lib/utils";
+
+const DependencyActionsCell = ({
+  script,
+  dependencyId,
+}: {
+  script: Script;
+  dependencyId: string;
+}) => {
+  const { updateScript } = useScripts();
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="size-8 p-0">
+          <span className="sr-only">Open menu</span>
+          <MoreVertical className="size-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem
+          onClick={() => {
+            const index = script.dependencies.findIndex(
+              ({ id }) => id === dependencyId
+            );
+            updateScript({
+              ...script,
+              dependencies: [
+                ...script.dependencies.slice(0, index),
+                ...script.dependencies.slice(index + 1),
+              ],
+            });
+          }}
+        >
+          Remove dependency
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
 
 const DependenciesTable = ({ script }: { script: Script }) => {
   const { scripts } = useScripts();
   const dependencies = script.dependencies
-    .map(({ name: scriptId }) => scripts.find(({ id }) => id === scriptId))
+    .map((dependency) => {
+      const scriptDependency = scripts.find(
+        ({ name }) => name === dependency.name
+      );
+      return scriptDependency
+        ? {
+            id: scriptDependency.id,
+            name: scriptDependency.name,
+            type: scriptDependency.type,
+            digest: dependency.digest,
+          }
+        : undefined;
+    })
+    .filter((dependency) => !["std", "base"].includes(dependency?.id ?? ""))
     .filter((dependency) => dependency !== undefined);
   return (
     <div className="rounded-md border">
@@ -21,35 +85,35 @@ const DependenciesTable = ({ script }: { script: Script }) => {
         <TableHeader>
           <TableRow>
             <TableHead>Name</TableHead>
-            <TableHead>Package Name</TableHead>
             <TableHead>Type</TableHead>
-            {/* <TableHead /> */}
+            <TableHead>Digest</TableHead>
+            <TableHead />
           </TableRow>
         </TableHeader>
         <TableBody>
-          {dependencies.map((dependency) => (
-            <TableRow key={dependency.id}>
+          {dependencies.map(({ id, name, type, digest }) => (
+            <TableRow key={id}>
               <TableCell>
-                {["std", "base"].includes(dependency.id) ? (
-                  dependency.name
-                ) : (
-                  <Link
-                    href={`/scripts/${dependency.id}`}
-                    className="text-primary font-medium underline underline-offset-4"
-                  >
-                    {dependency.name}
-                  </Link>
-                )}
+                <Link
+                  href={`/scripts/${id}`}
+                  className="text-primary font-medium underline underline-offset-4"
+                >
+                  {name}
+                </Link>
               </TableCell>
-              <TableCell>{dependency.packageName}</TableCell>
+              <TableCell>{scriptTypes[type]}</TableCell>
+              <TableHead>{digest && formatDigest(digest)}</TableHead>
               <TableCell>
-                {["std", "base"].includes(dependency.id)
-                  ? "Default Package"
-                  : scriptTypes[dependency.type]}
+                <DependencyActionsCell script={script} dependencyId={id} />
               </TableCell>
-              {/* <TableCell>
-                <NoteActionsCell account={account} inputNote={inputNote} />
-              </TableCell> */}
+            </TableRow>
+          ))}
+          {defaultDependencies().map(({ id, name, digest }) => (
+            <TableRow key={id}>
+              <TableCell>{name}</TableCell>
+              <TableCell>Default Package</TableCell>
+              <TableCell>{digest && formatDigest(digest)}</TableCell>
+              <TableCell />
             </TableRow>
           ))}
         </TableBody>

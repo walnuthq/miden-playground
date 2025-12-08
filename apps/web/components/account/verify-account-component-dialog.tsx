@@ -22,7 +22,7 @@ import {
 import { Label } from "@workspace/ui/components/label";
 import useAccounts from "@/hooks/use-accounts";
 import useComponents from "@/hooks/use-components";
-import defaultComponents from "@/lib/types/default-components";
+import { defaultComponentIds } from "@/lib/types/default-components";
 
 const VerifyAccountComponentDialog = () => {
   const {
@@ -34,7 +34,6 @@ const VerifyAccountComponentDialog = () => {
   const { components } = useComponents();
   const [loading, setLoading] = useState(false);
   const [componentId, setComponentId] = useState("");
-  const defaultComponentIds = defaultComponents.map(({ id }) => id);
   const shownComponents = components.filter(
     ({ id, type }) => !defaultComponentIds.includes(id) && type === "account"
   );
@@ -70,9 +69,9 @@ const VerifyAccountComponentDialog = () => {
             });
             setLoading(false);
             if (verified) {
-              toast.success("Account component verified");
+              toast.success("Account component verified.");
             } else {
-              toast.error("Account component couldn't be verified");
+              toast.error("Account component couldn't be verified.");
             }
             onClose();
           }}

@@ -4,32 +4,41 @@ import p2id from "@/lib/types/default-scripts/p2id";
 // import counterMapContractMasm from "@/app/api/scripts/[id]/counter-masm";
 // import p2idMasm from "@/app/api/scripts/[id]/p2id-masm";
 import { sleep } from "@/lib/utils";
-import type { ScriptExample, Export, Dependency } from "@/lib/types/script";
+import {
+  type ScriptExample,
+  type Export,
+  type Dependency,
+  defaultDependencies,
+} from "@/lib/types/script";
+import { type Buffer } from "@/lib/types";
 
-const scriptsMasm = {
+const scriptsMasm: Record<ScriptExample, string> = {
   "counter-contract": counterMapContract.masm,
   "p2id-note": p2id.masm,
 } as const;
 
-const scriptsRoot = {
+const scriptsRoot: Record<ScriptExample, string> = {
   "counter-contract": "0x0",
   "p2id-note":
     "0x94377a3ed496ef4282bb98b1df09f14be986f5ffed1ac5dd2f7e23e01d9c3bce",
 } as const;
 
-const scriptsPackages: Record<string, { type: "Buffer"; data: number[] }> = {
+const scriptsPackages: Record<ScriptExample, Buffer> = {
   "counter-contract": { type: "Buffer", data: [] },
   "p2id-note": { type: "Buffer", data: [] },
 } as const;
 
-const scriptsExports: Record<string, Export[]> = {
+const scriptsExports: Record<ScriptExample, Export[]> = {
   "counter-contract": counterMapContract.exports,
   "p2id-note": [],
 } as const;
 
-const scriptsDependencies: Record<string, Dependency[]> = {
-  "counter-contract": [],
-  "p2id-note": [{ name: "basic-wallet", digest: "" }],
+const scriptsDependencies: Record<ScriptExample, Dependency[]> = {
+  "counter-contract": defaultDependencies(),
+  "p2id-note": [
+    ...defaultDependencies(),
+    { id: "basic-wallet", name: "basic-wallet", digest: "" },
+  ],
 } as const;
 
 export const PATCH = async (

@@ -9,7 +9,7 @@ import { Button } from "@workspace/ui/components/button";
 import useAccounts from "@/hooks/use-accounts";
 import useGlobalContext from "@/components/global-context/hook";
 import useComponents from "@/hooks/use-components";
-import defaultComponents from "@/lib/types/default-components";
+import { defaultComponentIds } from "@/lib/types/default-components";
 
 const CreateAccountDropdownMenu = () => {
   const { networkId } = useGlobalContext();
@@ -20,7 +20,6 @@ const CreateAccountDropdownMenu = () => {
     openDeployAccountDialog,
   } = useAccounts();
   const { components } = useComponents();
-  const defaultComponentIds = defaultComponents.map(({ id }) => id);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

@@ -28,6 +28,8 @@ export type TransactionAction =
   | {
       type: "CLOSE_CREATE_TRANSACTION_DIALOG";
     }
+  | { type: "SUBMITTING_TRANSACTION" }
+  | { type: "TRANSACTION_SUBMITTED" }
   | {
       type: "SUBMIT_TRANSACTION";
       payload: {
@@ -69,12 +71,19 @@ const reducer = (state: State, action: TransactionAction): State => {
         createTransactionDialogTransactionResult: null,
       };
     }
+    case "SUBMITTING_TRANSACTION": {
+      return { ...state, submittingTransaction: true };
+    }
+    case "TRANSACTION_SUBMITTED": {
+      return { ...state, submittingTransaction: false };
+    }
     case "SUBMIT_TRANSACTION": {
       const index = state.accounts.findIndex(
         ({ id }) => id === action.payload.account.id
       );
       return {
         ...state,
+        submittingTransaction: false,
         transactions: [...state.transactions, action.payload.transaction],
         accounts: [
           ...state.accounts.slice(0, index).map((account) => ({

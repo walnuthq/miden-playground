@@ -1,10 +1,8 @@
-import { type Account as WasmAccountType } from "@demox-labs/miden-sdk";
-import { type MidenSdk } from "@/lib/types";
-
 export const scriptTypes = {
-  account: "Account Script",
-  note: "Note Script",
-  transaction: "Transaction Script",
+  account: "Account Component",
+  "note-script": "Note Script",
+  "transaction-script": "Transaction Script",
+  "authentication-component": "Authentication Component",
 } as const;
 
 export type ScriptType = keyof typeof scriptTypes;
@@ -16,7 +14,7 @@ export type ScriptExampleItem = {
 
 export const scriptExamples = {
   "counter-contract": { name: "Counter Contract", type: "account" },
-  "p2id-note": { name: "P2ID Note", type: "note" },
+  "p2id-note": { name: "P2ID Note", type: "note-script" },
   // "counter-note": { name: "Counter Note", type: "note" },
 } as const;
 
@@ -25,20 +23,10 @@ export type ScriptExample = keyof typeof scriptExamples;
 export const scriptStatuses = {
   draft: "Draft",
   compiled: "Compiled",
+  error: "Error",
 } as const;
 
 export type ScriptStatus = keyof typeof scriptStatuses;
-
-type StorageRead =
-  | {
-      type: "value";
-      index: number;
-    }
-  | {
-      type: "map";
-      index: number;
-      key: string[];
-    };
 
 type MidenType = "Felt" | "Word" | "AccountId";
 
@@ -61,7 +49,6 @@ export type Export = {
   digest: string;
   signature: Signature;
   readOnly: boolean;
-  storageRead?: StorageRead;
 };
 
 export const defaultExport = (): Export => ({
@@ -72,14 +59,31 @@ export const defaultExport = (): Export => ({
 });
 
 export type Dependency = {
+  id: string;
   name: string;
   digest: string;
 };
 
+export const baseDependency: Dependency = {
+  id: "base",
+  name: "base",
+  digest: "0x389cc47c54704ed5d03183bcdc0819010501a1cab9f07a421432fc5c2a2e77ef",
+};
+
+export const stdDependency: Dependency = {
+  id: "std",
+  name: "std",
+  digest: "0x2eaedee678906c235e33a89a64d16ea71b951a444463e9bcf8675ab1fe6210c0",
+};
+
+export const defaultDependencies = (): Dependency[] => [
+  baseDependency,
+  stdDependency,
+];
+
 export type Script = {
   id: string;
   name: string;
-  packageName: string;
   type: ScriptType;
   status: ScriptStatus;
   readOnly: boolean;
@@ -97,7 +101,6 @@ export type Script = {
 export const defaultScript = (): Script => ({
   id: "",
   name: "",
-  packageName: "",
   type: "account",
   status: "draft",
   readOnly: false,
@@ -107,35 +110,14 @@ export const defaultScript = (): Script => ({
   root: "",
   packageBytes: [],
   exports: [],
-  dependencies: [],
+  dependencies: defaultDependencies(),
   // inputs: [],
   updatedAt: 0,
 });
 
-export const getStorageRead = ({
-  wasmAccount,
-  storageRead,
-  midenSdk: { Word },
-}: {
-  wasmAccount: WasmAccountType;
-  storageRead: StorageRead;
-  midenSdk: MidenSdk;
-}) => {
-  if (storageRead.type === "map" && storageRead.key) {
-    return wasmAccount
-      .storage()
-      .getMapItem(
-        storageRead.index,
-        new Word(BigUint64Array.from(storageRead.key))
-      );
-  } else {
-    return wasmAccount.storage().getItem(storageRead.index);
-  }
-};
-
-const formatProcedureInputs = (inputs: MidenInput[]) => {
-  const reversed = [...inputs].reverse();
-  return reversed
+const formatProcedureInputs = (inputs: MidenInput[]) =>
+  inputs
+    .toReversed()
     .map((arg) => {
       switch (arg.type) {
         case "Felt":
@@ -155,22 +137,18 @@ const formatProcedureInputs = (inputs: MidenInput[]) => {
       }
     })
     .join("\n");
-};
 
 export const invokeProcedureCustomTransactionScript = ({
-  contractName,
   procedureExport,
   procedureInputs,
 }: {
-  contractName: string;
   procedureExport: Export;
   procedureInputs: MidenInput[];
-}) => `use.external_contract::${contractName}
-use.std::sys
+}) => `use.std::sys
 
 begin
     ${formatProcedureInputs(procedureInputs)}
-    call.${contractName}::${procedureExport.name}
+    call.${procedureExport.digest}
     exec.sys::truncate_stack
 end
 `;

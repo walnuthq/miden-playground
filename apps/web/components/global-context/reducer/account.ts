@@ -56,6 +56,7 @@ const reducer = (state: State, action: AccountAction): State => {
     case "NEW_ACCOUNT": {
       return {
         ...state,
+        submittingTransaction: false,
         accounts: [...state.accounts, action.payload.account],
       };
     }

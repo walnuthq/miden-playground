@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-// import { toast } from "sonner";
 import { Trash } from "lucide-react";
 import { Spinner } from "@workspace/ui/components/spinner";
 import { Button } from "@workspace/ui/components/button";
@@ -40,7 +39,7 @@ const CreateNoteDialog = () => {
   const [hasAssets, setHasAssets] = useState(false);
   const [faucetAccountId, setFaucetAccountId] = useState("");
   const [noteInputs, setNoteInputs] = useState<string[]>([]);
-  const shownScripts = scripts.filter(({ type }) => type === "note");
+  const shownScripts = scripts.filter(({ type }) => type === "note-script");
   const onClose = () => {
     setRecipientAccountId("");
     setScriptId("");
@@ -77,7 +76,6 @@ const CreateNoteDialog = () => {
               faucetAccount?.decimals
             );
             setLoading(true);
-            // const transactionRecord =
             await newNote({
               senderAccountId: connectedWallet?.id ?? "",
               recipientAccountId,
@@ -88,17 +86,6 @@ const CreateNoteDialog = () => {
               noteInputs,
             });
             setLoading(false);
-            // toast("Transaction submitted.", {
-            //   action: {
-            //     label: "View on MidenScan",
-            //     onClick: () =>
-            //       window.open(
-            //         `https://testnet.midenscan.com/tx/${transactionRecord.id().toHex()}`,
-            //         "_blank",
-            //         "noopener noreferrer"
-            //       ),
-            //   },
-            // });
             onClose();
           }}
         >
@@ -108,6 +95,7 @@ const CreateNoteDialog = () => {
               <SelectAccountDropdownMenu
                 value={recipientAccountId}
                 onValueChange={setRecipientAccountId}
+                withoutFaucets
               />
             </div>
             <div className="grid gap-3">

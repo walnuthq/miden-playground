@@ -3,11 +3,10 @@ import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
 import Step2Content from "@/components/tutorials/tutorial5/step2.mdx";
 import useScripts from "@/hooks/use-scripts";
-import defaultScripts from "@/lib/types/default-scripts";
+import { defaultScriptIds } from "@/lib/types/default-scripts";
 
 const useCompleted = () => {
   const { scripts } = useScripts();
-  const defaultScriptIds = defaultScripts.map(({ id }) => id);
   const script = scripts.find(
     ({ id, type }) => !defaultScriptIds.includes(id) && type === "account"
   );

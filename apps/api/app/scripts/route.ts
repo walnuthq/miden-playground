@@ -1,24 +1,22 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { v4 } from "uuid";
-import { newPackage, readRust } from "@/lib/miden-compiler";
+import { newPackage } from "@/lib/miden-compiler";
 
 type CreateScriptRequestBody = {
-  packageName: string;
+  name: string;
   type: string;
   example: string;
 };
 
 export const POST = async (request: NextRequest) => {
   const body = await request.json();
-  const { packageName, type, example } = body as CreateScriptRequestBody;
+  const { name, type, example } = body as CreateScriptRequestBody;
   const id = v4();
-  await newPackage({
+  const { rust, dependencies } = await newPackage({
     packageDir: id,
-    packageName,
+    name,
     type,
-    example:
-      type === "account" ? "counter-contract" : "counter-contract-tx-script",
+    example,
   });
-  const rust = await readRust(id);
-  return NextResponse.json({ id, rust });
+  return NextResponse.json({ id, rust, dependencies });
 };

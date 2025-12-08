@@ -9,10 +9,18 @@ import { cn } from "@workspace/ui/lib/utils";
 import useWebClient from "@/hooks/use-web-client";
 
 const NetworkBadge = () => {
-  const { networkId, blockNum, syncingState } = useGlobalContext();
+  const { networkId, blockNum, syncingState, submittingTransaction } =
+    useGlobalContext();
   const { syncState, popState } = useWebClient();
   const useIntervalTriggered = !syncingState && networkId === "mtst";
-  useInterval(syncState, useIntervalTriggered ? 4000 : null);
+  useInterval(
+    () => {
+      if (!submittingTransaction) {
+        syncState();
+      }
+    },
+    useIntervalTriggered ? 5000 : null
+  );
   useEffect(() => {
     if (!syncingState) {
       popState();

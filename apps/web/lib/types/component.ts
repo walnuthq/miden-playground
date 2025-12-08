@@ -1,6 +1,6 @@
 export const componentTypes = {
   account: "Account Component",
-  auth: "Auth Component",
+  "authentication-component": "Authentication Component",
 } as const;
 
 export type ComponentType = keyof typeof componentTypes;

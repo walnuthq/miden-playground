@@ -26,7 +26,6 @@ const useWebClient = () => {
     inputNotes: previousInputNotes,
     nextState,
     nextStore,
-    scripts,
     completedTutorials,
     dispatch,
   } = useGlobalContext();
@@ -65,7 +64,6 @@ const useWebClient = () => {
           networkId,
           updatedAt: syncSummary.blockNum(),
           consumableNoteIds,
-          scripts,
           midenSdk,
         });
         accounts.push(account);

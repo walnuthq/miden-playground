@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Spinner } from "@workspace/ui/components/spinner";
@@ -42,9 +42,12 @@ const CreateComponentDialog = () => {
   const shownScripts = scripts.filter(
     ({ id, type, status }) =>
       !componentScriptIds.includes(id) &&
-      type === "account" &&
+      type === componentType &&
       status === "compiled"
   );
+  useEffect(() => {
+    setScriptId("");
+  }, [componentType]);
   const onClose = () => {
     setScriptId("");
     setComponentType("account");
@@ -88,24 +91,6 @@ const CreateComponentDialog = () => {
               <Input id="name" name="name" required />
             </div>
             <div className="grid gap-3">
-              <Label htmlFor="script">Script</Label>
-              <Select onValueChange={setScriptId} value={scriptId}>
-                <SelectTrigger
-                  className="w-[180px]"
-                  disabled={shownScripts.length === 0}
-                >
-                  <SelectValue placeholder="Select script…" />
-                </SelectTrigger>
-                <SelectContent>
-                  {shownScripts.map((script) => (
-                    <SelectItem key={script.id} value={script.id}>
-                      {script.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-3">
               <Label htmlFor="type">Type</Label>
               <Select
                 onValueChange={(type) =>
@@ -120,6 +105,24 @@ const CreateComponentDialog = () => {
                   {Object.keys(componentTypes).map((type) => (
                     <SelectItem key={type} value={type}>
                       {componentTypes[type as ComponentType]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-3">
+              <Label htmlFor="script">Script</Label>
+              <Select onValueChange={setScriptId} value={scriptId}>
+                <SelectTrigger
+                  className="w-[180px]"
+                  disabled={shownScripts.length === 0}
+                >
+                  <SelectValue placeholder="Select script…" />
+                </SelectTrigger>
+                <SelectContent>
+                  {shownScripts.map((script) => (
+                    <SelectItem key={script.id} value={script.id}>
+                      {script.name}
                     </SelectItem>
                   ))}
                 </SelectContent>

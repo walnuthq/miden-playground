@@ -24,7 +24,8 @@ const ProceduresTable = ({
       <TableHeader>
         <TableRow>
           <TableHead className="w-[180px]">Name</TableHead>
-          {component.type === "account" && <TableHead>Result</TableHead>}
+          {account.components.includes("no-auth") &&
+            component.type === "account" && <TableHead>Result</TableHead>}
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -33,7 +34,7 @@ const ProceduresTable = ({
             key={procedureExport.name}
             account={account}
             component={component}
-            scriptId={script.id}
+            script={script}
             procedureExport={procedureExport}
           />
         ))}

@@ -21,7 +21,9 @@ import {
   clientGetTransactionsByIds,
   clientSubmitNewTransaction,
   clientGetAccountById,
+  clientReadWord,
 } from "@/lib/web-client";
+import { type Export } from "@/lib/types/script";
 import useGlobalContext from "@/components/global-context/hook";
 import useMidenSdk from "@/hooks/use-miden-sdk";
 import useWebClient from "@/hooks/use-web-client";
@@ -30,6 +32,7 @@ const useTransactions = () => {
   const { midenSdk } = useMidenSdk();
   const {
     accounts,
+    submittingTransaction,
     createTransactionDialogOpen,
     createTransactionDialogAccountId,
     createTransactionDialogTransactionType,
@@ -88,7 +91,7 @@ const useTransactions = () => {
     noteType: NoteType;
     amount: bigint;
   }) => {
-    const transactionRequest = await clientNewMintTransactionRequest({
+    const transactionRequest = clientNewMintTransactionRequest({
       client,
       targetAccountId,
       faucetId,
@@ -111,7 +114,7 @@ const useTransactions = () => {
     accountId: string;
     noteIds: string[];
   }) => {
-    const transactionRequest = await clientNewConsumeTransactionRequest({
+    const transactionRequest = clientNewConsumeTransactionRequest({
       client,
       noteIds,
     });
@@ -136,7 +139,7 @@ const useTransactions = () => {
     noteType: NoteType;
     amount: bigint;
   }) => {
-    const transactionRequest = await clientNewSendTransactionRequest({
+    const transactionRequest = clientNewSendTransactionRequest({
       client,
       senderAccountId,
       targetAccountId,
@@ -168,6 +171,23 @@ const useTransactions = () => {
     });
     return { transactionRequest, transactionResult };
   };
+  const readWord = async ({
+    accountId,
+    procedureExport,
+  }: {
+    accountId: string;
+    procedureExport: Export;
+  }) => {
+    dispatch({ type: "SUBMITTING_TRANSACTION" });
+    const word = await clientReadWord({
+      client,
+      accountId,
+      procedureExport,
+      midenSdk,
+    });
+    dispatch({ type: "TRANSACTION_SUBMITTED" });
+    return word;
+  };
   const submitNewTransaction = async ({
     accountId,
     transactionRequest,
@@ -177,6 +197,7 @@ const useTransactions = () => {
     transactionRequest: WasmTransactionRequestType;
     transactionResult: WasmTransactionResultType;
   }) => {
+    dispatch({ type: "SUBMITTING_TRANSACTION" });
     const transactionId = await clientSubmitNewTransaction({
       client,
       accountId,
@@ -254,6 +275,7 @@ const useTransactions = () => {
     return transactionRecord;
   };
   return {
+    submittingTransaction,
     createTransactionDialogOpen,
     createTransactionDialogAccountId,
     createTransactionDialogTransactionType,
@@ -269,6 +291,7 @@ const useTransactions = () => {
     newConsumeTransactionRequest,
     newSendTransactionRequest,
     newCustomTransactionRequest,
+    readWord,
     submitNewTransaction,
   };
 };

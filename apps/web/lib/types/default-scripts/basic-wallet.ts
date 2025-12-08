@@ -1,4 +1,4 @@
-import { type Script, defaultScript } from "@/lib/types/script";
+import { type Script, defaultScript, defaultExport } from "@/lib/types/script";
 
 export const basicWalletRust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
 #![no_std]
@@ -106,13 +106,26 @@ end
 const basicWallet: Script = {
   ...defaultScript(),
   id: "basic-wallet",
-  name: "Basic Wallet",
-  packageName: "basic-wallet",
+  name: "basic-wallet",
   type: "account",
   status: "compiled",
   readOnly: true,
   rust: basicWalletRust,
   masm: basicWalletMasm,
+  exports: [
+    {
+      ...defaultExport(),
+      name: "receive_asset",
+      digest:
+        "0x6f4bdbdc4b13d7ed933d590d88ac9dfb98020c9e917697845b5e169395b76a01",
+    },
+    {
+      ...defaultExport(),
+      name: "move_asset_to_note",
+      digest:
+        "0x0e406b067ed2bcd7de745ca6517f519fd1a9be245f913347ac673ca1db30c1d6",
+    },
+  ],
 };
 
 export default basicWallet;

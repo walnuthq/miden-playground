@@ -62,8 +62,7 @@ end
 const countReader: Script = {
   ...defaultScript(),
   id: "count-reader",
-  name: "Count Reader",
-  packageName: "count-reader",
+  name: "count-reader",
   type: "account",
   status: "compiled",
   readOnly: true,

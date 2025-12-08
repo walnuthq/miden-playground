@@ -9,9 +9,9 @@ import { clientGetConsumableNotes } from "@/lib/web-client";
 import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";
 import SelectTransactionTypeDropdownMenu from "@/components/transactions/select-transaction-type-dropdown-menu";
 import useAccounts from "@/hooks/use-accounts";
-import useTransactions from "@/hooks/use-transactions";
 import useMidenSdk from "@/hooks/use-miden-sdk";
 import useWebClient from "@/hooks/use-web-client";
+import useGlobalContext from "@/components/global-context/hook";
 
 const CreateTransactionDialogSelectForm = ({
   executingAccountId,
@@ -32,7 +32,7 @@ const CreateTransactionDialogSelectForm = ({
 }) => {
   const { midenSdk } = useMidenSdk();
   const { client } = useWebClient();
-  const { createTransactionDialogAccountId } = useTransactions();
+  const { networkId } = useGlobalContext();
   const { accounts } = useAccounts();
   const executingAccount = accounts.find(({ id }) => id === executingAccountId);
   return (
@@ -54,25 +54,24 @@ const CreateTransactionDialogSelectForm = ({
       }}
     >
       <div className="grid grid-cols-2 gap-4">
-        {!createTransactionDialogAccountId && (
-          <div className="grid gap-3 col-span-2">
-            <Label>Executing account</Label>
-            <SelectAccountDropdownMenu
-              value={executingAccountId}
-              onValueChange={(value) => {
-                setExecutingAccountId(value);
-                const account = accounts.find(({ id }) => id === value);
-                setTransactionType(
-                  account?.isFaucet
-                    ? "mint"
-                    : account?.components.includes("basic-wallet")
-                      ? "consume"
-                      : "custom"
-                );
-              }}
-            />
-          </div>
-        )}
+        <div className="grid gap-3 col-span-2">
+          <Label>Executing account</Label>
+          <SelectAccountDropdownMenu
+            value={executingAccountId}
+            onValueChange={(value) => {
+              setExecutingAccountId(value);
+              const account = accounts.find(({ id }) => id === value);
+              setTransactionType(
+                account?.isFaucet
+                  ? "mint"
+                  : account?.components.includes("basic-wallet")
+                    ? "consume"
+                    : "custom"
+              );
+            }}
+            withoutFaucets={networkId !== "mlcl"}
+          />
+        </div>
         <div className="grid gap-3 col-span-2">
           <Label>Transaction type</Label>
           <SelectTransactionTypeDropdownMenu

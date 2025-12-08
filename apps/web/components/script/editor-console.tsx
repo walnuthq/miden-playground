@@ -15,8 +15,9 @@ import { cn } from "@workspace/ui/lib/utils";
 import { compileScript } from "@/lib/api";
 
 const EditorConsole = ({ script }: { script: Script }) => {
-  const { updateScript } = useScripts();
+  const { scripts, updateScript } = useScripts();
   const [loading, setLoading] = useState(false);
+  const [content, setContent] = useState("");
   const compile = async () => {
     setLoading(true);
     const { error, masm, root, packageBytes, exports, dependencies } =
@@ -25,25 +26,34 @@ const EditorConsole = ({ script }: { script: Script }) => {
       ...script,
       error,
       masm,
-      status: masm
-        ? "compiled"
-        : packageBytes.length > 0
-          ? "compiled"
-          : "draft",
+      status: error ? "error" : "compiled",
       root,
       packageBytes,
-      exports: exports.map((procedureExport) => ({
-        ...defaultExport(),
-        ...procedureExport,
-        readOnly: procedureExport.name.startsWith("get"),
-        storageRead:
-          procedureExport.name.startsWith("get") &&
-          script.rust.includes("StorageMap")
-            ? { type: "map", index: 0, key: ["0", "0", "0", "1"] }
-            : { type: "value", index: 0 },
-      })),
-      dependencies,
+      exports: error
+        ? script.exports
+        : exports.map((procedureExport) => ({
+            ...defaultExport(),
+            ...procedureExport,
+            readOnly: procedureExport.name.startsWith("get"),
+          })),
+      dependencies: error
+        ? script.dependencies
+        : dependencies
+            .map((dependency) => {
+              const scriptDependency = scripts.find(
+                // TODO
+                ({ name }) => name === dependency.name
+              );
+              return scriptDependency
+                ? {
+                    ...dependency,
+                    id: scriptDependency.id,
+                  }
+                : undefined;
+            })
+            .filter((dependency) => dependency !== undefined),
     });
+    setContent(error ? error : "Script compiled successfully.");
     setLoading(false);
   };
   return (
@@ -63,13 +73,7 @@ const EditorConsole = ({ script }: { script: Script }) => {
             "text-destructive": !!script.error,
           })}
         >
-          {script.error
-            ? script.error
-            : script.masm
-              ? "Script compiled to MASM."
-              : script.packageBytes.length > 0
-                ? "Script compiled successfully."
-                : ""}
+          {content}
         </pre>
       </CardContent>
     </Card>

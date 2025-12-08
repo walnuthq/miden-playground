@@ -4,7 +4,7 @@ const noAuth: Component = {
   ...defaultComponent(),
   id: "no-auth",
   name: "No Auth",
-  type: "auth",
+  type: "authentication-component",
   scriptId: "no-auth",
 };
 

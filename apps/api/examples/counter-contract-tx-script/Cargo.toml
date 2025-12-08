@@ -24,10 +24,10 @@ package = "miden:counter-contract-tx-script"
 
 # Miden dependencies for cargo-miden build/linking
 [package.metadata.miden.dependencies]
-"miden:counter-contract" = { path = "../examples/counter-contract" }
+"miden:counter-contract" = { path = "../counter-contract" }
 
 [package.metadata.component.target.dependencies]
-"miden:counter-contract" = { path = "../examples/counter-contract/target/generated-wit/" }
+"miden:counter-contract" = { path = "../counter-contract/target/generated-wit/" }
 
 [profile.release]
 trim-paths = ["diagnostics", "object"]

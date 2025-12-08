@@ -11,6 +11,7 @@ import {
 import Editor from "@/components/lib/editor";
 import EditorConsole from "@/components/script/editor-console";
 import ScriptMetadata from "@/components/script/script-metadata";
+import AddDependencyDialog from "@/components/script/add-dependency-dialog";
 
 const Script = ({ id }: { id: string }) => {
   const router = useRouter();
@@ -37,9 +38,7 @@ const Script = ({ id }: { id: string }) => {
         <TabsList>
           <TabsTrigger value="rust">Rust</TabsTrigger>
           {script.masm && <TabsTrigger value="masm">MASM</TabsTrigger>}
-          {script.status === "compiled" && (
-            <TabsTrigger value="metadata">Metadata</TabsTrigger>
-          )}
+          <TabsTrigger value="metadata">Metadata</TabsTrigger>
         </TabsList>
         <div className="flex flex-col gap-4">
           <TabsContent value="rust">
@@ -60,16 +59,15 @@ const Script = ({ id }: { id: string }) => {
               />
             </TabsContent>
           )}
-          {script.status === "compiled" && (
-            <TabsContent value="metadata">
-              <div className={script.readOnly ? "h-[85vh]" : "h-[61vh]"}>
-                <ScriptMetadata script={script} />
-              </div>
-            </TabsContent>
-          )}
+          <TabsContent value="metadata">
+            <div className={script.readOnly ? "h-[85vh]" : "h-[61vh]"}>
+              <ScriptMetadata script={script} />
+            </div>
+          </TabsContent>
           {!script.readOnly && <EditorConsole script={script} />}
         </div>
       </Tabs>
+      <AddDependencyDialog />
     </div>
   );
 };

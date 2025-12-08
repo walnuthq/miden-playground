@@ -24,9 +24,12 @@ import {
   type TransactionNote,
   type Transaction,
 } from "@/lib/types/transaction";
-import { type Script } from "@/lib/types/script";
+import { type Script, type Export } from "@/lib/types/script";
 import { type StorageSlot, type Component } from "@/lib/types/component";
 import defaultScripts from "@/lib/types/default-scripts";
+import getterScript from "@/lib/types/default-scripts/getter";
+import noAuth from "@/lib/types/default-components/no-auth";
+import getterComponent from "@/lib/types/default-components/getter";
 import { stringToFeltArray } from "@/lib/utils";
 import { fromHex } from "viem";
 import type { MidenSdk } from "@/lib/types";
@@ -340,6 +343,90 @@ export const clientImportNewWallet = async ({
   }
 };
 
+const invokeGetterCustomTransactionScript = ({
+  accountIdPrefix,
+  accountIdSuffix,
+  procHash,
+}: {
+  accountIdPrefix: string;
+  accountIdSuffix: string;
+  procHash: string;
+}) => `use.external_contract::getter
+use.std::sys
+
+begin
+    push.${procHash}
+    push.${accountIdSuffix}
+    push.${accountIdPrefix}
+    call.getter::read_word
+    exec.sys::truncate_stack
+end
+`;
+
+export const clientReadWord = async ({
+  client,
+  accountId,
+  procedureExport,
+  midenSdk,
+}: {
+  client: WebClientType;
+  accountId: string;
+  procedureExport: Export;
+  midenSdk: MidenSdk;
+}) => {
+  const {
+    TransactionRequestBuilder,
+    MidenArrays,
+    AccountStorageRequirements,
+    AccountId,
+    ForeignAccount,
+  } = midenSdk;
+  const getterAccount = await clientDeployAccount({
+    client,
+    accountType: "regular-account-updatable-code",
+    storageMode: "public",
+    components: [noAuth, getterComponent],
+    scripts: [getterScript],
+    midenSdk,
+  });
+  const builder = client.createScriptBuilder();
+  const accountComponentLibrary = builder.buildLibrary(
+    "external_contract::getter",
+    getterScript.masm
+  );
+  builder.linkDynamicLibrary(accountComponentLibrary);
+  const wasmAccountId = AccountId.fromHex(accountId);
+  const transactionScript = builder.compileTxScript(
+    invokeGetterCustomTransactionScript({
+      accountIdPrefix: wasmAccountId.prefix().toString(),
+      accountIdSuffix: wasmAccountId.suffix().toString(),
+      procHash: procedureExport.digest,
+    })
+  );
+  const transactionRequest = new TransactionRequestBuilder()
+    .withCustomScript(transactionScript)
+    .withForeignAccounts(
+      new MidenArrays.ForeignAccountArray([
+        ForeignAccount.public(
+          AccountId.fromHex(accountId),
+          new AccountStorageRequirements()
+        ),
+      ])
+    )
+    .build();
+  const transactionResult = await clientExecuteTransaction({
+    client,
+    accountId: getterAccount.id().toString(),
+    transactionRequest,
+    midenSdk,
+  });
+  const accountDelta = transactionResult.executedTransaction().accountDelta();
+  const [word = bigintToWord({ value: 0n, midenSdk })] = accountDelta
+    .storage()
+    .values();
+  return word;
+};
+
 export const clientDeployAccount = async ({
   client,
   accountType,
@@ -398,8 +485,19 @@ export const clientDeployAccount = async ({
           Package.deserialize(new Uint8Array(script.packageBytes)),
           new MidenArrays.StorageSlotArray(storageSlots)
         );
+    // const procs = accountComponent.getProcedures();
+    // for (const proc of procs) {
+    //   console.log(proc.digest.toHex());
+    // }
+    // if (script.id === "basic-fungible-faucet") {
+    //   console.log(
+    //     "distribute",
+    //     accountComponent.getProcedureHash("distribute")
+    //   );
+    //   console.log("burn", accountComponent.getProcedureHash("burn"));
+    // }
     accountComponent = accountComponent.withSupportsAllTypes();
-    if (component.type === "auth") {
+    if (component.type === "authentication-component") {
       accountBuilder = accountBuilder.withAuthComponent(accountComponent);
     } else {
       accountBuilder = accountBuilder.withComponent(accountComponent);
@@ -411,56 +509,32 @@ export const clientDeployAccount = async ({
 };
 
 export const clientCreateTransactionFromScript = ({
-  // client,
-  // senderAccountId,
   script,
   midenSdk: { Package, TransactionScript, TransactionRequestBuilder },
 }: {
-  // client: WebClientType;
-  // senderAccountId: string;
   script: Script;
   midenSdk: MidenSdk;
 }) => {
-  // const transactionScript = TransactionScript.fromPackage(
-  //   Package.deserialize(new Uint8Array(script.packageBytes))
-  // );
+  const transactionScript = TransactionScript.fromPackage(
+    Package.deserialize(new Uint8Array(script.packageBytes))
+  );
   const transactionRequestBuilder =
-    new TransactionRequestBuilder(); /*.withCustomScript(transactionScript)*/
+    new TransactionRequestBuilder().withCustomScript(transactionScript);
   return transactionRequestBuilder.build();
 };
 
-export const clientCreateNoteFromScript = ({
+const clientCreateNoteScriptFromMasm = ({
   client,
-  senderAccountId,
-  recipientAccountId,
-  type,
   script,
   scripts,
-  midenSdk: {
-    NoteInputs,
-    FeltArray,
-    Word,
-    NoteRecipient,
-    NoteAssets,
-    NoteType,
-    NoteTag,
-    NoteExecutionHint,
-    NoteMetadata,
-    Note,
-    AccountId,
-  },
 }: {
   client: WebClientType;
-  senderAccountId: string;
-  recipientAccountId: string;
-  type: NoteType;
   script: Script;
   scripts: Script[];
-  midenSdk: MidenSdk;
 }) => {
   const builder = client.createScriptBuilder();
   const dependencies = script.dependencies
-    .map(({ name: scriptId }) => scripts.find(({ id }) => id === scriptId))
+    .map((dependency) => scripts.find(({ id }) => id === dependency.id))
     .filter((dependency) => dependency !== undefined);
   for (const dependency of dependencies) {
     const contractName = dependency.id.replaceAll("-", "_");
@@ -470,26 +544,80 @@ export const clientCreateNoteFromScript = ({
     );
     builder.linkDynamicLibrary(accountComponentLibrary);
   }
-  const compiledNoteScript = builder.compileNoteScript(script.masm);
-  const noteAssets = new NoteAssets([]);
-  const noteTag = NoteTag.fromAccountId(AccountId.fromHex(recipientAccountId));
-  const noteMetadata = new NoteMetadata(
+  return builder.compileNoteScript(script.masm);
+};
+
+const clientCreateNoteScriptFromPackage = ({
+  script,
+  midenSdk: { NoteScript, Package },
+}: {
+  script: Script;
+  midenSdk: MidenSdk;
+}) =>
+  NoteScript.fromPackage(
+    Package.deserialize(new Uint8Array(script.packageBytes))
+  );
+
+export const clientCreateNoteFromScript = ({
+  client,
+  senderAccountId,
+  recipientAccountId,
+  script,
+  type,
+  faucetAccountId,
+  amount,
+  noteInputs,
+  scripts,
+  midenSdk,
+}: {
+  client: WebClientType;
+  senderAccountId: string;
+  recipientAccountId: string;
+  script: Script;
+  type: NoteType;
+  faucetAccountId: string;
+  amount: bigint;
+  noteInputs: string[];
+  scripts: Script[];
+  midenSdk: MidenSdk;
+}) => {
+  const {
+    NoteInputs,
+    FeltArray,
+    Felt,
+    Word,
+    NoteRecipient,
+    NoteAssets,
+    FungibleAsset,
+    NoteType,
+    NoteTag,
+    NoteExecutionHint,
+    NoteMetadata,
+    Note,
+    AccountId,
+  } = midenSdk;
+  const noteScript = script.masm
+    ? clientCreateNoteScriptFromMasm({ client, script, scripts })
+    : clientCreateNoteScriptFromPackage({ script, midenSdk });
+  const assets = new NoteAssets(
+    faucetAccountId
+      ? [new FungibleAsset(AccountId.fromHex(faucetAccountId), amount)]
+      : []
+  );
+  const metadata = new NoteMetadata(
     AccountId.fromHex(senderAccountId),
     type === "public" ? NoteType.Public : NoteType.Private,
-    noteTag,
-    // WasmNoteTag.forLocalUseCase(0, 0),
+    NoteTag.fromAccountId(AccountId.fromHex(recipientAccountId)),
     NoteExecutionHint.none()
   );
   const randomBigUints = new BigUint64Array(4);
   crypto.getRandomValues(randomBigUints);
   const serialNum = new Word(randomBigUints);
-  const noteInputs = new NoteInputs(new FeltArray([]));
-  const noteRecipient = new NoteRecipient(
-    serialNum,
-    compiledNoteScript,
-    noteInputs
+  const inputs = new NoteInputs(
+    new FeltArray(noteInputs.map((noteInput) => new Felt(BigInt(noteInput))))
   );
-  return new Note(noteAssets, noteMetadata, noteRecipient);
+  const recipient = new NoteRecipient(serialNum, noteScript, inputs);
+  return new Note(assets, metadata, recipient);
 };
 
 const accountType = (account: WasmAccountType) => {
@@ -508,15 +636,15 @@ const storageMode = (account: WasmAccountType) =>
 
 const verifyDefaultComponents = ({
   wasmAccount,
-  scripts,
+  // scripts,
   midenSdk: { Word },
 }: {
   wasmAccount: WasmAccountType;
-  scripts: Script[];
+  // scripts: Script[];
   midenSdk: MidenSdk;
 }) => {
   const code = wasmAccount.code();
-  return scripts
+  return defaultScripts
     .filter(
       ({ exports }) =>
         exports.length > 0 &&
@@ -532,7 +660,7 @@ export const wasmAccountToAccount = ({
   networkId,
   updatedAt,
   consumableNoteIds,
-  scripts = [],
+  // scripts = [],
   midenSdk,
 }: {
   wasmAccount: WasmAccountType;
@@ -541,14 +669,14 @@ export const wasmAccountToAccount = ({
   networkId: string;
   updatedAt: number;
   consumableNoteIds?: string[];
-  scripts?: Script[];
+  // scripts?: Script[];
   midenSdk: MidenSdk;
 }): Account => {
   const { AccountInterface, BasicFungibleFaucetComponent } = midenSdk;
   const code = wasmAccount.code().commitment().toHex();
   const verifiedComponents = components
     ? components
-    : verifyDefaultComponents({ wasmAccount, scripts, midenSdk });
+    : verifyDefaultComponents({ wasmAccount, /*scripts,*/ midenSdk });
   const account: Account = {
     ...defaultAccount(),
     id: wasmAccount.id().toString(),
