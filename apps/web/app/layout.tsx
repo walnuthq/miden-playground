@@ -1,3 +1,4 @@
+import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import { type ReactNode } from "react";
 import "@demox-labs/miden-wallet-adapter/styles.css";
@@ -29,6 +30,13 @@ const RootLayout = ({
         <Toaster richColors />
       </Providers>
     </body>
+    <Script
+      src={
+        process.env.NODE_ENV !== "production"
+          ? "https://scripts.simpleanalyticscdn.com/latest.dev.js"
+          : "https://scripts.simpleanalyticscdn.com/latest.js"
+      }
+    />
   </html>
 );
 

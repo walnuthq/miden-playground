@@ -64,13 +64,6 @@ export const PATCH = async (
       rust: updatedRust,
       dependencies: updatedDependencies,
     });
-    // console.error("ENOENT", packageDir);
-    // return NextResponse.json(
-    //   compileScriptResponseError({
-    //     error: "ENOENT",
-    //     dependencies: updatedDependencies,
-    //   })
-    // );
   }
   await Promise.all([
     updateRust({ packageDir, rust: updatedRust }),
@@ -91,7 +84,6 @@ export const PATCH = async (
       })
     );
   }
-  // const masm = await compileWasmToMasm(id);
   const { packageBuffer, exports, dependencies } = await readPackage({
     packageDir,
     name,

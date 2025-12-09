@@ -1,5 +1,6 @@
 declare global {
   interface Window {
+    // Miden Wallet
     midenWallet: {
       accountId?: string;
       appName?: string;
@@ -14,6 +15,11 @@ declare global {
       };
       publicKey?: Uint8Array;
     };
+    // Simple Analytics
+    sa_event: (
+      event: string,
+      metadata: Record<string, string | boolean | number | Date>
+    ) => void;
   }
 }
 
