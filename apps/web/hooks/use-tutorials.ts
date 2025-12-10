@@ -3,7 +3,6 @@ import useGlobalContext from "@/components/global-context/hook";
 import tutorials from "@/components/tutorials";
 import { defaultTutorial } from "@/lib/types/tutorial";
 import useWebClient from "@/hooks/use-web-client";
-import useAccounts from "@/hooks/use-accounts";
 import { saEvent } from "@/lib/simple-analytics";
 
 const useTutorials = () => {
@@ -17,7 +16,6 @@ const useTutorials = () => {
     completedTutorials,
     dispatch,
   } = useGlobalContext();
-  const { connectedWallet } = useAccounts();
   const { pushState } = useWebClient();
   const startTutorial = async (tutorialId: string) => {
     const tutorial = tutorials.find(({ id }) => id === tutorialId);
@@ -29,10 +27,7 @@ const useTutorials = () => {
       pushedStore: tutorial.store,
     });
     router.push(tutorial.initialRoute);
-    saEvent("start_tutorial", {
-      wallet: connectedWallet?.address ?? "",
-      tutorialId,
-    });
+    saEvent("start_tutorial", { tutorial_id: tutorialId });
   };
   const nextTutorial = async () => {
     const tutorial = tutorials.find(({ id }) => id === tutorialId);
@@ -50,15 +45,9 @@ const useTutorials = () => {
       pushedStore: nextTutorial.store,
     });
     router.push(nextTutorial.initialRoute);
-    saEvent("complete_tutorial", {
-      wallet: connectedWallet?.address ?? "",
-      tutorialId,
-    });
+    saEvent("complete_tutorial", { tutorial_id: tutorialId });
     if (nextTutorial.id) {
-      saEvent("start_tutorial", {
-        wallet: connectedWallet?.address ?? "",
-        tutorialId: nextTutorial.id,
-      });
+      saEvent("start_tutorial", { tutorial_id: nextTutorial.id });
     }
   };
   const previousTutorialStep = () =>
@@ -68,9 +57,8 @@ const useTutorials = () => {
     const nextTutorialStep = tutorialStep + 1;
     if (nextTutorialStep > tutorialMaxStep) {
       saEvent("complete_tutorial_step", {
-        wallet: connectedWallet?.address ?? "",
-        tutorialId,
-        tutorialStep,
+        tutorial_id: tutorialId,
+        tutorial_step: tutorialStep,
       });
     }
   };
