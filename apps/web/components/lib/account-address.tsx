@@ -34,7 +34,7 @@ const AccountAddress = ({
   const displayedAccount =
     account ??
     accounts.find(
-      (account) => account.id === id || account.address === address,
+      (account) => account.id === id || account.address === address
     );
   if (!displayedAccount) {
     return null;
@@ -82,7 +82,7 @@ const AccountAddress = ({
     <div className="flex items-center gap-2">
       {accountAddressContent}
       {withCopyButton && (
-        <CopyButton content="Copy Account ID" copy={displayedAccount.address} />
+        <CopyButton content="Copy Address" copy={displayedAccount.address} />
       )}
     </div>
   ) : (
