@@ -1,8 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import counterMapContract from "@/lib/types/default-scripts/counter-map-contract";
 import p2id from "@/lib/types/default-scripts/p2id";
-// import counterMapContractMasm from "@/app/api/scripts/[id]/counter-masm";
-// import p2idMasm from "@/app/api/scripts/[id]/p2id-masm";
 import { sleep } from "@/lib/utils";
 import {
   type ScriptExample,

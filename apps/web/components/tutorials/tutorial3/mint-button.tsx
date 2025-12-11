@@ -2,13 +2,18 @@ import { useState, useEffect } from "react";
 import { HandCoins } from "lucide-react";
 import { Spinner } from "@workspace/ui/components/spinner";
 import useAccounts from "@/hooks/use-accounts";
+import useNotes from "@/hooks/use-notes";
+import { defaultInputNote } from "@/lib/types/note";
 import { Button } from "@workspace/ui/components/button";
 import {
   MIDEN_FAUCET_API_URL,
   FUNGIBLE_FAUCET_DEFAULT_DECIMALS,
+  MIDEN_FAUCET_ACCOUNT_ID,
+  P2ID_NOTE_CODE,
 } from "@/lib/constants";
 import { parseAmount } from "@/lib/utils";
 import { fromHex } from "viem";
+import useMidenSdk from "@/hooks/use-miden-sdk";
 
 // https://github.com/0xMiden/miden-faucet/blob/next/bin/faucet/frontend/app.js
 // Function to find a valid nonce for proof of work using the new challenge format
@@ -110,7 +115,9 @@ const getTokens = async (
 };
 
 const MintButton = () => {
-  const { connectedWallet } = useAccounts();
+  const { midenSdk } = useMidenSdk();
+  const { connectedWallet, updateAccount } = useAccounts();
+  const { addNote } = useNotes();
   const [loading, setLoading] = useState(false);
   const [noteId, setNoteId] = useState("");
   useEffect(() => {
@@ -145,8 +152,29 @@ const MintButton = () => {
           amount,
           false
         );
-        setNoteId(noteId);
-        console.log({ txId });
+        console.log({ noteId, txId });
+        if (connectedWallet?.isNew) {
+          updateAccount({
+            ...connectedWallet,
+            consumableNoteIds: [...connectedWallet.consumableNoteIds, noteId],
+          });
+          const accountId = midenSdk.AccountId.fromHex(connectedWallet.id);
+          addNote({
+            ...defaultInputNote(),
+            id: noteId,
+            senderId: MIDEN_FAUCET_ACCOUNT_ID,
+            scriptRoot: P2ID_NOTE_CODE,
+            scriptId: "p2id",
+            fungibleAssets: [{ faucetId: MIDEN_FAUCET_ACCOUNT_ID, amount }],
+            inputs: [
+              accountId.suffix().toString(),
+              accountId.prefix().toString(),
+            ],
+          });
+          setLoading(false);
+        } else {
+          setNoteId(noteId);
+        }
       }}
     >
       {loading ? <Spinner /> : <HandCoins />}

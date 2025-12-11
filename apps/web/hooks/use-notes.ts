@@ -1,5 +1,5 @@
 import useGlobalContext from "@/components/global-context/hook";
-import { type NoteType } from "@/lib/types/note";
+import { type NoteType, type InputNote } from "@/lib/types/note";
 import useAccounts from "@/hooks/use-accounts";
 import useScripts from "@/hooks/use-scripts";
 import {
@@ -28,6 +28,8 @@ const useNotes = () => {
   const { accounts } = useAccounts();
   const { scripts } = useScripts();
   const { requestTransaction } = useWallet();
+  const addNote = (inputNote: InputNote) =>
+    dispatch({ type: "ADD_NOTE", payload: { inputNote } });
   const openExportNoteDialog = () =>
     dispatch({ type: "OPEN_EXPORT_NOTE_DIALOG" });
   const closeExportNoteDialog = () =>
@@ -164,6 +166,7 @@ const useNotes = () => {
     createNoteDialogOpen,
     verifyNoteScriptDialogOpen,
     verifyNoteScriptDialogNoteId,
+    addNote,
     openExportNoteDialog,
     closeExportNoteDialog,
     openImportNoteDialog,

@@ -15,10 +15,12 @@ import { type NetworkId } from "@/lib/types/network";
 import useGlobalContext from "@/components/global-context/hook";
 import { type State, defaultState } from "@/lib/types/state";
 import { type Store, deleteStore, defaultStore } from "@/lib/types/store";
-import { MIDEN_FAUCET_ADDRESS } from "@/lib/constants";
+// import { MIDEN_FAUCET_ADDRESS } from "@/lib/constants";
+import { useWallet } from "@demox-labs/miden-wallet-adapter";
 
 const useWebClient = () => {
   const { client } = useContext(WebClientContext);
+  const { address } = useWallet();
   const { midenSdk } = useMidenSdk();
   const {
     networkId,
@@ -40,33 +42,45 @@ const useWebClient = () => {
       });
       const accounts: Account[] = [];
       for (const previousAccount of previousAccounts) {
-        if (previousAccount.address === MIDEN_FAUCET_ADDRESS) {
+        // if (previousAccount.address === MIDEN_FAUCET_ADDRESS) {
+        //   accounts.push(previousAccount);
+        //   continue;
+        // }
+        if (previousAccount.address === address && previousAccount.isNew) {
+          const connectedWalletNotes = previousInputNotes.filter(({ id }) =>
+            previousAccount.consumableNoteIds.includes(id)
+          );
+          inputNotes.push(...connectedWalletNotes);
+        }
+        try {
+          const wasmAccount = await clientGetAccountById({
+            client,
+            accountId: previousAccount.id,
+            midenSdk,
+          });
+          const consumableNotes = await clientGetConsumableNotes({
+            client,
+            accountId: previousAccount.id,
+            midenSdk,
+          });
+          const consumableNoteIds = consumableNotes.map((consumableNote) =>
+            consumableNote.inputNoteRecord().id().toString()
+          );
+          const account = wasmAccountToAccount({
+            wasmAccount,
+            name: previousAccount.name,
+            components: previousAccount.components,
+            networkId,
+            updatedAt: syncSummary.blockNum(),
+            consumableNoteIds,
+            midenSdk,
+          });
+          accounts.push(account);
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (error) {
           accounts.push(previousAccount);
           continue;
         }
-        const wasmAccount = await clientGetAccountById({
-          client,
-          accountId: previousAccount.id,
-          midenSdk,
-        });
-        const consumableNotes = await clientGetConsumableNotes({
-          client,
-          accountId: previousAccount.id,
-          midenSdk,
-        });
-        const consumableNoteIds = consumableNotes.map((consumableNote) =>
-          consumableNote.inputNoteRecord().id().toString()
-        );
-        const account = wasmAccountToAccount({
-          wasmAccount,
-          name: previousAccount.name,
-          components: previousAccount.components,
-          networkId,
-          updatedAt: syncSummary.blockNum(),
-          consumableNoteIds,
-          midenSdk,
-        });
-        accounts.push(account);
       }
       dispatch({
         type: "SYNC_STATE",

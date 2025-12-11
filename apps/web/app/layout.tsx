@@ -32,9 +32,7 @@ const RootLayout = ({
     </body>
     <Script
       src={
-        process.env.NODE_ENV !== "production"
-          ? "https://scripts.simpleanalyticscdn.com/latest.dev.js"
-          : "https://scripts.simpleanalyticscdn.com/latest.js"
+        process.env.NODE_ENV !== "production" ? "/proxy.dev.js" : "/proxy.js"
       }
     />
   </html>

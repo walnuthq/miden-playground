@@ -49,6 +49,23 @@ const nextConfig: NextConfig = {
 
     return config;
   },
+  allowedDevOrigins: ["playground.miden.local"],
+  rewrites: () => [
+    {
+      source: "/proxy.js",
+      destination:
+        "https://simpleanalyticsexternal.com/proxy.js?hostname=playground.miden.xyz&path=/simple",
+    },
+    {
+      source: "/proxy.dev.js",
+      destination:
+        "https://simpleanalyticsexternal.com/proxy.js?hostname=playground.miden.local&path=/simple",
+    },
+    {
+      source: "/simple/:path*",
+      destination: "https://queue.simpleanalyticscdn.com/:path*",
+    },
+  ],
 };
 
 const withMDX = createMDX({

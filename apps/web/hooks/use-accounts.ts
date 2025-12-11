@@ -5,10 +5,8 @@ import {
   clientGetConsumableNotes,
   wasmAccountToAccount,
   wasmInputNoteToInputNote,
-  //webClient,
   clientNewWallet,
   clientNewFaucet,
-  clientImportNewWallet,
   clientDeployAccount,
 } from "@/lib/web-client";
 import { type Account as WasmAccountType } from "@demox-labs/miden-sdk";
@@ -16,13 +14,15 @@ import useGlobalContext from "@/components/global-context/hook";
 import {
   type AccountStorageMode,
   type AccountType,
-  midenFaucetAccount,
+  type Account,
+  basicWalletAccount,
+  // midenFaucetAccount,
 } from "@/lib/types/account";
 import { type Component } from "@/lib/types/component";
 import useScripts from "@/hooks/use-scripts";
 import useComponents from "@/hooks/use-components";
 import {
-  MIDEN_FAUCET_ADDRESS,
+  // MIDEN_FAUCET_ADDRESS,
   BASIC_WALLET_CODE,
   COUNTER_CONTRACT_ADDRESS,
 } from "@/lib/constants";
@@ -126,14 +126,14 @@ const useAccounts = () => {
     address: string;
   }) => {
     // TODO mock importing Miden Faucet
-    if (address === MIDEN_FAUCET_ADDRESS) {
-      const account = midenFaucetAccount();
-      dispatch({
-        type: "IMPORT_ACCOUNT",
-        payload: { account, inputNotes: [], blockNum },
-      });
-      return account;
-    }
+    // if (address === MIDEN_FAUCET_ADDRESS) {
+    //   const account = midenFaucetAccount();
+    //   dispatch({
+    //     type: "IMPORT_ACCOUNT",
+    //     payload: { account, inputNotes: [], blockNum },
+    //   });
+    //   return account;
+    // }
     const syncSummary = await client.syncState();
     let wasmAccount: WasmAccountType | null = null;
     try {
@@ -144,12 +144,24 @@ const useAccounts = () => {
       });
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      await clientImportNewWallet({ client, address, midenSdk });
-      wasmAccount = await clientGetAccountByAddress({
-        client,
-        address,
-        midenSdk,
-      });
+      if (address === connectedWalletAddress) {
+        const account = {
+          ...basicWalletAccount({ storageMode: "public" }),
+          id: midenSdk.Address.fromBech32(address).accountId().toString(),
+          name,
+          address,
+          isNew: true,
+        };
+        dispatch({
+          type: "IMPORT_ACCOUNT",
+          payload: {
+            account,
+            inputNotes: [],
+            blockNum: syncSummary.blockNum(),
+          },
+        });
+        return account;
+      }
     }
     if (!wasmAccount) {
       throw new Error("Account not found");
@@ -262,6 +274,8 @@ const useAccounts = () => {
     });
     return account;
   };
+  const updateAccount = (account: Account) =>
+    dispatch({ type: "UPDATE_ACCOUNT", payload: { account } });
   const openCreateWalletDialog = () =>
     dispatch({
       type: "OPEN_CREATE_WALLET_DIALOG",
@@ -365,6 +379,7 @@ const useAccounts = () => {
     importAccountByAddress,
     importConnectedWallet,
     deployAccount,
+    updateAccount,
     openCreateWalletDialog,
     closeCreateWalletDialog,
     openCreateFaucetDialog,

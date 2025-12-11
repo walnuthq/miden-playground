@@ -32,7 +32,7 @@ impl CountReader {
         let result =
             tx::execute_foreign_procedure(counter_account_id, get_count_proc_hash, Vec::new());
         // Copy the new value received from the foreign account in storage
-        contract.count.write(result[0]);
+        self.count.write(result[0]);
     }
 }
 `;
