@@ -7,6 +7,7 @@ export type AccountAction =
       type: "NEW_ACCOUNT";
       payload: { account: Account };
     }
+  | { type: "UPDATE_ACCOUNT"; payload: { account: Account } }
   | {
       type: "IMPORT_ACCOUNT";
       payload: {
@@ -58,6 +59,19 @@ const reducer = (state: State, action: AccountAction): State => {
         ...state,
         submittingTransaction: false,
         accounts: [...state.accounts, action.payload.account],
+      };
+    }
+    case "UPDATE_ACCOUNT": {
+      const index = state.accounts.findIndex(
+        ({ id }) => id === action.payload.account.id
+      );
+      return {
+        ...state,
+        accounts: [
+          ...state.accounts.slice(0, index),
+          { ...action.payload.account, updatedAt: Date.now() },
+          ...state.accounts.slice(index + 1),
+        ],
       };
     }
     case "IMPORT_ACCOUNT": {

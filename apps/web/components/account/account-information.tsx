@@ -5,16 +5,12 @@ import AccountNotesTable from "@/components/account/account-notes-table";
 import { Separator } from "@workspace/ui/components/separator";
 import { Button } from "@workspace/ui/components/button";
 import useTransactions from "@/hooks/use-transactions";
-import useAccounts from "@/hooks/use-accounts";
 import useGlobalContext from "@/components/global-context/hook";
 
 const AccountInformation = ({ account }: { account: Account }) => {
   const { networkId } = useGlobalContext();
-  const { connectedWallet } = useAccounts();
   const { openCreateTransactionDialog, newConsumeTransactionRequest } =
     useTransactions();
-  const showConsumeAllNotesButton =
-    networkId === "mlcl" || connectedWallet?.address === account.address;
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-2">
@@ -53,7 +49,7 @@ const AccountInformation = ({ account }: { account: Account }) => {
                   This account has pending notes that can be consumed.
                 </p>
               </div>
-              {showConsumeAllNotesButton && (
+              {networkId === "mlcl" && (
                 <Button
                   variant="outline"
                   onClick={async () => {

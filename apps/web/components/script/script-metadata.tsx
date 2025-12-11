@@ -22,13 +22,15 @@ const ScriptMetadata = ({ script }: { script: Script }) => {
           <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
             Package dependencies
           </h4>
-          <Button
-            variant="outline"
-            onClick={() => openAddDependencyDialog({ scriptId: script.id })}
-          >
-            <Plus />
-            <span className="hidden lg:inline">Add dependency</span>
-          </Button>
+          {!script.readOnly && (
+            <Button
+              variant="outline"
+              onClick={() => openAddDependencyDialog({ scriptId: script.id })}
+            >
+              <Plus />
+              <span className="hidden lg:inline">Add dependency</span>
+            </Button>
+          )}
         </div>
         <DependenciesTable script={script} />
       </div>

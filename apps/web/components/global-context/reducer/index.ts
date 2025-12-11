@@ -40,6 +40,7 @@ const reducer = (state: State, action: Action): State => {
       return globalReducer(state, action);
     }
     case "NEW_ACCOUNT":
+    case "UPDATE_ACCOUNT":
     case "IMPORT_ACCOUNT":
     case "OPEN_CREATE_WALLET_DIALOG":
     case "CLOSE_CREATE_WALLET_DIALOG":
@@ -61,6 +62,7 @@ const reducer = (state: State, action: Action): State => {
     case "SUBMIT_TRANSACTION": {
       return transactionReducer(state, action);
     }
+    case "ADD_NOTE":
     case "OPEN_EXPORT_NOTE_DIALOG":
     case "CLOSE_EXPORT_NOTE_DIALOG":
     case "OPEN_IMPORT_NOTE_DIALOG":

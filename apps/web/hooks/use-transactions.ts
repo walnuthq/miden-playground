@@ -179,14 +179,21 @@ const useTransactions = () => {
     procedureExport: Export;
   }) => {
     dispatch({ type: "SUBMITTING_TRANSACTION" });
-    const word = await clientReadWord({
-      client,
-      accountId,
-      procedureExport,
-      midenSdk,
-    });
-    dispatch({ type: "TRANSACTION_SUBMITTED" });
-    return word;
+    await client.syncState();
+    try {
+      const word = await clientReadWord({
+        client,
+        accountId,
+        procedureExport,
+        midenSdk,
+      });
+      dispatch({ type: "TRANSACTION_SUBMITTED" });
+      return word;
+    } catch (error) {
+      console.error(error);
+      dispatch({ type: "TRANSACTION_SUBMITTED" });
+      throw error;
+    }
   };
   const submitNewTransaction = async ({
     accountId,

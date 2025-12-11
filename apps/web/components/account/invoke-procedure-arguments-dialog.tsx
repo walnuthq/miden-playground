@@ -65,56 +65,60 @@ const InvokeProcedureArgumentsDialog = () => {
             event.preventDefault();
             const formData = new FormData(event.currentTarget);
             setLoading(true);
-            const transactionRecord = await invokeProcedure({
-              senderAccountId,
-              scriptId,
-              procedureExport,
-              procedureInputs: procedureExport.signature.params.map(
-                (param, index) => {
-                  switch (param) {
-                    case "AccountId": {
-                      const wasmAccountId = AccountId.fromHex(accountId);
-                      return {
-                        name: "counter_account_id",
-                        type: param,
-                        value: JSON.stringify({
-                          prefix: wasmAccountId.prefix().toString(),
-                          suffix: wasmAccountId.suffix().toString(),
-                        }),
-                      };
-                    }
-                    case "Word": {
-                      return {
-                        name: "proc_hash",
-                        type: param,
-                        value: formData.get("procHash")!.toString(),
-                      };
-                    }
-                    default: {
-                      return {
-                        name: `param_${index}`,
-                        type: param,
-                        value: formData.get(`param_${index}`)!.toString(),
-                      };
+            try {
+              const transactionRecord = await invokeProcedure({
+                senderAccountId,
+                scriptId,
+                procedureExport,
+                procedureInputs: procedureExport.signature.params.map(
+                  (param, index) => {
+                    switch (param) {
+                      case "AccountId": {
+                        const wasmAccountId = AccountId.fromHex(accountId);
+                        return {
+                          name: "counter_account_id",
+                          type: param,
+                          value: JSON.stringify({
+                            prefix: wasmAccountId.prefix().toString(),
+                            suffix: wasmAccountId.suffix().toString(),
+                          }),
+                        };
+                      }
+                      case "Word": {
+                        return {
+                          name: "proc_hash",
+                          type: param,
+                          value: formData.get("procHash")!.toString(),
+                        };
+                      }
+                      default: {
+                        return {
+                          name: `param_${index}`,
+                          type: param,
+                          value: formData.get(`param_${index}`)!.toString(),
+                        };
+                      }
                     }
                   }
-                }
-              ),
-              foreignAccounts: accountId ? [accountId] : [],
-            });
+                ),
+                foreignAccounts: accountId ? [accountId] : [],
+              });
+              toast("Transaction submitted.", {
+                action: {
+                  label: "View on MidenScan",
+                  onClick: () =>
+                    window.open(
+                      `https://testnet.midenscan.com/tx/${transactionRecord.id().toHex()}`,
+                      "_blank",
+                      "noopener noreferrer"
+                    ),
+                },
+              });
+              onClose();
+            } catch (error) {
+              console.error(error);
+            }
             setLoading(false);
-            toast("Transaction submitted.", {
-              action: {
-                label: "View on MidenScan",
-                onClick: () =>
-                  window.open(
-                    `https://testnet.midenscan.com/tx/${transactionRecord.id().toHex()}`,
-                    "_blank",
-                    "noopener noreferrer"
-                  ),
-              },
-            });
-            onClose();
           }}
         >
           {isCopyCount ? (

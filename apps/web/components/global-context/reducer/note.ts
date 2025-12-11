@@ -1,6 +1,8 @@
 import { type State } from "@/lib/types/state";
+import { type InputNote } from "@/lib/types/note";
 
 export type NoteAction =
+  | { type: "ADD_NOTE"; payload: { inputNote: InputNote } }
   | { type: "OPEN_EXPORT_NOTE_DIALOG" }
   | { type: "CLOSE_EXPORT_NOTE_DIALOG" }
   | { type: "OPEN_IMPORT_NOTE_DIALOG" }
@@ -19,6 +21,12 @@ export type NoteAction =
 
 const reducer = (state: State, action: NoteAction): State => {
   switch (action.type) {
+    case "ADD_NOTE": {
+      return {
+        ...state,
+        inputNotes: [...state.inputNotes, action.payload.inputNote],
+      };
+    }
     case "OPEN_EXPORT_NOTE_DIALOG": {
       return {
         ...state,

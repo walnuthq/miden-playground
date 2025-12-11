@@ -38,6 +38,20 @@ export type InputNote = {
   updatedAt: number;
 };
 
+export const defaultInputNote = (): InputNote => ({
+  id: "",
+  type: "public",
+  state: "committed",
+  tag: "",
+  senderId: "",
+  scriptRoot: "",
+  scriptId: "",
+  fungibleAssets: [],
+  inputs: [],
+  nullifier: "",
+  updatedAt: 0,
+});
+
 // export const noteSerialNumber = (inputNote: InputNoteRecord) =>
 //   inputNote.details().recipient().serialNum();
 

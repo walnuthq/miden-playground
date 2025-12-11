@@ -41,7 +41,11 @@ const counterNote: Script = {
   masm: counterNoteMasm,
   dependencies: [
     ...defaultDependencies(),
-    { id: "counter-contract", name: "counter-contract", digest: "" },
+    {
+      id: "counter-value-contract",
+      name: "counter-value-contract",
+      digest: "",
+    },
   ],
 };
 

@@ -102,52 +102,64 @@ const useScripts = () => {
     if (!script) {
       throw new Error("Script not found");
     }
-    const {
-      TransactionRequestBuilder,
-      AccountStorageRequirements,
-      ForeignAccount,
-      AccountId,
-      MidenArrays,
-      Package,
-    } = midenSdk;
-    const builder = client.createScriptBuilder();
-    const contractName = script.name.replaceAll("-", "_");
-    const accountComponentLibrary = script.masm
-      ? builder.buildLibrary(`external_contract::${contractName}`, script.masm)
-      : Package.deserialize(new Uint8Array(script.packageBytes)).asLibrary();
-    builder.linkDynamicLibrary(accountComponentLibrary);
-    const transactionScript = builder.compileTxScript(
-      invokeProcedureCustomTransactionScript({
-        procedureExport,
-        procedureInputs,
-      })
-    );
-    let transactionRequestBuilder =
-      new TransactionRequestBuilder().withCustomScript(transactionScript);
-    if (foreignAccounts.length > 0) {
-      transactionRequestBuilder = transactionRequestBuilder.withForeignAccounts(
-        new MidenArrays.ForeignAccountArray(
-          foreignAccounts.map((foreignAccountId) =>
-            ForeignAccount.public(
-              AccountId.fromHex(foreignAccountId),
-              new AccountStorageRequirements()
-            )
+    dispatch({ type: "SUBMITTING_TRANSACTION" });
+    await client.syncState();
+    try {
+      const {
+        TransactionRequestBuilder,
+        AccountStorageRequirements,
+        ForeignAccount,
+        AccountId,
+        MidenArrays,
+        Package,
+      } = midenSdk;
+      const builder = client.createScriptBuilder();
+      const contractName = script.name.replaceAll("-", "_");
+      const accountComponentLibrary = script.masm
+        ? builder.buildLibrary(
+            `external_contract::${contractName}`,
+            script.masm
           )
-        )
+        : Package.deserialize(new Uint8Array(script.packageBytes)).asLibrary();
+      builder.linkDynamicLibrary(accountComponentLibrary);
+      const transactionScript = builder.compileTxScript(
+        invokeProcedureCustomTransactionScript({
+          procedureExport,
+          procedureInputs,
+        })
       );
+      let transactionRequestBuilder =
+        new TransactionRequestBuilder().withCustomScript(transactionScript);
+      if (foreignAccounts.length > 0) {
+        transactionRequestBuilder =
+          transactionRequestBuilder.withForeignAccounts(
+            new MidenArrays.ForeignAccountArray(
+              foreignAccounts.map((foreignAccountId) =>
+                ForeignAccount.public(
+                  AccountId.fromHex(foreignAccountId),
+                  new AccountStorageRequirements()
+                )
+              )
+            )
+          );
+      }
+      const transactionRequest = transactionRequestBuilder.build();
+      const transactionResult = await clientExecuteTransaction({
+        client,
+        accountId: senderAccountId,
+        transactionRequest,
+        midenSdk,
+      });
+      return submitNewTransaction({
+        accountId: senderAccountId,
+        transactionRequest,
+        transactionResult,
+      });
+    } catch (error) {
+      console.error(error);
+      dispatch({ type: "TRANSACTION_SUBMITTED" });
+      throw error;
     }
-    const transactionRequest = transactionRequestBuilder.build();
-    const transactionResult = await clientExecuteTransaction({
-      client,
-      accountId: senderAccountId,
-      transactionRequest,
-      midenSdk,
-    });
-    return submitNewTransaction({
-      accountId: senderAccountId,
-      transactionRequest,
-      transactionResult,
-    });
   };
   const openInvokeProcedureArgumentsDialog = ({
     senderAccountId,

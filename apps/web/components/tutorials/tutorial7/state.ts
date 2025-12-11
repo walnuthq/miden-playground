@@ -8,8 +8,19 @@ import counterContractComponent from "@/lib/types/default-components/counter-con
 const state: State = {
   ...defaultState(),
   networkId: "mtst",
-  scripts: [...defaultScripts, counterContractScript, counterNoteScript],
-  components: [...defaultComponents, counterContractComponent],
+  scripts: [
+    ...defaultScripts,
+    { ...counterContractScript, id: "counter-value-contract" },
+    counterNoteScript,
+  ],
+  components: [
+    ...defaultComponents,
+    {
+      ...counterContractComponent,
+      id: "counter-value-contract",
+      scriptId: "counter-value-contract",
+    },
+  ],
   tutorialId: "network-transactions",
 };
 

@@ -104,7 +104,9 @@ const DependenciesTable = ({ script }: { script: Script }) => {
               <TableCell>{scriptTypes[type]}</TableCell>
               <TableHead>{digest && formatDigest(digest)}</TableHead>
               <TableCell>
-                <DependencyActionsCell script={script} dependencyId={id} />
+                {!script.readOnly && (
+                  <DependencyActionsCell script={script} dependencyId={id} />
+                )}
               </TableCell>
             </TableRow>
           ))}

@@ -6,11 +6,9 @@ import { type Account } from "@/lib/types/account";
 import { type Script, type Export } from "@/lib/types/script";
 import { type Component } from "@/lib/types/component";
 import { Button } from "@workspace/ui/components/button";
-import { clientReadWord } from "@/lib/web-client";
 import useScripts from "@/hooks/use-scripts";
+import useTransactions from "@/hooks/use-transactions";
 import CopyButton from "@/components/lib/copy-button";
-import useMidenSdk from "@/hooks/use-miden-sdk";
-import useWebClient from "@/hooks/use-web-client";
 
 const ProceduresTableRow = ({
   account,
@@ -23,10 +21,8 @@ const ProceduresTableRow = ({
   script: Script;
   procedureExport: Export;
 }) => {
-  const { midenSdk } = useMidenSdk();
-  const { client } = useWebClient();
-  const { openInvokeProcedureArgumentsDialog } = useScripts();
-  const { invokeProcedure } = useScripts();
+  const { invokeProcedure, openInvokeProcedureArgumentsDialog } = useScripts();
+  const { submittingTransaction, readWord } = useTransactions();
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState("");
   return (
@@ -45,16 +41,18 @@ const ProceduresTableRow = ({
           <TableCell className="flex items-center justify-between gap-2">
             <span>{result}</span>
             <Button
-              disabled={loading || (account.isNew && procedureExport.readOnly)}
+              disabled={
+                loading ||
+                (account.isNew && procedureExport.readOnly) ||
+                submittingTransaction
+              }
               onClick={async () => {
                 setLoading(true);
                 if (procedureExport.readOnly) {
                   try {
-                    const word = await clientReadWord({
-                      client,
+                    const word = await readWord({
                       accountId: account.id,
                       procedureExport,
-                      midenSdk,
                     });
                     if (procedureExport.signature.results.length === 1) {
                       const [, , , felt = 0n] = word.toU64s();
@@ -63,8 +61,8 @@ const ProceduresTableRow = ({
                       setResult(word.toHex());
                     }
                   } catch (error) {
-                    setResult("ERROR");
                     console.error(error);
+                    setResult("ERROR");
                   }
                 } else if (procedureExport.signature.params.length === 0) {
                   try {
@@ -84,9 +82,10 @@ const ProceduresTableRow = ({
                           ),
                       },
                     });
+                    setResult("");
                   } catch (error) {
-                    setResult("ERROR");
                     console.error(error);
+                    setResult("ERROR");
                   }
                 } else {
                   openInvokeProcedureArgumentsDialog({

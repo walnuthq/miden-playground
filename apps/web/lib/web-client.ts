@@ -535,9 +535,10 @@ const clientCreateNoteScriptFromMasm = ({
   const builder = client.createScriptBuilder();
   const dependencies = script.dependencies
     .map((dependency) => scripts.find(({ id }) => id === dependency.id))
+    .filter((dependency) => dependency?.masm)
     .filter((dependency) => dependency !== undefined);
   for (const dependency of dependencies) {
-    const contractName = dependency.id.replaceAll("-", "_");
+    const contractName = dependency.name.replaceAll("-", "_");
     const accountComponentLibrary = builder.buildLibrary(
       `external_contract::${contractName}`,
       dependency.masm

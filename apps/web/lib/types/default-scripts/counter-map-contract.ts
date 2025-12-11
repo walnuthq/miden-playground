@@ -56,6 +56,9 @@ export.get_count
 
     exec.active_account::get_map_item
     # => [count]
+
+    exec.sys::truncate_stack
+    # => []
 end
 
 # => []
@@ -100,7 +103,7 @@ const counterMapContract: Script = {
       ...defaultExport(),
       name: "get_count",
       digest:
-        "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "0xcb055cd09294fa777a6136a3f0215849c06ebb7771248630be10a70e5e142024",
       signature: {
         ...defaultSignature(),
         results: ["Felt"],
@@ -111,7 +114,7 @@ const counterMapContract: Script = {
       ...defaultExport(),
       name: "increment_count",
       digest:
-        "0x0000000000000000000000000000000000000000000000000000000000000001",
+        "0xc0c3490a6fed68152a951a982b9d5f502709d75a7b46c5bfc50e98921fb67dd2",
       signature: {
         ...defaultSignature(),
         results: ["Felt"],
