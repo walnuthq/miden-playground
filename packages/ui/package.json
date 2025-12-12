@@ -10,11 +10,11 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
-    "lucide-react": "^0.560.0",
+    "lucide-react": "^0.561.0",
     "next-themes": "^0.4.6",
     "radix-ui": "^1.4.3",
-    "react": "^19.2.1",
-    "react-dom": "^19.2.1",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "react-resizable-panels": "^3.0.6",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
@@ -22,15 +22,15 @@
     "zod": "^4.1.13"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.1.17",
+    "@tailwindcss/postcss": "^4.1.18",
     "@turbo/gen": "^2.6.3",
-    "@types/node": "^25.0.0",
+    "@types/node": "^25.0.1",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
     "eslint": "^9.39.1",
-    "tailwindcss": "^4.1.17",
+    "tailwindcss": "^4.1.18",
     "typescript": "^5.9.3"
   },
   "exports": {
