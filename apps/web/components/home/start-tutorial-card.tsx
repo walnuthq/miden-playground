@@ -12,6 +12,7 @@ import { Button } from "@workspace/ui/components/button";
 import { Badge } from "@workspace/ui/components/badge";
 import useTutorials from "@/hooks/use-tutorials";
 import { type Tutorial } from "@/lib/types/tutorial";
+import { cn } from "@workspace/ui/lib/utils";
 
 const StartTutorialCard = ({ tutorial }: { tutorial: Tutorial }) => {
   const { completedTutorials, startTutorial } = useTutorials();
@@ -22,13 +23,20 @@ const StartTutorialCard = ({ tutorial }: { tutorial: Tutorial }) => {
           {tutorial.number}. {tutorial.title}
         </CardTitle>
         <CardAction>
-          {completedTutorials.has(tutorial.number) && (
-            <Badge
-              variant="secondary"
-              className="text-sm bg-green-500 text-white dark:bg-green-600"
-            >
+          {completedTutorials.has(tutorial.number) ? (
+            <Badge className="text-sm bg-green-500 text-white dark:bg-green-600">
               <BadgeCheck />
               Completed
+            </Badge>
+          ) : (
+            <Badge
+              className={cn("capitalize text-sm text-white", {
+                "bg-sky-500 dark:bg-sky-600": tutorial.category === "beginner",
+                "bg-amber-500 dark:bg-amber-600":
+                  tutorial.category === "advanced",
+              })}
+            >
+              {tutorial.category}
             </Badge>
           )}
         </CardAction>

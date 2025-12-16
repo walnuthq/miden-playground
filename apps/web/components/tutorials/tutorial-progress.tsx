@@ -20,7 +20,7 @@ const TutorialProgressStep = ({
       <TooltipTrigger asChild>
         <div
           className={cn(
-            "grow-1 first:rounded-l-md last:rounded-r-md border not-first:border-l-0 border-gray-400",
+            "grow first:rounded-l-md last:rounded-r-md border not-first:border-l-0 border-gray-400",
             {
               "bg-green-400": index < tutorialStep || index <= tutorialMaxStep,
               "bg-yellow-400": index === tutorialStep,

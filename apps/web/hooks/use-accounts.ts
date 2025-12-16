@@ -16,13 +16,13 @@ import {
   type AccountType,
   type Account,
   basicWalletAccount,
-  // midenFaucetAccount,
+  midenFaucetAccount,
 } from "@/lib/types/account";
 import { type Component } from "@/lib/types/component";
 import useScripts from "@/hooks/use-scripts";
 import useComponents from "@/hooks/use-components";
 import {
-  // MIDEN_FAUCET_ADDRESS,
+  MIDEN_FAUCET_ADDRESS,
   BASIC_WALLET_CODE,
   COUNTER_CONTRACT_ADDRESS,
 } from "@/lib/constants";
@@ -126,14 +126,14 @@ const useAccounts = () => {
     address: string;
   }) => {
     // TODO mock importing Miden Faucet
-    // if (address === MIDEN_FAUCET_ADDRESS) {
-    //   const account = midenFaucetAccount();
-    //   dispatch({
-    //     type: "IMPORT_ACCOUNT",
-    //     payload: { account, inputNotes: [], blockNum },
-    //   });
-    //   return account;
-    // }
+    if (address === MIDEN_FAUCET_ADDRESS) {
+      const account = midenFaucetAccount();
+      dispatch({
+        type: "IMPORT_ACCOUNT",
+        payload: { account, inputNotes: [], blockNum },
+      });
+      return account;
+    }
     const syncSummary = await client.syncState();
     let wasmAccount: WasmAccountType | null = null;
     try {

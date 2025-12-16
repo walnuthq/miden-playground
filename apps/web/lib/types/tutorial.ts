@@ -19,6 +19,7 @@ export type Tutorial = {
   title: string;
   tagline: string;
   description: string;
+  category: "beginner" | "advanced";
   initialRoute: string;
   store: Store;
   state: State;
@@ -31,6 +32,7 @@ export const defaultTutorial = (): Tutorial => ({
   title: "",
   tagline: "",
   description: "",
+  category: "beginner",
   initialRoute: "/",
   store: defaultStore(),
   state: defaultState(),

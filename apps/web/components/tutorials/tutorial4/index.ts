@@ -1,4 +1,4 @@
-import { type Tutorial } from "@/lib/types/tutorial";
+import { defaultTutorial, type Tutorial } from "@/lib/types/tutorial";
 import store from "@/components/tutorials/tutorial4/store";
 import state from "@/components/tutorials/tutorial4/state";
 import Step1 from "@/components/tutorials/tutorial4/step1";
@@ -9,6 +9,7 @@ import Step5 from "@/components/tutorials/tutorial4/step5";
 import Step6 from "@/components/tutorials/tutorial4/step6";
 
 const tutorial: Tutorial = {
+  ...defaultTutorial(),
   id: "interact-with-the-counter-contract",
   number: 4,
   title: "Interact with the Counter Contract",

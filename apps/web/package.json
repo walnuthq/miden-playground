@@ -37,19 +37,19 @@
     "sonner": "^2.0.7",
     "usehooks-ts": "^3.1.1",
     "uuid": "^13.0.0",
-    "viem": "^2.41.2"
+    "viem": "^2.42.1"
   },
   "devDependencies": {
     "@types/lodash": "^4.17.21",
     "@types/mdx": "^2.0.13",
-    "@types/node": "^25.0.1",
+    "@types/node": "^25.0.2",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@workspace/eslint-config": "workspace:^",
     "@workspace/typescript-config": "workspace:*",
     "copy-webpack-plugin": "^13.0.1",
-    "eslint": "^9.39.1",
+    "eslint": "^9.39.2",
     "typescript": "^5.9.3",
-    "wrangler": "^4.54.0"
+    "wrangler": "^4.55.0"
   }
 }

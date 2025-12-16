@@ -1,4 +1,4 @@
-import { type Tutorial } from "@/lib/types/tutorial";
+import { defaultTutorial, type Tutorial } from "@/lib/types/tutorial";
 import state from "@/components/tutorials/tutorial3/state";
 import store from "@/components/tutorials/tutorial3/store";
 import Step1 from "@/components/tutorials/tutorial3/step1";
@@ -9,6 +9,7 @@ import Step5 from "@/components/tutorials/tutorial3/step5";
 import Step6 from "@/components/tutorials/tutorial3/step6";
 
 const tutorial: Tutorial = {
+  ...defaultTutorial(),
   id: "connect-wallet-and-sign-transactions",
   number: 3,
   title: "Connect wallet and sign transactions",

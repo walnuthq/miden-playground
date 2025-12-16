@@ -1,4 +1,4 @@
-import { type Tutorial } from "@/lib/types/tutorial";
+import { defaultTutorial, type Tutorial } from "@/lib/types/tutorial";
 import store from "@/components/tutorials/tutorial8/store";
 import state from "@/components/tutorials/tutorial8/state";
 import Step1 from "@/components/tutorials/tutorial8/step1";
@@ -9,6 +9,7 @@ import Step5 from "@/components/tutorials/tutorial8/step5";
 import Step6 from "@/components/tutorials/tutorial8/step6";
 
 const tutorial: Tutorial = {
+  ...defaultTutorial(),
   id: "foreign-procedure-invocation",
   number: 8,
   title: "Foreign Procedure Invocation",
@@ -16,6 +17,7 @@ const tutorial: Tutorial = {
     "Using foreign procedure invocation to craft read-only cross-contract calls.",
   description:
     "Following up on the Counter Contract tutorial, we will create a Count Reader contract that can copy its value from another contract.",
+  category: "advanced",
   initialRoute: "/scripts",
   store,
   state,
