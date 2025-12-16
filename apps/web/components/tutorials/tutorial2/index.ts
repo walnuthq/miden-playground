@@ -1,4 +1,4 @@
-import { type Tutorial } from "@/lib/types/tutorial";
+import { defaultTutorial, type Tutorial } from "@/lib/types/tutorial";
 import state from "@/components/tutorials/tutorial2/state";
 import store from "@/components/tutorials/tutorial2/store";
 import Step1 from "@/components/tutorials/tutorial2/step1";
@@ -8,6 +8,7 @@ import Step4 from "@/components/tutorials/tutorial2/step4";
 import Step5 from "@/components/tutorials/tutorial2/step5";
 
 const tutorial: Tutorial = {
+  ...defaultTutorial(),
   id: "transfer-assets-between-wallets",
   number: 2,
   title: "Transfer assets between wallets",

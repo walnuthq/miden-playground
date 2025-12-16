@@ -1,4 +1,4 @@
-import { type Tutorial } from "@/lib/types/tutorial";
+import { defaultTutorial, type Tutorial } from "@/lib/types/tutorial";
 import store from "@/components/tutorials/tutorial9/store";
 import state from "@/components/tutorials/tutorial9/state";
 import Step1 from "@/components/tutorials/tutorial9/step1";
@@ -10,6 +10,7 @@ import Step2 from "@/components/tutorials/tutorial9/step2";
 // import Step7 from "@/components/tutorials/tutorial6/step7";
 
 const tutorial: Tutorial = {
+  ...defaultTutorial(),
   id: "create-a-counter-note",
   number: 7,
   title: "Create a Counter note",

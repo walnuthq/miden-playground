@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useInterval } from "usehooks-ts";
 import { CircleDot } from "lucide-react";
 import { Badge } from "@workspace/ui/components/badge";
@@ -12,14 +12,18 @@ const NetworkBadge = () => {
   const { networkId, blockNum, syncingState, submittingTransaction } =
     useGlobalContext();
   const { syncState, popState } = useWebClient();
+  const [delay, setDelay] = useState(15000);
   const useIntervalTriggered = !syncingState && networkId === "mtst";
   useInterval(
     () => {
       if (!submittingTransaction) {
         syncState();
+        if (delay !== 5000) {
+          setDelay(5000);
+        }
       }
     },
-    useIntervalTriggered ? 5000 : null
+    useIntervalTriggered ? delay : null
   );
   useEffect(() => {
     if (!syncingState) {

@@ -1,4 +1,4 @@
-import { type Tutorial } from "@/lib/types/tutorial";
+import { defaultTutorial, type Tutorial } from "@/lib/types/tutorial";
 import store from "@/components/tutorials/tutorial7/store";
 import state from "@/components/tutorials/tutorial7/state";
 import Step1 from "@/components/tutorials/tutorial7/step1";
@@ -9,6 +9,7 @@ import Step5 from "@/components/tutorials/tutorial7/step5";
 import Step6 from "@/components/tutorials/tutorial7/step6";
 
 const tutorial: Tutorial = {
+  ...defaultTutorial(),
   id: "network-transactions",
   number: 7,
   title: "Network transactions",
