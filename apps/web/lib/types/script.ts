@@ -139,16 +139,19 @@ const formatProcedureInputs = (inputs: MidenInput[]) =>
     .join("\n");
 
 export const invokeProcedureCustomTransactionScript = ({
+  contractName,
   procedureExport,
   procedureInputs,
 }: {
+  contractName?: string;
   procedureExport: Export;
   procedureInputs: MidenInput[];
-}) => `use.std::sys
+}) => `${contractName ? `use.external_contract::${contractName}` : ""}
+use.std::sys
 
 begin
     ${formatProcedureInputs(procedureInputs)}
-    call.${procedureExport.digest}
+    call.${contractName ? `${contractName}::${procedureExport.name}` : procedureExport.digest}
     exec.sys::truncate_stack
 end
 `;
