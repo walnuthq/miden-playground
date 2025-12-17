@@ -1,19 +1,13 @@
-import { isEqual } from "lodash";
 import { type TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
 import Step2Content from "@/components/tutorials/tutorial5/step2.mdx";
 import useScripts from "@/hooks/use-scripts";
-import { defaultScriptIds } from "@/lib/types/default-scripts";
-import counterMapContract from "@/lib/types/default-scripts/counter-map-contract";
 
 const useCompleted = () => {
   const { scripts } = useScripts();
   const script = scripts.find(
-    ({ id, type, exports }) =>
-      !defaultScriptIds.includes(id) &&
-      type === "account" &&
-      isEqual(exports, counterMapContract.exports)
+    ({ id, type }) => id.startsWith("counter-contract_") && type === "account"
   );
   const matches = script?.rust.matchAll(/felt!\((\d*)\)/g);
   const lastMatch = Array.from(matches ?? []).at(-1);
