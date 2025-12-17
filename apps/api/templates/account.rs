@@ -24,7 +24,7 @@ impl CounterContract {
     }
 
     /// Increments the counter value stored in the contract's storage by one.
-    pub fn increment_count(&self) -> Felt {
+    pub fn increment_count(&mut self) -> Felt {
         let current_value: Felt = self.count.read();
         let new_value = current_value + felt!(1);
         self.count.write(new_value);

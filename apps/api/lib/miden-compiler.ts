@@ -1,10 +1,10 @@
 import { cp, writeFile, readFile, rm, readdir, mkdir } from "node:fs/promises";
 import { execFile, fileExists } from "@/lib/utils";
-import { defaultDependencies, type Export, type Dependency } from "@/lib/types";
-
-const projectRoot = process.env.NODE_ENV !== "production" ? "." : "../../../..";
-
-const packagesPath = process.env.PACKAGES_PATH ?? "/tmp";
+import { type Export, type Dependency } from "@/lib/types";
+import { insertPackage, getDependencies } from "@/db/package";
+import { type PackageType } from "@/lib/types";
+import { packagesPath, projectRoot } from "@/lib/constants";
+import { midenPackageManifest } from "@/lib/miden-package-manifest";
 
 export const cargoMidenVersion = async () => {
   const { stdout } = await execFile("cargo", ["miden", "--version"]);
@@ -22,13 +22,13 @@ export const setupDefaultPackagesDir = async () => {
   if (defaultPackagesExists) {
     return;
   }
-  const defaultPackages = await readdir("default-packages");
+  const defaultPackages = await readdir(`${projectRoot}/default-packages`);
   for (const defaultPackage of defaultPackages) {
     console.info(
       `cp -r default-packages/${defaultPackage} ${packagesPath}/${defaultPackage}`
     );
     await cp(
-      `default-packages/${defaultPackage}`,
+      `${projectRoot}/default-packages/${defaultPackage}`,
       `${packagesPath}/${defaultPackage}`,
       {
         recursive: true,
@@ -39,40 +39,35 @@ export const setupDefaultPackagesDir = async () => {
 };
 
 export const newPackage = async ({
-  packageDir,
   name,
   type,
   example,
+  rust,
 }: {
-  packageDir: string;
   name: string;
-  type: string;
-  example: string;
+  type: PackageType;
+  example?: string;
+  rust?: string;
 }) => {
-  const dependencies = defaultDependencies();
-  if (example === "none") {
-    // await setupDefaultPackagesDir();
-    const rust = await readFile(`${projectRoot}/templates/${type}.rs`, "utf-8");
-    await generatePackageDir({
-      packageDir,
-      name,
-      type,
-      rust,
-      dependencies,
-    });
-  } else {
-    console.info(`cp -r examples/${example} ${packagesPath}/${packageDir}`);
-    await cp(
-      `${projectRoot}/examples/${example}`,
-      `${packagesPath}/${packageDir}`,
-      {
-        recursive: true,
-      }
-    );
-  }
-  compilePackage(packageDir);
-  const rust = await readRust(packageDir);
-  return { rust, dependencies };
+  const initialRust = rust
+    ? rust
+    : await readFile(`${projectRoot}/templates/${example ?? type}.rs`, "utf-8");
+  const id = await insertPackage({
+    name,
+    type,
+    status: rust ? "compiled" : "draft",
+    readOnly: !!rust,
+    rust: initialRust,
+  });
+  await generatePackageDir({
+    packageDir: id,
+    name,
+    type,
+    rust: initialRust,
+    dependencies: [],
+  });
+  compilePackage(id);
+  return { id, rust: initialRust };
 };
 
 export const readRust = async (packageDir: string) => {
@@ -91,19 +86,21 @@ export const generatePackageDir = async ({
   name: string;
   type: string;
   rust: string;
-  dependencies: Dependency[];
+  dependencies: string[];
 }) => {
-  // await Promise.all(
-  //   dependencies.map(async (dependency) => {
-  //     const dependencyExists = await packageExists(dependency.id);
-  //     if (!dependencyExists) {
-  //       await generatePackageDir({
-  //         packageDir: dependency.id,
-  //         name: dependency.name,
-  //       });
-  //     }
-  //   })
-  // );
+  const dependenciesPackages =
+    dependencies.length > 0 ? await getDependencies(dependencies) : [];
+  await Promise.all(
+    dependenciesPackages.map((dependency) =>
+      generatePackageDir({
+        packageDir: dependency.id,
+        name: dependency.name,
+        type: dependency.type,
+        rust: dependency.rust,
+        dependencies: dependency.dependencies,
+      })
+    )
+  );
   await mkdir(`${packagesPath}/${packageDir}`);
   await Promise.all([
     mkdir(`${packagesPath}/${packageDir}/src`),
@@ -115,7 +112,7 @@ export const generatePackageDir = async ({
       packageDir,
       name,
       type,
-      dependencies,
+      dependencies: dependenciesPackages,
     }),
     cp(
       `${projectRoot}/default-packages/counter-contract/rust-toolchain.toml`,
@@ -205,14 +202,8 @@ export const compilePackage = async (packageDir: string) => {
 };
 
 const readPackageMetadata = async (maspPath: string) => {
-  const { stdout } = await execFile(
-    "./miden_package_introspection",
-    [maspPath],
-    {
-      cwd: `${projectRoot}/miden-package-introspection/target/release`,
-    }
-  );
-  const { exports, dependencies } = JSON.parse(stdout) as {
+  const packageManifest = await midenPackageManifest(maspPath);
+  const { exports, dependencies } = JSON.parse(packageManifest) as {
     exports: Export[];
     dependencies: Dependency[];
   };
@@ -221,10 +212,12 @@ const readPackageMetadata = async (maspPath: string) => {
       const [, name = ""] = procedureExport.name.split("::");
       return { ...procedureExport, name };
     }),
-    dependencies: dependencies.map((dependency) => ({
-      ...dependency,
-      name: dependency.name.replaceAll("_", "-"),
-    })),
+    dependencies: dependencies
+      .filter(({ name }) => !["base", "std"].includes(name))
+      .map((dependency) => ({
+        ...dependency,
+        name: dependency.name.replaceAll("_", "-"),
+      })),
   };
 };
 
@@ -242,7 +235,7 @@ export const readPackage = async ({
   return { packageBuffer, exports, dependencies };
 };
 
-export const deletePackage = (packageDir: string) => {
+export const deletePackageDir = (packageDir: string) => {
   console.info(`rm -rf ${packagesPath}/${packageDir}`);
   return rm(`${packagesPath}/${packageDir}`, { recursive: true, force: true });
 };

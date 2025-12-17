@@ -1,11 +1,7 @@
 [package]
-name = "miden-package-introspection"
+name = "miden-package-manifest"
 version = "0.1.0"
 edition = "2021"
-
-[[bin]]
-name = "miden_package_introspection"
-path = "src/main.rs"
 
 [dependencies]
 miden-mast-package = "0.19.1"

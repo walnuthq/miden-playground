@@ -110,7 +110,7 @@ export const defaultScript = (): Script => ({
   root: "",
   packageBytes: [],
   exports: [],
-  dependencies: defaultDependencies(),
+  dependencies: [],
   // inputs: [],
   updatedAt: 0,
 });

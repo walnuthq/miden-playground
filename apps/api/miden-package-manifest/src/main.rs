@@ -3,7 +3,7 @@ use serde_json::Result;
 use std::fs;
 use winter_utils::Deserializable;
 
-// cargo run --release --bin miden_package_introspection
+// cargo run --release --bin miden_package_manifest
 fn main() -> Result<()> {
     let args: Vec<String> = std::env::args().collect();
     if args.len() != 2 {

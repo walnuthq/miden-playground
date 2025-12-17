@@ -13,20 +13,19 @@
   },
   "dependencies": {
     "dotenv": "^17.2.3",
-    "drizzle-orm": "^0.45.1",
+    "drizzle-orm": "1.0.0-beta.2-58a4521",
     "next": "^16.0.10",
     "pg": "^8.16.3",
-    "react": "^19.2.3",
-    "uuid": "^13.0.0"
+    "react": "^19.2.3"
   },
   "devDependencies": {
-    "@types/node": "^25.0.1",
+    "@types/node": "^25.0.2",
     "@types/pg": "^8.16.0",
     "@types/react": "^19.2.7",
     "@workspace/eslint-config": "workspace:^",
     "@workspace/typescript-config": "workspace:*",
-    "drizzle-kit": "^0.31.8",
-    "eslint": "^9.39.1",
+    "drizzle-kit": "1.0.0-beta.2-58a4521",
+    "eslint": "^9.39.2",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }

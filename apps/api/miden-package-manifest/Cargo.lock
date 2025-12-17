@@ -985,7 +985,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "miden-package-introspection"
+name = "miden-package-manifest"
 version = "0.1.0"
 dependencies = [
  "miden-mast-package",

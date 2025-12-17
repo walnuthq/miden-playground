@@ -1,27 +1,31 @@
 import { type NextRequest, NextResponse } from "next/server";
 import {
-  updateRust,
   compilePackage,
-  deletePackage,
+  deletePackageDir,
   packageExists,
   readPackage,
-  generateCargoToml,
   generatePackageDir,
+  generateCargoToml,
+  updateRust,
 } from "@/lib/miden-compiler";
 import { type Export, type Dependency } from "@/lib/types";
+import {
+  getDependencies,
+  getPackage,
+  updatePackage,
+  deletePackage,
+} from "@/db/package";
 
 type CompileScriptRequestBody = {
-  name: string;
-  type: string;
   rust: string;
-  dependencies: Dependency[];
+  dependencies: string[];
 };
 
 type CompileScriptResponse = {
   ok: boolean;
   error: string;
   masm: string;
-  root: string;
+  digest: string;
   package: { type: "Buffer"; data: number[] };
   exports: Export[];
   dependencies: Dependency[];
@@ -37,7 +41,7 @@ const compileScriptResponseError = ({
   ok: false,
   error,
   masm: "",
-  root: "",
+  digest: "",
   package: { type: "Buffer", data: [] },
   exports: [],
   dependencies,
@@ -49,14 +53,16 @@ export const PATCH = async (
 ) => {
   const { id: packageDir } = await params;
   const body = await request.json();
-  const {
-    name,
-    type,
-    rust: updatedRust,
-    dependencies: updatedDependencies,
-  } = body as CompileScriptRequestBody;
-  const exists = await packageExists(packageDir);
-  if (!exists) {
+  const { rust: updatedRust, dependencies: updatedDependencies } =
+    body as CompileScriptRequestBody;
+  const [exists, { name, type }, dependenciesPackages] = await Promise.all([
+    packageExists(packageDir),
+    getPackage(packageDir),
+    getDependencies(updatedDependencies),
+  ]);
+  if (exists) {
+    await updateRust({ packageDir, rust: updatedRust });
+  } else {
     await generatePackageDir({
       packageDir,
       name,
@@ -65,28 +71,39 @@ export const PATCH = async (
       dependencies: updatedDependencies,
     });
   }
-  await Promise.all([
-    updateRust({ packageDir, rust: updatedRust }),
-    generateCargoToml({
-      packageDir,
-      name,
-      type,
-      dependencies: updatedDependencies,
-    }),
-  ]);
+  await generateCargoToml({
+    packageDir,
+    name,
+    type,
+    dependencies: dependenciesPackages,
+  });
   const { stderr } = await compilePackage(packageDir);
   if (stderr) {
     console.error(stderr);
+    await updatePackage({
+      id: packageDir,
+      status: "error",
+      rust: updatedRust,
+      dependencies: updatedDependencies,
+      exports: [],
+    });
     return NextResponse.json(
       compileScriptResponseError({
         error: stderr,
-        dependencies: updatedDependencies,
+        dependencies: dependenciesPackages,
       })
     );
   }
   const { packageBuffer, exports, dependencies } = await readPackage({
     packageDir,
     name,
+  });
+  await updatePackage({
+    id: packageDir,
+    status: "compiled",
+    rust: updatedRust,
+    dependencies: updatedDependencies,
+    exports,
   });
   return NextResponse.json({
     ok: true,
@@ -104,6 +121,6 @@ export const DELETE = async (
   { params }: { params: Promise<{ id: string }> }
 ) => {
   const { id } = await params;
-  await deletePackage(id);
+  await Promise.all([deletePackage(id), deletePackageDir(id)]);
   return NextResponse.json({ id });
 };

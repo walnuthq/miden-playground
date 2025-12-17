@@ -1,4 +1,5 @@
 "use client";
+import { kebabCase } from "lodash";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -83,7 +84,7 @@ const CreateScriptDialog = () => {
             const formData = new FormData(event.currentTarget);
             setLoading(true);
             const script = await newScript({
-              name: formData.get("name")?.toString() ?? "",
+              name: kebabCase(formData.get("name")?.toString() ?? ""),
               type: scriptType,
               example: scriptExample,
             });
@@ -97,12 +98,7 @@ const CreateScriptDialog = () => {
             <FieldGroup className="grid grid-cols-2 gap-4">
               <Field className="grid col-span-2">
                 <FieldLabel htmlFor="name">Name</FieldLabel>
-                <Input
-                  id="name"
-                  name="name"
-                  required
-                  pattern="^[a-z]+[a-z0-9\-]*[a-z0-9]+$"
-                />
+                <Input id="name" name="name" required minLength={2} />
                 <FieldDescription>
                   Package name, 2 characters minimum.
                 </FieldDescription>
@@ -113,7 +109,7 @@ const CreateScriptDialog = () => {
                   onValueChange={(type) => setScriptType(type as ScriptType)}
                   value={scriptType}
                 >
-                  <SelectTrigger className="w-[180px]">
+                  <SelectTrigger className="w-45">
                     <SelectValue placeholder="Select type…" />
                   </SelectTrigger>
                   <SelectContent>
@@ -133,7 +129,7 @@ const CreateScriptDialog = () => {
                   }
                   value={scriptExample}
                 >
-                  <SelectTrigger className="w-[180px]">
+                  <SelectTrigger className="w-45">
                     <SelectValue placeholder="Select example" />
                   </SelectTrigger>
                   <SelectContent>

@@ -23,12 +23,11 @@ export const createScript = async ({
     body: JSON.stringify({ name, type, example }),
   });
   const result = await response.json();
-  const { id, rust, dependencies } = result as {
+  const { id, rust } = result as {
     id: string;
     rust: string;
-    dependencies: Dependency[];
   };
-  return { id, rust, dependencies };
+  return { id, rust };
 };
 
 export const compileScript = async (script: Script) => {
@@ -40,10 +39,8 @@ export const compileScript = async (script: Script) => {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      name: script.name,
-      type: script.type,
       rust: script.rust,
-      dependencies: script.dependencies,
+      dependencies: script.dependencies.map(({ id }) => id),
     }),
   });
   const result = await response.json();
@@ -85,4 +82,32 @@ export const deleteScript = async (scriptId: string) => {
   const result = await response.json();
   const { id } = result as { id: string };
   return id;
+};
+
+export const verifyAccountComponent = async ({
+  accountId,
+  cargoToml,
+  rust,
+}: {
+  accountId: string;
+  cargoToml: string;
+  rust: string;
+}) => {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const response = await fetch(`${apiUrl}/verify/account-component`, {
+    method: "POST",
+    body: JSON.stringify({
+      accountId,
+      cargoToml,
+      rust,
+    }),
+  });
+  const result = await response.json();
+  const { ok, verified } = result as
+    | { ok: true; verified: boolean }
+    | { ok: false; verified: undefined };
+  if (!ok) {
+    throw new Error("ERROR");
+  }
+  return verified;
 };

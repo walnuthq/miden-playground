@@ -77,7 +77,7 @@ const DependenciesTable = ({ script }: { script: Script }) => {
           }
         : undefined;
     })
-    .filter((dependency) => !["std", "base"].includes(dependency?.id ?? ""))
+    // .filter((dependency) => !["std", "base"].includes(dependency?.id ?? ""))
     .filter((dependency) => dependency !== undefined);
   return (
     <div className="rounded-md border">

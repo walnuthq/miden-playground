@@ -51,7 +51,7 @@ const useScripts = () => {
     type: ScriptType;
     example: ScriptExample | "none";
   }) => {
-    const { id, rust, dependencies } = await createScript({
+    const { id, rust } = await createScript({
       name,
       type,
       example,
@@ -62,7 +62,6 @@ const useScripts = () => {
       name,
       type,
       rust,
-      dependencies,
       updatedAt: Date.now(),
     };
     dispatch({

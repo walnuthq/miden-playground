@@ -646,6 +646,7 @@ const verifyDefaultComponents = ({
 }) => {
   const code = wasmAccount.code();
   return defaultScripts
+    .filter(({ id }) => id !== "cc2")
     .filter(
       ({ exports }) =>
         exports.length > 0 &&

@@ -1,3 +1,9 @@
+import { type packageTypeEnum, type packageStatusEnum } from "@/db/schema";
+
+export type PackageType = (typeof packageTypeEnum.enumValues)[number];
+
+export type PackageStatus = (typeof packageStatusEnum.enumValues)[number];
+
 export type Export = {
   name: string;
   digest: string;
