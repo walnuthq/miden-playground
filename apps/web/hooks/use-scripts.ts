@@ -124,6 +124,7 @@ const useScripts = () => {
       builder.linkDynamicLibrary(accountComponentLibrary);
       const transactionScript = builder.compileTxScript(
         invokeProcedureCustomTransactionScript({
+          contractName: script.masm ? contractName : undefined,
           procedureExport,
           procedureInputs,
         })
