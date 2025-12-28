@@ -15,7 +15,7 @@ import useWebClient from "@/hooks/use-web-client";
 const useNotes = () => {
   const { midenSdk } = useMidenSdk();
   const {
-    tutorialId, // TODO
+    tutorialId,
     inputNotes,
     exportNoteDialogOpen,
     importNoteDialogOpen,
