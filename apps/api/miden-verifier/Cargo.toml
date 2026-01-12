@@ -1,0 +1,9 @@
+[package]
+name = "miden-verifier"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+base64 = "0.22.1"
+miden-objects = "0.12.4"
+winter-utils = "0.13.1"

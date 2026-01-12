@@ -13,11 +13,7 @@ export type NoteAction =
       type: "OPEN_VERIFY_NOTE_SCRIPT_DIALOG";
       payload: { noteId: string };
     }
-  | { type: "CLOSE_VERIFY_NOTE_SCRIPT_DIALOG" }
-  | {
-      type: "VERIFY_NOTE_SCRIPT";
-      payload: { noteId: string; scriptId: string };
-    };
+  | { type: "CLOSE_VERIFY_NOTE_SCRIPT_DIALOG" };
 
 const reducer = (state: State, action: NoteAction): State => {
   switch (action.type) {
@@ -75,20 +71,6 @@ const reducer = (state: State, action: NoteAction): State => {
         ...state,
         verifyNoteScriptDialogOpen: false,
         verifyNoteScriptDialogNoteId: "",
-      };
-    }
-    case "VERIFY_NOTE_SCRIPT": {
-      const index = state.inputNotes.findIndex(
-        ({ id }) => id === action.payload.noteId
-      );
-      const note = state.inputNotes[index]!;
-      return {
-        ...state,
-        inputNotes: [
-          ...state.inputNotes.slice(0, index),
-          { ...note, scriptId: action.payload.scriptId },
-          ...state.inputNotes.slice(index + 1),
-        ],
       };
     }
   }

@@ -23,7 +23,7 @@ const ProceduresTable = ({
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead className="w-[180px]">Name</TableHead>
+          <TableHead className="w-45">Name</TableHead>
           {account.components.includes("no-auth") &&
             component.type === "account" && <TableHead>Result</TableHead>}
         </TableRow>

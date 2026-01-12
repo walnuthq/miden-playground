@@ -7,7 +7,6 @@ import {
   type ScriptType,
   type ScriptExample,
   type Dependency,
-  defaultDependencies,
 } from "@/lib/types/script";
 
 type CreateScriptRequestBody = {
@@ -22,11 +21,8 @@ const scriptsRust: Record<ScriptExample, string> = {
 } as const;
 
 const scriptsDependencies: Record<ScriptExample, Dependency[]> = {
-  "counter-contract": defaultDependencies(),
-  "p2id-note": [
-    ...defaultDependencies(),
-    { id: "basic-wallet", name: "basic-wallet", digest: "" },
-  ],
+  "counter-contract": [],
+  "p2id-note": [{ id: "basic-wallet", name: "basic-wallet", digest: "" }],
 } as const;
 
 export const POST = async (request: NextRequest) => {

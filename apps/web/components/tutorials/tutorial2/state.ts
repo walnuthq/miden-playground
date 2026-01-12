@@ -416,6 +416,8 @@ const state: State = {
       type: "public",
       state: "consumed-authenticated-local",
       tag: "3914334208",
+      serialNum:
+        "0x12d59d5e544500f04232c9df8d90831f4405caa81b6cbd86d3835dacad9388a6",
       senderId: "0xf19d0f4c1d78fb2008194697fdb242",
       scriptRoot:
         "0x638ae99901ba0adbb0998937e075bf66f651191a6521c5d9c3c324c80bf55290",

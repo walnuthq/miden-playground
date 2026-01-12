@@ -3,25 +3,25 @@ import store from "@/components/tutorials/tutorial9/store";
 import state from "@/components/tutorials/tutorial9/state";
 import Step1 from "@/components/tutorials/tutorial9/step1";
 import Step2 from "@/components/tutorials/tutorial9/step2";
-// import Step3 from "@/components/tutorials/tutorial6/step3";
-// import Step4 from "@/components/tutorials/tutorial6/step4";
-// import Step5 from "@/components/tutorials/tutorial6/step5";
-// import Step6 from "@/components/tutorials/tutorial6/step6";
-// import Step7 from "@/components/tutorials/tutorial6/step7";
+import Step3 from "@/components/tutorials/tutorial9/step3";
+import Step4 from "@/components/tutorials/tutorial9/step4";
+import Step5 from "@/components/tutorials/tutorial9/step5";
+import Step6 from "@/components/tutorials/tutorial9/step6";
+import Step7 from "@/components/tutorials/tutorial9/step7";
+import Step8 from "@/components/tutorials/tutorial9/step8";
 
 const tutorial: Tutorial = {
   ...defaultTutorial(),
-  id: "create-a-counter-note",
-  number: 7,
-  title: "Create a Counter note",
-  tagline:
-    "Create a note with custom logic interacting with the Counter Contract.",
+  id: "your-first-smart-contract-and-custom-note",
+  number: 9,
+  title: "Your first Smart Contract and custom note",
+  tagline: "Develop custom smart contracts and notes.",
   description:
-    "Following up on the Counter Contract tutorial, we will create a custom note incrementing the counter value and asserting the count was updated.",
+    "In this tutorial, you'll create your first smart contract and understand the structure and implementation of both the counter account contract and increment note script.",
   initialRoute: "/scripts",
   store,
   state,
-  steps: [Step1, Step2 /*, Step3, Step4, Step5, Step6, Step7*/],
+  steps: [Step1, Step2, Step3, Step4, Step5, Step6, Step7, Step8],
 };
 
 export default tutorial;

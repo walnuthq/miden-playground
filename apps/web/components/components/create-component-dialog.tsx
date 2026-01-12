@@ -60,7 +60,7 @@ const CreateComponentDialog = () => {
       onOpenChange={(open) => !open && onClose()}
     >
       <DialogContent
-        className="sm:max-w-[640px] z-100"
+        className="sm:max-w-160 z-100"
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
       >
@@ -114,7 +114,7 @@ const CreateComponentDialog = () => {
               <Label htmlFor="script">Script</Label>
               <Select onValueChange={setScriptId} value={scriptId}>
                 <SelectTrigger
-                  className="w-[180px]"
+                  className="w-45"
                   disabled={shownScripts.length === 0}
                 >
                   <SelectValue placeholder="Select script…" />

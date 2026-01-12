@@ -26,7 +26,7 @@ impl CountReader {
     /// Copy the count from a source contract into the CountReader own counter.
     /// This procedure takes 2 arguments: the CounterContract account ID to copy from and the
     /// get_count procedure hash.
-    pub fn copy_count(&self, counter_account_id: AccountId, get_count_proc_hash: Digest) {
+    pub fn copy_count(&mut self, counter_account_id: AccountId, get_count_proc_hash: Digest) {
         // Execute a foreign procedure call on the counter contract, calling get_count and return
         // the result in a felt array
         let result =

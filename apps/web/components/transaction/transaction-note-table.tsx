@@ -31,7 +31,9 @@ const TransactionNoteTable = ({ notes }: { notes: TransactionNote[] }) => {
         </TableHeader>
         <TableBody>
           {notes.map((note) => {
-            const script = scripts.find(({ root }) => root === note.scriptRoot);
+            const script = scripts.find(
+              ({ digest }) => digest === note.scriptRoot
+            );
             return (
               <TableRow key={note.id}>
                 <TableCell>

@@ -4,13 +4,6 @@ import { toast } from "sonner";
 import { Spinner } from "@workspace/ui/components/spinner";
 import { Button } from "@workspace/ui/components/button";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@workspace/ui/components/select";
-import {
   Dialog,
   DialogClose,
   DialogContent,
@@ -19,23 +12,27 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@workspace/ui/components/dialog";
+import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import useNotes from "@/hooks/use-notes";
-import useScripts from "@/hooks/use-scripts";
+import { verifyNoteFromSource } from "@/lib/api";
+import { clientGetInputNote } from "@/lib/web-client";
+import useWebClient from "@/hooks/use-web-client";
+import { toBase64, readFile } from "@/lib/utils";
 
 const VerifyNoteScriptDialog = () => {
+  const { client } = useWebClient();
   const {
     verifyNoteScriptDialogOpen,
     verifyNoteScriptDialogNoteId: noteId,
-    verifyNoteScript,
     closeVerifyNoteScriptDialog,
   } = useNotes();
-  const { scripts } = useScripts();
   const [loading, setLoading] = useState(false);
-  const [scriptId, setScriptId] = useState("");
-  const shownScripts = scripts.filter(({ type }) => type === "note-script");
+  const [cargoToml, setCargoToml] = useState("");
+  const [rust, setRust] = useState("");
   const onClose = () => {
-    setScriptId("");
+    setCargoToml("");
+    setRust("");
     closeVerifyNoteScriptDialog();
   };
   return (
@@ -45,7 +42,7 @@ const VerifyNoteScriptDialog = () => {
       onOpenChange={(open) => !open && onClose()}
     >
       <DialogContent
-        className="sm:max-w-[640px] z-100"
+        className="sm:max-w-160 z-100"
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
       >
@@ -58,9 +55,15 @@ const VerifyNoteScriptDialog = () => {
           onSubmit={async (event) => {
             event.preventDefault();
             setLoading(true);
-            const verified = await verifyNoteScript({
+            const record = await clientGetInputNote({ client, noteId });
+            if (!record) {
+              return;
+            }
+            const verified = await verifyNoteFromSource({
               noteId,
-              scriptId,
+              note: toBase64(record.toInputNote().note().serialize()),
+              cargoToml,
+              rust,
             });
             setLoading(false);
             if (verified) {
@@ -73,22 +76,35 @@ const VerifyNoteScriptDialog = () => {
         >
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-3">
-              <Label htmlFor="script">Script</Label>
-              <Select onValueChange={setScriptId} value={scriptId}>
-                <SelectTrigger
-                  className="w-[180px]"
-                  disabled={shownScripts.length === 0}
-                >
-                  <SelectValue placeholder="Select script…" />
-                </SelectTrigger>
-                <SelectContent>
-                  {shownScripts.map((script) => (
-                    <SelectItem key={script.id} value={script.id}>
-                      {script.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label htmlFor="project-dir">Project Directory</Label>
+              <Input
+                id="project-dir"
+                type="file"
+                // webkitdirectory=""
+                multiple
+                onChange={async (event) => {
+                  const { files } = event.target;
+                  if (!files) {
+                    return;
+                  }
+                  const filesArray = Array.from(files);
+                  const cargoTomlFile = filesArray.find(
+                    ({ name }) => name === "Cargo.toml"
+                  );
+                  const rustFile = filesArray.find(
+                    ({ name }) => name === "lib.rs"
+                  );
+                  if (!cargoTomlFile || !rustFile) {
+                    return;
+                  }
+                  const [cargoTomlContent, rustContent] = await Promise.all([
+                    readFile(cargoTomlFile),
+                    readFile(rustFile),
+                  ]);
+                  setCargoToml(cargoTomlContent);
+                  setRust(rustContent);
+                }}
+              />
             </div>
           </div>
         </form>
@@ -99,7 +115,7 @@ const VerifyNoteScriptDialog = () => {
           <Button
             form="verify-note-script-form"
             type="submit"
-            disabled={loading || scriptId === ""}
+            disabled={loading || !cargoToml || !rust}
           >
             {loading && <Spinner />}
             {loading ? "Verifying…" : "Verify"}

@@ -7,10 +7,11 @@ import {
   CustomTransaction,
   TransactionType,
 } from "@demox-labs/miden-wallet-adapter";
-import { sleep } from "@/lib/utils";
+import { toBase64 } from "@/lib/utils";
 import { clientCreateNoteFromScript } from "@/lib/web-client";
 import useMidenSdk from "@/hooks/use-miden-sdk";
 import useWebClient from "@/hooks/use-web-client";
+import { verifyNoteFromPackageId } from "@/lib/api";
 
 const useNotes = () => {
   const { midenSdk } = useMidenSdk();
@@ -112,6 +113,13 @@ const useNotes = () => {
             scripts,
             midenSdk,
           });
+    if (!tutorialId) {
+      verifyNoteFromPackageId({
+        noteId: note.id().toString(),
+        note: toBase64(note.serialize()),
+        packageId: script.id,
+      });
+    }
     const transactionRequest = new TransactionRequestBuilder()
       .withOwnOutputNotes(
         new MidenArrays.OutputNoteArray([OutputNote.full(note)])
@@ -137,28 +145,6 @@ const useNotes = () => {
     dispatch({
       type: "CLOSE_VERIFY_NOTE_SCRIPT_DIALOG",
     });
-  const verifyNoteScript = async ({
-    noteId,
-    scriptId,
-  }: {
-    noteId: string;
-    scriptId: string;
-  }) => {
-    const note = inputNotes.find(({ id }) => id === noteId);
-    if (!note) {
-      throw new Error("Note not found");
-    }
-    const script = scripts.find(({ id }) => id === scriptId);
-    if (!script) {
-      throw new Error("Script not found");
-    }
-    await sleep(400);
-    const verified = note.scriptRoot === script.root;
-    if (verified) {
-      dispatch({ type: "VERIFY_NOTE_SCRIPT", payload: { noteId, scriptId } });
-    }
-    return verified;
-  };
   return {
     inputNotes,
     exportNoteDialogOpen,
@@ -176,7 +162,6 @@ const useNotes = () => {
     newNote,
     openVerifyNoteScriptDialog,
     closeVerifyNoteScriptDialog,
-    verifyNoteScript,
   };
 };
 

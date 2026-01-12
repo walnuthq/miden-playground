@@ -94,7 +94,7 @@ const p2id: Script = {
   readOnly: true,
   rust: p2idRust,
   masm: p2idMasm,
-  root: P2ID_NOTE_CODE,
+  digest: P2ID_NOTE_CODE,
 };
 
 export default p2id;

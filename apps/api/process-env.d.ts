@@ -6,6 +6,7 @@ declare global {
       // private
       readonly WEB_URL: string;
       readonly PACKAGES_PATH: string;
+      readonly DATABASE_URL: string;
       // public
     }
   }

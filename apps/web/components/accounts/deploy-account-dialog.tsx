@@ -59,7 +59,7 @@ const DeployAccountDialog = () => {
       onOpenChange={(open) => !open && onClose()}
     >
       <DialogContent
-        className="sm:max-w-[640px] z-100"
+        className="sm:max-w-160 z-100"
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
       >
@@ -113,7 +113,7 @@ const DeployAccountDialog = () => {
                 }
                 value={accountType.toString()}
               >
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-45">
                   <SelectValue placeholder="Select type…" />
                 </SelectTrigger>
                 <SelectContent>
@@ -137,7 +137,7 @@ const DeployAccountDialog = () => {
                 }
                 value={storageMode}
               >
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-45">
                   <SelectValue placeholder="Select storage mode…" />
                 </SelectTrigger>
                 <SelectContent>
@@ -164,7 +164,7 @@ const DeployAccountDialog = () => {
                 onValueChange={setAuthComponentId}
                 value={authComponentId}
               >
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-45">
                   <SelectValue placeholder="Select auth component…" />
                 </SelectTrigger>
                 <SelectContent>
@@ -181,7 +181,7 @@ const DeployAccountDialog = () => {
             <div className="grid gap-3">
               <Label htmlFor="component">Account Component</Label>
               <Select onValueChange={setComponentId} value={componentId}>
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-45">
                   <SelectValue placeholder="Select component…" />
                 </SelectTrigger>
                 <SelectContent>

@@ -6,19 +6,23 @@ import {
   TableRow,
 } from "@workspace/ui/components/table";
 import { Badge } from "@workspace/ui/components/badge";
-// import { Button } from "@workspace/ui/components/button";
+import { Button } from "@workspace/ui/components/button";
 import { type InputNote, noteStates } from "@/lib/types/note";
 import AccountAddress from "@/components/lib/account-address";
 import { CircleCheckBig } from "lucide-react";
-// import useNotes from "@/hooks/use-notes";
-import useScripts from "@/hooks/use-scripts";
+import useNotes from "@/hooks/use-notes";
 import useGlobalContext from "@/components/global-context/hook";
+import { type Script } from "@/lib/types/script";
 
-const NoteInformationTable = ({ inputNote }: { inputNote: InputNote }) => {
+const NoteInformationTable = ({
+  inputNote,
+  script,
+}: {
+  inputNote: InputNote;
+  script: Script | null;
+}) => {
   const { networkId } = useGlobalContext();
-  // const { openVerifyNoteScriptDialog } = useNotes();
-  const { scripts } = useScripts();
-  const script = scripts.find(({ id }) => id === inputNote.scriptId);
+  const { openVerifyNoteScriptDialog } = useNotes();
   return (
     <div className="rounded-md border">
       <Table>
@@ -44,10 +48,10 @@ const NoteInformationTable = ({ inputNote }: { inputNote: InputNote }) => {
             <TableCell>Script Root</TableCell>
             <TableCell>{inputNote.scriptRoot}</TableCell>
           </TableRow>
-          {/* <TableRow>
+          <TableRow>
             <TableCell>Serial Number</TableCell>
-            <TableCell>{noteSerialNumber(inputNote)}</TableCell>
-          </TableRow> */}
+            <TableCell>{inputNote.serialNum}</TableCell>
+          </TableRow>
           <TableRow>
             <TableCell>Script</TableCell>
             <TableCell>
@@ -63,16 +67,16 @@ const NoteInformationTable = ({ inputNote }: { inputNote: InputNote }) => {
                   />
                 </Link>
               ) : (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-4">
                   <span className="text-muted-foreground">
                     Unknown note script
                   </span>
-                  {/* <Button
+                  <Button
                     size="sm"
                     onClick={() => openVerifyNoteScriptDialog(inputNote.id)}
                   >
                     Verify note script
-                  </Button> */}
+                  </Button>
                 </div>
               )}
             </TableCell>

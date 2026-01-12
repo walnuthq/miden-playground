@@ -20,7 +20,7 @@ const InputNoteActionsCell = ({ inputNote }: { inputNote: InputNote }) => {
   const { openCreateTransactionDialog, newConsumeTransactionRequest } =
     useTransactions();
   const { scripts } = useScripts();
-  const script = scripts.find(({ root }) => root === inputNote.scriptRoot);
+  const script = scripts.find(({ digest }) => digest === inputNote.scriptRoot);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

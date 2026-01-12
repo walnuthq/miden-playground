@@ -1,10 +1,11 @@
-import { cp, writeFile, readFile, rm, readdir, mkdir } from "node:fs/promises";
+import { cp, writeFile, readFile, rm, mkdir } from "node:fs/promises";
 import { execFile, fileExists } from "@/lib/utils";
-import { defaultDependencies, type Export, type Dependency } from "@/lib/types";
-
-const projectRoot = process.env.NODE_ENV !== "production" ? "." : "../../../..";
-
-const packagesPath = process.env.PACKAGES_PATH ?? "/tmp";
+import { parse } from "smol-toml";
+import { type Export, type Dependency, type CargoToml } from "@/lib/types";
+import { insertPackage, getDependencies } from "@/db/packages";
+import { type PackageType } from "@/lib/types";
+import { packagesPath, projectRoot } from "@/lib/constants";
+import { midenPackageMetadata } from "@/lib/miden-package-metadata";
 
 export const cargoMidenVersion = async () => {
   const { stdout } = await execFile("cargo", ["miden", "--version"]);
@@ -15,64 +16,36 @@ export const cargoMidenVersion = async () => {
 export const packageExists = async (packageDir: string) =>
   fileExists(`${packagesPath}/${packageDir}`);
 
-export const setupDefaultPackagesDir = async () => {
-  const defaultPackagesExists = await fileExists(
-    `${packagesPath}/default-packages/basic-wallet`
-  );
-  if (defaultPackagesExists) {
-    return;
-  }
-  const defaultPackages = await readdir("default-packages");
-  for (const defaultPackage of defaultPackages) {
-    console.info(
-      `cp -r default-packages/${defaultPackage} ${packagesPath}/${defaultPackage}`
-    );
-    await cp(
-      `default-packages/${defaultPackage}`,
-      `${packagesPath}/${defaultPackage}`,
-      {
-        recursive: true,
-      }
-    );
-    // await compilePackage(defaultPackage);
-  }
-};
-
 export const newPackage = async ({
-  packageDir,
   name,
   type,
   example,
+  rust,
 }: {
-  packageDir: string;
   name: string;
-  type: string;
-  example: string;
+  type: PackageType;
+  example?: string;
+  rust?: string;
 }) => {
-  const dependencies = defaultDependencies();
-  if (example === "none") {
-    // await setupDefaultPackagesDir();
-    const rust = await readFile(`${projectRoot}/templates/${type}.rs`, "utf-8");
-    await generatePackageDir({
-      packageDir,
-      name,
-      type,
-      rust,
-      dependencies,
-    });
-  } else {
-    console.info(`cp -r examples/${example} ${packagesPath}/${packageDir}`);
-    await cp(
-      `${projectRoot}/examples/${example}`,
-      `${packagesPath}/${packageDir}`,
-      {
-        recursive: true,
-      }
-    );
-  }
-  compilePackage(packageDir);
-  const rust = await readRust(packageDir);
-  return { rust, dependencies };
+  const initialRust = rust
+    ? rust
+    : await readFile(`${projectRoot}/templates/${example ?? type}.rs`, "utf-8");
+  const id = await insertPackage({
+    name,
+    type,
+    status: rust ? "compiled" : "draft",
+    readOnly: !!rust,
+    rust: initialRust,
+  });
+  await generatePackageDir({
+    packageDir: id,
+    name,
+    type,
+    rust: initialRust,
+    dependencies: [],
+  });
+  // compilePackage(id);
+  return { id, rust: initialRust };
 };
 
 export const readRust = async (packageDir: string) => {
@@ -91,34 +64,36 @@ export const generatePackageDir = async ({
   name: string;
   type: string;
   rust: string;
-  dependencies: Dependency[];
+  dependencies: string[];
 }) => {
-  // await Promise.all(
-  //   dependencies.map(async (dependency) => {
-  //     const dependencyExists = await packageExists(dependency.id);
-  //     if (!dependencyExists) {
-  //       await generatePackageDir({
-  //         packageDir: dependency.id,
-  //         name: dependency.name,
-  //       });
-  //     }
-  //   })
-  // );
+  const dependenciesPackages =
+    dependencies.length > 0 ? await getDependencies(dependencies) : [];
+  await Promise.all(
+    dependenciesPackages.map((dependency) =>
+      generatePackageDir({
+        packageDir: dependency.id,
+        name: dependency.name,
+        type: dependency.type,
+        rust: dependency.rust,
+        dependencies: dependency.dependencies,
+      })
+    )
+  );
   await mkdir(`${packagesPath}/${packageDir}`);
   await Promise.all([
     mkdir(`${packagesPath}/${packageDir}/src`),
     cp(
-      `${projectRoot}/default-packages/counter-contract/cargo-generate.toml`,
+      `${projectRoot}/templates/cargo-generate.toml`,
       `${packagesPath}/${packageDir}/cargo-generate.toml`
     ),
     generateCargoToml({
       packageDir,
       name,
       type,
-      dependencies,
+      dependencies: dependenciesPackages,
     }),
     cp(
-      `${projectRoot}/default-packages/counter-contract/rust-toolchain.toml`,
+      `${projectRoot}/templates/rust-toolchain.toml`,
       `${packagesPath}/${packageDir}/rust-toolchain.toml`
     ),
   ]);
@@ -140,11 +115,11 @@ export const generateCargoToml = ({
   cargoToml += `[package]\n`;
   cargoToml += `name = "${name}"\n`;
   cargoToml += `version = "0.1.0"\n`;
-  cargoToml += `edition = "2021"\n\n`;
+  cargoToml += `edition = "2024"\n\n`;
   cargoToml += `[lib]\n`;
   cargoToml += `crate-type = ["cdylib"]\n\n`;
   cargoToml += `[dependencies]\n`;
-  cargoToml += `miden = { git = "https://github.com/0xMiden/compiler" }\n\n`;
+  cargoToml += `miden = { version = "0.8" }\n\n`;
   cargoToml += `[package.metadata.component]\n`;
   cargoToml += `package = "miden:${name}"\n\n`;
   cargoToml += `[package.metadata.miden]\n`;
@@ -153,16 +128,13 @@ export const generateCargoToml = ({
     cargoToml += `supported-types = ["RegularAccountUpdatableCode"]\n`;
   }
   cargoToml += "\n";
-  const actualDependencies = dependencies.filter(
-    ({ name }) => !["std", "base"].includes(name)
-  );
-  if (actualDependencies.length > 0) {
-    const midenDependencies = actualDependencies.map(
+  if (dependencies.length > 0) {
+    const midenDependencies = dependencies.map(
       ({ id, name }) => `"miden:${name}" = { path = "${packagesPath}/${id}" }`
     );
     cargoToml += `[package.metadata.miden.dependencies]\n`;
     cargoToml += `${midenDependencies.join("\n")}\n\n`;
-    const targetDependencies = actualDependencies.map(
+    const targetDependencies = dependencies.map(
       ({ id, name }) =>
         `"miden:${name}" = { path = "${packagesPath}/${id}/target/generated-wit" }`
     );
@@ -205,26 +177,26 @@ export const compilePackage = async (packageDir: string) => {
 };
 
 const readPackageMetadata = async (maspPath: string) => {
-  const { stdout } = await execFile(
-    "./miden_package_introspection",
-    [maspPath],
-    {
-      cwd: `${projectRoot}/miden-package-introspection/target/release`,
-    }
-  );
-  const { exports, dependencies } = JSON.parse(stdout) as {
-    exports: Export[];
-    dependencies: Dependency[];
+  const packageMetadata = await midenPackageMetadata(maspPath);
+  const {
+    digest,
+    manifest: { exports, dependencies },
+  } = JSON.parse(packageMetadata) as {
+    digest: string;
+    manifest: { exports: Export[]; dependencies: Dependency[] };
   };
   return {
+    digest,
     exports: exports.map((procedureExport) => {
       const [, name = ""] = procedureExport.name.split("::");
       return { ...procedureExport, name };
     }),
-    dependencies: dependencies.map((dependency) => ({
-      ...dependency,
-      name: dependency.name.replaceAll("_", "-"),
-    })),
+    dependencies: dependencies
+      .filter(({ name }) => !["base", "std"].includes(name))
+      .map((dependency) => ({
+        ...dependency,
+        name: dependency.name.replaceAll("_", "-"),
+      })),
   };
 };
 
@@ -237,12 +209,20 @@ export const readPackage = async ({
 }) => {
   const packageName = name.replaceAll("-", "_");
   const maspPath = `${packagesPath}/${packageDir}/target/miden/release/${packageName}.masp`;
-  const packageBuffer = await readFile(maspPath);
-  const { exports, dependencies } = await readPackageMetadata(maspPath);
-  return { packageBuffer, exports, dependencies };
+  const maspBuffer = await readFile(maspPath);
+  const { digest, exports, dependencies } = await readPackageMetadata(maspPath);
+  return {
+    masp: maspBuffer.toString("base64"),
+    digest,
+    exports,
+    dependencies,
+  };
 };
 
-export const deletePackage = (packageDir: string) => {
+export const deletePackageDir = (packageDir: string) => {
   console.info(`rm -rf ${packagesPath}/${packageDir}`);
   return rm(`${packagesPath}/${packageDir}`, { recursive: true, force: true });
 };
+
+export const parseCargoToml = (cargoToml: string) =>
+  parse(cargoToml) as CargoToml;

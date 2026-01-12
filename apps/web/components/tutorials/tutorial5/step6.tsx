@@ -10,13 +10,14 @@ const useCompleted = () => {
   const { accounts } = useAccounts();
   const { components } = useComponents();
   const component = components.find(
-    ({ id, type }) => !defaultComponentIds.includes(id) && type === "account"
+    ({ type, scriptId }) =>
+      type === "account" && scriptId.startsWith("counter-contract_")
   );
   const counter = accounts.find(({ components }) =>
     components.includes(component?.id ?? "")
   );
-  const nonce = counter?.nonce ?? 0n;
-  return nonce > 0n;
+  const nonce = counter?.nonce ?? 0;
+  return nonce > 0;
 };
 
 const Step6: TutorialStep = {

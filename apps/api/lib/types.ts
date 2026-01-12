@@ -1,3 +1,29 @@
+import {
+  type packagesTable,
+  type packageTypeEnum,
+  type packageStatusEnum,
+} from "@/db/schema";
+
+export type CargoToml = {
+  package: {
+    name: string;
+    version: string;
+    edition: string;
+    metadata: {
+      miden: {
+        "project-kind": PackageType;
+        dependencies: Record<string, { path: string }>;
+      };
+    };
+  };
+};
+
+export type NewPackage = typeof packagesTable.$inferInsert;
+
+export type PackageType = (typeof packageTypeEnum.enumValues)[number];
+
+export type PackageStatus = (typeof packageStatusEnum.enumValues)[number];
+
 export type Export = {
   name: string;
   digest: string;

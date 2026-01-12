@@ -6,17 +6,25 @@ import DecodedNoteInputsTable from "@/components/note/decoded-note-inputs-table"
 import AccountAddress from "@/components/lib/account-address";
 import FungibleAssetsTable from "@/components/lib/fungible-assets-table";
 import useScripts from "@/hooks/use-scripts";
+import type { Script } from "@/lib/types/script";
 
-const NoteInformation = ({ inputNote }: { inputNote: InputNote }) => {
+const NoteInformation = ({
+  inputNote,
+  serverNoteScript,
+}: {
+  inputNote: InputNote;
+  serverNoteScript: Script | null;
+}) => {
   const { scripts } = useScripts();
-  const script = scripts.find(({ root }) => root === inputNote.scriptRoot);
+  const script =
+    scripts.find(({ id }) => id === inputNote.scriptId) ?? serverNoteScript;
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-2">
         <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
           Note Information
         </h4>
-        <NoteInformationTable inputNote={inputNote} />
+        <NoteInformationTable inputNote={inputNote} script={script} />
       </div>
       <div className="flex flex-col gap-2">
         <div className="flex items-center">
