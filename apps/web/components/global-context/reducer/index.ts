@@ -51,8 +51,7 @@ const reducer = (state: State, action: Action): State => {
     case "OPEN_DEPLOY_ACCOUNT_DIALOG":
     case "CLOSE_DEPLOY_ACCOUNT_DIALOG":
     case "OPEN_VERIFY_ACCOUNT_COMPONENT_DIALOG":
-    case "CLOSE_VERIFY_ACCOUNT_COMPONENT_DIALOG":
-    case "VERIFY_ACCOUNT_COMPONENT": {
+    case "CLOSE_VERIFY_ACCOUNT_COMPONENT_DIALOG": {
       return accountReducer(state, action);
     }
     case "OPEN_CREATE_TRANSACTION_DIALOG":
@@ -70,8 +69,7 @@ const reducer = (state: State, action: Action): State => {
     case "OPEN_CREATE_NOTE_DIALOG":
     case "CLOSE_CREATE_NOTE_DIALOG":
     case "OPEN_VERIFY_NOTE_SCRIPT_DIALOG":
-    case "CLOSE_VERIFY_NOTE_SCRIPT_DIALOG":
-    case "VERIFY_NOTE_SCRIPT": {
+    case "CLOSE_VERIFY_NOTE_SCRIPT_DIALOG": {
       return noteReducer(state, action);
     }
     case "OPEN_CREATE_SCRIPT_DIALOG":

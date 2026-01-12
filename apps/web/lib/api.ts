@@ -5,7 +5,6 @@ import {
   type Dependency,
   type ScriptType,
 } from "@/lib/types/script";
-import { type Buffer } from "@/lib/types";
 
 export const createScript = async ({
   name,
@@ -44,20 +43,12 @@ export const compileScript = async (script: Script) => {
     }),
   });
   const result = await response.json();
-  const {
-    ok,
-    error,
-    masm,
-    root,
-    package: packageBuffer,
-    exports,
-    dependencies,
-  } = result as {
+  const { ok, error, masm, digest, masp, exports, dependencies } = result as {
     ok: boolean;
     error: string;
     masm: string;
-    root: string;
-    package: Buffer;
+    digest: string;
+    masp: string;
     exports: Export[];
     dependencies: Dependency[];
   };
@@ -65,8 +56,8 @@ export const compileScript = async (script: Script) => {
     ok,
     error,
     masm,
-    root,
-    packageBytes: packageBuffer?.data,
+    digest,
+    masp,
     exports,
     dependencies,
   };
@@ -84,30 +75,169 @@ export const deleteScript = async (scriptId: string) => {
   return id;
 };
 
-export const verifyAccountComponent = async ({
+export const verifyAccountComponentFromSource = async ({
   accountId,
+  address,
+  account,
   cargoToml,
   rust,
 }: {
   accountId: string;
+  address: string;
+  account: string;
   cargoToml: string;
   rust: string;
 }) => {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  const response = await fetch(`${apiUrl}/verify/account-component`, {
+  const response = await fetch(`${apiUrl}/verified-account-components`, {
     method: "POST",
     body: JSON.stringify({
       accountId,
+      address,
+      account,
       cargoToml,
       rust,
     }),
   });
   const result = await response.json();
-  const { ok, verified } = result as
-    | { ok: true; verified: boolean }
-    | { ok: false; verified: undefined };
+  const { ok, error } = result as { ok: boolean; error?: string };
+  return { verified: ok, error };
+};
+
+export const verifyAccountComponentsFromPackageIds = async ({
+  accountId,
+  address,
+  account,
+  packageIds,
+}: {
+  accountId: string;
+  address: string;
+  account: string;
+  packageIds: string[];
+}) => {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const response = await fetch(`${apiUrl}/verified-account-components`, {
+    method: "POST",
+    body: JSON.stringify({ accountId, address, account, packageIds }),
+  });
+  const result = await response.json();
+  const { ok, error } = result as { ok: boolean; error?: string };
+  return { verified: ok, error };
+};
+
+export const getVerifiedAccountComponents = async (address: string) => {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const response = await fetch(
+    `${apiUrl}/verified-account-components/${address}`,
+    {
+      method: "GET",
+    }
+  );
+  const result = await response.json();
+  const { ok, components, error } = result as
+    | {
+        ok: true;
+        components: Script[];
+        error: undefined;
+      }
+    | {
+        ok: false;
+        components: undefined;
+        error: string;
+      };
   if (!ok) {
-    throw new Error("ERROR");
+    console.error(error);
+    return [];
   }
-  return verified;
+  return components;
+};
+
+export const verifyNoteFromSource = async ({
+  noteId,
+  note,
+  cargoToml,
+  rust,
+}: {
+  noteId: string;
+  note: string;
+  cargoToml: string;
+  rust: string;
+}) => {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const response = await fetch(`${apiUrl}/verified-notes`, {
+    method: "POST",
+    body: JSON.stringify({
+      noteId,
+      note,
+      cargoToml,
+      rust,
+    }),
+  });
+  const result = await response.json();
+  const { ok, error } = result as { ok: boolean; error?: string };
+  return { verified: ok, error };
+};
+
+export const verifyNoteFromPackageId = async ({
+  noteId,
+  note,
+  packageId,
+}: {
+  noteId: string;
+  note: string;
+  packageId: string;
+}) => {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const response = await fetch(`${apiUrl}/verified-notes`, {
+    method: "POST",
+    body: JSON.stringify({ noteId, note, packageId }),
+  });
+  const result = await response.json();
+  const { ok, error } = result as { ok: boolean; error?: string };
+  return { verified: ok, error };
+};
+
+export const getVerifiedNote = async (noteId: string) => {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const response = await fetch(`${apiUrl}/verified-notes/${noteId}`, {
+    method: "GET",
+  });
+  const result = await response.json();
+  const { ok, noteScript, error } = result as
+    | {
+        ok: true;
+        noteScript: Script | null;
+        error: undefined;
+      }
+    | {
+        ok: false;
+        noteScript: undefined;
+        error: string;
+      };
+  if (!ok) {
+    console.error(error);
+    return null;
+  }
+  return noteScript;
+};
+
+export const getScript = async (id: string) => {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const response = await fetch(`${apiUrl}/scripts/${id}`, {
+    method: "GET",
+  });
+  const result = await response.json();
+  const { ok, script } = result as
+    | {
+        ok: true;
+        script: Script;
+      }
+    | {
+        ok: false;
+        script: undefined;
+      };
+  if (!ok) {
+    return null;
+  }
+  return script;
 };

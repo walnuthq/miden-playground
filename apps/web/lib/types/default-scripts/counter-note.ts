@@ -1,8 +1,4 @@
-import {
-  type Script,
-  defaultDependencies,
-  defaultScript,
-} from "@/lib/types/script";
+import { type Script, defaultScript } from "@/lib/types/script";
 
 export const counterNoteRust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
 #![no_std]
@@ -40,7 +36,6 @@ const counterNote: Script = {
   rust: counterNoteRust,
   masm: counterNoteMasm,
   dependencies: [
-    ...defaultDependencies(),
     {
       id: "counter-value-contract",
       name: "counter-value-contract",

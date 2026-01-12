@@ -17,7 +17,7 @@ export default db;
 /*
 const seed = async () => {
   // setup default packages
-  setupDefaultPackagesDir();
+  // setupDefaultPackagesDir();
   // clear database
   await db.delete(packagesTable);
   // default dependencies

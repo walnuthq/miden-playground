@@ -1,0 +1,13 @@
+Try invoking the **`get_count`** procedure from the _"Components"_ tab to see the new value of the counter which should have incremented from 0 to 1.
+
+This tutorial demonstrates Miden's deployment flow:
+
+1. **Contract Building**: We started by compiling both the counter account and increment note contracts
+2. **Account Creation**: We created a counter account with initial storage (counter value = 0)
+3. **Note Publishing**: We created an increment note and published it to the network
+4. **Note Consumption**: The counter account consumed the note, executing the increment logic
+5. **State Update**: The counter value increased and the change has been recorded onchain
+
+This process shows how Miden contracts are deployed through state changes rather than separate deployment transactions.
+
+Congratulations! You've successfully deployed and interacted with your first Miden smart contract. The Miden Playground provides the foundation for managing all aspects of your contract lifecycle.

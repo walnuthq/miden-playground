@@ -14,7 +14,31 @@ import {
   getPackage,
   updatePackage,
   deletePackage,
-} from "@/db/package";
+} from "@/db/packages";
+
+export const GET = async (
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) => {
+  try {
+    const { id } = await params;
+    const dbPackage = await getPackage(id);
+    if (!dbPackage) {
+      throw new Error("Error: Package not found.");
+    }
+    return NextResponse.json({
+      ok: true,
+      script: {
+        ...dbPackage,
+        createdAt: dbPackage.createdAt.getTime(),
+        updatedAt: dbPackage.updatedAt.getTime(),
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ ok: false });
+  }
+};
 
 type CompileScriptRequestBody = {
   rust: string;
@@ -55,11 +79,15 @@ export const PATCH = async (
   const body = await request.json();
   const { rust: updatedRust, dependencies: updatedDependencies } =
     body as CompileScriptRequestBody;
-  const [exists, { name, type }, dependenciesPackages] = await Promise.all([
+  const [exists, dbPackage, dependenciesPackages] = await Promise.all([
     packageExists(packageDir),
     getPackage(packageDir),
     getDependencies(updatedDependencies),
   ]);
+  if (!dbPackage) {
+    throw new Error("Error: Package not found");
+  }
+  const { name, type } = dbPackage;
   if (exists) {
     await updateRust({ packageDir, rust: updatedRust });
   } else {
@@ -94,7 +122,7 @@ export const PATCH = async (
       })
     );
   }
-  const { packageBuffer, exports, dependencies } = await readPackage({
+  const { masp, digest, exports, dependencies } = await readPackage({
     packageDir,
     name,
   });
@@ -102,15 +130,17 @@ export const PATCH = async (
     id: packageDir,
     status: "compiled",
     rust: updatedRust,
-    dependencies: updatedDependencies,
+    masp,
+    digest,
     exports,
+    dependencies: updatedDependencies,
   });
   return NextResponse.json({
     ok: true,
     error: "",
     masm: "",
-    root: "",
-    package: packageBuffer,
+    digest,
+    masp,
     exports,
     dependencies,
   });

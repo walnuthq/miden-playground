@@ -24,9 +24,9 @@ export const packageStatusEnum = pgEnum("package_status", [
 
 export const packagesTable = pgTable("packages", {
   id: uuid().primaryKey().defaultRandom(),
-  name: varchar({ length: 255 }).notNull(),
+  name: varchar({ length: 255 }).notNull().default(""),
   type: packageTypeEnum().notNull().default("account"),
-  status: packageStatusEnum().default("draft"),
+  status: packageStatusEnum().notNull().default("draft"),
   readOnly: boolean("read_only").notNull().default(false),
   rust: text().notNull().default(""),
   masm: text().notNull().default(""),
@@ -35,6 +35,7 @@ export const packagesTable = pgTable("packages", {
     .default(
       "0x0000000000000000000000000000000000000000000000000000000000000000"
     ),
+  masp: text().notNull().default(""),
   exports: jsonb().array().notNull().default([]),
   dependencies: uuid().array().notNull().default([]),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -47,6 +48,9 @@ export const verifiedAccountComponentTable = pgTable(
     id: uuid().primaryKey().defaultRandom(),
     accountId: varchar("account_id", { length: 32 }).notNull(),
     packageId: uuid("package_id").notNull(),
+    address: text().notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
   }
 );
 
@@ -54,10 +58,14 @@ export const verifiedNoteTable = pgTable("verified_notes", {
   id: uuid().primaryKey().defaultRandom(),
   noteId: varchar("note_id", { length: 66 }).notNull(),
   packageId: uuid("package_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const verifiedTransactionTable = pgTable("verified_transactions", {
   id: uuid().primaryKey().defaultRandom(),
   transactionId: varchar("transaction_id", { length: 66 }).notNull(),
   packageId: uuid("package_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

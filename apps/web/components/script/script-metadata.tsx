@@ -1,6 +1,7 @@
 import { Plus } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { type Script } from "@/lib/types/script";
+import MetadataTable from "@/components/script/metadata-table";
 import ExportsTable from "@/components/script/exports-table";
 import DependenciesTable from "@/components/script/dependencies-table";
 import useScripts from "@/hooks/use-scripts";
@@ -9,6 +10,12 @@ const ScriptMetadata = ({ script }: { script: Script }) => {
   const { openAddDependencyDialog } = useScripts();
   return (
     <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-2">
+        <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
+          Package metadata
+        </h4>
+        <MetadataTable script={script} />
+      </div>
       {script.exports.length > 0 && (
         <div className="flex flex-col gap-2">
           <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">

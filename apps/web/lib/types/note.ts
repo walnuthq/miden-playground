@@ -29,6 +29,7 @@ export type InputNote = {
   type: NoteType;
   state: NoteState;
   tag: string;
+  serialNum: string;
   senderId: string;
   scriptRoot: string;
   scriptId: string;
@@ -43,6 +44,7 @@ export const defaultInputNote = (): InputNote => ({
   type: "public",
   state: "committed",
   tag: "",
+  serialNum: "",
   senderId: "",
   scriptRoot: "",
   scriptId: "",
@@ -51,17 +53,6 @@ export const defaultInputNote = (): InputNote => ({
   nullifier: "",
   updatedAt: 0,
 });
-
-// export const noteSerialNumber = (inputNote: InputNoteRecord) =>
-//   inputNote.details().recipient().serialNum();
-
-// export const noteTag = (inputNote: InputNoteRecord) =>
-//   inputNote.metadata()?.tag().executionMode().toString() ?? "";
-
-// export const noteSenderAddress = (
-//   inputNote: InputNoteRecord,
-//   networkId: string
-// ) => inputNote.metadata()?.sender().toBech32Custom(networkId) ?? "";
 
 export const noteConsumed = ({ state }: InputNote) =>
   state.includes("consumed");

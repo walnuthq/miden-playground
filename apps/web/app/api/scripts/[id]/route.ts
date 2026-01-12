@@ -6,24 +6,17 @@ import {
   type ScriptExample,
   type Export,
   type Dependency,
-  defaultDependencies,
 } from "@/lib/types/script";
-import { type Buffer } from "@/lib/types";
 
 const scriptsMasm: Record<ScriptExample, string> = {
   "counter-contract": counterMapContract.masm,
   "p2id-note": p2id.masm,
 } as const;
 
-const scriptsRoot: Record<ScriptExample, string> = {
+const scriptsDigest: Record<ScriptExample, string> = {
   "counter-contract": "0x0",
   "p2id-note":
     "0x94377a3ed496ef4282bb98b1df09f14be986f5ffed1ac5dd2f7e23e01d9c3bce",
-} as const;
-
-const scriptsPackages: Record<ScriptExample, Buffer> = {
-  "counter-contract": { type: "Buffer", data: [] },
-  "p2id-note": { type: "Buffer", data: [] },
 } as const;
 
 const scriptsExports: Record<ScriptExample, Export[]> = {
@@ -32,11 +25,8 @@ const scriptsExports: Record<ScriptExample, Export[]> = {
 } as const;
 
 const scriptsDependencies: Record<ScriptExample, Dependency[]> = {
-  "counter-contract": defaultDependencies(),
-  "p2id-note": [
-    ...defaultDependencies(),
-    { id: "basic-wallet", name: "basic-wallet", digest: "" },
-  ],
+  "counter-contract": [],
+  "p2id-note": [{ id: "basic-wallet", name: "basic-wallet", digest: "" }],
 } as const;
 
 export const PATCH = async (
@@ -44,11 +34,18 @@ export const PATCH = async (
   { params }: { params: Promise<{ id: string }> }
 ) => {
   const { id } = await params;
+  const body = await request.json();
+  const { rust } = body as { rust: string };
   const [rawExample] = id.split("_");
   const example = rawExample as ScriptExample;
-  const masm = scriptsMasm[example];
-  const root = scriptsRoot[example];
-  const packageBuffer = scriptsPackages[example];
+  let masm = scriptsMasm[example];
+  if (example === "counter-contract") {
+    const matches = rust.matchAll(/felt!\((\d*)\)/g);
+    const lastMatch = Array.from(matches ?? []).at(-1);
+    const incrementValue = Number(lastMatch?.at(1));
+    masm = masm.replace("add.1", `add.${incrementValue}`);
+  }
+  const digest = scriptsDigest[example];
   const exports = scriptsExports[example];
   const dependencies = scriptsDependencies[example];
   await sleep(1000);
@@ -56,8 +53,8 @@ export const PATCH = async (
     ok: true,
     error: "",
     masm,
-    root,
-    package: packageBuffer,
+    digest,
+    masp: "",
     exports,
     dependencies,
   });

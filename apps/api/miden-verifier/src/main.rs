@@ -1,66 +1,47 @@
-use cargo_toml::Manifest;
-use miden_client::{
-    account::AccountId,
-    builder::ClientBuilder,
-    keystore::FilesystemKeyStore,
-    rpc::{Endpoint, GrpcClient},
-    ClientError,
-};
-use miden_client_sqlite_store::ClientBuilderSqliteExt;
-use miden_mast_package::Package;
-use std::{fs, sync::Arc};
+use base64::prelude::*;
+use miden_objects::{account::Account, note::Note, vm::Package};
+use std::process::ExitCode;
 use winter_utils::Deserializable;
 
-// cargo run --release --bin miden_verifier
-#[tokio::main]
-async fn main() -> Result<(), ClientError> {
+// cargo run --release
+fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().collect();
     if args.len() != 4 {
         eprintln!(
-            "Usage: {} <account-component|note|transaction> <resource-id> <package-id>",
+            "Usage: {} <account-component|note|transaction> <resource> <masp>",
             args[0]
         );
-        std::process::exit(1);
+        return ExitCode::FAILURE;
     }
     // Initialize client
-    let endpoint = Endpoint::testnet();
-    let timeout_ms = 10_000;
-    let rpc_api = Arc::new(GrpcClient::new(&endpoint, timeout_ms));
-    let keystore = FilesystemKeyStore::new("./keystore".into()).unwrap().into();
+    // let endpoint = Endpoint::testnet();
+    // let timeout_ms = 10_000;
+    // let rpc_api = Arc::new(GrpcClient::new(&endpoint, timeout_ms));
+    // let keystore = FilesystemKeyStore::new("./keystore".into()).unwrap().into();
 
-    let mut client = ClientBuilder::new()
-        .rpc(rpc_api)
-        .sqlite_store("./store.sqlite3".into())
-        .authenticator(keystore)
-        // .in_debug_mode(true.into())
-        .build()
-        .await?;
+    // let mut client = ClientBuilder::new()
+    //     .rpc(rpc_api)
+    //     .sqlite_store("./store.sqlite3".into())
+    //     .authenticator(keystore)
+    //     // .in_debug_mode(true.into())
+    //     .build()
+    //     .await?;
 
     // let mut sync_summary = client.sync_state().await.unwrap();
     // println!("Latest block: {}", sync_summary.block_num);
 
     let resource_type = &args[1];
-    let resource_id = &args[2];
-    let package_id = &args[3];
+    let resource = &args[2];
+    let masp = &args[3];
 
-    let manifest = Manifest::from_path(format!("/tmp/{}/Cargo.toml", package_id)).unwrap();
-    let package_name = manifest.package.unwrap().name;
+    let resource_bytes = BASE64_STANDARD.decode(resource).unwrap();
 
-    let package_bytes = fs::read(format!(
-        "/tmp/{}/target/miden/release/{}.masp",
-        package_id,
-        package_name.clone().replacen("-", "_", usize::MAX)
-    ))
-    .unwrap();
-
+    let package_bytes = BASE64_STANDARD.decode(masp).unwrap();
     let package = Package::read_from_bytes(&package_bytes).unwrap();
 
     match resource_type.as_str() {
         "account-component" => {
-            let account_id = AccountId::from_hex(&resource_id).unwrap();
-            client.import_account_by_id(account_id).await?;
-            let account_record = client.get_account(account_id).await?.unwrap();
-            let account = account_record.account();
+            let account = Account::read_from_bytes(&resource_bytes).unwrap();
 
             let exports_len_iter = package.manifest.exports();
             let mut exports_length = 0;
@@ -69,22 +50,40 @@ async fn main() -> Result<(), ClientError> {
             }
 
             if exports_length == 0 {
-                std::process::exit(1);
+                return ExitCode::FAILURE;
             }
-            
+
             let mut exports = package.manifest.exports();
             let verified = exports.all(|export| account.code().has_procedure(export.digest));
-            let not_verified = !verified;
-            std::process::exit(not_verified.into());
+            // println!("verified: {}", verified);
+            // println!("{}", account_id.to_bech32(NetworkId::Testnet));
+            //std::process::exit(not_verified.into());
+            return if verified {
+                ExitCode::SUCCESS
+            } else {
+                ExitCode::FAILURE
+            };
         }
         "note" => {
-            std::process::exit(1);
+            let note = Note::read_from_bytes(&resource_bytes).unwrap();
+
+            let verified = package.digest() == note.script().root();
+            return if verified {
+                ExitCode::SUCCESS
+            } else {
+                ExitCode::FAILURE
+            };
         }
         "transaction" => {
-            std::process::exit(1);
+            let verified = false;
+            return if verified {
+                ExitCode::SUCCESS
+            } else {
+                ExitCode::FAILURE
+            };
         }
         _ => {
-            std::process::exit(1);
+            return ExitCode::FAILURE;
         }
     }
 

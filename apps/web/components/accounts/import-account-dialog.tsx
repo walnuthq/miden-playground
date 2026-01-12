@@ -33,7 +33,7 @@ const ImportAccountDialog = () => {
       onOpenChange={(open) => !open && closeImportAccountDialog()}
     >
       <DialogContent
-        className="sm:max-w-[640px] z-100"
+        className="sm:max-w-160 z-100"
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
       >

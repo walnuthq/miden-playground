@@ -13,6 +13,7 @@ import { createScript, deleteScript as apiDeleteScript } from "@/lib/api";
 import useMidenSdk from "@/hooks/use-miden-sdk";
 import useTransactions from "@/hooks/use-transactions";
 import useWebClient from "@/hooks/use-web-client";
+import { fromBase64 } from "@/lib/utils";
 
 const useScripts = () => {
   const { midenSdk } = useMidenSdk();
@@ -119,7 +120,7 @@ const useScripts = () => {
             `external_contract::${contractName}`,
             script.masm
           )
-        : Package.deserialize(new Uint8Array(script.packageBytes)).asLibrary();
+        : Package.deserialize(fromBase64(script.masp)).asLibrary();
       builder.linkDynamicLibrary(accountComponentLibrary);
       const transactionScript = builder.compileTxScript(
         invokeProcedureCustomTransactionScript({

@@ -90,11 +90,12 @@ export type Script = {
   rust: string;
   masm: string;
   error: string;
-  root: string;
-  packageBytes: number[];
+  digest: string;
+  masp: string;
   exports: Export[];
   dependencies: Dependency[];
   // inputs: MidenInput[];
+  createdAt: number;
   updatedAt: number;
 };
 
@@ -107,12 +108,13 @@ export const defaultScript = (): Script => ({
   rust: "",
   masm: "",
   error: "",
-  root: "",
-  packageBytes: [],
+  digest: "",
+  masp: "",
   exports: [],
   dependencies: [],
   // inputs: [],
-  updatedAt: 0,
+  createdAt: Date.now(),
+  updatedAt: Date.now(),
 });
 
 const formatProcedureInputs = (inputs: MidenInput[]) =>

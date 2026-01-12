@@ -1,8 +1,10 @@
 import { kebabCase } from "lodash";
+import { v4 } from "uuid";
 import useGlobalContext from "@/components/global-context/hook";
 import {
   type Component,
   type ComponentType,
+  type StorageSlot,
   defaultComponent,
 } from "@/lib/types/component";
 
@@ -36,17 +38,20 @@ const useComponents = () => {
     name,
     type,
     scriptId,
+    storageSlots = [],
   }: {
     name: string;
     type: ComponentType;
     scriptId: string;
+    storageSlots?: StorageSlot[];
   }) => {
     const component: Component = {
       ...defaultComponent(),
-      id: kebabCase(name),
+      id: `${kebabCase(name)}_${v4()}`,
       name,
       type,
       scriptId,
+      storageSlots,
       updatedAt: Date.now(),
     };
     dispatch({

@@ -26,6 +26,7 @@ const useWebClient = () => {
     networkId,
     accounts: previousAccounts,
     inputNotes: previousInputNotes,
+    scripts,
     nextState,
     nextStore,
     completedTutorials,
@@ -38,6 +39,7 @@ const useWebClient = () => {
       const inputNotes = await clientGetAllInputNotes({
         client,
         previousInputNotes,
+        scripts,
         midenSdk,
       });
       const accounts: Account[] = [];

@@ -1,6 +1,5 @@
 import { useWallet } from "@demox-labs/miden-wallet-adapter";
 import {
-  clientGetAccountById,
   clientGetAccountByAddress,
   clientGetConsumableNotes,
   wasmAccountToAccount,
@@ -20,16 +19,16 @@ import {
 } from "@/lib/types/account";
 import { type Component } from "@/lib/types/component";
 import useScripts from "@/hooks/use-scripts";
-import useComponents from "@/hooks/use-components";
 import {
   MIDEN_FAUCET_ADDRESS,
   BASIC_WALLET_CODE,
   COUNTER_CONTRACT_ADDRESS,
 } from "@/lib/constants";
-import { counterMapContractMasm } from "@/lib/types/default-scripts/counter-map-contract";
-import { sleep } from "@/lib/utils";
 import useWebClient from "@/hooks/use-web-client";
 import useMidenSdk from "@/hooks/use-miden-sdk";
+import { defaultScriptIds } from "@/lib/types/default-scripts";
+import { verifyAccountComponentsFromPackageIds } from "@/lib/api";
+import { toBase64, getAddressPart } from "@/lib/utils";
 
 const useAccounts = () => {
   const { address: connectedWalletAddress } = useWallet();
@@ -49,7 +48,6 @@ const useAccounts = () => {
   } = useGlobalContext();
   const { client } = useWebClient();
   const { scripts } = useScripts();
-  const { components } = useComponents();
   const wallets = accounts.filter(
     (account) => account.code === BASIC_WALLET_CODE
   );
@@ -191,6 +189,7 @@ const useAccounts = () => {
     const inputNotes = consumableNotes.map((consumableNote) =>
       wasmInputNoteToInputNote({
         record: consumableNote.inputNoteRecord(),
+        scripts,
         midenSdk,
       })
     );
@@ -230,28 +229,6 @@ const useAccounts = () => {
     const componentScripts = scripts.filter(({ id }) =>
       componentScriptIds.includes(id)
     );
-    // TODO remove mock
-    if (tutorialId === "deploy-a-counter-contract") {
-      const accountComponent = components.find(
-        ({ type }) => type === "account"
-      )!;
-      const script = componentScripts.find(
-        ({ id }) => id === accountComponent.scriptId
-      )!;
-      const matches = script.rust.matchAll(/felt!\((\d*)\)/g);
-      const lastMatch = Array.from(matches ?? []).at(-1);
-      const incrementValue = Number(lastMatch?.at(1));
-      // const index = componentScripts.findIndex(({ id }) => id === script.id);
-      // componentScripts[index] = {
-      //   ...script,
-      //   masm: counterMapContractMasm.replace("add.1", `add.${incrementValue}`),
-      // };
-      script.masm = counterMapContractMasm.replace(
-        "add.1",
-        `add.${incrementValue}`
-      );
-    }
-    //
     const wasmAccount = await clientDeployAccount({
       client,
       accountType,
@@ -260,6 +237,9 @@ const useAccounts = () => {
       scripts: componentScripts,
       midenSdk,
     });
+    const packageIds = componentScriptIds.filter(
+      (id) => !defaultScriptIds.includes(id)
+    );
     const account = wasmAccountToAccount({
       wasmAccount,
       name,
@@ -268,6 +248,14 @@ const useAccounts = () => {
       updatedAt: syncSummary.blockNum(),
       midenSdk,
     });
+    if (!tutorialId) {
+      verifyAccountComponentsFromPackageIds({
+        accountId: account.id,
+        address: getAddressPart(account.address),
+        account: toBase64(wasmAccount.serialize()),
+        packageIds,
+      });
+    }
     dispatch({
       type: "NEW_ACCOUNT",
       payload: { account },
@@ -317,52 +305,6 @@ const useAccounts = () => {
     dispatch({
       type: "CLOSE_VERIFY_ACCOUNT_COMPONENT_DIALOG",
     });
-  const verifyAccountComponent = async ({
-    accountId,
-    componentId,
-  }: {
-    accountId: string;
-    componentId: string;
-  }) => {
-    const { AccountComponent, Package, MidenArrays } = midenSdk;
-    const account = accounts.find(({ id }) => id === accountId);
-    if (!account) {
-      throw new Error("Account not found");
-    }
-    if (account.components.includes(componentId)) {
-      // already verified
-      return false;
-    }
-    const component = components.find(({ id }) => id === componentId);
-    if (!component) {
-      throw new Error("Component not found");
-    }
-    const script = scripts.find(({ id }) => id === component.scriptId);
-    if (!script) {
-      throw new Error("Script not found");
-    }
-    const accountComponent = AccountComponent.fromPackage(
-      Package.deserialize(new Uint8Array(script.packageBytes)),
-      new MidenArrays.StorageSlotArray([])
-    );
-    const wasmAccount = await clientGetAccountById({
-      client,
-      accountId: account.id,
-      midenSdk,
-    });
-    const code = wasmAccount.code();
-    const verified = accountComponent
-      .getProcedures()
-      .every((procedure) => code.hasProcedure(procedure.digest));
-    await sleep(400);
-    if (verified) {
-      dispatch({
-        type: "VERIFY_ACCOUNT_COMPONENT",
-        payload: { accountId, componentId },
-      });
-    }
-    return verified;
-  };
   return {
     createWalletDialogOpen,
     createFaucetDialogOpen,
@@ -390,7 +332,6 @@ const useAccounts = () => {
     closeDeployAccountDialog,
     openVerifyAccountComponentDialog,
     closeVerifyAccountComponentDialog,
-    verifyAccountComponent,
   };
 };
 

@@ -46,10 +46,6 @@ export type AccountAction =
     }
   | {
       type: "CLOSE_VERIFY_ACCOUNT_COMPONENT_DIALOG";
-    }
-  | {
-      type: "VERIFY_ACCOUNT_COMPONENT";
-      payload: { accountId: string; componentId: string };
     };
 
 const reducer = (state: State, action: AccountAction): State => {
@@ -152,23 +148,6 @@ const reducer = (state: State, action: AccountAction): State => {
         ...state,
         verifyAccountComponentDialogOpen: false,
         verifyAccountComponentDialogAccountId: "",
-      };
-    }
-    case "VERIFY_ACCOUNT_COMPONENT": {
-      const index = state.accounts.findIndex(
-        ({ id }) => id === action.payload.accountId
-      );
-      const account = state.accounts[index]!;
-      return {
-        ...state,
-        accounts: [
-          ...state.accounts.slice(0, index),
-          {
-            ...account,
-            components: [...account.components, action.payload.componentId],
-          },
-          ...state.accounts.slice(index + 1),
-        ],
       };
     }
   }

@@ -16,8 +16,8 @@ const useCompleted = () => {
     ({ components, storageMode }) =>
       components.includes(component?.id ?? "") && storageMode === "network"
   );
-  const nonce = counter?.nonce ?? 0n;
-  return nonce > 0n;
+  const nonce = counter?.nonce ?? 0;
+  return nonce > 0;
 };
 
 const Step3: TutorialStep = {

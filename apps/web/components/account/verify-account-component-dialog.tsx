@@ -3,13 +3,6 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Spinner } from "@workspace/ui/components/spinner";
 import { Button } from "@workspace/ui/components/button";
-// import {
-//   Select,
-//   SelectContent,
-//   SelectItem,
-//   SelectTrigger,
-//   SelectValue,
-// } from "@workspace/ui/components/select";
 import {
   Dialog,
   DialogClose,
@@ -22,36 +15,25 @@ import {
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import useAccounts from "@/hooks/use-accounts";
-import { verifyAccountComponent } from "@/lib/api";
-// import useComponents from "@/hooks/use-components";
-// import { defaultComponentIds } from "@/lib/types/default-components";
-
-const readFile = (file: File): Promise<string> =>
-  new Promise((resolve) => {
-    const fileReader = new FileReader();
-    fileReader.addEventListener("load", () => {
-      resolve(typeof fileReader.result === "string" ? fileReader.result : "");
-    });
-    fileReader.readAsText(file);
-  });
+import { verifyAccountComponentFromSource } from "@/lib/api";
+import { clientGetAccountById } from "@/lib/web-client";
+import useWebClient from "@/hooks/use-web-client";
+import useMidenSdk from "@/hooks/use-miden-sdk";
+import { toBase64, getAddressPart, readFile } from "@/lib/utils";
 
 const VerifyAccountComponentDialog = () => {
+  const { client } = useWebClient();
+  const { midenSdk } = useMidenSdk();
   const {
+    accounts,
     verifyAccountComponentDialogOpen,
     verifyAccountComponentDialogAccountId: accountId,
-    verifyAccountComponent: verify,
     closeVerifyAccountComponentDialog,
   } = useAccounts();
-  // const { components } = useComponents();
   const [loading, setLoading] = useState(false);
-  // const [componentId, setComponentId] = useState("");
   const [cargoToml, setCargoToml] = useState("");
   const [rust, setRust] = useState("");
-  // const shownComponents = components.filter(
-  //   ({ id, type }) => !defaultComponentIds.includes(id) && type === "account"
-  // );
   const onClose = () => {
-    // setComponentId("");
     setCargoToml("");
     setRust("");
     closeVerifyAccountComponentDialog();
@@ -63,7 +45,7 @@ const VerifyAccountComponentDialog = () => {
       onOpenChange={(open) => !open && onClose()}
     >
       <DialogContent
-        className="sm:max-w-[640px] z-100"
+        className="sm:max-w-160 z-100"
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
       >
@@ -78,46 +60,39 @@ const VerifyAccountComponentDialog = () => {
           onSubmit={async (event) => {
             event.preventDefault();
             setLoading(true);
-            const verified = await verifyAccountComponent({
+            const account = accounts.find(({ id }) => id === accountId);
+            if (!account) {
+              return;
+            }
+            const wasmAccount = await clientGetAccountById({
+              client,
               accountId,
+              midenSdk,
+            });
+            const { verified, error } = await verifyAccountComponentFromSource({
+              accountId,
+              address: getAddressPart(account.address),
+              account: toBase64(wasmAccount.serialize()),
               cargoToml,
               rust,
-              // componentId,
             });
             setLoading(false);
             if (verified) {
-              toast.success("Account component verified.");
+              toast.success("Account Component verified.");
             } else {
-              toast.error("Account component couldn't be verified.");
+              toast.error("Account Component couldn't be verified.", {
+                description: error,
+              });
             }
             onClose();
           }}
         >
           <div className="grid grid-cols-2 gap-4">
-            {/*<div className="grid gap-3">
-              <Label htmlFor="component">Account Component</Label>
-              <Select onValueChange={setComponentId} value={componentId}>
-                <SelectTrigger
-                  className="w-[180px]"
-                  disabled={shownComponents.length === 0}
-                >
-                  <SelectValue placeholder="Select component…" />
-                </SelectTrigger>
-                <SelectContent>
-                  {shownComponents.map(({ id, name }) => (
-                    <SelectItem key={id} value={id}>
-                      {name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div> */}
             <div className="grid gap-3">
               <Label htmlFor="project-dir">Project Directory</Label>
               <Input
                 id="project-dir"
                 type="file"
-                // multiple
                 webkitdirectory=""
                 onChange={async (event) => {
                   const { files } = event.target;
@@ -152,7 +127,6 @@ const VerifyAccountComponentDialog = () => {
           <Button
             form="verify-account-component-form"
             type="submit"
-            // disabled={loading || componentId === ""}
             disabled={loading || !cargoToml || !rust}
           >
             {loading && <Spinner />}

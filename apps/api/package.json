@@ -5,26 +5,28 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack -p 3001",
-    "build": "next build",
+    "build": "cargo install --path miden-package-metadata --locked && cargo install --path miden-verifier --locked && next build",
     "start": "PORT=3001 node .next/standalone/apps/api/server.js",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "db:push": "pnpm drizzle-kit push"
   },
   "dependencies": {
     "dotenv": "^17.2.3",
-    "drizzle-orm": "1.0.0-beta.2-58a4521",
-    "next": "^16.0.10",
+    "drizzle-orm": "1.0.0-beta.3-36e9b9e",
+    "next": "^16.1.1",
     "pg": "^8.16.3",
-    "react": "^19.2.3"
+    "react": "^19.2.3",
+    "smol-toml": "^1.6.0"
   },
   "devDependencies": {
-    "@types/node": "^25.0.2",
+    "@types/node": "^25.0.6",
     "@types/pg": "^8.16.0",
-    "@types/react": "^19.2.7",
+    "@types/react": "^19.2.8",
     "@workspace/eslint-config": "workspace:^",
     "@workspace/typescript-config": "workspace:*",
-    "drizzle-kit": "1.0.0-beta.2-58a4521",
+    "drizzle-kit": "1.0.0-beta.3-36e9b9e",
     "eslint": "^9.39.2",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"

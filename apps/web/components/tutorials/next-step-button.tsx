@@ -5,9 +5,11 @@ import useTutorials from "@/hooks/use-tutorials";
 const NextStepButton = ({
   text = "Next step",
   disabled = false,
+  onClick,
 }: {
   text?: string;
   disabled?: boolean;
+  onClick?: () => void;
 }) => {
   const {
     tutorialStep,
@@ -25,7 +27,7 @@ const NextStepButton = ({
     <Button
       className="relative grow-2"
       disabled={disabled}
-      onClick={nextTutorialStep}
+      onClick={onClick ?? nextTutorialStep}
     >
       {text}
       {!disabled && tutorialStep === tutorialMaxStep && (

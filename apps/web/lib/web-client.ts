@@ -16,7 +16,6 @@ import {
   type AccountStorageMode,
   type AccountType,
   defaultAccount,
-  newWallet,
 } from "@/lib/types/account";
 // import { type NetworkId } from "@/lib/types/network";
 import { type InputNote, type NoteType } from "@/lib/types/note";
@@ -30,8 +29,7 @@ import defaultScripts from "@/lib/types/default-scripts";
 import getterScript from "@/lib/types/default-scripts/getter";
 import noAuth from "@/lib/types/default-components/no-auth";
 import getterComponent from "@/lib/types/default-components/getter";
-import { stringToFeltArray } from "@/lib/utils";
-import { fromHex } from "viem";
+import { stringToFeltArray, fromBase64 } from "@/lib/utils";
 import type { MidenSdk } from "@/lib/types";
 
 // const globalForWebClient = globalThis as unknown as {
@@ -264,10 +262,12 @@ export const clientGetConsumableNotes = ({
 export const clientGetAllInputNotes = async ({
   client,
   previousInputNotes,
+  scripts,
   midenSdk,
 }: {
   client: WebClientType;
   previousInputNotes: InputNote[];
+  scripts: Script[];
   midenSdk: MidenSdk;
 }) => {
   const { NoteFilter, NoteFilterTypes, RpcClient, Endpoint } = midenSdk;
@@ -281,6 +281,7 @@ export const clientGetAllInputNotes = async ({
         previousInputNote: previousInputNotes.find(
           ({ id }) => id === wasmInputNote.id().toString()
         ),
+        scripts,
         midenSdk,
       })
     );
@@ -300,12 +301,21 @@ export const clientGetAllInputNotes = async ({
           previousInputNote: previousInputNotes.find(
             ({ id }) => id === wasmInputNote.id().toString()
           ),
+          scripts,
           midenSdk,
         })
       )
     );
   }
 };
+
+export const clientGetInputNote = ({
+  client,
+  noteId,
+}: {
+  client: WebClientType;
+  noteId: string;
+}) => client.getInputNote(noteId);
 
 export const clientGetTransactionsByIds = ({
   client,
@@ -317,31 +327,6 @@ export const clientGetTransactionsByIds = ({
   midenSdk: MidenSdk;
 }): Promise<WasmTransactionRecordType[]> =>
   client.getTransactions(TransactionFilter.ids(transactionIds));
-
-export const clientImportNewWallet = async ({
-  client,
-  address,
-  midenSdk: { Account, Address },
-}: {
-  client: WebClientType;
-  address: string;
-  midenSdk: MidenSdk;
-}) => {
-  const accountId = Address.fromBech32(address).accountId();
-  const serializedImportedWallet = Uint8Array.from([
-    ...fromHex(accountId.toString() as `0x${string}`, "bytes"),
-    ...newWallet.slice(15),
-  ]);
-  try {
-    await client.newAccount(
-      Account.deserialize(serializedImportedWallet),
-      true
-    );
-    //  eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (error) {
-    //
-  }
-};
 
 const invokeGetterCustomTransactionScript = ({
   accountIdPrefix,
@@ -482,7 +467,7 @@ export const clientDeployAccount = async ({
     let accountComponent = script.masm
       ? AccountComponent.compile(script.masm, builder, storageSlots)
       : AccountComponent.fromPackage(
-          Package.deserialize(new Uint8Array(script.packageBytes)),
+          Package.deserialize(fromBase64(script.masp)),
           new MidenArrays.StorageSlotArray(storageSlots)
         );
     // const procs = accountComponent.getProcedures();
@@ -516,7 +501,7 @@ export const clientCreateTransactionFromScript = ({
   midenSdk: MidenSdk;
 }) => {
   const transactionScript = TransactionScript.fromPackage(
-    Package.deserialize(new Uint8Array(script.packageBytes))
+    Package.deserialize(fromBase64(script.masp))
   );
   const transactionRequestBuilder =
     new TransactionRequestBuilder().withCustomScript(transactionScript);
@@ -554,10 +539,7 @@ const clientCreateNoteScriptFromPackage = ({
 }: {
   script: Script;
   midenSdk: MidenSdk;
-}) =>
-  NoteScript.fromPackage(
-    Package.deserialize(new Uint8Array(script.packageBytes))
-  );
+}) => NoteScript.fromPackage(Package.deserialize(fromBase64(script.masp)));
 
 export const clientCreateNoteFromScript = ({
   client,
@@ -635,21 +617,18 @@ const accountType = (account: WasmAccountType) => {
 const storageMode = (account: WasmAccountType) =>
   account.isPublic() ? "public" : account.isNetwork() ? "network" : "private";
 
-const verifyDefaultComponents = ({
+const verifyDefaultAccountComponents = ({
   wasmAccount,
-  // scripts,
   midenSdk: { Word },
 }: {
   wasmAccount: WasmAccountType;
-  // scripts: Script[];
   midenSdk: MidenSdk;
 }) => {
   const code = wasmAccount.code();
   return defaultScripts
-    .filter(({ id }) => id !== "cc2")
     .filter(
-      ({ exports }) =>
-        exports.length > 0 &&
+      ({ type, exports }) =>
+        type === "account" &&
         exports.every(({ digest }) => code.hasProcedure(Word.fromHex(digest)))
     )
     .map(({ id }) => id);
@@ -662,7 +641,6 @@ export const wasmAccountToAccount = ({
   networkId,
   updatedAt,
   consumableNoteIds,
-  // scripts = [],
   midenSdk,
 }: {
   wasmAccount: WasmAccountType;
@@ -671,14 +649,13 @@ export const wasmAccountToAccount = ({
   networkId: string;
   updatedAt: number;
   consumableNoteIds?: string[];
-  // scripts?: Script[];
   midenSdk: MidenSdk;
 }): Account => {
   const { AccountInterface, BasicFungibleFaucetComponent } = midenSdk;
   const code = wasmAccount.code().commitment().toHex();
   const verifiedComponents = components
     ? components
-    : verifyDefaultComponents({ wasmAccount, /*scripts,*/ midenSdk });
+    : verifyDefaultAccountComponents({ wasmAccount, midenSdk });
   const account: Account = {
     ...defaultAccount(),
     id: wasmAccount.id().toString(),
@@ -759,22 +736,36 @@ const noteState = ({
   return wasmInputNoteStates[state];
 };
 
+const verifyDefaultNotes = ({
+  scriptRoot,
+  scripts,
+}: {
+  scriptRoot: string;
+  scripts: Script[];
+}) =>
+  scripts
+    .filter(({ type }) => type === "note-script")
+    .find(({ digest }) => digest === scriptRoot);
+
 export const wasmInputNoteToInputNote = ({
   record,
   previousInputNote,
+  scripts,
   midenSdk,
 }: {
   record: WasmInputNoteRecordType;
   previousInputNote?: InputNote;
+  scripts: Script[];
   midenSdk: MidenSdk;
 }): InputNote => {
   const scriptRoot = record.details().recipient().script().root().toHex();
-  const script = defaultScripts.find(({ root }) => root === scriptRoot);
+  const script = verifyDefaultNotes({ scriptRoot, scripts });
   return {
     id: record.id().toString(),
     type: noteType({ metadata: record.metadata(), midenSdk }),
     state: noteState({ state: record.state(), midenSdk }),
     tag: record.metadata()?.tag().asU32().toString() ?? "",
+    serialNum: record.details().recipient().serialNum().toHex(),
     senderId: record.metadata()?.sender().toString() ?? "",
     scriptRoot,
     scriptId: previousInputNote

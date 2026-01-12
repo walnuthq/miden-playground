@@ -1,26 +1,35 @@
-// import { usePathname } from "next/navigation";
 import { type TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
-import Step2Content from "@/components/tutorials/tutorial7/step2.mdx";
-// import useScripts from "@/hooks/use-scripts";
-// import defaultScripts from "@/lib/types/default-scripts";
+import Step2Content from "@/components/tutorials/tutorial9/step2.mdx";
+import useScripts from "@/hooks/use-scripts";
+import { defaultScriptIds } from "@/lib/types/default-scripts";
+import useComponents from "@/hooks/use-components";
+import useTutorials from "@/hooks/use-tutorials";
+
+const useCompleted = () => {
+  const { scripts } = useScripts();
+  const script = scripts.find(
+    ({ id, type }) => !defaultScriptIds.includes(id) && type === "account"
+  );
+  return script?.status === "compiled";
+};
 
 const Step2: TutorialStep = {
-  title: "Title.",
+  title: "Understanding the Counter Account Contract.",
   Content: () => {
+    const completed = useCompleted();
     return (
       <>
         <Step2Content />
         <TutorialAlert
-          completed={false}
-          title="Action required: Create a new script."
-          titleWhenCompleted="You created a Counter Note script."
+          completed={completed}
+          title="Action required: Compile the script."
+          titleWhenCompleted="You compiled the script."
           description={
             <p>
-              Click on the <em>"Create new script"</em> button and create a new{" "}
-              <strong>Note Script</strong> from the{" "}
-              <strong>Counter Note</strong> example.
+              After reading and understanding the Counter Contract code, click
+              on the <em>"Compile"</em> button to compile the script.
             </p>
           }
         />
@@ -28,7 +37,32 @@ const Step2: TutorialStep = {
     );
   },
   NextStepButton: () => {
-    return <NextStepButton disabled />;
+    const completed = useCompleted();
+    const { scripts } = useScripts();
+    const { components, newComponent } = useComponents();
+    const { nextTutorialStep } = useTutorials();
+    const script = scripts.find(
+      ({ id, type }) => !defaultScriptIds.includes(id) && type === "account"
+    );
+    const component = components.find(
+      ({ scriptId }) => scriptId === script?.id
+    );
+    return (
+      <NextStepButton
+        disabled={!completed}
+        onClick={() => {
+          if (!component) {
+            newComponent({
+              name: "Counter Contract",
+              type: "account",
+              scriptId: script?.id ?? "",
+              storageSlots: [{ name: "count_map", type: "map", value: "1:0" }],
+            });
+          }
+          nextTutorialStep();
+        }}
+      />
+    );
   },
 };
 

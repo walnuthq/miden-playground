@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { type Account } from "@/lib/types/account";
 import { type InputNote } from "@/lib/types/note";
 import {
@@ -15,7 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
 import { Badge } from "@workspace/ui/components/badge";
-import { MoreVertical } from "lucide-react";
+import { MoreVertical, CircleCheckBig } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import AccountAddress from "@/components/lib/account-address";
 import useTransactions from "@/hooks/use-transactions";
@@ -54,7 +55,10 @@ const NoteActionsCell = ({
       <DropdownMenuContent align="end">
         <DropdownMenuItem
           onClick={async () => {
-            if (networkId === "mlcl") {
+            if (
+              networkId === "mlcl" ||
+              account.components.includes("no-auth")
+            ) {
               const { transactionRequest, transactionResult } =
                 await newConsumeTransactionRequest({
                   accountId: account.id,
@@ -109,14 +113,16 @@ const AccountNotesTable = ({ account }: { account: Account }) => {
     .map((noteId) => inputNotes.find(({ id }) => id === noteId))
     .filter((note) => note !== undefined);
   const showNoteActions =
-    networkId === "mlcl" || connectedWallet?.address === account.address;
+    networkId === "mlcl" ||
+    connectedWallet?.address === account.address ||
+    account.components.includes("no-auth");
   return (
     <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead>ID</TableHead>
-            <TableHead>Type</TableHead>
+            <TableHead>Script</TableHead>
             <TableHead>Storage mode</TableHead>
             <TableHead>Sender ID</TableHead>
             <TableHead>Assets</TableHead>
@@ -126,14 +132,29 @@ const AccountNotesTable = ({ account }: { account: Account }) => {
         <TableBody>
           {consumableNotes.map((inputNote) => {
             const script = scripts.find(
-              ({ root }) => root === inputNote.scriptRoot
+              ({ digest }) => digest === inputNote.scriptRoot
             );
             return (
               <TableRow key={inputNote.id}>
                 <TableCell>
                   <NoteId noteId={inputNote.id} />
                 </TableCell>
-                <TableCell>{script?.name ?? "Custom"}</TableCell>
+                <TableCell>
+                  {script ? (
+                    <Link
+                      className="text-primary font-medium underline underline-offset-4 flex items-center gap-2"
+                      href={`/scripts/${script.id}`}
+                    >
+                      {script.name}
+                      <CircleCheckBig
+                        color="var(--color-green-500)"
+                        className="size-4"
+                      />
+                    </Link>
+                  ) : (
+                    "Custom"
+                  )}
+                </TableCell>
                 <TableCell>
                   <Badge
                     variant={

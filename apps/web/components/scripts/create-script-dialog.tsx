@@ -69,7 +69,7 @@ const CreateScriptDialog = () => {
       onOpenChange={(open) => !open && onClose()}
     >
       <DialogContent
-        className="sm:max-w-[640px] z-100"
+        className="sm:max-w-160 z-100"
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
       >

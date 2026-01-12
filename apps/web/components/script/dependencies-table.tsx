@@ -21,7 +21,6 @@ import {
   type Script,
 } from "@/lib/types/script";
 import useScripts from "@/hooks/use-scripts";
-import { formatDigest } from "@/lib/utils";
 
 const DependencyActionsCell = ({
   script,
@@ -73,11 +72,10 @@ const DependenciesTable = ({ script }: { script: Script }) => {
             id: scriptDependency.id,
             name: scriptDependency.name,
             type: scriptDependency.type,
-            digest: dependency.digest,
+            digest: scriptDependency.digest,
           }
         : undefined;
     })
-    // .filter((dependency) => !["std", "base"].includes(dependency?.id ?? ""))
     .filter((dependency) => dependency !== undefined);
   return (
     <div className="rounded-md border">
@@ -102,7 +100,7 @@ const DependenciesTable = ({ script }: { script: Script }) => {
                 </Link>
               </TableCell>
               <TableCell>{scriptTypes[type]}</TableCell>
-              <TableHead>{digest && formatDigest(digest)}</TableHead>
+              <TableHead>{digest}</TableHead>
               <TableCell>
                 {!script.readOnly && (
                   <DependencyActionsCell script={script} dependencyId={id} />
@@ -114,7 +112,7 @@ const DependenciesTable = ({ script }: { script: Script }) => {
             <TableRow key={id}>
               <TableCell>{name}</TableCell>
               <TableCell>Default Package</TableCell>
-              <TableCell>{digest && formatDigest(digest)}</TableCell>
+              <TableCell>{digest}</TableCell>
               <TableCell />
             </TableRow>
           ))}

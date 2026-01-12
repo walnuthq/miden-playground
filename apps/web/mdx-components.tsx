@@ -16,6 +16,10 @@ const components = {
   ul: ({ children }) => (
     <ul className="ml-6 list-disc [&>li]:mt-2">{children}</ul>
   ),
+  ol: ({ children }) => (
+    <ol className="ml-6 list-decimal [&>li]:mt-2">{children}</ol>
+  ),
+  code: ({ children }) => <code className="font-mono text-xs">{children}</code>,
 } satisfies MDXComponents;
 
 export const useMDXComponents = (): MDXComponents => components;

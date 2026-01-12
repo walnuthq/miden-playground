@@ -294,7 +294,7 @@ const CreateTransactionConfigureForm = ({
             <Label>Transaction script</Label>
             <Select onValueChange={setScriptId} value={scriptId}>
               <SelectTrigger
-                className="w-[180px]"
+                className="w-45"
                 disabled={shownScripts.length === 0}
               >
                 <SelectValue placeholder="Select script…" />

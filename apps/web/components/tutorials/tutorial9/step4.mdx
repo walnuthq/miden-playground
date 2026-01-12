@@ -1,0 +1,47 @@
+Now let's examine the increment note script.
+
+**No-std Setup**
+
+Similar to the account contract, the note script uses **`#![no_std]`** with the same allocator and panic handler setup.
+
+**Miden Imports**
+
+```rust
+use miden::*;
+
+use crate::bindings::miden::counter_account::counter_account;
+```
+
+The wildcard import brings in all Miden note script functionality.
+The **`counter_account`** binding imports the interface functions from the counter contract, allowing the note script to call them.
+
+**No Struct Definition**
+
+Unlike account contracts, note scripts don't define a struct.
+They are purely functional code that gets executed when a note is consumed.
+The script defines **what happens** when the note is processed, not a persistent data structure.
+
+Learn more about [note scripts in the Miden documentation](http://docs.miden.xyz/miden-base/note/).
+
+**The Note Script Function**
+
+```rust
+#[note_script]
+fn run(_arg: Word) {
+    let initial_value = counter_account::get_count();
+    counter_account::increment_count();
+    let expected_value = initial_value + Felt::from_u32(1);
+    let final_value = counter_account::get_count();
+    assert_eq(final_value, expected_value);
+}
+```
+
+The **`#[note_script]`** attribute marks this function as the entry point for note execution. The function:
+
+1. **Gets the initial counter value** using the imported counter_account::get_count() function
+2. **Calls increment_count()** to increment the counter on the target account
+3. **Verifies the operation succeeded** by checking the final value matches expectations
+
+This demonstrates how note scripts interact with account contracts through their public interfaces, calling functions to change state.
+
+The counter example demonstrates a complete interaction pattern: the account contract manages persistent state, while the note script provides a mechanism to trigger state changes through note consumption.

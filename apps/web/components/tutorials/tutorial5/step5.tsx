@@ -4,13 +4,13 @@ import TutorialAlert from "@/components/tutorials/tutorial-alert";
 import Step5Content from "@/components/tutorials/tutorial5/step5.mdx";
 import useAccounts from "@/hooks/use-accounts";
 import useComponents from "@/hooks/use-components";
-import { defaultComponentIds } from "@/lib/types/default-components";
 
 const useCompleted = () => {
   const { accounts } = useAccounts();
   const { components } = useComponents();
   const component = components.find(
-    ({ id, type }) => !defaultComponentIds.includes(id) && type === "account"
+    ({ type, scriptId }) =>
+      type === "account" && scriptId.startsWith("counter-contract_")
   );
   const counter = accounts.find(({ components }) =>
     components.includes(component?.id ?? "")

@@ -3,22 +3,26 @@ import { projectRoot } from "@/lib/constants";
 
 export const midenVerifier = async ({
   type,
-  resourceId,
-  packageId,
+  resource,
+  masp,
 }: {
   type: "account-component" | "note" | "transaction";
-  resourceId: string;
-  packageId: string;
+  resource: string;
+  masp: string;
 }) => {
   try {
-    const { stdout } = await execFile(
-      "./miden-verifier",
-      [type, resourceId, packageId],
+    await execFile(
+      process.env.NODE_ENV === "production"
+        ? "miden-verifier"
+        : "./miden-verifier",
+      [type, resource, masp],
       {
-        cwd: `${projectRoot}/miden-verifier/target/release`,
+        cwd:
+          process.env.NODE_ENV === "production"
+            ? undefined
+            : `${projectRoot}/miden-verifier/target/release`,
       }
     );
-    console.log(stdout);
     return true;
   } catch (error) {
     console.error(error);

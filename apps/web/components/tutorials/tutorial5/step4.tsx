@@ -3,17 +3,18 @@ import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
 import Step4Content from "@/components/tutorials/tutorial5/step4.mdx";
 import useComponents from "@/hooks/use-components";
-import { defaultComponentIds } from "@/lib/types/default-components";
 
 const useCompleted = () => {
   const { components } = useComponents();
   const component = components.find(
-    ({ id, type }) => !defaultComponentIds.includes(id) && type === "account"
+    ({ type, scriptId }) =>
+      type === "account" && scriptId.startsWith("counter-contract_")
   );
+  const storageSlotsLength = component?.storageSlots.length ?? 0;
   const storageSlot = component?.storageSlots.find(
     ({ type, value }) => type === "map" && value.includes("1:")
   );
-  return !!storageSlot;
+  return storageSlotsLength === 1 && !!storageSlot;
 };
 
 const Step4: TutorialStep = {

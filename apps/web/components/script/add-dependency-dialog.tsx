@@ -57,7 +57,7 @@ const AddDependencyDialog = () => {
       onOpenChange={(open) => !open && onClose()}
     >
       <DialogContent
-        className="sm:max-w-[640px] z-100"
+        className="sm:max-w-160 z-100"
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
       >
@@ -94,7 +94,7 @@ const AddDependencyDialog = () => {
               <Label htmlFor="dependency">Dependency</Label>
               <Select onValueChange={setDependencyId} value={dependencyId}>
                 <SelectTrigger
-                  className="w-[180px]"
+                  className="w-45"
                   disabled={shownDependencies.length === 0}
                 >
                   <SelectValue placeholder="Select component…" />

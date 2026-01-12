@@ -4,13 +4,13 @@ import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
 import Step3Content from "@/components/tutorials/tutorial5/step3.mdx";
 import useComponents from "@/hooks/use-components";
-import { defaultComponentIds } from "@/lib/types/default-components";
 
 const useCompleted = () => {
   const pathname = usePathname();
   const { components } = useComponents();
   const component = components.find(
-    ({ id, type }) => !defaultComponentIds.includes(id) && type === "account"
+    ({ type, scriptId }) =>
+      type === "account" && scriptId.startsWith("counter-contract_")
   );
   return pathname === `/components/${component?.id}`;
 };

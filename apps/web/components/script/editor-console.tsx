@@ -20,15 +20,15 @@ const EditorConsole = ({ script }: { script: Script }) => {
   const [content, setContent] = useState("");
   const compile = async () => {
     setLoading(true);
-    const { error, masm, root, packageBytes, exports, dependencies } =
+    const { error, masm, digest, masp, exports, dependencies } =
       await compileScript(script);
     updateScript({
       ...script,
       error,
       masm,
       status: error ? "error" : "compiled",
-      root,
-      packageBytes,
+      digest,
+      masp,
       exports: error
         ? script.exports
         : exports.map((procedureExport) => ({
@@ -41,8 +41,7 @@ const EditorConsole = ({ script }: { script: Script }) => {
         : dependencies
             .map((dependency) => {
               const scriptDependency = scripts.find(
-                // TODO
-                ({ name }) => name === dependency.name
+                ({ digest }) => digest === dependency.digest
               );
               return scriptDependency
                 ? {

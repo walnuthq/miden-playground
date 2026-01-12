@@ -42,6 +42,7 @@ const useTransactions = () => {
     createTransactionDialogTransactionRequest,
     createTransactionDialogTransactionResult,
     inputNotes: previousInputNotes,
+    scripts,
     transactions,
     networkId,
     dispatch,
@@ -240,6 +241,7 @@ const useTransactions = () => {
     const inputNotes = await clientGetAllInputNotes({
       client,
       previousInputNotes,
+      scripts,
       midenSdk,
     });
     const consumableNoteIds: Record<string, string[]> = {};
