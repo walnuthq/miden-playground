@@ -16,7 +16,7 @@ import { verifyNoteFromPackageId } from "@/lib/api";
 const useNotes = () => {
   const { midenSdk } = useMidenSdk();
   const {
-    tutorialId, // TODO
+    tutorialId,
     inputNotes,
     exportNoteDialogOpen,
     importNoteDialogOpen,
