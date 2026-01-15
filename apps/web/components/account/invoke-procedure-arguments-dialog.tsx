@@ -25,15 +25,13 @@ const InvokeProcedureArgumentsDialog = () => {
   const {
     invokeProcedureArgumentsDialogOpen,
     invokeProcedureArgumentsDialogSenderAccountId: senderAccountId,
-    invokeProcedureArgumentsDialogScriptId: scriptId,
+    invokeProcedureArgumentsDialogScript: script,
     invokeProcedureArgumentsDialogProcedure: procedureExport,
-    scripts,
     closeInvokeProcedureArgumentsDialog,
     invokeProcedure,
   } = useScripts();
   const [loading, setLoading] = useState(false);
   const [accountId, setAccountId] = useState("");
-  const script = scripts.find(({ id }) => id === scriptId);
   if (!script || !procedureExport) {
     return null;
   }
@@ -68,7 +66,7 @@ const InvokeProcedureArgumentsDialog = () => {
             try {
               const transactionRecord = await invokeProcedure({
                 senderAccountId,
-                scriptId,
+                script,
                 procedureExport,
                 procedureInputs: procedureExport.signature.params.map(
                   (param, index) => {

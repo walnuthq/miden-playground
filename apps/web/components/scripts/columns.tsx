@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
 import useScripts from "@/hooks/use-scripts";
+import { exportScript } from "@/lib/api";
 
 const ScriptActionsCell = ({ script }: { script: Script }) => {
   const { openDeleteScriptAlertDialog } = useScripts();
@@ -23,6 +24,13 @@ const ScriptActionsCell = ({ script }: { script: Script }) => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
+        {!script.id.includes("_") && (
+          <DropdownMenuItem>
+            <a href={exportScript(script.id)} download={`${script.name}.zip`}>
+              Export script
+            </a>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem
           onClick={() => openDeleteScriptAlertDialog(script.id)}
         >

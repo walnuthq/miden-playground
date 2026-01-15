@@ -57,7 +57,7 @@ export type State = {
   deleteScriptAlertDialogScriptId: string;
   invokeProcedureArgumentsDialogOpen: boolean;
   invokeProcedureArgumentsDialogSenderAccountId: string;
-  invokeProcedureArgumentsDialogScriptId: string;
+  invokeProcedureArgumentsDialogScript: Script | null;
   invokeProcedureArgumentsDialogProcedure: Export | null;
   addDependencyDialogOpen: boolean;
   addDependencyDialogScriptId: string;
@@ -117,7 +117,7 @@ export const defaultState = (): State => ({
   deleteScriptAlertDialogScriptId: "",
   invokeProcedureArgumentsDialogOpen: false,
   invokeProcedureArgumentsDialogSenderAccountId: "",
-  invokeProcedureArgumentsDialogScriptId: "",
+  invokeProcedureArgumentsDialogScript: null,
   invokeProcedureArgumentsDialogProcedure: null,
   addDependencyDialogOpen: false,
   addDependencyDialogScriptId: "",

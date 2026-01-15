@@ -1,0 +1,16 @@
+import Link from "@/components/tutorials/tutorial-link";
+
+Now that we've compiled the **Counter Contract** script, let's deploy it.
+
+From the <Link href="/accounts">accounts page</Link>, click on _"Create new account"_ and select the _"Deploy account"_ option.
+
+Give your new contract a name and select **NoAuth** as authentication component and our custom **Counter Contract** account component.
+
+When you're done configuring your contract deployment, click on the _"Deploy"_ button to create your account.
+
+Every contract deployed using the Miden Playground is automatically verified upon deployment.
+This is the reason why we're able to invoke our account procedures using their human-readable names such as **`get_count`** or **`reset_count`** under the _"Components"_ tab of the contract details page.
+
+See for yourself: {props.counter ? <Link href={`/accounts/${props.counter.address}?tab=components`}>click on the <em>"Components"</em> tab of your deployed account</Link> : <>click on the <em>"Components"</em> tab of your deployed account</>} to access the list of verified components your smart contract contains, you will also be able to read the underlying script source code by clicking on the _"Script"_ link.
+
+When a contract is verified, anyone can import it and start interacting with it on the playground as well as access the Rust source code.

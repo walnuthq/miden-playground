@@ -1,0 +1,14 @@
+import Link from "@/components/tutorials/tutorial-link";
+import ImportButton from "@/components/tutorials/tutorial10/import-button";
+
+But what happens when we import an account that isn't verified?
+
+Let's find out by clicking on the _"Import"_ button, this will import a **Counter Contract** using the same source code as the script we compiled previously but since it was deployed from outside the playground it wasn't automatically verified for us.
+
+<ImportButton />
+
+When the contract is imported, {props.counter ? <Link href={`/accounts/${props.counter.address}?tab=components`}>click on its address and head to the <em>"Components"</em> tab</Link> : <>click on its address and head to the <em>"Components"</em> tab</>}: at the moment we have no verified components on this account and it behaves like a blackbox, only dApps aware of this contract interface can interact with it.
+
+**So how can we verify this contract?**
+
+One of the option is to add verified account components by providing the original source code that was used to build and deploy this contract on-chain.

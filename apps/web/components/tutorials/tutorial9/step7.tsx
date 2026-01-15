@@ -26,9 +26,21 @@ const Step7: TutorialStep = {
   title: "Consume the increment note.",
   Content: () => {
     const completed = useCompleted();
+    const { accounts } = useAccounts();
+    const { scripts } = useScripts();
+    const { components } = useComponents();
+    const script = scripts.find(
+      ({ id, type }) => !defaultScriptIds.includes(id) && type === "account"
+    );
+    const component = components.find(
+      ({ scriptId }) => scriptId === script?.id
+    );
+    const counter = accounts.find(({ components }) =>
+      components.includes(component?.id ?? "")
+    );
     return (
       <>
-        <Step7Content />
+        <Step7Content counter={counter} />
         <TutorialAlert
           completed={completed}
           title="Action required: Consume the increment note."

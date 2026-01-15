@@ -75,13 +75,13 @@ export const PATCH = async (
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) => {
-  const { id: packageDir } = await params;
+  const { id } = await params;
   const body = await request.json();
   const { rust: updatedRust, dependencies: updatedDependencies } =
     body as CompileScriptRequestBody;
   const [exists, dbPackage, dependenciesPackages] = await Promise.all([
-    packageExists(packageDir),
-    getPackage(packageDir),
+    packageExists(id),
+    getPackage(id),
     getDependencies(updatedDependencies),
   ]);
   if (!dbPackage) {
@@ -89,10 +89,10 @@ export const PATCH = async (
   }
   const { name, type } = dbPackage;
   if (exists) {
-    await updateRust({ packageDir, rust: updatedRust });
+    await updateRust({ packageDir: id, rust: updatedRust });
   } else {
     await generatePackageDir({
-      packageDir,
+      packageDir: id,
       name,
       type,
       rust: updatedRust,
@@ -100,16 +100,16 @@ export const PATCH = async (
     });
   }
   await generateCargoToml({
-    packageDir,
+    packageDir: id,
     name,
     type,
     dependencies: dependenciesPackages,
   });
-  const { stderr } = await compilePackage(packageDir);
+  const { stderr } = await compilePackage(id);
   if (stderr) {
     console.error(stderr);
     await updatePackage({
-      id: packageDir,
+      id,
       status: "error",
       rust: updatedRust,
       dependencies: updatedDependencies,
@@ -123,11 +123,11 @@ export const PATCH = async (
     );
   }
   const { masp, digest, exports, dependencies } = await readPackage({
-    packageDir,
+    packageDir: id,
     name,
   });
   await updatePackage({
-    id: packageDir,
+    id,
     status: "compiled",
     rust: updatedRust,
     masp,

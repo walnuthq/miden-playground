@@ -36,7 +36,8 @@ const ProceduresTableRow = ({
           />
         </div>
       </TableCell>
-      {account.components.includes("no-auth") &&
+      {
+        /*account.components.includes("no-auth") && TODO */
         component.type === "account" && (
           <TableCell className="flex items-center justify-between gap-2">
             <span>{result}</span>
@@ -68,7 +69,7 @@ const ProceduresTableRow = ({
                   try {
                     const transactionRecord = await invokeProcedure({
                       senderAccountId: account.id,
-                      scriptId: script.id,
+                      script,
                       procedureExport,
                     });
                     toast("Transaction submitted.", {
@@ -90,7 +91,7 @@ const ProceduresTableRow = ({
                 } else {
                   openInvokeProcedureArgumentsDialog({
                     senderAccountId: account.id,
-                    scriptId: script.id,
+                    script,
                     procedureExport,
                   });
                 }
@@ -101,7 +102,8 @@ const ProceduresTableRow = ({
               {loading ? "Invoking…" : "Invoke"}
             </Button>
           </TableCell>
-        )}
+        )
+      }
     </TableRow>
   );
 };

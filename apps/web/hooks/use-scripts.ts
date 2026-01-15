@@ -24,7 +24,7 @@ const useScripts = () => {
     deleteScriptAlertDialogScriptId,
     invokeProcedureArgumentsDialogOpen,
     invokeProcedureArgumentsDialogSenderAccountId,
-    invokeProcedureArgumentsDialogScriptId,
+    invokeProcedureArgumentsDialogScript,
     invokeProcedureArgumentsDialogProcedure,
     addDependencyDialogOpen,
     addDependencyDialogScriptId,
@@ -87,21 +87,17 @@ const useScripts = () => {
   };
   const invokeProcedure = async ({
     senderAccountId,
-    scriptId,
+    script,
     procedureExport,
     procedureInputs = [],
     foreignAccounts = [],
   }: {
     senderAccountId: string;
-    scriptId: string;
+    script: Script;
     procedureExport: Export;
     procedureInputs?: MidenInput[];
     foreignAccounts?: string[];
   }) => {
-    const script = scripts.find(({ id }) => id === scriptId);
-    if (!script) {
-      throw new Error("Script not found");
-    }
     dispatch({ type: "SUBMITTING_TRANSACTION" });
     await client.syncState();
     try {
@@ -164,16 +160,16 @@ const useScripts = () => {
   };
   const openInvokeProcedureArgumentsDialog = ({
     senderAccountId,
-    scriptId,
+    script,
     procedureExport,
   }: {
     senderAccountId: string;
-    scriptId: string;
+    script: Script;
     procedureExport: Export;
   }) =>
     dispatch({
       type: "OPEN_INVOKE_PROCEDURE_ARGUMENTS_DIALOG",
-      payload: { senderAccountId, scriptId, procedureExport },
+      payload: { senderAccountId, script, procedureExport },
     });
   const closeInvokeProcedureArgumentsDialog = () =>
     dispatch({
@@ -195,7 +191,7 @@ const useScripts = () => {
     deleteScriptAlertDialogScriptId,
     invokeProcedureArgumentsDialogOpen,
     invokeProcedureArgumentsDialogSenderAccountId,
-    invokeProcedureArgumentsDialogScriptId,
+    invokeProcedureArgumentsDialogScript,
     invokeProcedureArgumentsDialogProcedure,
     addDependencyDialogOpen,
     addDependencyDialogScriptId,

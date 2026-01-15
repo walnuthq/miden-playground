@@ -51,9 +51,7 @@ const Account = ({
         <div className="flex items-center justify-between">
           <TabsList>
             <TabsTrigger value="information">Information</TabsTrigger>
-            {account.components.length > 0 && (
-              <TabsTrigger value="components">Components</TabsTrigger>
-            )}
+            <TabsTrigger value="components">Components</TabsTrigger>
           </TabsList>
           {showCreateTransactionButton && (
             <CreateTransactionDropdownMenu account={account} />
@@ -62,14 +60,12 @@ const Account = ({
         <TabsContent value="information">
           <AccountInformation account={account} />
         </TabsContent>
-        {account.components.length > 0 && (
-          <TabsContent value="components">
-            <AccountComponents
-              account={account}
-              verifiedAccountComponents={verifiedAccountComponents}
-            />
-          </TabsContent>
-        )}
+        <TabsContent value="components">
+          <AccountComponents
+            account={account}
+            verifiedAccountComponents={verifiedAccountComponents}
+          />
+        </TabsContent>
       </Tabs>
       <CreateTransactionDialog />
       <InvokeProcedureArgumentsDialog />

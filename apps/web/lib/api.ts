@@ -149,7 +149,13 @@ export const getVerifiedAccountComponents = async (address: string) => {
     console.error(error);
     return [];
   }
-  return components;
+  return components.map((component) => ({
+    ...component,
+    exports: component.exports.map((procedureExport) => ({
+      ...procedureExport,
+      readOnly: procedureExport.name.startsWith("get"),
+    })),
+  }));
 };
 
 export const verifyNoteFromSource = async ({
@@ -240,4 +246,9 @@ export const getScript = async (id: string) => {
     return null;
   }
   return script;
+};
+
+export const exportScript = (id: string) => {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  return `${apiUrl}/scripts/${id}/export`;
 };

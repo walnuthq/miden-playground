@@ -31,7 +31,7 @@ export type ScriptAction =
       type: "OPEN_INVOKE_PROCEDURE_ARGUMENTS_DIALOG";
       payload: {
         senderAccountId: string;
-        scriptId: string;
+        script: Script;
         procedureExport: Export;
       };
     }
@@ -108,7 +108,7 @@ const reducer = (state: State, action: ScriptAction): State => {
         invokeProcedureArgumentsDialogOpen: true,
         invokeProcedureArgumentsDialogSenderAccountId:
           action.payload.senderAccountId,
-        invokeProcedureArgumentsDialogScriptId: action.payload.scriptId,
+        invokeProcedureArgumentsDialogScript: action.payload.script,
         invokeProcedureArgumentsDialogProcedure: action.payload.procedureExport,
       };
     }
@@ -117,7 +117,7 @@ const reducer = (state: State, action: ScriptAction): State => {
         ...state,
         invokeProcedureArgumentsDialogOpen: false,
         invokeProcedureArgumentsDialogSenderAccountId: "",
-        invokeProcedureArgumentsDialogScriptId: "",
+        invokeProcedureArgumentsDialogScript: null,
         invokeProcedureArgumentsDialogProcedure: null,
       };
     }

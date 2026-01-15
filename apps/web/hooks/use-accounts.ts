@@ -217,11 +217,13 @@ const useAccounts = () => {
     accountType,
     storageMode,
     components,
+    verify = true,
   }: {
     name: string;
     accountType: AccountType;
     storageMode: AccountStorageMode;
     components: Component[];
+    verify?: boolean;
   }) => {
     dispatch({ type: "SUBMITTING_TRANSACTION" });
     const syncSummary = await client.syncState();
@@ -243,12 +245,12 @@ const useAccounts = () => {
     const account = wasmAccountToAccount({
       wasmAccount,
       name,
-      components: components.map(({ id }) => id),
+      components: verify ? components.map(({ id }) => id) : [],
       networkId,
       updatedAt: syncSummary.blockNum(),
       midenSdk,
     });
-    if (!tutorialId) {
+    if (verify && !tutorialId) {
       verifyAccountComponentsFromPackageIds({
         accountId: account.id,
         address: getAddressPart(account.address),
