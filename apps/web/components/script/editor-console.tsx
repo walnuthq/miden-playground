@@ -22,8 +22,7 @@ const EditorConsole = ({ script }: { script: Script }) => {
     setLoading(true);
     const { error, masm, digest, masp, exports, dependencies } =
       await compileScript(script);
-    updateScript({
-      ...script,
+    updateScript(script.id, {
       error,
       masm,
       status: error ? "error" : "compiled",

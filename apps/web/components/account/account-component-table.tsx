@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { type Account } from "@/lib/types/account";
 import { type Script } from "@/lib/types/script";
-import { type Component, componentTypes } from "@/lib/types/component";
+import { type Component } from "@/lib/types/component";
 import {
   Table,
   TableBody,
@@ -24,8 +24,8 @@ const AccountComponentTable = ({
     <Table>
       <TableBody>
         <TableRow>
-          <TableCell>Type</TableCell>
-          <TableCell>{componentTypes[component.type]}</TableCell>
+          <TableCell>Name</TableCell>
+          <TableCell>{component.name}</TableCell>
         </TableRow>
         <TableRow>
           <TableCell>Script</TableCell>

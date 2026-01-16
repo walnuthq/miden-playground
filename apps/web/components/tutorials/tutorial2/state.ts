@@ -327,9 +327,21 @@ const state: State = {
       address: "mlcl1arce6r6vr4u0kgqgr9rf0ldjggzl35zz_qruqqypuyph",
       nonce: 1,
       storage: [
-        "0x00000000000000000000000000000000000000000000000000e1f50500000000",
-        "0xf8f41acd38a25f4c0c087f00a02843b2eaa6ca0734f9e63274072b8587d4ea5f",
-        "0x00008a5d78456301060000000000000021410300000000000000000000000000",
+        {
+          type: "value",
+          item: "0x00000000000000000000000000000000000000000000000000e1f50500000000",
+          mapEntries: [],
+        },
+        {
+          type: "value",
+          item: "0xf8f41acd38a25f4c0c087f00a02843b2eaa6ca0734f9e63274072b8587d4ea5f",
+          mapEntries: [],
+        },
+        {
+          type: "value",
+          item: "0x00008a5d78456301060000000000000021410300000000000000000000000000",
+          mapEntries: [],
+        },
       ],
       updatedAt: 1,
     },
@@ -346,7 +358,11 @@ const state: State = {
         },
       ],
       storage: [
-        "0x937a4da3ff9434b14dc29222a38293b6de917565432eaa9a37f17ef4ec57cab2",
+        {
+          type: "value",
+          item: "0x937a4da3ff9434b14dc29222a38293b6de917565432eaa9a37f17ef4ec57cab2",
+          mapEntries: [],
+        },
       ],
       updatedAt: 2,
     },
@@ -356,7 +372,11 @@ const state: State = {
       name: "Wallet B",
       address: "mlcl1ap7tazk885vxsyr7zkjtkdj5qycflg6e_qruqqypuyph",
       storage: [
-        "0xeb309850f8f765fe618258c9acdee219c9b673e2109495082621074311565dd3",
+        {
+          type: "value",
+          item: "0xeb309850f8f765fe618258c9acdee219c9b673e2109495082621074311565dd3",
+          mapEntries: [],
+        },
       ],
     },
   ],

@@ -76,8 +76,7 @@ const AddDependencyDialog = () => {
               return;
             }
             setLoading(true);
-            updateScript({
-              ...script,
+            updateScript(script.id, {
               dependencies: [
                 ...script.dependencies,
                 { id: dependency.id, name: dependency.name, digest: "" },

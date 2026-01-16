@@ -12,6 +12,7 @@ import {
 } from "@demox-labs/miden-sdk";
 import { type WasmTransactionRecordType } from "@/lib/types";
 import useAccounts from "@/hooks/use-accounts";
+import { defaultStorageItem } from "@/lib/types/account";
 
 const SubmitTransactionToastDescription = ({
   transactionRecord,
@@ -64,9 +65,9 @@ const TransactionPreview = ({
   const storageDelta = accountStorage
     .map((before, index) =>
       storageDeltaValues[index] !== undefined &&
-      before !== storageDeltaValues[index]
+      before.item !== storageDeltaValues[index]
         ? { index, before, after: storageDeltaValues[index] }
-        : { index, before: "", after: "" }
+        : { index, before: defaultStorageItem(), after: "" }
     )
     .filter(({ after }) => after !== "");
   return (

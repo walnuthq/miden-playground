@@ -7,6 +7,7 @@ import {
   FUNGIBLE_FAUCET_DEFAULT_MAX_SUPPLY,
   MIDEN_FAUCET_ACCOUNT_ID,
   MIDEN_FAUCET_ADDRESS,
+  EMPTY_WORD,
 } from "@/lib/constants";
 
 export const accountTypes = {
@@ -26,6 +27,18 @@ export const accountStorageModes = {
 
 export type AccountStorageMode = keyof typeof accountStorageModes;
 
+export type StorageItem = {
+  type: "value" | "map";
+  item: string;
+  mapEntries: { key: string; value: string }[];
+};
+
+export const defaultStorageItem = (): StorageItem => ({
+  type: "value",
+  item: "",
+  mapEntries: [],
+});
+
 export type Account = {
   id: string;
   name: string;
@@ -44,7 +57,7 @@ export type Account = {
   nonce: number;
   fungibleAssets: FungibleAsset[];
   code: string;
-  storage: string[];
+  storage: StorageItem[];
   consumableNoteIds: string[];
   components: string[];
   updatedAt: number;
@@ -137,3 +150,24 @@ export const midenFaucetAccount = () => ({
   name: "Miden Faucet",
   address: MIDEN_FAUCET_ADDRESS,
 });
+
+export const getItem = (storage: StorageItem[], index: number) => {
+  const storageItem = storage[index];
+  if (!storageItem || storageItem.type !== "value") {
+    return EMPTY_WORD;
+  }
+  return storageItem.item;
+};
+
+export const getMapItem = (
+  storage: StorageItem[],
+  index: number,
+  key: string
+) => {
+  const storageItem = storage[index];
+  if (!storageItem || storageItem.type !== "map") {
+    return EMPTY_WORD;
+  }
+  const entry = storageItem.mapEntries.find((entry) => entry.key === key);
+  return entry ? entry.value : EMPTY_WORD;
+};

@@ -15,7 +15,9 @@ import {
   type Account,
   type AccountStorageMode,
   type AccountType,
+  type StorageItem,
   defaultAccount,
+  getItem,
 } from "@/lib/types/account";
 // import { type NetworkId } from "@/lib/types/network";
 import { type InputNote, type NoteType } from "@/lib/types/note";
@@ -52,7 +54,7 @@ import type { MidenSdk } from "@/lib/types";
 //   return globalForWebClient.webClient;
 // };
 
-const bigintToWord = ({
+export const bigintToWord = ({
   value,
   midenSdk: { Word },
 }: {
@@ -628,7 +630,7 @@ const verifyDefaultAccountComponents = ({
   return defaultScripts
     .filter(
       ({ type, exports }) =>
-        type === "account" &&
+        ["account", "authentication-component"].includes(type) &&
         exports.every(({ digest }) => code.hasProcedure(Word.fromHex(digest)))
     )
     .map(({ id }) => id);
@@ -679,9 +681,26 @@ export const wasmAccountToAccount = ({
         amount: fungibleAsset.amount().toString(),
       })),
     code,
-    storage: range(255).reduce<string[]>((previousValue, currentValue) => {
+    storage: range(255).reduce<StorageItem[]>((previousValue, currentValue) => {
       const item = wasmAccount.storage().getItem(currentValue);
-      return item ? [...previousValue, item.toHex()] : previousValue;
+      const mapEntries = wasmAccount.storage().getMapEntries(currentValue);
+      if (mapEntries && item) {
+        return [
+          ...previousValue,
+          {
+            type: "map",
+            item: item.toHex(),
+            mapEntries: mapEntries.map(({ key, value }) => ({ key, value })),
+          },
+        ];
+      }
+      if (item) {
+        return [
+          ...previousValue,
+          { type: "value", item: item.toHex(), mapEntries: [] },
+        ];
+      }
+      return previousValue;
     }, []),
     consumableNoteIds: consumableNoteIds ?? [],
     components: verifiedComponents,
@@ -693,7 +712,7 @@ export const wasmAccountToAccount = ({
     account.symbol = basicFungibleFaucetComponent.symbol().toString();
     account.decimals = basicFungibleFaucetComponent.decimals();
     account.maxSupply = basicFungibleFaucetComponent.maxSupply().toString();
-    const [, , , totalSupply] = stringToFeltArray(account.storage[0]!);
+    const [, , , totalSupply] = stringToFeltArray(getItem(account.storage, 0));
     account.totalSupply = totalSupply!.toString();
   }
   return account;

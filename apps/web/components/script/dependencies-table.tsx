@@ -44,8 +44,7 @@ const DependencyActionsCell = ({
             const index = script.dependencies.findIndex(
               ({ id }) => id === dependencyId
             );
-            updateScript({
-              ...script,
+            updateScript(script.id, {
               dependencies: [
                 ...script.dependencies.slice(0, index),
                 ...script.dependencies.slice(index + 1),

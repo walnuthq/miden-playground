@@ -36,8 +36,7 @@ const ProceduresTableRow = ({
           />
         </div>
       </TableCell>
-      {
-        /*account.components.includes("no-auth") && TODO */
+      {account.components.includes("no-auth") &&
         component.type === "account" && (
           <TableCell className="flex items-center justify-between gap-2">
             <span>{result}</span>
@@ -102,8 +101,7 @@ const ProceduresTableRow = ({
               {loading ? "Invoking…" : "Invoke"}
             </Button>
           </TableCell>
-        )
-      }
+        )}
     </TableRow>
   );
 };

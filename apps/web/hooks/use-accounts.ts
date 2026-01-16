@@ -29,6 +29,7 @@ import useMidenSdk from "@/hooks/use-miden-sdk";
 import { defaultScriptIds } from "@/lib/types/default-scripts";
 import { verifyAccountComponentsFromPackageIds } from "@/lib/api";
 import { toBase64, getAddressPart } from "@/lib/utils";
+import { defaultComponentIds } from "@/lib/types/default-components";
 
 const useAccounts = () => {
   const { address: connectedWalletAddress } = useWallet();
@@ -177,7 +178,6 @@ const useAccounts = () => {
       consumableNoteIds: consumableNotes.map((consumableNote) =>
         consumableNote.inputNoteRecord().id().toString()
       ),
-      // scripts,
       midenSdk,
     });
     if (
@@ -245,7 +245,9 @@ const useAccounts = () => {
     const account = wasmAccountToAccount({
       wasmAccount,
       name,
-      components: verify ? components.map(({ id }) => id) : [],
+      components: components
+        .filter(({ id }) => (verify ? true : defaultComponentIds.includes(id)))
+        .map(({ id }) => id),
       networkId,
       updatedAt: syncSummary.blockNum(),
       midenSdk,

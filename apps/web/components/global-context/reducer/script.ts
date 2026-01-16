@@ -21,7 +21,7 @@ export type ScriptAction =
     }
   | {
       type: "UPDATE_SCRIPT";
-      payload: { script: Script };
+      payload: { id: string; script: Partial<Script> };
     }
   | {
       type: "DELETE_SCRIPT";
@@ -79,13 +79,17 @@ const reducer = (state: State, action: ScriptAction): State => {
     }
     case "UPDATE_SCRIPT": {
       const index = state.scripts.findIndex(
-        ({ id }) => id === action.payload.script.id
+        ({ id }) => id === action.payload.id
       );
       return {
         ...state,
         scripts: [
           ...state.scripts.slice(0, index),
-          { ...action.payload.script, updatedAt: Date.now() },
+          {
+            ...state.scripts[index]!,
+            ...action.payload.script,
+            updatedAt: Date.now(),
+          },
           ...state.scripts.slice(index + 1),
         ],
       };

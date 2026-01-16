@@ -71,10 +71,10 @@ const useScripts = () => {
     });
     return script;
   };
-  const updateScript = (script: Script) =>
+  const updateScript = (id: string, script: Partial<Script>) =>
     dispatch({
       type: "UPDATE_SCRIPT",
-      payload: { script },
+      payload: { id, script },
     });
   const deleteScript = async (scriptId: string) => {
     const script = scripts.find(({ id }) => id === scriptId);
