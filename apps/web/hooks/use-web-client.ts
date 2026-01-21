@@ -17,9 +17,13 @@ import { type State, defaultState } from "@/lib/types/state";
 import { type Store, deleteStore, defaultStore } from "@/lib/types/store";
 import { MIDEN_FAUCET_ADDRESS } from "@/lib/constants";
 import { useWallet } from "@demox-labs/miden-wallet-adapter";
+// import { useParaMiden } from "@/lib/para-miden";
 
 const useWebClient = () => {
-  const { client } = useContext(WebClientContext);
+  const { client: defaultClient } = useContext(WebClientContext);
+  // const { client: paraMidenClient } = useParaMiden();
+  // const client = paraMidenClient ?? defaultClient;
+  const client = defaultClient;
   const { address } = useWallet();
   const { midenSdk } = useMidenSdk();
   const {
@@ -50,7 +54,7 @@ const useWebClient = () => {
         }
         if (previousAccount.address === address && previousAccount.isNew) {
           const connectedWalletNotes = previousInputNotes.filter(({ id }) =>
-            previousAccount.consumableNoteIds.includes(id)
+            previousAccount.consumableNoteIds.includes(id),
           );
           inputNotes.push(...connectedWalletNotes);
         }
@@ -66,7 +70,7 @@ const useWebClient = () => {
             midenSdk,
           });
           const consumableNoteIds = consumableNotes.map((consumableNote) =>
-            consumableNote.inputNoteRecord().id().toString()
+            consumableNote.inputNoteRecord().id().toString(),
           );
           const account = wasmAccountToAccount({
             wasmAccount,

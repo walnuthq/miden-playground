@@ -5,10 +5,11 @@ import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
 import Step4Content from "@/components/tutorials/tutorial4/step4.mdx";
 import { COUNTER_CONTRACT_ADDRESS } from "@/lib/constants";
+import { getAddressPart } from "@/lib/utils";
 
 const useCompleted = () => {
   const pathname = usePathname();
-  return pathname === `/accounts/${COUNTER_CONTRACT_ADDRESS}`;
+  return pathname === `/accounts/${getAddressPart(COUNTER_CONTRACT_ADDRESS)}`;
 };
 
 const Step4: TutorialStep = {
@@ -16,7 +17,7 @@ const Step4: TutorialStep = {
   Content: () => {
     const { accounts } = useAccounts();
     const counter = accounts.find(
-      ({ address }) => address === COUNTER_CONTRACT_ADDRESS
+      ({ address }) => address === COUNTER_CONTRACT_ADDRESS,
     );
     const completed = useCompleted();
     return (

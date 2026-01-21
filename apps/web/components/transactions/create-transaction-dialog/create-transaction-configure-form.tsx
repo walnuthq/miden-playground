@@ -95,10 +95,11 @@ const CreateTransactionConfigureForm = ({
       : faucetAccount?.decimals;
   const balance =
     executingAccount?.fungibleAssets.find(
-      ({ faucetId }) => faucetId === faucetAccountId
+      ({ faucetId }) => faucetId === faucetAccountId,
     )?.amount ?? "0";
   const shownScripts = scripts.filter(
-    ({ type, status }) => type === "transaction-script" && status === "compiled"
+    ({ type, status }) =>
+      type === "transaction-script" && status === "compiled",
   );
   const script = scripts.find(({ id }) => id === scriptId);
   return (
@@ -118,7 +119,7 @@ const CreateTransactionConfigureForm = ({
                 : "private",
               amount: parseAmount(
                 formData.get("amount")?.toString() ?? "0",
-                decimals
+                decimals,
               ),
             });
           setTransactionRequest(transactionRequest);
@@ -150,7 +151,7 @@ const CreateTransactionConfigureForm = ({
                   : "private",
                 amount: parseAmount(
                   formData.get("amount")?.toString() ?? "0",
-                  decimals
+                  decimals,
                 ),
               });
             setTransactionRequest(transactionRequest);
@@ -167,8 +168,11 @@ const CreateTransactionConfigureForm = ({
                 ? "public"
                 : "private",
               Number(
-                parseAmount(formData.get("amount")?.toString() ?? "0", decimals)
-              )
+                parseAmount(
+                  formData.get("amount")?.toString() ?? "0",
+                  decimals,
+                ),
+              ),
             );
             const adapter = wallet.adapter as MidenWalletAdapter;
             const txId = await adapter.requestSend(transaction);
@@ -210,8 +214,14 @@ const CreateTransactionConfigureForm = ({
                 id="amount"
                 name="amount"
                 type="number"
-                step={formatAmount("1", decimals).replaceAll(",", "")}
-                min={formatAmount("1", decimals).replaceAll(",", "")}
+                step={formatAmount({ amount: "1", decimals }).replaceAll(
+                  ",",
+                  "",
+                )}
+                min={formatAmount({ amount: "1", decimals }).replaceAll(
+                  ",",
+                  "",
+                )}
                 required
               />
             </div>
@@ -267,9 +277,18 @@ const CreateTransactionConfigureForm = ({
                 id="amount"
                 name="amount"
                 type="number"
-                step={formatAmount("1", decimals).replaceAll(",", "")}
-                min={formatAmount("1", decimals).replaceAll(",", "")}
-                max={formatAmount(balance, decimals).replaceAll(",", "")}
+                step={formatAmount({ amount: "1", decimals }).replaceAll(
+                  ",",
+                  "",
+                )}
+                min={formatAmount({ amount: "1", decimals }).replaceAll(
+                  ",",
+                  "",
+                )}
+                max={formatAmount({ amount: balance, decimals }).replaceAll(
+                  ",",
+                  "",
+                )}
                 required
               />
             </div>

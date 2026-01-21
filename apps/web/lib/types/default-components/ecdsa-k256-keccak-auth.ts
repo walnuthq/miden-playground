@@ -1,12 +1,12 @@
 import { type Component, defaultComponent } from "@/lib/types/component";
 
-const basicAuth: Component = {
+const ecdsaK256KeccakAuth: Component = {
   ...defaultComponent(),
-  id: "basic-auth",
-  name: "Basic Auth",
+  id: "ecdsa-k256-keccak-auth",
+  name: "ECDSA K256 Keccak Auth",
   type: "authentication-component",
-  scriptId: "basic-auth",
+  scriptId: "ecdsa-k256-keccak-auth",
   storageSlots: [{ name: "Owner Public Key", type: "value", value: "0" }],
 };
 
-export default basicAuth;
+export default ecdsaK256KeccakAuth;

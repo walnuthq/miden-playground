@@ -99,7 +99,7 @@ export const basicWalletAccount = ({
   isRegularAccount: true,
   isUpdatable: true,
   code: BASIC_WALLET_CODE,
-  components: ["basic-auth", "basic-wallet"],
+  components: ["rpo-falcon-512-auth", "basic-wallet"],
 });
 
 export const basicFungibleFaucetAccount = ({
@@ -126,7 +126,7 @@ export const basicFungibleFaucetAccount = ({
   isPublic: storageMode === "public",
   isNew: true,
   code: FUNGIBLE_FAUCET_CODE,
-  components: ["basic-fungible-faucet"],
+  components: ["rpo-falcon-512-auth", "basic-fungible-faucet"],
 });
 
 export const accountIdFromPrefixSuffix = (prefix: string, suffix: string) => {
@@ -142,7 +142,7 @@ export const midenFaucetAccount = () => ({
     decimals: FUNGIBLE_FAUCET_DEFAULT_DECIMALS,
     maxSupply: parseAmount(
       FUNGIBLE_FAUCET_DEFAULT_MAX_SUPPLY.toString(),
-      FUNGIBLE_FAUCET_DEFAULT_DECIMALS
+      FUNGIBLE_FAUCET_DEFAULT_DECIMALS,
     ).toString(),
     totalSupply: "0",
   }),
@@ -162,7 +162,7 @@ export const getItem = (storage: StorageItem[], index: number) => {
 export const getMapItem = (
   storage: StorageItem[],
   index: number,
-  key: string
+  key: string,
 ) => {
   const storageItem = storage[index];
   if (!storageItem || storageItem.type !== "map") {

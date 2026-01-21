@@ -7,6 +7,7 @@ import {
   clientNewWallet,
   clientNewFaucet,
   clientDeployAccount,
+  // accountIdToAddress,
 } from "@/lib/web-client";
 import { type Account as WasmAccountType } from "@demox-labs/miden-sdk";
 import useGlobalContext from "@/components/global-context/hook";
@@ -21,7 +22,6 @@ import { type Component } from "@/lib/types/component";
 import useScripts from "@/hooks/use-scripts";
 import {
   MIDEN_FAUCET_ADDRESS,
-  BASIC_WALLET_CODE,
   COUNTER_CONTRACT_ADDRESS,
 } from "@/lib/constants";
 import useWebClient from "@/hooks/use-web-client";
@@ -30,9 +30,11 @@ import { defaultScriptIds } from "@/lib/types/default-scripts";
 import { verifyAccountComponentsFromPackageIds } from "@/lib/api";
 import { toBase64, getAddressPart } from "@/lib/utils";
 import { defaultComponentIds } from "@/lib/types/default-components";
+// import { useParaMiden } from "@/lib/para-miden";
 
 const useAccounts = () => {
-  const { address: connectedWalletAddress } = useWallet();
+  const { address: midenWalletAddress } = useWallet();
+  // const { accountId: paraWalletAccountId } = useParaMiden();
   const { midenSdk } = useMidenSdk();
   const {
     networkId,
@@ -49,12 +51,12 @@ const useAccounts = () => {
   } = useGlobalContext();
   const { client } = useWebClient();
   const { scripts } = useScripts();
-  const wallets = accounts.filter(
-    (account) => account.code === BASIC_WALLET_CODE
+  const wallets = accounts.filter((account) =>
+    account.components.includes("basic-wallet"),
   );
   const faucets = accounts.filter((account) => account.isFaucet);
   const connectedWallet = wallets.find(
-    ({ address }) => address === connectedWalletAddress
+    ({ /*id,*/ address }) => address === midenWalletAddress, // || id === paraWalletAccountId,
   );
   const newWallet = async ({
     name,
@@ -143,7 +145,7 @@ const useAccounts = () => {
       });
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      if (address === connectedWalletAddress) {
+      if (address === midenWalletAddress) {
         const account = {
           ...basicWalletAccount({ storageMode: "public" }),
           id: midenSdk.Address.fromBech32(address).accountId().toString(),
@@ -176,7 +178,7 @@ const useAccounts = () => {
       networkId,
       updatedAt: syncSummary.blockNum(),
       consumableNoteIds: consumableNotes.map((consumableNote) =>
-        consumableNote.inputNoteRecord().id().toString()
+        consumableNote.inputNoteRecord().id().toString(),
       ),
       midenSdk,
     });
@@ -191,7 +193,7 @@ const useAccounts = () => {
         record: consumableNote.inputNoteRecord(),
         scripts,
         midenSdk,
-      })
+      }),
     );
     dispatch({
       type: "IMPORT_ACCOUNT",
@@ -204,13 +206,26 @@ const useAccounts = () => {
     return account;
   };
   const importConnectedWallet = async () => {
-    if (networkId !== "mtst" || !connectedWalletAddress || connectedWallet) {
+    if (networkId !== "mtst" || connectedWallet) {
       return;
     }
-    await importAccountByAddress({
-      name: "Miden Account 1",
-      address: connectedWalletAddress,
-    });
+    if (midenWalletAddress) {
+      await importAccountByAddress({
+        name: "Miden Account 1",
+        address: midenWalletAddress,
+      });
+    }
+    // if (paraWalletAccountId) {
+    //   const paraWalletAddress = accountIdToAddress({
+    //     accountId: paraWalletAccountId,
+    //     networkId,
+    //     midenSdk,
+    //   });
+    //   await importAccountByAddress({
+    //     name: "Para Wallet",
+    //     address: paraWalletAddress,
+    //   });
+    // }
   };
   const deployAccount = async ({
     name,
@@ -229,7 +244,7 @@ const useAccounts = () => {
     const syncSummary = await client.syncState();
     const componentScriptIds = components.map(({ scriptId }) => scriptId);
     const componentScripts = scripts.filter(({ id }) =>
-      componentScriptIds.includes(id)
+      componentScriptIds.includes(id),
     );
     const wasmAccount = await clientDeployAccount({
       client,
@@ -240,7 +255,7 @@ const useAccounts = () => {
       midenSdk,
     });
     const packageIds = componentScriptIds.filter(
-      (id) => !defaultScriptIds.includes(id)
+      (id) => !defaultScriptIds.includes(id),
     );
     const account = wasmAccountToAccount({
       wasmAccount,

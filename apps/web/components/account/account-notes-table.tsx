@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Link from "next/link";
 import { type Account } from "@/lib/types/account";
 import { type InputNote } from "@/lib/types/note";
@@ -15,6 +16,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
+import { Spinner } from "@workspace/ui/components/spinner";
 import { Badge } from "@workspace/ui/components/badge";
 import { MoreVertical, CircleCheckBig } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
@@ -44,12 +46,13 @@ const NoteActionsCell = ({
   const { faucets } = useAccounts();
   const { openCreateTransactionDialog, newConsumeTransactionRequest } =
     useTransactions();
+  const [loading, setLoading] = useState(false);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="size-8 p-0">
-          <span className="sr-only">Open menu</span>
-          <MoreVertical className="size-4" />
+        <Button variant="ghost" className="size-8 p-0" disabled={loading}>
+          <span className="sr-only">{loading ? "Loading" : "Open menu"}</span>
+          {loading ? <Spinner /> : <MoreVertical className="size-4" />}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
@@ -57,13 +60,16 @@ const NoteActionsCell = ({
           onClick={async () => {
             if (
               networkId === "mlcl" ||
-              account.components.includes("no-auth")
+              account.components.includes("no-auth") ||
+              account.components.includes("ecdsa-k256-keccak-auth")
             ) {
+              setLoading(true);
               const { transactionRequest, transactionResult } =
                 await newConsumeTransactionRequest({
                   accountId: account.id,
                   noteIds: [inputNote.id],
                 });
+              setLoading(false);
               openCreateTransactionDialog({
                 accountId: account.id,
                 transactionType: "consume",
@@ -73,7 +79,7 @@ const NoteActionsCell = ({
               });
             } else {
               const faucet = faucets.find(
-                ({ id }) => id === inputNote.senderId
+                ({ id }) => id === inputNote.senderId,
               );
               const [fungibleAsset] = inputNote.fungibleAssets;
               if (!wallet || !fungibleAsset || !faucet) {
@@ -83,7 +89,7 @@ const NoteActionsCell = ({
                 getAddressPart(faucet.address),
                 inputNote.id,
                 inputNote.type === "public" ? "public" : "private",
-                Number(fungibleAsset.amount)
+                Number(fungibleAsset.amount),
               );
               // console.log({
               //   faucetId: getAddressPart(faucet.address),
@@ -132,7 +138,7 @@ const AccountNotesTable = ({ account }: { account: Account }) => {
         <TableBody>
           {consumableNotes.map((inputNote) => {
             const script = scripts.find(
-              ({ digest }) => digest === inputNote.scriptRoot
+              ({ digest }) => digest === inputNote.scriptRoot,
             );
             return (
               <TableRow key={inputNote.id}>
@@ -173,7 +179,7 @@ const AccountNotesTable = ({ account }: { account: Account }) => {
                     const faucet = faucets.find(({ id }) => id === faucetId);
                     return (
                       <p key={faucetId}>
-                        {formatAmount(amount, faucet?.decimals)}{" "}
+                        {formatAmount({ amount, decimals: faucet?.decimals })}{" "}
                         {faucet?.symbol}
                       </p>
                     );

@@ -18,6 +18,7 @@ import {
 } from "@workspace/ui/components/table";
 import { cn } from "@workspace/ui/lib/utils";
 import CreateAccountDropdownMenu from "@/components/accounts/create-account-dropdown-menu";
+import { getAddressPart } from "@/lib/utils";
 
 const AccountsTable = <TData, TValue>({
   columns,
@@ -57,7 +58,7 @@ const AccountsTable = <TData, TValue>({
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
-                          header.getContext(),
+                          header.getContext()
                         )}
                   </TableHead>
                 ))}
@@ -76,17 +77,19 @@ const AccountsTable = <TData, TValue>({
                       key={cell.id}
                       className={cn({
                         "cursor-pointer": !["address", "actions"].includes(
-                          cell.column.id,
+                          cell.column.id
                         ),
                       })}
                       onClick={() =>
                         !["address", "actions"].includes(cell.column.id) &&
-                        router.push(`/accounts/${cell.row.getValue("address")}`)
+                        router.push(
+                          `/accounts/${getAddressPart(cell.row.getValue("address"))}`
+                        )
                       }
                     >
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext(),
+                        cell.getContext()
                       )}
                     </TableCell>
                   ))}

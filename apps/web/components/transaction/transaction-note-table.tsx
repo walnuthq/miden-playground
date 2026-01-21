@@ -32,7 +32,7 @@ const TransactionNoteTable = ({ notes }: { notes: TransactionNote[] }) => {
         <TableBody>
           {notes.map((note) => {
             const script = scripts.find(
-              ({ digest }) => digest === note.scriptRoot
+              ({ digest }) => digest === note.scriptRoot,
             );
             return (
               <TableRow key={note.id}>
@@ -56,7 +56,7 @@ const TransactionNoteTable = ({ notes }: { notes: TransactionNote[] }) => {
                     const faucet = faucets.find(({ id }) => id === faucetId);
                     return (
                       <p key={faucetId}>
-                        {formatAmount(amount, faucet?.decimals)}{" "}
+                        {formatAmount({ amount, decimals: faucet?.decimals })}{" "}
                         {faucet?.symbol}
                       </p>
                     );

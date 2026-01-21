@@ -5,7 +5,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@workspace/ui/components/tooltip";
-import { formatAddress } from "@/lib/utils";
+import { formatAddress, getAddressPart } from "@/lib/utils";
 import useGlobalContext from "@/components/global-context/hook";
 import useAccounts from "@/hooks/use-accounts";
 import CopyButton from "@/components/lib/copy-button";
@@ -46,7 +46,7 @@ const AccountAddress = ({
     <Tooltip>
       <TooltipTrigger asChild>
         {withLink ? (
-          <Link href={`/accounts/${displayedAccount.address}`}>
+          <Link href={`/accounts/${getAddressPart(displayedAccount.address)}`}>
             <Button className="cursor-pointer -ml-4" variant="link">
               {displayedAddress}
               {withName && ` (${displayedAccount.name})`}
@@ -66,7 +66,7 @@ const AccountAddress = ({
       </TooltipContent>
     </Tooltip>
   ) : withLink ? (
-    <Link href={`/accounts/${displayedAccount.address}`}>
+    <Link href={`/accounts/${getAddressPart(displayedAccount.address)}`}>
       <Button className="cursor-pointer -ml-4" variant="link">
         {displayedAddress}
         {withName && ` (${displayedAccount.name})`}

@@ -37,8 +37,9 @@ import useComponents from "@/hooks/use-components";
 import { defaultScriptIds } from "@/lib/types/default-scripts";
 import { defaultComponentIds } from "@/lib/types/default-components";
 import useTutorials from "@/hooks/use-tutorials";
-import { BASIC_WALLET_CODE, MIDEN_FAUCET_ADDRESS } from "@/lib/constants";
+import { MIDEN_FAUCET_ADDRESS } from "@/lib/constants";
 import useGlobalContext from "@/components/global-context/hook";
+import { getAddressPart } from "@/lib/utils";
 
 const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
   const isClient = useIsClient();
@@ -68,12 +69,12 @@ const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
       items: accounts
         .sort((a, b) => b.updatedAt - a.updatedAt)
         .slice(0, 5)
-        .map(({ name, address, isFaucet, code }) => ({
+        .map(({ name, address, isFaucet, components }) => ({
           title: name,
-          url: `/accounts/${address}`,
+          url: `/accounts/${getAddressPart(address)}`,
           icon: isFaucet ? (
             <HandCoins className="size-4" />
-          ) : code === BASIC_WALLET_CODE ? (
+          ) : components.includes("basic-wallet") ? (
             <Wallet className="size-4" />
           ) : (
             <FileText className="size-4" />

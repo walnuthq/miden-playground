@@ -3,12 +3,12 @@ import Account from "@/components/account/account";
 import { getAddressPart } from "@/lib/utils";
 
 const AccountIndex = async ({ address }: { address: string }) => {
-  const verifiedAccountComponents = await getVerifiedAccountComponents(
-    getAddressPart(address)
-  );
+  const addressPart = getAddressPart(address);
+  const verifiedAccountComponents =
+    await getVerifiedAccountComponents(addressPart);
   return (
     <Account
-      address={address}
+      addressPart={addressPart}
       verifiedAccountComponents={verifiedAccountComponents}
     />
   );

@@ -1,7 +1,6 @@
 "use client";
 import { usePathname } from "next/navigation";
 import { useIsClient } from "usehooks-ts";
-import { WalletMultiButton } from "@demox-labs/miden-wallet-adapter";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -17,6 +16,7 @@ import ModeToggle from "@/components/lib/mode-toggle";
 import useTutorials from "@/hooks/use-tutorials";
 import NetworkBadge from "@/components/lib/network-badge";
 import useGlobalContext from "@/components/global-context/hook";
+import WalletButton from "@/components/lib/wallet-button";
 
 const getLink = (pathname: string) => {
   const [, route] = pathname.split("/");
@@ -90,7 +90,7 @@ const Header = () => {
           {isClient && <NetworkBadge />}
           {isClient && tutorialId && <TutorialToggle />}
           <ModeToggle />
-          {isClient && networkId === "mtst" && <WalletMultiButton />}
+          {isClient && networkId === "mtst" && <WalletButton />}
         </div>
       </div>
     </header>

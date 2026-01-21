@@ -67,7 +67,7 @@ const CreateFaucetDialog = () => {
               decimals: Number(decimals),
               maxSupply: parseAmount(
                 formData.get("max-supply")?.toString() ?? "0",
-                decimals
+                decimals,
               ),
             });
             setLoading(false);
@@ -131,8 +131,14 @@ const CreateFaucetDialog = () => {
                 id="max-supply"
                 name="max-supply"
                 type="number"
-                step={formatAmount("1", decimals).replaceAll(",", "")}
-                min={formatAmount("1", decimals).replaceAll(",", "")}
+                step={formatAmount({ amount: "1", decimals }).replaceAll(
+                  ",",
+                  "",
+                )}
+                min={formatAmount({ amount: "1", decimals }).replaceAll(
+                  ",",
+                  "",
+                )}
                 defaultValue={FUNGIBLE_FAUCET_DEFAULT_MAX_SUPPLY.toString()}
                 required
               />

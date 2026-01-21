@@ -17,6 +17,7 @@ export const P2IDE_NOTE_CODE =
 export const BASIC_WALLET_CODE =
   "0x91b7426f61f0b17d409919f19c69131a7f658c430df38168b87b082b6ff209c2";
 
+export const MIDEN_TESTNET_RPC_URL = "https://rpc.testnet.miden.io";
 export const MIDEN_FAUCET_API_URL = "https://faucet-api.testnet.miden.io";
 export const MIDEN_FAUCET_ACCOUNT_ID = "0x54bf4e12ef20082070758b022456c7";
 export const MIDEN_FAUCET_ADDRESS =

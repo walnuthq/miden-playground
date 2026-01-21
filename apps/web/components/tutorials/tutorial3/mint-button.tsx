@@ -35,7 +35,7 @@ const findValidNonce = async (challenge: string, target: number) => {
 
       // Combine challenge and nonce
       const combined = new Uint8Array(
-        challengeBytes.length + nonceByteArray.length
+        challengeBytes.length + nonceByteArray.length,
       );
       combined.set(challengeBytes);
       combined.set(nonceByteArray, challengeBytes.length);
@@ -68,10 +68,10 @@ const findValidNonce = async (challenge: string, target: number) => {
 const getPowChallenge = async (
   backendUrl: string,
   recipient: string,
-  amount: string
+  amount: string,
 ) => {
   const response = await fetch(
-    `${backendUrl}/pow?${new URLSearchParams({ amount, account_id: recipient })}`
+    `${backendUrl}/pow?${new URLSearchParams({ amount, account_id: recipient })}`,
   );
   if (!response.ok) {
     const message = await response.text();
@@ -91,7 +91,7 @@ const getTokens = async (
   nonce: number,
   recipient: string,
   amount: string,
-  isPrivateNote: boolean
+  isPrivateNote: boolean,
 ) => {
   const response = await fetch(
     `${backendUrl}/get_tokens?${new URLSearchParams({
@@ -100,7 +100,7 @@ const getTokens = async (
       asset_amount: amount,
       challenge,
       nonce: nonce.toString(),
-    })}`
+    })}`,
   );
   if (!response.ok) {
     const message = await response.text();
@@ -136,12 +136,12 @@ const MintButton = () => {
         setLoading(true);
         const amount = parseAmount(
           "100",
-          FUNGIBLE_FAUCET_DEFAULT_DECIMALS
+          FUNGIBLE_FAUCET_DEFAULT_DECIMALS,
         ).toString();
         const { challenge, target } = await getPowChallenge(
           MIDEN_FAUCET_API_URL,
           connectedWallet.address,
-          amount
+          amount,
         );
         const nonce = await findValidNonce(challenge, target);
         const { noteId, txId } = await getTokens(
@@ -150,7 +150,7 @@ const MintButton = () => {
           nonce,
           connectedWallet.address,
           amount,
-          false
+          false,
         );
         console.log({ noteId, txId });
         if (connectedWallet?.isNew) {

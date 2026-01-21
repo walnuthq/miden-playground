@@ -1,6 +1,7 @@
 import { type Script, defaultScript, defaultExport } from "@/lib/types/script";
 
-export const basicAuthRust = `#![no_std]
+export const rpoFalcon512AuthRust = `#![no_std]
+#![feature(alloc_error_handler)]
 
 extern crate alloc;
 
@@ -8,11 +9,6 @@ use miden::{
     component, felt, hash_words, intrinsics::advice::adv_insert, native_account, tx, Felt, Value,
     ValueAccess, Word,
 };
-
-use crate::bindings::exports::miden::base::authentication_component::Guest;
-
-miden::generate!();
-bindings::export!(AuthComponent);
 
 /// Authentication component storage/layout.
 ///
@@ -29,13 +25,14 @@ struct AuthComponent {
     owner_public_key: Value,
 }
 
-impl Guest for AuthComponent {
-    fn auth_procedure(_arg: Word) {
+#[component]
+impl AuthComponent {
+    pub fn auth_procedure(&mut self, _arg: Word) {
         let ref_block_num = tx::get_block_number();
-        let final_nonce = native_account::incr_nonce();
+        let final_nonce = self.incr_nonce();
 
         // Gather tx summary parts
-        let acct_delta_commit = native_account::compute_delta_commitment();
+        let acct_delta_commit = self.compute_delta_commitment();
         let input_notes_commit = tx::get_input_notes_commitment();
         let output_notes_commit = tx::get_output_notes_commitment();
 
@@ -46,14 +43,13 @@ impl Guest for AuthComponent {
         // On the advice stack the words are expected to be in the reverse order
         tx_summary.reverse();
         // Insert tx summary into advice map under key \`msg\`
-        adv_insert(msg.clone(), &tx_summary);
+        adv_insert(msg, &tx_summary);
 
         // Load public key from storage slot 0
-        let storage = Self::default();
-        let pub_key: Word = storage.owner_public_key.read();
+        let pub_key: Word = self.owner_public_key.read();
 
         // Emit signature request event to advice stack,
-        miden::emit_falcon_sig_to_stack(msg.clone(), pub_key.clone());
+        miden::emit_falcon_sig_to_stack(msg, pub_key);
 
         // Verify the signature loaded on the advice stack.
         miden::rpo_falcon512_verify(pub_key, msg);
@@ -61,12 +57,12 @@ impl Guest for AuthComponent {
 }
 `;
 
-export const basicAuthMasm = `# The MASM code of the RPO Falcon 512 authentication Account Component.
+export const rpoFalcon512AuthMasm = `# The MASM code of the RPO Falcon 512 authentication Account Component.
 #
 # See the \`AuthRpoFalcon512\` Rust type's documentation for more details.
 
-use miden::auth::rpo_falcon512
-use miden::active_account
+use miden::standards::auth::rpo_falcon512
+use miden::protocol::active_account
 
 type BeWord = struct @bigendian { a: felt, b: felt, c: felt, d: felt }
 
@@ -74,7 +70,7 @@ type BeWord = struct @bigendian { a: felt, b: felt, c: felt, d: felt }
 # =================================================================================================
 
 # The slot in this component's storage layout where the public key is stored.
-const PUBLIC_KEY_SLOT = 0
+const PUBLIC_KEY_SLOT = word("miden::standards::auth::rpo_falcon512::public_key")
 
 #! Authenticate a transaction using the Falcon signature scheme.
 #!
@@ -97,7 +93,8 @@ pub proc auth_tx_rpo_falcon512(auth_args: BeWord)
 
     # Fetch public key from storage.
     # ---------------------------------------------------------------------------------------------
-    push.PUBLIC_KEY_SLOT exec.active_account::get_item
+
+    push.PUBLIC_KEY_SLOT[0..2] exec.active_account::get_item
     # => [PUB_KEY, pad(16)]
 
     exec.rpo_falcon512::authenticate_transaction
@@ -105,15 +102,15 @@ pub proc auth_tx_rpo_falcon512(auth_args: BeWord)
 end
 `;
 
-const basicAuth: Script = {
+const rpoFalcon512Auth: Script = {
   ...defaultScript(),
-  id: "basic-auth",
-  name: "basic-auth",
+  id: "rpo-falcon-512-auth",
+  name: "rpo-falcon-512-auth",
   type: "authentication-component",
   status: "compiled",
   readOnly: true,
-  rust: basicAuthRust,
-  masm: basicAuthMasm,
+  rust: rpoFalcon512AuthRust,
+  masm: rpoFalcon512AuthMasm,
   exports: [
     {
       ...defaultExport(),
@@ -124,4 +121,4 @@ const basicAuth: Script = {
   ],
 };
 
-export default basicAuth;
+export default rpoFalcon512Auth;

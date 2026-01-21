@@ -16,12 +16,13 @@ import CreateTransactionDropdownMenu from "@/components/account/create-transacti
 import InvokeProcedureArgumentsDialog from "@/components/account/invoke-procedure-arguments-dialog";
 import VerifyAccountComponentDialog from "@/components/account/verify-account-component-dialog";
 import useGlobalContext from "@/components/global-context/hook";
+import { getAddressPart } from "@/lib/utils";
 
 const Account = ({
-  address,
+  addressPart,
   verifiedAccountComponents,
 }: {
-  address: string;
+  addressPart: string;
   verifiedAccountComponents: Script[];
 }) => {
   const router = useRouter();
@@ -30,7 +31,9 @@ const Account = ({
   const { networkId } = useGlobalContext();
   const isClient = useIsClient();
   const { accounts, connectedWallet } = useAccounts();
-  const account = accounts.find((account) => account.address === address);
+  const account = accounts.find(
+    (account) => getAddressPart(account.address) === addressPart
+  );
   if (!isClient || !account) {
     return null;
   }

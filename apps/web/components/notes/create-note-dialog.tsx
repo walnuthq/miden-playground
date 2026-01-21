@@ -73,7 +73,7 @@ const CreateNoteDialog = () => {
             const formData = new FormData(event.currentTarget);
             const amount = parseAmount(
               formData.get("amount")?.toString() ?? "0",
-              faucetAccount?.decimals
+              faucetAccount?.decimals,
             );
             setLoading(true);
             await newNote({
@@ -152,14 +152,14 @@ const CreateNoteDialog = () => {
                   id="amount"
                   name="amount"
                   type="number"
-                  step={formatAmount("1", faucetAccount?.decimals).replaceAll(
-                    ",",
-                    ""
-                  )}
-                  min={formatAmount("1", faucetAccount?.decimals).replaceAll(
-                    ",",
-                    ""
-                  )}
+                  step={formatAmount({
+                    amount: "1",
+                    decimals: faucetAccount?.decimals,
+                  }).replaceAll(",", "")}
+                  min={formatAmount({
+                    amount: "1",
+                    decimals: faucetAccount?.decimals,
+                  }).replaceAll(",", "")}
                   required
                 />
               </div>

@@ -26,7 +26,7 @@ const NextStepButton = ({
   return (
     <Button
       className="relative grow-2"
-      disabled={disabled}
+      disabled={disabled && tutorialStep === tutorialMaxStep}
       onClick={onClick ?? nextTutorialStep}
     >
       {text}

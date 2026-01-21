@@ -1,5 +1,6 @@
 import { formatUnits, parseUnits } from "viem";
-import { FUNGIBLE_FAUCET_DEFAULT_DECIMALS } from "./constants";
+import { FUNGIBLE_FAUCET_DEFAULT_DECIMALS } from "@/lib/constants";
+import { validate, version } from "uuid";
 
 export const sleep = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
@@ -22,34 +23,44 @@ export const getRoutingParametersPart = (address: string) => {
   return routingParametersPart;
 };
 
-export const formatAddress = (address: string, networkId: string) => {
+export const formatAddress = (
+  address: string,
+  networkId: string,
+  walletFormat = false,
+) => {
   const addressPart = getAddressPart(address);
-  return `${networkId}${addressPart.slice(networkId.length).slice(0, 8)}…${addressPart.slice(-8)}`;
+  return `${networkId}${addressPart.slice(networkId.length).slice(0, walletFormat ? 2 : 8)}…${addressPart.slice(walletFormat ? -4 : -8)}`;
 };
 
-export const formatAmount = (
-  amount: string,
-  decimals = FUNGIBLE_FAUCET_DEFAULT_DECIMALS
-) =>
+export const formatAmount = ({
+  amount,
+  decimals = FUNGIBLE_FAUCET_DEFAULT_DECIMALS,
+  signDisplay = "auto",
+}: {
+  amount: string;
+  decimals?: number;
+  signDisplay?: "auto" | "always" | "never" | "exceptZero";
+}) =>
   new Intl.NumberFormat("en-US", {
     style: "decimal",
     minimumFractionDigits: 0,
     maximumFractionDigits: decimals,
+    signDisplay,
   }).format(Number(formatUnits(BigInt(amount), decimals)));
 
 export const parseAmount = (
   amount: string,
-  decimals = FUNGIBLE_FAUCET_DEFAULT_DECIMALS
+  decimals = FUNGIBLE_FAUCET_DEFAULT_DECIMALS,
 ) => parseUnits(amount, decimals);
 
 export const stringToFeltArray = (word: string): BigUint64Array => {
   const [, felt0, felt1, felt2, felt3] = word.match(
-    /0x([0-9a-f]{16})([0-9a-f]{16})([0-9a-f]{16})([0-9a-f]{16})/
+    /0x([0-9a-f]{16})([0-9a-f]{16})([0-9a-f]{16})([0-9a-f]{16})/,
   )!;
   return new BigUint64Array(
     [felt0!, felt1!, felt2!, felt3!].map((felt) =>
-      BigInt(`0x${felt!.match(/../g)!.reverse().join("")}`)
-    )
+      BigInt(`0x${felt!.match(/../g)!.reverse().join("")}`),
+    ),
   );
 };
 
@@ -67,3 +78,6 @@ export const fromBase64 = (base64: string) =>
 
 export const toBase64 = (bytes: Uint8Array) =>
   btoa(String.fromCharCode(...bytes));
+
+export const isValidUuidv4 = (uuid: string) =>
+  validate(uuid) && version(uuid) === 4;

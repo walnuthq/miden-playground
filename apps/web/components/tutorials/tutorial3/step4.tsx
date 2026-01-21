@@ -8,7 +8,7 @@ import { TEST_WALLET_ADDRESS } from "@/lib/constants";
 const useCompleted = () => {
   const { wallets, connectedWallet } = useAccounts();
   const recipient = wallets.find(
-    ({ address }) => address !== connectedWallet?.address
+    ({ address }) => connectedWallet && address !== connectedWallet.address,
   );
   return !!recipient;
 };
