@@ -35,21 +35,23 @@ const CreateTransactionDialog = () => {
     closeCreateTransactionDialog,
   } = useTransactions();
   const [executingAccountId, setExecutingAccountId] = useState(
-    createTransactionDialogAccountId
+    createTransactionDialogAccountId,
   );
   const executingAccount = accounts.find(({ id }) => id === executingAccountId);
   const [transactionType, setTransactionType] = useState(
-    createTransactionDialogTransactionType
+    createTransactionDialogTransactionType,
   );
   const [step, setStep] = useState(createTransactionDialogStep);
   const [targetAccountId, setTargetAccountId] = useState("");
   const targetAccount = accounts.find(({ id }) => id === targetAccountId);
-  const [isPublic, setIsPublic] = useState(true);
+  const [isPublic, setIsPublic] = useState(
+    executingAccount ? executingAccount.storageMode === "public" : false,
+  );
   const [consumableNotes, setConsumableNotes] = useState<
     WasmConsumableNoteRecordType[]
   >(createTransactionDialogConsumableNotes);
   const [noteIds, setNoteIds] = useState<string[]>(
-    createTransactionDialogNoteIds
+    createTransactionDialogNoteIds,
   );
   const [scriptId, setScriptId] = useState("");
   const [faucetAccountId, setFaucetAccountId] = useState("");
@@ -57,11 +59,11 @@ const CreateTransactionDialog = () => {
   const [loading, setLoading] = useState(false);
   const [transactionRequest, setTransactionRequest] =
     useState<WasmTransactionRequestType | null>(
-      createTransactionDialogTransactionRequest
+      createTransactionDialogTransactionRequest,
     );
   const [transactionResult, setTransactionResult] =
     useState<WasmTransactionResultType | null>(
-      createTransactionDialogTransactionResult
+      createTransactionDialogTransactionResult,
     );
   const onClose = () => {
     setExecutingAccountId("");
@@ -91,6 +93,11 @@ const CreateTransactionDialog = () => {
     createTransactionDialogTransactionResult,
     createTransactionDialogConsumableNotes,
   ]);
+  useEffect(() => {
+    setIsPublic(
+      executingAccount ? executingAccount.storageMode === "public" : false,
+    );
+  }, [executingAccount]);
   return (
     <Dialog
       open={createTransactionDialogOpen}
@@ -98,7 +105,7 @@ const CreateTransactionDialog = () => {
       onOpenChange={(open) => !open && onClose()}
     >
       <DialogContent
-        className="sm:max-w-160 z-100"
+        className="sm:max-w-160 z-50"
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
       >
@@ -185,7 +192,7 @@ const CreateTransactionDialog = () => {
                     (transactionType === "mint" && !targetAccount) ||
                     (transactionType === "consume" && noteIds.length === 0) ||
                     (transactionType === "send" &&
-                      (!targetAccount || !faucetAccount)) ||
+                      (!targetAccountId || !faucetAccount)) ||
                     (transactionType === "custom" && !scriptId) ||
                     loading
                   }

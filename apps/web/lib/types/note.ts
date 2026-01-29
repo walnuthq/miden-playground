@@ -72,7 +72,7 @@ export const noteConsumable = ({
   if (networkId === "mtst") {
     const recipientAccountId = accountIdFromPrefixSuffix(
       inputNote.inputs[1]!,
-      inputNote.inputs[0]!
+      inputNote.inputs[0]!,
     );
     return accountId === recipientAccountId;
   } else {

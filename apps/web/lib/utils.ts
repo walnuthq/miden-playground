@@ -64,13 +64,26 @@ export const stringToFeltArray = (word: string): BigUint64Array => {
   );
 };
 
-export const readFile = (file: File): Promise<string> =>
+export const readFileAsText = (file: File): Promise<string> =>
   new Promise((resolve) => {
     const fileReader = new FileReader();
     fileReader.addEventListener("load", () => {
       resolve(typeof fileReader.result === "string" ? fileReader.result : "");
     });
     fileReader.readAsText(file);
+  });
+
+export const readFileAsArrayBuffer = (file: File): Promise<ArrayBuffer> =>
+  new Promise((resolve) => {
+    const fileReader = new FileReader();
+    fileReader.addEventListener("load", () => {
+      resolve(
+        fileReader.result instanceof ArrayBuffer
+          ? fileReader.result
+          : new ArrayBuffer(),
+      );
+    });
+    fileReader.readAsArrayBuffer(file);
   });
 
 export const fromBase64 = (base64: string) =>

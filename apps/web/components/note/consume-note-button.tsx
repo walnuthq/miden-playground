@@ -13,8 +13,13 @@ import {
   type MidenWalletAdapter,
 } from "@demox-labs/miden-wallet-adapter";
 import { getAddressPart } from "@/lib/utils";
+import { clientExportInputNoteFile } from "@/lib/web-client";
+import useWebClient from "@/hooks/use-web-client";
+import useMidenSdk from "@/hooks/use-miden-sdk";
 
 const ConsumeNoteButton = ({ inputNote }: { inputNote: InputNote }) => {
+  const { midenSdk } = useMidenSdk();
+  const { client } = useWebClient();
   const { wallet } = useWallet();
   const { networkId } = useGlobalContext();
   const { faucets, accounts } = useAccounts();
@@ -23,7 +28,7 @@ const ConsumeNoteButton = ({ inputNote }: { inputNote: InputNote }) => {
   const [loading, setLoading] = useState(false);
   const targetAccountId = accountIdFromPrefixSuffix(
     inputNote.inputs[1]!,
-    inputNote.inputs[0]!
+    inputNote.inputs[0]!,
   );
   const targetAccount = accounts.find(({ id }) => id === targetAccountId);
   return (
@@ -46,16 +51,27 @@ const ConsumeNoteButton = ({ inputNote }: { inputNote: InputNote }) => {
             transactionResult,
           });
         } else {
-          const faucet = faucets.find(({ id }) => id === inputNote.senderId);
           const [fungibleAsset] = inputNote.fungibleAssets;
+          const faucet = faucets.find(
+            ({ id }) => id === fungibleAsset?.faucetId,
+          );
           if (!wallet || !fungibleAsset || !faucet) {
             return;
           }
+          const noteFileBytes =
+            inputNote.type === "public"
+              ? undefined
+              : await clientExportInputNoteFile({
+                  client,
+                  noteId: inputNote.id,
+                  midenSdk,
+                });
           const transaction = new ConsumeTransaction(
             getAddressPart(faucet.address),
             inputNote.id,
             inputNote.type === "public" ? "public" : "private",
-            Number(fungibleAsset.amount)
+            Number(fungibleAsset.amount),
+            noteFileBytes,
           );
           const adapter = wallet.adapter as MidenWalletAdapter;
           const txId = await adapter.requestConsume(transaction);

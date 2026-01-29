@@ -4,7 +4,7 @@ import Step6Content from "@/components/tutorials/tutorial3/step6.mdx";
 
 const Step6: TutorialStep = {
   title: "Check your wallet activity.",
-  Content: () => <Step6Content />,
+  Content: Step6Content,
   NextStepButton: NextTutorialButton,
 };
 

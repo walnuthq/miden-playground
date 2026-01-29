@@ -23,7 +23,7 @@ const AddNoteDropdownMenu = () => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuItem disabled onClick={openImportNoteDialog}>
+        <DropdownMenuItem onClick={openImportNoteDialog}>
           <FileDown />
           Import note
         </DropdownMenuItem>

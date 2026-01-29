@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { type TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
@@ -6,19 +6,18 @@ import Step5Content from "@/components/tutorials/tutorial4/step5.mdx";
 import useAccounts from "@/hooks/use-accounts";
 import { COUNTER_CONTRACT_ADDRESS } from "@/lib/constants";
 
-let initialNonce = 0;
-
 const useCompleted = () => {
+  const [initialNonce, setInitialNonce] = useState(0);
   const { accounts } = useAccounts();
   const counter = accounts.find(
-    ({ address }) => address === COUNTER_CONTRACT_ADDRESS
+    ({ address }) => address === COUNTER_CONTRACT_ADDRESS,
   );
   const currentNonce = counter?.nonce ?? 0;
   useEffect(() => {
     if (initialNonce === 0) {
-      initialNonce = currentNonce;
+      setInitialNonce(currentNonce);
     }
-  }, [currentNonce]);
+  }, [initialNonce, currentNonce]);
   return initialNonce !== 0 && currentNonce > initialNonce;
 };
 

@@ -15,20 +15,20 @@
   "dependencies": {
     "archiver": "^7.0.1",
     "dotenv": "^17.2.3",
-    "drizzle-orm": "1.0.0-beta.3-36e9b9e",
-    "next": "^16.1.4",
+    "drizzle-orm": "1.0.0-beta.12-a5629fb",
+    "next": "^16.1.6",
     "pg": "^8.17.2",
-    "react": "^19.2.3",
+    "react": "^19.2.4",
     "smol-toml": "^1.6.0"
   },
   "devDependencies": {
     "@types/archiver": "^7.0.0",
-    "@types/node": "^25.0.9",
+    "@types/node": "^25.1.0",
     "@types/pg": "^8.16.0",
-    "@types/react": "^19.2.9",
+    "@types/react": "^19.2.10",
     "@workspace/eslint-config": "workspace:^",
     "@workspace/typescript-config": "workspace:*",
-    "drizzle-kit": "1.0.0-beta.3-36e9b9e",
+    "drizzle-kit": "1.0.0-beta.12-a5629fb",
     "eslint": "^9.39.2",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"

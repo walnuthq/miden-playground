@@ -4,7 +4,7 @@ import Step5Content from "@/components/tutorials/tutorial6/step5.mdx";
 
 const Step5: TutorialStep = {
   title: "Check the Test Wallet consumable notes.",
-  Content: () => <Step5Content />,
+  Content: Step5Content,
   NextStepButton: NextTutorialButton,
 };
 

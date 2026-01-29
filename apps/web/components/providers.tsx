@@ -6,6 +6,7 @@ import {
   WalletProvider,
   WalletModalProvider,
   PrivateDataPermission,
+  AllowedPrivateData,
 } from "@demox-labs/miden-wallet-adapter";
 // import { ParaProvider } from "@getpara/react-sdk";
 // import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -26,7 +27,9 @@ const Providers = ({ children }: { children: ReactNode }) => (
   >
     <WalletProvider
       wallets={[walletAdapter]}
-      privateDataPermission={PrivateDataPermission.UponRequest}
+      // privateDataPermission={PrivateDataPermission.Auto}
+      privateDataPermission={PrivateDataPermission.Auto}
+      allowedPrivateData={AllowedPrivateData.All}
       autoConnect
     >
       <WalletModalProvider>

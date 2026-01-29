@@ -7,7 +7,8 @@ import {
   clientNewWallet,
   clientNewFaucet,
   clientDeployAccount,
-  // accountIdToAddress,
+  storageMode,
+  addressToAccountId,
 } from "@/lib/web-client";
 import { type Account as WasmAccountType } from "@demox-labs/miden-sdk";
 import useGlobalContext from "@/components/global-context/hook";
@@ -30,10 +31,11 @@ import { defaultScriptIds } from "@/lib/types/default-scripts";
 import { verifyAccountComponentsFromPackageIds } from "@/lib/api";
 import { toBase64, getAddressPart } from "@/lib/utils";
 import { defaultComponentIds } from "@/lib/types/default-components";
+import type { FungibleAsset } from "@/lib/types/asset";
 // import { useParaMiden } from "@/lib/para-miden";
 
 const useAccounts = () => {
-  const { address: midenWalletAddress } = useWallet();
+  const { address: midenWalletAddress, requestAssets } = useWallet();
   // const { accountId: paraWalletAccountId } = useParaMiden();
   const { midenSdk } = useMidenSdk();
   const {
@@ -122,9 +124,11 @@ const useAccounts = () => {
   const importAccountByAddress = async ({
     name,
     address,
+    fungibleAssets,
   }: {
     name: string;
     address: string;
+    fungibleAssets?: FungibleAsset[];
   }) => {
     // TODO mock importing Miden Faucet
     if (address === MIDEN_FAUCET_ADDRESS) {
@@ -146,12 +150,15 @@ const useAccounts = () => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       if (address === midenWalletAddress) {
+        const accountId = addressToAccountId({ address, midenSdk });
+        const accountStorageMode = storageMode(accountId);
         const account = {
-          ...basicWalletAccount({ storageMode: "public" }),
-          id: midenSdk.Address.fromBech32(address).accountId().toString(),
-          name,
+          ...basicWalletAccount({ storageMode: accountStorageMode }),
+          id: accountId.toString(),
+          name: accountStorageMode === "private" ? "Priv Account 1" : name,
           address,
           isNew: true,
+          fungibleAssets: fungibleAssets ?? [],
         };
         dispatch({
           type: "IMPORT_ACCOUNT",
@@ -182,6 +189,9 @@ const useAccounts = () => {
       ),
       midenSdk,
     });
+    // if (fungibleAssets) {
+    //   account.fungibleAssets = fungibleAssets;
+    // }
     if (
       address === COUNTER_CONTRACT_ADDRESS &&
       tutorialId === "interact-with-the-counter-contract"
@@ -210,9 +220,19 @@ const useAccounts = () => {
       return;
     }
     if (midenWalletAddress) {
+      const assets = await requestAssets?.();
       await importAccountByAddress({
         name: "Miden Account 1",
         address: midenWalletAddress,
+        fungibleAssets: assets
+          ? assets.map(({ faucetId, amount }) => ({
+              faucetId: addressToAccountId({
+                address: faucetId,
+                midenSdk,
+              }).toString(),
+              amount,
+            }))
+          : [],
       });
     }
     // if (paraWalletAccountId) {

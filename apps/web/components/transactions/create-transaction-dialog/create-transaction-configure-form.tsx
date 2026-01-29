@@ -14,6 +14,7 @@ import { Label } from "@workspace/ui/components/label";
 import { Input } from "@workspace/ui/components/input";
 import { Switch } from "@workspace/ui/components/switch";
 import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";
+import SelectAccountCombobox from "@/components/transactions/select-account-combobox";
 import useAccounts from "@/hooks/use-accounts";
 import SelectConsumableNotesCombobox from "@/components/transactions/select-consumable-notes-combobox";
 import useGlobalContext from "@/components/global-context/hook";
@@ -30,7 +31,10 @@ import {
 } from "@demox-labs/miden-wallet-adapter";
 import { formatAmount, parseAmount } from "@/lib/utils";
 import useScripts from "@/hooks/use-scripts";
-import { clientCreateTransactionFromScript } from "@/lib/web-client";
+import {
+  accountIdToAddress,
+  createTransactionFromScript,
+} from "@/lib/web-client";
 import useMidenSdk from "@/hooks/use-miden-sdk";
 
 const CreateTransactionConfigureForm = ({
@@ -124,6 +128,8 @@ const CreateTransactionConfigureForm = ({
             });
           setTransactionRequest(transactionRequest);
           setTransactionResult(transactionResult);
+          setLoading(false);
+          setStep("preview");
         }
         if (transactionType === "consume" && executingAccount) {
           const { transactionRequest, transactionResult } =
@@ -133,18 +139,20 @@ const CreateTransactionConfigureForm = ({
             });
           setTransactionRequest(transactionRequest);
           setTransactionResult(transactionResult);
+          setLoading(false);
+          setStep("preview");
         }
         if (
           transactionType === "send" &&
           executingAccount &&
-          targetAccount &&
+          targetAccountId &&
           faucetAccount
         ) {
           if (networkId === "mlcl") {
             const { transactionRequest, transactionResult } =
               await newSendTransactionRequest({
                 senderAccountId: executingAccount.id,
-                targetAccountId: targetAccount.id,
+                targetAccountId,
                 faucetId: faucetAccount.id,
                 noteType: formData.getAll("is-public").includes("on")
                   ? "public"
@@ -156,13 +164,18 @@ const CreateTransactionConfigureForm = ({
               });
             setTransactionRequest(transactionRequest);
             setTransactionResult(transactionResult);
+            setStep("preview");
           } else {
             if (!wallet) {
               return;
             }
             const transaction = new SendTransaction(
               executingAccount.address,
-              targetAccount.address,
+              accountIdToAddress({
+                accountId: targetAccountId,
+                networkId,
+                midenSdk,
+              }),
               faucetAccount.address,
               formData.getAll("is-public").includes("on")
                 ? "public"
@@ -175,13 +188,18 @@ const CreateTransactionConfigureForm = ({
               ),
             );
             const adapter = wallet.adapter as MidenWalletAdapter;
-            const txId = await adapter.requestSend(transaction);
-            console.log({ txId });
-            closeCreateTransactionDialog();
+            try {
+              const txId = await adapter.requestSend(transaction);
+              console.log({ txId });
+              closeCreateTransactionDialog();
+            } catch (error) {
+              console.error(error);
+            }
           }
+          setLoading(false);
         }
         if (transactionType === "custom" && executingAccount && script) {
-          const customTransactionRequest = clientCreateTransactionFromScript({
+          const customTransactionRequest = createTransactionFromScript({
             script,
             midenSdk,
           });
@@ -192,9 +210,9 @@ const CreateTransactionConfigureForm = ({
             });
           setTransactionRequest(transactionRequest);
           setTransactionResult(transactionResult);
+          setLoading(false);
+          setStep("preview");
         }
-        setLoading(false);
-        setStep("preview");
       }}
     >
       <div className="grid grid-cols-2 gap-4">
@@ -255,12 +273,7 @@ const CreateTransactionConfigureForm = ({
           <>
             <div className="grid gap-3 col-span-2">
               <Label>Target account</Label>
-              <SelectAccountDropdownMenu
-                value={targetAccountId}
-                onValueChange={setTargetAccountId}
-                selectWallets
-                without={executingAccountId}
-              />
+              <SelectAccountCombobox onValueChange={setTargetAccountId} />
             </div>
             <div className="grid gap-3 col-span-2">
               <Label>Asset</Label>

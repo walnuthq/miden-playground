@@ -1,0 +1,12 @@
+import Link from "@/components/tutorials/tutorial-link";
+
+In the previous step, we downloaded the private note locally on our device.
+This P2ID note encodes the intended recipient of its embedded assets in the note private data.
+
+**Public** notes data is stored in the [note database](https://docs.miden.xyz/miden-base/state/#note-database), making it fully visible on-chain: this means we can automatically import them in the playground by listening to the Miden blockchain activity.
+
+On the contrary, **Private** notes are invisible to the outside world and must be first imported in the playground before we can interact with them.
+
+From the <Link href="/notes">notes page</Link>, click on _"Add note"_ and select the _"Import note"_ option.
+
+Upload the note file (note.mno) using the file picker, click on _"Import"_ and your private note will be available in the playground.

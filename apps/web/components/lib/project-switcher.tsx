@@ -127,7 +127,7 @@ const ProjectSwitcher = () => {
                       <BadgeCheck
                         className={cn("size-4 text-transparent", {
                           "text-green-500": completedTutorials.has(
-                            tutorial.number
+                            tutorial.number,
                           ),
                         })}
                       />{" "}

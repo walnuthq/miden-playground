@@ -1,6 +1,7 @@
 import { range } from "lodash";
 import {
   type Account as WasmAccountType,
+  type AccountId as WasmAccountIdType,
   type WebClient as WebClientType,
   type InputNoteRecord as WasmInputNoteRecordType,
   type NoteMetadata as WasmNoteMetadataType,
@@ -246,8 +247,7 @@ export const clientGetAccountByAddress = ({
   address: string;
   midenSdk: MidenSdk;
 }) => {
-  const { Address } = midenSdk;
-  const accountId = Address.fromBech32(address).accountId().toString();
+  const accountId = addressToAccountId({ address, midenSdk }).toString();
   return clientGetAccountById({ client, accountId, midenSdk });
 };
 
@@ -495,7 +495,7 @@ export const clientDeployAccount = async ({
   return account;
 };
 
-export const clientCreateTransactionFromScript = ({
+export const createTransactionFromScript = ({
   script,
   midenSdk: { Package, TransactionScript, TransactionRequestBuilder },
 }: {
@@ -535,7 +535,7 @@ const clientCreateNoteScriptFromMasm = ({
   return builder.compileNoteScript(script.masm);
 };
 
-const clientCreateNoteScriptFromPackage = ({
+const createNoteScriptFromPackage = ({
   script,
   midenSdk: { NoteScript, Package },
 }: {
@@ -583,7 +583,7 @@ export const clientCreateNoteFromScript = ({
   } = midenSdk;
   const noteScript = script.masm
     ? clientCreateNoteScriptFromMasm({ client, script, scripts })
-    : clientCreateNoteScriptFromPackage({ script, midenSdk });
+    : createNoteScriptFromPackage({ script, midenSdk });
   const assets = new NoteAssets(
     faucetAccountId
       ? [new FungibleAsset(AccountId.fromHex(faucetAccountId), amount)]
@@ -605,6 +605,70 @@ export const clientCreateNoteFromScript = ({
   return new Note(assets, metadata, recipient);
 };
 
+export const clientImportNoteFile = async ({
+  client,
+  noteFileBytes,
+  scripts,
+  midenSdk,
+}: {
+  client: WebClientType;
+  noteFileBytes: Uint8Array;
+  scripts: Script[];
+  midenSdk: MidenSdk;
+}) => {
+  const noteId = await client.importNoteFile(
+    midenSdk.NoteFile.deserialize(noteFileBytes),
+  );
+  const record = await client.getInputNote(noteId.toString());
+  if (!record) {
+    throw new Error();
+  }
+  return wasmInputNoteToInputNote({ record, scripts, midenSdk });
+};
+
+export const clientExportNoteFile = async ({
+  client,
+  noteId,
+}: {
+  client: WebClientType;
+  noteId: string;
+}) => {
+  const noteFile = await client.exportNoteFile(noteId, "Details");
+  return noteFile.serialize();
+};
+
+export const clientExportInputNoteFile = async ({
+  client,
+  noteId,
+  midenSdk: { NoteFile },
+}: {
+  client: WebClientType;
+  noteId: string;
+  midenSdk: MidenSdk;
+}) => {
+  const record = await client.getInputNote(noteId);
+  if (!record) {
+    throw new Error("Input note not found");
+  }
+  try {
+    const inputNote = record.toInputNote();
+    return NoteFile.fromInputNote(inputNote).serialize();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (error) {
+    return NoteFile.fromNoteDetails(record.details()).serialize();
+  }
+};
+
+// export const clientSendPrivateNote = async ({
+//   client,
+//   address,
+//   midenSdk: { Address },
+// }: {
+//   client: WebClientType;
+//   address: string;
+//   midenSdk: MidenSdk;
+// }) => client.sendPrivateNote(note, Address.fromBech32(address));
+
 const accountType = (account: WasmAccountType) => {
   if (account.isFaucet()) {
     return "fungible-faucet";
@@ -616,8 +680,12 @@ const accountType = (account: WasmAccountType) => {
   return "non-fungible-faucet";
 };
 
-const storageMode = (account: WasmAccountType) =>
-  account.isPublic() ? "public" : account.isNetwork() ? "network" : "private";
+export const storageMode = (accountId: WasmAccountIdType) =>
+  accountId.isPublic()
+    ? "public"
+    : accountId.isNetwork()
+      ? "network"
+      : "private";
 
 export const accountIdToAddress = ({
   accountId,
@@ -631,6 +699,14 @@ export const accountIdToAddress = ({
   const wasmAccountId = AccountId.fromHex(accountId);
   return wasmAccountId.toBech32Custom(networkId, AccountInterface.BasicWallet);
 };
+
+export const addressToAccountId = ({
+  address,
+  midenSdk: { Address },
+}: {
+  address: string;
+  midenSdk: MidenSdk;
+}) => Address.fromBech32(address).accountId();
 
 const verifyDefaultAccountComponents = ({
   wasmAccount,
@@ -681,7 +757,7 @@ export const wasmAccountToAccount = ({
       midenSdk,
     }),
     type: accountType(wasmAccount),
-    storageMode: storageMode(wasmAccount),
+    storageMode: storageMode(wasmAccount.id()),
     isPublic: wasmAccount.isPublic(),
     isUpdatable: wasmAccount.isUpdatable(),
     isRegularAccount: wasmAccount.isRegularAccount(),

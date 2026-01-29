@@ -20,6 +20,5 @@ export const MidenSdkProvider = ({ children }: { children: ReactNode }) => {
   if (!midenSdk) {
     return null;
   }
-  console.log("MidenSdk loaded:", midenSdk);
   return <MidenSdkContext value={{ midenSdk }}>{children}</MidenSdkContext>;
 };

@@ -1,5 +1,5 @@
 import { defaultTutorial, type Tutorial } from "@/lib/types/tutorial";
-import store from "@/components/tutorials/tutorial5/store";
+import { defaultStore } from "@/lib/types/store";
 import state from "@/components/tutorials/tutorial5/state";
 import Step1 from "@/components/tutorials/tutorial5/step1";
 import Step2 from "@/components/tutorials/tutorial5/step2";
@@ -19,7 +19,7 @@ const tutorial: Tutorial = {
     "This tutorial will walk you through developing your own custom Counter Contract and deploying it on testnet.",
   category: "advanced",
   initialRoute: "/scripts",
-  store,
+  store: defaultStore(),
   state,
   steps: [Step1, Step2, Step3, Step4, Step5, Step6, Step7],
 };

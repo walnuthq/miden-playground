@@ -26,10 +26,12 @@ const RootLayout = ({
     <body
       className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased`}
     >
-      <Providers>
-        {children}
-        <Toaster richColors />
-      </Providers>
+      <div className="root">
+        <Providers>
+          {children}
+          <Toaster richColors />
+        </Providers>
+      </div>
     </body>
     <Script
       src={

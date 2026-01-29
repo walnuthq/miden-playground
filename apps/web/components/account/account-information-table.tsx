@@ -33,6 +33,7 @@ const AccountInformationTable = ({ account }: { account: Account }) => (
               withLink={false}
               withName={false}
               withTooltip={false}
+              formatted={false}
             />
           </TableCell>
         </TableRow>

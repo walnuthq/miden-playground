@@ -10,12 +10,13 @@ const useCompleted = () => {
   const pathname = usePathname();
   const { connectedWallet } = useAccounts();
   return (
+    connectedWallet?.storageMode === "public" &&
     pathname === `/accounts/${getAddressPart(connectedWallet?.address ?? "")}`
   );
 };
 
 const Step1: TutorialStep = {
-  title: "Connect your wallet to testnet.",
+  title: "Connect your wallet to the playground.",
   Content: () => {
     const { connectedWallet } = useAccounts();
     const completed = useCompleted();

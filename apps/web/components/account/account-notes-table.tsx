@@ -33,6 +33,9 @@ import {
 import useGlobalContext from "@/components/global-context/hook";
 import useScripts from "@/hooks/use-scripts";
 import { formatAmount, getAddressPart } from "@/lib/utils";
+import useWebClient from "@/hooks/use-web-client";
+import useMidenSdk from "@/hooks/use-miden-sdk";
+import { clientExportInputNoteFile } from "@/lib/web-client";
 
 const NoteActionsCell = ({
   account,
@@ -41,6 +44,8 @@ const NoteActionsCell = ({
   account: Account;
   inputNote: InputNote;
 }) => {
+  const { midenSdk } = useMidenSdk();
+  const { client } = useWebClient();
   const { wallet } = useWallet();
   const { networkId } = useGlobalContext();
   const { faucets } = useAccounts();
@@ -78,18 +83,27 @@ const NoteActionsCell = ({
                 transactionResult,
               });
             } else {
-              const faucet = faucets.find(
-                ({ id }) => id === inputNote.senderId,
-              );
               const [fungibleAsset] = inputNote.fungibleAssets;
+              const faucet = faucets.find(
+                ({ id }) => id === fungibleAsset?.faucetId,
+              );
               if (!wallet || !fungibleAsset || !faucet) {
                 return;
               }
+              const noteFileBytes =
+                inputNote.type === "public"
+                  ? undefined
+                  : await clientExportInputNoteFile({
+                      client,
+                      noteId: inputNote.id,
+                      midenSdk,
+                    });
               const transaction = new ConsumeTransaction(
                 getAddressPart(faucet.address),
                 inputNote.id,
                 inputNote.type === "public" ? "public" : "private",
                 Number(fungibleAsset.amount),
+                noteFileBytes,
               );
               // console.log({
               //   faucetId: getAddressPart(faucet.address),

@@ -1,5 +1,5 @@
 import { defaultTutorial, type Tutorial } from "@/lib/types/tutorial";
-import store from "@/components/tutorials/tutorial8/store";
+import { defaultStore } from "@/lib/types/store";
 import state from "@/components/tutorials/tutorial8/state";
 import Step1 from "@/components/tutorials/tutorial8/step1";
 import Step2 from "@/components/tutorials/tutorial8/step2";
@@ -19,7 +19,7 @@ const tutorial: Tutorial = {
     "Following up on the Counter Contract tutorial, we will create a Count Reader contract that can copy its value from another contract.",
   category: "advanced",
   initialRoute: "/scripts",
-  store,
+  store: defaultStore(),
   state,
   steps: [Step1, Step2, Step3, Step4, Step5, Step6],
 };

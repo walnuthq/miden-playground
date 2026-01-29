@@ -19,7 +19,7 @@ import { verifyAccountComponentFromSource } from "@/lib/actions";
 import { clientGetAccountById } from "@/lib/web-client";
 import useWebClient from "@/hooks/use-web-client";
 import useMidenSdk from "@/hooks/use-miden-sdk";
-import { toBase64, getAddressPart, readFile } from "@/lib/utils";
+import { toBase64, getAddressPart, readFileAsText } from "@/lib/utils";
 
 const VerifyAccountComponentDialog = () => {
   const { client } = useWebClient();
@@ -101,17 +101,17 @@ const VerifyAccountComponentDialog = () => {
                   }
                   const filesArray = Array.from(files);
                   const cargoTomlFile = filesArray.find(
-                    ({ name }) => name === "Cargo.toml"
+                    ({ name }) => name === "Cargo.toml",
                   );
                   const rustFile = filesArray.find(
-                    ({ name }) => name === "lib.rs"
+                    ({ name }) => name === "lib.rs",
                   );
                   if (!cargoTomlFile || !rustFile) {
                     return;
                   }
                   const [cargoTomlContent, rustContent] = await Promise.all([
-                    readFile(cargoTomlFile),
-                    readFile(rustFile),
+                    readFileAsText(cargoTomlFile),
+                    readFileAsText(rustFile),
                   ]);
                   setCargoToml(cargoTomlContent);
                   setRust(rustContent);
