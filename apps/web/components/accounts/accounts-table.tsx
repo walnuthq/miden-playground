@@ -58,7 +58,7 @@ const AccountsTable = <TData, TValue>({
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
-                          header.getContext()
+                          header.getContext(),
                         )}
                   </TableHead>
                 ))}
@@ -77,19 +77,19 @@ const AccountsTable = <TData, TValue>({
                       key={cell.id}
                       className={cn({
                         "cursor-pointer": !["address", "actions"].includes(
-                          cell.column.id
+                          cell.column.id,
                         ),
                       })}
                       onClick={() =>
                         !["address", "actions"].includes(cell.column.id) &&
                         router.push(
-                          `/accounts/${getAddressPart(cell.row.getValue("address"))}`
+                          `/accounts/${getAddressPart(cell.row.getValue("address"))}`,
                         )
                       }
                     >
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   ))}

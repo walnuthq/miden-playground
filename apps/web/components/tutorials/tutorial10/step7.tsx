@@ -15,7 +15,7 @@ const useCompleted = () => {
   const count = getMapItem(
     counter?.storage,
     0,
-    "0x0000000000000000000000000000000000000000000000000100000000000000"
+    "0x0000000000000000000000000000000000000000000000000100000000000000",
   );
   return counter.nonce > 0 && count === EMPTY_WORD;
 };

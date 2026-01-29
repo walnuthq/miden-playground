@@ -3,7 +3,7 @@ import { getVerifiedNote } from "@/db/verified-notes";
 
 export const GET = async (
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) => {
   try {
     const { id } = await params;

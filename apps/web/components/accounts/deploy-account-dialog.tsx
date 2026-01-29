@@ -38,7 +38,7 @@ const DeployAccountDialog = () => {
   const { components } = useComponents();
   const [loading, setLoading] = useState(false);
   const [accountType, setAccountType] = useState<AccountType>(
-    "regular-account-updatable-code"
+    "regular-account-updatable-code",
   );
   const [storageMode, setStorageMode] = useState<AccountStorageMode>("public");
   const [authComponentId, setAuthComponentId] = useState("no-auth");
@@ -81,7 +81,7 @@ const DeployAccountDialog = () => {
                 (storageSlot, index) => ({
                   ...storageSlot,
                   value: formData.get(`slot-${index}`)?.toString() ?? "",
-                })
+                }),
               ),
             };
             setLoading(true);
@@ -119,7 +119,7 @@ const DeployAccountDialog = () => {
                 <SelectContent>
                   {Object.keys(accountTypes)
                     .filter((accountType) =>
-                      accountType.startsWith("regular-account")
+                      accountType.startsWith("regular-account"),
                     )
                     .map((accountType) => (
                       <SelectItem key={accountType} value={accountType}>
@@ -153,7 +153,7 @@ const DeployAccountDialog = () => {
                           ]
                         }
                       </SelectItem>
-                    )
+                    ),
                   )}
                 </SelectContent>
               </Select>
@@ -188,7 +188,7 @@ const DeployAccountDialog = () => {
                   {components
                     .filter(
                       ({ id, type }) =>
-                        !defaultComponentIds.includes(id) && type === "account"
+                        !defaultComponentIds.includes(id) && type === "account",
                     )
                     .map(({ id, name }) => (
                       <SelectItem key={id} value={id}>

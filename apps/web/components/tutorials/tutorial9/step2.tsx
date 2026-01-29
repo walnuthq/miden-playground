@@ -10,7 +10,7 @@ import useTutorials from "@/hooks/use-tutorials";
 const useCompleted = () => {
   const { scripts } = useScripts();
   const script = scripts.find(
-    ({ id, type }) => !defaultScriptIds.includes(id) && type === "account"
+    ({ id, type }) => !defaultScriptIds.includes(id) && type === "account",
   );
   return script?.status === "compiled";
 };
@@ -42,10 +42,10 @@ const Step2: TutorialStep = {
     const { components, newComponent } = useComponents();
     const { nextTutorialStep } = useTutorials();
     const script = scripts.find(
-      ({ id, type }) => !defaultScriptIds.includes(id) && type === "account"
+      ({ id, type }) => !defaultScriptIds.includes(id) && type === "account",
     );
     const component = components.find(
-      ({ scriptId }) => scriptId === script?.id
+      ({ scriptId }) => scriptId === script?.id,
     );
     return (
       <NextStepButton

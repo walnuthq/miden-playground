@@ -43,7 +43,7 @@ const Note = ({
           router.push(
             value === "information"
               ? pathname
-              : `${pathname}?${new URLSearchParams({ tab: value })}`
+              : `${pathname}?${new URLSearchParams({ tab: value })}`,
           )
         }
       >

@@ -79,7 +79,7 @@ const reducer = (state: State, action: ScriptAction): State => {
     }
     case "UPDATE_SCRIPT": {
       const index = state.scripts.findIndex(
-        ({ id }) => id === action.payload.id
+        ({ id }) => id === action.payload.id,
       );
       return {
         ...state,
@@ -96,7 +96,7 @@ const reducer = (state: State, action: ScriptAction): State => {
     }
     case "DELETE_SCRIPT": {
       const index = state.scripts.findIndex(
-        ({ id }) => id === action.payload.scriptId
+        ({ id }) => id === action.payload.scriptId,
       );
       return {
         ...state,

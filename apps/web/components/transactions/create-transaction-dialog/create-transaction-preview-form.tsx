@@ -67,7 +67,7 @@ const TransactionPreview = ({
       storageDeltaValues[index] !== undefined &&
       before.item !== storageDeltaValues[index]
         ? { index, before, after: storageDeltaValues[index] }
-        : { index, before: defaultStorageItem(), after: "" }
+        : { index, before: defaultStorageItem(), after: "" },
     )
     .filter(({ after }) => after !== "");
   return (

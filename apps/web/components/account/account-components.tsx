@@ -75,7 +75,7 @@ const AccountComponents = ({
         scripts.find(({ id }) => id === component.scriptId) ?? defaultScript(),
     }));
   const accountComponentsScriptsDigests = accountComponentsWithScripts.map(
-    ({ script }) => script.digest
+    ({ script }) => script.digest,
   );
   const verifiedAccountComponentsWithScripts = verifiedAccountComponents
     .filter(({ digest }) => !accountComponentsScriptsDigests.includes(digest))
@@ -108,10 +108,10 @@ const AccountComponents = ({
     ...verifiedAccountComponentsWithScripts,
   ];
   const authenticationComponents = componentsWithScripts.filter(
-    ({ component }) => component.type === "authentication-component"
+    ({ component }) => component.type === "authentication-component",
   );
   const accountComponents = componentsWithScripts.filter(
-    ({ component }) => component.type === "account"
+    ({ component }) => component.type === "account",
   );
   return (
     <div className="space-y-8">

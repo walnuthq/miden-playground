@@ -63,7 +63,7 @@ const reducer = (state: State, action: ComponentAction): State => {
     }
     case "UPDATE_COMPONENT": {
       const index = state.components.findIndex(
-        ({ id }) => id === action.payload.component.id
+        ({ id }) => id === action.payload.component.id,
       );
       return {
         ...state,

@@ -40,7 +40,7 @@ const EditorConsole = ({ script }: { script: Script }) => {
         : dependencies
             .map((dependency) => {
               const scriptDependency = scripts.find(
-                ({ digest }) => digest === dependency.digest
+                ({ digest }) => digest === dependency.digest,
               );
               return scriptDependency
                 ? {

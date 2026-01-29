@@ -8,11 +8,11 @@ const useCompleted = () => {
   const { components } = useComponents();
   const component = components.find(
     ({ type, scriptId }) =>
-      type === "account" && scriptId.startsWith("counter-contract_")
+      type === "account" && scriptId.startsWith("counter-contract_"),
   );
   const storageSlotsLength = component?.storageSlots.length ?? 0;
   const storageSlot = component?.storageSlots.find(
-    ({ type, value }) => type === "map" && value.includes("1:")
+    ({ type, value }) => type === "map" && value.includes("1:"),
   );
   return storageSlotsLength === 1 && !!storageSlot;
 };

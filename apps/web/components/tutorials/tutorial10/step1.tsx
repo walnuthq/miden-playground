@@ -10,7 +10,7 @@ const useCompleted = () => {
   const pathname = usePathname();
   const { scripts } = useScripts();
   const script = scripts.find(
-    ({ id, type }) => !defaultScriptIds.includes(id) && type === "account"
+    ({ id, type }) => !defaultScriptIds.includes(id) && type === "account",
   );
   return pathname === `/scripts/${script?.id}`;
 };

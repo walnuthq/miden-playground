@@ -18,7 +18,7 @@ import {
 
 export const GET = async (
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) => {
   try {
     const { id } = await params;
@@ -73,7 +73,7 @@ const compileScriptResponseError = ({
 
 export const PATCH = async (
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) => {
   const { id } = await params;
   const body = await request.json();
@@ -119,7 +119,7 @@ export const PATCH = async (
       compileScriptResponseError({
         error: stderr,
         dependencies: dependenciesPackages,
-      })
+      }),
     );
   }
   const { masp, digest, exports, dependencies } = await readPackage({
@@ -148,7 +148,7 @@ export const PATCH = async (
 
 export const DELETE = async (
   _: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) => {
   const { id } = await params;
   await Promise.all([deletePackage(id), deletePackageDir(id)]);

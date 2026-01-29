@@ -16,13 +16,13 @@ const useCompleted = () => {
     () => {
       const checkVerifiedAccountComponents = async () => {
         const verifiedAccountComponents = await getVerifiedAccountComponents(
-          getAddressPart(counter?.address ?? "")
+          getAddressPart(counter?.address ?? ""),
         );
         setCompleted(verifiedAccountComponents.length > 0);
       };
       checkVerifiedAccountComponents();
     },
-    completed ? null : 5000
+    completed ? null : 5000,
   );
   return completed;
 };

@@ -27,7 +27,7 @@ const TutorialProgressStep = ({
               "bg-muted": index > tutorialStep && index > tutorialMaxStep,
               "cursor-pointer": index <= tutorialMaxStep,
               "cursor-not-allowed": index > tutorialMaxStep,
-            }
+            },
           )}
           onClick={() =>
             index <= tutorialMaxStep ? setTutorialStep(index) : undefined

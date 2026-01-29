@@ -7,10 +7,10 @@ import useAccounts from "@/hooks/use-accounts";
 const useCompleted = () => {
   const { accounts } = useAccounts();
   const countReader = accounts.find(({ components }) =>
-    components.includes("count-reader")
+    components.includes("count-reader"),
   );
   const counter = accounts.find(({ components }) =>
-    components.includes("counter-contract")
+    components.includes("counter-contract"),
   );
   if (!countReader || !counter) {
     return false;

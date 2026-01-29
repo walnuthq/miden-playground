@@ -12,7 +12,7 @@ const ImportButton = () => {
   const { components } = useComponents();
   const [loading, setLoading] = useState(false);
   const counterContractComponent = components.find(
-    ({ id, type }) => !defaultComponentIds.includes(id) && type === "account"
+    ({ id, type }) => !defaultComponentIds.includes(id) && type === "account",
   );
   const counter = accounts.find(({ components }) => components.length === 0);
   return (

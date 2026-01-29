@@ -97,7 +97,7 @@ const InvokeProcedureArgumentsDialog = () => {
                         };
                       }
                     }
-                  }
+                  },
                 ),
                 foreignAccounts: accountId ? [accountId] : [],
               });
@@ -108,7 +108,7 @@ const InvokeProcedureArgumentsDialog = () => {
                     window.open(
                       `https://testnet.midenscan.com/tx/${transactionRecord.id().toHex()}`,
                       "_blank",
-                      "noopener noreferrer"
+                      "noopener noreferrer",
                     ),
                 },
               });

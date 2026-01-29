@@ -10,11 +10,11 @@ const useCompleted = () => {
   const { accounts } = useAccounts();
   const { components } = useComponents();
   const component = components.find(
-    ({ id, type }) => !defaultComponentIds.includes(id) && type === "account"
+    ({ id, type }) => !defaultComponentIds.includes(id) && type === "account",
   );
   const counter = accounts.find(
     ({ components, storageMode }) =>
-      components.includes(component?.id ?? "") && storageMode === "network"
+      components.includes(component?.id ?? "") && storageMode === "network",
   );
   return !!counter;
 };

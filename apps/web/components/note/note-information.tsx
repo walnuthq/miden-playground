@@ -74,7 +74,7 @@ const NoteInformation = ({
                   <AccountAddress
                     id={accountIdFromPrefixSuffix(
                       inputNote.inputs[1]!,
-                      inputNote.inputs[0]!
+                      inputNote.inputs[0]!,
                     )}
                   />
                 ),

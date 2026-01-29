@@ -11,10 +11,10 @@ import { accountIdFromPrefixSuffix } from "@/lib/types/account";
 const useCompleted = () => {
   const { wallets, connectedWallet } = useAccounts();
   const senderAccount = wallets.find(
-    ({ address }) => address === connectedWallet?.address
+    ({ address }) => address === connectedWallet?.address,
   );
   const recipientAccount = wallets.find(
-    ({ address }) => address !== connectedWallet?.address
+    ({ address }) => address !== connectedWallet?.address,
   );
   const { inputNotes } = useNotes();
   const note = inputNotes.find(
@@ -24,7 +24,7 @@ const useCompleted = () => {
       accountIdFromPrefixSuffix(inputs[1]!, inputs[0]!) ===
         recipientAccount?.id &&
       state === "committed" &&
-      type === "public"
+      type === "public",
   );
   return !!note;
 };

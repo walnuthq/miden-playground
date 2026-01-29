@@ -7,7 +7,7 @@ import useAccounts from "@/hooks/use-accounts";
 const useCompleted = () => {
   const { accounts } = useAccounts();
   const countReader = accounts.find(({ components }) =>
-    components.includes("count-reader")
+    components.includes("count-reader"),
   );
   return !!countReader;
 };
@@ -18,7 +18,7 @@ export default {
   Content: () => {
     const { accounts } = useAccounts();
     const countReader = accounts.find(({ components }) =>
-      components.includes("count-reader")
+      components.includes("count-reader"),
     );
     const completed = useCompleted();
     return (

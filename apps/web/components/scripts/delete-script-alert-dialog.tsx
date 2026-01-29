@@ -41,7 +41,7 @@ const DeleteScriptAlertDialog = () => {
             onClick={async () => {
               setLoading(true);
               const script = await deleteScript(
-                deleteScriptAlertDialogScriptId
+                deleteScriptAlertDialogScriptId,
               );
               setLoading(false);
               toast(`${script.name} has been deleted.`);

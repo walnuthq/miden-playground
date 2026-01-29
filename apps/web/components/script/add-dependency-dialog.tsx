@@ -43,7 +43,7 @@ const AddDependencyDialog = () => {
         !defaultScriptIds.includes(id) &&
         !dependenciesIds.includes(id) &&
         ["authentication-component", "account"].includes(type) &&
-        status === "compiled"
+        status === "compiled",
     )
     .toReversed();
   const onClose = () => {

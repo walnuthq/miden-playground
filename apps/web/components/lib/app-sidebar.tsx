@@ -161,7 +161,7 @@ const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
   // automatically import Miden Faucet on testnet
   useEffect(() => {
     const midenFaucet = faucets.find(
-      ({ address }) => address === MIDEN_FAUCET_ADDRESS
+      ({ address }) => address === MIDEN_FAUCET_ADDRESS,
     );
     if (networkId === "mtst" && !midenFaucet) {
       importAccountByAddress({

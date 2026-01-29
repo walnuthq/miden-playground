@@ -6,7 +6,7 @@ import { packagesPath } from "@/lib/constants";
 
 export const GET = async (
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) => {
   try {
     const { id } = await params;

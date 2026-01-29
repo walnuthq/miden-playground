@@ -31,7 +31,7 @@ const scriptsDependencies: Record<ScriptExample, Dependency[]> = {
 
 export const PATCH = async (
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) => {
   const { id } = await params;
   const body = await request.json();
@@ -62,7 +62,7 @@ export const PATCH = async (
 
 export const DELETE = async (
   _: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) => {
   const { id } = await params;
   await sleep(1000);

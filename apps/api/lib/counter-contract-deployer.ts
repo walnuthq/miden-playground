@@ -21,7 +21,7 @@ export const counterContractDeployer = async ({
           process.env.NODE_ENV === "production"
             ? undefined
             : `${projectRoot}/counter-contract-deployer/target/release`,
-      }
+      },
     );
     return address;
   } catch (error) {

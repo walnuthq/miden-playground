@@ -13,11 +13,11 @@ const useCompleted = () => {
   const { scripts } = useScripts();
   const { components } = useComponents();
   const script = scripts.find(
-    ({ id, type }) => !defaultScriptIds.includes(id) && type === "account"
+    ({ id, type }) => !defaultScriptIds.includes(id) && type === "account",
   );
   const component = components.find(({ scriptId }) => scriptId === script?.id);
   const counter = accounts.find(({ components }) =>
-    components.includes(component?.id ?? "")
+    components.includes(component?.id ?? ""),
   );
   return counter?.consumableNoteIds.length === 0;
 };
@@ -30,13 +30,13 @@ const Step7: TutorialStep = {
     const { scripts } = useScripts();
     const { components } = useComponents();
     const script = scripts.find(
-      ({ id, type }) => !defaultScriptIds.includes(id) && type === "account"
+      ({ id, type }) => !defaultScriptIds.includes(id) && type === "account",
     );
     const component = components.find(
-      ({ scriptId }) => scriptId === script?.id
+      ({ scriptId }) => scriptId === script?.id,
     );
     const counter = accounts.find(({ components }) =>
-      components.includes(component?.id ?? "")
+      components.includes(component?.id ?? ""),
     );
     return (
       <>

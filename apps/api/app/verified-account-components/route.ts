@@ -123,7 +123,7 @@ const verifyAccountComponentsFromPackageIds = async ({
         address,
       });
       return true;
-    })
+    }),
   );
   return result.every((verified) => verified);
 };

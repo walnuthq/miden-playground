@@ -59,7 +59,7 @@ const reducer = (state: State, action: AccountAction): State => {
     }
     case "UPDATE_ACCOUNT": {
       const index = state.accounts.findIndex(
-        ({ id }) => id === action.payload.account.id
+        ({ id }) => id === action.payload.account.id,
       );
       return {
         ...state,
@@ -72,14 +72,14 @@ const reducer = (state: State, action: AccountAction): State => {
     }
     case "IMPORT_ACCOUNT": {
       const account = state.accounts.find(
-        ({ id }) => id === action.payload.account.id
+        ({ id }) => id === action.payload.account.id,
       );
       if (account) {
         return state;
       }
       const noteIds = state.inputNotes.map(({ id }) => id);
       const filteredInputNotes = action.payload.inputNotes.filter(
-        ({ id }) => !noteIds.includes(id)
+        ({ id }) => !noteIds.includes(id),
       );
       return {
         ...state,

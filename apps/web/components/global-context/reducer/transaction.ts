@@ -79,7 +79,7 @@ const reducer = (state: State, action: TransactionAction): State => {
     }
     case "SUBMIT_TRANSACTION": {
       const index = state.accounts.findIndex(
-        ({ id }) => id === action.payload.account.id
+        ({ id }) => id === action.payload.account.id,
       );
       return {
         ...state,

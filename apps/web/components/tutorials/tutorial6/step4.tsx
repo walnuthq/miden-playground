@@ -11,7 +11,7 @@ import useGlobalContext from "@/components/global-context/hook";
 const useCompleted = () => {
   const { wallets, connectedWallet } = useAccounts();
   const senderAccount = wallets.find(
-    ({ address }) => address === connectedWallet?.address
+    ({ address }) => address === connectedWallet?.address,
   );
   const { inputNotes } = useNotes();
   const note = inputNotes.find(
@@ -21,7 +21,7 @@ const useCompleted = () => {
       accountIdFromPrefixSuffix(inputs[1]!, inputs[0]!) ===
         TEST_WALLET_ACCOUNT_ID &&
       state === "committed" &&
-      type === "public"
+      type === "public",
   );
   return !!note;
 };

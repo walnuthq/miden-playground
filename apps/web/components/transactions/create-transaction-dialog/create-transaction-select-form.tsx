@@ -66,7 +66,7 @@ const CreateTransactionDialogSelectForm = ({
                   ? "mint"
                   : account?.components.includes("basic-wallet")
                     ? "consume"
-                    : "custom"
+                    : "custom",
               );
             }}
             withoutFaucets={networkId !== "mlcl"}

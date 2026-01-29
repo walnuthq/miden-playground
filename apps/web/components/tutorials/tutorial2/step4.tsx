@@ -10,7 +10,7 @@ const useCompleted = () => {
   const { transactions } = useTransactions();
   const walletB = wallets.find(({ name }) => name === "Wallet B");
   const transaction = transactions.find(
-    ({ accountId }) => accountId === walletB?.id
+    ({ accountId }) => accountId === walletB?.id,
   );
   return !!transaction;
 };

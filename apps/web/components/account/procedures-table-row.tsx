@@ -78,7 +78,7 @@ const ProceduresTableRow = ({
                           window.open(
                             `https://testnet.midenscan.com/tx/${transactionRecord.id().toHex()}`,
                             "_blank",
-                            "noopener noreferrer"
+                            "noopener noreferrer",
                           ),
                       },
                     });

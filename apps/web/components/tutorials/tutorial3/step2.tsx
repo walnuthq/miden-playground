@@ -21,14 +21,14 @@ const useCompleted = () => {
         ({ faucetId, amount }) =>
           faucetId === MIDEN_FAUCET_ACCOUNT_ID &&
           amount ===
-            parseAmount("100", FUNGIBLE_FAUCET_DEFAULT_DECIMALS).toString()
+            parseAmount("100", FUNGIBLE_FAUCET_DEFAULT_DECIMALS).toString(),
       ) &&
       senderId === MIDEN_FAUCET_ACCOUNT_ID &&
       scriptRoot === P2ID_NOTE_CODE &&
       accountIdFromPrefixSuffix(inputs[1]!, inputs[0]!) ===
         connectedWallet?.id &&
       state === "committed" &&
-      type === "public"
+      type === "public",
   );
   return !!note;
 };

@@ -131,7 +131,7 @@ export const getVerifiedAccountComponents = async (address: string) => {
     `${apiUrl}/verified-account-components/${address}`,
     {
       method: "GET",
-    }
+    },
   );
   const result = await response.json();
   const { ok, components, error } = result as

@@ -47,7 +47,7 @@ const ScriptComponent = ({
           router.push(
             value === "rust"
               ? pathname
-              : `${pathname}?${new URLSearchParams({ tab: value })}`
+              : `${pathname}?${new URLSearchParams({ tab: value })}`,
           )
         }
       >

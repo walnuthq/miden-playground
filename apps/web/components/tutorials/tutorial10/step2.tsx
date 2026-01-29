@@ -10,13 +10,13 @@ import useTutorials from "@/hooks/use-tutorials";
 const useCompleted = () => {
   const { scripts } = useScripts();
   const script = scripts.find(
-    ({ id, type }) => !defaultScriptIds.includes(id) && type === "account"
+    ({ id, type }) => !defaultScriptIds.includes(id) && type === "account",
   );
   const exports = script?.exports ?? [];
   const resetCountProcedure = exports.find(
     ({ digest }) =>
       digest ===
-      "0x0f45560f0fc73fb1972c2793a3190799adc7b4a3a739004f50bf8fe5eb030e21"
+      "0x0f45560f0fc73fb1972c2793a3190799adc7b4a3a739004f50bf8fe5eb030e21",
   );
   return script?.status === "compiled" && !!resetCountProcedure;
 };
@@ -48,10 +48,10 @@ const Step2: TutorialStep = {
     const { components, newComponent } = useComponents();
     const { nextTutorialStep } = useTutorials();
     const script = scripts.find(
-      ({ id, type }) => !defaultScriptIds.includes(id) && type === "account"
+      ({ id, type }) => !defaultScriptIds.includes(id) && type === "account",
     );
     const component = components.find(
-      ({ scriptId }) => scriptId === script?.id
+      ({ scriptId }) => scriptId === script?.id,
     );
     return (
       <NextStepButton

@@ -32,7 +32,7 @@ const Account = ({
   const isClient = useIsClient();
   const { accounts, connectedWallet } = useAccounts();
   const account = accounts.find(
-    (account) => getAddressPart(account.address) === addressPart
+    (account) => getAddressPart(account.address) === addressPart,
   );
   if (!isClient || !account) {
     return null;
@@ -47,7 +47,7 @@ const Account = ({
           router.push(
             value === "information"
               ? pathname
-              : `${pathname}?${new URLSearchParams({ tab: value })}`
+              : `${pathname}?${new URLSearchParams({ tab: value })}`,
           )
         }
       >

@@ -8,16 +8,16 @@ import { defaultScriptIds } from "@/lib/types/default-scripts";
 const useCompleted = () => {
   const { scripts } = useScripts();
   const script = scripts.find(
-    ({ id, type }) => !defaultScriptIds.includes(id) && type === "note-script"
+    ({ id, type }) => !defaultScriptIds.includes(id) && type === "note-script",
   );
   const firstMatches = script?.rust.match(
-    /let\s+timelock_height\s*=\s*inputs\[2\];/
+    /let\s+timelock_height\s*=\s*inputs\[2\];/,
   );
   const secondMatches = script?.rust.match(
-    /let\s+block_number\s*=\s*tx::get_block_number\(\);/
+    /let\s+block_number\s*=\s*tx::get_block_number\(\);/,
   );
   const thirdMatches = script?.rust.match(
-    /assert!\s*\(\s*block_number\s*>=\s*timelock_height\s*\);/
+    /assert!\s*\(\s*block_number\s*>=\s*timelock_height\s*\);/,
   );
   return (
     script?.masm !== "" && !!firstMatches && !!secondMatches && !!thirdMatches

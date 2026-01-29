@@ -11,7 +11,7 @@ const useCompleted = () => {
   const walletA = wallets.find(({ name }) => name === "Wallet A");
   const transaction = transactions.find(
     ({ accountId, outputNotes }) =>
-      accountId === walletA?.id && outputNotes.length === 1
+      accountId === walletA?.id && outputNotes.length === 1,
   );
   return !!transaction;
 };

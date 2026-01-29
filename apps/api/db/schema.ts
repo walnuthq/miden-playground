@@ -33,7 +33,7 @@ export const packagesTable = pgTable("packages", {
   digest: varchar({ length: 66 })
     .notNull()
     .default(
-      "0x0000000000000000000000000000000000000000000000000000000000000000"
+      "0x0000000000000000000000000000000000000000000000000000000000000000",
     ),
   masp: text().notNull().default(""),
   exports: jsonb().array().notNull().default([]),
@@ -51,7 +51,7 @@ export const verifiedAccountComponentTable = pgTable(
     address: text().notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
-  }
+  },
 );
 
 export const verifiedNoteTable = pgTable("verified_notes", {

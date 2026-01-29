@@ -34,7 +34,7 @@ const AccountAddress = ({
   const displayedAccount =
     account ??
     accounts.find(
-      (account) => account.id === id || account.address === address
+      (account) => account.id === id || account.address === address,
     );
   if (!displayedAccount) {
     return null;

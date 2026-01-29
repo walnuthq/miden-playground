@@ -11,7 +11,7 @@ const useCompleted = () => {
   const { connectedWallet } = useAccounts();
   const { scripts } = useScripts();
   const script = scripts.find(
-    ({ id, type }) => !defaultScriptIds.includes(id) && type === "note-script"
+    ({ id, type }) => !defaultScriptIds.includes(id) && type === "note-script",
   );
   const { inputNotes } = useNotes();
   const note = inputNotes.find(
@@ -19,7 +19,7 @@ const useCompleted = () => {
       senderId === connectedWallet?.id &&
       scriptId === script?.id &&
       state === "committed" &&
-      type === "public"
+      type === "public",
   );
   return !!note;
 };

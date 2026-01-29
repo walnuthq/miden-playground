@@ -12,7 +12,7 @@ export const midenPackageMetadata = async (maspPath: string) => {
         process.env.NODE_ENV === "production"
           ? undefined
           : `${projectRoot}/miden-package-metadata/target/release`,
-    }
+    },
   );
   return stdout;
 };

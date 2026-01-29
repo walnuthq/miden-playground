@@ -114,7 +114,7 @@ const useScripts = () => {
       const accountComponentLibrary = script.masm
         ? builder.buildLibrary(
             `external_contract::${contractName}`,
-            script.masm
+            script.masm,
           )
         : Package.deserialize(fromBase64(script.masp)).asLibrary();
       builder.linkDynamicLibrary(accountComponentLibrary);
@@ -123,7 +123,7 @@ const useScripts = () => {
           contractName: script.masm ? contractName : undefined,
           procedureExport,
           procedureInputs,
-        })
+        }),
       );
       let transactionRequestBuilder =
         new TransactionRequestBuilder().withCustomScript(transactionScript);
@@ -134,10 +134,10 @@ const useScripts = () => {
               foreignAccounts.map((foreignAccountId) =>
                 ForeignAccount.public(
                   AccountId.fromHex(foreignAccountId),
-                  new AccountStorageRequirements()
-                )
-              )
-            )
+                  new AccountStorageRequirements(),
+                ),
+              ),
+            ),
           );
       }
       const transactionRequest = transactionRequestBuilder.build();

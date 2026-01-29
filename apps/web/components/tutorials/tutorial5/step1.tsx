@@ -9,7 +9,7 @@ const useCompleted = () => {
   const pathname = usePathname();
   const { scripts } = useScripts();
   const script = scripts.find(
-    ({ id, type }) => id.startsWith("counter-contract_") && type === "account"
+    ({ id, type }) => id.startsWith("counter-contract_") && type === "account",
   );
   return pathname === `/scripts/${script?.id}`;
 };

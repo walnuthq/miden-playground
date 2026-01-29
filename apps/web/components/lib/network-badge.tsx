@@ -23,7 +23,7 @@ const NetworkBadge = () => {
         }
       }
     },
-    useIntervalTriggered ? delay : null
+    useIntervalTriggered ? delay : null,
   );
   useEffect(() => {
     if (!syncingState) {

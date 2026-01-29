@@ -3,7 +3,7 @@ import { getVerifiedAccountComponents } from "@/db/verified-account-components";
 
 export const GET = async (
   request: NextRequest,
-  { params }: { params: Promise<{ address: string }> }
+  { params }: { params: Promise<{ address: string }> },
 ) => {
   try {
     const { address } = await params;
