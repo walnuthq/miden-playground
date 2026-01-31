@@ -47,6 +47,9 @@ importers:
       smol-toml:
         specifier: ^1.6.0
         version: 1.6.0
+      uuid:
+        specifier: ^13.0.0
+        version: 13.0.0
     devDependencies:
       '@types/archiver':
         specifier: ^7.0.0
