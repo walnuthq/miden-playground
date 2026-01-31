@@ -1,16 +1,21 @@
 import { usePathname } from "next/navigation";
 import { type TutorialStep } from "@/lib/types/tutorial";
+import useAccounts from "@/hooks/use-accounts";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
 import Step1Content from "@/components/tutorials/tutorial4/step1.mdx";
 
 const useCompleted = () => {
   const pathname = usePathname();
-  return pathname === "/scripts/counter-value-contract";
+  const { connectedWallet } = useAccounts();
+  return (
+    connectedWallet?.storageMode === "private" &&
+    pathname === `/accounts/${connectedWallet?.identifier}`
+  );
 };
 
 const Step1: TutorialStep = {
-  title: "Learn about Smart Contract scripts.",
+  title: "Connect a private wallet to the playground.",
   Content: () => {
     const completed = useCompleted();
     return (
@@ -18,12 +23,14 @@ const Step1: TutorialStep = {
         <Step1Content />
         <TutorialAlert
           completed={completed}
-          title="Action required: Click on the script."
-          titleWhenCompleted="You navigated to the Counter Contract script."
+          title="Action required: Connect a private wallet."
+          titleWhenCompleted="Your wallet is connected and imported."
           description={
             <p>
-              Click on the <em>"Counter Contract"</em> row in the scripts table
-              to start reading the script.
+              Click on the <em>"Select Wallet"</em> button in the top-right
+              corner and connect a <strong>Private</strong> wallet to the
+              Playground, then once imported, navigate to your account details
+              page.
             </p>
           }
         />

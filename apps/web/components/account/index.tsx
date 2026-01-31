@@ -1,14 +1,12 @@
 import { getVerifiedAccountComponents } from "@/lib/api";
 import Account from "@/components/account/account";
-import { getAddressPart } from "@/lib/utils";
 
-const AccountIndex = async ({ address }: { address: string }) => {
-  const addressPart = getAddressPart(address);
+const AccountIndex = async ({ identifier }: { identifier: string }) => {
   const verifiedAccountComponents =
-    await getVerifiedAccountComponents(addressPart);
+    await getVerifiedAccountComponents(identifier);
   return (
     <Account
-      addressPart={addressPart}
+      identifier={identifier}
       verifiedAccountComponents={verifiedAccountComponents}
     />
   );

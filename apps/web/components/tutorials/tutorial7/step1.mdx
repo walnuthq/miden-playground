@@ -1,14 +1,13 @@
-Unlike local transactions that require users to execute and prove, network transactions are executed and proven by a network transaction builder.
+In this tutorial, we will create a custom time locked note on Miden that is an extended version of the **P2ID (Pay-to-ID)** note.
+Using custom note logic, you will learn how to program a note that can only be consumed if the transaction's reference block number is greater than or equal to our note's timelock block height.
 
-We'll build a network counter smart contract using the same code as the regular counter, but with different [storage configuration](https://docs.miden.xyz/miden-base/account/id#account-storage-mode) to enable network execution.
+Creating a custom note is a two step process:
 
-Then we'll create a note interacting with the network counter and let the network transaction builder actually consume and process the note.
+- First, you develop the note script using a **Rust program** and compile it to **MASM (Miden Assembly)**.
+- Then you perform a transaction on your wallet that is responsible for creating the note on the network.
 
-Network transactions are executed and proven by the Miden operator rather than the client. They are useful for:
+When creating a note, you can pass arbitrary parameters called [Note Inputs](https://docs.miden.xyz/miden-base/note#inputs) and the [Note Script](https://docs.miden.xyz/miden-base/note#script) can access these inputs.
 
-- **Public shared state**: Multiple users can interact with the same contract state without race conditions.
-- **Autonomous execution**: Smart contracts can execute when conditions are met without user intervention.
-- **Resource-constrained devices**: Clients that can't generate ZK proofs efficiently.
-- **AMM applications**: Using network notes, you can build sophisticated AMMs where trades execute automatically.
+In our timelock example, we have 2 note inputs: the recipient account ID and the minimal block height before the note can be consumed.
 
-The main trade-off is reduced privacy since the operator can see transaction inputs.
+Let's get started by clicking on _"Create new script"_ then choose a name and make sure to select a **Note Script** using the **P2ID Note** example.

@@ -1,19 +1,60 @@
-Try adding a new procedure to this **Counter Contract** that resets the counter value to zero.
-It must have the following signature:
+Let's examine the counter account contract.
+
+**No-std Environment**
 
 ```rust
-/// Resets the counter value to zero
-pub fn reset_count(&mut self) {
-    // Your code goes here
+#![no_std]
+```
+
+Miden contracts run in a **`no_std`** environment, meaning they don't link against Rust's standard library. This is essential for blockchain execution where contracts need to be deterministic and lightweight.
+
+**Miden Library Imports**
+
+```rust
+use miden::{
+  component, felt, Felt, StorageMap, StorageMapAccess, Word
+};
+```
+
+These imports provide:
+
+- **`component`**: Macro for defining contract components
+- **`Felt`**/**`Word`**: Miden's native field element and word types
+- **`StorageMap`**: Key-value storage within account storage slots
+- **`StorageMapAccess`**: Needed for reading storage values (**`get_count`** function)
+
+**Contract Structure Definition**
+
+```rust
+#[component]
+struct CounterContract {
+    /// Storage map holding the counter value.
+    #[storage(slot(0), description = "...")]
+    count_map: StorageMap,
 }
 ```
 
-When developing a smart contract you write human-readable Rust code and use a compiler to transpile it to [MASM](https://docs.miden.xyz/glossary#miden-assembly) code that can be executed by the [MidenVM](https://docs.miden.xyz/miden-vm/).
+The **`#[component]`** attribute marks this as a Miden component.
+The **`count_map`** field is a **`StorageMap`** that will be stored in storage slot 0 of the account.
 
-Click on the _"Compile"_ button to see this process in action: the actual result of compilation is a Miden Assembly Package (MASP) containing both the MASM code and a manifest describing the package exports.
+**Important**: Storage slots in Miden hold **`Word`** values, which are composed of four field elements (**`Felt`**).
+Each **`Felt`** is a 64-bit unsigned integer (u64).
+The **`StorageMap`** provides a key-value interface within a single storage slot, allowing you to store multiple key-value pairs within the four-element word structure.
 
-On the _"Metadata"_ tab, you'll find the list of exported procedures exposed by the package manifest along with their signature.
+**Contract Implementation**
 
-The MASM code ends up being deployed on-chain but we lose the link with the original human-readable code and the interface exposed by the smart contract: the function signature of our exported procedures are necessary to invoke them using the correct arguments.
+```rust
+impl CounterContract {
+    // Function implementations...
+}
+```
 
-Contract verification aims at bridging the gap between on-chain deployed code and its original source and interface: we're linking them back together to grant anyone access to the Rust source code and package manifest so they know how to call the exposed procedures.
+The **`CounterContract`** implementation defines the external interface that other contracts and notes can call. This is the contract's public API.
+
+**Storage Key Strategy**
+
+```rust
+let key = Word::from_u64_unchecked(0, 0, 0, 1);
+```
+
+Both functions use the same fixed key **`[0, 0, 0, 1]`** to store and retrieve the counter value within the storage map. This demonstrates a simple but effective storage pattern.

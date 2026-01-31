@@ -2,31 +2,32 @@ import { type TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
 import Step4Content from "@/components/tutorials/tutorial10/step4.mdx";
-import useAccounts from "@/hooks/use-accounts";
+import useScripts from "@/hooks/use-scripts";
+import { defaultScriptIds } from "@/lib/types/default-scripts";
 
 const useCompleted = () => {
-  const { accounts } = useAccounts();
-  const counter = accounts.find(({ name }) => name === "Unverified Contract");
-  return !!counter;
+  const { scripts } = useScripts();
+  const script = scripts.find(
+    ({ id, type }) => !defaultScriptIds.includes(id) && type === "note-script",
+  );
+  return script?.status === "compiled";
 };
 
 const Step4: TutorialStep = {
-  title: "Import an unverified Counter Contract.",
+  title: "Understanding the increment count note script.",
   Content: () => {
     const completed = useCompleted();
-    const { accounts } = useAccounts();
-    const counter = accounts.find(({ name }) => name === "Unverified Contract");
     return (
       <>
-        <Step4Content counter={counter} />
+        <Step4Content />
         <TutorialAlert
           completed={completed}
-          title="Action required: Import the unverified contract."
-          titleWhenCompleted="You imported the unverified contract."
+          title="Action required: Compile the script."
+          titleWhenCompleted="You compiled the script."
           description={
             <p>
-              Click on the <em>Import</em> button to import an unverified
-              Counter Contract.
+              After reading and understanding the increment note code, click on
+              the <em>"Compile"</em> button to compile the script.
             </p>
           }
         />

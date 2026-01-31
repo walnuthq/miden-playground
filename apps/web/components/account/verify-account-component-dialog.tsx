@@ -19,7 +19,7 @@ import { verifyAccountComponentFromSource } from "@/lib/actions";
 import { clientGetAccountById } from "@/lib/web-client";
 import useWebClient from "@/hooks/use-web-client";
 import useMidenSdk from "@/hooks/use-miden-sdk";
-import { toBase64, getAddressPart, readFileAsText } from "@/lib/utils";
+import { toBase64, readFileAsText } from "@/lib/utils";
 
 const VerifyAccountComponentDialog = () => {
   const { client } = useWebClient();
@@ -71,7 +71,7 @@ const VerifyAccountComponentDialog = () => {
             });
             const { verified, error } = await verifyAccountComponentFromSource({
               accountId,
-              address: getAddressPart(account.address),
+              identifier: account.identifier,
               account: toBase64(wasmAccount.serialize()),
               cargoToml,
               rust,

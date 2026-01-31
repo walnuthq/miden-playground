@@ -16,6 +16,8 @@ const state: State = {
       id: "0x2b2f81fc8487ff2076b164f5bbf4fc",
       name: "MDN Faucet",
       address: "mlcl1aq4jlq0usjrl7grkk9j0twl5ls7tzu6c_qruqqypuyph",
+      identifier: "mlcl1aq4jlq0usjrl7grkk9j0twl5ls7tzu6c",
+      routingParameters: "qruqqypuyph",
       storage: [
         {
           type: "value",

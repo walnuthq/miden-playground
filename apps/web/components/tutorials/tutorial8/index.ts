@@ -10,15 +10,14 @@ import Step6 from "@/components/tutorials/tutorial8/step6";
 
 const tutorial: Tutorial = {
   ...defaultTutorial(),
-  id: "foreign-procedure-invocation",
+  id: "network-transactions",
   number: 8,
-  title: "Foreign Procedure Invocation",
+  title: "Network transactions",
   tagline:
-    "Using foreign procedure invocation to craft read-only cross-contract calls.",
+    "Deploy and interact with smart contracts using network transactions.",
   description:
-    "Following up on the Counter Contract tutorial, we will create a Count Reader contract that can copy its value from another contract.",
-  category: "advanced",
-  initialRoute: "/scripts",
+    "In this tutorial, we will explore Network Transactions (NTXs) on Miden - a powerful feature that enables autonomous smart contract execution and public shared state management.",
+  initialRoute: "/accounts",
   store: defaultStore(),
   state,
   steps: [Step1, Step2, Step3, Step4, Step5, Step6],

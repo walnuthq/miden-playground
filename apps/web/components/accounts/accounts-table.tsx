@@ -18,7 +18,7 @@ import {
 } from "@workspace/ui/components/table";
 import { cn } from "@workspace/ui/lib/utils";
 import CreateAccountDropdownMenu from "@/components/accounts/create-account-dropdown-menu";
-import { getAddressPart } from "@/lib/utils";
+import { getIdentifierPart } from "@/lib/types/account";
 
 const AccountsTable = <TData, TValue>({
   columns,
@@ -83,7 +83,7 @@ const AccountsTable = <TData, TValue>({
                       onClick={() =>
                         !["address", "actions"].includes(cell.column.id) &&
                         router.push(
-                          `/accounts/${getAddressPart(cell.row.getValue("address"))}`,
+                          `/accounts/${getIdentifierPart(cell.row.getValue("address"))}`,
                         )
                       }
                     >

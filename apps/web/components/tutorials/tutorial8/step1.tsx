@@ -1,8 +1,9 @@
-import { defaultTutorialStep } from "@/lib/types/tutorial";
+import { type TutorialStep } from "@/lib/types/tutorial";
 import Step1Content from "@/components/tutorials/tutorial8/step1.mdx";
 
-export default {
-  ...defaultTutorialStep(),
-  title: "What is Foreign Procedure Invocation?",
+const Step1: TutorialStep = {
+  title: "What are Network Transactions?",
   Content: Step1Content,
 };
+
+export default Step1;

@@ -8,20 +8,21 @@ import Step4 from "@/components/tutorials/tutorial10/step4";
 import Step5 from "@/components/tutorials/tutorial10/step5";
 import Step6 from "@/components/tutorials/tutorial10/step6";
 import Step7 from "@/components/tutorials/tutorial10/step7";
+import Step8 from "@/components/tutorials/tutorial10/step8";
 
 const tutorial: Tutorial = {
   ...defaultTutorial(),
-  id: "contract-verification",
+  id: "your-first-smart-contract-and-custom-note",
   number: 10,
-  title: "Contract verification",
-  tagline: "Deploy and verify custom smart contracts on-chain.",
+  title: "Your first Smart Contract and custom note",
+  tagline: "Develop custom smart contracts and notes.",
   description:
-    "In this tutorial we learn how to develop custom Miden contracts, deploy them on-chain, and verify them using the Miden playground.",
+    "In this tutorial, you'll create your first smart contract and understand the structure and implementation of both the counter account contract and increment note script.",
   category: "advanced",
   initialRoute: "/scripts",
   store: defaultStore(),
   state,
-  steps: [Step1, Step2, Step3, Step4, Step5, Step6, Step7],
+  steps: [Step1, Step2, Step3, Step4, Step5, Step6, Step7, Step8],
 };
 
 export default tutorial;

@@ -1,18 +1,12 @@
-import AccountAddress from "@/components/lib/account-address";
-import CopyButton from "@/components/lib/copy-button";
+import { EllipsisVertical } from "lucide-react";
+import Link from "@/components/tutorials/tutorial-link";
 
-Since the contract is verified, you can call its procedures as the interface is now available to everyone.
+In the previous step, we performed a transaction to publish an **increment-note** on Miden testnet.
 
-Increment and reset the count of this newly verified **Counter Contract** to test the unlocked **Read/Write** contract feature that verification enables.
+The resulting output note must now be consumed by the **Counter Contract** to actually increment the count of our smart contract.
 
-Note that this verification process is not happening locally, meaning that anyone can now read the source of this contract and interact with it on-chain.
+From the <Link href={`/accounts/${props.counter.identifier}`}>Counter Contract account details page</Link>, click on the <EllipsisVertical className="size-4 inline" /> icon button in the _"Consumable Notes"_ table to consume the note with the **Counter Contract**.
 
-You can test it after finishing this tutorial by importing the contract again in a new testnet sandbox environment.
+A _"Preview consume transaction"_ modal will show up, click on the _"Submit"_ button to trigger the note consumption process.
 
-- **Name**: Verified Contract <CopyButton content="Copy Account Name" copy="Verified Contract" />
-
-- **Address**:
-
-<AccountAddress account={props.counter} withLink={false} />
-
-Congratulations! You discovered what contract verification is all about and verified your first contract on the Miden Playground.
+The note will transition to the **Consumed** state and disappear from the consumable notes.

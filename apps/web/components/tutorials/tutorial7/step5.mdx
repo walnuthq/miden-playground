@@ -1,15 +1,9 @@
 import Link from "@/components/tutorials/tutorial-link";
+import { TEST_WALLET_ADDRESS } from "@/lib/constants";
+import { getIdentifierPart } from "@/lib/types/account";
 
-Let's create the network note by executing a transaction that will output our custom note.
-You will need a connected wallet to sign the transaction so make sure your Miden Wallet is connected to the playground before continuing.
+Congratulations! You have successfully used the Miden Playground to create your first custom note using a timelock pattern.
 
-From the <Link href="/notes">notes page</Link>, click on the _"Add note"_ button and select the _"Create note"_ option.
+You have performed advanced testnet operations including developing your own custom note script and using it to create a custom note on the network.
 
-A _"Create Note"_ dialog will show up to help you configure the note creation transaction.
-First, select the counter network deployed in step #2 and choose the counter note script, leave the note type as public.
-
-Do not add note assets and leave the note inputs empty as our note doesn't need to embed assets and takes no parameters.
-
-Once you're done configuring your custom note, click on the _"Create"_ button and sign the resulting transaction.
-
-It will take some time for your note to be acknowledged and consumed by the network.
+Click on the <Link href={`/accounts/${getIdentifierPart(TEST_WALLET_ADDRESS)}`}>Test Wallet</Link> account details page to validate that the note you created is consumable by this account, though it won't be able to claim the assets in the note until the configured time locked block height has been reached.

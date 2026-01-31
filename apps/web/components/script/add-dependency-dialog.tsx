@@ -40,7 +40,9 @@ const AddDependencyDialog = () => {
     .filter(
       ({ id, type, status }) =>
         id !== scriptId &&
-        !defaultScriptIds.includes(id) &&
+        !defaultScriptIds
+          .filter((defaultScriptId) => defaultScriptId !== "basic-wallet")
+          .includes(id) &&
         !dependenciesIds.includes(id) &&
         ["authentication-component", "account"].includes(type) &&
         status === "compiled",
@@ -79,7 +81,11 @@ const AddDependencyDialog = () => {
             updateScript(script.id, {
               dependencies: [
                 ...script.dependencies,
-                { id: dependency.id, name: dependency.name, digest: "" },
+                {
+                  id: dependency.id,
+                  name: dependency.name,
+                  digest: dependency.digest,
+                },
               ],
             });
             await sleep(400);

@@ -1,11 +1,19 @@
-import Link from "@/components/tutorials/tutorial-link";
+In the previous step we had a look at the higher-level **Rust** source code of the Counter Contract, now let's focus on the compiled **MASM** output.
 
-[Account components](https://docs.miden.xyz/miden-base/account/components) are the building blocks that define an account's [code](https://docs.miden.xyz/miden-base/account/code) and [storage](https://docs.miden.xyz/miden-base/account/storage).
-Multiple account components can be merged together to deploy a final account on-chain.
+Here's a breakdown of what the **get_count** procedure does:
 
-As an example, consider a wallet account, capable of holding assets and requiring authentication to move funds. Such an account can be created by merging a **BasicWallet** component with an **RpoFalcon512** authentication component.
+- Pushes 0 onto the stack, representing the index of the storage slot to read.
+- Calls **active_account::get_item** with the index of 0.
+- Calls **sys::truncate_stack** to truncate the stack to size 16.
+- The value returned from **active_account::get_item** is still on the stack and will be returned when this procedure is called.
 
-The basic wallet contains the code to move assets in and out of the account vault. The authentication component holds a user's public key in storage and additionally contains the code to verify a signature against that public key. Together, these components form a fully functional wallet account.
+Here's a breakdown of what the **increment_count** procedure does:
 
-From the <Link href="/components">Components page</Link>, create a new account component to represent our Counter Contract functionality.
-Select the Counter Contract script created in the first step and choose the **Account Component** type.
+- Pushes 0 onto the stack, representing the index of the storage slot to read.
+- Calls **active_account::get_item** with the index of 0.
+- Pushes 1 onto the stack.
+- Adds 1 to the count value returned from **active_account::get_item**.
+- For demonstration purposes, calls **debug.stack** to see the state of the stack
+- Pushes 0 onto the stack, which is the index of the storage slot we want to write to.
+- Calls **native_account::set_item** which saves the incremented count to storage at index 0
+- Calls **sys::truncate_stack** to truncate the stack to size 16.

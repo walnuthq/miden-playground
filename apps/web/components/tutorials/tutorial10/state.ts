@@ -3,7 +3,7 @@ import { type State, defaultState } from "@/lib/types/state";
 const state: State = {
   ...defaultState(),
   networkId: "mtst",
-  tutorialId: "contract-verification",
+  tutorialId: "your-first-smart-contract-and-custom-note",
 };
 
 export default state;

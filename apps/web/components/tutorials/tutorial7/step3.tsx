@@ -2,48 +2,44 @@ import { type TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
 import Step3Content from "@/components/tutorials/tutorial7/step3.mdx";
-import useAccounts from "@/hooks/use-accounts";
-import useComponents from "@/hooks/use-components";
-import { defaultComponentIds } from "@/lib/types/default-components";
+import useScripts from "@/hooks/use-scripts";
+import { defaultScriptIds } from "@/lib/types/default-scripts";
 
 const useCompleted = () => {
-  const { accounts } = useAccounts();
-  const { components } = useComponents();
-  const component = components.find(
-    ({ id, type }) => !defaultComponentIds.includes(id) && type === "account",
+  const { scripts } = useScripts();
+  const script = scripts.find(
+    ({ id, type }) => !defaultScriptIds.includes(id) && type === "note-script",
   );
-  const counter = accounts.find(
-    ({ components, storageMode }) =>
-      components.includes(component?.id ?? "") && storageMode === "network",
+  const firstMatches = script?.rust.match(
+    /let\s+timelock_height\s*=\s*inputs\[2\];/,
   );
-  const nonce = counter?.nonce ?? 0;
-  return nonce > 0;
+  const secondMatches = script?.rust.match(
+    /let\s+block_number\s*=\s*tx::get_block_number\(\);/,
+  );
+  const thirdMatches = script?.rust.match(
+    /assert!\s*\(\s*block_number\s*>=\s*timelock_height\s*\);/,
+  );
+  return (
+    script?.masm !== "" && !!firstMatches && !!secondMatches && !!thirdMatches
+  );
 };
 
 const Step3: TutorialStep = {
-  title: "Register your network Counter on-chain.",
+  title: "Add timelock logic to the P2ID Note.",
   Content: () => {
-    const { accounts } = useAccounts();
-    const { components } = useComponents();
-    const component = components.find(
-      ({ id, type }) => !defaultComponentIds.includes(id) && type === "account",
-    );
-    const counter = accounts.find(
-      ({ components, storageMode }) =>
-        components.includes(component?.id ?? "") && storageMode === "network",
-    );
     const completed = useCompleted();
     return (
       <>
-        <Step3Content counter={counter} />
+        <Step3Content />
         <TutorialAlert
           completed={completed}
-          title="Action required: Register the network account on-chain."
-          titleWhenCompleted="You registered the network account."
+          title="Action required: Compile the script."
+          titleWhenCompleted="You compiled the timelock P2ID script."
           description={
             <p>
-              Click on the <em>"Invoke"</em> button from your newly deployed
-              network account to register and commit its state on-chain.
+              Follow the instructions to add timelock logic to your P2ID script.
+              When you're done, click on the <em>"Compile"</em> button in the
+              editor console to compile your script.
             </p>
           }
         />

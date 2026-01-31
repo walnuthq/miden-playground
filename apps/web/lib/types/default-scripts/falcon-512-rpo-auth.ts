@@ -1,6 +1,6 @@
 import { type Script, defaultScript, defaultExport } from "@/lib/types/script";
 
-export const rpoFalcon512AuthRust = `#![no_std]
+export const falcon512RpoAuthRust = `#![no_std]
 #![feature(alloc_error_handler)]
 
 extern crate alloc;
@@ -57,11 +57,11 @@ impl AuthComponent {
 }
 `;
 
-export const rpoFalcon512AuthMasm = `# The MASM code of the RPO Falcon 512 authentication Account Component.
+export const falcon512RpoAuthMasm = `# The MASM code of the Falcon 512 RPO authentication Account Component.
 #
-# See the \`AuthRpoFalcon512\` Rust type's documentation for more details.
+# See the \`AuthFalcon512Rpo\` Rust type's documentation for more details.
 
-use miden::standards::auth::rpo_falcon512
+use miden::standards::auth::falcon512_rpo
 use miden::protocol::active_account
 
 type BeWord = struct @bigendian { a: felt, b: felt, c: felt, d: felt }
@@ -70,7 +70,7 @@ type BeWord = struct @bigendian { a: felt, b: felt, c: felt, d: felt }
 # =================================================================================================
 
 # The slot in this component's storage layout where the public key is stored.
-const PUBLIC_KEY_SLOT = word("miden::standards::auth::rpo_falcon512::public_key")
+const PUBLIC_KEY_SLOT = word("miden::standards::auth::falcon512_rpo::public_key")
 
 #! Authenticate a transaction using the Falcon signature scheme.
 #!
@@ -87,7 +87,7 @@ const PUBLIC_KEY_SLOT = word("miden::standards::auth::rpo_falcon512::public_key"
 #! Outputs: [pad(16)]
 #!
 #! Invocation: call
-pub proc auth_tx_rpo_falcon512(auth_args: BeWord)
+pub proc auth_tx_falcon512_rpo(auth_args: BeWord)
     dropw
     # => [pad(16)]
 
@@ -97,20 +97,20 @@ pub proc auth_tx_rpo_falcon512(auth_args: BeWord)
     push.PUBLIC_KEY_SLOT[0..2] exec.active_account::get_item
     # => [PUB_KEY, pad(16)]
 
-    exec.rpo_falcon512::authenticate_transaction
+    exec.falcon512_rpo::authenticate_transaction
     # => [pad(16)]
 end
 `;
 
-const rpoFalcon512Auth: Script = {
+const falcon512RpoAuth: Script = {
   ...defaultScript(),
-  id: "rpo-falcon-512-auth",
-  name: "rpo-falcon-512-auth",
+  id: "falcon-512-rpo-auth",
+  name: "falcon-512-rpo-auth",
   type: "authentication-component",
   status: "compiled",
   readOnly: true,
-  rust: rpoFalcon512AuthRust,
-  masm: rpoFalcon512AuthMasm,
+  rust: falcon512RpoAuthRust,
+  masm: falcon512RpoAuthMasm,
   exports: [
     {
       ...defaultExport(),
@@ -121,4 +121,4 @@ const rpoFalcon512Auth: Script = {
   ],
 };
 
-export default rpoFalcon512Auth;
+export default falcon512RpoAuth;

@@ -19,7 +19,7 @@
   "dependencies": {
     "@demox-labs/miden-sdk": "^0.12.5",
     "@demox-labs/miden-wallet-adapter": "^0.10.0",
-    "@getpara/react-sdk": "^2.7.0",
+    "@getpara/react-sdk": "^2.8.0",
     "@mdx-js/loader": "^3.1.1",
     "@mdx-js/react": "^3.1.1",
     "@monaco-editor/react": "^4.7.0",
@@ -41,12 +41,12 @@
     "sonner": "^2.0.7",
     "usehooks-ts": "^3.1.1",
     "uuid": "^13.0.0",
-    "viem": "^2.45.0"
+    "viem": "^2.45.1"
   },
   "devDependencies": {
     "@types/lodash": "^4.17.23",
     "@types/mdx": "^2.0.13",
-    "@types/node": "^25.0.10",
+    "@types/node": "^25.1.0",
     "@types/react": "^19.2.10",
     "@types/react-dom": "^19.2.3",
     "@workspace/eslint-config": "workspace:^",
@@ -54,6 +54,6 @@
     "copy-webpack-plugin": "^13.0.1",
     "eslint": "^9.39.2",
     "typescript": "^5.9.3",
-    "wrangler": "^4.61.0"
+    "wrangler": "^4.61.1"
   }
 }

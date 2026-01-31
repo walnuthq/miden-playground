@@ -3,19 +3,14 @@ import { type TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
 import Step1Content from "@/components/tutorials/tutorial5/step1.mdx";
-import useScripts from "@/hooks/use-scripts";
 
 const useCompleted = () => {
   const pathname = usePathname();
-  const { scripts } = useScripts();
-  const script = scripts.find(
-    ({ id, type }) => id.startsWith("counter-contract_") && type === "account",
-  );
-  return pathname === `/scripts/${script?.id}`;
+  return pathname === "/scripts/counter-value-contract";
 };
 
 const Step1: TutorialStep = {
-  title: "Create a new script from the Counter Contract example.",
+  title: "Learn about Smart Contract scripts.",
   Content: () => {
     const completed = useCompleted();
     return (
@@ -23,13 +18,12 @@ const Step1: TutorialStep = {
         <Step1Content />
         <TutorialAlert
           completed={completed}
-          title="Action required: Create a new script."
-          titleWhenCompleted="You created a Counter Contract script."
+          title="Action required: Click on the script."
+          titleWhenCompleted="You navigated to the Counter Contract script."
           description={
             <p>
-              Click on the <em>"Create new script"</em> button and create a new{" "}
-              <strong>Account Script</strong> from the{" "}
-              <strong>Counter Contract</strong> example.
+              Click on the <em>"Counter Contract"</em> row in the scripts table
+              to start reading the script.
             </p>
           }
         />

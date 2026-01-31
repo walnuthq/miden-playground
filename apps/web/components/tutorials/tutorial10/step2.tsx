@@ -12,17 +12,11 @@ const useCompleted = () => {
   const script = scripts.find(
     ({ id, type }) => !defaultScriptIds.includes(id) && type === "account",
   );
-  const exports = script?.exports ?? [];
-  const resetCountProcedure = exports.find(
-    ({ digest }) =>
-      digest ===
-      "0x0f45560f0fc73fb1972c2793a3190799adc7b4a3a739004f50bf8fe5eb030e21",
-  );
-  return script?.status === "compiled" && !!resetCountProcedure;
+  return script?.status === "compiled";
 };
 
 const Step2: TutorialStep = {
-  title: "Compile the script.",
+  title: "Understanding the Counter Account Contract.",
   Content: () => {
     const completed = useCompleted();
     return (
@@ -34,8 +28,8 @@ const Step2: TutorialStep = {
           titleWhenCompleted="You compiled the script."
           description={
             <p>
-              Add the <strong>reset_count</strong> procedure and click on the{" "}
-              <em>"Compile"</em> button to compile the script.
+              After reading and understanding the Counter Contract code, click
+              on the <em>"Compile"</em> button to compile the script.
             </p>
           }
         />

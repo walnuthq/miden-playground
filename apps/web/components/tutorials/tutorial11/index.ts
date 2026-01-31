@@ -11,14 +11,14 @@ import Step7 from "@/components/tutorials/tutorial11/step7";
 
 const tutorial: Tutorial = {
   ...defaultTutorial(),
-  id: "private-transfers",
+  id: "contract-verification",
   number: 11,
-  title: "Private transfers",
-  tagline: "Learn how to perform privacy preserving transfers on Miden.",
+  title: "Contract verification",
+  tagline: "Deploy and verify custom smart contracts on-chain.",
   description:
-    "Perform transactions to move assets between wallets while preserving your privacy.",
-  category: "beginner",
-  initialRoute: "/accounts",
+    "In this tutorial we learn how to develop custom Miden contracts, deploy them on-chain, and verify them using the Miden playground.",
+  category: "advanced",
+  initialRoute: "/scripts",
   store: defaultStore(),
   state,
   steps: [Step1, Step2, Step3, Step4, Step5, Step6, Step7],

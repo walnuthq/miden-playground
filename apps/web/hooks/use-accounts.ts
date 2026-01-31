@@ -18,6 +18,8 @@ import {
   type Account,
   basicWalletAccount,
   midenFaucetAccount,
+  getRoutingParametersPart,
+  getIdentifierPart,
 } from "@/lib/types/account";
 import { type Component } from "@/lib/types/component";
 import useScripts from "@/hooks/use-scripts";
@@ -29,7 +31,7 @@ import useWebClient from "@/hooks/use-web-client";
 import useMidenSdk from "@/hooks/use-miden-sdk";
 import { defaultScriptIds } from "@/lib/types/default-scripts";
 import { verifyAccountComponentsFromPackageIds } from "@/lib/api";
-import { toBase64, getAddressPart } from "@/lib/utils";
+import { toBase64 } from "@/lib/utils";
 import { defaultComponentIds } from "@/lib/types/default-components";
 import type { FungibleAsset } from "@/lib/types/asset";
 // import { useParaMiden } from "@/lib/para-miden";
@@ -157,6 +159,8 @@ const useAccounts = () => {
           id: accountId.toString(),
           name: accountStorageMode === "private" ? "Priv Account 1" : name,
           address,
+          identifier: getIdentifierPart(address),
+          routingParameters: getRoutingParametersPart(address),
           isNew: true,
           fungibleAssets: fungibleAssets ?? [],
         };
@@ -290,7 +294,7 @@ const useAccounts = () => {
     if (verify && !tutorialId) {
       verifyAccountComponentsFromPackageIds({
         accountId: account.id,
-        address: getAddressPart(account.address),
+        identifier: account.identifier,
         account: toBase64(wasmAccount.serialize()),
         packageIds,
       });

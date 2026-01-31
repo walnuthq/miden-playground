@@ -12,6 +12,7 @@ import { clientExecuteTransaction } from "@/lib/web-client";
 import { createScript, deleteScript as apiDeleteScript } from "@/lib/api";
 import useMidenSdk from "@/hooks/use-miden-sdk";
 import useTransactions from "@/hooks/use-transactions";
+import useTutorials from "@/hooks/use-tutorials";
 import useWebClient from "@/hooks/use-web-client";
 import { fromBase64 } from "@/lib/utils";
 
@@ -32,6 +33,7 @@ const useScripts = () => {
   } = useGlobalContext();
   const { client } = useWebClient();
   const { submitNewTransaction } = useTransactions();
+  const { tutorialId } = useTutorials();
   const openCreateScriptDialog = () =>
     dispatch({ type: "OPEN_CREATE_SCRIPT_DIALOG" });
   const closeCreateScriptDialog = () =>
@@ -52,10 +54,11 @@ const useScripts = () => {
     type: ScriptType;
     example: ScriptExample | "none";
   }) => {
-    const { id, rust } = await createScript({
+    const { id, rust, dependencies } = await createScript({
       name,
       type,
       example,
+      tutorialId,
     });
     const script: Script = {
       ...defaultScript(),
@@ -63,6 +66,7 @@ const useScripts = () => {
       name,
       type,
       rust,
+      dependencies,
       updatedAt: Date.now(),
     };
     dispatch({

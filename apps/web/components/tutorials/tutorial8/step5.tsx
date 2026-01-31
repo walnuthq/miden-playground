@@ -1,26 +1,34 @@
-import { defaultTutorialStep } from "@/lib/types/tutorial";
-import TutorialAlert from "@/components/tutorials/tutorial-alert";
+import { useEffect, useState } from "react";
+import { type TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
+import TutorialAlert from "@/components/tutorials/tutorial-alert";
 import Step5Content from "@/components/tutorials/tutorial8/step5.mdx";
 import useAccounts from "@/hooks/use-accounts";
+import useComponents from "@/hooks/use-components";
+import { defaultComponentIds } from "@/lib/types/default-components";
 
 const useCompleted = () => {
+  const [initialNonce, setInitialNonce] = useState(0);
   const { accounts } = useAccounts();
-  const countReader = accounts.find(({ components }) =>
-    components.includes("count-reader"),
+  const { components } = useComponents();
+  const component = components.find(
+    ({ id, type }) => !defaultComponentIds.includes(id) && type === "account",
   );
-  const counter = accounts.find(({ components }) =>
-    components.includes("counter-contract"),
+  const counter = accounts.find(
+    ({ components, storageMode }) =>
+      components.includes(component?.id ?? "") && storageMode === "network",
   );
-  if (!countReader || !counter) {
-    return false;
-  }
-  return countReader.storage[0] === counter.storage[0];
+  const currentNonce = counter?.nonce ?? 0;
+  useEffect(() => {
+    if (initialNonce === 0) {
+      setInitialNonce(currentNonce);
+    }
+  }, [initialNonce, currentNonce]);
+  return initialNonce !== 0 && currentNonce > initialNonce;
 };
 
-export default {
-  ...defaultTutorialStep(),
-  title: "Copy the count from the Counter contract.",
+const Step5: TutorialStep = {
+  title: "Create a network note by executing a transaction.",
   Content: () => {
     const completed = useCompleted();
     return (
@@ -28,13 +36,10 @@ export default {
         <Step5Content />
         <TutorialAlert
           completed={completed}
-          title="Action required: Invoke the copy count procedure."
-          titleWhenCompleted="You invoked the copy count procedure."
+          title="Action required: Create the network note."
+          titleWhenCompleted="You created the network note."
           description={
-            <p>
-              Click on the <em>"Invoke"</em> button and call the{" "}
-              <strong>copy_count</strong> procedure with the correct parameters.
-            </p>
+            <p>Follow the instructions to create your custom network note.</p>
           }
         />
       </>
@@ -45,3 +50,5 @@ export default {
     return <NextStepButton disabled={!completed} />;
   },
 };
+
+export default Step5;

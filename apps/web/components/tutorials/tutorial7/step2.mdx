@@ -1,9 +1,9 @@
-import Link from "@/components/tutorials/tutorial-link";
+You are probably familiar with the P2ID note as we used it in previous tutorials, but maybe it's the first time you deep dive into its actual implementation.
 
-From the <Link href="/accounts">accounts page</Link>, click on _"Create new account"_ and select the _"Deploy account"_ option.
+The script reads 2 values from the note inputs forming the target [account ID](https://docs.miden.xyz/miden-base/account/id/) which is decomposed in a prefix and a suffix.
+The account ID needs to be split in 2 separate 64 bits **Felt**s as note inputs are encoded as a **Felt** array and account IDs are 120 bits.
 
-Give your new contract a name and select **Network** as storage mode.
-Choose **NoAuth** for the authentication scheme and select the custom **Counter Contract** account component.
+The script then reads the consuming account ID using the account's interface function **`account::get_id`** and compares it against the note inputs.
+If the 2 values are equal, the script proceeds with sending the note assets to the target account.
 
-When you're done configuring your contract deployment, click on the _"Deploy"_ button to create your network account.
-The key difference from regular contracts is using the **Network** [Account Storage Mode](https://docs.miden.xyz/miden-base/account/id#account-storage-mode) instead of **Public**, which enables the contract to be executed by the network operator.
+Now that we understand the P2ID implementation, let's add the timelock logic.

@@ -34,6 +34,7 @@ const useWebClient = () => {
     scripts,
     nextState,
     nextStore,
+    tutorialId,
     completedTutorials,
     dispatch,
   } = useGlobalContext();
@@ -41,10 +42,12 @@ const useWebClient = () => {
     dispatch({ type: "SYNCING_STATE", payload: { syncingState: true } });
     try {
       const syncSummary = await client.syncState();
-      try {
-        await client.fetchPrivateNotes();
-      } catch (error) {
-        console.error(error);
+      if (!tutorialId || tutorialId === "private-transfers") {
+        try {
+          await client.fetchPrivateNotes();
+        } catch (error) {
+          console.error(error);
+        }
       }
       const inputNotes = await clientGetAllInputNotes({
         client,

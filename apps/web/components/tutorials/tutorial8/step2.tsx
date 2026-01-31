@@ -1,17 +1,26 @@
-import { usePathname } from "next/navigation";
-import { defaultTutorialStep } from "@/lib/types/tutorial";
+import { type TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
 import Step2Content from "@/components/tutorials/tutorial8/step2.mdx";
+import useAccounts from "@/hooks/use-accounts";
+import useComponents from "@/hooks/use-components";
+import { defaultComponentIds } from "@/lib/types/default-components";
 
 const useCompleted = () => {
-  const pathname = usePathname();
-  return pathname === "/scripts/count-reader";
+  const { accounts } = useAccounts();
+  const { components } = useComponents();
+  const component = components.find(
+    ({ id, type }) => !defaultComponentIds.includes(id) && type === "account",
+  );
+  const counter = accounts.find(
+    ({ components, storageMode }) =>
+      components.includes(component?.id ?? "") && storageMode === "network",
+  );
+  return !!counter;
 };
 
-export default {
-  ...defaultTutorialStep(),
-  title: "What we will build.",
+const Step2: TutorialStep = {
+  title: "Deploy a network Counter smart contract.",
   Content: () => {
     const completed = useCompleted();
     return (
@@ -19,12 +28,14 @@ export default {
         <Step2Content />
         <TutorialAlert
           completed={completed}
-          title="Action required: Click on the script."
-          titleWhenCompleted="You navigated to the Count Reader script."
+          title="Action required: Deploy a network Counter."
+          titleWhenCompleted="You deployed a network Counter."
           description={
             <p>
-              Click on the <em>"Count Reader"</em> row in the scripts table to
-              start reading the script.
+              Click on the <em>"Create new account"</em> button and deploy a
+              network account by selecting the <strong>Network</strong> storage
+              mode. Use the <strong>NoAuth</strong> authentication scheme and
+              the <strong>Counter Contract</strong> component.
             </p>
           }
         />
@@ -36,3 +47,5 @@ export default {
     return <NextStepButton disabled={!completed} />;
   },
 };
+
+export default Step2;

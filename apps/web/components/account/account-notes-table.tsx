@@ -32,10 +32,11 @@ import {
 } from "@demox-labs/miden-wallet-adapter";
 import useGlobalContext from "@/components/global-context/hook";
 import useScripts from "@/hooks/use-scripts";
-import { formatAmount, getAddressPart } from "@/lib/utils";
+import { formatAmount } from "@/lib/utils";
 import useWebClient from "@/hooks/use-web-client";
 import useMidenSdk from "@/hooks/use-miden-sdk";
 import { clientExportInputNoteFile } from "@/lib/web-client";
+import { accountIdToAddress } from "@/lib/web-client";
 
 const NoteActionsCell = ({
   account,
@@ -99,18 +100,12 @@ const NoteActionsCell = ({
                       midenSdk,
                     });
               const transaction = new ConsumeTransaction(
-                getAddressPart(faucet.address),
+                faucet.identifier,
                 inputNote.id,
                 inputNote.type === "public" ? "public" : "private",
                 Number(fungibleAsset.amount),
                 noteFileBytes,
               );
-              // console.log({
-              //   faucetId: getAddressPart(faucet.address),
-              //   noteId: inputNote.id,
-              //   noteType: inputNote.type === "public" ? "public" : "private",
-              //   amount: Number(fungibleAsset.amount),
-              // });
               const adapter = wallet.adapter as MidenWalletAdapter;
               const txId = await adapter.requestConsume(transaction);
               console.log({ txId });
@@ -125,8 +120,9 @@ const NoteActionsCell = ({
 };
 
 const AccountNotesTable = ({ account }: { account: Account }) => {
+  const { midenSdk } = useMidenSdk();
   const { networkId } = useGlobalContext();
-  const { faucets, connectedWallet } = useAccounts();
+  const { accounts, faucets, connectedWallet } = useAccounts();
   const { inputNotes } = useNotes();
   const { scripts } = useScripts();
   const consumableNotes = account.consumableNoteIds
@@ -144,7 +140,7 @@ const AccountNotesTable = ({ account }: { account: Account }) => {
             <TableHead>ID</TableHead>
             <TableHead>Script</TableHead>
             <TableHead>Storage mode</TableHead>
-            <TableHead>Sender ID</TableHead>
+            <TableHead>Sender</TableHead>
             <TableHead>Assets</TableHead>
             {showNoteActions && <TableHead />}
           </TableRow>
@@ -154,6 +150,12 @@ const AccountNotesTable = ({ account }: { account: Account }) => {
             const script = scripts.find(
               ({ digest }) => digest === inputNote.scriptRoot,
             );
+            const sender = accounts.find(({ id }) => id === inputNote.senderId);
+            const senderAddress = accountIdToAddress({
+              accountId: inputNote.senderId,
+              networkId,
+              midenSdk,
+            });
             return (
               <TableRow key={inputNote.id}>
                 <TableCell>
@@ -186,7 +188,14 @@ const AccountNotesTable = ({ account }: { account: Account }) => {
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <AccountAddress id={inputNote.senderId} />
+                  <AccountAddress
+                    account={{
+                      name: sender?.name ?? "",
+                      address: senderAddress,
+                    }}
+                    withName={!!sender}
+                    withLink={!!sender}
+                  />
                 </TableCell>
                 <TableCell>
                   {inputNote.fungibleAssets.map(({ faucetId, amount }) => {

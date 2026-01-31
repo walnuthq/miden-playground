@@ -1,19 +1,11 @@
-We assume the timelock block height will be appended as the 3rd item in the note inputs, let's store it in a variable for future use:
+import Link from "@/components/tutorials/tutorial-link";
 
-```rust
-let timelock_height = inputs[2];
-```
+[Account components](https://docs.miden.xyz/miden-base/account/components) are the building blocks that define an account's [code](https://docs.miden.xyz/miden-base/account/code) and [storage](https://docs.miden.xyz/miden-base/account/storage).
+Multiple account components can be merged together to deploy a final account on-chain.
 
-To get the current block height, we'll use the transaction kernel `get_block_number` call:
+As an example, consider a wallet account, capable of holding assets and requiring authentication to move funds. Such an account can be created by merging a **BasicWallet** component with a **Falcon512Rpo** authentication component.
 
-```rust
-let block_number = tx::get_block_number();
-```
+The basic wallet contains the code to move assets in and out of the account vault. The authentication component holds a user's public key in storage and additionally contains the code to verify a signature against that public key. Together, these components form a fully functional wallet account.
 
-Finally, we must check that `block_number` ≥ `timelock_height`:
-
-```rust
-assert!(block_number >= timelock_height);
-```
-
-After adding the timelock logic to your script, compile it and proceed to the next step.
+From the <Link href="/components">components page</Link>, create a new account component to represent our Counter Contract functionality.
+Select the Counter Contract script created in the first step and choose the **Account Component** type.

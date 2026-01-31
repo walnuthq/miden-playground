@@ -1,12 +1,16 @@
 import Link from "@/components/tutorials/tutorial-link";
 
-In the previous step, we downloaded the private note locally on our device.
-This P2ID note encodes the intended recipient of its embedded assets in the note private data.
+Now that we've compiled the **Counter Contract** script, let's deploy it.
 
-**Public** notes data is stored in the [note database](https://docs.miden.xyz/miden-base/state/#note-database), making it fully visible on-chain: this means we can automatically import them in the playground by listening to the Miden blockchain activity.
+From the <Link href="/accounts">accounts page</Link>, click on _"Create new account"_ and select the _"Deploy account"_ option.
 
-On the contrary, **Private** notes are invisible to the outside world and must be first imported in the playground before we can interact with them.
+Give your new contract a name and select **No Auth** as authentication component and our custom **Counter Contract** account component.
 
-From the <Link href="/notes">notes page</Link>, click on _"Add note"_ and select the _"Import note"_ option.
+When you're done configuring your contract deployment, click on the _"Deploy"_ button to create your account.
 
-Upload the note file (note.mno) using the file picker, click on _"Import"_ and your private note will be available in the playground.
+Every contract deployed using the Miden Playground is automatically verified upon deployment.
+This is the reason why we're able to invoke our account procedures using their human-readable names such as **`get_count`** or **`reset_count`** under the _"Components"_ tab of the contract details page.
+
+See for yourself: {props.counter ? <Link href={`/accounts/${props.counter.identifier}?tab=components`}>click on the <em>"Components"</em> tab of your deployed account</Link> : <>click on the <em>"Components"</em> tab of your deployed account</>} to access the list of verified components your smart contract contains, you will also be able to read the underlying script source code by clicking on the _"Script"_ link.
+
+When a contract is verified, anyone can import it and start interacting with it on the playground as well as access the Rust source code.

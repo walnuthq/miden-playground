@@ -43,6 +43,8 @@ export type Account = {
   id: string;
   name: string;
   address: string;
+  identifier: string;
+  routingParameters: string;
   type: AccountType;
   storageMode: AccountStorageMode;
   isFaucet: boolean;
@@ -67,6 +69,8 @@ export const defaultAccount = (): Account => ({
   id: "",
   name: "",
   address: "",
+  identifier: "",
+  routingParameters: "",
   type: "fungible-faucet",
   storageMode: "private",
   isFaucet: false,
@@ -87,6 +91,25 @@ export const defaultAccount = (): Account => ({
   updatedAt: 0,
 });
 
+export const getIdentifierPart = (address: string) => {
+  const [addressPart = ""] = address.split("_");
+  return addressPart;
+};
+
+export const getRoutingParametersPart = (address: string) => {
+  const [, routingParametersPart = ""] = address.split("_");
+  return routingParametersPart;
+};
+
+export const formatAddress = (
+  address: string,
+  networkId: string,
+  walletFormat = false,
+) => {
+  const addressPart = getIdentifierPart(address);
+  return `${networkId}${addressPart.slice(networkId.length).slice(0, walletFormat ? 2 : 8)}…${addressPart.slice(walletFormat ? -4 : -8)}`;
+};
+
 export const basicWalletAccount = ({
   storageMode,
 }: {
@@ -99,7 +122,7 @@ export const basicWalletAccount = ({
   isRegularAccount: true,
   isUpdatable: true,
   code: BASIC_WALLET_CODE,
-  components: ["rpo-falcon-512-auth", "basic-wallet"],
+  components: ["falcon-512-rpo-auth", "basic-wallet"],
 });
 
 export const basicFungibleFaucetAccount = ({
@@ -126,7 +149,7 @@ export const basicFungibleFaucetAccount = ({
   isPublic: storageMode === "public",
   isNew: true,
   code: FUNGIBLE_FAUCET_CODE,
-  components: ["rpo-falcon-512-auth", "basic-fungible-faucet"],
+  components: ["falcon-512-rpo-auth", "basic-fungible-faucet"],
 });
 
 export const accountIdFromPrefixSuffix = (prefix: string, suffix: string) => {
@@ -149,6 +172,8 @@ export const midenFaucetAccount = () => ({
   id: MIDEN_FAUCET_ACCOUNT_ID,
   name: "Miden Faucet",
   address: MIDEN_FAUCET_ADDRESS,
+  identifier: getIdentifierPart(MIDEN_FAUCET_ADDRESS),
+  routingParameters: getRoutingParametersPart(MIDEN_FAUCET_ADDRESS),
 });
 
 export const getItem = (storage: StorageItem[], index: number) => {

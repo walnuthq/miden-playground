@@ -1,25 +1,28 @@
+import { useEffect, useState } from "react";
 import { type TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
 import Step5Content from "@/components/tutorials/tutorial5/step5.mdx";
 import useAccounts from "@/hooks/use-accounts";
-import useComponents from "@/hooks/use-components";
+import { COUNTER_CONTRACT_ADDRESS } from "@/lib/constants";
 
 const useCompleted = () => {
+  const [initialNonce, setInitialNonce] = useState(0);
   const { accounts } = useAccounts();
-  const { components } = useComponents();
-  const component = components.find(
-    ({ type, scriptId }) =>
-      type === "account" && scriptId.startsWith("counter-contract_"),
+  const counter = accounts.find(
+    ({ address }) => address === COUNTER_CONTRACT_ADDRESS,
   );
-  const counter = accounts.find(({ components }) =>
-    components.includes(component?.id ?? ""),
-  );
-  return !!counter;
+  const currentNonce = counter?.nonce ?? 0;
+  useEffect(() => {
+    if (initialNonce === 0) {
+      setInitialNonce(currentNonce);
+    }
+  }, [initialNonce, currentNonce]);
+  return initialNonce !== 0 && currentNonce > initialNonce;
 };
 
 const Step5: TutorialStep = {
-  title: "Deploy your Counter Contract.",
+  title: "Invoke the Counter Contract procedures.",
   Content: () => {
     const completed = useCompleted();
     return (
@@ -27,13 +30,13 @@ const Step5: TutorialStep = {
         <Step5Content />
         <TutorialAlert
           completed={completed}
-          title="Action required: Deploy a Counter Contract."
-          titleWhenCompleted="You deployed a Counter Contract."
+          title="Action required: Invoke the procedure."
+          titleWhenCompleted="You have invoked the Counter Contract procedures."
           description={
             <p>
-              Click on the <em>"Create new account"</em> button and deploy an{" "}
-              account using the <strong>NoAuth</strong> authentication scheme
-              and the <strong>Counter Contract</strong> component.
+              Click on the <em>"Invoke"</em> button in the <em>"Components"</em>{" "}
+              section of the account details page to invoke the{" "}
+              <strong>increment_count</strong> procedure.
             </p>
           }
         />

@@ -3,10 +3,10 @@ import Account from "@/components/account";
 const AccountPage = async ({
   params,
 }: {
-  params: Promise<{ address: string }>;
+  params: Promise<{ identifier: string }>;
 }) => {
-  const { address } = await params;
-  return <Account address={address} />;
+  const { identifier } = await params;
+  return <Account identifier={identifier} />;
 };
 
 export default AccountPage;

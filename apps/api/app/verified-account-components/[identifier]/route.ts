@@ -3,12 +3,12 @@ import { getVerifiedAccountComponents } from "@/db/verified-account-components";
 
 export const GET = async (
   request: NextRequest,
-  { params }: { params: Promise<{ address: string }> },
+  { params }: { params: Promise<{ identifier: string }> },
 ) => {
   try {
-    const { address } = await params;
+    const { identifier } = await params;
     const verifiedAccountComponents =
-      await getVerifiedAccountComponents(address);
+      await getVerifiedAccountComponents(identifier);
     return NextResponse.json({
       ok: true,
       components: verifiedAccountComponents.map(({ package: dbPackage }) => ({

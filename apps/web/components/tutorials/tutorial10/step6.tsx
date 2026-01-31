@@ -1,50 +1,42 @@
-import { useState } from "react";
 import { type TutorialStep } from "@/lib/types/tutorial";
-import { useInterval } from "usehooks-ts";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
 import Step6Content from "@/components/tutorials/tutorial10/step6.mdx";
 import useAccounts from "@/hooks/use-accounts";
-import { getVerifiedAccountComponents } from "@/lib/api";
-import { getAddressPart } from "@/lib/utils";
+import useNotes from "@/hooks/use-notes";
+import useScripts from "@/hooks/use-scripts";
+import { defaultScriptIds } from "@/lib/types/default-scripts";
 
 const useCompleted = () => {
-  const [completed, setCompleted] = useState(false);
-  const { accounts } = useAccounts();
-  const counter = accounts.find(({ name }) => name === "Unverified Contract");
-  useInterval(
-    () => {
-      const checkVerifiedAccountComponents = async () => {
-        const verifiedAccountComponents = await getVerifiedAccountComponents(
-          getAddressPart(counter?.address ?? ""),
-        );
-        setCompleted(verifiedAccountComponents.length > 0);
-      };
-      checkVerifiedAccountComponents();
-    },
-    completed ? null : 5000,
+  const { connectedWallet } = useAccounts();
+  const { scripts } = useScripts();
+  const script = scripts.find(
+    ({ id, type }) => !defaultScriptIds.includes(id) && type === "note-script",
   );
-  return completed;
+  const { inputNotes } = useNotes();
+  const note = inputNotes.find(
+    ({ senderId, scriptId, state, type }) =>
+      senderId === connectedWallet?.id &&
+      scriptId === script?.id &&
+      state === "committed" &&
+      type === "public",
+  );
+  return !!note;
 };
 
 const Step6: TutorialStep = {
-  title: "Verify the imported contract.",
+  title: "Create an increment note.",
   Content: () => {
     const completed = useCompleted();
-    const { accounts } = useAccounts();
-    const counter = accounts.find(({ name }) => name === "Unverified Contract");
     return (
       <>
-        <Step6Content counter={counter} />
+        <Step6Content />
         <TutorialAlert
           completed={completed}
-          title="Action required: Verify the contract."
-          titleWhenCompleted="You verified the contract."
+          title="Action required: Create the increment note."
+          titleWhenCompleted="You created the increment note."
           description={
-            <p>
-              Click on the <em>"Verify account component"</em> button and upload
-              the contract source code.
-            </p>
+            <p>Follow the instructions to create a custom increment note.</p>
           }
         />
       </>

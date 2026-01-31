@@ -37,7 +37,7 @@ export const packagesTable = pgTable("packages", {
     ),
   masp: text().notNull().default(""),
   exports: jsonb().array().notNull().default([]),
-  dependencies: uuid().array().notNull().default([]),
+  dependencies: varchar({ length: 36 }).array().notNull().default([]),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -48,7 +48,7 @@ export const verifiedAccountComponentTable = pgTable(
     id: uuid().primaryKey().defaultRandom(),
     accountId: varchar("account_id", { length: 32 }).notNull(),
     packageId: uuid("package_id").notNull(),
-    address: text().notNull(),
+    identifier: text().notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },

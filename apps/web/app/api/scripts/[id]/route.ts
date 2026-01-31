@@ -1,32 +1,41 @@
 import { type NextRequest, NextResponse } from "next/server";
 import counterMapContract from "@/lib/types/default-scripts/counter-map-contract";
-import p2id from "@/lib/types/default-scripts/p2id";
+import timelockP2id from "@/lib/types/default-scripts/timelock-p2id";
+import counterNote from "@/lib/types/default-scripts/counter-note";
 import { sleep } from "@/lib/utils";
 import {
   type ScriptExample,
   type Export,
   type Dependency,
+  defaultScript,
 } from "@/lib/types/script";
 
-const scriptsMasm: Record<ScriptExample, string> = {
+const scriptsMasm: Record<ScriptExample | "none", string> = {
+  none: defaultScript().masm,
   "counter-contract": counterMapContract.masm,
-  "p2id-note": p2id.masm,
+  "p2id-note": timelockP2id.masm,
+  "counter-note": counterNote.masm,
 } as const;
 
-const scriptsDigest: Record<ScriptExample, string> = {
-  "counter-contract": "0x0",
-  "p2id-note":
-    "0x94377a3ed496ef4282bb98b1df09f14be986f5ffed1ac5dd2f7e23e01d9c3bce",
+const scriptsDigest: Record<ScriptExample | "none", string> = {
+  none: defaultScript().digest,
+  "counter-contract": counterMapContract.digest,
+  "p2id-note": timelockP2id.digest,
+  "counter-note": counterNote.digest,
 } as const;
 
-const scriptsExports: Record<ScriptExample, Export[]> = {
+const scriptsExports: Record<ScriptExample | "none", Export[]> = {
+  none: defaultScript().exports,
   "counter-contract": counterMapContract.exports,
-  "p2id-note": [],
+  "p2id-note": timelockP2id.exports,
+  "counter-note": counterNote.exports,
 } as const;
 
-const scriptsDependencies: Record<ScriptExample, Dependency[]> = {
-  "counter-contract": [],
-  "p2id-note": [{ id: "basic-wallet", name: "basic-wallet", digest: "" }],
+const scriptsDependencies: Record<ScriptExample | "none", Dependency[]> = {
+  none: defaultScript().dependencies,
+  "counter-contract": counterMapContract.dependencies,
+  "p2id-note": timelockP2id.dependencies,
+  "counter-note": counterNote.dependencies,
 } as const;
 
 export const PATCH = async (

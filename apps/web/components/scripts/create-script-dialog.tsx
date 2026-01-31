@@ -113,11 +113,13 @@ const CreateScriptDialog = () => {
                     <SelectValue placeholder="Select type…" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Object.keys(scriptTypes).map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {scriptTypes[type as ScriptType]}
-                      </SelectItem>
-                    ))}
+                    {Object.keys(scriptTypes)
+                      .filter((type) => type !== "library")
+                      .map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {scriptTypes[type as ScriptType]}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </Field>

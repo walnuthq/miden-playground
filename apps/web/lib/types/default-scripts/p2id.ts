@@ -1,75 +1,74 @@
 import { type Script, defaultScript } from "@/lib/types/script";
-import { P2ID_NOTE_CODE } from "@/lib/constants";
+import { BASIC_WALLET_CODE, P2ID_NOTE_CODE } from "@/lib/constants";
 
 export const p2idRust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
 #![no_std]
+#![feature(alloc_error_handler)]
 
-// However, we could still use some standard library types while
-// remaining no-std compatible, if we uncommented the following lines:
-//
-// extern crate alloc;
-// use alloc::vec::Vec;
+use miden::{AccountId, Word, active_note, note};
 
-use miden::*;
+use crate::bindings::Account;
 
-use crate::bindings::miden::basic_wallet::basic_wallet::receive_asset;
+#[note]
+struct P2idNote {
+    target_account_id: AccountId,
+}
 
-#[note_script]
-fn run(_arg: Word) {
-    let inputs = active_note::get_inputs();
-    let target_account_id_prefix = inputs[0];
-    let target_account_id_suffix = inputs[1];
+#[note]
+impl P2idNote {
+    #[note_script]
+    pub fn run(self, _arg: Word, account: &mut Account) {
+        let current_account = account.get_id();
+        assert_eq!(current_account, self.target_account_id);
 
-    let target_account = AccountId::from(target_account_id_prefix, target_account_id_suffix);
-    let current_account = active_account::get_id();
-    assert_eq!(current_account, target_account);
-
-    let assets = active_note::get_assets();
-    for asset in assets {
-        receive_asset(asset);
+        let assets = active_note::get_assets();
+        for asset in assets {
+            account.receive_asset(asset);
+        }
     }
 }
 `;
 
-export const p2idMasm = `use.miden::active_account
-use.miden::account_id
-use.miden::active_note
+export const p2idMasm = `use miden::protocol::active_account
+use miden::protocol::account_id
+use miden::protocol::active_note
+use miden::standards::wallets::basic->basic_wallet
 
 # ERRORS
 # =================================================================================================
 
-const.ERR_P2ID_WRONG_NUMBER_OF_INPUTS="P2ID note expects exactly 2 note inputs"
+const ERR_P2ID_UNEXPECTED_NUMBER_OF_STORAGE_ITEMS="P2ID note expects exactly 2 note storage items"
 
-const.ERR_P2ID_TARGET_ACCT_MISMATCH="P2ID's target account address and transaction address do not match"
+const ERR_P2ID_TARGET_ACCT_MISMATCH="P2ID's target account address and transaction address do not match"
 
 #! Pay-to-ID script: adds all assets from the note to the account, assuming ID of the account
-#! matches target account ID specified by the note inputs.
+#! matches target account ID specified by the note storage.
 #!
 #! Requires that the account exposes:
-#! - miden::contracts::wallets::basic::receive_asset procedure.
+#! - miden::standards::wallets::basic::receive_asset procedure.
 #!
 #! Inputs:  []
 #! Outputs: []
 #!
-#! Note inputs are assumed to be as follows:
+#! Note storage is assumed to be as follows:
 #! - target_account_id is the ID of the account for which the note is intended.
 #!
 #! Panics if:
-#! - Account does not expose miden::contracts::wallets::basic::receive_asset procedure.
-#! - Account ID of executing account is not equal to the Account ID specified via note inputs.
+#! - Account does not expose miden::standards::wallets::basic::receive_asset procedure.
+#! - Account ID of executing account is not equal to the Account ID specified via note storage.
 #! - The same non-fungible asset already exists in the account.
 #! - Adding a fungible asset would result in amount overflow, i.e., the total amount would be
 #!   greater than 2^63.
-begin
-    # store the note inputs to memory starting at address 0
-    padw push.0 exec.active_note::get_inputs
-    # => [num_inputs, inputs_ptr, EMPTY_WORD]
+pub proc main
+    # store the note storage to memory starting at address 0
+    padw push.0 exec.active_note::get_storage
+    # => [num_storage_items, storage_ptr, EMPTY_WORD]
 
-    # make sure the number of inputs is 2
-    eq.2 assert.err=ERR_P2ID_WRONG_NUMBER_OF_INPUTS
-    # => [inputs_ptr, EMPTY_WORD]
+    # make sure the number of storage items is 2
+    eq.2 assert.err=ERR_P2ID_UNEXPECTED_NUMBER_OF_STORAGE_ITEMS
+    # => [storage_ptr, EMPTY_WORD]
 
-    # read the target account ID from the note inputs
+    # read the target account ID from the note storage
     mem_loadw_be drop drop
     # => [target_account_id_prefix, target_account_id_suffix]
 
@@ -80,7 +79,7 @@ begin
     exec.account_id::is_equal assert.err=ERR_P2ID_TARGET_ACCT_MISMATCH
     # => []
 
-    exec.active_note::add_assets_to_account
+    exec.basic_wallet::add_assets_to_account
     # => []
 end
 `;
@@ -94,6 +93,9 @@ const p2id: Script = {
   readOnly: true,
   rust: p2idRust,
   masm: p2idMasm,
+  dependencies: [
+    { id: "basic-wallet", name: "basic-wallet", digest: BASIC_WALLET_CODE },
+  ],
   digest: P2ID_NOTE_CODE,
 };
 

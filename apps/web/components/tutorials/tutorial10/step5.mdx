@@ -1,8 +1,16 @@
 import Link from "@/components/tutorials/tutorial-link";
-import { EllipsisVertical } from "lucide-react";
 
-Since the imported unverified contract was deployed using the exact same script as the **Counter Contract** created in the first step, let's export this script to download the source code on your device.
+Now that we've compiled both our **counter-account** and **increment-note** scripts, it's time to actually deploy our smart contract and interact with it using notes.
 
-From the <Link href="/scripts">scripts page</Link>, click on the <EllipsisVertical className="size-4 inline" /> icon button on the right-most side of the **Counter Contract** script row and then on the _"Export script"_ option to trigger the download.
+From the <Link href="/accounts">accounts page</Link>, click on _"Create new account"_ and select the _"Deploy account"_ option.
 
-Unzip the downloaded archive to get a valid Miden project in the resulting folder, you can explore the project structure but make sure to not modify anything in the source code or you won't be able to verify the contract in the next step.
+Give your new contract a name and select **No Auth** as authentication component and our custom **Counter Contract** account component: our contract doesn't require authentication as we allow any user to interact with it without requiring signature verification.
+It means that any user will be able to make the counter account consume the increment note.
+
+When you're done configuring your contract deployment, click on the _"Deploy"_ button to create your account locally.
+
+**Miden's Deployment Flow**: In Miden, accounts (contracts) become visible onchain only when they undergo a state change.
+Simply creating an account locally doesn't deploy it - the account must participate in a transaction that modifies its state.
+
+In our case, we'll increment the counter by creating and consuming an **increment-note**, effectively "deploying" the contract and making it visible on the [Miden testnet explorer](https://testnet.midenscan.com/).
+This is why the increment operation serves both as the deployment and the first interaction with the contract.

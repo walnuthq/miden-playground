@@ -18,7 +18,9 @@ import {
   type AccountType,
   type StorageItem,
   defaultAccount,
+  getIdentifierPart,
   getItem,
+  getRoutingParametersPart,
 } from "@/lib/types/account";
 import { type InputNote, type NoteType } from "@/lib/types/note";
 import {
@@ -747,15 +749,18 @@ export const wasmAccountToAccount = ({
   const verifiedComponents = components
     ? components
     : verifyDefaultAccountComponents({ wasmAccount, midenSdk });
+  const address = accountIdToAddress({
+    accountId: wasmAccount.id().toString(),
+    networkId,
+    midenSdk,
+  });
   const account: Account = {
     ...defaultAccount(),
     id: wasmAccount.id().toString(),
     name,
-    address: accountIdToAddress({
-      accountId: wasmAccount.id().toString(),
-      networkId,
-      midenSdk,
-    }),
+    address,
+    identifier: getIdentifierPart(address),
+    routingParameters: getRoutingParametersPart(address),
     type: accountType(wasmAccount),
     storageMode: storageMode(wasmAccount.id()),
     isPublic: wasmAccount.isPublic(),
@@ -965,6 +970,11 @@ export const wasmNoteToNote = ({
       faucetId: fungibleAsset.faucetId().toString(),
       amount: fungibleAsset.amount().toString(),
     })),
+  inputs: note
+    .recipient()
+    .inputs()
+    .values()
+    .map((value) => value.toString()),
 });
 
 export const wasmStorageSlotFromStorageSlot = ({

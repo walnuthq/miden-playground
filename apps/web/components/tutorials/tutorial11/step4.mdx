@@ -1,10 +1,14 @@
 import Link from "@/components/tutorials/tutorial-link";
-import { EllipsisVertical } from "lucide-react";
+import ImportButton from "@/components/tutorials/tutorial11/import-button";
 
-In the previous step, we imported a private note containing 100 tokens from the public [Miden Faucet](https://faucet.testnet.miden.io/), now let's consume this note to fund our private wallet.
+But what happens when we import an account that isn't verified?
 
-From your {props.wallet?.address ? <Link href={`/accounts/${props.wallet.address}`}>private wallet details page</Link> : 'private wallet details page'}, click on the <EllipsisVertical className="size-4 inline" /> icon button in the _"Consumable Notes"_ table to consume the note with your wallet.
+Let's find out by clicking on the _"Import"_ button, this will import a **Counter Contract** using the same source code as the script we compiled previously but since it was deployed from outside the playground it wasn't automatically verified for us.
 
-A _"Confirm Transaction"_ modal from your Miden Wallet will show up asking you to sign the resulting consume transaction that will transfer the tokens to your account.
+<ImportButton />
 
-The private note will transition to the **Consumed** state and disappear from your wallet consumable notes.
+When the contract is imported, {props.counter ? <Link href={`/accounts/${props.counter.identifier}?tab=components`}>click on its address and head to the <em>"Components"</em> tab</Link> : <>click on its address and head to the <em>"Components"</em> tab</>}: at the moment we have no verified account components on this account (except for the **No Auth** component which is a default component always automatically verified) and it behaves like a blackbox, only dApps aware of this contract interface can interact with it.
+
+**So how can we verify this contract?**
+
+One of the option is to add verified account components by providing the original source code that was used to build and deploy this contract on-chain.

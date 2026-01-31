@@ -2,7 +2,7 @@
 import { MoreVertical } from "lucide-react";
 import { type InputNote, noteConsumed, noteStates } from "@/lib/types/note";
 import { accountIdFromPrefixSuffix } from "@/lib/types/account";
-import { formatId, getAddressPart } from "@/lib/utils";
+import { formatId } from "@/lib/utils";
 import { type ColumnDef } from "@tanstack/react-table";
 import { Button } from "@workspace/ui/components/button";
 import { Badge } from "@workspace/ui/components/badge";
@@ -25,6 +25,26 @@ import useAccounts from "@/hooks/use-accounts";
 import { clientExportInputNoteFile } from "@/lib/web-client";
 import useWebClient from "@/hooks/use-web-client";
 import useMidenSdk from "@/hooks/use-miden-sdk";
+import { accountIdToAddress } from "@/lib/web-client";
+
+const InputNoteSenderCell = ({ inputNote }: { inputNote: InputNote }) => {
+  const { midenSdk } = useMidenSdk();
+  const { networkId } = useGlobalContext();
+  const { accounts } = useAccounts();
+  const sender = accounts.find(({ id }) => id === inputNote.senderId);
+  const senderAddress = accountIdToAddress({
+    accountId: inputNote.senderId,
+    networkId,
+    midenSdk,
+  });
+  return (
+    <AccountAddress
+      account={{ name: sender?.name ?? "", address: senderAddress }}
+      withName={!!sender}
+      withLink={!!sender}
+    />
+  );
+};
 
 const InputNoteActionsCell = ({ inputNote }: { inputNote: InputNote }) => {
   const { midenSdk } = useMidenSdk();
@@ -98,7 +118,7 @@ const InputNoteActionsCell = ({ inputNote }: { inputNote: InputNote }) => {
                         midenSdk,
                       });
                 const transaction = new ConsumeTransaction(
-                  getAddressPart(faucet.address),
+                  faucet.identifier,
                   inputNote.id,
                   inputNote.type === "public" ? "public" : "private",
                   Number(fungibleAsset.amount),
@@ -150,8 +170,8 @@ export const columns: ColumnDef<InputNote>[] = [
   },
   {
     accessorKey: "senderId",
-    header: "Sender ID",
-    cell: ({ row }) => <AccountAddress id={row.original.senderId} />,
+    header: "Sender",
+    cell: ({ row }) => <InputNoteSenderCell inputNote={row.original} />,
   },
   {
     id: "actions",

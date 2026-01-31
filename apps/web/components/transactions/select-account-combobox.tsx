@@ -8,7 +8,7 @@ import {
   ComboboxItem,
   ComboboxList,
 } from "@workspace/ui/components/combobox";
-import { getAddressPart } from "@/lib/utils";
+import { getIdentifierPart } from "@/lib/types/account";
 import useMidenSdk from "@/hooks/use-miden-sdk";
 import { addressToAccountId } from "@/lib/web-client";
 
@@ -18,11 +18,11 @@ const SelectAccountCombobox = ({
   onValueChange: Dispatch<SetStateAction<string>>;
 }) => {
   const { midenSdk } = useMidenSdk();
-  const { connectedWallet, wallets } = useAccounts();
+  const { connectedWallet, accounts } = useAccounts();
   const [value, setValue] = useState("");
-  const items = wallets
+  const items = accounts
     .filter(({ id }) => id !== connectedWallet?.id)
-    .map((wallet) => getAddressPart(wallet.address));
+    .map(({ identifier }) => identifier);
   if (value !== "" && !items.includes(value)) {
     items.unshift(value);
   }
@@ -31,10 +31,10 @@ const SelectAccountCombobox = ({
       value={value}
       items={items}
       onInputValueChange={(inputValue) => {
-        setValue(getAddressPart(inputValue));
-        const wallet = wallets.find(({ address }) => address === inputValue);
-        if (wallet) {
-          onValueChange(wallet.id);
+        setValue(getIdentifierPart(inputValue));
+        const account = accounts.find(({ address }) => address === inputValue);
+        if (account) {
+          onValueChange(account.id);
           return;
         }
         try {
@@ -51,24 +51,21 @@ const SelectAccountCombobox = ({
         onValueChange("");
       }}
     >
-      <ComboboxInput placeholder="Select a wallet" />
+      <ComboboxInput placeholder="Select an account" />
       <ComboboxContent>
-        <ComboboxEmpty>No wallets found.</ComboboxEmpty>
+        <ComboboxEmpty>No accounts found.</ComboboxEmpty>
         <ComboboxList>
           {(item: string) => {
-            const wallet = wallets.find(
-              ({ address }) => getAddressPart(address) === item,
+            const account = accounts.find(
+              ({ identifier }) => identifier === item,
             ) ?? {
               id: "0x000000000000000000000000000000",
-              address: value,
-              name: "Custom Wallet",
+              identifier: value,
+              name: "Custom Account",
             };
             return (
-              <ComboboxItem
-                key={wallet.id}
-                value={getAddressPart(wallet.address)}
-              >
-                {wallet.name} ({getAddressPart(wallet.address)})
+              <ComboboxItem key={account.id} value={account.identifier}>
+                {account.identifier} ({account.name})
               </ComboboxItem>
             );
           }}

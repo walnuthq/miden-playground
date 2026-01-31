@@ -1,20 +1,9 @@
-import Image from "next/image";
 import Link from "@/components/tutorials/tutorial-link";
 
-<Image
-  className="max-h-96 object-contain"
-  src="/img/count-copy-fpi-diagram.png"
-  alt="Count copy FPI diagram"
-  width={1100}
-  height={744}
-/>
+From the <Link href="/accounts">accounts page</Link>, click on _"Create new account"_ and select the _"Deploy account"_ option.
 
-The diagram above depicts the **Count Reader** smart contract using foreign procedure invocation to read the count state of the counter contract. After reading the state via FPI, the **Count Reader** smart contract writes the value returned from the counter contract to storage.
+Give your new contract a name and select **Network** as storage mode.
+Choose **NoAuth** for the authentication scheme and select the custom **Counter Contract** account component.
 
-What we'll cover:
-
-- **Foreign Procedure Invocation** (FPI) with the Playground.
-- Building a **Count Reader** smart contract.
-- Executing **cross-contract calls** in the browser.
-
-First, let's discover the <Link href="/scripts/count-reader">Count Reader</Link> script logic.
+When you're done configuring your contract deployment, click on the _"Deploy"_ button to create your network account.
+The key difference from regular contracts is using the **Network** [Account Storage Mode](https://docs.miden.xyz/miden-base/account/id#account-storage-mode) instead of **Public**, which enables the contract to be executed by the network operator.

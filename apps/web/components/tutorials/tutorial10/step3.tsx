@@ -2,46 +2,35 @@ import { type TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
 import Step3Content from "@/components/tutorials/tutorial10/step3.mdx";
-import useComponents from "@/hooks/use-components";
-import { defaultComponentIds } from "@/lib/types/default-components";
-import useAccounts from "@/hooks/use-accounts";
+import useScripts from "@/hooks/use-scripts";
+import { defaultScriptIds } from "@/lib/types/default-scripts";
 
 const useCompleted = () => {
-  const { accounts } = useAccounts();
-  const { components } = useComponents();
-  const component = components.find(
-    ({ id, type }) => !defaultComponentIds.includes(id) && type === "account",
+  const { scripts } = useScripts();
+  const script = scripts.find(
+    ({ id, type }) => !defaultScriptIds.includes(id) && type === "note-script",
   );
-  const counter = accounts.find(({ components }) =>
-    components.includes(component?.id ?? ""),
-  );
-  return !!counter;
+  const dependenciesLength = script?.dependencies.length ?? 0;
+  return dependenciesLength > 0;
 };
 
 const Step3: TutorialStep = {
-  title: "Deploy the Counter Contract.",
+  title: "Create a new note script.",
   Content: () => {
     const completed = useCompleted();
-    const { accounts } = useAccounts();
-    const { components } = useComponents();
-    const component = components.find(
-      ({ id, type }) => !defaultComponentIds.includes(id) && type === "account",
-    );
-    const counter = accounts.find(({ components }) =>
-      components.includes(component?.id ?? ""),
-    );
     return (
       <>
-        <Step3Content counter={counter} />
+        <Step3Content />
         <TutorialAlert
           completed={completed}
-          title="Action required: Deploy the Counter Contract."
-          titleWhenCompleted="You deployed the Counter Contract."
+          title="Action required: Create a new script."
+          titleWhenCompleted="You created a note script."
           description={
             <p>
-              Click on the <em>"Create new account"</em> button and deploy an{" "}
-              account using the <strong>NoAuth</strong> authentication scheme
-              and the <strong>Counter Contract</strong> component.
+              Click on the <em>"Create new script"</em> button and create a new{" "}
+              <strong>Note Script</strong> with the{" "}
+              <strong>Counter Note</strong> example, then add the{" "}
+              <strong>counter-account</strong> script as a dependency.
             </p>
           }
         />

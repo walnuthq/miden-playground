@@ -1,12 +1,8 @@
-Your **Private** wallet is funded and your privacy has been preserved as it's impossible to link the 2 transactions that were necessary to transfer the tokens from the faucet to your account, neither is it possible to read on-chain data that would link your private wallet address to the mint request.
+import Link from "@/components/tutorials/tutorial-link";
+import { EllipsisVertical } from "lucide-react";
 
-Now let's use your **Private** wallet to send some tokens to your **Public** wallet using the same private communication channel enabled by **Private** notes.
+Since the imported unverified contract was deployed using the exact same script as the **Counter Contract** created in the first step, let's export this script to download the source code on your device.
 
-Click on the _"Create new transaction"_ button and select the _"New send transaction"_ option: a _"Configure send transaction"_ modal will show up.
+From the <Link href="/scripts">scripts page</Link>, click on the <EllipsisVertical className="size-4 inline" /> icon button on the right-most side of the **Counter Contract** script row and then on the _"Export script"_ option to trigger the download.
 
-Click on the Miden Wallet browser extension and then click on the wallet selection dropdown to pick your public wallet.
-Copy your public wallet address to the clipboard and paste it inside the _"Target account"_ input of the send transaction modal.
-
-Select the **MIDEN** asset and enter an amount eg. **10** tokens, leave the note type as **Private**.
-
-Finally, click on the _"Preview"_ button to confirm the send transaction and create a new **Private** P2ID output note embedding your sent tokens.
+Unzip the downloaded archive to get a valid Miden project in the resulting folder, you can explore the project structure but make sure to not modify anything in the source code or you won't be able to verify the contract in the next step.

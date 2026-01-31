@@ -1,45 +1,32 @@
-import { EllipsisVertical } from "lucide-react";
 import { type TutorialStep } from "@/lib/types/tutorial";
-import useAccounts from "@/hooks/use-accounts";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
 import Step4Content from "@/components/tutorials/tutorial11/step4.mdx";
-import { getAddressPart } from "@/lib/utils";
+import useAccounts from "@/hooks/use-accounts";
 
 const useCompleted = () => {
-  const { connectedWallet } = useAccounts();
-  return (
-    connectedWallet?.storageMode === "private" &&
-    connectedWallet?.consumableNoteIds.length === 0
-  );
+  const { accounts } = useAccounts();
+  const counter = accounts.find(({ name }) => name === "Unverified Contract");
+  return !!counter;
 };
 
 const Step4: TutorialStep = {
-  title: "Consume the private note with your private wallet.",
+  title: "Import an unverified Counter Contract.",
   Content: () => {
-    const { connectedWallet } = useAccounts();
     const completed = useCompleted();
+    const { accounts } = useAccounts();
+    const counter = accounts.find(({ name }) => name === "Unverified Contract");
     return (
       <>
-        <Step4Content
-          wallet={
-            connectedWallet?.storageMode === "private"
-              ? {
-                  ...connectedWallet,
-                  address: getAddressPart(connectedWallet.address),
-                }
-              : undefined
-          }
-        />
+        <Step4Content counter={counter} />
         <TutorialAlert
           completed={completed}
-          title="Action required: Consume the private note."
-          titleWhenCompleted="Your wallet has been privately funded."
+          title="Action required: Import the unverified contract."
+          titleWhenCompleted="You imported the unverified contract."
           description={
             <p>
-              Click on the <EllipsisVertical className="size-4 inline" /> icon
-              button on the right-most side of the consumable note row in your
-              private wallet page details to consume the note with your wallet.
+              Click on the <em>Import</em> button to import an unverified
+              Counter Contract.
             </p>
           }
         />

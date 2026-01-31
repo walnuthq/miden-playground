@@ -1,15 +1,15 @@
-import CopyButton from "@/components/lib/copy-button";
-import { COUNTER_CONTRACT_GET_COUNT_PROC_HASH } from "@/lib/constants";
+import Link from "@/components/tutorials/tutorial-link";
 
-On the _"Components"_ tab, you can access the **Count Reader** component to invoke the **copy_count** procedure.
+Let's create the network note by executing a transaction that will output our custom note.
+You will need a connected wallet to sign the transaction so make sure your Miden Wallet is connected to the playground before continuing.
 
-You can read the initial counter value by hovering the **Counter** _"Value"_ column in the _"Storage Slots"_ table and confirm it was initialized to zero.
+From the <Link href="/notes">notes page</Link>, click on the _"Add note"_ button and select the _"Create note"_ option.
 
-Click on the _"Invoke"_ button of **copy_count** to open a modal that will let you configure the procedure arguments.
+A _"Create Note"_ dialog will show up to help you configure the note creation transaction.
+First, select the counter network deployed in step #2 and choose the counter note script, leave the note type as public.
 
-We need to select the **Counter Contract** account as the first parameter which is the source account from which to copy the counter value.
+Do not add note assets and leave the note inputs empty as our note doesn't need to embed assets and takes no parameters.
 
-The **get_count** procedure hash can be obtained from the **Counter Contract** account component page by clicking on the _"Copy Procedure Hash"_ button next to the procedure name.
-For convenience, you can also copy it from here: <CopyButton content="Copy Procedure Hash" copy={COUNTER_CONTRACT_GET_COUNT_PROC_HASH} />
+Once you're done configuring your custom note, click on the _"Create"_ button and sign the resulting transaction.
 
-After setting the procedure parameters, click on the _"Invoke"_ button to trigger a new custom transaction calling **copy_count**, check the storage slot value again and confirm it now holds a copy of the **Counter Contract** counter value.
+It will take some time for your note to be acknowledged and consumed by the network.

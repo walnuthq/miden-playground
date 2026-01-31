@@ -7,21 +7,19 @@ import Step3 from "@/components/tutorials/tutorial5/step3";
 import Step4 from "@/components/tutorials/tutorial5/step4";
 import Step5 from "@/components/tutorials/tutorial5/step5";
 import Step6 from "@/components/tutorials/tutorial5/step6";
-import Step7 from "@/components/tutorials/tutorial5/step7";
 
 const tutorial: Tutorial = {
   ...defaultTutorial(),
-  id: "deploy-a-counter-contract",
+  id: "interact-with-the-counter-contract",
   number: 5,
-  title: "Deploy a Counter Contract",
-  tagline: "Deploy your own Counter Contract on testnet.",
+  title: "Interact with the Counter Contract",
+  tagline: "Increment the count of a Counter Contract on testnet.",
   description:
-    "This tutorial will walk you through developing your own custom Counter Contract and deploying it on testnet.",
-  category: "advanced",
+    "This tutorial will guide you through interacting with a Counter Contract by incrementing its counter on testnet.",
   initialRoute: "/scripts",
   store: defaultStore(),
   state,
-  steps: [Step1, Step2, Step3, Step4, Step5, Step6, Step7],
+  steps: [Step1, Step2, Step3, Step4, Step5, Step6],
 };
 
 export default tutorial;

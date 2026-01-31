@@ -1,16 +1,8 @@
-import Link from "@/components/tutorials/tutorial-link";
+Now that we're done with the Counter Contract script, let's create a simple increment note script that will call the **`increment_count`** procedure of our smart contract when consumed.
 
-Now that we've compiled the **Counter Contract** script, let's deploy it.
+Click on the _"Create new script"_ button on the main _"Scripts"_ page and create a **Note Script**, you can name it anything you want eg. **increment-note**, make sure to select the **Counter Note** example.
 
-From the <Link href="/accounts">accounts page</Link>, click on _"Create new account"_ and select the _"Deploy account"_ option.
+Once your script is created, we'll start by adding a dependency to the **counter-account** script we created in the first step.
+This is required as our increment note script is calling our smart contract procedures (both **`get_count`** and **`increment_count`**) so we'll need to import the [AccountComponent](https://docs.miden.xyz/glossary#accountcomponent) interface.
 
-Give your new contract a name and select **NoAuth** as authentication component and our custom **Counter Contract** account component.
-
-When you're done configuring your contract deployment, click on the _"Deploy"_ button to create your account.
-
-Every contract deployed using the Miden Playground is automatically verified upon deployment.
-This is the reason why we're able to invoke our account procedures using their human-readable names such as **`get_count`** or **`reset_count`** under the _"Components"_ tab of the contract details page.
-
-See for yourself: {props.counter ? <Link href={`/accounts/${props.counter.address}?tab=components`}>click on the <em>"Components"</em> tab of your deployed account</Link> : <>click on the <em>"Components"</em> tab of your deployed account</>} to access the list of verified components your smart contract contains, you will also be able to read the underlying script source code by clicking on the _"Script"_ link.
-
-When a contract is verified, anyone can import it and start interacting with it on the playground as well as access the Rust source code.
+On the _"Metadata"_ tab click on the _"Add dependency"_ button and select the **counter-account** script to add it as a dependency of our **increment-note** script.

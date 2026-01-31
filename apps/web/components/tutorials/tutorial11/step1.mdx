@@ -1,12 +1,7 @@
-In this tutorial, we'll discover how to make private transactions and move assets between wallets using the Miden playground.
+Following up on the previous tutorial, we'll discover what is contract verification and why it's important in blockchain decentralized applications.
 
-You should already have created and funded a **Public** wallet in the previous tutorial.
-You will also need to create a **Private** wallet to complete this tutorial.
+Contract verification is the process of confirming that the deployed bytecode of a smart contract on a blockchain matches its original human-readable source code.
+This ensures transparency, allowing users to inspect the contract's logic and verify that it functions as intended without hidden vulnerabilities or malicious modifications.
+It is a foundational step in building security, trust, and credibility in blockchain applications.
 
-The main difference between **Public** and **Private** accounts is how their state is handled: while a public account state is entirely stored on-chain, only a commitment (hash) to a private account's state is stored on-chain.
-
-In Miden, when you are the custodian of your account state (in the case of a private wallet), **losing this state amounts to losing your funds**, similar to losing a private key.
-
-Click on the Miden Wallet browser extension to select a **Private** account, if you don't have any, create a new one by clicking on your current account dropdown then click on _"Add account"_, make sure to select the _"Off-chain Account (Private)"_ option.
-
-Connect your **Private** wallet by clicking on _"Select Wallet"_, you will be requested access to your **Private** account state, accept and click on _"Connect"_.
+Let's get started by clicking on _"Create new script"_, give it a name and select an **Account Component** script with the **Counter Contract** example.

@@ -15,6 +15,10 @@ import { exportScript } from "@/lib/api";
 
 const ScriptActionsCell = ({ script }: { script: Script }) => {
   const { openDeleteScriptAlertDialog } = useScripts();
+  const showActions = !script.readOnly && !script.id.includes("_");
+  if (!showActions) {
+    return null;
+  }
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -24,13 +28,11 @@ const ScriptActionsCell = ({ script }: { script: Script }) => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        {!script.id.includes("_") && (
-          <DropdownMenuItem>
-            <a href={exportScript(script.id)} download={`${script.name}.zip`}>
-              Export script
-            </a>
-          </DropdownMenuItem>
-        )}
+        <DropdownMenuItem>
+          <a href={exportScript(script.id)} download={`${script.name}.zip`}>
+            Export script
+          </a>
+        </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => openDeleteScriptAlertDialog(script.id)}
         >

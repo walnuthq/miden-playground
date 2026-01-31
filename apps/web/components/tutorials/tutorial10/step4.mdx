@@ -1,14 +1,50 @@
-import Link from "@/components/tutorials/tutorial-link";
-import ImportButton from "@/components/tutorials/tutorial10/import-button";
+Now let's examine the increment note script.
 
-But what happens when we import an account that isn't verified?
+**No-std Setup**
 
-Let's find out by clicking on the _"Import"_ button, this will import a **Counter Contract** using the same source code as the script we compiled previously but since it was deployed from outside the playground it wasn't automatically verified for us.
+Similar to the account contract, the note script uses **`#![no_std]`** with the same allocator and panic handler setup.
 
-<ImportButton />
+**Miden Imports**
 
-When the contract is imported, {props.counter ? <Link href={`/accounts/${props.counter.address}?tab=components`}>click on its address and head to the <em>"Components"</em> tab</Link> : <>click on its address and head to the <em>"Components"</em> tab</>}: at the moment we have no verified account components on this account (except for the **NoAuth** component which is a default component always automatically verified) and it behaves like a blackbox, only dApps aware of this contract interface can interact with it.
+```rust
+use miden::*;
 
-**So how can we verify this contract?**
+use crate::bindings::miden::counter_account::counter_account;
+```
 
-One of the option is to add verified account components by providing the original source code that was used to build and deploy this contract on-chain.
+The wildcard import brings in all Miden note script functionality.
+The **`counter_account`** binding imports the interface functions from the counter contract, allowing the note script to call them.
+
+**No Struct Definition**
+
+Unlike account contracts, note scripts don't define a struct.
+They are purely functional code that gets executed when a note is consumed.
+The script defines **what happens** when the note is processed, not a persistent data structure.
+
+Learn more about [note scripts in the Miden documentation](http://docs.miden.xyz/miden-base/note/).
+
+**The Note Script Function**
+
+```rust
+#[note]
+impl CounterNote {
+    #[note_script]
+    pub fn run(self, _arg: Word) {
+        let initial_value = cc::get_count();
+        cc::increment_count();
+        let expected_value = initial_value + Felt::from_u32(1);
+        let final_value = cc::get_count();
+        assert_eq(final_value, expected_value);
+    }
+}
+```
+
+The **`#[note_script]`** attribute marks this function as the entry point for note execution. The function:
+
+1. **Gets the initial counter value** using the imported **`counter_account::get_count()`** function
+2. **Calls `increment_count()`** to increment the counter on the target account
+3. **Verifies the operation succeeded** by checking the final value matches expectations
+
+This demonstrates how note scripts interact with account contracts through their public interfaces, calling functions to change state.
+
+The counter example demonstrates a complete interaction pattern: the account contract manages persistent state, while the note script provides a mechanism to trigger state changes through note consumption.

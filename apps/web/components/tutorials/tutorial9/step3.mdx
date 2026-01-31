@@ -1,8 +1,18 @@
-Now that we're done with the Counter Contract script, let's create a simple increment note script that will call the **`increment_count`** procedure of our smart contract when consumed.
+import Link from "@/components/tutorials/tutorial-link";
 
-Click on the _"Create new script"_ button on the main _"Scripts"_ page and create a **Note Script**, you can name it anything you want eg. **increment-note**, do not use any example.
+The **Count Reader** script is similar to the previously encountered <Link href="/scripts/counter-contract">Counter Contract script</Link>, it's defining a [storage value slot](https://docs.miden.xyz/miden-base/account/storage/#value-slots) to store its own counter value that will be copied from the **Counter Contract**.
 
-Once your script is created, we'll start by adding a dependency to the **counter-account** script we created in the first step.
-This is required as our increment note script is calling our smart contract procedures (both **`get_count`** and **`increment_count`**) so we'll need to import the [AccountComponent](https://docs.miden.xyz/glossary#accountcomponent) interface.
+Let's focus on lines _22-29_ in the Rust source code of the **Count Reader** script, where the **`copy_count`** function is defined.
 
-On the _"Metadata"_ tab click on the _"Add dependency"_ button and select the **counter-account** script to add it as a dependency of our **increment-note** script.
+The **`copy_count`** procedure takes 2 arguments:
+
+- **`counter_account_id`**: The account ID of the source contract from which to copy the counter value.
+- **`get_count_proc_hash`**: The procedure hash of the procedure that should be called on the source contract to fetch the counter value.
+
+The **`copy_count`** function executes a foreign procedure invocation with the arguments provided, calling **`get_count`** on the **Counter Contract** account.
+
+The final argument of **`execute_foreign_procedure`** is the list of arguments to pass to the invoked procedure, which is left empty as **`get_count`** doesn't take any.
+
+The **`get_count`** result is returned as the first item in a [Felt](https://docs.miden.xyz/glossary#felt) array, which is written back to [contract storage](https://docs.miden.xyz/glossary#accountstorage).
+
+Note that this **`copy_count`** procedure is generic thanks to the function parameters: we can copy the value from any source contract using any procedure as long it takes no arguments and returns a **Felt**.

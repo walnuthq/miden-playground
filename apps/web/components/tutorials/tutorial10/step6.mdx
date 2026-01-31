@@ -1,9 +1,15 @@
 import Link from "@/components/tutorials/tutorial-link";
 
-Back on the <Link href={`/accounts/${props.counter.address}?tab=components`}>imported contract components page</Link>, click on the _"Verify account component"_ button and upload the folder you extracted from the downloaded script archive.
+Let's create an **increment-note** by executing a transaction that will output our custom note incrementing the count of the **Counter Contract**.
+You will need a connected wallet to sign the transaction so make sure your wallet is ready before continuing.
 
-This process will take some time as we need to recompile the submitted script server-side and compare the resulting [MASM](https://docs.miden.xyz/glossary#miden-assembly) code against the unverified contract [AccountCode](https://docs.miden.xyz/glossary#accountcode).
+From the <Link href="/notes">notes page</Link>, click on the _"Add note"_ button and select the _"Create note"_ option.
 
-The verification will be successful if we're able to find a match and assert that the unverified account exports the same procedures defined in the uploaded source code.
+A _"Create Note"_ dialog will show up to help you configure the note creation transaction.
+First, select the **Counter Contract** deployed in the previous step and choose the **increment-note** script, leave the note type as public.
 
-The verified [AccountComponent](https://docs.miden.xyz/glossary#accountcomponent) should be appended to the account verified components list and you will be able to start interacting with this contract within the playground.
+Do not add note assets and leave the note inputs empty as our note doesn't need to embed assets and takes no parameters.
+
+Once you're done configuring your custom note, click on the _"Create"_ button and sign the resulting transaction.
+
+It will take some time for your note to be acknowledged by the network, wait until it appears in the notes list.

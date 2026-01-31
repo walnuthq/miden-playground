@@ -1,9 +1,9 @@
-Let's focus on lines _12-17_ in the Rust source code of the Counter Contract script, where the contract structure is defined.
-This contract uses a [Map Slot](https://docs.miden.xyz/miden-base/account/storage#map-slots) to store the counter value, a **StorageMap** holds key-value pairs and both keys and values are of type [Word](https://docs.miden.xyz/glossary#word).
+Let's focus on lines _13-18_ in the Rust source code of the Counter Contract script, where the contract structure is defined.
+This contract uses a [Value Slot](https://docs.miden.xyz/miden-base/account/storage#value-slots) to store the counter in its first storage slot, a **Value** represents a single [Word](https://docs.miden.xyz/glossary#word) of storage data.
 
-The **get_count** procedure defined at lines _22-25_ returns the current counter stored in the contract [AccountStorage](https://docs.miden.xyz/miden-base/account/storage) as a [Felt](https://docs.miden.xyz/glossary#felt).
-A fixed key is predefined using the Word constant value 1 and the corresponding value is retrieved within the map and truncated to a single Felt.
+The **get_count** procedure defined at lines _23-25_ returns the current counter stored in the contract [AccountStorage](https://docs.miden.xyz/glossary#accountstorage) as a [Felt](https://docs.miden.xyz/glossary#felt).
+We simply return the Word value stored in the count storage slot truncated to a single Felt.
 
-Finally, the **increment_count** procedure at lines _28-34_ is responsible for incrementing the counter value and returning it, using similar code as the getter method.
+Finally, the **increment_count** procedure at lines _28-33_ is responsible for incrementing the counter value and returning it, using similar code as the getter method.
 
-For the purpose of this tutorial, let's modify the increment value to something else than **1** and compile the script to [Miden Assembly](https://docs.miden.xyz/glossary#miden-assembly).
+In the next step, we'll focus on the compiled **MASM** code so if you want to deep dive into the underlying Miden VM architecture click on the _"MASM"_ tab, otherwise feel free to skip this step.

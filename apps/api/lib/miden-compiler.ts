@@ -21,12 +21,14 @@ export const newPackage = async ({
   type,
   example,
   rust,
+  dependencies = [],
 }: {
   name: string;
   type: PackageType;
   example?: string;
   rust?: string;
-}) => {
+  dependencies?: Dependency[];
+}): Promise<{ id: string; rust: string; dependencies: Dependency[] }> => {
   const initialRust = rust
     ? rust
     : await readFile(`${projectRoot}/templates/${example ?? type}.rs`, "utf-8");
@@ -36,16 +38,17 @@ export const newPackage = async ({
     status: rust ? "compiled" : "draft",
     readOnly: !!rust,
     rust: initialRust,
+    dependencies: dependencies.map(({ id }) => id),
   });
   await generatePackageDir({
     packageDir: id,
     name,
     type,
     rust: initialRust,
-    dependencies: [],
+    dependencies: dependencies.map(({ id }) => id),
   });
   // compilePackage(id);
-  return { id, rust: initialRust };
+  return { id, rust: initialRust, dependencies };
 };
 
 export const readRust = async (packageDir: string) => {
@@ -69,15 +72,19 @@ export const generatePackageDir = async ({
   const dependenciesPackages =
     dependencies.length > 0 ? await getDependencies(dependencies) : [];
   await Promise.all(
-    dependenciesPackages.map((dependency) =>
-      generatePackageDir({
+    dependenciesPackages.map(async (dependency) => {
+      const exists = await packageExists(dependency.id);
+      if (exists) {
+        return;
+      }
+      return generatePackageDir({
         packageDir: dependency.id,
         name: dependency.name,
         type: dependency.type,
         rust: dependency.rust,
         dependencies: dependency.dependencies,
-      }),
-    ),
+      });
+    }),
   );
   await mkdir(`${packagesPath}/${packageDir}`);
   await Promise.all([
@@ -119,7 +126,7 @@ export const generateCargoToml = ({
   cargoToml += `[lib]\n`;
   cargoToml += `crate-type = ["cdylib"]\n\n`;
   cargoToml += `[dependencies]\n`;
-  cargoToml += `miden = { version = "0.8" }\n\n`;
+  cargoToml += `miden = { git = "https://github.com/0xMiden/compiler" }\n\n`;
   cargoToml += `[package.metadata.component]\n`;
   cargoToml += `package = "miden:${name}"\n\n`;
   cargoToml += `[package.metadata.miden]\n`;

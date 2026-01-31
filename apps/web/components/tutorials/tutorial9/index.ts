@@ -7,22 +7,21 @@ import Step3 from "@/components/tutorials/tutorial9/step3";
 import Step4 from "@/components/tutorials/tutorial9/step4";
 import Step5 from "@/components/tutorials/tutorial9/step5";
 import Step6 from "@/components/tutorials/tutorial9/step6";
-import Step7 from "@/components/tutorials/tutorial9/step7";
-import Step8 from "@/components/tutorials/tutorial9/step8";
 
 const tutorial: Tutorial = {
   ...defaultTutorial(),
-  id: "your-first-smart-contract-and-custom-note",
+  id: "foreign-procedure-invocation",
   number: 9,
-  title: "Your first Smart Contract and custom note",
-  tagline: "Develop custom smart contracts and notes.",
+  title: "Foreign Procedure Invocation",
+  tagline:
+    "Using foreign procedure invocation to craft read-only cross-contract calls.",
   description:
-    "In this tutorial, you'll create your first smart contract and understand the structure and implementation of both the counter account contract and increment note script.",
+    "Following up on the Counter Contract tutorial, we will create a Count Reader contract that can copy its value from another contract.",
   category: "advanced",
   initialRoute: "/scripts",
   store: defaultStore(),
   state,
-  steps: [Step1, Step2, Step3, Step4, Step5, Step6, Step7, Step8],
+  steps: [Step1, Step2, Step3, Step4, Step5, Step6],
 };
 
 export default tutorial;

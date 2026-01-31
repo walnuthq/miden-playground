@@ -325,6 +325,8 @@ const state: State = {
       id: "0xf19d0f4c1d78fb2008194697fdb242",
       name: "MDN Faucet",
       address: "mlcl1arce6r6vr4u0kgqgr9rf0ldjggzl35zz_qruqqypuyph",
+      identifier: "mlcl1arce6r6vr4u0kgqgr9rf0ldjggzl35zz",
+      routingParameters: "qruqqypuyph",
       nonce: 1,
       storage: [
         {
@@ -350,6 +352,8 @@ const state: State = {
       id: "0xa543524e3475f6107ee0b8fb13ce35",
       name: "Wallet A",
       address: "mlcl1azj5x5jwx36lvyr7uzu0ky7wx58zjvzp_qruqqypuyph",
+      identifier: "mlcl1azj5x5jwx36lvyr7uzu0ky7wx58zjvzp",
+      routingParameters: "qruqqypuyph",
       nonce: 1,
       fungibleAssets: [
         {
@@ -371,6 +375,8 @@ const state: State = {
       id: "0x7cbe8ac73d1868107e15a4bb365401",
       name: "Wallet B",
       address: "mlcl1ap7tazk885vxsyr7zkjtkdj5qycflg6e_qruqqypuyph",
+      identifier: "mlcl1ap7tazk885vxsyr7zkjtkdj5qycflg6e",
+      routingParameters: "qruqqypuyph",
       storage: [
         {
           type: "value",
@@ -401,6 +407,7 @@ const state: State = {
               amount: "100000000",
             },
           ],
+          inputs: ["9142510632070690048", "11908452335538796048"],
         },
       ],
       updatedAt: 0,
@@ -424,6 +431,7 @@ const state: State = {
               amount: "100000000",
             },
           ],
+          inputs: ["9142510632070690048", "11908452335538796048"],
         },
       ],
       outputNotes: [],

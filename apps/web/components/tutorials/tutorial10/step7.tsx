@@ -1,43 +1,56 @@
+import { EllipsisVertical } from "lucide-react";
 import { type TutorialStep } from "@/lib/types/tutorial";
-import NextTutorialButton from "@/components/tutorials/next-tutorial-button";
+import useAccounts from "@/hooks/use-accounts";
+import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
 import Step7Content from "@/components/tutorials/tutorial10/step7.mdx";
-import useAccounts from "@/hooks/use-accounts";
-import { getMapItem } from "@/lib/types/account";
-import { EMPTY_WORD } from "@/lib/constants";
+import useScripts from "@/hooks/use-scripts";
+import useComponents from "@/hooks/use-components";
+import { defaultScriptIds } from "@/lib/types/default-scripts";
 
 const useCompleted = () => {
   const { accounts } = useAccounts();
-  const counter = accounts.find(({ name }) => name === "Unverified Contract");
-  if (!counter) {
-    return false;
-  }
-  const count = getMapItem(
-    counter?.storage,
-    0,
-    "0x0000000000000000000000000000000000000000000000000100000000000000",
+  const { scripts } = useScripts();
+  const { components } = useComponents();
+  const script = scripts.find(
+    ({ id, type }) => !defaultScriptIds.includes(id) && type === "account",
   );
-  return counter.nonce > 0 && count === EMPTY_WORD;
+  const component = components.find(({ scriptId }) => scriptId === script?.id);
+  const counter = accounts.find(({ components }) =>
+    components.includes(component?.id ?? ""),
+  );
+  return counter?.consumableNoteIds.length === 0;
 };
 
 const Step7: TutorialStep = {
-  title: "Interact with the verified contract.",
+  title: "Consume the increment note.",
   Content: () => {
     const completed = useCompleted();
     const { accounts } = useAccounts();
-    const counter = accounts.find(({ name }) => name === "Unverified Contract");
+    const { scripts } = useScripts();
+    const { components } = useComponents();
+    const script = scripts.find(
+      ({ id, type }) => !defaultScriptIds.includes(id) && type === "account",
+    );
+    const component = components.find(
+      ({ scriptId }) => scriptId === script?.id,
+    );
+    const counter = accounts.find(({ components }) =>
+      components.includes(component?.id ?? ""),
+    );
     return (
       <>
         <Step7Content counter={counter} />
         <TutorialAlert
           completed={completed}
-          title="Action required: Interact with the contract."
-          titleWhenCompleted="You interacted with the contract."
+          title="Action required: Consume the increment note."
+          titleWhenCompleted="Increment note has been consumed."
           description={
             <p>
-              Click on the <em>"Invoke"</em> button next to the{" "}
-              <strong>increment-count</strong> procedure to interact with the
-              verified contract.
+              Click on the <EllipsisVertical className="size-4 inline" /> icon
+              button on the right-most side of the consumable note row in the
+              counter account page details to consume the note with the counter
+              contract.
             </p>
           }
         />
@@ -46,7 +59,7 @@ const Step7: TutorialStep = {
   },
   NextStepButton: () => {
     const completed = useCompleted();
-    return <NextTutorialButton disabled={!completed} />;
+    return <NextStepButton disabled={!completed} />;
   },
 };
 

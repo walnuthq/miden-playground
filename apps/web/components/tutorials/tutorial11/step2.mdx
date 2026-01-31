@@ -1,17 +1,19 @@
-import MintButton from "@/components/tutorials/tutorial11/mint-button";
+Try adding a new procedure to this **Counter Contract** that resets the counter value to zero.
+It must have the following signature:
 
-Now that your **Private** wallet is connected, let's fund it by requesting tokens from the **Public** [Miden Faucet](https://faucet.testnet.miden.io/).
+```rust
+/// Resets the counter value to zero
+pub fn reset_count(&mut self) {
+    // Your code goes here
+}
+```
 
-Let's use a **Private** note to keep this wallet funding secret: only the note's hash will be stored publicly.
-The Note's actual data will remain off-chain, enhancing privacy.
+When developing a smart contract you write human-readable Rust code and use a compiler to transpile it to [MASM](https://docs.miden.xyz/glossary#miden-assembly) code that can be executed by the [MidenVM](https://docs.miden.xyz/miden-vm/).
 
-While the faucet is a **Public** account and our wallet is **Private**, the note's data will be only known by the 2 parties involved.
-This means that from the outside world, we can observe the faucet being depleted but we can't track the intended recipient of the outgoing tokens.
+Click on the _"Compile"_ button to see this process in action: the actual result of compilation is a Miden Assembly Package (MASP) containing both the MASM code and a manifest describing the package exports.
 
-Click on the _"Mint"_ button to automatically request 100 tokens from the Miden Faucet privately.
-Once the note has been created, you will be prompted to download it on your device.
+On the _"Metadata"_ tab, you'll find the list of exported procedures exposed by the package manifest along with their signature.
 
-<MintButton />
+The MASM code ends up being deployed on-chain but we lose the link with the original human-readable code and the interface exposed by the smart contract: the function signature of our exported procedures are necessary to invoke them using the correct arguments.
 
-**Important**: if you lose this note file, your tokens cannot be recovered.
-Keep it safe and do not share it.
+Contract verification aims at bridging the gap between on-chain deployed code and its original source and interface: we're linking them back together to grant anyone access to the Rust source code and package manifest so they know how to call the exposed procedures.

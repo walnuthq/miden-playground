@@ -4,14 +4,13 @@ import useAccounts from "@/hooks/use-accounts";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
 import Step1Content from "@/components/tutorials/tutorial3/step1.mdx";
-import { getAddressPart } from "@/lib/utils";
 
 const useCompleted = () => {
   const pathname = usePathname();
   const { connectedWallet } = useAccounts();
   return (
     connectedWallet?.storageMode === "public" &&
-    pathname === `/accounts/${getAddressPart(connectedWallet?.address ?? "")}`
+    pathname === `/accounts/${connectedWallet?.identifier}`
   );
 };
 

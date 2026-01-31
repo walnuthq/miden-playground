@@ -12,7 +12,6 @@ import {
   ConsumeTransaction,
   type MidenWalletAdapter,
 } from "@demox-labs/miden-wallet-adapter";
-import { getAddressPart } from "@/lib/utils";
 import { clientExportInputNoteFile } from "@/lib/web-client";
 import useWebClient from "@/hooks/use-web-client";
 import useMidenSdk from "@/hooks/use-miden-sdk";
@@ -67,7 +66,7 @@ const ConsumeNoteButton = ({ inputNote }: { inputNote: InputNote }) => {
                   midenSdk,
                 });
           const transaction = new ConsumeTransaction(
-            getAddressPart(faucet.address),
+            faucet.identifier,
             inputNote.id,
             inputNote.type === "public" ? "public" : "private",
             Number(fungibleAsset.amount),

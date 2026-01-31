@@ -3,13 +3,13 @@ import { refresh } from "next/cache";
 
 export const verifyAccountComponentFromSource = async ({
   accountId,
-  address,
+  identifier,
   account,
   cargoToml,
   rust,
 }: {
   accountId: string;
-  address: string;
+  identifier: string;
   account: string;
   cargoToml: string;
   rust: string;
@@ -19,7 +19,7 @@ export const verifyAccountComponentFromSource = async ({
     method: "POST",
     body: JSON.stringify({
       accountId,
-      address,
+      identifier,
       account,
       cargoToml,
       rust,

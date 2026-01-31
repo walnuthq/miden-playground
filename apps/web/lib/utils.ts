@@ -13,25 +13,6 @@ export const formatValue = (value: string) =>
 export const formatDigest = (value: string) =>
   `${value.slice(0, 10)}…${value.slice(-8)}`;
 
-export const getAddressPart = (address: string) => {
-  const [addressPart = ""] = address.split("_");
-  return addressPart;
-};
-
-export const getRoutingParametersPart = (address: string) => {
-  const [, routingParametersPart = ""] = address.split("_");
-  return routingParametersPart;
-};
-
-export const formatAddress = (
-  address: string,
-  networkId: string,
-  walletFormat = false,
-) => {
-  const addressPart = getAddressPart(address);
-  return `${networkId}${addressPart.slice(networkId.length).slice(0, walletFormat ? 2 : 8)}…${addressPart.slice(walletFormat ? -4 : -8)}`;
-};
-
 export const formatAmount = ({
   amount,
   decimals = FUNGIBLE_FAUCET_DEFAULT_DECIMALS,

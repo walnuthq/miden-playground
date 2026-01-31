@@ -19,11 +19,12 @@ const Step4: TutorialStep = {
   title: "Consume the output note.",
   Content: () => {
     const { accounts } = useAccounts();
+    const walletA = accounts.find(({ name }) => name === "Wallet A");
     const walletB = accounts.find(({ name }) => name === "Wallet B");
     const completed = useCompleted();
     return (
       <>
-        <Step4Content walletB={walletB} />
+        <Step4Content walletA={walletA} walletB={walletB} />
         <TutorialAlert
           completed={completed}
           title="Action required: Consume the note."

@@ -7,6 +7,7 @@ import {
 import { COUNT_READER_COPY_COUNT_PROC_HASH } from "@/lib/constants";
 
 export const countReaderRust = `#![no_std]
+#![feature(alloc_error_handler)]
 
 extern crate alloc;
 

@@ -10,9 +10,12 @@ import { Button } from "@workspace/ui/components/button";
 import { type InputNote, noteStates } from "@/lib/types/note";
 import AccountAddress from "@/components/lib/account-address";
 import { CircleCheckBig } from "lucide-react";
+import useAccounts from "@/hooks/use-accounts";
 import useNotes from "@/hooks/use-notes";
 import useGlobalContext from "@/components/global-context/hook";
 import { type Script } from "@/lib/types/script";
+import useMidenSdk from "@/hooks/use-miden-sdk";
+import { accountIdToAddress } from "@/lib/web-client";
 
 const NoteInformationTable = ({
   inputNote,
@@ -21,8 +24,16 @@ const NoteInformationTable = ({
   inputNote: InputNote;
   script: Script | null;
 }) => {
+  const { midenSdk } = useMidenSdk();
   const { networkId } = useGlobalContext();
+  const { accounts } = useAccounts();
   const { openVerifyNoteScriptDialog } = useNotes();
+  const sender = accounts.find(({ id }) => id === inputNote.senderId);
+  const senderAddress = accountIdToAddress({
+    accountId: inputNote.senderId,
+    networkId,
+    midenSdk,
+  });
   return (
     <div className="rounded-md border">
       <Table>
@@ -107,9 +118,13 @@ const NoteInformationTable = ({
             <TableCell>{inputNote.tag}</TableCell>
           </TableRow>
           <TableRow>
-            <TableCell>Sender ID</TableCell>
+            <TableCell>Sender</TableCell>
             <TableCell>
-              <AccountAddress id={inputNote.senderId} />
+              <AccountAddress
+                account={{ name: sender?.name ?? "", address: senderAddress }}
+                withName={!!sender}
+                withLink={!!sender}
+              />
             </TableCell>
           </TableRow>
         </TableBody>

@@ -1,44 +1,41 @@
-import { usePathname } from "next/navigation";
+import { EllipsisVertical } from "lucide-react";
 import { type TutorialStep } from "@/lib/types/tutorial";
 import useAccounts from "@/hooks/use-accounts";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
 import Step4Content from "@/components/tutorials/tutorial4/step4.mdx";
-import { COUNTER_CONTRACT_ADDRESS } from "@/lib/constants";
-import { getAddressPart } from "@/lib/utils";
 
 const useCompleted = () => {
-  const pathname = usePathname();
-  return pathname === `/accounts/${getAddressPart(COUNTER_CONTRACT_ADDRESS)}`;
+  const { connectedWallet } = useAccounts();
+  return (
+    connectedWallet?.storageMode === "private" &&
+    connectedWallet?.consumableNoteIds.length === 0
+  );
 };
 
 const Step4: TutorialStep = {
-  title: "Import the Counter Contract.",
+  title: "Consume the private note with your private wallet.",
   Content: () => {
-    const { accounts } = useAccounts();
-    const counter = accounts.find(
-      ({ address }) => address === COUNTER_CONTRACT_ADDRESS,
-    );
+    const { connectedWallet } = useAccounts();
     const completed = useCompleted();
     return (
       <>
         <Step4Content
-          counter={{
-            name: "Counter Contract",
-            address: COUNTER_CONTRACT_ADDRESS,
-          }}
-          withLink={!!counter}
+          wallet={
+            connectedWallet?.storageMode === "private"
+              ? connectedWallet
+              : undefined
+          }
         />
         <TutorialAlert
           completed={completed}
-          title="Action required: Import the Counter Contract."
-          titleWhenCompleted="You have imported the Counter Contract."
+          title="Action required: Consume the private note."
+          titleWhenCompleted="Your wallet has been privately funded."
           description={
             <p>
-              Click on the <em>"Create new account"</em> button on top of the
-              accounts page and select the <em>"Import account"</em> option to
-              import the Counter Contract in the Playground, then navigate to
-              the account details page.
+              Click on the <EllipsisVertical className="size-4 inline" /> icon
+              button on the right-most side of the consumable note row in your
+              private wallet page details to consume the note with your wallet.
             </p>
           }
         />

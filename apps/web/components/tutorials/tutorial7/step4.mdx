@@ -1,11 +1,25 @@
 import Link from "@/components/tutorials/tutorial-link";
+import {
+  TEST_WALLET_ADDRESS,
+  TEST_WALLET_ACCOUNT_ID_PREFIX,
+  TEST_WALLET_ACCOUNT_ID_SUFFIX,
+} from "@/lib/constants";
+import { getIdentifierPart } from "@/lib/types/account";
 
-Our network counter being registered on-chain, let's create a public note that the network operator can consume to execute the increment function.
-This will increment the counter from 1 to 2.
+Now that our custom note script is compiled, let's create the note by executing a custom transaction.
+You will need a connected wallet to sign the transaction so make sure your Miden Wallet is connected to the playground before continuing.
 
-Take some time to get familiar with the <Link href="/scripts/counter-note">counter note script</Link> which is very basic: we simply call the network counter **increment_count** procedure within the note script.
+From the <Link href="/notes">notes page</Link>, click on the _"Add note"_ button and select the _"Create note"_ option.
 
-The next step will be to create a custom network note with this script and register it on the network by signing a transaction.
+A _"Create Note"_ dialog will show up to help you configure the note creation transaction.
+Set the recipient account to **Test Wallet** and select the timelock script, leave the note type as public.
 
-A network note is a public note targetting a network account.
-Once it's acknowledged by the network transaction builder, it will be automatically consumed by executing a transaction against the targetted network account.
+The note will be created through your wallet so you must include some of your assets in the note, try sending **10 MIDEN** tokens.
+
+The final step is to add the correct note inputs to configure your custom note.
+
+The first two inputs are the target account ID suffix and prefix, you can use the <Link href={`/accounts/${getIdentifierPart(TEST_WALLET_ADDRESS)}`}>Test Wallet</Link> account ID suffix **{TEST_WALLET_ACCOUNT_ID_SUFFIX}** and prefix **{TEST_WALLET_ACCOUNT_ID_PREFIX}**.
+
+The third input is the timelock block height, you can set it to any future block height eg. **{props.blockNum}**.
+
+Once you're done configuring your note creation, click on the _"Create"_ button and sign the resulting transaction.

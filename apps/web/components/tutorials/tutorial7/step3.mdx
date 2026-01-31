@@ -1,8 +1,19 @@
-import Link from "@/components/tutorials/tutorial-link";
+We assume the timelock block height will be appended as the 3rd item in the note inputs, let's store it in a variable for future use:
 
-Now that our network account is deployed, we must execute a transaction performing a procedure invocation (**increment_count**) that creates a necessary state change for our contract to be deployed and stored on the network on-chain.
-In Miden, network contracts must have their state modified through a transaction to be properly registered and committed to the blockchain - simply creating the account isn't sufficient for network storage mode.
+```rust
+let timelock_height = inputs[2];
+```
 
-Navigate to your network account by <Link href={`/accounts/${props.counter?.address}`}>clicking on its ID</Link>, on the _"Components"_ tab, you can access the account components to perform an initial transaction on this newly created smart contract.
+To get the current block height, we'll use the transaction kernel `get_block_number` call:
 
-Click on the _"Invoke"_ button of **increment_count** to trigger a custom transaction and increment the counter.
+```rust
+let block_number = tx::get_block_number();
+```
+
+Finally, we must check that `block_number` ≥ `timelock_height`:
+
+```rust
+assert!(block_number >= timelock_height);
+```
+
+After adding the timelock logic to your script, compile it and proceed to the next step.

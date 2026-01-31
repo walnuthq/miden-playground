@@ -1,12 +1,12 @@
 import { type Component, defaultComponent } from "@/lib/types/component";
 
-const rpoFalcon512Auth: Component = {
+const falcon512RpoAuth: Component = {
   ...defaultComponent(),
-  id: "rpo-falcon-512-auth",
-  name: "RPO Falcon 512 Auth",
+  id: "falcon-512-rpo-auth",
+  name: "Falcon 512 RPO Auth",
   type: "authentication-component",
-  scriptId: "rpo-falcon-512-auth",
+  scriptId: "falcon-512-rpo-auth",
   storageSlots: [{ name: "Owner Public Key", type: "value", value: "0" }],
 };
 
-export default rpoFalcon512Auth;
+export default falcon512RpoAuth;

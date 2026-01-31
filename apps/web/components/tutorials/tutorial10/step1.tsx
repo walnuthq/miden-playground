@@ -29,7 +29,8 @@ const Step1: TutorialStep = {
           description={
             <p>
               Click on the <em>"Create new script"</em> button and create a new{" "}
-              <strong>Account Component</strong>, do not select any example.
+              <strong>Account Component</strong> with the{" "}
+              <strong>Counter Contract</strong> example.
             </p>
           }
         />

@@ -36,7 +36,7 @@ const useTutorials = () => {
     }
     const nextTutorial = tutorials[tutorial.number] ?? defaultTutorial();
     const newCompletedTutorials = new Set([...completedTutorials]);
-    newCompletedTutorials.add(tutorial.number);
+    newCompletedTutorials.add(tutorial.id);
     pushState({
       pushedState: {
         ...nextTutorial.state,

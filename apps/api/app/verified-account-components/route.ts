@@ -21,7 +21,7 @@ import {
 
 type VerifyAccountComponentRequestBody = {
   accountId: string;
-  address: string;
+  identifier: string;
   account: string;
   //
   cargoToml?: string;
@@ -32,13 +32,13 @@ type VerifyAccountComponentRequestBody = {
 
 const verifyAccountComponentFromSource = async ({
   accountId,
-  address,
+  identifier,
   account,
   cargoToml,
   rust,
 }: {
   accountId: string;
-  address: string;
+  identifier: string;
   account: string;
   cargoToml: string;
   rust: string;
@@ -82,19 +82,19 @@ const verifyAccountComponentFromSource = async ({
       exports,
       dependencies: dependencies.map(({ id }) => id),
     }),
-    insertVerifiedAccountComponent({ accountId, packageId: id, address }),
+    insertVerifiedAccountComponent({ accountId, packageId: id, identifier }),
   ]);
   return true;
 };
 
 const verifyAccountComponentsFromPackageIds = async ({
   accountId,
-  address,
+  identifier,
   account,
   packageIds,
 }: {
   accountId: string;
-  address: string;
+  identifier: string;
   account: string;
   packageIds: string[];
 }) => {
@@ -120,7 +120,7 @@ const verifyAccountComponentsFromPackageIds = async ({
       await insertVerifiedAccountComponent({
         accountId,
         packageId: id,
-        address,
+        identifier,
       });
       return true;
     }),
@@ -131,12 +131,12 @@ const verifyAccountComponentsFromPackageIds = async ({
 export const POST = async (request: NextRequest) => {
   try {
     const body = await request.json();
-    const { accountId, address, account, cargoToml, rust, packageIds } =
+    const { accountId, identifier, account, cargoToml, rust, packageIds } =
       body as VerifyAccountComponentRequestBody;
     if (cargoToml && rust) {
       const verified = await verifyAccountComponentFromSource({
         accountId,
-        address,
+        identifier,
         account,
         cargoToml,
         rust,
@@ -145,7 +145,7 @@ export const POST = async (request: NextRequest) => {
     } else if (packageIds) {
       const verified = await verifyAccountComponentsFromPackageIds({
         accountId,
-        address,
+        identifier,
         account,
         packageIds,
       });

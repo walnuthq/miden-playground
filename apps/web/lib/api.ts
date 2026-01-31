@@ -10,23 +10,32 @@ export const createScript = async ({
   name,
   type,
   example,
+  tutorialId,
 }: {
   name: string;
   type: ScriptType;
   example: ScriptExample | "none";
+  tutorialId: string;
 }) => {
-  const apiUrl = example === "none" ? process.env.NEXT_PUBLIC_API_URL : "/api";
+  const apiUrl = [
+    "",
+    "your-first-smart-contract-and-custom-note",
+    "contract-verification",
+  ].includes(tutorialId)
+    ? process.env.NEXT_PUBLIC_API_URL
+    : "/api";
   const response = await fetch(`${apiUrl}/scripts`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name, type, example }),
   });
   const result = await response.json();
-  const { id, rust } = result as {
+  const { id, rust, dependencies } = result as {
     id: string;
     rust: string;
+    dependencies: Dependency[];
   };
-  return { id, rust };
+  return { id, rust, dependencies };
 };
 
 export const compileScript = async (script: Script) => {
@@ -77,13 +86,13 @@ export const deleteScript = async (scriptId: string) => {
 
 export const verifyAccountComponentFromSource = async ({
   accountId,
-  address,
+  identifier,
   account,
   cargoToml,
   rust,
 }: {
   accountId: string;
-  address: string;
+  identifier: string;
   account: string;
   cargoToml: string;
   rust: string;
@@ -93,7 +102,7 @@ export const verifyAccountComponentFromSource = async ({
     method: "POST",
     body: JSON.stringify({
       accountId,
-      address,
+      identifier,
       account,
       cargoToml,
       rust,
@@ -106,29 +115,29 @@ export const verifyAccountComponentFromSource = async ({
 
 export const verifyAccountComponentsFromPackageIds = async ({
   accountId,
-  address,
+  identifier,
   account,
   packageIds,
 }: {
   accountId: string;
-  address: string;
+  identifier: string;
   account: string;
   packageIds: string[];
 }) => {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   const response = await fetch(`${apiUrl}/verified-account-components`, {
     method: "POST",
-    body: JSON.stringify({ accountId, address, account, packageIds }),
+    body: JSON.stringify({ accountId, identifier, account, packageIds }),
   });
   const result = await response.json();
   const { ok, error } = result as { ok: boolean; error?: string };
   return { verified: ok, error };
 };
 
-export const getVerifiedAccountComponents = async (address: string) => {
+export const getVerifiedAccountComponents = async (identifier: string) => {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   const response = await fetch(
-    `${apiUrl}/verified-account-components/${address}`,
+    `${apiUrl}/verified-account-components/${identifier}`,
     {
       method: "GET",
     },
