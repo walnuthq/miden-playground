@@ -1,8 +1,9 @@
 import { type Script, defaultScript } from "@/lib/types/script";
-import { P2IDE_NOTE_CODE } from "@/lib/constants";
+import { BASIC_WALLET_CODE, P2IDE_NOTE_CODE } from "@/lib/constants";
 
 export const p2ideRust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
 #![no_std]
+#![feature(alloc_error_handler)]
 
 // However, we could still use some standard library types while
 // remaining no-std compatible, if we uncommented the following lines:
@@ -12,75 +13,82 @@ export const p2ideRust = `// Do not link against libstd (i.e. anything defined i
 
 use miden::*;
 
-use crate::bindings::miden::basic_wallet::basic_wallet::receive_asset;
+use crate::bindings::Account;
 
-fn consume_assets() {
+fn consume_assets(account: &mut Account) {
     let assets = active_note::get_assets();
     for asset in assets {
-        receive_asset(asset);
+        account.receive_asset(asset);
     }
 }
 
-fn reclaim_assets(consuming_account: AccountId) {
+fn reclaim_assets(account: &mut Account, consuming_account: AccountId) {
     let creator_account = active_note::get_sender();
 
     if consuming_account == creator_account {
-        consume_assets();
+        consume_assets(account);
     } else {
         panic!();
     }
 }
 
-#[note_script]
-fn run(_arg: Word) {
-    let inputs = active_note::get_inputs();
+#[note]
+struct P2ideNote;
 
-    // make sure the number of inputs is 4
-    assert_eq((inputs.len() as u32).into(), felt!(4));
+#[note]
+impl P2ideNote {
+    #[note_script]
+    pub fn run(self, _arg: Word, account: &mut Account) {
+        let inputs = active_note::get_inputs();
 
-    let target_account_id_prefix = inputs[0];
-    let target_account_id_suffix = inputs[1];
+        // make sure the number of inputs is 4
+        assert_eq((inputs.len() as u32).into(), felt!(4));
 
-    let timelock_height = inputs[2];
-    let reclaim_height = inputs[3];
+        let target_account_id_prefix = inputs[0];
+        let target_account_id_suffix = inputs[1];
 
-    // get block number
-    let block_number = tx::get_block_number();
-    assert!(block_number >= timelock_height);
+        let timelock_height = inputs[2];
+        let reclaim_height = inputs[3];
 
-    // get consuming account id
-    let consuming_account_id = active_account::get_id();
+        // get block number
+        let block_number = tx::get_block_number();
+        assert!(block_number >= timelock_height);
 
-    // target account id
-    let target_account_id = AccountId::from(target_account_id_prefix, target_account_id_suffix);
+        // get consuming account id
+        let consuming_account_id = account.get_id();
 
-    let is_target = target_account_id == consuming_account_id;
-    if is_target {
-        consume_assets();
-    } else {
-        assert!(reclaim_height >= block_number);
-        reclaim_assets(consuming_account_id);
+        // target account id
+        let target_account_id = AccountId::new(target_account_id_prefix, target_account_id_suffix);
+
+        let is_target = target_account_id == consuming_account_id;
+        if is_target {
+            consume_assets(account);
+        } else {
+            assert!(reclaim_height >= block_number);
+            reclaim_assets(account, consuming_account_id);
+        }
     }
 }
 `;
 
-export const p2ideMasm = `use.miden::active_account
-use.miden::account_id
-use.miden::active_note
-use.miden::tx
+export const p2ideMasm = `use miden::protocol::active_account
+use miden::protocol::account_id
+use miden::protocol::active_note
+use miden::protocol::tx
+use miden::standards::wallets::basic->basic_wallet
 
 # ERRORS
 # =================================================================================================
 
-const.ERR_P2IDE_WRONG_NUMBER_OF_INPUTS="P2IDE note expects exactly 4 note inputs"
+const ERR_P2IDE_UNEXPECTED_NUMBER_OF_STORAGE_ITEMS="P2IDE note expects exactly 4 note storage items"
 
-const.ERR_P2IDE_RECLAIM_ACCT_IS_NOT_SENDER="failed to reclaim P2IDE note because the reclaiming account is not the sender"
+const ERR_P2IDE_RECLAIM_ACCT_IS_NOT_SENDER="failed to reclaim P2IDE note because the reclaiming account is not the sender"
 
-const.ERR_P2IDE_RECLAIM_HEIGHT_NOT_REACHED="failed to reclaim P2IDE note because the reclaim block height is not reached yet"
+const ERR_P2IDE_RECLAIM_HEIGHT_NOT_REACHED="failed to reclaim P2IDE note because the reclaim block height is not reached yet"
 
-const.ERR_P2IDE_RECLAIM_DISABLED="P2IDE reclaim is disabled"
+const ERR_P2IDE_RECLAIM_DISABLED="P2IDE reclaim is disabled"
 
-const.ERR_P2IDE_TIMELOCK_HEIGHT_NOT_REACHED="failed to consume P2IDE note because the note is still timelocked"
+const ERR_P2IDE_TIMELOCK_HEIGHT_NOT_REACHED="failed to consume P2IDE note because the note is still timelocked"
 
 # HELPER PROCEDURES
 # =================================================================================================
@@ -89,7 +97,7 @@ const.ERR_P2IDE_TIMELOCK_HEIGHT_NOT_REACHED="failed to consume P2IDE note becaus
 #!
 #! Inputs:  [current_block_height, timelock_block_height]
 #! Outputs: [current_block_height]
-proc.verify_unlocked
+proc verify_unlocked
     dup movdn.2
     # => [current_block_height, timelock_block_height, current_block_height]
 
@@ -109,7 +117,7 @@ end
 #! - the reclaim of the active note is disabled.
 #! - the reclaim block height is not reached yet.
 #! - the account attempting to reclaim the note is not the sender account.
-proc.reclaim_note
+proc reclaim_note
     # check that the reclaim of the active note is enabled
     movup.3 dup neq.0 assert.err=ERR_P2IDE_RECLAIM_DISABLED
     # => [reclaim_block_height, account_id_prefix, account_id_suffix, current_block_height]
@@ -130,7 +138,7 @@ proc.reclaim_note
     # => []
 
     # add note assets to account
-    exec.active_note::add_assets_to_account
+    exec.basic_wallet::add_assets_to_account
     # => []
 end
 
@@ -144,18 +152,18 @@ end
 #!     the transaction's reference block number is greater than or equal to the note's reclaim block height.
 #!
 #! Requires that the account exposes:
-#! - miden::contracts::wallets::basic::receive_asset procedure.
+#! - miden::standards::wallets::basic::receive_asset procedure.
 #!
 #! Inputs:  []
 #! Outputs: []
 #!
-#! Note inputs are assumed to be as follows:
+#! Note storage is assumed to be as follows:
 #! - target_account_id is the ID of the account for which the note is intended.
 #! - reclaim_block_height is the block height at which the note can be reclaimed by the sender.
 #! - timelock_block_height is the block height at which the note can be consumed by the target.
 #!
 #! Panics if:
-#! - The account does not expose miden::contracts::wallets::basic::receive_asset procedure.
+#! - The account does not expose miden::standards::wallets::basic::receive_asset procedure.
 #! - The note is consumed before the timelock expired, i.e. the transaction's reference block
 #!   number is less than the timelock block height.
 #! - Before reclaim block height: the account ID of the executing account is not equal to the specified
@@ -165,16 +173,16 @@ end
 #! - The same non-fungible asset already exists in the account.
 #! - Adding a fungible asset would result in an amount overflow, i.e., the total amount would be
 #!   greater than 2^63.
-begin
-    # store the note inputs to memory starting at address 0
-    push.0 exec.active_note::get_inputs
-    # => [num_inputs, inputs_ptr]
+pub proc main
+    # store the note storage to memory starting at address 0
+    push.0 exec.active_note::get_storage
+    # => [num_storage_items, storage_ptr]
 
-    # make sure the number of inputs is 4
-    eq.4 assert.err=ERR_P2IDE_WRONG_NUMBER_OF_INPUTS
-    # => [inputs_ptr]
+    # make sure the number of storage items is 4
+    eq.4 assert.err=ERR_P2IDE_UNEXPECTED_NUMBER_OF_STORAGE_ITEMS
+    # => [storage_ptr]
 
-    # read the reclaim block height, timelock_block_height, and target account ID from the note inputs
+    # read the reclaim block height, timelock_block_height, and target account ID from the note storage
     mem_loadw_be
     # => [timelock_block_height, reclaim_block_height, target_account_id_prefix, target_account_id_suffix]
 
@@ -196,7 +204,7 @@ begin
 
     if.true
         # we can safely consume the note since the active account is the target of the note
-        dropw exec.active_note::add_assets_to_account
+        dropw exec.basic_wallet::add_assets_to_account
         # => []
 
     else
@@ -218,6 +226,9 @@ const p2ide: Script = {
   readOnly: true,
   rust: p2ideRust,
   masm: p2ideMasm,
+  dependencies: [
+    { id: "basic-wallet", name: "basic-wallet", digest: BASIC_WALLET_CODE },
+  ],
   digest: P2IDE_NOTE_CODE,
 };
 

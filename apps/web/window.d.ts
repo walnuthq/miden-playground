@@ -18,7 +18,7 @@ declare global {
     // Simple Analytics
     sa_event: (
       event: string,
-      metadata: Record<string, string | boolean | number | Date>
+      metadata: Record<string, string | boolean | number | Date>,
     ) => void;
   }
 }

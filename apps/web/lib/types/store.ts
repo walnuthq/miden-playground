@@ -127,7 +127,7 @@ export const defaultStore = (): Store => ({
   notesScripts: [],
   outputNotes: [],
   partialBlockchainNodes: [],
-  settings: [],
+  settings: [{ key: "note_transport_cursor", value: [0, 0, 0, 0, 0, 0, 0, 0] }],
   stateSync: [{ id: 1, blockNum: "0" }],
   storageMapEntries: [],
   tags: [],

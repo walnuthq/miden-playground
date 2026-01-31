@@ -37,7 +37,7 @@ import useComponents from "@/hooks/use-components";
 import { defaultScriptIds } from "@/lib/types/default-scripts";
 import { defaultComponentIds } from "@/lib/types/default-components";
 import useTutorials from "@/hooks/use-tutorials";
-import { BASIC_WALLET_CODE, MIDEN_FAUCET_ADDRESS } from "@/lib/constants";
+import { MIDEN_FAUCET_ADDRESS } from "@/lib/constants";
 import useGlobalContext from "@/components/global-context/hook";
 
 const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
@@ -68,12 +68,12 @@ const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
       items: accounts
         .sort((a, b) => b.updatedAt - a.updatedAt)
         .slice(0, 5)
-        .map(({ name, address, isFaucet, code }) => ({
+        .map(({ name, identifier, isFaucet, components }) => ({
           title: name,
-          url: `/accounts/${address}`,
+          url: `/accounts/${identifier}`,
           icon: isFaucet ? (
             <HandCoins className="size-4" />
-          ) : code === BASIC_WALLET_CODE ? (
+          ) : components.includes("basic-wallet") ? (
             <Wallet className="size-4" />
           ) : (
             <FileText className="size-4" />
@@ -160,7 +160,7 @@ const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
   // automatically import Miden Faucet on testnet
   useEffect(() => {
     const midenFaucet = faucets.find(
-      ({ address }) => address === MIDEN_FAUCET_ADDRESS
+      ({ address }) => address === MIDEN_FAUCET_ADDRESS,
     );
     if (networkId === "mtst" && !midenFaucet) {
       importAccountByAddress({

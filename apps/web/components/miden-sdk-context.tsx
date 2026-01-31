@@ -16,7 +16,7 @@ export const MidenSdkProvider = ({ children }: { children: ReactNode }) => {
       setMidenSdk(sdk);
     };
     loadMidenSdk();
-  }, []);
+  }, [midenSdk]);
   if (!midenSdk) {
     return null;
   }

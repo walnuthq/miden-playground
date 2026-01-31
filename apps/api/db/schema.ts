@@ -33,11 +33,11 @@ export const packagesTable = pgTable("packages", {
   digest: varchar({ length: 66 })
     .notNull()
     .default(
-      "0x0000000000000000000000000000000000000000000000000000000000000000"
+      "0x0000000000000000000000000000000000000000000000000000000000000000",
     ),
   masp: text().notNull().default(""),
   exports: jsonb().array().notNull().default([]),
-  dependencies: uuid().array().notNull().default([]),
+  dependencies: varchar({ length: 36 }).array().notNull().default([]),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -48,10 +48,10 @@ export const verifiedAccountComponentTable = pgTable(
     id: uuid().primaryKey().defaultRandom(),
     accountId: varchar("account_id", { length: 32 }).notNull(),
     packageId: uuid("package_id").notNull(),
-    address: text().notNull(),
+    identifier: text().notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
-  }
+  },
 );
 
 export const verifiedNoteTable = pgTable("verified_notes", {

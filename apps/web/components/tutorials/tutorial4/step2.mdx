@@ -1,9 +1,17 @@
-Let's focus on lines _12-17_ in the Rust source code of the Counter Contract script, where the contract structure is defined.
-This contract uses a [Value Slot](https://docs.miden.xyz/miden-base/account/storage#value-slots) to store the counter in its first storage slot, a **Value** represents a single [Word](https://docs.miden.xyz/glossary#word) of storage data.
+import MintButton from "@/components/tutorials/tutorial4/mint-button";
 
-The **get_count** procedure defined at lines _22-24_ returns the current counter stored in the contract [AccountStorage](https://docs.miden.xyz/glossary#accountstorage) as a [Felt](https://docs.miden.xyz/glossary#felt).
-We simply return the Word value stored in the count storage slot truncated to a single Felt.
+Now that your **Private** wallet is connected, let's fund it by requesting tokens from the **Public** [Miden Faucet](https://faucet.testnet.miden.io/).
 
-Finally, the **increment_count** procedure at lines _27-32_ is responsible for incrementing the counter value and returning it, using similar code as the getter method.
+Let's use a **Private** note to keep this wallet funding secret: only the note's hash will be stored publicly.
+The Note's actual data will remain off-chain, enhancing privacy.
 
-In the next step, we'll focus on the compiled **MASM** code so if you want to deep dive into the underlying Miden VM architecture click on the _"MASM"_ tab, otherwise feel free to skip this step.
+While the faucet is a **Public** account and our wallet is **Private**, the note's data will be only known by the 2 parties involved.
+This means that from the outside world, we can observe the faucet being depleted but we can't track the intended recipient of the outgoing tokens.
+
+Click on the _"Mint"_ button to automatically request 100 tokens from the Miden Faucet privately.
+Once the note has been created, you will be prompted to download it on your device.
+
+<MintButton />
+
+**Important**: if you lose this note file, your tokens cannot be recovered.
+Keep it safe and do not share it.

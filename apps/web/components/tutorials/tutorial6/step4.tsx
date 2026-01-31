@@ -2,45 +2,37 @@ import { type TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
 import Step4Content from "@/components/tutorials/tutorial6/step4.mdx";
-import useAccounts from "@/hooks/use-accounts";
-import useNotes from "@/hooks/use-notes";
-import { P2IDE_NOTE_CODE, TEST_WALLET_ACCOUNT_ID } from "@/lib/constants";
-import { accountIdFromPrefixSuffix } from "@/lib/types/account";
-import useGlobalContext from "@/components/global-context/hook";
+import useComponents from "@/hooks/use-components";
 
 const useCompleted = () => {
-  const { wallets, connectedWallet } = useAccounts();
-  const senderAccount = wallets.find(
-    ({ address }) => address === connectedWallet?.address
+  const { components } = useComponents();
+  const component = components.find(
+    ({ type, scriptId }) =>
+      type === "account" && scriptId.startsWith("counter-contract_"),
   );
-  const { inputNotes } = useNotes();
-  const note = inputNotes.find(
-    ({ senderId, scriptRoot, inputs, state, type }) =>
-      senderId === senderAccount?.id &&
-      scriptRoot === P2IDE_NOTE_CODE &&
-      accountIdFromPrefixSuffix(inputs[1]!, inputs[0]!) ===
-        TEST_WALLET_ACCOUNT_ID &&
-      state === "committed" &&
-      type === "public"
+  const storageSlotsLength = component?.storageSlots.length ?? 0;
+  const storageSlot = component?.storageSlots.find(
+    ({ type, value }) => type === "map" && value.includes("1:"),
   );
-  return !!note;
+  return storageSlotsLength === 1 && !!storageSlot;
 };
 
 const Step4: TutorialStep = {
-  title: "Create a note by executing a transaction.",
+  title: "Create a Storage Slot.",
   Content: () => {
-    const { blockNum } = useGlobalContext();
     const completed = useCompleted();
     return (
       <>
-        <Step4Content blockNum={blockNum + 100} />
+        <Step4Content />
         <TutorialAlert
           completed={completed}
-          title="Action required: Create the note."
-          titleWhenCompleted="You created the timelock P2ID note."
+          title="Action required: Create a Storage Slot."
+          titleWhenCompleted="You created a Storage Slot."
           description={
             <p>
-              Follow the instructions to create your custom timelock P2ID note.
+              Click on the <em>"Add storage slot"</em> button and create a{" "}
+              <strong>StorageMap</strong> slot with the initial counter value
+              stored at key <strong>1</strong>.
             </p>
           }
         />

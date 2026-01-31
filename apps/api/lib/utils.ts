@@ -1,6 +1,7 @@
 import { access, constants } from "node:fs/promises";
 import { execFile as execFileCb, exec as execCb } from "node:child_process";
 import { promisify } from "node:util";
+import { validate, version } from "uuid";
 
 export const execFile = promisify(execFileCb);
 
@@ -14,3 +15,6 @@ export const fileExists = async (fileName: string) => {
     return false;
   }
 };
+
+export const isValidUuidv4 = (uuid: string) =>
+  validate(uuid) && version(uuid) === 4;

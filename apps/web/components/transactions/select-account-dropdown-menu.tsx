@@ -38,7 +38,7 @@ const SelectAccountDropdownMenu = ({
     selectFaucets && shownFaucets.length > 0 && !withoutFaucets;
   const faucetIds = faucets.map(({ id }) => id);
   const shownAccounts = accounts.filter(({ id }) =>
-    id !== without && withoutFaucets ? !faucetIds.includes(id) : true
+    id !== without && withoutFaucets ? !faucetIds.includes(id) : true,
   );
   const disabled =
     (selectWallets && !showWallets) || (selectFaucets && !showFaucets);

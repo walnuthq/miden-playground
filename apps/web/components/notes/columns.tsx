@@ -12,11 +12,46 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
+import {
+  useWallet,
+  ConsumeTransaction,
+  type MidenWalletAdapter,
+} from "@demox-labs/miden-wallet-adapter";
 import useTransactions from "@/hooks/use-transactions";
 import AccountAddress from "@/components/lib/account-address";
 import useScripts from "@/hooks/use-scripts";
+import useGlobalContext from "@/components/global-context/hook";
+import useAccounts from "@/hooks/use-accounts";
+import { clientExportInputNoteFile } from "@/lib/web-client";
+import useWebClient from "@/hooks/use-web-client";
+import useMidenSdk from "@/hooks/use-miden-sdk";
+import { accountIdToAddress } from "@/lib/web-client";
+
+const InputNoteSenderCell = ({ inputNote }: { inputNote: InputNote }) => {
+  const { midenSdk } = useMidenSdk();
+  const { networkId } = useGlobalContext();
+  const { accounts } = useAccounts();
+  const sender = accounts.find(({ id }) => id === inputNote.senderId);
+  const senderAddress = accountIdToAddress({
+    accountId: inputNote.senderId,
+    networkId,
+    midenSdk,
+  });
+  return (
+    <AccountAddress
+      account={{ name: sender?.name ?? "", address: senderAddress }}
+      withName={!!sender}
+      withLink={!!sender}
+    />
+  );
+};
 
 const InputNoteActionsCell = ({ inputNote }: { inputNote: InputNote }) => {
+  const { midenSdk } = useMidenSdk();
+  const { client } = useWebClient();
+  const { wallet } = useWallet();
+  const { networkId } = useGlobalContext();
+  const { faucets } = useAccounts();
   const { openCreateTransactionDialog, newConsumeTransactionRequest } =
     useTransactions();
   const { scripts } = useScripts();
@@ -33,22 +68,66 @@ const InputNoteActionsCell = ({ inputNote }: { inputNote: InputNote }) => {
         {script?.id === "p2id" && !noteConsumed(inputNote) && (
           <DropdownMenuItem
             onClick={async () => {
-              const targetAccountId = accountIdFromPrefixSuffix(
-                inputNote.inputs[1]!,
-                inputNote.inputs[0]!
-              );
-              const { transactionRequest, transactionResult } =
-                await newConsumeTransactionRequest({
+              // const targetAccountId = accountIdFromPrefixSuffix(
+              //   inputNote.inputs[1]!,
+              //   inputNote.inputs[0]!
+              // );
+              // const { transactionRequest, transactionResult } =
+              //   await newConsumeTransactionRequest({
+              //     accountId: targetAccountId,
+              //     noteIds: [inputNote.id],
+              //   });
+              // openCreateTransactionDialog({
+              //   accountId: targetAccountId,
+              //   transactionType: "consume",
+              //   step: "preview",
+              //   transactionRequest,
+              //   transactionResult,
+              // });
+              if (networkId === "mlcl") {
+                const targetAccountId = accountIdFromPrefixSuffix(
+                  inputNote.inputs[1]!,
+                  inputNote.inputs[0]!,
+                );
+                const { transactionRequest, transactionResult } =
+                  await newConsumeTransactionRequest({
+                    accountId: targetAccountId,
+                    noteIds: [inputNote.id],
+                  });
+                openCreateTransactionDialog({
                   accountId: targetAccountId,
-                  noteIds: [inputNote.id],
+                  transactionType: "consume",
+                  step: "preview",
+                  transactionRequest,
+                  transactionResult,
                 });
-              openCreateTransactionDialog({
-                accountId: targetAccountId,
-                transactionType: "consume",
-                step: "preview",
-                transactionRequest,
-                transactionResult,
-              });
+              } else {
+                const [fungibleAsset] = inputNote.fungibleAssets;
+                const faucet = faucets.find(
+                  ({ id }) => id === fungibleAsset?.faucetId,
+                );
+                if (!wallet || !fungibleAsset || !faucet) {
+                  return;
+                }
+                const noteFileBytes =
+                  inputNote.type === "public"
+                    ? undefined
+                    : await clientExportInputNoteFile({
+                        client,
+                        noteId: inputNote.id,
+                        midenSdk,
+                      });
+                const transaction = new ConsumeTransaction(
+                  faucet.identifier,
+                  inputNote.id,
+                  inputNote.type === "public" ? "public" : "private",
+                  Number(fungibleAsset.amount),
+                  noteFileBytes,
+                );
+                const adapter = wallet.adapter as MidenWalletAdapter;
+                const txId = await adapter.requestConsume(transaction);
+                console.log({ txId });
+              }
             }}
           >
             Consume note
@@ -91,8 +170,8 @@ export const columns: ColumnDef<InputNote>[] = [
   },
   {
     accessorKey: "senderId",
-    header: "Sender ID",
-    cell: ({ row }) => <AccountAddress id={row.original.senderId} />,
+    header: "Sender",
+    cell: ({ row }) => <InputNoteSenderCell inputNote={row.original} />,
   },
   {
     id: "actions",

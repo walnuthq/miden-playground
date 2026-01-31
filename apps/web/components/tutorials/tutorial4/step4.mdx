@@ -1,17 +1,10 @@
 import Link from "@/components/tutorials/tutorial-link";
-import AccountAddress from "@/components/lib/account-address";
-import CopyButton from "@/components/lib/copy-button";
+import { EllipsisVertical } from "lucide-react";
 
-Now that we understood the implementation of the Counter Contract procedures, let's import it into the Playground to start interacting with the contract.
+In the previous step, we imported a private note containing 100 tokens from the public [Miden Faucet](https://faucet.testnet.miden.io/), now let's consume this note to fund our private wallet.
 
-On the <Link href="/accounts">accounts page</Link>, click on the _"Create new account"_ button on top of the page and select the _"Import account"_ option.
+From your {props.wallet ? <Link href={`/accounts/${props.wallet.identifier}`}>private wallet details page</Link> : 'private wallet details page'}, click on the <EllipsisVertical className="size-4 inline" /> icon button in the _"Consumable Notes"_ table to consume the note with your wallet.
 
-A modal will show up requesting both the name and the address of your newly imported account, enter the Counter Contract details found just below:
+A _"Confirm Transaction"_ modal from your Miden Wallet will show up asking you to sign the resulting consume transaction that will transfer the tokens to your account.
 
-- **Name**: Counter Contract <CopyButton content="Copy Account Name" copy="Counter Contract" />
-
-- **Address**:
-
-<AccountAddress account={props.counter} withLink={props.withLink} />
-
-Once the account is imported, {props.withLink ? <Link href={`/accounts/${props.counter.address}`}>click on its ID</Link> : 'click on its ID'} to navigate to the contract details page.
+The private note will transition to the **Consumed** state and disappear from your wallet consumable notes.

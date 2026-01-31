@@ -52,7 +52,7 @@ const CreateAccountDropdownMenu = () => {
               disabled={
                 components.filter(
                   ({ id, type }) =>
-                    !defaultComponentIds.includes(id) && type === "account"
+                    !defaultComponentIds.includes(id) && type === "account",
                 ).length === 0
               }
             >

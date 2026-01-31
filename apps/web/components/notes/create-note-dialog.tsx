@@ -24,6 +24,7 @@ import { Input } from "@workspace/ui/components/input";
 import useNotes from "@/hooks/use-notes";
 import useScripts from "@/hooks/use-scripts";
 import { noteTypes, type NoteType } from "@/lib/types/note";
+import SelectAccountCombobox from "@/components/transactions/select-account-combobox";
 import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";
 import useAccounts from "@/hooks/use-accounts";
 import { parseAmount, formatAmount } from "@/lib/utils";
@@ -56,7 +57,7 @@ const CreateNoteDialog = () => {
       onOpenChange={(open) => !open && onClose()}
     >
       <DialogContent
-        className="sm:max-w-160 z-100"
+        className="sm:max-w-160 z-50"
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
       >
@@ -73,7 +74,7 @@ const CreateNoteDialog = () => {
             const formData = new FormData(event.currentTarget);
             const amount = parseAmount(
               formData.get("amount")?.toString() ?? "0",
-              faucetAccount?.decimals
+              faucetAccount?.decimals,
             );
             setLoading(true);
             await newNote({
@@ -92,11 +93,7 @@ const CreateNoteDialog = () => {
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-3 col-span-2">
               <Label>Recipient account</Label>
-              <SelectAccountDropdownMenu
-                value={recipientAccountId}
-                onValueChange={setRecipientAccountId}
-                withoutFaucets
-              />
+              <SelectAccountCombobox onValueChange={setRecipientAccountId} />
             </div>
             <div className="grid gap-3">
               <Label htmlFor="script">Script</Label>
@@ -152,14 +149,14 @@ const CreateNoteDialog = () => {
                   id="amount"
                   name="amount"
                   type="number"
-                  step={formatAmount("1", faucetAccount?.decimals).replaceAll(
-                    ",",
-                    ""
-                  )}
-                  min={formatAmount("1", faucetAccount?.decimals).replaceAll(
-                    ",",
-                    ""
-                  )}
+                  step={formatAmount({
+                    amount: "1",
+                    decimals: faucetAccount?.decimals,
+                  }).replaceAll(",", "")}
+                  min={formatAmount({
+                    amount: "1",
+                    decimals: faucetAccount?.decimals,
+                  }).replaceAll(",", "")}
                   required
                 />
               </div>

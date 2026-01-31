@@ -2,6 +2,8 @@ import { eq } from "drizzle-orm";
 import db from "@/db";
 import { packagesTable } from "@/db/schema";
 import type { NewPackage, PackageStatus, Export } from "@/lib/types";
+import { isValidUuidv4 } from "@/lib/utils";
+import { defaultDependenciesRecords } from "@/lib/default-dependencies";
 
 export const getReadOnlyPackage = (digest: string) =>
   db.query.packagesTable.findFirst({ where: { digest, readOnly: true } });
@@ -45,8 +47,13 @@ export const updatePackage = ({
 export const deletePackage = (id: string) =>
   db.delete(packagesTable).where(eq(packagesTable.id, id));
 
-export const getDependencies = (dependencies: string[]) =>
-  db.query.packagesTable.findMany({
+export const getDependencies = async (dependencies: string[]) => {
+  const defaultDependencies = dependencies
+    .filter((dependency) => !isValidUuidv4(dependency))
+    .map(
+      (dependency) => defaultDependenciesRecords[dependency as "basic-wallet"],
+    );
+  const dbDependencies = await db.query.packagesTable.findMany({
     columns: {
       id: true,
       name: true,
@@ -55,5 +62,11 @@ export const getDependencies = (dependencies: string[]) =>
       rust: true,
       dependencies: true,
     },
-    where: { id: { in: dependencies } },
+    where: {
+      id: {
+        in: dependencies.filter((dependency) => isValidUuidv4(dependency)),
+      },
+    },
   });
+  return [...defaultDependencies, ...dbDependencies];
+};

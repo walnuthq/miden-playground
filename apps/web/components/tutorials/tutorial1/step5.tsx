@@ -11,7 +11,7 @@ const useCompleted = () => {
   const { transactions } = useTransactions();
   const wallet = wallets.find(({ isPublic }) => isPublic);
   const transaction = transactions.find(
-    ({ accountId }) => accountId === wallet?.id
+    ({ accountId }) => accountId === wallet?.id,
   );
   return !!transaction;
 };

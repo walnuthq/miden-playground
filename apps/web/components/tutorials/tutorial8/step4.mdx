@@ -1,7 +1,15 @@
 import Link from "@/components/tutorials/tutorial-link";
 
-From the <Link href="/accounts">Accounts page</Link>, click on _"Create new account"_ and select the _"Deploy account"_ option.
+Our network counter being registered on-chain, let's create a public note that the network operator can consume to execute the increment function.
+This will increment the counter from 1 to 2.
 
-Give your new contract a name and select the **Count Reader** account component, leave all the other parameters with their default values.
+Take some time to get familiar with the <Link href="/scripts/counter-note">counter note script</Link>.
 
-Click on the _"Deploy"_ button to create your **Count Reader** contract, when your contract is deployed {props.countReader ? <Link href={`/accounts/${props.countReader.address}`}>click on its ID</Link> : 'click on its ID'} to continue.
+First, we fetch the current count value before the increment and then call the **`increment_count`** procedure.
+The script computes the expected count value after incrementation and compares it against the final count value returned by the Counter Contract **get_count** procedure.
+The note script would fail if the increment logic wasn't correctly implemented by the contract.
+
+The next step will be to create a custom network note with this script and register it on the network by signing a transaction.
+
+A network note is a public note targetting a network account.
+Once it's acknowledged by the network transaction builder, it will be automatically consumed by executing a transaction against the targetted network account.

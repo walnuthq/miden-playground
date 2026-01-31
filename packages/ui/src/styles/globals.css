@@ -126,6 +126,10 @@
   }
 }
 
+.root {
+  isolation: isolate;
+}
+
 .wallet-adapter-button-trigger {
   border-color: var(--color-border) !important;
   @apply text-foreground!;

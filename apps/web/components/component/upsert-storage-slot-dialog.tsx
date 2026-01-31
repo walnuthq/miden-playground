@@ -78,7 +78,7 @@ const StorageMapInput = ({
                   ...keyValues.slice(0, index),
                   { ...keyValue, key: event.target.value },
                   ...keyValues.slice(index + 1),
-                ])
+                ]),
               )
             }
             required
@@ -96,7 +96,7 @@ const StorageMapInput = ({
                   ...keyValues.slice(0, index),
                   { ...keyValue, value: event.target.value },
                   ...keyValues.slice(index + 1),
-                ])
+                ]),
               )
             }
             required
@@ -111,7 +111,7 @@ const StorageMapInput = ({
                 keyValuesToString([
                   ...keyValues.slice(0, index),
                   ...keyValues.slice(index + 1),
-                ])
+                ]),
               )
             }
           >
@@ -124,7 +124,7 @@ const StorageMapInput = ({
         variant="secondary"
         onClick={() =>
           setStorageSlotValue(
-            keyValuesToString([...keyValues, { key: "", value: "" }])
+            keyValuesToString([...keyValues, { key: "", value: "" }]),
           )
         }
       >
@@ -149,14 +149,14 @@ const UpsertStorageSlotDialog = ({
   } = useComponents();
   const component = components.find(({ id }) => id === componentId);
   const storageSlot = component?.storageSlots.find(
-    (_, index) => index === storageSlotIndex
+    (_, index) => index === storageSlotIndex,
   );
   const [loading, setLoading] = useState(false);
   const [storageSlotType, setStorageSlotType] = useState<StorageSlotType>(
-    storageSlot?.type ?? "value"
+    storageSlot?.type ?? "value",
   );
   const [storageSlotValue, setStorageSlotValue] = useState(
-    storageSlot?.value ?? ""
+    storageSlot?.value ?? "",
   );
   const onClose = () => {
     setStorageSlotType("value");

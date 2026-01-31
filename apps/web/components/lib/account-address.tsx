@@ -5,7 +5,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@workspace/ui/components/tooltip";
-import { formatAddress } from "@/lib/utils";
+import { formatAddress, getIdentifierPart } from "@/lib/types/account";
 import useGlobalContext from "@/components/global-context/hook";
 import useAccounts from "@/hooks/use-accounts";
 import CopyButton from "@/components/lib/copy-button";
@@ -34,7 +34,7 @@ const AccountAddress = ({
   const displayedAccount =
     account ??
     accounts.find(
-      (account) => account.id === id || account.address === address
+      (account) => account.id === id || account.address === address,
     );
   if (!displayedAccount) {
     return null;
@@ -46,7 +46,9 @@ const AccountAddress = ({
     <Tooltip>
       <TooltipTrigger asChild>
         {withLink ? (
-          <Link href={`/accounts/${displayedAccount.address}`}>
+          <Link
+            href={`/accounts/${getIdentifierPart(displayedAccount.address)}`}
+          >
             <Button className="cursor-pointer -ml-4" variant="link">
               {displayedAddress}
               {withName && ` (${displayedAccount.name})`}
@@ -61,12 +63,13 @@ const AccountAddress = ({
       </TooltipTrigger>
       <TooltipContent>
         <p>
-          {displayedAccount.address} ({displayedAccount.name})
+          {displayedAccount.address}
+          {withName && ` (${displayedAccount.name})`}
         </p>
       </TooltipContent>
     </Tooltip>
   ) : withLink ? (
-    <Link href={`/accounts/${displayedAccount.address}`}>
+    <Link href={`/accounts/${getIdentifierPart(displayedAccount.address)}`}>
       <Button className="cursor-pointer -ml-4" variant="link">
         {displayedAddress}
         {withName && ` (${displayedAccount.name})`}

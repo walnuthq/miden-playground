@@ -1,5 +1,7 @@
 import Link from "@/components/tutorials/tutorial-link";
 
-Congratulations! You have successfully used the Miden Playground to perform your first Foreign Procedure Invocation.
+Your custom note has been automatically consumed by a network transaction and you can now check that the network counter value has been incremented from 1 to 2.
 
-In this tutorial we created a smart contract that calls the **get_count** procedure in the **Counter Contract** using FPI, and then saves the returned value to its local storage using the playground.
+On the <Link href={`/accounts/${props.counter.identifier}`}>network counter page</Link>, click on the _"Components"_ tab and try calling the **`get_count`** procedure to confirm the network counter was incremented by the network transaction.
+
+Congratulations! You have successfully created a network smart contract and triggered a network transaction using a custom note.

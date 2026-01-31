@@ -13,6 +13,7 @@ import {
 } from "@workspace/ui/components/tooltip";
 import { Button } from "@workspace/ui/components/button";
 import { formatValue } from "@/lib/utils";
+import type { StorageItem } from "@/lib/types/account";
 
 const ValueTooltip = ({ value }: { value: string }) => (
   <Tooltip>
@@ -30,7 +31,7 @@ const ValueTooltip = ({ value }: { value: string }) => (
 const AccountStorageDeltaTable = ({
   storageDelta,
 }: {
-  storageDelta: { index: number; before: string; after: string }[];
+  storageDelta: { index: number; before: StorageItem; after: string }[];
 }) => (
   <div className="rounded-md border">
     <Table>
@@ -47,7 +48,7 @@ const AccountStorageDeltaTable = ({
             <TableCell className="space-y-2.5">
               <p>
                 Before:
-                <ValueTooltip value={before} />
+                <ValueTooltip value={before.item} />
               </p>
               <p>
                 After:

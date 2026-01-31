@@ -1,31 +1,22 @@
+import { usePathname } from "next/navigation";
 import { type TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
 import Step3Content from "@/components/tutorials/tutorial6/step3.mdx";
-import useScripts from "@/hooks/use-scripts";
-import { defaultScriptIds } from "@/lib/types/default-scripts";
+import useComponents from "@/hooks/use-components";
 
 const useCompleted = () => {
-  const { scripts } = useScripts();
-  const script = scripts.find(
-    ({ id, type }) => !defaultScriptIds.includes(id) && type === "note-script"
+  const pathname = usePathname();
+  const { components } = useComponents();
+  const component = components.find(
+    ({ type, scriptId }) =>
+      type === "account" && scriptId.startsWith("counter-contract_"),
   );
-  const firstMatches = script?.rust.match(
-    /let\s+timelock_height\s*=\s*inputs\[2\];/
-  );
-  const secondMatches = script?.rust.match(
-    /let\s+block_number\s*=\s*tx::get_block_number\(\);/
-  );
-  const thirdMatches = script?.rust.match(
-    /assert!\s*\(\s*block_number\s*>=\s*timelock_height\s*\);/
-  );
-  return (
-    script?.masm !== "" && !!firstMatches && !!secondMatches && !!thirdMatches
-  );
+  return pathname === `/components/${component?.id}`;
 };
 
 const Step3: TutorialStep = {
-  title: "Add timelock logic to the P2ID Note.",
+  title: "Create an Account Component.",
   Content: () => {
     const completed = useCompleted();
     return (
@@ -33,13 +24,13 @@ const Step3: TutorialStep = {
         <Step3Content />
         <TutorialAlert
           completed={completed}
-          title="Action required: Compile the script."
-          titleWhenCompleted="You compiled the timelock P2ID script."
+          title="Action required: Create an Account Component."
+          titleWhenCompleted="You created an Account Component."
           description={
             <p>
-              Follow the instructions to add timelock logic to your P2ID script.
-              When you're done, click on the <em>"Compile"</em> button in the
-              editor console to compile your script.
+              Click on the <em>"Create new component"</em> button and create a
+              component from the <strong>Counter Contract</strong> script, make
+              sure to select <strong>Account Component</strong> type.
             </p>
           }
         />

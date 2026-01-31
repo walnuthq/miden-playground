@@ -18,10 +18,10 @@ import VerifyAccountComponentDialog from "@/components/account/verify-account-co
 import useGlobalContext from "@/components/global-context/hook";
 
 const Account = ({
-  address,
+  identifier,
   verifiedAccountComponents,
 }: {
-  address: string;
+  identifier: string;
   verifiedAccountComponents: Script[];
 }) => {
   const router = useRouter();
@@ -30,7 +30,7 @@ const Account = ({
   const { networkId } = useGlobalContext();
   const isClient = useIsClient();
   const { accounts, connectedWallet } = useAccounts();
-  const account = accounts.find((account) => account.address === address);
+  const account = accounts.find((account) => account.identifier === identifier);
   if (!isClient || !account) {
     return null;
   }
@@ -44,16 +44,14 @@ const Account = ({
           router.push(
             value === "information"
               ? pathname
-              : `${pathname}?${new URLSearchParams({ tab: value })}`
+              : `${pathname}?${new URLSearchParams({ tab: value })}`,
           )
         }
       >
         <div className="flex items-center justify-between">
           <TabsList>
             <TabsTrigger value="information">Information</TabsTrigger>
-            {account.components.length > 0 && (
-              <TabsTrigger value="components">Components</TabsTrigger>
-            )}
+            <TabsTrigger value="components">Components</TabsTrigger>
           </TabsList>
           {showCreateTransactionButton && (
             <CreateTransactionDropdownMenu account={account} />
@@ -62,14 +60,12 @@ const Account = ({
         <TabsContent value="information">
           <AccountInformation account={account} />
         </TabsContent>
-        {account.components.length > 0 && (
-          <TabsContent value="components">
-            <AccountComponents
-              account={account}
-              verifiedAccountComponents={verifiedAccountComponents}
-            />
-          </TabsContent>
-        )}
+        <TabsContent value="components">
+          <AccountComponents
+            account={account}
+            verifiedAccountComponents={verifiedAccountComponents}
+          />
+        </TabsContent>
       </Tabs>
       <CreateTransactionDialog />
       <InvokeProcedureArgumentsDialog />

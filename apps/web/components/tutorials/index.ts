@@ -7,6 +7,8 @@ import tutorial6 from "@/components/tutorials/tutorial6";
 import tutorial7 from "@/components/tutorials/tutorial7";
 import tutorial8 from "@/components/tutorials/tutorial8";
 import tutorial9 from "@/components/tutorials/tutorial9";
+import tutorial10 from "@/components/tutorials/tutorial10";
+import tutorial11 from "@/components/tutorials/tutorial11";
 
 const tutorials = [
   tutorial1,
@@ -18,6 +20,8 @@ const tutorials = [
   tutorial7,
   tutorial8,
   tutorial9,
+  tutorial10,
+  tutorial11,
 ];
 
 export default tutorials;

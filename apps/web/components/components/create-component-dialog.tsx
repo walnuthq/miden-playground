@@ -43,7 +43,7 @@ const CreateComponentDialog = () => {
     ({ id, type, status }) =>
       !componentScriptIds.includes(id) &&
       type === componentType &&
-      status === "compiled"
+      status === "compiled",
   );
   useEffect(() => {
     setScriptId("");

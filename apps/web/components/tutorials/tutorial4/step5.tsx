@@ -1,29 +1,31 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { type TutorialStep } from "@/lib/types/tutorial";
+import useAccounts from "@/hooks/use-accounts";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
 import Step5Content from "@/components/tutorials/tutorial4/step5.mdx";
-import useAccounts from "@/hooks/use-accounts";
-import { COUNTER_CONTRACT_ADDRESS } from "@/lib/constants";
-
-let initialNonce = 0;
+import { MIDEN_FAUCET_ACCOUNT_ID } from "@/lib/constants";
 
 const useCompleted = () => {
-  const { accounts } = useAccounts();
-  const counter = accounts.find(
-    ({ address }) => address === COUNTER_CONTRACT_ADDRESS
+  const [initialBalance, setInitialBalance] = useState(0n);
+  const { connectedWallet } = useAccounts();
+  const currentBalance = BigInt(
+    (connectedWallet?.storageMode === "private" &&
+      connectedWallet?.fungibleAssets.find(
+        ({ faucetId }) => faucetId === MIDEN_FAUCET_ACCOUNT_ID,
+      )?.amount) ??
+      "0",
   );
-  const currentNonce = counter?.nonce ?? 0;
   useEffect(() => {
-    if (initialNonce === 0) {
-      initialNonce = currentNonce;
+    if (initialBalance === 0n) {
+      setInitialBalance(currentBalance);
     }
-  }, [currentNonce]);
-  return initialNonce !== 0 && currentNonce > initialNonce;
+  }, [initialBalance, currentBalance]);
+  return initialBalance !== 0n && currentBalance < initialBalance;
 };
 
 const Step5: TutorialStep = {
-  title: "Invoke the Counter Contract procedures.",
+  title: "Send tokens privately to your public wallet.",
   Content: () => {
     const completed = useCompleted();
     return (
@@ -31,13 +33,14 @@ const Step5: TutorialStep = {
         <Step5Content />
         <TutorialAlert
           completed={completed}
-          title="Action required: Invoke the procedure."
-          titleWhenCompleted="You have invoked the Counter Contract procedures."
+          title="Action required: Send tokens to your public wallet."
+          titleWhenCompleted="Private note with sent tokens created."
           description={
             <p>
-              Click on the <em>"Invoke"</em> button in the <em>"Components"</em>{" "}
-              section of the account details page to invoke the{" "}
-              <strong>increment_count</strong> procedure.
+              Click on the <em>"Create new transaction"</em> button and select
+              the <em>"New send transaction"</em> option. Configure and sign a
+              send transaction to create a private note consumable by your
+              public wallet.
             </p>
           }
         />

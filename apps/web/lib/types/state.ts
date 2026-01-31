@@ -57,7 +57,7 @@ export type State = {
   deleteScriptAlertDialogScriptId: string;
   invokeProcedureArgumentsDialogOpen: boolean;
   invokeProcedureArgumentsDialogSenderAccountId: string;
-  invokeProcedureArgumentsDialogScriptId: string;
+  invokeProcedureArgumentsDialogScript: Script | null;
   invokeProcedureArgumentsDialogProcedure: Export | null;
   addDependencyDialogOpen: boolean;
   addDependencyDialogScriptId: string;
@@ -74,7 +74,7 @@ export type State = {
   tutorialMaxStep: number;
   tutorialOpen: boolean;
   nextTutorialStepDisabled: boolean;
-  completedTutorials: Set<number>;
+  completedTutorials: Set<string>;
 };
 
 export const defaultState = (): State => ({
@@ -117,7 +117,7 @@ export const defaultState = (): State => ({
   deleteScriptAlertDialogScriptId: "",
   invokeProcedureArgumentsDialogOpen: false,
   invokeProcedureArgumentsDialogSenderAccountId: "",
-  invokeProcedureArgumentsDialogScriptId: "",
+  invokeProcedureArgumentsDialogScript: null,
   invokeProcedureArgumentsDialogProcedure: null,
   addDependencyDialogOpen: false,
   addDependencyDialogScriptId: "",
@@ -202,8 +202,33 @@ export const stateDeserializer = (value: string): State => {
       tutorialMaxStep?: number;
       tutorialOpen?: boolean;
       nextTutorialStepDisabled?: boolean;
-      completedTutorials?: number[];
+      completedTutorials?: string[];
     };
+    // TODO remove completedTutorials migration
+    let migratedCompletedTutorials = completedTutorials;
+    if (
+      completedTutorials &&
+      completedTutorials.length > 0 &&
+      typeof completedTutorials[0] === "number"
+    ) {
+      migratedCompletedTutorials = completedTutorials
+        .map((tutorialNumber) => {
+          const tutorialNumberToTutorialId = {
+            1: "create-and-fund-wallet",
+            2: "transfer-assets-between-wallets",
+            3: "connect-wallet-and-sign-transactions",
+            4: "interact-with-the-counter-contract",
+            5: "deploy-a-counter-contract",
+            6: "timelock-p2id-note",
+            7: "network-transactions",
+            8: "foreign-procedure-invocation",
+          } as const;
+          return tutorialNumberToTutorialId[
+            tutorialNumber as unknown as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8
+          ];
+        })
+        .filter((tutorialId) => tutorialId !== undefined);
+    }
     const initialState = defaultState();
     return {
       ...initialState,
@@ -224,8 +249,8 @@ export const stateDeserializer = (value: string): State => {
       tutorialOpen: tutorialOpen ?? initialState.tutorialOpen,
       nextTutorialStepDisabled:
         nextTutorialStepDisabled ?? initialState.nextTutorialStepDisabled,
-      completedTutorials: completedTutorials
-        ? new Set(completedTutorials)
+      completedTutorials: migratedCompletedTutorials
+        ? new Set(migratedCompletedTutorials)
         : initialState.completedTutorials,
     };
   } catch (error) {

@@ -18,6 +18,7 @@ export type TransactionNote = {
   scriptRoot: string;
   senderId: string;
   fungibleAssets: FungibleAsset[];
+  inputs: string[];
 };
 
 export type Transaction = {

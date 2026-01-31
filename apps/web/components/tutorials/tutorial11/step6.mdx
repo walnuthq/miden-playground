@@ -1,0 +1,9 @@
+import Link from "@/components/tutorials/tutorial-link";
+
+Back on the <Link href={`/accounts/${props.counter?.identifier}?tab=components`}>imported contract components page</Link>, click on the _"Verify account component"_ button and upload the folder you extracted from the downloaded script archive.
+
+This process will take some time as we need to recompile the submitted script server-side and compare the resulting [MASM](https://docs.miden.xyz/glossary#miden-assembly) code against the unverified contract [AccountCode](https://docs.miden.xyz/glossary#accountcode).
+
+The verification will be successful if we're able to find a match and assert that the unverified account exports the same procedures defined in the uploaded source code.
+
+The verified [AccountComponent](https://docs.miden.xyz/glossary#accountcomponent) should be appended to the account verified components list and you will be able to start interacting with this contract within the playground.

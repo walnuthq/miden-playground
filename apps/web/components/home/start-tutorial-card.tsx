@@ -23,7 +23,7 @@ const StartTutorialCard = ({ tutorial }: { tutorial: Tutorial }) => {
           {tutorial.number}. {tutorial.title}
         </CardTitle>
         <CardAction>
-          {completedTutorials.has(tutorial.number) ? (
+          {completedTutorials.has(tutorial.id) ? (
             <Badge className="text-sm bg-green-500 text-white dark:bg-green-600">
               <BadgeCheck />
               Completed

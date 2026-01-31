@@ -5,6 +5,10 @@ import { type MidenSdk } from "@/lib/types";
 import { type NetworkId } from "@/lib/types/network";
 import useMidenSdk from "@/hooks/use-miden-sdk";
 import useGlobalContext from "@/components/global-context/hook";
+import {
+  MIDEN_TESTNET_RPC_URL,
+  MIDEN_NOTE_TRANSPORT_URL,
+} from "@/lib/constants";
 
 const globalForWebClient = globalThis as unknown as {
   webClient: WebClientType;
@@ -30,7 +34,10 @@ export const createClient = async ({
     return MockWebClient.createClient(serializedMockChain);
   } else {
     if (!globalForWebClient.webClient) {
-      globalForWebClient.webClient = await WebClient.createClient();
+      globalForWebClient.webClient = await WebClient.createClient(
+        MIDEN_TESTNET_RPC_URL,
+        MIDEN_NOTE_TRANSPORT_URL,
+      );
     }
     return globalForWebClient.webClient;
   }

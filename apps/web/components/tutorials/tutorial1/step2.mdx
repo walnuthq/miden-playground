@@ -2,7 +2,7 @@ import AccountAddress from "@/components/lib/account-address";
 
 Our newly created Account generated its own unique [Account ID](https://docs.miden.xyz/miden-base/account/id), an immutable and unique identifier for the Account. Click on the link below to access your wallet:
 
-<AccountAddress address={props.wallet?.address} />
+<AccountAddress account={props.wallet?.address} />
 
 This identifier is designed to contain the metadata of an Account. The metadata includes the account type, account storage mode and the version of the Account. This metadata is included in the ID to ensure it can be determined without needing the full account state.
 

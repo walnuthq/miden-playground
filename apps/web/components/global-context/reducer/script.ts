@@ -21,7 +21,7 @@ export type ScriptAction =
     }
   | {
       type: "UPDATE_SCRIPT";
-      payload: { script: Script };
+      payload: { id: string; script: Partial<Script> };
     }
   | {
       type: "DELETE_SCRIPT";
@@ -31,7 +31,7 @@ export type ScriptAction =
       type: "OPEN_INVOKE_PROCEDURE_ARGUMENTS_DIALOG";
       payload: {
         senderAccountId: string;
-        scriptId: string;
+        script: Script;
         procedureExport: Export;
       };
     }
@@ -79,20 +79,24 @@ const reducer = (state: State, action: ScriptAction): State => {
     }
     case "UPDATE_SCRIPT": {
       const index = state.scripts.findIndex(
-        ({ id }) => id === action.payload.script.id
+        ({ id }) => id === action.payload.id,
       );
       return {
         ...state,
         scripts: [
           ...state.scripts.slice(0, index),
-          { ...action.payload.script, updatedAt: Date.now() },
+          {
+            ...state.scripts[index]!,
+            ...action.payload.script,
+            updatedAt: Date.now(),
+          },
           ...state.scripts.slice(index + 1),
         ],
       };
     }
     case "DELETE_SCRIPT": {
       const index = state.scripts.findIndex(
-        ({ id }) => id === action.payload.scriptId
+        ({ id }) => id === action.payload.scriptId,
       );
       return {
         ...state,
@@ -108,7 +112,7 @@ const reducer = (state: State, action: ScriptAction): State => {
         invokeProcedureArgumentsDialogOpen: true,
         invokeProcedureArgumentsDialogSenderAccountId:
           action.payload.senderAccountId,
-        invokeProcedureArgumentsDialogScriptId: action.payload.scriptId,
+        invokeProcedureArgumentsDialogScript: action.payload.script,
         invokeProcedureArgumentsDialogProcedure: action.payload.procedureExport,
       };
     }
@@ -117,7 +121,7 @@ const reducer = (state: State, action: ScriptAction): State => {
         ...state,
         invokeProcedureArgumentsDialogOpen: false,
         invokeProcedureArgumentsDialogSenderAccountId: "",
-        invokeProcedureArgumentsDialogScriptId: "",
+        invokeProcedureArgumentsDialogScript: null,
         invokeProcedureArgumentsDialogProcedure: null,
       };
     }

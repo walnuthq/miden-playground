@@ -47,17 +47,24 @@ const ImportAccountDialog = () => {
             event.preventDefault();
             const formData = new FormData(event.currentTarget);
             setLoading(true);
-            const account = await importAccountByAddress({
-              name: formData.get("name")?.toString() ?? "",
-              address: formData.get("address")?.toString() ?? "",
-            });
+            try {
+              const account = await importAccountByAddress({
+                name: formData.get("name")?.toString() ?? "",
+                address: formData.get("address")?.toString() ?? "",
+              });
+              toast(`${account.name} has been imported.`, {
+                description: (
+                  <AccountAddress account={account} withTooltip={false} />
+                ),
+              });
+              closeImportAccountDialog();
+            } catch (error) {
+              const { message } = error as { message: string };
+              toast.error("Account couldn't be imported.", {
+                description: message,
+              });
+            }
             setLoading(false);
-            toast(`${account.name} has been imported.`, {
-              description: (
-                <AccountAddress account={account} withTooltip={false} />
-              ),
-            });
-            closeImportAccountDialog();
           }}
         >
           <div className="grid grid-cols-2 gap-4">

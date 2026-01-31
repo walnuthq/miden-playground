@@ -22,8 +22,7 @@ const EditorConsole = ({ script }: { script: Script }) => {
     setLoading(true);
     const { error, masm, digest, masp, exports, dependencies } =
       await compileScript(script);
-    updateScript({
-      ...script,
+    updateScript(script.id, {
       error,
       masm,
       status: error ? "error" : "compiled",
@@ -40,8 +39,15 @@ const EditorConsole = ({ script }: { script: Script }) => {
         ? script.dependencies
         : dependencies
             .map((dependency) => {
+              if (
+                dependency.digest ===
+                "0xc414a8aa918aa163c89b4543fac58500189e4bed24630806f276d49665c692a3"
+              ) {
+                return { ...dependency, id: "basic-wallet" };
+              }
               const scriptDependency = scripts.find(
-                ({ digest }) => digest === dependency.digest
+                ({ id, digest }) =>
+                  id === dependency.id || digest === dependency.digest,
               );
               return scriptDependency
                 ? {

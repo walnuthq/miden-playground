@@ -8,6 +8,7 @@ import {
 import { Badge } from "@workspace/ui/components/badge";
 import AccountAddress from "@/components/lib/account-address";
 import { formatAmount } from "@/lib/utils";
+import CopyButton from "@/components/lib/copy-button";
 
 const AccountInformationTable = ({ account }: { account: Account }) => (
   <div className="rounded-md border">
@@ -19,13 +20,20 @@ const AccountInformationTable = ({ account }: { account: Account }) => (
         </TableRow>
         <TableRow>
           <TableCell>ID</TableCell>
+          <TableCell className="flex items-center gap-2">
+            {account.id}
+            <CopyButton content="Copy Account ID" copy={account.id} />
+          </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell>Address</TableCell>
           <TableCell>
             <AccountAddress
               address={account.address}
               withLink={false}
               withName={false}
-              formatted={false}
               withTooltip={false}
+              formatted={false}
             />
           </TableCell>
         </TableRow>
@@ -38,13 +46,19 @@ const AccountInformationTable = ({ account }: { account: Account }) => (
             <TableRow>
               <TableCell>Total supply</TableCell>
               <TableCell>
-                {formatAmount(account.totalSupply, account.decimals)}
+                {formatAmount({
+                  amount: account.totalSupply,
+                  decimals: account.decimals,
+                })}
               </TableCell>
             </TableRow>
             <TableRow>
               <TableCell>Max supply</TableCell>
               <TableCell>
-                {formatAmount(account.maxSupply, account.decimals)}
+                {formatAmount({
+                  amount: account.maxSupply,
+                  decimals: account.decimals,
+                })}
               </TableCell>
             </TableRow>
             <TableRow>

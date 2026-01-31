@@ -7,6 +7,7 @@ import {
   FUNGIBLE_FAUCET_DEFAULT_MAX_SUPPLY,
   MIDEN_FAUCET_ACCOUNT_ID,
   MIDEN_FAUCET_ADDRESS,
+  EMPTY_WORD,
 } from "@/lib/constants";
 
 export const accountTypes = {
@@ -26,10 +27,24 @@ export const accountStorageModes = {
 
 export type AccountStorageMode = keyof typeof accountStorageModes;
 
+export type StorageItem = {
+  type: "value" | "map";
+  item: string;
+  mapEntries: { key: string; value: string }[];
+};
+
+export const defaultStorageItem = (): StorageItem => ({
+  type: "value",
+  item: "",
+  mapEntries: [],
+});
+
 export type Account = {
   id: string;
   name: string;
   address: string;
+  identifier: string;
+  routingParameters: string;
   type: AccountType;
   storageMode: AccountStorageMode;
   isFaucet: boolean;
@@ -44,7 +59,7 @@ export type Account = {
   nonce: number;
   fungibleAssets: FungibleAsset[];
   code: string;
-  storage: string[];
+  storage: StorageItem[];
   consumableNoteIds: string[];
   components: string[];
   updatedAt: number;
@@ -54,6 +69,8 @@ export const defaultAccount = (): Account => ({
   id: "",
   name: "",
   address: "",
+  identifier: "",
+  routingParameters: "",
   type: "fungible-faucet",
   storageMode: "private",
   isFaucet: false,
@@ -74,6 +91,25 @@ export const defaultAccount = (): Account => ({
   updatedAt: 0,
 });
 
+export const getIdentifierPart = (address: string) => {
+  const [addressPart = ""] = address.split("_");
+  return addressPart;
+};
+
+export const getRoutingParametersPart = (address: string) => {
+  const [, routingParametersPart = ""] = address.split("_");
+  return routingParametersPart;
+};
+
+export const formatAddress = (
+  address: string,
+  networkId: string,
+  walletFormat = false,
+) => {
+  const addressPart = getIdentifierPart(address);
+  return `${networkId}${addressPart.slice(networkId.length).slice(0, walletFormat ? 2 : 8)}…${addressPart.slice(walletFormat ? -4 : -8)}`;
+};
+
 export const basicWalletAccount = ({
   storageMode,
 }: {
@@ -86,7 +122,7 @@ export const basicWalletAccount = ({
   isRegularAccount: true,
   isUpdatable: true,
   code: BASIC_WALLET_CODE,
-  components: ["basic-auth", "basic-wallet"],
+  components: ["falcon-512-rpo-auth", "basic-wallet"],
 });
 
 export const basicFungibleFaucetAccount = ({
@@ -113,7 +149,7 @@ export const basicFungibleFaucetAccount = ({
   isPublic: storageMode === "public",
   isNew: true,
   code: FUNGIBLE_FAUCET_CODE,
-  components: ["basic-fungible-faucet"],
+  components: ["falcon-512-rpo-auth", "basic-fungible-faucet"],
 });
 
 export const accountIdFromPrefixSuffix = (prefix: string, suffix: string) => {
@@ -129,11 +165,34 @@ export const midenFaucetAccount = () => ({
     decimals: FUNGIBLE_FAUCET_DEFAULT_DECIMALS,
     maxSupply: parseAmount(
       FUNGIBLE_FAUCET_DEFAULT_MAX_SUPPLY.toString(),
-      FUNGIBLE_FAUCET_DEFAULT_DECIMALS
+      FUNGIBLE_FAUCET_DEFAULT_DECIMALS,
     ).toString(),
     totalSupply: "0",
   }),
   id: MIDEN_FAUCET_ACCOUNT_ID,
   name: "Miden Faucet",
   address: MIDEN_FAUCET_ADDRESS,
+  identifier: getIdentifierPart(MIDEN_FAUCET_ADDRESS),
+  routingParameters: getRoutingParametersPart(MIDEN_FAUCET_ADDRESS),
 });
+
+export const getItem = (storage: StorageItem[], index: number) => {
+  const storageItem = storage[index];
+  if (!storageItem || storageItem.type !== "value") {
+    return EMPTY_WORD;
+  }
+  return storageItem.item;
+};
+
+export const getMapItem = (
+  storage: StorageItem[],
+  index: number,
+  key: string,
+) => {
+  const storageItem = storage[index];
+  if (!storageItem || storageItem.type !== "map") {
+    return EMPTY_WORD;
+  }
+  const entry = storageItem.mapEntries.find((entry) => entry.key === key);
+  return entry ? entry.value : EMPTY_WORD;
+};

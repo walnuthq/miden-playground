@@ -1,6 +1,7 @@
 import { range } from "lodash";
 import {
   type Account as WasmAccountType,
+  type AccountId as WasmAccountIdType,
   type WebClient as WebClientType,
   type InputNoteRecord as WasmInputNoteRecordType,
   type NoteMetadata as WasmNoteMetadataType,
@@ -15,9 +16,12 @@ import {
   type Account,
   type AccountStorageMode,
   type AccountType,
+  type StorageItem,
   defaultAccount,
+  getIdentifierPart,
+  getItem,
+  getRoutingParametersPart,
 } from "@/lib/types/account";
-// import { type NetworkId } from "@/lib/types/network";
 import { type InputNote, type NoteType } from "@/lib/types/note";
 import {
   type TransactionNote,
@@ -31,6 +35,7 @@ import noAuth from "@/lib/types/default-components/no-auth";
 import getterComponent from "@/lib/types/default-components/getter";
 import { stringToFeltArray, fromBase64 } from "@/lib/utils";
 import type { MidenSdk } from "@/lib/types";
+import type { NetworkId } from "@/lib/types/network";
 
 // const globalForWebClient = globalThis as unknown as {
 //   webClient: WebClientType;
@@ -52,7 +57,7 @@ import type { MidenSdk } from "@/lib/types";
 //   return globalForWebClient.webClient;
 // };
 
-const bigintToWord = ({
+export const bigintToWord = ({
   value,
   midenSdk: { Word },
 }: {
@@ -65,8 +70,8 @@ const bigintToWord = ({
         .toString(16)
         .padStart(64, "0")
         .match(/.{1,16}/g)!
-        .map((chunk) => BigInt(`0x${chunk}`))
-    )
+        .map((chunk) => BigInt(`0x${chunk}`)),
+    ),
   );
 
 export const clientNewWallet = ({
@@ -88,7 +93,7 @@ export const clientNewWallet = ({
       : AccountStorageMode.private(),
     mutable,
     0,
-    initSeed
+    initSeed,
   );
 
 export const clientNewFaucet = ({
@@ -116,7 +121,7 @@ export const clientNewFaucet = ({
     tokenSymbol,
     decimals,
     maxSupply,
-    0
+    0,
   );
 
 export const clientExecuteTransaction = async ({
@@ -156,7 +161,7 @@ export const clientNewMintTransactionRequest = ({
     AccountId.fromHex(targetAccountId),
     AccountId.fromHex(faucetId),
     wasmNoteTypes[noteType],
-    amount
+    amount,
   );
 };
 
@@ -195,7 +200,7 @@ export const clientNewSendTransactionRequest = ({
     AccountId.fromHex(targetAccountId),
     AccountId.fromHex(faucetId),
     wasmNoteTypes[noteType],
-    amount
+    amount,
   );
 };
 
@@ -244,8 +249,7 @@ export const clientGetAccountByAddress = ({
   address: string;
   midenSdk: MidenSdk;
 }) => {
-  const { Address } = midenSdk;
-  const accountId = Address.fromBech32(address).accountId().toString();
+  const accountId = addressToAccountId({ address, midenSdk }).toString();
   return clientGetAccountById({ client, accountId, midenSdk });
 };
 
@@ -272,23 +276,23 @@ export const clientGetAllInputNotes = async ({
 }) => {
   const { NoteFilter, NoteFilterTypes, RpcClient, Endpoint } = midenSdk;
   const wasmInputNotes = await client.getInputNotes(
-    new NoteFilter(NoteFilterTypes.All)
+    new NoteFilter(NoteFilterTypes.All),
   );
   if (client.usesMockChain()) {
     return wasmInputNotes.map((wasmInputNote) =>
       wasmInputNoteToInputNote({
         record: wasmInputNote,
         previousInputNote: previousInputNotes.find(
-          ({ id }) => id === wasmInputNote.id().toString()
+          ({ id }) => id === wasmInputNote.id().toString(),
         ),
         scripts,
         midenSdk,
-      })
+      }),
     );
   } else {
     const rpcClient = new RpcClient(Endpoint.testnet());
     const wasmFetchedNotes = await rpcClient.getNotesById(
-      wasmInputNotes.map((wasmInputNote) => wasmInputNote.id())
+      wasmInputNotes.map((wasmInputNote) => wasmInputNote.id()),
     );
     const patchedWasmInputNotes = wasmInputNotes.map((wasmInputNote, index) => {
       wasmInputNote.metadata = () => wasmFetchedNotes[index]?.metadata;
@@ -299,12 +303,12 @@ export const clientGetAllInputNotes = async ({
         wasmInputNoteToInputNote({
           record: wasmInputNote,
           previousInputNote: previousInputNotes.find(
-            ({ id }) => id === wasmInputNote.id().toString()
+            ({ id }) => id === wasmInputNote.id().toString(),
           ),
           scripts,
           midenSdk,
-        })
-      )
+        }),
+      ),
     );
   }
 };
@@ -377,7 +381,7 @@ export const clientReadWord = async ({
   const builder = client.createScriptBuilder();
   const accountComponentLibrary = builder.buildLibrary(
     "external_contract::getter",
-    getterScript.masm
+    getterScript.masm,
   );
   builder.linkDynamicLibrary(accountComponentLibrary);
   const wasmAccountId = AccountId.fromHex(accountId);
@@ -386,7 +390,7 @@ export const clientReadWord = async ({
       accountIdPrefix: wasmAccountId.prefix().toString(),
       accountIdSuffix: wasmAccountId.suffix().toString(),
       procHash: procedureExport.digest,
-    })
+    }),
   );
   const transactionRequest = new TransactionRequestBuilder()
     .withCustomScript(transactionScript)
@@ -394,9 +398,9 @@ export const clientReadWord = async ({
       new MidenArrays.ForeignAccountArray([
         ForeignAccount.public(
           AccountId.fromHex(accountId),
-          new AccountStorageRequirements()
+          new AccountStorageRequirements(),
         ),
-      ])
+      ]),
     )
     .build();
   const transactionResult = await clientExecuteTransaction({
@@ -462,13 +466,13 @@ export const clientDeployAccount = async ({
       continue;
     }
     const storageSlots = component.storageSlots.map((storageSlot) =>
-      wasmStorageSlotFromStorageSlot({ storageSlot, midenSdk })
+      wasmStorageSlotFromStorageSlot({ storageSlot, midenSdk }),
     );
     let accountComponent = script.masm
       ? AccountComponent.compile(script.masm, builder, storageSlots)
       : AccountComponent.fromPackage(
           Package.deserialize(fromBase64(script.masp)),
-          new MidenArrays.StorageSlotArray(storageSlots)
+          new MidenArrays.StorageSlotArray(storageSlots),
         );
     // const procs = accountComponent.getProcedures();
     // for (const proc of procs) {
@@ -493,7 +497,7 @@ export const clientDeployAccount = async ({
   return account;
 };
 
-export const clientCreateTransactionFromScript = ({
+export const createTransactionFromScript = ({
   script,
   midenSdk: { Package, TransactionScript, TransactionRequestBuilder },
 }: {
@@ -501,7 +505,7 @@ export const clientCreateTransactionFromScript = ({
   midenSdk: MidenSdk;
 }) => {
   const transactionScript = TransactionScript.fromPackage(
-    Package.deserialize(fromBase64(script.masp))
+    Package.deserialize(fromBase64(script.masp)),
   );
   const transactionRequestBuilder =
     new TransactionRequestBuilder().withCustomScript(transactionScript);
@@ -526,14 +530,14 @@ const clientCreateNoteScriptFromMasm = ({
     const contractName = dependency.name.replaceAll("-", "_");
     const accountComponentLibrary = builder.buildLibrary(
       `external_contract::${contractName}`,
-      dependency.masm
+      dependency.masm,
     );
     builder.linkDynamicLibrary(accountComponentLibrary);
   }
   return builder.compileNoteScript(script.masm);
 };
 
-const clientCreateNoteScriptFromPackage = ({
+const createNoteScriptFromPackage = ({
   script,
   midenSdk: { NoteScript, Package },
 }: {
@@ -581,27 +585,91 @@ export const clientCreateNoteFromScript = ({
   } = midenSdk;
   const noteScript = script.masm
     ? clientCreateNoteScriptFromMasm({ client, script, scripts })
-    : clientCreateNoteScriptFromPackage({ script, midenSdk });
+    : createNoteScriptFromPackage({ script, midenSdk });
   const assets = new NoteAssets(
     faucetAccountId
       ? [new FungibleAsset(AccountId.fromHex(faucetAccountId), amount)]
-      : []
+      : [],
   );
   const metadata = new NoteMetadata(
     AccountId.fromHex(senderAccountId),
     type === "public" ? NoteType.Public : NoteType.Private,
     NoteTag.fromAccountId(AccountId.fromHex(recipientAccountId)),
-    NoteExecutionHint.none()
+    NoteExecutionHint.none(),
   );
   const randomBigUints = new BigUint64Array(4);
   crypto.getRandomValues(randomBigUints);
   const serialNum = new Word(randomBigUints);
   const inputs = new NoteInputs(
-    new FeltArray(noteInputs.map((noteInput) => new Felt(BigInt(noteInput))))
+    new FeltArray(noteInputs.map((noteInput) => new Felt(BigInt(noteInput)))),
   );
   const recipient = new NoteRecipient(serialNum, noteScript, inputs);
   return new Note(assets, metadata, recipient);
 };
+
+export const clientImportNoteFile = async ({
+  client,
+  noteFileBytes,
+  scripts,
+  midenSdk,
+}: {
+  client: WebClientType;
+  noteFileBytes: Uint8Array;
+  scripts: Script[];
+  midenSdk: MidenSdk;
+}) => {
+  const noteId = await client.importNoteFile(
+    midenSdk.NoteFile.deserialize(noteFileBytes),
+  );
+  const record = await client.getInputNote(noteId.toString());
+  if (!record) {
+    throw new Error();
+  }
+  return wasmInputNoteToInputNote({ record, scripts, midenSdk });
+};
+
+export const clientExportNoteFile = async ({
+  client,
+  noteId,
+}: {
+  client: WebClientType;
+  noteId: string;
+}) => {
+  const noteFile = await client.exportNoteFile(noteId, "Details");
+  return noteFile.serialize();
+};
+
+export const clientExportInputNoteFile = async ({
+  client,
+  noteId,
+  midenSdk: { NoteFile },
+}: {
+  client: WebClientType;
+  noteId: string;
+  midenSdk: MidenSdk;
+}) => {
+  const record = await client.getInputNote(noteId);
+  if (!record) {
+    throw new Error("Input note not found");
+  }
+  try {
+    const inputNote = record.toInputNote();
+    return NoteFile.fromInputNote(inputNote).serialize();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (error) {
+    return NoteFile.fromNoteDetails(record.details()).serialize();
+  }
+};
+
+// export const clientSendPrivateNote = async ({
+//   client,
+//   address,
+//   midenSdk: { Address },
+// }: {
+//   client: WebClientType;
+//   address: string;
+//   midenSdk: MidenSdk;
+// }) => client.sendPrivateNote(note, Address.fromBech32(address));
 
 const accountType = (account: WasmAccountType) => {
   if (account.isFaucet()) {
@@ -614,8 +682,33 @@ const accountType = (account: WasmAccountType) => {
   return "non-fungible-faucet";
 };
 
-const storageMode = (account: WasmAccountType) =>
-  account.isPublic() ? "public" : account.isNetwork() ? "network" : "private";
+export const storageMode = (accountId: WasmAccountIdType) =>
+  accountId.isPublic()
+    ? "public"
+    : accountId.isNetwork()
+      ? "network"
+      : "private";
+
+export const accountIdToAddress = ({
+  accountId,
+  networkId,
+  midenSdk: { AccountId, AccountInterface },
+}: {
+  accountId: string;
+  networkId: NetworkId;
+  midenSdk: MidenSdk;
+}) => {
+  const wasmAccountId = AccountId.fromHex(accountId);
+  return wasmAccountId.toBech32Custom(networkId, AccountInterface.BasicWallet);
+};
+
+export const addressToAccountId = ({
+  address,
+  midenSdk: { Address },
+}: {
+  address: string;
+  midenSdk: MidenSdk;
+}) => Address.fromBech32(address).accountId();
 
 const verifyDefaultAccountComponents = ({
   wasmAccount,
@@ -628,8 +721,8 @@ const verifyDefaultAccountComponents = ({
   return defaultScripts
     .filter(
       ({ type, exports }) =>
-        type === "account" &&
-        exports.every(({ digest }) => code.hasProcedure(Word.fromHex(digest)))
+        ["account", "authentication-component"].includes(type) &&
+        exports.every(({ digest }) => code.hasProcedure(Word.fromHex(digest))),
     )
     .map(({ id }) => id);
 };
@@ -646,25 +739,30 @@ export const wasmAccountToAccount = ({
   wasmAccount: WasmAccountType;
   name: string;
   components?: string[];
-  networkId: string;
+  networkId: NetworkId;
   updatedAt: number;
   consumableNoteIds?: string[];
   midenSdk: MidenSdk;
 }): Account => {
-  const { AccountInterface, BasicFungibleFaucetComponent } = midenSdk;
+  const { BasicFungibleFaucetComponent } = midenSdk;
   const code = wasmAccount.code().commitment().toHex();
   const verifiedComponents = components
     ? components
     : verifyDefaultAccountComponents({ wasmAccount, midenSdk });
+  const address = accountIdToAddress({
+    accountId: wasmAccount.id().toString(),
+    networkId,
+    midenSdk,
+  });
   const account: Account = {
     ...defaultAccount(),
     id: wasmAccount.id().toString(),
     name,
-    address: wasmAccount
-      .id()
-      .toBech32Custom(networkId, AccountInterface.BasicWallet),
+    address,
+    identifier: getIdentifierPart(address),
+    routingParameters: getRoutingParametersPart(address),
     type: accountType(wasmAccount),
-    storageMode: storageMode(wasmAccount),
+    storageMode: storageMode(wasmAccount.id()),
     isPublic: wasmAccount.isPublic(),
     isUpdatable: wasmAccount.isUpdatable(),
     isRegularAccount: wasmAccount.isRegularAccount(),
@@ -679,9 +777,26 @@ export const wasmAccountToAccount = ({
         amount: fungibleAsset.amount().toString(),
       })),
     code,
-    storage: range(255).reduce<string[]>((previousValue, currentValue) => {
+    storage: range(255).reduce<StorageItem[]>((previousValue, currentValue) => {
       const item = wasmAccount.storage().getItem(currentValue);
-      return item ? [...previousValue, item.toHex()] : previousValue;
+      const mapEntries = wasmAccount.storage().getMapEntries(currentValue);
+      if (mapEntries && item) {
+        return [
+          ...previousValue,
+          {
+            type: "map",
+            item: item.toHex(),
+            mapEntries: mapEntries.map(({ key, value }) => ({ key, value })),
+          },
+        ];
+      }
+      if (item) {
+        return [
+          ...previousValue,
+          { type: "value", item: item.toHex(), mapEntries: [] },
+        ];
+      }
+      return previousValue;
     }, []),
     consumableNoteIds: consumableNoteIds ?? [],
     components: verifiedComponents,
@@ -693,7 +808,7 @@ export const wasmAccountToAccount = ({
     account.symbol = basicFungibleFaucetComponent.symbol().toString();
     account.decimals = basicFungibleFaucetComponent.decimals();
     account.maxSupply = basicFungibleFaucetComponent.maxSupply().toString();
-    const [, , , totalSupply] = stringToFeltArray(account.storage[0]!);
+    const [, , , totalSupply] = stringToFeltArray(getItem(account.storage, 0));
     account.totalSupply = totalSupply!.toString();
   }
   return account;
@@ -811,13 +926,13 @@ export const wasmTransactionToTransaction = ({
   midenSdk: MidenSdk;
 }): Transaction => {
   const inputNotes = range(
-    result.executedTransaction().inputNotes().numNotes()
+    result.executedTransaction().inputNotes().numNotes(),
   ).map((index) => {
     const note = result.executedTransaction().inputNotes().getNote(index);
     return wasmNoteToNote({ note: note.note(), midenSdk });
   });
   const outputNotes = range(
-    result.executedTransaction().outputNotes().numNotes()
+    result.executedTransaction().outputNotes().numNotes(),
   )
     .map((index) => {
       const note = result.executedTransaction().outputNotes().getNote(index);
@@ -855,6 +970,11 @@ export const wasmNoteToNote = ({
       faucetId: fungibleAsset.faucetId().toString(),
       amount: fungibleAsset.amount().toString(),
     })),
+  inputs: note
+    .recipient()
+    .inputs()
+    .values()
+    .map((value) => value.toString()),
 });
 
 export const wasmStorageSlotFromStorageSlot = ({
@@ -867,7 +987,7 @@ export const wasmStorageSlotFromStorageSlot = ({
   const { StorageSlot, StorageMap } = midenSdk;
   if (storageSlot.type === "value") {
     return StorageSlot.fromValue(
-      bigintToWord({ value: BigInt(storageSlot.value), midenSdk })
+      bigintToWord({ value: BigInt(storageSlot.value), midenSdk }),
     );
   } else {
     const storageMap = new StorageMap();
@@ -876,7 +996,7 @@ export const wasmStorageSlotFromStorageSlot = ({
       const [key = "", value = ""] = keyValuePair.split(":");
       storageMap.insert(
         bigintToWord({ value: BigInt(key), midenSdk }),
-        bigintToWord({ value: BigInt(value), midenSdk })
+        bigintToWord({ value: BigInt(value), midenSdk }),
       );
     }
     return StorageSlot.map(storageMap);

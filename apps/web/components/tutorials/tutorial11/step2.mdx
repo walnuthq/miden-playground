@@ -1,0 +1,19 @@
+Try adding a new procedure to this **Counter Contract** that resets the counter value to zero.
+It must have the following signature:
+
+```rust
+/// Resets the counter value to zero
+pub fn reset_count(&mut self) {
+    // Your code goes here
+}
+```
+
+When developing a smart contract you write human-readable Rust code and use a compiler to transpile it to [MASM](https://docs.miden.xyz/glossary#miden-assembly) code that can be executed by the [MidenVM](https://docs.miden.xyz/miden-vm/).
+
+Click on the _"Compile"_ button to see this process in action: the actual result of compilation is a Miden Assembly Package (MASP) containing both the MASM code and a manifest describing the package exports.
+
+On the _"Metadata"_ tab, you'll find the list of exported procedures exposed by the package manifest along with their signature.
+
+The MASM code ends up being deployed on-chain but we lose the link with the original human-readable code and the interface exposed by the smart contract: the function signature of our exported procedures are necessary to invoke them using the correct arguments.
+
+Contract verification aims at bridging the gap between on-chain deployed code and its original source and interface: we're linking them back together to grant anyone access to the Rust source code and package manifest so they know how to call the exposed procedures.

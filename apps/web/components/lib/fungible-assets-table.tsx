@@ -34,7 +34,7 @@ const FungibleAssetsTable = ({
         <TableBody>
           {fungibleAssets.map((fungibleAsset) => {
             const faucet = faucets.find(
-              ({ id }) => id === fungibleAsset.faucetId
+              ({ id }) => id === fungibleAsset.faucetId,
             );
             return (
               <TableRow key={fungibleAsset.faucetId}>
@@ -54,7 +54,13 @@ const FungibleAssetsTable = ({
                     "text-red-500": fungibleAsset.amount.startsWith("-"),
                   })}
                 >
-                  {formatAmount(fungibleAsset.amount, faucet?.decimals)}
+                  {formatAmount({
+                    amount: fungibleAsset.amount,
+                    decimals: faucet?.decimals,
+                    signDisplay: fungibleAsset.amount.startsWith("+")
+                      ? "exceptZero"
+                      : "auto",
+                  })}
                 </TableCell>
               </TableRow>
             );

@@ -27,7 +27,7 @@ import { formatAmount } from "@/lib/utils";
 
 const getConsumableNoteFields = (
   inputNoteRecord: WasmInputNoteRecordType,
-  faucets: Account[]
+  faucets: Account[],
 ) => {
   const noteFungibleAssets = inputNoteRecord
     .details()
@@ -37,7 +37,7 @@ const getConsumableNoteFields = (
       const faucetId = fungibleAsset.faucetId().toString();
       const amount = fungibleAsset.amount().toString();
       const faucet = faucets.find(({ id }) => id === faucetId);
-      return `${formatAmount(amount, faucet?.decimals)} ${faucet?.symbol}`;
+      return `${formatAmount({ amount, decimals: faucet?.decimals })} ${faucet?.symbol}`;
     });
   const metadata = inputNoteRecord.metadata();
   const wasmNoteTypes = {
@@ -54,22 +54,22 @@ const getConsumableNoteFields = (
 
 const getConsumableNoteValue = (
   inputNoteRecord: WasmInputNoteRecordType,
-  faucets: Account[]
+  faucets: Account[],
 ) => {
   const { noteId, noteType, noteFungibleAssets } = getConsumableNoteFields(
     inputNoteRecord,
-    faucets
+    faucets,
   );
   return [noteId, noteType, noteFungibleAssets.join(",")].join(",");
 };
 
 const getConsumableNoteLabel = (
   inputNoteRecord: WasmInputNoteRecordType,
-  faucets: Account[]
+  faucets: Account[],
 ) => {
   const { noteId, noteType, noteFungibleAssets } = getConsumableNoteFields(
     inputNoteRecord,
-    faucets
+    faucets,
   );
   return `${noteType} note ${
     noteFungibleAssets.length === 0
@@ -118,12 +118,12 @@ const SelectConsumableNotesCombobox = ({
                   key={consumableNote.inputNoteRecord().id().toString()}
                   value={getConsumableNoteValue(
                     consumableNote.inputNoteRecord(),
-                    faucets
+                    faucets,
                   )}
                   onSelect={(currentValue) => {
                     const [currentNoteId] = currentValue.split(",") as [string];
                     const index = value.findIndex(
-                      (noteId) => noteId === currentNoteId
+                      (noteId) => noteId === currentNoteId,
                     );
                     const newValue =
                       index === -1
@@ -135,16 +135,16 @@ const SelectConsumableNotesCombobox = ({
                 >
                   {getConsumableNoteLabel(
                     consumableNote.inputNoteRecord(),
-                    faucets
+                    faucets,
                   )}
                   <Check
                     className={cn(
                       "ml-auto",
                       value.includes(
-                        consumableNote.inputNoteRecord().id().toString()
+                        consumableNote.inputNoteRecord().id().toString(),
                       )
                         ? "opacity-100"
-                        : "opacity-0"
+                        : "opacity-0",
                     )}
                   />
                 </CommandItem>

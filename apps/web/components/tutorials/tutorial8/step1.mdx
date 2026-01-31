@@ -1,10 +1,14 @@
-In previous tutorials we deployed a public counter contract and incremented its count.
+Unlike local transactions that require users to execute and prove, network transactions are executed and proven by a network transaction builder.
 
-In this tutorial we will cover the basics of **foreign procedure invocation** (FPI) using the playground.
-To demonstrate FPI, we will build a "count copy" smart contract that reads the count from our previously deployed counter contract and copies the count to its own local storage.
+We'll build a network counter smart contract using the same code as the regular counter, but with different [storage configuration](https://docs.miden.xyz/miden-base/account/id#account-storage-mode) to enable network execution.
 
-Foreign procedure invocation (FPI) is a powerful tool for building composable smart contracts in Miden. FPI allows one smart contract or note to read the state of another contract.
+Then we'll create a note interacting with the network counter and let the network transaction builder actually consume and process the note.
 
-The term "foreign procedure invocation" might sound a bit verbose, but it is as simple as one smart contract calling a non-state modifying procedure in another smart contract. The "EVM equivalent" of foreign procedure invocation would be a smart contract calling a read-only function in another contract.
+Network transactions are executed and proven by the Miden operator rather than the client. They are useful for:
 
-FPI is useful for developing smart contracts that extend the functionality of existing contracts on Miden. FPI is the core primitive used by price oracles on Miden.
+- **Public shared state**: Multiple users can interact with the same contract state without race conditions.
+- **Autonomous execution**: Smart contracts can execute when conditions are met without user intervention.
+- **Resource-constrained devices**: Clients that can't generate ZK proofs efficiently.
+- **AMM applications**: Using network notes, you can build sophisticated AMMs where trades execute automatically.
+
+The main trade-off is reduced privacy since the operator can see transaction inputs.

@@ -68,7 +68,7 @@ const ProceduresTableRow = ({
                   try {
                     const transactionRecord = await invokeProcedure({
                       senderAccountId: account.id,
-                      scriptId: script.id,
+                      script,
                       procedureExport,
                     });
                     toast("Transaction submitted.", {
@@ -78,7 +78,7 @@ const ProceduresTableRow = ({
                           window.open(
                             `https://testnet.midenscan.com/tx/${transactionRecord.id().toHex()}`,
                             "_blank",
-                            "noopener noreferrer"
+                            "noopener noreferrer",
                           ),
                       },
                     });
@@ -90,7 +90,7 @@ const ProceduresTableRow = ({
                 } else {
                   openInvokeProcedureArgumentsDialog({
                     senderAccountId: account.id,
-                    scriptId: script.id,
+                    script,
                     procedureExport,
                   });
                 }

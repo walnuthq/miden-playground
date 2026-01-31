@@ -225,7 +225,7 @@ const useTransactions = () => {
       midenSdk,
     });
     const transactionRecord = transactions.find(
-      (tx) => tx.id().toHex() === transactionIdHex
+      (tx) => tx.id().toHex() === transactionIdHex,
     );
     const nextAccount = await clientGetAccountById({
       client,
@@ -233,7 +233,7 @@ const useTransactions = () => {
       midenSdk,
     });
     const previousAccount = accounts.find(
-      ({ id }) => id === nextAccount?.id().toString()
+      ({ id }) => id === nextAccount?.id().toString(),
     );
     if (!transactionRecord || !nextAccount || !previousAccount) {
       throw new Error("Transaction record or account not found");
@@ -252,7 +252,7 @@ const useTransactions = () => {
         midenSdk,
       });
       const noteIds = consumableNotes.map((consumableNote) =>
-        consumableNote.inputNoteRecord().id().toString()
+        consumableNote.inputNoteRecord().id().toString(),
       );
       consumableNoteIds[account.id] = noteIds;
     }

@@ -1,19 +1,12 @@
-In the previous step we had a look at the higher-level **Rust** source code of the Counter Contract, now let's focus on the compiled **MASM** output.
+import Link from "@/components/tutorials/tutorial-link";
 
-Here's a breakdown of what the **get_count** procedure does:
+In the previous step, we downloaded the private note locally on our device.
+This P2ID note encodes the intended recipient of its embedded assets in the note private data.
 
-- Pushes 0 onto the stack, representing the index of the storage slot to read.
-- Calls **active_account::get_item** with the index of 0.
-- Calls **sys::truncate_stack** to truncate the stack to size 16.
-- The value returned from **active_account::get_item** is still on the stack and will be returned when this procedure is called.
+**Public** notes data is stored in the [note database](https://docs.miden.xyz/miden-base/state/#note-database), making it fully visible on-chain: this means we can automatically import them in the playground by listening to the Miden blockchain activity.
 
-Here's a breakdown of what the **increment_count** procedure does:
+On the contrary, **Private** notes are invisible to the outside world and must be first imported in the playground before we can interact with them.
 
-- Pushes 0 onto the stack, representing the index of the storage slot to read.
-- Calls **active_account::get_item** with the index of 0.
-- Pushes 1 onto the stack.
-- Adds 1 to the count value returned from **active_account::get_item**.
-- For demonstration purposes, calls **debug.stack** to see the state of the stack
-- Pushes 0 onto the stack, which is the index of the storage slot we want to write to.
-- Calls **native_account::set_item** which saves the incremented count to storage at index 0
-- Calls **sys::truncate_stack** to truncate the stack to size 16.
+From the <Link href="/notes">notes page</Link>, click on _"Add note"_ and select the _"Import note"_ option.
+
+Upload the note file (note.mno) using the file picker, click on _"Import"_ and your private note will be available in the playground.

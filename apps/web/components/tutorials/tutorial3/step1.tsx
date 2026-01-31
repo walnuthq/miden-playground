@@ -8,11 +8,14 @@ import Step1Content from "@/components/tutorials/tutorial3/step1.mdx";
 const useCompleted = () => {
   const pathname = usePathname();
   const { connectedWallet } = useAccounts();
-  return pathname === `/accounts/${connectedWallet?.address}`;
+  return (
+    connectedWallet?.storageMode === "public" &&
+    pathname === `/accounts/${connectedWallet?.identifier}`
+  );
 };
 
 const Step1: TutorialStep = {
-  title: "Connect your wallet to testnet.",
+  title: "Connect your wallet to the playground.",
   Content: () => {
     const { connectedWallet } = useAccounts();
     const completed = useCompleted();

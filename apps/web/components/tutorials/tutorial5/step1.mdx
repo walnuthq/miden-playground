@@ -1,5 +1,7 @@
-In this tutorial, we will build a simple counter smart contract that maintains a count, deploy it to the Miden testnet, and interact with it by incrementing the count.
+In this tutorial, we will interact with a counter contract already deployed on chain by incrementing the count using the Miden Playground.
 
-Using a script, we will invoke the increment function within the counter contract to update the count. This tutorial provides a foundational understanding of developing and deploying custom smart contracts on Miden.
+Using a custom transaction, we will invoke the increment function within the counter contract to update the count. This tutorial provides a foundational understanding of interacting with custom smart contracts on Miden.
 
-Let's get started by clicking on _"Create new script"_ then choose a name and make sure to select an **Account Script** using the **Counter Contract** example.
+In Miden, Smart Contracts are implemented through custom accounts, their [code](https://docs.miden.xyz/miden-base/account/code) can be written in Rust and compiled to [Miden Assembly](https://docs.miden.xyz/glossary#miden-assembly) before being deployed on chain.
+
+Let's dive into the Counter Contract code by understanding how the **get_count** and **increment_count** procedures are implemented.

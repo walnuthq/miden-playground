@@ -1,5 +1,10 @@
-In this tutorial, you'll create your first smart contract and understand the structure and implementation of both the counter account contract and increment note script.
+In previous tutorials we deployed a public counter contract and incremented its count.
 
-Let's get started by clicking on _"Create new script"_ then make sure to name your script **counter-account** and select an **Account Component** script, do not use any example.
+In this tutorial we will cover the basics of **foreign procedure invocation** (FPI) using the playground.
+To demonstrate FPI, we will build a "count copy" smart contract that reads the count from our previously deployed counter contract and copies the count to its own local storage.
 
-It's important that you name your script **counter-account** otherwise you'll have compilation errors on step 4 of this tutorial.
+Foreign procedure invocation (FPI) is a powerful tool for building composable smart contracts in Miden. FPI allows one smart contract or note to read the state of another contract.
+
+The term "foreign procedure invocation" might sound a bit verbose, but it is as simple as one smart contract calling a non-state modifying procedure in another smart contract. The "EVM equivalent" of foreign procedure invocation would be a smart contract calling a read-only function in another contract.
+
+FPI is useful for developing smart contracts that extend the functionality of existing contracts on Miden. FPI is the core primitive used by price oracles on Miden.

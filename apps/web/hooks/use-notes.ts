@@ -8,7 +8,10 @@ import {
   TransactionType,
 } from "@demox-labs/miden-wallet-adapter";
 import { toBase64 } from "@/lib/utils";
-import { clientCreateNoteFromScript } from "@/lib/web-client";
+import {
+  clientCreateNoteFromScript,
+  clientImportNoteFile,
+} from "@/lib/web-client";
 import useMidenSdk from "@/hooks/use-miden-sdk";
 import useWebClient from "@/hooks/use-web-client";
 import { verifyNoteFromPackageId } from "@/lib/api";
@@ -68,7 +71,7 @@ const useNotes = () => {
       throw new Error("Sender account not found");
     }
     const recipientAccount = accounts.find(
-      ({ id }) => id === recipientAccountId
+      ({ id }) => id === recipientAccountId,
     );
     if (!recipientAccount) {
       throw new Error("Recipient account not found");
@@ -99,7 +102,7 @@ const useNotes = () => {
             Number(noteInputs[2]),
             Number(noteInputs[2]),
             type === "public" ? NoteType.Public : NoteType.Private,
-            new Felt(0n)
+            new Felt(0n),
           )
         : clientCreateNoteFromScript({
             client,
@@ -122,19 +125,28 @@ const useNotes = () => {
     }
     const transactionRequest = new TransactionRequestBuilder()
       .withOwnOutputNotes(
-        new MidenArrays.OutputNoteArray([OutputNote.full(note)])
+        new MidenArrays.OutputNoteArray([OutputNote.full(note)]),
       )
       .build();
     const customTransaction = new CustomTransaction(
       senderAccount.address,
       recipientAccount.address,
-      transactionRequest
+      transactionRequest,
     );
     const txId = await requestTransaction({
       type: TransactionType.Custom,
       payload: customTransaction,
     });
     console.log({ txId });
+  };
+  const importNoteFromFile = async (noteFileBytes: Uint8Array) => {
+    const inputNote = await clientImportNoteFile({
+      client,
+      noteFileBytes,
+      scripts,
+      midenSdk,
+    });
+    addNote(inputNote);
   };
   const openVerifyNoteScriptDialog = (noteId: string) =>
     dispatch({
@@ -160,6 +172,7 @@ const useNotes = () => {
     openCreateNoteDialog,
     closeCreateNoteDialog,
     newNote,
+    importNoteFromFile,
     openVerifyNoteScriptDialog,
     closeVerifyNoteScriptDialog,
   };

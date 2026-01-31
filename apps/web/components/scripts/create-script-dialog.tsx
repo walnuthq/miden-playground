@@ -46,7 +46,7 @@ const CreateScriptDialog = () => {
   const [scriptType, setScriptType] = useState<ScriptType>("account");
   const [scriptExample, setScriptExample] = useState<ScriptExample | "none">(
     // "counter-contract"
-    "none"
+    "none",
   );
   useEffect(() => {
     // if (scriptType === "account") {
@@ -113,11 +113,13 @@ const CreateScriptDialog = () => {
                     <SelectValue placeholder="Select type…" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Object.keys(scriptTypes).map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {scriptTypes[type as ScriptType]}
-                      </SelectItem>
-                    ))}
+                    {Object.keys(scriptTypes)
+                      .filter((type) => type !== "library")
+                      .map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {scriptTypes[type as ScriptType]}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </Field>

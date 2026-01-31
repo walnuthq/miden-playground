@@ -1,12 +1,9 @@
-// import {
-//   setupDefaultPackagesDir,
-//   newPackage,
-//   readRust,
-//   compilePackage,
-// } from "@/lib/miden-compiler";
+import dotenv from "dotenv";
 import { drizzle } from "drizzle-orm/node-postgres";
-// import { packagesTable } from "@/db/schema";
 import { relations } from "@/db/relations";
+import { projectRoot } from "@/lib/constants";
+
+dotenv.config({ path: `${projectRoot}/.env.local` });
 
 const db = drizzle(process.env.DATABASE_URL, {
   relations,

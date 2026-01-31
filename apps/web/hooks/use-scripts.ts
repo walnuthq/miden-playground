@@ -12,6 +12,7 @@ import { clientExecuteTransaction } from "@/lib/web-client";
 import { createScript, deleteScript as apiDeleteScript } from "@/lib/api";
 import useMidenSdk from "@/hooks/use-miden-sdk";
 import useTransactions from "@/hooks/use-transactions";
+import useTutorials from "@/hooks/use-tutorials";
 import useWebClient from "@/hooks/use-web-client";
 import { fromBase64 } from "@/lib/utils";
 
@@ -24,7 +25,7 @@ const useScripts = () => {
     deleteScriptAlertDialogScriptId,
     invokeProcedureArgumentsDialogOpen,
     invokeProcedureArgumentsDialogSenderAccountId,
-    invokeProcedureArgumentsDialogScriptId,
+    invokeProcedureArgumentsDialogScript,
     invokeProcedureArgumentsDialogProcedure,
     addDependencyDialogOpen,
     addDependencyDialogScriptId,
@@ -32,6 +33,7 @@ const useScripts = () => {
   } = useGlobalContext();
   const { client } = useWebClient();
   const { submitNewTransaction } = useTransactions();
+  const { tutorialId } = useTutorials();
   const openCreateScriptDialog = () =>
     dispatch({ type: "OPEN_CREATE_SCRIPT_DIALOG" });
   const closeCreateScriptDialog = () =>
@@ -52,10 +54,11 @@ const useScripts = () => {
     type: ScriptType;
     example: ScriptExample | "none";
   }) => {
-    const { id, rust } = await createScript({
+    const { id, rust, dependencies } = await createScript({
       name,
       type,
       example,
+      tutorialId,
     });
     const script: Script = {
       ...defaultScript(),
@@ -63,6 +66,7 @@ const useScripts = () => {
       name,
       type,
       rust,
+      dependencies,
       updatedAt: Date.now(),
     };
     dispatch({
@@ -71,10 +75,10 @@ const useScripts = () => {
     });
     return script;
   };
-  const updateScript = (script: Script) =>
+  const updateScript = (id: string, script: Partial<Script>) =>
     dispatch({
       type: "UPDATE_SCRIPT",
-      payload: { script },
+      payload: { id, script },
     });
   const deleteScript = async (scriptId: string) => {
     const script = scripts.find(({ id }) => id === scriptId);
@@ -87,21 +91,17 @@ const useScripts = () => {
   };
   const invokeProcedure = async ({
     senderAccountId,
-    scriptId,
+    script,
     procedureExport,
     procedureInputs = [],
     foreignAccounts = [],
   }: {
     senderAccountId: string;
-    scriptId: string;
+    script: Script;
     procedureExport: Export;
     procedureInputs?: MidenInput[];
     foreignAccounts?: string[];
   }) => {
-    const script = scripts.find(({ id }) => id === scriptId);
-    if (!script) {
-      throw new Error("Script not found");
-    }
     dispatch({ type: "SUBMITTING_TRANSACTION" });
     await client.syncState();
     try {
@@ -118,7 +118,7 @@ const useScripts = () => {
       const accountComponentLibrary = script.masm
         ? builder.buildLibrary(
             `external_contract::${contractName}`,
-            script.masm
+            script.masm,
           )
         : Package.deserialize(fromBase64(script.masp)).asLibrary();
       builder.linkDynamicLibrary(accountComponentLibrary);
@@ -127,7 +127,7 @@ const useScripts = () => {
           contractName: script.masm ? contractName : undefined,
           procedureExport,
           procedureInputs,
-        })
+        }),
       );
       let transactionRequestBuilder =
         new TransactionRequestBuilder().withCustomScript(transactionScript);
@@ -138,10 +138,10 @@ const useScripts = () => {
               foreignAccounts.map((foreignAccountId) =>
                 ForeignAccount.public(
                   AccountId.fromHex(foreignAccountId),
-                  new AccountStorageRequirements()
-                )
-              )
-            )
+                  new AccountStorageRequirements(),
+                ),
+              ),
+            ),
           );
       }
       const transactionRequest = transactionRequestBuilder.build();
@@ -164,16 +164,16 @@ const useScripts = () => {
   };
   const openInvokeProcedureArgumentsDialog = ({
     senderAccountId,
-    scriptId,
+    script,
     procedureExport,
   }: {
     senderAccountId: string;
-    scriptId: string;
+    script: Script;
     procedureExport: Export;
   }) =>
     dispatch({
       type: "OPEN_INVOKE_PROCEDURE_ARGUMENTS_DIALOG",
-      payload: { senderAccountId, scriptId, procedureExport },
+      payload: { senderAccountId, script, procedureExport },
     });
   const closeInvokeProcedureArgumentsDialog = () =>
     dispatch({
@@ -195,7 +195,7 @@ const useScripts = () => {
     deleteScriptAlertDialogScriptId,
     invokeProcedureArgumentsDialogOpen,
     invokeProcedureArgumentsDialogSenderAccountId,
-    invokeProcedureArgumentsDialogScriptId,
+    invokeProcedureArgumentsDialogScript,
     invokeProcedureArgumentsDialogProcedure,
     addDependencyDialogOpen,
     addDependencyDialogScriptId,

@@ -21,12 +21,14 @@ export const newPackage = async ({
   type,
   example,
   rust,
+  dependencies = [],
 }: {
   name: string;
   type: PackageType;
   example?: string;
   rust?: string;
-}) => {
+  dependencies?: Dependency[];
+}): Promise<{ id: string; rust: string; dependencies: Dependency[] }> => {
   const initialRust = rust
     ? rust
     : await readFile(`${projectRoot}/templates/${example ?? type}.rs`, "utf-8");
@@ -36,16 +38,17 @@ export const newPackage = async ({
     status: rust ? "compiled" : "draft",
     readOnly: !!rust,
     rust: initialRust,
+    dependencies: dependencies.map(({ id }) => id),
   });
   await generatePackageDir({
     packageDir: id,
     name,
     type,
     rust: initialRust,
-    dependencies: [],
+    dependencies: dependencies.map(({ id }) => id),
   });
   // compilePackage(id);
-  return { id, rust: initialRust };
+  return { id, rust: initialRust, dependencies };
 };
 
 export const readRust = async (packageDir: string) => {
@@ -69,22 +72,26 @@ export const generatePackageDir = async ({
   const dependenciesPackages =
     dependencies.length > 0 ? await getDependencies(dependencies) : [];
   await Promise.all(
-    dependenciesPackages.map((dependency) =>
-      generatePackageDir({
+    dependenciesPackages.map(async (dependency) => {
+      const exists = await packageExists(dependency.id);
+      if (exists) {
+        return;
+      }
+      return generatePackageDir({
         packageDir: dependency.id,
         name: dependency.name,
         type: dependency.type,
         rust: dependency.rust,
         dependencies: dependency.dependencies,
-      })
-    )
+      });
+    }),
   );
   await mkdir(`${packagesPath}/${packageDir}`);
   await Promise.all([
     mkdir(`${packagesPath}/${packageDir}/src`),
     cp(
       `${projectRoot}/templates/cargo-generate.toml`,
-      `${packagesPath}/${packageDir}/cargo-generate.toml`
+      `${packagesPath}/${packageDir}/cargo-generate.toml`,
     ),
     generateCargoToml({
       packageDir,
@@ -94,7 +101,7 @@ export const generatePackageDir = async ({
     }),
     cp(
       `${projectRoot}/templates/rust-toolchain.toml`,
-      `${packagesPath}/${packageDir}/rust-toolchain.toml`
+      `${packagesPath}/${packageDir}/rust-toolchain.toml`,
     ),
   ]);
   await updateRust({ packageDir, rust });
@@ -119,7 +126,7 @@ export const generateCargoToml = ({
   cargoToml += `[lib]\n`;
   cargoToml += `crate-type = ["cdylib"]\n\n`;
   cargoToml += `[dependencies]\n`;
-  cargoToml += `miden = { version = "0.8" }\n\n`;
+  cargoToml += `miden = { git = "https://github.com/0xMiden/compiler" }\n\n`;
   cargoToml += `[package.metadata.component]\n`;
   cargoToml += `package = "miden:${name}"\n\n`;
   cargoToml += `[package.metadata.miden]\n`;
@@ -130,13 +137,13 @@ export const generateCargoToml = ({
   cargoToml += "\n";
   if (dependencies.length > 0) {
     const midenDependencies = dependencies.map(
-      ({ id, name }) => `"miden:${name}" = { path = "${packagesPath}/${id}" }`
+      ({ id, name }) => `"miden:${name}" = { path = "${packagesPath}/${id}" }`,
     );
     cargoToml += `[package.metadata.miden.dependencies]\n`;
     cargoToml += `${midenDependencies.join("\n")}\n\n`;
     const targetDependencies = dependencies.map(
       ({ id, name }) =>
-        `"miden:${name}" = { path = "${packagesPath}/${id}/target/generated-wit" }`
+        `"miden:${name}" = { path = "${packagesPath}/${id}/target/generated-wit" }`,
     );
     cargoToml += `[package.metadata.component.target.dependencies]\n`;
     cargoToml += `${targetDependencies.join("\n")}\n\n`;
@@ -167,7 +174,7 @@ export const compilePackage = async (packageDir: string) => {
       ["miden", "build", "--release"],
       {
         cwd: `${packagesPath}/${packageDir}`,
-      }
+      },
     );
     return { stdout, stderr: "" };
   } catch (error) {

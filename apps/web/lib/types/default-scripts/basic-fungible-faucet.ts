@@ -12,29 +12,26 @@ export const basicFungibleFaucetMasm = `# BASIC FUNGIBLE FAUCET CONTRACT
 # - decimals are the decimals of the token.
 # - token_symbol as three chars encoded in a Felt.
 
-use.miden::contracts::faucets
+use miden::standards::faucets
 
 # CONSTANTS
 # =================================================================================================
 
-const.PRIVATE_NOTE=2
+const PRIVATE_NOTE=2
 
 # ERRORS
 # =================================================================================================
-const.ERR_FUNGIBLE_ASSET_DISTRIBUTE_WOULD_CAUSE_MAX_SUPPLY_TO_BE_EXCEEDED="distribute would cause the maximum supply to be exceeded"
+const ERR_FUNGIBLE_ASSET_DISTRIBUTE_WOULD_CAUSE_MAX_SUPPLY_TO_BE_EXCEEDED="distribute would cause the maximum supply to be exceeded"
 
-const.ERR_BASIC_FUNGIBLE_BURN_WRONG_NUMBER_OF_ASSETS="burn requires exactly 1 note asset"
+const ERR_BASIC_FUNGIBLE_BURN_WRONG_NUMBER_OF_ASSETS="burn requires exactly 1 note asset"
 
 # CONSTANTS
 # =================================================================================================
-
-# The slot in this component's storage layout where the metadata is stored.
-const.METADATA_SLOT=0
 
 #! Distributes freshly minted fungible assets to the provided recipient by creating a note.
 #!
 #! Inputs:  [amount, tag, aux, note_type, execution_hint, RECIPIENT, pad(7)]
-#! Outputs: [pad(16)]
+#! Outputs: [note_idx, pad(15)]
 #!
 #! Where:
 #! - amount is the amount to be minted and sent.
@@ -43,16 +40,17 @@ const.METADATA_SLOT=0
 #! - note_type is the type of the note that holds the asset.
 #! - execution_hint is the execution hint of the note that holds the asset.
 #! - RECIPIENT is the recipient of the asset, i.e.,
-#!   hash(hash(hash(serial_num, [0; 4]), script_root), input_commitment).
+#!   hash(hash(hash(serial_num, [0; 4]), script_root), storage_commitment).
+#! - note_idx is the index of the created note.
 #!
 #! Panics if:
 #! - the transaction is being executed against an account that is not a fungible asset faucet.
 #! - the total issuance after minting is greater than the maximum allowed supply.
 #!
 #! Invocation: call
-export.distribute
+pub proc distribute
     exec.faucets::distribute
-    # => [pad(16)]
+    # => [note_idx, pad(15)]
 end
 
 #! Burns the fungible asset from the active note.
@@ -71,7 +69,7 @@ end
 #! - the transaction is executed against an account which is not a fungible asset faucet.
 #! - the transaction is executed against a faucet which is not the origin of the specified asset.
 #! - the amount about to be burned is greater than the outstanding supply of the asset.
-export.faucets::burn
+pub use faucets::burn
 `;
 
 const basicFungibleFaucet: Script = {

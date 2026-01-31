@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Link from "next/link";
 import { type Account } from "@/lib/types/account";
 import { type InputNote } from "@/lib/types/note";
@@ -15,6 +16,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
+import { Spinner } from "@workspace/ui/components/spinner";
 import { Badge } from "@workspace/ui/components/badge";
 import { MoreVertical, CircleCheckBig } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
@@ -30,7 +32,11 @@ import {
 } from "@demox-labs/miden-wallet-adapter";
 import useGlobalContext from "@/components/global-context/hook";
 import useScripts from "@/hooks/use-scripts";
-import { formatAmount, getAddressPart } from "@/lib/utils";
+import { formatAmount } from "@/lib/utils";
+import useWebClient from "@/hooks/use-web-client";
+import useMidenSdk from "@/hooks/use-miden-sdk";
+import { clientExportInputNoteFile } from "@/lib/web-client";
+import { accountIdToAddress } from "@/lib/web-client";
 
 const NoteActionsCell = ({
   account,
@@ -39,17 +45,20 @@ const NoteActionsCell = ({
   account: Account;
   inputNote: InputNote;
 }) => {
+  const { midenSdk } = useMidenSdk();
+  const { client } = useWebClient();
   const { wallet } = useWallet();
   const { networkId } = useGlobalContext();
   const { faucets } = useAccounts();
   const { openCreateTransactionDialog, newConsumeTransactionRequest } =
     useTransactions();
+  const [loading, setLoading] = useState(false);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="size-8 p-0">
-          <span className="sr-only">Open menu</span>
-          <MoreVertical className="size-4" />
+        <Button variant="ghost" className="size-8 p-0" disabled={loading}>
+          <span className="sr-only">{loading ? "Loading" : "Open menu"}</span>
+          {loading ? <Spinner /> : <MoreVertical className="size-4" />}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
@@ -57,13 +66,16 @@ const NoteActionsCell = ({
           onClick={async () => {
             if (
               networkId === "mlcl" ||
-              account.components.includes("no-auth")
+              account.components.includes("no-auth") ||
+              account.components.includes("ecdsa-k256-keccak-auth")
             ) {
+              setLoading(true);
               const { transactionRequest, transactionResult } =
                 await newConsumeTransactionRequest({
                   accountId: account.id,
                   noteIds: [inputNote.id],
                 });
+              setLoading(false);
               openCreateTransactionDialog({
                 accountId: account.id,
                 transactionType: "consume",
@@ -72,25 +84,28 @@ const NoteActionsCell = ({
                 transactionResult,
               });
             } else {
-              const faucet = faucets.find(
-                ({ id }) => id === inputNote.senderId
-              );
               const [fungibleAsset] = inputNote.fungibleAssets;
+              const faucet = faucets.find(
+                ({ id }) => id === fungibleAsset?.faucetId,
+              );
               if (!wallet || !fungibleAsset || !faucet) {
                 return;
               }
+              const noteFileBytes =
+                inputNote.type === "public"
+                  ? undefined
+                  : await clientExportInputNoteFile({
+                      client,
+                      noteId: inputNote.id,
+                      midenSdk,
+                    });
               const transaction = new ConsumeTransaction(
-                getAddressPart(faucet.address),
+                faucet.identifier,
                 inputNote.id,
                 inputNote.type === "public" ? "public" : "private",
-                Number(fungibleAsset.amount)
+                Number(fungibleAsset.amount),
+                noteFileBytes,
               );
-              // console.log({
-              //   faucetId: getAddressPart(faucet.address),
-              //   noteId: inputNote.id,
-              //   noteType: inputNote.type === "public" ? "public" : "private",
-              //   amount: Number(fungibleAsset.amount),
-              // });
               const adapter = wallet.adapter as MidenWalletAdapter;
               const txId = await adapter.requestConsume(transaction);
               console.log({ txId });
@@ -105,8 +120,9 @@ const NoteActionsCell = ({
 };
 
 const AccountNotesTable = ({ account }: { account: Account }) => {
+  const { midenSdk } = useMidenSdk();
   const { networkId } = useGlobalContext();
-  const { faucets, connectedWallet } = useAccounts();
+  const { accounts, faucets, connectedWallet } = useAccounts();
   const { inputNotes } = useNotes();
   const { scripts } = useScripts();
   const consumableNotes = account.consumableNoteIds
@@ -124,7 +140,7 @@ const AccountNotesTable = ({ account }: { account: Account }) => {
             <TableHead>ID</TableHead>
             <TableHead>Script</TableHead>
             <TableHead>Storage mode</TableHead>
-            <TableHead>Sender ID</TableHead>
+            <TableHead>Sender</TableHead>
             <TableHead>Assets</TableHead>
             {showNoteActions && <TableHead />}
           </TableRow>
@@ -132,8 +148,14 @@ const AccountNotesTable = ({ account }: { account: Account }) => {
         <TableBody>
           {consumableNotes.map((inputNote) => {
             const script = scripts.find(
-              ({ digest }) => digest === inputNote.scriptRoot
+              ({ digest }) => digest === inputNote.scriptRoot,
             );
+            const sender = accounts.find(({ id }) => id === inputNote.senderId);
+            const senderAddress = accountIdToAddress({
+              accountId: inputNote.senderId,
+              networkId,
+              midenSdk,
+            });
             return (
               <TableRow key={inputNote.id}>
                 <TableCell>
@@ -166,14 +188,21 @@ const AccountNotesTable = ({ account }: { account: Account }) => {
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <AccountAddress id={inputNote.senderId} />
+                  <AccountAddress
+                    account={{
+                      name: sender?.name ?? "",
+                      address: senderAddress,
+                    }}
+                    withName={!!sender}
+                    withLink={!!sender}
+                  />
                 </TableCell>
                 <TableCell>
                   {inputNote.fungibleAssets.map(({ faucetId, amount }) => {
                     const faucet = faucets.find(({ id }) => id === faucetId);
                     return (
                       <p key={faucetId}>
-                        {formatAmount(amount, faucet?.decimals)}{" "}
+                        {formatAmount({ amount, decimals: faucet?.decimals })}{" "}
                         {faucet?.symbol}
                       </p>
                     );

@@ -10,7 +10,7 @@ const Step4: TutorialStep = {
     const { transactions } = useTransactions();
     const faucet = faucets.find(({ name }) => name === "MDN Faucet");
     const transaction = transactions.find(
-      ({ accountId }) => accountId === faucet?.id
+      ({ accountId }) => accountId === faucet?.id,
     );
     return <Step4Content transaction={transaction} />;
   },

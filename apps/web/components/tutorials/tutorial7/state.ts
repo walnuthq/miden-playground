@@ -1,27 +1,25 @@
+import { TEST_WALLET_ACCOUNT_ID, TEST_WALLET_ADDRESS } from "@/lib/constants";
+import {
+  basicWalletAccount,
+  getIdentifierPart,
+  getRoutingParametersPart,
+} from "@/lib/types/account";
 import { type State, defaultState } from "@/lib/types/state";
-import defaultScripts from "@/lib/types/default-scripts";
-import counterContractScript from "@/lib/types/default-scripts/counter-contract";
-import counterNoteScript from "@/lib/types/default-scripts/counter-note";
-import defaultComponents from "@/lib/types/default-components";
-import counterContractComponent from "@/lib/types/default-components/counter-contract";
 
 const state: State = {
   ...defaultState(),
   networkId: "mtst",
-  scripts: [
-    ...defaultScripts,
-    { ...counterContractScript, id: "counter-value-contract" },
-    counterNoteScript,
-  ],
-  components: [
-    ...defaultComponents,
+  accounts: [
     {
-      ...counterContractComponent,
-      id: "counter-value-contract",
-      scriptId: "counter-value-contract",
+      ...basicWalletAccount({ storageMode: "public" }),
+      id: TEST_WALLET_ACCOUNT_ID,
+      name: "Test Wallet",
+      address: TEST_WALLET_ADDRESS,
+      identifier: getIdentifierPart(TEST_WALLET_ADDRESS),
+      routingParameters: getRoutingParametersPart(TEST_WALLET_ADDRESS),
     },
   ],
-  tutorialId: "network-transactions",
+  tutorialId: "timelock-p2id-note",
 };
 
 export default state;

@@ -1,60 +1,20 @@
-Let's examine the counter account contract.
+import Image from "next/image";
+import Link from "@/components/tutorials/tutorial-link";
 
-**No-std Environment**
+<Image
+  className="max-h-96 object-contain"
+  src="/img/count-copy-fpi-diagram.png"
+  alt="Count copy FPI diagram"
+  width={1100}
+  height={744}
+/>
 
-```rust
-#![no_std]
-```
+The diagram above depicts the **Count Reader** smart contract using foreign procedure invocation to read the count state of the counter contract. After reading the state via FPI, the **Count Reader** smart contract writes the value returned from the counter contract to storage.
 
-Miden contracts run in a **`no_std`** environment, meaning they don't link against Rust's standard library. This is essential for blockchain execution where contracts need to be deterministic and lightweight.
+What we'll cover:
 
-**Miden Library Imports**
+- **Foreign Procedure Invocation** (FPI) with the Playground.
+- Building a **Count Reader** smart contract.
+- Executing **cross-contract calls** in the browser.
 
-```rust
-use miden::{
-  component, felt, Felt, StorageMap, StorageMapAccess, Word
-};
-```
-
-These imports provide:
-
-- **`component`**: Macro for defining contract components
-- **`Felt`**/**`Word`**: Miden's native field element and word types
-- **`StorageMap`**: Key-value storage within account storage slots
-- **`StorageMapAccess`**: Needed for reading storage values (**`get_count`** function)
-
-**Contract Structure Definition**
-
-```rust
-#[component]
-struct CounterContract {
-    /// Storage map holding the counter value.
-    #[storage(slot(0), description = "...")]
-    count_map: StorageMap,
-}
-```
-
-The **`#[component]`** attribute marks this as a Miden component.
-The **`count_map`** field is a **`StorageMap`** that will be stored in storage slot 0 of the account.
-
-**Important**: Storage slots in Miden hold **`Word`** values, which are composed of four field elements (**`Felt`**).
-Each **`Felt`** is a 64-bit unsigned integer (u64).
-The **`StorageMap`** provides a key-value interface within a single storage slot, allowing you to store multiple key-value pairs within the four-element word structure.
-
-**Contract Implementation**
-
-```rust
-impl CounterContract {
-    // Function implementations...
-}
-```
-
-The **`CounterContract`** implementation defines the external interface that other contracts and notes can call. This is the contract's public API.
-
-**Storage Key Strategy**
-
-```rust
-let key = Word::from([felt!(0), felt!(0), felt!(0), felt!(1)]);
-```
-
-Both functions use the same fixed key **`[0, 0, 0, 1]`** to store and retrieve the counter value within the storage map. This demonstrates a simple but effective storage pattern.
+First, let's discover the <Link href="/scripts/count-reader">Count Reader</Link> script logic.

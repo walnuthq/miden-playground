@@ -1,0 +1,8 @@
+Now that we're done with the Counter Contract script, let's create a simple increment note script that will call the **`increment_count`** procedure of our smart contract when consumed.
+
+Click on the _"Create new script"_ button on the main _"Scripts"_ page and create a **Note Script**, you can name it anything you want eg. **increment-note**, make sure to select the **Counter Note** example.
+
+Once your script is created, we'll start by adding a dependency to the **counter-account** script we created in the first step.
+This is required as our increment note script is calling our smart contract procedures (both **`get_count`** and **`increment_count`**) so we'll need to import the [AccountComponent](https://docs.miden.xyz/glossary#accountcomponent) interface.
+
+On the _"Metadata"_ tab click on the _"Add dependency"_ button and select the **counter-account** script to add it as a dependency of our **increment-note** script.

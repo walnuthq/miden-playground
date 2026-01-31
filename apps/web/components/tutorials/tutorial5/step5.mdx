@@ -1,11 +1,7 @@
-import Link from "@/components/tutorials/tutorial-link";
+Our Counter Contract has been imported in the Playground and we can now start interacting with it.
 
-Now that we both defined our [AccountCode](https://docs.miden.xyz/miden-base/account/code) using a script and [AccountStorage](https://docs.miden.xyz/miden-base/account/storage) using an account component, it's time to deploy our contract on testnet.
+First, click on the _"Components"_ tab in the account details page to access the Counter Contract [account components](https://docs.miden.xyz/miden-base/account/components).
 
-From the <Link href="/accounts">Accounts page</Link>, click on _"Create new account"_ and select the _"Deploy account"_ option.
+In the procedures section of the account component, click on the _"Invoke"_ button next to the **get_count** procedure to get the current value of the counter.
 
-Give your new contract a name and select **NoAuth** as authentication component: our counter contract doesn't require authentication as we allow any user to interact with it without requiring signature verification.
-
-After selecting your custom **Counter Contract** account component, you will be given the opportunity to overwrite the storage slots default values.
-
-When you're done configuring your contract deployment, click on the _"Deploy"_ button to create your account locally: you will need to perform at least one transaction against it before it is acknowledged by testnet.
+Next, click on the _"Invoke"_ button of the **increment_count** procedure to invoke it and increment the previous value by one.

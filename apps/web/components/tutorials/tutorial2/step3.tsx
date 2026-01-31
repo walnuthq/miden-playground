@@ -12,7 +12,7 @@ const Step3: TutorialStep = {
     const walletB = wallets.find(({ name }) => name === "Wallet B");
     const transaction = transactions.find(
       ({ accountId, outputNotes }) =>
-        accountId === walletA?.id && outputNotes.length === 1
+        accountId === walletA?.id && outputNotes.length === 1,
     );
     const note = transaction?.outputNotes[0];
     return (

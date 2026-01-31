@@ -1,0 +1,18 @@
+import AccountAddress from "@/components/lib/account-address";
+import CopyButton from "@/components/lib/copy-button";
+
+Since the contract is verified, you can call its procedures as the interface is now available to everyone.
+
+Increment and reset the count of this newly verified **Counter Contract** to test the unlocked **Read/Write** contract feature that verification enables.
+
+Note that this verification process is not happening locally, meaning that anyone can now read the source of this contract and interact with it on-chain.
+
+You can test it after finishing this tutorial by importing the contract again in a new testnet sandbox environment.
+
+- **Name**: Verified Contract <CopyButton content="Copy Account Name" copy="Verified Contract" />
+
+- **Address**:
+
+<AccountAddress account={props.counter} withLink={false} />
+
+Congratulations! You discovered what contract verification is all about and verified your first contract on the Miden Playground.

@@ -42,10 +42,9 @@ const DependencyActionsCell = ({
         <DropdownMenuItem
           onClick={() => {
             const index = script.dependencies.findIndex(
-              ({ id }) => id === dependencyId
+              ({ id }) => id === dependencyId,
             );
-            updateScript({
-              ...script,
+            updateScript(script.id, {
               dependencies: [
                 ...script.dependencies.slice(0, index),
                 ...script.dependencies.slice(index + 1),
@@ -65,7 +64,7 @@ const DependenciesTable = ({ script }: { script: Script }) => {
   const dependencies = script.dependencies
     .map((dependency) => {
       const scriptDependency = scripts.find(
-        ({ name }) => name === dependency.name
+        ({ name }) => name === dependency.name,
       );
       return scriptDependency
         ? {

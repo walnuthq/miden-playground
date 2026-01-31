@@ -15,6 +15,12 @@ export type StorageSlot = {
   value: string;
 };
 
+export const defaultStorageSlot = (): StorageSlot => ({
+  name: "",
+  type: "value",
+  value: "0",
+});
+
 export type Component = {
   id: string;
   name: string;
@@ -39,8 +45,8 @@ export const stringToKeyValues = (value: string) => {
   }
   const keyValuePairs = value.split(",");
   return keyValuePairs.map((pair) => {
-    const [key, value] = pair.split(":");
-    return { key: key!, value: value! };
+    const [key = "", value = ""] = pair.split(":");
+    return { key, value };
   });
 };
 

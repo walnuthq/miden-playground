@@ -21,7 +21,7 @@ export const midenVerifier = async ({
           process.env.NODE_ENV === "production"
             ? undefined
             : `${projectRoot}/miden-verifier/target/release`,
-      }
+      },
     );
     return true;
   } catch (error) {
