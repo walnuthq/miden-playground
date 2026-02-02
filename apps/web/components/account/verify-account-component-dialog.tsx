@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 import { Spinner } from "@workspace/ui/components/spinner";
 import { Button } from "@workspace/ui/components/button";
 import {
@@ -15,13 +16,14 @@ import {
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import useAccounts from "@/hooks/use-accounts";
-import { verifyAccountComponentFromSource } from "@/lib/actions";
+import { verifyAccountComponentFromSource } from "@/lib/api";
 import { clientGetAccountById } from "@/lib/web-client";
 import useWebClient from "@/hooks/use-web-client";
 import useMidenSdk from "@/hooks/use-miden-sdk";
 import { toBase64, readFileAsText } from "@/lib/utils";
 
 const VerifyAccountComponentDialog = () => {
+  const router = useRouter();
   const { client } = useWebClient();
   const { midenSdk } = useMidenSdk();
   const {
@@ -79,6 +81,7 @@ const VerifyAccountComponentDialog = () => {
             setLoading(false);
             if (verified) {
               toast.success("Account Component verified.");
+              router.refresh();
             } else {
               toast.error("Account Component couldn't be verified.", {
                 description: error,
