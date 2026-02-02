@@ -84,35 +84,6 @@ export const deleteScript = async (scriptId: string) => {
   return id;
 };
 
-export const verifyAccountComponentFromSource = async ({
-  accountId,
-  identifier,
-  account,
-  cargoToml,
-  rust,
-}: {
-  accountId: string;
-  identifier: string;
-  account: string;
-  cargoToml: string;
-  rust: string;
-}) => {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  const response = await fetch(`${apiUrl}/verified-account-components`, {
-    method: "POST",
-    body: JSON.stringify({
-      accountId,
-      identifier,
-      account,
-      cargoToml,
-      rust,
-    }),
-  });
-  const result = await response.json();
-  const { ok, error } = result as { ok: boolean; error?: string };
-  return { verified: ok, error };
-};
-
 export const verifyAccountComponentsFromPackageIds = async ({
   accountId,
   identifier,
