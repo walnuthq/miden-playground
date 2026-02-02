@@ -98,7 +98,13 @@ const CreateScriptDialog = () => {
             <FieldGroup className="grid grid-cols-2 gap-4">
               <Field className="grid col-span-2">
                 <FieldLabel htmlFor="name">Name</FieldLabel>
-                <Input id="name" name="name" required minLength={2} />
+                <Input
+                  id="name"
+                  name="name"
+                  required
+                  minLength={2}
+                  pattern="[a-zA-Z\-\s]+"
+                />
                 <FieldDescription>
                   Package name, 2 characters minimum.
                 </FieldDescription>

@@ -13,7 +13,7 @@ const useCompleted = () => {
     return false;
   }
   const count = getMapItem(
-    counter?.storage,
+    counter.storage,
     0,
     "0x0000000000000000000000000000000000000000000000000100000000000000",
   );
@@ -37,7 +37,8 @@ const Step7: TutorialStep = {
             <p>
               Click on the <em>"Invoke"</em> button next to the{" "}
               <strong>increment-count</strong> procedure to interact with the
-              verified contract.
+              verified contract, then call the <strong>reset-count</strong>{" "}
+              procedure to set the counter value back to zero.
             </p>
           }
         />
