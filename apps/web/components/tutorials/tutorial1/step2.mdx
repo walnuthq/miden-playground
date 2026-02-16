@@ -1,6 +1,6 @@
 import AccountAddress from "@/components/lib/account-address";
 
-Our newly created Account generated its own unique [Account ID](https://docs.miden.xyz/miden-base/account/id), an immutable and unique identifier for the Account. Click on the link below to access your wallet:
+Our newly created Account generated its own unique [Account ID](https://docs.miden.xyz/design/miden-base/account/id/), an immutable and unique identifier for the Account. Click on the link below to access your wallet:
 
 <AccountAddress account={props.wallet} />
 
@@ -9,6 +9,6 @@ This identifier is designed to contain the metadata of an Account. The metadata 
 There are two main categories of accounts in Miden: **basic accounts** and **faucets**.
 
 - **Basic Accounts**: Basic Accounts may be either mutable (code can be changed after deployment) or immutable (code cannot be changed once deployed).
-- **Faucets**: Faucets are always immutable and can be specialized by the type of [Assets](https://docs.miden.xyz/miden-base/asset) they issue: either fungible or non-fungible.
+- **Faucets**: Faucets are always immutable and can be specialized by the type of [Assets](https://docs.miden.xyz/design/miden-base/asset/) they issue: either fungible or non-fungible.
 
 Let's fund our wallet by requesting MDN assets (tokens) from a pre-existing fungible MDN faucet.

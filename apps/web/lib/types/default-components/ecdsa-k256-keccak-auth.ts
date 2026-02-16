@@ -6,7 +6,13 @@ const ecdsaK256KeccakAuth: Component = {
   name: "ECDSA K256 Keccak Auth",
   type: "authentication-component",
   scriptId: "ecdsa-k256-keccak-auth",
-  storageSlots: [{ name: "Owner Public Key", type: "value", value: "0" }],
+  storageSlots: [
+    {
+      name: "miden::standards::auth::ecdsa_k256_keccak::public_key",
+      type: "value",
+      value: "0",
+    },
+  ],
 };
 
 export default ecdsaK256KeccakAuth;

@@ -5,5 +5,5 @@ edition = "2024"
 
 [dependencies]
 base64 = "0.22.1"
-miden-objects = "0.12.4"
+miden-protocol = "0.13.3"
 winter-utils = "0.13.1"

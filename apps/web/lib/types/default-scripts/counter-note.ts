@@ -30,7 +30,7 @@ impl CounterNote {
 }
 `;
 
-export const counterNoteMasm = `use.external_contract::counter_contract
+export const counterNoteMasm = `use external_contract::counter_contract
 
 begin
     call.counter_contract::increment_count

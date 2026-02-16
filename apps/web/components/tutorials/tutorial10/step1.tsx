@@ -12,7 +12,9 @@ const useCompleted = () => {
   const script = scripts.find(
     ({ id, type }) => !defaultScriptIds.includes(id) && type === "account",
   );
-  return pathname === `/scripts/${script?.id}`;
+  return (
+    pathname === `/scripts/${script?.id}` && script?.name === "counter-account"
+  );
 };
 
 const Step1: TutorialStep = {

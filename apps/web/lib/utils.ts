@@ -29,6 +29,9 @@ export const formatAmount = ({
     signDisplay,
   }).format(Number(formatUnits(BigInt(amount), decimals)));
 
+export const formatProcedureExportPath = (path: string) =>
+  path.split("::").at(-1)?.replaceAll('"', "") ?? "";
+
 export const parseAmount = (
   amount: string,
   decimals = FUNGIBLE_FAUCET_DEFAULT_DECIMALS,

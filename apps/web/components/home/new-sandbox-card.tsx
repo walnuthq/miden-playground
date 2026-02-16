@@ -8,31 +8,29 @@ import {
   CardTitle,
 } from "@workspace/ui/components/card";
 import { Button } from "@workspace/ui/components/button";
-import type { NetworkId } from "@/lib/types/network";
-import useWebClient from "@/hooks/use-web-client";
+import { type NetworkId, networks } from "@/lib/types/network";
+import useAppState from "@/hooks/use-app-state";
 
 const NewSandboxCard = ({ networkId }: { networkId: NetworkId }) => {
   const router = useRouter();
-  const { resetState } = useWebClient();
+  const { resetState } = useAppState();
   return (
     <Card>
       <CardHeader>
-        <CardTitle>
-          New {networkId === "mtst" ? "testnet" : "local"} sandbox
-        </CardTitle>
+        <CardTitle>New {networks[networkId]} sandbox</CardTitle>
         <CardDescription>Start a new sandbox from scratch.</CardDescription>
       </CardHeader>
       <CardContent className="h-full">
-        {networkId === "mtst" ? (
+        {networkId === "mmck" ? (
           <p>
-            Choose this option to create a new empty sandbox connected to
-            testnet.
+            Choose this option to experiment on a MockChain environment not
+            connected to any network. You won't need to sign transactions using
+            a wallet.
           </p>
         ) : (
           <p>
-            Choose this option to experiment on a local environment not
-            connected to any network. You won't need to sign transactions using
-            a wallet.
+            Choose this option to create a new empty sandbox connected to{" "}
+            {networks[networkId]}.
           </p>
         )}
       </CardContent>

@@ -1,5 +1,4 @@
 import { defaultTutorial, type Tutorial } from "@/lib/types/tutorial";
-import { defaultStore } from "@/lib/types/store";
 import state from "@/components/tutorials/tutorial8/state";
 import Step1 from "@/components/tutorials/tutorial8/step1";
 import Step2 from "@/components/tutorials/tutorial8/step2";
@@ -18,7 +17,6 @@ const tutorial: Tutorial = {
   description:
     "In this tutorial, we will explore Network Transactions (NTXs) on Miden - a powerful feature that enables autonomous smart contract execution and public shared state management.",
   initialRoute: "/accounts",
-  store: defaultStore(),
   state,
   steps: [Step1, Step2, Step3, Step4, Step5, Step6],
 };

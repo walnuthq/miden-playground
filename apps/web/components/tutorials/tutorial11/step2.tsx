@@ -6,17 +6,18 @@ import useScripts from "@/hooks/use-scripts";
 import { defaultScriptIds } from "@/lib/types/default-scripts";
 import useComponents from "@/hooks/use-components";
 import useTutorials from "@/hooks/use-tutorials";
+import { storageSlotName } from "@/lib/types/component";
 
 const useCompleted = () => {
   const { scripts } = useScripts();
   const script = scripts.find(
     ({ id, type }) => !defaultScriptIds.includes(id) && type === "account",
   );
-  const exports = script?.exports ?? [];
-  const resetCountProcedure = exports.find(
+  const procedureExports = script?.procedureExports ?? [];
+  const resetCountProcedure = procedureExports.find(
     ({ digest }) =>
       digest ===
-      "0x3883aa041f7a28943538ff9f8642f327232025c5e208d034f1aab7eac364ce49",
+      "0x21f0becec69be75d8ffc46bc9a9a38153f111f9436de70899ef852ca8c5d2ddb",
   );
   return script?.status === "compiled" && !!resetCountProcedure;
 };
@@ -62,7 +63,16 @@ const Step2: TutorialStep = {
               name: "Counter Contract",
               type: "account",
               scriptId: script?.id ?? "",
-              storageSlots: [{ name: "count_map", type: "map", value: "1:0" }],
+              storageSlots: [
+                {
+                  name: storageSlotName({
+                    packageName: script?.name ?? "",
+                    fieldName: "count_map",
+                  }),
+                  type: "map",
+                  value: "1:0",
+                },
+              ],
             });
           }
           nextTutorialStep();

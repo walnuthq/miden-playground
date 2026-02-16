@@ -9,10 +9,11 @@ import {
   CardTitle,
 } from "@workspace/ui/components/card";
 import { Button } from "@workspace/ui/components/button";
-import { defaultExport, type Script } from "@/lib/types/script";
+import { defaultProcedureExport, type Script } from "@/lib/types/script";
 import useScripts from "@/hooks/use-scripts";
 import { cn } from "@workspace/ui/lib/utils";
 import { compileScript } from "@/lib/api";
+import { formatProcedureExportPath } from "@/lib/utils";
 
 const EditorConsole = ({ script }: { script: Script }) => {
   const { scripts, updateScript } = useScripts();
@@ -20,7 +21,7 @@ const EditorConsole = ({ script }: { script: Script }) => {
   const [content, setContent] = useState("");
   const compile = async () => {
     setLoading(true);
-    const { error, masm, digest, masp, exports, dependencies } =
+    const { error, masm, digest, masp, procedureExports, dependencies } =
       await compileScript(script);
     updateScript(script.id, {
       error,
@@ -28,12 +29,14 @@ const EditorConsole = ({ script }: { script: Script }) => {
       status: error ? "error" : "compiled",
       digest,
       masp,
-      exports: error
-        ? script.exports
-        : exports.map((procedureExport) => ({
-            ...defaultExport(),
+      procedureExports: error
+        ? script.procedureExports
+        : procedureExports.map((procedureExport) => ({
+            ...defaultProcedureExport(),
             ...procedureExport,
-            readOnly: procedureExport.name.startsWith("get"),
+            readOnly: formatProcedureExportPath(
+              procedureExport.path,
+            ).startsWith("get"),
           })),
       dependencies: error
         ? script.dependencies

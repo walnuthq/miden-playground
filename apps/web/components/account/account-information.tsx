@@ -49,7 +49,7 @@ const AccountInformation = ({ account }: { account: Account }) => {
                   This account has pending notes that can be consumed.
                 </p>
               </div>
-              {networkId === "mlcl" && (
+              {networkId === "mmck" && (
                 <Button
                   variant="outline"
                   onClick={async () => {

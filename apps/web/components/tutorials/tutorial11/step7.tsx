@@ -3,18 +3,31 @@ import NextTutorialButton from "@/components/tutorials/next-tutorial-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
 import Step7Content from "@/components/tutorials/tutorial11/step7.mdx";
 import useAccounts from "@/hooks/use-accounts";
-import { getMapItem } from "@/lib/types/account";
+import useScripts from "@/hooks/use-scripts";
+import { defaultScriptIds } from "@/lib/types/default-scripts";
+import { storageSlotName } from "@/lib/types/component";
+import { defaultStorageItem, getMapItem } from "@/lib/types/account";
 import { EMPTY_WORD } from "@/lib/constants";
 
 const useCompleted = () => {
   const { accounts } = useAccounts();
+  const { scripts } = useScripts();
   const counter = accounts.find(({ name }) => name === "Unverified Contract");
+  const script = scripts.find(
+    ({ id, type }) => !defaultScriptIds.includes(id) && type === "account",
+  );
   if (!counter) {
     return false;
   }
   const count = getMapItem(
-    counter.storage,
-    0,
+    counter.storage.find(
+      ({ name }) =>
+        name ===
+        storageSlotName({
+          packageName: script?.name ?? "",
+          fieldName: "count_map",
+        }),
+    ) ?? defaultStorageItem(),
     "0x0000000000000000000000000000000000000000000000000100000000000000",
   );
   return counter.nonce > 0 && count === EMPTY_WORD;

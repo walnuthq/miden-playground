@@ -1,7 +1,7 @@
 import {
   type Script,
   defaultScript,
-  defaultExport,
+  defaultProcedureExport,
   defaultSignature,
 } from "@/lib/types/script";
 
@@ -20,7 +20,7 @@ use miden::{component, felt, Felt, StorageMap, StorageMapAccess, Word};
 #[component]
 struct CounterContract {
     /// Storage map holding the counter value.
-    #[storage(slot(0), description = "counter contract storage map")]
+    #[storage(description = "counter contract storage map")]
     count_map: StorageMap,
 }
 
@@ -43,47 +43,34 @@ impl CounterContract {
 }
 `;
 
-export const counterMapContractMasm = `use.miden::active_account
-use.miden::native_account
-use.std::sys
+export const counterMapContractMasm = `use miden::protocol::active_account
+use miden::protocol::native_account
+use miden::core::word
+use miden::core::sys
 
-# => []
-export.get_count
-    push.0.0.0.1
-    # => [key]
+const COUNTER_SLOT = word("miden::component::miden_counter_contract::count_map")
 
-    push.0
-    # => [index, key]
-
-    exec.active_account::get_map_item
+#! Inputs:  []
+#! Outputs: [count]
+pub proc get_count
+    push.0.0.0.1 push.COUNTER_SLOT[0..2] exec.active_account::get_map_item
     # => [count]
 
     exec.sys::truncate_stack
-    # => []
+    # => [count]
 end
 
-# => []
-export.increment_count
-    push.0.0.0.1
-    # => [key]
-
-    push.0
-    # => [index, key]
-
-    exec.active_account::get_map_item
+#! Inputs:  []
+#! Outputs: []
+pub proc increment_count
+    push.0.0.0.1 push.COUNTER_SLOT[0..2] exec.active_account::get_map_item
     # => [count]
 
     add.1
     # => [count+1]
 
-    push.0.0.0.1
-    # => [key, count+1]
-
-    push.0
-    # => [index, key, count+1]
-
-    exec.native_account::set_map_item
-    # => [OLD_MAP_ROOT, OLD_MAP_VALUE]
+    push.0.0.0.1 push.COUNTER_SLOT[0..2] exec.native_account::set_map_item
+    # => [old_value]
 
     exec.sys::truncate_stack
     # => []
@@ -99,12 +86,12 @@ const counterMapContract: Script = {
   readOnly: true,
   rust: counterMapContractRust,
   masm: counterMapContractMasm,
-  exports: [
+  procedureExports: [
     {
-      ...defaultExport(),
-      name: "get_count",
+      ...defaultProcedureExport(),
+      path: "get_count",
       digest:
-        "0xcb055cd09294fa777a6136a3f0215849c06ebb7771248630be10a70e5e142024",
+        "0xa5786be8056e5650452d712e1f736a2c0d07f26f061bce8186d39054e00de2dc",
       signature: {
         ...defaultSignature(),
         results: ["Felt"],
@@ -112,10 +99,10 @@ const counterMapContract: Script = {
       readOnly: true,
     },
     {
-      ...defaultExport(),
-      name: "increment_count",
+      ...defaultProcedureExport(),
+      path: "increment_count",
       digest:
-        "0xc0c3490a6fed68152a951a982b9d5f502709d75a7b46c5bfc50e98921fb67dd2",
+        "0x52bcd648b2678a5fda8024d96e01cc794ba16dc13c7ce48e9cc7a9f69cd02590",
       signature: {
         ...defaultSignature(),
         results: ["Felt"],

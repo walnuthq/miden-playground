@@ -1,5 +1,4 @@
 import { execFile } from "@/lib/utils";
-import { projectRoot } from "@/lib/constants";
 
 export const midenVerifier = async ({
   type,
@@ -11,18 +10,7 @@ export const midenVerifier = async ({
   masp: string;
 }) => {
   try {
-    await execFile(
-      process.env.NODE_ENV === "production"
-        ? "miden-verifier"
-        : "./miden-verifier",
-      [type, resource, masp],
-      {
-        cwd:
-          process.env.NODE_ENV === "production"
-            ? undefined
-            : `${projectRoot}/miden-verifier/target/release`,
-      },
-    );
+    await execFile("miden-verifier", [type, resource, masp]);
     return true;
   } catch (error) {
     console.error(error);

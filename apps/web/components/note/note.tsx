@@ -11,7 +11,7 @@ import useNotes from "@/hooks/use-notes";
 import NoteInformation from "@/components/note/note-information";
 import ConsumeNoteButton from "@/components/note/consume-note-button";
 import CreateTransactionDialog from "@/components/transactions/create-transaction-dialog";
-import { noteConsumable } from "@/lib/types/note";
+import { noteConsumed } from "@/lib/types/note";
 import { type Script } from "@/lib/types/script";
 import useAccounts from "@/hooks/use-accounts";
 import useGlobalContext from "@/components/global-context/hook";
@@ -29,12 +29,15 @@ const Note = ({
   const searchParams = useSearchParams();
   const isClient = useIsClient();
   const { networkId } = useGlobalContext();
-  const { connectedWallet } = useAccounts();
+  const { accounts, connectedWallet } = useAccounts();
   const { inputNotes } = useNotes();
   const inputNote = inputNotes.find((inputNote) => inputNote.id === id);
   if (!isClient || !inputNote) {
     return null;
   }
+  const targetAccount = accounts.find(({ consumableNoteIds }) =>
+    consumableNoteIds.includes(inputNote.id),
+  );
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
       <Tabs
@@ -51,11 +54,16 @@ const Note = ({
           <TabsList>
             <TabsTrigger value="information">Information</TabsTrigger>
           </TabsList>
-          {noteConsumable({
-            inputNote,
-            networkId,
-            accountId: connectedWallet?.id,
-          }) && <ConsumeNoteButton inputNote={inputNote} />}
+          {!noteConsumed(inputNote) &&
+            targetAccount &&
+            (networkId === "mmck"
+              ? true
+              : connectedWallet?.id === targetAccount.id) && (
+              <ConsumeNoteButton
+                inputNote={inputNote}
+                targetAccount={targetAccount}
+              />
+            )}
         </div>
         <TabsContent value="information">
           <NoteInformation

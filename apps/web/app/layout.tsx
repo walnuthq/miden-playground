@@ -2,9 +2,9 @@ import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import { type ReactNode } from "react";
 import "@getpara/react-sdk/styles.css";
-import "@demox-labs/miden-wallet-adapter/styles.css";
+import "@miden-sdk/miden-wallet-adapter/styles.css";
 import "@workspace/ui/globals.css";
-import Providers from "@/components/providers";
+import ProvidersNoSsr from "@/components/providers-no-ssr";
 import { Toaster } from "@workspace/ui/components/sonner";
 
 const fontSans = Geist({
@@ -27,10 +27,10 @@ const RootLayout = ({
       className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased`}
     >
       <div className="root">
-        <Providers>
+        <ProvidersNoSsr>
           {children}
           <Toaster richColors />
-        </Providers>
+        </ProvidersNoSsr>
       </div>
     </body>
     <Script

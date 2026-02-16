@@ -16,7 +16,9 @@ import useMidenSdk from "@/hooks/use-miden-sdk";
 import { getPowChallenge, findValidNonce, getTokens } from "@/lib/miden-faucet";
 
 const MintButton = () => {
-  const { midenSdk } = useMidenSdk();
+  const {
+    midenSdk: { AccountId },
+  } = useMidenSdk();
   const { connectedWallet } = useAccounts();
   const { addNote } = useNotes();
   const [loading, setLoading] = useState(false);
@@ -55,7 +57,7 @@ const MintButton = () => {
         });
         console.log({ noteId, txId });
         if (connectedWallet?.isNew) {
-          const accountId = midenSdk.AccountId.fromHex(connectedWallet.id);
+          const accountId = AccountId.fromHex(connectedWallet.id);
           addNote({
             ...defaultInputNote(),
             id: noteId,

@@ -1,7 +1,7 @@
 import {
   type Script,
   defaultScript,
-  defaultExport,
+  defaultProcedureExport,
   defaultSignature,
 } from "@/lib/types/script";
 import { COUNT_READER_COPY_COUNT_PROC_HASH } from "@/lib/constants";
@@ -18,7 +18,7 @@ use miden::{component, tx, AccountId, Digest, Value, ValueAccess};
 #[component]
 struct CountReader {
     /// Storage slot holding the counter value.
-    #[storage(slot(0), description = "count reader storage value")]
+    #[storage(description = "count reader storage value")]
     count: Value,
 }
 
@@ -38,21 +38,19 @@ impl CountReader {
 }
 `;
 
-export const countReaderMasm = `use.miden::native_account
-use.miden::tx
-use.std::sys
+export const countReaderMasm = `use miden::protocol::native_account
+use miden::protocol::tx
+use miden::core::word
+use miden::core::sys
 
-const.COUNTER_SLOT=0
+const COUNTER_SLOT = word("miden::component::miden_count_reader::counter")
 
 # => [account_id_prefix, account_id_suffix, get_count_proc_hash]
-export.copy_count
+pub proc copy_count
     exec.tx::execute_foreign_procedure
     # => [count]
 
-    push.COUNTER_SLOT
-    # [index, count]
-
-    exec.native_account::set_item
+    push.COUNTER_SLOT[0..2] exec.native_account::set_item
     # => []
 
     exec.sys::truncate_stack
@@ -69,10 +67,10 @@ const countReader: Script = {
   readOnly: true,
   rust: countReaderRust,
   masm: countReaderMasm,
-  exports: [
+  procedureExports: [
     {
-      ...defaultExport(),
-      name: "copy_count",
+      ...defaultProcedureExport(),
+      path: "copy_count",
       digest: COUNT_READER_COPY_COUNT_PROC_HASH,
       signature: {
         ...defaultSignature(),

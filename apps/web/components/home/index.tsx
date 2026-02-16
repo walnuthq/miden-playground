@@ -10,7 +10,7 @@ const Home = () => (
     </h3>
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       <NewSandboxCard networkId="mtst" />
-      <NewSandboxCard networkId="mlcl" />
+      <NewSandboxCard networkId="mmck" />
     </div>
     <h3 className="scroll-m-20 border-b pb-2 text-2xl font-semibold tracking-tight">
       Tutorials

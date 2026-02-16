@@ -3,12 +3,14 @@ import { toast } from "sonner";
 import { Spinner } from "@workspace/ui/components/spinner";
 import { TableRow, TableCell } from "@workspace/ui/components/table";
 import { type Account } from "@/lib/types/account";
-import { type Script, type Export } from "@/lib/types/script";
+import { type Script, type ProcedureExport } from "@/lib/types/script";
 import { type Component } from "@/lib/types/component";
 import { Button } from "@workspace/ui/components/button";
 import useScripts from "@/hooks/use-scripts";
 import useTransactions from "@/hooks/use-transactions";
 import CopyButton from "@/components/lib/copy-button";
+import { MIDEN_EXPLORER_URL } from "@/lib/constants";
+import { formatProcedureExportPath } from "@/lib/utils";
 
 const ProceduresTableRow = ({
   account,
@@ -19,17 +21,17 @@ const ProceduresTableRow = ({
   account: Account;
   component: Component;
   script: Script;
-  procedureExport: Export;
+  procedureExport: ProcedureExport;
 }) => {
   const { invokeProcedure, openInvokeProcedureArgumentsDialog } = useScripts();
   const { submittingTransaction, readWord } = useTransactions();
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState("");
   return (
-    <TableRow key={procedureExport.name}>
+    <TableRow key={procedureExport.path}>
       <TableCell>
         <div className="flex items-center gap-2">
-          {procedureExport.name}
+          {formatProcedureExportPath(procedureExport.path)}
           <CopyButton
             content="Copy Procedure Digest"
             copy={procedureExport.digest}
@@ -76,7 +78,7 @@ const ProceduresTableRow = ({
                         label: "View on MidenScan",
                         onClick: () =>
                           window.open(
-                            `https://testnet.midenscan.com/tx/${transactionRecord.id().toHex()}`,
+                            `${MIDEN_EXPLORER_URL}/tx/${transactionRecord.id().toHex()}`,
                             "_blank",
                             "noopener noreferrer",
                           ),

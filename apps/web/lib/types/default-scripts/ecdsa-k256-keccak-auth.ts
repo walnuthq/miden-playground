@@ -1,4 +1,8 @@
-import { type Script, defaultScript, defaultExport } from "@/lib/types/script";
+import {
+  type Script,
+  defaultScript,
+  defaultProcedureExport,
+} from "@/lib/types/script";
 
 export const ecdsaK256KeccakAuthRust = ``;
 
@@ -56,10 +60,10 @@ const ecdsaK256KeccakAuth: Script = {
   readOnly: true,
   rust: ecdsaK256KeccakAuthRust,
   masm: ecdsaK256KeccakAuthMasm,
-  exports: [
+  procedureExports: [
     {
-      ...defaultExport(),
-      name: "auth_tx_ecdsa_k256_keccak",
+      ...defaultProcedureExport(),
+      path: "auth_tx_ecdsa_k256_keccak",
       digest:
         "0xea0fd92d17441c30c39d7232a22c66b26f9971520d65dcb8fe8d08e477868868",
     },

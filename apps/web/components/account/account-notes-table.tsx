@@ -29,7 +29,7 @@ import {
   useWallet,
   ConsumeTransaction,
   type MidenWalletAdapter,
-} from "@demox-labs/miden-wallet-adapter";
+} from "@miden-sdk/miden-wallet-adapter";
 import useGlobalContext from "@/components/global-context/hook";
 import useScripts from "@/hooks/use-scripts";
 import { formatAmount } from "@/lib/utils";
@@ -65,7 +65,7 @@ const NoteActionsCell = ({
         <DropdownMenuItem
           onClick={async () => {
             if (
-              networkId === "mlcl" ||
+              networkId === "mmck" ||
               account.components.includes("no-auth") ||
               account.components.includes("ecdsa-k256-keccak-auth")
             ) {
@@ -129,7 +129,7 @@ const AccountNotesTable = ({ account }: { account: Account }) => {
     .map((noteId) => inputNotes.find(({ id }) => id === noteId))
     .filter((note) => note !== undefined);
   const showNoteActions =
-    networkId === "mlcl" ||
+    networkId === "mmck" ||
     connectedWallet?.address === account.address ||
     account.components.includes("no-auth");
   return (

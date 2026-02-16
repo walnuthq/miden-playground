@@ -1,4 +1,4 @@
-import { type Script, type Export } from "@/lib/types/script";
+import { type Script, type ProcedureExport } from "@/lib/types/script";
 import { type State } from "@/lib/types/state";
 
 export type ScriptAction =
@@ -32,7 +32,7 @@ export type ScriptAction =
       payload: {
         senderAccountId: string;
         script: Script;
-        procedureExport: Export;
+        procedureExport: ProcedureExport;
       };
     }
   | { type: "CLOSE_INVOKE_PROCEDURE_ARGUMENTS_DIALOG" }

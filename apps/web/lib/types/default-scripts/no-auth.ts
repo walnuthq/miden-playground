@@ -1,4 +1,8 @@
-import { type Script, defaultExport, defaultScript } from "@/lib/types/script";
+import {
+  type Script,
+  defaultProcedureExport,
+  defaultScript,
+} from "@/lib/types/script";
 import { NO_AUTH_PROC_HASH } from "@/lib/constants";
 
 export const noAuthRust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
@@ -85,10 +89,10 @@ const noAuth: Script = {
   readOnly: true,
   rust: noAuthRust,
   masm: noAuthMasm,
-  exports: [
+  procedureExports: [
     {
-      ...defaultExport(),
-      name: "auth_no_auth",
+      ...defaultProcedureExport(),
+      path: "auth_no_auth",
       digest: NO_AUTH_PROC_HASH,
     },
   ],

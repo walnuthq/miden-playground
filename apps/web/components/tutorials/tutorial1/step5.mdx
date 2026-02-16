@@ -5,8 +5,8 @@ note created by the mint transaction.
 
 Each Note has a script that defines the conditions under which it can be consumed. Consumption of a Note can be restricted to certain accounts or entities. For example, the **P2ID (Pay-to-ID)** note script locks a note to a specific account ID, allowing only that account to spend it.
 
-Our [note inputs](https://docs.miden.xyz/miden-base/note#inputs) constraint specifies that only our own wallet Account ID can consume the note and receive the embedded assets, which has been enforced during the note creation process by the faucet.
+Our [note inputs](https://docs.miden.xyz/design/miden-base/note/#inputs) constraint specifies that only our own wallet Account ID can consume the note and receive the embedded assets, which has been enforced during the note creation process by the faucet.
 
-Note inputs are encoded as a [Felt](https://docs.miden.xyz/glossary#felt) array, the decoded note inputs section shows our wallet Account ID, which must be decomposed in 2 separate Felts (prefix and suffix).
+Note inputs are encoded as a [Felt](https://docs.miden.xyz/builder/glossary/#felt) array, the decoded note inputs section shows our wallet Account ID, which must be decomposed in 2 separate Felts (prefix and suffix).
 
-Consumption occurs as part of a transaction. Upon successful consumption a [nullifier](https://docs.miden.xyz/glossary#nullifier) is generated for the consumed notes to ensure they can no longer be spent and avoid double-spending.
+Consumption occurs as part of a transaction. Upon successful consumption a [nullifier](https://docs.miden.xyz/builder/glossary/#nullifier) is generated for the consumed notes to ensure they can no longer be spent and avoid double-spending.

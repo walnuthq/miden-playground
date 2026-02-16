@@ -23,12 +23,12 @@ import {
   type ConsumableNoteRecord as WasmConsumableNoteRecordType,
   type TransactionResult as WasmTransactionResultType,
   type TransactionRequest as WasmTransactionRequestType,
-} from "@demox-labs/miden-sdk";
+} from "@miden-sdk/miden-sdk";
 import {
   useWallet,
   SendTransaction,
   type MidenWalletAdapter,
-} from "@demox-labs/miden-wallet-adapter";
+} from "@miden-sdk/miden-wallet-adapter";
 import { formatAmount, parseAmount } from "@/lib/utils";
 import useScripts from "@/hooks/use-scripts";
 import {
@@ -148,7 +148,7 @@ const CreateTransactionConfigureForm = ({
           targetAccountId &&
           faucetAccount
         ) {
-          if (networkId === "mlcl") {
+          if (networkId === "mmck") {
             const { transactionRequest, transactionResult } =
               await newSendTransactionRequest({
                 senderAccountId: executingAccount.id,

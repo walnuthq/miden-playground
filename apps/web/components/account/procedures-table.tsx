@@ -29,9 +29,9 @@ const ProceduresTable = ({
         </TableRow>
       </TableHeader>
       <TableBody>
-        {script.exports.map((procedureExport) => (
+        {script.procedureExports.map((procedureExport) => (
           <ProceduresTableRow
-            key={procedureExport.name}
+            key={procedureExport.path}
             account={account}
             component={component}
             script={script}

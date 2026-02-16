@@ -4,7 +4,7 @@ import {
 } from "@/lib/constants";
 import {
   type Script,
-  defaultExport,
+  defaultProcedureExport,
   defaultScript,
   defaultSignature,
 } from "@/lib/types/script";
@@ -24,7 +24,7 @@ use miden::{component, felt, Felt, Value, ValueAccess};
 #[component]
 struct CounterContract {
     /// Storage slot holding the counter value.
-    #[storage(slot(0), description = "counter contract storage value")]
+    #[storage(description = "counter contract storage value")]
     count: Value,
 }
 
@@ -45,41 +45,33 @@ impl CounterContract {
 }
 `;
 
-export const counterContractMasm = `use.miden::active_account
-use.miden::native_account
-use.std::sys
+export const counterContractMasm = `use miden::protocol::active_account
+use miden::protocol::native_account
+use miden::core::word
+use miden::core::sys
 
-const.COUNTER_SLOT=0
+const COUNTER_SLOT = word("miden::component::miden_counter_contract::counter")
 
-# => []
-export.get_count
-    push.COUNTER_SLOT
-    # => [index]
-
-    exec.active_account::get_item
+#! Inputs:  []
+#! Outputs: [count]
+pub proc get_count
+    push.COUNTER_SLOT[0..2] exec.active_account::get_item
     # => [count]
 
     exec.sys::truncate_stack
-    # => []
+    # => [count]
 end
 
-# => []
-export.increment_count
-    push.COUNTER_SLOT
-    # => [index]
-
-    exec.active_account::get_item
+#! Inputs:  []
+#! Outputs: []
+pub proc increment_count
+    push.COUNTER_SLOT[0..2] exec.active_account::get_item
     # => [count]
 
     add.1
     # => [count+1]
 
-    debug.stack
-
-    push.COUNTER_SLOT
-    # [index, count+1]
-
-    exec.native_account::set_item
+    push.COUNTER_SLOT[0..2] exec.native_account::set_item
     # => []
 
     exec.sys::truncate_stack
@@ -96,10 +88,10 @@ const counterContract: Script = {
   readOnly: true,
   rust: counterContractRust,
   masm: counterContractMasm,
-  exports: [
+  procedureExports: [
     {
-      ...defaultExport(),
-      name: "get_count",
+      ...defaultProcedureExport(),
+      path: "get_count",
       digest: COUNTER_CONTRACT_GET_COUNT_PROC_HASH,
       signature: {
         ...defaultSignature(),
@@ -108,8 +100,8 @@ const counterContract: Script = {
       readOnly: true,
     },
     {
-      ...defaultExport(),
-      name: "increment_count",
+      ...defaultProcedureExport(),
+      path: "increment_count",
       digest: COUNTER_CONTRACT_INCREMENT_COUNT_PROC_HASH,
       signature: {
         ...defaultSignature(),

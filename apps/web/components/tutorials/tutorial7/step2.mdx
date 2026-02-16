@@ -1,6 +1,6 @@
-You are probably familiar with the P2ID note as we used it in previous tutorials, but maybe it's the first time you deep dive into its actual implementation.
+You are probably familiar with the **P2ID** note as we used it in previous tutorials, but maybe it's the first time you deep dive into its actual implementation.
 
-The script reads 2 values from the note inputs forming the target [account ID](https://docs.miden.xyz/miden-base/account/id/) which is decomposed in a prefix and a suffix.
+The script reads 2 values from the note inputs forming the target [account ID](https://docs.miden.xyz/design/miden-base/account/id/) which is decomposed in a prefix and a suffix.
 The account ID needs to be split in 2 separate 64 bits **Felt**s as note inputs are encoded as a **Felt** array and account IDs are 120 bits.
 
 The script then reads the consuming account ID using the account's interface function **`account::get_id`** and compares it against the note inputs.

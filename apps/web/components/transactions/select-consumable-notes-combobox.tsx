@@ -20,7 +20,7 @@ import {
 import {
   type ConsumableNoteRecord as WasmConsumableNoteRecordType,
   type InputNoteRecord as WasmInputNoteRecordType,
-} from "@demox-labs/miden-sdk";
+} from "@miden-sdk/miden-sdk";
 import useAccounts from "@/hooks/use-accounts";
 import { type Account } from "@/lib/types/account";
 import { formatAmount } from "@/lib/utils";

@@ -28,12 +28,14 @@ export const accountStorageModes = {
 export type AccountStorageMode = keyof typeof accountStorageModes;
 
 export type StorageItem = {
+  name: string;
   type: "value" | "map";
   item: string;
   mapEntries: { key: string; value: string }[];
 };
 
 export const defaultStorageItem = (): StorageItem => ({
+  name: "",
   type: "value",
   item: "",
   mapEntries: [],
@@ -81,7 +83,7 @@ export const defaultAccount = (): Account => ({
   isPublic: false,
   isUpdatable: false,
   isRegularAccount: false,
-  isNew: false,
+  isNew: true,
   nonce: 0,
   fungibleAssets: [],
   code: "",
@@ -147,7 +149,6 @@ export const basicFungibleFaucetAccount = ({
   maxSupply,
   totalSupply,
   isPublic: storageMode === "public",
-  isNew: true,
   code: FUNGIBLE_FAUCET_CODE,
   components: ["falcon-512-rpo-auth", "basic-fungible-faucet"],
 });
@@ -184,13 +185,8 @@ export const getItem = (storage: StorageItem[], index: number) => {
   return storageItem.item;
 };
 
-export const getMapItem = (
-  storage: StorageItem[],
-  index: number,
-  key: string,
-) => {
-  const storageItem = storage[index];
-  if (!storageItem || storageItem.type !== "map") {
+export const getMapItem = (storageItem: StorageItem, key: string) => {
+  if (storageItem.type !== "map") {
     return EMPTY_WORD;
   }
   const entry = storageItem.mapEntries.find((entry) => entry.key === key);

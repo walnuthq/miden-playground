@@ -4,7 +4,7 @@ import {
   type ConsumableNoteRecord as WasmConsumableNoteRecordType,
   type TransactionRequest as WasmTransactionRequestType,
   type TransactionResult as WasmTransactionResultType,
-} from "@demox-labs/miden-sdk";
+} from "@miden-sdk/miden-sdk";
 import {
   Dialog,
   DialogClose,

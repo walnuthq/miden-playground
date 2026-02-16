@@ -1,4 +1,8 @@
-import { type Script, defaultScript, defaultExport } from "@/lib/types/script";
+import {
+  type Script,
+  defaultScript,
+  defaultProcedureExport,
+} from "@/lib/types/script";
 
 export const falcon512RpoAuthRust = `#![no_std]
 #![feature(alloc_error_handler)]
@@ -18,7 +22,6 @@ use miden::{
 struct AuthComponent {
     /// The account owner's public key (RPO-Falcon512 public key hash).
     #[storage(
-        slot(0),
         description = "owner public key",
         type = "auth::rpo_falcon512::pub_key"
     )]
@@ -111,12 +114,12 @@ const falcon512RpoAuth: Script = {
   readOnly: true,
   rust: falcon512RpoAuthRust,
   masm: falcon512RpoAuthMasm,
-  exports: [
+  procedureExports: [
     {
-      ...defaultExport(),
-      name: "auth_tx_rpo_falcon512",
+      ...defaultProcedureExport(),
+      path: "auth_tx_falcon512_rpo",
       digest:
-        "0x97271c437f9715b37fe022de0283a093a3f89f5dbc918970c93c5ab398b863d3",
+        "0x55756031e881db5a6e360ab27890b8760949caa633976779381b28bbaf4cc9f0",
     },
   ],
 };

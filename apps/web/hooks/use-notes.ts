@@ -6,7 +6,7 @@ import {
   useWallet,
   CustomTransaction,
   TransactionType,
-} from "@demox-labs/miden-wallet-adapter";
+} from "@miden-sdk/miden-wallet-adapter";
 import { toBase64 } from "@/lib/utils";
 import {
   clientCreateNoteFromScript,
@@ -88,7 +88,7 @@ const useNotes = () => {
       NoteAssets,
       FungibleAsset,
       NoteType,
-      Felt,
+      NoteAttachment,
       MidenArrays,
     } = midenSdk;
     const note =
@@ -102,12 +102,13 @@ const useNotes = () => {
             Number(noteInputs[2]),
             Number(noteInputs[2]),
             type === "public" ? NoteType.Public : NoteType.Private,
-            new Felt(0n),
+            new NoteAttachment(),
           )
         : clientCreateNoteFromScript({
             client,
             senderAccountId,
             recipientAccountId,
+            networkRecipient: recipientAccount.storageMode === "network",
             script,
             type,
             faucetAccountId,

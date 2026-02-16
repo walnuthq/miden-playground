@@ -24,11 +24,14 @@ export type PackageType = (typeof packageTypeEnum.enumValues)[number];
 
 export type PackageStatus = (typeof packageStatusEnum.enumValues)[number];
 
-export type Export = {
-  name: string;
+export type ProcedureExport = {
+  path: string;
   digest: string;
   signature: { abi: number; params: string[]; results: string[] };
+  attributes: { attrs: string[] };
 };
+
+export type Export = { Procedure: ProcedureExport };
 
 export type Dependency = { id: string; name: string; digest: string };
 

@@ -7,13 +7,14 @@ import {
   TableRow,
 } from "@workspace/ui/components/table";
 import CopyButton from "@/components/lib/copy-button";
-import { type Script, type Export } from "@/lib/types/script";
+import { type Script, type ProcedureExport } from "@/lib/types/script";
+import { formatProcedureExportPath } from "@/lib/utils";
 
 const procedureSignature = ({
-  name,
+  path,
   signature: { params, results },
-}: Export) => {
-  let result = `fn ${name.replaceAll("-", "_")}(`;
+}: ProcedureExport) => {
+  let result = `fn ${formatProcedureExportPath(path).replaceAll("-", "_")}(`;
   result += params.map((param) => param).join(", ");
   result += ")";
   if (results.length > 0) {
@@ -37,11 +38,11 @@ const ExportsTable = ({ script }: { script: Script }) => (
         </TableRow>
       </TableHeader>
       <TableBody>
-        {script.exports.map((procedureExport) => (
+        {script.procedureExports.map((procedureExport) => (
           <TableRow key={procedureExport.digest}>
             <TableCell>
               <div className="flex items-center gap-2">
-                {procedureExport.name}
+                {formatProcedureExportPath(procedureExport.path)}
                 <CopyButton
                   content="Copy Procedure Digest"
                   copy={procedureExport.digest}

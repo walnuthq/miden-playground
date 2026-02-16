@@ -2,7 +2,7 @@ import {
   type ConsumableNoteRecord as WasmConsumableNoteRecordType,
   type TransactionResult as WasmTransactionResultType,
   type TransactionRequest as WasmTransactionRequestType,
-} from "@demox-labs/miden-sdk";
+} from "@miden-sdk/miden-sdk";
 import { type NoteType } from "@/lib/types/note";
 import {
   type CreateTransactionDialogStep,
@@ -23,7 +23,7 @@ import {
   clientGetAccountById,
   clientReadWord,
 } from "@/lib/web-client";
-import { type Export } from "@/lib/types/script";
+import { type ProcedureExport } from "@/lib/types/script";
 import useGlobalContext from "@/components/global-context/hook";
 import useMidenSdk from "@/hooks/use-miden-sdk";
 import useWebClient from "@/hooks/use-web-client";
@@ -115,7 +115,7 @@ const useTransactions = () => {
     accountId: string;
     noteIds: string[];
   }) => {
-    const transactionRequest = clientNewConsumeTransactionRequest({
+    const transactionRequest = await clientNewConsumeTransactionRequest({
       client,
       noteIds,
     });
@@ -177,7 +177,7 @@ const useTransactions = () => {
     procedureExport,
   }: {
     accountId: string;
-    procedureExport: Export;
+    procedureExport: ProcedureExport;
   }) => {
     dispatch({ type: "SUBMITTING_TRANSACTION" });
     await client.syncState();
@@ -212,10 +212,8 @@ const useTransactions = () => {
       transactionRequest,
       midenSdk,
     });
-    let newSerializedMockChain = null;
     if (client.usesMockChain()) {
       await client.proveBlock();
-      newSerializedMockChain = client.serializeMockChain();
     }
     const syncSummary = await client.syncState();
     const transactionIdHex = transactionId.toHex();
@@ -240,6 +238,7 @@ const useTransactions = () => {
     }
     const inputNotes = await clientGetAllInputNotes({
       client,
+      networkId,
       previousInputNotes,
       scripts,
       midenSdk,
@@ -278,7 +277,9 @@ const useTransactions = () => {
         consumableNoteIds,
         inputNotes,
         blockNum: syncSummary.blockNum(),
-        serializedMockChain: newSerializedMockChain,
+        serializedMockChain: client.usesMockChain()
+          ? client.serializeMockChain()
+          : new Uint8Array(),
       },
     });
     return transactionRecord;

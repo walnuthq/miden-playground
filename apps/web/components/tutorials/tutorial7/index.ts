@@ -1,5 +1,4 @@
 import { defaultTutorial, type Tutorial } from "@/lib/types/tutorial";
-import { defaultStore } from "@/lib/types/store";
 import state from "@/components/tutorials/tutorial7/state";
 import Step1 from "@/components/tutorials/tutorial7/step1";
 import Step2 from "@/components/tutorials/tutorial7/step2";
@@ -17,7 +16,6 @@ const tutorial: Tutorial = {
     "In this tutorial we create a time locked P2ID note script and discover how it can be acknowledged by the network before consumed by another account.",
   category: "advanced",
   initialRoute: "/scripts",
-  store: defaultStore(),
   state,
   steps: [Step1, Step2, Step3, Step4, Step5],
 };

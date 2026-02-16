@@ -2,7 +2,7 @@ import {
   type ConsumableNoteRecord as WasmConsumableNoteRecordType,
   type TransactionRequest as WasmTransactionRequestType,
   type TransactionResult as WasmTransactionResultType,
-} from "@demox-labs/miden-sdk";
+} from "@miden-sdk/miden-sdk";
 import { type Account } from "@/lib/types/account";
 import { type NetworkId } from "@/lib/types/network";
 import { type InputNote } from "@/lib/types/note";
@@ -12,7 +12,7 @@ import {
   type TransactionType,
   type CreateTransactionDialogStep,
 } from "@/lib/types/transaction";
-import { type Script, type Export } from "@/lib/types/script";
+import { type Script, type ProcedureExport } from "@/lib/types/script";
 import { type Store } from "@/lib/types/store";
 import defaultScripts from "@/lib/types/default-scripts";
 import defaultComponents from "@/lib/types/default-components";
@@ -20,8 +20,10 @@ import defaultComponents from "@/lib/types/default-components";
 export type State = {
   // GLOBAL
   networkId: NetworkId;
+  initializingMockWebClient: boolean;
+  initializingWebClient: boolean;
   blockNum: number;
-  serializedMockChain: Uint8Array | null;
+  serializedMockChain: Uint8Array;
   syncingState: boolean;
   nextState: State | null;
   nextStore: Store | null;
@@ -58,7 +60,7 @@ export type State = {
   invokeProcedureArgumentsDialogOpen: boolean;
   invokeProcedureArgumentsDialogSenderAccountId: string;
   invokeProcedureArgumentsDialogScript: Script | null;
-  invokeProcedureArgumentsDialogProcedure: Export | null;
+  invokeProcedureArgumentsDialogProcedure: ProcedureExport | null;
   addDependencyDialogOpen: boolean;
   addDependencyDialogScriptId: string;
   scripts: Script[];
@@ -80,8 +82,10 @@ export type State = {
 export const defaultState = (): State => ({
   // GLOBAL
   networkId: "mtst",
+  initializingMockWebClient: false,
+  initializingWebClient: false,
   blockNum: 0,
-  serializedMockChain: null,
+  serializedMockChain: new Uint8Array(),
   syncingState: false,
   nextState: null,
   nextStore: null,
@@ -191,7 +195,7 @@ export const stateDeserializer = (value: string): State => {
     } = JSON.parse(value) as {
       networkId?: NetworkId;
       blockNum?: number;
-      serializedMockChain?: string | null;
+      serializedMockChain?: string;
       accounts?: Account[];
       transactions?: Transaction[];
       inputNotes?: InputNote[];
@@ -234,10 +238,9 @@ export const stateDeserializer = (value: string): State => {
       ...initialState,
       networkId: networkId ?? initialState.networkId,
       blockNum: blockNum ?? initialState.blockNum,
-      serializedMockChain:
-        serializedMockChain === null || serializedMockChain === undefined
-          ? null
-          : new Uint8Array(serializedMockChain.split(",").map(Number)),
+      serializedMockChain: serializedMockChain
+        ? new Uint8Array(serializedMockChain.split(",").map(Number))
+        : initialState.serializedMockChain,
       accounts: accounts ?? initialState.accounts,
       transactions: transactions ?? initialState.transactions,
       inputNotes: inputNotes ?? initialState.inputNotes,
