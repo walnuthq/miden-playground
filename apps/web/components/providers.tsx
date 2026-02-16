@@ -13,6 +13,7 @@ import {
 import { MidenSdkProvider } from "@/components/miden-sdk-context";
 import GlobalContextProvider from "@/components/global-context/provider";
 import WebClientProvider from "@/components/web-client-provider";
+import SimpleAnalyticsProvider from "@/components/simple-analytics-provider";
 
 const walletAdapter = new MidenWalletAdapter({ appName: "Miden Playground" });
 // const queryClient = new QueryClient();
@@ -40,11 +41,13 @@ const Providers = ({ children }: { children: ReactNode }) => (
             }}
             config={{ appName: "Miden Playground" }}
           >*/}
-        <MidenSdkProvider>
-          <GlobalContextProvider>
-            <WebClientProvider>{children}</WebClientProvider>
-          </GlobalContextProvider>
-        </MidenSdkProvider>
+        <SimpleAnalyticsProvider>
+          <MidenSdkProvider>
+            <GlobalContextProvider>
+              <WebClientProvider>{children}</WebClientProvider>
+            </GlobalContextProvider>
+          </MidenSdkProvider>
+        </SimpleAnalyticsProvider>
         {/*</ParaProvider>
         </QueryClientProvider>*/}
       </WalletModalProvider>

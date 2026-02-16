@@ -20,6 +20,10 @@ declare global {
       event: string,
       metadata: Record<string, string | boolean | number | Date>,
     ) => void;
+    sa_pageview: (
+      pathname: string,
+      metadata: Record<string, string | boolean | number | Date>,
+    ) => void;
   }
 }
 

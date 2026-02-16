@@ -1,4 +1,5 @@
 import { useRouter } from "next/navigation";
+import { useWallet } from "@miden-sdk/miden-wallet-adapter";
 import useGlobalContext from "@/components/global-context/hook";
 import tutorials from "@/components/tutorials";
 import { defaultTutorial } from "@/lib/types/tutorial";
@@ -8,6 +9,7 @@ import { sleep } from "@/lib/utils";
 
 const useTutorials = () => {
   const router = useRouter();
+  const { connected: walletConnected } = useWallet();
   const {
     blockNum,
     tutorialId,
@@ -35,7 +37,10 @@ const useTutorials = () => {
       nextStore: tutorial.store,
       completedTutorials,
     });
-    saEvent("start_tutorial", { tutorial_id: tutorialId });
+    saEvent("start_tutorial", {
+      tutorial_id: tutorialId,
+      wallet_connected: walletConnected,
+    });
   };
   const nextTutorial = async () => {
     const tutorial = tutorials.find(({ id }) => id === tutorialId);
@@ -56,9 +61,15 @@ const useTutorials = () => {
       nextStore: nextTutorial.store,
       completedTutorials: newCompletedTutorials,
     });
-    saEvent("complete_tutorial", { tutorial_id: tutorialId });
+    saEvent("complete_tutorial", {
+      tutorial_id: tutorialId,
+      wallet_connected: walletConnected,
+    });
     if (nextTutorial.id) {
-      saEvent("start_tutorial", { tutorial_id: nextTutorial.id });
+      saEvent("start_tutorial", {
+        tutorial_id: nextTutorial.id,
+        wallet_connected: walletConnected,
+      });
     }
   };
   const previousTutorialStep = () =>
@@ -70,6 +81,7 @@ const useTutorials = () => {
       saEvent("complete_tutorial_step", {
         tutorial_id: tutorialId,
         tutorial_step: tutorialStep,
+        wallet_connected: walletConnected,
       });
     }
   };

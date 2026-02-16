@@ -56,6 +56,10 @@ const useAppState = () => {
       payload: { blockNum },
     });
   const syncState = async () => {
+    if (!client) {
+      // TODO client should always be truthy
+      return;
+    }
     dispatch({ type: "SYNCING_STATE", payload: { syncingState: true } });
     try {
       const syncSummary = await client.syncState();
