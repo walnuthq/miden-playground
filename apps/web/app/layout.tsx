@@ -1,4 +1,3 @@
-import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import { type ReactNode } from "react";
 import "@getpara/react-sdk/styles.css";
@@ -33,11 +32,6 @@ const RootLayout = ({
         </ProvidersNoSsr>
       </div>
     </body>
-    <Script
-      src={
-        process.env.NODE_ENV !== "production" ? "/proxy.dev.js" : "/proxy.js"
-      }
-    />
   </html>
 );
 
