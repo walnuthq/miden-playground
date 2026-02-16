@@ -1,4 +1,8 @@
-import { type Component, defaultComponent } from "@/lib/types/component";
+import {
+  type Component,
+  defaultComponent,
+  storageSlotName,
+} from "@/lib/types/component";
 
 const counterContract: Component = {
   ...defaultComponent(),
@@ -6,7 +10,16 @@ const counterContract: Component = {
   name: "Counter Contract",
   type: "account",
   scriptId: "counter-contract",
-  storageSlots: [{ name: "Counter", type: "value", value: "0" }],
+  storageSlots: [
+    {
+      name: storageSlotName({
+        packageName: "counter-contract",
+        fieldName: "counter",
+      }),
+      type: "value",
+      value: "0",
+    },
+  ],
 };
 
 export default counterContract;

@@ -3,7 +3,7 @@ import {
   type Script,
   type ScriptExample,
   type ScriptType,
-  type Export,
+  type ProcedureExport,
   type MidenInput,
   defaultScript,
   invokeProcedureCustomTransactionScript,
@@ -98,7 +98,7 @@ const useScripts = () => {
   }: {
     senderAccountId: string;
     script: Script;
-    procedureExport: Export;
+    procedureExport: ProcedureExport;
     procedureInputs?: MidenInput[];
     foreignAccounts?: string[];
   }) => {
@@ -113,7 +113,7 @@ const useScripts = () => {
         MidenArrays,
         Package,
       } = midenSdk;
-      const builder = client.createScriptBuilder();
+      const builder = client.createCodeBuilder();
       const contractName = script.name.replaceAll("-", "_");
       const accountComponentLibrary = script.masm
         ? builder.buildLibrary(
@@ -169,7 +169,7 @@ const useScripts = () => {
   }: {
     senderAccountId: string;
     script: Script;
-    procedureExport: Export;
+    procedureExport: ProcedureExport;
   }) =>
     dispatch({
       type: "OPEN_INVOKE_PROCEDURE_ARGUMENTS_DIALOG",

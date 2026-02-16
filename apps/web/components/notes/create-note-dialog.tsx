@@ -28,6 +28,7 @@ import SelectAccountCombobox from "@/components/transactions/select-account-comb
 import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";
 import useAccounts from "@/hooks/use-accounts";
 import { parseAmount, formatAmount } from "@/lib/utils";
+import { defaultScriptIds } from "@/lib/types/default-scripts";
 
 const CreateNoteDialog = () => {
   const { connectedWallet, faucets } = useAccounts();
@@ -40,7 +41,9 @@ const CreateNoteDialog = () => {
   const [hasAssets, setHasAssets] = useState(false);
   const [faucetAccountId, setFaucetAccountId] = useState("");
   const [noteInputs, setNoteInputs] = useState<string[]>([]);
-  const shownScripts = scripts.filter(({ type }) => type === "note-script");
+  const shownScripts = scripts.filter(
+    ({ id, type }) => !defaultScriptIds.includes(id) && type === "note-script",
+  );
   const onClose = () => {
     setRecipientAccountId("");
     setScriptId("");
@@ -82,7 +85,7 @@ const CreateNoteDialog = () => {
               recipientAccountId,
               scriptId,
               type: noteType,
-              faucetAccountId,
+              faucetAccountId: hasAssets ? faucetAccountId : "",
               amount,
               noteInputs,
             });

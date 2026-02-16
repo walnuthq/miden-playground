@@ -3,7 +3,7 @@ import {
   WalletMultiButton,
   // useWallet,
   // useWalletModal,
-} from "@demox-labs/miden-wallet-adapter";
+} from "@miden-sdk/miden-wallet-adapter";
 // import { useAccount, useModal } from "@getpara/react-sdk";
 // import {
 //   DropdownMenu,

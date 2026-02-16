@@ -16,7 +16,7 @@ const ScriptMetadata = ({ script }: { script: Script }) => {
         </h4>
         <MetadataTable script={script} />
       </div>
-      {script.exports.length > 0 && (
+      {script.procedureExports.length > 0 && (
         <div className="flex flex-col gap-2">
           <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
             Package exports

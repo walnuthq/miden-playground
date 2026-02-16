@@ -4,40 +4,43 @@ export const EMPTY_WORD =
 export const FUNGIBLE_FAUCET_DEFAULT_DECIMALS = 6;
 export const FUNGIBLE_FAUCET_DEFAULT_MAX_SUPPLY = 100_000_000_000n;
 export const FUNGIBLE_FAUCET_CODE =
-  "0xa27a5cdb0d50add0a3e141c6c14034c1852f59ded9826aeb43bc341c22cf1045";
+  "0x44ca76648f7067a0378050f87c7f2d7693d92d1cd8de30db34f0779e287cb47f";
 
 export const NO_AUTH_PROC_HASH =
   "0x00498108f0eae0e35deadd489892062338c3d55772635d0b133f0bdf2980bf64";
 
 export const P2ID_NOTE_CODE =
-  "0x638ae99901ba0adbb0998937e075bf66f651191a6521c5d9c3c324c80bf55290";
+  "0xa657a127211172b9b305d06c6e076dd1edbf67c8b1a32c063647d5f7bf456131";
 export const P2IDE_NOTE_CODE =
-  "0x66ced5cfbbb85983c0467f7ccfe5b8802adf946e958420872966c7bc9983b3b6";
+  "0x3ce934e7d4d1560cedb4d49609062c06071b72bb7914a2791a04eccc10505cbe";
 
 export const BASIC_WALLET_CODE =
-  "0x91b7426f61f0b17d409919f19c69131a7f658c430df38168b87b082b6ff209c2";
+  "0xb93e83e1a6f12d6a156b05d5bd010067ff65d5e7677d9a242d6eaeaabfc16918";
 
+export const MIDEN_DEVNET_RPC_URL = "https://rpc.devnet.miden.io";
 export const MIDEN_TESTNET_RPC_URL = "https://rpc.testnet.miden.io";
+export const MIDEN_RPC_URL = MIDEN_TESTNET_RPC_URL;
 export const MIDEN_NOTE_TRANSPORT_URL = "https://transport.miden.io";
+export const MIDEN_DEVNET_EXPLORER_URL = "https://devnet.midenscan.com";
+export const MIDEN_TESTNET_EXPLORER_URL = "https://testnet.midenscan.com";
+export const MIDEN_EXPLORER_URL = MIDEN_TESTNET_EXPLORER_URL;
 export const MIDEN_FAUCET_API_URL = "https://faucet-api.testnet.miden.io";
-export const MIDEN_FAUCET_ACCOUNT_ID = "0x54bf4e12ef20082070758b022456c7";
+export const MIDEN_FAUCET_ACCOUNT_ID = "0x37d5977a8e16d8205a360820f0230f";
 export const MIDEN_FAUCET_ADDRESS =
-  "mtst1ap2t7nsjausqsgrswk9syfzkcu328yna_qruqqypuyph";
+  "mtst1aqmat9m63ctdsgz6xcyzpuprpulwk9vg_qruqqypuyph";
 
-export const TEST_WALLET_ACCOUNT_ID = "0x4ee5effeb273ee1028dd393a56bb21";
-export const TEST_WALLET_ACCOUNT_ID_PREFIX = 5685213981819792912n;
-export const TEST_WALLET_ACCOUNT_ID_SUFFIX = 2944572654096163072n;
+export const TEST_WALLET_ACCOUNT_ID = "0xfa5121fe1d484b10698bae223fbc94";
+export const TEST_WALLET_ACCOUNT_ID_PREFIX = 18037235357892234000n;
+export const TEST_WALLET_ACCOUNT_ID_SUFFIX = 7605363857866658816n;
 export const TEST_WALLET_ADDRESS =
-  "mtst1ap8wtml7kfe7uypgm5un544myyfu55ml_qruqqypuyph";
+  "mtst1ara9zg07r4yykyrf3whzy0aujsdjugmy_qruqqypuyph";
 
-export const COUNTER_CONTRACT_ACCOUNT_ID = "0x74fb56ac9f4125100ca767f511885f";
+export const COUNTER_CONTRACT_ACCOUNT_ID = "0x391b90f3b726040028f580ab8026c8";
 export const COUNTER_CONTRACT_ADDRESS =
-  "mtst1ap60k44vnaqj2yqv5anl2yvgtugyjt3k_qruqqypuyph";
-export const COUNTER_CONTRACT_CODE =
-  "0x28f716bedb0f5d3afda7e06a3eb08b9eacbde6324d1955b12558dbe0669bb6aa";
+  "mtst1aqu3hy8nkunqgqpg7kq2hqpxeqjp7nam_qruqqypuyph";
 export const COUNTER_CONTRACT_GET_COUNT_PROC_HASH =
-  "0x7db16e7b7b17b490e1d6fe7d80073bf863f52ca46666d0086e7a7d8fde219011";
+  "0xd17e069ff189f43f2ed3346a2058e307003f4d1a5691877fddc26c88dce0dd3e";
 export const COUNTER_CONTRACT_INCREMENT_COUNT_PROC_HASH =
-  "0xd830e707b3e2b287692faed9bc8e3dd6594a20728ae0c1a6aa24ce549dd9a508";
+  "0x6ffe5c3f936801e81ccadff0f6eaf76696e7c074d76ad1f61a9c8bbb6069e8b5";
 export const COUNT_READER_COPY_COUNT_PROC_HASH =
-  "0x921cbe2b3dc5ea5e959428c234a07cd54a3083d4de5d822757b2119a34956b62";
+  "0xcfbafa70b4b2abcb665dcea4447c9296761db959475f68407edfaeacd5e0b16a";

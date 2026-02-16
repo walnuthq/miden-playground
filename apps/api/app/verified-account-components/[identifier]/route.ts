@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getVerifiedAccountComponents } from "@/db/verified-account-components";
+import { type Export } from "@/lib/types";
 
 export const GET = async (
   request: NextRequest,
@@ -11,11 +12,17 @@ export const GET = async (
       await getVerifiedAccountComponents(identifier);
     return NextResponse.json({
       ok: true,
-      components: verifiedAccountComponents.map(({ package: dbPackage }) => ({
-        ...dbPackage,
-        createdAt: dbPackage.createdAt.getTime(),
-        updatedAt: dbPackage.updatedAt.getTime(),
-      })),
+      components: verifiedAccountComponents.map(({ package: dbPackage }) => {
+        const exports = dbPackage.exports as Export[];
+        return {
+          ...dbPackage,
+          procedureExports: exports.map(
+            (manifestExport) => manifestExport.Procedure,
+          ),
+          createdAt: dbPackage.createdAt.getTime(),
+          updatedAt: dbPackage.updatedAt.getTime(),
+        };
+      }),
     });
   } catch (error) {
     console.error(error);

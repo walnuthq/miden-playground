@@ -5,6 +5,7 @@ import {
   type Dependency,
   type ScriptType,
 } from "@/lib/types/script";
+import { formatProcedureExportPath } from "@/lib/utils";
 
 export const createScript = async ({
   name,
@@ -67,7 +68,7 @@ export const compileScript = async (script: Script) => {
     masm,
     digest,
     masp,
-    exports,
+    procedureExports: exports.map((manifestExport) => manifestExport.Procedure),
     dependencies,
   };
 };
@@ -160,9 +161,11 @@ export const getVerifiedAccountComponents = async (identifier: string) => {
   }
   return components.map((component) => ({
     ...component,
-    exports: component.exports.map((procedureExport) => ({
+    procedureExports: component.procedureExports.map((procedureExport) => ({
       ...procedureExport,
-      readOnly: procedureExport.name.startsWith("get"),
+      readOnly: formatProcedureExportPath(procedureExport.path).startsWith(
+        "get",
+      ),
     })),
   }));
 };

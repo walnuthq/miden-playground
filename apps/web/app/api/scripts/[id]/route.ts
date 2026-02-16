@@ -25,10 +25,20 @@ const scriptsDigest: Record<ScriptExample | "none", string> = {
 } as const;
 
 const scriptsExports: Record<ScriptExample | "none", Export[]> = {
-  none: defaultScript().exports,
-  "counter-contract": counterMapContract.exports,
-  "p2id-note": timelockP2id.exports,
-  "counter-note": counterNote.exports,
+  none: defaultScript().procedureExports.map((procedureExport) => ({
+    Procedure: procedureExport,
+  })),
+  "counter-contract": counterMapContract.procedureExports.map(
+    (procedureExport) => ({
+      Procedure: procedureExport,
+    }),
+  ),
+  "p2id-note": timelockP2id.procedureExports.map((procedureExport) => ({
+    Procedure: procedureExport,
+  })),
+  "counter-note": counterNote.procedureExports.map((procedureExport) => ({
+    Procedure: procedureExport,
+  })),
 } as const;
 
 const scriptsDependencies: Record<ScriptExample | "none", Dependency[]> = {

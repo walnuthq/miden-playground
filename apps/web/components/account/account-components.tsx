@@ -16,6 +16,7 @@ import {
 } from "@workspace/ui/components/empty";
 import {
   defaultComponent,
+  storageSlotName,
   type ComponentType,
   type StorageSlotType,
 } from "@/lib/types/component";
@@ -93,7 +94,10 @@ const AccountComponents = ({
           tutorialId === "contract-verification"
             ? [
                 {
-                  name: "count_map",
+                  name: storageSlotName({
+                    packageName: script.name,
+                    fieldName: "count_map",
+                  }),
                   type: "map" as StorageSlotType,
                   value: "1:0",
                 },

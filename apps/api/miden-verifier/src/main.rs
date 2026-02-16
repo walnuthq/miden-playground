@@ -1,5 +1,9 @@
 use base64::prelude::*;
-use miden_objects::{account::Account, note::Note, vm::Package};
+use miden_protocol::{
+    account::Account,
+    note::Note,
+    vm::{Package, PackageExport},
+};
 use std::process::ExitCode;
 use winter_utils::Deserializable;
 
@@ -53,8 +57,15 @@ fn main() -> ExitCode {
                 return ExitCode::FAILURE;
             }
 
-            let mut exports = package.manifest.exports();
-            let verified = exports.all(|export| account.code().has_procedure(export.digest));
+            let exports = package.manifest.exports();
+            // let verified = exports.all(|export| account.code().has_procedure(export.digest));
+            //let verified = exports.filter(|export| export.is_procedure());
+            let mut procedures = exports.filter_map(|export| match export {
+                PackageExport::Procedure(procedure) => Some(procedure),
+                _ => None,
+            });
+            let verified =
+                procedures.all(|procedure| account.code().has_procedure(procedure.digest));
             // println!("verified: {}", verified);
             // println!("{}", account_id.to_bech32(NetworkId::Testnet));
             //std::process::exit(not_verified.into());

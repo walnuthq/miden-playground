@@ -7,12 +7,12 @@ import {
   WalletModalProvider,
   PrivateDataPermission,
   AllowedPrivateData,
-} from "@demox-labs/miden-wallet-adapter";
+} from "@miden-sdk/miden-wallet-adapter";
 // import { ParaProvider } from "@getpara/react-sdk";
 // import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MidenSdkProvider } from "@/components/miden-sdk-context";
 import GlobalContextProvider from "@/components/global-context/provider";
-import { WebClientProvider } from "@/components/web-client-context";
+import WebClientProvider from "@/components/web-client-provider";
 
 const walletAdapter = new MidenWalletAdapter({ appName: "Miden Playground" });
 // const queryClient = new QueryClient();

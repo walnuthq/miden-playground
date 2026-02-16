@@ -1,4 +1,8 @@
-import { type Component, defaultComponent } from "@/lib/types/component";
+import {
+  type Component,
+  defaultComponent,
+  storageSlotName,
+} from "@/lib/types/component";
 
 const getter: Component = {
   ...defaultComponent(),
@@ -6,7 +10,16 @@ const getter: Component = {
   name: "Getter",
   type: "account",
   scriptId: "getter",
-  storageSlots: [{ name: "word", type: "value", value: "0" }],
+  storageSlots: [
+    {
+      name: storageSlotName({
+        packageName: "getter",
+        fieldName: "word",
+      }),
+      type: "value",
+      value: "0",
+    },
+  ],
 };
 
 export default getter;

@@ -16,8 +16,8 @@ const tutorial: Tutorial = {
   description:
     "This tutorial focuses on learning how to transfer assets between 2 wallets.",
   initialRoute: "/accounts",
-  store,
   state,
+  store,
   steps: [Step1, Step2, Step3, Step4, Step5],
 };
 

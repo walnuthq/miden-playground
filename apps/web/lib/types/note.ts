@@ -1,6 +1,4 @@
 import { type FungibleAsset } from "@/lib/types/asset";
-import { P2ID_NOTE_CODE } from "@/lib/constants";
-import { accountIdFromPrefixSuffix } from "@/lib/types/account";
 
 export const noteTypes = {
   public: "Public",
@@ -22,7 +20,7 @@ export const noteStates = {
   "consumed-external": "Consumed External",
 } as const;
 
-type NoteState = keyof typeof noteStates;
+export type NoteState = keyof typeof noteStates;
 
 export type InputNote = {
   id: string;
@@ -56,26 +54,3 @@ export const defaultInputNote = (): InputNote => ({
 
 export const noteConsumed = ({ state }: InputNote) =>
   state.includes("consumed");
-
-export const noteConsumable = ({
-  inputNote,
-  networkId,
-  accountId,
-}: {
-  inputNote: InputNote;
-  networkId: string;
-  accountId?: string;
-}) => {
-  if (noteConsumed(inputNote) || inputNote.scriptRoot !== P2ID_NOTE_CODE) {
-    return false;
-  }
-  if (networkId === "mtst") {
-    const recipientAccountId = accountIdFromPrefixSuffix(
-      inputNote.inputs[1]!,
-      inputNote.inputs[0]!,
-    );
-    return accountId === recipientAccountId;
-  } else {
-    return true;
-  }
-};

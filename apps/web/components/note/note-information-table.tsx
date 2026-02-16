@@ -16,6 +16,7 @@ import useGlobalContext from "@/components/global-context/hook";
 import { type Script } from "@/lib/types/script";
 import useMidenSdk from "@/hooks/use-miden-sdk";
 import { accountIdToAddress } from "@/lib/web-client";
+import { MIDEN_EXPLORER_URL } from "@/lib/constants";
 
 const NoteInformationTable = ({
   inputNote,
@@ -41,9 +42,9 @@ const NoteInformationTable = ({
           <TableRow>
             <TableCell>ID</TableCell>
             <TableCell>
-              {networkId === "mtst" ? (
+              {networkId !== "mmck" ? (
                 <a
-                  href={`https://testnet.midenscan.com/note/${inputNote.id}`}
+                  href={`${MIDEN_EXPLORER_URL}/note/${inputNote.id}`}
                   className="text-primary font-medium underline underline-offset-4"
                   target="_blank"
                   rel="noopener noreferrer"

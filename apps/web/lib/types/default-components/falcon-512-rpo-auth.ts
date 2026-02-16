@@ -6,7 +6,13 @@ const falcon512RpoAuth: Component = {
   name: "Falcon 512 RPO Auth",
   type: "authentication-component",
   scriptId: "falcon-512-rpo-auth",
-  storageSlots: [{ name: "Owner Public Key", type: "value", value: "0" }],
+  storageSlots: [
+    {
+      name: "miden::standards::auth::falcon512_rpo::public_key",
+      type: "value",
+      value: "0",
+    },
+  ],
 };
 
 export default falcon512RpoAuth;

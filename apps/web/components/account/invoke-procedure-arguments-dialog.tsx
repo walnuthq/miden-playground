@@ -17,6 +17,8 @@ import { Label } from "@workspace/ui/components/label";
 import useScripts from "@/hooks/use-scripts";
 import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";
 import useMidenSdk from "@/hooks/use-miden-sdk";
+import { MIDEN_EXPLORER_URL } from "@/lib/constants";
+import { formatProcedureExportPath } from "@/lib/utils";
 
 const InvokeProcedureArgumentsDialog = () => {
   const {
@@ -39,7 +41,8 @@ const InvokeProcedureArgumentsDialog = () => {
     setAccountId("");
     closeInvokeProcedureArgumentsDialog();
   };
-  const isCopyCount = procedureExport.name === "copy_count";
+  const isCopyCount =
+    formatProcedureExportPath(procedureExport.path) === "copy_count";
   return (
     <Dialog
       open={invokeProcedureArgumentsDialogOpen}
@@ -106,7 +109,7 @@ const InvokeProcedureArgumentsDialog = () => {
                   label: "View on MidenScan",
                   onClick: () =>
                     window.open(
-                      `https://testnet.midenscan.com/tx/${transactionRecord.id().toHex()}`,
+                      `${MIDEN_EXPLORER_URL}/tx/${transactionRecord.id().toHex()}`,
                       "_blank",
                       "noopener noreferrer",
                     ),

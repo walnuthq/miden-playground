@@ -39,10 +39,12 @@ import { defaultComponentIds } from "@/lib/types/default-components";
 import useTutorials from "@/hooks/use-tutorials";
 import { MIDEN_FAUCET_ADDRESS } from "@/lib/constants";
 import useGlobalContext from "@/components/global-context/hook";
+import useWebClient from "@/hooks/use-web-client";
 
 const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
   const isClient = useIsClient();
-  const { networkId } = useGlobalContext();
+  const { networkId, initializingWebClient } = useGlobalContext();
+  const { client } = useWebClient();
   const { tutorialId } = useTutorials();
   const {
     accounts,
@@ -153,22 +155,34 @@ const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
   ];
   // TODO refactor using onConnect callback?
   useEffect(() => {
-    if (networkId === "mtst" && !connectedWallet) {
+    if (
+      client &&
+      !initializingWebClient &&
+      networkId !== "mmck" &&
+      !connectedWallet
+    ) {
       importConnectedWallet();
     }
-  }, [networkId, connectedWallet, tutorialId, importConnectedWallet]);
+  }, [
+    client,
+    initializingWebClient,
+    networkId,
+    connectedWallet,
+    tutorialId,
+    importConnectedWallet,
+  ]);
   // automatically import Miden Faucet on testnet
   useEffect(() => {
     const midenFaucet = faucets.find(
       ({ address }) => address === MIDEN_FAUCET_ADDRESS,
     );
-    if (networkId === "mtst" && !midenFaucet) {
+    if (client && networkId !== "mmck" && !midenFaucet) {
       importAccountByAddress({
         name: "Miden Faucet",
         address: MIDEN_FAUCET_ADDRESS,
       });
     }
-  }, [networkId, faucets, tutorialId, importAccountByAddress]);
+  }, [client, networkId, faucets, tutorialId, importAccountByAddress]);
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>

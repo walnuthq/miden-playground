@@ -29,13 +29,14 @@ These imports provide:
 #[component]
 struct CounterContract {
     /// Storage map holding the counter value.
-    #[storage(slot(0), description = "...")]
+    #[storage(description = "...")]
     count_map: StorageMap,
 }
 ```
 
 The **`#[component]`** attribute marks this as a Miden component.
-The **`count_map`** field is a **`StorageMap`** that will be stored in storage slot 0 of the account.
+The **`count_map`** field is a **`StorageMap`** stored in a named storage slot of the account.
+In v0.13, storage slots are identified by name rather than explicit index numbers — the slot name is derived automatically from the component's package name and field name (e.g., **`miden::component::miden_counter_account::count_map`**).
 
 **Important**: Storage slots in Miden hold **`Word`** values, which are composed of four field elements (**`Felt`**).
 Each **`Felt`** is a 64-bit unsigned integer (u64).
@@ -57,4 +58,6 @@ The **`CounterContract`** implementation defines the external interface that oth
 let key = Word::from_u64_unchecked(0, 0, 0, 1);
 ```
 
-Both functions use the same fixed key **`[0, 0, 0, 1]`** to store and retrieve the counter value within the storage map. This demonstrates a simple but effective storage pattern.
+Both functions use the same fixed key **`[0, 0, 0, 1]`** to store and retrieve the counter value within the storage map.
+The **`Word::from_u64_unchecked`** constructor creates a **`Word`** from four **`u64`** values.
+This demonstrates a simple but effective storage pattern.

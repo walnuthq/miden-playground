@@ -2,7 +2,7 @@ import {
   type ConsumableNoteRecord as WasmConsumableNoteRecordType,
   type TransactionRequest as WasmTransactionRequestType,
   type TransactionResult as WasmTransactionResultType,
-} from "@demox-labs/miden-sdk";
+} from "@miden-sdk/miden-sdk";
 import { type Account } from "@/lib/types/account";
 import { type InputNote } from "@/lib/types/note";
 import {
@@ -38,7 +38,7 @@ export type TransactionAction =
         consumableNoteIds: Record<string, string[]>;
         inputNotes: InputNote[];
         blockNum: number;
-        serializedMockChain: Uint8Array | null;
+        serializedMockChain: Uint8Array;
       };
     };
 

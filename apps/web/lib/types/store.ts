@@ -1,3 +1,5 @@
+import type { NetworkId } from "@/lib/types/network";
+
 type StoreAccountAsset = {
   root: string;
   vaultKey: string;
@@ -5,13 +7,13 @@ type StoreAccountAsset = {
   asset: string;
 };
 
-type StoreAccountAuth = { pubKey: string; secretKey: string };
+type StoreAccountAuth = { pubKeyCommitmentHex: string; secretKeyHex: string };
 
 type StoreAccountCode = { root: string; code: number[] };
 
 type StoreAccountStorage = {
   commitment: string;
-  slotIndex: number;
+  slotName: string;
   slotValue: string;
   slotType: number;
 };
@@ -31,7 +33,7 @@ type StoreAccount = {
 type StoreAddress = { address: number[]; id: string };
 
 type StoreBlockHeader = {
-  blockNum: string;
+  blockNum: number;
   header: number[];
   partialBlockchainPeaks: number[];
   hasClientNotes: string;
@@ -64,11 +66,11 @@ type StoreOutputNote = {
   state: number[];
 };
 
-type StorePartialBlockchainNode = { id: string; node: string };
+type StorePartialBlockchainNode = { id: number; node: string };
 
 type StoreSetting = { key: string; value: number[] };
 
-type StoreStateSync = { id: number; blockNum: string };
+type StoreStateSync = { id: number; blockNum: number };
 
 type StoreStorageMapEntry = { root: string; key: string; value: string };
 
@@ -128,7 +130,7 @@ export const defaultStore = (): Store => ({
   outputNotes: [],
   partialBlockchainNodes: [],
   settings: [{ key: "note_transport_cursor", value: [0, 0, 0, 0, 0, 0, 0, 0] }],
-  stateSync: [{ id: 1, blockNum: "0" }],
+  stateSync: [{ id: 1, blockNum: 0 }],
   storageMapEntries: [],
   tags: [],
   trackedAccounts: [],
@@ -136,10 +138,11 @@ export const defaultStore = (): Store => ({
   transactions: [],
 });
 
-export const deleteStore = () =>
+export const storeName = (networkId: NetworkId) =>
+  networkId === "mmck" ? "mock_client_db" : `MidenClientDB_${networkId}`;
+
+export const deleteStore = (networkId: NetworkId) =>
   new Promise((resolve) => {
-    const deleteRequest = indexedDB.deleteDatabase("MidenClientDB");
+    const deleteRequest = indexedDB.deleteDatabase(storeName(networkId));
     deleteRequest.onsuccess = resolve;
   });
-
-// export const storeSerializer = (store: Store) => JSON.stringify(store);

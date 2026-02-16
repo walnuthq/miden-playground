@@ -1,5 +1,5 @@
 import { type Dispatch, type SetStateAction } from "react";
-import { type ConsumableNoteRecord as WasmConsumableNoteRecordType } from "@demox-labs/miden-sdk";
+import { type ConsumableNoteRecord as WasmConsumableNoteRecordType } from "@miden-sdk/miden-sdk";
 import {
   type CreateTransactionDialogStep,
   type TransactionType,
@@ -69,7 +69,7 @@ const CreateTransactionDialogSelectForm = ({
                     : "custom",
               );
             }}
-            withoutFaucets={networkId !== "mlcl"}
+            withoutFaucets={networkId !== "mmck"}
           />
         </div>
         <div className="grid gap-3 col-span-2">

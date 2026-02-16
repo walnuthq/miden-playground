@@ -45,18 +45,21 @@ export const defaultSignature = (): Signature => ({
   results: [],
 });
 
-export type Export = {
-  name: string;
+export type ProcedureExport = {
+  path: string;
   digest: string;
   signature: Signature;
-  readOnly: boolean;
+  attributes: { attrs: string[] };
+  readOnly?: boolean;
 };
 
-export const defaultExport = (): Export => ({
-  name: "",
+export type Export = { Procedure: ProcedureExport };
+
+export const defaultProcedureExport = (): ProcedureExport => ({
+  path: "",
   digest: "",
   signature: defaultSignature(),
-  readOnly: false,
+  attributes: { attrs: [] },
 });
 
 export type Dependency = {
@@ -93,7 +96,7 @@ export type Script = {
   error: string;
   digest: string;
   masp: string;
-  exports: Export[];
+  procedureExports: ProcedureExport[];
   dependencies: Dependency[];
   // inputs: MidenInput[];
   createdAt: number;
@@ -111,7 +114,7 @@ export const defaultScript = (): Script => ({
   error: "",
   digest: "",
   masp: "",
-  exports: [],
+  procedureExports: [],
   dependencies: [],
   // inputs: [],
   createdAt: Date.now(),
@@ -147,14 +150,14 @@ export const invokeProcedureCustomTransactionScript = ({
   procedureInputs,
 }: {
   contractName?: string;
-  procedureExport: Export;
+  procedureExport: ProcedureExport;
   procedureInputs: MidenInput[];
-}) => `${contractName ? `use.external_contract::${contractName}` : ""}
-use.std::sys
+}) => `${contractName ? `use external_contract::${contractName}` : ""}
+use miden::core::sys
 
 begin
     ${formatProcedureInputs(procedureInputs)}
-    call.${contractName ? `${contractName}::${procedureExport.name}` : procedureExport.digest}
+    call.${contractName ? `${contractName}::${procedureExport.path}` : procedureExport.digest}
     exec.sys::truncate_stack
 end
 `;

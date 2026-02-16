@@ -1,5 +1,4 @@
 import { defaultTutorial, type Tutorial } from "@/lib/types/tutorial";
-import { defaultStore } from "@/lib/types/store";
 import state from "@/components/tutorials/tutorial3/state";
 import Step1 from "@/components/tutorials/tutorial3/step1";
 import Step2 from "@/components/tutorials/tutorial3/step2";
@@ -17,7 +16,6 @@ const tutorial: Tutorial = {
   description:
     "This tutorial will walk you through connecting your Miden Wallet to the Miden Playground and confirming transactions on Miden testnet.",
   initialRoute: "/accounts",
-  store: defaultStore(),
   state,
   steps: [Step1, Step2, Step3, Step4, Step5, Step6],
 };

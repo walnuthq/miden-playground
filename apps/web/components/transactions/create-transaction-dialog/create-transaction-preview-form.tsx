@@ -9,8 +9,8 @@ import NoteId from "@/components/lib/note-id";
 import {
   type TransactionResult as WasmTransactionResultType,
   type TransactionRequest as WasmTransactionRequestType,
-} from "@demox-labs/miden-sdk";
-import { type WasmTransactionRecordType } from "@/lib/types";
+  type TransactionRecord as WasmTransactionRecordType,
+} from "@miden-sdk/miden-sdk";
 import useAccounts from "@/hooks/use-accounts";
 import { defaultStorageItem } from "@/lib/types/account";
 

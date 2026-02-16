@@ -90,7 +90,7 @@ const Header = () => {
           {isClient && <NetworkBadge />}
           {isClient && tutorialId && <TutorialToggle />}
           <ModeToggle />
-          {isClient && networkId === "mtst" && <WalletButton />}
+          {isClient && networkId !== "mmck" && <WalletButton />}
         </div>
       </div>
     </header>

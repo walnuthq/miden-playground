@@ -1,4 +1,5 @@
 import Link from "@/components/tutorials/tutorial-link";
+import WalletAlert from "@/components/tutorials/wallet-alert";
 import {
   TEST_WALLET_ADDRESS,
   TEST_WALLET_ACCOUNT_ID_PREFIX,
@@ -23,3 +24,5 @@ The first two inputs are the target account ID suffix and prefix, you can use th
 The third input is the timelock block height, you can set it to any future block height eg. **{props.blockNum}**.
 
 Once you're done configuring your note creation, click on the _"Create"_ button and sign the resulting transaction.
+
+<WalletAlert />

@@ -29,7 +29,7 @@ const CreateAccountDropdownMenu = () => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        {networkId === "mlcl" && (
+        {networkId === "mmck" && (
           <>
             <DropdownMenuItem onClick={openCreateWalletDialog}>
               <Wallet />
@@ -41,7 +41,7 @@ const CreateAccountDropdownMenu = () => {
             </DropdownMenuItem>
           </>
         )}
-        {networkId === "mtst" && (
+        {networkId !== "mmck" && (
           <>
             <DropdownMenuItem onClick={openImportAccountDialog}>
               <Download />

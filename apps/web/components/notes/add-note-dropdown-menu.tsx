@@ -27,7 +27,7 @@ const AddNoteDropdownMenu = () => {
           <FileDown />
           Import note
         </DropdownMenuItem>
-        {networkId === "mtst" && (
+        {networkId !== "mmck" && (
           <DropdownMenuItem
             disabled={!connectedWallet}
             onClick={openCreateNoteDialog}

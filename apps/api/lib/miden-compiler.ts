@@ -89,10 +89,6 @@ export const generatePackageDir = async ({
   await mkdir(`${packagesPath}/${packageDir}`);
   await Promise.all([
     mkdir(`${packagesPath}/${packageDir}/src`),
-    cp(
-      `${projectRoot}/templates/cargo-generate.toml`,
-      `${packagesPath}/${packageDir}/cargo-generate.toml`,
-    ),
     generateCargoToml({
       packageDir,
       name,
@@ -126,7 +122,7 @@ export const generateCargoToml = ({
   cargoToml += `[lib]\n`;
   cargoToml += `crate-type = ["cdylib"]\n\n`;
   cargoToml += `[dependencies]\n`;
-  cargoToml += `miden = { git = "https://github.com/0xMiden/compiler" }\n\n`;
+  cargoToml += `miden = { version = "0.10" }\n\n`;
   cargoToml += `[package.metadata.component]\n`;
   cargoToml += `package = "miden:${name}"\n\n`;
   cargoToml += `[package.metadata.miden]\n`;
@@ -194,10 +190,7 @@ const readPackageMetadata = async (maspPath: string) => {
   };
   return {
     digest,
-    exports: exports.map((procedureExport) => {
-      const [, name = ""] = procedureExport.name.split("::");
-      return { ...procedureExport, name };
-    }),
+    exports,
     dependencies: dependencies
       .filter(({ name }) => !["base", "std"].includes(name))
       .map((dependency) => ({

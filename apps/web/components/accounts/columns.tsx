@@ -24,7 +24,7 @@ const AccountActionsCell = ({ account }: { account: Account }) => {
   const { client } = useWebClient();
   const { connectedWallet } = useAccounts();
   const { openCreateTransactionDialog } = useTransactions();
-  if (networkId === "mtst" && connectedWallet?.address !== account.address) {
+  if (networkId !== "mmck" && connectedWallet?.address !== account.address) {
     return null;
   }
   return (

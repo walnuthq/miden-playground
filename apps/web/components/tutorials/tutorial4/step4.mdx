@@ -1,4 +1,5 @@
 import Link from "@/components/tutorials/tutorial-link";
+import WalletAlert from "@/components/tutorials/wallet-alert";
 import { EllipsisVertical } from "lucide-react";
 
 In the previous step, we imported a private note containing 100 tokens from the public [Miden Faucet](https://faucet.testnet.miden.io/), now let's consume this note to fund our private wallet.
@@ -6,5 +7,7 @@ In the previous step, we imported a private note containing 100 tokens from the 
 From your {props.wallet ? <Link href={`/accounts/${props.wallet.identifier}`}>private wallet details page</Link> : 'private wallet details page'}, click on the <EllipsisVertical className="size-4 inline" /> icon button in the _"Consumable Notes"_ table to consume the note with your wallet.
 
 A _"Confirm Transaction"_ modal from your Miden Wallet will show up asking you to sign the resulting consume transaction that will transfer the tokens to your account.
+
+<WalletAlert />
 
 The private note will transition to the **Consumed** state and disappear from your wallet consumable notes.

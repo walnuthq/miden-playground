@@ -1,65 +1,83 @@
 "use client";
 import { createContext, useState, useEffect, type ReactNode } from "react";
-import { type WebClient as WebClientType } from "@demox-labs/miden-sdk";
+import { type WebClient as WebClientType } from "@miden-sdk/miden-sdk";
 import { type MidenSdk } from "@/lib/types";
 import { type NetworkId } from "@/lib/types/network";
 import useMidenSdk from "@/hooks/use-miden-sdk";
 import useGlobalContext from "@/components/global-context/hook";
 import {
-  MIDEN_TESTNET_RPC_URL,
   MIDEN_NOTE_TRANSPORT_URL,
+  MIDEN_DEVNET_RPC_URL,
+  MIDEN_TESTNET_RPC_URL,
 } from "@/lib/constants";
-
-const globalForWebClient = globalThis as unknown as {
-  webClient: WebClientType;
-};
+import useAppState from "@/hooks/use-app-state";
+import { storeName } from "@/lib/types/store";
 
 export const WebClientContext = createContext<{
-  client: WebClientType;
+  client: WebClientType | null;
 }>({
-  client: {} as WebClientType,
+  client: null,
 });
 
-export const createClient = async ({
+const createWebClient = async ({
   networkId,
-  serializedMockChain,
-  // @ts-expect-error MockWebClient not exported
-  midenSdk: { WebClient, MockWebClient },
+  midenSdk: { WebClient },
 }: {
   networkId: NetworkId;
-  serializedMockChain: Uint8Array | null;
   midenSdk: MidenSdk;
-}) => {
-  if (networkId === "mlcl") {
-    return MockWebClient.createClient(serializedMockChain);
-  } else {
-    if (!globalForWebClient.webClient) {
-      globalForWebClient.webClient = await WebClient.createClient(
-        MIDEN_TESTNET_RPC_URL,
-        MIDEN_NOTE_TRANSPORT_URL,
-      );
-    }
-    return globalForWebClient.webClient;
-  }
-};
+}) =>
+  WebClient.createClient(
+    networkId === "mdev" ? MIDEN_DEVNET_RPC_URL : MIDEN_TESTNET_RPC_URL,
+    MIDEN_NOTE_TRANSPORT_URL,
+  );
+
+let initializedClient = false;
 
 export const WebClientProvider = ({ children }: { children: ReactNode }) => {
   const { midenSdk } = useMidenSdk();
-  const { networkId, serializedMockChain } = useGlobalContext();
+  const { networkId, initializingWebClient, nextState, nextStore } =
+    useGlobalContext();
+  const { webClientInitializing, webClientInitialized } = useAppState();
   const [client, setClient] = useState<WebClientType | null>(null);
   useEffect(() => {
-    const initClient = async () => {
-      const client = await createClient({
+    if (initializingWebClient || networkId === "mmck") {
+      return;
+    }
+    const initializeClient = async () => {
+      // console.log("INITIALIZE_WEB_CLIENT");
+      client?.terminate();
+      webClientInitializing();
+      const newClient = await createWebClient({
         networkId,
-        serializedMockChain,
         midenSdk,
       });
-      setClient(client);
+      if (nextStore) {
+        await newClient.forceImportStore(
+          JSON.stringify(nextStore),
+          storeName(networkId),
+        );
+      }
+      const syncSummary = await newClient.syncState();
+      setClient(newClient);
+      webClientInitialized({ blockNum: syncSummary.blockNum() });
     };
-    initClient();
-  }, [networkId, serializedMockChain, midenSdk]);
-  if (!client) {
-    return null;
-  }
+    if (!initializedClient) {
+      initializedClient = true;
+      initializeClient();
+    }
+  }, [
+    client,
+    initializingWebClient,
+    networkId,
+    midenSdk,
+    nextStore,
+    webClientInitializing,
+    webClientInitialized,
+  ]);
+  useEffect(() => {
+    if (networkId === "mmck" && nextState?.networkId !== "mmck") {
+      initializedClient = false;
+    }
+  }, [networkId, nextState]);
   return <WebClientContext value={{ client }}>{children}</WebClientContext>;
 };

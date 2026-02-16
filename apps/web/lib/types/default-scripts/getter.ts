@@ -1,18 +1,18 @@
 import { type Script, defaultScript } from "@/lib/types/script";
 
-export const getterMasm = `use.miden::native_account
-use.miden::tx
-use.std::sys
+export const getterMasm = `use miden::protocol::native_account
+use miden::protocol::tx
+use miden::core::word
+use miden::core::sys
+
+const WORD_SLOT = word("miden::component::miden_getter::word")
 
 # => [account_id_prefix, account_id_suffix, proc_hash]
-export.read_word
+pub proc read_word
     exec.tx::execute_foreign_procedure
     # => [count]
 
-    push.0
-    # [index, count]
-
-    exec.native_account::set_item
+    push.WORD_SLOT[0..2] exec.native_account::set_item
     # => []
 
     exec.sys::truncate_stack

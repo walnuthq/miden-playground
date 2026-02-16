@@ -15,31 +15,43 @@ use crate::bindings::miden::counter_account::counter_account;
 The wildcard import brings in all Miden note script functionality.
 The **`counter_account`** binding imports the interface functions from the counter contract, allowing the note script to call them.
 
-**No Struct Definition**
+**Note Script Structure**
 
-Unlike account contracts, note scripts don't define a struct.
-They are purely functional code that gets executed when a note is consumed.
-The script defines **what happens** when the note is processed, not a persistent data structure.
+Note scripts use a struct-based pattern.
+The **`#[note]`** attribute on both the struct and **`impl`** block marks this as a Miden note script component:
 
-Learn more about [note scripts in the Miden documentation](http://docs.miden.xyz/miden-base/note/).
+```rust
+#[note]
+struct IncrementNote;
+
+#[note]
+impl IncrementNote {
+    #[note_script]
+    fn run(self, _arg: Word) { ... }
+}
+```
+
+The struct definition (**`IncrementNote`**) provides a named type for the note script.
+Unlike account contracts, note scripts don't store persistent data — the struct serves as the entry point container.
+
+Learn more about [note scripts in the Miden documentation](https://docs.miden.xyz/design/miden-base/note#script).
 
 **The Note Script Function**
 
 ```rust
-#[note]
-impl CounterNote {
-    #[note_script]
-    pub fn run(self, _arg: Word) {
-        let initial_value = cc::get_count();
-        cc::increment_count();
-        let expected_value = initial_value + Felt::from_u32(1);
-        let final_value = cc::get_count();
-        assert_eq(final_value, expected_value);
-    }
+#[note_script]
+fn run(self, _arg: Word) {
+    let initial_value = counter_account::get_count();
+    counter_account::increment_count();
+    let expected_value = initial_value + Felt::from_u32(1);
+    let final_value = counter_account::get_count();
+    assert_eq(final_value, expected_value);
 }
 ```
 
-The **`#[note_script]`** attribute marks this function as the entry point for note execution. The function:
+The **`#[note_script]`** attribute marks this function as the entry point for note execution.
+The **`self`** parameter is required for methods in the **`impl`** block.
+The function:
 
 1. **Gets the initial counter value** using the imported **`counter_account::get_count()`** function
 2. **Calls `increment_count()`** to increment the counter on the target account

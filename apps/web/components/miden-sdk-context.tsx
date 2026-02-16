@@ -12,7 +12,7 @@ export const MidenSdkProvider = ({ children }: { children: ReactNode }) => {
   const [midenSdk, setMidenSdk] = useState<MidenSdk | null>(null);
   useEffect(() => {
     const loadMidenSdk = async () => {
-      const sdk = await import("@demox-labs/miden-sdk");
+      const sdk = await import("@miden-sdk/miden-sdk");
       setMidenSdk(sdk);
     };
     loadMidenSdk();

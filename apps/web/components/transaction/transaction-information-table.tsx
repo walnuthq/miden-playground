@@ -7,6 +7,7 @@ import {
 } from "@workspace/ui/components/table";
 import AccountAddress from "@/components/lib/account-address";
 import useGlobalContext from "@/components/global-context/hook";
+import { MIDEN_EXPLORER_URL } from "@/lib/constants";
 
 const TransactionInformationTable = ({
   transaction,
@@ -21,9 +22,9 @@ const TransactionInformationTable = ({
           <TableRow>
             <TableCell>ID</TableCell>
             <TableCell>
-              {networkId === "mtst" ? (
+              {networkId !== "mmck" ? (
                 <a
-                  href={`https://testnet.midenscan.com/tx/${transaction.id}`}
+                  href={`${MIDEN_EXPLORER_URL}/tx/${transaction.id}`}
                   className="text-primary font-medium underline underline-offset-4"
                   target="_blank"
                   rel="noopener noreferrer"

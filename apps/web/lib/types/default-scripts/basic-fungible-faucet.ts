@@ -1,4 +1,8 @@
-import { type Script, defaultScript, defaultExport } from "@/lib/types/script";
+import {
+  type Script,
+  defaultScript,
+  defaultProcedureExport,
+} from "@/lib/types/script";
 
 export const basicFungibleFaucetRust = "";
 
@@ -81,16 +85,16 @@ const basicFungibleFaucet: Script = {
   readOnly: true,
   rust: basicFungibleFaucetRust,
   masm: basicFungibleFaucetMasm,
-  exports: [
+  procedureExports: [
     {
-      ...defaultExport(),
-      name: "distribute",
+      ...defaultProcedureExport(),
+      path: "distribute",
       digest:
-        "0x98856a6233e1c53e69c8aad44230e11380815c95411385cdd1a6c964e926dc6e",
+        "0xd323717ca61e7fdc3eb4d26447c2fb2a73f20c52496ec550522ea14179f1340d",
     },
     {
-      ...defaultExport(),
-      name: "burn",
+      ...defaultProcedureExport(),
+      path: "burn",
       digest:
         "0x3cf2fa0fec35c463ee28b80f719c80963582480a71d5ec3c9c461bb418ca988b",
     },

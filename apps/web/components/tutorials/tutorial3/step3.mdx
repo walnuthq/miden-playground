@@ -1,4 +1,5 @@
 import { EllipsisVertical } from "lucide-react";
+import WalletAlert from "@/components/tutorials/wallet-alert";
 
 In the previous step, we requested 100 tokens from the public [Miden Faucet](https://faucet.testnet.miden.io/).
 
@@ -7,5 +8,7 @@ The resulting output note containing our tokens must now be consumed to fund our
 Click on the <EllipsisVertical className="size-4 inline" /> icon button in the _"Consumable Notes"_ table to consume the note with your wallet.
 
 A _"Confirm Transaction"_ modal from your Miden Wallet will show up asking you to sign the resulting consume transaction that will transfer the tokens to your account.
+
+<WalletAlert />
 
 The note will transition to the **Consumed** state and disappear from your wallet consumable notes.

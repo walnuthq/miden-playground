@@ -16,7 +16,7 @@ import {
   useWallet,
   ConsumeTransaction,
   type MidenWalletAdapter,
-} from "@demox-labs/miden-wallet-adapter";
+} from "@miden-sdk/miden-wallet-adapter";
 import useTransactions from "@/hooks/use-transactions";
 import AccountAddress from "@/components/lib/account-address";
 import useScripts from "@/hooks/use-scripts";
@@ -84,7 +84,7 @@ const InputNoteActionsCell = ({ inputNote }: { inputNote: InputNote }) => {
               //   transactionRequest,
               //   transactionResult,
               // });
-              if (networkId === "mlcl") {
+              if (networkId === "mmck") {
                 const targetAccountId = accountIdFromPrefixSuffix(
                   inputNote.inputs[1]!,
                   inputNote.inputs[0]!,

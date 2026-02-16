@@ -12,7 +12,7 @@ use miden::*;
 #[component]
 struct MyAccount {
     // Storage
-    #[storage(slot(0), description = "storage value")]
+    #[storage(description = "storage value")]
     value: Value,
 }
 

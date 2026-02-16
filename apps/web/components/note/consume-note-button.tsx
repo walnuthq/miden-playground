@@ -3,47 +3,48 @@ import { FileInput } from "lucide-react";
 import { Spinner } from "@workspace/ui/components/spinner";
 import { Button } from "@workspace/ui/components/button";
 import useTransactions from "@/hooks/use-transactions";
-import { accountIdFromPrefixSuffix } from "@/lib/types/account";
 import { type InputNote } from "@/lib/types/note";
+import { type Account } from "@/lib/types/account";
 import useAccounts from "@/hooks/use-accounts";
 import useGlobalContext from "@/components/global-context/hook";
 import {
   useWallet,
   ConsumeTransaction,
   type MidenWalletAdapter,
-} from "@demox-labs/miden-wallet-adapter";
+} from "@miden-sdk/miden-wallet-adapter";
 import { clientExportInputNoteFile } from "@/lib/web-client";
 import useWebClient from "@/hooks/use-web-client";
 import useMidenSdk from "@/hooks/use-miden-sdk";
 
-const ConsumeNoteButton = ({ inputNote }: { inputNote: InputNote }) => {
+const ConsumeNoteButton = ({
+  inputNote,
+  targetAccount,
+}: {
+  inputNote: InputNote;
+  targetAccount: Account;
+}) => {
   const { midenSdk } = useMidenSdk();
   const { client } = useWebClient();
   const { wallet } = useWallet();
   const { networkId } = useGlobalContext();
-  const { faucets, accounts } = useAccounts();
+  const { faucets } = useAccounts();
   const { openCreateTransactionDialog, newConsumeTransactionRequest } =
     useTransactions();
   const [loading, setLoading] = useState(false);
-  const targetAccountId = accountIdFromPrefixSuffix(
-    inputNote.inputs[1]!,
-    inputNote.inputs[0]!,
-  );
-  const targetAccount = accounts.find(({ id }) => id === targetAccountId);
   return (
     <Button
       variant="outline"
       onClick={async () => {
-        if (networkId === "mlcl") {
+        if (networkId === "mmck") {
           setLoading(true);
           const { transactionRequest, transactionResult } =
             await newConsumeTransactionRequest({
-              accountId: targetAccountId,
+              accountId: targetAccount.id,
               noteIds: [inputNote.id],
             });
           setLoading(false);
           openCreateTransactionDialog({
-            accountId: targetAccountId,
+            accountId: targetAccount.id,
             transactionType: "consume",
             step: "preview",
             transactionRequest,
@@ -83,7 +84,7 @@ const ConsumeNoteButton = ({ inputNote }: { inputNote: InputNote }) => {
       <span className="hidden lg:inline">
         {loading
           ? "Consuming note…"
-          : `Consume note with ${targetAccount?.name}`}
+          : `Consume note with ${targetAccount.name}`}
       </span>
     </Button>
   );

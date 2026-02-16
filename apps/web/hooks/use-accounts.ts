@@ -1,4 +1,4 @@
-import { useWallet } from "@demox-labs/miden-wallet-adapter";
+import { useWallet } from "@miden-sdk/miden-wallet-adapter";
 import {
   clientGetAccountByAddress,
   clientGetConsumableNotes,
@@ -10,7 +10,7 @@ import {
   storageMode,
   addressToAccountId,
 } from "@/lib/web-client";
-import { type Account as WasmAccountType } from "@demox-labs/miden-sdk";
+import { type Account as WasmAccountType } from "@miden-sdk/miden-sdk";
 import useGlobalContext from "@/components/global-context/hook";
 import {
   type AccountStorageMode,
@@ -161,7 +161,6 @@ const useAccounts = () => {
           address,
           identifier: getIdentifierPart(address),
           routingParameters: getRoutingParametersPart(address),
-          isNew: true,
           fungibleAssets: fungibleAssets ?? [],
         };
         dispatch({
@@ -220,7 +219,7 @@ const useAccounts = () => {
     return account;
   };
   const importConnectedWallet = async () => {
-    if (networkId !== "mtst" || connectedWallet) {
+    if (networkId === "mmck" || connectedWallet) {
       return;
     }
     if (midenWalletAddress) {
@@ -358,7 +357,7 @@ const useAccounts = () => {
     accounts,
     wallets,
     faucets,
-    connectedWallet: networkId !== "mlcl" ? connectedWallet : undefined,
+    connectedWallet: networkId !== "mmck" ? connectedWallet : undefined,
     newWallet,
     newFaucet,
     importAccountByAddress,

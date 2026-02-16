@@ -1,7 +1,7 @@
 import { type State } from "@/lib/types/state";
-import globalReducer, {
-  type GlobalAction,
-} from "@/components/global-context/reducer/global";
+import stateReducer, {
+  type StateAction,
+} from "@/components/global-context/reducer/state";
 import accountReducer, {
   type AccountAction,
 } from "@/components/global-context/reducer/account";
@@ -22,7 +22,7 @@ import tutorialReducer, {
 } from "@/components/global-context/reducer/tutorial";
 
 export type Action =
-  | GlobalAction
+  | StateAction
   | AccountAction
   | TransactionAction
   | NoteAction
@@ -33,11 +33,15 @@ export type Action =
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case "SWITCH_NETWORK":
+    case "MOCK_WEB_CLIENT_INITIALIZING":
+    case "MOCK_WEB_CLIENT_INITIALIZED":
+    case "WEB_CLIENT_INITIALIZING":
+    case "WEB_CLIENT_INITIALIZED":
     case "SYNCING_STATE":
     case "SYNC_STATE":
     case "PUSH_STATE":
     case "POP_STATE": {
-      return globalReducer(state, action);
+      return stateReducer(state, action);
     }
     case "NEW_ACCOUNT":
     case "UPDATE_ACCOUNT":

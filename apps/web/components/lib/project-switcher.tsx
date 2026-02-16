@@ -31,14 +31,14 @@ import { useIsClient } from "usehooks-ts";
 import { networks } from "@/lib/types/network";
 // import { cn } from "@workspace/ui/lib/utils";
 import { cn } from "@workspace/ui/lib/utils";
-import useWebClient from "@/hooks/use-web-client";
+import useAppState from "@/hooks/use-app-state";
 
 const ProjectSwitcher = () => {
   const isClient = useIsClient();
   const { isMobile } = useSidebar();
   const router = useRouter();
   const { networkId } = useGlobalContext();
-  const { resetState } = useWebClient();
+  const { resetState } = useAppState();
   const { tutorial, completedTutorials, startTutorial } = useTutorials();
   // const { saveProject, loadProject } = useProjects();
   if (!isClient) {
@@ -79,15 +79,15 @@ const ProjectSwitcher = () => {
                 router.push("/accounts");
               }}
             >
-              New testnet sandbox
+              New Testnet sandbox
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => {
-                resetState("mlcl");
+                resetState("mmck");
                 router.push("/accounts");
               }}
             >
-              New local sandbox
+              New MockChain sandbox
             </DropdownMenuItem>
             {/* <DropdownMenuItem
               onClick={() => loadTutorial("transfer-assets-between-wallets")}
@@ -115,14 +115,7 @@ const ProjectSwitcher = () => {
                   {tutorials.map((tutorial) => (
                     <DropdownMenuItem
                       key={tutorial.id}
-                      onClick={async () => {
-                        startTutorial(tutorial.id);
-                        //await sleep(2000);
-                        //loadTutorial(tutorial.id);
-                        /*sleep(2000).then(() => {
-                          loadTutorial(tutorial.id);
-                        });*/
-                      }}
+                      onClick={() => startTutorial(tutorial.id)}
                     >
                       <BadgeCheck
                         className={cn("size-4 text-transparent", {

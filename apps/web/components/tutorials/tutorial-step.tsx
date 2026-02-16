@@ -40,8 +40,8 @@ const TutorialStep = ({ tutorial }: { tutorial: Tutorial }) => {
         {tutorialStep === 0 && (
           <>
             {isMobile && <MobileAlert />}
-            {networkId === "mlcl" && <MockChainAlert />}
-            {networkId === "mtst" && !window.midenWallet && (
+            {networkId === "mmck" && <MockChainAlert />}
+            {networkId !== "mmck" && !window.midenWallet && (
               <MidenWalletAlert />
             )}
           </>

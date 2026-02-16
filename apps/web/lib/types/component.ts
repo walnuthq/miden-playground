@@ -1,3 +1,5 @@
+import { snakeCase } from "lodash";
+
 export const componentTypes = {
   account: "Account Component",
   "authentication-component": "Authentication Component",
@@ -20,6 +22,14 @@ export const defaultStorageSlot = (): StorageSlot => ({
   type: "value",
   value: "0",
 });
+
+export const storageSlotName = ({
+  packageName,
+  fieldName,
+}: {
+  packageName: string;
+  fieldName: string;
+}) => `miden::component::miden_${snakeCase(packageName)}::${fieldName}`;
 
 export type Component = {
   id: string;

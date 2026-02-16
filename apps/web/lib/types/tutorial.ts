@@ -1,6 +1,6 @@
 import { type FunctionComponent } from "react";
 import { type State, defaultState } from "@/lib/types/state";
-import { type Store, defaultStore } from "@/lib/types/store";
+import { type Store } from "@/lib/types/store";
 
 export type TutorialStep = {
   title: string;
@@ -21,8 +21,8 @@ export type Tutorial = {
   description: string;
   category: "beginner" | "advanced";
   initialRoute: string;
-  store: Store;
   state: State;
+  store: Store | null;
   steps: TutorialStep[];
 };
 
@@ -34,7 +34,7 @@ export const defaultTutorial = (): Tutorial => ({
   description: "",
   category: "beginner",
   initialRoute: "/",
-  store: defaultStore(),
   state: defaultState(),
+  store: null,
   steps: [],
 });
