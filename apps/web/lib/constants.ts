@@ -35,12 +35,12 @@ export const TEST_WALLET_ACCOUNT_ID_SUFFIX = 7605363857866658816n;
 export const TEST_WALLET_ADDRESS =
   "mtst1ara9zg07r4yykyrf3whzy0aujsdjugmy_qruqqypuyph";
 
-export const COUNTER_CONTRACT_ACCOUNT_ID = "0x391b90f3b726040028f580ab8026c8";
+export const COUNTER_CONTRACT_ACCOUNT_ID = "0x5ad4594a904974000fc69245a29fc3";
 export const COUNTER_CONTRACT_ADDRESS =
-  "mtst1aqu3hy8nkunqgqpg7kq2hqpxeqjp7nam_qruqqypuyph";
+  "mtst1apddgk22jpyhgqq0c6fytg5lcvwrrej5_qruqqypuyph";
 export const COUNTER_CONTRACT_GET_COUNT_PROC_HASH =
-  "0xd17e069ff189f43f2ed3346a2058e307003f4d1a5691877fddc26c88dce0dd3e";
+  "0x7c79674b4ff38808f0f398222674e7cb4e32315eb6bd01f46b65a82cb80dc66e";
 export const COUNTER_CONTRACT_INCREMENT_COUNT_PROC_HASH =
-  "0x6ffe5c3f936801e81ccadff0f6eaf76696e7c074d76ad1f61a9c8bbb6069e8b5";
+  "0xfab6fc0c032206c376f4c51405443c973c3fce27784149bf4dbfcf434e534052";
 export const COUNT_READER_COPY_COUNT_PROC_HASH =
-  "0xcfbafa70b4b2abcb665dcea4447c9296761db959475f68407edfaeacd5e0b16a";
+  "0xe37ab919bc9af46da35dc6c55ac68d5009756a2c6f517f4bb6a575d9067af4ed";
