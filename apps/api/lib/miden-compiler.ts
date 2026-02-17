@@ -4,7 +4,7 @@ import { parse } from "smol-toml";
 import { type Export, type Dependency, type CargoToml } from "@/lib/types";
 import { insertPackage, getDependencies } from "@/db/packages";
 import { type PackageType } from "@/lib/types";
-import { packagesPath, projectRoot } from "@/lib/constants";
+import { PACKAGES_PATH, PROJECT_ROOT } from "@/lib/constants";
 import { midenPackageMetadata } from "@/lib/miden-package-metadata";
 
 export const cargoMidenVersion = async () => {
@@ -14,7 +14,7 @@ export const cargoMidenVersion = async () => {
 };
 
 export const packageExists = async (packageDir: string) =>
-  fileExists(`${packagesPath}/${packageDir}`);
+  fileExists(`${PACKAGES_PATH}/${packageDir}`);
 
 export const newPackage = async ({
   name,
@@ -31,7 +31,10 @@ export const newPackage = async ({
 }): Promise<{ id: string; rust: string; dependencies: Dependency[] }> => {
   const initialRust = rust
     ? rust
-    : await readFile(`${projectRoot}/templates/${example ?? type}.rs`, "utf-8");
+    : await readFile(
+        `${PROJECT_ROOT}/templates/${example ?? type}.rs`,
+        "utf-8",
+      );
   const id = await insertPackage({
     name,
     type,
@@ -52,8 +55,8 @@ export const newPackage = async ({
 };
 
 export const readRust = async (packageDir: string) => {
-  console.info(`cat ${packagesPath}/${packageDir}/src/lib.rs`);
-  return readFile(`${packagesPath}/${packageDir}/src/lib.rs`, "utf-8");
+  console.info(`cat ${PACKAGES_PATH}/${packageDir}/src/lib.rs`);
+  return readFile(`${PACKAGES_PATH}/${packageDir}/src/lib.rs`, "utf-8");
 };
 
 export const generatePackageDir = async ({
@@ -86,9 +89,9 @@ export const generatePackageDir = async ({
       });
     }),
   );
-  await mkdir(`${packagesPath}/${packageDir}`);
+  await mkdir(`${PACKAGES_PATH}/${packageDir}`);
   await Promise.all([
-    mkdir(`${packagesPath}/${packageDir}/src`),
+    mkdir(`${PACKAGES_PATH}/${packageDir}/src`),
     generateCargoToml({
       packageDir,
       name,
@@ -96,8 +99,8 @@ export const generatePackageDir = async ({
       dependencies: dependenciesPackages,
     }),
     cp(
-      `${projectRoot}/templates/rust-toolchain.toml`,
-      `${packagesPath}/${packageDir}/rust-toolchain.toml`,
+      `${PROJECT_ROOT}/templates/rust-toolchain.toml`,
+      `${PACKAGES_PATH}/${packageDir}/rust-toolchain.toml`,
     ),
   ]);
   await updateRust({ packageDir, rust });
@@ -133,13 +136,13 @@ export const generateCargoToml = ({
   cargoToml += "\n";
   if (dependencies.length > 0) {
     const midenDependencies = dependencies.map(
-      ({ id, name }) => `"miden:${name}" = { path = "${packagesPath}/${id}" }`,
+      ({ id, name }) => `"miden:${name}" = { path = "${PACKAGES_PATH}/${id}" }`,
     );
     cargoToml += `[package.metadata.miden.dependencies]\n`;
     cargoToml += `${midenDependencies.join("\n")}\n\n`;
     const targetDependencies = dependencies.map(
       ({ id, name }) =>
-        `"miden:${name}" = { path = "${packagesPath}/${id}/target/generated-wit" }`,
+        `"miden:${name}" = { path = "${PACKAGES_PATH}/${id}/target/generated-wit" }`,
     );
     cargoToml += `[package.metadata.component.target.dependencies]\n`;
     cargoToml += `${targetDependencies.join("\n")}\n\n`;
@@ -148,7 +151,7 @@ export const generateCargoToml = ({
   cargoToml += `trim-paths = ["diagnostics", "object"]\n\n`;
   cargoToml += `[profile.dev]\n`;
   cargoToml += `trim-paths = ["diagnostics", "object"]\n\n`;
-  return writeFile(`${packagesPath}/${packageDir}/Cargo.toml`, cargoToml);
+  return writeFile(`${PACKAGES_PATH}/${packageDir}/Cargo.toml`, cargoToml);
 };
 
 export const updateRust = ({
@@ -158,8 +161,8 @@ export const updateRust = ({
   packageDir: string;
   rust: string;
 }) => {
-  console.info(`cp rust ${packagesPath}/${packageDir}/src/lib.rs`);
-  writeFile(`${packagesPath}/${packageDir}/src/lib.rs`, rust);
+  console.info(`cp rust ${PACKAGES_PATH}/${packageDir}/src/lib.rs`);
+  writeFile(`${PACKAGES_PATH}/${packageDir}/src/lib.rs`, rust);
 };
 
 export const compilePackage = async (packageDir: string) => {
@@ -169,7 +172,7 @@ export const compilePackage = async (packageDir: string) => {
       "cargo",
       ["miden", "build", "--release"],
       {
-        cwd: `${packagesPath}/${packageDir}`,
+        cwd: `${PACKAGES_PATH}/${packageDir}`,
       },
     );
     return { stdout, stderr: "" };
@@ -208,7 +211,7 @@ export const readPackage = async ({
   name: string;
 }) => {
   const packageName = name.replaceAll("-", "_");
-  const maspPath = `${packagesPath}/${packageDir}/target/miden/release/${packageName}.masp`;
+  const maspPath = `${PACKAGES_PATH}/${packageDir}/target/miden/release/${packageName}.masp`;
   const maspBuffer = await readFile(maspPath);
   const { digest, exports, dependencies } = await readPackageMetadata(maspPath);
   return {
@@ -220,8 +223,8 @@ export const readPackage = async ({
 };
 
 export const deletePackageDir = (packageDir: string) => {
-  console.info(`rm -rf ${packagesPath}/${packageDir}`);
-  return rm(`${packagesPath}/${packageDir}`, { recursive: true, force: true });
+  console.info(`rm -rf ${PACKAGES_PATH}/${packageDir}`);
+  return rm(`${PACKAGES_PATH}/${packageDir}`, { recursive: true, force: true });
 };
 
 export const parseCargoToml = (cargoToml: string) =>

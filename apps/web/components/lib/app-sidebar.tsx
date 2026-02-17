@@ -176,7 +176,7 @@ const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
     const midenFaucet = faucets.find(
       ({ address }) => address === MIDEN_FAUCET_ADDRESS,
     );
-    if (client && networkId !== "mmck" && !midenFaucet) {
+    if (client && networkId === "mtst" && !midenFaucet) {
       importAccountByAddress({
         name: "Miden Faucet",
         address: MIDEN_FAUCET_ADDRESS,

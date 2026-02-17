@@ -6,6 +6,7 @@ import {
   type ScriptType,
 } from "@/lib/types/script";
 import { formatProcedureExportPath } from "@/lib/utils";
+import { API_URL } from "@/lib/constants";
 
 export const createScript = async ({
   name,
@@ -23,7 +24,7 @@ export const createScript = async ({
     "your-first-smart-contract-and-custom-note",
     "contract-verification",
   ].includes(tutorialId)
-    ? process.env.NEXT_PUBLIC_API_URL
+    ? API_URL
     : "/api";
   const response = await fetch(`${apiUrl}/scripts`, {
     method: "POST",
@@ -43,7 +44,7 @@ export const compileScript = async (script: Script) => {
   const isExample =
     script.id.startsWith("counter-contract") ||
     script.id.startsWith("p2id-note");
-  const apiUrl = isExample ? "/api" : process.env.NEXT_PUBLIC_API_URL;
+  const apiUrl = isExample ? "/api" : API_URL;
   const response = await fetch(`${apiUrl}/scripts/${script.id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
@@ -76,7 +77,7 @@ export const compileScript = async (script: Script) => {
 export const deleteScript = async (scriptId: string) => {
   const isExample =
     scriptId.startsWith("counter-contract") || scriptId.startsWith("p2id-note");
-  const apiUrl = isExample ? "/api" : process.env.NEXT_PUBLIC_API_URL;
+  const apiUrl = isExample ? "/api" : API_URL;
   const response = await fetch(`${apiUrl}/scripts/${scriptId}`, {
     method: "DELETE",
   });
@@ -98,8 +99,7 @@ export const verifyAccountComponentFromSource = async ({
   cargoToml: string;
   rust: string;
 }) => {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  const response = await fetch(`${apiUrl}/verified-account-components`, {
+  const response = await fetch(`${API_URL}/verified-account-components`, {
     method: "POST",
     body: JSON.stringify({
       accountId,
@@ -125,8 +125,7 @@ export const verifyAccountComponentsFromPackageIds = async ({
   account: string;
   packageIds: string[];
 }) => {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  const response = await fetch(`${apiUrl}/verified-account-components`, {
+  const response = await fetch(`${API_URL}/verified-account-components`, {
     method: "POST",
     body: JSON.stringify({ accountId, identifier, account, packageIds }),
   });
@@ -136,9 +135,8 @@ export const verifyAccountComponentsFromPackageIds = async ({
 };
 
 export const getVerifiedAccountComponents = async (identifier: string) => {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   const response = await fetch(
-    `${apiUrl}/verified-account-components/${identifier}`,
+    `${API_URL}/verified-account-components/${identifier}`,
     {
       method: "GET",
     },
@@ -181,8 +179,7 @@ export const verifyNoteFromSource = async ({
   cargoToml: string;
   rust: string;
 }) => {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  const response = await fetch(`${apiUrl}/verified-notes`, {
+  const response = await fetch(`${API_URL}/verified-notes`, {
     method: "POST",
     body: JSON.stringify({
       noteId,
@@ -205,8 +202,7 @@ export const verifyNoteFromPackageId = async ({
   note: string;
   packageId: string;
 }) => {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  const response = await fetch(`${apiUrl}/verified-notes`, {
+  const response = await fetch(`${API_URL}/verified-notes`, {
     method: "POST",
     body: JSON.stringify({ noteId, note, packageId }),
   });
@@ -216,8 +212,7 @@ export const verifyNoteFromPackageId = async ({
 };
 
 export const getVerifiedNote = async (noteId: string) => {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  const response = await fetch(`${apiUrl}/verified-notes/${noteId}`, {
+  const response = await fetch(`${API_URL}/verified-notes/${noteId}`, {
     method: "GET",
   });
   const result = await response.json();
@@ -240,8 +235,7 @@ export const getVerifiedNote = async (noteId: string) => {
 };
 
 export const getScript = async (id: string) => {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  const response = await fetch(`${apiUrl}/scripts/${id}`, {
+  const response = await fetch(`${API_URL}/scripts/${id}`, {
     method: "GET",
   });
   const result = await response.json();
@@ -260,7 +254,4 @@ export const getScript = async (id: string) => {
   return script;
 };
 
-export const exportScript = (id: string) => {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  return `${apiUrl}/scripts/${id}/export`;
-};
+export const exportScript = (id: string) => `${API_URL}/scripts/${id}/export`;

@@ -36,8 +36,17 @@ const NetworkBadge = () => {
       callPopState();
     }
   }, [syncingState, popState]);
+  const variants = {
+    mtst: "default",
+    mdev: "secondary",
+    mlcl: "destructive",
+    mmck: "default",
+  } as const;
   return (
-    <Badge className={cn({ "bg-[#f50] text-white": networkId === "mmck" })}>
+    <Badge
+      variant={variants[networkId]}
+      className={cn({ "bg-[#f50] text-white": networkId === "mmck" })}
+    >
       {networks[networkId]} | <pre>#{blockNum}</pre>
       {syncingState ? <Spinner /> : <CircleDot />}
     </Badge>

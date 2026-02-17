@@ -7,8 +7,9 @@ import useMidenSdk from "@/hooks/use-miden-sdk";
 import useGlobalContext from "@/components/global-context/hook";
 import {
   MIDEN_NOTE_TRANSPORT_URL,
-  MIDEN_DEVNET_RPC_URL,
   MIDEN_TESTNET_RPC_URL,
+  MIDEN_DEVNET_RPC_URL,
+  MIDEN_LOCAL_RPC_URL,
 } from "@/lib/constants";
 import useAppState from "@/hooks/use-app-state";
 import { storeName } from "@/lib/types/store";
@@ -25,11 +26,15 @@ const createWebClient = async ({
 }: {
   networkId: NetworkId;
   midenSdk: MidenSdk;
-}) =>
-  WebClient.createClient(
-    networkId === "mdev" ? MIDEN_DEVNET_RPC_URL : MIDEN_TESTNET_RPC_URL,
-    MIDEN_NOTE_TRANSPORT_URL,
-  );
+}) => {
+  const rpcUrls = {
+    mtst: MIDEN_TESTNET_RPC_URL,
+    mdev: MIDEN_DEVNET_RPC_URL,
+    mlcl: MIDEN_LOCAL_RPC_URL,
+    mmck: MIDEN_LOCAL_RPC_URL,
+  } as const;
+  return WebClient.createClient(rpcUrls[networkId], MIDEN_NOTE_TRANSPORT_URL);
+};
 
 let initializedClient = false;
 

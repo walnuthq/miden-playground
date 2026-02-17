@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { WEB_URL } from "@/lib/constants";
 
-const allowedOrigins = [process.env.WEB_URL, "https://testnet.midenscan.com"];
+const allowedOrigins = [WEB_URL, "https://testnet.midenscan.com"];
 
 const corsOptions = {
   "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",

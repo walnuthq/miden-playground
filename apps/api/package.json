@@ -5,17 +5,20 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack -p 3001",
-    "build": "cargo install --path miden-package-metadata --locked && cargo install --path miden-verifier --locked && next build",
+    "build": "pnpm build:rust && next build",
     "start": "PORT=3001 node .next/standalone/apps/api/server.js",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
-    "typecheck": "tsc --noEmit",
+    "check-types": "tsc --noEmit",
+    "build:miden-package-metadata": "cargo install --path miden-package-metadata --locked",
+    "build:miden-verifier": "cargo install --path miden-verifier --locked",
+    "build:rust": "pnpm build:miden-package-metadata && pnpm build:miden-verifier",
     "db:push": "pnpm drizzle-kit push"
   },
   "dependencies": {
     "archiver": "^7.0.1",
     "dotenv": "^17.3.1",
-    "drizzle-orm": "1.0.0-beta.12-a5629fb",
+    "drizzle-orm": "1.0.0-beta.15-859cf75",
     "next": "^16.1.6",
     "pg": "^8.18.0",
     "react": "^19.2.4",
@@ -29,7 +32,7 @@
     "@types/react": "^19.2.14",
     "@workspace/eslint-config": "workspace:^",
     "@workspace/typescript-config": "workspace:*",
-    "drizzle-kit": "1.0.0-beta.12-a5629fb",
+    "drizzle-kit": "1.0.0-beta.15-859cf75",
     "eslint": "^9.39.2",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
