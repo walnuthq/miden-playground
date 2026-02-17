@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import archiver from "archiver";
 import { getPackage } from "@/db/packages";
 import { packageExists, generatePackageDir } from "@/lib/miden-compiler";
-import { packagesPath } from "@/lib/constants";
+import { PACKAGES_PATH } from "@/lib/constants";
 
 export const GET = async (
   request: NextRequest,
@@ -48,9 +48,9 @@ export const GET = async (
           controller.close();
         });
         // Add folder contents (root level - no parent folder in zip)
-        // archive.directory(`${packagesPath}/${id}`, false);
+        // archive.directory(`${PACKAGES_PATH}/${id}`, false);
         archive.glob("**", {
-          cwd: `${packagesPath}/${id}`,
+          cwd: `${PACKAGES_PATH}/${id}`,
           ignore: "target/**",
         });
         // Finalize (start zipping)

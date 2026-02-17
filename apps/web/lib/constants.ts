@@ -1,3 +1,6 @@
+export const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+
 export const EMPTY_WORD =
   "0x0000000000000000000000000000000000000000000000000000000000000000";
 
@@ -17,12 +20,13 @@ export const P2IDE_NOTE_CODE =
 export const BASIC_WALLET_CODE =
   "0xb93e83e1a6f12d6a156b05d5bd010067ff65d5e7677d9a242d6eaeaabfc16918";
 
-export const MIDEN_DEVNET_RPC_URL = "https://rpc.devnet.miden.io";
 export const MIDEN_TESTNET_RPC_URL = "https://rpc.testnet.miden.io";
+export const MIDEN_DEVNET_RPC_URL = "https://rpc.devnet.miden.io";
+export const MIDEN_LOCAL_RPC_URL = "http://localhost:57291";
 export const MIDEN_RPC_URL = MIDEN_TESTNET_RPC_URL;
 export const MIDEN_NOTE_TRANSPORT_URL = "https://transport.miden.io";
-export const MIDEN_DEVNET_EXPLORER_URL = "https://devnet.midenscan.com";
 export const MIDEN_TESTNET_EXPLORER_URL = "https://testnet.midenscan.com";
+export const MIDEN_DEVNET_EXPLORER_URL = "https://devnet.midenscan.com";
 export const MIDEN_EXPLORER_URL = MIDEN_TESTNET_EXPLORER_URL;
 export const MIDEN_FAUCET_API_URL = "https://faucet-api.testnet.miden.io";
 export const MIDEN_FAUCET_ACCOUNT_ID = "0x37d5977a8e16d8205a360820f0230f";

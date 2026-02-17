@@ -89,6 +89,16 @@ const ProjectSwitcher = () => {
             >
               New MockChain sandbox
             </DropdownMenuItem>
+            {process.env.NODE_ENV === "development" && (
+              <DropdownMenuItem
+                onClick={() => {
+                  resetState("mlcl");
+                  router.push("/accounts");
+                }}
+              >
+                New Local sandbox
+              </DropdownMenuItem>
+            )}
             {/* <DropdownMenuItem
               onClick={() => loadTutorial("transfer-assets-between-wallets")}
             >
