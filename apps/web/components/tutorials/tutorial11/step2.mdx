@@ -1,10 +1,11 @@
 Try adding a new procedure to this **Counter Contract** that resets the counter value to zero.
-It must have the following signature:
+It must have the following body:
 
 ```rust
 /// Resets the counter value to zero
 pub fn reset_count(&mut self) {
-    // Your code goes here
+    let key = Word::from_u64_unchecked(0, 0, 0, 1);
+    self.count_map.set(key, felt!(0));
 }
 ```
 
