@@ -1,5 +1,4 @@
-import { fromHex } from "viem";
-import { fromBase64 } from "@/lib/utils";
+import { fromBase64, fromHex } from "@/lib/utils";
 
 // https://github.com/0xMiden/miden-faucet/blob/next/bin/faucet/frontend/app.js
 // Function to find a valid nonce for proof of work using the new challenge format
@@ -12,7 +11,7 @@ export const findValidNonce = async ({
 }) => {
   let nonce = 0;
   const targetNum = BigInt(target);
-  const challengeBytes = fromHex(`0x${challenge}`, "bytes");
+  const challengeBytes = fromHex(challenge);
 
   while (true) {
     // Generate a random nonce

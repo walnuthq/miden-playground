@@ -1,16 +1,23 @@
 import { execFile } from "@/lib/utils";
+import { PROJECT_ROOT } from "./constants";
 
 export const midenVerifier = async ({
-  type,
-  resource,
-  masp,
+  resourceType,
+  resourceId,
+  resourcePath = "/dev/null",
+  maspPath,
 }: {
-  type: "account-component" | "note" | "transaction";
-  resource: string;
-  masp: string;
+  resourceType: "account-component" | "note" | "transaction";
+  resourceId: string;
+  resourcePath?: string;
+  maspPath: string;
 }) => {
   try {
-    await execFile("miden-verifier", [type, resource, masp]);
+    await execFile(
+      "miden-verifier",
+      [resourceType, resourceId, resourcePath, maspPath],
+      { cwd: `${PROJECT_ROOT}/miden-verifier` },
+    );
     return true;
   } catch (error) {
     console.error(error);

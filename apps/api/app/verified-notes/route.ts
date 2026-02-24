@@ -1,3 +1,4 @@
+import { writeFile } from "node:fs/promises";
 import { type NextRequest, NextResponse } from "next/server";
 import { getVerifiedNote, insertVerifiedNote } from "@/db/verified-notes";
 import { midenVerifier } from "@/lib/miden-verifier";
@@ -7,6 +8,9 @@ import {
   deletePackageDir,
   readPackage,
   parseCargoToml,
+  packagePath,
+  packageExists,
+  generatePackageDir,
 } from "@/lib/miden-compiler";
 import {
   deletePackage,
@@ -15,10 +19,11 @@ import {
   insertPackage,
   getReadOnlyPackage,
 } from "@/db/packages";
+import { PACKAGES_PATH } from "@/lib/constants";
 
 type VerifyNoteRequestBody = {
   noteId: string;
-  note: string;
+  note?: string;
   //
   cargoToml?: string;
   rust?: string;
@@ -33,7 +38,7 @@ const verifyNoteFromSource = async ({
   rust,
 }: {
   noteId: string;
-  note: string;
+  note?: string;
   cargoToml: string;
   rust: string;
 }) => {
@@ -55,10 +60,15 @@ const verifyNoteFromSource = async ({
     packageDir: id,
     name,
   });
+  const resourcePath = `${PACKAGES_PATH}/${noteId}.txt`;
+  if (note) {
+    await writeFile(resourcePath, note);
+  }
   const verified = await midenVerifier({
-    type: "note",
-    resource: note,
-    masp,
+    resourceType: "note",
+    resourceId: noteId,
+    resourcePath: note ? resourcePath : undefined,
+    maspPath: packagePath({ packageDir: id, name }),
   });
   if (!verified) {
     await Promise.all([deletePackageDir(id), deletePackage(id)]);
@@ -92,15 +102,30 @@ const verifyNoteFromPackageId = async ({
   note: string;
   packageId: string;
 }) => {
-  const dbPackage = await getPackage(packageId);
+  const [exists, dbPackage] = await Promise.all([
+    packageExists(packageId),
+    getPackage(packageId),
+  ]);
   if (!dbPackage) {
     throw new Error(`Error: Package ${packageId} not found.`);
   }
-  const { masp, digest } = dbPackage;
+  const { name, type, rust, dependencies, digest } = dbPackage;
+  if (!exists) {
+    await generatePackageDir({
+      packageDir: packageId,
+      name,
+      type,
+      rust,
+      dependencies,
+    });
+  }
+  const resourcePath = `${PACKAGES_PATH}/${noteId}.txt`;
+  await writeFile(resourcePath, note);
   const verified = await midenVerifier({
-    type: "note",
-    resource: note,
-    masp,
+    resourceType: "note",
+    resourceId: noteId,
+    resourcePath,
+    maspPath: packagePath({ packageDir: packageId, name }),
   });
   if (!verified) {
     throw new Error("Error: Note Script verification failed.");
@@ -128,19 +153,19 @@ export const POST = async (request: NextRequest) => {
         cargoToml,
         rust,
       });
-      return NextResponse.json({ ok: verified });
-    } else if (packageId) {
+      return NextResponse.json({ ok: true, verified });
+    } else if (note && packageId) {
       const verified = await verifyNoteFromPackageId({
         noteId,
         note,
         packageId,
       });
-      return NextResponse.json({ ok: verified });
+      return NextResponse.json({ ok: true, verified });
     }
     throw new Error("Error: Invalid request body.");
   } catch (error) {
     console.error(error);
     const { message } = error as { message: string };
-    return NextResponse.json({ ok: false, error: message });
+    return NextResponse.json({ ok: false, error: message }, { status: 500 });
   }
 };
