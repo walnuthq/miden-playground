@@ -110,8 +110,22 @@ export const verifyAccountComponentFromSource = async ({
     }),
   });
   const result = await response.json();
-  const { ok, error } = result as { ok: boolean; error?: string };
-  return { verified: ok, error };
+  const { ok, verified, error } = result as
+    | {
+        ok: true;
+        verified: boolean;
+        error: undefined;
+      }
+    | {
+        ok: false;
+        verified: undefined;
+        error: string;
+      };
+  if (!ok) {
+    console.error(error);
+    return { verified: false, error };
+  }
+  return { verified };
 };
 
 export const verifyAccountComponentsFromPackageIds = async ({
@@ -130,8 +144,22 @@ export const verifyAccountComponentsFromPackageIds = async ({
     body: JSON.stringify({ accountId, identifier, account, packageIds }),
   });
   const result = await response.json();
-  const { ok, error } = result as { ok: boolean; error?: string };
-  return { verified: ok, error };
+  const { ok, verified, error } = result as
+    | {
+        ok: true;
+        verified: boolean;
+        error: undefined;
+      }
+    | {
+        ok: false;
+        verified: undefined;
+        error: string;
+      };
+  if (!ok) {
+    console.error(error);
+    return { verified: false, error };
+  }
+  return { verified };
 };
 
 export const getVerifiedAccountComponents = async (identifier: string) => {
@@ -189,8 +217,22 @@ export const verifyNoteFromSource = async ({
     }),
   });
   const result = await response.json();
-  const { ok, error } = result as { ok: boolean; error?: string };
-  return { verified: ok, error };
+  const { ok, verified, error } = result as
+    | {
+        ok: true;
+        verified: boolean;
+        error: undefined;
+      }
+    | {
+        ok: false;
+        verified: undefined;
+        error: string;
+      };
+  if (!ok) {
+    console.error(error);
+    return { verified: false, error };
+  }
+  return { verified };
 };
 
 export const verifyNoteFromPackageId = async ({
@@ -207,8 +249,22 @@ export const verifyNoteFromPackageId = async ({
     body: JSON.stringify({ noteId, note, packageId }),
   });
   const result = await response.json();
-  const { ok, error } = result as { ok: boolean; error?: string };
-  return { verified: ok, error };
+  const { ok, verified, error } = result as
+    | {
+        ok: true;
+        verified: boolean;
+        error: undefined;
+      }
+    | {
+        ok: false;
+        verified: undefined;
+        error: string;
+      };
+  if (!ok) {
+    console.error(error);
+    return { verified: false, error };
+  }
+  return { verified };
 };
 
 export const getVerifiedNote = async (noteId: string) => {

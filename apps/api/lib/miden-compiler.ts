@@ -8,9 +8,11 @@ import { PACKAGES_PATH, PROJECT_ROOT } from "@/lib/constants";
 import { midenPackageMetadata } from "@/lib/miden-package-metadata";
 
 export const cargoMidenVersion = async () => {
-  const { stdout } = await execFile("cargo", ["miden", "--version"]);
-  const [, semver] = stdout.split(" ");
-  return semver!.replaceAll("\n", "");
+  const { stdout } = await execFile("miden", ["cargo-miden", "--version"], {
+    cwd: `${PROJECT_ROOT}/templates`,
+  });
+  const [, semver = ""] = stdout.split(" ");
+  return semver.replaceAll("\n", "");
 };
 
 export const packageExists = async (packageDir: string) =>
@@ -99,6 +101,10 @@ export const generatePackageDir = async ({
       dependencies: dependenciesPackages,
     }),
     cp(
+      `${PROJECT_ROOT}/templates/miden-toolchain.toml`,
+      `${PACKAGES_PATH}/${packageDir}/miden-toolchain.toml`,
+    ),
+    cp(
       `${PROJECT_ROOT}/templates/rust-toolchain.toml`,
       `${PACKAGES_PATH}/${packageDir}/rust-toolchain.toml`,
     ),
@@ -162,19 +168,15 @@ export const updateRust = ({
   rust: string;
 }) => {
   console.info(`cp rust ${PACKAGES_PATH}/${packageDir}/src/lib.rs`);
-  writeFile(`${PACKAGES_PATH}/${packageDir}/src/lib.rs`, rust);
+  return writeFile(`${PACKAGES_PATH}/${packageDir}/src/lib.rs`, rust);
 };
 
 export const compilePackage = async (packageDir: string) => {
   try {
-    console.info("cargo miden build --release");
-    const { stdout } = await execFile(
-      "cargo",
-      ["miden", "build", "--release"],
-      {
-        cwd: `${PACKAGES_PATH}/${packageDir}`,
-      },
-    );
+    console.info("miden build --release");
+    const { stdout } = await execFile("miden", ["build", "--release"], {
+      cwd: `${PACKAGES_PATH}/${packageDir}`,
+    });
     return { stdout, stderr: "" };
   } catch (error) {
     const { stderr } = error as { stderr: string };
@@ -203,7 +205,7 @@ const readPackageMetadata = async (maspPath: string) => {
   };
 };
 
-export const readPackage = async ({
+export const packagePath = ({
   packageDir,
   name,
 }: {
@@ -211,7 +213,17 @@ export const readPackage = async ({
   name: string;
 }) => {
   const packageName = name.replaceAll("-", "_");
-  const maspPath = `${PACKAGES_PATH}/${packageDir}/target/miden/release/${packageName}.masp`;
+  return `${PACKAGES_PATH}/${packageDir}/target/miden/release/${packageName}.masp`;
+};
+
+export const readPackage = async ({
+  packageDir,
+  name,
+}: {
+  packageDir: string;
+  name: string;
+}) => {
+  const maspPath = packagePath({ packageDir, name });
   const maspBuffer = await readFile(maspPath);
   const { digest, exports, dependencies } = await readPackageMetadata(maspPath);
   return {

@@ -59,7 +59,7 @@ const VerifyNoteScriptDialog = () => {
             if (!record) {
               return;
             }
-            const verified = await verifyNoteFromSource({
+            const { verified, error } = await verifyNoteFromSource({
               noteId,
               note: toBase64(record.toInputNote().note().serialize()),
               cargoToml,
@@ -69,7 +69,9 @@ const VerifyNoteScriptDialog = () => {
             if (verified) {
               toast.success("Note script verified.");
             } else {
-              toast.error("Note script couldn't be verified.");
+              toast.error("Note script couldn't be verified.", {
+                description: error,
+              });
             }
             onClose();
           }}

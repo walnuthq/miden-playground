@@ -11,7 +11,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
-    "lucide-react": "^0.574.0",
+    "lucide-react": "^0.575.0",
     "next-themes": "^0.4.6",
     "radix-ui": "^1.4.3",
     "react": "^19.2.4",
@@ -23,15 +23,15 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.2.0",
+    "@tailwindcss/postcss": "^4.2.1",
     "@turbo/gen": "^2.8.10",
     "@types/node": "^25.3.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
-    "eslint": "^9.39.2",
-    "tailwindcss": "^4.2.0",
+    "eslint": "^9.39.3",
+    "tailwindcss": "^4.2.1",
     "typescript": "^5.9.3"
   },
   "exports": {

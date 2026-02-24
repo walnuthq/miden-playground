@@ -1,3 +1,4 @@
+import { writeFile } from "node:fs/promises";
 import { type NextRequest, NextResponse } from "next/server";
 import {
   getVerifiedAccountComponent,
@@ -10,6 +11,9 @@ import {
   deletePackageDir,
   readPackage,
   parseCargoToml,
+  packagePath,
+  packageExists,
+  generatePackageDir,
 } from "@/lib/miden-compiler";
 import {
   deletePackage,
@@ -18,11 +22,12 @@ import {
   insertPackage,
   getReadOnlyPackage,
 } from "@/db/packages";
+import { PACKAGES_PATH } from "@/lib/constants";
 
 type VerifyAccountComponentRequestBody = {
   accountId: string;
   identifier: string;
-  account: string;
+  account?: string;
   //
   cargoToml?: string;
   rust?: string;
@@ -39,7 +44,7 @@ const verifyAccountComponentFromSource = async ({
 }: {
   accountId: string;
   identifier: string;
-  account: string;
+  account?: string;
   cargoToml: string;
   rust: string;
 }) => {
@@ -56,10 +61,15 @@ const verifyAccountComponentFromSource = async ({
     packageDir: id,
     name,
   });
+  const resourcePath = `${PACKAGES_PATH}/${accountId}.txt`;
+  if (account) {
+    await writeFile(resourcePath, account);
+  }
   const verified = await midenVerifier({
-    type: "account-component",
-    resource: account,
-    masp,
+    resourceType: "account-component",
+    resourceId: accountId,
+    resourcePath: account ? resourcePath : undefined,
+    maspPath: packagePath({ packageDir: id, name }),
   });
   if (!verified) {
     await Promise.all([deletePackageDir(id), deletePackage(id)]);
@@ -100,15 +110,30 @@ const verifyAccountComponentsFromPackageIds = async ({
 }) => {
   const result = await Promise.all(
     packageIds.map(async (packageId) => {
-      const dbPackage = await getPackage(packageId);
+      const [exists, dbPackage] = await Promise.all([
+        packageExists(packageId),
+        getPackage(packageId),
+      ]);
       if (!dbPackage) {
         throw new Error(`Error: Package ${packageId} not found.`);
       }
-      const { masp, digest } = dbPackage;
+      const { name, type, rust, dependencies, digest } = dbPackage;
+      if (!exists) {
+        await generatePackageDir({
+          packageDir: packageId,
+          name,
+          type,
+          rust,
+          dependencies,
+        });
+      }
+      const resourcePath = `${PACKAGES_PATH}/${accountId}.txt`;
+      await writeFile(resourcePath, account);
       const verified = await midenVerifier({
-        type: "account-component",
-        resource: account,
-        masp,
+        resourceType: "account-component",
+        resourceId: accountId,
+        resourcePath,
+        maspPath: packagePath({ packageDir: packageId, name }),
       });
       if (!verified) {
         throw new Error("Error: Account Component verification failed.");
@@ -141,20 +166,20 @@ export const POST = async (request: NextRequest) => {
         cargoToml,
         rust,
       });
-      return NextResponse.json({ ok: verified });
-    } else if (packageIds) {
+      return NextResponse.json({ ok: true, verified });
+    } else if (account && packageIds) {
       const verified = await verifyAccountComponentsFromPackageIds({
         accountId,
         identifier,
         account,
         packageIds,
       });
-      return NextResponse.json({ ok: verified });
+      return NextResponse.json({ ok: true, verified });
     }
     throw new Error("Error: Invalid request body.");
   } catch (error) {
     console.error(error);
     const { message } = error as { message: string };
-    return NextResponse.json({ ok: false, error: message });
+    return NextResponse.json({ ok: false, error: message }, { status: 500 });
   }
 };

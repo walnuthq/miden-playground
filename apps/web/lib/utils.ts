@@ -70,11 +70,21 @@ export const readFileAsArrayBuffer = (file: File): Promise<ArrayBuffer> =>
     fileReader.readAsArrayBuffer(file);
   });
 
+export const fromHex = (hex: string) =>
+  Uint8Array.from(hex.match(/.{1,2}/g) ?? [], (byte) =>
+    Number.parseInt(byte, 16),
+  );
+
 export const fromBase64 = (base64: string) =>
   Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
 
-export const toBase64 = (bytes: Uint8Array) =>
-  btoa(String.fromCharCode(...bytes));
+export const toBase64 = (bytes: Uint8Array) => {
+  const output = [];
+  for (let i = 0; i < bytes.length; i++) {
+    output.push(String.fromCharCode(bytes[i]!));
+  }
+  return btoa(output.join(""));
+};
 
 export const isValidUuidv4 = (uuid: string) =>
   validate(uuid) && version(uuid) === 4;

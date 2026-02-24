@@ -208,7 +208,7 @@ const DeployAccountDialog = () => {
                   id={`slot-${index}`}
                   name={`slot-${index}`}
                   defaultValue={storageSlot.value}
-                  required
+                  required={storageSlot.type === "value"}
                 />
               </div>
             ))}
