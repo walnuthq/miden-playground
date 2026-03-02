@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getVerifiedNote } from "@/db/verified-notes";
+import { getVerifiedNotes } from "@/db/verified-notes";
 
 export const GET = async (
   request: NextRequest,
@@ -7,9 +7,10 @@ export const GET = async (
 ) => {
   try {
     const { id } = await params;
-    const verifiedNote = await getVerifiedNote(id);
+    const verifiedNotes = await getVerifiedNotes(id);
+    const [verifiedNote = null] = verifiedNotes;
     if (!verifiedNote) {
-      return NextResponse.json({ ok: true, note: null });
+      return NextResponse.json({ ok: true, noteScript: null });
     }
     const { package: dbPackage } = verifiedNote;
     return NextResponse.json({

@@ -1,6 +1,6 @@
-import { cp, writeFile, readFile, rm, mkdir } from "node:fs/promises";
-import { execFile, fileExists } from "@/lib/utils";
+import { cp, writeFile, readFile, mkdir } from "node:fs/promises";
 import { parse } from "smol-toml";
+import { execFile, fileExists, safeRm } from "@/lib/utils";
 import { type Export, type Dependency, type CargoToml } from "@/lib/types";
 import { insertPackage, getDependencies } from "@/db/packages";
 import { type PackageType } from "@/lib/types";
@@ -40,7 +40,6 @@ export const newPackage = async ({
   const id = await insertPackage({
     name,
     type,
-    status: rust ? "compiled" : "draft",
     readOnly: !!rust,
     rust: initialRust,
     dependencies: dependencies.map(({ id }) => id),
@@ -234,9 +233,12 @@ export const readPackage = async ({
   };
 };
 
-export const deletePackageDir = (packageDir: string) => {
+export const deletePackageDir = async (packageDir: string) => {
   console.info(`rm -rf ${PACKAGES_PATH}/${packageDir}`);
-  return rm(`${PACKAGES_PATH}/${packageDir}`, { recursive: true, force: true });
+  return safeRm(`${PACKAGES_PATH}/${packageDir}`, {
+    recursive: true,
+    force: true,
+  });
 };
 
 export const parseCargoToml = (cargoToml: string) =>

@@ -23,6 +23,7 @@ import {
   getReadOnlyPackage,
 } from "@/db/packages";
 import { PACKAGES_PATH } from "@/lib/constants";
+import { safeRm } from "@/lib/utils";
 
 type VerifyAccountComponentRequestBody = {
   accountId: string;
@@ -61,6 +62,14 @@ const verifyAccountComponentFromSource = async ({
     packageDir: id,
     name,
   });
+  await updatePackage({
+    id,
+    status: "compiled",
+    digest,
+    masp,
+    exports,
+    dependencies: dependencies.map(({ id }) => id),
+  });
   const resourcePath = `${PACKAGES_PATH}/${accountId}.txt`;
   if (account) {
     await writeFile(resourcePath, account);
@@ -71,29 +80,30 @@ const verifyAccountComponentFromSource = async ({
     resourcePath: account ? resourcePath : undefined,
     maspPath: packagePath({ packageDir: id, name }),
   });
+  if (account) {
+    await safeRm(resourcePath);
+  }
   if (!verified) {
     await Promise.all([deletePackageDir(id), deletePackage(id)]);
-    throw new Error("Error: Account Component verification failed.");
+    return false;
   }
+  const readOnlyPackage = await getReadOnlyPackage({ id, digest });
+  if (readOnlyPackage) {
+    await Promise.all([deletePackageDir(id), deletePackage(id)]);
+  }
+  const readOnlyPackageId = readOnlyPackage?.id ?? id;
   const verifiedAccountComponent = await getVerifiedAccountComponent({
     accountId,
-    packageId: id,
+    packageId: readOnlyPackageId,
   });
   if (verifiedAccountComponent) {
-    await Promise.all([deletePackageDir(id), deletePackage(id)]);
     throw new Error("Error: Account Component already verified.");
   }
-  await Promise.all([
-    updatePackage({
-      id,
-      status: "compiled",
-      digest,
-      masp,
-      exports,
-      dependencies: dependencies.map(({ id }) => id),
-    }),
-    insertVerifiedAccountComponent({ accountId, packageId: id, identifier }),
-  ]);
+  await insertVerifiedAccountComponent({
+    accountId,
+    packageId: readOnlyPackageId,
+    identifier,
+  });
   return true;
 };
 
@@ -135,16 +145,17 @@ const verifyAccountComponentsFromPackageIds = async ({
         resourcePath,
         maspPath: packagePath({ packageDir: packageId, name }),
       });
+      await safeRm(resourcePath);
       if (!verified) {
-        throw new Error("Error: Account Component verification failed.");
+        return false;
       }
-      const readOnlyPackage = await getReadOnlyPackage(digest);
-      const id = readOnlyPackage
+      const readOnlyPackage = await getReadOnlyPackage({ digest });
+      const readOnlyPackageId = readOnlyPackage
         ? readOnlyPackage.id
         : await insertPackage({ ...dbPackage, id: undefined, readOnly: true });
       await insertVerifiedAccountComponent({
         accountId,
-        packageId: id,
+        packageId: readOnlyPackageId,
         identifier,
       });
       return true;
