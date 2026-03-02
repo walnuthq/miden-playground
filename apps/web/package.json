@@ -19,9 +19,9 @@
   "dependencies": {
     "@mdx-js/loader": "^3.1.1",
     "@mdx-js/react": "^3.1.1",
-    "@miden-sdk/miden-sdk": "^0.13.1",
-    "@miden-sdk/miden-wallet-adapter": "^0.13.2",
-    "@miden-sdk/react": "^0.13.2",
+    "@miden-sdk/miden-sdk": "0.13.1",
+    "@miden-sdk/miden-wallet-adapter": "0.13.2",
+    "@miden-sdk/react": "0.13.2",
     "@monaco-editor/react": "^4.7.0",
     "@next/mdx": "^16.1.6",
     "@opennextjs/cloudflare": "^1.17.0",
@@ -29,7 +29,7 @@
     "@tanstack/react-table": "^8.21.3",
     "@workspace/ui": "workspace:*",
     "lodash": "^4.17.23",
-    "lucide-react": "^0.575.0",
+    "lucide-react": "^0.576.0",
     "new-github-issue-url": "^1.1.0",
     "next": "^16.1.6",
     "next-themes": "^0.4.6",
@@ -40,6 +40,11 @@
     "usehooks-ts": "^3.1.1",
     "uuid": "^13.0.0",
     "viem": "^2.46.3"
+  },
+  "peerDependencies": {
+    "@miden-sdk/miden-wallet-adapter-miden": "0.13.2",
+    "@miden-sdk/miden-wallet-adapter-react": "0.13.2",
+    "@miden-sdk/miden-wallet-adapter-reactui": "0.13.2"
   },
   "devDependencies": {
     "@types/lodash": "^4.17.24",

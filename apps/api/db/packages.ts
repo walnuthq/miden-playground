@@ -5,8 +5,20 @@ import type { NewPackage, PackageStatus, Export } from "@/lib/types";
 import { isValidUuidv4 } from "@/lib/utils";
 import { defaultDependenciesRecords } from "@/lib/default-dependencies";
 
-export const getReadOnlyPackage = (digest: string) =>
-  db.query.packagesTable.findFirst({ where: { digest, readOnly: true } });
+export const getReadOnlyPackage = ({
+  id,
+  digest,
+}: {
+  id?: string;
+  digest: string;
+}) =>
+  db.query.packagesTable.findFirst({
+    where: {
+      NOT: id ? { id } : undefined,
+      digest,
+      readOnly: true,
+    },
+  });
 
 export const getPackage = (id: string) =>
   db.query.packagesTable.findFirst({ where: { id } });

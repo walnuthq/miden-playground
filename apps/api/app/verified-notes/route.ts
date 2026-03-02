@@ -20,6 +20,7 @@ import {
   getReadOnlyPackage,
 } from "@/db/packages";
 import { PACKAGES_PATH } from "@/lib/constants";
+import { safeRm } from "@/lib/utils";
 
 type VerifyNoteRequestBody = {
   noteId: string;
@@ -60,6 +61,14 @@ const verifyNoteFromSource = async ({
     packageDir: id,
     name,
   });
+  await updatePackage({
+    id,
+    status: "compiled",
+    digest,
+    masp,
+    exports,
+    dependencies: dependencies.map(({ id }) => id),
+  });
   const resourcePath = `${PACKAGES_PATH}/${noteId}.txt`;
   if (note) {
     await writeFile(resourcePath, note);
@@ -70,26 +79,26 @@ const verifyNoteFromSource = async ({
     resourcePath: note ? resourcePath : undefined,
     maspPath: packagePath({ packageDir: id, name }),
   });
+  if (note) {
+    await safeRm(resourcePath);
+  }
   if (!verified) {
     await Promise.all([deletePackageDir(id), deletePackage(id)]);
-    throw new Error("Error: Note Script verification failed.");
+    return false;
   }
-  const verifiedNote = await getVerifiedNote(noteId);
-  if (verifiedNote) {
+  const readOnlyPackage = await getReadOnlyPackage({ id, digest });
+  if (readOnlyPackage) {
     await Promise.all([deletePackageDir(id), deletePackage(id)]);
+  }
+  const readOnlyPackageId = readOnlyPackage?.id ?? id;
+  const verifiedNote = await getVerifiedNote({
+    noteId,
+    packageId: readOnlyPackageId,
+  });
+  if (verifiedNote) {
     throw new Error("Error: Note Script already verified.");
   }
-  await Promise.all([
-    updatePackage({
-      id,
-      status: "compiled",
-      digest,
-      masp,
-      exports,
-      dependencies: dependencies.map(({ id }) => id),
-    }),
-    insertVerifiedNote({ noteId, packageId: id }),
-  ]);
+  await insertVerifiedNote({ noteId, packageId: readOnlyPackageId });
   return true;
 };
 
@@ -127,16 +136,17 @@ const verifyNoteFromPackageId = async ({
     resourcePath,
     maspPath: packagePath({ packageDir: packageId, name }),
   });
+  await safeRm(resourcePath);
   if (!verified) {
-    throw new Error("Error: Note Script verification failed.");
+    return false;
   }
-  const readOnlyPackage = await getReadOnlyPackage(digest);
-  const id = readOnlyPackage
+  const readOnlyPackage = await getReadOnlyPackage({ digest });
+  const readOnlyPackageId = readOnlyPackage
     ? readOnlyPackage.id
     : await insertPackage({ ...dbPackage, id: undefined, readOnly: true });
   await insertVerifiedNote({
     noteId,
-    packageId: id,
+    packageId: readOnlyPackageId,
   });
   return true;
 };

@@ -1,8 +1,19 @@
 import db from "@/db";
 import { verifiedNoteTable } from "@/db/schema";
 
-export const getVerifiedNote = (noteId: string) =>
+export const getVerifiedNote = ({
+  noteId,
+  packageId,
+}: {
+  noteId: string;
+  packageId: string;
+}) =>
   db.query.verifiedNoteTable.findFirst({
+    where: { noteId, packageId },
+  });
+
+export const getVerifiedNotes = (noteId: string) =>
+  db.query.verifiedNoteTable.findMany({
     where: { noteId },
     with: { package: true },
   });
