@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 import { Spinner } from "@workspace/ui/components/spinner";
 import { Button } from "@workspace/ui/components/button";
 import {
@@ -19,9 +20,12 @@ import { verifyNoteFromSource } from "@/lib/api";
 import { clientGetInputNote } from "@/lib/web-client";
 import useWebClient from "@/hooks/use-web-client";
 import { toBase64, readFileAsText } from "@/lib/utils";
+import useGlobalContext from "@/components/global-context/hook";
 
 const VerifyNoteScriptDialog = () => {
+  const queryClient = useQueryClient();
   const { client } = useWebClient();
+  const { networkId } = useGlobalContext();
   const {
     verifyNoteScriptDialogOpen,
     verifyNoteScriptDialogNoteId: noteId,
@@ -60,6 +64,7 @@ const VerifyNoteScriptDialog = () => {
               return;
             }
             const { verified, error } = await verifyNoteFromSource({
+              networkId,
               noteId,
               note: toBase64(record.toInputNote().note().serialize()),
               cargoToml,
@@ -68,6 +73,9 @@ const VerifyNoteScriptDialog = () => {
             setLoading(false);
             if (verified) {
               toast.success("Note script verified.");
+              queryClient.invalidateQueries({
+                queryKey: ["verifiedNote", networkId, noteId],
+              });
             } else {
               toast.error("Note script couldn't be verified.", {
                 description: error,

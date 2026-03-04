@@ -6,17 +6,20 @@ import TutorialAlert from "@/components/tutorials/tutorial-alert";
 import Step6Content from "@/components/tutorials/tutorial11/step6.mdx";
 import useAccounts from "@/hooks/use-accounts";
 import { getVerifiedAccountComponents } from "@/lib/api";
+import useGlobalContext from "@/components/global-context/hook";
 
 const useCompleted = () => {
   const [completed, setCompleted] = useState(false);
+  const { networkId } = useGlobalContext();
   const { accounts } = useAccounts();
   const counter = accounts.find(({ name }) => name === "Unverified Contract");
   useInterval(
     () => {
       const checkVerifiedAccountComponents = async () => {
-        const verifiedAccountComponents = await getVerifiedAccountComponents(
-          counter?.identifier ?? "",
-        );
+        const verifiedAccountComponents = await getVerifiedAccountComponents({
+          networkId,
+          identifier: counter?.identifier ?? "",
+        });
         setCompleted(verifiedAccountComponents.length > 0);
       };
       checkVerifiedAccountComponents();

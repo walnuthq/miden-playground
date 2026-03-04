@@ -87,28 +87,33 @@ export const deleteScript = async (scriptId: string) => {
 };
 
 export const verifyAccountComponentFromSource = async ({
+  networkId,
   accountId,
   identifier,
   account,
   cargoToml,
   rust,
 }: {
+  networkId: string;
   accountId: string;
   identifier: string;
   account: string;
   cargoToml: string;
   rust: string;
 }) => {
-  const response = await fetch(`${API_URL}/verified-account-components`, {
-    method: "POST",
-    body: JSON.stringify({
-      accountId,
-      identifier,
-      account,
-      cargoToml,
-      rust,
-    }),
-  });
+  const response = await fetch(
+    `${API_URL}/verified-account-components/${networkId}`,
+    {
+      method: "POST",
+      body: JSON.stringify({
+        accountId,
+        identifier,
+        account,
+        cargoToml,
+        rust,
+      }),
+    },
+  );
   const result = await response.json();
   const { ok, verified, error } = result as
     | {
@@ -129,20 +134,25 @@ export const verifyAccountComponentFromSource = async ({
 };
 
 export const verifyAccountComponentsFromPackageIds = async ({
+  networkId,
   accountId,
   identifier,
   account,
   packageIds,
 }: {
+  networkId: string;
   accountId: string;
   identifier: string;
   account: string;
   packageIds: string[];
 }) => {
-  const response = await fetch(`${API_URL}/verified-account-components`, {
-    method: "POST",
-    body: JSON.stringify({ accountId, identifier, account, packageIds }),
-  });
+  const response = await fetch(
+    `${API_URL}/verified-account-components/${networkId}`,
+    {
+      method: "POST",
+      body: JSON.stringify({ accountId, identifier, account, packageIds }),
+    },
+  );
   const result = await response.json();
   const { ok, verified, error } = result as
     | {
@@ -162,9 +172,15 @@ export const verifyAccountComponentsFromPackageIds = async ({
   return { verified };
 };
 
-export const getVerifiedAccountComponents = async (identifier: string) => {
+export const getVerifiedAccountComponents = async ({
+  networkId,
+  identifier,
+}: {
+  networkId: string;
+  identifier: string;
+}) => {
   const response = await fetch(
-    `${API_URL}/verified-account-components/${identifier}`,
+    `${API_URL}/verified-account-components/${networkId}/${identifier}`,
     {
       method: "GET",
     },
@@ -197,17 +213,19 @@ export const getVerifiedAccountComponents = async (identifier: string) => {
 };
 
 export const verifyNoteFromSource = async ({
+  networkId,
   noteId,
   note,
   cargoToml,
   rust,
 }: {
+  networkId: string;
   noteId: string;
   note: string;
   cargoToml: string;
   rust: string;
 }) => {
-  const response = await fetch(`${API_URL}/verified-notes`, {
+  const response = await fetch(`${API_URL}/verified-notes/${networkId}`, {
     method: "POST",
     body: JSON.stringify({
       noteId,
@@ -236,15 +254,17 @@ export const verifyNoteFromSource = async ({
 };
 
 export const verifyNoteFromPackageId = async ({
+  networkId,
   noteId,
   note,
   packageId,
 }: {
+  networkId: string;
   noteId: string;
   note: string;
   packageId: string;
 }) => {
-  const response = await fetch(`${API_URL}/verified-notes`, {
+  const response = await fetch(`${API_URL}/verified-notes/${networkId}`, {
     method: "POST",
     body: JSON.stringify({ noteId, note, packageId }),
   });
@@ -267,10 +287,19 @@ export const verifyNoteFromPackageId = async ({
   return { verified };
 };
 
-export const getVerifiedNote = async (noteId: string) => {
-  const response = await fetch(`${API_URL}/verified-notes/${noteId}`, {
-    method: "GET",
-  });
+export const getVerifiedNote = async ({
+  networkId,
+  noteId,
+}: {
+  networkId: string;
+  noteId: string;
+}) => {
+  const response = await fetch(
+    `${API_URL}/verified-notes/${networkId}/${noteId}`,
+    {
+      method: "GET",
+    },
+  );
   const result = await response.json();
   const { ok, noteScript, error } = result as
     | {

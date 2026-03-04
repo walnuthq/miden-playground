@@ -33,11 +33,13 @@ type VerifyNoteRequestBody = {
 };
 
 const verifyNoteFromSource = async ({
+  networkId,
   noteId,
   note,
   cargoToml,
   rust,
 }: {
+  networkId: string;
   noteId: string;
   note?: string;
   cargoToml: string;
@@ -74,6 +76,7 @@ const verifyNoteFromSource = async ({
     await writeFile(resourcePath, note);
   }
   const verified = await midenVerifier({
+    networkId,
     resourceType: "note",
     resourceId: noteId,
     resourcePath: note ? resourcePath : undefined,
@@ -98,15 +101,17 @@ const verifyNoteFromSource = async ({
   if (verifiedNote) {
     throw new Error("Error: Note Script already verified.");
   }
-  await insertVerifiedNote({ noteId, packageId: readOnlyPackageId });
+  await insertVerifiedNote({ networkId, noteId, packageId: readOnlyPackageId });
   return true;
 };
 
 const verifyNoteFromPackageId = async ({
+  networkId,
   noteId,
   note,
   packageId,
 }: {
+  networkId: string;
   noteId: string;
   note: string;
   packageId: string;
@@ -131,6 +136,7 @@ const verifyNoteFromPackageId = async ({
   const resourcePath = `${PACKAGES_PATH}/${noteId}.txt`;
   await writeFile(resourcePath, note);
   const verified = await midenVerifier({
+    networkId,
     resourceType: "note",
     resourceId: noteId,
     resourcePath,
@@ -144,20 +150,22 @@ const verifyNoteFromPackageId = async ({
   const readOnlyPackageId = readOnlyPackage
     ? readOnlyPackage.id
     : await insertPackage({ ...dbPackage, id: undefined, readOnly: true });
-  await insertVerifiedNote({
-    noteId,
-    packageId: readOnlyPackageId,
-  });
+  await insertVerifiedNote({ networkId, noteId, packageId: readOnlyPackageId });
   return true;
 };
 
-export const POST = async (request: NextRequest) => {
+export const POST = async (
+  request: NextRequest,
+  { params }: { params: Promise<{ network: string }> },
+) => {
   try {
+    const { network } = await params;
     const body = await request.json();
     const { noteId, note, cargoToml, rust, packageId } =
       body as VerifyNoteRequestBody;
     if (cargoToml && rust) {
       const verified = await verifyNoteFromSource({
+        networkId: network,
         noteId,
         note,
         cargoToml,
@@ -166,6 +174,7 @@ export const POST = async (request: NextRequest) => {
       return NextResponse.json({ ok: true, verified });
     } else if (note && packageId) {
       const verified = await verifyNoteFromPackageId({
+        networkId: network,
         noteId,
         note,
         packageId,

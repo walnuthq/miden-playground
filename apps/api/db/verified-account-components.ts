@@ -12,27 +12,36 @@ export const getVerifiedAccountComponent = ({
     where: { accountId, packageId },
   });
 
-export const getVerifiedAccountComponents = (identifier: string) =>
+export const getVerifiedAccountComponents = ({
+  networkId,
+  identifier,
+}: {
+  networkId: string;
+  identifier: string;
+}) =>
   db.query.verifiedAccountComponentTable.findMany({
-    where: { identifier },
+    where: { networkId, identifier },
     with: { package: true },
   });
 
 export const insertVerifiedAccountComponent = async ({
+  networkId,
+  identifier,
   accountId,
   packageId,
-  identifier,
 }: {
+  networkId: string;
+  identifier: string;
   accountId: string;
   packageId: string;
-  identifier: string;
 }) => {
   const [insertedVerifiedAccountComponent] = await db
     .insert(verifiedAccountComponentTable)
     .values({
+      networkId,
+      identifier,
       accountId,
       packageId,
-      identifier,
     })
     .returning({ id: verifiedAccountComponentTable.id });
   if (!insertedVerifiedAccountComponent) {

@@ -19,6 +19,7 @@ import { verifyNoteFromPackageId } from "@/lib/api";
 const useNotes = () => {
   const { midenSdk } = useMidenSdk();
   const {
+    networkId,
     tutorialId, // TODO
     inputNotes,
     exportNoteDialogOpen,
@@ -119,6 +120,7 @@ const useNotes = () => {
           });
     if (!tutorialId) {
       verifyNoteFromPackageId({
+        networkId,
         noteId: note.id().toString(),
         note: toBase64(note.serialize()),
         packageId: script.id,

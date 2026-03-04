@@ -37,14 +37,16 @@ type VerifyAccountComponentRequestBody = {
 };
 
 const verifyAccountComponentFromSource = async ({
-  accountId,
+  networkId,
   identifier,
+  accountId,
   account,
   cargoToml,
   rust,
 }: {
-  accountId: string;
+  networkId: string;
   identifier: string;
+  accountId: string;
   account?: string;
   cargoToml: string;
   rust: string;
@@ -75,6 +77,7 @@ const verifyAccountComponentFromSource = async ({
     await writeFile(resourcePath, account);
   }
   const verified = await midenVerifier({
+    networkId,
     resourceType: "account-component",
     resourceId: accountId,
     resourcePath: account ? resourcePath : undefined,
@@ -100,21 +103,24 @@ const verifyAccountComponentFromSource = async ({
     throw new Error("Error: Account Component already verified.");
   }
   await insertVerifiedAccountComponent({
+    networkId,
+    identifier,
     accountId,
     packageId: readOnlyPackageId,
-    identifier,
   });
   return true;
 };
 
 const verifyAccountComponentsFromPackageIds = async ({
-  accountId,
+  networkId,
   identifier,
+  accountId,
   account,
   packageIds,
 }: {
-  accountId: string;
+  networkId: string;
   identifier: string;
+  accountId: string;
   account: string;
   packageIds: string[];
 }) => {
@@ -140,6 +146,7 @@ const verifyAccountComponentsFromPackageIds = async ({
       const resourcePath = `${PACKAGES_PATH}/${accountId}.txt`;
       await writeFile(resourcePath, account);
       const verified = await midenVerifier({
+        networkId,
         resourceType: "account-component",
         resourceId: accountId,
         resourcePath,
@@ -154,9 +161,10 @@ const verifyAccountComponentsFromPackageIds = async ({
         ? readOnlyPackage.id
         : await insertPackage({ ...dbPackage, id: undefined, readOnly: true });
       await insertVerifiedAccountComponent({
+        networkId,
+        identifier,
         accountId,
         packageId: readOnlyPackageId,
-        identifier,
       });
       return true;
     }),
@@ -164,15 +172,20 @@ const verifyAccountComponentsFromPackageIds = async ({
   return result.every((verified) => verified);
 };
 
-export const POST = async (request: NextRequest) => {
+export const POST = async (
+  request: NextRequest,
+  { params }: { params: Promise<{ network: string }> },
+) => {
   try {
+    const { network } = await params;
     const body = await request.json();
     const { accountId, identifier, account, cargoToml, rust, packageIds } =
       body as VerifyAccountComponentRequestBody;
     if (cargoToml && rust) {
       const verified = await verifyAccountComponentFromSource({
-        accountId,
+        networkId: network,
         identifier,
+        accountId,
         account,
         cargoToml,
         rust,
@@ -180,8 +193,9 @@ export const POST = async (request: NextRequest) => {
       return NextResponse.json({ ok: true, verified });
     } else if (account && packageIds) {
       const verified = await verifyAccountComponentsFromPackageIds({
-        accountId,
+        networkId: network,
         identifier,
+        accountId,
         account,
         packageIds,
       });
