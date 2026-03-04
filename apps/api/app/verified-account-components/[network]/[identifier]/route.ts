@@ -4,12 +4,14 @@ import { type Export } from "@/lib/types";
 
 export const GET = async (
   request: NextRequest,
-  { params }: { params: Promise<{ identifier: string }> },
+  { params }: { params: Promise<{ network: string; identifier: string }> },
 ) => {
   try {
-    const { identifier } = await params;
-    const verifiedAccountComponents =
-      await getVerifiedAccountComponents(identifier);
+    const { network, identifier } = await params;
+    const verifiedAccountComponents = await getVerifiedAccountComponents({
+      networkId: network,
+      identifier,
+    });
     return NextResponse.json({
       ok: true,
       components: verifiedAccountComponents.map(({ package: dbPackage }) => {

@@ -18,15 +18,24 @@ use std::sync::Arc;
 #[tokio::main]
 async fn main() -> Result<()> {
     let args: Vec<String> = std::env::args().collect();
-    if args.len() != 5 {
+    if args.len() != 6 {
         eprintln!(
-            "Usage: {} <account-component|note|transaction> <resource-id> <resource-path> <masp-path>",
+            "Usage: {} <network-id> <account-component|note|transaction> <resource-id> <resource-path> <masp-path>",
             args[0]
         );
         return Err(anyhow!("Wrong number of arguments"));
     }
+    let network_id = &args[1];
+    let resource_type = &args[2];
+    let resource_id = &args[3];
+    let resource_path = &args[4];
+    let masp_path = &args[5];
     // Initialize client
-    let endpoint = Endpoint::testnet();
+    let endpoint = if network_id == "mdev" {
+        Endpoint::devnet()
+    } else {
+        Endpoint::testnet()
+    };
     let timeout_ms = 10_000;
     let rpc_client = Arc::new(GrpcClient::new(&endpoint, timeout_ms));
 
@@ -43,11 +52,6 @@ async fn main() -> Result<()> {
         .in_debug_mode(true.into())
         .build()
         .await?;
-
-    let resource_type = &args[1];
-    let resource_id = &args[2];
-    let resource_path = &args[3];
-    let masp_path = &args[4];
 
     let package_bytes = fs::read(masp_path)?;
     let package = Package::read_from_bytes(&package_bytes)?;

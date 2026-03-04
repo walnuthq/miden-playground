@@ -3,11 +3,14 @@ import { getVerifiedNotes } from "@/db/verified-notes";
 
 export const GET = async (
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: Promise<{ network: string; id: string }> },
 ) => {
   try {
-    const { id } = await params;
-    const verifiedNotes = await getVerifiedNotes(id);
+    const { network, id } = await params;
+    const verifiedNotes = await getVerifiedNotes({
+      networkId: network,
+      noteId: id,
+    });
     const [verifiedNote = null] = verifiedNotes;
     if (!verifiedNote) {
       return NextResponse.json({ ok: true, noteScript: null });

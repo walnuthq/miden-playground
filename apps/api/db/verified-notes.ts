@@ -12,25 +12,30 @@ export const getVerifiedNote = ({
     where: { noteId, packageId },
   });
 
-export const getVerifiedNotes = (noteId: string) =>
+export const getVerifiedNotes = ({
+  networkId,
+  noteId,
+}: {
+  networkId: string;
+  noteId: string;
+}) =>
   db.query.verifiedNoteTable.findMany({
-    where: { noteId },
+    where: { networkId, noteId },
     with: { package: true },
   });
 
 export const insertVerifiedNote = async ({
+  networkId,
   noteId,
   packageId,
 }: {
+  networkId: string;
   noteId: string;
   packageId: string;
 }) => {
   const [insertedVerifiedNote] = await db
     .insert(verifiedNoteTable)
-    .values({
-      noteId,
-      packageId,
-    })
+    .values({ networkId, noteId, packageId })
     .returning({ id: verifiedNoteTable.id });
   if (!insertedVerifiedNote) {
     throw new Error("ERROR: insert verified note failed");

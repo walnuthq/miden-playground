@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { Spinner } from "@workspace/ui/components/spinner";
 import { Button } from "@workspace/ui/components/button";
 import {
@@ -21,11 +21,13 @@ import { clientGetAccountById } from "@/lib/web-client";
 import useWebClient from "@/hooks/use-web-client";
 import useMidenSdk from "@/hooks/use-miden-sdk";
 import { toBase64, readFileAsText } from "@/lib/utils";
+import useGlobalContext from "@/components/global-context/hook";
 
 const VerifyAccountComponentDialog = () => {
-  const router = useRouter();
+  const queryClient = useQueryClient();
   const { client } = useWebClient();
   const { midenSdk } = useMidenSdk();
+  const { networkId } = useGlobalContext();
   const {
     accounts,
     verifyAccountComponentDialogOpen,
@@ -72,6 +74,7 @@ const VerifyAccountComponentDialog = () => {
               midenSdk,
             });
             const { verified, error } = await verifyAccountComponentFromSource({
+              networkId,
               accountId,
               identifier: account.identifier,
               account: toBase64(wasmAccount.serialize()),
@@ -81,7 +84,13 @@ const VerifyAccountComponentDialog = () => {
             setLoading(false);
             if (verified) {
               toast.success("Account Component verified.");
-              router.refresh();
+              queryClient.invalidateQueries({
+                queryKey: [
+                  "verifiedAccountComponents",
+                  networkId,
+                  account.identifier,
+                ],
+              });
             } else {
               toast.error("Account Component couldn't be verified.", {
                 description: error,

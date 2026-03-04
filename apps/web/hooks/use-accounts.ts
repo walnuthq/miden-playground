@@ -292,6 +292,7 @@ const useAccounts = () => {
     });
     if (verify && !tutorialId) {
       verifyAccountComponentsFromPackageIds({
+        networkId,
         accountId: account.id,
         identifier: account.identifier,
         account: toBase64(wasmAccount.serialize()),
