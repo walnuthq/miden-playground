@@ -37,6 +37,7 @@ import useWebClient from "@/hooks/use-web-client";
 import useMidenSdk from "@/hooks/use-miden-sdk";
 import { clientExportInputNoteFile } from "@/lib/web-client";
 import { accountIdToAddress } from "@/lib/web-client";
+import useMultisig from "@/hooks/use-multisig";
 
 const NoteActionsCell = ({
   account,
@@ -48,6 +49,7 @@ const NoteActionsCell = ({
   const { midenSdk } = useMidenSdk();
   const { client } = useWebClient();
   const { wallet } = useWallet();
+  const { loadMultisig, createConsumeNotesProposal } = useMultisig();
   const { networkId } = useGlobalContext();
   const { faucets } = useAccounts();
   const { openCreateTransactionDialog, newConsumeTransactionRequest } =
@@ -82,6 +84,15 @@ const NoteActionsCell = ({
                 step: "preview",
                 transactionRequest,
                 transactionResult,
+              });
+            } else if (account.multisig) {
+              const multisig = await loadMultisig(account.id);
+              if (!multisig) {
+                return;
+              }
+              await createConsumeNotesProposal({
+                multisig,
+                noteIds: [inputNote.id],
               });
             } else {
               const [fungibleAsset] = inputNote.fungibleAssets;
@@ -131,7 +142,8 @@ const AccountNotesTable = ({ account }: { account: Account }) => {
   const showNoteActions =
     networkId === "mmck" ||
     connectedWallet?.address === account.address ||
-    account.components.includes("no-auth");
+    account.components.includes("no-auth") ||
+    account.multisig;
   return (
     <div className="rounded-md border">
       <Table>

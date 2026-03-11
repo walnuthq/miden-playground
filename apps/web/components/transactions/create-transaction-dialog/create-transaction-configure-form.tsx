@@ -36,6 +36,7 @@ import {
   createTransactionFromScript,
 } from "@/lib/web-client";
 import useMidenSdk from "@/hooks/use-miden-sdk";
+import useMultisig from "@/hooks/use-multisig";
 
 const CreateTransactionConfigureForm = ({
   transactionType,
@@ -90,6 +91,7 @@ const CreateTransactionConfigureForm = ({
     newCustomTransactionRequest,
     closeCreateTransactionDialog,
   } = useTransactions();
+  const { loadMultisig, createSendProposal } = useMultisig();
   const executingAccount = accounts.find(({ id }) => id === executingAccountId);
   const targetAccount = accounts.find(({ id }) => id === targetAccountId);
   const faucetAccount = accounts.find(({ id }) => id === faucetAccountId);
@@ -169,31 +171,48 @@ const CreateTransactionConfigureForm = ({
             if (!wallet) {
               return;
             }
-            const transaction = new SendTransaction(
-              executingAccount.address,
-              accountIdToAddress({
-                accountId: targetAccountId,
-                networkId,
-                midenSdk,
-              }),
-              faucetAccount.address,
-              formData.getAll("is-public").includes("on")
-                ? "public"
-                : "private",
-              Number(
-                parseAmount(
+            if (executingAccount.multisig) {
+              const multisig = await loadMultisig(executingAccount.id);
+              if (!multisig) {
+                return;
+              }
+              await createSendProposal({
+                multisig,
+                recipientId: targetAccountId,
+                faucetId: faucetAccountId,
+                amount: parseAmount(
                   formData.get("amount")?.toString() ?? "0",
                   decimals,
-                ),
-              ),
-            );
-            const adapter = wallet.adapter as MidenWalletAdapter;
-            try {
-              const txId = await adapter.requestSend(transaction);
-              console.log({ txId });
+                ).toString(),
+              });
               closeCreateTransactionDialog();
-            } catch (error) {
-              console.error(error);
+            } else {
+              const transaction = new SendTransaction(
+                executingAccount.address,
+                accountIdToAddress({
+                  accountId: targetAccountId,
+                  networkId,
+                  midenSdk,
+                }),
+                faucetAccount.address,
+                formData.getAll("is-public").includes("on")
+                  ? "public"
+                  : "private",
+                Number(
+                  parseAmount(
+                    formData.get("amount")?.toString() ?? "0",
+                    decimals,
+                  ),
+                ),
+              );
+              const adapter = wallet.adapter as MidenWalletAdapter;
+              try {
+                const txId = await adapter.requestSend(transaction);
+                console.log({ txId });
+                closeCreateTransactionDialog();
+              } catch (error) {
+                console.error(error);
+              }
             }
           }
           setLoading(false);

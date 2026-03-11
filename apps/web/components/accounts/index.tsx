@@ -6,6 +6,7 @@ import CreateWalletDialog from "@/components/accounts/create-wallet-dialog";
 import CreateFaucetDialog from "@/components/accounts/create-faucet-dialog";
 import ImportAccountDialog from "@/components/accounts/import-account-dialog";
 import DeployAccountDialog from "@/components/accounts/deploy-account-dialog";
+import DeployMultisigDialog from "@/components/accounts/deploy-multisig-dialog";
 import useAccounts from "@/hooks/use-accounts";
 import CreateTransactionDialog from "@/components/transactions/create-transaction-dialog";
 
@@ -22,6 +23,7 @@ const Accounts = () => {
       <CreateFaucetDialog />
       <ImportAccountDialog />
       <DeployAccountDialog />
+      <DeployMultisigDialog />
       <CreateTransactionDialog />
     </div>
   );

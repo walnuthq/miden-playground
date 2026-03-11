@@ -38,13 +38,13 @@ const StorageSlotValueTooltip = ({ value }: { value: string }) => {
 
 const StorageSlotMapTable = ({
   storageItem,
-  value,
+  defaultValue,
 }: {
   storageItem: StorageItem;
-  value: string;
+  defaultValue: string;
 }) => {
   const { midenSdk } = useMidenSdk();
-  const keyValuePairs = value.split(",");
+  const keyValuePairs = defaultValue === "" ? [] : defaultValue.split(",");
   const keyValues = keyValuePairs.map((pair) => {
     const [key = "", value = ""] = pair.split(":");
     return {
@@ -96,23 +96,28 @@ const StorageSlotsTable = ({
         </TableRow>
       </TableHeader>
       <TableBody>
-        {storageSlots.map(({ name, type, value }, index) => (
-          <TableRow key={name}>
-            <TableCell>{name}</TableCell>
-            <TableCell>{storageSlotTypes[type]}</TableCell>
-            <TableCell>
-              {type === "value" && (
-                <StorageSlotValueTooltip value={getItem(storage, index)} />
-              )}
-              {type === "map" && storage[index] && (
-                <StorageSlotMapTable
-                  storageItem={storage[index]}
-                  value={value}
-                />
-              )}
-            </TableCell>
-          </TableRow>
-        ))}
+        {storageSlots.map((storageSlot) => {
+          const storageItem = storage.find(
+            ({ name }) => name === storageSlot.name,
+          );
+          return (
+            <TableRow key={storageSlot.name}>
+              <TableCell>{storageSlot.name}</TableCell>
+              <TableCell>{storageSlotTypes[storageSlot.type]}</TableCell>
+              <TableCell>
+                {storageSlot.type === "value" && storageItem && (
+                  <StorageSlotValueTooltip value={getItem(storageItem)} />
+                )}
+                {storageSlot.type === "map" && storageItem && (
+                  <StorageSlotMapTable
+                    storageItem={storageItem}
+                    defaultValue={storageSlot.value}
+                  />
+                )}
+              </TableCell>
+            </TableRow>
+          );
+        })}
       </TableBody>
     </Table>
   </div>

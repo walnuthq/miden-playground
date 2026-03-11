@@ -48,6 +48,7 @@ const useAccounts = () => {
     deployAccountDialogOpen,
     verifyAccountComponentDialogOpen,
     verifyAccountComponentDialogAccountId,
+    deployMultisigDialogOpen,
     accounts,
     tutorialId,
     blockNum,
@@ -58,6 +59,7 @@ const useAccounts = () => {
   const wallets = accounts.filter((account) =>
     account.components.includes("basic-wallet"),
   );
+  const multisigs = wallets.filter((wallet) => !!wallet.multisig);
   const faucets = accounts.filter((account) => account.isFaucet);
   const connectedWallet = wallets.find(
     ({ /*id,*/ address }) => address === midenWalletAddress, // || id === paraWalletAccountId,
@@ -121,6 +123,21 @@ const useAccounts = () => {
       type: "NEW_ACCOUNT",
       payload: { account },
     });
+    return account;
+  };
+  const newAccount = (account: Account) => {
+    dispatch({
+      type: "NEW_ACCOUNT",
+      payload: { account },
+    });
+    return account;
+  };
+  const deleteAccount = async (accountId: string) => {
+    const account = accounts.find(({ id }) => id === accountId);
+    if (!account) {
+      throw new Error("Error: Account not found");
+    }
+    dispatch({ type: "DELETE_ACCOUNT", payload: { accountId } });
     return account;
   };
   const importAccountByAddress = async ({
@@ -348,6 +365,15 @@ const useAccounts = () => {
     dispatch({
       type: "CLOSE_VERIFY_ACCOUNT_COMPONENT_DIALOG",
     });
+  const openDeployMultisigDialog = () =>
+    dispatch({
+      type: "OPEN_DEPLOY_MULTISIG_DIALOG",
+    });
+  const closeDeployMultisigDialog = () =>
+    dispatch({
+      type: "CLOSE_DEPLOY_MULTISIG_DIALOG",
+    });
+
   return {
     createWalletDialogOpen,
     createFaucetDialogOpen,
@@ -355,12 +381,16 @@ const useAccounts = () => {
     deployAccountDialogOpen,
     verifyAccountComponentDialogOpen,
     verifyAccountComponentDialogAccountId,
+    deployMultisigDialogOpen,
     accounts,
     wallets,
+    multisigs,
     faucets,
     connectedWallet: networkId !== "mmck" ? connectedWallet : undefined,
     newWallet,
     newFaucet,
+    newAccount,
+    deleteAccount,
     importAccountByAddress,
     importConnectedWallet,
     deployAccount,
@@ -375,6 +405,8 @@ const useAccounts = () => {
     closeDeployAccountDialog,
     openVerifyAccountComponentDialog,
     closeVerifyAccountComponentDialog,
+    openDeployMultisigDialog,
+    closeDeployMultisigDialog,
   };
 };
 

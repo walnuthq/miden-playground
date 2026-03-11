@@ -9,6 +9,10 @@ import {
   MIDEN_FAUCET_ADDRESS,
   EMPTY_WORD,
 } from "@/lib/constants";
+import type {
+  DetectedMultisigConfig,
+  TransactionProposal,
+} from "@openzeppelin/miden-multisig-client";
 
 export const accountTypes = {
   "fungible-faucet": "Fungible Faucet",
@@ -41,6 +45,13 @@ export const defaultStorageItem = (): StorageItem => ({
   mapEntries: [],
 });
 
+export type AccountMultisig = {
+  config: Omit<DetectedMultisigConfig, "vaultBalances"> & {
+    vaultBalances: FungibleAsset[];
+  };
+  proposals: TransactionProposal[];
+};
+
 export type Account = {
   id: string;
   name: string;
@@ -64,6 +75,7 @@ export type Account = {
   storage: StorageItem[];
   consumableNoteIds: string[];
   components: string[];
+  multisig?: AccountMultisig;
   updatedAt: number;
 };
 
@@ -177,15 +189,14 @@ export const midenFaucetAccount = () => ({
   routingParameters: getRoutingParametersPart(MIDEN_FAUCET_ADDRESS),
 });
 
-export const getItem = (storage: StorageItem[], index: number) => {
-  const storageItem = storage[index];
-  if (!storageItem || storageItem.type !== "value") {
+export const getItem = (storageItem = defaultStorageItem()) => {
+  if (storageItem.type !== "value") {
     return EMPTY_WORD;
   }
   return storageItem.item;
 };
 
-export const getMapItem = (storageItem: StorageItem, key: string) => {
+export const getMapItem = (storageItem = defaultStorageItem(), key: string) => {
   if (storageItem.type !== "map") {
     return EMPTY_WORD;
   }

@@ -13,20 +13,19 @@ import {
 import useTransactions from "@/hooks/use-transactions";
 import AccountAddress from "@/components/lib/account-address";
 import { clientGetConsumableNotes } from "@/lib/web-client";
-import useGlobalContext from "@/components/global-context/hook";
 import useAccounts from "@/hooks/use-accounts";
 import useMidenSdk from "@/hooks/use-miden-sdk";
 import useWebClient from "@/hooks/use-web-client";
+import { MIDEN_FAUCET_ADDRESS } from "@/lib/constants";
 
 const AccountActionsCell = ({ account }: { account: Account }) => {
   const { midenSdk } = useMidenSdk();
-  const { networkId } = useGlobalContext();
   const { client } = useWebClient();
-  const { connectedWallet } = useAccounts();
+  const { connectedWallet, deleteAccount } = useAccounts();
   const { openCreateTransactionDialog } = useTransactions();
-  if (networkId !== "mmck" && connectedWallet?.address !== account.address) {
-    return null;
-  }
+  const showDeleteAccount =
+    account.address !== connectedWallet?.address &&
+    account.address !== MIDEN_FAUCET_ADDRESS;
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -79,6 +78,11 @@ const AccountActionsCell = ({ account }: { account: Account }) => {
               New send transaction
             </DropdownMenuItem>
           </>
+        )}
+        {showDeleteAccount && (
+          <DropdownMenuItem onClick={() => deleteAccount(account.id)}>
+            Delete account
+          </DropdownMenuItem>
         )}
         {/* <DropdownMenuItem onClick={() => {}}>
           New custom transaction

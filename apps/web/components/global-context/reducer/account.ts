@@ -7,6 +7,10 @@ export type AccountAction =
       type: "NEW_ACCOUNT";
       payload: { account: Account };
     }
+  | {
+      type: "DELETE_ACCOUNT";
+      payload: { accountId: string };
+    }
   | { type: "UPDATE_ACCOUNT"; payload: { account: Account } }
   | {
       type: "IMPORT_ACCOUNT";
@@ -46,6 +50,12 @@ export type AccountAction =
     }
   | {
       type: "CLOSE_VERIFY_ACCOUNT_COMPONENT_DIALOG";
+    }
+  | {
+      type: "OPEN_DEPLOY_MULTISIG_DIALOG";
+    }
+  | {
+      type: "CLOSE_DEPLOY_MULTISIG_DIALOG";
     };
 
 const reducer = (state: State, action: AccountAction): State => {
@@ -55,6 +65,18 @@ const reducer = (state: State, action: AccountAction): State => {
         ...state,
         submittingTransaction: false,
         accounts: [...state.accounts, action.payload.account],
+      };
+    }
+    case "DELETE_ACCOUNT": {
+      const index = state.accounts.findIndex(
+        ({ id }) => id === action.payload.accountId,
+      );
+      return {
+        ...state,
+        accounts: [
+          ...state.accounts.slice(0, index),
+          ...state.accounts.slice(index + 1),
+        ],
       };
     }
     case "UPDATE_ACCOUNT": {
@@ -148,6 +170,18 @@ const reducer = (state: State, action: AccountAction): State => {
         ...state,
         verifyAccountComponentDialogOpen: false,
         verifyAccountComponentDialogAccountId: "",
+      };
+    }
+    case "OPEN_DEPLOY_MULTISIG_DIALOG": {
+      return {
+        ...state,
+        deployMultisigDialogOpen: true,
+      };
+    }
+    case "CLOSE_DEPLOY_MULTISIG_DIALOG": {
+      return {
+        ...state,
+        deployMultisigDialogOpen: false,
       };
     }
   }

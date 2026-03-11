@@ -1,3 +1,5 @@
+import { EMPTY_WORD } from "../constants";
+
 export const scriptTypes = {
   library: "Library",
   account: "Account Component",
@@ -57,7 +59,7 @@ export type Export = { Procedure: ProcedureExport };
 
 export const defaultProcedureExport = (): ProcedureExport => ({
   path: "",
-  digest: "",
+  digest: EMPTY_WORD,
   signature: defaultSignature(),
   attributes: { attrs: [] },
 });
@@ -112,7 +114,7 @@ export const defaultScript = (): Script => ({
   rust: "",
   masm: "",
   error: "",
-  digest: "",
+  digest: EMPTY_WORD,
   masp: "",
   procedureExports: [],
   dependencies: [],

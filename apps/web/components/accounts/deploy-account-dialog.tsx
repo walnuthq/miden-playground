@@ -203,7 +203,9 @@ const DeployAccountDialog = () => {
                 key={`${index}-${storageSlot.name}-${storageSlot.type}-${storageSlot.value}`}
                 className="grid gap-3 col-span-2"
               >
-                <Label htmlFor={`slot-${index}`}>{storageSlot.name}</Label>
+                <Label htmlFor={`slot-${index}`}>
+                  <pre>{storageSlot.name}</pre>
+                </Label>
                 <Input
                   id={`slot-${index}`}
                   name={`slot-${index}`}

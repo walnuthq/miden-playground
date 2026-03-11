@@ -1,4 +1,11 @@
-import { Plus, Wallet, HandCoins, Download, Upload } from "lucide-react";
+import {
+  Plus,
+  Wallet,
+  HandCoins,
+  Download,
+  Upload,
+  Signature,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,10 +21,12 @@ import { defaultComponentIds } from "@/lib/types/default-components";
 const CreateAccountDropdownMenu = () => {
   const { networkId } = useGlobalContext();
   const {
+    connectedWallet,
     openCreateWalletDialog,
     openCreateFaucetDialog,
     openImportAccountDialog,
     openDeployAccountDialog,
+    openDeployMultisigDialog,
   } = useAccounts();
   const { components } = useComponents();
   return (
@@ -58,6 +67,15 @@ const CreateAccountDropdownMenu = () => {
             >
               <Upload />
               Deploy account
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={openDeployMultisigDialog}
+              disabled={
+                !connectedWallet || connectedWallet.storageMode !== "private"
+              }
+            >
+              <Signature />
+              Deploy multisig
             </DropdownMenuItem>
           </>
         )}

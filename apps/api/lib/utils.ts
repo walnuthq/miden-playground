@@ -25,5 +25,5 @@ export const safeRm = async (path: PathLike, options?: RmOptions) => {
   }
 };
 
-export const isValidUuidv4 = (uuid: string) =>
+export const isValidUUIDv4 = (uuid: string) =>
   validate(uuid) && version(uuid) === 4;

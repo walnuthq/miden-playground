@@ -7,7 +7,7 @@ export const componentTypes = {
 
 export type ComponentType = keyof typeof componentTypes;
 
-export const storageSlotTypes = { value: "Value", map: "Storage Map" } as const;
+export const storageSlotTypes = { value: "Value", map: "Map" } as const;
 
 export type StorageSlotType = keyof typeof storageSlotTypes;
 

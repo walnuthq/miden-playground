@@ -86,5 +86,5 @@ export const toBase64 = (bytes: Uint8Array) => {
   return btoa(output.join(""));
 };
 
-export const isValidUuidv4 = (uuid: string) =>
+export const isValidUUIDv4 = (uuid: string) =>
   validate(uuid) && version(uuid) === 4;
