@@ -14,7 +14,7 @@ export type ScriptExampleItem = {
 };
 
 export const scriptExamples = {
-  "counter-contract": { name: "Counter Contract", type: "account" },
+  "counter-account": { name: "Counter Contract", type: "account" },
   "p2id-note": { name: "P2ID Note", type: "note-script" },
   "counter-note": { name: "Counter Note", type: "note-script" },
 } as const;

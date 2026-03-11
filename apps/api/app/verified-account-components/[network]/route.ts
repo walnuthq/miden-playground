@@ -55,15 +55,12 @@ const verifyAccountComponentFromSource = async ({
     package: { name },
   } = parseCargoToml(cargoToml);
   const { id } = await newPackage({ name, type: "account", rust });
-  const { stderr } = await compilePackage(id);
+  const { stderr } = await compilePackage({ packageDir: id, name });
   if (stderr) {
     await Promise.all([deletePackageDir(id), deletePackage(id)]);
     throw new Error("Error: Account Component compilation failed.");
   }
-  const { masp, digest, exports, dependencies } = await readPackage({
-    packageDir: id,
-    name,
-  });
+  const { masp, digest, exports, dependencies } = await readPackage(id);
   await updatePackage({
     id,
     status: "compiled",
@@ -81,7 +78,7 @@ const verifyAccountComponentFromSource = async ({
     resourceType: "account-component",
     resourceId: accountId,
     resourcePath: account ? resourcePath : undefined,
-    maspPath: packagePath({ packageDir: id, name }),
+    maspPath: packagePath(id),
   });
   if (account) {
     await safeRm(resourcePath);
@@ -150,7 +147,7 @@ const verifyAccountComponentsFromPackageIds = async ({
         resourceType: "account-component",
         resourceId: accountId,
         resourcePath,
-        maspPath: packagePath({ packageDir: packageId, name }),
+        maspPath: packagePath(packageId),
       });
       await safeRm(resourcePath);
       if (!verified) {

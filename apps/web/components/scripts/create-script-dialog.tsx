@@ -45,20 +45,13 @@ const CreateScriptDialog = () => {
   const [loading, setLoading] = useState(false);
   const [scriptType, setScriptType] = useState<ScriptType>("account");
   const [scriptExample, setScriptExample] = useState<ScriptExample | "none">(
-    // "counter-contract"
     "none",
   );
   useEffect(() => {
-    // if (scriptType === "account") {
-    //   setScriptExample("counter-contract");
-    // } else if (scriptType === "note") {
-    //   setScriptExample("p2id-note");
-    // }
     setScriptExample("none");
   }, [scriptType]);
   const onClose = () => {
     setScriptType("account");
-    // setScriptExample("counter-contract");
     setScriptExample("none");
     closeCreateScriptDialog();
   };
