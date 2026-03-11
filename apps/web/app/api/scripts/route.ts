@@ -19,14 +19,14 @@ type CreateScriptRequestBody = {
 
 const scriptsRust: Record<ScriptExample | "none", string> = {
   none: defaultScript().rust,
-  "counter-contract": counterMapContract.rust,
+  "counter-account": counterMapContract.rust,
   "p2id-note": timelockP2id.rust,
   "counter-note": counterNote.rust,
 } as const;
 
 const scriptsDependencies: Record<ScriptExample | "none", Dependency[]> = {
   none: defaultScript().dependencies,
-  "counter-contract": counterMapContract.dependencies,
+  "counter-account": counterMapContract.dependencies,
   "p2id-note": timelockP2id.dependencies,
   "counter-note": counterNote.dependencies,
 } as const;

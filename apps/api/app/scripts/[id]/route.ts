@@ -89,7 +89,7 @@ export const PATCH = async (
   }
   const { name, type } = dbPackage;
   if (exists) {
-    await updateRust({ packageDir: id, rust: updatedRust });
+    await updateRust({ packageDir: id, name, rust: updatedRust });
   } else {
     await generatePackageDir({
       packageDir: id,
@@ -105,7 +105,7 @@ export const PATCH = async (
     type,
     dependencies: dependenciesPackages,
   });
-  const { stderr } = await compilePackage(id);
+  const { stderr } = await compilePackage({ packageDir: id, name });
   if (stderr) {
     console.error(stderr);
     await updatePackage({
@@ -122,10 +122,7 @@ export const PATCH = async (
       }),
     );
   }
-  const { masp, digest, exports, dependencies } = await readPackage({
-    packageDir: id,
-    name,
-  });
+  const { masp, digest, exports, dependencies } = await readPackage(id);
   await updatePackage({
     id,
     status: "compiled",
