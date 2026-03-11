@@ -12,14 +12,14 @@ import {
 
 const scriptsMasm: Record<ScriptExample | "none", string> = {
   none: defaultScript().masm,
-  "counter-contract": counterMapContract.masm,
+  "counter-account": counterMapContract.masm,
   "p2id-note": timelockP2id.masm,
   "counter-note": counterNote.masm,
 } as const;
 
 const scriptsDigest: Record<ScriptExample | "none", string> = {
   none: defaultScript().digest,
-  "counter-contract": counterMapContract.digest,
+  "counter-account": counterMapContract.digest,
   "p2id-note": timelockP2id.digest,
   "counter-note": counterNote.digest,
 } as const;
@@ -28,7 +28,7 @@ const scriptsExports: Record<ScriptExample | "none", Export[]> = {
   none: defaultScript().procedureExports.map((procedureExport) => ({
     Procedure: procedureExport,
   })),
-  "counter-contract": counterMapContract.procedureExports.map(
+  "counter-account": counterMapContract.procedureExports.map(
     (procedureExport) => ({
       Procedure: procedureExport,
     }),
@@ -43,7 +43,7 @@ const scriptsExports: Record<ScriptExample | "none", Export[]> = {
 
 const scriptsDependencies: Record<ScriptExample | "none", Dependency[]> = {
   none: defaultScript().dependencies,
-  "counter-contract": counterMapContract.dependencies,
+  "counter-account": counterMapContract.dependencies,
   "p2id-note": timelockP2id.dependencies,
   "counter-note": counterNote.dependencies,
 } as const;
@@ -58,7 +58,7 @@ export const PATCH = async (
   const [rawExample] = id.split("_");
   const example = rawExample as ScriptExample;
   let masm = scriptsMasm[example];
-  if (example === "counter-contract") {
+  if (example === "counter-account") {
     const matches = rust.matchAll(/felt!\((\d*)\)/g);
     const lastMatch = Array.from(matches ?? []).at(-1);
     const incrementValue = Number(lastMatch?.at(1));

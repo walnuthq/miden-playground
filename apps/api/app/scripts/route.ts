@@ -1,17 +1,17 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { newPackage } from "@/lib/miden-compiler";
-import type { Dependency, PackageType } from "@/lib/types";
+import type { Dependency, PackageType, ScriptExample } from "@/lib/types";
 import { basicWalletDependency } from "@/lib/default-dependencies";
 
 type CreateScriptRequestBody = {
   name: string;
   type: PackageType;
-  example: string;
+  example: ScriptExample;
 };
 
-const scriptsDependencies: Record<string, Dependency[]> = {
+const scriptsDependencies: Record<ScriptExample, Dependency[]> = {
   none: [],
-  "counter-contract": [],
+  "counter-account": [],
   "p2id-note": [
     {
       id: basicWalletDependency.id,

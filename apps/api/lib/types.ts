@@ -4,6 +4,12 @@ import {
   type packageStatusEnum,
 } from "@/db/schema";
 
+export type ScriptExample =
+  | "none"
+  | "counter-account"
+  | "p2id-note"
+  | "counter-note";
+
 export type CargoToml = {
   package: {
     name: string;
