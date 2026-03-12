@@ -1,9 +1,11 @@
+import { dirname } from "path";
+import { fileURLToPath } from "url";
 import type { NextConfig } from "next";
 import createMDX from "@next/mdx";
 
 const nextConfig: NextConfig = {
   transpilePackages: ["@workspace/ui"],
-  webpack: (config) => {
+  webpack: (config, { dev, webpack }) => {
     // Handle WASM files
     config.experiments = {
       ...config.experiments,
@@ -11,10 +13,18 @@ const nextConfig: NextConfig = {
       topLevelAwait: true,
     };
     // Add WASM to asset rules
-    config.module.rules.push({
-      test: /\.wasm$/,
-      type: "asset/resource",
-    });
+    // config.module.rules.push({
+    //   test: /\.wasm$/,
+    //   type: "asset/resource",
+    // });
+    if (!dev) {
+      config.plugins.push(
+        new webpack.NormalModuleReplacementPlugin(
+          /\.wasm$/,
+          `${dirname(fileURLToPath(import.meta.url))}/public/miden_client_web.wasm`,
+        ),
+      );
+    }
     return config;
   },
   allowedDevOrigins: ["playground.miden.local"],
