@@ -5,6 +5,8 @@ const allowedOrigins = [
   WEB_URL,
   "https://testnet.midenscan.com",
   "https://devnet.midenscan.com",
+  "https://explorer.devnet.miden.io",
+  "https://explorer.testnet.miden.io",
 ];
 
 const corsOptions = {

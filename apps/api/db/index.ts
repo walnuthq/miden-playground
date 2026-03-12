@@ -1,4 +1,4 @@
-import { config } from "@dotenvx/dotenvx";
+import { config } from "dotenv";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { relations } from "@/db/relations";
 import { PROJECT_ROOT } from "@/lib/constants";

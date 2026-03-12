@@ -13,12 +13,13 @@
     "build:miden-package-metadata": "cargo install --path miden-package-metadata --locked",
     "build:miden-verifier": "cargo install --path miden-verifier --locked",
     "build:project-template": "dotenvx run -f .env.local -- sh -c 'rm -rf $PACKAGES_PATH/project-template && cp -r templates/project-template $PACKAGES_PATH/project-template && cd $PACKAGES_PATH/project-template && CARGO_TARGET_DIR=$PACKAGES_PATH/target miden build --release'",
-    "build:rust": "pnpm build:miden-package-metadata && pnpm build:miden-verifier && build:project-template",
+    "build:rust": "pnpm build:miden-package-metadata && pnpm build:miden-verifier && pnpm build:project-template",
     "db:push": "pnpm drizzle-kit push"
   },
   "dependencies": {
     "@dotenvx/dotenvx": "^1.54.1",
     "archiver": "^7.0.1",
+    "dotenv": "^17.3.1",
     "drizzle-orm": "1.0.0-beta.15-859cf75",
     "next": "^16.1.6",
     "pg": "^8.20.0",
@@ -28,7 +29,7 @@
   },
   "devDependencies": {
     "@types/archiver": "^7.0.0",
-    "@types/node": "^25.4.0",
+    "@types/node": "^25.5.0",
     "@types/pg": "^8.18.0",
     "@types/react": "^19.2.14",
     "@workspace/eslint-config": "workspace:^",
