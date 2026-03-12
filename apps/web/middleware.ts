@@ -10,5 +10,5 @@ export const middleware = () => {
 };
 
 export const config = {
-  matcher: "/_next/static/media/miden_client_web.8318b253.wasm",
+  matcher: "/_next/static/media/miden_client_web.e6753bbd.wasm",
 };
