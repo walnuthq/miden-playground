@@ -1,4 +1,4 @@
-import { cargoMidenVersion } from "@/lib/miden-compiler";
+import { activeToolchainVersion } from "@/lib/miden-compiler";
 import { NextResponse } from "next/server";
 
 export const GET = async () =>
@@ -9,5 +9,5 @@ export const GET = async () =>
       WEB_URL: process.env.WEB_URL,
       PACKAGES_PATH: process.env.PACKAGES_PATH,
     },
-    cargoMidenVersion: await cargoMidenVersion(),
+    activeToolchainVersion: await activeToolchainVersion(),
   });
