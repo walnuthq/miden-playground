@@ -1,4 +1,4 @@
-import { cp, writeFile, readFile, mkdir } from "node:fs/promises";
+import { cp, writeFile, readFile } from "node:fs/promises";
 import { parse } from "smol-toml";
 import { execFile, fileExists, safeRm } from "@/lib/utils";
 import { type Export, type Dependency, type CargoToml } from "@/lib/types";
@@ -7,12 +7,15 @@ import { type PackageType } from "@/lib/types";
 import { PACKAGES_PATH, PROJECT_ROOT } from "@/lib/constants";
 import { midenPackageMetadata } from "@/lib/miden-package-metadata";
 
-export const cargoMidenVersion = async () => {
-  const { stdout } = await execFile("miden", ["cargo-miden", "--version"], {
-    cwd: `${PROJECT_ROOT}/templates/project-template`,
-  });
-  const [, semver = ""] = stdout.split(" ");
-  return semver.replaceAll("\n", "");
+export const activeToolchainVersion = async () => {
+  const { stdout } = await execFile("midenup", ["--version"]);
+  const activeToolchainVersionString = "active toolchain version";
+  const versionIndex =
+    stdout.indexOf(activeToolchainVersionString) +
+    activeToolchainVersionString.length +
+    2;
+  const [major, minor, patch] = stdout.slice(versionIndex).split(".");
+  return `${major}.${minor}.${patch}`;
 };
 
 export const packageExists = async (packageDir: string) =>
