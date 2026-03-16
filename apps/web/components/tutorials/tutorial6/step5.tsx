@@ -10,7 +10,7 @@ const useCompleted = () => {
   const { components } = useComponents();
   const component = components.find(
     ({ type, scriptId }) =>
-      type === "account" && scriptId.startsWith("counter-contract_"),
+      type === "account" && scriptId.startsWith("counter-account_"),
   );
   const counter = accounts.find(({ components }) =>
     components.includes(component?.id ?? ""),
