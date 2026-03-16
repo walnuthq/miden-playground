@@ -39,7 +39,7 @@
     "sonner": "^2.0.7",
     "usehooks-ts": "^3.1.1",
     "uuid": "^13.0.0",
-    "viem": "^2.47.2"
+    "viem": "^2.47.4"
   },
   "devDependencies": {
     "@types/lodash": "^4.17.24",
@@ -51,6 +51,6 @@
     "@workspace/typescript-config": "workspace:*",
     "eslint": "^9.39.4",
     "typescript": "^5.9.3",
-    "wrangler": "^4.72.0"
+    "wrangler": "^4.73.0"
   }
 }
