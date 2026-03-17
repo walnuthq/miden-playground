@@ -4,7 +4,8 @@ import {
   HandCoins,
   Download,
   Upload,
-  Signature,
+  // Signature,
+  ShieldUser,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -74,8 +75,8 @@ const CreateAccountDropdownMenu = () => {
                 !connectedWallet || connectedWallet.storageMode !== "private"
               }
             >
-              <Signature />
-              Deploy multisig
+              <ShieldUser />
+              Deploy guardian
             </DropdownMenuItem>
           </>
         )}

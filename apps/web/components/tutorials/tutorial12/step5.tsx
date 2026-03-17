@@ -1,9 +1,12 @@
+import { useRouter } from "next/navigation";
 import { EllipsisVertical } from "lucide-react";
+import { useWallet } from "@miden-sdk/miden-wallet-adapter";
 import { type TutorialStep } from "@/lib/types/tutorial";
 import useAccounts from "@/hooks/use-accounts";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
 import Step5Content from "@/components/tutorials/tutorial12/step5.mdx";
+import useTutorials from "@/hooks/use-tutorials";
 
 const useCompleted = () => {
   const { multisigs } = useAccounts();
@@ -16,9 +19,11 @@ const Step5: TutorialStep = {
   title: "Sign and execute the proposal.",
   Content: () => {
     const completed = useCompleted();
+    const { multisigs } = useAccounts();
+    const [multisig] = multisigs;
     return (
       <>
-        <Step5Content />
+        <Step5Content account={multisig} />
         <TutorialAlert
           completed={completed}
           title="Action required: Sign and execute the proposal."
@@ -26,8 +31,8 @@ const Step5: TutorialStep = {
           description={
             <p>
               Click on the <EllipsisVertical className="size-4 inline" /> icon
-              button on the right-most side of the consumable note row in your
-              account page details to consume the note with your wallet.
+              button on the right-most side of the consume notes proposal row in
+              your guardian page details to sign and execute the proposal.
             </p>
           }
         />
@@ -35,8 +40,25 @@ const Step5: TutorialStep = {
     );
   },
   NextStepButton: () => {
+    const router = useRouter();
+    const { disconnect } = useWallet();
+    const { multisigs, deleteAccount } = useAccounts();
+    const { nextTutorialStep } = useTutorials();
     const completed = useCompleted();
-    return <NextStepButton disabled={!completed} />;
+    return (
+      <NextStepButton
+        disabled={!completed}
+        onClick={() => {
+          nextTutorialStep();
+          const [multisig] = multisigs;
+          if (multisig) {
+            disconnect();
+            deleteAccount(multisig.id);
+            router.push("/accounts");
+          }
+        }}
+      />
+    );
   },
 };
 

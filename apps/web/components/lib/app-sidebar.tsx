@@ -15,7 +15,8 @@ import {
   FileText,
   Key,
   ReceiptText,
-  Signature,
+  // Signature,
+  ShieldUser,
 } from "lucide-react";
 import { useIsClient } from "usehooks-ts";
 import NavMain from "@/components/lib/nav-main";
@@ -77,7 +78,7 @@ const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
           icon: isFaucet ? (
             <HandCoins className="size-4" />
           ) : multisig ? (
-            <Signature className="size-4" />
+            <ShieldUser className="size-4" />
           ) : components.includes("basic-wallet") ? (
             <Wallet className="size-4" />
           ) : (

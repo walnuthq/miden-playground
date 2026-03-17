@@ -13,7 +13,11 @@ const signatureSchemes = {
 
 const AccountMultisigInformationTable = ({
   multisig: {
-    config: { threshold, signerCommitments, psmCommitment, signatureScheme },
+    config: {
+      /*threshold,*/ signerCommitments,
+      psmCommitment,
+      signatureScheme,
+    },
   },
 }: {
   multisig: AccountMultisig;
@@ -21,10 +25,10 @@ const AccountMultisigInformationTable = ({
   <div className="rounded-md border">
     <Table>
       <TableBody>
-        <TableRow>
+        {/* <TableRow>
           <TableCell>Threshold</TableCell>
           <TableCell>{threshold}</TableCell>
-        </TableRow>
+        </TableRow> */}
         <TableRow>
           <TableCell>Signer commitments</TableCell>
           <TableCell>
@@ -34,7 +38,7 @@ const AccountMultisigInformationTable = ({
           </TableCell>
         </TableRow>
         <TableRow>
-          <TableCell>PSM commitment</TableCell>
+          <TableCell>Guardian commitment</TableCell>
           <TableCell>
             <p>{psmCommitment}</p>
           </TableCell>

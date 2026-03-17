@@ -48,7 +48,7 @@ const Step3: TutorialStep = {
             <p>
               Click on the <em>"Mint"</em> button to automatically request 100
               tokens from the Miden Faucet. Once the note has been committed on
-              testnet, you will be able to continue the tutorial.
+              testnet, you will be able to continue.
             </p>
           }
         />

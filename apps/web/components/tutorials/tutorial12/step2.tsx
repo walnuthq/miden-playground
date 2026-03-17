@@ -13,7 +13,7 @@ const useCompleted = () => {
 };
 
 const Step2: TutorialStep = {
-  title: "Deploy a new 1/1 multisig.",
+  title: "Deploy a new guardian.",
   Content: () => {
     const completed = useCompleted();
     return (
@@ -21,12 +21,13 @@ const Step2: TutorialStep = {
         <Step2Content />
         <TutorialAlert
           completed={completed}
-          title="Action required: Deploy a multisig"
-          titleWhenCompleted="Your multisig has been deployed."
+          title="Action required: Deploy a guardian"
+          titleWhenCompleted="Your guardian has been deployed."
           description={
             <p>
-              Click on the <em>"Create new account"</em> button and deploy a{" "}
-              multisig wallet using a 1/1 threshold.
+              Click on the <em>"Create new account"</em> button and deploy a new
+              Miden Guardian secured wallet then navigate to your account
+              details page.
             </p>
           }
         />

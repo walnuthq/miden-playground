@@ -57,7 +57,7 @@ const Account = ({
           <TabsList>
             <TabsTrigger value="information">Information</TabsTrigger>
             {account.multisig && (
-              <TabsTrigger value="multisig">Multisig</TabsTrigger>
+              <TabsTrigger value="guardian">Guardian</TabsTrigger>
             )}
             <TabsTrigger value="components">Components</TabsTrigger>
           </TabsList>
@@ -69,7 +69,7 @@ const Account = ({
           <AccountInformation account={account} />
         </TabsContent>
         {account.multisig && (
-          <TabsContent value="multisig">
+          <TabsContent value="guardian">
             <AccountMultisig account={account} />
           </TabsContent>
         )}

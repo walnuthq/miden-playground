@@ -10,11 +10,12 @@ import Step7 from "@/components/tutorials/tutorial12/step7";
 
 const tutorial: Tutorial = {
   ...defaultTutorial(),
-  id: "wallet-backup",
+  id: "wallet-backup-using-miden-guardian",
   number: 12,
-  title: "Wallet backup",
-  tagline: "Backup your wallet using the Private State Manager and a multisig.",
-  description: "",
+  title: "Wallet backup using Miden Guardian",
+  tagline: "Backup your wallet using a Guardian.",
+  description:
+    "This tutorial teaches you how to backup your private wallet state using Miden Guardian, a system that allows a device, or a group of devices, to backup and sync their state securely without trust assumptions about the server operator.",
   category: "advanced",
   initialRoute: "/accounts",
   state,

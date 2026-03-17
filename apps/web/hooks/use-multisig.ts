@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   useWallet,
   type MessageSignerWalletAdapter,
@@ -19,6 +20,7 @@ import useGlobalContext from "@/components/global-context/hook";
 import { psmClient } from "@/lib/psm-client";
 
 const useMultisig = () => {
+  const [multisig, setMultisig] = useState<Multisig | null>(null);
   const { wallet } = useWallet();
   const { session: midenWalletSession, signBytes } = useMidenWallet(
     (wallet?.adapter as MessageSignerWalletAdapter) ?? null,
@@ -46,7 +48,7 @@ const useMultisig = () => {
       midenWalletSession.commitment,
       midenWalletSession.scheme,
     );
-    const multisig = await multisigClient.create(
+    const newMultisig = await multisigClient.create(
       {
         threshold,
         signerCommitments: [signer.commitment],
@@ -55,13 +57,14 @@ const useMultisig = () => {
       },
       signer,
     );
-    await multisig.registerOnPsm();
-    const config = await multisig.getAccountConfig();
-    if (!multisig.account) {
+    await newMultisig.registerOnPsm();
+    setMultisig(newMultisig);
+    const config = await newMultisig.getAccountConfig();
+    if (!newMultisig.account) {
       return;
     }
     const account = wasmAccountToAccount({
-      wasmAccount: multisig.account,
+      wasmAccount: newMultisig.account,
       name,
       components: ["multisig", "psm", "basic-wallet"],
       multisig: {
@@ -85,6 +88,9 @@ const useMultisig = () => {
     if (!midenWalletSession.commitment || !midenWalletSession.scheme) {
       return;
     }
+    if (multisig) {
+      return multisig;
+    }
     dispatch({ type: "SUBMITTING_TRANSACTION" });
     const { client: multisigClient } = await initMultisigClient(
       client,
@@ -96,7 +102,9 @@ const useMultisig = () => {
       midenWalletSession.scheme,
     );
     dispatch({ type: "TRANSACTION_SUBMITTED" });
-    return multisigClient.load(accountId, signer);
+    const loadedMultisig = await multisigClient.load(accountId, signer);
+    setMultisig(loadedMultisig);
+    return loadedMultisig;
   };
   const isMultisigSigner = ({ multisig }: Account) => {
     if (
@@ -329,7 +337,7 @@ const useMultisig = () => {
     if (!multisig || !multisig.account) {
       throw new Error("Multisig not found");
     }
-    dispatch({ type: "SUBMITTING_TRANSACTION" });
+    // dispatch({ type: "SUBMITTING_TRANSACTION" });
     const [config, syncSummary] = await Promise.all([
       multisig.getAccountConfig(),
       client.syncState(),
@@ -360,7 +368,7 @@ const useMultisig = () => {
         blockNum: syncSummary.blockNum(),
       },
     });
-    dispatch({ type: "TRANSACTION_SUBMITTED" });
+    // dispatch({ type: "TRANSACTION_SUBMITTED" });
     return account;
   };
   return {

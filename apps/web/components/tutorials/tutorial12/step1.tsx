@@ -24,8 +24,7 @@ const Step1: TutorialStep = {
             <p>
               Click on the <em>"Select Wallet"</em> button in the top-right
               corner and connect a <strong>Private</strong> wallet to the
-              Playground, then once imported, navigate to your account details
-              page.
+              Playground.
             </p>
           }
         />

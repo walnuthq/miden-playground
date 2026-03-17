@@ -21,7 +21,7 @@ import useMultisig from "@/hooks/use-multisig";
 const DeployMultisigDialog = () => {
   const { createMultisig } = useMultisig();
   const {
-    connectedWallet,
+    // connectedWallet,
     deployMultisigDialogOpen,
     closeDeployMultisigDialog,
   } = useAccounts();
@@ -41,8 +41,10 @@ const DeployMultisigDialog = () => {
         onInteractOutside={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle>Deploy Multisig</DialogTitle>
-          <DialogDescription>Deploy a new multisig account.</DialogDescription>
+          <DialogTitle>Deploy Guardian</DialogTitle>
+          <DialogDescription>
+            Deploy a new Miden Guardian wallet.
+          </DialogDescription>
         </DialogHeader>
         <form
           id="deploy-multisig-form"
@@ -52,7 +54,7 @@ const DeployMultisigDialog = () => {
             setLoading(true);
             const account = await createMultisig({
               name: formData.get("name")!.toString(),
-              threshold: Number(formData.get("threshold")!.toString()),
+              threshold: 1, //Number(formData.get("threshold")!.toString()),
             });
             toast(`${account?.name} has been deployed.`, {
               description: (
@@ -67,7 +69,7 @@ const DeployMultisigDialog = () => {
               <Label htmlFor="name">Name</Label>
               <Input id="name" name="name" required />
             </div>
-            <div className="grid gap-3 col-span-2">
+            {/* <div className="grid gap-3 col-span-2">
               <Label htmlFor="threshold">Signature threshold</Label>
               <Input
                 id="threshold"
@@ -91,7 +93,7 @@ const DeployMultisigDialog = () => {
               <Button type="button" variant="secondary" disabled>
                 Add signer
               </Button>
-            </div>
+            </div> */}
           </div>
         </form>
         <DialogFooter>

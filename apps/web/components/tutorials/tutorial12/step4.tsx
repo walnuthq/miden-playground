@@ -29,7 +29,8 @@ const Step4: TutorialStep = {
             <p>
               Click on the <EllipsisVertical className="size-4 inline" /> icon
               button on the right-most side of the consumable note row in your
-              account page details to consume the note with your wallet.
+              account page details to create a consume note proposal on your
+              guardian.
             </p>
           }
         />
