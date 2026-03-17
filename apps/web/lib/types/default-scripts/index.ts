@@ -3,10 +3,12 @@ import base from "@/lib/types/default-scripts/base";
 import noAuth from "@/lib/types/default-scripts/no-auth";
 import falcon512RpoAuth from "@/lib/types/default-scripts/falcon-512-rpo-auth";
 import ecdsaK256KeccakAuth from "@/lib/types/default-scripts/ecdsa-k256-keccak-auth";
+import multisig from "@/lib/types/default-scripts/multisig";
 import p2id from "@/lib/types/default-scripts/p2id";
 // import p2ide from "@/lib/types/default-scripts/p2ide";
 import basicFungibleFaucet from "@/lib/types/default-scripts/basic-fungible-faucet";
 import basicWallet from "@/lib/types/default-scripts/basic-wallet";
+import psm from "@/lib/types/default-scripts/psm";
 import counterContract from "@/lib/types/default-scripts/counter-contract";
 
 const defaultScripts = [
@@ -15,10 +17,12 @@ const defaultScripts = [
   noAuth,
   falcon512RpoAuth,
   ecdsaK256KeccakAuth,
+  multisig,
   p2id,
   // p2ide,
   basicFungibleFaucet,
   basicWallet,
+  psm,
   counterContract,
 ];
 

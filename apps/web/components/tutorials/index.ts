@@ -9,6 +9,14 @@ import tutorial8 from "@/components/tutorials/tutorial8";
 import tutorial9 from "@/components/tutorials/tutorial9";
 import tutorial10 from "@/components/tutorials/tutorial10";
 import tutorial11 from "@/components/tutorials/tutorial11";
+import tutorial12 from "@/components/tutorials/tutorial12";
+
+if (
+  typeof window !== "undefined" &&
+  new URL(window.location.href).searchParams.get("preview-tutorials") === "true"
+) {
+  localStorage.setItem("preview-tutorials", "true");
+}
 
 const tutorials = [
   tutorial1,
@@ -22,6 +30,14 @@ const tutorials = [
   tutorial9,
   tutorial10,
   tutorial11,
+  // tutorial12,
 ];
+
+if (
+  typeof window !== "undefined" &&
+  localStorage.getItem("preview-tutorials") === "true"
+) {
+  tutorials.push(tutorial12);
+}
 
 export default tutorials;

@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import db from "@/db";
 import { packagesTable } from "@/db/schema";
 import type { NewPackage, PackageStatus, Export } from "@/lib/types";
-import { isValidUuidv4 } from "@/lib/utils";
+import { isValidUUIDv4 } from "@/lib/utils";
 import { defaultDependenciesRecords } from "@/lib/default-dependencies";
 
 export const getReadOnlyPackage = ({
@@ -61,7 +61,7 @@ export const deletePackage = (id: string) =>
 
 export const getDependencies = async (dependencies: string[]) => {
   const defaultDependencies = dependencies
-    .filter((dependency) => !isValidUuidv4(dependency))
+    .filter((dependency) => !isValidUUIDv4(dependency))
     .map(
       (dependency) => defaultDependenciesRecords[dependency as "basic-wallet"],
     );
@@ -76,7 +76,7 @@ export const getDependencies = async (dependencies: string[]) => {
     },
     where: {
       id: {
-        in: dependencies.filter((dependency) => isValidUuidv4(dependency)),
+        in: dependencies.filter((dependency) => isValidUUIDv4(dependency)),
       },
     },
   });

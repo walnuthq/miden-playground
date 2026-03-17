@@ -5,7 +5,7 @@ import {
   type Dependency,
   type ScriptType,
 } from "@/lib/types/script";
-import { formatProcedureExportPath } from "@/lib/utils";
+import { formatProcedureExportPath, isValidUUIDv4 } from "@/lib/utils";
 import { API_URL } from "@/lib/constants";
 
 export const createScript = async ({
@@ -41,10 +41,7 @@ export const createScript = async ({
 };
 
 export const compileScript = async (script: Script) => {
-  const isExample =
-    script.id.startsWith("counter-account") ||
-    script.id.startsWith("p2id-note");
-  const apiUrl = isExample ? "/api" : API_URL;
+  const apiUrl = isValidUUIDv4(script.id) ? API_URL : "/api";
   const response = await fetch(`${apiUrl}/scripts/${script.id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
@@ -75,9 +72,7 @@ export const compileScript = async (script: Script) => {
 };
 
 export const deleteScript = async (scriptId: string) => {
-  const isExample =
-    scriptId.startsWith("counter-account") || scriptId.startsWith("p2id-note");
-  const apiUrl = isExample ? "/api" : API_URL;
+  const apiUrl = isValidUUIDv4(scriptId) ? API_URL : "/api";
   const response = await fetch(`${apiUrl}/scripts/${scriptId}`, {
     method: "DELETE",
   });

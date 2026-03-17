@@ -28,6 +28,8 @@ export const MIDEN_NOTE_TRANSPORT_URL = "https://transport.miden.io";
 export const MIDEN_TESTNET_EXPLORER_URL = "https://testnet.midenscan.com";
 export const MIDEN_DEVNET_EXPLORER_URL = "https://devnet.midenscan.com";
 export const MIDEN_EXPLORER_URL = MIDEN_TESTNET_EXPLORER_URL;
+export const MIDEN_PSM_ENDPOINT_URL =
+  process.env.NEXT_PUBLIC_MIDEN_PSM_ENDPOINT_URL ?? "http://localhost:3002";
 export const MIDEN_FAUCET_API_URL = "https://faucet-api.testnet.miden.io";
 export const MIDEN_FAUCET_ACCOUNT_ID = "0x37d5977a8e16d8205a360820f0230f";
 export const MIDEN_FAUCET_ADDRESS =

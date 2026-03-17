@@ -1,0 +1,16 @@
+import { EllipsisVertical } from "lucide-react";
+import WalletAlert from "@/components/tutorials/wallet-alert";
+
+In the previous step, we requested 100 tokens from the [Miden Faucet](https://faucet.testnet.miden.io/).
+
+The resulting output note containing our tokens must now be consumed to fund our guardian.
+
+Contrary to a regular wallet, we can't consume the note directly to fund our guardian, we must first create a **Consume Note** proposal to initiate a state change on the guardian.
+
+This process is mandatory to notify the Miden Guardian system we want to push a state change on our private state so it can keep track of the proposed update.
+
+Click on the <EllipsisVertical className="size-4 inline" /> icon button in the _"Consumable Notes"_ table to create a consume note proposal.
+
+A _"Confirm Signature"_ modal from your Miden Wallet will show up asking you to sign the proposal creation.
+
+The note will disappear from your wallet consumable notes as it is now included in a consume note proposal.

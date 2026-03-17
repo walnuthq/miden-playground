@@ -34,6 +34,7 @@ export type State = {
   deployAccountDialogOpen: boolean;
   verifyAccountComponentDialogOpen: boolean;
   verifyAccountComponentDialogAccountId: string;
+  deployMultisigDialogOpen: boolean;
   accounts: Account[];
   // TRANSACTIONS
   submittingTransaction: boolean;
@@ -96,6 +97,7 @@ export const defaultState = (): State => ({
   deployAccountDialogOpen: false,
   verifyAccountComponentDialogOpen: false,
   verifyAccountComponentDialogAccountId: "",
+  deployMultisigDialogOpen: false,
   accounts: [],
   // TRANSACTIONS
   submittingTransaction: false,

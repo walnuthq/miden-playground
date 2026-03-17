@@ -6,6 +6,14 @@ const basicFungibleFaucet: Component = {
   name: "Basic Fungible Faucet",
   type: "account",
   scriptId: "basic-fungible-faucet",
+  storageSlots: [
+    { name: "miden::protocol::faucet::sysdata", type: "value", value: "0" },
+    {
+      name: "miden::standards::fungible_faucets::metadata",
+      type: "value",
+      value: "0",
+    },
+  ],
 };
 
 export default basicFungibleFaucet;

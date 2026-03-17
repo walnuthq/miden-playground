@@ -38,7 +38,8 @@ const ScriptComponent = ({
   if (!script) {
     notFound();
   }
-  const tab = searchParams.get("tab") ?? "rust";
+  const defaultTab = script.rust !== "" ? "rust" : "masm";
+  const tab = searchParams.get("tab") ?? defaultTab;
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
       <Tabs

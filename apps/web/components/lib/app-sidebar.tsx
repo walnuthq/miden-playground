@@ -15,6 +15,8 @@ import {
   FileText,
   Key,
   ReceiptText,
+  // Signature,
+  ShieldUser,
 } from "lucide-react";
 import { useIsClient } from "usehooks-ts";
 import NavMain from "@/components/lib/nav-main";
@@ -70,11 +72,13 @@ const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
       items: accounts
         .sort((a, b) => b.updatedAt - a.updatedAt)
         .slice(0, 5)
-        .map(({ name, identifier, isFaucet, components }) => ({
+        .map(({ name, identifier, isFaucet, components, multisig }) => ({
           title: name,
           url: `/accounts/${identifier}`,
           icon: isFaucet ? (
             <HandCoins className="size-4" />
+          ) : multisig ? (
+            <ShieldUser className="size-4" />
           ) : components.includes("basic-wallet") ? (
             <Wallet className="size-4" />
           ) : (

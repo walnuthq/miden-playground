@@ -1,0 +1,14 @@
+import { EllipsisVertical } from "lucide-react";
+import Link from "@/components/tutorials/tutorial-link";
+
+Click on the {props.account ? <Link href={`/accounts/${props.account.identifier}?tab=guardian`}>Guardian</Link> : <em>"Guardian"</em>} tab of your wallet backup to list the ongoing state changes proposals.
+
+At the moment, we only have the consume note proposal initiated in the previous step in the **Pending** state: let's sign this proposal to approve the requested change and confirm we're willing to consume the note with our guardian wallet.
+
+Click on the <EllipsisVertical className="size-4 inline" /> icon button in the _"Proposals"_ table to sign the consume note proposal.
+
+After signing with your connected wallet, the proposal will transition from **Pending** to **Ready**, the final step is to execute the proposal: click on the <EllipsisVertical className="size-4 inline" /> icon button again to execute the proposal against your guardian account.
+
+It will take some time for the proposal to actually go through as we need to prove the state changing transaction, send it to the Miden Guardian infrastructure and wait for settlement to confirm our new wallet state has been validated on-chain.
+
+Once this is completed, you can go back to your guardian wallet {props.account ? <Link href={`/accounts/${props.account.identifier}`}>Information</Link> : <em>"Information"</em>} tab to see your assets vault updated.

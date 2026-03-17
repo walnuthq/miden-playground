@@ -88,22 +88,47 @@ const useAppState = () => {
           accounts.push(previousAccount);
           continue;
         }
-        if (previousAccount.address === address) {
-          const connectedWalletP2IDNotes = previousInputNotes.filter(
-            ({ scriptRoot, inputs }) => {
-              const [suffix = "", prefix = ""] = inputs;
-              const targetAccountId = accountIdFromPrefixSuffix(prefix, suffix);
-              return (
-                scriptRoot === P2ID_NOTE_CODE &&
-                targetAccountId === previousAccount.id
-              );
-            },
+        const previousAccountP2IDNotes = previousInputNotes.filter(
+          ({ scriptRoot, inputs }) => {
+            const [suffix = "", prefix = ""] = inputs;
+            const targetAccountId = accountIdFromPrefixSuffix(prefix, suffix);
+            return (
+              scriptRoot === P2ID_NOTE_CODE &&
+              targetAccountId === previousAccount.id
+            );
+          },
+        );
+        const previousAccountConsumableP2IDNotes =
+          previousAccountP2IDNotes.filter(
+            ({ state }) => !state.includes("consumed"),
           );
+        if (previousAccount.multisig) {
+          const pendingConsumableNotesProposalsNoteIds =
+            previousAccount.multisig.proposals.reduce<string[]>(
+              (previousValue, currentValue) =>
+                ["pending", "ready"].includes(currentValue.status.type) &&
+                currentValue.metadata.proposalType === "consume_notes"
+                  ? [...previousValue, ...currentValue.metadata.noteIds]
+                  : previousValue,
+              [],
+            );
+          accounts.push({
+            ...previousAccount,
+            consumableNoteIds: previousAccountConsumableP2IDNotes
+              .filter(
+                ({ id }) =>
+                  !pendingConsumableNotesProposalsNoteIds.includes(id),
+              )
+              .map(({ id }) => id),
+          });
+          continue;
+        }
+        if (previousAccount.address === address) {
           const isNewPublicAccount =
             previousAccount.storageMode === "public" && previousAccount.isNew;
           // always re-add notes targetting connected wallet
           inputNotes.push(
-            ...connectedWalletP2IDNotes
+            ...previousAccountP2IDNotes
               .filter(({ id }) => !inputNotes.find((note) => note.id === id))
               .map((note) => ({
                 ...note,
@@ -112,15 +137,11 @@ const useAppState = () => {
                   : ("consumed-external" as NoteState),
               })),
           );
-          const connectedWalletConsumableP2IDNotes =
-            connectedWalletP2IDNotes.filter(
-              ({ state }) => !state.includes("consumed"),
-            );
           // handle new public accounts updates
           if (isNewPublicAccount) {
             accounts.push({
               ...previousAccount,
-              consumableNoteIds: connectedWalletConsumableP2IDNotes.map(
+              consumableNoteIds: previousAccountConsumableP2IDNotes.map(
                 ({ id }) => id,
               ),
             });
@@ -131,7 +152,7 @@ const useAppState = () => {
             const assets = await requestAssets?.();
             accounts.push({
               ...previousAccount,
-              consumableNoteIds: connectedWalletConsumableP2IDNotes.map(
+              consumableNoteIds: previousAccountConsumableP2IDNotes.map(
                 ({ id }) => id,
               ),
               fungibleAssets: assets

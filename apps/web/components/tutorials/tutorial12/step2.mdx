@@ -1,0 +1,10 @@
+import Link from "@/components/tutorials/tutorial-link";
+
+Setting up a Miden Guardian secured wallet involves using 2 accounts:
+
+- **The Guardian** is where your wallet funds are secured, by storing a backup of your private account offchain and providing an interface to update, sync and restore your private state.
+- **The Signer** is a regular private wallet controlling the Guardian: it is responsible for creating it, signing transactions updating the Guardian state and as the owner, it is capable of restoring your wallet backup if you lose access to your private state.
+
+Let's deploy a **Guardian** using our connected private wallet as a **Signer**: from the <Link href="/accounts">accounts page</Link>, click on _"Create new account"_ and select the _"Deploy guardian"_ option.
+
+Give your new wallet backup a name and click on the _"Deploy"_ button to create your guardian-protected wallet, you will be asked to sign the deployment configuration to add your private wallet as a registered **Signer**.

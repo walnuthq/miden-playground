@@ -14,6 +14,7 @@ import {
 } from "@miden-sdk/miden-sdk";
 import {
   type Account,
+  type AccountMultisig,
   type AccountStorageMode,
   type AccountType,
   type StorageItem,
@@ -59,7 +60,7 @@ export const clientNewWallet = ({
   storageMode,
   mutable,
   initSeed,
-  midenSdk: { AccountStorageMode },
+  midenSdk: { AccountStorageMode, AuthScheme },
 }: {
   client: WebClientType;
   storageMode: AccountStorageMode;
@@ -72,7 +73,7 @@ export const clientNewWallet = ({
       ? AccountStorageMode.public()
       : AccountStorageMode.private(),
     mutable,
-    0,
+    AuthScheme.AuthRpoFalcon512,
     initSeed,
   );
 
@@ -83,7 +84,7 @@ export const clientNewFaucet = ({
   tokenSymbol,
   decimals,
   maxSupply,
-  midenSdk: { AccountStorageMode },
+  midenSdk: { AccountStorageMode, AuthScheme },
 }: {
   client: WebClientType;
   storageMode: AccountStorageMode;
@@ -101,7 +102,7 @@ export const clientNewFaucet = ({
     tokenSymbol,
     decimals,
     maxSupply,
-    0,
+    AuthScheme.AuthRpoFalcon512,
   );
 
 export const clientExecuteTransaction = async ({
@@ -478,6 +479,7 @@ export const clientDeployAccount = async ({
         );
     const procedures = accountComponent.getProcedures();
     for (const procedure of procedures) {
+      console.log(script.id);
       console.log(procedure.digest.toHex());
     }
     // if (script.id === "no-auth") {
@@ -747,6 +749,7 @@ export const wasmAccountToAccount = ({
   wasmAccount,
   name,
   components,
+  multisig,
   networkId,
   updatedAt,
   consumableNoteIds,
@@ -755,6 +758,7 @@ export const wasmAccountToAccount = ({
   wasmAccount: WasmAccountType;
   name: string;
   components?: string[];
+  multisig?: AccountMultisig;
   networkId: NetworkId;
   updatedAt: number;
   consumableNoteIds?: string[];
@@ -823,6 +827,7 @@ export const wasmAccountToAccount = ({
     }, []),
     consumableNoteIds: consumableNoteIds ?? [],
     components: verifiedComponents,
+    multisig,
     updatedAt,
   };
   if (wasmAccount.isFaucet()) {
@@ -831,7 +836,13 @@ export const wasmAccountToAccount = ({
     account.symbol = basicFungibleFaucetComponent.symbol().toString();
     account.decimals = basicFungibleFaucetComponent.decimals();
     account.maxSupply = basicFungibleFaucetComponent.maxSupply().toString();
-    const [, , , totalSupply] = stringToFeltArray(getItem(account.storage, 0));
+    const [, , , totalSupply] = stringToFeltArray(
+      getItem(
+        account.storage.find(
+          ({ name }) => name === "miden::standards::fungible_faucets::metadata",
+        ),
+      ),
+    );
     account.totalSupply = totalSupply!.toString();
   }
   return account;

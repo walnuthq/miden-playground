@@ -25,6 +25,8 @@
     "@monaco-editor/react": "^4.7.0",
     "@next/mdx": "^16.1.6",
     "@opennextjs/cloudflare": "^1.17.1",
+    "@openzeppelin/miden-multisig-client": "^0.13.1",
+    "@openzeppelin/psm-client": "^0.13.1",
     "@tanstack/react-query": "^5.90.21",
     "@tanstack/react-table": "^8.21.3",
     "@workspace/ui": "workspace:*",
@@ -51,6 +53,6 @@
     "@workspace/typescript-config": "workspace:*",
     "eslint": "^9.39.4",
     "typescript": "^5.9.3",
-    "wrangler": "^4.73.0"
+    "wrangler": "^4.74.0"
   }
 }

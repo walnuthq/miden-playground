@@ -1,0 +1,13 @@
+In this tutorial, we'll discover how to protect your private wallet using Miden Guardian, a service allowing you to securely backup and sync your private state without trust assumptions about the server operator.
+
+Previously, we learned that when you are the custodian of your account state (in the case of a private wallet), **losing this state amounts to losing your funds**, similar to losing a private key. Suppose your private wallet lives on your mobile phone: if you lose it, you lose all your assets…
+
+Fortunately, the Miden ecosystem addressed this UX issue by creating Miden Guardian, an offchain system responsible for storing your private wallet state and restoring it if you can prove you're the owner of this private account.
+
+**Miden Guardian enables backups for solo account**: we can recover a private account state in case it is lost.
+
+Let's setup a Miden Guardian protected wallet backup to secure our funds and use a regular private Miden Wallet to control it.
+
+Click on the Miden Wallet browser extension to select a **Private** account, if you don't have any, create a new one by clicking on your current account dropdown then click on _"Add account"_, make sure to select the _"Off-chain Account (Private)"_ option.
+
+Connect your **Private** wallet by clicking on _"Select Wallet"_, you will be requested access to your **Private** account state, accept and click on _"Connect"_.

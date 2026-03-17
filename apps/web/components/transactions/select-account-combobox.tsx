@@ -11,6 +11,7 @@ import {
 import { getIdentifierPart } from "@/lib/types/account";
 import useMidenSdk from "@/hooks/use-miden-sdk";
 import { addressToAccountId } from "@/lib/web-client";
+import useMultisig from "@/hooks/use-multisig";
 
 const SelectAccountCombobox = ({
   onValueChange,
@@ -18,10 +19,15 @@ const SelectAccountCombobox = ({
   onValueChange: Dispatch<SetStateAction<string>>;
 }) => {
   const { midenSdk } = useMidenSdk();
-  const { connectedWallet, accounts } = useAccounts();
+  const { connectedWallet, accounts, multisigs } = useAccounts();
+  const { isMultisigSigner } = useMultisig();
   const [value, setValue] = useState("");
   const items = accounts
-    .filter(({ id }) => id !== connectedWallet?.id)
+    .filter(({ id }) =>
+      id === connectedWallet?.id
+        ? multisigs.some((multisig) => isMultisigSigner(multisig))
+        : true,
+    )
     .map(({ identifier }) => identifier);
   if (value !== "" && !items.includes(value)) {
     items.unshift(value);

@@ -44,6 +44,7 @@ const reducer = (state: State, action: Action): State => {
       return stateReducer(state, action);
     }
     case "NEW_ACCOUNT":
+    case "DELETE_ACCOUNT":
     case "UPDATE_ACCOUNT":
     case "IMPORT_ACCOUNT":
     case "OPEN_CREATE_WALLET_DIALOG":
@@ -55,7 +56,9 @@ const reducer = (state: State, action: Action): State => {
     case "OPEN_DEPLOY_ACCOUNT_DIALOG":
     case "CLOSE_DEPLOY_ACCOUNT_DIALOG":
     case "OPEN_VERIFY_ACCOUNT_COMPONENT_DIALOG":
-    case "CLOSE_VERIFY_ACCOUNT_COMPONENT_DIALOG": {
+    case "CLOSE_VERIFY_ACCOUNT_COMPONENT_DIALOG":
+    case "OPEN_DEPLOY_MULTISIG_DIALOG":
+    case "CLOSE_DEPLOY_MULTISIG_DIALOG": {
       return accountReducer(state, action);
     }
     case "OPEN_CREATE_TRANSACTION_DIALOG":

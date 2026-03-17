@@ -15,16 +15,21 @@ import {
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import useAccounts from "@/hooks/use-accounts";
+import useMultisig from "@/hooks/use-multisig";
 // import useGlobalContext from "@/components/global-context/hook";
 import AccountAddress from "@/components/lib/account-address";
+import { addressToAccountId } from "@/lib/web-client";
+import useMidenSdk from "@/hooks/use-miden-sdk";
 
 const ImportAccountDialog = () => {
   // const { networkId } = useGlobalContext();
+  const { midenSdk } = useMidenSdk();
   const {
     importAccountDialogOpen,
     importAccountByAddress,
     closeImportAccountDialog,
   } = useAccounts();
+  const { isRegisteredOnPsm, importMultisig } = useMultisig();
   const [loading, setLoading] = useState(false);
   return (
     <Dialog
@@ -48,9 +53,16 @@ const ImportAccountDialog = () => {
             const formData = new FormData(event.currentTarget);
             setLoading(true);
             try {
-              const account = await importAccountByAddress({
+              //mtst1az9cpjd9dsmnayqspmt69hf3qvncxmhs_qruqqypuyph
+              const address = formData.get("address")?.toString() ?? "";
+              const accountId = addressToAccountId({ address, midenSdk });
+              const isMultisig = await isRegisteredOnPsm(accountId.toString());
+              const importAccount = isMultisig
+                ? importMultisig
+                : importAccountByAddress;
+              const account = await importAccount({
                 name: formData.get("name")?.toString() ?? "",
-                address: formData.get("address")?.toString() ?? "",
+                address,
               });
               toast(`${account.name} has been imported.`, {
                 description: (
