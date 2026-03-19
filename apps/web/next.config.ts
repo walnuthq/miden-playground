@@ -21,7 +21,7 @@ const nextConfig: NextConfig = {
       config.plugins.push(
         new webpack.NormalModuleReplacementPlugin(
           /\.wasm$/,
-          `${dirname(fileURLToPath(import.meta.url))}/public/miden_client_web.wasm`,
+          `${dirname(fileURLToPath(import.meta.url))}/public/wasm/0.13.1/miden_client_web.wasm`,
         ),
       );
     }

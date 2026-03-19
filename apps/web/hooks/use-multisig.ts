@@ -17,7 +17,6 @@ import { MIDEN_PSM_ENDPOINT_URL } from "@/lib/constants";
 import useAccounts from "@/hooks/use-accounts";
 import useMidenSdk from "@/hooks/use-miden-sdk";
 import useGlobalContext from "@/components/global-context/hook";
-import { psmClient } from "@/lib/psm-client";
 
 const useMultisig = () => {
   const [multisig, setMultisig] = useState<Multisig | null>(null);
@@ -307,24 +306,6 @@ const useMultisig = () => {
     updateAccount(account);
     dispatch({ type: "TRANSACTION_SUBMITTED" });
   };
-  const isRegisteredOnPsm = async (accountId: string) => {
-    if (!midenWalletSession.commitment || !midenWalletSession.scheme) {
-      return false;
-    }
-    try {
-      const signer = new MidenWalletSigner(
-        { signBytes },
-        midenWalletSession.commitment,
-        midenWalletSession.scheme,
-      );
-      psmClient.setSigner(signer);
-      await psmClient.getState(accountId);
-      return true;
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
-      return false;
-    }
-  };
   const importMultisig = async ({
     name,
     address,
@@ -380,7 +361,6 @@ const useMultisig = () => {
     createSendProposal,
     signTransactionProposal,
     executeTransactionProposal,
-    isRegisteredOnPsm,
     importMultisig,
   };
 };

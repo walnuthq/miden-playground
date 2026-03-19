@@ -20,6 +20,12 @@ export type CargoToml = {
         "project-kind": PackageType;
         dependencies: Record<string, { path: string }>;
       };
+      component: {
+        package: string;
+        target: {
+          dependencies: Record<string, { path: string }>;
+        };
+      };
     };
   };
 };

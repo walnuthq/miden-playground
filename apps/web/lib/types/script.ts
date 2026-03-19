@@ -87,6 +87,8 @@ export const defaultDependencies = (): Dependency[] => [
   stdDependency,
 ];
 
+export type PackageSource = { cargoToml: string; rust: string };
+
 export type Script = {
   id: string;
   name: string;

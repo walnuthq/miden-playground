@@ -34,6 +34,7 @@ export type AccountAction =
     }
   | {
       type: "OPEN_IMPORT_ACCOUNT_DIALOG";
+      payload: { multisig: boolean };
     }
   | {
       type: "CLOSE_IMPORT_ACCOUNT_DIALOG";
@@ -138,12 +139,14 @@ const reducer = (state: State, action: AccountAction): State => {
       return {
         ...state,
         importAccountDialogOpen: true,
+        importAccountDialogMultisig: action.payload.multisig,
       };
     }
     case "CLOSE_IMPORT_ACCOUNT_DIALOG": {
       return {
         ...state,
         importAccountDialogOpen: false,
+        importAccountDialogMultisig: false,
       };
     }
     case "OPEN_DEPLOY_ACCOUNT_DIALOG": {

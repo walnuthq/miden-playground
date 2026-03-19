@@ -5,7 +5,8 @@ import {
   Download,
   Upload,
   // Signature,
-  ShieldUser,
+  ShieldPlus,
+  ShieldCheck,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -53,7 +54,7 @@ const CreateAccountDropdownMenu = () => {
         )}
         {networkId !== "mmck" && (
           <>
-            <DropdownMenuItem onClick={openImportAccountDialog}>
+            <DropdownMenuItem onClick={() => openImportAccountDialog()}>
               <Download />
               Import account
             </DropdownMenuItem>
@@ -75,8 +76,17 @@ const CreateAccountDropdownMenu = () => {
                 !connectedWallet || connectedWallet.storageMode !== "private"
               }
             >
-              <ShieldUser />
+              <ShieldPlus />
               Deploy guardian
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => openImportAccountDialog(true)}
+              disabled={
+                !connectedWallet || connectedWallet.storageMode !== "private"
+              }
+            >
+              <ShieldCheck />
+              Restore guardian
             </DropdownMenuItem>
           </>
         )}

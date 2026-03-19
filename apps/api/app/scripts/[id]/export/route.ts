@@ -1,6 +1,8 @@
+import { mkdir, cp, readFile, writeFile } from "node:fs/promises";
 import { type NextRequest, NextResponse } from "next/server";
 import archiver from "archiver";
-import { getPackage } from "@/db/packages";
+import { safeRm } from "@/lib/utils";
+import { getPackage, getDependencies } from "@/db/packages";
 import { packageExists, generatePackageDir } from "@/lib/miden-compiler";
 import { PACKAGES_PATH } from "@/lib/constants";
 
@@ -47,14 +49,49 @@ export const GET = async (
         archive.on("end", () => {
           controller.close();
         });
-        // Add folder contents (root level - no parent folder in zip)
-        // archive.directory(`${PACKAGES_PATH}/${id}`, false);
-        archive.glob("**", {
-          cwd: `${PACKAGES_PATH}/${id}`,
-          ignore: "target/**",
+        await mkdir(`${PACKAGES_PATH}/${id}-export`);
+        const copyOptions = {
+          recursive: true,
+          filter: (source: string) =>
+            !source.includes("target") && !source.includes("Cargo.lock"),
+        };
+        await cp(
+          `${PACKAGES_PATH}/${id}`,
+          `${PACKAGES_PATH}/${id}-export/${name}`,
+          copyOptions,
+        );
+        let cargoToml = await readFile(
+          `${PACKAGES_PATH}/${id}-export/${name}/Cargo.toml`,
+          "utf-8",
+        );
+        const dependenciesPackages =
+          dependencies.length > 0 ? await getDependencies(dependencies) : [];
+        dependenciesPackages.forEach((dependencyPackage) => {
+          cargoToml = cargoToml.replaceAll(
+            `/tmp/${dependencyPackage.id}`,
+            `../${dependencyPackage.name}`,
+          );
         });
+        await writeFile(
+          `${PACKAGES_PATH}/${id}-export/${name}/Cargo.toml`,
+          cargoToml,
+        );
+        await Promise.all(
+          dependenciesPackages.map((dependencyPackage) =>
+            cp(
+              `${PACKAGES_PATH}/${dependencyPackage.id}`,
+              `${PACKAGES_PATH}/${id}-export/${dependencyPackage.name}`,
+              copyOptions,
+            ),
+          ),
+        );
+        archive.directory(`${PACKAGES_PATH}/${id}-export`, false);
         // Finalize (start zipping)
         await archive.finalize();
+        await safeRm(`${PACKAGES_PATH}/${id}-export`, {
+          recursive: true,
+          force: true,
+        });
       },
     });
     return new NextResponse(stream, {

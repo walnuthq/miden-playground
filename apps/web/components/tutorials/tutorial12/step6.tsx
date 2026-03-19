@@ -55,7 +55,7 @@ const Step6: TutorialStep = {
           description={
             <p>
               Click on the <em>"Create new account"</em> button on top of the
-              accounts page and select the <em>"Import account"</em> option to
+              accounts page and select the <em>"Restore guardian"</em> option to
               restore your guardian wallet backup.
             </p>
           }
