@@ -4,7 +4,7 @@ use miden_client::{
     account::{Account, AccountId},
     builder::ClientBuilder,
     keystore::FilesystemKeyStore,
-    note::{NoteFile, NoteId},
+    note::{Note, NoteFile, NoteId},
     rpc::{Endpoint, GrpcClient},
     store::AccountRecordData,
     utils::Deserializable,
@@ -97,10 +97,18 @@ async fn main() -> Result<()> {
         }
         "note" => {
             let note_id = NoteId::try_from_hex(resource_id)?;
-            client.import_notes(&[NoteFile::NoteId(note_id)]).await?;
-            let note_record = client.get_input_note(note_id).await?.unwrap();
 
-            let verified = package.digest() == note_record.details().script().root();
+            let note = if resource_path.as_str() == "/dev/null" {
+                client.import_notes(&[NoteFile::NoteId(note_id)]).await?;
+                let note_record = client.get_input_note(note_id).await?.unwrap();
+                note_record.try_into().unwrap()
+            } else {
+                let resource = fs::read_to_string(resource_path)?;
+                let resource_bytes = BASE64_STANDARD.decode(resource)?;
+                Note::read_from_bytes(&resource_bytes)?
+            };
+
+            let verified = package.digest() == note.script().root();
 
             return if verified {
                 Ok(())

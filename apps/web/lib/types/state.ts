@@ -31,6 +31,7 @@ export type State = {
   createWalletDialogOpen: boolean;
   createFaucetDialogOpen: boolean;
   importAccountDialogOpen: boolean;
+  importAccountDialogMultisig: boolean;
   deployAccountDialogOpen: boolean;
   verifyAccountComponentDialogOpen: boolean;
   verifyAccountComponentDialogAccountId: string;
@@ -94,6 +95,7 @@ export const defaultState = (): State => ({
   createWalletDialogOpen: false,
   createFaucetDialogOpen: false,
   importAccountDialogOpen: false,
+  importAccountDialogMultisig: false,
   deployAccountDialogOpen: false,
   verifyAccountComponentDialogOpen: false,
   verifyAccountComponentDialogAccountId: "",
@@ -210,31 +212,6 @@ export const stateDeserializer = (value: string): State => {
       nextTutorialStepDisabled?: boolean;
       completedTutorials?: string[];
     };
-    // TODO remove completedTutorials migration
-    let migratedCompletedTutorials = completedTutorials;
-    if (
-      completedTutorials &&
-      completedTutorials.length > 0 &&
-      typeof completedTutorials[0] === "number"
-    ) {
-      migratedCompletedTutorials = completedTutorials
-        .map((tutorialNumber) => {
-          const tutorialNumberToTutorialId = {
-            1: "create-and-fund-wallet",
-            2: "transfer-assets-between-wallets",
-            3: "connect-wallet-and-sign-transactions",
-            4: "interact-with-the-counter-contract",
-            5: "deploy-a-counter-contract",
-            6: "timelock-p2id-note",
-            7: "network-transactions",
-            8: "foreign-procedure-invocation",
-          } as const;
-          return tutorialNumberToTutorialId[
-            tutorialNumber as unknown as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8
-          ];
-        })
-        .filter((tutorialId) => tutorialId !== undefined);
-    }
     const initialState = defaultState();
     return {
       ...initialState,
@@ -254,8 +231,8 @@ export const stateDeserializer = (value: string): State => {
       tutorialOpen: tutorialOpen ?? initialState.tutorialOpen,
       nextTutorialStepDisabled:
         nextTutorialStepDisabled ?? initialState.nextTutorialStepDisabled,
-      completedTutorials: migratedCompletedTutorials
-        ? new Set(migratedCompletedTutorials)
+      completedTutorials: completedTutorials
+        ? new Set(completedTutorials)
         : initialState.completedTutorials,
     };
   } catch (error) {

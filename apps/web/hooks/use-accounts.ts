@@ -45,6 +45,7 @@ const useAccounts = () => {
     createWalletDialogOpen,
     createFaucetDialogOpen,
     importAccountDialogOpen,
+    importAccountDialogMultisig,
     deployAccountDialogOpen,
     verifyAccountComponentDialogOpen,
     verifyAccountComponentDialogAccountId,
@@ -340,9 +341,10 @@ const useAccounts = () => {
     dispatch({
       type: "CLOSE_CREATE_FAUCET_DIALOG",
     });
-  const openImportAccountDialog = () =>
+  const openImportAccountDialog = (multisig = false) =>
     dispatch({
       type: "OPEN_IMPORT_ACCOUNT_DIALOG",
+      payload: { multisig },
     });
   const closeImportAccountDialog = () =>
     dispatch({
@@ -378,6 +380,7 @@ const useAccounts = () => {
     createWalletDialogOpen,
     createFaucetDialogOpen,
     importAccountDialogOpen,
+    importAccountDialogMultisig,
     deployAccountDialogOpen,
     verifyAccountComponentDialogOpen,
     verifyAccountComponentDialogAccountId,

@@ -18,18 +18,16 @@ import useAccounts from "@/hooks/use-accounts";
 import useMultisig from "@/hooks/use-multisig";
 // import useGlobalContext from "@/components/global-context/hook";
 import AccountAddress from "@/components/lib/account-address";
-import { addressToAccountId } from "@/lib/web-client";
-import useMidenSdk from "@/hooks/use-miden-sdk";
 
 const ImportAccountDialog = () => {
   // const { networkId } = useGlobalContext();
-  const { midenSdk } = useMidenSdk();
   const {
     importAccountDialogOpen,
+    importAccountDialogMultisig,
     importAccountByAddress,
     closeImportAccountDialog,
   } = useAccounts();
-  const { isRegisteredOnPsm, importMultisig } = useMultisig();
+  const { importMultisig } = useMultisig();
   const [loading, setLoading] = useState(false);
   return (
     <Dialog
@@ -53,11 +51,8 @@ const ImportAccountDialog = () => {
             const formData = new FormData(event.currentTarget);
             setLoading(true);
             try {
-              //mtst1az9cpjd9dsmnayqspmt69hf3qvncxmhs_qruqqypuyph
               const address = formData.get("address")?.toString() ?? "";
-              const accountId = addressToAccountId({ address, midenSdk });
-              const isMultisig = await isRegisteredOnPsm(accountId.toString());
-              const importAccount = isMultisig
+              const importAccount = importAccountDialogMultisig
                 ? importMultisig
                 : importAccountByAddress;
               const account = await importAccount({

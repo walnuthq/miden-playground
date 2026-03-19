@@ -1,4 +1,5 @@
 "use client";
+// import { groupBy } from "lodash";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -21,6 +22,7 @@ import { clientGetInputNote } from "@/lib/web-client";
 import useWebClient from "@/hooks/use-web-client";
 import { toBase64, readFileAsText } from "@/lib/utils";
 import useGlobalContext from "@/components/global-context/hook";
+// import { type PackageSource } from "@/lib/types/script";
 
 const VerifyNoteScriptDialog = () => {
   const queryClient = useQueryClient();
@@ -32,6 +34,7 @@ const VerifyNoteScriptDialog = () => {
     closeVerifyNoteScriptDialog,
   } = useNotes();
   const [loading, setLoading] = useState(false);
+  // const [packagesSources, setPackagesSources] = useState<PackageSource[]>([]);
   const [cargoToml, setCargoToml] = useState("");
   const [rust, setRust] = useState("");
   const onClose = () => {
@@ -90,14 +93,47 @@ const VerifyNoteScriptDialog = () => {
               <Input
                 id="project-dir"
                 type="file"
-                // webkitdirectory=""
-                multiple
+                webkitdirectory=""
                 onChange={async (event) => {
                   const { files } = event.target;
                   if (!files) {
                     return;
                   }
                   const filesArray = Array.from(files);
+                  // const packagesSourcesFiles = filesArray.filter(({ name }) =>
+                  //   ["Cargo.toml", "lib.rs"].includes(name),
+                  // );
+                  // const packagesSourcesFilesWithContent = await Promise.all(
+                  //   packagesSourcesFiles.map(async (packageSourceFile) => ({
+                  //     file: packageSourceFile,
+                  //     content: await readFileAsText(packageSourceFile),
+                  //   })),
+                  // );
+                  // const packagesSourcesFilesByPackage = groupBy(
+                  //   packagesSourcesFilesWithContent,
+                  //   ({ file }) =>
+                  //     file.webkitRelativePath
+                  //       .replace("/Cargo.toml", "")
+                  //       .replace("/src/lib.rs", ""),
+                  // );
+                  // const packagesSourcesList = Object.values(
+                  //   packagesSourcesFilesByPackage,
+                  // ).map((packagesSourcesFilesWithContent) =>
+                  //   packagesSourcesFilesWithContent.reduce<PackageSource>(
+                  //     (previousValue, { file, content }) => ({
+                  //       ...previousValue,
+                  //       cargoToml:
+                  //         file.name === "Cargo.toml"
+                  //           ? content
+                  //           : previousValue.cargoToml,
+                  //       rust:
+                  //         file.name === "lib.rs" ? content : previousValue.rust,
+                  //     }),
+                  //     { cargoToml: "", rust: "" },
+                  //   ),
+                  // );
+                  // setPackagesSources(packagesSourcesList);
+                  //
                   const cargoTomlFile = filesArray.find(
                     ({ name }) => name === "Cargo.toml",
                   );

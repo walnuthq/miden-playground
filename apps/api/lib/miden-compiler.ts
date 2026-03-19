@@ -1,5 +1,5 @@
 import { cp, writeFile, readFile } from "node:fs/promises";
-import { parse } from "smol-toml";
+import { parse, stringify } from "smol-toml";
 import { execFile, fileExists, safeRm } from "@/lib/utils";
 import { type Export, type Dependency, type CargoToml } from "@/lib/types";
 import { insertPackage, getDependencies } from "@/db/packages";
@@ -331,3 +331,6 @@ export const deletePackageDir = async (packageDir: string) => {
 
 export const parseCargoToml = (cargoToml: string) =>
   parse(cargoToml) as CargoToml;
+
+export const stringifyCargoToml = (cargoToml: CargoToml) =>
+  stringify(cargoToml);
