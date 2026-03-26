@@ -5,15 +5,16 @@ import {
 } from "@miden-sdk/miden-wallet-adapter";
 import {
   MidenWalletSigner,
+  AccountInspector,
   type Multisig,
-  type TransactionProposal,
+  type Proposal,
 } from "@openzeppelin/miden-multisig-client";
 import { type Account } from "@/lib/types/account";
 import { wasmAccountToAccount, addressToAccountId } from "@/lib/web-client";
 import useWebClient from "@/hooks/use-web-client";
 import { initMultisigClient } from "@/lib/multisig-client";
 import { useMidenWallet } from "@/hooks/use-miden-wallet";
-import { MIDEN_PSM_ENDPOINT_URL } from "@/lib/constants";
+import { MIDEN_GUARDIAN_ENDPOINT_URL } from "@/lib/constants";
 import useAccounts from "@/hooks/use-accounts";
 import useMidenSdk from "@/hooks/use-miden-sdk";
 import useGlobalContext from "@/components/global-context/hook";
@@ -38,10 +39,14 @@ const useMultisig = () => {
     if (!midenWalletSession.commitment || !midenWalletSession.scheme) {
       return;
     }
-    const { client: multisigClient, psmCommitment } = await initMultisigClient(
-      client,
-      MIDEN_PSM_ENDPOINT_URL,
-    );
+    const {
+      client: multisigClient,
+      guardianCommitment,
+      guardianPublicKey,
+    } = await initMultisigClient({
+      webClient: client,
+      guardianEndpoint: MIDEN_GUARDIAN_ENDPOINT_URL,
+    });
     const signer = new MidenWalletSigner(
       { signBytes },
       midenWalletSession.commitment,
@@ -51,21 +56,23 @@ const useMultisig = () => {
       {
         threshold,
         signerCommitments: [signer.commitment],
-        psmCommitment,
+        guardianCommitment,
+        guardianPublicKey,
         signatureScheme: signer.scheme,
       },
       signer,
     );
-    await newMultisig.registerOnPsm();
+    await newMultisig.registerOnGuardian();
     setMultisig(newMultisig);
-    const config = await newMultisig.getAccountConfig();
+    const state = await newMultisig.syncState();
+    const config = AccountInspector.fromBase64(state.stateDataBase64);
     if (!newMultisig.account) {
       return;
     }
     const account = wasmAccountToAccount({
       wasmAccount: newMultisig.account,
       name,
-      components: ["multisig", "psm", "basic-wallet"],
+      components: ["auth-multisig-guardian", "basic-wallet"],
       multisig: {
         config: {
           ...config,
@@ -91,10 +98,10 @@ const useMultisig = () => {
       return multisig;
     }
     dispatch({ type: "SUBMITTING_TRANSACTION" });
-    const { client: multisigClient } = await initMultisigClient(
-      client,
-      MIDEN_PSM_ENDPOINT_URL,
-    );
+    const { client: multisigClient } = await initMultisigClient({
+      webClient: client,
+      guardianEndpoint: MIDEN_GUARDIAN_ENDPOINT_URL,
+    });
     const signer = new MidenWalletSigner(
       { signBytes },
       midenWalletSession.commitment,
@@ -117,72 +124,41 @@ const useMultisig = () => {
       midenWalletSession.commitment,
     );
   };
-  const syncMultisig = async (accountId: string) => {
-    const previousAccount = accounts.find(({ id }) => id === accountId);
-    const multisig = await loadMultisig(accountId);
-    if (!previousAccount || !multisig || !multisig.account) {
-      return;
-    }
-    dispatch({ type: "SUBMITTING_TRANSACTION" });
-    // console.log(multisig);
-    // const state = await multisig.fetchState();
-    // console.log(state);
-    // const localAccount = await client.getAccount(
-    //   midenSdk.AccountId.fromHex(accountId),
-    // );
-    // const account = midenSdk.Account.deserialize(
-    //   fromBase64(state.stateDataBase64),
-    // );
-    // console.log(account.id().toString());
-    // console.log(account.nonce().asInt());
-    // console.log(account.commitment().toHex());
-    // console.log(account.getPublicKeyCommitments().map((w) => w.toHex()));
-    // const account3 = wasmAccountToAccount({
-    //   wasmAccount: localAccount!,
-    //   name: previousAccount.name,
-    //   components: previousAccount.components,
-    //   networkId,
-    //   updatedAt: blockNum,
-    //   midenSdk,
-    // });
-    // const account2 = wasmAccountToAccount({
-    //   wasmAccount: account,
-    //   name: previousAccount.name,
-    //   components: previousAccount.components,
-    //   networkId,
-    //   updatedAt: blockNum,
-    //   midenSdk,
-    // });
-    //console.log(account2);
-    // console.log(account3);
-    const { proposals, state, notes, config } = await multisig.syncAll();
-    for (const p of proposals) {
-      console.log(`${p.id}: ${p.status.type}`);
-    }
-    console.log("proposals", proposals);
-    console.log("state", state);
-    console.log("notes", notes);
-    const account = wasmAccountToAccount({
-      wasmAccount: multisig.account,
-      name: previousAccount.name,
-      components: previousAccount.components,
-      multisig: {
-        config: {
-          ...config,
-          vaultBalances: config.vaultBalances.map((vaultBalance) => ({
-            ...vaultBalance,
-            amount: vaultBalance.amount.toString(),
-          })),
-        },
-        proposals,
-      },
-      networkId,
-      updatedAt: blockNum,
-      midenSdk,
-    });
-    updateAccount(account);
-    dispatch({ type: "TRANSACTION_SUBMITTED" });
-  };
+  // const syncMultisig = async (accountId: string) => {
+  //   const previousAccount = accounts.find(({ id }) => id === accountId);
+  //   const multisig = await loadMultisig(accountId);
+  //   if (!previousAccount || !multisig || !multisig.account) {
+  //     return;
+  //   }
+  //   dispatch({ type: "SUBMITTING_TRANSACTION" });
+  //   const { proposals, state, notes, config } = await multisig.syncAll();
+  //   for (const p of proposals) {
+  //     console.log(`${p.id}: ${p.status.type}`);
+  //   }
+  //   console.log("proposals", proposals);
+  //   console.log("state", state);
+  //   console.log("notes", notes);
+  //   const account = wasmAccountToAccount({
+  //     wasmAccount: multisig.account,
+  //     name: previousAccount.name,
+  //     components: previousAccount.components,
+  //     multisig: {
+  //       config: {
+  //         ...config,
+  //         vaultBalances: config.vaultBalances.map((vaultBalance) => ({
+  //           ...vaultBalance,
+  //           amount: vaultBalance.amount.toString(),
+  //         })),
+  //       },
+  //       proposals,
+  //     },
+  //     networkId,
+  //     updatedAt: blockNum,
+  //     midenSdk,
+  //   });
+  //   updateAccount(account);
+  //   dispatch({ type: "TRANSACTION_SUBMITTED" });
+  // };
   const createConsumeNotesProposal = async ({
     multisig,
     noteIds,
@@ -197,17 +173,17 @@ const useMultisig = () => {
       return;
     }
     dispatch({ type: "SUBMITTING_TRANSACTION" });
-    const { proposals } = await multisig.createConsumeNotesProposal(noteIds);
+    const proposal = await multisig.createConsumeNotesProposal(noteIds);
     updateAccount({
       ...previousAccount,
       multisig: {
         ...previousAccount.multisig,
-        proposals: [...previousAccount.multisig.proposals, ...proposals],
+        proposals: [...previousAccount.multisig.proposals, proposal],
       },
     });
     dispatch({ type: "TRANSACTION_SUBMITTED" });
   };
-  const createSendProposal = async ({
+  const createP2idProposal = async ({
     multisig,
     recipientId,
     faucetId,
@@ -225,7 +201,7 @@ const useMultisig = () => {
       return;
     }
     dispatch({ type: "SUBMITTING_TRANSACTION" });
-    const { proposals } = await multisig.createSendProposal(
+    const proposal = await multisig.createP2idProposal(
       recipientId,
       faucetId,
       BigInt(amount),
@@ -234,17 +210,17 @@ const useMultisig = () => {
       ...previousAccount,
       multisig: {
         ...previousAccount.multisig,
-        proposals: [...previousAccount.multisig.proposals, ...proposals],
+        proposals: [...previousAccount.multisig.proposals, proposal],
       },
     });
     dispatch({ type: "TRANSACTION_SUBMITTED" });
   };
-  const signTransactionProposal = async ({
+  const signProposal = async ({
     multisig,
     proposal,
   }: {
     multisig: Multisig;
-    proposal: TransactionProposal;
+    proposal: Proposal;
   }) => {
     const previousAccount = accounts.find(
       ({ id }) => id === multisig.accountId,
@@ -253,22 +229,20 @@ const useMultisig = () => {
       return;
     }
     dispatch({ type: "SUBMITTING_TRANSACTION" });
-    await multisig.syncTransactionProposals();
-    const proposals = await multisig.signTransactionProposal(
-      proposal.commitment,
-    );
+    await multisig.signProposal(proposal.id);
+    const proposals = await multisig.syncProposals();
     updateAccount({
       ...previousAccount,
       multisig: { ...previousAccount.multisig, proposals },
     });
     dispatch({ type: "TRANSACTION_SUBMITTED" });
   };
-  const executeTransactionProposal = async ({
+  const executeProposal = async ({
     multisig,
     proposal,
   }: {
     multisig: Multisig;
-    proposal: TransactionProposal;
+    proposal: Proposal;
   }) => {
     const previousAccount = accounts.find(
       ({ id }) => id === multisig.accountId,
@@ -277,9 +251,8 @@ const useMultisig = () => {
       return;
     }
     dispatch({ type: "SUBMITTING_TRANSACTION" });
-    await multisig.syncTransactionProposals();
-    await multisig.executeTransactionProposal(proposal.commitment);
-    const proposals = multisig.listTransactionProposals();
+    await multisig.executeProposal(proposal.id);
+    const proposals = await multisig.syncProposals();
     // updateAccount({
     //   ...previousAccount,
     //   multisig: { ...previousAccount.multisig, proposals },
@@ -319,14 +292,15 @@ const useMultisig = () => {
       throw new Error("Multisig not found");
     }
     // dispatch({ type: "SUBMITTING_TRANSACTION" });
-    const [config, syncSummary] = await Promise.all([
-      multisig.getAccountConfig(),
+    const [state, syncSummary] = await Promise.all([
+      multisig.syncState(),
       client.syncState(),
     ]);
+    const config = AccountInspector.fromBase64(state.stateDataBase64);
     const account = wasmAccountToAccount({
       wasmAccount: multisig.account,
       name,
-      components: ["multisig", "psm", "basic-wallet"],
+      components: ["auth-multisig-guardian", "basic-wallet"],
       multisig: {
         config: {
           ...config,
@@ -356,11 +330,11 @@ const useMultisig = () => {
     createMultisig,
     loadMultisig,
     isMultisigSigner,
-    syncMultisig,
+    // syncMultisig,
     createConsumeNotesProposal,
-    createSendProposal,
-    signTransactionProposal,
-    executeTransactionProposal,
+    createP2idProposal,
+    signProposal,
+    executeProposal,
     importMultisig,
   };
 };

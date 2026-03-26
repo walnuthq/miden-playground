@@ -1,7 +1,7 @@
 import { writeFile } from "node:fs/promises";
 import { type NextRequest, NextResponse } from "next/server";
 import { getVerifiedNote, insertVerifiedNote } from "@/db/verified-notes";
-import { midenVerifier } from "@/lib/miden-verifier";
+import { midenNoteVerifier } from "@/lib/miden-verifier";
 import {
   compilePackage,
   newPackage,
@@ -21,76 +21,120 @@ import {
 } from "@/db/packages";
 import { PACKAGES_PATH } from "@/lib/constants";
 import { safeRm } from "@/lib/utils";
+import { type PackageSource } from "@/lib/types";
 
 type VerifyNoteRequestBody = {
   noteId: string;
   note?: string;
   //
-  cargoToml?: string;
-  rust?: string;
+  packagesSources?: PackageSource[];
   //
   packageId?: string;
 };
+
+const deletePackages = async (packages: { id: string }[]) =>
+  Promise.all(
+    packages.map(({ id }) =>
+      Promise.all([deletePackageDir(id), deletePackage(id)]),
+    ),
+  );
 
 const verifyNoteFromSource = async ({
   networkId,
   noteId,
   note,
-  cargoToml,
-  rust,
+  packagesSources,
 }: {
   networkId: string;
   noteId: string;
   note?: string;
-  cargoToml: string;
-  rust: string;
+  packagesSources: PackageSource[];
 }) => {
-  const {
-    package: {
+  const packagesData = packagesSources.map(({ cargoToml, rust }) => {
+    const {
+      package: {
+        name,
+        metadata: {
+          miden: { "project-kind": type, dependencies },
+        },
+      },
+    } = parseCargoToml(cargoToml);
+    return {
       name,
-      // metadata: {
-      //   miden: { dependencies: cargoTomlDependencies },
-      // },
-    },
-  } = parseCargoToml(cargoToml);
-  const { id } = await newPackage({ name, type: "note-script", rust });
-  const { stderr } = await compilePackage({ packageDir: id, name });
+      type,
+      dependencies: dependencies
+        ? Object.keys(dependencies).map((dependency) =>
+            dependency.slice(dependency.indexOf(":") + 1),
+          )
+        : [],
+      rust,
+    };
+  });
+  const notePackageData = packagesData.find(
+    ({ type }) => type === "note-script",
+  );
+  if (!notePackageData) {
+    throw new Error("Error: Note Script not found.");
+  }
+  const dependenciesPackagesData = notePackageData.dependencies
+    .map((dependency) => packagesData.find(({ name }) => name === dependency))
+    .filter((packageData) => packageData !== undefined);
+  const dependenciesPackages = await Promise.all(
+    dependenciesPackagesData.map(({ name, type, rust }) =>
+      newPackage({ name, type, rust }),
+    ),
+  );
+  const notePackageDependencies = notePackageData.dependencies
+    .map((dependency) =>
+      dependenciesPackages.find(({ name }) => name === dependency),
+    )
+    .filter((dependency) => dependency !== undefined)
+    .map(({ id, name }) => ({ id, name, digest: "" }));
+  const notePackage = await newPackage({
+    ...notePackageData,
+    dependencies: notePackageDependencies,
+  });
+  const { stderr } = await compilePackage({
+    packageDir: notePackage.id,
+    name: notePackage.name,
+  });
   if (stderr) {
-    await Promise.all([deletePackageDir(id), deletePackage(id)]);
+    await deletePackages([notePackage, ...dependenciesPackages]);
     throw new Error("Error: Note Script compilation failed.");
   }
-  const { masp, digest, exports, dependencies } = await readPackage(id);
+  const { masp, digest, exports } = await readPackage(notePackage.id);
   await updatePackage({
-    id,
+    id: notePackage.id,
     status: "compiled",
     digest,
     masp,
     exports,
-    dependencies: dependencies.map(({ id }) => id),
   });
   const resourcePath = `${PACKAGES_PATH}/${noteId}.txt`;
   if (note) {
     await writeFile(resourcePath, note);
   }
-  const verified = await midenVerifier({
+  const noteScript = await midenNoteVerifier({
     networkId,
-    resourceType: "note",
     resourceId: noteId,
     resourcePath: note ? resourcePath : undefined,
-    maspPath: packagePath(id),
+    maspPath: packagePath(notePackage.id),
   });
   if (note) {
     await safeRm(resourcePath);
   }
-  if (!verified) {
-    await Promise.all([deletePackageDir(id), deletePackage(id)]);
+  if (!noteScript.startsWith("Custom")) {
+    await deletePackages([notePackage, ...dependenciesPackages]);
     return false;
   }
-  const readOnlyPackage = await getReadOnlyPackage({ id, digest });
+  const readOnlyPackage = await getReadOnlyPackage({
+    id: notePackage.id,
+    digest,
+  });
   if (readOnlyPackage) {
-    await Promise.all([deletePackageDir(id), deletePackage(id)]);
+    await deletePackages([notePackage, ...dependenciesPackages]);
   }
-  const readOnlyPackageId = readOnlyPackage?.id ?? id;
+  const readOnlyPackageId = readOnlyPackage?.id ?? notePackage.id;
   const verifiedNote = await getVerifiedNote({
     noteId,
     packageId: readOnlyPackageId,
@@ -132,15 +176,14 @@ const verifyNoteFromPackageId = async ({
   }
   const resourcePath = `${PACKAGES_PATH}/${noteId}.txt`;
   await writeFile(resourcePath, note);
-  const verified = await midenVerifier({
+  const noteScript = await midenNoteVerifier({
     networkId,
-    resourceType: "note",
     resourceId: noteId,
     resourcePath,
     maspPath: packagePath(packageId),
   });
   await safeRm(resourcePath);
-  if (!verified) {
+  if (!noteScript.startsWith("Custom")) {
     return false;
   }
   const readOnlyPackage = await getReadOnlyPackage({ digest });
@@ -158,15 +201,14 @@ export const POST = async (
   try {
     const { network } = await params;
     const body = await request.json();
-    const { noteId, note, cargoToml, rust, packageId } =
+    const { noteId, note, packagesSources, packageId } =
       body as VerifyNoteRequestBody;
-    if (cargoToml && rust) {
+    if (packagesSources) {
       const verified = await verifyNoteFromSource({
         networkId: network,
         noteId,
         note,
-        cargoToml,
-        rust,
+        packagesSources,
       });
       return NextResponse.json({ ok: true, verified });
     } else if (note && packageId) {

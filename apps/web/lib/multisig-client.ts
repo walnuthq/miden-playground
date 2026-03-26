@@ -4,12 +4,17 @@ import {
   type SignatureScheme,
 } from "@openzeppelin/miden-multisig-client";
 
-export const initMultisigClient = async (
-  webClient: WebClientType,
-  psmEndpoint: string,
-  scheme?: SignatureScheme,
-) => {
-  const client = new MultisigClient(webClient, { psmEndpoint });
-  const { psmCommitment, psmPublicKey } = await client.initialize(scheme);
-  return { client, psmCommitment, psmPubkey: psmPublicKey };
+export const initMultisigClient = async ({
+  webClient,
+  guardianEndpoint,
+  scheme,
+}: {
+  webClient: WebClientType;
+  guardianEndpoint: string;
+  scheme?: SignatureScheme;
+}) => {
+  const client = new MultisigClient(webClient, { guardianEndpoint });
+  const { commitment: guardianCommitment, pubkey: guardianPublicKey } =
+    await client.guardianClient.getPubkey(scheme);
+  return { client, guardianCommitment, guardianPublicKey };
 };

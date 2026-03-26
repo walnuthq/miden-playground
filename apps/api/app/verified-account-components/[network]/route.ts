@@ -4,7 +4,7 @@ import {
   getVerifiedAccountComponent,
   insertVerifiedAccountComponent,
 } from "@/db/verified-account-components";
-import { midenVerifier } from "@/lib/miden-verifier";
+import { midenAccountComponentVerifier } from "@/lib/miden-verifier";
 import {
   compilePackage,
   newPackage,
@@ -60,22 +60,20 @@ const verifyAccountComponentFromSource = async ({
     await Promise.all([deletePackageDir(id), deletePackage(id)]);
     throw new Error("Error: Account Component compilation failed.");
   }
-  const { masp, digest, exports, dependencies } = await readPackage(id);
+  const { masp, digest, exports } = await readPackage(id);
   await updatePackage({
     id,
     status: "compiled",
     digest,
     masp,
     exports,
-    dependencies: dependencies.map(({ id }) => id),
   });
   const resourcePath = `${PACKAGES_PATH}/${accountId}.txt`;
   if (account) {
     await writeFile(resourcePath, account);
   }
-  const verified = await midenVerifier({
+  const accountComponents = await midenAccountComponentVerifier({
     networkId,
-    resourceType: "account-component",
     resourceId: accountId,
     resourcePath: account ? resourcePath : undefined,
     maspPath: packagePath(id),
@@ -83,7 +81,10 @@ const verifyAccountComponentFromSource = async ({
   if (account) {
     await safeRm(resourcePath);
   }
-  if (!verified) {
+  const customAccountComponent = accountComponents.find((accountComponent) =>
+    accountComponent.startsWith("Custom"),
+  );
+  if (!customAccountComponent) {
     await Promise.all([deletePackageDir(id), deletePackage(id)]);
     return false;
   }
@@ -142,15 +143,17 @@ const verifyAccountComponentsFromPackageIds = async ({
       }
       const resourcePath = `${PACKAGES_PATH}/${accountId}.txt`;
       await writeFile(resourcePath, account);
-      const verified = await midenVerifier({
+      const accountComponents = await midenAccountComponentVerifier({
         networkId,
-        resourceType: "account-component",
         resourceId: accountId,
         resourcePath,
         maspPath: packagePath(packageId),
       });
+      const customAccountComponent = accountComponents.find(
+        (accountComponent) => accountComponent.startsWith("Custom"),
+      );
       await safeRm(resourcePath);
-      if (!verified) {
+      if (!customAccountComponent) {
         return false;
       }
       const readOnlyPackage = await getReadOnlyPackage({ digest });

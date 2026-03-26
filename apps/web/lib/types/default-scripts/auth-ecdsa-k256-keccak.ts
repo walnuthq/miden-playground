@@ -4,9 +4,9 @@ import {
   defaultProcedureExport,
 } from "@/lib/types/script";
 
-export const ecdsaK256KeccakAuthRust = ``;
+export const rust = ``;
 
-export const ecdsaK256KeccakAuthMasm = `# The MASM code of the ECDSA K256 Keccak authentication Account Component.
+export const masm = `# The MASM code of the ECDSA K256 Keccak authentication Account Component.
 #
 # See the \`AuthEcdsaK256Keccak\` Rust type's documentation for more details.
 
@@ -51,23 +51,24 @@ pub proc auth_tx_ecdsa_k256_keccak(auth_args: BeWord)
 end
 `;
 
-const ecdsaK256KeccakAuth: Script = {
+const authEcdsaK256Keccak: Script = {
   ...defaultScript(),
-  id: "ecdsa-k256-keccak-auth",
-  name: "ecdsa-k256-keccak-auth",
+  id: "auth-ecdsa-k256-keccak",
+  name: "auth-ecdsa-k256-keccak",
   type: "authentication-component",
   status: "compiled",
   readOnly: true,
-  rust: ecdsaK256KeccakAuthRust,
-  masm: ecdsaK256KeccakAuthMasm,
+  rust,
+  masm,
+  digest: "0x1217b0e628ccc605a6d2cecb20341545294b448a3828e7f1656ce4d4d7932b37",
   procedureExports: [
     {
       ...defaultProcedureExport(),
-      path: "auth_tx_ecdsa_k256_keccak",
+      path: "::ecdsa_k256_keccak::auth_tx_ecdsa_k256_keccak",
       digest:
-        "0xea0fd92d17441c30c39d7232a22c66b26f9971520d65dcb8fe8d08e477868868",
+        "0xc3e04c25e03931a21c88a32411ba47b5f3641073e8788c797d3c8552342c1a5f",
     },
   ],
 };
 
-export default ecdsaK256KeccakAuth;
+export default authEcdsaK256Keccak;

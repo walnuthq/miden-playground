@@ -38,7 +38,7 @@ const ProceduresTableRow = ({
           />
         </div>
       </TableCell>
-      {account.components.includes("no-auth") &&
+      {account.components.includes("auth-no-auth") &&
         component.type === "account" && (
           <TableCell className="flex items-center justify-between gap-2">
             <span>{result}</span>
@@ -80,7 +80,7 @@ const ProceduresTableRow = ({
                           window.open(
                             `${MIDEN_EXPLORER_URL}/tx/${transactionRecord.id().toHex()}`,
                             "_blank",
-                            "noopener noreferrer",
+                            "noreferrer",
                           ),
                       },
                     });

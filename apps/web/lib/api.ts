@@ -4,6 +4,7 @@ import {
   type Export,
   type Dependency,
   type ScriptType,
+  type PackageSource,
 } from "@/lib/types/script";
 import { formatProcedureExportPath, isValidUUIDv4 } from "@/lib/utils";
 import { API_URL } from "@/lib/constants";
@@ -211,22 +212,19 @@ export const verifyNoteFromSource = async ({
   networkId,
   noteId,
   note,
-  cargoToml,
-  rust,
+  packagesSources,
 }: {
   networkId: string;
   noteId: string;
   note: string;
-  cargoToml: string;
-  rust: string;
+  packagesSources: PackageSource[];
 }) => {
   const response = await fetch(`${API_URL}/verified-notes/${networkId}`, {
     method: "POST",
     body: JSON.stringify({
       noteId,
       note,
-      cargoToml,
-      rust,
+      packagesSources,
     }),
   });
   const result = await response.json();

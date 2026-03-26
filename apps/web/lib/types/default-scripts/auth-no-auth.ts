@@ -3,9 +3,8 @@ import {
   defaultProcedureExport,
   defaultScript,
 } from "@/lib/types/script";
-import { NO_AUTH_PROC_HASH } from "@/lib/constants";
 
-export const noAuthRust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
+export const rust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
 #![no_std]
 #![feature(alloc_error_handler)]
 
@@ -37,7 +36,7 @@ impl AuthComponent {
 }
 `;
 
-export const noAuthMasm = `use miden::protocol::active_account
+export const masm = `use miden::protocol::active_account
 use miden::protocol::native_account
 use miden::core::word
 
@@ -80,22 +79,24 @@ pub proc auth_no_auth
 end
 `;
 
-const noAuth: Script = {
+const authNoAuth: Script = {
   ...defaultScript(),
-  id: "no-auth",
-  name: "no-auth",
+  id: "auth-no-auth",
+  name: "auth-no-auth",
   type: "authentication-component",
   status: "compiled",
   readOnly: true,
-  rust: noAuthRust,
-  masm: noAuthMasm,
+  rust,
+  masm,
+  digest: "0xe9ee054ffeb3bd22bc4f0a4778960ec8e3571b0a0c8299bfed0cdb5d156686b7",
   procedureExports: [
     {
       ...defaultProcedureExport(),
-      path: "auth_no_auth",
-      digest: NO_AUTH_PROC_HASH,
+      path: "::no_auth::auth_no_auth",
+      digest:
+        "0x00498108f0eae0e35deadd489892062338c3d55772635d0b133f0bdf2980bf64",
     },
   ],
 };
 
-export default noAuth;
+export default authNoAuth;

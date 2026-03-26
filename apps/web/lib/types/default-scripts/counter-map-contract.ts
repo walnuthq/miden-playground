@@ -5,7 +5,7 @@ import {
   defaultSignature,
 } from "@/lib/types/script";
 
-export const counterMapContractRust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
+export const rust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
 #![no_std]
 #![feature(alloc_error_handler)]
 
@@ -43,7 +43,7 @@ impl CounterContract {
 }
 `;
 
-export const counterMapContractMasm = `use miden::protocol::active_account
+export const masm = `use miden::protocol::active_account
 use miden::protocol::native_account
 use miden::core::word
 use miden::core::sys
@@ -84,8 +84,8 @@ const counterMapContract: Script = {
   type: "account",
   status: "compiled",
   readOnly: true,
-  rust: counterMapContractRust,
-  masm: counterMapContractMasm,
+  rust,
+  masm,
   procedureExports: [
     {
       ...defaultProcedureExport(),

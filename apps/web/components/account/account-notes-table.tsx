@@ -68,8 +68,8 @@ const NoteActionsCell = ({
           onClick={async () => {
             if (
               networkId === "mmck" ||
-              account.components.includes("no-auth") ||
-              account.components.includes("ecdsa-k256-keccak-auth")
+              account.components.includes("auth-no-auth") ||
+              account.components.includes("auth-ecdsa-k256-keccak")
             ) {
               setLoading(true);
               const { transactionRequest, transactionResult } =
@@ -142,7 +142,7 @@ const AccountNotesTable = ({ account }: { account: Account }) => {
   const showNoteActions =
     networkId === "mmck" ||
     connectedWallet?.address === account.address ||
-    account.components.includes("no-auth") ||
+    account.components.includes("auth-no-auth") ||
     account.multisig;
   return (
     <div className="rounded-md border">

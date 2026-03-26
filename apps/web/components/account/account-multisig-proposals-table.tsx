@@ -19,10 +19,10 @@ import { MoreVertical } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import useMultisig from "@/hooks/use-multisig";
 import type {
-  TransactionProposal,
+  Proposal,
   ProposalMetadata,
 } from "@openzeppelin/miden-multisig-client";
-import { formatDigest, formatAmount } from "@/lib/utils";
+import { formatAmount, formatDigest } from "@/lib/utils";
 import useAccounts from "@/hooks/use-accounts";
 
 const ProposalActionsCell = ({
@@ -30,10 +30,9 @@ const ProposalActionsCell = ({
   proposal,
 }: {
   account: Account;
-  proposal: TransactionProposal;
+  proposal: Proposal;
 }) => {
-  const { loadMultisig, signTransactionProposal, executeTransactionProposal } =
-    useMultisig();
+  const { loadMultisig, signProposal, executeProposal } = useMultisig();
   const [loading, setLoading] = useState(false);
   return (
     <DropdownMenu>
@@ -44,7 +43,7 @@ const ProposalActionsCell = ({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        {proposal.status.type === "pending" && (
+        {proposal.status === "pending" && (
           <DropdownMenuItem
             onClick={async () => {
               setLoading(true);
@@ -52,14 +51,14 @@ const ProposalActionsCell = ({
               if (!multisig) {
                 return;
               }
-              await signTransactionProposal({ multisig, proposal });
+              await signProposal({ multisig, proposal });
               setLoading(false);
             }}
           >
             Sign proposal
           </DropdownMenuItem>
         )}
-        {proposal.status.type === "ready" && (
+        {proposal.status === "ready" && (
           <DropdownMenuItem
             onClick={async () => {
               setLoading(true);
@@ -67,7 +66,7 @@ const ProposalActionsCell = ({
               if (!multisig) {
                 return;
               }
-              await executeTransactionProposal({ multisig, proposal });
+              await executeProposal({ multisig, proposal });
               setLoading(false);
             }}
           >
@@ -84,10 +83,11 @@ const AccountMultisigProposalsTable = ({ account }: { account: Account }) => {
   const { isMultisigSigner } = useMultisig();
   const showProposalActions = isMultisigSigner(account);
   const proposalTypes = {
+    update_procedure_threshold: "Update procedure threshold",
     add_signer: "Add signer",
     remove_signer: "Remove signer",
     change_threshold: "Change threshold",
-    switch_psm: "Switch PSM",
+    switch_guardian: "Switch Guardian",
     consume_notes: "Consume notes",
     p2id: "P2ID",
     unknown: "Unknown",
@@ -127,15 +127,15 @@ const AccountMultisigProposalsTable = ({ account }: { account: Account }) => {
         <TableBody>
           {account.multisig?.proposals.map((proposal) => (
             <TableRow key={proposal.id}>
-              <TableCell>{formatDigest(proposal.commitment)}</TableCell>
+              <TableCell>{formatDigest(proposal.id)}</TableCell>
               <TableCell>
                 {proposalTypes[proposal.metadata.proposalType]}
               </TableCell>
               <TableCell>{proposalDescription(proposal.metadata)}</TableCell>
               <TableCell className="capitalize">
-                {proposal.status.type}{" "}
-                {proposal.status.type === "pending" &&
-                  `(${proposal.status.signaturesCollected}/${proposal.status.signaturesRequired})`}
+                {proposal.status}{" "}
+                {/*proposal.status === "pending" &&
+                  `(${proposal.status.signaturesCollected}/${proposal.status.signaturesRequired})`*/}
               </TableCell>
               {showProposalActions && (
                 <TableCell>

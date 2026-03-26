@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getVerifiedAccountComponents } from "@/lib/api";
 import Account from "@/components/account/account";
 import useGlobalContext from "@/components/global-context/hook";
+import { isValidUUIDv4 } from "@/lib/utils";
 
 const AccountIndex = ({ identifier }: { identifier: string }) => {
   const { networkId } = useGlobalContext();
@@ -14,8 +15,15 @@ const AccountIndex = ({ identifier }: { identifier: string }) => {
         identifier,
       }),
   });
+  const rawVerifiedAccountComponents = data ?? [];
+  const verifiedAccountComponents = rawVerifiedAccountComponents.filter(
+    ({ id }) => isValidUUIDv4(id),
+  );
   return (
-    <Account identifier={identifier} verifiedAccountComponents={data ?? []} />
+    <Account
+      identifier={identifier}
+      verifiedAccountComponents={verifiedAccountComponents}
+    />
   );
 };
 

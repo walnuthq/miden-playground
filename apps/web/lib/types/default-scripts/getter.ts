@@ -1,6 +1,6 @@
 import { type Script, defaultScript } from "@/lib/types/script";
 
-export const getterMasm = `use miden::protocol::native_account
+export const masm = `use miden::protocol::native_account
 use miden::protocol::tx
 use miden::core::word
 use miden::core::sys
@@ -27,7 +27,7 @@ const getter: Script = {
   type: "account",
   status: "compiled",
   readOnly: true,
-  masm: getterMasm,
+  masm,
 };
 
 export default getter;

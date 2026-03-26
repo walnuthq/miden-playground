@@ -1,20 +1,18 @@
-import noAuth from "@/lib/types/default-components/no-auth";
-import falcon512RpoAuth from "@/lib/types/default-components/falcon-512-rpo-auth";
-import ecdsaK256KeccakAuth from "@/lib/types/default-components/ecdsa-k256-keccak-auth";
-import multisig from "@/lib/types/default-components/multisig";
+import authEcdsaK256Keccak from "@/lib/types/default-components/auth-ecdsa-k256-keccak";
+import authFalcon512Rpo from "@/lib/types/default-components/auth-falcon-512-rpo";
+import authMultisigGuardian from "@/lib/types/default-components/auth-multisig-guardian";
+import authNoAuth from "@/lib/types/default-components/auth-no-auth";
 import basicFungibleFaucet from "@/lib/types/default-components/basic-fungible-faucet";
 import basicWallet from "@/lib/types/default-components/basic-wallet";
-import psm from "@/lib/types/default-components/psm";
 import counterContract from "@/lib/types/default-components/counter-contract";
 
 const defaultComponents = [
-  noAuth,
-  falcon512RpoAuth,
-  ecdsaK256KeccakAuth,
-  multisig,
+  authEcdsaK256Keccak,
+  authFalcon512Rpo,
+  authMultisigGuardian,
+  authNoAuth,
   basicFungibleFaucet,
   basicWallet,
-  psm,
   counterContract,
 ];
 

@@ -27,7 +27,7 @@ const TransactionInformationTable = ({
                   href={`${MIDEN_EXPLORER_URL}/tx/${transaction.id}`}
                   className="text-primary font-medium underline underline-offset-4"
                   target="_blank"
-                  rel="noopener noreferrer"
+                  rel="noreferrer"
                 >
                   {transaction.id}
                 </a>

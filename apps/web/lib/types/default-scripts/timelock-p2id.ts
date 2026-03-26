@@ -1,7 +1,8 @@
+import { pick } from "lodash";
 import { type Script, defaultScript } from "@/lib/types/script";
-import { BASIC_WALLET_CODE } from "@/lib/constants";
+import basicWallet from "@/lib/types/default-scripts/basic-wallet";
 
-export const timelockP2idRust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
+export const rust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
 #![no_std]
 #![feature(alloc_error_handler)]
 
@@ -37,7 +38,7 @@ impl P2idNote {
 }
 `;
 
-export const timelockP2idMasm = `use miden::protocol::active_account
+export const masm = `use miden::protocol::active_account
 use miden::protocol::account_id
 use miden::protocol::active_note
 use miden::standards::wallets::basic->basic_wallet
@@ -99,12 +100,10 @@ const timelockP2id: Script = {
   type: "note-script",
   status: "compiled",
   readOnly: true,
-  rust: timelockP2idRust,
-  masm: timelockP2idMasm,
-  dependencies: [
-    { id: "basic-wallet", name: "basic-wallet", digest: BASIC_WALLET_CODE },
-  ],
+  rust,
+  masm,
   digest: "0x94377a3ed496ef4282bb98b1df09f14be986f5ffed1ac5dd2f7e23e01d9c3bce",
+  dependencies: [pick(basicWallet, "id", "name", "digest")],
 };
 
 export default timelockP2id;

@@ -106,7 +106,7 @@ const useAppState = () => {
           const pendingConsumableNotesProposalsNoteIds =
             previousAccount.multisig.proposals.reduce<string[]>(
               (previousValue, currentValue) =>
-                ["pending", "ready"].includes(currentValue.status.type) &&
+                ["pending", "ready"].includes(currentValue.status) &&
                 currentValue.metadata.proposalType === "consume_notes"
                   ? [...previousValue, ...currentValue.metadata.noteIds]
                   : previousValue,

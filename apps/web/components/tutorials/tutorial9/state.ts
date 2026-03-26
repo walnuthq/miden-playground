@@ -33,7 +33,7 @@ const state: State = {
       isUpdatable: true,
       isRegularAccount: true,
       isNew: false,
-      components: ["no-auth", "counter-contract"],
+      components: ["auth-no-auth", "counter-contract"],
     },
   ],
   scripts: [...defaultScripts, countReaderScript, counterContractScript],

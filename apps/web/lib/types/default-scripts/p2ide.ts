@@ -1,7 +1,8 @@
+import { pick } from "lodash";
 import { type Script, defaultScript } from "@/lib/types/script";
-import { BASIC_WALLET_CODE, P2IDE_NOTE_CODE } from "@/lib/constants";
+import basicWallet from "@/lib/types/default-scripts/basic-wallet";
 
-export const p2ideRust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
+export const rust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
 #![no_std]
 #![feature(alloc_error_handler)]
 
@@ -71,7 +72,7 @@ impl P2ideNote {
 }
 `;
 
-export const p2ideMasm = `use miden::protocol::active_account
+export const masm = `use miden::protocol::active_account
 use miden::protocol::account_id
 use miden::protocol::active_note
 use miden::protocol::tx
@@ -224,12 +225,10 @@ const p2ide: Script = {
   type: "note-script",
   status: "compiled",
   readOnly: true,
-  rust: p2ideRust,
-  masm: p2ideMasm,
-  dependencies: [
-    { id: "basic-wallet", name: "basic-wallet", digest: BASIC_WALLET_CODE },
-  ],
-  digest: P2IDE_NOTE_CODE,
+  rust,
+  masm,
+  digest: "0x3ce934e7d4d1560cedb4d49609062c06071b72bb7914a2791a04eccc10505cbe",
+  dependencies: [pick(basicWallet, "id", "name", "digest")],
 };
 
 export default p2ide;

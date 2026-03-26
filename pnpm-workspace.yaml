@@ -1,3 +1,6 @@
 packages:
   - "apps/*"
   - "packages/*"
+
+overrides:
+  "@miden-sdk/miden-sdk": "0.13.3"

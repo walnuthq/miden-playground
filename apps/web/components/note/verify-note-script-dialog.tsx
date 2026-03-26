@@ -1,5 +1,5 @@
 "use client";
-// import { groupBy } from "lodash";
+import { groupBy } from "lodash";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -22,7 +22,7 @@ import { clientGetInputNote } from "@/lib/web-client";
 import useWebClient from "@/hooks/use-web-client";
 import { toBase64, readFileAsText } from "@/lib/utils";
 import useGlobalContext from "@/components/global-context/hook";
-// import { type PackageSource } from "@/lib/types/script";
+import { type PackageSource } from "@/lib/types/script";
 
 const VerifyNoteScriptDialog = () => {
   const queryClient = useQueryClient();
@@ -34,12 +34,9 @@ const VerifyNoteScriptDialog = () => {
     closeVerifyNoteScriptDialog,
   } = useNotes();
   const [loading, setLoading] = useState(false);
-  // const [packagesSources, setPackagesSources] = useState<PackageSource[]>([]);
-  const [cargoToml, setCargoToml] = useState("");
-  const [rust, setRust] = useState("");
+  const [packagesSources, setPackagesSources] = useState<PackageSource[]>([]);
   const onClose = () => {
-    setCargoToml("");
-    setRust("");
+    setPackagesSources([]);
     closeVerifyNoteScriptDialog();
   };
   return (
@@ -70,8 +67,7 @@ const VerifyNoteScriptDialog = () => {
               networkId,
               noteId,
               note: toBase64(record.toInputNote().note().serialize()),
-              cargoToml,
-              rust,
+              packagesSources,
             });
             setLoading(false);
             if (verified) {
@@ -100,55 +96,39 @@ const VerifyNoteScriptDialog = () => {
                     return;
                   }
                   const filesArray = Array.from(files);
-                  // const packagesSourcesFiles = filesArray.filter(({ name }) =>
-                  //   ["Cargo.toml", "lib.rs"].includes(name),
-                  // );
-                  // const packagesSourcesFilesWithContent = await Promise.all(
-                  //   packagesSourcesFiles.map(async (packageSourceFile) => ({
-                  //     file: packageSourceFile,
-                  //     content: await readFileAsText(packageSourceFile),
-                  //   })),
-                  // );
-                  // const packagesSourcesFilesByPackage = groupBy(
-                  //   packagesSourcesFilesWithContent,
-                  //   ({ file }) =>
-                  //     file.webkitRelativePath
-                  //       .replace("/Cargo.toml", "")
-                  //       .replace("/src/lib.rs", ""),
-                  // );
-                  // const packagesSourcesList = Object.values(
-                  //   packagesSourcesFilesByPackage,
-                  // ).map((packagesSourcesFilesWithContent) =>
-                  //   packagesSourcesFilesWithContent.reduce<PackageSource>(
-                  //     (previousValue, { file, content }) => ({
-                  //       ...previousValue,
-                  //       cargoToml:
-                  //         file.name === "Cargo.toml"
-                  //           ? content
-                  //           : previousValue.cargoToml,
-                  //       rust:
-                  //         file.name === "lib.rs" ? content : previousValue.rust,
-                  //     }),
-                  //     { cargoToml: "", rust: "" },
-                  //   ),
-                  // );
-                  // setPackagesSources(packagesSourcesList);
-                  //
-                  const cargoTomlFile = filesArray.find(
-                    ({ name }) => name === "Cargo.toml",
+                  const packagesSourcesFiles = filesArray.filter(({ name }) =>
+                    ["Cargo.toml", "lib.rs"].includes(name),
                   );
-                  const rustFile = filesArray.find(
-                    ({ name }) => name === "lib.rs",
+                  const packagesSourcesFilesWithContent = await Promise.all(
+                    packagesSourcesFiles.map(async (packageSourceFile) => ({
+                      file: packageSourceFile,
+                      content: await readFileAsText(packageSourceFile),
+                    })),
                   );
-                  if (!cargoTomlFile || !rustFile) {
-                    return;
-                  }
-                  const [cargoTomlContent, rustContent] = await Promise.all([
-                    readFileAsText(cargoTomlFile),
-                    readFileAsText(rustFile),
-                  ]);
-                  setCargoToml(cargoTomlContent);
-                  setRust(rustContent);
+                  const packagesSourcesFilesByPackage = groupBy(
+                    packagesSourcesFilesWithContent,
+                    ({ file }) =>
+                      file.webkitRelativePath
+                        .replace("/Cargo.toml", "")
+                        .replace("/src/lib.rs", ""),
+                  );
+                  const packagesSourcesList = Object.values(
+                    packagesSourcesFilesByPackage,
+                  ).map((packagesSourcesFilesWithContent) =>
+                    packagesSourcesFilesWithContent.reduce<PackageSource>(
+                      (previousValue, { file, content }) => ({
+                        ...previousValue,
+                        cargoToml:
+                          file.name === "Cargo.toml"
+                            ? content
+                            : previousValue.cargoToml,
+                        rust:
+                          file.name === "lib.rs" ? content : previousValue.rust,
+                      }),
+                      { cargoToml: "", rust: "" },
+                    ),
+                  );
+                  setPackagesSources(packagesSourcesList);
                 }}
               />
             </div>
@@ -161,7 +141,7 @@ const VerifyNoteScriptDialog = () => {
           <Button
             form="verify-note-script-form"
             type="submit"
-            disabled={loading || !cargoToml || !rust}
+            disabled={loading || packagesSources.length === 0}
           >
             {loading && <Spinner />}
             {loading ? "Verifying…" : "Verify"}

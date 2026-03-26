@@ -6,18 +6,9 @@ import {
   TableRow,
 } from "@workspace/ui/components/table";
 
-const signatureSchemes = {
-  falcon: "Falcon",
-  ecdsa: "ECDSA",
-} as const;
-
 const AccountMultisigInformationTable = ({
   multisig: {
-    config: {
-      /*threshold,*/ signerCommitments,
-      psmCommitment,
-      signatureScheme,
-    },
+    config: { /*threshold,*/ signerCommitments, guardianCommitment },
   },
 }: {
   multisig: AccountMultisig;
@@ -40,12 +31,8 @@ const AccountMultisigInformationTable = ({
         <TableRow>
           <TableCell>Guardian commitment</TableCell>
           <TableCell>
-            <p>{psmCommitment}</p>
+            <p>{guardianCommitment}</p>
           </TableCell>
-        </TableRow>
-        <TableRow>
-          <TableCell>Signature scheme</TableCell>
-          <TableCell>{signatureSchemes[signatureScheme]}</TableCell>
         </TableRow>
       </TableBody>
     </Table>

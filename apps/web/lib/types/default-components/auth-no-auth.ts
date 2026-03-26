@@ -1,11 +1,11 @@
 import { type Component, defaultComponent } from "@/lib/types/component";
 
-const noAuth: Component = {
+const authNoAuth: Component = {
   ...defaultComponent(),
-  id: "no-auth",
+  id: "auth-no-auth",
   name: "No Auth",
   type: "authentication-component",
-  scriptId: "no-auth",
+  scriptId: "auth-no-auth",
 };
 
-export default noAuth;
+export default authNoAuth;

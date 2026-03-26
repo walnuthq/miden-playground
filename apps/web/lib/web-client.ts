@@ -32,7 +32,7 @@ import { type Script, type ProcedureExport } from "@/lib/types/script";
 import { type StorageSlot, type Component } from "@/lib/types/component";
 import defaultScripts from "@/lib/types/default-scripts";
 import getterScript from "@/lib/types/default-scripts/getter";
-import noAuth from "@/lib/types/default-components/no-auth";
+import noAuth from "@/lib/types/default-components/auth-no-auth";
 import getterComponent from "@/lib/types/default-components/getter";
 import { stringToFeltArray, fromBase64 } from "@/lib/utils";
 import type { MidenSdk } from "@/lib/types";
@@ -454,7 +454,7 @@ export const clientDeployAccount = async ({
     .accountType(accountTypes[accountType])
     .storageMode(accountStorageModes[storageMode]);
   for (const component of components) {
-    if (component.scriptId === "no-auth") {
+    if (component.scriptId === "auth-no-auth") {
       accountBuilder = accountBuilder.withNoAuthComponent();
       continue;
     }
@@ -482,7 +482,7 @@ export const clientDeployAccount = async ({
       console.log(script.id);
       console.log(procedure.digest.toHex());
     }
-    // if (script.id === "no-auth") {
+    // if (script.id === "auth-no-auth") {
     // console.log(script.id);
     // console.log("get_count", accountComponent.getProcedureHash("get_count"));
     // console.log(

@@ -1,11 +1,11 @@
 import { type Component, defaultComponent } from "@/lib/types/component";
 
-const ecdsaK256KeccakAuth: Component = {
+const authEcdsaK256Keccak: Component = {
   ...defaultComponent(),
-  id: "ecdsa-k256-keccak-auth",
+  id: "auth-ecdsa-k256-keccak",
   name: "ECDSA K256 Keccak Auth",
   type: "authentication-component",
-  scriptId: "ecdsa-k256-keccak-auth",
+  scriptId: "auth-ecdsa-k256-keccak",
   storageSlots: [
     {
       name: "miden::standards::auth::ecdsa_k256_keccak::public_key",
@@ -15,4 +15,4 @@ const ecdsaK256KeccakAuth: Component = {
   ],
 };
 
-export default ecdsaK256KeccakAuth;
+export default authEcdsaK256Keccak;

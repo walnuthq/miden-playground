@@ -11,7 +11,7 @@ import {
 } from "@/lib/constants";
 import type {
   DetectedMultisigConfig,
-  TransactionProposal,
+  Proposal,
 } from "@openzeppelin/miden-multisig-client";
 
 export const accountTypes = {
@@ -49,7 +49,7 @@ export type AccountMultisig = {
   config: Omit<DetectedMultisigConfig, "vaultBalances"> & {
     vaultBalances: FungibleAsset[];
   };
-  proposals: TransactionProposal[];
+  proposals: Proposal[];
 };
 
 export type Account = {
@@ -136,7 +136,7 @@ export const basicWalletAccount = ({
   isRegularAccount: true,
   isUpdatable: true,
   code: BASIC_WALLET_CODE,
-  components: ["falcon-512-rpo-auth", "basic-wallet"],
+  components: ["auth-falcon-512-rpo", "basic-wallet"],
 });
 
 export const basicFungibleFaucetAccount = ({
@@ -162,7 +162,7 @@ export const basicFungibleFaucetAccount = ({
   totalSupply,
   isPublic: storageMode === "public",
   code: FUNGIBLE_FAUCET_CODE,
-  components: ["falcon-512-rpo-auth", "basic-fungible-faucet"],
+  components: ["auth-falcon-512-rpo", "basic-fungible-faucet"],
 });
 
 export const accountIdFromPrefixSuffix = (prefix: string, suffix: string) => {
