@@ -20,8 +20,9 @@ import { verifyAccountComponentFromSource } from "@/lib/api";
 import { clientGetAccountById } from "@/lib/web-client";
 import useWebClient from "@/hooks/use-web-client";
 import useMidenSdk from "@/hooks/use-miden-sdk";
-import { toBase64, readFileAsText } from "@/lib/utils";
+import { toBase64, fileListToPackageSources } from "@/lib/utils";
 import useGlobalContext from "@/components/global-context/hook";
+import { type PackageSource } from "@/lib/types/script";
 
 const VerifyAccountComponentDialog = () => {
   const queryClient = useQueryClient();
@@ -35,11 +36,11 @@ const VerifyAccountComponentDialog = () => {
     closeVerifyAccountComponentDialog,
   } = useAccounts();
   const [loading, setLoading] = useState(false);
-  const [cargoToml, setCargoToml] = useState("");
-  const [rust, setRust] = useState("");
+  const [packageSource, setPackageSource] = useState<PackageSource | null>(
+    null,
+  );
   const onClose = () => {
-    setCargoToml("");
-    setRust("");
+    setPackageSource(null);
     closeVerifyAccountComponentDialog();
   };
   return (
@@ -65,7 +66,7 @@ const VerifyAccountComponentDialog = () => {
             event.preventDefault();
             setLoading(true);
             const account = accounts.find(({ id }) => id === accountId);
-            if (!account) {
+            if (!account || !packageSource) {
               return;
             }
             const wasmAccount = await clientGetAccountById({
@@ -78,8 +79,7 @@ const VerifyAccountComponentDialog = () => {
               accountId,
               identifier: account.identifier,
               account: toBase64(wasmAccount.serialize()),
-              cargoToml,
-              rust,
+              packageSource,
             });
             setLoading(false);
             if (verified) {
@@ -111,22 +111,10 @@ const VerifyAccountComponentDialog = () => {
                   if (!files) {
                     return;
                   }
-                  const filesArray = Array.from(files);
-                  const cargoTomlFile = filesArray.find(
-                    ({ name }) => name === "Cargo.toml",
-                  );
-                  const rustFile = filesArray.find(
-                    ({ name }) => name === "lib.rs",
-                  );
-                  if (!cargoTomlFile || !rustFile) {
-                    return;
-                  }
-                  const [cargoTomlContent, rustContent] = await Promise.all([
-                    readFileAsText(cargoTomlFile),
-                    readFileAsText(rustFile),
-                  ]);
-                  setCargoToml(cargoTomlContent);
-                  setRust(rustContent);
+                  const packageSources = await fileListToPackageSources(files);
+                  const packageSourcesList = Object.values(packageSources);
+                  const [accountPackageSource = null] = packageSourcesList;
+                  setPackageSource(accountPackageSource);
                 }}
               />
             </div>
@@ -139,7 +127,7 @@ const VerifyAccountComponentDialog = () => {
           <Button
             form="verify-account-component-form"
             type="submit"
-            disabled={loading || !cargoToml || !rust}
+            disabled={loading || !packageSource}
           >
             {loading && <Spinner />}
             {loading ? "Verifying…" : "Verify"}

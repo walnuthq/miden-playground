@@ -726,7 +726,7 @@ export const addressToAccountId = ({
   midenSdk: MidenSdk;
 }) => Address.fromBech32(address).accountId();
 
-const verifyDefaultAccountComponents = ({
+const verifyStandardAccountComponents = ({
   wasmAccount,
   midenSdk: { Word },
 }: {
@@ -768,7 +768,7 @@ export const wasmAccountToAccount = ({
   const code = wasmAccount.code().commitment().toHex();
   const verifiedComponents = components
     ? components
-    : verifyDefaultAccountComponents({ wasmAccount, midenSdk });
+    : verifyStandardAccountComponents({ wasmAccount, midenSdk });
   const address = accountIdToAddress({
     accountId: wasmAccount.id().toString(),
     networkId,
@@ -885,7 +885,7 @@ const noteState = ({
   return wasmInputNoteStates[state];
 };
 
-const verifyDefaultNotes = ({
+const verifyStandardNotes = ({
   scriptRoot,
   scripts,
 }: {
@@ -908,7 +908,7 @@ export const wasmInputNoteToInputNote = ({
   midenSdk: MidenSdk;
 }): InputNote => {
   const scriptRoot = record.details().recipient().script().root().toHex();
-  const script = verifyDefaultNotes({ scriptRoot, scripts });
+  const script = verifyStandardNotes({ scriptRoot, scripts });
   return {
     id: record.id().toString(),
     type: noteType({ metadata: record.metadata(), midenSdk }),

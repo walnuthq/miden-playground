@@ -1,5 +1,4 @@
 "use client";
-import { groupBy } from "lodash";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -20,9 +19,9 @@ import useNotes from "@/hooks/use-notes";
 import { verifyNoteFromSource } from "@/lib/api";
 import { clientGetInputNote } from "@/lib/web-client";
 import useWebClient from "@/hooks/use-web-client";
-import { toBase64, readFileAsText } from "@/lib/utils";
+import { toBase64, fileListToPackageSources } from "@/lib/utils";
 import useGlobalContext from "@/components/global-context/hook";
-import { type PackageSource } from "@/lib/types/script";
+import { parseCargoToml, type PackageSource } from "@/lib/types/script";
 
 const VerifyNoteScriptDialog = () => {
   const queryClient = useQueryClient();
@@ -34,9 +33,13 @@ const VerifyNoteScriptDialog = () => {
     closeVerifyNoteScriptDialog,
   } = useNotes();
   const [loading, setLoading] = useState(false);
-  const [packagesSources, setPackagesSources] = useState<PackageSource[]>([]);
+  const [packageSource, setPackageSource] = useState<PackageSource | null>(
+    null,
+  );
+  const [dependencies, setDependencies] = useState<PackageSource[]>([]);
   const onClose = () => {
-    setPackagesSources([]);
+    setPackageSource(null);
+    setDependencies([]);
     closeVerifyNoteScriptDialog();
   };
   return (
@@ -60,14 +63,15 @@ const VerifyNoteScriptDialog = () => {
             event.preventDefault();
             setLoading(true);
             const record = await clientGetInputNote({ client, noteId });
-            if (!record) {
+            if (!record || !packageSource) {
               return;
             }
             const { verified, error } = await verifyNoteFromSource({
               networkId,
               noteId,
               note: toBase64(record.toInputNote().note().serialize()),
-              packagesSources,
+              packageSource,
+              dependencies,
             });
             setLoading(false);
             if (verified) {
@@ -95,40 +99,44 @@ const VerifyNoteScriptDialog = () => {
                   if (!files) {
                     return;
                   }
-                  const filesArray = Array.from(files);
-                  const packagesSourcesFiles = filesArray.filter(({ name }) =>
-                    ["Cargo.toml", "lib.rs"].includes(name),
+                  const packageSources = await fileListToPackageSources(files);
+                  const packageSourcesList = Object.values(packageSources);
+                  const packageSourcesParsed = packageSourcesList.map(
+                    (packageSource) => ({
+                      ...packageSource,
+                      parsedCargoToml: parseCargoToml(packageSource.cargoToml),
+                    }),
                   );
-                  const packagesSourcesFilesWithContent = await Promise.all(
-                    packagesSourcesFiles.map(async (packageSourceFile) => ({
-                      file: packageSourceFile,
-                      content: await readFileAsText(packageSourceFile),
-                    })),
+                  const notePackage = packageSourcesParsed.find(
+                    ({ parsedCargoToml }) =>
+                      parsedCargoToml.package.metadata.miden["project-kind"] ===
+                      "note-script",
                   );
-                  const packagesSourcesFilesByPackage = groupBy(
-                    packagesSourcesFilesWithContent,
-                    ({ file }) =>
-                      file.webkitRelativePath
-                        .replace("/Cargo.toml", "")
-                        .replace("/src/lib.rs", ""),
-                  );
-                  const packagesSourcesList = Object.values(
-                    packagesSourcesFilesByPackage,
-                  ).map((packagesSourcesFilesWithContent) =>
-                    packagesSourcesFilesWithContent.reduce<PackageSource>(
-                      (previousValue, { file, content }) => ({
-                        ...previousValue,
-                        cargoToml:
-                          file.name === "Cargo.toml"
-                            ? content
-                            : previousValue.cargoToml,
-                        rust:
-                          file.name === "lib.rs" ? content : previousValue.rust,
-                      }),
-                      { cargoToml: "", rust: "" },
-                    ),
-                  );
-                  setPackagesSources(packagesSourcesList);
+                  if (!notePackage) {
+                    return;
+                  }
+                  setPackageSource(notePackage);
+                  const rawNotePackageDependencies =
+                    notePackage.parsedCargoToml.package.metadata.miden
+                      .dependencies;
+                  const notePackageDependencies = Object.keys(
+                    rawNotePackageDependencies,
+                  )
+                    .map((dependency) => {
+                      const { path: dependencyPath } =
+                        rawNotePackageDependencies[dependency] ?? {
+                          path: "",
+                        };
+                      const dependencyDir = dependencyPath.split("/").at(-1);
+                      const packagePath =
+                        Object.keys(packageSources).find((packagePath) => {
+                          const packageDir = packagePath.split("/").at(-1);
+                          return packageDir === dependencyDir;
+                        }) ?? "";
+                      return packageSources[packagePath];
+                    })
+                    .filter((dependency) => dependency !== undefined);
+                  setDependencies(notePackageDependencies);
                 }}
               />
             </div>
@@ -141,7 +149,7 @@ const VerifyNoteScriptDialog = () => {
           <Button
             form="verify-note-script-form"
             type="submit"
-            disabled={loading || packagesSources.length === 0}
+            disabled={loading || !packageSource}
           >
             {loading && <Spinner />}
             {loading ? "Verifying…" : "Verify"}

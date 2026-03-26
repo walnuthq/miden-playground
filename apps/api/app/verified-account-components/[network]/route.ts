@@ -24,14 +24,14 @@ import {
 } from "@/db/packages";
 import { PACKAGES_PATH } from "@/lib/constants";
 import { safeRm } from "@/lib/utils";
+import { type PackageSource } from "@/lib/types";
 
 type VerifyAccountComponentRequestBody = {
   accountId: string;
   identifier: string;
   account?: string;
   //
-  cargoToml?: string;
-  rust?: string;
+  packageSource?: PackageSource;
   //
   packageIds?: string[];
 };
@@ -41,15 +41,13 @@ const verifyAccountComponentFromSource = async ({
   identifier,
   accountId,
   account,
-  cargoToml,
-  rust,
+  packageSource: { cargoToml, rust },
 }: {
   networkId: string;
   identifier: string;
   accountId: string;
   account?: string;
-  cargoToml: string;
-  rust: string;
+  packageSource: PackageSource;
 }) => {
   const {
     package: { name },
@@ -179,16 +177,15 @@ export const POST = async (
   try {
     const { network } = await params;
     const body = await request.json();
-    const { accountId, identifier, account, cargoToml, rust, packageIds } =
+    const { accountId, identifier, account, packageSource, packageIds } =
       body as VerifyAccountComponentRequestBody;
-    if (cargoToml && rust) {
+    if (packageSource) {
       const verified = await verifyAccountComponentFromSource({
         networkId: network,
         identifier,
         accountId,
         account,
-        cargoToml,
-        rust,
+        packageSource,
       });
       return NextResponse.json({ ok: true, verified });
     } else if (account && packageIds) {

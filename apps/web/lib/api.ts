@@ -87,15 +87,13 @@ export const verifyAccountComponentFromSource = async ({
   accountId,
   identifier,
   account,
-  cargoToml,
-  rust,
+  packageSource,
 }: {
   networkId: string;
   accountId: string;
   identifier: string;
   account: string;
-  cargoToml: string;
-  rust: string;
+  packageSource: PackageSource;
 }) => {
   const response = await fetch(
     `${API_URL}/verified-account-components/${networkId}`,
@@ -105,8 +103,7 @@ export const verifyAccountComponentFromSource = async ({
         accountId,
         identifier,
         account,
-        cargoToml,
-        rust,
+        packageSource,
       }),
     },
   );
@@ -212,19 +209,22 @@ export const verifyNoteFromSource = async ({
   networkId,
   noteId,
   note,
-  packagesSources,
+  packageSource,
+  dependencies = [],
 }: {
   networkId: string;
   noteId: string;
   note: string;
-  packagesSources: PackageSource[];
+  packageSource: PackageSource;
+  dependencies?: PackageSource[];
 }) => {
   const response = await fetch(`${API_URL}/verified-notes/${networkId}`, {
     method: "POST",
     body: JSON.stringify({
       noteId,
       note,
-      packagesSources,
+      packageSource,
+      dependencies,
     }),
   });
   const result = await response.json();
