@@ -44,7 +44,7 @@ const Account = ({
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
       <Tabs
-        defaultValue={searchParams.get("tab") ?? "information"}
+        value={searchParams.get("tab") ?? "information"}
         onValueChange={(value) =>
           router.push(
             value === "information"

@@ -3,7 +3,7 @@ import { Download } from "lucide-react";
 import { Spinner } from "@workspace/ui/components/spinner";
 import useAccounts from "@/hooks/use-accounts";
 import { Button } from "@workspace/ui/components/button";
-import noAuth from "@/lib/types/default-components/no-auth";
+import noAuth from "@/lib/types/default-components/auth-no-auth";
 import useComponents from "@/hooks/use-components";
 import { defaultComponentIds } from "@/lib/types/default-components";
 

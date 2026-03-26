@@ -1,6 +1,8 @@
+import { pick } from "lodash";
 import { type Script, defaultScript } from "@/lib/types/script";
+import counterContract from "@/lib/types/default-scripts/counter-contract";
 
-export const counterNoteRust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
+export const rust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
 #![no_std]
 #![feature(alloc_error_handler)]
 
@@ -30,7 +32,7 @@ impl CounterNote {
 }
 `;
 
-export const counterNoteMasm = `use external_contract::counter_contract
+export const masm = `use external_contract::counter_contract
 
 begin
     call.counter_contract::increment_count
@@ -44,15 +46,9 @@ const counterNote: Script = {
   type: "note-script",
   status: "compiled",
   readOnly: true,
-  rust: counterNoteRust,
-  masm: counterNoteMasm,
-  dependencies: [
-    {
-      id: "counter-contract",
-      name: "counter-contract",
-      digest: "",
-    },
-  ],
+  rust,
+  masm,
+  dependencies: [pick(counterContract, "id", "name", "digest")],
 };
 
 export default counterNote;

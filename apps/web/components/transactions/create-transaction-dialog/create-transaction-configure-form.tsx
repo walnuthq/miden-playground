@@ -91,7 +91,7 @@ const CreateTransactionConfigureForm = ({
     newCustomTransactionRequest,
     closeCreateTransactionDialog,
   } = useTransactions();
-  const { loadMultisig, createSendProposal } = useMultisig();
+  const { loadMultisig, createP2idProposal } = useMultisig();
   const executingAccount = accounts.find(({ id }) => id === executingAccountId);
   const targetAccount = accounts.find(({ id }) => id === targetAccountId);
   const faucetAccount = accounts.find(({ id }) => id === faucetAccountId);
@@ -176,7 +176,7 @@ const CreateTransactionConfigureForm = ({
               if (!multisig) {
                 return;
               }
-              await createSendProposal({
+              await createP2idProposal({
                 multisig,
                 recipientId: targetAccountId,
                 faucetId: faucetAccountId,

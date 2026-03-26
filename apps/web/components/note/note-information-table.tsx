@@ -47,7 +47,7 @@ const NoteInformationTable = ({
                   href={`${MIDEN_EXPLORER_URL}/note/${inputNote.id}`}
                   className="text-primary font-medium underline underline-offset-4"
                   target="_blank"
-                  rel="noopener noreferrer"
+                  rel="noreferrer"
                 >
                   {inputNote.id}
                 </a>

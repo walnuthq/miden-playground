@@ -1,11 +1,10 @@
-import { BASIC_WALLET_CODE } from "@/lib/constants";
 import {
   type Script,
   defaultScript,
   defaultProcedureExport,
 } from "@/lib/types/script";
 
-export const basicWalletRust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
+export const rust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
 #![no_std]
 #![feature(alloc_error_handler)]
 
@@ -46,7 +45,7 @@ impl MyAccount {
 }
 `;
 
-export const basicWalletMasm = `use miden::protocol::native_account
+export const masm = `use miden::protocol::native_account
 use miden::protocol::output_note
 use miden::protocol::active_note
 
@@ -175,21 +174,21 @@ const basicWallet: Script = {
   type: "account",
   status: "compiled",
   readOnly: true,
-  rust: basicWalletRust,
-  masm: basicWalletMasm,
-  digest: BASIC_WALLET_CODE,
+  rust,
+  masm,
+  digest: "0xc45592b272266a4601d30484643b1df7a9e4c0b2306fef126e8e686234554603",
   procedureExports: [
     {
       ...defaultProcedureExport(),
-      path: "receive_asset",
+      path: "::basic_wallet::move_asset_to_note",
       digest:
-        "0x6f4bdbdc4b13d7ed933d590d88ac9dfb98020c9e917697845b5e169395b76a01",
+        "0x0e406b067ed2bcd7de745ca6517f519fd1a9be245f913347ac673ca1db30c1d6",
     },
     {
       ...defaultProcedureExport(),
-      path: "move_asset_to_note",
+      path: "::basic_wallet::receive_asset",
       digest:
-        "0x0e406b067ed2bcd7de745ca6517f519fd1a9be245f913347ac673ca1db30c1d6",
+        "0x6f4bdbdc4b13d7ed933d590d88ac9dfb98020c9e917697845b5e169395b76a01",
     },
   ],
 };

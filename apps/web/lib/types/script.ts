@@ -1,4 +1,4 @@
-import { EMPTY_WORD } from "../constants";
+import { EMPTY_WORD } from "@/lib/constants";
 
 export const scriptTypes = {
   library: "Library",

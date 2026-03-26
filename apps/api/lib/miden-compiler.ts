@@ -33,7 +33,13 @@ export const newPackage = async ({
   example?: string;
   rust?: string;
   dependencies?: Dependency[];
-}): Promise<{ id: string; rust: string; dependencies: Dependency[] }> => {
+}): Promise<{
+  id: string;
+  name: string;
+  type: PackageType;
+  rust: string;
+  dependencies: Dependency[];
+}> => {
   const initialRust = rust
     ? rust
     : await readFile(
@@ -54,7 +60,7 @@ export const newPackage = async ({
     rust: initialRust,
     dependencies: dependencies.map(({ id }) => id),
   });
-  return { id, rust: initialRust, dependencies };
+  return { id, name, type, rust: initialRust, dependencies };
 };
 
 export const generatePackageDir = async ({

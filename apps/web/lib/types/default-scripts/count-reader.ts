@@ -6,7 +6,7 @@ import {
 } from "@/lib/types/script";
 import { COUNT_READER_COPY_COUNT_PROC_HASH } from "@/lib/constants";
 
-export const countReaderRust = `#![no_std]
+export const rust = `#![no_std]
 #![feature(alloc_error_handler)]
 
 extern crate alloc;
@@ -38,7 +38,7 @@ impl CountReader {
 }
 `;
 
-export const countReaderMasm = `use miden::protocol::native_account
+export const masm = `use miden::protocol::native_account
 use miden::protocol::tx
 use miden::core::word
 use miden::core::sys
@@ -65,8 +65,8 @@ const countReader: Script = {
   type: "account",
   status: "compiled",
   readOnly: true,
-  rust: countReaderRust,
-  masm: countReaderMasm,
+  rust,
+  masm,
   procedureExports: [
     {
       ...defaultProcedureExport(),

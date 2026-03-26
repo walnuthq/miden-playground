@@ -32,6 +32,26 @@ export type CargoToml = {
 
 export type NewPackage = typeof packagesTable.$inferInsert;
 
+export type Package = Omit<typeof packagesTable.$inferSelect, "exports"> & {
+  exports: Export[];
+};
+
+export const defaultPackage = (): Package => ({
+  id: "",
+  name: "",
+  type: "account",
+  status: "compiled",
+  readOnly: true,
+  rust: "",
+  masm: "",
+  digest: "",
+  masp: "",
+  exports: [],
+  dependencies: [],
+  createdAt: new Date(0),
+  updatedAt: new Date(0),
+});
+
 export type PackageType = (typeof packageTypeEnum.enumValues)[number];
 
 export type PackageStatus = (typeof packageStatusEnum.enumValues)[number];
@@ -42,6 +62,13 @@ export type ProcedureExport = {
   signature: { abi: number; params: string[]; results: string[] };
   attributes: { attrs: string[] };
 };
+
+export const defaultProcedureExport = (): ProcedureExport => ({
+  path: "",
+  digest: "",
+  signature: { abi: 0, params: [], results: [] },
+  attributes: { attrs: [] },
+});
 
 export type Export = { Procedure: ProcedureExport };
 
@@ -72,3 +99,5 @@ export type DependencyRecord = {
   rust: string;
   dependencies: string[];
 };
+
+export type PackageSource = { cargoToml: string; rust: string };

@@ -8,7 +8,7 @@ const components = {
       href={href}
       className="text-primary font-medium underline underline-offset-4 inline-flex items-center gap-1"
       target="_blank"
-      rel="noopener noreferrer"
+      rel="noreferrer"
     >
       {children} <SquareArrowOutUpRight className="size-4" />
     </a>

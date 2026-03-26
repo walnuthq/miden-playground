@@ -217,7 +217,7 @@ const useAccounts = () => {
       address === COUNTER_CONTRACT_ADDRESS &&
       tutorialId === "interact-with-the-counter-contract"
     ) {
-      account.components = ["no-auth", "counter-value-contract"];
+      account.components = ["auth-no-auth", "counter-value-contract"];
     }
     const inputNotes = consumableNotes.map((consumableNote) =>
       wasmInputNoteToInputNote({

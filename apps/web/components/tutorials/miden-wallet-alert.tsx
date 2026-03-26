@@ -14,7 +14,7 @@ const MidenWalletAlert = () => (
         href="https://chromewebstore.google.com/detail/miden-wallet/ablmompanofnodfdkgchkpmphailefpb?hl=en"
         className="text-primary font-medium underline underline-offset-4 inline-flex items-center gap-1"
         target="_blank"
-        rel="noopener noreferrer"
+        rel="noreferrer"
       >
         Miden Wallet
       </a>

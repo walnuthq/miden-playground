@@ -111,7 +111,7 @@ const InvokeProcedureArgumentsDialog = () => {
                     window.open(
                       `${MIDEN_EXPLORER_URL}/tx/${transactionRecord.id().toHex()}`,
                       "_blank",
-                      "noopener noreferrer",
+                      "noreferrer",
                     ),
                 },
               });

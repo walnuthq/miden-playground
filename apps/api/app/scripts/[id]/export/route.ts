@@ -68,7 +68,7 @@ export const GET = async (
           dependencies.length > 0 ? await getDependencies(dependencies) : [];
         dependenciesPackages.forEach((dependencyPackage) => {
           cargoToml = cargoToml.replaceAll(
-            `/tmp/${dependencyPackage.id}`,
+            `${PACKAGES_PATH}/${dependencyPackage.id}`,
             `../${dependencyPackage.name}`,
           );
         });

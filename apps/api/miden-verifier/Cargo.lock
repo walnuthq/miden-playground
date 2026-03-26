@@ -1931,6 +1931,7 @@ dependencies = [
  "base64",
  "miden-client",
  "miden-client-sqlite-store",
+ "miden-standards",
  "rand",
  "tokio",
 ]

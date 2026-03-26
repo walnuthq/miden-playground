@@ -9,9 +9,6 @@ export const FUNGIBLE_FAUCET_DEFAULT_MAX_SUPPLY = 100_000_000_000n;
 export const FUNGIBLE_FAUCET_CODE =
   "0x44ca76648f7067a0378050f87c7f2d7693d92d1cd8de30db34f0779e287cb47f";
 
-export const NO_AUTH_PROC_HASH =
-  "0x00498108f0eae0e35deadd489892062338c3d55772635d0b133f0bdf2980bf64";
-
 export const P2ID_NOTE_CODE =
   "0xa657a127211172b9b305d06c6e076dd1edbf67c8b1a32c063647d5f7bf456131";
 export const P2IDE_NOTE_CODE =
@@ -28,8 +25,9 @@ export const MIDEN_NOTE_TRANSPORT_URL = "https://transport.miden.io";
 export const MIDEN_TESTNET_EXPLORER_URL = "https://testnet.midenscan.com";
 export const MIDEN_DEVNET_EXPLORER_URL = "https://devnet.midenscan.com";
 export const MIDEN_EXPLORER_URL = MIDEN_TESTNET_EXPLORER_URL;
-export const MIDEN_PSM_ENDPOINT_URL =
-  process.env.NEXT_PUBLIC_MIDEN_PSM_ENDPOINT_URL ?? "http://localhost:3002";
+export const MIDEN_GUARDIAN_ENDPOINT_URL =
+  process.env.NEXT_PUBLIC_MIDEN_GUARDIAN_ENDPOINT_URL ??
+  "http://localhost:3002";
 export const MIDEN_FAUCET_API_URL = "https://faucet-api.testnet.miden.io";
 export const MIDEN_FAUCET_ACCOUNT_ID = "0x37d5977a8e16d8205a360820f0230f";
 export const MIDEN_FAUCET_ADDRESS =

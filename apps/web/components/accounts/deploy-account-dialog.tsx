@@ -41,14 +41,14 @@ const DeployAccountDialog = () => {
     "regular-account-updatable-code",
   );
   const [storageMode, setStorageMode] = useState<AccountStorageMode>("public");
-  const [authComponentId, setAuthComponentId] = useState("no-auth");
+  const [authComponentId, setAuthComponentId] = useState("auth-no-auth");
   const [componentId, setComponentId] = useState("");
   const authComponent = components.find(({ id }) => id === authComponentId);
   const component = components.find(({ id }) => id === componentId);
   const onClose = () => {
     setAccountType("regular-account-updatable-code");
     setStorageMode("public");
-    setAuthComponentId("no-auth");
+    setAuthComponentId("auth-no-auth");
     setComponentId("");
     closeDeployAccountDialog();
   };

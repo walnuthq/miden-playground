@@ -24,7 +24,7 @@ const ProceduresTable = ({
       <TableHeader>
         <TableRow>
           <TableHead className="w-45">Name</TableHead>
-          {account.components.includes("no-auth") &&
+          {account.components.includes("auth-no-auth") &&
             component.type === "account" && <TableHead>Result</TableHead>}
         </TableRow>
       </TableHeader>
