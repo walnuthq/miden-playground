@@ -27,7 +27,8 @@ type VerifyNoteRequestBody = {
   noteId: string;
   note?: string;
   //
-  packagesSources?: PackageSource[];
+  packageSource?: PackageSource;
+  dependencies?: PackageSource[];
   //
   packageId?: string;
 };
@@ -43,55 +44,52 @@ const verifyNoteFromSource = async ({
   networkId,
   noteId,
   note,
-  packagesSources,
+  packageSource,
+  dependencies,
 }: {
   networkId: string;
   noteId: string;
   note?: string;
-  packagesSources: PackageSource[];
+  packageSource: PackageSource;
+  dependencies: PackageSource[];
 }) => {
-  const packagesData = packagesSources.map(({ cargoToml, rust }) => {
-    const {
-      package: {
-        name,
-        metadata: {
-          miden: { "project-kind": type, dependencies },
+  const dependenciesPackages = await Promise.all(
+    dependencies.map(({ cargoToml, rust }) => {
+      const {
+        package: {
+          name,
+          metadata: {
+            miden: { "project-kind": type },
+          },
+        },
+      } = parseCargoToml(cargoToml);
+      return newPackage({ name, type, rust });
+    }),
+  );
+  const {
+    package: {
+      name: notePackageName,
+      metadata: {
+        miden: {
+          "project-kind": notePackageType,
+          dependencies: rawNotePackageDependencies,
         },
       },
-    } = parseCargoToml(cargoToml);
-    return {
-      name,
-      type,
-      dependencies: dependencies
-        ? Object.keys(dependencies).map((dependency) =>
-            dependency.slice(dependency.indexOf(":") + 1),
-          )
-        : [],
-      rust,
-    };
-  });
-  const notePackageData = packagesData.find(
-    ({ type }) => type === "note-script",
-  );
-  if (!notePackageData) {
-    throw new Error("Error: Note Script not found.");
-  }
-  const dependenciesPackagesData = notePackageData.dependencies
-    .map((dependency) => packagesData.find(({ name }) => name === dependency))
-    .filter((packageData) => packageData !== undefined);
-  const dependenciesPackages = await Promise.all(
-    dependenciesPackagesData.map(({ name, type, rust }) =>
-      newPackage({ name, type, rust }),
-    ),
-  );
-  const notePackageDependencies = notePackageData.dependencies
-    .map((dependency) =>
-      dependenciesPackages.find(({ name }) => name === dependency),
-    )
-    .filter((dependency) => dependency !== undefined)
-    .map(({ id, name }) => ({ id, name, digest: "" }));
+    },
+  } = parseCargoToml(packageSource.cargoToml);
+  const notePackageDependencies = rawNotePackageDependencies
+    ? Object.keys(rawNotePackageDependencies)
+        .map((dependency) => dependency.slice(dependency.indexOf(":") + 1))
+        .map((dependency) =>
+          dependenciesPackages.find(({ name }) => name === dependency),
+        )
+        .filter((dependency) => dependency !== undefined)
+        .map(({ id, name }) => ({ id, name, digest: "" }))
+    : [];
   const notePackage = await newPackage({
-    ...notePackageData,
+    name: notePackageName,
+    type: notePackageType,
+    rust: packageSource.rust,
     dependencies: notePackageDependencies,
   });
   const { stderr } = await compilePackage({
@@ -201,14 +199,15 @@ export const POST = async (
   try {
     const { network } = await params;
     const body = await request.json();
-    const { noteId, note, packagesSources, packageId } =
+    const { noteId, note, packageSource, dependencies, packageId } =
       body as VerifyNoteRequestBody;
-    if (packagesSources) {
+    if (packageSource && dependencies) {
       const verified = await verifyNoteFromSource({
         networkId: network,
         noteId,
         note,
-        packagesSources,
+        packageSource,
+        dependencies,
       });
       return NextResponse.json({ ok: true, verified });
     } else if (note && packageId) {

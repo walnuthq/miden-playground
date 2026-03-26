@@ -1,3 +1,4 @@
+import { parse } from "smol-toml";
 import { EMPTY_WORD } from "@/lib/constants";
 
 export const scriptTypes = {
@@ -165,3 +166,26 @@ begin
     exec.sys::truncate_stack
 end
 `;
+
+export type CargoToml = {
+  package: {
+    name: string;
+    version: string;
+    edition: string;
+    metadata: {
+      miden: {
+        "project-kind": ScriptType;
+        dependencies: Record<string, { path: string }>;
+      };
+      component: {
+        package: string;
+        target: {
+          dependencies: Record<string, { path: string }>;
+        };
+      };
+    };
+  };
+};
+
+export const parseCargoToml = (cargoToml: string) =>
+  parse(cargoToml) as CargoToml;

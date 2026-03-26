@@ -1,6 +1,9 @@
-import { formatUnits, parseUnits } from "viem";
-import { FUNGIBLE_FAUCET_DEFAULT_DECIMALS } from "@/lib/constants";
+import { groupBy } from "lodash";
 import { validate, version } from "uuid";
+import { formatUnits, parseUnits } from "viem";
+// import { formatAssetAmount } from "@miden-sdk/react";
+import { FUNGIBLE_FAUCET_DEFAULT_DECIMALS } from "@/lib/constants";
+import { type PackageSource } from "@/lib/types/script";
 
 export const sleep = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
@@ -88,3 +91,55 @@ export const toBase64 = (bytes: Uint8Array) => {
 
 export const isValidUUIDv4 = (uuid: string) =>
   validate(uuid) && version(uuid) === 4;
+
+export const fileListToPackageSources = async (fileList: FileList) => {
+  const files = Array.from(fileList);
+  const packagesSourcesFiles = files.filter(({ name }) =>
+    ["Cargo.toml", "lib.rs"].includes(name),
+  );
+  const packagesSourcesFilesWithContent = await Promise.all(
+    packagesSourcesFiles.map(async (packageSourceFile) => ({
+      file: packageSourceFile,
+      content: await readFileAsText(packageSourceFile),
+    })),
+  );
+  const packagesSourcesFilesByPackage = groupBy(
+    packagesSourcesFilesWithContent,
+    ({ file }) =>
+      file.webkitRelativePath
+        .replace("/Cargo.toml", "")
+        .replace("/src/lib.rs", ""),
+  );
+  return Object.keys(packagesSourcesFilesByPackage).reduce<
+    Record<string, PackageSource>
+  >((previousValue, currentValue) => {
+    const packagesSourcesFilesWithContent =
+      packagesSourcesFilesByPackage[currentValue];
+    if (!packagesSourcesFilesWithContent) {
+      return previousValue;
+    }
+    const packageSource = packagesSourcesFilesWithContent.reduce<PackageSource>(
+      (previousValue, { file, content }) => ({
+        ...previousValue,
+        cargoToml:
+          file.name === "Cargo.toml" ? content : previousValue.cargoToml,
+        rust: file.name === "lib.rs" ? content : previousValue.rust,
+      }),
+      { cargoToml: "", rust: "" },
+    );
+    return { ...previousValue, [currentValue]: packageSource };
+  }, {});
+  // console.log(packagesSourcesFilesByPackage);
+  // return Object.values(packagesSourcesFilesByPackage).map(
+  //   (packagesSourcesFilesWithContent) =>
+  //     packagesSourcesFilesWithContent.reduce<PackageSource>(
+  //       (previousValue, { file, content }) => ({
+  //         ...previousValue,
+  //         cargoToml:
+  //           file.name === "Cargo.toml" ? content : previousValue.cargoToml,
+  //         rust: file.name === "lib.rs" ? content : previousValue.rust,
+  //       }),
+  //       { cargoToml: "", rust: "" },
+  //     ),
+  // );
+};

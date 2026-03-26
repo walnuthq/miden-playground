@@ -4,7 +4,7 @@ use miden_client::{
     account::{Account, AccountId, AccountInterfaceExt},
     builder::ClientBuilder,
     keystore::FilesystemKeyStore,
-    note::{Note, NoteFile, NoteId, WellKnownNote},
+    note::{Note, NoteFile, NoteId, NoteScript, WellKnownNote},
     rpc::{Endpoint, GrpcClient},
     store::AccountRecordData,
     transaction::{AccountComponentInterface, AccountInterface},
@@ -66,7 +66,7 @@ fn verify_account_component(account: Account, package_opt: Option<Package>) -> R
                     let verified =
                         procedures.all(|procedure| account.code().has_procedure(procedure.digest));
                     if verified {
-                        println!("CustomAccountComponent({})", package.digest());
+                        println!("Custom({})", package.digest());
                     }
                 }
             }
@@ -76,8 +76,30 @@ fn verify_account_component(account: Account, package_opt: Option<Package>) -> R
     Ok(())
 }
 
-fn verify_note_script(note: Note, package_opt: Option<Package>) -> Result<()> {
-    if let Some(well_known_note) = WellKnownNote::from_note(&note) {
+fn from_note(note_script: &NoteScript) -> Option<WellKnownNote> {
+    let note_script_root = note_script.root();
+
+    if note_script_root == WellKnownNote::P2ID.script_root() {
+        return Some(WellKnownNote::P2ID);
+    }
+    if note_script_root == WellKnownNote::P2IDE.script_root() {
+        return Some(WellKnownNote::P2IDE);
+    }
+    if note_script_root == WellKnownNote::SWAP.script_root() {
+        return Some(WellKnownNote::SWAP);
+    }
+    if note_script_root == WellKnownNote::MINT.script_root() {
+        return Some(WellKnownNote::MINT);
+    }
+    if note_script_root == WellKnownNote::BURN.script_root() {
+        return Some(WellKnownNote::BURN);
+    }
+
+    None
+}
+
+fn verify_note_script(note_script: &NoteScript, package_opt: Option<Package>) -> Result<()> {
+    if let Some(well_known_note) = from_note(note_script) {
         let well_known_note_str = match well_known_note {
             WellKnownNote::P2ID => "P2ID",
             WellKnownNote::P2IDE => "P2IDE",
@@ -87,8 +109,8 @@ fn verify_note_script(note: Note, package_opt: Option<Package>) -> Result<()> {
         };
         println!("{}", well_known_note_str);
     } else if let Some(package) = package_opt.clone() {
-        if package.digest() == note.script().root() {
-            println!("CustomNoteScript({})", package.digest());
+        if package.digest() == note_script.root() {
+            println!("Custom({})", package.digest());
         }
     }
     Ok(())
@@ -213,7 +235,7 @@ async fn main() -> Result<()> {
         "note-script" => {
             let note_id = NoteId::try_from_hex(resource_id)?;
 
-            let note = if resource_path.as_str() == "/dev/null" {
+            let note_script = if resource_path.as_str() == "/dev/null" {
                 match client.import_notes(&[NoteFile::NoteId(note_id)]).await {
                     Ok(_) => {}
                     Err(_) => {
@@ -221,14 +243,15 @@ async fn main() -> Result<()> {
                     }
                 };
                 let note_record = client.get_input_note(note_id).await?.unwrap();
-                note_record.try_into().unwrap()
+                note_record.details().script().clone()
             } else {
                 let resource = fs::read_to_string(resource_path)?;
                 let resource_bytes = BASE64_STANDARD.decode(resource)?;
-                Note::read_from_bytes(&resource_bytes)?
+                let note = Note::read_from_bytes(&resource_bytes)?;
+                note.script().clone()
             };
 
-            verify_note_script(note, package_opt)
+            verify_note_script(&note_script, package_opt)
         }
         "transaction-script" => {
             // TODO unimplemented
