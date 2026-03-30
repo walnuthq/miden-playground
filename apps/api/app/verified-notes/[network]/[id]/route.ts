@@ -40,7 +40,12 @@ export const GET = async (
         ok: true,
         noteScript: {
           ...dbPackage,
-          dependencies,
+          dependencies: dependencies.map((dependency) => ({
+            id: dependency.id,
+            name: dependency.name,
+            type: dependency.type,
+            rust: dependency.rust,
+          })),
           procedureExports: [],
           createdAt: dbPackage.createdAt.getTime(),
           updatedAt: dbPackage.updatedAt.getTime(),
