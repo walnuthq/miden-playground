@@ -139,7 +139,12 @@ const AccountMultisigProposalsTable = ({ account }: { account: Account }) => {
               </TableCell>
               {showProposalActions && (
                 <TableCell>
-                  <ProposalActionsCell account={account} proposal={proposal} />
+                  {proposal.status !== "finalized" && (
+                    <ProposalActionsCell
+                      account={account}
+                      proposal={proposal}
+                    />
+                  )}
                 </TableCell>
               )}
             </TableRow>

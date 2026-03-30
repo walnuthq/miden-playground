@@ -8,7 +8,11 @@ const NextTutorialButton = ({ disabled = false }: { disabled?: boolean }) => {
     return null;
   }
   return (
-    <Button className="grow-2" disabled={disabled} onClick={nextTutorial}>
+    <Button
+      className="grow-2 bg-[#ff5500]"
+      disabled={disabled}
+      onClick={nextTutorial}
+    >
       {tutorial.number < tutorials.length
         ? "Next tutorial"
         : "Back to tutorials list"}

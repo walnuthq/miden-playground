@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - "5433:5432"
+    volumes:
+      - miden-playground-postgres:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=miden-playground
+      - POSTGRES_PASSWORD=miden_playground_dev_password
+      - POSTGRES_DB=miden-playground
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U miden-playground -d miden-playground"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  miden-playground-postgres:
