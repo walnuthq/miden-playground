@@ -76,9 +76,9 @@ export const getDependencies = async (dependencies: string[]) => {
       id: true,
       name: true,
       type: true,
-      // digest: true,
+      digest: true,
       rust: true,
-      // dependencies: true,
+      dependencies: true,
     },
     where: {
       id: {
