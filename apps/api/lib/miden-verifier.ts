@@ -15,19 +15,25 @@ export const midenVerifier = async ({
   maspPath?: string;
 }) => {
   try {
+    console.info(
+      `miden-verifier ${networkId} ${resourceType} ${resourceId} ${resourcePath} ${maspPath}`,
+    );
     const { stdout } = await execFile(
       "miden-verifier",
       [networkId, resourceType, resourceId, resourcePath, maspPath],
       { cwd: `${PROJECT_ROOT}/miden-verifier` },
     );
-    return stdout.split("\n").map((result) => result.trim());
+    return stdout
+      .split("\n")
+      .map((result) => result.trim())
+      .filter((result) => result !== "");
   } catch (error) {
     console.error(error);
     throw new Error("Error: miden-verifier failed");
   }
 };
 
-export const midenAccountComponentVerifier = async ({
+export const midenAccountComponentVerifier = ({
   networkId = "mtst",
   resourceId,
   resourcePath = "/dev/null",

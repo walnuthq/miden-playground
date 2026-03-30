@@ -1,7 +1,12 @@
 import { eq } from "drizzle-orm";
 import db from "@/db";
 import { packagesTable } from "@/db/schema";
-import type { NewPackage, PackageStatus, Export } from "@/lib/types";
+import type {
+  NewPackage,
+  PackageStatus,
+  Export,
+  DefaultDependency,
+} from "@/lib/types";
 import { isValidUUIDv4 } from "@/lib/utils";
 import { defaultDependenciesRecords } from "@/lib/default-dependencies";
 
@@ -63,16 +68,17 @@ export const getDependencies = async (dependencies: string[]) => {
   const defaultDependencies = dependencies
     .filter((dependency) => !isValidUUIDv4(dependency))
     .map(
-      (dependency) => defaultDependenciesRecords[dependency as "basic-wallet"],
+      (dependency) =>
+        defaultDependenciesRecords[dependency as DefaultDependency],
     );
   const dbDependencies = await db.query.packagesTable.findMany({
     columns: {
       id: true,
       name: true,
       type: true,
-      digest: true,
+      // digest: true,
       rust: true,
-      dependencies: true,
+      // dependencies: true,
     },
     where: {
       id: {

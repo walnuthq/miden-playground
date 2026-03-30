@@ -91,13 +91,13 @@ export const defaultDependencies = (): Dependency[] => [
 
 export type DefaultDependency = "basic-wallet";
 
-export type DependencyRecord = {
+export type PackageDependency = {
   id: string;
   name: string;
   type: PackageType;
-  digest: string;
+  // digest: string;
   rust: string;
-  dependencies: string[];
+  // dependencies: string[];
 };
 
 export type PackageSource = { cargoToml: string; rust: string };

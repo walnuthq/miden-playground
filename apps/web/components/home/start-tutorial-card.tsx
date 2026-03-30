@@ -1,7 +1,6 @@
 import { BadgeCheck } from "lucide-react";
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
   CardFooter,

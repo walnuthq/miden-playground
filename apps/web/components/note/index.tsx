@@ -14,6 +14,7 @@ const NoteIndex = ({ id }: { id: string }) => {
         networkId,
         noteId: id,
       }),
+    enabled: ["mtst", "mdev"].includes(networkId),
   });
   const rawVerifiedNote = data ?? null;
   const verifiedNote = isValidUUIDv4(rawVerifiedNote?.id ?? "")
