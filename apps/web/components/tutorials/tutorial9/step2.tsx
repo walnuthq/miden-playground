@@ -1,7 +1,7 @@
 import { usePathname } from "next/navigation";
 import { defaultTutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialAlert from "@/components/tutorials/tutorial-alert";
+import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
 import Step2Content from "@/components/tutorials/tutorial9/step2.mdx";
 
 const useCompleted = () => {

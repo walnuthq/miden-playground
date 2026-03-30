@@ -34,7 +34,7 @@ const InnerTutorialLayout = ({ children }: { children: ReactNode }) => {
         ref={tutorialRef}
         order={2}
         defaultSize={tutorialOpen ? 33 : 0}
-        className="bg-sidebar border z-60 shadow-2xl"
+        className="bg-white border z-60 shadow-2xl"
       >
         {tutorial && <TutorialStep tutorial={tutorial} />}
       </ResizablePanel>

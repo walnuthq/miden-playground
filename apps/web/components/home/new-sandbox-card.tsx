@@ -16,8 +16,10 @@ const NewSandboxCard = ({ networkId }: { networkId: NetworkId }) => {
   const { resetState } = useAppState();
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>New {networks[networkId]} sandbox</CardTitle>
+      <CardHeader className="gap-0">
+        <CardTitle className="text-xl">
+          New {networks[networkId]} sandbox
+        </CardTitle>
         <CardDescription>Start a new sandbox from scratch.</CardDescription>
       </CardHeader>
       <CardContent className="h-full">
@@ -36,7 +38,8 @@ const NewSandboxCard = ({ networkId }: { networkId: NetworkId }) => {
       </CardContent>
       <CardFooter>
         <Button
-          className="w-full"
+          variant="outline"
+          className="w-full bg-[#f9f9f9]"
           onClick={() => {
             resetState(networkId);
             router.push("/accounts");

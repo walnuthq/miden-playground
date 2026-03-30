@@ -1,12 +1,9 @@
 import { MonitorCheck } from "lucide-react";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@workspace/ui/components/alert";
+import { AlertDescription, AlertTitle } from "@workspace/ui/components/alert";
+import TutorialAlert from "@/components/tutorials/tutorial-alert";
 
 const MobileAlert = () => (
-  <Alert>
+  <TutorialAlert>
     <MonitorCheck />
     <AlertTitle>This tutorial is best viewed on a desktop browser.</AlertTitle>
     <AlertDescription>
@@ -14,7 +11,7 @@ const MobileAlert = () => (
       have a better experience using a desktop browser. Click on the book icon
       above to toggle the tutorial panel.
     </AlertDescription>
-  </Alert>
+  </TutorialAlert>
 );
 
 export default MobileAlert;

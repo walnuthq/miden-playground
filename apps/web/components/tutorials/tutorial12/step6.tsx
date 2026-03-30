@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { type TutorialStep } from "@/lib/types/tutorial";
 import useAccounts from "@/hooks/use-accounts";
-import TutorialAlert from "@/components/tutorials/tutorial-alert";
+import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import Step6Content from "@/components/tutorials/tutorial12/step6.mdx";
 import useWebClient from "@/hooks/use-web-client";

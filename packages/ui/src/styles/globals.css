@@ -134,7 +134,7 @@
   border-color: var(--color-border) !important;
   @apply text-foreground!;
   @apply whitespace-nowrap;
-  @apply rounded-md;
+  @apply rounded-xs;
   @apply text-sm;
   @apply font-medium;
   @apply transition-all;
@@ -143,7 +143,7 @@
   @apply shadow-xs;
   @apply dark:bg-input/30;
   @apply dark:border-input;
-  @apply h-9;
+  @apply h-8;
   @apply px-4;
   &:is(.dark *) {
     background-color: color-mix(

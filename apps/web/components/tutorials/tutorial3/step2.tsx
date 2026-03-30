@@ -1,7 +1,7 @@
 import { type TutorialStep } from "@/lib/types/tutorial";
 import useNotes from "@/hooks/use-notes";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialAlert from "@/components/tutorials/tutorial-alert";
+import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
 import Step2Content from "@/components/tutorials/tutorial3/step2.mdx";
 import useAccounts from "@/hooks/use-accounts";
 import {

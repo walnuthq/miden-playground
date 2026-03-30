@@ -19,18 +19,17 @@ const TutorialProgressStep = ({
     <Tooltip>
       <TooltipTrigger asChild>
         <div
-          className={cn(
-            "grow first:rounded-l-md last:rounded-r-md border not-first:border-l-0 border-gray-400",
-            {
-              "bg-green-400": index < tutorialStep || index <= tutorialMaxStep,
-              "bg-yellow-400": index === tutorialStep,
-              "bg-muted": index > tutorialStep && index > tutorialMaxStep,
-              "cursor-pointer": index <= tutorialMaxStep,
-              "cursor-not-allowed": index > tutorialMaxStep,
-            },
-          )}
-          onClick={() =>
-            index <= tutorialMaxStep ? setTutorialStep(index) : undefined
+          className={cn("grow first:rounded-l-md last:rounded-r-md", {
+            "bg-[#ff5500]": index < tutorialStep || index <= tutorialMaxStep,
+            "bg-[rgba(255,85,0,0.25)] border border-black/20":
+              index === tutorialStep,
+            "bg-[#f9f9f9] border border-black/20":
+              index > tutorialStep && index > tutorialMaxStep,
+            "cursor-pointer": index <= tutorialMaxStep,
+            "cursor-not-allowed": index > tutorialMaxStep,
+          })}
+          onClick={
+            index <= tutorialMaxStep ? () => setTutorialStep(index) : undefined
           }
         >
           &nbsp;
@@ -46,7 +45,7 @@ const TutorialProgressStep = ({
 };
 
 const TutorialProgress = ({ steps }: { steps: TutorialStep[] }) => (
-  <div className="flex h-3">
+  <div className="flex h-3 my-2">
     {steps.map((step, index) => (
       <TutorialProgressStep key={step.title} step={step} index={index} />
     ))}

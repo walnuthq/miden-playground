@@ -1,12 +1,9 @@
 import { FlaskConical } from "lucide-react";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@workspace/ui/components/alert";
+import { AlertDescription, AlertTitle } from "@workspace/ui/components/alert";
+import TutorialAlert from "@/components/tutorials/tutorial-alert";
 
 const MockChainAlert = () => (
-  <Alert>
+  <TutorialAlert>
     <FlaskConical />
     <AlertTitle>This tutorial uses a MockChain.</AlertTitle>
     <AlertDescription>
@@ -14,7 +11,7 @@ const MockChainAlert = () => (
       environment simulating the Miden network. You won't need a Miden Wallet to
       sign transactions.
     </AlertDescription>
-  </Alert>
+  </TutorialAlert>
 );
 
 export default MockChainAlert;

@@ -1,12 +1,9 @@
 import { Wallet } from "lucide-react";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@workspace/ui/components/alert";
+import { AlertDescription, AlertTitle } from "@workspace/ui/components/alert";
+import TutorialAlert from "@/components/tutorials/tutorial-alert";
 
 const WalletAlert = () => (
-  <Alert>
+  <TutorialAlert>
     <Wallet />
     <AlertTitle>How to generate a transaction in your wallet?</AlertTitle>
     <AlertDescription>
@@ -14,7 +11,7 @@ const WalletAlert = () => (
       actually trigger the transaction. If the proof generation fails, you can
       retry by clicking on the history tab and consume the note again.
     </AlertDescription>
-  </Alert>
+  </TutorialAlert>
 );
 
 export default WalletAlert;

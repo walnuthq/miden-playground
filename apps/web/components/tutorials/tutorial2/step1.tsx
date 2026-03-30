@@ -1,6 +1,6 @@
 import { type TutorialStep } from "@/lib/types/tutorial";
 import useAccounts from "@/hooks/use-accounts";
-import TutorialAlert from "@/components/tutorials/tutorial-alert";
+import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
 import Step1Content from "@/components/tutorials/tutorial2/step1.mdx";
 
 const Step1: TutorialStep = {

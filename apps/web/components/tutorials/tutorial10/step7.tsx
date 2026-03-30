@@ -2,7 +2,7 @@ import { EllipsisVertical } from "lucide-react";
 import { type TutorialStep } from "@/lib/types/tutorial";
 import useAccounts from "@/hooks/use-accounts";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialAlert from "@/components/tutorials/tutorial-alert";
+import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
 import Step7Content from "@/components/tutorials/tutorial10/step7.mdx";
 import useScripts from "@/hooks/use-scripts";
 import useComponents from "@/hooks/use-components";

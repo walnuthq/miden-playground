@@ -1,12 +1,9 @@
 import { Wallet } from "lucide-react";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@workspace/ui/components/alert";
+import { AlertDescription, AlertTitle } from "@workspace/ui/components/alert";
+import TutorialAlert from "@/components/tutorials/tutorial-alert";
 
 const MidenWalletAlert = () => (
-  <Alert>
+  <TutorialAlert>
     <Wallet />
     <AlertTitle>
       You need to install{" "}
@@ -24,7 +21,7 @@ const MidenWalletAlert = () => (
       To complete this tutorial, make sure you have installed and configured
       your Miden Wallet, then pin it to your browser for easy access.
     </AlertDescription>
-  </Alert>
+  </TutorialAlert>
 );
 
 export default MidenWalletAlert;
