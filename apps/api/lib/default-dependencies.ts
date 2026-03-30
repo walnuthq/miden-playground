@@ -1,4 +1,4 @@
-import type { DefaultDependency, DependencyRecord } from "@/lib/types";
+import type { DefaultDependency, PackageDependency } from "@/lib/types";
 
 const basicWalletRust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
 #![no_std]
@@ -41,18 +41,18 @@ impl MyAccount {
 }
 `;
 
-export const basicWalletDependency: DependencyRecord = {
+export const basicWalletDependency: PackageDependency = {
   id: "basic-wallet",
   name: "basic-wallet",
   type: "account",
-  digest: "0x91b7426f61f0b17d409919f19c69131a7f658c430df38168b87b082b6ff209c2",
+  // digest: "0x91b7426f61f0b17d409919f19c69131a7f658c430df38168b87b082b6ff209c2",
   rust: basicWalletRust,
-  dependencies: [],
+  // dependencies: [],
 };
 
 export const defaultDependenciesRecords: Record<
   DefaultDependency,
-  DependencyRecord
+  PackageDependency
 > = {
   "basic-wallet": basicWalletDependency,
 } as const;

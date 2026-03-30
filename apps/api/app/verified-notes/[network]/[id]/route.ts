@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getVerifiedNotes } from "@/db/verified-notes";
 import { midenNoteVerifier } from "@/lib/miden-verifier";
 import { getStandardNoteScript } from "@/lib/default-note-scripts";
+import { getDependencies } from "@/db/packages";
 
 export const GET = async (
   request: NextRequest,
@@ -22,6 +23,7 @@ export const GET = async (
         ok: true,
         noteScript: {
           ...standardNoteScript,
+          procedureExports: [],
           createdAt: standardNoteScript.createdAt.getTime(),
           updatedAt: standardNoteScript.updatedAt.getTime(),
         },
@@ -30,10 +32,16 @@ export const GET = async (
     const [verifiedNote = null] = verifiedNotes;
     if (verifiedNote) {
       const { package: dbPackage } = verifiedNote;
+      const dependencies =
+        dbPackage.dependencies.length > 0
+          ? await getDependencies(dbPackage.dependencies)
+          : [];
       return NextResponse.json({
         ok: true,
         noteScript: {
           ...dbPackage,
+          dependencies,
+          procedureExports: [],
           createdAt: dbPackage.createdAt.getTime(),
           updatedAt: dbPackage.updatedAt.getTime(),
         },

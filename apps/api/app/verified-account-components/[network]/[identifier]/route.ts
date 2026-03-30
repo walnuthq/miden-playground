@@ -26,16 +26,14 @@ export const GET = async (
     return NextResponse.json({
       ok: true,
       components: [
-        ...standardAccountComponents.map((standardAccountComponent) => {
-          return {
-            ...standardAccountComponent,
-            procedureExports: standardAccountComponent.exports.map(
-              (manifestExport) => manifestExport.Procedure,
-            ),
-            createdAt: standardAccountComponent.createdAt.getTime(),
-            updatedAt: standardAccountComponent.updatedAt.getTime(),
-          };
-        }),
+        ...standardAccountComponents.map((standardAccountComponent) => ({
+          ...standardAccountComponent,
+          procedureExports: standardAccountComponent.exports.map(
+            (manifestExport) => manifestExport.Procedure,
+          ),
+          createdAt: standardAccountComponent.createdAt.getTime(),
+          updatedAt: standardAccountComponent.updatedAt.getTime(),
+        })),
         ...verifiedAccountComponents.map(({ package: dbPackage }) => {
           const exports = dbPackage.exports as Export[];
           return {
