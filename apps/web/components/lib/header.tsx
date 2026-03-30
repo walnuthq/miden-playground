@@ -89,9 +89,9 @@ const Header = () => {
         </Breadcrumb>
         <div className="ml-auto flex items-center gap-2">
           {isClient && <NetworkBadge />}
-          {isClient && tutorialId && <TutorialToggle />}
           <GithubButton />
-          <ModeToggle />
+          {isClient && tutorialId && <TutorialToggle />}
+          {/* <ModeToggle /> */}
           {isClient && networkId !== "mmck" && <WalletButton />}
         </div>
       </div>

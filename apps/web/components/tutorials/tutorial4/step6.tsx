@@ -3,7 +3,7 @@ import { EllipsisVertical } from "lucide-react";
 import { type TutorialStep } from "@/lib/types/tutorial";
 import useAccounts from "@/hooks/use-accounts";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialAlert from "@/components/tutorials/tutorial-alert";
+import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
 import Step6Content from "@/components/tutorials/tutorial4/step6.mdx";
 import { MIDEN_FAUCET_ACCOUNT_ID } from "@/lib/constants";
 

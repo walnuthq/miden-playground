@@ -2,7 +2,7 @@ import { usePathname } from "next/navigation";
 import { type TutorialStep } from "@/lib/types/tutorial";
 import useAccounts from "@/hooks/use-accounts";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialAlert from "@/components/tutorials/tutorial-alert";
+import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
 import Step4Content from "@/components/tutorials/tutorial5/step4.mdx";
 import { COUNTER_CONTRACT_ADDRESS } from "@/lib/constants";
 import { getIdentifierPart } from "@/lib/types/account";

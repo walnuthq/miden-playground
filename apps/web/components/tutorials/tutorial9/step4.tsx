@@ -1,6 +1,6 @@
 import { usePathname } from "next/navigation";
 import { defaultTutorialStep } from "@/lib/types/tutorial";
-import TutorialAlert from "@/components/tutorials/tutorial-alert";
+import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import Step4Content from "@/components/tutorials/tutorial9/step4.mdx";
 import useAccounts from "@/hooks/use-accounts";

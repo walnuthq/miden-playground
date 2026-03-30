@@ -25,17 +25,11 @@ const NextStepButton = ({
   }, [disabled, nextTutorialStepDisabled, setNextTutorialStepDisabled]);
   return (
     <Button
-      className="relative grow-2"
+      className="relative grow-2 bg-[#ff5500]"
       disabled={disabled && tutorialStep === tutorialMaxStep}
       onClick={onClick ?? nextTutorialStep}
     >
       {text}
-      {!disabled && tutorialStep === tutorialMaxStep && (
-        <span className="absolute top-0 right-0 -mt-1 -mr-1 flex size-3">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#f50] opacity-75" />
-          <span className="relative inline-flex size-3 rounded-full bg-[#f50]" />
-        </span>
-      )}
     </Button>
   );
 };

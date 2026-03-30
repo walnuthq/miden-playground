@@ -45,7 +45,9 @@ const NetworkBadge = () => {
   return (
     <Badge
       variant={variants[networkId]}
-      className={cn({ "bg-[#f50] text-white": networkId === "mmck" })}
+      className={cn("rounded-xs h-8", {
+        "bg-[#f50] text-white": networkId === "mmck",
+      })}
     >
       {networks[networkId]} | <pre>#{blockNum}</pre>
       {syncingState ? <Spinner /> : <CircleDot />}

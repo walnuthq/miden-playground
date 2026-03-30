@@ -18,11 +18,11 @@ const StartTutorialCard = ({ tutorial }: { tutorial: Tutorial }) => {
   const { completedTutorials, startTutorial } = useTutorials();
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>
-          {tutorial.number}. {tutorial.title}
-        </CardTitle>
-        <CardAction>
+      <CardHeader className="gap-0">
+        <div className="flex items-center justify-between">
+          <strong className="text-[#ff5500] text-sm">
+            {tutorial.number.toString().padStart(2, "0")}
+          </strong>
           {completedTutorials.has(tutorial.id) ? (
             <Badge className="text-sm bg-green-500 text-white dark:bg-green-600">
               <BadgeCheck />
@@ -31,22 +31,28 @@ const StartTutorialCard = ({ tutorial }: { tutorial: Tutorial }) => {
           ) : (
             <Badge
               className={cn("capitalize text-sm text-white", {
-                "bg-sky-500 dark:bg-sky-600": tutorial.category === "beginner",
-                "bg-amber-500 dark:bg-amber-600":
+                "bg-[#588EFB] dark:bg-sky-600":
+                  tutorial.category === "beginner",
+                "bg-[#9D00FF] dark:bg-amber-600":
                   tutorial.category === "advanced",
               })}
             >
               {tutorial.category}
             </Badge>
           )}
-        </CardAction>
+        </div>
+        <CardTitle className="text-xl">{tutorial.title}</CardTitle>
         <CardDescription>{tutorial.tagline}</CardDescription>
       </CardHeader>
       <CardContent className="h-full">
         <p>{tutorial.description}</p>
       </CardContent>
       <CardFooter>
-        <Button className="w-full" onClick={() => startTutorial(tutorial.id)}>
+        <Button
+          variant="outline"
+          className="w-full bg-[#f9f9f9]"
+          onClick={() => startTutorial(tutorial.id)}
+        >
           Start tutorial
         </Button>
       </CardFooter>

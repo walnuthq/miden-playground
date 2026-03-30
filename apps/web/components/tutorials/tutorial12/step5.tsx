@@ -4,7 +4,7 @@ import { useWallet } from "@miden-sdk/miden-wallet-adapter";
 import { type TutorialStep } from "@/lib/types/tutorial";
 import useAccounts from "@/hooks/use-accounts";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialAlert from "@/components/tutorials/tutorial-alert";
+import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
 import Step5Content from "@/components/tutorials/tutorial12/step5.mdx";
 import useTutorials from "@/hooks/use-tutorials";
 

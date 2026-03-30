@@ -2,7 +2,7 @@ import { useState } from "react";
 import { type TutorialStep } from "@/lib/types/tutorial";
 import { useInterval } from "usehooks-ts";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialAlert from "@/components/tutorials/tutorial-alert";
+import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
 import Step6Content from "@/components/tutorials/tutorial11/step6.mdx";
 import useAccounts from "@/hooks/use-accounts";
 import { getVerifiedAccountComponents } from "@/lib/api";
