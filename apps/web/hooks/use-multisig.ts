@@ -81,7 +81,7 @@ const useMultisig = () => {
             amount: vaultBalance.amount.toString(),
           })),
         },
-        proposals: [],
+        proposals: newMultisig.listProposals(),
       },
       networkId,
       updatedAt: blockNum,
@@ -173,12 +173,12 @@ const useMultisig = () => {
       return;
     }
     dispatch({ type: "SUBMITTING_TRANSACTION" });
-    const proposal = await multisig.createConsumeNotesProposal(noteIds);
+    await multisig.createConsumeNotesProposal(noteIds);
     updateAccount({
       ...previousAccount,
       multisig: {
         ...previousAccount.multisig,
-        proposals: [...previousAccount.multisig.proposals, proposal],
+        proposals: multisig.listProposals(),
       },
     });
     dispatch({ type: "TRANSACTION_SUBMITTED" });
@@ -201,16 +201,12 @@ const useMultisig = () => {
       return;
     }
     dispatch({ type: "SUBMITTING_TRANSACTION" });
-    const proposal = await multisig.createP2idProposal(
-      recipientId,
-      faucetId,
-      BigInt(amount),
-    );
+    await multisig.createP2idProposal(recipientId, faucetId, BigInt(amount));
     updateAccount({
       ...previousAccount,
       multisig: {
         ...previousAccount.multisig,
-        proposals: [...previousAccount.multisig.proposals, proposal],
+        proposals: multisig.listProposals(),
       },
     });
     dispatch({ type: "TRANSACTION_SUBMITTED" });
@@ -230,10 +226,12 @@ const useMultisig = () => {
     }
     dispatch({ type: "SUBMITTING_TRANSACTION" });
     await multisig.signProposal(proposal.id);
-    const proposals = await multisig.syncProposals();
     updateAccount({
       ...previousAccount,
-      multisig: { ...previousAccount.multisig, proposals },
+      multisig: {
+        ...previousAccount.multisig,
+        proposals: multisig.listProposals(),
+      },
     });
     dispatch({ type: "TRANSACTION_SUBMITTED" });
   };
@@ -252,7 +250,6 @@ const useMultisig = () => {
     }
     dispatch({ type: "SUBMITTING_TRANSACTION" });
     await multisig.executeProposal(proposal.id);
-    const proposals = await multisig.syncProposals();
     // updateAccount({
     //   ...previousAccount,
     //   multisig: { ...previousAccount.multisig, proposals },
@@ -270,7 +267,7 @@ const useMultisig = () => {
       components: previousAccount.components,
       multisig: {
         config: previousAccount.multisig.config,
-        proposals,
+        proposals: multisig.listProposals(),
       },
       networkId,
       updatedAt: blockNum,
@@ -309,7 +306,7 @@ const useMultisig = () => {
             amount: vaultBalance.amount.toString(),
           })),
         },
-        proposals: [],
+        proposals: multisig.listProposals(),
       },
       networkId,
       updatedAt: blockNum,

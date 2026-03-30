@@ -33,7 +33,7 @@ const Step6: TutorialStep = {
         const multisig = accounts.find(
           (account) =>
             account.codeCommitment().toHex() ===
-            "0x2860c3c59588e2c3d73ffdb90dc142131515c08a29fb2d2325d271ca24f902f2",
+            "0xda13c649b0aca3c630d42eaf2c79fd003147c2a1d9259636498952dd3a5173e7",
         );
         setAddress(
           accountIdToAddress({
