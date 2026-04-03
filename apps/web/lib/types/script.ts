@@ -1,5 +1,6 @@
 import { parse } from "smol-toml";
-import { EMPTY_WORD } from "@/lib/constants";
+import { formatProcedureExportPath } from "@/lib/utils";
+import { EMPTY_WORD } from "../constants";
 
 export const scriptTypes = {
   library: "Library",
@@ -32,7 +33,7 @@ export const scriptStatuses = {
 
 export type ScriptStatus = keyof typeof scriptStatuses;
 
-type MidenType = "Felt" | "Word" | "AccountId";
+export type MidenType = "Felt" | "Word" | "AccountId" | "FaucetId" | "Asset";
 
 export type MidenInput = {
   name: string;
@@ -43,7 +44,7 @@ export type MidenInput = {
 type Signature = { abi: number; params: MidenType[]; results: MidenType[] };
 
 export const defaultSignature = (): Signature => ({
-  abi: 0,
+  abi: 3,
   params: [],
   results: [],
 });
@@ -68,18 +69,21 @@ export const defaultProcedureExport = (): ProcedureExport => ({
 export type Dependency = {
   id: string;
   name: string;
+  type: ScriptType;
   digest: string;
 };
 
 export const baseDependency: Dependency = {
   id: "base",
   name: "base",
+  type: "library",
   digest: "0x389cc47c54704ed5d03183bcdc0819010501a1cab9f07a421432fc5c2a2e77ef",
 };
 
 export const stdDependency: Dependency = {
   id: "std",
   name: "std",
+  type: "library",
   digest: "0x2eaedee678906c235e33a89a64d16ea71b951a444463e9bcf8675ab1fe6210c0",
 };
 
@@ -101,6 +105,7 @@ export type Script = {
   error: string;
   digest: string;
   masp: string;
+  exports: Export[];
   procedureExports: ProcedureExport[];
   dependencies: Dependency[];
   // inputs: MidenInput[];
@@ -117,8 +122,9 @@ export const defaultScript = (): Script => ({
   rust: "",
   masm: "",
   error: "",
-  digest: EMPTY_WORD,
+  digest: "",
   masp: "",
+  exports: [],
   procedureExports: [],
   dependencies: [],
   // inputs: [],
@@ -126,7 +132,21 @@ export const defaultScript = (): Script => ({
   updatedAt: Date.now(),
 });
 
-const formatProcedureInputs = (inputs: MidenInput[]) =>
+export type CompiledPackage = Pick<
+  Script,
+  | "id"
+  | "name"
+  | "type"
+  | "rust"
+  | "dependencies"
+  | "error"
+  | "masm"
+  | "digest"
+  | "masp"
+  | "exports"
+>;
+
+export const formatProcedureInputs = (inputs: MidenInput[]) =>
   inputs
     .toReversed()
     .map((arg) => {
@@ -135,7 +155,8 @@ const formatProcedureInputs = (inputs: MidenInput[]) =>
         case "Word": {
           return `push.${arg.value}`;
         }
-        case "AccountId": {
+        case "AccountId":
+        case "FaucetId": {
           const { prefix, suffix } = JSON.parse(arg.value ?? "") as {
             prefix: string;
             suffix: string;
@@ -189,3 +210,19 @@ export type CargoToml = {
 
 export const parseCargoToml = (cargoToml: string) =>
   parse(cargoToml) as CargoToml;
+
+export const compiledPackageToScript = (
+  compiledPackage: CompiledPackage,
+): Script => ({
+  ...defaultScript(),
+  ...compiledPackage,
+  procedureExports: compiledPackage.error
+    ? []
+    : compiledPackage.exports.map((manifestExport) => ({
+        ...defaultProcedureExport(),
+        ...manifestExport.Procedure,
+        readOnly: formatProcedureExportPath(
+          manifestExport.Procedure.path,
+        ).startsWith("get"),
+      })),
+});

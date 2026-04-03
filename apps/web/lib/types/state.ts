@@ -65,6 +65,9 @@ export type State = {
   invokeProcedureArgumentsDialogProcedure: ProcedureExport | null;
   addDependencyDialogOpen: boolean;
   addDependencyDialogScriptId: string;
+  importProjectDialogOpen: boolean;
+  readOnlyProcedureDigest: string;
+  readOnlyProcedureResult: string;
   scripts: Script[];
   // COMPONENTS
   createComponentDialogOpen: boolean;
@@ -79,6 +82,8 @@ export type State = {
   tutorialOpen: boolean;
   nextTutorialStepDisabled: boolean;
   completedTutorials: Set<string>;
+  // EXAMPLES
+  exampleId: string;
 };
 
 export const defaultState = (): State => ({
@@ -129,6 +134,9 @@ export const defaultState = (): State => ({
   invokeProcedureArgumentsDialogProcedure: null,
   addDependencyDialogOpen: false,
   addDependencyDialogScriptId: "",
+  importProjectDialogOpen: false,
+  readOnlyProcedureDigest: "",
+  readOnlyProcedureResult: "",
   scripts: defaultScripts,
   // COMPONENTS
   createComponentDialogOpen: false,
@@ -143,6 +151,8 @@ export const defaultState = (): State => ({
   tutorialOpen: true,
   nextTutorialStepDisabled: true,
   completedTutorials: new Set([]),
+  // EXAMPLES
+  exampleId: "",
 });
 
 export const stateSerializer = ({

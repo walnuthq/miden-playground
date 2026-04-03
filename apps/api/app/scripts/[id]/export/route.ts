@@ -7,7 +7,7 @@ import { packageExists, generatePackageDir } from "@/lib/miden-compiler";
 import { PACKAGES_PATH } from "@/lib/constants";
 
 export const GET = async (
-  request: NextRequest,
+  _: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) => {
   try {

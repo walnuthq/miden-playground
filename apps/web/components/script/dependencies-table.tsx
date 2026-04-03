@@ -44,7 +44,8 @@ const DependencyActionsCell = ({
             const index = script.dependencies.findIndex(
               ({ id }) => id === dependencyId,
             );
-            updateScript(script.id, {
+            updateScript({
+              id: script.id,
               dependencies: [
                 ...script.dependencies.slice(0, index),
                 ...script.dependencies.slice(index + 1),
@@ -59,66 +60,48 @@ const DependencyActionsCell = ({
   );
 };
 
-const DependenciesTable = ({ script }: { script: Script }) => {
-  const { scripts } = useScripts();
-  const dependencies = script.dependencies
-    .map((dependency) => {
-      const scriptDependency = scripts.find(
-        ({ name }) => name === dependency.name,
-      );
-      return scriptDependency
-        ? {
-            id: scriptDependency.id,
-            name: scriptDependency.name,
-            type: scriptDependency.type,
-            digest: scriptDependency.digest,
-          }
-        : undefined;
-    })
-    .filter((dependency) => dependency !== undefined);
-  return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Digest</TableHead>
-            <TableHead />
+const DependenciesTable = ({ script }: { script: Script }) => (
+  <div className="rounded-md border">
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Name</TableHead>
+          <TableHead>Type</TableHead>
+          <TableHead>Digest</TableHead>
+          <TableHead />
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {script.dependencies.map(({ id, name, type, digest }) => (
+          <TableRow key={id}>
+            <TableCell>
+              <Link
+                href={`/scripts/${id}`}
+                className="text-primary font-medium underline underline-offset-4"
+              >
+                {name}
+              </Link>
+            </TableCell>
+            <TableCell>{scriptTypes[type]}</TableCell>
+            <TableHead>{digest}</TableHead>
+            <TableCell>
+              {!script.readOnly && (
+                <DependencyActionsCell script={script} dependencyId={id} />
+              )}
+            </TableCell>
           </TableRow>
-        </TableHeader>
-        <TableBody>
-          {dependencies.map(({ id, name, type, digest }) => (
-            <TableRow key={id}>
-              <TableCell>
-                <Link
-                  href={`/scripts/${id}`}
-                  className="text-primary font-medium underline underline-offset-4"
-                >
-                  {name}
-                </Link>
-              </TableCell>
-              <TableCell>{scriptTypes[type]}</TableCell>
-              <TableHead>{digest}</TableHead>
-              <TableCell>
-                {!script.readOnly && (
-                  <DependencyActionsCell script={script} dependencyId={id} />
-                )}
-              </TableCell>
-            </TableRow>
-          ))}
-          {defaultDependencies().map(({ id, name, digest }) => (
-            <TableRow key={id}>
-              <TableCell>{name}</TableCell>
-              <TableCell>Default Package</TableCell>
-              <TableCell>{digest}</TableCell>
-              <TableCell />
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
-  );
-};
+        ))}
+        {defaultDependencies().map(({ id, name, type, digest }) => (
+          <TableRow key={id}>
+            <TableCell>{name}</TableCell>
+            <TableCell>{scriptTypes[type]}</TableCell>
+            <TableCell>{digest}</TableCell>
+            <TableCell />
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  </div>
+);
 
 export default DependenciesTable;

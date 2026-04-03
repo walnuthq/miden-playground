@@ -16,6 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@workspace/ui/components/table";
+import ImportProjectButton from "@/components/scripts/import-project-button";
 import CreateScriptButton from "@/components/scripts/create-script-button";
 import { cn } from "@workspace/ui/lib/utils";
 
@@ -35,7 +36,7 @@ const ScriptsTable = <TData, TValue>({
   });
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex justify-between">
+      <div className="flex items-center justify-between">
         <Input
           placeholder="Filter by script name…"
           value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
@@ -44,7 +45,10 @@ const ScriptsTable = <TData, TValue>({
           }
           className="max-w-sm"
         />
-        <CreateScriptButton />
+        <div className="flex gap-2">
+          <ImportProjectButton />
+          <CreateScriptButton />
+        </div>
       </div>
       <div className="rounded-md border">
         <Table>

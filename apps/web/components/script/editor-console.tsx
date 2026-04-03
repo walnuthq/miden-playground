@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Play } from "lucide-react";
+import { toast } from "sonner";
 import { Spinner } from "@workspace/ui/components/spinner";
 import {
   Card,
@@ -9,60 +10,27 @@ import {
   CardTitle,
 } from "@workspace/ui/components/card";
 import { Button } from "@workspace/ui/components/button";
-import { defaultProcedureExport, type Script } from "@/lib/types/script";
+import { type Script } from "@/lib/types/script";
 import useScripts from "@/hooks/use-scripts";
 import { cn } from "@workspace/ui/lib/utils";
-import { compileScript } from "@/lib/api";
-import { formatProcedureExportPath } from "@/lib/utils";
 
 const EditorConsole = ({ script }: { script: Script }) => {
-  const { scripts, updateScript } = useScripts();
+  const { compileScript } = useScripts();
   const [loading, setLoading] = useState(false);
   const [content, setContent] = useState("");
   const compile = async () => {
     setLoading(true);
-    const { error, masm, digest, masp, procedureExports, dependencies } =
-      await compileScript(script);
-    updateScript(script.id, {
-      error,
-      masm,
-      status: error ? "error" : "compiled",
-      digest,
-      masp,
-      procedureExports: error
-        ? script.procedureExports
-        : procedureExports.map((procedureExport) => ({
-            ...defaultProcedureExport(),
-            ...procedureExport,
-            readOnly: formatProcedureExportPath(
-              procedureExport.path,
-            ).startsWith("get"),
-          })),
-      dependencies: error
-        ? script.dependencies
-        : dependencies
-            .map((dependency) => {
-              if (
-                dependency.digest ===
-                "0xc414a8aa918aa163c89b4543fac58500189e4bed24630806f276d49665c692a3"
-              ) {
-                return { ...dependency, id: "basic-wallet" };
-              }
-              const scriptDependency = scripts.find(
-                ({ id, digest }) =>
-                  id === dependency.id || digest === dependency.digest,
-              );
-              return scriptDependency
-                ? {
-                    ...dependency,
-                    id: scriptDependency.id,
-                  }
-                : undefined;
-            })
-            .filter((dependency) => dependency !== undefined),
-    });
-    setContent(error ? error : "Script compiled successfully.");
+    const { script: compiledScript, error } = await compileScript(script);
     setLoading(false);
+    if (compiledScript) {
+      setContent(
+        compiledScript.error
+          ? compiledScript.error
+          : "Script compiled successfully.",
+      );
+    } else {
+      toast.error("Script compilation failed.", { description: error });
+    }
   };
   return (
     <Card>

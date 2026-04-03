@@ -63,7 +63,7 @@ const verifyNoteFromSource = async ({
           },
         },
       } = parseCargoToml(cargoToml);
-      return newPackage({ name, type, rust });
+      return newPackage({ name, type, rust, readOnly: true });
     }),
   );
   const {
@@ -84,12 +84,13 @@ const verifyNoteFromSource = async ({
           dependenciesPackages.find(({ name }) => name === dependency),
         )
         .filter((dependency) => dependency !== undefined)
-        .map(({ id, name }) => ({ id, name, digest: "" }))
+        .map(({ id, name, type }) => ({ id, name, type, digest: "" }))
     : [];
   const notePackage = await newPackage({
     name: notePackageName,
     type: notePackageType,
     rust: packageSource.rust,
+    readOnly: true,
     dependencies: notePackageDependencies,
   });
   const { stderr } = await compilePackage({

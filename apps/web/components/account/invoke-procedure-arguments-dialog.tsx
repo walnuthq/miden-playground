@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { Fragment, useState, type Dispatch, type SetStateAction } from "react";
 import { toast } from "sonner";
 import { Spinner } from "@workspace/ui/components/spinner";
 import { Button } from "@workspace/ui/components/button";
@@ -14,16 +14,138 @@ import {
   DialogTitle,
 } from "@workspace/ui/components/dialog";
 import { Label } from "@workspace/ui/components/label";
+import useAccounts from "@/hooks/use-accounts";
 import useScripts from "@/hooks/use-scripts";
 import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";
 import useMidenSdk from "@/hooks/use-miden-sdk";
 import { MIDEN_EXPLORER_URL } from "@/lib/constants";
-import { formatProcedureExportPath } from "@/lib/utils";
+import { formatProcedureExportPath, formatAmount } from "@/lib/utils";
+import { type ProcedureExport, type MidenType } from "@/lib/types/script";
+import { getMapItem } from "@/lib/types/account";
+
+const FeltField = ({ id }: { id: string }) => (
+  <div className="grid gap-3 col-span-2">
+    <Label htmlFor={id}>{id}</Label>
+    <Input id={id} name={id} required />
+  </div>
+);
+
+const WordField = ({ id }: { id: string }) => (
+  <div className="grid gap-3 col-span-2">
+    <Label htmlFor={id}>{id}</Label>
+    <Input id={id} name={id} required />
+  </div>
+);
+
+const AccountIdField = ({
+  id,
+  accountId,
+  setAccountId,
+}: {
+  id: string;
+  accountId: string;
+  setAccountId: Dispatch<SetStateAction<string>>;
+}) => (
+  <div className="grid gap-3 col-span-2">
+    <Label>{id}</Label>
+    <SelectAccountDropdownMenu value={accountId} onValueChange={setAccountId} />
+  </div>
+);
+
+const FaucetIdField = ({
+  id,
+  faucetId,
+  setFaucetId,
+}: {
+  id: string;
+  faucetId: string;
+  setFaucetId: Dispatch<SetStateAction<string>>;
+}) => (
+  <div className="grid gap-3 col-span-2">
+    <Label>{id}</Label>
+    <SelectAccountDropdownMenu
+      value={faucetId}
+      onValueChange={setFaucetId}
+      selectFaucets
+      showFaucetsAsAssets
+    />
+  </div>
+);
+
+const AssetField = ({
+  id,
+  faucetId,
+  setFaucetId,
+}: {
+  id: string;
+  faucetId: string;
+  setFaucetId: Dispatch<SetStateAction<string>>;
+}) => {
+  const { faucets } = useAccounts();
+  const faucetAccount = faucets.find(({ id }) => id === faucetId);
+  return (
+    <>
+      <div className="grid gap-3">
+        <Label>{id} faucet</Label>
+        <SelectAccountDropdownMenu
+          value={faucetId}
+          onValueChange={setFaucetId}
+          selectFaucets
+          showFaucetsAsAssets
+        />
+      </div>
+      <div className="grid gap-3">
+        <Label htmlFor="amount">{id} amount</Label>
+        <Input
+          id={`${id}-amount`}
+          name={`${id}-amount`}
+          type="number"
+          step={formatAmount({
+            amount: "1",
+            decimals: faucetAccount?.decimals,
+          }).replaceAll(",", "")}
+          min={formatAmount({
+            amount: "1",
+            decimals: faucetAccount?.decimals,
+          }).replaceAll(",", "")}
+          required
+        />
+      </div>
+    </>
+  );
+};
+
+const getParamsWithNames = (
+  procedureExport: ProcedureExport,
+): { name: string; type: MidenType }[] => {
+  const path = formatProcedureExportPath(procedureExport.path);
+  return path === "copy_count"
+    ? [
+        { name: "counter_contract_id", type: "AccountId" },
+        { name: "get_count_proc_hash", type: "Word" },
+      ]
+    : path === "get-balance"
+      ? [
+          { name: "depositor", type: "AccountId" },
+          { name: "faucet", type: "FaucetId" },
+        ]
+      : path === "deposit"
+        ? [
+            { name: "depositor", type: "AccountId" },
+            { name: "asset", type: "Asset" },
+          ]
+        : procedureExport.signature.params.map((param, index) => ({
+            name: `param_${index}`,
+            type: param,
+          }));
+};
 
 const InvokeProcedureArgumentsDialog = () => {
   const {
-    midenSdk: { AccountId },
+    midenSdk: { AccountId, Word },
   } = useMidenSdk();
+  // const { readWord } = useTransactions();
+  const { accounts } = useAccounts();
   const {
     invokeProcedureArgumentsDialogOpen,
     invokeProcedureArgumentsDialogSenderAccountId: senderAccountId,
@@ -31,18 +153,20 @@ const InvokeProcedureArgumentsDialog = () => {
     invokeProcedureArgumentsDialogProcedure: procedureExport,
     closeInvokeProcedureArgumentsDialog,
     invokeProcedure,
+    setReadOnlyProcedureResult,
   } = useScripts();
   const [loading, setLoading] = useState(false);
   const [accountId, setAccountId] = useState("");
+  const [faucetId, setFaucetId] = useState("");
   if (!script || !procedureExport) {
     return null;
   }
   const onClose = () => {
     setAccountId("");
+    setFaucetId("");
     closeInvokeProcedureArgumentsDialog();
   };
-  const isCopyCount =
-    formatProcedureExportPath(procedureExport.path) === "copy_count";
+  const paramsWithNames = getParamsWithNames(procedureExport);
   return (
     <Dialog
       open={invokeProcedureArgumentsDialogOpen}
@@ -66,92 +190,143 @@ const InvokeProcedureArgumentsDialog = () => {
             event.preventDefault();
             const formData = new FormData(event.currentTarget);
             setLoading(true);
-            try {
-              const transactionRecord = await invokeProcedure({
-                senderAccountId,
-                script,
-                procedureExport,
-                procedureInputs: procedureExport.signature.params.map(
-                  (param, index) => {
-                    switch (param) {
-                      case "AccountId": {
-                        const wasmAccountId = AccountId.fromHex(accountId);
-                        return {
-                          name: "counter_account_id",
-                          type: param,
-                          value: JSON.stringify({
-                            prefix: wasmAccountId.prefix().toString(),
-                            suffix: wasmAccountId.suffix().toString(),
-                          }),
-                        };
-                      }
-                      case "Word": {
-                        return {
-                          name: "proc_hash",
-                          type: param,
-                          value: formData.get("procHash")!.toString(),
-                        };
-                      }
-                      default: {
-                        return {
-                          name: `param_${index}`,
-                          type: param,
-                          value: formData.get(`param_${index}`)!.toString(),
-                        };
-                      }
-                    }
-                  },
-                ),
-                foreignAccounts: accountId ? [accountId] : [],
-              });
-              toast("Transaction submitted.", {
-                action: {
-                  label: "View on MidenScan",
-                  onClick: () =>
-                    window.open(
-                      `${MIDEN_EXPLORER_URL}/tx/${transactionRecord.id().toHex()}`,
-                      "_blank",
-                      "noreferrer",
-                    ),
-                },
-              });
+            const procedureInputs = paramsWithNames.map(({ name, type }) => {
+              switch (type) {
+                case "AccountId": {
+                  const wasmAccountId = AccountId.fromHex(accountId);
+                  return {
+                    name,
+                    type,
+                    value: JSON.stringify({
+                      prefix: wasmAccountId.prefix().toString(),
+                      suffix: wasmAccountId.suffix().toString(),
+                    }),
+                  };
+                }
+                case "FaucetId": {
+                  const wasmAccountId = AccountId.fromHex(faucetId);
+                  return {
+                    name,
+                    type,
+                    value: JSON.stringify({
+                      prefix: wasmAccountId.prefix().toString(),
+                      suffix: wasmAccountId.suffix().toString(),
+                    }),
+                  };
+                }
+                case "Asset": {
+                  const wasmAccountId = AccountId.fromHex(faucetId);
+                  return {
+                    name,
+                    type,
+                    value: JSON.stringify({
+                      prefix: wasmAccountId.prefix().toString(),
+                      suffix: wasmAccountId.suffix().toString(),
+                      amount: formData.get(`${name}-amount`)!.toString(),
+                    }),
+                  };
+                }
+                default: {
+                  return {
+                    name,
+                    type,
+                    value: formData.get(name)!.toString(),
+                  };
+                }
+              }
+            });
+            if (procedureExport.readOnly) {
+              // const word = await readWord({
+              //   accountId: senderAccountId,
+              //   procedureExport,
+              //   procedureInputs,
+              // });
+              // console.log("word", word.toHex());
+              const senderAccount = accounts.find(
+                ({ id }) => id === senderAccountId,
+              );
+              if (
+                formatProcedureExportPath(procedureExport.path) ===
+                "get-balance"
+              ) {
+                const wasmAccountId = AccountId.fromHex(accountId);
+                const wasmFaucetId = AccountId.fromHex(faucetId);
+                const balance = getMapItem(
+                  senderAccount?.storage.find(
+                    ({ name }) =>
+                      name === "miden::component::miden_bank_account::balances",
+                  ),
+                  Word.newFromFelts([
+                    wasmAccountId.prefix(),
+                    wasmAccountId.suffix(),
+                    wasmFaucetId.prefix(),
+                    wasmFaucetId.suffix(),
+                  ]).toHex(),
+                );
+                const [, , , felt = 0n] = Word.fromHex(balance).toU64s();
+                setReadOnlyProcedureResult({
+                  digest: procedureExport.digest,
+                  result: felt.toString(),
+                });
+              }
               onClose();
-            } catch (error) {
-              console.error(error);
+            } else {
+              try {
+                const transactionRecord = await invokeProcedure({
+                  senderAccountId,
+                  script,
+                  procedureExport,
+                  procedureInputs,
+                  foreignAccounts: accountId ? [accountId] : [],
+                });
+                toast("Transaction submitted.", {
+                  action: {
+                    label: "View on MidenScan",
+                    onClick: () =>
+                      window.open(
+                        `${MIDEN_EXPLORER_URL}/tx/${transactionRecord.id().toHex()}`,
+                        "_blank",
+                        "noreferrer",
+                      ),
+                  },
+                });
+                onClose();
+              } catch (error) {
+                console.error(error);
+              }
             }
             setLoading(false);
           }}
         >
-          {isCopyCount ? (
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-3 col-span-2">
-                <Label>counter_account_id</Label>
-                <SelectAccountDropdownMenu
-                  value={accountId}
-                  onValueChange={setAccountId}
-                />
-              </div>
-              <div className="grid gap-3 col-span-2">
-                <Label htmlFor="procHash">get_count_proc_hash</Label>
-                <Input id="procHash" name="procHash" required />
-              </div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-4">
-              {procedureExport.signature.params.map((param, index) => (
-                <div key={index} className="grid gap-3 col-span-2">
-                  <Label htmlFor={`param_${index}`}>
-                    Param #{index} ({param})
-                  </Label>
-                  <Input
-                    id={`param_${index}`}
-                    name={`param_${index}`}
-                    required
+          <div className="grid grid-cols-2 gap-4">
+            {paramsWithNames.map(({ name, type }) => (
+              <Fragment key={name}>
+                {type === "Felt" && <FeltField id={name} />}
+                {type === "Word" && <WordField id={name} />}
+                {type === "AccountId" && (
+                  <AccountIdField
+                    id={name}
+                    accountId={accountId}
+                    setAccountId={setAccountId}
                   />
-                </div>
-              ))}
-            </div>
-          )}
+                )}
+                {type === "FaucetId" && (
+                  <FaucetIdField
+                    id={name}
+                    faucetId={faucetId}
+                    setFaucetId={setFaucetId}
+                  />
+                )}
+                {type === "Asset" && (
+                  <AssetField
+                    id={name}
+                    faucetId={faucetId}
+                    setFaucetId={setFaucetId}
+                  />
+                )}
+              </Fragment>
+            ))}
+          </div>
         </form>
         <DialogFooter>
           <DialogClose asChild>
@@ -160,7 +335,14 @@ const InvokeProcedureArgumentsDialog = () => {
           <Button
             form="invoke-procedure-form"
             type="submit"
-            disabled={loading || isCopyCount ? accountId === "" : false}
+            disabled={
+              loading ||
+              (procedureExport.signature.params.includes("AccountId") &&
+                !accountId) ||
+              (procedureExport.signature.params.includes("FaucetId") &&
+                !faucetId) ||
+              (procedureExport.signature.params.includes("Asset") && !faucetId)
+            }
           >
             {loading && <Spinner />}
             {loading ? "Invoking…" : "Invoke"}

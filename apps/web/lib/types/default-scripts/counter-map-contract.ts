@@ -28,15 +28,21 @@ struct CounterContract {
 impl CounterContract {
     /// Returns the current counter value stored in the contract's storage map.
     pub fn get_count(&self) -> Felt {
+        // Define a fixed key for the counter value within the map
         let key = Word::from_u64_unchecked(0, 0, 0, 1);
+        // Read the value associated with the key from the storage map
         self.count_map.get(&key)
     }
 
     /// Increments the counter value stored in the contract's storage map by one.
     pub fn increment_count(&mut self) -> Felt {
+        // Define the same fixed key
         let key = Word::from_u64_unchecked(0, 0, 0, 1);
+        // Read the current value
         let current_value: Felt = self.count_map.get(&key);
+        // Increment the value by one
         let new_value = current_value + felt!(1);
+        // Write the new value back to the storage map
         self.count_map.set(key, new_value);
         new_value
     }

@@ -23,7 +23,7 @@ import {
   clientGetAccountById,
   clientReadWord,
 } from "@/lib/web-client";
-import { type ProcedureExport } from "@/lib/types/script";
+import { type MidenInput, type ProcedureExport } from "@/lib/types/script";
 import useGlobalContext from "@/components/global-context/hook";
 import useMidenSdk from "@/hooks/use-miden-sdk";
 import useWebClient from "@/hooks/use-web-client";
@@ -175,9 +175,11 @@ const useTransactions = () => {
   const readWord = async ({
     accountId,
     procedureExport,
+    procedureInputs = [],
   }: {
     accountId: string;
     procedureExport: ProcedureExport;
+    procedureInputs?: MidenInput[];
   }) => {
     dispatch({ type: "SUBMITTING_TRANSACTION" });
     await client.syncState();
@@ -186,6 +188,7 @@ const useTransactions = () => {
         client,
         accountId,
         procedureExport,
+        procedureInputs,
         midenSdk,
       });
       dispatch({ type: "TRANSACTION_SUBMITTED" });

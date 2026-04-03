@@ -21,14 +21,14 @@ const queryClient = new QueryClient();
 const Providers = ({ children }: { children: ReactNode }) => (
   <NextThemesProvider
     attribute="class"
-    defaultTheme="light"
-    enableSystem
+    // defaultTheme="system"
+    // enableSystem
+    forcedTheme="light"
     disableTransitionOnChange
     enableColorScheme
   >
     <WalletProvider
       wallets={[walletAdapter]}
-      // privateDataPermission={PrivateDataPermission.Auto}
       privateDataPermission={PrivateDataPermission.Auto}
       allowedPrivateData={AllowedPrivateData.All}
       autoConnect

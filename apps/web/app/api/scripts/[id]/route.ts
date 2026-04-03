@@ -8,7 +8,19 @@ import {
   type Export,
   type Dependency,
   defaultScript,
+  type Script,
 } from "@/lib/types/script";
+
+type CompileScriptRequestBody = {
+  rust: string;
+  dependencies: string[];
+};
+
+type CompileScriptResponse = {
+  package: Pick<Script, "error" | "masm" | "digest" | "masp" | "exports"> & {
+    dependencies: Dependency[];
+  };
+};
 
 const scriptsMasm: Record<ScriptExample | "none", string> = {
   none: defaultScript().masm,
@@ -52,38 +64,48 @@ export const PATCH = async (
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) => {
-  const { id } = await params;
-  const body = await request.json();
-  const { rust } = body as { rust: string };
-  const [rawExample] = id.split("_");
-  const example = rawExample as ScriptExample;
-  let masm = scriptsMasm[example];
-  if (example === "counter-account") {
-    const matches = rust.matchAll(/felt!\((\d*)\)/g);
-    const lastMatch = Array.from(matches ?? []).at(-1);
-    const incrementValue = Number(lastMatch?.at(1));
-    masm = masm.replace("add.1", `add.${incrementValue}`);
+  try {
+    const { id } = await params;
+    const body = await request.json();
+    const { rust } = body as CompileScriptRequestBody;
+    const [rawExample] = id.split("_");
+    const example = rawExample as ScriptExample;
+    let masm = scriptsMasm[example];
+    if (example === "counter-account") {
+      const matches = rust.matchAll(/felt!\((\d*)\)/g);
+      const lastMatch = Array.from(matches ?? []).at(-1);
+      const incrementValue = Number(lastMatch?.at(1));
+      masm = masm.replace("add.1", `add.${incrementValue}`);
+    }
+    await sleep(1000);
+    return NextResponse.json<CompileScriptResponse>({
+      package: {
+        error: "",
+        masm,
+        digest: scriptsDigest[example],
+        masp: "",
+        exports: scriptsExports[example],
+        dependencies: scriptsDependencies[example],
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    const { message } = error as { message: string };
+    return new NextResponse(message, { status: 500 });
   }
-  const digest = scriptsDigest[example];
-  const exports = scriptsExports[example];
-  const dependencies = scriptsDependencies[example];
-  await sleep(1000);
-  return NextResponse.json({
-    ok: true,
-    error: "",
-    masm,
-    digest,
-    masp: "",
-    exports,
-    dependencies,
-  });
 };
 
 export const DELETE = async (
   _: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) => {
-  const { id } = await params;
-  await sleep(1000);
-  return NextResponse.json({ id });
+  try {
+    const { id } = await params;
+    await sleep(1000);
+    return NextResponse.json<{ package: { id: string } }>({ package: { id } });
+  } catch (error) {
+    console.error(error);
+    const { message } = error as { message: string };
+    return new NextResponse(message, { status: 500 });
+  }
 };

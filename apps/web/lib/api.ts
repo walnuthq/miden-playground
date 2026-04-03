@@ -1,8 +1,7 @@
 import {
   type Script,
   type ScriptExample,
-  type Export,
-  type Dependency,
+  type CompiledPackage,
   type ScriptType,
   type PackageSource,
 } from "@/lib/types/script";
@@ -32,13 +31,14 @@ export const createScript = async ({
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name, type, example }),
   });
+  if (response.status === 500) {
+    return { error: await response.text() };
+  }
   const result = await response.json();
-  const { id, rust, dependencies } = result as {
-    id: string;
-    rust: string;
-    dependencies: Dependency[];
+  const { package: script } = result as {
+    package: Pick<Script, "id" | "name" | "type" | "rust" | "dependencies">;
   };
-  return { id, rust, dependencies };
+  return { script };
 };
 
 export const compileScript = async (script: Script) => {
@@ -51,25 +51,12 @@ export const compileScript = async (script: Script) => {
       dependencies: script.dependencies.map(({ id }) => id),
     }),
   });
+  if (response.status === 500) {
+    return { error: await response.text() };
+  }
   const result = await response.json();
-  const { ok, error, masm, digest, masp, exports, dependencies } = result as {
-    ok: boolean;
-    error: string;
-    masm: string;
-    digest: string;
-    masp: string;
-    exports: Export[];
-    dependencies: Dependency[];
-  };
-  return {
-    ok,
-    error,
-    masm,
-    digest,
-    masp,
-    procedureExports: exports.map((manifestExport) => manifestExport.Procedure),
-    dependencies,
-  };
+  const { package: compiledScript } = result as { package: CompiledPackage };
+  return { script: compiledScript };
 };
 
 export const deleteScript = async (scriptId: string) => {
@@ -77,9 +64,14 @@ export const deleteScript = async (scriptId: string) => {
   const response = await fetch(`${apiUrl}/scripts/${scriptId}`, {
     method: "DELETE",
   });
+  if (response.status === 500) {
+    return { error: await response.text() };
+  }
   const result = await response.json();
-  const { id } = result as { id: string };
-  return id;
+  const {
+    package: { id },
+  } = result as { package: { id: string } };
+  return { script: { id } };
 };
 
 export const verifyAccountComponentFromSource = async ({
@@ -333,3 +325,39 @@ export const getScript = async (id: string) => {
 };
 
 export const exportScript = (id: string) => `${API_URL}/scripts/${id}/export`;
+
+export const importScriptsFromPackageSources = async (
+  packageSources: Record<string, PackageSource>,
+) => {
+  const response = await fetch(`${API_URL}/scripts/import`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ packageSources }),
+  });
+  if (response.status === 500) {
+    return { error: await response.text() };
+  }
+  const result = await response.json();
+  const { packages } = result as { packages: CompiledPackage[] };
+  return { scripts: packages };
+};
+
+export const importScriptsFromGithubRepo = async ({
+  githubRepoUrl,
+  projectDir,
+}: {
+  githubRepoUrl: string;
+  projectDir?: string;
+}) => {
+  const response = await fetch(`${API_URL}/scripts/import`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ githubRepoUrl, projectDir }),
+  });
+  if (response.status === 500) {
+    return { error: await response.text() };
+  }
+  const result = await response.json();
+  const { packages } = result as { packages: CompiledPackage[] };
+  return { scripts: packages };
+};

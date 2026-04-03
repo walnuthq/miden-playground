@@ -3,6 +3,7 @@ import { useIsClient } from "usehooks-ts";
 import { columns } from "@/components/scripts/columns";
 import ScriptsTable from "@/components/scripts/scripts-table";
 import useScripts from "@/hooks/use-scripts";
+import ImportProjectDialog from "@/components/scripts/import-project-dialog";
 import CreateScriptDialog from "@/components/scripts/create-script-dialog";
 import { defaultScriptIds } from "@/lib/types/default-scripts";
 import DeleteScriptAlertDialog from "@/components/scripts/delete-script-alert-dialog";
@@ -19,6 +20,7 @@ const Scripts = () => {
         columns={columns}
         data={scripts.filter(({ id }) => !defaultScriptIds.includes(id))}
       />
+      <ImportProjectDialog />
       <CreateScriptDialog />
       <DeleteScriptAlertDialog />
     </div>

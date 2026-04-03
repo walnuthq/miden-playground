@@ -52,7 +52,12 @@ const verifyAccountComponentFromSource = async ({
   const {
     package: { name },
   } = parseCargoToml(cargoToml);
-  const { id } = await newPackage({ name, type: "account", rust });
+  const { id } = await newPackage({
+    name,
+    type: "account",
+    rust,
+    readOnly: true,
+  });
   const { stderr } = await compilePackage({ packageDir: id, name });
   if (stderr) {
     await Promise.all([deletePackageDir(id), deletePackage(id)]);

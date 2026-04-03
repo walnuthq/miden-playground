@@ -1,14 +1,12 @@
 import { eq } from "drizzle-orm";
 import db from "@/db";
 import { packagesTable } from "@/db/schema";
-import type {
-  NewPackage,
-  PackageStatus,
-  Export,
-  DefaultDependency,
-} from "@/lib/types";
+import type { NewPackage, PackageStatus, Export } from "@/lib/types";
 import { isValidUUIDv4 } from "@/lib/utils";
-import { defaultDependenciesRecords } from "@/lib/default-dependencies";
+import {
+  defaultDependenciesRecords,
+  type DefaultDependency,
+} from "@/lib/default-dependencies";
 
 export const getReadOnlyPackage = ({
   id,
@@ -67,10 +65,10 @@ export const deletePackage = (id: string) =>
 export const getDependencies = async (dependencies: string[]) => {
   const defaultDependencies = dependencies
     .filter((dependency) => !isValidUUIDv4(dependency))
-    .map(
-      (dependency) =>
-        defaultDependenciesRecords[dependency as DefaultDependency],
-    );
+    .map((dependency) => ({
+      ...defaultDependenciesRecords[dependency as DefaultDependency],
+      rust: "",
+    }));
   const dbDependencies = await db.query.packagesTable.findMany({
     columns: {
       id: true,
@@ -78,7 +76,6 @@ export const getDependencies = async (dependencies: string[]) => {
       type: true,
       digest: true,
       rust: true,
-      dependencies: true,
     },
     where: {
       id: {

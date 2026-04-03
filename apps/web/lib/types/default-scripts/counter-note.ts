@@ -48,7 +48,7 @@ const counterNote: Script = {
   readOnly: true,
   rust,
   masm,
-  dependencies: [pick(counterContract, "id", "name", "digest")],
+  dependencies: [pick(counterContract, "id", "name", "type", "digest")],
 };
 
 export default counterNote;

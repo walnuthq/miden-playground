@@ -20,17 +20,16 @@ import useMidenSdk from "@/hooks/use-miden-sdk";
 import { bigintToWord } from "@/lib/web-client";
 
 const StorageSlotValueTooltip = ({ value }: { value: string }) => {
-  const [, , , dec] = stringToFeltArray(value);
+  const feltArray = stringToFeltArray(value);
+  const [first = 0n] = feltArray.filter((felt) => felt !== 0n);
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button variant="ghost" className="-ml-4">
-          {dec}
-        </Button>
+        <Button variant="outline">{first}</Button>
       </TooltipTrigger>
       <TooltipContent>
         <p>Hex: {value}</p>
-        <p>Dec: {dec}</p>
+        <p>Dec: [{feltArray.join(", ")}]</p>
       </TooltipContent>
     </Tooltip>
   );

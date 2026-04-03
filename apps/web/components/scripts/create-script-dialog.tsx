@@ -76,15 +76,19 @@ const CreateScriptDialog = () => {
             event.preventDefault();
             const formData = new FormData(event.currentTarget);
             setLoading(true);
-            const script = await newScript({
+            const { script, error } = await newScript({
               name: kebabCase(formData.get("name")?.toString() ?? ""),
               type: scriptType,
               example: scriptExample,
             });
             setLoading(false);
-            onClose();
-            toast(`${script.name} has been created.`);
-            router.push(`/scripts/${script.id}`);
+            if (script) {
+              toast(`${script.name} has been created.`);
+              router.push(`/scripts/${script.id}`);
+              onClose();
+            } else {
+              toast.error("Failed to create script.", { description: error });
+            }
           }}
         >
           <FieldSet>

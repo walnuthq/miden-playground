@@ -375,7 +375,6 @@ const useAccounts = () => {
     dispatch({
       type: "CLOSE_DEPLOY_MULTISIG_DIALOG",
     });
-
   return {
     createWalletDialogOpen,
     createFaucetDialogOpen,

@@ -9,12 +9,19 @@ import {
   type ScriptExample,
   type Dependency,
   defaultScript,
+  type Script,
 } from "@/lib/types/script";
 
 type CreateScriptRequestBody = {
   name: string;
   type: ScriptType;
   example: ScriptExample | "none";
+};
+
+type CreateScriptResponse = {
+  package: Pick<Script, "id" | "name" | "type" | "rust"> & {
+    dependencies: Dependency[];
+  };
 };
 
 const scriptsRust: Record<ScriptExample | "none", string> = {
@@ -32,11 +39,19 @@ const scriptsDependencies: Record<ScriptExample | "none", Dependency[]> = {
 } as const;
 
 export const POST = async (request: NextRequest) => {
-  const body = await request.json();
-  const { example } = body as CreateScriptRequestBody;
-  const id = `${example}_${v4()}`;
-  const rust = scriptsRust[example];
-  const dependencies = scriptsDependencies[example];
-  await sleep(1000);
-  return NextResponse.json({ id, rust, dependencies });
+  try {
+    const body = await request.json();
+    const { name, type, example } = body as CreateScriptRequestBody;
+    const id = `${example}_${v4()}`;
+    const rust = scriptsRust[example];
+    const dependencies = scriptsDependencies[example];
+    await sleep(1000);
+    return NextResponse.json<CreateScriptResponse>({
+      package: { id, name, type, rust, dependencies },
+    });
+  } catch (error) {
+    console.error(error);
+    const { message } = error as { message: string };
+    return new NextResponse(message, { status: 500 });
+  }
 };

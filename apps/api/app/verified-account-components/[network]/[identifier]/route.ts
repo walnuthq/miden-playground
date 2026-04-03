@@ -1,11 +1,20 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getVerifiedAccountComponents } from "@/db/verified-account-components";
-import { type Export } from "@/lib/types";
+import { type Export, type Package, type ProcedureExport } from "@/lib/types";
 import { getStandardAccountComponent } from "@/lib/default-account-components";
 import { midenAccountComponentVerifier } from "@/lib/miden-verifier";
 
+type VerifiedAccountComponentsResponse = {
+  ok: boolean;
+  components: (Omit<Package, "createdAt" | "updatedAt"> & {
+    procedureExports: ProcedureExport[];
+    createdAt: number;
+    updatedAt: number;
+  })[];
+};
+
 export const GET = async (
-  request: NextRequest,
+  _: NextRequest,
   { params }: { params: Promise<{ network: string; identifier: string }> },
 ) => {
   try {
@@ -23,7 +32,7 @@ export const GET = async (
     const standardAccountComponents = accountComponents
       .map((accountComponent) => getStandardAccountComponent(accountComponent))
       .filter((standardAccountComponent) => !!standardAccountComponent);
-    return NextResponse.json({
+    return NextResponse.json<VerifiedAccountComponentsResponse>({
       ok: true,
       components: [
         ...standardAccountComponents.map((standardAccountComponent) => ({
@@ -41,6 +50,7 @@ export const GET = async (
             procedureExports: exports.map(
               (manifestExport) => manifestExport.Procedure,
             ),
+            exports,
             createdAt: dbPackage.createdAt.getTime(),
             updatedAt: dbPackage.updatedAt.getTime(),
           };
