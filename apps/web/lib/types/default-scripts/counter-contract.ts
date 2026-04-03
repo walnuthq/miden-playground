@@ -32,13 +32,17 @@ struct CounterContract {
 impl CounterContract {
     /// Returns the current counter value stored in the contract's storage value.
     pub fn get_count(&self) -> Felt {
+        // Read the value from storage
         self.count.read()
     }
 
     /// Increments the counter value stored in the contract's storage by one.
     pub fn increment_count(&mut self) -> Felt {
+        // Read the current value
         let current_value: Felt = self.count.read();
+        // Increment the value by one
         let new_value = current_value + felt!(1);
+        // Write the new value back to storage
         self.count.write(new_value);
         new_value
     }

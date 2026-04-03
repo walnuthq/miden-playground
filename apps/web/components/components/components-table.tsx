@@ -34,7 +34,7 @@ const ComponentsTable = <TData, TValue>({
   });
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex justify-between">
+      <div className="flex items-center justify-between">
         <Input
           placeholder="Filter by component name…"
           value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}

@@ -83,6 +83,14 @@ const ProjectSwitcher = () => {
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => {
+                resetState("mdev");
+                router.push("/accounts");
+              }}
+            >
+              New Devnet sandbox
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => {
                 resetState("mmck");
                 router.push("/accounts");
               }}

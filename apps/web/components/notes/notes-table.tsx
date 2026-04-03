@@ -35,7 +35,7 @@ const NotesTable = <TData, TValue>({
   });
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex justify-between">
+      <div className="flex items-center justify-between">
         <Input
           placeholder="Filter by sender ID…"
           value={

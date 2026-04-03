@@ -118,7 +118,7 @@ const VerifyNoteScriptDialog = () => {
                   setPackageSource(notePackage);
                   const rawNotePackageDependencies =
                     notePackage.parsedCargoToml.package.metadata.miden
-                      .dependencies;
+                      .dependencies ?? {};
                   const notePackageDependencies = Object.keys(
                     rawNotePackageDependencies,
                   )

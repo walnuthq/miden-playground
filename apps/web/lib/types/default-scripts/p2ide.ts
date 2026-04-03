@@ -228,7 +228,7 @@ const p2ide: Script = {
   rust,
   masm,
   digest: "0x3ce934e7d4d1560cedb4d49609062c06071b72bb7914a2791a04eccc10505cbe",
-  dependencies: [pick(basicWallet, "id", "name", "digest")],
+  dependencies: [pick(basicWallet, "id", "name", "type", "digest")],
 };
 
 export default p2ide;

@@ -7,9 +7,17 @@ import {
   type MidenInput,
   defaultScript,
   invokeProcedureCustomTransactionScript,
+  type PackageSource,
+  compiledPackageToScript,
 } from "@/lib/types/script";
 import { clientExecuteTransaction } from "@/lib/web-client";
-import { createScript, deleteScript as apiDeleteScript } from "@/lib/api";
+import {
+  createScript,
+  compileScript as apiCompileScript,
+  deleteScript as apiDeleteScript,
+  importScriptsFromPackageSources as apiImportScriptsFromPackageSources,
+  importScriptsFromGithubRepo as apiImportScriptsFromGithubRepo,
+} from "@/lib/api";
 import useMidenSdk from "@/hooks/use-miden-sdk";
 import useTransactions from "@/hooks/use-transactions";
 import useTutorials from "@/hooks/use-tutorials";
@@ -29,6 +37,9 @@ const useScripts = () => {
     invokeProcedureArgumentsDialogProcedure,
     addDependencyDialogOpen,
     addDependencyDialogScriptId,
+    importProjectDialogOpen,
+    readOnlyProcedureDigest,
+    readOnlyProcedureResult,
     dispatch,
   } = useGlobalContext();
   const { client } = useWebClient();
@@ -54,40 +65,48 @@ const useScripts = () => {
     type: ScriptType;
     example: ScriptExample | "none";
   }) => {
-    const { id, rust, dependencies } = await createScript({
+    const { script, error } = await createScript({
       name,
       type,
       example,
       tutorialId,
     });
-    const script: Script = {
-      ...defaultScript(),
-      id,
-      name,
-      type,
-      rust,
-      dependencies,
-      updatedAt: Date.now(),
-    };
-    dispatch({
-      type: "NEW_SCRIPT",
-      payload: { script },
-    });
-    return script;
+    if (script) {
+      dispatch({
+        type: "NEW_SCRIPT",
+        payload: {
+          script: { ...defaultScript(), ...script },
+        },
+      });
+    }
+    return { script, error };
   };
-  const updateScript = (id: string, script: Partial<Script>) =>
+  const compileScript = async (script: Script) => {
+    const { script: compiledScript, error } = await apiCompileScript(script);
+    if (compiledScript) {
+      dispatch({
+        type: "UPDATE_SCRIPT",
+        payload: {
+          script: compiledPackageToScript(compiledScript),
+        },
+      });
+    }
+    return { script: compiledScript, error };
+  };
+  const updateScript = (script: Partial<Script>) =>
     dispatch({
       type: "UPDATE_SCRIPT",
-      payload: { id, script },
+      payload: { script },
     });
   const deleteScript = async (scriptId: string) => {
-    const script = scripts.find(({ id }) => id === scriptId);
-    if (!script) {
-      throw new Error("Error: Script not found");
+    const { script, error } = await apiDeleteScript(scriptId);
+    if (script) {
+      dispatch({
+        type: "DELETE_SCRIPT",
+        payload: { scriptId: script.id },
+      });
     }
-    const deletedScriptId = await apiDeleteScript(scriptId);
-    dispatch({ type: "DELETE_SCRIPT", payload: { scriptId: deletedScriptId } });
-    return script;
+    return { script, error };
   };
   const invokeProcedure = async ({
     senderAccountId,
@@ -188,6 +207,65 @@ const useScripts = () => {
     dispatch({
       type: "CLOSE_ADD_DEPENDENCY_DIALOG",
     });
+  const openImportProjectDialog = () =>
+    dispatch({
+      type: "OPEN_IMPORT_PROJECT_DIALOG",
+    });
+  const closeImportProjectDialog = () =>
+    dispatch({
+      type: "CLOSE_IMPORT_PROJECT_DIALOG",
+    });
+  const importScriptsFromPackageSources = async (
+    packageSources: Record<string, PackageSource>,
+  ) => {
+    const { scripts, error } =
+      await apiImportScriptsFromPackageSources(packageSources);
+    if (scripts) {
+      dispatch({
+        type: "IMPORT_SCRIPTS",
+        payload: {
+          scripts: scripts.map((compiledScript) =>
+            compiledPackageToScript(compiledScript),
+          ),
+        },
+      });
+    }
+    return { scripts, error };
+  };
+  const importScriptsFromGithubRepo = async ({
+    githubRepoUrl,
+    projectDir,
+  }: {
+    githubRepoUrl: string;
+    projectDir?: string;
+  }) => {
+    const { scripts, error } = await apiImportScriptsFromGithubRepo({
+      githubRepoUrl,
+      projectDir,
+    });
+    if (scripts) {
+      dispatch({
+        type: "IMPORT_SCRIPTS",
+        payload: {
+          scripts: scripts.map((compiledScript) =>
+            compiledPackageToScript(compiledScript),
+          ),
+        },
+      });
+    }
+    return { scripts, error };
+  };
+  const setReadOnlyProcedureResult = ({
+    digest,
+    result,
+  }: {
+    digest: string;
+    result: string;
+  }) =>
+    dispatch({
+      type: "SET_READ_ONLY_PROCEDURE_RESULT",
+      payload: { digest, result },
+    });
   return {
     scripts,
     createScriptDialogOpen,
@@ -199,11 +277,15 @@ const useScripts = () => {
     invokeProcedureArgumentsDialogProcedure,
     addDependencyDialogOpen,
     addDependencyDialogScriptId,
+    importProjectDialogOpen,
+    readOnlyProcedureDigest,
+    readOnlyProcedureResult,
     openCreateScriptDialog,
     closeCreateScriptDialog,
     openDeleteScriptAlertDialog,
     closeDeleteScriptAlertDialog,
     newScript,
+    compileScript,
     updateScript,
     deleteScript,
     invokeProcedure,
@@ -211,6 +293,11 @@ const useScripts = () => {
     closeInvokeProcedureArgumentsDialog,
     openAddDependencyDialog,
     closeAddDependencyDialog,
+    openImportProjectDialog,
+    closeImportProjectDialog,
+    importScriptsFromPackageSources,
+    importScriptsFromGithubRepo,
+    setReadOnlyProcedureResult,
   };
 };
 

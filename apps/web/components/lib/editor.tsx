@@ -27,7 +27,8 @@ const Editor = ({
         readOnly
           ? undefined
           : (content) =>
-              updateScript(script.id, {
+              updateScript({
+                id: script.id,
                 status: "draft",
                 rust: content ?? "",
                 masm: "",

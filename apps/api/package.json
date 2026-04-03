@@ -19,9 +19,10 @@
   "dependencies": {
     "@dotenvx/dotenvx": "^1.59.1",
     "archiver": "^7.0.1",
-    "dotenv": "^17.3.1",
+    "dotenv": "^17.4.0",
     "drizzle-orm": "1.0.0-beta.20",
-    "next": "^16.2.1",
+    "lodash": "^4.18.1",
+    "next": "^16.2.2",
     "pg": "^8.20.0",
     "react": "^19.2.4",
     "smol-toml": "^1.6.1",
@@ -29,7 +30,8 @@
   },
   "devDependencies": {
     "@types/archiver": "^7.0.0",
-    "@types/node": "^25.5.0",
+    "@types/lodash": "^4.17.24",
+    "@types/node": "^25.5.2",
     "@types/pg": "^8.20.0",
     "@types/react": "^19.2.14",
     "@workspace/eslint-config": "workspace:^",

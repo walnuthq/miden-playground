@@ -89,7 +89,11 @@ const reducer = (state: State, action: Action): State => {
     case "OPEN_INVOKE_PROCEDURE_ARGUMENTS_DIALOG":
     case "CLOSE_INVOKE_PROCEDURE_ARGUMENTS_DIALOG":
     case "OPEN_ADD_DEPENDENCY_DIALOG":
-    case "CLOSE_ADD_DEPENDENCY_DIALOG": {
+    case "CLOSE_ADD_DEPENDENCY_DIALOG":
+    case "OPEN_IMPORT_PROJECT_DIALOG":
+    case "CLOSE_IMPORT_PROJECT_DIALOG":
+    case "IMPORT_SCRIPTS":
+    case "SET_READ_ONLY_PROCEDURE_RESULT": {
       return scriptReducer(state, action);
     }
     case "OPEN_CREATE_COMPONENT_DIALOG":

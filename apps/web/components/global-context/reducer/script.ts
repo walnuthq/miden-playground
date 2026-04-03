@@ -21,7 +21,7 @@ export type ScriptAction =
     }
   | {
       type: "UPDATE_SCRIPT";
-      payload: { id: string; script: Partial<Script> };
+      payload: { script: Partial<Script> };
     }
   | {
       type: "DELETE_SCRIPT";
@@ -42,7 +42,16 @@ export type ScriptAction =
         scriptId: string;
       };
     }
-  | { type: "CLOSE_ADD_DEPENDENCY_DIALOG" };
+  | { type: "CLOSE_ADD_DEPENDENCY_DIALOG" }
+  | {
+      type: "OPEN_IMPORT_PROJECT_DIALOG";
+    }
+  | { type: "CLOSE_IMPORT_PROJECT_DIALOG" }
+  | { type: "IMPORT_SCRIPTS"; payload: { scripts: Script[] } }
+  | {
+      type: "SET_READ_ONLY_PROCEDURE_RESULT";
+      payload: { digest: string; result: string };
+    };
 
 const reducer = (state: State, action: ScriptAction): State => {
   switch (action.type) {
@@ -79,7 +88,7 @@ const reducer = (state: State, action: ScriptAction): State => {
     }
     case "UPDATE_SCRIPT": {
       const index = state.scripts.findIndex(
-        ({ id }) => id === action.payload.id,
+        ({ id }) => id === action.payload.script.id,
       );
       return {
         ...state,
@@ -137,6 +146,31 @@ const reducer = (state: State, action: ScriptAction): State => {
         ...state,
         addDependencyDialogOpen: false,
         addDependencyDialogScriptId: "",
+      };
+    }
+    case "OPEN_IMPORT_PROJECT_DIALOG": {
+      return {
+        ...state,
+        importProjectDialogOpen: true,
+      };
+    }
+    case "CLOSE_IMPORT_PROJECT_DIALOG": {
+      return {
+        ...state,
+        importProjectDialogOpen: false,
+      };
+    }
+    case "IMPORT_SCRIPTS": {
+      return {
+        ...state,
+        scripts: [...state.scripts, ...action.payload.scripts],
+      };
+    }
+    case "SET_READ_ONLY_PROCEDURE_RESULT": {
+      return {
+        ...state,
+        readOnlyProcedureDigest: action.payload.digest,
+        readOnlyProcedureResult: action.payload.result,
       };
     }
   }

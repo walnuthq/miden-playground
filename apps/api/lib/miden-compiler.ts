@@ -26,12 +26,14 @@ export const newPackage = async ({
   type,
   example,
   rust,
+  readOnly = false,
   dependencies = [],
 }: {
   name: string;
   type: PackageType;
   example?: string;
   rust?: string;
+  readOnly?: boolean;
   dependencies?: Dependency[];
 }): Promise<{
   id: string;
@@ -49,7 +51,7 @@ export const newPackage = async ({
   const id = await insertPackage({
     name,
     type,
-    readOnly: !!rust,
+    readOnly,
     rust: initialRust,
     dependencies: dependencies.map(({ id }) => id),
   });
@@ -89,7 +91,7 @@ export const generatePackageDir = async ({
         name: dependency.name,
         type: dependency.type,
         rust: dependency.rust,
-        dependencies: dependency.dependencies,
+        dependencies: [],
       });
     }),
   );
@@ -296,7 +298,10 @@ const readPackageMetadata = async (maspPath: string) => {
     manifest: { exports, dependencies },
   } = JSON.parse(packageMetadata) as {
     digest: string;
-    manifest: { exports: Export[]; dependencies: Dependency[] };
+    manifest: {
+      exports: Export[];
+      dependencies: { name: string; digest: string }[];
+    };
   };
   return {
     digest,
@@ -304,8 +309,9 @@ const readPackageMetadata = async (maspPath: string) => {
     dependencies: dependencies
       .filter(({ name }) => !["base", "std"].includes(name))
       .map((dependency) => ({
-        ...dependency,
-        name: dependency.name.replaceAll("_", "-"),
+        // name is package id in camel case
+        id: dependency.name.replaceAll("_", "-"),
+        digest: dependency.digest,
       })),
   };
 };

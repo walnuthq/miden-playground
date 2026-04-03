@@ -70,7 +70,7 @@ const NavMain = ({
                 </SidebarMenuAction>
               )}
               <CollapsibleContent>
-                <SidebarMenuSub>
+                <SidebarMenuSub className="pr-0 mr-0">
                   {item.items?.map((subItem) => (
                     <SidebarMenuSubItem key={subItem.url}>
                       <SidebarMenuSubButton

@@ -17,6 +17,7 @@ const state: State = {
         {
           id: "counter-value-contract",
           name: "counter-value-contract",
+          type: "account",
           digest: "",
         },
       ],

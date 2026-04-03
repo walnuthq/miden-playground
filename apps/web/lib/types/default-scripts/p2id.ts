@@ -95,7 +95,7 @@ const p2id: Script = {
   rust,
   masm,
   digest: "0xa657a127211172b9b305d06c6e076dd1edbf67c8b1a32c063647d5f7bf456131",
-  dependencies: [pick(basicWallet, "id", "name", "digest")],
+  dependencies: [pick(basicWallet, "id", "name", "type", "digest")],
 };
 
 export default p2id;

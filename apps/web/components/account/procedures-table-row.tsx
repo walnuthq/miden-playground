@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Spinner } from "@workspace/ui/components/spinner";
 import { TableRow, TableCell } from "@workspace/ui/components/table";
@@ -23,10 +23,28 @@ const ProceduresTableRow = ({
   script: Script;
   procedureExport: ProcedureExport;
 }) => {
-  const { invokeProcedure, openInvokeProcedureArgumentsDialog } = useScripts();
+  const {
+    invokeProcedure,
+    openInvokeProcedureArgumentsDialog,
+    readOnlyProcedureDigest,
+    readOnlyProcedureResult,
+  } = useScripts();
   const { submittingTransaction, readWord } = useTransactions();
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState("");
+  useEffect(() => {
+    if (
+      procedureExport.digest === readOnlyProcedureDigest &&
+      result !== readOnlyProcedureResult
+    ) {
+      setResult(readOnlyProcedureResult);
+    }
+  }, [
+    procedureExport.digest,
+    readOnlyProcedureDigest,
+    result,
+    readOnlyProcedureResult,
+  ]);
   return (
     <TableRow key={procedureExport.path}>
       <TableCell>
@@ -50,44 +68,48 @@ const ProceduresTableRow = ({
               }
               onClick={async () => {
                 setLoading(true);
-                if (procedureExport.readOnly) {
-                  try {
-                    const word = await readWord({
-                      accountId: account.id,
-                      procedureExport,
-                    });
-                    if (procedureExport.signature.results.length === 1) {
-                      const [, , , felt = 0n] = word.toU64s();
-                      setResult(felt.toString());
-                    } else if (procedureExport.signature.results.length === 4) {
-                      setResult(word.toHex());
+                if (procedureExport.signature.params.length === 0) {
+                  if (procedureExport.readOnly) {
+                    try {
+                      const word = await readWord({
+                        accountId: account.id,
+                        procedureExport,
+                      });
+                      if (procedureExport.signature.results.length === 1) {
+                        const [, , , felt = 0n] = word.toU64s();
+                        setResult(felt.toString());
+                      } else if (
+                        procedureExport.signature.results.length === 4
+                      ) {
+                        setResult(word.toHex());
+                      }
+                    } catch (error) {
+                      console.error(error);
+                      setResult("ERROR");
                     }
-                  } catch (error) {
-                    console.error(error);
-                    setResult("ERROR");
-                  }
-                } else if (procedureExport.signature.params.length === 0) {
-                  try {
-                    const transactionRecord = await invokeProcedure({
-                      senderAccountId: account.id,
-                      script,
-                      procedureExport,
-                    });
-                    toast("Transaction submitted.", {
-                      action: {
-                        label: "View on MidenScan",
-                        onClick: () =>
-                          window.open(
-                            `${MIDEN_EXPLORER_URL}/tx/${transactionRecord.id().toHex()}`,
-                            "_blank",
-                            "noreferrer",
-                          ),
-                      },
-                    });
-                    setResult("");
-                  } catch (error) {
-                    console.error(error);
-                    setResult("ERROR");
+                  } else {
+                    try {
+                      const transactionRecord = await invokeProcedure({
+                        senderAccountId: account.id,
+                        script,
+                        procedureExport,
+                      });
+                      toast("Transaction submitted.", {
+                        action: {
+                          label: "View on MidenScan",
+                          onClick: () =>
+                            window.open(
+                              `${MIDEN_EXPLORER_URL}/tx/${transactionRecord.id().toHex()}`,
+                              "_blank",
+                              "noreferrer",
+                            ),
+                        },
+                      });
+                      setResult("");
+                    } catch (error) {
+                      console.error(error);
+                      setResult("ERROR");
+                    }
                   }
                 } else {
                   openInvokeProcedureArgumentsDialog({

@@ -103,7 +103,7 @@ const timelockP2id: Script = {
   rust,
   masm,
   digest: "0x94377a3ed496ef4282bb98b1df09f14be986f5ffed1ac5dd2f7e23e01d9c3bce",
-  dependencies: [pick(basicWallet, "id", "name", "digest")],
+  dependencies: [pick(basicWallet, "id", "name", "type", "digest")],
 };
 
 export default timelockP2id;

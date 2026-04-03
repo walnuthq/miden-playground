@@ -13,7 +13,7 @@ import { Separator } from "@workspace/ui/components/separator";
 import { SidebarTrigger } from "@workspace/ui/components/sidebar";
 import TutorialToggle from "@/components/lib/tutorial-toggle";
 import GithubButton from "@/components/lib/github-button";
-import ModeToggle from "@/components/lib/mode-toggle";
+// import ModeToggle from "@/components/lib/mode-toggle";
 import useTutorials from "@/hooks/use-tutorials";
 import NetworkBadge from "@/components/lib/network-badge";
 import useGlobalContext from "@/components/global-context/hook";
@@ -88,11 +88,11 @@ const Header = () => {
           </BreadcrumbList>
         </Breadcrumb>
         <div className="ml-auto flex items-center gap-2">
-          {isClient && <NetworkBadge />}
           <GithubButton />
-          {isClient && tutorialId && <TutorialToggle />}
+          {isClient && <NetworkBadge />}
           {/* <ModeToggle /> */}
           {isClient && networkId !== "mmck" && <WalletButton />}
+          {isClient && tutorialId && <TutorialToggle />}
         </div>
       </div>
     </header>

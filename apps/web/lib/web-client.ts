@@ -28,7 +28,12 @@ import {
   type TransactionNote,
   type Transaction,
 } from "@/lib/types/transaction";
-import { type Script, type ProcedureExport } from "@/lib/types/script";
+import {
+  type Script,
+  type ProcedureExport,
+  type MidenInput,
+  formatProcedureInputs,
+} from "@/lib/types/script";
 import { type StorageSlot, type Component } from "@/lib/types/component";
 import defaultScripts from "@/lib/types/default-scripts";
 import getterScript from "@/lib/types/default-scripts/getter";
@@ -333,14 +338,17 @@ const invokeGetterCustomTransactionScript = ({
   accountIdPrefix,
   accountIdSuffix,
   procHash,
+  procedureInputs,
 }: {
   accountIdPrefix: string;
   accountIdSuffix: string;
   procHash: string;
+  procedureInputs: MidenInput[];
 }) => `use external_contract::getter
 use miden::core::sys
 
 begin
+    ${formatProcedureInputs(procedureInputs)}
     push.${procHash}
     push.${accountIdSuffix}
     push.${accountIdPrefix}
@@ -353,11 +361,13 @@ export const clientReadWord = async ({
   client,
   accountId,
   procedureExport,
+  procedureInputs,
   midenSdk,
 }: {
   client: WebClientType;
   accountId: string;
   procedureExport: ProcedureExport;
+  procedureInputs: MidenInput[];
   midenSdk: MidenSdk;
 }) => {
   const {
@@ -382,11 +392,20 @@ export const clientReadWord = async ({
   );
   builder.linkDynamicLibrary(accountComponentLibrary);
   const wasmAccountId = AccountId.fromHex(accountId);
+  console.log(
+    invokeGetterCustomTransactionScript({
+      accountIdPrefix: wasmAccountId.prefix().toString(),
+      accountIdSuffix: wasmAccountId.suffix().toString(),
+      procHash: procedureExport.digest,
+      procedureInputs,
+    }),
+  );
   const transactionScript = builder.compileTxScript(
     invokeGetterCustomTransactionScript({
       accountIdPrefix: wasmAccountId.prefix().toString(),
       accountIdSuffix: wasmAccountId.suffix().toString(),
       procHash: procedureExport.digest,
+      procedureInputs,
     }),
   );
   const transactionRequest = new TransactionRequestBuilder()
@@ -477,11 +496,11 @@ export const clientDeployAccount = async ({
           Package.deserialize(fromBase64(script.masp)),
           new MidenArrays.StorageSlotArray(storageSlots),
         );
-    const procedures = accountComponent.getProcedures();
-    for (const procedure of procedures) {
-      console.log(script.id);
-      console.log(procedure.digest.toHex());
-    }
+    // const procedures = accountComponent.getProcedures();
+    // for (const procedure of procedures) {
+    //   console.log(script.id);
+    //   console.log(procedure.digest.toHex());
+    // }
     // if (script.id === "auth-no-auth") {
     // console.log(script.id);
     // console.log("get_count", accountComponent.getProcedureHash("get_count"));

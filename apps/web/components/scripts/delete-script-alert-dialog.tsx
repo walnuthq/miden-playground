@@ -15,6 +15,7 @@ import {
 
 const DeleteScriptAlertDialog = () => {
   const {
+    scripts,
     deleteScriptAlertDialogOpen,
     deleteScriptAlertDialogScriptId,
     closeDeleteScriptAlertDialog,
@@ -40,11 +41,18 @@ const DeleteScriptAlertDialog = () => {
             disabled={loading}
             onClick={async () => {
               setLoading(true);
-              const script = await deleteScript(
+              const { script, error } = await deleteScript(
                 deleteScriptAlertDialogScriptId,
               );
               setLoading(false);
-              toast(`${script.name} has been deleted.`);
+              if (script) {
+                const deletedScript = scripts.find(
+                  ({ id }) => id === script.id,
+                );
+                toast(`${deletedScript?.name} has been deleted.`);
+              } else {
+                toast.error("Error deleting script.", { description: error });
+              }
             }}
           >
             {loading && <Spinner />}
