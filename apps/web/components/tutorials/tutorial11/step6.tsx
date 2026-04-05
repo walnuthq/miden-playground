@@ -16,10 +16,11 @@ const useCompleted = () => {
   useInterval(
     () => {
       const checkVerifiedAccountComponents = async () => {
-        const verifiedAccountComponents = await getVerifiedAccountComponents({
-          networkId,
-          identifier: counter?.identifier ?? "",
-        });
+        const { components: verifiedAccountComponents = [] } =
+          await getVerifiedAccountComponents({
+            networkId,
+            identifier: counter?.identifier ?? "",
+          });
         setCompleted(verifiedAccountComponents.length > 0);
       };
       checkVerifiedAccountComponents();

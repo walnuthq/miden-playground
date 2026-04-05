@@ -33,6 +33,8 @@ type VerifyNoteRequestBody = {
   packageId?: string;
 };
 
+type VerifyNoteResponse = { verified: boolean };
+
 const deletePackages = async (packages: { id: string }[]) =>
   Promise.all(
     packages.map(({ id }) =>
@@ -210,7 +212,7 @@ export const POST = async (
         packageSource,
         dependencies,
       });
-      return NextResponse.json({ ok: true, verified });
+      return NextResponse.json<VerifyNoteResponse>({ verified });
     } else if (note && packageId) {
       const verified = await verifyNoteFromPackageId({
         networkId: network,
@@ -218,12 +220,12 @@ export const POST = async (
         note,
         packageId,
       });
-      return NextResponse.json({ ok: true, verified });
+      return NextResponse.json<VerifyNoteResponse>({ verified });
     }
     throw new Error("Error: Invalid request body.");
   } catch (error) {
     console.error(error);
     const { message } = error as { message: string };
-    return NextResponse.json({ ok: false, error: message }, { status: 500 });
+    return new NextResponse(message, { status: 500 });
   }
 };

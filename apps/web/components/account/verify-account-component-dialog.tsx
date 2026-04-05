@@ -82,17 +82,21 @@ const VerifyAccountComponentDialog = () => {
               packageSource,
             });
             setLoading(false);
-            if (verified) {
-              toast.success("Account Component verified.");
-              queryClient.invalidateQueries({
-                queryKey: [
-                  "verifiedAccountComponents",
-                  networkId,
-                  account.identifier,
-                ],
-              });
+            if (verified !== undefined) {
+              if (verified) {
+                toast.success("Account Component verified.");
+                queryClient.invalidateQueries({
+                  queryKey: [
+                    "verifiedAccountComponents",
+                    networkId,
+                    account.identifier,
+                  ],
+                });
+              } else {
+                toast.error("Account Component couldn't be verified.");
+              }
             } else {
-              toast.error("Account Component couldn't be verified.", {
+              toast.error("Error while verifying Account Component.", {
                 description: error,
               });
             }

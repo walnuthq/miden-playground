@@ -99,22 +99,11 @@ export const verifyAccountComponentFromSource = async ({
       }),
     },
   );
-  const result = await response.json();
-  const { ok, verified, error } = result as
-    | {
-        ok: true;
-        verified: boolean;
-        error: undefined;
-      }
-    | {
-        ok: false;
-        verified: undefined;
-        error: string;
-      };
-  if (!ok) {
-    console.error(error);
-    return { verified: false, error };
+  if (response.status === 500) {
+    return { error: await response.text() };
   }
+  const result = await response.json();
+  const { verified } = result as { verified: boolean };
   return { verified };
 };
 
@@ -138,22 +127,11 @@ export const verifyAccountComponentsFromPackageIds = async ({
       body: JSON.stringify({ accountId, identifier, account, packageIds }),
     },
   );
-  const result = await response.json();
-  const { ok, verified, error } = result as
-    | {
-        ok: true;
-        verified: boolean;
-        error: undefined;
-      }
-    | {
-        ok: false;
-        verified: undefined;
-        error: string;
-      };
-  if (!ok) {
-    console.error(error);
-    return { verified: false, error };
+  if (response.status === 500) {
+    return { error: await response.text() };
   }
+  const result = await response.json();
+  const { verified } = result as { verified: boolean };
   return { verified };
 };
 
@@ -170,31 +148,22 @@ export const getVerifiedAccountComponents = async ({
       method: "GET",
     },
   );
-  const result = await response.json();
-  const { ok, components, error } = result as
-    | {
-        ok: true;
-        components: Script[];
-        error: undefined;
-      }
-    | {
-        ok: false;
-        components: undefined;
-        error: string;
-      };
-  if (!ok) {
-    console.error(error);
-    return [];
+  if (response.status === 500) {
+    return { error: await response.text() };
   }
-  return components.map((component) => ({
-    ...component,
-    procedureExports: component.procedureExports.map((procedureExport) => ({
-      ...procedureExport,
-      readOnly: formatProcedureExportPath(procedureExport.path).startsWith(
-        "get",
-      ),
+  const result = await response.json();
+  const { components } = result as { components: Script[] };
+  return {
+    components: components.map((component) => ({
+      ...component,
+      procedureExports: component.procedureExports.map((procedureExport) => ({
+        ...procedureExport,
+        readOnly: formatProcedureExportPath(procedureExport.path).startsWith(
+          "get",
+        ),
+      })),
     })),
-  }));
+  };
 };
 
 export const verifyNoteFromSource = async ({
@@ -219,22 +188,11 @@ export const verifyNoteFromSource = async ({
       dependencies,
     }),
   });
-  const result = await response.json();
-  const { ok, verified, error } = result as
-    | {
-        ok: true;
-        verified: boolean;
-        error: undefined;
-      }
-    | {
-        ok: false;
-        verified: undefined;
-        error: string;
-      };
-  if (!ok) {
-    console.error(error);
-    return { verified: false, error };
+  if (response.status === 500) {
+    return { error: await response.text() };
   }
+  const result = await response.json();
+  const { verified } = result as { verified: boolean };
   return { verified };
 };
 
@@ -253,22 +211,11 @@ export const verifyNoteFromPackageId = async ({
     method: "POST",
     body: JSON.stringify({ noteId, note, packageId }),
   });
-  const result = await response.json();
-  const { ok, verified, error } = result as
-    | {
-        ok: true;
-        verified: boolean;
-        error: undefined;
-      }
-    | {
-        ok: false;
-        verified: undefined;
-        error: string;
-      };
-  if (!ok) {
-    console.error(error);
-    return { verified: false, error };
+  if (response.status === 500) {
+    return { error: await response.text() };
   }
+  const result = await response.json();
+  const { verified } = result as { verified: boolean };
   return { verified };
 };
 
@@ -285,43 +232,24 @@ export const getVerifiedNote = async ({
       method: "GET",
     },
   );
-  const result = await response.json();
-  const { ok, noteScript, error } = result as
-    | {
-        ok: true;
-        noteScript: Script | null;
-        error: undefined;
-      }
-    | {
-        ok: false;
-        noteScript: undefined;
-        error: string;
-      };
-  if (!ok) {
-    console.error(error);
-    return null;
+  if (response.status === 500) {
+    return { error: await response.text() };
   }
-  return noteScript;
+  const result = await response.json();
+  const { noteScript } = result as { noteScript: Script | null };
+  return { noteScript };
 };
 
 export const getScript = async (id: string) => {
   const response = await fetch(`${API_URL}/scripts/${id}`, {
     method: "GET",
   });
-  const result = await response.json();
-  const { ok, script } = result as
-    | {
-        ok: true;
-        script: Script;
-      }
-    | {
-        ok: false;
-        script: undefined;
-      };
-  if (!ok) {
-    return null;
+  if (response.status === 500) {
+    return { error: await response.text() };
   }
-  return script;
+  const result = await response.json();
+  const { package: script } = result as { package: Script };
+  return { script };
 };
 
 export const exportScript = (id: string) => `${API_URL}/scripts/${id}/export`;
