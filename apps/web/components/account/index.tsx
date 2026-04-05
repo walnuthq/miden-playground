@@ -16,7 +16,7 @@ const AccountIndex = ({ identifier }: { identifier: string }) => {
       }),
     enabled: ["mtst", "mdev"].includes(networkId),
   });
-  const rawVerifiedAccountComponents = data ?? [];
+  const rawVerifiedAccountComponents = data?.components ?? [];
   const verifiedAccountComponents = rawVerifiedAccountComponents.filter(
     ({ id }) => isValidUUIDv4(id),
   );

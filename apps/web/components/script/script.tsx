@@ -24,7 +24,7 @@ const ScriptComponent = ({
   serverScript,
 }: {
   id: string;
-  serverScript: Script | null;
+  serverScript?: Script;
 }) => {
   const router = useRouter();
   const pathname = usePathname();

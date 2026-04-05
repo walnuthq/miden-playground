@@ -8,13 +8,26 @@ import {
   generateCargoToml,
   updateRust,
 } from "@/lib/miden-compiler";
-import { type CompiledPackage } from "@/lib/types";
+import {
+  type CompiledPackage,
+  type Package,
+  type ProcedureExport,
+  type Export,
+} from "@/lib/types";
 import {
   getDependencies,
   getPackage,
   updatePackage,
   deletePackage,
 } from "@/db/packages";
+
+type GetScriptResponse = {
+  package: Omit<Package, "createdAt" | "updatedAt"> & {
+    procedureExports: ProcedureExport[];
+    createdAt: number;
+    updatedAt: number;
+  };
+};
 
 export const GET = async (
   _: NextRequest,
@@ -26,9 +39,14 @@ export const GET = async (
     if (!dbPackage) {
       throw new Error("Error: Package not found.");
     }
-    return NextResponse.json({
-      script: {
+    const exports = dbPackage.exports as Export[];
+    return NextResponse.json<GetScriptResponse>({
+      package: {
         ...dbPackage,
+        procedureExports: exports.map(
+          (manifestExport) => manifestExport.Procedure,
+        ),
+        exports,
         createdAt: dbPackage.createdAt.getTime(),
         updatedAt: dbPackage.updatedAt.getTime(),
       },

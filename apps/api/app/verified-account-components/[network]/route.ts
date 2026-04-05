@@ -36,6 +36,8 @@ type VerifyAccountComponentRequestBody = {
   packageIds?: string[];
 };
 
+type VerifyAccountComponentResponse = { verified: boolean };
+
 const verifyAccountComponentFromSource = async ({
   networkId,
   identifier,
@@ -192,7 +194,7 @@ export const POST = async (
         account,
         packageSource,
       });
-      return NextResponse.json({ ok: true, verified });
+      return NextResponse.json<VerifyAccountComponentResponse>({ verified });
     } else if (account && packageIds) {
       const verified = await verifyAccountComponentsFromPackageIds({
         networkId: network,
@@ -201,12 +203,12 @@ export const POST = async (
         account,
         packageIds,
       });
-      return NextResponse.json({ ok: true, verified });
+      return NextResponse.json<VerifyAccountComponentResponse>({ verified });
     }
     throw new Error("Error: Invalid request body.");
   } catch (error) {
     console.error(error);
     const { message } = error as { message: string };
-    return NextResponse.json({ ok: false, error: message }, { status: 500 });
+    return new NextResponse(message, { status: 500 });
   }
 };

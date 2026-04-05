@@ -5,7 +5,6 @@ import { getStandardAccountComponent } from "@/lib/default-account-components";
 import { midenAccountComponentVerifier } from "@/lib/miden-verifier";
 
 type VerifiedAccountComponentsResponse = {
-  ok: boolean;
   components: (Omit<Package, "createdAt" | "updatedAt"> & {
     procedureExports: ProcedureExport[];
     createdAt: number;
@@ -33,7 +32,6 @@ export const GET = async (
       .map((accountComponent) => getStandardAccountComponent(accountComponent))
       .filter((standardAccountComponent) => !!standardAccountComponent);
     return NextResponse.json<VerifiedAccountComponentsResponse>({
-      ok: true,
       components: [
         ...standardAccountComponents.map((standardAccountComponent) => ({
           ...standardAccountComponent,
@@ -60,6 +58,6 @@ export const GET = async (
   } catch (error) {
     console.error(error);
     const { message } = error as { message: string };
-    return NextResponse.json({ ok: false, error: message }, { status: 500 });
+    return new NextResponse(message, { status: 500 });
   }
 };

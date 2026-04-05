@@ -74,13 +74,17 @@ const VerifyNoteScriptDialog = () => {
               dependencies,
             });
             setLoading(false);
-            if (verified) {
-              toast.success("Note script verified.");
-              queryClient.invalidateQueries({
-                queryKey: ["verifiedNote", networkId, noteId],
-              });
+            if (verified !== undefined) {
+              if (verified) {
+                toast.success("Note script verified.");
+                queryClient.invalidateQueries({
+                  queryKey: ["verifiedNote", networkId, noteId],
+                });
+              } else {
+                toast.error("Note script couldn't be verified.");
+              }
             } else {
-              toast.error("Note script couldn't be verified.", {
+              toast.error("Error while verifying Note script.", {
                 description: error,
               });
             }
