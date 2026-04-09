@@ -59,6 +59,7 @@ export const GET = async (
 };
 
 type CompileScriptRequestBody = {
+  name: string;
   rust: string;
   dependencies: string[];
 };

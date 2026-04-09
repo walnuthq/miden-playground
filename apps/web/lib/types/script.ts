@@ -137,6 +137,7 @@ export type CompiledPackage = Pick<
   | "id"
   | "name"
   | "type"
+  | "masm"
   | "rust"
   | "dependencies"
   | "error"

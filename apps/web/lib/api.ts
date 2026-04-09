@@ -47,6 +47,7 @@ export const compileScript = async (script: Script) => {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
+      name: script.name,
       rust: script.rust,
       dependencies: script.dependencies.map(({ id }) => id),
     }),

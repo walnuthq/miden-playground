@@ -5,6 +5,8 @@ import { getStandardAccountComponent } from "@/lib/default-account-components";
 import { midenAccountComponentVerifier } from "@/lib/miden-verifier";
 
 type VerifiedAccountComponentsResponse = {
+  // legacy
+  ok: boolean;
   components: (Omit<Package, "createdAt" | "updatedAt"> & {
     procedureExports: ProcedureExport[];
     createdAt: number;
@@ -32,6 +34,7 @@ export const GET = async (
       .map((accountComponent) => getStandardAccountComponent(accountComponent))
       .filter((standardAccountComponent) => !!standardAccountComponent);
     return NextResponse.json<VerifiedAccountComponentsResponse>({
+      ok: true,
       components: [
         ...standardAccountComponents.map((standardAccountComponent) => ({
           ...standardAccountComponent,
