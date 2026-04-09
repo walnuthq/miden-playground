@@ -6,6 +6,8 @@ import { getDependencies } from "@/db/packages";
 import type { Package, ProcedureExport, Export, Dependency } from "@/lib/types";
 
 type VerifiedNotesResponse = {
+  // legacy
+  ok: boolean;
   noteScript:
     | (Omit<Package, "dependencies" | "createdAt" | "updatedAt"> & {
         dependencies: (Dependency & { rust: string })[];
@@ -32,6 +34,7 @@ export const GET = async (
     const standardNoteScript = getStandardNoteScript(noteScript);
     if (standardNoteScript) {
       return NextResponse.json<VerifiedNotesResponse>({
+        ok: true,
         noteScript: {
           ...standardNoteScript,
           dependencies: [],
@@ -50,6 +53,7 @@ export const GET = async (
           ? await getDependencies(dbPackage.dependencies)
           : [];
       return NextResponse.json<VerifiedNotesResponse>({
+        ok: true,
         noteScript: {
           ...dbPackage,
           dependencies,
@@ -60,7 +64,10 @@ export const GET = async (
         },
       });
     }
-    return NextResponse.json<VerifiedNotesResponse>({ noteScript: null });
+    return NextResponse.json<VerifiedNotesResponse>({
+      ok: true,
+      noteScript: null,
+    });
   } catch (error) {
     console.error(error);
     const { message } = error as { message: string };

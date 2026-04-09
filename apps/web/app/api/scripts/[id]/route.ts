@@ -6,34 +6,24 @@ import { sleep } from "@/lib/utils";
 import {
   type ScriptExample,
   type Export,
-  type Dependency,
   defaultScript,
   type Script,
+  type CompiledPackage,
 } from "@/lib/types/script";
 
 type CompileScriptRequestBody = {
+  name: string;
   rust: string;
   dependencies: string[];
 };
 
-type CompileScriptResponse = {
-  package: Pick<Script, "error" | "masm" | "digest" | "masp" | "exports"> & {
-    dependencies: Dependency[];
-  };
-};
+type CompileScriptResponse = { package: CompiledPackage };
 
-const scriptsMasm: Record<ScriptExample | "none", string> = {
-  none: defaultScript().masm,
-  "counter-account": counterMapContract.masm,
-  "p2id-note": timelockP2id.masm,
-  "counter-note": counterNote.masm,
-} as const;
-
-const scriptsDigest: Record<ScriptExample | "none", string> = {
-  none: defaultScript().digest,
-  "counter-account": counterMapContract.digest,
-  "p2id-note": timelockP2id.digest,
-  "counter-note": counterNote.digest,
+const scripts: Record<ScriptExample | "none", Script> = {
+  none: defaultScript(),
+  "counter-account": counterMapContract,
+  "p2id-note": timelockP2id,
+  "counter-note": counterNote,
 } as const;
 
 const scriptsExports: Record<ScriptExample | "none", Export[]> = {
@@ -53,13 +43,6 @@ const scriptsExports: Record<ScriptExample | "none", Export[]> = {
   })),
 } as const;
 
-const scriptsDependencies: Record<ScriptExample | "none", Dependency[]> = {
-  none: defaultScript().dependencies,
-  "counter-account": counterMapContract.dependencies,
-  "p2id-note": timelockP2id.dependencies,
-  "counter-note": counterNote.dependencies,
-} as const;
-
 export const PATCH = async (
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
@@ -67,10 +50,10 @@ export const PATCH = async (
   try {
     const { id } = await params;
     const body = await request.json();
-    const { rust } = body as CompileScriptRequestBody;
+    const { name, rust } = body as CompileScriptRequestBody;
     const [rawExample] = id.split("_");
     const example = rawExample as ScriptExample;
-    let masm = scriptsMasm[example];
+    let masm = scripts[example].masm;
     if (example === "counter-account") {
       const matches = rust.matchAll(/felt!\((\d*)\)/g);
       const lastMatch = Array.from(matches ?? []).at(-1);
@@ -80,12 +63,16 @@ export const PATCH = async (
     await sleep(1000);
     return NextResponse.json<CompileScriptResponse>({
       package: {
+        id,
+        name,
+        type: scripts[example].type,
         error: "",
         masm,
-        digest: scriptsDigest[example],
+        rust,
+        digest: scripts[example].digest,
         masp: "",
         exports: scriptsExports[example],
-        dependencies: scriptsDependencies[example],
+        dependencies: scripts[example].dependencies,
       },
     });
   } catch (error) {
