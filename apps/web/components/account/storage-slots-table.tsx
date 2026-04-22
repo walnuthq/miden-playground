@@ -1,3 +1,5 @@
+import { uniqBy } from "lodash";
+import { Word as WasmWord } from "@miden-sdk/miden-sdk";
 import {
   Table,
   TableBody,
@@ -13,14 +15,11 @@ import {
 } from "@workspace/ui/components/tooltip";
 import { Button } from "@workspace/ui/components/button";
 import { type StorageSlot, storageSlotTypes } from "@/lib/types/component";
-import { stringToFeltArray } from "@/lib/utils";
-import { type StorageItem, getItem } from "@/lib/types/account";
-import { uniqBy } from "lodash";
-import useMidenSdk from "@/hooks/use-miden-sdk";
-import { bigintToWord } from "@/lib/web-client";
+import type { StorageItem } from "@/lib/types/account";
+import { getItem } from "@/lib/utils/account";
 
 const StorageSlotValueTooltip = ({ value }: { value: string }) => {
-  const feltArray = stringToFeltArray(value);
+  const feltArray = WasmWord.fromHex(value).toU64s();
   const [first = 0n] = feltArray.filter((felt) => felt !== 0n);
   return (
     <Tooltip>
@@ -42,13 +41,14 @@ const StorageSlotMapTable = ({
   storageItem: StorageItem;
   defaultValue: string;
 }) => {
-  const { midenSdk } = useMidenSdk();
   const keyValuePairs = defaultValue === "" ? [] : defaultValue.split(",");
   const keyValues = keyValuePairs.map((pair) => {
     const [key = "", value = ""] = pair.split(":");
     return {
-      key: bigintToWord({ value: BigInt(key), midenSdk }).toHex(),
-      value: bigintToWord({ value: BigInt(value), midenSdk }).toHex(),
+      key: new WasmWord(new BigUint64Array([BigInt(key), 0n, 0n, 0n])).toHex(),
+      value: new WasmWord(
+        new BigUint64Array([BigInt(value), 0n, 0n, 0n]),
+      ).toHex(),
     };
   });
   const entries = uniqBy([...storageItem.mapEntries, ...keyValues], "key");

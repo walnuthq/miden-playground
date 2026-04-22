@@ -1,7 +1,7 @@
 "use client";
 import { MoreVertical } from "lucide-react";
-import { type InputNote, noteConsumed, noteStates } from "@/lib/types/note";
-import { accountIdFromPrefixSuffix } from "@/lib/types/account";
+import { type InputNote, noteStates } from "@/lib/types/note";
+import { noteConsumed } from "@/lib/utils/note";
 import { formatId } from "@/lib/utils";
 import { type ColumnDef } from "@tanstack/react-table";
 import { Button } from "@workspace/ui/components/button";
@@ -19,24 +19,14 @@ import {
 } from "@miden-sdk/miden-wallet-adapter";
 import useTransactions from "@/hooks/use-transactions";
 import AccountAddress from "@/components/lib/account-address";
-import useScripts from "@/hooks/use-scripts";
-import useGlobalContext from "@/components/global-context/hook";
 import useAccounts from "@/hooks/use-accounts";
 import { clientExportInputNoteFile } from "@/lib/web-client";
-import useWebClient from "@/hooks/use-web-client";
-import useMidenSdk from "@/hooks/use-miden-sdk";
-import { accountIdToAddress } from "@/lib/web-client";
+import { normalizeAccountId, useMiden } from "@miden-sdk/react";
 
 const InputNoteSenderCell = ({ inputNote }: { inputNote: InputNote }) => {
-  const { midenSdk } = useMidenSdk();
-  const { networkId } = useGlobalContext();
   const { accounts } = useAccounts();
   const sender = accounts.find(({ id }) => id === inputNote.senderId);
-  const senderAddress = accountIdToAddress({
-    accountId: inputNote.senderId,
-    networkId,
-    midenSdk,
-  });
+  const senderAddress = normalizeAccountId(inputNote.senderId);
   return (
     <AccountAddress
       account={{ name: sender?.name ?? "", address: senderAddress }}
@@ -47,15 +37,14 @@ const InputNoteSenderCell = ({ inputNote }: { inputNote: InputNote }) => {
 };
 
 const InputNoteActionsCell = ({ inputNote }: { inputNote: InputNote }) => {
-  const { midenSdk } = useMidenSdk();
-  const { client } = useWebClient();
+  const { client } = useMiden();
   const { wallet } = useWallet();
-  const { networkId } = useGlobalContext();
-  const { faucets } = useAccounts();
+  const { accounts, faucets, connectedWallet, isAuthorized } = useAccounts();
   const { openCreateTransactionDialog, newConsumeTransactionRequest } =
     useTransactions();
-  const { scripts } = useScripts();
-  const script = scripts.find(({ digest }) => digest === inputNote.scriptRoot);
+  const targetAccount = accounts.find(({ consumableNoteIds }) =>
+    consumableNoteIds.includes(inputNote.id),
+  );
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -65,74 +54,55 @@ const InputNoteActionsCell = ({ inputNote }: { inputNote: InputNote }) => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        {script?.id === "p2id" && !noteConsumed(inputNote) && (
-          <DropdownMenuItem
-            onClick={async () => {
-              // const targetAccountId = accountIdFromPrefixSuffix(
-              //   inputNote.inputs[1]!,
-              //   inputNote.inputs[0]!
-              // );
-              // const { transactionRequest, transactionResult } =
-              //   await newConsumeTransactionRequest({
-              //     accountId: targetAccountId,
-              //     noteIds: [inputNote.id],
-              //   });
-              // openCreateTransactionDialog({
-              //   accountId: targetAccountId,
-              //   transactionType: "consume",
-              //   step: "preview",
-              //   transactionRequest,
-              //   transactionResult,
-              // });
-              if (networkId === "mmck") {
-                const targetAccountId = accountIdFromPrefixSuffix(
-                  inputNote.inputs[1]!,
-                  inputNote.inputs[0]!,
-                );
-                const { transactionRequest, transactionResult } =
-                  await newConsumeTransactionRequest({
-                    accountId: targetAccountId,
-                    noteIds: [inputNote.id],
+        {!noteConsumed(inputNote) &&
+          targetAccount &&
+          isAuthorized(targetAccount) && (
+            <DropdownMenuItem
+              onClick={async () => {
+                if (connectedWallet?.id === targetAccount.id) {
+                  const [fungibleAsset] = inputNote.fungibleAssets;
+                  const faucet = faucets.find(
+                    ({ id }) => id === fungibleAsset?.faucetId,
+                  );
+                  if (!client || !wallet || !fungibleAsset || !faucet) {
+                    return;
+                  }
+                  const noteFileBytes =
+                    inputNote.type === "public"
+                      ? undefined
+                      : await clientExportInputNoteFile({
+                          client,
+                          noteId: inputNote.id,
+                        });
+                  const transaction = new ConsumeTransaction(
+                    faucet.identifier,
+                    inputNote.id,
+                    inputNote.type === "public" ? "public" : "private",
+                    Number(fungibleAsset.amount),
+                    noteFileBytes,
+                  );
+                  const adapter = wallet.adapter as MidenWalletAdapter;
+                  const txId = await adapter.requestConsume(transaction);
+                  console.log({ txId });
+                } else {
+                  const { transactionRequest, transactionResult } =
+                    await newConsumeTransactionRequest({
+                      accountId: targetAccount.id,
+                      noteIds: [inputNote.id],
+                    });
+                  openCreateTransactionDialog({
+                    accountId: targetAccount.id,
+                    transactionType: "consume",
+                    step: "preview",
+                    transactionRequest,
+                    transactionResult,
                   });
-                openCreateTransactionDialog({
-                  accountId: targetAccountId,
-                  transactionType: "consume",
-                  step: "preview",
-                  transactionRequest,
-                  transactionResult,
-                });
-              } else {
-                const [fungibleAsset] = inputNote.fungibleAssets;
-                const faucet = faucets.find(
-                  ({ id }) => id === fungibleAsset?.faucetId,
-                );
-                if (!wallet || !fungibleAsset || !faucet) {
-                  return;
                 }
-                const noteFileBytes =
-                  inputNote.type === "public"
-                    ? undefined
-                    : await clientExportInputNoteFile({
-                        client,
-                        noteId: inputNote.id,
-                        midenSdk,
-                      });
-                const transaction = new ConsumeTransaction(
-                  faucet.identifier,
-                  inputNote.id,
-                  inputNote.type === "public" ? "public" : "private",
-                  Number(fungibleAsset.amount),
-                  noteFileBytes,
-                );
-                const adapter = wallet.adapter as MidenWalletAdapter;
-                const txId = await adapter.requestConsume(transaction);
-                console.log({ txId });
-              }
-            }}
-          >
-            Consume note
-          </DropdownMenuItem>
-        )}
+              }}
+            >
+              Consume note
+            </DropdownMenuItem>
+          )}
         <DropdownMenuItem disabled onClick={() => {}}>
           Export note
         </DropdownMenuItem>

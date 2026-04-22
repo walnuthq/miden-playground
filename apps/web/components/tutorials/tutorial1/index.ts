@@ -1,4 +1,5 @@
-import { defaultTutorial, type Tutorial } from "@/lib/types/tutorial";
+import type { Tutorial } from "@/lib/types/tutorial";
+import { defaultTutorial } from "@/lib/utils/tutorial";
 import state from "@/components/tutorials/tutorial1/state";
 import store from "@/components/tutorials/tutorial1/store";
 import Step1 from "@/components/tutorials/tutorial1/step1";

@@ -1,6 +1,7 @@
 import { Puzzle } from "lucide-react";
-import { type Account } from "@/lib/types/account";
-import { type Script, defaultScript } from "@/lib/types/script";
+import type { Account } from "@/lib/types/account";
+import type { Script } from "@/lib/types/script";
+import { defaultScript } from "@/lib/utils/script";
 import AccountComponentTable from "@/components/account/account-component-table";
 import useAccounts from "@/hooks/use-accounts";
 import useScripts from "@/hooks/use-scripts";
@@ -14,12 +15,8 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@workspace/ui/components/empty";
-import {
-  defaultComponent,
-  storageSlotName,
-  type ComponentType,
-  type StorageSlotType,
-} from "@/lib/types/component";
+import type { ComponentType, StorageSlotType } from "@/lib/types/component";
+import { defaultComponent, storageSlotName } from "@/lib/utils/component";
 import useTutorials from "@/hooks/use-tutorials";
 
 const EmptyComponents = ({
@@ -96,6 +93,7 @@ const AccountComponents = ({
                 {
                   name: storageSlotName({
                     packageName: script.name,
+                    componentStruct: "CounterContract",
                     fieldName: "count_map",
                   }),
                   type: "map" as StorageSlotType,

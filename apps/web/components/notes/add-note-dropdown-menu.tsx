@@ -7,11 +7,11 @@ import {
 } from "@workspace/ui/components/dropdown-menu";
 import { Button } from "@workspace/ui/components/button";
 import useNotes from "@/hooks/use-notes";
-import useGlobalContext from "@/components/global-context/hook";
+import useNetwork from "@/hooks/use-network";
 import useAccounts from "@/hooks/use-accounts";
 
 const AddNoteDropdownMenu = () => {
-  const { networkId } = useGlobalContext();
+  const { networkId } = useNetwork();
   const { connectedWallet } = useAccounts();
   const { openImportNoteDialog, openCreateNoteDialog } = useNotes();
   return (

@@ -1,16 +1,25 @@
-import useGlobalContext from "@/components/global-context/hook";
 import {
-  type Script,
-  type ScriptExample,
-  type ScriptType,
-  type ProcedureExport,
-  type MidenInput,
+  Package as WasmPackage,
+  TransactionRequestBuilder as WasmTransactionRequestBuilder,
+  MidenArrays as WasmMidenArrays,
+  ForeignAccount as WasmForeignAccount,
+  AccountId as WasmAccountId,
+  AccountStorageRequirements as WasmAccountStorageRequirements,
+} from "@miden-sdk/miden-sdk";
+import useGlobalContext from "@/components/global-context/hook";
+import type {
+  Script,
+  ScriptExample,
+  ScriptType,
+  ProcedureExport,
+  MidenInput,
+  PackageSource,
+} from "@/lib/types/script";
+import {
   defaultScript,
   invokeProcedureCustomTransactionScript,
-  type PackageSource,
   compiledPackageToScript,
-} from "@/lib/types/script";
-import { clientExecuteTransaction } from "@/lib/web-client";
+} from "@/lib/utils/script";
 import {
   createScript,
   compileScript as apiCompileScript,
@@ -18,14 +27,12 @@ import {
   importScriptsFromPackageSources as apiImportScriptsFromPackageSources,
   importScriptsFromGithubRepo as apiImportScriptsFromGithubRepo,
 } from "@/lib/api";
-import useMidenSdk from "@/hooks/use-miden-sdk";
 import useTransactions from "@/hooks/use-transactions";
 import useTutorials from "@/hooks/use-tutorials";
-import useWebClient from "@/hooks/use-web-client";
 import { fromBase64 } from "@/lib/utils";
+import { useMiden } from "@miden-sdk/react";
 
 const useScripts = () => {
-  const { midenSdk } = useMidenSdk();
   const {
     scripts,
     createScriptDialogOpen,
@@ -42,7 +49,7 @@ const useScripts = () => {
     readOnlyProcedureResult,
     dispatch,
   } = useGlobalContext();
-  const { client } = useWebClient();
+  const { client } = useMiden();
   const { submitNewTransaction } = useTransactions();
   const { tutorialId } = useTutorials();
   const openCreateScriptDialog = () =>
@@ -121,17 +128,11 @@ const useScripts = () => {
     procedureInputs?: MidenInput[];
     foreignAccounts?: string[];
   }) => {
+    if (!client) {
+      throw new Error("MidenClient not ready");
+    }
     dispatch({ type: "SUBMITTING_TRANSACTION" });
-    await client.syncState();
     try {
-      const {
-        TransactionRequestBuilder,
-        AccountStorageRequirements,
-        ForeignAccount,
-        AccountId,
-        MidenArrays,
-        Package,
-      } = midenSdk;
       const builder = client.createCodeBuilder();
       const contractName = script.name.replaceAll("-", "_");
       const accountComponentLibrary = script.masm
@@ -139,7 +140,7 @@ const useScripts = () => {
             `external_contract::${contractName}`,
             script.masm,
           )
-        : Package.deserialize(fromBase64(script.masp)).asLibrary();
+        : WasmPackage.deserialize(fromBase64(script.masp)).asLibrary();
       builder.linkDynamicLibrary(accountComponentLibrary);
       const transactionScript = builder.compileTxScript(
         invokeProcedureCustomTransactionScript({
@@ -149,27 +150,25 @@ const useScripts = () => {
         }),
       );
       let transactionRequestBuilder =
-        new TransactionRequestBuilder().withCustomScript(transactionScript);
+        new WasmTransactionRequestBuilder().withCustomScript(transactionScript);
       if (foreignAccounts.length > 0) {
         transactionRequestBuilder =
           transactionRequestBuilder.withForeignAccounts(
-            new MidenArrays.ForeignAccountArray(
+            new WasmMidenArrays.ForeignAccountArray(
               foreignAccounts.map((foreignAccountId) =>
-                ForeignAccount.public(
-                  AccountId.fromHex(foreignAccountId),
-                  new AccountStorageRequirements(),
+                WasmForeignAccount.public(
+                  WasmAccountId.fromHex(foreignAccountId),
+                  new WasmAccountStorageRequirements(),
                 ),
               ),
             ),
           );
       }
       const transactionRequest = transactionRequestBuilder.build();
-      const transactionResult = await clientExecuteTransaction({
-        client,
-        accountId: senderAccountId,
+      const transactionResult = await client.executeTransaction(
+        WasmAccountId.fromHex(senderAccountId),
         transactionRequest,
-        midenSdk,
-      });
+      );
       return submitNewTransaction({
         accountId: senderAccountId,
         transactionRequest,

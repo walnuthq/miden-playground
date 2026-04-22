@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getVerifiedAccountComponents } from "@/db/verified-account-components";
 import { type Export, type Package, type ProcedureExport } from "@/lib/types";
-import { getStandardAccountComponent } from "@/lib/default-account-components";
+import { getStandardAccountComponent } from "@/lib/standard-account-components";
 import { midenAccountComponentVerifier } from "@/lib/miden-verifier";
 
 type VerifiedAccountComponentsResponse = {

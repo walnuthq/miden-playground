@@ -17,8 +17,8 @@ import SelectAccountDropdownMenu from "@/components/transactions/select-account-
 import SelectAccountCombobox from "@/components/transactions/select-account-combobox";
 import useAccounts from "@/hooks/use-accounts";
 import SelectConsumableNotesCombobox from "@/components/transactions/select-consumable-notes-combobox";
-import useGlobalContext from "@/components/global-context/hook";
 import useTransactions from "@/hooks/use-transactions";
+import useTutorials from "@/hooks/use-tutorials";
 import {
   type ConsumableNoteRecord as WasmConsumableNoteRecordType,
   type TransactionResult as WasmTransactionResultType,
@@ -29,14 +29,12 @@ import {
   SendTransaction,
   type MidenWalletAdapter,
 } from "@miden-sdk/miden-wallet-adapter";
-import { formatAmount, parseAmount } from "@/lib/utils";
+import { formatAmount, parseAmount } from "@/lib/utils/asset";
 import useScripts from "@/hooks/use-scripts";
-import {
-  accountIdToAddress,
-  createTransactionFromScript,
-} from "@/lib/web-client";
-import useMidenSdk from "@/hooks/use-miden-sdk";
-import useMultisig from "@/hooks/use-multisig";
+import { createTransactionFromScript } from "@/lib/web-client";
+import { normalizeAccountId } from "@miden-sdk/react";
+import useNetwork from "@/hooks/use-network";
+// import useMultisig from "@/hooks/use-multisig";
 
 const CreateTransactionConfigureForm = ({
   transactionType,
@@ -79,9 +77,8 @@ const CreateTransactionConfigureForm = ({
   setLoading: Dispatch<SetStateAction<boolean>>;
   setStep: Dispatch<SetStateAction<CreateTransactionDialogStep>>;
 }) => {
-  const { midenSdk } = useMidenSdk();
   const { wallet } = useWallet();
-  const { networkId } = useGlobalContext();
+  const { networkId } = useNetwork();
   const { accounts } = useAccounts();
   const { scripts } = useScripts();
   const {
@@ -91,7 +88,8 @@ const CreateTransactionConfigureForm = ({
     newCustomTransactionRequest,
     closeCreateTransactionDialog,
   } = useTransactions();
-  const { loadMultisig, createP2idProposal } = useMultisig();
+  // const { loadMultisig, createP2idProposal } = useMultisig();
+  const { isTutorial } = useTutorials();
   const executingAccount = accounts.find(({ id }) => id === executingAccountId);
   const targetAccount = accounts.find(({ id }) => id === targetAccountId);
   const faucetAccount = accounts.find(({ id }) => id === faucetAccountId);
@@ -116,33 +114,37 @@ const CreateTransactionConfigureForm = ({
         const formData = new FormData(event.currentTarget);
         setLoading(true);
         if (transactionType === "mint" && executingAccount && targetAccount) {
-          const { transactionRequest, transactionResult } =
-            await newMintTransactionRequest({
-              targetAccountId: targetAccount.id,
-              faucetId: executingAccount.id,
-              noteType: formData.getAll("is-public").includes("on")
-                ? "public"
-                : "private",
-              amount: parseAmount(
-                formData.get("amount")?.toString() ?? "0",
-                decimals,
-              ),
-            });
-          setTransactionRequest(transactionRequest);
-          setTransactionResult(transactionResult);
+          if (isTutorial || networkId === "mmck") {
+            const { transactionRequest, transactionResult } =
+              await newMintTransactionRequest({
+                targetAccountId: targetAccount.id,
+                faucetId: executingAccount.id,
+                noteType: formData.getAll("is-public").includes("on")
+                  ? "public"
+                  : "private",
+                amount: parseAmount(
+                  formData.get("amount")?.toString() ?? "0",
+                  decimals,
+                ),
+              });
+            setTransactionRequest(transactionRequest);
+            setTransactionResult(transactionResult);
+            setStep("preview");
+          }
           setLoading(false);
-          setStep("preview");
         }
         if (transactionType === "consume" && executingAccount) {
-          const { transactionRequest, transactionResult } =
-            await newConsumeTransactionRequest({
-              accountId: executingAccount.id,
-              noteIds,
-            });
-          setTransactionRequest(transactionRequest);
-          setTransactionResult(transactionResult);
+          if (isTutorial || networkId === "mmck") {
+            const { transactionRequest, transactionResult } =
+              await newConsumeTransactionRequest({
+                accountId: executingAccount.id,
+                noteIds,
+              });
+            setTransactionRequest(transactionRequest);
+            setTransactionResult(transactionResult);
+            setStep("preview");
+          }
           setLoading(false);
-          setStep("preview");
         }
         if (
           transactionType === "send" &&
@@ -150,7 +152,7 @@ const CreateTransactionConfigureForm = ({
           targetAccountId &&
           faucetAccount
         ) {
-          if (networkId === "mmck") {
+          if (isTutorial || networkId === "mmck") {
             const { transactionRequest, transactionResult } =
               await newSendTransactionRequest({
                 senderAccountId: executingAccount.id,
@@ -172,28 +174,24 @@ const CreateTransactionConfigureForm = ({
               return;
             }
             if (executingAccount.multisig) {
-              const multisig = await loadMultisig(executingAccount.id);
-              if (!multisig) {
-                return;
-              }
-              await createP2idProposal({
-                multisig,
-                recipientId: targetAccountId,
-                faucetId: faucetAccountId,
-                amount: parseAmount(
-                  formData.get("amount")?.toString() ?? "0",
-                  decimals,
-                ).toString(),
-              });
+              // const multisig = await loadMultisig(executingAccount.id);
+              // if (!multisig) {
+              //   return;
+              // }
+              // await createP2idProposal({
+              //   multisig,
+              //   recipientId: targetAccountId,
+              //   faucetId: faucetAccountId,
+              //   amount: parseAmount(
+              //     formData.get("amount")?.toString() ?? "0",
+              //     decimals,
+              //   ).toString(),
+              // });
               closeCreateTransactionDialog();
             } else {
               const transaction = new SendTransaction(
                 executingAccount.address,
-                accountIdToAddress({
-                  accountId: targetAccountId,
-                  networkId,
-                  midenSdk,
-                }),
+                normalizeAccountId(targetAccountId),
                 faucetAccount.address,
                 formData.getAll("is-public").includes("on")
                   ? "public"
@@ -218,10 +216,7 @@ const CreateTransactionConfigureForm = ({
           setLoading(false);
         }
         if (transactionType === "custom" && executingAccount && script) {
-          const customTransactionRequest = createTransactionFromScript({
-            script,
-            midenSdk,
-          });
+          const customTransactionRequest = createTransactionFromScript(script);
           const { transactionRequest, transactionResult } =
             await newCustomTransactionRequest({
               senderAccountId: executingAccount.id,
@@ -259,6 +254,14 @@ const CreateTransactionConfigureForm = ({
                   ",",
                   "",
                 )}
+                // max={
+                //   isTutorial
+                //     ? formatAmount({
+                //         amount: "100000000",
+                //         decimals,
+                //       }).replaceAll(",", "")
+                //     : undefined
+                // }100000000000
                 required
               />
             </div>
@@ -317,10 +320,17 @@ const CreateTransactionConfigureForm = ({
                   ",",
                   "",
                 )}
-                max={formatAmount({ amount: balance, decimals }).replaceAll(
-                  ",",
-                  "",
-                )}
+                max={
+                  isTutorial
+                    ? formatAmount({
+                        amount: "100000000",
+                        decimals,
+                      }).replaceAll(",", "")
+                    : formatAmount({ amount: balance, decimals }).replaceAll(
+                        ",",
+                        "",
+                      )
+                }
                 required
               />
             </div>

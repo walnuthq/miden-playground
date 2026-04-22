@@ -1,5 +1,7 @@
-import { defaultTutorial, type Tutorial } from "@/lib/types/tutorial";
-import state from "@/components/tutorials/tutorial3/state";
+import type { Tutorial } from "@/lib/types/tutorial";
+import { defaultTutorial } from "@/lib/utils/tutorial";
+import { defaultState } from "@/lib/utils/state";
+import { midenFaucetAccount } from "@/lib/utils/account";
 import Step1 from "@/components/tutorials/tutorial3/step1";
 import Step2 from "@/components/tutorials/tutorial3/step2";
 import Step3 from "@/components/tutorials/tutorial3/step3";
@@ -16,7 +18,11 @@ const tutorial: Tutorial = {
   description:
     "This tutorial will walk you through connecting your Miden Wallet to the Miden Playground and confirming transactions on Miden testnet.",
   initialRoute: "/accounts",
-  state,
+  state: {
+    ...defaultState(),
+    accounts: [midenFaucetAccount("mtst")],
+    tutorialId: "connect-wallet-and-sign-transactions",
+  },
   steps: [Step1, Step2, Step3, Step4, Step5, Step6],
 };
 

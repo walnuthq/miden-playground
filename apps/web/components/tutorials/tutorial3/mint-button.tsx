@@ -1,24 +1,23 @@
 import { useState, useEffect } from "react";
 import { HandCoins } from "lucide-react";
+import { AccountId as WasmAccountId } from "@miden-sdk/miden-sdk";
 import { Spinner } from "@workspace/ui/components/spinner";
 import useAccounts from "@/hooks/use-accounts";
 import useNotes from "@/hooks/use-notes";
-import { defaultInputNote } from "@/lib/types/note";
+import useNetwork from "@/hooks/use-network";
+import { defaultInputNote } from "@/lib/utils/note";
 import { Button } from "@workspace/ui/components/button";
 import {
-  MIDEN_FAUCET_API_URL,
   FUNGIBLE_FAUCET_DEFAULT_DECIMALS,
-  MIDEN_FAUCET_ACCOUNT_ID,
   P2ID_NOTE_CODE,
+  midenFaucetApiUrl,
+  midenFaucetAccountId,
 } from "@/lib/constants";
-import { parseAmount } from "@/lib/utils";
-import useMidenSdk from "@/hooks/use-miden-sdk";
+import { parseAmount } from "@/lib/utils/asset";
 import { getPowChallenge, findValidNonce, getTokens } from "@/lib/miden-faucet";
 
 const MintButton = () => {
-  const {
-    midenSdk: { AccountId },
-  } = useMidenSdk();
+  const { networkId } = useNetwork();
   const { connectedWallet } = useAccounts();
   const { addNote } = useNotes();
   const [loading, setLoading] = useState(false);
@@ -42,13 +41,13 @@ const MintButton = () => {
           FUNGIBLE_FAUCET_DEFAULT_DECIMALS,
         ).toString();
         const { challenge, target } = await getPowChallenge({
-          backendUrl: MIDEN_FAUCET_API_URL,
+          backendUrl: midenFaucetApiUrl(networkId),
           recipient: connectedWallet.address,
           amount,
         });
         const nonce = await findValidNonce({ challenge, target });
         const { noteId, txId } = await getTokens({
-          backendUrl: MIDEN_FAUCET_API_URL,
+          backendUrl: midenFaucetApiUrl(networkId),
           challenge,
           nonce,
           recipient: connectedWallet.address,
@@ -57,15 +56,17 @@ const MintButton = () => {
         });
         console.log({ noteId, txId });
         if (connectedWallet?.isNew) {
-          const accountId = AccountId.fromHex(connectedWallet.id);
+          const accountId = WasmAccountId.fromHex(connectedWallet.id);
           addNote({
             ...defaultInputNote(),
             id: noteId,
-            senderId: MIDEN_FAUCET_ACCOUNT_ID,
+            senderId: midenFaucetAccountId(networkId),
             scriptRoot: P2ID_NOTE_CODE,
             scriptId: "p2id",
-            fungibleAssets: [{ faucetId: MIDEN_FAUCET_ACCOUNT_ID, amount }],
-            inputs: [
+            fungibleAssets: [
+              { faucetId: midenFaucetAccountId(networkId), amount },
+            ],
+            storage: [
               accountId.suffix().toString(),
               accountId.prefix().toString(),
             ],

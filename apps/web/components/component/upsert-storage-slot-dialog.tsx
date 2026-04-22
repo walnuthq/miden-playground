@@ -23,12 +23,8 @@ import {
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import useComponents from "@/hooks/use-components";
-import {
-  type StorageSlotType,
-  storageSlotTypes,
-  stringToKeyValues,
-  keyValuesToString,
-} from "@/lib/types/component";
+import { type StorageSlotType, storageSlotTypes } from "@/lib/types/component";
+import { stringToKeyValues, keyValuesToString } from "@/lib/utils/component";
 import { sleep } from "@/lib/utils";
 
 const StorageSlotInput = ({
@@ -136,10 +132,10 @@ const StorageMapInput = ({
 
 const UpsertStorageSlotDialog = ({
   componentId,
-  storageSlotIndex,
+  storageSlotName,
 }: {
   componentId: string;
-  storageSlotIndex: number;
+  storageSlotName: string;
 }) => {
   const {
     components,
@@ -149,7 +145,7 @@ const UpsertStorageSlotDialog = ({
   } = useComponents();
   const component = components.find(({ id }) => id === componentId);
   const storageSlot = component?.storageSlots.find(
-    (_, index) => index === storageSlotIndex,
+    ({ name }) => name === storageSlotName,
   );
   const [loading, setLoading] = useState(false);
   const [storageSlotType, setStorageSlotType] = useState<StorageSlotType>(
@@ -201,6 +197,9 @@ const UpsertStorageSlotDialog = ({
             };
             setLoading(true);
             await sleep(400);
+            const storageSlotIndex = component.storageSlots.findIndex(
+              ({ name }) => name === storageSlotName,
+            );
             updateComponent({
               ...component,
               storageSlots: storageSlot

@@ -1,5 +1,5 @@
 import { type Example } from "@/lib/types/example";
-import { defaultProcedureExport, defaultSignature } from "@/lib/types/script";
+import { defaultProcedureExport, defaultSignature } from "@/lib/utils/script";
 import state from "@/components/home/examples/counter-contract/state";
 
 const counterContract: Example = {

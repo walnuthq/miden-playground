@@ -1,5 +1,5 @@
 import { usePathname } from "next/navigation";
-import { defaultTutorialStep } from "@/lib/types/tutorial";
+import type { TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
 import Step2Content from "@/components/tutorials/tutorial9/step2.mdx";
@@ -9,8 +9,7 @@ const useCompleted = () => {
   return pathname === "/scripts/count-reader";
 };
 
-export default {
-  ...defaultTutorialStep(),
+const Step2: TutorialStep = {
   title: "What we will build.",
   Content: () => {
     const completed = useCompleted();
@@ -36,3 +35,5 @@ export default {
     return <NextStepButton disabled={!completed} />;
   },
 };
+
+export default Step2;

@@ -11,6 +11,6 @@ From the <Link href={`/accounts/${props.faucet?.identifier}`}>faucet page</Link>
 [Note type](https://docs.miden.xyz/design/miden-base/note/#note-storage-mode) refers to the privacy mode of the transaction you're about to create, it can be either **private** (known only to you) or **publicly** available on-chain. Leave it as it is and proceed with the preview of the mint transaction.
 
 The preview step shows a quick summary of the changes about to be performed on the executing Account (in this case the MDN Faucet).
-A Fungible Faucet stores the total circulating supply already minted in its first [storage slot](https://docs.miden.xyz/design/miden-base/account/storage/).
+A Fungible Faucet stores the total circulating supply already minted in its metadata [storage slot](https://docs.miden.xyz/design/miden-base/account/storage/).
 
 When you're ready to execute the transaction click on _"Submit"_, it will take some time as its execution results in the generation of a zero-knowledge proof, which is computation-heavy and depends on your underlying hardware.

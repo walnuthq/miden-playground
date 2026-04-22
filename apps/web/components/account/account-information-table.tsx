@@ -7,7 +7,7 @@ import {
 } from "@workspace/ui/components/table";
 import { Badge } from "@workspace/ui/components/badge";
 import AccountAddress from "@/components/lib/account-address";
-import { formatAmount } from "@/lib/utils";
+import { formatAmount } from "@/lib/utils/asset";
 import CopyButton from "@/components/lib/copy-button";
 
 const AccountInformationTable = ({ account }: { account: Account }) => (

@@ -8,24 +8,22 @@ import {
   ComboboxItem,
   ComboboxList,
 } from "@workspace/ui/components/combobox";
-import { getIdentifierPart } from "@/lib/types/account";
-import useMidenSdk from "@/hooks/use-miden-sdk";
-import { addressToAccountId } from "@/lib/web-client";
-import useMultisig from "@/hooks/use-multisig";
+import { getIdentifierPart } from "@/lib/utils/account";
+import { Address as WasmAddress } from "@miden-sdk/miden-sdk";
+// import useMultisig from "@/hooks/use-multisig";
 
 const SelectAccountCombobox = ({
   onValueChange,
 }: {
   onValueChange: Dispatch<SetStateAction<string>>;
 }) => {
-  const { midenSdk } = useMidenSdk();
   const { connectedWallet, accounts, multisigs } = useAccounts();
-  const { isMultisigSigner } = useMultisig();
+  // const { isMultisigSigner } = useMultisig();
   const [value, setValue] = useState("");
   const items = accounts
     .filter(({ id }) =>
       id === connectedWallet?.id
-        ? multisigs.some((multisig) => isMultisigSigner(multisig))
+        ? true // multisigs.some((multisig) => isMultisigSigner(multisig))
         : true,
     )
     .map(({ identifier }) => identifier);
@@ -44,10 +42,7 @@ const SelectAccountCombobox = ({
           return;
         }
         try {
-          const accountId = addressToAccountId({
-            address: inputValue,
-            midenSdk,
-          });
+          const accountId = WasmAddress.fromBech32(inputValue).accountId();
           onValueChange(accountId.toString());
           return;
           // eslint-disable-next-line @typescript-eslint/no-unused-vars

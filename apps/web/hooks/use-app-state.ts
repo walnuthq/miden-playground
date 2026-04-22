@@ -1,32 +1,45 @@
 "use client";
 import {
+  Address as WasmAddress,
+  AccountId as WasmAccountId,
+} from "@miden-sdk/miden-sdk";
+import {
   clientGetAllInputNotes,
-  clientGetConsumableNotes,
   wasmAccountToAccount,
-  clientGetAccountById,
-  addressToAccountId,
+  clientGetConsumableNotes,
 } from "@/lib/web-client";
-import useMidenSdk from "@/hooks/use-miden-sdk";
-import useWebClient from "@/hooks/use-web-client";
-import { accountIdFromPrefixSuffix, type Account } from "@/lib/types/account";
+import type { Account } from "@/lib/types/account";
+import {
+  accountIdFromPrefixSuffix,
+  midenFaucetAccount,
+} from "@/lib/utils/account";
 import { type NetworkId } from "@/lib/types/network";
 import useGlobalContext from "@/components/global-context/hook";
-import { type State, defaultState } from "@/lib/types/state";
-import { MIDEN_FAUCET_ADDRESS, P2ID_NOTE_CODE } from "@/lib/constants";
+import type { State } from "@/lib/types/state";
+import { defaultState } from "@/lib/utils/state";
+import { noteConsumed } from "@/lib/utils/note";
+import { P2ID_NOTE_CODE, midenFaucetAddress } from "@/lib/constants";
 import { useWallet } from "@miden-sdk/miden-wallet-adapter";
-import { deleteStore, storeName, defaultStore } from "@/lib/types/store";
+import { storeName, defaultStore } from "@/lib/utils/store";
 import type { NoteState } from "@/lib/types/note";
 // import { useParaMiden } from "@/lib/para-miden";
+import {
+  useMiden,
+  useSyncState,
+  clearMidenStorage,
+  useImportStore,
+} from "@miden-sdk/react";
+import useNetwork from "@/hooks/use-network";
 
 const useAppState = () => {
-  const { midenSdk } = useMidenSdk();
-  const { client } = useWebClient();
+  const { networkId, switchNetwork } = useNetwork();
+  const { client } = useMiden();
+  const { importStore } = useImportStore();
+  const { lastSyncTime } = useSyncState();
   // const { client: paraMidenClient } = useParaMiden();
   // const client = paraMidenClient ?? defaultClient;
-  const { address, requestAssets } = useWallet();
+  const { address: midenWalletAddress, requestAssets } = useWallet();
   const {
-    networkId,
-    blockNum,
     accounts: previousAccounts,
     inputNotes: previousInputNotes,
     scripts,
@@ -35,39 +48,17 @@ const useAppState = () => {
     completedTutorials,
     dispatch,
   } = useGlobalContext();
-  const mockWebClientInitializing = () =>
-    dispatch({ type: "MOCK_WEB_CLIENT_INITIALIZING" });
-  const mockWebClientInitialized = ({
-    blockNum,
-    serializedMockChain,
-  }: {
-    blockNum: number;
-    serializedMockChain: Uint8Array;
-  }) =>
-    dispatch({
-      type: "MOCK_WEB_CLIENT_INITIALIZED",
-      payload: { blockNum, serializedMockChain },
-    });
-  const webClientInitializing = () =>
-    dispatch({ type: "WEB_CLIENT_INITIALIZING" });
-  const webClientInitialized = ({ blockNum }: { blockNum: number }) =>
-    dispatch({
-      type: "WEB_CLIENT_INITIALIZED",
-      payload: { blockNum },
-    });
   const syncState = async () => {
     if (!client) {
-      // TODO client should always be truthy
       return;
     }
     dispatch({ type: "SYNCING_STATE", payload: { syncingState: true } });
     try {
-      const syncSummary = await client.syncState();
-      if (!tutorialId || tutorialId === "private-transfers") {
+      if (tutorialId === "" || tutorialId === "private-transfers") {
         try {
           await client.fetchPrivateNotes();
         } catch (error) {
-          console.error(error);
+          console.error("ERROR: fetchPrivateNotes", error);
         }
       }
       const inputNotes = await clientGetAllInputNotes({
@@ -75,22 +66,22 @@ const useAppState = () => {
         networkId,
         previousInputNotes,
         scripts,
-        midenSdk,
+        updatedAt: lastSyncTime,
       });
       const consumableP2IDNotes = inputNotes.filter(
-        ({ state, scriptRoot }) =>
-          !state.includes("consumed") && scriptRoot === P2ID_NOTE_CODE,
+        (inputNote) =>
+          !noteConsumed(inputNote) && inputNote.scriptRoot === P2ID_NOTE_CODE,
       );
       const accounts: Account[] = [];
       for (const previousAccount of previousAccounts) {
         // never update the Miden Faucet for better performance
-        if (previousAccount.address === MIDEN_FAUCET_ADDRESS) {
+        if (midenFaucetAddress(networkId) === previousAccount.address) {
           accounts.push(previousAccount);
           continue;
         }
         const previousAccountP2IDNotes = previousInputNotes.filter(
-          ({ scriptRoot, inputs }) => {
-            const [suffix = "", prefix = ""] = inputs;
+          ({ scriptRoot, storage }) => {
+            const [suffix = "", prefix = ""] = storage;
             const targetAccountId = accountIdFromPrefixSuffix(prefix, suffix);
             return (
               scriptRoot === P2ID_NOTE_CODE &&
@@ -100,7 +91,7 @@ const useAppState = () => {
         );
         const previousAccountConsumableP2IDNotes =
           previousAccountP2IDNotes.filter(
-            ({ state }) => !state.includes("consumed"),
+            (inputNote) => !noteConsumed(inputNote),
           );
         if (previousAccount.multisig) {
           const pendingConsumableNotesProposalsNoteIds =
@@ -123,7 +114,7 @@ const useAppState = () => {
           });
           continue;
         }
-        if (previousAccount.address === address) {
+        if (previousAccount.address === midenWalletAddress) {
           const isNewPublicAccount =
             previousAccount.storageMode === "public" && previousAccount.isNew;
           // always re-add notes targetting connected wallet
@@ -157,10 +148,9 @@ const useAppState = () => {
               ),
               fungibleAssets: assets
                 ? assets.map(({ faucetId, amount }) => ({
-                    faucetId: addressToAccountId({
-                      address: faucetId,
-                      midenSdk,
-                    }).toString(),
+                    faucetId: WasmAddress.fromBech32(faucetId)
+                      .accountId()
+                      .toString(),
                     amount,
                   }))
                 : previousAccount.fungibleAssets,
@@ -169,23 +159,31 @@ const useAppState = () => {
           }
         }
         try {
-          const wasmAccount = await clientGetAccountById({
-            client,
-            accountId: previousAccount.id,
-            midenSdk,
-          });
+          let wasmAccount = await client.getAccount(
+            WasmAccountId.fromHex(previousAccount.id),
+          );
+          if (!wasmAccount) {
+            await client.importAccountById(
+              WasmAccountId.fromHex(previousAccount.id),
+            );
+            wasmAccount = await client.getAccount(
+              WasmAccountId.fromHex(previousAccount.id),
+            );
+            if (!wasmAccount) {
+              throw new Error("Account not found");
+            }
+          }
           // TODO this is unreliable for some reason?
           const consumableNotes = await clientGetConsumableNotes({
             client,
             accountId: previousAccount.id,
-            midenSdk,
           });
           const consumableNoteIds = consumableNotes.map((consumableNote) =>
             consumableNote.inputNoteRecord().id().toString(),
           );
           const consumableP2IDNoteIds = consumableP2IDNotes
-            .filter(({ inputs }) => {
-              const [suffix = "", prefix = ""] = inputs;
+            .filter(({ storage }) => {
+              const [suffix = "", prefix = ""] = storage;
               const targetAccountId = accountIdFromPrefixSuffix(prefix, suffix);
               return targetAccountId === previousAccount.id;
             })
@@ -195,14 +193,14 @@ const useAppState = () => {
               (id) => !consumableNoteIds.includes(id),
             ),
           );
-          const addressNoteTag = midenSdk.Address.fromBech32(
+          const addressNoteTag = WasmAddress.fromBech32(
             previousAccount.address,
           ).toNoteTag();
           const consumableInputNoteIds = inputNotes
             .filter(
-              ({ state, tag }) =>
-                !state.includes("consumed") &&
-                tag === addressNoteTag.asU32().toString(),
+              (inputNote) =>
+                !noteConsumed(inputNote) &&
+                inputNote.tag === addressNoteTag.asU32().toString(),
             )
             .map(({ id }) => id);
           consumableNoteIds.push(
@@ -214,10 +212,8 @@ const useAppState = () => {
             wasmAccount,
             name: previousAccount.name,
             components: previousAccount.components,
-            networkId,
-            updatedAt: syncSummary.blockNum(),
+            updatedAt: lastSyncTime,
             consumableNoteIds,
-            midenSdk,
           });
           const accountIndex = accounts.findIndex(
             ({ id }) => id === previousAccount.id,
@@ -241,13 +237,12 @@ const useAppState = () => {
       dispatch({
         type: "SYNC_STATE",
         payload: {
-          blockNum: syncSummary.blockNum(),
           accounts,
           inputNotes,
         },
       });
     } catch (error) {
-      console.error("ERROR: SyncState", error);
+      console.error("ERROR: syncState", error);
       dispatch({ type: "SYNCING_STATE", payload: { syncingState: false } });
     }
   };
@@ -260,27 +255,24 @@ const useAppState = () => {
     if (!nextState) {
       return;
     }
-    await deleteStore(nextState.networkId);
-    if (networkId === nextState.networkId) {
-      await client?.forceImportStore(
-        JSON.stringify(nextState.nextStore ?? defaultStore()),
-        storeName(networkId),
-      );
-    }
+    await clearMidenStorage();
+    await importStore(
+      JSON.stringify(nextState.nextStore ?? defaultStore(networkId)),
+      storeName(networkId),
+    );
     dispatch({ type: "POP_STATE" });
   };
-  const resetState = async (newNetworkId: NetworkId) =>
+  const resetState = async (newNetworkId: NetworkId) => {
+    switchNetwork(newNetworkId);
+    // console.log(newNetworkId, midenFaucetAccount(newNetworkId));
+    // await sleep(1000);
     pushState({
       ...defaultState(),
-      networkId: newNetworkId,
-      blockNum: newNetworkId === "mmck" ? 0 : blockNum,
+      accounts: [midenFaucetAccount(newNetworkId)],
       completedTutorials,
     });
+  };
   return {
-    mockWebClientInitializing,
-    mockWebClientInitialized,
-    webClientInitializing,
-    webClientInitialized,
     syncState,
     pushState,
     popState,

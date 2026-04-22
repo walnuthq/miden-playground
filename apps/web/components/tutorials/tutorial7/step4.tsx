@@ -2,21 +2,32 @@ import { type TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
 import Step4Content from "@/components/tutorials/tutorial7/step4.mdx";
+import useNetwork from "@/hooks/use-network";
 import useAccounts from "@/hooks/use-accounts";
 import useNotes from "@/hooks/use-notes";
-import { P2IDE_NOTE_CODE, TEST_WALLET_ACCOUNT_ID } from "@/lib/constants";
-import { accountIdFromPrefixSuffix } from "@/lib/types/account";
-import useGlobalContext from "@/components/global-context/hook";
+import {
+  P2IDE_NOTE_CODE,
+  testWalletAccountId,
+  testWalletAddress,
+  testWalletAccountIdPrefix,
+  testWalletAccountIdSuffix,
+} from "@/lib/constants";
+import {
+  accountIdFromPrefixSuffix,
+  getIdentifierPart,
+} from "@/lib/utils/account";
+import { useSyncState } from "@miden-sdk/react";
 
 const useCompleted = () => {
+  const { networkId } = useNetwork();
   const { connectedWallet } = useAccounts();
   const { inputNotes } = useNotes();
   const note = inputNotes.find(
-    ({ senderId, scriptRoot, inputs, state, type }) =>
+    ({ senderId, scriptRoot, storage, state, type }) =>
       senderId === connectedWallet?.id &&
       scriptRoot === P2IDE_NOTE_CODE &&
-      accountIdFromPrefixSuffix(inputs[1]!, inputs[0]!) ===
-        TEST_WALLET_ACCOUNT_ID &&
+      accountIdFromPrefixSuffix(storage[1]!, storage[0]!) ===
+        testWalletAccountId(networkId) &&
       state === "committed" &&
       type === "public",
   );
@@ -26,11 +37,17 @@ const useCompleted = () => {
 const Step4: TutorialStep = {
   title: "Create a note by executing a transaction.",
   Content: () => {
-    const { blockNum } = useGlobalContext();
+    const { networkId } = useNetwork();
+    const { syncHeight } = useSyncState();
     const completed = useCompleted();
     return (
       <>
-        <Step4Content blockNum={blockNum + 100} />
+        <Step4Content
+          address={getIdentifierPart(testWalletAddress(networkId))}
+          accountIdPrefix={testWalletAccountIdPrefix(networkId)}
+          accountIdSuffix={testWalletAccountIdSuffix(networkId)}
+          syncHeight={syncHeight + 100}
+        />
         <TutorialAlert
           completed={completed}
           title="Action required: Create the note."

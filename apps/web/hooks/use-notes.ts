@@ -1,3 +1,14 @@
+import {
+  AccountId as WasmAccountId,
+  TransactionRequestBuilder as WasmTransactionRequestBuilder,
+  Note as WasmNote,
+  NoteAssets as WasmNoteAssets,
+  FungibleAsset as WasmFungibleAsset,
+  NoteType as WasmNoteType,
+  NoteAttachment as WasmNoteAttachment,
+  NoteArray as WasmNoteArray,
+} from "@miden-sdk/miden-sdk";
+import { useMiden } from "@miden-sdk/react";
 import useGlobalContext from "@/components/global-context/hook";
 import { type NoteType, type InputNote } from "@/lib/types/note";
 import useAccounts from "@/hooks/use-accounts";
@@ -12,14 +23,12 @@ import {
   clientCreateNoteFromScript,
   clientImportNoteFile,
 } from "@/lib/web-client";
-import useMidenSdk from "@/hooks/use-miden-sdk";
-import useWebClient from "@/hooks/use-web-client";
 import { verifyNoteFromPackageId } from "@/lib/api";
+import useNetwork from "@/hooks/use-network";
 
 const useNotes = () => {
-  const { midenSdk } = useMidenSdk();
+  const { networkId } = useNetwork();
   const {
-    networkId,
     tutorialId, // TODO
     inputNotes,
     exportNoteDialogOpen,
@@ -29,7 +38,7 @@ const useNotes = () => {
     verifyNoteScriptDialogNoteId,
     dispatch,
   } = useGlobalContext();
-  const { client } = useWebClient();
+  const { client } = useMiden();
   const { accounts } = useAccounts();
   const { scripts } = useScripts();
   const { requestTransaction } = useWallet();
@@ -54,7 +63,7 @@ const useNotes = () => {
     type,
     faucetAccountId,
     amount,
-    noteInputs,
+    noteStorage,
   }: {
     senderAccountId: string;
     recipientAccountId: string;
@@ -62,8 +71,11 @@ const useNotes = () => {
     type: NoteType;
     faucetAccountId: string;
     amount: bigint;
-    noteInputs: string[];
+    noteStorage: string[];
   }) => {
+    if (!client) {
+      throw new Error("MidenClient not ready");
+    }
     if (!requestTransaction) {
       return;
     }
@@ -81,29 +93,21 @@ const useNotes = () => {
     if (!script) {
       throw new Error("Script not found");
     }
-    const {
-      AccountId,
-      TransactionRequestBuilder,
-      OutputNote,
-      Note,
-      NoteAssets,
-      FungibleAsset,
-      NoteType,
-      NoteAttachment,
-      MidenArrays,
-    } = midenSdk;
     const note =
       tutorialId === "timelock-p2id-note"
-        ? Note.createP2IDENote(
-            AccountId.fromHex(senderAccountId),
-            AccountId.fromHex(recipientAccountId),
-            new NoteAssets([
-              new FungibleAsset(AccountId.fromHex(faucetAccountId), amount),
+        ? WasmNote.createP2IDENote(
+            WasmAccountId.fromHex(senderAccountId),
+            WasmAccountId.fromHex(recipientAccountId),
+            new WasmNoteAssets([
+              new WasmFungibleAsset(
+                WasmAccountId.fromHex(faucetAccountId),
+                amount,
+              ),
             ]),
-            Number(noteInputs[2]),
-            Number(noteInputs[2]),
-            type === "public" ? NoteType.Public : NoteType.Private,
-            new NoteAttachment(),
+            Number(noteStorage[2]),
+            Number(noteStorage[2]),
+            type === "public" ? WasmNoteType.Public : WasmNoteType.Private,
+            new WasmNoteAttachment(),
           )
         : clientCreateNoteFromScript({
             client,
@@ -114,9 +118,8 @@ const useNotes = () => {
             type,
             faucetAccountId,
             amount,
-            noteInputs,
+            noteStorage,
             scripts,
-            midenSdk,
           });
     if (!tutorialId) {
       verifyNoteFromPackageId({
@@ -126,10 +129,8 @@ const useNotes = () => {
         packageId: script.id,
       });
     }
-    const transactionRequest = new TransactionRequestBuilder()
-      .withOwnOutputNotes(
-        new MidenArrays.OutputNoteArray([OutputNote.full(note)]),
-      )
+    const transactionRequest = new WasmTransactionRequestBuilder()
+      .withOwnOutputNotes(new WasmNoteArray([note]))
       .build();
     const customTransaction = new CustomTransaction(
       senderAccount.address,
@@ -143,11 +144,13 @@ const useNotes = () => {
     console.log({ txId });
   };
   const importNoteFromFile = async (noteFileBytes: Uint8Array) => {
+    if (!client) {
+      throw new Error("MidenClient not ready");
+    }
     const inputNote = await clientImportNoteFile({
       client,
       noteFileBytes,
       scripts,
-      midenSdk,
     });
     addNote(inputNote);
   };

@@ -1,8 +1,5 @@
-import {
-  type Component,
-  defaultComponent,
-  storageSlotName,
-} from "@/lib/types/component";
+import type { Component } from "@/lib/types/component";
+import { defaultComponent, storageSlotName } from "@/lib/utils/component";
 
 const countReader: Component = {
   ...defaultComponent(),
@@ -14,6 +11,7 @@ const countReader: Component = {
     {
       name: storageSlotName({
         packageName: "count-reader",
+        componentStruct: "CountReader",
         fieldName: "counter",
       }),
       type: "value",

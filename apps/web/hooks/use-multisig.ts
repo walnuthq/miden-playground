@@ -1,5 +1,10 @@
 import { useState } from "react";
 import {
+  Address as WasmAddress,
+  AccountId as WasmAccountId,
+} from "@miden-sdk/miden-sdk";
+import { useMiden, useSyncState } from "@miden-sdk/react";
+import {
   useWallet,
   type MessageSignerWalletAdapter,
 } from "@miden-sdk/miden-wallet-adapter";
@@ -10,24 +15,25 @@ import {
   type Proposal,
 } from "@openzeppelin/miden-multisig-client";
 import { type Account } from "@/lib/types/account";
-import { wasmAccountToAccount, addressToAccountId } from "@/lib/web-client";
-import useWebClient from "@/hooks/use-web-client";
+import { wasmAccountToAccount } from "@/lib/web-client";
 import { initMultisigClient } from "@/lib/multisig-client";
 import { useMidenWallet } from "@/hooks/use-miden-wallet";
-import { MIDEN_GUARDIAN_ENDPOINT_URL } from "@/lib/constants";
+import { GUARDIAN_ENDPOINT_URL } from "@/lib/constants";
 import useAccounts from "@/hooks/use-accounts";
-import useMidenSdk from "@/hooks/use-miden-sdk";
 import useGlobalContext from "@/components/global-context/hook";
+import useNetwork from "@/hooks/use-network";
+import createMidenClient from "@/lib/miden-client";
 
 const useMultisig = () => {
   const [multisig, setMultisig] = useState<Multisig | null>(null);
+  const { networkId } = useNetwork();
   const { wallet } = useWallet();
   const { session: midenWalletSession, signBytes } = useMidenWallet(
     (wallet?.adapter as MessageSignerWalletAdapter) ?? null,
   );
-  const { midenSdk } = useMidenSdk();
-  const { networkId, blockNum, dispatch } = useGlobalContext();
-  const { client } = useWebClient();
+  const { dispatch } = useGlobalContext();
+  const { client } = useMiden();
+  const { lastSyncTime } = useSyncState();
   const { accounts, newAccount, updateAccount } = useAccounts();
   const createMultisig = async ({
     name,
@@ -36,16 +42,20 @@ const useMultisig = () => {
     name: string;
     threshold: number;
   }) => {
+    if (!client) {
+      throw new Error("MidenClient not ready");
+    }
     if (!midenWalletSession.commitment || !midenWalletSession.scheme) {
       return;
     }
+    const midenClient = await createMidenClient(networkId);
     const {
       client: multisigClient,
       guardianCommitment,
       guardianPublicKey,
     } = await initMultisigClient({
-      webClient: client,
-      guardianEndpoint: MIDEN_GUARDIAN_ENDPOINT_URL,
+      midenClient,
+      guardianEndpoint: GUARDIAN_ENDPOINT_URL,
     });
     const signer = new MidenWalletSigner(
       { signBytes },
@@ -83,14 +93,15 @@ const useMultisig = () => {
         },
         proposals: newMultisig.listProposals(),
       },
-      networkId,
-      updatedAt: blockNum,
-      midenSdk,
+      updatedAt: lastSyncTime,
     });
     newAccount(account);
     return account;
   };
   const loadMultisig = async (accountId: string) => {
+    if (!client) {
+      throw new Error("MidenClient not ready");
+    }
     if (!midenWalletSession.commitment || !midenWalletSession.scheme) {
       return;
     }
@@ -98,9 +109,10 @@ const useMultisig = () => {
       return multisig;
     }
     dispatch({ type: "SUBMITTING_TRANSACTION" });
+    const midenClient = await createMidenClient(networkId);
     const { client: multisigClient } = await initMultisigClient({
-      webClient: client,
-      guardianEndpoint: MIDEN_GUARDIAN_ENDPOINT_URL,
+      midenClient,
+      guardianEndpoint: GUARDIAN_ENDPOINT_URL,
     });
     const signer = new MidenWalletSigner(
       { signBytes },
@@ -242,6 +254,9 @@ const useMultisig = () => {
     multisig: Multisig;
     proposal: Proposal;
   }) => {
+    if (!client) {
+      throw new Error("MidenClient not ready");
+    }
     const previousAccount = accounts.find(
       ({ id }) => id === multisig.accountId,
     );
@@ -255,7 +270,7 @@ const useMultisig = () => {
     //   multisig: { ...previousAccount.multisig, proposals },
     // });
     const localAccount = await client.getAccount(
-      midenSdk.AccountId.fromHex(multisig.accountId),
+      WasmAccountId.fromHex(multisig.accountId),
     );
     if (!localAccount) {
       dispatch({ type: "TRANSACTION_SUBMITTED" });
@@ -269,9 +284,7 @@ const useMultisig = () => {
         config: previousAccount.multisig.config,
         proposals: multisig.listProposals(),
       },
-      networkId,
-      updatedAt: blockNum,
-      midenSdk,
+      updatedAt: lastSyncTime,
     });
     updateAccount(account);
     dispatch({ type: "TRANSACTION_SUBMITTED" });
@@ -283,16 +296,16 @@ const useMultisig = () => {
     name: string;
     address: string;
   }) => {
-    const accountId = addressToAccountId({ address, midenSdk });
+    if (!client) {
+      throw new Error("MidenClient not ready");
+    }
+    const accountId = WasmAddress.fromBech32(address).accountId();
     const multisig = await loadMultisig(accountId.toString());
     if (!multisig || !multisig.account) {
       throw new Error("Multisig not found");
     }
     // dispatch({ type: "SUBMITTING_TRANSACTION" });
-    const [state, syncSummary] = await Promise.all([
-      multisig.syncState(),
-      client.syncState(),
-    ]);
+    const state = await multisig.syncState();
     const config = AccountInspector.fromBase64(state.stateDataBase64);
     const account = wasmAccountToAccount({
       wasmAccount: multisig.account,
@@ -308,16 +321,13 @@ const useMultisig = () => {
         },
         proposals: multisig.listProposals(),
       },
-      networkId,
-      updatedAt: blockNum,
-      midenSdk,
+      updatedAt: lastSyncTime,
     });
     dispatch({
       type: "IMPORT_ACCOUNT",
       payload: {
         account,
         inputNotes: [],
-        blockNum: syncSummary.blockNum(),
       },
     });
     // dispatch({ type: "TRANSACTION_SUBMITTED" });

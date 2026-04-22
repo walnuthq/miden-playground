@@ -6,11 +6,11 @@ import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
 import Step6Content from "@/components/tutorials/tutorial11/step6.mdx";
 import useAccounts from "@/hooks/use-accounts";
 import { getVerifiedAccountComponents } from "@/lib/api";
-import useGlobalContext from "@/components/global-context/hook";
+import useNetwork from "@/hooks/use-network";
 
 const useCompleted = () => {
   const [completed, setCompleted] = useState(false);
-  const { networkId } = useGlobalContext();
+  const { networkId } = useNetwork();
   const { accounts } = useAccounts();
   const counter = accounts.find(({ name }) => name === "Unverified Contract");
   useInterval(

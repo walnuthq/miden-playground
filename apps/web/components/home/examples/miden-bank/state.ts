@@ -1,5 +1,6 @@
-import { defaultState, type State } from "@/lib/types/state";
-import { storageSlotName, defaultComponent } from "@/lib/types/component";
+import type { State } from "@/lib/types/state";
+import { defaultState } from "@/lib/utils/state";
+import { storageSlotName, defaultComponent } from "@/lib/utils/component";
 import defaultComponents from "@/lib/types/default-components";
 
 const state: State = {
@@ -17,6 +18,7 @@ const state: State = {
         {
           name: storageSlotName({
             packageName: "bank-account",
+            componentStruct: "Bank",
             fieldName: "initialized",
           }),
           type: "value",
@@ -25,6 +27,7 @@ const state: State = {
         {
           name: storageSlotName({
             packageName: "bank-account",
+            componentStruct: "Bank",
             fieldName: "balances",
           }),
           type: "map",

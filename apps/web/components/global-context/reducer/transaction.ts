@@ -37,7 +37,6 @@ export type TransactionAction =
         account: Account;
         consumableNoteIds: Record<string, string[]>;
         inputNotes: InputNote[];
-        blockNum: number;
         serializedMockChain: Uint8Array;
       };
     };
@@ -99,7 +98,6 @@ const reducer = (state: State, action: TransactionAction): State => {
           })),
         ],
         inputNotes: action.payload.inputNotes,
-        blockNum: action.payload.blockNum,
         serializedMockChain: action.payload.serializedMockChain,
       };
     }

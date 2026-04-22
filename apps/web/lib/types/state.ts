@@ -1,28 +1,22 @@
-import {
-  type ConsumableNoteRecord as WasmConsumableNoteRecordType,
-  type TransactionRequest as WasmTransactionRequestType,
-  type TransactionResult as WasmTransactionResultType,
+import type {
+  ConsumableNoteRecord as WasmConsumableNoteRecordType,
+  TransactionRequest as WasmTransactionRequestType,
+  TransactionResult as WasmTransactionResultType,
 } from "@miden-sdk/miden-sdk";
-import { type Account } from "@/lib/types/account";
-import { type NetworkId } from "@/lib/types/network";
-import { type InputNote } from "@/lib/types/note";
-import { type Component } from "@/lib/types/component";
-import {
-  type Transaction,
-  type TransactionType,
-  type CreateTransactionDialogStep,
+import type { Account } from "@/lib/types/account";
+import type { InputNote } from "@/lib/types/note";
+import type { Component } from "@/lib/types/component";
+import type {
+  Transaction,
+  TransactionType,
+  CreateTransactionDialogStep,
 } from "@/lib/types/transaction";
-import { type Script, type ProcedureExport } from "@/lib/types/script";
-import { type Store } from "@/lib/types/store";
-import defaultScripts from "@/lib/types/default-scripts";
-import defaultComponents from "@/lib/types/default-components";
+import type { Script, ProcedureExport } from "@/lib/types/script";
+import type { Store } from "@/lib/types/store";
+import type { TutorialId } from "@/lib/types/tutorial";
 
 export type State = {
   // GLOBAL
-  networkId: NetworkId;
-  initializingMockWebClient: boolean;
-  initializingWebClient: boolean;
-  blockNum: number;
   serializedMockChain: Uint8Array;
   syncingState: boolean;
   nextState: State | null;
@@ -73,10 +67,10 @@ export type State = {
   createComponentDialogOpen: boolean;
   upsertStorageSlotDialogOpen: boolean;
   upsertStorageSlotDialogComponentId: string;
-  upsertStorageSlotDialogStorageSlotIndex: number;
+  upsertStorageSlotDialogStorageSlotName: string;
   components: Component[];
   // TUTORIALS
-  tutorialId: string;
+  tutorialId: TutorialId;
   tutorialStep: number;
   tutorialMaxStep: number;
   tutorialOpen: boolean;
@@ -84,169 +78,4 @@ export type State = {
   completedTutorials: Set<string>;
   // EXAMPLES
   exampleId: string;
-};
-
-export const defaultState = (): State => ({
-  // GLOBAL
-  networkId: "mtst",
-  initializingMockWebClient: false,
-  initializingWebClient: false,
-  blockNum: 0,
-  serializedMockChain: new Uint8Array(),
-  syncingState: false,
-  nextState: null,
-  nextStore: null,
-  // ACCOUNTS
-  createWalletDialogOpen: false,
-  createFaucetDialogOpen: false,
-  importAccountDialogOpen: false,
-  importAccountDialogMultisig: false,
-  deployAccountDialogOpen: false,
-  verifyAccountComponentDialogOpen: false,
-  verifyAccountComponentDialogAccountId: "",
-  deployMultisigDialogOpen: false,
-  accounts: [],
-  // TRANSACTIONS
-  submittingTransaction: false,
-  createTransactionDialogOpen: false,
-  createTransactionDialogAccountId: "",
-  createTransactionDialogTransactionType: "consume",
-  createTransactionDialogStep: "select",
-  createTransactionDialogConsumableNotes: [],
-  createTransactionDialogNoteIds: [],
-  createTransactionDialogTransactionRequest: null,
-  createTransactionDialogTransactionResult: null,
-  transactions: [],
-  // NOTES
-  inputNotes: [],
-  exportNoteDialogOpen: false,
-  importNoteDialogOpen: false,
-  createNoteDialogOpen: false,
-  verifyNoteScriptDialogOpen: false,
-  verifyNoteScriptDialogNoteId: "",
-  // SCRIPTS
-  createScriptDialogOpen: false,
-  deleteScriptAlertDialogOpen: false,
-  deleteScriptAlertDialogScriptId: "",
-  invokeProcedureArgumentsDialogOpen: false,
-  invokeProcedureArgumentsDialogSenderAccountId: "",
-  invokeProcedureArgumentsDialogScript: null,
-  invokeProcedureArgumentsDialogProcedure: null,
-  addDependencyDialogOpen: false,
-  addDependencyDialogScriptId: "",
-  importProjectDialogOpen: false,
-  readOnlyProcedureDigest: "",
-  readOnlyProcedureResult: "",
-  scripts: defaultScripts,
-  // COMPONENTS
-  createComponentDialogOpen: false,
-  upsertStorageSlotDialogOpen: false,
-  upsertStorageSlotDialogComponentId: "",
-  upsertStorageSlotDialogStorageSlotIndex: -1,
-  components: defaultComponents,
-  // TUTORIALS
-  tutorialId: "",
-  tutorialStep: 0,
-  tutorialMaxStep: 0,
-  tutorialOpen: true,
-  nextTutorialStepDisabled: true,
-  completedTutorials: new Set([]),
-  // EXAMPLES
-  exampleId: "",
-});
-
-export const stateSerializer = ({
-  networkId,
-  blockNum,
-  serializedMockChain,
-  accounts,
-  transactions,
-  inputNotes,
-  scripts,
-  components,
-  tutorialId,
-  tutorialStep,
-  tutorialMaxStep,
-  tutorialOpen,
-  nextTutorialStepDisabled,
-  completedTutorials,
-}: State) =>
-  JSON.stringify({
-    networkId,
-    blockNum,
-    serializedMockChain:
-      serializedMockChain === null ? null : serializedMockChain.toString(),
-    accounts,
-    transactions,
-    inputNotes,
-    scripts,
-    components,
-    tutorialId,
-    tutorialStep,
-    tutorialMaxStep,
-    tutorialOpen,
-    nextTutorialStepDisabled,
-    completedTutorials: [...completedTutorials],
-  });
-
-export const stateDeserializer = (value: string): State => {
-  try {
-    const {
-      networkId,
-      blockNum,
-      serializedMockChain,
-      accounts,
-      transactions,
-      inputNotes,
-      scripts,
-      components,
-      tutorialId,
-      tutorialStep,
-      tutorialMaxStep,
-      tutorialOpen,
-      nextTutorialStepDisabled,
-      completedTutorials,
-    } = JSON.parse(value) as {
-      networkId?: NetworkId;
-      blockNum?: number;
-      serializedMockChain?: string;
-      accounts?: Account[];
-      transactions?: Transaction[];
-      inputNotes?: InputNote[];
-      scripts?: Script[];
-      components?: Component[];
-      tutorialId?: string;
-      tutorialStep?: number;
-      tutorialMaxStep?: number;
-      tutorialOpen?: boolean;
-      nextTutorialStepDisabled?: boolean;
-      completedTutorials?: string[];
-    };
-    const initialState = defaultState();
-    return {
-      ...initialState,
-      networkId: networkId ?? initialState.networkId,
-      blockNum: blockNum ?? initialState.blockNum,
-      serializedMockChain: serializedMockChain
-        ? new Uint8Array(serializedMockChain.split(",").map(Number))
-        : initialState.serializedMockChain,
-      accounts: accounts ?? initialState.accounts,
-      transactions: transactions ?? initialState.transactions,
-      inputNotes: inputNotes ?? initialState.inputNotes,
-      scripts: scripts ?? initialState.scripts,
-      components: components ?? initialState.components,
-      tutorialId: tutorialId ?? initialState.tutorialId,
-      tutorialStep: tutorialStep ?? initialState.tutorialStep,
-      tutorialMaxStep: tutorialMaxStep ?? initialState.tutorialMaxStep,
-      tutorialOpen: tutorialOpen ?? initialState.tutorialOpen,
-      nextTutorialStepDisabled:
-        nextTutorialStepDisabled ?? initialState.nextTutorialStepDisabled,
-      completedTutorials: completedTutorials
-        ? new Set(completedTutorials)
-        : initialState.completedTutorials,
-    };
-  } catch (error) {
-    console.error(error);
-    return defaultState();
-  }
 };

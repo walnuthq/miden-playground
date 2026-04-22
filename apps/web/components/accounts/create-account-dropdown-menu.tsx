@@ -16,12 +16,13 @@ import {
 } from "@workspace/ui/components/dropdown-menu";
 import { Button } from "@workspace/ui/components/button";
 import useAccounts from "@/hooks/use-accounts";
-import useGlobalContext from "@/components/global-context/hook";
+import useNetwork from "@/hooks/use-network";
 import useComponents from "@/hooks/use-components";
 import { defaultComponentIds } from "@/lib/types/default-components";
+import useTutorials from "@/hooks/use-tutorials";
 
 const CreateAccountDropdownMenu = () => {
-  const { networkId } = useGlobalContext();
+  const { networkId } = useNetwork();
   const {
     connectedWallet,
     openCreateWalletDialog,
@@ -31,6 +32,9 @@ const CreateAccountDropdownMenu = () => {
     openDeployMultisigDialog,
   } = useAccounts();
   const { components } = useComponents();
+  const { isTutorial } = useTutorials();
+  const showCreateWalletsFaucets = isTutorial || networkId === "mmck";
+  const showImportDeployAccounts = true;
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -40,7 +44,7 @@ const CreateAccountDropdownMenu = () => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        {networkId === "mmck" && (
+        {showCreateWalletsFaucets && (
           <>
             <DropdownMenuItem onClick={openCreateWalletDialog}>
               <Wallet />
@@ -52,7 +56,7 @@ const CreateAccountDropdownMenu = () => {
             </DropdownMenuItem>
           </>
         )}
-        {networkId !== "mmck" && (
+        {showImportDeployAccounts && (
           <>
             <DropdownMenuItem onClick={() => openImportAccountDialog()}>
               <Download />

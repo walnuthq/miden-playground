@@ -14,8 +14,8 @@ import {
 } from "@workspace/ui/components/dialog";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
-import { fileListToPackageSources } from "@/lib/utils";
-import { type PackageSource } from "@/lib/types/script";
+import { fileListToPackageSources } from "@/lib/utils/script";
+import type { PackageSource } from "@/lib/types/script";
 import useScripts from "@/hooks/use-scripts";
 
 const ImportProjectDialog = () => {

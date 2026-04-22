@@ -4,13 +4,15 @@ import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
 import Step5Content from "@/components/tutorials/tutorial5/step5.mdx";
 import useAccounts from "@/hooks/use-accounts";
-import { COUNTER_CONTRACT_ADDRESS } from "@/lib/constants";
+import { counterContractAddress } from "@/lib/constants";
+import useNetwork from "@/hooks/use-network";
 
 const useCompleted = () => {
   const [initialNonce, setInitialNonce] = useState(0);
+  const { networkId } = useNetwork();
   const { accounts } = useAccounts();
   const counter = accounts.find(
-    ({ address }) => address === COUNTER_CONTRACT_ADDRESS,
+    ({ address }) => address === counterContractAddress(networkId),
   );
   const currentNonce = counter?.nonce ?? 0;
   useEffect(() => {

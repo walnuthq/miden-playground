@@ -5,13 +5,12 @@ import {
   type TransactionType,
 } from "@/lib/types/transaction";
 import { Label } from "@workspace/ui/components/label";
-import { clientGetConsumableNotes } from "@/lib/web-client";
 import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";
 import SelectTransactionTypeDropdownMenu from "@/components/transactions/select-transaction-type-dropdown-menu";
 import useAccounts from "@/hooks/use-accounts";
-import useMidenSdk from "@/hooks/use-miden-sdk";
-import useWebClient from "@/hooks/use-web-client";
-import useGlobalContext from "@/components/global-context/hook";
+import useNetwork from "@/hooks/use-network";
+import { clientGetConsumableNotes } from "@/lib/web-client";
+import { useMiden } from "@miden-sdk/react";
 
 const CreateTransactionDialogSelectForm = ({
   executingAccountId,
@@ -30,9 +29,8 @@ const CreateTransactionDialogSelectForm = ({
   setConsumableNotes: Dispatch<SetStateAction<WasmConsumableNoteRecordType[]>>;
   setStep: Dispatch<SetStateAction<CreateTransactionDialogStep>>;
 }) => {
-  const { midenSdk } = useMidenSdk();
-  const { client } = useWebClient();
-  const { networkId } = useGlobalContext();
+  const { networkId } = useNetwork();
+  const { client } = useMiden();
   const { accounts } = useAccounts();
   const executingAccount = accounts.find(({ id }) => id === executingAccountId);
   return (
@@ -40,12 +38,14 @@ const CreateTransactionDialogSelectForm = ({
       id="create-transaction-select-form"
       onSubmit={async (event) => {
         event.preventDefault();
+        if (!client) {
+          throw new Error("MidenClient not ready");
+        }
         if (transactionType === "consume" && executingAccount) {
           setLoading(true);
           const consumableNotes = await clientGetConsumableNotes({
             client,
-            accountId: executingAccount.id,
-            midenSdk,
+            accountId: executingAccountId,
           });
           setLoading(false);
           setConsumableNotes(consumableNotes);

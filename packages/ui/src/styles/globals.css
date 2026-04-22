@@ -130,6 +130,10 @@
   isolation: isolate;
 }
 
+.wallet-adapter-dropdown {
+  width: initial;
+}
+
 .wallet-adapter-button-trigger {
   border-color: var(--color-border) !important;
   @apply text-foreground!;
@@ -144,7 +148,7 @@
   @apply dark:bg-input/30;
   @apply dark:border-input;
   @apply h-8;
-  @apply px-4;
+  @apply px-2;
   &:is(.dark *) {
     background-color: color-mix(
       in oklab,

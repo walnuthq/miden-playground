@@ -1,19 +1,21 @@
 import { useEffect, useState } from "react";
 import { EllipsisVertical } from "lucide-react";
 import { type TutorialStep } from "@/lib/types/tutorial";
+import useNetwork from "@/hooks/use-network";
 import useAccounts from "@/hooks/use-accounts";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
 import Step6Content from "@/components/tutorials/tutorial4/step6.mdx";
-import { MIDEN_FAUCET_ACCOUNT_ID } from "@/lib/constants";
+import { midenFaucetAccountId } from "@/lib/constants";
 
 const useCompleted = () => {
+  const { networkId } = useNetwork();
   const [initialBalance, setInitialBalance] = useState(0n);
   const { connectedWallet } = useAccounts();
   const currentBalance = BigInt(
     (connectedWallet?.storageMode === "public" &&
       connectedWallet?.fungibleAssets.find(
-        ({ faucetId }) => faucetId === MIDEN_FAUCET_ACCOUNT_ID,
+        ({ faucetId }) => faucetId === midenFaucetAccountId(networkId),
       )?.amount) ??
       "0",
   );

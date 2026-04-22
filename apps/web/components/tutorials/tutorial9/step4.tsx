@@ -1,5 +1,5 @@
 import { usePathname } from "next/navigation";
-import { defaultTutorialStep } from "@/lib/types/tutorial";
+import type { TutorialStep } from "@/lib/types/tutorial";
 import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import Step4Content from "@/components/tutorials/tutorial9/step4.mdx";
@@ -14,8 +14,7 @@ const useCompleted = () => {
   return pathname === `/accounts/${countReader?.identifier}`;
 };
 
-export default {
-  ...defaultTutorialStep(),
+const Step4: TutorialStep = {
   title: "Deploy the Count Reader contract.",
   Content: () => {
     const { accounts } = useAccounts();
@@ -46,3 +45,5 @@ export default {
     return <NextStepButton disabled={!completed} />;
   },
 };
+
+export default Step4;

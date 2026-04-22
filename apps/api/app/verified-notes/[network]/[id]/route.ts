@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getVerifiedNotes } from "@/db/verified-notes";
 import { midenNoteVerifier } from "@/lib/miden-verifier";
-import { getStandardNoteScript } from "@/lib/default-note-scripts";
+import { getStandardNoteScript } from "@/lib/standard-notes";
 import { getDependencies } from "@/db/packages";
 import type { Package, ProcedureExport, Export, Dependency } from "@/lib/types";
 

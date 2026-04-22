@@ -7,8 +7,8 @@ import {
   TableRow,
 } from "@workspace/ui/components/table";
 import CopyButton from "@/components/lib/copy-button";
-import { type Script, type ProcedureExport } from "@/lib/types/script";
-import { formatProcedureExportPath } from "@/lib/utils";
+import type { Script, ProcedureExport } from "@/lib/types/script";
+import { formatProcedureExportPath } from "@/lib/utils/script";
 
 const procedureSignature = ({
   path,

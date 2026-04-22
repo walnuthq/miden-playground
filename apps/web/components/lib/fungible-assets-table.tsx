@@ -10,7 +10,7 @@ import { type FungibleAsset } from "@/lib/types/asset";
 import useAccounts from "@/hooks/use-accounts";
 import AccountAddress from "@/components/lib/account-address";
 import { cn } from "@workspace/ui/lib/utils";
-import { formatAmount } from "@/lib/utils";
+import { formatAmount } from "@/lib/utils/asset";
 
 const FungibleAssetsTable = ({
   fungibleAssets,

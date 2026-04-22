@@ -16,7 +16,7 @@ import GithubButton from "@/components/lib/github-button";
 // import ModeToggle from "@/components/lib/mode-toggle";
 import useTutorials from "@/hooks/use-tutorials";
 import NetworkBadge from "@/components/lib/network-badge";
-import useGlobalContext from "@/components/global-context/hook";
+import useNetwork from "@/hooks/use-network";
 import WalletButton from "@/components/lib/wallet-button";
 
 const getLink = (pathname: string) => {
@@ -55,7 +55,7 @@ const SubLevelPageBreadcrumbs = () => {
 
 const Header = () => {
   const isClient = useIsClient();
-  const { networkId } = useGlobalContext();
+  const { networkId } = useNetwork();
   const { tutorialId } = useTutorials();
   const pathname = usePathname();
   const isTopLevelPage = [

@@ -2,30 +2,32 @@ import { type TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
 import Step3Content from "@/components/tutorials/tutorial4/step3.mdx";
+import useNetwork from "@/hooks/use-network";
 import useNotes from "@/hooks/use-notes";
 import useAccounts from "@/hooks/use-accounts";
-import { accountIdFromPrefixSuffix } from "@/lib/types/account";
+import { accountIdFromPrefixSuffix } from "@/lib/utils/account";
 import {
   FUNGIBLE_FAUCET_DEFAULT_DECIMALS,
-  MIDEN_FAUCET_ACCOUNT_ID,
   P2ID_NOTE_CODE,
+  midenFaucetAccountId,
 } from "@/lib/constants";
-import { parseAmount } from "@/lib/utils";
+import { parseAmount } from "@/lib/utils/asset";
 
 const useCompleted = () => {
+  const { networkId } = useNetwork();
   const { connectedWallet } = useAccounts();
   const { inputNotes } = useNotes();
   const note = inputNotes.find(
-    ({ fungibleAssets, senderId, scriptRoot, inputs, state, type }) =>
+    ({ fungibleAssets, senderId, scriptRoot, storage, state, type }) =>
       fungibleAssets.some(
         ({ faucetId, amount }) =>
-          faucetId === MIDEN_FAUCET_ACCOUNT_ID &&
+          faucetId === midenFaucetAccountId(networkId) &&
           amount ===
             parseAmount("100", FUNGIBLE_FAUCET_DEFAULT_DECIMALS).toString(),
       ) &&
-      senderId === MIDEN_FAUCET_ACCOUNT_ID &&
+      senderId === midenFaucetAccountId(networkId) &&
       scriptRoot === P2ID_NOTE_CODE &&
-      accountIdFromPrefixSuffix(inputs[1]!, inputs[0]!) ===
+      accountIdFromPrefixSuffix(storage[1]!, storage[0]!) ===
         connectedWallet?.id &&
       state === "committed" &&
       type === "private",

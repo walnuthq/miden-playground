@@ -1,22 +1,24 @@
-import { TEST_WALLET_ACCOUNT_ID, TEST_WALLET_ADDRESS } from "@/lib/constants";
+import type { State } from "@/lib/types/state";
+import { defaultState } from "@/lib/utils/state";
+import { testWalletAccountId, testWalletAddress } from "@/lib/constants";
 import {
   basicWalletAccount,
   getIdentifierPart,
   getRoutingParametersPart,
-} from "@/lib/types/account";
-import { type State, defaultState } from "@/lib/types/state";
+  midenFaucetAccount,
+} from "@/lib/utils/account";
 
 const state: State = {
   ...defaultState(),
-  networkId: "mtst",
   accounts: [
+    midenFaucetAccount("mtst"),
     {
       ...basicWalletAccount({ storageMode: "public" }),
-      id: TEST_WALLET_ACCOUNT_ID,
+      id: testWalletAccountId("mtst"),
       name: "Test Wallet",
-      address: TEST_WALLET_ADDRESS,
-      identifier: getIdentifierPart(TEST_WALLET_ADDRESS),
-      routingParameters: getRoutingParametersPart(TEST_WALLET_ADDRESS),
+      address: testWalletAddress("mtst"),
+      identifier: getIdentifierPart(testWalletAddress("mtst")),
+      routingParameters: getRoutingParametersPart(testWalletAddress("mtst")),
     },
   ],
   tutorialId: "timelock-p2id-note",

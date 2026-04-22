@@ -1,8 +1,5 @@
-import {
-  type Component,
-  defaultComponent,
-  storageSlotName,
-} from "@/lib/types/component";
+import type { Component } from "@/lib/types/component";
+import { defaultComponent, storageSlotName } from "@/lib/utils/component";
 
 const counterMapContract: Component = {
   ...defaultComponent(),
@@ -14,6 +11,7 @@ const counterMapContract: Component = {
     {
       name: storageSlotName({
         packageName: "counter-contract",
+        componentStruct: "CounterContract",
         fieldName: "count_map",
       }),
       type: "map",

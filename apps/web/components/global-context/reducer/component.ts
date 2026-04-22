@@ -10,7 +10,7 @@ export type ComponentAction =
     }
   | {
       type: "OPEN_UPSERT_STORAGE_SLOT_DIALOG";
-      payload: { componentId: string; storageSlotIndex: number };
+      payload: { componentId: string; storageSlotName: string };
     }
   | {
       type: "CLOSE_UPSERT_STORAGE_SLOT_DIALOG";
@@ -43,8 +43,7 @@ const reducer = (state: State, action: ComponentAction): State => {
         ...state,
         upsertStorageSlotDialogOpen: true,
         upsertStorageSlotDialogComponentId: action.payload.componentId,
-        upsertStorageSlotDialogStorageSlotIndex:
-          action.payload.storageSlotIndex,
+        upsertStorageSlotDialogStorageSlotName: action.payload.storageSlotName,
       };
     }
     case "CLOSE_UPSERT_STORAGE_SLOT_DIALOG": {
@@ -52,7 +51,7 @@ const reducer = (state: State, action: ComponentAction): State => {
         ...state,
         upsertStorageSlotDialogOpen: false,
         upsertStorageSlotDialogComponentId: "",
-        upsertStorageSlotDialogStorageSlotIndex: -1,
+        upsertStorageSlotDialogStorageSlotName: "",
       };
     }
     case "NEW_COMPONENT": {

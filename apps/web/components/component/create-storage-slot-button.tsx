@@ -8,7 +8,7 @@ const CreateStorageSlotButton = ({ componentId }: { componentId: string }) => {
     <Button
       variant="outline"
       onClick={() =>
-        openUpsertStorageSlotDialog({ componentId, storageSlotIndex: -1 })
+        openUpsertStorageSlotDialog({ componentId, storageSlotName: "" })
       }
     >
       <Plus />

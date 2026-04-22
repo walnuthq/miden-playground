@@ -3,15 +3,17 @@ import useGlobalContext from "@/components/global-context/hook";
 import { type Example } from "@/lib/types/example";
 import useAppState from "@/hooks/use-app-state";
 import { importScriptsFromGithubRepo } from "@/lib/api";
-import { compiledPackageToScript } from "@/lib/types/script";
+import { compiledPackageToScript } from "@/lib/utils/script";
 import { defaultComponentIds } from "@/lib/types/default-components";
 import useAccounts from "@/hooks/use-accounts";
 import authNoAuth from "@/lib/types/default-components/auth-no-auth";
 import useComponents from "@/hooks/use-components";
+import useNetwork from "@/hooks/use-network";
 
 const useExamples = () => {
   const router = useRouter();
-  const { blockNum, completedTutorials, exampleId } = useGlobalContext();
+  const { switchNetwork } = useNetwork();
+  const { completedTutorials, exampleId } = useGlobalContext();
   const { pushState } = useAppState();
   const { deployAccount } = useAccounts();
   const { components } = useComponents();
@@ -23,6 +25,7 @@ const useExamples = () => {
     if (!scripts) {
       return;
     }
+    switchNetwork("mtst");
     pushState({
       ...example.state,
       scripts: [
@@ -42,7 +45,6 @@ const useExamples = () => {
           scriptId: script?.id ?? "",
         };
       }),
-      blockNum,
       completedTutorials,
     });
   };

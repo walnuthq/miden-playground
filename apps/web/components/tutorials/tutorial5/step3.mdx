@@ -2,14 +2,14 @@ In the previous step we had a look at the higher-level **Rust** source code of t
 
 Here's a breakdown of what the **`get_count`** procedure does:
 
-1. Pushes the slot ID prefix and suffix for **`miden::component::miden_counter_contract::counter`** onto the stack.
+1. Pushes the slot ID prefix and suffix for **` miden_counter_contract::counter`** onto the stack.
 2. Calls **`active_account::get_item`** with the slot ID.
 3. Calls **`sys::truncate_stack`** to truncate the stack to size 16.
 4. The value returned from **`active_account::get_item`** is still on the stack and will be returned when this procedure is called.
 
 Here's a breakdown of what the **`increment_count`** procedure does:
 
-1. Pushes the slot ID prefix and suffix for **`miden::component::miden_counter_contract::counter`** onto the stack.
+1. Pushes the slot ID prefix and suffix for **`miden_counter_contract::counter`** onto the stack.
 2. Calls **`active_account::get_item`** with the slot ID.
 3. Pushes **`1`** onto the stack.
 4. Adds **`1`** to the count value returned from **`active_account::get_item`**.

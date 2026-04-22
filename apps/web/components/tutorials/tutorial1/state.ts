@@ -1,35 +1,9 @@
-import { basicFungibleFaucetAccount } from "@/lib/types/account";
-import { defaultState, type State } from "@/lib/types/state";
+import { basicFungibleFaucetAccount } from "@/lib/utils/account";
+import type { State } from "@/lib/types/state";
+import { defaultState } from "@/lib/utils/state";
 
 const state: State = {
   ...defaultState(),
-  networkId: "mmck",
-  serializedMockChain: new Uint8Array([
-    3, 3, 83, 0, 75, 149, 203, 139, 84, 71, 85, 235, 135, 228, 76, 20, 159, 204,
-    83, 30, 219, 242, 91, 202, 64, 24, 246, 77, 106, 94, 92, 8, 189, 31, 3, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 105, 220, 168, 45, 57, 157, 41,
-    151, 25, 7, 148, 98, 175, 68, 116, 6, 214, 247, 160, 7, 199, 11, 151, 123,
-    139, 157, 243, 120, 124, 141, 35, 228, 62, 18, 140, 87, 246, 207, 160, 212,
-    74, 177, 48, 137, 148, 23, 26, 241, 60, 181, 19, 66, 42, 221, 40, 209, 145,
-    107, 63, 242, 84, 254, 248, 45, 62, 18, 140, 87, 246, 207, 160, 212, 74,
-    177, 48, 137, 148, 23, 26, 241, 60, 181, 19, 66, 42, 221, 40, 209, 145, 107,
-    63, 242, 84, 254, 248, 45, 254, 36, 135, 161, 200, 221, 206, 147, 237, 48,
-    145, 46, 23, 153, 50, 78, 96, 200, 8, 24, 14, 158, 34, 128, 120, 253, 183,
-    126, 52, 121, 244, 19, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 218, 228, 7, 52, 234, 13, 163, 36,
-    250, 227, 11, 118, 215, 1, 214, 51, 49, 205, 245, 63, 34, 60, 71, 253, 216,
-    21, 88, 244, 42, 46, 179, 182, 3, 176, 251, 177, 153, 33, 227, 9, 240, 52,
-    77, 146, 123, 104, 245, 90, 211, 113, 1, 16, 187, 155, 32, 151, 154, 204,
-    154, 238, 162, 184, 158, 30, 47, 171, 0, 0, 0, 0, 0, 205, 32, 0, 0, 172, 0,
-    0, 0, 222, 0, 0, 0, 0, 0, 241, 83, 101, 1, 1, 1, 1, 18, 82, 22, 3, 115, 33,
-    219, 190, 207, 197, 202, 231, 128, 92, 61, 111, 83, 153, 42, 115, 121, 102,
-    50, 15, 149, 111, 85, 68, 37, 55, 88, 29, 84, 225, 243, 23, 223, 237, 44,
-    78, 3, 63, 28, 220, 15, 149, 173, 219, 49, 243, 67, 4, 77, 90, 244, 96, 160,
-    73, 26, 43, 121, 132, 154, 81, 0, 1, 1, 1, 1, 1, 1, 128, 36, 22, 97, 246,
-    215, 254, 63, 174, 75, 194, 20, 26, 28, 180, 233, 71, 87, 165, 71, 16, 8,
-    129, 204, 205, 146, 178, 79, 120, 103, 156, 29,
-  ]),
   accounts: [
     {
       ...basicFungibleFaucetAccount({
@@ -39,28 +13,52 @@ const state: State = {
         maxSupply: "100000000000000000",
         totalSupply: "0",
       }),
-      id: "0x2a485a7912c375203e5c9830550656",
+      id: "0x4f8c7e5870e79520025c8693649ddf",
       name: "MDN Faucet",
-      address: "mmck1aq4yskneztph2gp7tjvrq4gx2cydfalq_qruqqypuyph",
-      identifier: "mmck1aq4yskneztph2gp7tjvrq4gx2cydfalq",
-      routingParameters: "qruqqypuyph",
+      address: "mtst1ap8ccljcwrne2gqztjrfxeyamuzpdvw9_qr7qqq9wr6w",
+      identifier: "mtst1ap8ccljcwrne2gqztjrfxeyamuzpdvw9",
+      routingParameters: "qr7qqq9wr6w",
       storage: [
         {
-          name: "miden::protocol::faucet::sysdata",
+          name: "miden::standards::fungible_faucets::metadata",
+          type: "value",
+          item: "0x000000000000000000008a5d7845630106000000000000002141030000000000",
+          mapEntries: [],
+        },
+        {
+          name: "miden::standards::mint_policy_manager::allowed_policy_proc_roots",
+          type: "map",
+          item: "0x5ec52927ccafaa5d8023e7049cec6bebf981d451a33dd07de3d437cc831b575c",
+          mapEntries: [
+            {
+              key: "0xbc05c4459b303d098f0d1dcafa41ec505e0022cf6c8dbc651672035d533b70b7",
+              value:
+                "0x0100000000000000000000000000000000000000000000000000000000000000",
+            },
+          ],
+        },
+        {
+          name: "miden::standards::auth::singlesig::scheme",
+          type: "value",
+          item: "0x0200000000000000000000000000000000000000000000000000000000000000",
+          mapEntries: [],
+        },
+        {
+          name: "miden::standards::mint_policy_manager::active_policy_proc_root",
+          type: "value",
+          item: "0xbc05c4459b303d098f0d1dcafa41ec505e0022cf6c8dbc651672035d533b70b7",
+          mapEntries: [],
+        },
+        {
+          name: "miden::standards::mint_policy_manager::policy_authority",
           type: "value",
           item: "0x0000000000000000000000000000000000000000000000000000000000000000",
           mapEntries: [],
         },
         {
-          name: "miden::standards::fungible_faucets::metadata",
+          name: "miden::standards::auth::singlesig::pub_key",
           type: "value",
-          item: "0x00008a5d78456301060000000000000021410300000000000000000000000000",
-          mapEntries: [],
-        },
-        {
-          name: "miden::standards::auth::falcon512_rpo::public_key",
-          type: "value",
-          item: "0x82bcb26c5fc86d4b785c2fec6a6ee9121f5be3c9a8dfd7a8b47afbfefedebeee",
+          item: "0x50edd20821d345803f111816c7eb747e3ad0835c8c0d19ea629c7506ef9cf64d",
           mapEntries: [],
         },
       ],

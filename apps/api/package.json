@@ -17,21 +17,21 @@
     "db:push": "pnpm drizzle-kit push"
   },
   "dependencies": {
-    "@dotenvx/dotenvx": "^1.61.0",
+    "@dotenvx/dotenvx": "^1.61.5",
     "archiver": "^7.0.1",
-    "dotenv": "^17.4.1",
+    "dotenv": "^17.4.2",
     "drizzle-orm": "1.0.0-beta.20",
     "lodash": "^4.18.1",
-    "next": "^16.2.3",
+    "next": "^16.2.4",
     "pg": "^8.20.0",
     "react": "^19.2.5",
     "smol-toml": "^1.6.1",
-    "uuid": "^13.0.0"
+    "uuid": "^14.0.0"
   },
   "devDependencies": {
     "@types/archiver": "^7.0.0",
     "@types/lodash": "^4.17.24",
-    "@types/node": "^25.5.2",
+    "@types/node": "^25.6.0",
     "@types/pg": "^8.20.0",
     "@types/react": "^19.2.14",
     "@workspace/eslint-config": "workspace:^",

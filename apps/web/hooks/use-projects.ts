@@ -1,11 +1,11 @@
 // import useGlobalContext from "@/components/global-context/hook";
-import useWebClient from "@/hooks/use-web-client";
+import { useExportStore } from "@miden-sdk/react";
 
 const useProjects = () => {
   // const { dispatch } = useGlobalContext();
-  const { client } = useWebClient();
+  const { exportStore } = useExportStore();
   const saveProject = async () => {
-    const storeDump = await client.exportStore();
+    const storeDump = await exportStore();
     console.log("STORE_DUMP");
     console.log(JSON.parse(storeDump));
     console.log(storeDump);

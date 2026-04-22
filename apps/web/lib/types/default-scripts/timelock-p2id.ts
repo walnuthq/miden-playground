@@ -1,5 +1,6 @@
 import { pick } from "lodash";
-import { type Script, defaultScript } from "@/lib/types/script";
+import type { Script } from "@/lib/types/script";
+import { defaultScript } from "@/lib/utils/script";
 import basicWallet from "@/lib/types/default-scripts/basic-wallet";
 
 export const rust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
@@ -19,8 +20,8 @@ impl P2idNote {
     pub fn run(self, _arg: Word, account: &mut Account) {
         let inputs = active_note::get_inputs();
 
-        let target_account_id_prefix = inputs[0];
-        let target_account_id_suffix = inputs[1];
+        let target_account_id_suffix = inputs[0];
+        let target_account_id_prefix = inputs[1];
 
         // get consuming account id
         let consuming_account_id = account.get_id();
@@ -41,6 +42,8 @@ impl P2idNote {
 export const masm = `use miden::protocol::active_account
 use miden::protocol::account_id
 use miden::protocol::active_note
+use miden::protocol::note
+use miden::protocol::output_note
 use miden::standards::wallets::basic->basic_wallet
 
 # ERRORS
@@ -49,6 +52,16 @@ use miden::standards::wallets::basic->basic_wallet
 const ERR_P2ID_UNEXPECTED_NUMBER_OF_STORAGE_ITEMS="P2ID note expects exactly 2 note storage items"
 
 const ERR_P2ID_TARGET_ACCT_MISMATCH="P2ID's target account address and transaction address do not match"
+
+# CONSTANTS
+# =================================================================================================
+
+const STORAGE_PTR = 0
+const TARGET_ACCOUNT_ID_SUFFIX_PTR = STORAGE_PTR
+const TARGET_ACCOUNT_ID_PREFIX_PTR = STORAGE_PTR + 1
+
+# PROCEDURES
+# =================================================================================================
 
 #! Pay-to-ID script: adds all assets from the note to the account, assuming ID of the account
 #! matches target account ID specified by the note storage.
@@ -68,21 +81,24 @@ const ERR_P2ID_TARGET_ACCT_MISMATCH="P2ID's target account address and transacti
 #! - The same non-fungible asset already exists in the account.
 #! - Adding a fungible asset would result in amount overflow, i.e., the total amount would be
 #!   greater than 2^63.
+@note_script
 pub proc main
     # store the note storage to memory starting at address 0
-    padw push.0 exec.active_note::get_storage
-    # => [num_storage_items, storage_ptr, EMPTY_WORD]
+    push.STORAGE_PTR exec.active_note::get_storage
+    # => [num_storage_items, storage_ptr]
 
     # make sure the number of storage items is 2
     eq.2 assert.err=ERR_P2ID_UNEXPECTED_NUMBER_OF_STORAGE_ITEMS
-    # => [storage_ptr, EMPTY_WORD]
+    # => [storage_ptr]
 
     # read the target account ID from the note storage
-    mem_loadw_be drop drop
-    # => [target_account_id_prefix, target_account_id_suffix]
+    drop
+    mem_load.TARGET_ACCOUNT_ID_PREFIX_PTR
+    mem_load.TARGET_ACCOUNT_ID_SUFFIX_PTR
+    # => [target_account_id_suffix, target_account_id_prefix]
 
     exec.active_account::get_id
-    # => [account_id_prefix, account_id_suffix, target_account_id_prefix, target_account_id_suffix, ...]
+    # => [account_id_suffix, account_id_prefix, target_account_id_suffix, target_account_id_prefix]
 
     # ensure account_id = target_account_id, fails otherwise
     exec.account_id::is_equal assert.err=ERR_P2ID_TARGET_ACCT_MISMATCH
@@ -90,6 +106,55 @@ pub proc main
 
     exec.basic_wallet::add_assets_to_account
     # => []
+end
+
+#! Creates a new P2ID output note from the given inputs.
+#!
+#! This procedure handles:
+#! - Writing note storage to memory in the expected layout ([suffix, prefix] to match
+#!   existing P2ID storage format)
+#! - Obtaining the note script root via procref
+#! - Building the recipient and creating the note
+#!
+#! Inputs:  [target_id_suffix, target_id_prefix, tag, note_type, SERIAL_NUM]
+#! Outputs: [note_idx]
+#!
+#! Where:
+#! - target_id_suffix is the suffix felt of the target account ID.
+#! - target_id_prefix is the prefix felt of the target account ID.
+#! - tag is the note tag to be included in the note.
+#! - note_type is the storage type of the note (1 = public, 2 = private).
+#! - SERIAL_NUM is the serial number of the note (4 elements).
+#! - note_idx is the index of the created note.
+#!
+#! Invocation: exec
+@locals(2)
+pub proc new
+    # => [target_id_suffix, target_id_prefix, tag, note_type, SERIAL_NUM]
+
+    loc_store.TARGET_ACCOUNT_ID_SUFFIX_PTR loc_store.TARGET_ACCOUNT_ID_PREFIX_PTR
+    # => [tag, note_type, SERIAL_NUM]
+
+    movdn.5 movdn.5
+    # => [SERIAL_NUM, tag, note_type]
+
+    procref.main
+    # => [SCRIPT_ROOT, SERIAL_NUM, tag, note_type]
+
+    swapw
+    # => [SERIAL_NUM, SCRIPT_ROOT, tag, note_type]
+
+    push.2 locaddr.STORAGE_PTR
+    # => [storage_ptr, num_storage_items=2, SERIAL_NUM, SCRIPT_ROOT, tag, note_type]
+
+    exec.note::build_recipient
+    # => [RECIPIENT, tag, note_type]
+
+    movup.5 movup.5
+    # => [tag, note_type, RECIPIENT]
+
+    exec.output_note::create
+    # => [note_idx]
 end
 `;
 

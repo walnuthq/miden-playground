@@ -1,8 +1,5 @@
-import {
-  type Script,
-  defaultProcedureExport,
-  defaultScript,
-} from "@/lib/types/script";
+import type { Script } from "@/lib/types/script";
+import { defaultProcedureExport, defaultScript } from "@/lib/utils/script";
 
 export const rust = ``;
 

@@ -1,5 +1,3 @@
-import { snakeCase } from "lodash";
-
 export const componentTypes = {
   account: "Account Component",
   "authentication-component": "Authentication Component",
@@ -17,20 +15,6 @@ export type StorageSlot = {
   value: string;
 };
 
-export const defaultStorageSlot = (): StorageSlot => ({
-  name: "",
-  type: "value",
-  value: "0",
-});
-
-export const storageSlotName = ({
-  packageName,
-  fieldName,
-}: {
-  packageName: string;
-  fieldName: string;
-}) => `miden::component::miden_${snakeCase(packageName)}::${fieldName}`;
-
 export type Component = {
   id: string;
   name: string;
@@ -39,26 +23,3 @@ export type Component = {
   storageSlots: StorageSlot[];
   updatedAt: number;
 };
-
-export const defaultComponent = (): Component => ({
-  id: "",
-  name: "",
-  type: "account",
-  scriptId: "",
-  storageSlots: [],
-  updatedAt: 0,
-});
-
-export const stringToKeyValues = (value: string) => {
-  if (value === "") {
-    return [];
-  }
-  const keyValuePairs = value.split(",");
-  return keyValuePairs.map((pair) => {
-    const [key = "", value = ""] = pair.split(":");
-    return { key, value };
-  });
-};
-
-export const keyValuesToString = (value: { key: string; value: string }[]) =>
-  value.map(({ key, value }) => `${key}:${value}`).join(",");

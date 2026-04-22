@@ -1,9 +1,8 @@
-import { type FungibleAsset } from "@/lib/types/asset";
+import type { FungibleAsset } from "@/lib/types/asset";
 
 export const noteTypes = {
   public: "Public",
   private: "Private",
-  encrypted: "Encrypted",
 } as const;
 
 export type NoteType = keyof typeof noteTypes;
@@ -32,25 +31,7 @@ export type InputNote = {
   scriptRoot: string;
   scriptId: string;
   fungibleAssets: FungibleAsset[];
-  inputs: string[];
+  storage: string[];
   nullifier: string;
   updatedAt: number;
 };
-
-export const defaultInputNote = (): InputNote => ({
-  id: "",
-  type: "public",
-  state: "committed",
-  tag: "",
-  serialNum: "",
-  senderId: "",
-  scriptRoot: "",
-  scriptId: "",
-  fungibleAssets: [],
-  inputs: [],
-  nullifier: "",
-  updatedAt: 0,
-});
-
-export const noteConsumed = ({ state }: InputNote) =>
-  state.includes("consumed");

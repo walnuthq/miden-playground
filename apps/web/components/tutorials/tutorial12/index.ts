@@ -1,5 +1,6 @@
-import { defaultTutorial, type Tutorial } from "@/lib/types/tutorial";
-import state from "@/components/tutorials/tutorial12/state";
+import type { Tutorial } from "@/lib/types/tutorial";
+import { defaultTutorial } from "@/lib/utils/tutorial";
+import { defaultState } from "@/lib/utils/state";
 import Step1 from "@/components/tutorials/tutorial12/step1";
 import Step2 from "@/components/tutorials/tutorial12/step2";
 import Step3 from "@/components/tutorials/tutorial12/step3";
@@ -18,7 +19,10 @@ const tutorial: Tutorial = {
     "This tutorial teaches you how to backup your private wallet state using Miden Guardian, a system that allows a device, or a group of devices, to backup and sync their state securely without trust assumptions about the server operator.",
   category: "advanced",
   initialRoute: "/accounts",
-  state,
+  state: {
+    ...defaultState(),
+    tutorialId: "wallet-backup-using-miden-guardian",
+  },
   steps: [Step1, Step2, Step3, Step4, Step5, Step6, Step7],
 };
 

@@ -14,7 +14,7 @@ import {
 import { Label } from "@workspace/ui/components/label";
 import { Input } from "@workspace/ui/components/input";
 import useNotes from "@/hooks/use-notes";
-import { readFileAsArrayBuffer } from "@/lib/utils";
+import { readFileAsArrayBuffer } from "@/lib/utils/script";
 
 const ImportNoteDialog = () => {
   const { importNoteDialogOpen, closeImportNoteDialog, importNoteFromFile } =

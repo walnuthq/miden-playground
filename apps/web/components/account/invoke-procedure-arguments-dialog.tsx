@@ -1,6 +1,7 @@
 "use client";
 import { Fragment, useState, type Dispatch, type SetStateAction } from "react";
 import { toast } from "sonner";
+import { AccountId as WasmAccountId } from "@miden-sdk/miden-sdk";
 import { Spinner } from "@workspace/ui/components/spinner";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
@@ -16,12 +17,13 @@ import {
 import { Label } from "@workspace/ui/components/label";
 import useAccounts from "@/hooks/use-accounts";
 import useScripts from "@/hooks/use-scripts";
+import useTransactions from "@/hooks/use-transactions";
 import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";
-import useMidenSdk from "@/hooks/use-miden-sdk";
-import { MIDEN_EXPLORER_URL } from "@/lib/constants";
-import { formatProcedureExportPath, formatAmount } from "@/lib/utils";
-import { type ProcedureExport, type MidenType } from "@/lib/types/script";
-import { getMapItem } from "@/lib/types/account";
+import { midenExplorerUrl } from "@/lib/constants";
+import { formatAmount } from "@/lib/utils/asset";
+import type { ProcedureExport, MidenType } from "@/lib/types/script";
+import { formatProcedureExportPath } from "@/lib/utils/script";
+import useNetwork from "@/hooks/use-network";
 
 const FeltField = ({ id }: { id: string }) => (
   <div className="grid gap-3 col-span-2">
@@ -141,11 +143,8 @@ const getParamsWithNames = (
 };
 
 const InvokeProcedureArgumentsDialog = () => {
-  const {
-    midenSdk: { AccountId, Word },
-  } = useMidenSdk();
-  // const { readWord } = useTransactions();
-  const { accounts } = useAccounts();
+  const { readWord } = useTransactions();
+  const { networkId } = useNetwork();
   const {
     invokeProcedureArgumentsDialogOpen,
     invokeProcedureArgumentsDialogSenderAccountId: senderAccountId,
@@ -193,7 +192,7 @@ const InvokeProcedureArgumentsDialog = () => {
             const procedureInputs = paramsWithNames.map(({ name, type }) => {
               switch (type) {
                 case "AccountId": {
-                  const wasmAccountId = AccountId.fromHex(accountId);
+                  const wasmAccountId = WasmAccountId.fromHex(accountId);
                   return {
                     name,
                     type,
@@ -204,7 +203,7 @@ const InvokeProcedureArgumentsDialog = () => {
                   };
                 }
                 case "FaucetId": {
-                  const wasmAccountId = AccountId.fromHex(faucetId);
+                  const wasmAccountId = WasmAccountId.fromHex(faucetId);
                   return {
                     name,
                     type,
@@ -215,7 +214,7 @@ const InvokeProcedureArgumentsDialog = () => {
                   };
                 }
                 case "Asset": {
-                  const wasmAccountId = AccountId.fromHex(faucetId);
+                  const wasmAccountId = WasmAccountId.fromHex(faucetId);
                   return {
                     name,
                     type,
@@ -236,37 +235,30 @@ const InvokeProcedureArgumentsDialog = () => {
               }
             });
             if (procedureExport.readOnly) {
-              // const word = await readWord({
-              //   accountId: senderAccountId,
-              //   procedureExport,
-              //   procedureInputs,
-              // });
-              // console.log("word", word.toHex());
-              const senderAccount = accounts.find(
-                ({ id }) => id === senderAccountId,
-              );
-              if (
-                formatProcedureExportPath(procedureExport.path) ===
-                "get-balance"
-              ) {
-                const wasmAccountId = AccountId.fromHex(accountId);
-                const wasmFaucetId = AccountId.fromHex(faucetId);
-                const balance = getMapItem(
-                  senderAccount?.storage.find(
-                    ({ name }) =>
-                      name === "miden::component::miden_bank_account::balances",
-                  ),
-                  Word.newFromFelts([
-                    wasmAccountId.prefix(),
-                    wasmAccountId.suffix(),
-                    wasmFaucetId.prefix(),
-                    wasmFaucetId.suffix(),
-                  ]).toHex(),
-                );
-                const [, , , felt = 0n] = Word.fromHex(balance).toU64s();
+              try {
+                const word = await readWord({
+                  accountId: senderAccountId,
+                  script,
+                  procedureExport,
+                  procedureInputs,
+                });
+                if (procedureExport.signature.results.length === 1) {
+                  const [felt = 0n] = word.toU64s();
+                  setReadOnlyProcedureResult({
+                    digest: procedureExport.digest,
+                    result: felt.toString(),
+                  });
+                } else if (procedureExport.signature.results.length === 4) {
+                  setReadOnlyProcedureResult({
+                    digest: procedureExport.digest,
+                    result: word.toHex(),
+                  });
+                }
+              } catch (error) {
+                console.error(error);
                 setReadOnlyProcedureResult({
                   digest: procedureExport.digest,
-                  result: felt.toString(),
+                  result: "ERROR",
                 });
               }
               onClose();
@@ -284,7 +276,7 @@ const InvokeProcedureArgumentsDialog = () => {
                     label: "View on MidenScan",
                     onClick: () =>
                       window.open(
-                        `${MIDEN_EXPLORER_URL}/tx/${transactionRecord.id().toHex()}`,
+                        `${midenExplorerUrl(networkId)}/tx/${transactionRecord.id().toHex()}`,
                         "_blank",
                         "noreferrer",
                       ),

@@ -14,14 +14,10 @@ import { type TransactionNote } from "@/lib/types/transaction";
 import AccountAddress from "@/components/lib/account-address";
 import useAccounts from "@/hooks/use-accounts";
 import useScripts from "@/hooks/use-scripts";
-import { formatAmount } from "@/lib/utils";
-import useMidenSdk from "@/hooks/use-miden-sdk";
-import useGlobalContext from "@/components/global-context/hook";
-import { accountIdToAddress } from "@/lib/web-client";
+import { formatAmount } from "@/lib/utils/asset";
+import { normalizeAccountId } from "@miden-sdk/react";
 
 const TransactionNoteTable = ({ notes }: { notes: TransactionNote[] }) => {
-  const { midenSdk } = useMidenSdk();
-  const { networkId } = useGlobalContext();
   const { accounts, faucets } = useAccounts();
   const { scripts } = useScripts();
   return (
@@ -42,11 +38,7 @@ const TransactionNoteTable = ({ notes }: { notes: TransactionNote[] }) => {
               ({ digest }) => digest === note.scriptRoot,
             );
             const sender = accounts.find(({ id }) => id === note.senderId);
-            const senderAddress = accountIdToAddress({
-              accountId: note.senderId,
-              networkId,
-              midenSdk,
-            });
+            const senderAddress = normalizeAccountId(note.senderId);
             return (
               <TableRow key={note.id}>
                 <TableCell>

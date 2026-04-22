@@ -1,11 +1,12 @@
-import {
-  type Script,
-  type ScriptExample,
-  type CompiledPackage,
-  type ScriptType,
-  type PackageSource,
+import type {
+  Script,
+  ScriptExample,
+  CompiledPackage,
+  ScriptType,
+  PackageSource,
 } from "@/lib/types/script";
-import { formatProcedureExportPath, isValidUUIDv4 } from "@/lib/utils";
+import { formatProcedureExportPath } from "@/lib/utils/script";
+import { isValidUUIDv4 } from "@/lib/utils";
 import { API_URL } from "@/lib/constants";
 
 export const createScript = async ({

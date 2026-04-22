@@ -1,8 +1,8 @@
 import { type InputNote } from "@/lib/types/note";
-import { accountIdFromPrefixSuffix } from "@/lib/types/account";
+import { accountIdFromPrefixSuffix } from "@/lib/utils/account";
 import NoteInformationTable from "@/components/note/note-information-table";
 import NoteInputsTable from "@/components/note/note-inputs-table";
-import DecodedNoteInputsTable from "@/components/note/decoded-note-inputs-table";
+import DecodedNoteStorageTable from "@/components/note/decoded-note-storage-table";
 import AccountAddress from "@/components/lib/account-address";
 import FungibleAssetsTable from "@/components/lib/fungible-assets-table";
 import useScripts from "@/hooks/use-scripts";
@@ -47,34 +47,34 @@ const NoteInformation = ({
         <div className="flex items-center">
           <div>
             <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
-              Raw Note Inputs
+              Raw Note Storage
             </h4>
             {inputNote.fungibleAssets.length === 0 && (
               <p className="text-muted-foreground text-sm">
-                This note has no inputs.
+                This note has no storage.
               </p>
             )}
           </div>
         </div>
-        {inputNote.inputs.length > 0 && (
-          <NoteInputsTable inputs={inputNote.inputs} />
+        {inputNote.storage.length > 0 && (
+          <NoteInputsTable inputs={inputNote.storage} />
         )}
       </div>
-      {/* TODO: better decoded note inputs using inputNote.scriptId */}
+      {/* TODO: better decoded note storage using inputNote.scriptId */}
       {script?.id === "p2id" && (
         <div className="flex flex-col gap-2">
           <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
-            Decoded Note Inputs
+            Decoded Note Storage
           </h4>
-          <DecodedNoteInputsTable
+          <DecodedNoteStorageTable
             inputs={[
               {
                 key: "Target Account ID",
                 value: (
                   <AccountAddress
                     id={accountIdFromPrefixSuffix(
-                      inputNote.inputs[1]!,
-                      inputNote.inputs[0]!,
+                      inputNote.storage[1]!,
+                      inputNote.storage[0]!,
                     )}
                   />
                 ),

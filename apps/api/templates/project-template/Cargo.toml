@@ -9,7 +9,7 @@ edition = "2024"
 crate-type = ["cdylib"]
 
 [dependencies]
-miden = { version = "0.10" }
+miden = { version = "0.12" }
 
 [package.metadata.component]
 package = "miden:counter-account"

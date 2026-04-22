@@ -1,5 +1,5 @@
-import { type FungibleAsset } from "@/lib/types/asset";
-import { type NoteType } from "@/lib/types/note";
+import type { FungibleAsset } from "@/lib/types/asset";
+import type { NoteType } from "@/lib/types/note";
 
 export const transactionTypes = {
   mint: "Mint",
@@ -18,7 +18,7 @@ export type TransactionNote = {
   scriptRoot: string;
   senderId: string;
   fungibleAssets: FungibleAsset[];
-  inputs: string[];
+  storage: string[];
 };
 
 export type Transaction = {

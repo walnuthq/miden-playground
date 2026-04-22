@@ -1,7 +1,3 @@
-import { parse } from "smol-toml";
-import { formatProcedureExportPath } from "@/lib/utils";
-import { EMPTY_WORD } from "../constants";
-
 export const scriptTypes = {
   library: "Library",
   account: "Account Component",
@@ -41,13 +37,11 @@ export type MidenInput = {
   value: string;
 };
 
-type Signature = { abi: number; params: MidenType[]; results: MidenType[] };
-
-export const defaultSignature = (): Signature => ({
-  abi: 3,
-  params: [],
-  results: [],
-});
+export type Signature = {
+  abi: number;
+  params: MidenType[];
+  results: MidenType[];
+};
 
 export type ProcedureExport = {
   path: string;
@@ -58,13 +52,6 @@ export type ProcedureExport = {
 };
 
 export type Export = { Procedure: ProcedureExport };
-
-export const defaultProcedureExport = (): ProcedureExport => ({
-  path: "",
-  digest: EMPTY_WORD,
-  signature: defaultSignature(),
-  attributes: { attrs: [] },
-});
 
 export type Dependency = {
   id: string;
@@ -77,20 +64,15 @@ export const baseDependency: Dependency = {
   id: "base",
   name: "base",
   type: "library",
-  digest: "0x389cc47c54704ed5d03183bcdc0819010501a1cab9f07a421432fc5c2a2e77ef",
+  digest: "0xfdb2ca9bbbf77002ea29ed266fed210f7a75dca0d6939ad015f6925a027ad650",
 };
 
 export const stdDependency: Dependency = {
   id: "std",
   name: "std",
   type: "library",
-  digest: "0x2eaedee678906c235e33a89a64d16ea71b951a444463e9bcf8675ab1fe6210c0",
+  digest: "0xe5b1988c03ba3b190595c78d20f3b0fdf105048ad3edc7498cacf8676b4d9434",
 };
-
-export const defaultDependencies = (): Dependency[] => [
-  baseDependency,
-  stdDependency,
-];
 
 export type PackageSource = { cargoToml: string; rust: string };
 
@@ -108,86 +90,24 @@ export type Script = {
   exports: Export[];
   procedureExports: ProcedureExport[];
   dependencies: Dependency[];
-  // inputs: MidenInput[];
   createdAt: number;
   updatedAt: number;
 };
-
-export const defaultScript = (): Script => ({
-  id: "",
-  name: "",
-  type: "account",
-  status: "draft",
-  readOnly: false,
-  rust: "",
-  masm: "",
-  error: "",
-  digest: "",
-  masp: "",
-  exports: [],
-  procedureExports: [],
-  dependencies: [],
-  // inputs: [],
-  createdAt: Date.now(),
-  updatedAt: Date.now(),
-});
 
 export type CompiledPackage = Pick<
   Script,
   | "id"
   | "name"
   | "type"
+  | "status"
   | "masm"
   | "rust"
-  | "dependencies"
-  | "error"
-  | "masm"
   | "digest"
   | "masp"
   | "exports"
+  | "error"
+  | "dependencies"
 >;
-
-export const formatProcedureInputs = (inputs: MidenInput[]) =>
-  inputs
-    .toReversed()
-    .map((arg) => {
-      switch (arg.type) {
-        case "Felt":
-        case "Word": {
-          return `push.${arg.value}`;
-        }
-        case "AccountId":
-        case "FaucetId": {
-          const { prefix, suffix } = JSON.parse(arg.value ?? "") as {
-            prefix: string;
-            suffix: string;
-          };
-          return `push.${suffix}\npush.${prefix}`;
-        }
-        default: {
-          return "";
-        }
-      }
-    })
-    .join("\n");
-
-export const invokeProcedureCustomTransactionScript = ({
-  contractName,
-  procedureExport,
-  procedureInputs,
-}: {
-  contractName?: string;
-  procedureExport: ProcedureExport;
-  procedureInputs: MidenInput[];
-}) => `${contractName ? `use external_contract::${contractName}` : ""}
-use miden::core::sys
-
-begin
-    ${formatProcedureInputs(procedureInputs)}
-    call.${contractName ? `${contractName}::${procedureExport.path}` : procedureExport.digest}
-    exec.sys::truncate_stack
-end
-`;
 
 export type CargoToml = {
   package: {
@@ -208,22 +128,3 @@ export type CargoToml = {
     };
   };
 };
-
-export const parseCargoToml = (cargoToml: string) =>
-  parse(cargoToml) as CargoToml;
-
-export const compiledPackageToScript = (
-  compiledPackage: CompiledPackage,
-): Script => ({
-  ...defaultScript(),
-  ...compiledPackage,
-  procedureExports: compiledPackage.error
-    ? []
-    : compiledPackage.exports.map((manifestExport) => ({
-        ...defaultProcedureExport(),
-        ...manifestExport.Procedure,
-        readOnly: formatProcedureExportPath(
-          manifestExport.Procedure.path,
-        ).startsWith("get"),
-      })),
-});

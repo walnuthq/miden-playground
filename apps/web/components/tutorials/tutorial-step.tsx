@@ -1,6 +1,7 @@
 import { X } from "lucide-react";
 import useTutorials from "@/hooks/use-tutorials";
-import { type Tutorial, defaultTutorialStep } from "@/lib/types/tutorial";
+import type { Tutorial } from "@/lib/types/tutorial";
+import { defaultTutorialStep } from "@/lib/utils/tutorial";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import TutorialProgress from "@/components/tutorials/tutorial-progress";
@@ -8,13 +9,13 @@ import { useIsMobile } from "@workspace/ui/hooks/use-mobile";
 import MobileAlert from "@/components/tutorials/mobile-alert";
 import { cn } from "@workspace/ui/lib/utils";
 import DefaultNextStepButton from "@/components/tutorials/next-step-button";
-import useGlobalContext from "@/components/global-context/hook";
 import MockChainAlert from "@/components/tutorials/mockchain-alert";
 import MidenWalletAlert from "@/components/tutorials/miden-wallet-alert";
+import useNetwork from "@/hooks/use-network";
 
 const TutorialStep = ({ tutorial }: { tutorial: Tutorial }) => {
   const isMobile = useIsMobile();
-  const { networkId } = useGlobalContext();
+  const { networkId } = useNetwork();
   const { tutorialStep, tutorialOpen, previousTutorialStep, closeTutorial } =
     useTutorials();
   const step = tutorial.steps[tutorialStep] ?? defaultTutorialStep();
@@ -55,7 +56,7 @@ const TutorialStep = ({ tutorial }: { tutorial: Tutorial }) => {
         {isMobile && tutorialStep === 0 && <MobileAlert />}
         <step.Content />
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 pt-4">
         {tutorialStep > 0 && (
           <Button
             className="grow"

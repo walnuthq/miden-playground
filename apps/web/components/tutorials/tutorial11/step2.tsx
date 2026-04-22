@@ -6,7 +6,7 @@ import useScripts from "@/hooks/use-scripts";
 import { defaultScriptIds } from "@/lib/types/default-scripts";
 import useComponents from "@/hooks/use-components";
 import useTutorials from "@/hooks/use-tutorials";
-import { storageSlotName } from "@/lib/types/component";
+import { storageSlotName } from "@/lib/utils/component";
 
 const useCompleted = () => {
   const { scripts } = useScripts();
@@ -17,7 +17,7 @@ const useCompleted = () => {
   const resetCountProcedure = procedureExports.find(
     ({ digest }) =>
       digest ===
-      "0x6cd21d60fbe1a0677d1a0df7fc5c06e26c6e20a522368b9577ec333c9f5873e7",
+      "0x7d16f4f4c909a3d0d58d0263873e5f2307e60f5d218afeff8af92481945ce36b",
   );
   return script?.status === "compiled" && !!resetCountProcedure;
 };
@@ -67,6 +67,7 @@ const Step2: TutorialStep = {
                 {
                   name: storageSlotName({
                     packageName: script?.name ?? "",
+                    componentStruct: "CounterContract",
                     fieldName: "count_map",
                   }),
                   type: "map",

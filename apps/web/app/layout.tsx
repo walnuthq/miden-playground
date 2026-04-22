@@ -3,7 +3,7 @@ import { type ReactNode } from "react";
 // import "@getpara/react-sdk/styles.css";
 import "@miden-sdk/miden-wallet-adapter/styles.css";
 import "@workspace/ui/globals.css";
-import ProvidersNoSsr from "@/components/providers-no-ssr";
+import Providers from "@/components/providers";
 import { Toaster } from "@workspace/ui/components/sonner";
 
 const fontSans = Geist({
@@ -26,10 +26,10 @@ const RootLayout = ({
       className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased`}
     >
       <div className="root">
-        <ProvidersNoSsr>
+        <Providers>
           {children}
           <Toaster richColors />
-        </ProvidersNoSsr>
+        </Providers>
       </div>
     </body>
   </html>

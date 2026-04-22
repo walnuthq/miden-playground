@@ -5,9 +5,9 @@ edition = "2024"
 
 [dependencies]
 anyhow = "1.0"
-base64 = "0.22.1"
-miden-client = { version = "0.13", features = ["tonic", "testing"] }
-miden-client-sqlite-store = { version = "0.13", package = "miden-client-sqlite-store" }
-miden-standards = { version = "0.13" }
-tokio = { version = "1.40", features = ["rt-multi-thread", "net", "macros", "fs"] }
+base64 = "0.22"
+miden-client = { version = "0.14", features = ["tonic", "testing"] }
+miden-client-sqlite-store = { version = "0.14", package = "miden-client-sqlite-store" }
+miden-standards = { version = "0.14" }
+tokio = { version = "1.51", features = ["rt-multi-thread", "net", "macros", "fs"] }
 rand = { version = "0.9" }

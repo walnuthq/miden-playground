@@ -39,22 +39,15 @@ import useComponents from "@/hooks/use-components";
 import { defaultScriptIds } from "@/lib/types/default-scripts";
 import { defaultComponentIds } from "@/lib/types/default-components";
 import useTutorials from "@/hooks/use-tutorials";
-import { MIDEN_FAUCET_ADDRESS } from "@/lib/constants";
-import useGlobalContext from "@/components/global-context/hook";
-import useWebClient from "@/hooks/use-web-client";
+import useNetwork from "@/hooks/use-network";
+import { useMiden } from "@miden-sdk/react";
 
 const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
   const isClient = useIsClient();
-  const { networkId, initializingWebClient } = useGlobalContext();
-  const { client } = useWebClient();
-  const { tutorialId } = useTutorials();
-  const {
-    accounts,
-    faucets,
-    connectedWallet,
-    importConnectedWallet,
-    importAccountByAddress,
-  } = useAccounts();
+  const { networkId } = useNetwork();
+  const { client } = useMiden();
+  const { isTutorial } = useTutorials();
+  const { accounts, connectedWallet, importConnectedWallet } = useAccounts();
   const { transactions } = useTransactions();
   const { inputNotes } = useNotes();
   const { scripts } = useScripts();
@@ -159,34 +152,10 @@ const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
   ];
   // TODO refactor using onConnect callback?
   useEffect(() => {
-    if (
-      client &&
-      !initializingWebClient &&
-      networkId !== "mmck" &&
-      !connectedWallet
-    ) {
+    if (client && !isTutorial && networkId !== "mmck" && !connectedWallet) {
       importConnectedWallet();
     }
-  }, [
-    client,
-    initializingWebClient,
-    networkId,
-    connectedWallet,
-    tutorialId,
-    importConnectedWallet,
-  ]);
-  // automatically import Miden Faucet on testnet
-  useEffect(() => {
-    const midenFaucet = faucets.find(
-      ({ address }) => address === MIDEN_FAUCET_ADDRESS,
-    );
-    if (client && networkId === "mtst" && !midenFaucet) {
-      importAccountByAddress({
-        name: "Miden Faucet",
-        address: MIDEN_FAUCET_ADDRESS,
-      });
-    }
-  }, [client, networkId, faucets, tutorialId, importAccountByAddress]);
+  }, [client, isTutorial, networkId, connectedWallet, importConnectedWallet]);
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>

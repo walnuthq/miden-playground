@@ -21,7 +21,7 @@ import {
   FUNGIBLE_FAUCET_DEFAULT_DECIMALS,
   FUNGIBLE_FAUCET_DEFAULT_MAX_SUPPLY,
 } from "@/lib/constants";
-import { parseAmount, formatAmount } from "@/lib/utils";
+import { parseAmount, formatAmount } from "@/lib/utils/asset";
 
 const CreateFaucetDialog = () => {
   const {

@@ -19,10 +19,10 @@ import useComponents from "@/hooks/use-components";
 
 const StorageSlotActionsCell = ({
   component,
-  storageSlotIndex,
+  storageSlotName,
 }: {
   component: Component;
-  storageSlotIndex: number;
+  storageSlotName: string;
 }) => {
   const { openUpsertStorageSlotDialog, updateComponent } = useComponents();
   return (
@@ -38,7 +38,7 @@ const StorageSlotActionsCell = ({
           onClick={() =>
             openUpsertStorageSlotDialog({
               componentId: component.id,
-              storageSlotIndex,
+              storageSlotName,
             })
           }
         >
@@ -46,6 +46,9 @@ const StorageSlotActionsCell = ({
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => {
+            const storageSlotIndex = component.storageSlots.findIndex(
+              ({ name }) => name === storageSlotName,
+            );
             updateComponent({
               ...component,
               storageSlots: [
@@ -71,7 +74,6 @@ const ComponentStorageSlotsTable = ({
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Index</TableHead>
           <TableHead>Name</TableHead>
           <TableHead>Type</TableHead>
           <TableHead>Default Value</TableHead>
@@ -79,16 +81,15 @@ const ComponentStorageSlotsTable = ({
         </TableRow>
       </TableHeader>
       <TableBody>
-        {component.storageSlots.map((storageSlot, index) => (
-          <TableRow key={index}>
-            <TableCell>{index}</TableCell>
+        {component.storageSlots.map((storageSlot) => (
+          <TableRow key={storageSlot.name}>
             <TableCell>{storageSlot.name}</TableCell>
             <TableCell>{storageSlotTypes[storageSlot.type]}</TableCell>
             <TableCell>{storageSlot.value}</TableCell>
             <TableCell>
               <StorageSlotActionsCell
                 component={component}
-                storageSlotIndex={index}
+                storageSlotName={storageSlot.name}
               />
             </TableCell>
           </TableRow>

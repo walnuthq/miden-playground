@@ -1,4 +1,5 @@
-import { type State, defaultState } from "@/lib/types/state";
+import type { State } from "@/lib/types/state";
+import { defaultState } from "@/lib/utils/state";
 import defaultScripts from "@/lib/types/default-scripts";
 import counterContractScript from "@/lib/types/default-scripts/counter-contract";
 import counterNoteScript from "@/lib/types/default-scripts/counter-note";
@@ -7,7 +8,6 @@ import counterContractComponent from "@/lib/types/default-components/counter-con
 
 const state: State = {
   ...defaultState(),
-  networkId: "mtst",
   scripts: [
     ...defaultScripts,
     { ...counterContractScript, id: "counter-value-contract" },

@@ -1,5 +1,6 @@
-import { defaultTutorial, type Tutorial } from "@/lib/types/tutorial";
-import state from "@/components/tutorials/tutorial11/state";
+import type { Tutorial } from "@/lib/types/tutorial";
+import { defaultTutorial } from "@/lib/utils/tutorial";
+import { defaultState } from "@/lib/utils/state";
 import Step1 from "@/components/tutorials/tutorial11/step1";
 import Step2 from "@/components/tutorials/tutorial11/step2";
 import Step3 from "@/components/tutorials/tutorial11/step3";
@@ -18,7 +19,10 @@ const tutorial: Tutorial = {
     "In this tutorial we learn how to develop custom Miden contracts, deploy them on-chain, and verify them using the Miden playground.",
   category: "advanced",
   initialRoute: "/scripts",
-  state,
+  state: {
+    ...defaultState(),
+    tutorialId: "contract-verification",
+  },
   steps: [Step1, Step2, Step3, Step4, Step5, Step6, Step7],
 };
 

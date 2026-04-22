@@ -27,7 +27,7 @@ import { noteTypes, type NoteType } from "@/lib/types/note";
 import SelectAccountCombobox from "@/components/transactions/select-account-combobox";
 import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";
 import useAccounts from "@/hooks/use-accounts";
-import { parseAmount, formatAmount } from "@/lib/utils";
+import { parseAmount, formatAmount } from "@/lib/utils/asset";
 import { defaultScriptIds } from "@/lib/types/default-scripts";
 
 const CreateNoteDialog = () => {
@@ -40,7 +40,7 @@ const CreateNoteDialog = () => {
   const [noteType, setNoteType] = useState<NoteType>("public");
   const [hasAssets, setHasAssets] = useState(false);
   const [faucetAccountId, setFaucetAccountId] = useState("");
-  const [noteInputs, setNoteInputs] = useState<string[]>([]);
+  const [noteStorage, setNoteStorage] = useState<string[]>([]);
   const shownScripts = scripts.filter(
     ({ id, type }) => !defaultScriptIds.includes(id) && type === "note-script",
   );
@@ -49,7 +49,7 @@ const CreateNoteDialog = () => {
     setScriptId("");
     setNoteType("public");
     setFaucetAccountId("");
-    setNoteInputs([]);
+    setNoteStorage([]);
     closeCreateNoteDialog();
   };
   const faucetAccount = faucets.find(({ id }) => id === faucetAccountId);
@@ -87,7 +87,7 @@ const CreateNoteDialog = () => {
               type: noteType,
               faucetAccountId: hasAssets ? faucetAccountId : "",
               amount,
-              noteInputs,
+              noteStorage,
             });
             setLoading(false);
             onClose();
@@ -174,21 +174,21 @@ const CreateNoteDialog = () => {
               </Button>
             </div>
             <div className="grid gap-3 col-span-2">
-              <Label htmlFor="inputs">Note inputs</Label>
-              {noteInputs.map((noteInput, index) => (
+              <Label htmlFor="inputs">Note storage</Label>
+              {noteStorage.map((noteStorageItem, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <Input
-                    id={`input-${index}`}
-                    name={`input-${index}`}
-                    placeholder={`Note input #${index}`}
+                    id={`storage-${index}`}
+                    name={`storage-${index}`}
+                    placeholder={`Note storage #${index}`}
                     type="number"
                     min="0"
-                    value={noteInput}
+                    value={noteStorageItem}
                     onChange={(event) =>
-                      setNoteInputs([
-                        ...noteInputs.slice(0, index),
+                      setNoteStorage([
+                        ...noteStorage.slice(0, index),
                         event.target.value,
-                        ...noteInputs.slice(index + 1),
+                        ...noteStorage.slice(index + 1),
                       ])
                     }
                     required
@@ -199,9 +199,9 @@ const CreateNoteDialog = () => {
                     size="icon"
                     className="size-8"
                     onClick={() =>
-                      setNoteInputs([
-                        ...noteInputs.slice(0, index),
-                        ...noteInputs.slice(index + 1),
+                      setNoteStorage([
+                        ...noteStorage.slice(0, index),
+                        ...noteStorage.slice(index + 1),
                       ])
                     }
                   >
@@ -212,9 +212,9 @@ const CreateNoteDialog = () => {
               <Button
                 type="button"
                 variant="secondary"
-                onClick={() => setNoteInputs([...noteInputs, ""])}
+                onClick={() => setNoteStorage([...noteStorage, ""])}
               >
-                Add note input
+                Add note storage
               </Button>
             </div>
           </div>

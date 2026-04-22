@@ -17,16 +17,16 @@ import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import useNotes from "@/hooks/use-notes";
 import { verifyNoteFromSource } from "@/lib/api";
-import { clientGetInputNote } from "@/lib/web-client";
-import useWebClient from "@/hooks/use-web-client";
-import { toBase64, fileListToPackageSources } from "@/lib/utils";
-import useGlobalContext from "@/components/global-context/hook";
-import { parseCargoToml, type PackageSource } from "@/lib/types/script";
+import { toBase64 } from "@/lib/utils";
+import type { PackageSource } from "@/lib/types/script";
+import { parseCargoToml, fileListToPackageSources } from "@/lib/utils/script";
+import useNetwork from "@/hooks/use-network";
+import { useMiden } from "@miden-sdk/react";
 
 const VerifyNoteScriptDialog = () => {
   const queryClient = useQueryClient();
-  const { client } = useWebClient();
-  const { networkId } = useGlobalContext();
+  const { client } = useMiden();
+  const { networkId } = useNetwork();
   const {
     verifyNoteScriptDialogOpen,
     verifyNoteScriptDialogNoteId: noteId,
@@ -61,8 +61,11 @@ const VerifyNoteScriptDialog = () => {
           id="verify-note-script-form"
           onSubmit={async (event) => {
             event.preventDefault();
+            if (!client) {
+              throw new Error("MidenClient not ready");
+            }
             setLoading(true);
-            const record = await clientGetInputNote({ client, noteId });
+            const record = await client.getInputNote(noteId);
             if (!record || !packageSource) {
               return;
             }

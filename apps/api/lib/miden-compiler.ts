@@ -18,6 +18,13 @@ export const activeToolchainVersion = async () => {
   return `${major}.${minor}.${patch}`;
 };
 
+export const cargoMidenVersion = async () => {
+  const { stdout } = await execFile("cargo", ["miden", "--version"]);
+  const [, version = ""] = stdout.split(" ").map((part) => part.trim());
+  const [major, minor, patch] = version.split(".");
+  return `${major}.${minor}.${patch}`;
+};
+
 export const packageExists = async (packageDir: string) =>
   fileExists(`${PACKAGES_PATH}/${packageDir}`);
 
@@ -218,7 +225,7 @@ export const generateCargoToml = ({
   cargoToml += `name = "${packageDir.replaceAll("-", "_")}"\n`;
   cargoToml += `crate-type = ["cdylib"]\n\n`;
   cargoToml += `[dependencies]\n`;
-  cargoToml += `miden = { version = "0.10" }\n\n`;
+  cargoToml += `miden = { version = "0.12" }\n\n`;
   cargoToml += `[package.metadata.component]\n`;
   cargoToml += `package = "miden:${name}"\n\n`;
   cargoToml += `[package.metadata.miden]\n`;
@@ -270,15 +277,24 @@ export const compilePackage = async ({
   name: string;
 }) => {
   try {
-    console.info(
-      `miden build --release --manifest-path contracts/${name}/Cargo.toml`,
-    );
+    // console.info(
+    //   `miden build --release --manifest-path contracts/${name}/Cargo.toml`,
+    // );
+    // const { stdout } = await execFile(
+    //   "miden",
+    //   [
+    //     "build",
+    //     "--release" /*, "--manifest-path", `contracts/${name}/Cargo.toml`*/,
+    //   ],
+    //   {
+    //     cwd: `${PACKAGES_PATH}/${packageDir}`,
+    //     env: { ...process.env, CARGO_TARGET_DIR: `${PACKAGES_PATH}/target` },
+    //   },
+    // );
+    console.info("cargo miden build --release");
     const { stdout } = await execFile(
-      "miden",
-      [
-        "build",
-        "--release" /*, "--manifest-path", `contracts/${name}/Cargo.toml`*/,
-      ],
+      "cargo",
+      ["miden", "build", "--release"],
       {
         cwd: `${PACKAGES_PATH}/${packageDir}`,
         env: { ...process.env, CARGO_TARGET_DIR: `${PACKAGES_PATH}/target` },
@@ -305,7 +321,9 @@ const readPackageMetadata = async (maspPath: string) => {
   };
   return {
     digest,
-    exports,
+    exports: exports.filter(
+      ({ Procedure: { signature } }) => signature.abi === 3,
+    ),
     dependencies: dependencies
       .filter(({ name }) => !["base", "std"].includes(name))
       .map((dependency) => ({

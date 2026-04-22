@@ -6,7 +6,7 @@ import useScripts from "@/hooks/use-scripts";
 import { defaultScriptIds } from "@/lib/types/default-scripts";
 import useComponents from "@/hooks/use-components";
 import useTutorials from "@/hooks/use-tutorials";
-import { storageSlotName } from "@/lib/types/component";
+import { storageSlotName } from "@/lib/utils/component";
 
 const useCompleted = () => {
   const { scripts } = useScripts();
@@ -61,6 +61,7 @@ const Step2: TutorialStep = {
                 {
                   name: storageSlotName({
                     packageName: script?.name ?? "",
+                    componentStruct: "CounterContract",
                     fieldName: "count_map",
                   }),
                   type: "map",

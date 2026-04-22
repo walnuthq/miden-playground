@@ -17,18 +17,17 @@ import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import useAccounts from "@/hooks/use-accounts";
 import { verifyAccountComponentFromSource } from "@/lib/api";
-import { clientGetAccountById } from "@/lib/web-client";
-import useWebClient from "@/hooks/use-web-client";
-import useMidenSdk from "@/hooks/use-miden-sdk";
-import { toBase64, fileListToPackageSources } from "@/lib/utils";
-import useGlobalContext from "@/components/global-context/hook";
-import { type PackageSource } from "@/lib/types/script";
+import { toBase64 } from "@/lib/utils";
+import { fileListToPackageSources } from "@/lib/utils/script";
+import useNetwork from "@/hooks/use-network";
+import type { PackageSource } from "@/lib/types/script";
+import { AccountId as WasmAccountId } from "@miden-sdk/miden-sdk";
+import { useMiden } from "@miden-sdk/react";
 
 const VerifyAccountComponentDialog = () => {
   const queryClient = useQueryClient();
-  const { client } = useWebClient();
-  const { midenSdk } = useMidenSdk();
-  const { networkId } = useGlobalContext();
+  const { client } = useMiden();
+  const { networkId } = useNetwork();
   const {
     accounts,
     verifyAccountComponentDialogOpen,
@@ -64,16 +63,17 @@ const VerifyAccountComponentDialog = () => {
           id="verify-account-component-form"
           onSubmit={async (event) => {
             event.preventDefault();
+            if (!client) {
+              throw new Error("MidenClient not ready");
+            }
             setLoading(true);
             const account = accounts.find(({ id }) => id === accountId);
-            if (!account || !packageSource) {
+            const wasmAccount = await client.getAccount(
+              WasmAccountId.fromHex(accountId),
+            );
+            if (!wasmAccount || !account || !packageSource) {
               return;
             }
-            const wasmAccount = await clientGetAccountById({
-              client,
-              accountId,
-              midenSdk,
-            });
             const { verified, error } = await verifyAccountComponentFromSource({
               networkId,
               accountId,
