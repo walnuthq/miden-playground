@@ -254,14 +254,14 @@ const CreateTransactionConfigureForm = ({
                   ",",
                   "",
                 )}
-                // max={
-                //   isTutorial
-                //     ? formatAmount({
-                //         amount: "100000000",
-                //         decimals,
-                //       }).replaceAll(",", "")
-                //     : undefined
-                // }100000000000
+                max={
+                  isTutorial
+                    ? formatAmount({
+                        amount: "100000000",
+                        decimals,
+                      }).replaceAll(",", "")
+                    : undefined
+                }
                 required
               />
             </div>
