@@ -1,5 +1,6 @@
-import { defaultTutorial, type Tutorial } from "@/lib/types/tutorial";
-import state from "@/components/tutorials/tutorial10/state";
+import type { Tutorial } from "@/lib/types/tutorial";
+import { defaultTutorial } from "@/lib/utils/tutorial";
+import { defaultState } from "@/lib/utils/state";
 import Step1 from "@/components/tutorials/tutorial10/step1";
 import Step2 from "@/components/tutorials/tutorial10/step2";
 import Step3 from "@/components/tutorials/tutorial10/step3";
@@ -19,7 +20,10 @@ const tutorial: Tutorial = {
     "In this tutorial, you'll create your first smart contract and understand the structure and implementation of both the counter account contract and increment note script.",
   category: "advanced",
   initialRoute: "/scripts",
-  state,
+  state: {
+    ...defaultState(),
+    tutorialId: "your-first-smart-contract-and-custom-note",
+  },
   steps: [Step1, Step2, Step3, Step4, Step5, Step6, Step7, Step8],
 };
 

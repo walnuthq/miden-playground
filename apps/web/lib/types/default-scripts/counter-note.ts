@@ -1,5 +1,6 @@
 import { pick } from "lodash";
-import { type Script, defaultScript } from "@/lib/types/script";
+import type { Script } from "@/lib/types/script";
+import { defaultScript } from "@/lib/utils/script";
 import counterContract from "@/lib/types/default-scripts/counter-contract";
 
 export const rust = `// Do not link against libstd (i.e. anything defined in \`std::\`)

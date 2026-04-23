@@ -1,9 +1,10 @@
 import { type TutorialStep } from "@/lib/types/tutorial";
+import useNetwork from "@/hooks/use-network";
 import useAccounts from "@/hooks/use-accounts";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
 import Step4Content from "@/components/tutorials/tutorial3/step4.mdx";
-import { TEST_WALLET_ADDRESS } from "@/lib/constants";
+import { testWalletAddress } from "@/lib/constants";
 
 const useCompleted = () => {
   const { wallets, connectedWallet } = useAccounts();
@@ -16,13 +17,14 @@ const useCompleted = () => {
 const Step4: TutorialStep = {
   title: "Import another wallet in the Playground.",
   Content: () => {
+    const { networkId } = useNetwork();
     const completed = useCompleted();
     return (
       <>
         <Step4Content
           account={{
             name: "Test Wallet",
-            address: TEST_WALLET_ADDRESS,
+            address: testWalletAddress(networkId),
           }}
         />
         <TutorialAlert

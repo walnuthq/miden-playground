@@ -1,9 +1,9 @@
+import type { Script } from "@/lib/types/script";
 import {
-  type Script,
-  defaultScript,
   defaultProcedureExport,
+  defaultScript,
   defaultSignature,
-} from "@/lib/types/script";
+} from "@/lib/utils/script";
 import { COUNT_READER_COPY_COUNT_PROC_HASH } from "@/lib/constants";
 
 export const rust = `#![no_std]
@@ -12,14 +12,14 @@ export const rust = `#![no_std]
 extern crate alloc;
 
 use alloc::vec::Vec;
-use miden::{component, tx, AccountId, Digest, Value, ValueAccess};
+use miden::*;
 
 /// Main contract structure for the CountReader example.
 #[component]
 struct CountReader {
     /// Storage slot holding the counter value.
     #[storage(description = "count reader storage value")]
-    count: Value,
+    count: StorageValue<Word>,
 }
 
 #[component]
@@ -33,24 +33,31 @@ impl CountReader {
         let result =
             tx::execute_foreign_procedure(counter_account_id, get_count_proc_hash, Vec::new());
         // Copy the new value received from the foreign account in storage
-        self.count.write(result[0]);
+        self.count.set(result[0]);
     }
 }
 `;
 
-export const masm = `use miden::protocol::native_account
+export const masm = `use miden::protocol::active_account
+use miden::protocol::native_account
 use miden::protocol::tx
 use miden::core::word
 use miden::core::sys
 
-const COUNTER_SLOT = word("miden::component::miden_count_reader::counter")
+const COUNT_READER_SLOT = word("miden_count_reader::count_reader::counter")
 
-# => [account_id_prefix, account_id_suffix, get_count_proc_hash]
+# => [account_id_suffix, account_id_prefix, PROC_HASH(4), foreign_procedure_inputs(16)]
 pub proc copy_count
     exec.tx::execute_foreign_procedure
-    # => [count]
+    # => [count, pad(12)]
 
-    push.COUNTER_SLOT[0..2] exec.native_account::set_item
+    push.COUNT_READER_SLOT[0..2]
+    # [slot_id_prefix, slot_id_suffix, count, pad(12)]
+
+    exec.native_account::set_item
+    # => [OLD_VALUE, pad(12)]
+
+    dropw dropw dropw dropw
     # => []
 
     exec.sys::truncate_stack

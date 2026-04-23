@@ -2,15 +2,16 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Spinner } from "@workspace/ui/components/spinner";
 import { TableRow, TableCell } from "@workspace/ui/components/table";
-import { type Account } from "@/lib/types/account";
-import { type Script, type ProcedureExport } from "@/lib/types/script";
-import { type Component } from "@/lib/types/component";
+import type { Account } from "@/lib/types/account";
+import type { Script, ProcedureExport } from "@/lib/types/script";
+import { formatProcedureExportPath } from "@/lib/utils/script";
+import type { Component } from "@/lib/types/component";
 import { Button } from "@workspace/ui/components/button";
 import useScripts from "@/hooks/use-scripts";
 import useTransactions from "@/hooks/use-transactions";
 import CopyButton from "@/components/lib/copy-button";
-import { MIDEN_EXPLORER_URL } from "@/lib/constants";
-import { formatProcedureExportPath } from "@/lib/utils";
+import { midenExplorerUrl } from "@/lib/constants";
+import useNetwork from "@/hooks/use-network";
 
 const ProceduresTableRow = ({
   account,
@@ -23,6 +24,7 @@ const ProceduresTableRow = ({
   script: Script;
   procedureExport: ProcedureExport;
 }) => {
+  const { networkId } = useNetwork();
   const {
     invokeProcedure,
     openInvokeProcedureArgumentsDialog,
@@ -73,10 +75,11 @@ const ProceduresTableRow = ({
                     try {
                       const word = await readWord({
                         accountId: account.id,
+                        script,
                         procedureExport,
                       });
                       if (procedureExport.signature.results.length === 1) {
-                        const [, , , felt = 0n] = word.toU64s();
+                        const [felt = 0n] = word.toU64s();
                         setResult(felt.toString());
                       } else if (
                         procedureExport.signature.results.length === 4
@@ -99,7 +102,7 @@ const ProceduresTableRow = ({
                           label: "View on MidenScan",
                           onClick: () =>
                             window.open(
-                              `${MIDEN_EXPLORER_URL}/tx/${transactionRecord.id().toHex()}`,
+                              `${midenExplorerUrl(networkId)}/tx/${transactionRecord.id().toHex()}`,
                               "_blank",
                               "noreferrer",
                             ),

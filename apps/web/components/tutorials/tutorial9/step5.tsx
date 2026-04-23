@@ -1,4 +1,4 @@
-import { defaultTutorialStep } from "@/lib/types/tutorial";
+import type { TutorialStep } from "@/lib/types/tutorial";
 import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import Step5Content from "@/components/tutorials/tutorial9/step5.mdx";
@@ -18,8 +18,7 @@ const useCompleted = () => {
   return countReader.storage[0]?.item === counter.storage[0]?.item;
 };
 
-export default {
-  ...defaultTutorialStep(),
+const Step5: TutorialStep = {
   title: "Copy the count from the Counter contract.",
   Content: () => {
     const completed = useCompleted();
@@ -45,3 +44,5 @@ export default {
     return <NextStepButton disabled={!completed} />;
   },
 };
+
+export default Step5;

@@ -1,8 +1,17 @@
+use anyhow::{Context, Result};
+use clap::Parser;
 use miden_mast_package::{Package, PackageManifest};
+use miden_serde_utils::Deserializable;
 use serde::{Deserialize, Serialize};
-use serde_json::Result;
-use std::fs;
-use winter_utils::Deserializable;
+use std::path::PathBuf;
+
+/// Extracts and prints metadata from a Miden package (.masp) file as JSON.
+#[derive(Parser)]
+#[command(version, about)]
+struct Args {
+    /// Path to the .masp file
+    masp_path: PathBuf,
+}
 
 #[derive(Serialize, Deserialize)]
 struct PackageMetadata {
@@ -11,22 +20,24 @@ struct PackageMetadata {
 }
 
 fn main() -> Result<()> {
-    let args: Vec<String> = std::env::args().collect();
-    if args.len() != 2 {
-        eprintln!("Usage: {} <path-to-masp-file>", args[0]);
-        std::process::exit(1);
-    }
+    let args = Args::parse();
 
-    let masp_path = &args[1];
-    let bytes = fs::read(masp_path).unwrap();
-    let package = Package::read_from_bytes(&bytes).unwrap();
+    let bytes = std::fs::read(&args.masp_path)
+        .with_context(|| format!("failed to read '{}'", args.masp_path.display()))?;
 
-    let json = serde_json::to_string(&PackageMetadata {
-        digest: package.mast.digest().to_hex(),
-        manifest: package.manifest,
+    let package = Package::read_from_bytes(&bytes).with_context(|| {
+        format!(
+            "failed to parse package from '{}'",
+            args.masp_path.display()
+        )
     })?;
 
-    println!("{}", json);
+    let metadata = PackageMetadata {
+        digest: package.mast.digest().to_hex(),
+        manifest: package.manifest,
+    };
+
+    println!("{}", serde_json::to_string(&metadata)?);
 
     Ok(())
 }

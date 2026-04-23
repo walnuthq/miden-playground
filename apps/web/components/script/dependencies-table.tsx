@@ -15,11 +15,8 @@ import {
 } from "@workspace/ui/components/dropdown-menu";
 import { MoreVertical } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
-import {
-  defaultDependencies,
-  scriptTypes,
-  type Script,
-} from "@/lib/types/script";
+import { scriptTypes, type Script } from "@/lib/types/script";
+import { defaultDependencies } from "@/lib/utils/script";
 import useScripts from "@/hooks/use-scripts";
 
 const DependencyActionsCell = ({

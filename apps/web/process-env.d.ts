@@ -7,7 +7,7 @@ declare global {
       readonly ENVIRONMENT: "dev" | "staging" | "production";
       // public
       readonly NEXT_PUBLIC_API_URL: string;
-      readonly NEXT_PUBLIC_MIDEN_GUARDIAN_ENDPOINT_URL: string;
+      readonly NEXT_PUBLIC_GUARDIAN_ENDPOINT_URL: string;
     }
   }
 }

@@ -1,13 +1,13 @@
+import type { Script } from "@/lib/types/script";
+import {
+  defaultProcedureExport,
+  defaultScript,
+  defaultSignature,
+} from "@/lib/utils/script";
 import {
   COUNTER_CONTRACT_GET_COUNT_PROC_HASH,
   COUNTER_CONTRACT_INCREMENT_COUNT_PROC_HASH,
 } from "@/lib/constants";
-import {
-  type Script,
-  defaultProcedureExport,
-  defaultScript,
-  defaultSignature,
-} from "@/lib/types/script";
 
 export const rust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
 #![no_std]
@@ -18,14 +18,14 @@ export const rust = `// Do not link against libstd (i.e. anything defined in \`s
 //
 // extern crate alloc;
 
-use miden::{component, felt, Felt, Value, ValueAccess};
+use miden::{component, felt, Felt, StorageValue};
 
 /// Main contract structure for the counter example.
 #[component]
 struct CounterContract {
     /// Storage slot holding the counter value.
     #[storage(description = "counter contract storage value")]
-    count: Value,
+    count: StorageValue<Word>,
 }
 
 #[component]
@@ -33,17 +33,17 @@ impl CounterContract {
     /// Returns the current counter value stored in the contract's storage value.
     pub fn get_count(&self) -> Felt {
         // Read the value from storage
-        self.count.read()
+        self.count.get()
     }
 
     /// Increments the counter value stored in the contract's storage by one.
     pub fn increment_count(&mut self) -> Felt {
         // Read the current value
-        let current_value: Felt = self.count.read();
+        let current_value = self.count.get();
         // Increment the value by one
         let new_value = current_value + felt!(1);
         // Write the new value back to storage
-        self.count.write(new_value);
+        self.count.set(new_value);
         new_value
     }
 }
@@ -54,7 +54,7 @@ use miden::protocol::native_account
 use miden::core::word
 use miden::core::sys
 
-const COUNTER_SLOT = word("miden::component::miden_counter_contract::counter")
+const COUNTER_SLOT = word("miden_counter_contract::counter_contract::count")
 
 #! Inputs:  []
 #! Outputs: [count]

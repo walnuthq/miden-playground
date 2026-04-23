@@ -22,7 +22,8 @@ import type {
   Proposal,
   ProposalMetadata,
 } from "@openzeppelin/miden-multisig-client";
-import { formatAmount, formatDigest } from "@/lib/utils";
+import { formatDigest } from "@/lib/utils";
+import { formatAmount } from "@/lib/utils/asset";
 import useAccounts from "@/hooks/use-accounts";
 
 const ProposalActionsCell = ({

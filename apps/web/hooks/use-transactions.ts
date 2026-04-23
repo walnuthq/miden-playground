@@ -2,34 +2,39 @@ import {
   type ConsumableNoteRecord as WasmConsumableNoteRecordType,
   type TransactionResult as WasmTransactionResultType,
   type TransactionRequest as WasmTransactionRequestType,
+  NoteType as WasmNoteType,
+  AccountId as WasmAccountId,
+  Word as WasmWord,
+  TransactionFilter as WasmTransactionFilter,
+  TransactionId as WasmTransactionId,
+  Package as WasmPackage,
 } from "@miden-sdk/miden-sdk";
-import { type NoteType } from "@/lib/types/note";
-import {
-  type CreateTransactionDialogStep,
-  type TransactionType,
+import type { NoteType } from "@/lib/types/note";
+import type {
+  CreateTransactionDialogStep,
+  TransactionType,
 } from "@/lib/types/transaction";
 import {
-  // webClient,
-  clientExecuteTransaction,
-  clientNewMintTransactionRequest,
-  clientNewConsumeTransactionRequest,
-  clientNewSendTransactionRequest,
   wasmAccountToAccount,
   wasmTransactionToTransaction,
   clientGetAllInputNotes,
   clientGetConsumableNotes,
-  clientGetTransactionsByIds,
-  clientSubmitNewTransaction,
-  clientGetAccountById,
-  clientReadWord,
 } from "@/lib/web-client";
-import { type MidenInput, type ProcedureExport } from "@/lib/types/script";
+import type { MidenInput, ProcedureExport, Script } from "@/lib/types/script";
+import { invokeProcedureCustomTransactionScript } from "@/lib/utils/script";
 import useGlobalContext from "@/components/global-context/hook";
-import useMidenSdk from "@/hooks/use-miden-sdk";
-import useWebClient from "@/hooks/use-web-client";
+import { fromBase64 } from "@/lib/utils";
+import {
+  useMiden,
+  useSyncState,
+  useExecuteProgram,
+  // useTransaction,
+  // useTransactionHistory,
+} from "@miden-sdk/react";
+import useNetwork from "@/hooks/use-network";
 
 const useTransactions = () => {
-  const { midenSdk } = useMidenSdk();
+  const { networkId } = useNetwork();
   const {
     accounts,
     submittingTransaction,
@@ -44,10 +49,13 @@ const useTransactions = () => {
     inputNotes: previousInputNotes,
     scripts,
     transactions,
-    networkId,
     dispatch,
   } = useGlobalContext();
-  const { client } = useWebClient();
+  const { client } = useMiden();
+  const { lastSyncTime } = useSyncState();
+  const { execute: executeProgram } = useExecuteProgram();
+  // const { execute } = useTransaction();
+  // const { records } = useTransactionHistory();
   const openCreateTransactionDialog = ({
     accountId = "",
     transactionType = "consume",
@@ -92,20 +100,23 @@ const useTransactions = () => {
     noteType: NoteType;
     amount: bigint;
   }) => {
-    const transactionRequest = clientNewMintTransactionRequest({
-      client,
-      targetAccountId,
-      faucetId,
-      noteType,
+    if (!client) {
+      throw new Error("MidenClient not ready");
+    }
+    const wasmNoteTypes = {
+      public: WasmNoteType.Public,
+      private: WasmNoteType.Private,
+    } as const;
+    const transactionRequest = client.newMintTransactionRequest(
+      WasmAccountId.fromHex(targetAccountId),
+      WasmAccountId.fromHex(faucetId),
+      wasmNoteTypes[noteType],
       amount,
-      midenSdk,
-    });
-    const transactionResult = await clientExecuteTransaction({
-      client,
-      accountId: faucetId,
+    );
+    const transactionResult = await client.executeTransaction(
+      WasmAccountId.fromHex(faucetId),
       transactionRequest,
-      midenSdk,
-    });
+    );
     return { transactionRequest, transactionResult };
   };
   const newConsumeTransactionRequest = async ({
@@ -115,16 +126,20 @@ const useTransactions = () => {
     accountId: string;
     noteIds: string[];
   }) => {
-    const transactionRequest = await clientNewConsumeTransactionRequest({
-      client,
-      noteIds,
-    });
-    const transactionResult = await clientExecuteTransaction({
-      client,
-      accountId,
+    if (!client) {
+      throw new Error("MidenClient not ready");
+    }
+    const wasmInputNoteRecords = await Promise.all(
+      noteIds.map((noteId) => client.getInputNote(noteId)),
+    );
+    const notes = wasmInputNoteRecords
+      .filter((inputNoteRecord) => inputNoteRecord !== undefined)
+      .map((inputNoteRecord) => inputNoteRecord.toNote());
+    const transactionRequest = await client.newConsumeTransactionRequest(notes);
+    const transactionResult = await client.executeTransaction(
+      WasmAccountId.fromHex(accountId),
       transactionRequest,
-      midenSdk,
-    });
+    );
     return { transactionRequest, transactionResult };
   };
   const newSendTransactionRequest = async ({
@@ -140,21 +155,24 @@ const useTransactions = () => {
     noteType: NoteType;
     amount: bigint;
   }) => {
-    const transactionRequest = clientNewSendTransactionRequest({
-      client,
-      senderAccountId,
-      targetAccountId,
-      faucetId,
-      noteType,
+    if (!client) {
+      throw new Error("MidenClient not ready");
+    }
+    const wasmNoteTypes = {
+      public: WasmNoteType.Public,
+      private: WasmNoteType.Private,
+    } as const;
+    const transactionRequest = client.newSendTransactionRequest(
+      WasmAccountId.fromHex(senderAccountId),
+      WasmAccountId.fromHex(targetAccountId),
+      WasmAccountId.fromHex(faucetId),
+      wasmNoteTypes[noteType],
       amount,
-      midenSdk,
-    });
-    const transactionResult = await clientExecuteTransaction({
-      client,
-      accountId: senderAccountId,
+    );
+    const transactionResult = await client.executeTransaction(
+      WasmAccountId.fromHex(senderAccountId),
       transactionRequest,
-      midenSdk,
-    });
+    );
     return { transactionRequest, transactionResult };
   };
   const newCustomTransactionRequest = async ({
@@ -164,40 +182,47 @@ const useTransactions = () => {
     senderAccountId: string;
     transactionRequest: WasmTransactionRequestType;
   }) => {
-    const transactionResult = await clientExecuteTransaction({
-      client,
-      accountId: senderAccountId,
+    if (!client) {
+      throw new Error("MidenClient not ready");
+    }
+    const transactionResult = await client.executeTransaction(
+      WasmAccountId.fromHex(senderAccountId),
       transactionRequest,
-      midenSdk,
-    });
+    );
     return { transactionRequest, transactionResult };
   };
   const readWord = async ({
     accountId,
+    script,
     procedureExport,
     procedureInputs = [],
   }: {
     accountId: string;
+    script: Script;
     procedureExport: ProcedureExport;
     procedureInputs?: MidenInput[];
   }) => {
-    dispatch({ type: "SUBMITTING_TRANSACTION" });
-    await client.syncState();
-    try {
-      const word = await clientReadWord({
-        client,
-        accountId,
+    if (!client) {
+      throw new Error("MidenClient not ready");
+    }
+    const builder = client.createCodeBuilder();
+    const contractName = script.name.replaceAll("-", "_");
+    const accountComponentLibrary = script.masm
+      ? builder.buildLibrary(`external_contract::${contractName}`, script.masm)
+      : WasmPackage.deserialize(fromBase64(script.masp)).asLibrary();
+    builder.linkDynamicLibrary(accountComponentLibrary);
+    const transactionScript = builder.compileTxScript(
+      invokeProcedureCustomTransactionScript({
+        contractName: script.masm ? contractName : undefined,
         procedureExport,
         procedureInputs,
-        midenSdk,
-      });
-      dispatch({ type: "TRANSACTION_SUBMITTED" });
-      return word;
-    } catch (error) {
-      console.error(error);
-      dispatch({ type: "TRANSACTION_SUBMITTED" });
-      throw error;
-    }
+      }),
+    );
+    const { stack } = await executeProgram({
+      accountId,
+      script: transactionScript,
+    });
+    return new WasmWord(new BigUint64Array(stack.slice(0, 4)));
   };
   const submitNewTransaction = async ({
     accountId,
@@ -208,31 +233,33 @@ const useTransactions = () => {
     transactionRequest: WasmTransactionRequestType;
     transactionResult: WasmTransactionResultType;
   }) => {
-    dispatch({ type: "SUBMITTING_TRANSACTION" });
-    const transactionId = await clientSubmitNewTransaction({
-      client,
-      accountId,
-      transactionRequest,
-      midenSdk,
-    });
-    if (client.usesMockChain()) {
-      await client.proveBlock();
+    if (!client) {
+      throw new Error("MidenClient not ready");
     }
-    const syncSummary = await client.syncState();
+    dispatch({ type: "SUBMITTING_TRANSACTION" });
+    const transactionId = await client.submitNewTransaction(
+      WasmAccountId.fromHex(accountId),
+      transactionRequest,
+    );
     const transactionIdHex = transactionId.toHex();
-    const transactions = await clientGetTransactionsByIds({
-      client,
-      transactionIds: [transactionId],
-      midenSdk,
-    });
+    // const { transactionId } = await execute({
+    //   accountId,
+    //   request: transactionRequest,
+    // });
+    // console.log("transactionId", transactionId);
+    // if (client.usesMockChain()) {
+    //   await client.proveBlock();
+    // }
+    // const syncSummary = await client.syncState();
+    const transactions = await client.getTransactions(
+      WasmTransactionFilter.ids([WasmTransactionId.fromHex(transactionIdHex)]),
+    );
     const transactionRecord = transactions.find(
       (tx) => tx.id().toHex() === transactionIdHex,
     );
-    const nextAccount = await clientGetAccountById({
-      client,
-      accountId,
-      midenSdk,
-    });
+    const nextAccount = await client.getAccount(
+      WasmAccountId.fromHex(accountId),
+    );
     const previousAccount = accounts.find(
       ({ id }) => id === nextAccount?.id().toString(),
     );
@@ -244,14 +271,13 @@ const useTransactions = () => {
       networkId,
       previousInputNotes,
       scripts,
-      midenSdk,
+      updatedAt: lastSyncTime,
     });
     const consumableNoteIds: Record<string, string[]> = {};
     for (const account of accounts) {
       const consumableNotes = await clientGetConsumableNotes({
         client,
-        accountId: account.id,
-        midenSdk,
+        accountId,
       });
       const noteIds = consumableNotes.map((consumableNote) =>
         consumableNote.inputNoteRecord().id().toString(),
@@ -261,16 +287,13 @@ const useTransactions = () => {
     const transaction = wasmTransactionToTransaction({
       record: transactionRecord,
       result: transactionResult,
-      midenSdk,
     });
     const account = wasmAccountToAccount({
       wasmAccount: nextAccount,
       name: previousAccount.name,
       components: previousAccount.components,
-      networkId,
-      updatedAt: syncSummary.blockNum(),
+      updatedAt: lastSyncTime,
       consumableNoteIds: consumableNoteIds[previousAccount.id],
-      midenSdk,
     });
     dispatch({
       type: "SUBMIT_TRANSACTION",
@@ -279,7 +302,6 @@ const useTransactions = () => {
         account,
         consumableNoteIds,
         inputNotes,
-        blockNum: syncSummary.blockNum(),
         serializedMockChain: client.usesMockChain()
           ? client.serializeMockChain()
           : new Uint8Array(),

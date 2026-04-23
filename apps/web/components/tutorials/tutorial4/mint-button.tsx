@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { HandCoins } from "lucide-react";
 import { Spinner } from "@workspace/ui/components/spinner";
+import useNetwork from "@/hooks/use-network";
 import useAccounts from "@/hooks/use-accounts";
 import { Button } from "@workspace/ui/components/button";
 import {
-  MIDEN_FAUCET_API_URL,
   FUNGIBLE_FAUCET_DEFAULT_DECIMALS,
+  midenFaucetApiUrl,
 } from "@/lib/constants";
-import { parseAmount } from "@/lib/utils";
+import { parseAmount } from "@/lib/utils/asset";
 import {
   getPowChallenge,
   findValidNonce,
@@ -28,6 +29,7 @@ const downloadBlob = (blob: Blob, fileName: string) => {
 };
 
 const MintButton = () => {
+  const { networkId } = useNetwork();
   const { connectedWallet } = useAccounts();
   const [loading, setLoading] = useState(false);
   return (
@@ -43,13 +45,13 @@ const MintButton = () => {
           FUNGIBLE_FAUCET_DEFAULT_DECIMALS,
         ).toString();
         const { challenge, target } = await getPowChallenge({
-          backendUrl: MIDEN_FAUCET_API_URL,
+          backendUrl: midenFaucetApiUrl(networkId),
           recipient: connectedWallet.address,
           amount,
         });
         const nonce = await findValidNonce({ challenge, target });
         const { noteId, txId } = await getTokens({
-          backendUrl: MIDEN_FAUCET_API_URL,
+          backendUrl: midenFaucetApiUrl(networkId),
           challenge,
           nonce,
           recipient: connectedWallet.address,
@@ -58,7 +60,7 @@ const MintButton = () => {
         });
         console.log({ noteId, txId });
         const noteFileBytes = await getNote({
-          backendUrl: MIDEN_FAUCET_API_URL,
+          backendUrl: midenFaucetApiUrl(networkId),
           noteId,
         });
         const noteFileBlob = new Blob([noteFileBytes], {

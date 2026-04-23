@@ -3,13 +3,13 @@ import counterMapContract from "@/lib/types/default-scripts/counter-map-contract
 import timelockP2id from "@/lib/types/default-scripts/timelock-p2id";
 import counterNote from "@/lib/types/default-scripts/counter-note";
 import { sleep } from "@/lib/utils";
-import {
-  type ScriptExample,
-  type Export,
-  defaultScript,
-  type Script,
-  type CompiledPackage,
+import type {
+  ScriptExample,
+  Export,
+  Script,
+  CompiledPackage,
 } from "@/lib/types/script";
+import { defaultScript } from "@/lib/utils/script";
 
 type CompileScriptRequestBody = {
   name: string;
@@ -60,18 +60,19 @@ export const PATCH = async (
       const incrementValue = Number(lastMatch?.at(1));
       masm = masm.replace("add.1", `add.${incrementValue}`);
     }
-    await sleep(1000);
+    await sleep(400);
     return NextResponse.json<CompileScriptResponse>({
       package: {
         id,
         name,
         type: scripts[example].type,
-        error: "",
+        status: "compiled",
         masm,
         rust,
         digest: scripts[example].digest,
         masp: "",
         exports: scriptsExports[example],
+        error: "",
         dependencies: scripts[example].dependencies,
       },
     });
@@ -88,7 +89,7 @@ export const DELETE = async (
 ) => {
   try {
     const { id } = await params;
-    await sleep(1000);
+    await sleep(400);
     return NextResponse.json<{ package: { id: string } }>({ package: { id } });
   } catch (error) {
     console.error(error);

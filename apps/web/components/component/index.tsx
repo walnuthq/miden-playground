@@ -20,7 +20,7 @@ const Component = ({ id }: { id: string }) => {
   const {
     components,
     upsertStorageSlotDialogComponentId: componentId,
-    upsertStorageSlotDialogStorageSlotIndex: storageSlotIndex,
+    upsertStorageSlotDialogStorageSlotName: storageSlotName,
   } = useComponents();
   const component = components.find((component) => component.id === id);
   if (!isClient || !component) {
@@ -53,7 +53,7 @@ const Component = ({ id }: { id: string }) => {
       </Tabs>
       <UpsertStorageSlotDialog
         componentId={componentId}
-        storageSlotIndex={storageSlotIndex}
+        storageSlotName={storageSlotName}
       />
     </div>
   );

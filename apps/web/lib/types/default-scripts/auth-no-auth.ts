@@ -1,8 +1,5 @@
-import {
-  type Script,
-  defaultProcedureExport,
-  defaultScript,
-} from "@/lib/types/script";
+import type { Script } from "@/lib/types/script";
+import { defaultProcedureExport, defaultScript } from "@/lib/utils/script";
 
 export const rust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
 #![no_std]
@@ -50,6 +47,7 @@ use miden::core::word
 #!
 #! Inputs:  [pad(16)]
 #! Outputs: [pad(16)]
+@auth_script
 pub proc auth_no_auth
     # check if the account state has changed by comparing initial and final commitments
 
@@ -88,13 +86,13 @@ const authNoAuth: Script = {
   readOnly: true,
   rust,
   masm,
-  digest: "0xe9ee054ffeb3bd22bc4f0a4778960ec8e3571b0a0c8299bfed0cdb5d156686b7",
+  digest: "0xdcc744a24dfa37ae9c7826267102a0fa7a081c28d2e1bfbd3784cbc6a7f0fa0e",
   procedureExports: [
     {
       ...defaultProcedureExport(),
-      path: "::no_auth::auth_no_auth",
+      path: "::miden::standards::components::auth::no_auth::auth_no_auth",
       digest:
-        "0x00498108f0eae0e35deadd489892062338c3d55772635d0b133f0bdf2980bf64",
+        "0xd5dbddf4f755c4b7787de8df59da61dc15d4c1bef45541e8c043e11345703ef1",
     },
   ],
 };

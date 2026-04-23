@@ -13,13 +13,13 @@ use miden::*;
 struct MyAccount {
     // Storage
     #[storage(description = "storage value")]
-    value: Value,
+    value: StorageValue<Word>,
 }
 
 #[component]
 impl MyAccount {
     // Procedures
     pub fn get_value(&self) -> Word {
-        self.value.read()
+        self.value.get()
     }
 }

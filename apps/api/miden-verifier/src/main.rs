@@ -4,20 +4,18 @@ use miden_client::{
     account::{Account, AccountId, AccountInterfaceExt},
     builder::ClientBuilder,
     keystore::FilesystemKeyStore,
-    note::{Note, NoteFile, NoteId, NoteScript, WellKnownNote},
+    note::{Note, NoteFile, NoteId, NoteScript},
     rpc::{Endpoint, GrpcClient},
-    store::AccountRecordData,
     transaction::{AccountComponentInterface, AccountInterface},
     utils::Deserializable,
     vm::{Package, PackageExport},
 };
 use miden_client_sqlite_store::ClientBuilderSqliteExt;
-// use miden_standards::account::components::{
-//     basic_fungible_faucet_library, basic_wallet_library, ecdsa_k256_keccak_acl_library,
-//     ecdsa_k256_keccak_library, ecdsa_k256_keccak_multisig_library, falcon_512_rpo_acl_library,
-//     falcon_512_rpo_library, falcon_512_rpo_multisig_library, network_fungible_faucet_library,
-//     no_auth_library,
-// };
+use miden_standards::account::components::{
+    basic_fungible_faucet_library, basic_wallet_library, multisig_library, multisig_psm_library,
+    network_fungible_faucet_library, no_auth_library, singlesig_acl_library, singlesig_library,
+};
+use miden_standards::note::{BurnNote, MintNote, P2idNote, P2ideNote, StandardNote, SwapNote};
 use std::fs;
 use std::sync::Arc;
 
@@ -32,27 +30,23 @@ fn verify_account_component(account: Account, package_opt: Option<Package>) -> R
             AccountComponentInterface::NetworkFungibleFaucet => {
                 println!("NetworkFungibleFaucet")
             }
-            AccountComponentInterface::AuthEcdsaK256Keccak => {
-                println!("AuthEcdsaK256Keccak")
+            AccountComponentInterface::AuthSingleSig => {
+                println!("AuthSingleSig")
             }
-            AccountComponentInterface::AuthEcdsaK256KeccakAcl => {
-                println!("AuthEcdsaK256KeccakAcl")
+            AccountComponentInterface::AuthSingleSigAcl => {
+                println!("AuthSingleSigAcl")
             }
-            AccountComponentInterface::AuthEcdsaK256KeccakMultisig => {
-                println!("AuthEcdsaK256KeccakMultisig")
+            AccountComponentInterface::AuthMultisig => {
+                println!("AuthMultisig")
             }
-            AccountComponentInterface::AuthFalcon512Rpo => println!("AuthFalcon512Rpo"),
-            AccountComponentInterface::AuthFalcon512RpoAcl => {
-                println!("AuthFalcon512RpoAcl")
-            }
-            AccountComponentInterface::AuthFalcon512RpoMultisig => {
-                println!("AuthFalcon512RpoMultisig")
+            AccountComponentInterface::AuthMultisigPsm => {
+                println!("AuthMultisigPsm")
             }
             AccountComponentInterface::AuthNoAuth => println!("AuthNoAuth"),
             AccountComponentInterface::Custom(_) => {
                 if let Some(package) = package_opt.clone() {
                     if package.manifest.num_exports() == 0 {
-                        return Err(anyhow!("Package has no exports"));
+                        bail!("Package has no exports");
                     }
                     let mut procedures =
                         package
@@ -76,38 +70,9 @@ fn verify_account_component(account: Account, package_opt: Option<Package>) -> R
     Ok(())
 }
 
-fn from_note(note_script: &NoteScript) -> Option<WellKnownNote> {
-    let note_script_root = note_script.root();
-
-    if note_script_root == WellKnownNote::P2ID.script_root() {
-        return Some(WellKnownNote::P2ID);
-    }
-    if note_script_root == WellKnownNote::P2IDE.script_root() {
-        return Some(WellKnownNote::P2IDE);
-    }
-    if note_script_root == WellKnownNote::SWAP.script_root() {
-        return Some(WellKnownNote::SWAP);
-    }
-    if note_script_root == WellKnownNote::MINT.script_root() {
-        return Some(WellKnownNote::MINT);
-    }
-    if note_script_root == WellKnownNote::BURN.script_root() {
-        return Some(WellKnownNote::BURN);
-    }
-
-    None
-}
-
 fn verify_note_script(note_script: &NoteScript, package_opt: Option<Package>) -> Result<()> {
-    if let Some(well_known_note) = from_note(note_script) {
-        let well_known_note_str = match well_known_note {
-            WellKnownNote::P2ID => "P2ID",
-            WellKnownNote::P2IDE => "P2IDE",
-            WellKnownNote::SWAP => "SWAP",
-            WellKnownNote::MINT => "MINT",
-            WellKnownNote::BURN => "BURN",
-        };
-        println!("{}", well_known_note_str);
+    if let Some(standard_note) = StandardNote::from_script(note_script) {
+        println!("{}", standard_note.name());
     } else if let Some(package) = package_opt.clone() {
         if package.digest() == note_script.root() {
             println!("Custom({})", package.digest());
@@ -119,28 +84,21 @@ fn verify_note_script(note_script: &NoteScript, package_opt: Option<Package>) ->
 // cargo run --release
 #[tokio::main]
 async fn main() -> Result<()> {
-    // println!("standard notes");
-    // let standard_notes = vec![
-    //     WellKnownNote::P2ID,
-    //     WellKnownNote::P2IDE,
-    //     WellKnownNote::SWAP,
-    //     WellKnownNote::MINT,
-    //     WellKnownNote::BURN,
-    // ];
-    // for standard_note in standard_notes {
-    //     println!("{}", standard_note.script_root().to_hex());
-    // }
-    // println!("standard components");
+    // println!("standard notes script roots");
+    // println!("P2ID: {}", P2idNote::script_root());
+    // println!("P2IDE: {}", P2ideNote::script_root());
+    // println!("SWAP: {}", SwapNote::script_root());
+    // println!("MINT: {}", MintNote::script_root());
+    // println!("BURN: {}", BurnNote::script_root());
+    // println!("standard account components");
     // let libraries = vec![
     //     basic_wallet_library(),
     //     basic_fungible_faucet_library(),
     //     network_fungible_faucet_library(),
-    //     ecdsa_k256_keccak_library(),
-    //     ecdsa_k256_keccak_acl_library(),
-    //     ecdsa_k256_keccak_multisig_library(),
-    //     falcon_512_rpo_library(),
-    //     falcon_512_rpo_acl_library(),
-    //     falcon_512_rpo_multisig_library(),
+    //     singlesig_library(),
+    //     singlesig_acl_library(),
+    //     multisig_library(),
+    //     multisig_psm_library(),
     //     no_auth_library(),
     // ];
     // for library in libraries {
@@ -157,14 +115,13 @@ async fn main() -> Result<()> {
     //         );
     //     }
     // }
-    // println!("{:?}", exports);
     let args: Vec<String> = std::env::args().collect();
     if args.len() != 6 {
         eprintln!(
             "Usage: {} <network-id> <account-component|note-script|transaction-script> <resource-id> <resource-path> <masp-path>",
             args[0]
         );
-        return Err(anyhow!("Wrong number of arguments"));
+        bail!("Wrong number of arguments");
     }
     let network_id = &args[1];
     let resource_type = &args[2];
@@ -219,11 +176,8 @@ async fn main() -> Result<()> {
                     }
                 };
                 let account_record = client.get_account(account_id).await?.unwrap();
-                let account = match account_record.account_data() {
-                    AccountRecordData::Full(account) => account,
-                    AccountRecordData::Partial(_) => bail!("Account is missing full account data"),
-                };
-                account.clone()
+                Account::try_from(account_record)
+                    .map_err(|e| anyhow!("Account is missing full account data: {}", e))?
             } else {
                 let resource = fs::read_to_string(resource_path)?;
                 let resource_bytes = BASE64_STANDARD.decode(resource)?;

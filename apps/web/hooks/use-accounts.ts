@@ -1,47 +1,44 @@
 import { useWallet } from "@miden-sdk/miden-wallet-adapter";
 import {
-  clientGetAccountByAddress,
-  clientGetConsumableNotes,
   wasmAccountToAccount,
-  wasmInputNoteToInputNote,
-  clientNewWallet,
-  clientNewFaucet,
   clientDeployAccount,
   storageMode,
-  addressToAccountId,
 } from "@/lib/web-client";
-import { type Account as WasmAccountType } from "@miden-sdk/miden-sdk";
+import { AuthScheme, Address as WasmAddress } from "@miden-sdk/miden-sdk";
 import useGlobalContext from "@/components/global-context/hook";
+import type {
+  AccountStorageMode,
+  AccountType,
+  Account,
+} from "@/lib/types/account";
 import {
-  type AccountStorageMode,
-  type AccountType,
-  type Account,
   basicWalletAccount,
   midenFaucetAccount,
   getRoutingParametersPart,
   getIdentifierPart,
-} from "@/lib/types/account";
-import { type Component } from "@/lib/types/component";
+} from "@/lib/utils/account";
+import type { Component } from "@/lib/types/component";
 import useScripts from "@/hooks/use-scripts";
-import {
-  MIDEN_FAUCET_ADDRESS,
-  COUNTER_CONTRACT_ADDRESS,
-} from "@/lib/constants";
-import useWebClient from "@/hooks/use-web-client";
-import useMidenSdk from "@/hooks/use-miden-sdk";
+import { counterContractAddress, midenFaucetAddress } from "@/lib/constants";
 import { defaultScriptIds } from "@/lib/types/default-scripts";
 import { verifyAccountComponentsFromPackageIds } from "@/lib/api";
 import { toBase64 } from "@/lib/utils";
 import { defaultComponentIds } from "@/lib/types/default-components";
-import type { FungibleAsset } from "@/lib/types/asset";
 // import { useParaMiden } from "@/lib/para-miden";
+import {
+  useSyncState,
+  useCreateWallet,
+  useCreateFaucet,
+  useImportAccount,
+  useMiden,
+} from "@miden-sdk/react";
+import useNetwork from "@/hooks/use-network";
 
 const useAccounts = () => {
   const { address: midenWalletAddress, requestAssets } = useWallet();
   // const { accountId: paraWalletAccountId } = useParaMiden();
-  const { midenSdk } = useMidenSdk();
+  const { networkId } = useNetwork();
   const {
-    networkId,
     createWalletDialogOpen,
     createFaucetDialogOpen,
     importAccountDialogOpen,
@@ -52,10 +49,13 @@ const useAccounts = () => {
     deployMultisigDialogOpen,
     accounts,
     tutorialId,
-    blockNum,
     dispatch,
   } = useGlobalContext();
-  const { client } = useWebClient();
+  const { lastSyncTime } = useSyncState();
+  const { client } = useMiden();
+  const { createWallet } = useCreateWallet();
+  const { createFaucet } = useCreateFaucet();
+  const { importAccount } = useImportAccount();
   const { scripts } = useScripts();
   const wallets = accounts.filter((account) =>
     account.components.includes("basic-wallet"),
@@ -65,6 +65,18 @@ const useAccounts = () => {
   const connectedWallet = wallets.find(
     ({ /*id,*/ address }) => address === midenWalletAddress, // || id === paraWalletAccountId,
   );
+  const isAuthorized = (targetAccount: Account) => {
+    const isTutorial =
+      tutorialId === "create-and-fund-wallet" ||
+      tutorialId === "transfer-assets-between-wallets";
+    return (
+      networkId === "mmck" ||
+      isTutorial ||
+      connectedWallet?.id === targetAccount.id ||
+      targetAccount.components.includes("auth-no-auth") ||
+      !!targetAccount.multisig
+    );
+  };
   const newWallet = async ({
     name,
     storageMode,
@@ -72,18 +84,14 @@ const useAccounts = () => {
     name: string;
     storageMode: AccountStorageMode;
   }) => {
-    const wallet = await clientNewWallet({
-      client,
+    const wallet = await createWallet({
       storageMode,
-      mutable: true,
-      midenSdk,
+      authScheme: 2, // AuthScheme.AuthRpoFalcon512
     });
     const account = wasmAccountToAccount({
       wasmAccount: wallet,
       name,
-      networkId,
-      updatedAt: blockNum,
-      midenSdk,
+      updatedAt: lastSyncTime,
     });
     dispatch({
       type: "NEW_ACCOUNT",
@@ -104,21 +112,17 @@ const useAccounts = () => {
     decimals: number;
     maxSupply: bigint;
   }) => {
-    const faucet = await clientNewFaucet({
-      client,
-      storageMode,
-      nonFungible: false,
+    const faucet = await createFaucet({
       tokenSymbol,
       decimals,
       maxSupply,
-      midenSdk,
+      storageMode,
+      authScheme: 2, // AuthScheme.AuthRpoFalcon512
     });
     const account = wasmAccountToAccount({
       wasmAccount: faucet,
       name,
-      networkId,
-      updatedAt: blockNum,
-      midenSdk,
+      updatedAt: lastSyncTime,
     });
     dispatch({
       type: "NEW_ACCOUNT",
@@ -144,120 +148,86 @@ const useAccounts = () => {
   const importAccountByAddress = async ({
     name,
     address,
-    fungibleAssets,
   }: {
     name: string;
     address: string;
-    fungibleAssets?: FungibleAsset[];
   }) => {
-    // TODO mock importing Miden Faucet
-    if (address === MIDEN_FAUCET_ADDRESS) {
-      const account = midenFaucetAccount();
-      dispatch({
-        type: "IMPORT_ACCOUNT",
-        payload: { account, inputNotes: [], blockNum },
-      });
-      return account;
+    if (!client) {
+      throw new Error("MidenClient not ready");
     }
-    const syncSummary = await client.syncState();
-    let wasmAccount: WasmAccountType | null = null;
-    try {
-      wasmAccount = await clientGetAccountByAddress({
-        client,
-        address,
-        midenSdk,
-      });
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
-      if (address === midenWalletAddress) {
-        const accountId = addressToAccountId({ address, midenSdk });
-        const accountStorageMode = storageMode(accountId);
+    const wasmAccount = await importAccount({ type: "id", accountId: address });
+    const account = wasmAccountToAccount({
+      wasmAccount,
+      name,
+      updatedAt: lastSyncTime,
+    });
+    if (
+      address === counterContractAddress(networkId) &&
+      tutorialId === "interact-with-the-counter-contract"
+    ) {
+      account.components = ["auth-no-auth", "counter-value-contract"];
+    }
+    dispatch({
+      type: "IMPORT_ACCOUNT",
+      payload: {
+        account,
+        inputNotes: [],
+      },
+    });
+    return account;
+  };
+  const importConnectedWallet = async () => {
+    if (connectedWallet) {
+      return;
+    }
+    if (midenWalletAddress) {
+      const assets = await requestAssets?.();
+      const fungibleAssets = assets
+        ? assets.map(({ faucetId, amount }) => ({
+            faucetId: WasmAddress.fromBech32(faucetId).accountId().toString(),
+            amount,
+          }))
+        : [];
+      const accountId = WasmAddress.fromBech32(midenWalletAddress).accountId();
+      const accountStorageMode = storageMode(accountId);
+      const name =
+        accountStorageMode === "private" ? "Priv Account 1" : "Miden Account 1";
+      try {
+        const wasmAccount = await importAccount({ type: "id", accountId });
+        const account = wasmAccountToAccount({
+          wasmAccount,
+          name,
+          updatedAt: lastSyncTime,
+        });
+        dispatch({
+          type: "IMPORT_ACCOUNT",
+          payload: {
+            account,
+            inputNotes: [],
+          },
+        });
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (error) {
         const account = {
           ...basicWalletAccount({ storageMode: accountStorageMode }),
           id: accountId.toString(),
-          name: accountStorageMode === "private" ? "Priv Account 1" : name,
-          address,
-          identifier: getIdentifierPart(address),
-          routingParameters: getRoutingParametersPart(address),
-          fungibleAssets: fungibleAssets ?? [],
+          name,
+          address: midenWalletAddress,
+          identifier: getIdentifierPart(midenWalletAddress),
+          routingParameters: getRoutingParametersPart(midenWalletAddress),
+          fungibleAssets,
         };
         dispatch({
           type: "IMPORT_ACCOUNT",
           payload: {
             account,
             inputNotes: [],
-            blockNum: syncSummary.blockNum(),
           },
         });
-        return account;
       }
     }
-    if (!wasmAccount) {
-      throw new Error("Account not found");
-    }
-    const consumableNotes = await clientGetConsumableNotes({
-      client,
-      accountId: wasmAccount.id().toString(),
-      midenSdk,
-    });
-    const account = wasmAccountToAccount({
-      wasmAccount,
-      name,
-      networkId,
-      updatedAt: syncSummary.blockNum(),
-      consumableNoteIds: consumableNotes.map((consumableNote) =>
-        consumableNote.inputNoteRecord().id().toString(),
-      ),
-      midenSdk,
-    });
-    // if (fungibleAssets) {
-    //   account.fungibleAssets = fungibleAssets;
-    // }
-    if (
-      address === COUNTER_CONTRACT_ADDRESS &&
-      tutorialId === "interact-with-the-counter-contract"
-    ) {
-      account.components = ["auth-no-auth", "counter-value-contract"];
-    }
-    const inputNotes = consumableNotes.map((consumableNote) =>
-      wasmInputNoteToInputNote({
-        record: consumableNote.inputNoteRecord(),
-        scripts,
-        midenSdk,
-      }),
-    );
-    dispatch({
-      type: "IMPORT_ACCOUNT",
-      payload: {
-        account,
-        inputNotes,
-        blockNum: syncSummary.blockNum(),
-      },
-    });
-    return account;
-  };
-  const importConnectedWallet = async () => {
-    if (networkId === "mmck" || connectedWallet) {
-      return;
-    }
-    if (midenWalletAddress) {
-      const assets = await requestAssets?.();
-      await importAccountByAddress({
-        name: "Miden Account 1",
-        address: midenWalletAddress,
-        fungibleAssets: assets
-          ? assets.map(({ faucetId, amount }) => ({
-              faucetId: addressToAccountId({
-                address: faucetId,
-                midenSdk,
-              }).toString(),
-              amount,
-            }))
-          : [],
-      });
-    }
     // if (paraWalletAccountId) {
-    //   const paraWalletAddress = accountIdToAddress({
+    //   const paraWalletAddress = n({
     //     accountId: paraWalletAccountId,
     //     networkId,
     //     midenSdk,
@@ -281,8 +251,10 @@ const useAccounts = () => {
     components: Component[];
     verify?: boolean;
   }) => {
+    if (!client) {
+      throw new Error("MidenClient not ready");
+    }
     dispatch({ type: "SUBMITTING_TRANSACTION" });
-    const syncSummary = await client.syncState();
     const componentScriptIds = components.map(({ scriptId }) => scriptId);
     const componentScripts = scripts.filter(({ id }) =>
       componentScriptIds.includes(id),
@@ -293,7 +265,6 @@ const useAccounts = () => {
       storageMode,
       components,
       scripts: componentScripts,
-      midenSdk,
     });
     const packageIds = componentScriptIds.filter(
       (id) => !defaultScriptIds.includes(id),
@@ -304,9 +275,7 @@ const useAccounts = () => {
       components: components
         .filter(({ id }) => (verify ? true : defaultComponentIds.includes(id)))
         .map(({ id }) => id),
-      networkId,
-      updatedAt: syncSummary.blockNum(),
-      midenSdk,
+      updatedAt: lastSyncTime,
     });
     if (verify && !tutorialId) {
       verifyAccountComponentsFromPackageIds({
@@ -389,6 +358,7 @@ const useAccounts = () => {
     multisigs,
     faucets,
     connectedWallet: networkId !== "mmck" ? connectedWallet : undefined,
+    isAuthorized,
     newWallet,
     newFaucet,
     newAccount,

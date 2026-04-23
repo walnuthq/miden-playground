@@ -11,10 +11,9 @@ import useNotes from "@/hooks/use-notes";
 import NoteInformation from "@/components/note/note-information";
 import ConsumeNoteButton from "@/components/note/consume-note-button";
 import CreateTransactionDialog from "@/components/transactions/create-transaction-dialog";
-import { noteConsumed } from "@/lib/types/note";
-import { type Script } from "@/lib/types/script";
+import { noteConsumed } from "@/lib/utils/note";
+import type { Script } from "@/lib/types/script";
 import useAccounts from "@/hooks/use-accounts";
-import useGlobalContext from "@/components/global-context/hook";
 import VerifyNoteScriptDialog from "@/components/note/verify-note-script-dialog";
 
 const Note = ({
@@ -28,8 +27,7 @@ const Note = ({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const isClient = useIsClient();
-  const { networkId } = useGlobalContext();
-  const { accounts, connectedWallet } = useAccounts();
+  const { accounts, isAuthorized } = useAccounts();
   const { inputNotes } = useNotes();
   const inputNote = inputNotes.find((inputNote) => inputNote.id === id);
   if (!isClient || !inputNote) {
@@ -38,6 +36,8 @@ const Note = ({
   const targetAccount = accounts.find(({ consumableNoteIds }) =>
     consumableNoteIds.includes(inputNote.id),
   );
+  const showConsumeNoteButton =
+    !noteConsumed(inputNote) && targetAccount && isAuthorized(targetAccount);
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
       <Tabs
@@ -54,16 +54,12 @@ const Note = ({
           <TabsList>
             <TabsTrigger value="information">Information</TabsTrigger>
           </TabsList>
-          {!noteConsumed(inputNote) &&
-            targetAccount &&
-            (networkId === "mmck"
-              ? true
-              : connectedWallet?.id === targetAccount.id) && (
-              <ConsumeNoteButton
-                inputNote={inputNote}
-                targetAccount={targetAccount}
-              />
-            )}
+          {showConsumeNoteButton && targetAccount && (
+            <ConsumeNoteButton
+              inputNote={inputNote}
+              targetAccount={targetAccount}
+            />
+          )}
         </div>
         <TabsContent value="information">
           <NoteInformation

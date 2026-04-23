@@ -1,79 +1,14 @@
-import {
-  type Script,
-  defaultScript,
-  defaultProcedureExport,
-} from "@/lib/types/script";
+import type { Script } from "@/lib/types/script";
+import { defaultProcedureExport, defaultScript } from "@/lib/utils/script";
 
 export const rust = "";
 
-export const masm = `# BASIC FUNGIBLE FAUCET CONTRACT
-# =================================================================================================
-# This is a basic fungible faucet smart contract.
+export const masm = `# The MASM code of the Basic Fungible Faucet Account Component.
 #
-# It allows the owner of the faucet to mint, distribute, and burn tokens. Token metadata is stored
-# in account storage at position 1 as [max_supply, decimals, token_symbol, 0], where:
-# - max_supply is the maximum supply of the token.
-# - decimals are the decimals of the token.
-# - token_symbol as three chars encoded in a Felt.
+# See the \`BasicFungibleFaucet\` Rust type's documentation for more details.
 
-use miden::standards::faucets
-
-# CONSTANTS
-# =================================================================================================
-
-const PRIVATE_NOTE=2
-
-# ERRORS
-# =================================================================================================
-const ERR_FUNGIBLE_ASSET_DISTRIBUTE_WOULD_CAUSE_MAX_SUPPLY_TO_BE_EXCEEDED="distribute would cause the maximum supply to be exceeded"
-
-const ERR_BASIC_FUNGIBLE_BURN_WRONG_NUMBER_OF_ASSETS="burn requires exactly 1 note asset"
-
-# CONSTANTS
-# =================================================================================================
-
-#! Distributes freshly minted fungible assets to the provided recipient by creating a note.
-#!
-#! Inputs:  [amount, tag, aux, note_type, execution_hint, RECIPIENT, pad(7)]
-#! Outputs: [note_idx, pad(15)]
-#!
-#! Where:
-#! - amount is the amount to be minted and sent.
-#! - tag is the tag to be included in the note.
-#! - aux is the auxiliary data to be included in the note.
-#! - note_type is the type of the note that holds the asset.
-#! - execution_hint is the execution hint of the note that holds the asset.
-#! - RECIPIENT is the recipient of the asset, i.e.,
-#!   hash(hash(hash(serial_num, [0; 4]), script_root), storage_commitment).
-#! - note_idx is the index of the created note.
-#!
-#! Panics if:
-#! - the transaction is being executed against an account that is not a fungible asset faucet.
-#! - the total issuance after minting is greater than the maximum allowed supply.
-#!
-#! Invocation: call
-pub proc distribute
-    exec.faucets::distribute
-    # => [note_idx, pad(15)]
-end
-
-#! Burns the fungible asset from the active note.
-#!
-#! This procedure retrieves the asset from the active note and burns it. The note must contain
-#! exactly one asset, which must be a fungible asset issued by this faucet.
-#!
-#! This is a re-export of basic_fungible::burn.
-#!
-#! Inputs:  [pad(16)]
-#! Outputs: [pad(16)]
-#!
-#! Panics if:
-#! - the procedure is not called from a note context (active_note::get_assets will fail).
-#! - the note does not contain exactly one asset.
-#! - the transaction is executed against an account which is not a fungible asset faucet.
-#! - the transaction is executed against a faucet which is not the origin of the specified asset.
-#! - the amount about to be burned is greater than the outstanding supply of the asset.
-pub use faucets::burn
+pub use ::miden::standards::faucets::basic_fungible::mint_and_send
+pub use ::miden::standards::faucets::basic_fungible::burn
 `;
 
 const basicFungibleFaucet: Script = {
@@ -85,19 +20,19 @@ const basicFungibleFaucet: Script = {
   readOnly: true,
   rust,
   masm,
-  digest: "0x0977096bca196ee5a05d7854579c6cd5056785aee2ed47eb654c561e20bcc253",
+  digest: "0x59f4f46d113f05821999e9c7721f299639338f586325daa2ee9d0e2c7fe1e899",
   procedureExports: [
     {
       ...defaultProcedureExport(),
-      path: "::basic_fungible_faucet::burn",
+      path: "::miden::standards::components::faucets::basic_fungible_faucet::burn",
       digest:
-        "0x3cf2fa0fec35c463ee28b80f719c80963582480a71d5ec3c9c461bb418ca988b",
+        "0xe691b954bc9474baae6948b176642f425ea166970003fcf5666b1e4aa6af5257",
     },
     {
       ...defaultProcedureExport(),
-      path: "::basic_fungible_faucet::distribute",
+      path: "::miden::standards::components::faucets::basic_fungible_faucet::mint_and_send",
       digest:
-        "0xd323717ca61e7fdc3eb4d26447c2fb2a73f20c52496ec550522ea14179f1340d",
+        "0x1a36b822da3f4fc13b08a2865c8c252658ebb04ea721ad31173e2a01850ec6f3",
     },
   ],
 };

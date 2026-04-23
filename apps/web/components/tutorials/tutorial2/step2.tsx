@@ -4,7 +4,7 @@ import useTransactions from "@/hooks/use-transactions";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
 import Step2Content from "@/components/tutorials/tutorial2/step2.mdx";
-import { accountIdFromPrefixSuffix } from "@/lib/types/account";
+import { accountIdFromPrefixSuffix } from "@/lib/utils/account";
 
 const useCompleted = () => {
   const { wallets } = useAccounts();
@@ -13,13 +13,9 @@ const useCompleted = () => {
   const walletB = wallets.find(({ name }) => name === "Wallet B");
   const transaction = transactions.find(({ accountId, outputNotes }) => {
     const [outputNote] = outputNotes;
-    const [suffix = "", prefix = ""] = outputNote?.inputs ?? [];
+    const [suffix = "", prefix = ""] = outputNote?.storage ?? [];
     const targetAccountId = accountIdFromPrefixSuffix(prefix, suffix);
-    return (
-      accountId === walletA?.id &&
-      outputNote?.inputs &&
-      targetAccountId === walletB?.id
-    );
+    return accountId === walletA?.id && targetAccountId === walletB?.id;
   });
   return !!transaction;
 };

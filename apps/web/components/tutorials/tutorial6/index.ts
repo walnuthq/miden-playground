@@ -1,5 +1,6 @@
-import { defaultTutorial, type Tutorial } from "@/lib/types/tutorial";
-import state from "@/components/tutorials/tutorial6/state";
+import type { Tutorial } from "@/lib/types/tutorial";
+import { defaultTutorial } from "@/lib/utils/tutorial";
+import { defaultState } from "@/lib/utils/state";
 import Step1 from "@/components/tutorials/tutorial6/step1";
 import Step2 from "@/components/tutorials/tutorial6/step2";
 import Step3 from "@/components/tutorials/tutorial6/step3";
@@ -18,7 +19,10 @@ const tutorial: Tutorial = {
     "This tutorial will walk you through developing your own custom Counter Contract and deploying it on testnet.",
   category: "advanced",
   initialRoute: "/scripts",
-  state,
+  state: {
+    ...defaultState(),
+    tutorialId: "deploy-a-counter-contract",
+  },
   steps: [Step1, Step2, Step3, Step4, Step5, Step6, Step7],
 };
 

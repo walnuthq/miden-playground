@@ -2,16 +2,17 @@ import { useRouter } from "next/navigation";
 import { useWallet } from "@miden-sdk/miden-wallet-adapter";
 import useGlobalContext from "@/components/global-context/hook";
 import tutorials from "@/components/tutorials";
-import { defaultTutorial } from "@/lib/types/tutorial";
+import { defaultTutorial } from "@/lib/utils/tutorial";
 import useAppState from "@/hooks/use-app-state";
 import { saEvent } from "@/lib/simple-analytics";
 import { sleep } from "@/lib/utils";
+import useNetwork from "@/hooks/use-network";
 
 const useTutorials = () => {
   const router = useRouter();
   const { connected: walletConnected } = useWallet();
+  const { switchNetwork } = useNetwork();
   const {
-    blockNum,
     tutorialId,
     tutorialStep,
     tutorialMaxStep,
@@ -28,12 +29,9 @@ const useTutorials = () => {
     }
     router.push(tutorial.initialRoute);
     await sleep(400);
+    switchNetwork(tutorial.networkId);
     pushState({
       ...tutorial.state,
-      blockNum:
-        tutorial.state.networkId === "mmck"
-          ? tutorial.state.blockNum
-          : blockNum,
       nextStore: tutorial.store,
       completedTutorials,
     });
@@ -52,12 +50,9 @@ const useTutorials = () => {
     await sleep(400);
     const newCompletedTutorials = new Set([...completedTutorials]);
     newCompletedTutorials.add(tutorial.id);
+    switchNetwork(tutorial.networkId);
     pushState({
       ...nextTutorial.state,
-      blockNum:
-        nextTutorial.state.networkId === "mmck"
-          ? nextTutorial.state.blockNum
-          : blockNum,
       nextStore: nextTutorial.store,
       completedTutorials: newCompletedTutorials,
     });
@@ -102,6 +97,9 @@ const useTutorials = () => {
     nextTutorialStepDisabled,
     completedTutorials,
     tutorial: tutorials.find(({ id }) => id === tutorialId),
+    isTutorial:
+      tutorialId === "create-and-fund-wallet" ||
+      tutorialId === "transfer-assets-between-wallets",
     startTutorial,
     nextTutorial,
     previousTutorialStep,

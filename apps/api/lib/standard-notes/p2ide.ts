@@ -1,0 +1,235 @@
+import { type Package, defaultPackage } from "@/lib/types";
+
+export const rust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
+#![no_std]
+#![feature(alloc_error_handler)]
+
+// However, we could still use some standard library types while
+// remaining no-std compatible, if we uncommented the following lines:
+//
+// extern crate alloc;
+// use alloc::vec::Vec;
+
+use miden::*;
+
+use crate::bindings::Account;
+
+fn consume_assets(account: &mut Account) {
+    let assets = active_note::get_assets();
+    for asset in assets {
+        account.receive_asset(asset);
+    }
+}
+
+fn reclaim_assets(account: &mut Account, consuming_account: AccountId) {
+    let creator_account = active_note::get_sender();
+
+    if consuming_account == creator_account {
+        consume_assets(account);
+    } else {
+        panic!();
+    }
+}
+
+#[note]
+struct P2ideNote;
+
+#[note]
+impl P2ideNote {
+    #[note_script]
+    pub fn run(self, _arg: Word, account: &mut Account) {
+        let inputs = active_note::get_storage();
+
+        // make sure the number of inputs is 4
+        assert_eq((inputs.len() as u32).into(), felt!(4));
+
+        // P2IDE storage follows the protocol layout:
+        // [target_account_id_suffix, target_account_id_prefix, reclaim_height, timelock_height]
+        let target_account_id_suffix = inputs[0];
+        let target_account_id_prefix = inputs[1];
+        let reclaim_height = inputs[2];
+        let timelock_height = inputs[3];
+
+        // get block number
+        let block_number = tx::get_block_number();
+        assert!(block_number >= timelock_height);
+
+        // get consuming account id
+        let consuming_account_id = account.get_id();
+
+        // target account id
+        let target_account_id = AccountId::new(target_account_id_prefix, target_account_id_suffix);
+
+        let is_target = target_account_id == consuming_account_id;
+        if is_target {
+            consume_assets(account);
+        } else {
+            assert!(reclaim_height != felt!(0));
+            assert!(block_number >= reclaim_height);
+            reclaim_assets(account, consuming_account_id);
+        }
+    }
+}
+`;
+
+export const masm = `use miden::protocol::active_account
+use miden::protocol::account_id
+use miden::protocol::active_note
+use miden::protocol::tx
+use miden::standards::wallets::basic->basic_wallet
+
+# ERRORS
+# =================================================================================================
+
+const ERR_P2IDE_UNEXPECTED_NUMBER_OF_STORAGE_ITEMS="P2IDE note expects exactly 4 note storage items"
+
+const ERR_P2IDE_RECLAIM_ACCT_IS_NOT_SENDER="failed to reclaim P2IDE note because the reclaiming account is not the sender"
+
+const ERR_P2IDE_RECLAIM_HEIGHT_NOT_REACHED="failed to reclaim P2IDE note because the reclaim block height is not reached yet"
+
+const ERR_P2IDE_RECLAIM_DISABLED="P2IDE reclaim is disabled"
+
+const ERR_P2IDE_TIMELOCK_HEIGHT_NOT_REACHED="failed to consume P2IDE note because the note is still timelocked"
+
+# HELPER PROCEDURES
+# =================================================================================================
+
+#! Helper procedure to check if the P2IDE note is unlocked.
+#!
+#! Inputs:  [current_block_height, timelock_block_height]
+#! Outputs: [current_block_height]
+proc assert_unlocked
+    dup movdn.2
+    # => [current_block_height, timelock_block_height, current_block_height]
+
+    # check timelock_block_height <= current_block_height
+    lte assert.err=ERR_P2IDE_TIMELOCK_HEIGHT_NOT_REACHED
+    # => [current_block_height]
+end
+
+#! Helper procedure which adds the note assets to the sender account.
+#!
+#! Checks if P2IDE reclaim is enabled and if true, if reclaim height has been reached.
+#!
+#! Inputs:  [account_id_suffix, account_id_prefix, current_block_height, reclaim_block_height]
+#! Outputs: []
+#!
+#! Panics if:
+#! - the reclaim of the active note is disabled.
+#! - the reclaim block height is not reached yet.
+#! - the account attempting to reclaim the note is not the sender account.
+proc reclaim_note
+    # check that the reclaim of the active note is enabled
+    movup.3 dup neq.0 assert.err=ERR_P2IDE_RECLAIM_DISABLED
+    # => [reclaim_block_height, account_id_suffix, account_id_prefix, current_block_height]
+
+    # now check that sender is allowed to reclaim, reclaim block height <= current block height
+    movup.3
+    # => [current_block_height, reclaim_block_height, account_id_suffix, account_id_prefix]
+
+    lte assert.err=ERR_P2IDE_RECLAIM_HEIGHT_NOT_REACHED
+    # => [account_id_suffix, account_id_prefix]
+
+    # if active account is not the target, we need to ensure it is the sender
+    exec.active_note::get_sender
+    # => [sender_account_id_suffix, sender_account_id_prefix, account_id_suffix, account_id_prefix]
+
+    # ensure active account ID = sender account ID
+    exec.account_id::is_equal assert.err=ERR_P2IDE_RECLAIM_ACCT_IS_NOT_SENDER
+    # => []
+
+    # add note assets to account
+    exec.basic_wallet::add_assets_to_account
+    # => []
+end
+
+#! Extended Pay-to-ID note script (Reclaimable & Timelockable)
+#!
+#! Adds all assets from the note to the account if all of the following conditions are true:
+#! - The transaction's reference block number is greater than or equal to the note's timelock block height.
+#! - Any of the following conditions is true:
+#!   - The account ID against which the transaction is executed matches the note's target account id.
+#!   - The account ID against which the transaction is executed matches the note's sender account id and
+#!     the transaction's reference block number is greater than or equal to the note's reclaim block height.
+#!
+#! Requires that the account exposes:
+#! - miden::standards::wallets::basic::receive_asset procedure.
+#!
+#! Inputs:  []
+#! Outputs: []
+#!
+#! Note storage is assumed to be as follows:
+#! - target_account_id is the ID of the account for which the note is intended.
+#! - reclaim_block_height is the block height at which the note can be reclaimed by the sender.
+#! - timelock_block_height is the block height at which the note can be consumed by the target.
+#!
+#! Panics if:
+#! - The account does not expose miden::standards::wallets::basic::receive_asset procedure.
+#! - The note is consumed before the timelock expired, i.e. the transaction's reference block
+#!   number is less than the timelock block height.
+#! - Before reclaim block height: the account ID of the executing account is not equal to the specified
+#!   account ID.
+#! - At and after reclaim block height: the account ID of the executing account is not equal to
+#!   the specified account ID or sender account ID.
+#! - The same non-fungible asset already exists in the account.
+#! - Adding a fungible asset would result in an amount overflow, i.e., the total amount would be
+#!   greater than 2^63.
+@note_script
+pub proc main
+    # store the note storage to memory starting at address 0
+    push.0 exec.active_note::get_storage
+    # => [num_storage_items, storage_ptr]
+
+    # make sure the number of storage items is 4
+    eq.4 assert.err=ERR_P2IDE_UNEXPECTED_NUMBER_OF_STORAGE_ITEMS
+    # => [storage_ptr]
+
+    # read the target account ID, reclaim block height, and timelock_block_height from the note storage
+    mem_loadw_le
+    # => [target_account_id_suffix, target_account_id_prefix, reclaim_block_height, timelock_block_height]
+
+    movup.3
+    # => [timelock_block_height, target_account_id_suffix, target_account_id_prefix, reclaim_block_height]
+
+    # read the current block number
+    exec.tx::get_block_number
+    # => [current_block_height, timelock_block_height, target_account_id_suffix, target_account_id_prefix, reclaim_block_height]
+
+    # assert note is unlocked
+    exec.assert_unlocked
+    # => [current_block_height, target_account_id_suffix, target_account_id_prefix, reclaim_block_height]
+
+    # get active account id
+    exec.active_account::get_id dup.1 dup.1
+    # => [account_id_suffix, account_id_prefix, account_id_suffix, account_id_prefix, current_block_height, target_account_id_suffix, target_account_id_prefix, reclaim_block_height]
+
+    # determine if the active account is the target account
+    movup.6 movup.6 exec.account_id::is_equal
+    # => [is_target, account_id_suffix, account_id_prefix, current_block_height, reclaim_block_height]
+
+    if.true
+        # we can safely consume the note since the active account is the target of the note
+        dropw exec.basic_wallet::add_assets_to_account
+        # => []
+
+    else
+        # checks if active account is sender and if reclaim is enabled
+        exec.reclaim_note
+        # => []
+    end
+
+    # => []
+end
+`;
+
+const p2ide: Package = {
+  ...defaultPackage(),
+  id: "p2ide",
+  name: "p2ide",
+  type: "note-script",
+  rust,
+  masm,
+  digest: "0xe32225e1fc4aa2b531e400922ef0f57349cefe195c5f74c7f736dad2aba02875",
+};
+
+export default p2ide;

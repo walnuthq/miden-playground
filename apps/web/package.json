@@ -19,19 +19,19 @@
   "dependencies": {
     "@mdx-js/loader": "^3.1.1",
     "@mdx-js/react": "^3.1.1",
-    "@miden-sdk/miden-sdk": "0.13.3",
-    "@miden-sdk/miden-wallet-adapter": "0.13.6",
-    "@miden-sdk/react": "0.13.3",
+    "@miden-sdk/miden-sdk": "0.14.4",
+    "@miden-sdk/miden-wallet-adapter": "0.14.3",
+    "@miden-sdk/react": "0.14.4",
     "@monaco-editor/react": "^4.7.0",
-    "@next/mdx": "^16.2.3",
-    "@opennextjs/cloudflare": "^1.18.1",
-    "@openzeppelin/miden-multisig-client": "^0.13.4",
-    "@tanstack/react-query": "^5.97.0",
+    "@next/mdx": "^16.2.4",
+    "@opennextjs/cloudflare": "^1.19.3",
+    "@openzeppelin/miden-multisig-client": "^0.14.3",
+    "@tanstack/react-query": "^5.99.2",
     "@tanstack/react-table": "^8.21.3",
     "@workspace/ui": "workspace:*",
     "lodash": "^4.18.1",
     "lucide-react": "^1.8.0",
-    "next": "^16.2.3",
+    "next": "^16.2.4",
     "next-themes": "^0.4.6",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
@@ -39,19 +39,18 @@
     "smol-toml": "^1.6.1",
     "sonner": "^2.0.7",
     "usehooks-ts": "^3.1.1",
-    "uuid": "^13.0.0",
-    "viem": "^2.47.11"
+    "uuid": "^14.0.0"
   },
   "devDependencies": {
     "@types/lodash": "^4.17.24",
     "@types/mdx": "^2.0.13",
-    "@types/node": "^25.5.2",
+    "@types/node": "^25.6.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@workspace/eslint-config": "workspace:^",
     "@workspace/typescript-config": "workspace:*",
     "eslint": "^9.39.4",
     "typescript": "^5.9.3",
-    "wrangler": "^4.81.0"
+    "wrangler": "^4.84.1"
   }
 }

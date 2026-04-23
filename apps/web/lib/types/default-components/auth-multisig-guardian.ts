@@ -1,4 +1,5 @@
-import { type Component, defaultComponent } from "@/lib/types/component";
+import type { Component } from "@/lib/types/component";
+import { defaultComponent } from "@/lib/utils/component";
 
 const authMultisigGuardian: Component = {
   ...defaultComponent(),

@@ -72,11 +72,11 @@ const SandboxEnvironments = () => (
     </div>
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       <NewSandboxCard networkId="mtst" />
-      <NewSandboxCard networkId="mdev" />
-      <NewSandboxCard networkId="mmck" />
-      {process.env.NODE_ENV === "development" && (
+      {/* <NewSandboxCard networkId="mdev" /> */}
+      {/* <NewSandboxCard networkId="mmck" /> */}
+      {/* process.env.NODE_ENV === "development" && (
         <NewSandboxCard networkId="mlcl" />
-      )}
+      )*/}
     </div>
   </>
 );

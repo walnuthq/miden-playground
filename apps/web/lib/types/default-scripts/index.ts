@@ -1,5 +1,4 @@
-import authEcdsaK256Keccak from "@/lib/types/default-scripts/auth-ecdsa-k256-keccak";
-import authFalcon512Rpo from "@/lib/types/default-scripts/auth-falcon-512-rpo";
+import authSingleSig from "@/lib/types/default-scripts/auth-single-sig";
 import authMultisigGuardian from "@/lib/types/default-scripts/auth-multisig-guardian";
 import authNoAuth from "@/lib/types/default-scripts/auth-no-auth";
 import base from "@/lib/types/default-scripts/base";
@@ -11,8 +10,7 @@ import p2id from "@/lib/types/default-scripts/p2id";
 import std from "@/lib/types/default-scripts/std";
 
 const defaultScripts = [
-  authEcdsaK256Keccak,
-  authFalcon512Rpo,
+  authSingleSig,
   authMultisigGuardian,
   authNoAuth,
   base,

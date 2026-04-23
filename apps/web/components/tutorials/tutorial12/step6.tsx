@@ -4,10 +4,8 @@ import useAccounts from "@/hooks/use-accounts";
 import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import Step6Content from "@/components/tutorials/tutorial12/step6.mdx";
-import useWebClient from "@/hooks/use-web-client";
-import { accountIdToAddress } from "@/lib/web-client";
-import useMidenSdk from "@/hooks/use-miden-sdk";
-import useGlobalContext from "@/components/global-context/hook";
+import { normalizeAccountId, useMiden } from "@miden-sdk/react";
+import useNetwork from "@/hooks/use-network";
 
 const useCompleted = () => {
   const { multisigs } = useAccounts();
@@ -20,31 +18,24 @@ const Step6: TutorialStep = {
   title: "Restore your guardian wallet.",
   Content: () => {
     const completed = useCompleted();
-    const { midenSdk } = useMidenSdk();
-    const { client } = useWebClient();
-    const { networkId } = useGlobalContext();
+    // const { client } = useMiden();
+    const { networkId } = useNetwork();
     const [address, setAddress] = useState("");
-    useEffect(() => {
-      if (!client) {
-        return;
-      }
-      const getMultisigWalletAddress = async () => {
-        const accounts = await client.getAccounts();
-        const multisig = accounts.find(
-          (account) =>
-            account.codeCommitment().toHex() ===
-            "0xda13c649b0aca3c630d42eaf2c79fd003147c2a1d9259636498952dd3a5173e7",
-        );
-        setAddress(
-          accountIdToAddress({
-            accountId: multisig?.id().toString() ?? "",
-            networkId,
-            midenSdk,
-          }),
-        );
-      };
-      getMultisigWalletAddress();
-    }, [midenSdk, client, networkId]);
+    // useEffect(() => {
+    //   if (!client) {
+    //     return;
+    //   }
+    //   const getMultisigWalletAddress = async () => {
+    //     const accounts = await client.getAccounts();
+    //     const multisig = accounts.find(
+    //       (account) =>
+    //         account.codeCommitment().toHex() ===
+    //         "0xda13c649b0aca3c630d42eaf2c79fd003147c2a1d9259636498952dd3a5173e7",
+    //     );
+    //     setAddress(normalizeAccountId(multisig?.id().toString() ?? ""));
+    //   };
+    //   getMultisigWalletAddress();
+    // }, [client, networkId]);
     return (
       <>
         <Step6Content account={{ name: "Guardian Wallet", address }} />

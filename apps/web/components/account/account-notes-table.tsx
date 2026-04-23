@@ -30,14 +30,11 @@ import {
   ConsumeTransaction,
   type MidenWalletAdapter,
 } from "@miden-sdk/miden-wallet-adapter";
-import useGlobalContext from "@/components/global-context/hook";
 import useScripts from "@/hooks/use-scripts";
-import { formatAmount } from "@/lib/utils";
-import useWebClient from "@/hooks/use-web-client";
-import useMidenSdk from "@/hooks/use-miden-sdk";
+import { formatAmount } from "@/lib/utils/asset";
 import { clientExportInputNoteFile } from "@/lib/web-client";
-import { accountIdToAddress } from "@/lib/web-client";
-import useMultisig from "@/hooks/use-multisig";
+import { normalizeAccountId, useMiden } from "@miden-sdk/react";
+// import useMultisig from "@/hooks/use-multisig";
 
 const NoteActionsCell = ({
   account,
@@ -46,12 +43,10 @@ const NoteActionsCell = ({
   account: Account;
   inputNote: InputNote;
 }) => {
-  const { midenSdk } = useMidenSdk();
-  const { client } = useWebClient();
+  const { client } = useMiden();
   const { wallet } = useWallet();
-  const { loadMultisig, createConsumeNotesProposal } = useMultisig();
-  const { networkId } = useGlobalContext();
-  const { faucets } = useAccounts();
+  // const { loadMultisig, createConsumeNotesProposal } = useMultisig();
+  const { faucets, connectedWallet } = useAccounts();
   const { openCreateTransactionDialog, newConsumeTransactionRequest } =
     useTransactions();
   const [loading, setLoading] = useState(false);
@@ -66,11 +61,44 @@ const NoteActionsCell = ({
       <DropdownMenuContent align="end">
         <DropdownMenuItem
           onClick={async () => {
-            if (
-              networkId === "mmck" ||
-              account.components.includes("auth-no-auth") ||
-              account.components.includes("auth-ecdsa-k256-keccak")
-            ) {
+            if (connectedWallet?.id === account.id) {
+              if (!client) {
+                throw new Error("MidenClient not ready");
+              }
+              const [fungibleAsset] = inputNote.fungibleAssets;
+              const faucet = faucets.find(
+                ({ id }) => id === fungibleAsset?.faucetId,
+              );
+              if (!wallet || !fungibleAsset || !faucet) {
+                return;
+              }
+              const noteFileBytes =
+                inputNote.type === "public"
+                  ? undefined
+                  : await clientExportInputNoteFile({
+                      client,
+                      noteId: inputNote.id,
+                    });
+              const transaction = new ConsumeTransaction(
+                faucet.identifier,
+                inputNote.id,
+                inputNote.type === "public" ? "public" : "private",
+                Number(fungibleAsset.amount),
+                noteFileBytes,
+              );
+              const adapter = wallet.adapter as MidenWalletAdapter;
+              const txId = await adapter.requestConsume(transaction);
+              console.log({ txId });
+            } else if (account.multisig) {
+              // const multisig = await loadMultisig(account.id);
+              // if (!multisig) {
+              //   return;
+              // }
+              // await createConsumeNotesProposal({
+              //   multisig,
+              //   noteIds: [inputNote.id],
+              // });
+            } else {
               setLoading(true);
               const { transactionRequest, transactionResult } =
                 await newConsumeTransactionRequest({
@@ -85,41 +113,6 @@ const NoteActionsCell = ({
                 transactionRequest,
                 transactionResult,
               });
-            } else if (account.multisig) {
-              const multisig = await loadMultisig(account.id);
-              if (!multisig) {
-                return;
-              }
-              await createConsumeNotesProposal({
-                multisig,
-                noteIds: [inputNote.id],
-              });
-            } else {
-              const [fungibleAsset] = inputNote.fungibleAssets;
-              const faucet = faucets.find(
-                ({ id }) => id === fungibleAsset?.faucetId,
-              );
-              if (!wallet || !fungibleAsset || !faucet) {
-                return;
-              }
-              const noteFileBytes =
-                inputNote.type === "public"
-                  ? undefined
-                  : await clientExportInputNoteFile({
-                      client,
-                      noteId: inputNote.id,
-                      midenSdk,
-                    });
-              const transaction = new ConsumeTransaction(
-                faucet.identifier,
-                inputNote.id,
-                inputNote.type === "public" ? "public" : "private",
-                Number(fungibleAsset.amount),
-                noteFileBytes,
-              );
-              const adapter = wallet.adapter as MidenWalletAdapter;
-              const txId = await adapter.requestConsume(transaction);
-              console.log({ txId });
             }
           }}
         >
@@ -131,19 +124,13 @@ const NoteActionsCell = ({
 };
 
 const AccountNotesTable = ({ account }: { account: Account }) => {
-  const { midenSdk } = useMidenSdk();
-  const { networkId } = useGlobalContext();
-  const { accounts, faucets, connectedWallet } = useAccounts();
+  const { accounts, faucets, isAuthorized } = useAccounts();
   const { inputNotes } = useNotes();
   const { scripts } = useScripts();
   const consumableNotes = account.consumableNoteIds
     .map((noteId) => inputNotes.find(({ id }) => id === noteId))
     .filter((note) => note !== undefined);
-  const showNoteActions =
-    networkId === "mmck" ||
-    connectedWallet?.address === account.address ||
-    account.components.includes("auth-no-auth") ||
-    account.multisig;
+  const showNoteActions = isAuthorized(account);
   return (
     <div className="rounded-md border">
       <Table>
@@ -163,11 +150,7 @@ const AccountNotesTable = ({ account }: { account: Account }) => {
               ({ digest }) => digest === inputNote.scriptRoot,
             );
             const sender = accounts.find(({ id }) => id === inputNote.senderId);
-            const senderAddress = accountIdToAddress({
-              accountId: inputNote.senderId,
-              networkId,
-              midenSdk,
-            });
+            const senderAddress = normalizeAccountId(inputNote.senderId);
             return (
               <TableRow key={inputNote.id}>
                 <TableCell>

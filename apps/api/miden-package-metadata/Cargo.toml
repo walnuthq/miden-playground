@@ -4,7 +4,9 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-miden-mast-package = "0.20.6"
-serde = "1.0.228"
-serde_json = "1.0.149"
-winter-utils = "0.13.1"
+anyhow = "1.0"
+clap = { version = "4", features = ["derive"] }
+miden-mast-package = "0.22"
+miden-serde-utils = "0.23"
+serde = "1.0"
+serde_json = "1.0"

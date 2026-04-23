@@ -17,13 +17,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@workspace/ui/components/popover";
-import {
-  type ConsumableNoteRecord as WasmConsumableNoteRecordType,
-  type InputNoteRecord as WasmInputNoteRecordType,
+import type {
+  ConsumableNoteRecord as WasmConsumableNoteRecordType,
+  InputNoteRecord as WasmInputNoteRecordType,
 } from "@miden-sdk/miden-sdk";
 import useAccounts from "@/hooks/use-accounts";
-import { type Account } from "@/lib/types/account";
-import { formatAmount } from "@/lib/utils";
+import type { Account } from "@/lib/types/account";
+import { formatAmount } from "@/lib/utils/asset";
 
 const getConsumableNoteFields = (
   inputNoteRecord: WasmInputNoteRecordType,

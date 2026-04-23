@@ -30,13 +30,13 @@ These imports provide:
 struct CounterContract {
     /// Storage map holding the counter value.
     #[storage(description = "...")]
-    count_map: StorageMap,
+    count_map: StorageMap<Word, Felt>,
 }
 ```
 
 The **`#[component]`** attribute marks this as a Miden component.
 The **`count_map`** field is a **`StorageMap`** stored in a named storage slot of the account.
-In v0.13, storage slots are identified by name rather than explicit index numbers — the slot name is derived automatically from the component's package name and field name (e.g., **`miden::component::miden_counter_account::count_map`**).
+In v0.13, storage slots are identified by name rather than explicit index numbers — the slot name is derived automatically from the component's package name and field name (e.g., **`miden_counter_account::count_map`**).
 
 **Important**: Storage slots in Miden hold **`Word`** values, which are composed of four field elements (**`Felt`**).
 Each **`Felt`** is a 64-bit unsigned integer (u64).

@@ -1,7 +1,7 @@
 "use client";
-import { accountTypes, type Account } from "@/lib/types/account";
-import { type ColumnDef } from "@tanstack/react-table";
 import { MoreVertical } from "lucide-react";
+import { useMiden } from "@miden-sdk/react";
+import { type ColumnDef } from "@tanstack/react-table";
 import { Button } from "@workspace/ui/components/button";
 import { Badge } from "@workspace/ui/components/badge";
 import {
@@ -10,22 +10,33 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
+import { accountTypes, type Account } from "@/lib/types/account";
+import useNetwork from "@/hooks/use-network";
 import useTransactions from "@/hooks/use-transactions";
 import AccountAddress from "@/components/lib/account-address";
-import { clientGetConsumableNotes } from "@/lib/web-client";
 import useAccounts from "@/hooks/use-accounts";
-import useMidenSdk from "@/hooks/use-miden-sdk";
-import useWebClient from "@/hooks/use-web-client";
-import { MIDEN_FAUCET_ADDRESS } from "@/lib/constants";
+import useTutorials from "@/hooks/use-tutorials";
+import { midenFaucetAddress } from "@/lib/constants";
+import { clientGetConsumableNotes } from "@/lib/web-client";
 
 const AccountActionsCell = ({ account }: { account: Account }) => {
-  const { midenSdk } = useMidenSdk();
-  const { client } = useWebClient();
+  const { networkId } = useNetwork();
+  const { client } = useMiden();
   const { connectedWallet, deleteAccount } = useAccounts();
   const { openCreateTransactionDialog } = useTransactions();
+  const { isTutorial } = useTutorials();
+  const showMint = (isTutorial || networkId === "mmck") && account.isFaucet;
+  const showConsumeSend =
+    (isTutorial ||
+      networkId === "mmck" ||
+      connectedWallet?.address === account.address) &&
+    !account.isFaucet;
   const showDeleteAccount =
     account.address !== connectedWallet?.address &&
-    account.address !== MIDEN_FAUCET_ADDRESS;
+    account.address !== midenFaucetAddress(networkId);
+  if (!showMint && !showConsumeSend && !showDeleteAccount) {
+    return null;
+  }
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -35,7 +46,7 @@ const AccountActionsCell = ({ account }: { account: Account }) => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        {account.isFaucet ? (
+        {showMint && (
           <DropdownMenuItem
             onClick={() =>
               openCreateTransactionDialog({
@@ -47,14 +58,17 @@ const AccountActionsCell = ({ account }: { account: Account }) => {
           >
             New mint transaction
           </DropdownMenuItem>
-        ) : (
+        )}
+        {showConsumeSend && (
           <>
             <DropdownMenuItem
               onClick={async () => {
+                if (!client) {
+                  return;
+                }
                 const consumableNotes = await clientGetConsumableNotes({
                   client,
                   accountId: account.id,
-                  midenSdk,
                 });
                 openCreateTransactionDialog({
                   accountId: account.id,

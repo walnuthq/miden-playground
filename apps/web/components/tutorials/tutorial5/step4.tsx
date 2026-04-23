@@ -4,22 +4,26 @@ import useAccounts from "@/hooks/use-accounts";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
 import Step4Content from "@/components/tutorials/tutorial5/step4.mdx";
-import { COUNTER_CONTRACT_ADDRESS } from "@/lib/constants";
-import { getIdentifierPart } from "@/lib/types/account";
+import { counterContractAddress } from "@/lib/constants";
+import { getIdentifierPart } from "@/lib/utils/account";
+import useNetwork from "@/hooks/use-network";
 
 const useCompleted = () => {
   const pathname = usePathname();
+  const { networkId } = useNetwork();
   return (
-    pathname === `/accounts/${getIdentifierPart(COUNTER_CONTRACT_ADDRESS)}`
+    pathname ===
+    `/accounts/${getIdentifierPart(counterContractAddress(networkId))}`
   );
 };
 
 const Step4: TutorialStep = {
   title: "Import the Counter Contract.",
   Content: () => {
+    const { networkId } = useNetwork();
     const { accounts } = useAccounts();
     const counter = accounts.find(
-      ({ address }) => address === COUNTER_CONTRACT_ADDRESS,
+      ({ address }) => address === counterContractAddress(networkId),
     );
     const completed = useCompleted();
     return (
@@ -27,8 +31,8 @@ const Step4: TutorialStep = {
         <Step4Content
           counter={{
             name: "Counter Contract",
-            address: COUNTER_CONTRACT_ADDRESS,
-            identifier: getIdentifierPart(COUNTER_CONTRACT_ADDRESS),
+            address: counterContractAddress(networkId),
+            identifier: getIdentifierPart(counterContractAddress(networkId)),
           }}
           withLink={!!counter}
         />

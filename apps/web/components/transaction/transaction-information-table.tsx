@@ -6,15 +6,15 @@ import {
   TableRow,
 } from "@workspace/ui/components/table";
 import AccountAddress from "@/components/lib/account-address";
-import useGlobalContext from "@/components/global-context/hook";
-import { MIDEN_EXPLORER_URL } from "@/lib/constants";
+import { midenExplorerUrl } from "@/lib/constants";
+import useNetwork from "@/hooks/use-network";
 
 const TransactionInformationTable = ({
   transaction,
 }: {
   transaction: Transaction;
 }) => {
-  const { networkId } = useGlobalContext();
+  const { networkId } = useNetwork();
   return (
     <div className="rounded-md border">
       <Table>
@@ -24,7 +24,7 @@ const TransactionInformationTable = ({
             <TableCell>
               {networkId !== "mmck" ? (
                 <a
-                  href={`${MIDEN_EXPLORER_URL}/tx/${transaction.id}`}
+                  href={`${midenExplorerUrl(networkId)}/tx/${transaction.id}`}
                   className="text-primary font-medium underline underline-offset-4"
                   target="_blank"
                   rel="noreferrer"
@@ -42,7 +42,7 @@ const TransactionInformationTable = ({
           </TableRow>
           <TableRow>
             <TableCell>Account ID</TableCell>
-            <TableCell>
+            <TableCell className="px-3">
               <AccountAddress id={transaction.accountId} />
             </TableCell>
           </TableRow>

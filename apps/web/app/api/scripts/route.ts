@@ -1,16 +1,16 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { v4 } from "uuid";
+import { randomUUID } from "node:crypto";
 import counterMapContract from "@/lib/types/default-scripts/counter-map-contract";
 import timelockP2id from "@/lib/types/default-scripts/timelock-p2id";
 import counterNote from "@/lib/types/default-scripts/counter-note";
 import { sleep } from "@/lib/utils";
-import {
-  type ScriptType,
-  type ScriptExample,
-  type Dependency,
-  defaultScript,
-  type Script,
+import type {
+  ScriptType,
+  ScriptExample,
+  Dependency,
+  Script,
 } from "@/lib/types/script";
+import { defaultScript } from "@/lib/utils/script";
 
 type CreateScriptRequestBody = {
   name: string;
@@ -42,10 +42,10 @@ export const POST = async (request: NextRequest) => {
   try {
     const body = await request.json();
     const { name, type, example } = body as CreateScriptRequestBody;
-    const id = `${example}_${v4()}`;
+    const id = `${example}_${randomUUID()}`;
     const rust = scriptsRust[example];
     const dependencies = scriptsDependencies[example];
-    await sleep(1000);
+    await sleep(400);
     return NextResponse.json<CreateScriptResponse>({
       package: { id, name, type, rust, dependencies },
     });

@@ -17,7 +17,6 @@ export type AccountAction =
       payload: {
         account: Account;
         inputNotes: InputNote[];
-        blockNum: number;
       };
     }
   | {
@@ -108,7 +107,6 @@ const reducer = (state: State, action: AccountAction): State => {
         ...state,
         accounts: [...state.accounts, action.payload.account],
         inputNotes: [...state.inputNotes, ...filteredInputNotes],
-        blockNum: action.payload.blockNum,
       };
     }
     case "OPEN_CREATE_WALLET_DIALOG": {

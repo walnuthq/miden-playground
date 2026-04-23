@@ -4,7 +4,7 @@ It must have the following body:
 ```rust
 /// Resets the counter value to zero
 pub fn reset_count(&mut self) {
-    let key = Word::from_u64_unchecked(0, 0, 0, 1);
+    let key = Word::new([felt!(1), felt!(0), felt!(0), felt!(0)]);
     self.count_map.set(key, felt!(0));
 }
 ```

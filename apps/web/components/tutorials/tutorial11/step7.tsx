@@ -5,8 +5,8 @@ import Step7Content from "@/components/tutorials/tutorial11/step7.mdx";
 import useAccounts from "@/hooks/use-accounts";
 import useScripts from "@/hooks/use-scripts";
 import { defaultScriptIds } from "@/lib/types/default-scripts";
-import { storageSlotName } from "@/lib/types/component";
-import { getMapItem } from "@/lib/types/account";
+import { storageSlotName } from "@/lib/utils/component";
+import { getMapItem } from "@/lib/utils/account";
 import { EMPTY_WORD } from "@/lib/constants";
 
 const useCompleted = () => {
@@ -25,10 +25,11 @@ const useCompleted = () => {
         name ===
         storageSlotName({
           packageName: script?.name ?? "",
+          componentStruct: "CounterContract",
           fieldName: "count_map",
         }),
     ),
-    "0x0000000000000000000000000000000000000000000000000100000000000000",
+    "0x0100000000000000000000000000000000000000000000000000000000000000",
   );
   return counter.nonce > 0 && count === EMPTY_WORD;
 };

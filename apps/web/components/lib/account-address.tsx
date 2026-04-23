@@ -5,8 +5,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@workspace/ui/components/tooltip";
-import { formatAddress, getIdentifierPart } from "@/lib/types/account";
-import useGlobalContext from "@/components/global-context/hook";
+import { formatAddress, getIdentifierPart } from "@/lib/utils/account";
+import useNetwork from "@/hooks/use-network";
 import useAccounts from "@/hooks/use-accounts";
 import CopyButton from "@/components/lib/copy-button";
 
@@ -29,7 +29,7 @@ const AccountAddress = ({
   withCopyButton?: boolean;
   withName?: boolean;
 }) => {
-  const { networkId } = useGlobalContext();
+  const { networkId } = useNetwork();
   const { accounts } = useAccounts();
   const displayedAccount =
     account ??

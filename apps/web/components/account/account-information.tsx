@@ -5,12 +5,15 @@ import AccountNotesTable from "@/components/account/account-notes-table";
 import { Separator } from "@workspace/ui/components/separator";
 import { Button } from "@workspace/ui/components/button";
 import useTransactions from "@/hooks/use-transactions";
-import useGlobalContext from "@/components/global-context/hook";
+import useNetwork from "@/hooks/use-network";
+import useTutorials from "@/hooks/use-tutorials";
 
 const AccountInformation = ({ account }: { account: Account }) => {
-  const { networkId } = useGlobalContext();
+  const { networkId } = useNetwork();
   const { openCreateTransactionDialog, newConsumeTransactionRequest } =
     useTransactions();
+  const { isTutorial } = useTutorials();
+  const showConsumeAllNotesButton = isTutorial || networkId === "mmck";
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-2">
@@ -49,7 +52,7 @@ const AccountInformation = ({ account }: { account: Account }) => {
                   This account has pending notes that can be consumed.
                 </p>
               </div>
-              {networkId === "mmck" && (
+              {showConsumeAllNotesButton && (
                 <Button
                   variant="outline"
                   onClick={async () => {

@@ -12,7 +12,7 @@ import {
   type TransactionRecord as WasmTransactionRecordType,
 } from "@miden-sdk/miden-sdk";
 import useAccounts from "@/hooks/use-accounts";
-import { defaultStorageItem } from "@/lib/types/account";
+import { defaultStorageItem } from "@/lib/utils/account";
 
 const SubmitTransactionToastDescription = ({
   transactionRecord,
@@ -63,6 +63,7 @@ const TransactionPreview = ({
     .values()
     .map((word) => word.toHex());
   const storageDelta = accountStorage
+    .filter(({ type }) => type === "value")
     .map((before, index) =>
       storageDeltaValues[index] !== undefined &&
       before.item !== storageDeltaValues[index]

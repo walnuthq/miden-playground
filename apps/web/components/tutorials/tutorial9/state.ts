@@ -1,4 +1,5 @@
-import { type State, defaultState } from "@/lib/types/state";
+import type { State } from "@/lib/types/state";
+import { defaultState } from "@/lib/utils/state";
 import defaultScripts from "@/lib/types/default-scripts";
 import countReaderScript from "@/lib/types/default-scripts/count-reader";
 import counterContractScript from "@/lib/types/default-scripts/counter-contract";
@@ -9,23 +10,24 @@ import {
   defaultAccount,
   getIdentifierPart,
   getRoutingParametersPart,
-} from "@/lib/types/account";
+} from "@/lib/utils/account";
 import {
-  COUNTER_CONTRACT_ACCOUNT_ID,
-  COUNTER_CONTRACT_ADDRESS,
+  counterContractAccountId,
+  counterContractAddress,
 } from "@/lib/constants";
 
 const state: State = {
   ...defaultState(),
-  networkId: "mtst",
   accounts: [
     {
       ...defaultAccount(),
-      id: COUNTER_CONTRACT_ACCOUNT_ID,
+      id: counterContractAccountId("mtst"),
       name: "Counter Contract",
-      address: COUNTER_CONTRACT_ADDRESS,
-      identifier: getIdentifierPart(COUNTER_CONTRACT_ADDRESS),
-      routingParameters: getRoutingParametersPart(COUNTER_CONTRACT_ADDRESS),
+      address: counterContractAddress("mtst"),
+      identifier: getIdentifierPart(counterContractAddress("mtst")),
+      routingParameters: getRoutingParametersPart(
+        counterContractAddress("mtst"),
+      ),
       type: "regular-account-updatable-code",
       storageMode: "public",
       isFaucet: false,

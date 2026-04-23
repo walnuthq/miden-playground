@@ -1,4 +1,5 @@
-import { type Script, defaultScript } from "@/lib/types/script";
+import type { Script } from "@/lib/types/script";
+import { defaultScript } from "@/lib/utils/script";
 
 const std: Script = {
   ...defaultScript(),

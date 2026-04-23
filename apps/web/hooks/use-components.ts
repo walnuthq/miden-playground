@@ -1,12 +1,11 @@
 import { kebabCase } from "lodash";
-import { v4 } from "uuid";
 import useGlobalContext from "@/components/global-context/hook";
-import {
-  type Component,
-  type ComponentType,
-  type StorageSlot,
-  defaultComponent,
+import type {
+  Component,
+  ComponentType,
+  StorageSlot,
 } from "@/lib/types/component";
+import { defaultComponent } from "@/lib/utils/component";
 
 const useComponents = () => {
   const {
@@ -14,7 +13,7 @@ const useComponents = () => {
     createComponentDialogOpen,
     upsertStorageSlotDialogOpen,
     upsertStorageSlotDialogComponentId,
-    upsertStorageSlotDialogStorageSlotIndex,
+    upsertStorageSlotDialogStorageSlotName,
     dispatch,
   } = useGlobalContext();
   const openCreateComponentDialog = () =>
@@ -23,14 +22,14 @@ const useComponents = () => {
     dispatch({ type: "CLOSE_CREATE_COMPONENT_DIALOG" });
   const openUpsertStorageSlotDialog = ({
     componentId,
-    storageSlotIndex,
+    storageSlotName,
   }: {
     componentId: string;
-    storageSlotIndex: number;
+    storageSlotName: string;
   }) =>
     dispatch({
       type: "OPEN_UPSERT_STORAGE_SLOT_DIALOG",
-      payload: { componentId, storageSlotIndex },
+      payload: { componentId, storageSlotName },
     });
   const closeUpsertStorageSlotDialog = () =>
     dispatch({ type: "CLOSE_UPSERT_STORAGE_SLOT_DIALOG" });
@@ -47,12 +46,11 @@ const useComponents = () => {
   }) => {
     const component: Component = {
       ...defaultComponent(),
-      id: `${kebabCase(name)}_${v4()}`,
+      id: `${kebabCase(name)}_${crypto.randomUUID()}`,
       name,
       type,
       scriptId,
       storageSlots,
-      updatedAt: Date.now(),
     };
     dispatch({
       type: "NEW_COMPONENT",
@@ -70,7 +68,7 @@ const useComponents = () => {
     createComponentDialogOpen,
     upsertStorageSlotDialogOpen,
     upsertStorageSlotDialogComponentId,
-    upsertStorageSlotDialogStorageSlotIndex,
+    upsertStorageSlotDialogStorageSlotName,
     openCreateComponentDialog,
     closeCreateComponentDialog,
     openUpsertStorageSlotDialog,

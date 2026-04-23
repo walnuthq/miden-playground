@@ -32,11 +32,6 @@ export type Action =
 
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
-    case "SWITCH_NETWORK":
-    case "MOCK_WEB_CLIENT_INITIALIZING":
-    case "MOCK_WEB_CLIENT_INITIALIZED":
-    case "WEB_CLIENT_INITIALIZING":
-    case "WEB_CLIENT_INITIALIZED":
     case "SYNCING_STATE":
     case "SYNC_STATE":
     case "PUSH_STATE":
