@@ -1,11 +1,11 @@
-import { dirname } from "path";
-import { fileURLToPath } from "url";
+// import { dirname } from "path";
+// import { fileURLToPath } from "url";
 import type { NextConfig } from "next";
 import createMDX from "@next/mdx";
 
 const nextConfig: NextConfig = {
   transpilePackages: ["@workspace/ui"],
-  webpack: (config, { dev, webpack }) => {
+  webpack: (config /*, { dev, webpack }*/) => {
     // Handle WASM files
     config.experiments = {
       ...config.experiments,
@@ -17,14 +17,14 @@ const nextConfig: NextConfig = {
     //   test: /\.wasm$/,
     //   type: "asset/resource",
     // });
-    if (!dev) {
-      config.plugins.push(
-        new webpack.NormalModuleReplacementPlugin(
-          /\.wasm$/,
-          `${dirname(fileURLToPath(import.meta.url))}/public/wasm/0.13.1/miden_client_web.wasm`,
-        ),
-      );
-    }
+    // if (!dev) {
+    //   config.plugins.push(
+    //     new webpack.NormalModuleReplacementPlugin(
+    //       /\.wasm$/,
+    //       `${dirname(fileURLToPath(import.meta.url))}/public/wasm/0.13.1/miden_client_web.wasm`,
+    //     ),
+    //   );
+    // }
     return config;
   },
   allowedDevOrigins: ["playground.miden.local"],
