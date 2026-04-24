@@ -4,7 +4,7 @@ import {
   clientDeployAccount,
   storageMode,
 } from "@/lib/web-client";
-import { AuthScheme, Address as WasmAddress } from "@miden-sdk/miden-sdk";
+import { /*AuthScheme,*/ Address as WasmAddress } from "@miden-sdk/miden-sdk";
 import useGlobalContext from "@/components/global-context/hook";
 import type {
   AccountStorageMode,
@@ -13,13 +13,12 @@ import type {
 } from "@/lib/types/account";
 import {
   basicWalletAccount,
-  midenFaucetAccount,
   getRoutingParametersPart,
   getIdentifierPart,
 } from "@/lib/utils/account";
 import type { Component } from "@/lib/types/component";
 import useScripts from "@/hooks/use-scripts";
-import { counterContractAddress, midenFaucetAddress } from "@/lib/constants";
+import { counterContractAddress } from "@/lib/constants";
 import { defaultScriptIds } from "@/lib/types/default-scripts";
 import { verifyAccountComponentsFromPackageIds } from "@/lib/api";
 import { toBase64 } from "@/lib/utils";

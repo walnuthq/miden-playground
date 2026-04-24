@@ -11,14 +11,14 @@ import {
 } from "@workspace/ui/components/tabs";
 import { type Script } from "@/lib/types/script";
 import AccountInformation from "@/components/account/account-information";
-// import AccountMultisig from "@/components/account/account-multisig";
+import AccountMultisig from "@/components/account/account-multisig";
 import AccountComponents from "@/components/account/account-components";
 import CreateTransactionDialog from "@/components/transactions/create-transaction-dialog";
 import CreateTransactionDropdownMenu from "@/components/account/create-transaction-dropdown-menu";
 import InvokeProcedureArgumentsDialog from "@/components/account/invoke-procedure-arguments-dialog";
 import VerifyAccountComponentDialog from "@/components/account/verify-account-component-dialog";
 import useNetwork from "@/hooks/use-network";
-// import useMultisig from "@/hooks/use-multisig";
+import useMultisig from "@/hooks/use-multisig";
 
 const Account = ({
   identifier,
@@ -34,7 +34,7 @@ const Account = ({
   const isClient = useIsClient();
   const { accounts, connectedWallet } = useAccounts();
   const { isTutorial } = useTutorials();
-  // const { isMultisigSigner } = useMultisig();
+  const { isMultisigSigner } = useMultisig();
   const account = accounts.find((account) => account.identifier === identifier);
   if (!isClient || !account) {
     return null;
@@ -42,8 +42,8 @@ const Account = ({
   const showCreateTransactionButton =
     isTutorial ||
     networkId === "mmck" ||
-    connectedWallet?.address === account.address; /* ||
-    isMultisigSigner(account);*/
+    connectedWallet?.address === account.address ||
+    isMultisigSigner(account);
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
       <Tabs
@@ -71,11 +71,11 @@ const Account = ({
         <TabsContent value="information">
           <AccountInformation account={account} />
         </TabsContent>
-        {/*account.multisig && (
+        {account.multisig && (
           <TabsContent value="guardian">
             <AccountMultisig account={account} />
           </TabsContent>
-        )*/}
+        )}
         <TabsContent value="components">
           <AccountComponents
             account={account}

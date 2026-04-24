@@ -1,6 +1,6 @@
 import { type Example } from "@/lib/types/example";
 import { defaultProcedureExport, defaultSignature } from "@/lib/utils/script";
-import state from "@/components/home/examples/counter-contract/state";
+import state from "@/lib/examples/counter-contract/state";
 
 const counterContract: Example = {
   id: "counter-account",
@@ -29,7 +29,7 @@ const counterContract: Example = {
       ...defaultProcedureExport(),
       path: "get-count",
       digest:
-        "0xe589c4b6ed1cdd8213e265f842b3b2f8da8093236a3b75e0d56ec9872fbe2604",
+        "0xc8a31db7968e83b2c446d0fcbfabbab5fd752d22d31e293eafe11e018e9cc7a3",
       signature: {
         ...defaultSignature(),
         results: ["Felt"],
@@ -40,7 +40,7 @@ const counterContract: Example = {
       ...defaultProcedureExport(),
       path: "increment-count",
       digest:
-        "0xa1fbf768204b8bb3588d273ce7eb666e7304cd9b9ec71bfb8ccada08e4570deb",
+        "0x630aff54c6265d5847a1f8ce3e007bf2c3e0753edb548a0241387cd6fdc7e386",
       signature: {
         ...defaultSignature(),
         results: ["Felt"],

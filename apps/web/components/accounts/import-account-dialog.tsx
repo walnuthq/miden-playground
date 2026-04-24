@@ -15,7 +15,7 @@ import {
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import useAccounts from "@/hooks/use-accounts";
-// import useMultisig from "@/hooks/use-multisig";
+import useMultisig from "@/hooks/use-multisig";
 import AccountAddress from "@/components/lib/account-address";
 // import useNetwork from "@/hooks/use-network";
 
@@ -27,7 +27,7 @@ const ImportAccountDialog = () => {
     importAccountByAddress,
     closeImportAccountDialog,
   } = useAccounts();
-  // const { importMultisig } = useMultisig();
+  const { importMultisig } = useMultisig();
   const [loading, setLoading] = useState(false);
   return (
     <Dialog
@@ -53,7 +53,7 @@ const ImportAccountDialog = () => {
             try {
               const address = formData.get("address")?.toString() ?? "";
               const importAccount = importAccountDialogMultisig
-                ? importAccountByAddress //importMultisig
+                ? importMultisig
                 : importAccountByAddress;
               const account = await importAccount({
                 name: formData.get("name")?.toString() ?? "",

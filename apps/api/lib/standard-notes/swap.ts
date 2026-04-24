@@ -2,7 +2,119 @@ import { type Package, defaultPackage } from "@/lib/types";
 
 const rust = "";
 
-const masm = "";
+const masm = `use miden::protocol::active_note
+use miden::protocol::asset
+use miden::protocol::output_note
+use miden::standards::wallets::basic->wallet
+
+# CONSTANTS
+# =================================================================================================
+
+const SWAP_NOTE_NUM_STORAGE_ITEMS=14
+
+const REQUESTED_ASSET_PTR=0
+const PAYBACK_RECIPIENT_PTR=8
+const PAYBACK_NOTE_TYPE_PTR=12
+const PAYBACK_NOTE_TAG_PTR=13
+const ASSET_PTR=16
+
+# ERRORS
+# =================================================================================================
+
+const ERR_SWAP_UNEXPECTED_NUMBER_OF_STORAGE_ITEMS="SWAP script expects exactly 14 note storage items"
+
+const ERR_SWAP_WRONG_NUMBER_OF_ASSETS="SWAP script requires exactly 1 note asset"
+
+#! Swap script: adds an asset from the note into consumers account and
+#! creates a note consumable by note issuer containing requested asset.
+#!
+#! Requires that the account exposes:
+#! - miden::standards::wallets::basic::receive_asset procedure.
+#! - miden::standards::wallets::basic::move_asset_to_note procedure.
+#!
+#! Inputs:  [ARGS]
+#! Outputs: []
+#!
+#! Note storage is assumed to be as follows:
+#! - REQUESTED_ASSET_KEY
+#! - REQUESTED_ASSET_VALUE
+#! - PAYBACK_RECIPIENT
+#! - payback_note_type
+#! - payback_note_tag
+#!
+#! Panics if:
+#! - account does not expose miden::standards::wallets::basic::receive_asset procedure.
+#! - account does not expose miden::standards::wallets::basic::move_asset_to_note procedure.
+#! - account vault does not contain the requested asset.
+#! - adding a fungible asset would result in amount overflow, i.e., the total amount would be
+#!   greater than 2^63.
+@note_script
+pub proc main
+    # dropping note args
+    dropw
+    # => []
+
+    # --- create a payback note with the requested asset ----------------
+
+    # store note storage into memory starting at address 0
+    push.0 exec.active_note::get_storage
+    # => [num_storage_items, storage_ptr]
+
+    # check number of storage items
+    eq.SWAP_NOTE_NUM_STORAGE_ITEMS assert.err=ERR_SWAP_UNEXPECTED_NUMBER_OF_STORAGE_ITEMS
+    drop
+    # => []
+
+    padw mem_loadw_le.PAYBACK_RECIPIENT_PTR
+    # => [PAYBACK_NOTE_RECIPIENT]
+
+    # load payback P2ID details
+    mem_load.PAYBACK_NOTE_TYPE_PTR
+    mem_load.PAYBACK_NOTE_TAG_PTR
+    # => [tag, note_type, PAYBACK_NOTE_RECIPIENT]
+
+    # create payback P2ID note
+    exec.output_note::create
+    # => [note_idx]
+
+    padw push.0.0.0 movup.7
+    # => [note_idx, pad(7)]
+
+    push.REQUESTED_ASSET_PTR exec.asset::load
+    # => [REQUESTED_ASSET_KEY, REQUESTED_ASSET_VALUE, note_idx, pad(7)]
+
+    # move asset to the note
+    call.wallet::move_asset_to_note
+    # => [pad(16)]
+
+    dropw dropw
+    # => [pad(8)]
+
+    # --- move assets from the SWAP note into the account -------------------------
+
+    # store the number of note assets to memory starting at address ASSET_PTR
+    push.ASSET_PTR exec.active_note::get_assets
+    # => [num_assets, asset_ptr, pad(8)]
+
+    # make sure the number of assets is 1
+    assert.err=ERR_SWAP_WRONG_NUMBER_OF_ASSETS
+    # => [asset_ptr, pad(8)]
+
+    # load asset
+    exec.asset::load
+    # => [ASSET_KEY, ASSET_VALUE, pad(8)]
+
+    # add the asset to the account
+    call.wallet::receive_asset
+    # => [pad(16)]
+
+    # clearing the stack of padded 0s
+    repeat.4
+        dropw
+    end
+    # => []
+end
+`;
 
 const swap: Package = {
   ...defaultPackage(),

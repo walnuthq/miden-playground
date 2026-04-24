@@ -11,11 +11,12 @@ use miden_client::{
     vm::{Package, PackageExport},
 };
 use miden_client_sqlite_store::ClientBuilderSqliteExt;
-use miden_standards::account::components::{
-    basic_fungible_faucet_library, basic_wallet_library, multisig_library, multisig_psm_library,
-    network_fungible_faucet_library, no_auth_library, singlesig_acl_library, singlesig_library,
-};
-use miden_standards::note::{BurnNote, MintNote, P2idNote, P2ideNote, StandardNote, SwapNote};
+// use miden_standards::account::components::{
+//     basic_fungible_faucet_library, basic_wallet_library, multisig_library, multisig_psm_library,
+//     network_fungible_faucet_library, no_auth_library, singlesig_acl_library, singlesig_library,
+// };
+// use miden_standards::note::{BurnNote, MintNote, P2idNote, P2ideNote, StandardNote, SwapNote};
+use miden_standards::note::StandardNote;
 use std::fs;
 use std::sync::Arc;
 
@@ -56,7 +57,6 @@ fn verify_account_component(account: Account, package_opt: Option<Package>) -> R
                                 PackageExport::Procedure(procedure) => Some(procedure),
                                 _ => None,
                             });
-
                     let verified =
                         procedures.all(|procedure| account.code().has_procedure(procedure.digest));
                     if verified {
@@ -74,7 +74,18 @@ fn verify_note_script(note_script: &NoteScript, package_opt: Option<Package>) ->
     if let Some(standard_note) = StandardNote::from_script(note_script) {
         println!("{}", standard_note.name());
     } else if let Some(package) = package_opt.clone() {
-        if package.digest() == note_script.root() {
+        let mut procedures = package
+            .manifest
+            .exports()
+            .filter_map(|export| match export {
+                PackageExport::Procedure(procedure) => Some(procedure),
+                _ => None,
+            });
+        let run_procedure_opt =
+            procedures.find(|procedure| procedure.path.as_str().ends_with("::run"));
+        if let Some(run_procedure) = run_procedure_opt
+            && run_procedure.digest == note_script.root()
+        {
             println!("Custom({})", package.digest());
         }
     }

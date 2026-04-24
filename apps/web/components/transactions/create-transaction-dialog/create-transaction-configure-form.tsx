@@ -1,7 +1,7 @@
-import { type Dispatch, type SetStateAction } from "react";
-import {
-  type CreateTransactionDialogStep,
-  type TransactionType,
+import type { Dispatch, SetStateAction } from "react";
+import type {
+  CreateTransactionDialogStep,
+  TransactionType,
 } from "@/lib/types/transaction";
 import {
   Select,
@@ -34,7 +34,7 @@ import useScripts from "@/hooks/use-scripts";
 import { createTransactionFromScript } from "@/lib/web-client";
 import { normalizeAccountId } from "@miden-sdk/react";
 import useNetwork from "@/hooks/use-network";
-// import useMultisig from "@/hooks/use-multisig";
+import useMultisig from "@/hooks/use-multisig";
 
 const CreateTransactionConfigureForm = ({
   transactionType,
@@ -88,7 +88,7 @@ const CreateTransactionConfigureForm = ({
     newCustomTransactionRequest,
     closeCreateTransactionDialog,
   } = useTransactions();
-  // const { loadMultisig, createP2idProposal } = useMultisig();
+  const { loadMultisig, createP2idProposal } = useMultisig();
   const { isTutorial } = useTutorials();
   const executingAccount = accounts.find(({ id }) => id === executingAccountId);
   const targetAccount = accounts.find(({ id }) => id === targetAccountId);
@@ -174,19 +174,19 @@ const CreateTransactionConfigureForm = ({
               return;
             }
             if (executingAccount.multisig) {
-              // const multisig = await loadMultisig(executingAccount.id);
-              // if (!multisig) {
-              //   return;
-              // }
-              // await createP2idProposal({
-              //   multisig,
-              //   recipientId: targetAccountId,
-              //   faucetId: faucetAccountId,
-              //   amount: parseAmount(
-              //     formData.get("amount")?.toString() ?? "0",
-              //     decimals,
-              //   ).toString(),
-              // });
+              const multisig = await loadMultisig(executingAccount.id);
+              if (!multisig) {
+                return;
+              }
+              await createP2idProposal({
+                multisig,
+                recipientId: targetAccountId,
+                faucetId: faucetAccountId,
+                amount: parseAmount(
+                  formData.get("amount")?.toString() ?? "0",
+                  decimals,
+                ).toString(),
+              });
               closeCreateTransactionDialog();
             } else {
               const transaction = new SendTransaction(

@@ -67,7 +67,7 @@ export const formatProcedureInputs = (inputs: MidenInput[]) =>
             prefix: string;
             suffix: string;
           };
-          return `push.${prefix}\npush.${suffix}`;
+          return `push.${prefix}.${suffix}`;
         }
         default: {
           return "";

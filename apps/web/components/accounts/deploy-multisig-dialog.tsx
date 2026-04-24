@@ -16,10 +16,10 @@ import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import useAccounts from "@/hooks/use-accounts";
 import AccountAddress from "@/components/lib/account-address";
-// import useMultisig from "@/hooks/use-multisig";
+import useMultisig from "@/hooks/use-multisig";
 
 const DeployMultisigDialog = () => {
-  // const { createMultisig } = useMultisig();
+  const { createMultisig } = useMultisig();
   const {
     // connectedWallet,
     deployMultisigDialogOpen,
@@ -52,15 +52,15 @@ const DeployMultisigDialog = () => {
             event.preventDefault();
             const formData = new FormData(event.currentTarget);
             setLoading(true);
-            // const account = await createMultisig({
-            //   name: formData.get("name")!.toString(),
-            //   threshold: 1, //Number(formData.get("threshold")!.toString()),
-            // });
-            // toast(`${account?.name} has been deployed.`, {
-            //   description: (
-            //     <AccountAddress account={account} withTooltip={false} />
-            //   ),
-            // });
+            const account = await createMultisig({
+              name: formData.get("name")!.toString(),
+              threshold: 1, //Number(formData.get("threshold")!.toString()),
+            });
+            toast(`${account?.name} has been deployed.`, {
+              description: (
+                <AccountAddress account={account} withTooltip={false} />
+              ),
+            });
             onClose();
           }}
         >

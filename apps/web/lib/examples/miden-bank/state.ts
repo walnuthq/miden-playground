@@ -2,10 +2,12 @@ import type { State } from "@/lib/types/state";
 import { defaultState } from "@/lib/utils/state";
 import { storageSlotName, defaultComponent } from "@/lib/utils/component";
 import defaultComponents from "@/lib/types/default-components";
+import { midenFaucetAccount } from "@/lib/utils/account";
 
 const state: State = {
   ...defaultState(),
   exampleId: "bank-account",
+  accounts: [midenFaucetAccount("mtst")],
   components: [
     ...defaultComponents,
     {

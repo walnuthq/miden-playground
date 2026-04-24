@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -9,29 +9,12 @@ import {
 } from "@workspace/ui/components/card";
 import { Button } from "@workspace/ui/components/button";
 import { Spinner } from "@workspace/ui/components/spinner";
-import useAccounts from "@/hooks/use-accounts";
 import type { Example } from "@/lib/types/example";
 import useExamples from "@/hooks/use-examples";
 
-let callingLoadExample = false;
-
 const LaunchExampleCard = ({ example }: { example: Example }) => {
-  const { accounts } = useAccounts();
-  const { exampleId, launchExample, loadExample } = useExamples();
+  const { launchExample } = useExamples();
   const [loading, setLoading] = useState(false);
-  const exampleAccount = accounts.find(({ components }) =>
-    components.includes(example.id),
-  );
-  useEffect(() => {
-    const callLoadExample = async () => {
-      callingLoadExample = true;
-      await loadExample(example);
-      callingLoadExample = false;
-    };
-    if (exampleId === example.id && !exampleAccount && !callingLoadExample) {
-      callLoadExample();
-    }
-  }, [exampleId, example, exampleAccount, loadExample]);
   return (
     <Card>
       <CardHeader className="gap-0">
@@ -46,7 +29,7 @@ const LaunchExampleCard = ({ example }: { example: Example }) => {
           disabled={loading}
           onClick={() => {
             setLoading(true);
-            launchExample(example);
+            launchExample(example.id);
           }}
         >
           {loading && <Spinner />}

@@ -1,6 +1,7 @@
 import type { Tutorial } from "@/lib/types/tutorial";
 import { defaultTutorial } from "@/lib/utils/tutorial";
 import { defaultState } from "@/lib/utils/state";
+import { midenFaucetAccount } from "@/lib/utils/account";
 import Step1 from "@/components/tutorials/tutorial4/step1";
 import Step2 from "@/components/tutorials/tutorial4/step2";
 import Step3 from "@/components/tutorials/tutorial4/step3";
@@ -21,6 +22,7 @@ const tutorial: Tutorial = {
   initialRoute: "/accounts",
   state: {
     ...defaultState(),
+    accounts: [midenFaucetAccount("mtst")],
     tutorialId: "private-transfers",
   },
   steps: [Step1, Step2, Step3, Step4, Step5, Step6, Step7],

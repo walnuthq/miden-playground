@@ -4,11 +4,42 @@ import {
   defaultProcedureExport,
 } from "@/lib/types";
 
+const masm = `# The MASM code of the Multi-Signature Authentication Component.
+#
+# See the \`AuthMultisig\` Rust type's documentation for more details.
+
+use miden::standards::auth::multisig
+
+pub use multisig::update_signers_and_threshold
+pub use multisig::get_threshold_and_num_approvers
+pub use multisig::set_procedure_threshold
+pub use multisig::get_signer_at
+pub use multisig::is_signer
+
+#! Authenticate a transaction with multi-signature support.
+#!
+#! Inputs:
+#!   Operand stack: [SALT]
+#! Outputs:
+#!   Operand stack: []
+#!
+#! Invocation: call
+@auth_script
+pub proc auth_tx_multisig(salt: word)
+    exec.multisig::auth_tx
+    # => [TX_SUMMARY_COMMITMENT]
+
+    exec.multisig::assert_new_tx
+    # => []
+end
+`;
+
 const authFalcon512RpoMultisig: Package = {
   ...defaultPackage(),
   id: "auth-multisig",
   name: "auth-multisig",
   type: "authentication-component",
+  masm,
   digest: "0xe87e60785d676aff840291889154aefe8d92d36d286532977e347fc979b80228",
   exports: [
     {

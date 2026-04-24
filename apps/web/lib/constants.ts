@@ -19,6 +19,9 @@ export const P2IDE_NOTE_CODE =
 export const BASIC_WALLET_CODE =
   "0x0bad1f4a00c7989a3b54f4fcbca767b9f724c7f251ed13a4c1785e2b1a0220bf";
 
+export const GUARDIAN_WALLET_CODE =
+  "0x31cffd84377197f286187f0babd8496848c6711e891db24827ed4102f9f50f57";
+
 export const TESTNET_RPC_URL = "https://rpc.testnet.miden.io";
 export const DEVNET_RPC_URL = "https://rpc.devnet.miden.io";
 export const LOCAL_RPC_URL = "http://localhost:57291";
