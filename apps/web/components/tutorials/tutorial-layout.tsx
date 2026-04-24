@@ -6,7 +6,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@workspace/ui/components/resizable";
-import { type ImperativePanelHandle } from "react-resizable-panels";
+import type { ImperativePanelHandle } from "react-resizable-panels";
 import { useIsClient } from "usehooks-ts";
 import TutorialStep from "@/components/tutorials/tutorial-step";
 import { useIsMobile } from "@workspace/ui/hooks/use-mobile";

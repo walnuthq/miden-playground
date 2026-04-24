@@ -2,8 +2,8 @@
 import { MoreVertical } from "lucide-react";
 import { type InputNote, noteStates } from "@/lib/types/note";
 import { noteConsumed } from "@/lib/utils/note";
-import { formatId } from "@/lib/utils";
-import { type ColumnDef } from "@tanstack/react-table";
+import { formatId, fromBase64 } from "@/lib/utils";
+import type { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@workspace/ui/components/button";
 import { Badge } from "@workspace/ui/components/badge";
 import {
@@ -20,7 +20,6 @@ import {
 import useTransactions from "@/hooks/use-transactions";
 import AccountAddress from "@/components/lib/account-address";
 import useAccounts from "@/hooks/use-accounts";
-import { clientExportInputNoteFile } from "@/lib/web-client";
 import { normalizeAccountId, useMiden } from "@miden-sdk/react";
 
 const InputNoteSenderCell = ({ inputNote }: { inputNote: InputNote }) => {
@@ -67,23 +66,21 @@ const InputNoteActionsCell = ({ inputNote }: { inputNote: InputNote }) => {
                   if (!client || !wallet || !fungibleAsset || !faucet) {
                     return;
                   }
-                  const noteFileBytes =
-                    inputNote.type === "public"
-                      ? undefined
-                      : await clientExportInputNoteFile({
-                          client,
-                          noteId: inputNote.id,
-                        });
-                  const transaction = new ConsumeTransaction(
-                    faucet.identifier,
-                    inputNote.id,
-                    inputNote.type === "public" ? "public" : "private",
-                    Number(fungibleAsset.amount),
-                    noteFileBytes,
-                  );
                   const adapter = wallet.adapter as MidenWalletAdapter;
-                  const txId = await adapter.requestConsume(transaction);
-                  console.log({ txId });
+                  if (inputNote.noteFileBytes) {
+                    await adapter.importPrivateNote(
+                      fromBase64(inputNote.noteFileBytes),
+                    );
+                  } else {
+                    const transaction = new ConsumeTransaction(
+                      faucet.identifier,
+                      inputNote.id,
+                      inputNote.type === "public" ? "public" : "private",
+                      Number(fungibleAsset.amount),
+                    );
+                    const txId = await adapter.requestConsume(transaction);
+                    console.log({ txId });
+                  }
                 } else {
                   const { transactionRequest, transactionResult } =
                     await newConsumeTransactionRequest({

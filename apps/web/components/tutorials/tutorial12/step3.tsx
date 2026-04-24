@@ -1,4 +1,4 @@
-import { type TutorialStep } from "@/lib/types/tutorial";
+import type { TutorialStep } from "@/lib/types/tutorial";
 import useNetwork from "@/hooks/use-network";
 import useNotes from "@/hooks/use-notes";
 import NextStepButton from "@/components/tutorials/next-step-button";

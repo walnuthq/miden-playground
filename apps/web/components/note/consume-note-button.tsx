@@ -3,16 +3,16 @@ import { FileInput } from "lucide-react";
 import { Spinner } from "@workspace/ui/components/spinner";
 import { Button } from "@workspace/ui/components/button";
 import useTransactions from "@/hooks/use-transactions";
-import { type InputNote } from "@/lib/types/note";
-import { type Account } from "@/lib/types/account";
+import type { InputNote } from "@/lib/types/note";
+import type { Account } from "@/lib/types/account";
 import useAccounts from "@/hooks/use-accounts";
 import {
   useWallet,
   ConsumeTransaction,
   type MidenWalletAdapter,
 } from "@miden-sdk/miden-wallet-adapter";
-import { clientExportInputNoteFile } from "@/lib/web-client";
 import { useMiden } from "@miden-sdk/react";
+import { fromBase64 } from "@/lib/utils";
 
 const ConsumeNoteButton = ({
   inputNote,
@@ -50,23 +50,21 @@ const ConsumeNoteButton = ({
           if (!wallet || !fungibleAsset || !faucet) {
             return;
           }
-          const noteFileBytes =
-            inputNote.type === "public"
-              ? undefined
-              : await clientExportInputNoteFile({
-                  client,
-                  noteId: inputNote.id,
-                });
-          const transaction = new ConsumeTransaction(
-            faucet.identifier,
-            inputNote.id,
-            inputNote.type === "public" ? "public" : "private",
-            Number(fungibleAsset.amount),
-            noteFileBytes,
-          );
           const adapter = wallet.adapter as MidenWalletAdapter;
-          const txId = await adapter.requestConsume(transaction);
-          console.log({ txId });
+          if (inputNote.noteFileBytes) {
+            await adapter.importPrivateNote(
+              fromBase64(inputNote.noteFileBytes),
+            );
+          } else {
+            const transaction = new ConsumeTransaction(
+              faucet.identifier,
+              inputNote.id,
+              inputNote.type === "public" ? "public" : "private",
+              Number(fungibleAsset.amount),
+            );
+            const txId = await adapter.requestConsume(transaction);
+            console.log({ txId });
+          }
         } else {
           setLoading(true);
           const { transactionRequest, transactionResult } =

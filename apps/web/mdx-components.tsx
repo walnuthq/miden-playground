@@ -1,4 +1,4 @@
-import { type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { SquareArrowOutUpRight } from "lucide-react";
 import type { MDXComponents } from "mdx/types";
 

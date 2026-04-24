@@ -1,4 +1,4 @@
-import { type State } from "@/lib/types/state";
+import type { State } from "@/lib/types/state";
 
 export type TutorialAction =
   | { type: "PREVIOUS_TUTORIAL_STEP" }

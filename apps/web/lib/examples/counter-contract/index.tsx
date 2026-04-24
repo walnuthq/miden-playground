@@ -1,4 +1,4 @@
-import { type Example } from "@/lib/types/example";
+import type { Example } from "@/lib/types/example";
 import { defaultProcedureExport, defaultSignature } from "@/lib/utils/script";
 import state from "@/lib/examples/counter-contract/state";
 

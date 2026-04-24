@@ -1,7 +1,7 @@
-import {
-  type packagesTable,
-  type packageTypeEnum,
-  type packageStatusEnum,
+import type {
+  packagesTable,
+  packageTypeEnum,
+  packageStatusEnum,
 } from "@/db/schema";
 
 export type ScriptExample =

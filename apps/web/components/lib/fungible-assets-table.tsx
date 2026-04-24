@@ -6,7 +6,7 @@ import {
   TableHeader,
   TableRow,
 } from "@workspace/ui/components/table";
-import { type FungibleAsset } from "@/lib/types/asset";
+import type { FungibleAsset } from "@/lib/types/asset";
 import useAccounts from "@/hooks/use-accounts";
 import AccountAddress from "@/components/lib/account-address";
 import { cn } from "@workspace/ui/lib/utils";

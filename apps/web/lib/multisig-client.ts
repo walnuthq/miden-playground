@@ -1,4 +1,4 @@
-import { type MidenClient as MidenClientType } from "@miden-sdk/miden-sdk";
+import type { MidenClient as MidenClientType } from "@miden-sdk/miden-sdk";
 import {
   MultisigClient,
   type SignatureScheme,

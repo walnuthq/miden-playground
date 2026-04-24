@@ -1,4 +1,4 @@
-import { type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { AlertDescription, AlertTitle } from "@workspace/ui/components/alert";
 import { CircleAlert, CircleCheckBig } from "lucide-react";
 import useTutorials from "@/hooks/use-tutorials";

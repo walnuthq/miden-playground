@@ -1,12 +1,15 @@
+import { EllipsisVertical } from "lucide-react";
 import Link from "@/components/tutorials/tutorial-link";
+import WalletAlert from "@/components/tutorials/wallet-alert";
 
-In the previous step, we downloaded the private note locally on our device.
-This P2ID note encodes the intended recipient of its embedded assets in the note private data.
+In the previous step, we requested 100 tokens privately from the [Miden Faucet](https://faucet.testnet.miden.io/).
 
-**Public** notes data is stored in the [note database](https://docs.miden.xyz/design/miden-base/state/#note-database), making it fully visible on-chain: this means we can automatically import them in the playground by listening to the Miden blockchain activity.
+The resulting private output note containing our tokens must now be consumed to fund our wallet.
 
-On the contrary, **Private** notes are invisible to the outside world and must be first imported in the playground before we can interact with them.
+Click on the <EllipsisVertical className="size-4 inline" /> icon button in the _"Consumable Notes"_ table to consume the note with your wallet.
 
-From the <Link href="/notes">notes page</Link>, click on _"Add note"_ and select the _"Import note"_ option.
+A _"Request Import Private Note"_ modal from your Miden Wallet will show up asking you to confirm importing the note containing your tokens.
 
-Upload the note file (note.mno) using the file picker, click on _"Import"_ and your private note will be available in the playground.
+<WalletAlert />
+
+The private note will transition to the **Consumed** state and disappear from your wallet consumable notes.

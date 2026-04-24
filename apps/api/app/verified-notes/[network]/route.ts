@@ -21,7 +21,7 @@ import {
 } from "@/db/packages";
 import { PACKAGES_PATH } from "@/lib/constants";
 import { safeRm } from "@/lib/utils";
-import { type PackageSource } from "@/lib/types";
+import type { PackageSource } from "@/lib/types";
 
 type VerifyNoteRequestBody = {
   noteId: string;

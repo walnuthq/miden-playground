@@ -1,48 +1,41 @@
-import { useEffect, useState } from "react";
-import { type TutorialStep } from "@/lib/types/tutorial";
-import useNetwork from "@/hooks/use-network";
+import { EllipsisVertical } from "lucide-react";
+import type { TutorialStep } from "@/lib/types/tutorial";
 import useAccounts from "@/hooks/use-accounts";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
 import Step5Content from "@/components/tutorials/tutorial4/step5.mdx";
-import { midenFaucetAccountId } from "@/lib/constants";
 
 const useCompleted = () => {
-  const { networkId } = useNetwork();
-  const [initialBalance, setInitialBalance] = useState(0n);
   const { connectedWallet } = useAccounts();
-  const currentBalance = BigInt(
-    (connectedWallet?.storageMode === "private" &&
-      connectedWallet?.fungibleAssets.find(
-        ({ faucetId }) => faucetId === midenFaucetAccountId(networkId),
-      )?.amount) ??
-      "0",
+  return (
+    connectedWallet?.storageMode === "public" &&
+    connectedWallet?.consumableNoteIds.length === 0
   );
-  useEffect(() => {
-    if (initialBalance === 0n) {
-      setInitialBalance(currentBalance);
-    }
-  }, [initialBalance, currentBalance]);
-  return initialBalance !== 0n && currentBalance < initialBalance;
 };
 
-const Step5: TutorialStep = {
-  title: "Send tokens privately to your public wallet.",
+const Step6: TutorialStep = {
+  title: "Consume the private note with your public wallet.",
   Content: () => {
+    const { connectedWallet } = useAccounts();
     const completed = useCompleted();
     return (
       <>
-        <Step5Content />
+        <Step5Content
+          wallet={
+            connectedWallet?.storageMode === "public"
+              ? connectedWallet
+              : undefined
+          }
+        />
         <TutorialAlert
           completed={completed}
-          title="Action required: Send tokens to your public wallet."
-          titleWhenCompleted="Private note with sent tokens created."
+          title="Action required: Consume the private note."
+          titleWhenCompleted="Your received a private transfer."
           description={
             <p>
-              Click on the <em>"Create new transaction"</em> button and select
-              the <em>"New send transaction"</em> option. Configure and sign a
-              send transaction to create a private note consumable by your
-              public wallet.
+              Click on the <EllipsisVertical className="size-4 inline" /> icon
+              button on the right-most side of the consumable note row in your
+              public wallet page details to consume the note with your wallet.
             </p>
           }
         />
@@ -55,4 +48,4 @@ const Step5: TutorialStep = {
   },
 };
 
-export default Step5;
+export default Step6;

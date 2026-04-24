@@ -1,4 +1,4 @@
-import { type TutorialStep } from "@/lib/types/tutorial";
+import type { TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
 import Step2Content from "@/components/tutorials/tutorial11/step2.mdx";

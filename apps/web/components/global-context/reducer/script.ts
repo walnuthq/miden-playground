@@ -1,5 +1,5 @@
-import { type Script, type ProcedureExport } from "@/lib/types/script";
-import { type State } from "@/lib/types/state";
+import type { Script, ProcedureExport } from "@/lib/types/script";
+import type { State } from "@/lib/types/state";
 
 export type ScriptAction =
   | {

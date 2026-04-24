@@ -1,5 +1,5 @@
-import { type Component } from "@/lib/types/component";
-import { type State } from "@/lib/types/state";
+import type { Component } from "@/lib/types/component";
+import type { State } from "@/lib/types/state";
 
 export type ComponentAction =
   | {

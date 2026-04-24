@@ -1,9 +1,9 @@
 import { cp, writeFile, readFile } from "node:fs/promises";
 import { parse, stringify } from "smol-toml";
 import { execFile, fileExists, safeRm } from "@/lib/utils";
-import { type Export, type Dependency, type CargoToml } from "@/lib/types";
+import type { Export, Dependency, CargoToml } from "@/lib/types";
 import { insertPackage, getDependencies } from "@/db/packages";
-import { type PackageType } from "@/lib/types";
+import type { PackageType } from "@/lib/types";
 import { PACKAGES_PATH, PROJECT_ROOT } from "@/lib/constants";
 import { midenPackageMetadata } from "@/lib/miden-package-metadata";
 

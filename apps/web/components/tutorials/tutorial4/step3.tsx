@@ -1,56 +1,41 @@
-import { type TutorialStep } from "@/lib/types/tutorial";
+import { EllipsisVertical } from "lucide-react";
+import type { TutorialStep } from "@/lib/types/tutorial";
+import useAccounts from "@/hooks/use-accounts";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
 import Step3Content from "@/components/tutorials/tutorial4/step3.mdx";
-import useNetwork from "@/hooks/use-network";
-import useNotes from "@/hooks/use-notes";
-import useAccounts from "@/hooks/use-accounts";
-import { accountIdFromPrefixSuffix } from "@/lib/utils/account";
-import {
-  FUNGIBLE_FAUCET_DEFAULT_DECIMALS,
-  P2ID_NOTE_CODE,
-  midenFaucetAccountId,
-} from "@/lib/constants";
-import { parseAmount } from "@/lib/utils/asset";
 
 const useCompleted = () => {
-  const { networkId } = useNetwork();
   const { connectedWallet } = useAccounts();
-  const { inputNotes } = useNotes();
-  const note = inputNotes.find(
-    ({ fungibleAssets, senderId, scriptRoot, storage, state, type }) =>
-      fungibleAssets.some(
-        ({ faucetId, amount }) =>
-          faucetId === midenFaucetAccountId(networkId) &&
-          amount ===
-            parseAmount("100", FUNGIBLE_FAUCET_DEFAULT_DECIMALS).toString(),
-      ) &&
-      senderId === midenFaucetAccountId(networkId) &&
-      scriptRoot === P2ID_NOTE_CODE &&
-      accountIdFromPrefixSuffix(storage[1]!, storage[0]!) ===
-        connectedWallet?.id &&
-      state === "committed" &&
-      type === "private",
+  return (
+    connectedWallet?.storageMode === "private" &&
+    connectedWallet?.consumableNoteIds.length === 0
   );
-  return connectedWallet?.storageMode === "private" && !!note;
 };
 
-const Step3: TutorialStep = {
-  title: "Import the private note.",
+const Step4: TutorialStep = {
+  title: "Consume the private note with your private wallet.",
   Content: () => {
+    const { connectedWallet } = useAccounts();
     const completed = useCompleted();
     return (
       <>
-        <Step3Content />
+        <Step3Content
+          wallet={
+            connectedWallet?.storageMode === "private"
+              ? connectedWallet
+              : undefined
+          }
+        />
         <TutorialAlert
           completed={completed}
-          title="Action required: Import the note file."
-          titleWhenCompleted="Your private note has been imported."
+          title="Action required: Consume the private note."
+          titleWhenCompleted="Your wallet has been privately funded."
           description={
             <p>
-              Click on the <em>"Add note"</em> button and select the{" "}
-              <em>"Import note"</em> option to import the private note file you
-              downloaded in the previous step.
+              Click on the <EllipsisVertical className="size-4 inline" /> icon
+              button on the right-most side of the consumable note row in your
+              private wallet page details to consume the note with your wallet.
             </p>
           }
         />
@@ -63,4 +48,4 @@ const Step3: TutorialStep = {
   },
 };
 
-export default Step3;
+export default Step4;

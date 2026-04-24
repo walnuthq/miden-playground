@@ -1,5 +1,5 @@
-import { type State } from "@/lib/types/state";
-import { type InputNote } from "@/lib/types/note";
+import type { State } from "@/lib/types/state";
+import type { InputNote } from "@/lib/types/note";
 
 export type NoteAction =
   | { type: "ADD_NOTE"; payload: { inputNote: InputNote } }

@@ -1,7 +1,7 @@
 import { useRouter } from "next/navigation";
 import { EllipsisVertical } from "lucide-react";
 import { useWallet } from "@miden-sdk/miden-wallet-adapter";
-import { type TutorialStep } from "@/lib/types/tutorial";
+import type { TutorialStep } from "@/lib/types/tutorial";
 import useAccounts from "@/hooks/use-accounts";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-step-alert";

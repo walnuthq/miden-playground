@@ -12,7 +12,7 @@ import AccountAddress from "@/components/lib/account-address";
 import { CircleCheckBig } from "lucide-react";
 import useAccounts from "@/hooks/use-accounts";
 import useNotes from "@/hooks/use-notes";
-import { type Script } from "@/lib/types/script";
+import type { Script } from "@/lib/types/script";
 import { midenExplorerUrl } from "@/lib/constants";
 import { normalizeAccountId } from "@miden-sdk/react";
 import useNetwork from "@/hooks/use-network";

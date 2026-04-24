@@ -63,7 +63,7 @@ import type { Script } from "@/lib/types/script";
 import { defaultProcedureExport } from "@/lib/utils/script";
 import type { StorageSlot, Component } from "@/lib/types/component";
 import defaultScripts from "@/lib/types/default-scripts";
-import { fromBase64 } from "@/lib/utils";
+import { fromBase64, toBase64 } from "@/lib/utils";
 
 export const clientGetConsumableNotes = ({
   client,
@@ -306,7 +306,7 @@ export const clientImportNoteFile = async ({
   if (!record) {
     throw new Error("Note not found");
   }
-  return wasmInputNoteToInputNote({ record, scripts });
+  return wasmInputNoteToInputNote({ record, scripts, noteFileBytes });
 };
 
 export const clientExportNoteFile = async ({
@@ -519,11 +519,13 @@ export const wasmInputNoteToInputNote = ({
   record,
   previousInputNote,
   scripts,
+  noteFileBytes,
   updatedAt,
 }: {
   record: WasmInputNoteRecordType;
   previousInputNote?: InputNote;
   scripts: Script[];
+  noteFileBytes?: Uint8Array;
   updatedAt?: number | null;
 }): InputNote => {
   const scriptRoot = record.details().recipient().script().root().toHex();
@@ -554,6 +556,11 @@ export const wasmInputNoteToInputNote = ({
       .items()
       .map((item) => item.toString()),
     nullifier: record.nullifier(),
+    noteFileBytes: previousInputNote
+      ? previousInputNote.noteFileBytes
+      : noteFileBytes
+        ? toBase64(noteFileBytes)
+        : "",
     updatedAt: previousInputNote
       ? previousInputNote.updatedAt
       : (updatedAt ?? Date.now()),

@@ -1,5 +1,5 @@
 import { Geist, Geist_Mono } from "next/font/google";
-import { type ReactNode } from "react";
+import type { ReactNode } from "react";
 // import "@getpara/react-sdk/styles.css";
 import "@miden-sdk/miden-wallet-adapter/styles.css";
 import "@workspace/ui/globals.css";

@@ -1,5 +1,5 @@
 import { EllipsisVertical } from "lucide-react";
-import { type TutorialStep } from "@/lib/types/tutorial";
+import type { TutorialStep } from "@/lib/types/tutorial";
 import useNetwork from "@/hooks/use-network";
 import useAccounts from "@/hooks/use-accounts";
 import useNotes from "@/hooks/use-notes";

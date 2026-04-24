@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { type TutorialStep } from "@/lib/types/tutorial";
+import type { TutorialStep } from "@/lib/types/tutorial";
 import { useInterval } from "usehooks-ts";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-step-alert";

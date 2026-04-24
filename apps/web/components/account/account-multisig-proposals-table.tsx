@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { type Account } from "@/lib/types/account";
+import type { Account } from "@/lib/types/account";
 import {
   Table,
   TableBody,

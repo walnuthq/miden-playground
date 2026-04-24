@@ -1,4 +1,4 @@
-import { type Metadata } from "next";
+import type { Metadata } from "next";
 import Home from "@/components/home";
 
 const metadataBase = "https://playground.miden.xyz";

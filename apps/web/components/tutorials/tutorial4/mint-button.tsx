@@ -15,28 +15,32 @@ import {
   getTokens,
   getNote,
 } from "@/lib/miden-faucet";
+import useNotes from "@/hooks/use-notes";
+import { useMiden } from "@miden-sdk/react";
 
-const downloadBlob = (blob: Blob, fileName: string) => {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.style.display = "none";
-  a.href = url;
-  a.download = fileName;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-};
+// const downloadBlob = (blob: Blob, fileName: string) => {
+//   const url = URL.createObjectURL(blob);
+//   const a = document.createElement("a");
+//   a.style.display = "none";
+//   a.href = url;
+//   a.download = fileName;
+//   document.body.appendChild(a);
+//   a.click();
+//   a.remove();
+//   URL.revokeObjectURL(url);
+// };
 
 const MintButton = () => {
   const { networkId } = useNetwork();
+  const { client } = useMiden();
   const { connectedWallet } = useAccounts();
+  const { importNoteFromFile } = useNotes();
   const [loading, setLoading] = useState(false);
   return (
     <Button
       disabled={!connectedWallet || loading}
       onClick={async () => {
-        if (!connectedWallet) {
+        if (!client || !connectedWallet) {
           return;
         }
         setLoading(true);
@@ -63,10 +67,11 @@ const MintButton = () => {
           backendUrl: midenFaucetApiUrl(networkId),
           noteId,
         });
-        const noteFileBlob = new Blob([noteFileBytes], {
-          type: "application/octet-stream",
-        });
-        downloadBlob(noteFileBlob, "note.mno");
+        await importNoteFromFile(noteFileBytes);
+        // const noteFileBlob = new Blob([noteFileBytes], {
+        //   type: "application/octet-stream",
+        // });
+        // downloadBlob(noteFileBlob, "note.mno");
         setLoading(false);
       }}
     >

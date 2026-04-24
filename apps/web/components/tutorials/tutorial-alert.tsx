@@ -1,4 +1,4 @@
-import { type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Alert } from "@workspace/ui/components/alert";
 
 const TutorialAlert = ({ children }: { children: ReactNode }) => (
