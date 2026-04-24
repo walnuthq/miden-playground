@@ -56,10 +56,12 @@ export type PackageType = (typeof packageTypeEnum.enumValues)[number];
 
 export type PackageStatus = (typeof packageStatusEnum.enumValues)[number];
 
+type ProcedureSignature = { abi: number; params: string[]; results: string[] };
+
 export type ProcedureExport = {
   path: string;
   digest: string;
-  signature: { abi: number; params: string[]; results: string[] };
+  signature: ProcedureSignature | null;
   attributes: { attrs: string[] };
 };
 

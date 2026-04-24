@@ -1,6 +1,6 @@
 import type { Example } from "@/lib/types/example";
 import { defaultProcedureExport, defaultSignature } from "@/lib/utils/script";
-import state from "@/components/home/examples/miden-bank/state";
+import state from "@/lib/examples/miden-bank/state";
 
 const midenBank: Example = {
   id: "bank-account",
@@ -30,10 +30,11 @@ const midenBank: Example = {
       ...defaultProcedureExport(),
       path: "get-balance",
       digest:
-        "0x583ef74b80f6a62f60b99c1a6c466f1b363ba120e36987f15b69b092ec697a3e",
+        "0x107340abda40a4ec5c6dff5bcba2cc52373cce52affdd29e8bf7a6fd2eb37a14",
       signature: {
         ...defaultSignature(),
-        params: ["AccountId"],
+        params: ["AccountId", "AccountId"],
+        results: ["Felt"],
       },
       readOnly: true,
     },
@@ -41,7 +42,7 @@ const midenBank: Example = {
       ...defaultProcedureExport(),
       path: "deposit",
       digest:
-        "0x2db33b47fc363b27b5e55cebcb9dc1d0f916cf1be71be38e2ef87cd65558b0cd",
+        "0x4af6b8b449bbe5c8073a405fdfee3876010abfb4d69c0646fd09f01d1df6f8f2",
       signature: {
         ...defaultSignature(),
         params: ["AccountId", "Asset"],
@@ -51,13 +52,13 @@ const midenBank: Example = {
       ...defaultProcedureExport(),
       path: "initialize",
       digest:
-        "0xaf2c9810a3899fd82bdfe1710ddc67efe146f2b2202d525c74d2ee0e42430807",
+        "0x02e5121dbb7b358b8629ed37686e1b3d8924d29005633873dd828d1cdf5e8404",
     },
     {
       ...defaultProcedureExport(),
       path: "withdraw",
       digest:
-        "0x4da9ccc289b315fece220f22b5625b289d7068c5bfc6c10d8866fba1260403df",
+        "0x0de776130f49fd0880904ff8cd964aeab8fbd454bef29dbd251766b2555408e0",
       signature: {
         ...defaultSignature(),
         params: ["AccountId", "Asset", "Word", "Felt", "Felt"],

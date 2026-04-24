@@ -322,7 +322,7 @@ const readPackageMetadata = async (maspPath: string) => {
   return {
     digest,
     exports: exports.filter(
-      ({ Procedure: { signature } }) => signature.abi === 3,
+      ({ Procedure: { signature } }) => signature?.abi === 3,
     ),
     dependencies: dependencies
       .filter(({ name }) => !["base", "std"].includes(name))

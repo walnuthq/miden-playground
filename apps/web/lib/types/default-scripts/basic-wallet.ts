@@ -10,7 +10,7 @@ export const rust = `// Do not link against libstd (i.e. anything defined in \`s
 //
 // extern crate alloc;
 
-use miden::{component, native_account, output_note, Asset, NoteIdx};
+use miden::{Asset, NoteIdx, component, output_note};
 
 #[component]
 struct MyAccount;
@@ -36,7 +36,7 @@ impl MyAccount {
     /// * \`asset\` - The asset to move from the account to the note
     /// * \`note_idx\` - The index of the note to receive the asset
     pub fn move_asset_to_note(&mut self, asset: Asset, note_idx: NoteIdx) {
-        let asset = self.remove_asset(asset);
+        self.remove_asset(asset);
         output_note::add_asset(asset, note_idx);
     }
 }

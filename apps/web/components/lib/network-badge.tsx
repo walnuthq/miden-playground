@@ -9,14 +9,20 @@ import { cn } from "@workspace/ui/lib/utils";
 import useAppState from "@/hooks/use-app-state";
 import { useSyncState } from "@miden-sdk/react";
 import useNetwork from "@/hooks/use-network";
+import useExamples from "@/hooks/use-examples";
 
 let callingPopState = false;
+let callingLoadExample = false;
 
 const NetworkBadge = () => {
   const { syncHeight, isSyncing } = useSyncState();
   const { networkId } = useNetwork();
-  const { syncingState, submittingTransaction } = useGlobalContext();
+  const { accounts, syncingState, submittingTransaction } = useGlobalContext();
   const { syncState, popState } = useAppState();
+  const { exampleId, loadExample } = useExamples();
+  const exampleAccount = accounts.find(({ components }) =>
+    components.includes(exampleId),
+  );
   const useIntervalTriggered =
     networkId !== "mmck" &&
     !isSyncing &&
@@ -40,6 +46,16 @@ const NetworkBadge = () => {
       callPopState();
     }
   }, [syncingState, popState]);
+  useEffect(() => {
+    const callLoadExample = async () => {
+      callingLoadExample = true;
+      await loadExample(exampleId);
+      callingLoadExample = false;
+    };
+    if (exampleId && !exampleAccount && !callingLoadExample) {
+      callLoadExample();
+    }
+  }, [exampleId, exampleAccount, loadExample]);
   const variants = {
     mtst: "default",
     mdev: "secondary",

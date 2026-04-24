@@ -186,6 +186,10 @@ const fileListToPackageSources = async (fileList: FileList) => {
         rust:
           file.name === "lib.rs"
             ? content
+                .replaceAll(
+                  "let key = Word::new([felt!(0), felt!(0), felt!(0), felt!(1)]);",
+                  "let key = Word::new([felt!(1), felt!(0), felt!(0), felt!(0)]);",
+                )
                 .replace("1_000_000;", "1_000_000_000;")
                 .replace(
                   "get_balance(&self, depositor: AccountId)",

@@ -10,7 +10,7 @@ import {
 } from "@workspace/ui/components/combobox";
 import { getIdentifierPart } from "@/lib/utils/account";
 import { Address as WasmAddress } from "@miden-sdk/miden-sdk";
-// import useMultisig from "@/hooks/use-multisig";
+import useMultisig from "@/hooks/use-multisig";
 
 const SelectAccountCombobox = ({
   onValueChange,
@@ -18,12 +18,12 @@ const SelectAccountCombobox = ({
   onValueChange: Dispatch<SetStateAction<string>>;
 }) => {
   const { connectedWallet, accounts, multisigs } = useAccounts();
-  // const { isMultisigSigner } = useMultisig();
+  const { isMultisigSigner } = useMultisig();
   const [value, setValue] = useState("");
   const items = accounts
     .filter(({ id }) =>
       id === connectedWallet?.id
-        ? true // multisigs.some((multisig) => isMultisigSigner(multisig))
+        ? multisigs.some((multisig) => isMultisigSigner(multisig))
         : true,
     )
     .map(({ identifier }) => identifier);

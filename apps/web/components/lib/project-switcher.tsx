@@ -32,6 +32,8 @@ import { networks } from "@/lib/types/network";
 // import { cn } from "@workspace/ui/lib/utils";
 import { cn } from "@workspace/ui/lib/utils";
 import useAppState from "@/hooks/use-app-state";
+import examples from "@/lib/examples";
+import useExamples from "@/hooks/use-examples";
 
 const ProjectSwitcher = () => {
   const isClient = useIsClient();
@@ -40,6 +42,7 @@ const ProjectSwitcher = () => {
   const { networkId } = useNetwork();
   const { resetState } = useAppState();
   const { tutorial, completedTutorials, startTutorial } = useTutorials();
+  const { example, launchExample } = useExamples();
   // const { saveProject, loadProject } = useProjects();
   if (!isClient) {
     return null;
@@ -61,7 +64,9 @@ const ProjectSwitcher = () => {
                 <span className="truncate text-xs">
                   {tutorial
                     ? `${tutorial.title}`
-                    : `${networks[networkId]} sandbox`}
+                    : example
+                      ? `${example.title}`
+                      : `${networks[networkId]} sandbox`}
                 </span>
               </div>
               <ChevronsUpDown className="ml-auto" />
@@ -73,6 +78,56 @@ const ProjectSwitcher = () => {
             side={isMobile ? "bottom" : "right"}
             sideOffset={4}
           >
+            {/* <DropdownMenuSub>
+              <DropdownMenuSubTrigger>Projects</DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent>
+                  <DropdownMenuItem onClick={() => saveProject()}>
+                    Save project
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => loadProject()}>
+                    Load project
+                  </DropdownMenuItem>
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub> */}
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>Tutorials</DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent>
+                  {tutorials.map((tutorial) => (
+                    <DropdownMenuItem
+                      key={tutorial.id}
+                      onClick={() => startTutorial(tutorial.id)}
+                    >
+                      <BadgeCheck
+                        className={cn("size-4 text-transparent", {
+                          "text-green-500": completedTutorials.has(tutorial.id),
+                        })}
+                      />{" "}
+                      {tutorial.number}. {tutorial.title}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
+            <DropdownMenuSeparator />
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>Examples</DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent>
+                  {examples.map((example) => (
+                    <DropdownMenuItem
+                      key={example.id}
+                      onClick={() => launchExample(example.id)}
+                    >
+                      {example.title}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
+            <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() => {
                 resetState("mtst");
@@ -107,40 +162,6 @@ const ProjectSwitcher = () => {
                 New Local sandbox
               </DropdownMenuItem>
             ) */}
-            <DropdownMenuSeparator />
-            {/* <DropdownMenuSub>
-              <DropdownMenuSubTrigger>Projects</DropdownMenuSubTrigger>
-              <DropdownMenuPortal>
-                <DropdownMenuSubContent>
-                  <DropdownMenuItem onClick={() => saveProject()}>
-                    Save project
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => loadProject()}>
-                    Load project
-                  </DropdownMenuItem>
-                </DropdownMenuSubContent>
-              </DropdownMenuPortal>
-            </DropdownMenuSub> */}
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger>Tutorials</DropdownMenuSubTrigger>
-              <DropdownMenuPortal>
-                <DropdownMenuSubContent>
-                  {tutorials.map((tutorial) => (
-                    <DropdownMenuItem
-                      key={tutorial.id}
-                      onClick={() => startTutorial(tutorial.id)}
-                    >
-                      <BadgeCheck
-                        className={cn("size-4 text-transparent", {
-                          "text-green-500": completedTutorials.has(tutorial.id),
-                        })}
-                      />{" "}
-                      {tutorial.number}. {tutorial.title}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuSubContent>
-              </DropdownMenuPortal>
-            </DropdownMenuSub>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>

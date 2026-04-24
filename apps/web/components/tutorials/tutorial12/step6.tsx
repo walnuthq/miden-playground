@@ -6,6 +6,7 @@ import NextStepButton from "@/components/tutorials/next-step-button";
 import Step6Content from "@/components/tutorials/tutorial12/step6.mdx";
 import { normalizeAccountId, useMiden } from "@miden-sdk/react";
 import useNetwork from "@/hooks/use-network";
+import { GUARDIAN_WALLET_CODE } from "@/lib/constants";
 
 const useCompleted = () => {
   const { multisigs } = useAccounts();
@@ -18,24 +19,30 @@ const Step6: TutorialStep = {
   title: "Restore your guardian wallet.",
   Content: () => {
     const completed = useCompleted();
-    // const { client } = useMiden();
+    const { client } = useMiden();
     const { networkId } = useNetwork();
     const [address, setAddress] = useState("");
-    // useEffect(() => {
-    //   if (!client) {
-    //     return;
-    //   }
-    //   const getMultisigWalletAddress = async () => {
-    //     const accounts = await client.getAccounts();
-    //     const multisig = accounts.find(
-    //       (account) =>
-    //         account.codeCommitment().toHex() ===
-    //         "0xda13c649b0aca3c630d42eaf2c79fd003147c2a1d9259636498952dd3a5173e7",
-    //     );
-    //     setAddress(normalizeAccountId(multisig?.id().toString() ?? ""));
-    //   };
-    //   getMultisigWalletAddress();
-    // }, [client, networkId]);
+    useEffect(() => {
+      if (!client) {
+        return;
+      }
+      const getMultisigWalletAddress = async () => {
+        const accounts = await client.getAccounts();
+        for (const account of accounts) {
+          console.log(
+            account.id().toString(),
+            account.codeCommitment().toHex(),
+          );
+        }
+        const multisig = accounts.find(
+          (account) =>
+            account.codeCommitment().toHex() === GUARDIAN_WALLET_CODE,
+        );
+        console.log(multisig?.id().toString());
+        setAddress(normalizeAccountId(multisig?.id().toString() ?? ""));
+      };
+      getMultisigWalletAddress();
+    }, [client, networkId]);
     return (
       <>
         <Step6Content account={{ name: "Guardian Wallet", address }} />

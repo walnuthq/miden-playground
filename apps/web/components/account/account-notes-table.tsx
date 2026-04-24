@@ -34,7 +34,7 @@ import useScripts from "@/hooks/use-scripts";
 import { formatAmount } from "@/lib/utils/asset";
 import { clientExportInputNoteFile } from "@/lib/web-client";
 import { normalizeAccountId, useMiden } from "@miden-sdk/react";
-// import useMultisig from "@/hooks/use-multisig";
+import useMultisig from "@/hooks/use-multisig";
 
 const NoteActionsCell = ({
   account,
@@ -45,7 +45,7 @@ const NoteActionsCell = ({
 }) => {
   const { client } = useMiden();
   const { wallet } = useWallet();
-  // const { loadMultisig, createConsumeNotesProposal } = useMultisig();
+  const { loadMultisig, createConsumeNotesProposal } = useMultisig();
   const { faucets, connectedWallet } = useAccounts();
   const { openCreateTransactionDialog, newConsumeTransactionRequest } =
     useTransactions();
@@ -90,14 +90,14 @@ const NoteActionsCell = ({
               const txId = await adapter.requestConsume(transaction);
               console.log({ txId });
             } else if (account.multisig) {
-              // const multisig = await loadMultisig(account.id);
-              // if (!multisig) {
-              //   return;
-              // }
-              // await createConsumeNotesProposal({
-              //   multisig,
-              //   noteIds: [inputNote.id],
-              // });
+              const multisig = await loadMultisig(account.id);
+              if (!multisig) {
+                return;
+              }
+              await createConsumeNotesProposal({
+                multisig,
+                noteIds: [inputNote.id],
+              });
             } else {
               setLoading(true);
               const { transactionRequest, transactionResult } =

@@ -4,11 +4,51 @@ import {
   defaultProcedureExport,
 } from "@/lib/types";
 
+const masm = `# The MASM code of the Multi-Signature Authentication component integrated with a state guardian.
+#
+// # See the \`AuthGuardedMultisig\` Rust type's documentation for more details.
+
+use miden::standards::auth::multisig
+use miden::standards::auth::guardian
+
+pub use multisig::update_signers_and_threshold
+pub use multisig::get_threshold_and_num_approvers
+pub use multisig::set_procedure_threshold
+pub use multisig::get_signer_at
+pub use multisig::is_signer
+
+pub use guardian::update_guardian_public_key
+
+#! Authenticate a transaction with multi-signature support and optional guardian verification.
+#!
+#! Inputs:
+#!   Operand stack: [SALT]
+#! Outputs:
+#!   Operand stack: []
+#!
+#! Invocation: call
+@auth_script
+pub proc auth_tx_guarded_multisig(salt: word)
+    exec.multisig::auth_tx
+    # => [TX_SUMMARY_COMMITMENT]
+
+    dupw
+    # => [TX_SUMMARY_COMMITMENT, TX_SUMMARY_COMMITMENT]
+    
+    exec.guardian::verify_signature
+    # => [TX_SUMMARY_COMMITMENT]
+
+    exec.multisig::assert_new_tx
+    # => []
+end
+`;
+
 const authMultisigPsm: Package = {
   ...defaultPackage(),
   id: "auth-multisig-psm",
   name: "auth-multisig-psm",
   type: "authentication-component",
+  masm,
   digest: "0x1c2a0fb796823ecc8226952bb27f52542e3810f060b705560972bf65711eabd6",
   exports: [
     {

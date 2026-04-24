@@ -14,7 +14,7 @@ import {
   type Multisig,
   type Proposal,
 } from "@openzeppelin/miden-multisig-client";
-import { type Account } from "@/lib/types/account";
+import type { Account } from "@/lib/types/account";
 import { wasmAccountToAccount } from "@/lib/web-client";
 import { initMultisigClient } from "@/lib/multisig-client";
 import { useMidenWallet } from "@/hooks/use-miden-wallet";
