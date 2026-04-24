@@ -9,7 +9,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@workspace/ui/components/tabs";
-import { type Script } from "@/lib/types/script";
+import type { Script } from "@/lib/types/script";
 import AccountInformation from "@/components/account/account-information";
 import AccountMultisig from "@/components/account/account-multisig";
 import AccountComponents from "@/components/account/account-components";

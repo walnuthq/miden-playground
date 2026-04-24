@@ -1,4 +1,4 @@
-import { type Package } from "@/lib/types";
+import type { Package } from "@/lib/types";
 import p2id from "@/lib/standard-notes/p2id";
 import p2ide from "@/lib/standard-notes/p2ide";
 import swap from "@/lib/standard-notes/swap";

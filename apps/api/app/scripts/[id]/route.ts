@@ -8,11 +8,11 @@ import {
   generateCargoToml,
   updateRust,
 } from "@/lib/miden-compiler";
-import {
-  type CompiledPackage,
-  type Package,
-  type ProcedureExport,
-  type Export,
+import type {
+  CompiledPackage,
+  Package,
+  ProcedureExport,
+  Export,
 } from "@/lib/types";
 import {
   getDependencies,

@@ -7,7 +7,7 @@ import {
 } from "@workspace/ui/components/dropdown-menu";
 import { Button } from "@workspace/ui/components/button";
 import useTransactions from "@/hooks/use-transactions";
-import { type Account } from "@/lib/types/account";
+import type { Account } from "@/lib/types/account";
 import { useMiden } from "@miden-sdk/react";
 import { clientGetConsumableNotes } from "@/lib/web-client";
 

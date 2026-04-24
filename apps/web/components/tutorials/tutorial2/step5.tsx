@@ -1,4 +1,4 @@
-import { type TutorialStep } from "@/lib/types/tutorial";
+import type { TutorialStep } from "@/lib/types/tutorial";
 import useAccounts from "@/hooks/use-accounts";
 import NextTutorialButton from "@/components/tutorials/next-tutorial-button";
 import Step5Content from "@/components/tutorials/tutorial2/step5.mdx";

@@ -10,7 +10,7 @@ import {
 import { Button } from "@workspace/ui/components/button";
 import { Badge } from "@workspace/ui/components/badge";
 import useTutorials from "@/hooks/use-tutorials";
-import { type Tutorial } from "@/lib/types/tutorial";
+import type { Tutorial } from "@/lib/types/tutorial";
 import { cn } from "@workspace/ui/lib/utils";
 
 const StartTutorialCard = ({ tutorial }: { tutorial: Tutorial }) => {

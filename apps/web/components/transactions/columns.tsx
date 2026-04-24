@@ -1,7 +1,7 @@
 "use client";
-import { type Transaction } from "@/lib/types/transaction";
+import type { Transaction } from "@/lib/types/transaction";
 import { formatId } from "@/lib/utils";
-import { type ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import AccountAddress from "@/components/lib/account-address";
 
 export const columns: ColumnDef<Transaction>[] = [

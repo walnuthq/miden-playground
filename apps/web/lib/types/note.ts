@@ -33,5 +33,6 @@ export type InputNote = {
   fungibleAssets: FungibleAsset[];
   storage: string[];
   nullifier: string;
+  noteFileBytes: string;
   updatedAt: number;
 };

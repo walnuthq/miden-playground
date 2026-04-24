@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from "@workspace/ui/components/card";
 import { Button } from "@workspace/ui/components/button";
-import { type Script } from "@/lib/types/script";
+import type { Script } from "@/lib/types/script";
 import useScripts from "@/hooks/use-scripts";
 import { cn } from "@workspace/ui/lib/utils";
 

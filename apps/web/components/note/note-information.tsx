@@ -1,4 +1,4 @@
-import { type InputNote } from "@/lib/types/note";
+import type { InputNote } from "@/lib/types/note";
 import { accountIdFromPrefixSuffix } from "@/lib/utils/account";
 import NoteInformationTable from "@/components/note/note-information-table";
 import NoteInputsTable from "@/components/note/note-inputs-table";

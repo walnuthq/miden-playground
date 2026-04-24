@@ -1,6 +1,6 @@
 "use client";
 import { type Script, scriptTypes, scriptStatuses } from "@/lib/types/script";
-import { type ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { MoreVertical } from "lucide-react";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";

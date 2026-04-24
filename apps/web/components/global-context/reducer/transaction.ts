@@ -1,16 +1,16 @@
-import {
-  type ConsumableNoteRecord as WasmConsumableNoteRecordType,
-  type TransactionRequest as WasmTransactionRequestType,
-  type TransactionResult as WasmTransactionResultType,
+import type {
+  ConsumableNoteRecord as WasmConsumableNoteRecordType,
+  TransactionRequest as WasmTransactionRequestType,
+  TransactionResult as WasmTransactionResultType,
 } from "@miden-sdk/miden-sdk";
-import { type Account } from "@/lib/types/account";
-import { type InputNote } from "@/lib/types/note";
-import {
-  type Transaction,
-  type TransactionType,
-  type CreateTransactionDialogStep,
+import type { Account } from "@/lib/types/account";
+import type { InputNote } from "@/lib/types/note";
+import type {
+  Transaction,
+  TransactionType,
+  CreateTransactionDialogStep,
 } from "@/lib/types/transaction";
-import { type State } from "@/lib/types/state";
+import type { State } from "@/lib/types/state";
 
 export type TransactionAction =
   | {

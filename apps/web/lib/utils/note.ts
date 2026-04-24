@@ -12,8 +12,9 @@ export const defaultInputNote = (): InputNote => ({
   fungibleAssets: [],
   storage: [],
   nullifier: "",
+  noteFileBytes: "",
   updatedAt: Date.now(),
 });
 
 export const noteConsumed = ({ state }: InputNote) =>
-  state.includes("consumed");
+  state.includes("consumed") || state === "expected";

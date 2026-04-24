@@ -19,10 +19,10 @@ import useAccounts from "@/hooks/use-accounts";
 import SelectConsumableNotesCombobox from "@/components/transactions/select-consumable-notes-combobox";
 import useTransactions from "@/hooks/use-transactions";
 import useTutorials from "@/hooks/use-tutorials";
-import {
-  type ConsumableNoteRecord as WasmConsumableNoteRecordType,
-  type TransactionResult as WasmTransactionResultType,
-  type TransactionRequest as WasmTransactionRequestType,
+import type {
+  ConsumableNoteRecord as WasmConsumableNoteRecordType,
+  TransactionResult as WasmTransactionResultType,
+  TransactionRequest as WasmTransactionRequestType,
 } from "@miden-sdk/miden-sdk";
 import {
   useWallet,

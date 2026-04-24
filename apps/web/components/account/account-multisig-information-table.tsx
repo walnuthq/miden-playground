@@ -1,4 +1,4 @@
-import { type AccountMultisig } from "@/lib/types/account";
+import type { AccountMultisig } from "@/lib/types/account";
 import {
   Table,
   TableBody,

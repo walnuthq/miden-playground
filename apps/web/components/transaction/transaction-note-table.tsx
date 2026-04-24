@@ -10,7 +10,7 @@ import {
 } from "@workspace/ui/components/table";
 import { Badge } from "@workspace/ui/components/badge";
 import NoteId from "@/components/lib/note-id";
-import { type TransactionNote } from "@/lib/types/transaction";
+import type { TransactionNote } from "@/lib/types/transaction";
 import AccountAddress from "@/components/lib/account-address";
 import useAccounts from "@/hooks/use-accounts";
 import useScripts from "@/hooks/use-scripts";

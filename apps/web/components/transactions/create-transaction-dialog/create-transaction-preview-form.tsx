@@ -1,4 +1,4 @@
-import { type Dispatch, type SetStateAction } from "react";
+import type { Dispatch, SetStateAction } from "react";
 import { toast } from "sonner";
 import useTransactions from "@/hooks/use-transactions";
 import FungibleAssetsTable from "@/components/lib/fungible-assets-table";
@@ -6,10 +6,10 @@ import AccountAddress from "@/components/lib/account-address";
 import AccountStorageDeltaTable from "@/components/lib/account-storage-delta-table";
 import TransactionId from "@/components/lib/transaction-id";
 import NoteId from "@/components/lib/note-id";
-import {
-  type TransactionResult as WasmTransactionResultType,
-  type TransactionRequest as WasmTransactionRequestType,
-  type TransactionRecord as WasmTransactionRecordType,
+import type {
+  TransactionResult as WasmTransactionResultType,
+  TransactionRequest as WasmTransactionRequestType,
+  TransactionRecord as WasmTransactionRecordType,
 } from "@miden-sdk/miden-sdk";
 import useAccounts from "@/hooks/use-accounts";
 import { defaultStorageItem } from "@/lib/utils/account";

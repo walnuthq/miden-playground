@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { Spinner } from "@workspace/ui/components/spinner";
-import {
-  type ConsumableNoteRecord as WasmConsumableNoteRecordType,
-  type TransactionRequest as WasmTransactionRequestType,
-  type TransactionResult as WasmTransactionResultType,
+import type {
+  ConsumableNoteRecord as WasmConsumableNoteRecordType,
+  TransactionRequest as WasmTransactionRequestType,
+  TransactionResult as WasmTransactionResultType,
 } from "@miden-sdk/miden-sdk";
 import {
   Dialog,

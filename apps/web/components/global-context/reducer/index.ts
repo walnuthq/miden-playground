@@ -1,4 +1,4 @@
-import { type State } from "@/lib/types/state";
+import type { State } from "@/lib/types/state";
 import stateReducer, {
   type StateAction,
 } from "@/components/global-context/reducer/state";

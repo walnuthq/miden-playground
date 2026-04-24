@@ -13,7 +13,7 @@ import {
   accountIdFromPrefixSuffix,
   midenFaucetAccount,
 } from "@/lib/utils/account";
-import { type NetworkId } from "@/lib/types/network";
+import type { NetworkId } from "@/lib/types/network";
 import useGlobalContext from "@/components/global-context/hook";
 import type { State } from "@/lib/types/state";
 import { defaultState } from "@/lib/utils/state";
@@ -38,7 +38,7 @@ const useAppState = () => {
   const { lastSyncTime } = useSyncState();
   // const { client: paraMidenClient } = useParaMiden();
   // const client = paraMidenClient ?? defaultClient;
-  const { address: midenWalletAddress, requestAssets } = useWallet();
+  const { wallet, address: midenWalletAddress, requestAssets } = useWallet();
   const {
     accounts: previousAccounts,
     inputNotes: previousInputNotes,
@@ -140,7 +140,7 @@ const useAppState = () => {
           }
           // handle private accounts updates
           if (previousAccount.storageMode === "private") {
-            const assets = await requestAssets?.();
+            const assets = wallet && requestAssets ? await requestAssets() : [];
             accounts.push({
               ...previousAccount,
               consumableNoteIds: previousAccountConsumableP2IDNotes.map(

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Link from "next/link";
-import { type Account } from "@/lib/types/account";
-import { type InputNote } from "@/lib/types/note";
+import type { Account } from "@/lib/types/account";
+import type { InputNote } from "@/lib/types/note";
 import {
   Table,
   TableBody,
@@ -32,7 +32,7 @@ import {
 } from "@miden-sdk/miden-wallet-adapter";
 import useScripts from "@/hooks/use-scripts";
 import { formatAmount } from "@/lib/utils/asset";
-import { clientExportInputNoteFile } from "@/lib/web-client";
+import { fromBase64 } from "@/lib/utils";
 import { normalizeAccountId, useMiden } from "@miden-sdk/react";
 import useMultisig from "@/hooks/use-multisig";
 
@@ -72,23 +72,21 @@ const NoteActionsCell = ({
               if (!wallet || !fungibleAsset || !faucet) {
                 return;
               }
-              const noteFileBytes =
-                inputNote.type === "public"
-                  ? undefined
-                  : await clientExportInputNoteFile({
-                      client,
-                      noteId: inputNote.id,
-                    });
-              const transaction = new ConsumeTransaction(
-                faucet.identifier,
-                inputNote.id,
-                inputNote.type === "public" ? "public" : "private",
-                Number(fungibleAsset.amount),
-                noteFileBytes,
-              );
               const adapter = wallet.adapter as MidenWalletAdapter;
-              const txId = await adapter.requestConsume(transaction);
-              console.log({ txId });
+              if (inputNote.noteFileBytes) {
+                await adapter.importPrivateNote(
+                  fromBase64(inputNote.noteFileBytes),
+                );
+              } else {
+                const transaction = new ConsumeTransaction(
+                  faucet.identifier,
+                  inputNote.id,
+                  inputNote.type === "public" ? "public" : "private",
+                  Number(fungibleAsset.amount),
+                );
+                const txId = await adapter.requestConsume(transaction);
+                console.log({ txId });
+              }
             } else if (account.multisig) {
               const multisig = await loadMultisig(account.id);
               if (!multisig) {

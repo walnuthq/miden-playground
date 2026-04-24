@@ -1,8 +1,8 @@
-import { type Dispatch, type SetStateAction } from "react";
-import { type ConsumableNoteRecord as WasmConsumableNoteRecordType } from "@miden-sdk/miden-sdk";
-import {
-  type CreateTransactionDialogStep,
-  type TransactionType,
+import type { Dispatch, SetStateAction } from "react";
+import type { ConsumableNoteRecord as WasmConsumableNoteRecordType } from "@miden-sdk/miden-sdk";
+import type {
+  CreateTransactionDialogStep,
+  TransactionType,
 } from "@/lib/types/transaction";
 import { Label } from "@workspace/ui/components/label";
 import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";

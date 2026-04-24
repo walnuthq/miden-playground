@@ -1,5 +1,5 @@
 "use client";
-import { type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import {
   MidenWalletAdapter,

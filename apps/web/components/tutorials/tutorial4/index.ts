@@ -8,7 +8,6 @@ import Step3 from "@/components/tutorials/tutorial4/step3";
 import Step4 from "@/components/tutorials/tutorial4/step4";
 import Step5 from "@/components/tutorials/tutorial4/step5";
 import Step6 from "@/components/tutorials/tutorial4/step6";
-import Step7 from "@/components/tutorials/tutorial4/step7";
 
 const tutorial: Tutorial = {
   ...defaultTutorial(),
@@ -25,7 +24,7 @@ const tutorial: Tutorial = {
     accounts: [midenFaucetAccount("mtst")],
     tutorialId: "private-transfers",
   },
-  steps: [Step1, Step2, Step3, Step4, Step5, Step6, Step7],
+  steps: [Step1, Step2, Step3, Step4, Step5, Step6],
 };
 
 export default tutorial;

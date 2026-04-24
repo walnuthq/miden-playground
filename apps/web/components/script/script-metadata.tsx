@@ -1,6 +1,6 @@
 import { Plus } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
-import { type Script } from "@/lib/types/script";
+import type { Script } from "@/lib/types/script";
 import MetadataTable from "@/components/script/metadata-table";
 import ExportsTable from "@/components/script/exports-table";
 import DependenciesTable from "@/components/script/dependencies-table";

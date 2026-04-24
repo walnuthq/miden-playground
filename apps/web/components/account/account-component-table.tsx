@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { type Account } from "@/lib/types/account";
-import { type Script } from "@/lib/types/script";
-import { type Component } from "@/lib/types/component";
+import type { Account } from "@/lib/types/account";
+import type { Script } from "@/lib/types/script";
+import type { Component } from "@/lib/types/component";
 import {
   Table,
   TableBody,

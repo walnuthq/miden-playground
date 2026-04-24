@@ -1,4 +1,4 @@
-import { type Package } from "@/lib/types";
+import type { Package } from "@/lib/types";
 import basicWallet from "@/lib/standard-account-components/basic-wallet";
 import basicFungibleFaucet from "@/lib/standard-account-components/basic-fungible-faucet";
 import networkFungibleFaucet from "@/lib/standard-account-components/network-fungible-faucet";

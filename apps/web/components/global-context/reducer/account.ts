@@ -1,6 +1,6 @@
-import { type Account } from "@/lib/types/account";
-import { type InputNote } from "@/lib/types/note";
-import { type State } from "@/lib/types/state";
+import type { Account } from "@/lib/types/account";
+import type { InputNote } from "@/lib/types/note";
+import type { State } from "@/lib/types/state";
 
 export type AccountAction =
   | {

@@ -10,7 +10,7 @@ import {
 } from "@miden-sdk/miden-sdk";
 import { useMiden } from "@miden-sdk/react";
 import useGlobalContext from "@/components/global-context/hook";
-import { type NoteType, type InputNote } from "@/lib/types/note";
+import type { NoteType, InputNote } from "@/lib/types/note";
 import useAccounts from "@/hooks/use-accounts";
 import useScripts from "@/hooks/use-scripts";
 import {

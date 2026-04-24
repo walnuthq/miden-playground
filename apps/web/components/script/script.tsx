@@ -5,7 +5,7 @@ import {
   useSearchParams,
   notFound,
 } from "next/navigation";
-import { type Script } from "@/lib/types/script";
+import type { Script } from "@/lib/types/script";
 import { useIsClient } from "usehooks-ts";
 import useScripts from "@/hooks/use-scripts";
 import {

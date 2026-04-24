@@ -1,4 +1,4 @@
-import { type TutorialStep } from "@/lib/types/tutorial";
+import type { TutorialStep } from "@/lib/types/tutorial";
 import Step1Content from "@/components/tutorials/tutorial8/step1.mdx";
 
 const Step1: TutorialStep = {
