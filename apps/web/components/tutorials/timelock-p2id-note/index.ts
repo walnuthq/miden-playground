@@ -1,0 +1,24 @@
+import type { Tutorial } from "@/lib/types/tutorial";
+import { defaultTutorial } from "@/lib/utils/tutorial";
+import state from "@/components/tutorials/timelock-p2id-note/state";
+import Step1 from "@/components/tutorials/timelock-p2id-note/step1";
+import Step2 from "@/components/tutorials/timelock-p2id-note/step2";
+import Step3 from "@/components/tutorials/timelock-p2id-note/step3";
+import Step4 from "@/components/tutorials/timelock-p2id-note/step4";
+import Step5 from "@/components/tutorials/timelock-p2id-note/step5";
+
+const tutorial: Tutorial = {
+  ...defaultTutorial(),
+  id: "timelock-p2id-note",
+  number: 8,
+  title: "Timelock P2ID note",
+  tagline: "Create your own custom time locked P2ID note.",
+  description:
+    "In this tutorial we create a time locked P2ID note script and discover how it can be acknowledged by the network before consumed by another account.",
+  category: "advanced",
+  initialRoute: "/scripts",
+  state,
+  steps: [Step1, Step2, Step3, Step4, Step5],
+};
+
+export default tutorial;
