@@ -1,15 +1,15 @@
-import tutorial1 from "@/components/tutorials/tutorial1";
-import tutorial2 from "@/components/tutorials/tutorial2";
-import tutorial3 from "@/components/tutorials/tutorial3";
-import tutorial4 from "@/components/tutorials/tutorial4";
-import tutorial5 from "@/components/tutorials/tutorial5";
-import tutorial6 from "@/components/tutorials/tutorial6";
-import tutorial7 from "@/components/tutorials/tutorial7";
-import tutorial8 from "@/components/tutorials/tutorial8";
-import tutorial9 from "@/components/tutorials/tutorial9";
-import tutorial10 from "@/components/tutorials/tutorial10";
-import tutorial11 from "@/components/tutorials/tutorial11";
-import tutorial12 from "@/components/tutorials/tutorial12";
+import tutorial1 from "@/components/tutorials/create-and-fund-wallet";
+import tutorial2 from "@/components/tutorials/transfer-assets-between-wallets";
+import tutorial3 from "@/components/tutorials/connect-wallet-and-sign-transactions";
+import tutorial4 from "@/components/tutorials/private-transfers";
+import tutorial5 from "@/components/tutorials/wallet-backup-using-miden-guardian";
+import tutorial6 from "@/components/tutorials/interact-with-the-counter-contract";
+import tutorial7 from "@/components/tutorials/deploy-a-counter-contract";
+import tutorial8 from "@/components/tutorials/timelock-p2id-note";
+import tutorial9 from "@/components/tutorials/network-transactions";
+import tutorial10 from "@/components/tutorials/foreign-procedure-invocation";
+import tutorial11 from "@/components/tutorials/your-first-smart-contract-and-custom-note";
+import tutorial12 from "@/components/tutorials/contract-verification";
 
 if (
   typeof window !== "undefined" &&
@@ -30,14 +30,14 @@ const tutorials = [
   tutorial9,
   tutorial10,
   tutorial11,
-  // tutorial12,
+  tutorial12,
 ];
 
 if (
   typeof window !== "undefined" &&
   localStorage.getItem("preview-tutorials") === "true"
 ) {
-  tutorials.push(tutorial12);
+  // tutorials.push(tutorial12);
 }
 
 export default tutorials;
