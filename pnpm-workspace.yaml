@@ -3,4 +3,4 @@ packages:
   - "packages/*"
 
 overrides:
-  "@miden-sdk/miden-sdk": "0.14.4"
+  "@miden-sdk/miden-sdk": "0.14.5"
