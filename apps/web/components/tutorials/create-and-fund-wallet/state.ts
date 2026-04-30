@@ -18,6 +18,7 @@ const state: State = {
       address: "mtst1ap8ccljcwrne2gqztjrfxeyamuzpdvw9_qr7qqq9wr6w",
       identifier: "mtst1ap8ccljcwrne2gqztjrfxeyamuzpdvw9",
       routingParameters: "qr7qqq9wr6w",
+      isNew: false,
       storage: [
         {
           name: "miden::standards::fungible_faucets::metadata",

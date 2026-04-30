@@ -22,7 +22,6 @@ const state: State = {
       identifier: "mtst1azp8w4m7qphd6gzyxx8qeahsxqmcwrav",
       routingParameters: "qr7qqq9wr6w",
       isNew: false,
-      nonce: 1,
       storage: [
         {
           name: "miden::standards::fungible_faucets::metadata",
@@ -76,7 +75,6 @@ const state: State = {
       identifier: "mtst1arpjdkdh5up4jyzvk30mr95vtszruza6",
       routingParameters: "qr7qqq9wr6w",
       isNew: false,
-      nonce: 1,
       fungibleAssets: [
         {
           faucetId: "0x8277577e006edd2044318e0cf6f030",
@@ -105,6 +103,7 @@ const state: State = {
       address: "mtst1aqxx7egr0expyyzs4xc56vjmhqsmcqlt_qr7qqq9wr6w",
       identifier: "mtst1aqxx7egr0expyyzs4xc56vjmhqsmcqlt",
       routingParameters: "qr7qqq9wr6w",
+      isNew: false,
       storage: [
         {
           name: "miden::standards::auth::singlesig::scheme",
