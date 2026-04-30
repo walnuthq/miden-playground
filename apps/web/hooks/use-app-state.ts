@@ -115,8 +115,9 @@ const useAppState = () => {
           continue;
         }
         if (previousAccount.address === midenWalletAddress) {
+          const assets = wallet && requestAssets ? await requestAssets() : [];
           const isNewPublicAccount =
-            previousAccount.storageMode === "public" && previousAccount.isNew;
+            previousAccount.storageMode === "public" && assets.length === 0;
           // always re-add notes targetting connected wallet
           inputNotes.push(
             ...previousAccountP2IDNotes
@@ -136,11 +137,10 @@ const useAppState = () => {
                 ({ id }) => id,
               ),
             });
-            //continue;
+            continue;
           }
           // handle private accounts updates
           if (previousAccount.storageMode === "private") {
-            const assets = wallet && requestAssets ? await requestAssets() : [];
             accounts.push({
               ...previousAccount,
               consumableNoteIds: previousAccountConsumableP2IDNotes.map(

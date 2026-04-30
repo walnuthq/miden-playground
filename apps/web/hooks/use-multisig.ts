@@ -325,10 +325,7 @@ const useMultisig = () => {
     });
     dispatch({
       type: "IMPORT_ACCOUNT",
-      payload: {
-        account,
-        inputNotes: [],
-      },
+      payload: { account },
     });
     // dispatch({ type: "TRANSACTION_SUBMITTED" });
     return account;
