@@ -1,4 +1,5 @@
 "use client";
+import { uniq } from "lodash";
 import {
   Address as WasmAddress,
   AccountId as WasmAccountId,
@@ -6,7 +7,7 @@ import {
 import {
   clientGetAllInputNotes,
   wasmAccountToAccount,
-  clientGetConsumableNotes,
+  // clientGetConsumableNotes,
 } from "@/lib/web-client";
 import type { Account } from "@/lib/types/account";
 import {
@@ -159,28 +160,14 @@ const useAppState = () => {
           }
         }
         try {
-          let wasmAccount = await client.getAccount(
-            WasmAccountId.fromHex(previousAccount.id),
-          );
-          if (!wasmAccount) {
-            await client.importAccountById(
-              WasmAccountId.fromHex(previousAccount.id),
-            );
-            wasmAccount = await client.getAccount(
-              WasmAccountId.fromHex(previousAccount.id),
-            );
-            if (!wasmAccount) {
-              throw new Error("Account not found");
-            }
-          }
           // TODO this is unreliable for some reason?
-          const consumableNotes = await clientGetConsumableNotes({
-            client,
-            accountId: previousAccount.id,
-          });
-          const consumableNoteIds = consumableNotes.map((consumableNote) =>
-            consumableNote.inputNoteRecord().id().toString(),
-          );
+          // const consumableNotes = await clientGetConsumableNotes({
+          //   client,
+          //   accountId: previousAccount.id,
+          // });
+          // const consumableNoteIds = consumableNotes.map((consumableNote) =>
+          //   consumableNote.inputNoteRecord().id().toString(),
+          // );
           const consumableP2IDNoteIds = consumableP2IDNotes
             .filter(({ storage }) => {
               const [suffix = "", prefix = ""] = storage;
@@ -188,11 +175,6 @@ const useAppState = () => {
               return targetAccountId === previousAccount.id;
             })
             .map(({ id }) => id);
-          consumableNoteIds.push(
-            ...consumableP2IDNoteIds.filter(
-              (id) => !consumableNoteIds.includes(id),
-            ),
-          );
           const addressNoteTag = WasmAddress.fromBech32(
             previousAccount.address,
           ).toNoteTag();
@@ -203,25 +185,50 @@ const useAppState = () => {
                 inputNote.tag === addressNoteTag.asU32().toString(),
             )
             .map(({ id }) => id);
-          consumableNoteIds.push(
-            ...consumableInputNoteIds.filter(
-              (id) => !consumableNoteIds.includes(id),
-            ),
-          );
-          const account = wasmAccountToAccount({
-            wasmAccount,
-            name: previousAccount.name,
-            components: previousAccount.components,
-            updatedAt: lastSyncTime,
-            consumableNoteIds,
-          });
-          const accountIndex = accounts.findIndex(
-            ({ id }) => id === previousAccount.id,
-          );
-          if (accountIndex === -1) {
-            accounts.push(account);
+          const consumableNoteIds = uniq([
+            ...consumableP2IDNoteIds,
+            ...consumableInputNoteIds,
+          ]);
+          //
+          const isNewPublicAccount =
+            previousAccount.isNew && previousAccount.storageMode === "public";
+          if (isNewPublicAccount || previousAccount.storageMode === "private") {
+            const existingAccount = accounts.find(
+              ({ id }) => id === previousAccount.id,
+            );
+            if (!existingAccount) {
+              accounts.push({ ...previousAccount, consumableNoteIds });
+            }
           } else {
-            accounts[accountIndex] = account;
+            let wasmAccount = await client.getAccount(
+              WasmAccountId.fromHex(previousAccount.id),
+            );
+            if (!wasmAccount) {
+              await client.importAccountById(
+                WasmAccountId.fromHex(previousAccount.id),
+              );
+              wasmAccount = await client.getAccount(
+                WasmAccountId.fromHex(previousAccount.id),
+              );
+              if (!wasmAccount) {
+                throw new Error("Account not found");
+              }
+            }
+            const account = wasmAccountToAccount({
+              wasmAccount,
+              name: previousAccount.name,
+              components: previousAccount.components,
+              updatedAt: lastSyncTime,
+              consumableNoteIds,
+            });
+            const accountIndex = accounts.findIndex(
+              ({ id }) => id === previousAccount.id,
+            );
+            if (accountIndex === -1) {
+              accounts.push(account);
+            } else {
+              accounts[accountIndex] = account;
+            }
           }
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
@@ -231,7 +238,6 @@ const useAppState = () => {
           if (!existingAccount) {
             accounts.push(previousAccount);
           }
-          continue;
         }
       }
       dispatch({
