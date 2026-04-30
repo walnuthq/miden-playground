@@ -1,5 +1,4 @@
 import type { Account } from "@/lib/types/account";
-import type { InputNote } from "@/lib/types/note";
 import type { State } from "@/lib/types/state";
 
 export type AccountAction =
@@ -14,10 +13,7 @@ export type AccountAction =
   | { type: "UPDATE_ACCOUNT"; payload: { account: Account } }
   | {
       type: "IMPORT_ACCOUNT";
-      payload: {
-        account: Account;
-        inputNotes: InputNote[];
-      };
+      payload: { account: Account };
     }
   | {
       type: "OPEN_CREATE_WALLET_DIALOG";
@@ -99,14 +95,9 @@ const reducer = (state: State, action: AccountAction): State => {
       if (account) {
         return state;
       }
-      const noteIds = state.inputNotes.map(({ id }) => id);
-      const filteredInputNotes = action.payload.inputNotes.filter(
-        ({ id }) => !noteIds.includes(id),
-      );
       return {
         ...state,
         accounts: [...state.accounts, action.payload.account],
-        inputNotes: [...state.inputNotes, ...filteredInputNotes],
       };
     }
     case "OPEN_CREATE_WALLET_DIALOG": {

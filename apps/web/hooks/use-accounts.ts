@@ -168,10 +168,7 @@ const useAccounts = () => {
     }
     dispatch({
       type: "IMPORT_ACCOUNT",
-      payload: {
-        account,
-        inputNotes: [],
-      },
+      payload: { account },
     });
     return account;
   };
@@ -200,10 +197,7 @@ const useAccounts = () => {
         });
         dispatch({
           type: "IMPORT_ACCOUNT",
-          payload: {
-            account,
-            inputNotes: [],
-          },
+          payload: { account },
         });
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
@@ -218,10 +212,7 @@ const useAccounts = () => {
         };
         dispatch({
           type: "IMPORT_ACCOUNT",
-          payload: {
-            account,
-            inputNotes: [],
-          },
+          payload: { account },
         });
       }
     }
