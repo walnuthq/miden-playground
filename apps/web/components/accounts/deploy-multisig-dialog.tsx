@@ -56,6 +56,7 @@ const DeployMultisigDialog = () => {
               name: formData.get("name")!.toString(),
               threshold: 1, //Number(formData.get("threshold")!.toString()),
             });
+            setLoading(false);
             toast(`${account?.name} has been deployed.`, {
               description: (
                 <AccountAddress account={account} withTooltip={false} />
