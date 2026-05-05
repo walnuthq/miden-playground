@@ -34,7 +34,7 @@ const useMultisig = () => {
   const { dispatch } = useGlobalContext();
   const { client } = useMiden();
   const { lastSyncTime } = useSyncState();
-  const { accounts, newAccount, updateAccount } = useAccounts();
+  const { accounts, updateAccount } = useAccounts();
   const createMultisig = async ({
     name,
     threshold,
@@ -48,6 +48,7 @@ const useMultisig = () => {
     if (!midenWalletSession.commitment || !midenWalletSession.scheme) {
       return;
     }
+    dispatch({ type: "SUBMITTING_TRANSACTION" });
     const midenClient = await createMidenClient(networkId);
     const {
       client: multisigClient,
@@ -95,7 +96,10 @@ const useMultisig = () => {
       },
       updatedAt: lastSyncTime,
     });
-    newAccount(account);
+    dispatch({
+      type: "NEW_ACCOUNT",
+      payload: { account },
+    });
     return account;
   };
   const loadMultisig = async (accountId: string) => {
@@ -304,7 +308,7 @@ const useMultisig = () => {
     if (!multisig || !multisig.account) {
       throw new Error("Multisig not found");
     }
-    // dispatch({ type: "SUBMITTING_TRANSACTION" });
+    dispatch({ type: "SUBMITTING_TRANSACTION" });
     const state = await multisig.syncState();
     const config = AccountInspector.fromBase64(state.stateDataBase64);
     const account = wasmAccountToAccount({
@@ -327,7 +331,7 @@ const useMultisig = () => {
       type: "IMPORT_ACCOUNT",
       payload: { account },
     });
-    // dispatch({ type: "TRANSACTION_SUBMITTED" });
+    dispatch({ type: "TRANSACTION_SUBMITTED" });
     return account;
   };
   return {

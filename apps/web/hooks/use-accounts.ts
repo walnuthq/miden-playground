@@ -129,13 +129,6 @@ const useAccounts = () => {
     });
     return account;
   };
-  const newAccount = (account: Account) => {
-    dispatch({
-      type: "NEW_ACCOUNT",
-      payload: { account },
-    });
-    return account;
-  };
   const deleteAccount = async (accountId: string) => {
     const account = accounts.find(({ id }) => id === accountId);
     if (!account) {
@@ -351,7 +344,6 @@ const useAccounts = () => {
     isAuthorized,
     newWallet,
     newFaucet,
-    newAccount,
     deleteAccount,
     importAccountByAddress,
     importConnectedWallet,
