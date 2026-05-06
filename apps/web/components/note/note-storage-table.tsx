@@ -7,7 +7,7 @@ import {
   TableHead,
 } from "@workspace/ui/components/table";
 
-const NoteInputsTable = ({ inputs }: { inputs: string[] }) => (
+const NoteStorageTable = ({ storage }: { storage: string[] }) => (
   <div className="rounded-md border">
     <Table>
       <TableHeader>
@@ -18,7 +18,7 @@ const NoteInputsTable = ({ inputs }: { inputs: string[] }) => (
       </TableHeader>
       <TableBody>
         {/* TODO remove */}
-        {inputs.slice(0, 3).map((value, index) => (
+        {storage.slice(0, 3).map((value, index) => (
           <TableRow key={index}>
             <TableCell>{index}</TableCell>
             <TableCell>{BigInt(value)}</TableCell>
@@ -29,4 +29,4 @@ const NoteInputsTable = ({ inputs }: { inputs: string[] }) => (
   </div>
 );
 
-export default NoteInputsTable;
+export default NoteStorageTable;

@@ -174,7 +174,7 @@ const CreateNoteDialog = () => {
               </Button>
             </div>
             <div className="grid gap-3 col-span-2">
-              <Label htmlFor="inputs">Note storage</Label>
+              <Label htmlFor="storage">Note storage</Label>
               {noteStorage.map((noteStorageItem, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <Input

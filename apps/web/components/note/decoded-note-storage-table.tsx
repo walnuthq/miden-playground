@@ -7,14 +7,14 @@ import {
 } from "@workspace/ui/components/table";
 
 const DecodedNoteStorageTable = ({
-  inputs,
+  storage,
 }: {
-  inputs: { key: string; value: ReactNode }[];
+  storage: { key: string; value: ReactNode }[];
 }) => (
   <div className="rounded-md border">
     <Table>
       <TableBody>
-        {inputs.map(({ key, value }) => (
+        {storage.map(({ key, value }) => (
           <TableRow key={key}>
             <TableCell>{key}</TableCell>
             <TableCell>{value}</TableCell>

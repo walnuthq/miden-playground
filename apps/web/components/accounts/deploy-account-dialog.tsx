@@ -85,19 +85,26 @@ const DeployAccountDialog = () => {
               ),
             };
             setLoading(true);
-            const account = await deployAccount({
-              name: formData.get("name")?.toString() ?? "",
-              accountType,
-              storageMode,
-              components: [authComponent, componentWithInitialValues],
-            });
+            try {
+              const account = await deployAccount({
+                name: formData.get("name")?.toString() ?? "",
+                accountType,
+                storageMode,
+                components: [authComponent, componentWithInitialValues],
+              });
+              toast(`${account.name} has been deployed.`, {
+                description: (
+                  <AccountAddress account={account} withTooltip={false} />
+                ),
+              });
+              onClose();
+            } catch (error) {
+              const { message } = error as { message: string };
+              toast.error("Error while verifying Account Component.", {
+                description: message,
+              });
+            }
             setLoading(false);
-            toast(`${account.name} has been deployed.`, {
-              description: (
-                <AccountAddress account={account} withTooltip={false} />
-              ),
-            });
-            onClose();
           }}
         >
           <div className="grid grid-cols-2 gap-4">
