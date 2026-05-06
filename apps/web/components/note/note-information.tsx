@@ -1,7 +1,7 @@
 import type { InputNote } from "@/lib/types/note";
 import { accountIdFromPrefixSuffix } from "@/lib/utils/account";
 import NoteInformationTable from "@/components/note/note-information-table";
-import NoteInputsTable from "@/components/note/note-inputs-table";
+import NoteStorageTable from "@/components/note/note-storage-table";
 import DecodedNoteStorageTable from "@/components/note/decoded-note-storage-table";
 import AccountAddress from "@/components/lib/account-address";
 import FungibleAssetsTable from "@/components/lib/fungible-assets-table";
@@ -57,7 +57,7 @@ const NoteInformation = ({
           </div>
         </div>
         {inputNote.storage.length > 0 && (
-          <NoteInputsTable inputs={inputNote.storage} />
+          <NoteStorageTable storage={inputNote.storage} />
         )}
       </div>
       {/* TODO: better decoded note storage using inputNote.scriptId */}
@@ -67,7 +67,7 @@ const NoteInformation = ({
             Decoded Note Storage
           </h4>
           <DecodedNoteStorageTable
-            inputs={[
+            storage={[
               {
                 key: "Target Account ID",
                 value: (

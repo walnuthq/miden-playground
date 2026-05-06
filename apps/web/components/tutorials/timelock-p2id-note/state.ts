@@ -19,6 +19,7 @@ const state: State = {
       address: testWalletAddress("mtst"),
       identifier: getIdentifierPart(testWalletAddress("mtst")),
       routingParameters: getRoutingParametersPart(testWalletAddress("mtst")),
+      isNew: false,
     },
   ],
   tutorialId: "timelock-p2id-note",

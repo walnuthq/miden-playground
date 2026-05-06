@@ -18,10 +18,10 @@ struct P2idNote;
 impl P2idNote {
     #[note_script]
     pub fn run(self, _arg: Word, account: &mut Account) {
-        let inputs = active_note::get_inputs();
+        let storage = active_note::get_storage();
 
-        let target_account_id_suffix = inputs[0];
-        let target_account_id_prefix = inputs[1];
+        let target_account_id_suffix = storage[0];
+        let target_account_id_prefix = storage[1];
 
         // get consuming account id
         let consuming_account_id = account.get_id();

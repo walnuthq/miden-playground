@@ -41,17 +41,17 @@ struct P2ideNote;
 impl P2ideNote {
     #[note_script]
     pub fn run(self, _arg: Word, account: &mut Account) {
-        let inputs = active_note::get_storage();
+        let storage = active_note::get_storage();
 
-        // make sure the number of inputs is 4
-        assert_eq((inputs.len() as u32).into(), felt!(4));
+        // make sure the number of storage items is 4
+        assert_eq((storage.len() as u32).into(), felt!(4));
 
         // P2IDE storage follows the protocol layout:
         // [target_account_id_suffix, target_account_id_prefix, reclaim_height, timelock_height]
-        let target_account_id_suffix = inputs[0];
-        let target_account_id_prefix = inputs[1];
-        let reclaim_height = inputs[2];
-        let timelock_height = inputs[3];
+        let target_account_id_suffix = storage[0];
+        let target_account_id_prefix = storage[1];
+        let reclaim_height = storage[2];
+        let timelock_height = storage[3];
 
         // get block number
         let block_number = tx::get_block_number();

@@ -115,23 +115,30 @@ const useAppState = () => {
           });
           continue;
         }
+        const midenWalletAssets =
+          previousAccount.address === midenWalletAddress &&
+          wallet &&
+          requestAssets
+            ? await requestAssets()
+            : [];
+        const isNewPublicWallet =
+          previousAccount.address === midenWalletAddress &&
+          previousAccount.storageMode === "public" &&
+          midenWalletAssets.length === 0;
         if (previousAccount.address === midenWalletAddress) {
-          const assets = wallet && requestAssets ? await requestAssets() : [];
-          const isNewPublicAccount =
-            previousAccount.storageMode === "public" && assets.length === 0;
           // always re-add notes targetting connected wallet
           inputNotes.push(
             ...previousAccountP2IDNotes
               .filter(({ id }) => !inputNotes.find((note) => note.id === id))
               .map((note) => ({
                 ...note,
-                state: isNewPublicAccount
+                state: isNewPublicWallet
                   ? ("committed" as NoteState)
                   : ("consumed-external" as NoteState),
               })),
           );
           // handle new public accounts updates
-          if (isNewPublicAccount) {
+          if (isNewPublicWallet) {
             accounts.push({
               ...previousAccount,
               consumableNoteIds: previousAccountConsumableP2IDNotes.map(
@@ -147,8 +154,8 @@ const useAppState = () => {
               consumableNoteIds: previousAccountConsumableP2IDNotes.map(
                 ({ id }) => id,
               ),
-              fungibleAssets: assets
-                ? assets.map(({ faucetId, amount }) => ({
+              fungibleAssets: midenWalletAssets
+                ? midenWalletAssets.map(({ faucetId, amount }) => ({
                     faucetId: WasmAddress.fromBech32(faucetId)
                       .accountId()
                       .toString(),
@@ -191,7 +198,10 @@ const useAppState = () => {
           ]);
           //
           const isNewPublicAccount =
-            previousAccount.isNew && previousAccount.storageMode === "public";
+            previousAccount.address === midenWalletAddress
+              ? isNewPublicWallet
+              : previousAccount.isNew &&
+                previousAccount.storageMode === "public";
           if (isNewPublicAccount || previousAccount.storageMode === "private") {
             const existingAccount = accounts.find(
               ({ id }) => id === previousAccount.id,

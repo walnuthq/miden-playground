@@ -11,7 +11,7 @@ const useCompleted = () => {
     ({ id, type }) => !defaultScriptIds.includes(id) && type === "note-script",
   );
   const firstMatches = script?.rust.match(
-    /let\s+timelock_height\s*=\s*inputs\[2\];/,
+    /let\s+timelock_height\s*=\s*storage\[2\];/,
   );
   const secondMatches = script?.rust.match(
     /let\s+block_number\s*=\s*tx::get_block_number\(\);/,

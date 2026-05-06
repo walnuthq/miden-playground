@@ -1,7 +1,7 @@
-We assume the timelock block height will be appended as the 3rd item in the note inputs, let's store it in a variable for future use:
+We assume the timelock block height will be appended as the 3rd item in the note storage, let's store it in a variable for future use:
 
 ```rust
-let timelock_height = inputs[2];
+let timelock_height = storage[2];
 ```
 
 To get the current block height, we'll use the transaction kernel `get_block_number` call:
