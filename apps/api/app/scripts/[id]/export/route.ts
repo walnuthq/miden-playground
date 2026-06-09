@@ -1,6 +1,6 @@
 import { mkdir, cp, readFile, writeFile } from "node:fs/promises";
 import { type NextRequest, NextResponse } from "next/server";
-import archiver from "archiver";
+import { ZipArchive } from "archiver";
 import { safeRm } from "@/lib/utils";
 import { getPackage, getDependencies } from "@/db/packages";
 import { packageExists, generatePackageDir } from "@/lib/miden-compiler";
@@ -30,7 +30,7 @@ export const GET = async (
       });
     }
     // Create readable stream for the zip
-    const archive = archiver("zip", {
+    const archive = new ZipArchive({
       zlib: { level: 9 }, // max compression
     });
     // Create response stream

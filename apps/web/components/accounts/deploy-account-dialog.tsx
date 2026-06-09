@@ -100,7 +100,7 @@ const DeployAccountDialog = () => {
               onClose();
             } catch (error) {
               const { message } = error as { message: string };
-              toast.error("Error while verifying Account Component.", {
+              toast.error("Error while deploying Account Component.", {
                 description: message,
               });
             }

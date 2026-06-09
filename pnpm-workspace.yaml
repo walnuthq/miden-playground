@@ -7,5 +7,9 @@ allowBuilds:
   sharp: true
   workerd: true
 
+minimumReleaseAgeExclude:
+  - miniflare@4.20260603.0
+  - wrangler@4.98.0
+
 overrides:
-  "@miden-sdk/miden-sdk": "0.14.5"
+  "@miden-sdk/miden-sdk": "0.14.10"

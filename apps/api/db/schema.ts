@@ -29,6 +29,7 @@ export const packagesTable = pgTable("packages", {
   status: packageStatusEnum().notNull().default("draft"),
   readOnly: boolean("read_only").notNull().default(false),
   rust: text().notNull().default(""),
+  files: jsonb().notNull().default({}),
   masm: text().notNull().default(""),
   digest: varchar({ length: 66 })
     .notNull()

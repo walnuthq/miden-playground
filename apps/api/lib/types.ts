@@ -32,7 +32,11 @@ export type CargoToml = {
 
 export type NewPackage = typeof packagesTable.$inferInsert;
 
-export type Package = Omit<typeof packagesTable.$inferSelect, "exports"> & {
+export type Package = Omit<
+  typeof packagesTable.$inferSelect,
+  "files" | "exports"
+> & {
+  files: Record<string, string>;
   exports: Export[];
 };
 
@@ -43,6 +47,7 @@ export const defaultPackage = (): Package => ({
   status: "compiled",
   readOnly: true,
   rust: "",
+  files: {},
   masm: "",
   digest: "",
   masp: "",
@@ -74,6 +79,13 @@ export const defaultProcedureExport = (): ProcedureExport => ({
 
 export type Export = { Procedure: ProcedureExport };
 
+export type PackageDependency = {
+  name: string;
+  kind: string;
+  version: string;
+  digest: string;
+};
+
 export type Dependency = {
   id: string;
   name: string;
@@ -98,3 +110,5 @@ export type CompiledPackage = Pick<
   error: string;
   dependencies: Dependency[];
 };
+
+export type Manifest = { exports: Export[]; dependencies: PackageDependency[] };
