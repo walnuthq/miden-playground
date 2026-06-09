@@ -8,7 +8,14 @@
       "outputs": [".next/**", "!.next/cache/**"]
     },
     "api#build": {
-      "env": ["NODE_ENV", "WEB_URL", "PACKAGES_PATH", "DATABASE_URL"]
+      "env": [
+        "NODE_ENV",
+        "WEB_URL",
+        "API_COMPILE_URL",
+        "API_REGISTRY_URL",
+        "PACKAGES_PATH",
+        "DATABASE_URL"
+      ]
     },
     "web#build": {
       "env": ["NODE_ENV", "NEXT_PUBLIC_API_URL"]

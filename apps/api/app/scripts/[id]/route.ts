@@ -1,18 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
-import {
-  compilePackage,
-  deletePackageDir,
-  packageExists,
-  readPackage,
-  generatePackageDir,
-  generateCargoToml,
-  updateRust,
-} from "@/lib/miden-compiler";
 import type {
   CompiledPackage,
   Package,
   ProcedureExport,
   Export,
+  Manifest,
 } from "@/lib/types";
 import {
   getDependencies,
@@ -20,6 +12,8 @@ import {
   updatePackage,
   deletePackage,
 } from "@/db/packages";
+import { API_COMPILE_URL } from "@/lib/constants";
+import { generateCargoToml } from "@/lib/utils";
 
 type GetScriptResponse = {
   package: Omit<Package, "createdAt" | "updatedAt"> & {
@@ -75,8 +69,7 @@ export const PATCH = async (
     const body = await request.json();
     const { rust: updatedRust, dependencies: updatedDependencies } =
       body as CompileScriptRequestBody;
-    const [exists, dbPackage, dependenciesPackages] = await Promise.all([
-      packageExists(id),
+    const [dbPackage, dependenciesPackages] = await Promise.all([
       getPackage(id),
       getDependencies(updatedDependencies),
     ]);
@@ -84,30 +77,43 @@ export const PATCH = async (
       throw new Error("Error: Package not found");
     }
     const { name, type } = dbPackage;
-    if (exists) {
-      await updateRust({ packageDir: id, name, rust: updatedRust });
-    } else {
-      await generatePackageDir({
-        packageDir: id,
-        name,
-        type,
-        rust: updatedRust,
-        dependencies: updatedDependencies,
-      });
-    }
-    await generateCargoToml({
-      packageDir: id,
+    const updatedFiles = dbPackage.files;
+    updatedFiles[`${name}/src/lib.rs`] = updatedRust;
+    updatedFiles[`${name}/Cargo.toml`] = generateCargoToml({
       name,
       type,
       dependencies: dependenciesPackages,
     });
-    const { stderr } = await compilePackage({ packageDir: id, name });
-    if (stderr) {
+    const files = dependenciesPackages.reduce<Record<string, string>>(
+      (previousValue, currentValue) => {
+        for (const [path, content] of Object.entries(currentValue.files)) {
+          previousValue[path] = content;
+        }
+        return previousValue;
+      },
+      updatedFiles,
+    );
+    const response = await fetch(`${API_COMPILE_URL}/compile`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        files,
+        entrypoint: name,
+      }),
+    });
+    const result = await response.json();
+    if (!response.ok) {
+      const { error } = result as { error: string };
+      throw new Error(error);
+    }
+    const { stdout, stderr } = result as { stdout: string; stderr: string };
+    if (stdout === "" && stderr !== "") {
       console.error(stderr);
       await updatePackage({
         id,
         status: "error",
         rust: updatedRust,
+        files: updatedFiles,
         dependencies: updatedDependencies,
         exports: [],
       });
@@ -134,16 +140,19 @@ export const PATCH = async (
         },
       });
     }
-    const {
-      masp,
-      digest,
-      exports,
-      dependencies: compiledDependencies,
-    } = await readPackage(id);
+    const { masp, digest, manifest } = result as {
+      masp: string;
+      digest: string;
+      manifest: Manifest;
+    };
+    const exports = manifest.exports.filter(
+      ({ Procedure: { signature } }) => signature?.abi === 3,
+    );
     await updatePackage({
       id,
       status: "compiled",
       rust: updatedRust,
+      files: updatedFiles,
       masp,
       digest,
       exports,
@@ -162,8 +171,8 @@ export const PATCH = async (
         masp,
         exports,
         dependencies: dependenciesPackages.map((dependencyPackage) => {
-          const dependency = compiledDependencies.find(
-            ({ id }) => id === dependencyPackage.id,
+          const dependency = manifest.dependencies.find(
+            ({ name }) => name.replaceAll("_", "-") === dependencyPackage.name,
           );
           return {
             id: dependencyPackage.id,
@@ -187,7 +196,7 @@ export const DELETE = async (
 ) => {
   try {
     const { id } = await params;
-    await Promise.all([deletePackage(id), deletePackageDir(id)]);
+    await deletePackage(id);
     return NextResponse.json<{ package: { id: string } }>({ package: { id } });
   } catch (error) {
     console.error(error);

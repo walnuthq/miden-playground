@@ -23,8 +23,12 @@ export const getReadOnlyPackage = ({
     },
   });
 
-export const getPackage = (id: string) =>
-  db.query.packagesTable.findFirst({ where: { id } });
+export const getPackage = async (id: string) => {
+  const dbPackage = await db.query.packagesTable.findFirst({ where: { id } });
+  return dbPackage
+    ? { ...dbPackage, files: dbPackage.files as Record<string, string> }
+    : undefined;
+};
 
 export const insertPackage = async (newPackage: NewPackage) => {
   const [insertedPackage] = await db
@@ -41,6 +45,7 @@ export const updatePackage = ({
   id,
   status,
   rust,
+  files,
   masp,
   digest,
   exports,
@@ -49,6 +54,7 @@ export const updatePackage = ({
   id: string;
   status?: PackageStatus;
   rust?: string;
+  files?: Record<string, string>;
   masp?: string;
   digest?: string;
   exports?: Export[];
@@ -56,7 +62,7 @@ export const updatePackage = ({
 }) =>
   db
     .update(packagesTable)
-    .set({ status, rust, masp, digest, exports, dependencies })
+    .set({ status, rust, files, masp, digest, exports, dependencies })
     .where(eq(packagesTable.id, id));
 
 export const deletePackage = (id: string) =>
@@ -68,6 +74,7 @@ export const getDependencies = async (dependencies: string[]) => {
     .map((dependency) => ({
       ...defaultDependenciesRecords[dependency as DefaultDependency],
       rust: "",
+      files: {} as Record<string, string>,
     }));
   const dbDependencies = await db.query.packagesTable.findMany({
     columns: {
@@ -76,6 +83,7 @@ export const getDependencies = async (dependencies: string[]) => {
       type: true,
       digest: true,
       rust: true,
+      files: true,
     },
     where: {
       id: {
@@ -83,5 +91,11 @@ export const getDependencies = async (dependencies: string[]) => {
       },
     },
   });
-  return [...defaultDependencies, ...dbDependencies];
+  return [
+    ...defaultDependencies,
+    ...dbDependencies.map((dbDependency) => ({
+      ...dbDependency,
+      files: dbDependency.files as Record<string, string>,
+    })),
+  ];
 };

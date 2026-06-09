@@ -2,7 +2,7 @@
   "name": "miden-playground",
   "version": "0.0.1",
   "private": true,
-  "packageManager": "pnpm@11.0.9+sha512.34ce82e6780233cf9cad8685029a8f81d2e06196c5a9bad98879f7424940c6817c4e4524fb7d38b8553ceed48b9758b8ebaf1abd3600c232c4c8cf7366086f38",
+  "packageManager": "pnpm@11.5.2+sha512.71c631e382066efc25625d5cf029075de07b61b37f6e27350fbd84b1bda5864c8c1967adc280776b45c30a715c0359a3be08fef42d5bb09e2b99029979692916",
   "engines": {
     "node": ">=22"
   },
@@ -10,14 +10,14 @@
     "build": "turbo build",
     "dev": "turbo dev",
     "lint": "turbo lint",
-    "check-types": "turbo check-types",
+    "typecheck": "turbo typecheck",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
-    "prettier": "^3.8.3",
-    "turbo": "^2.9.12",
-    "typescript": "^5.9.3"
+    "prettier": "3.8.3",
+    "turbo": "2.9.16",
+    "typescript": "6.0.3"
   }
 }

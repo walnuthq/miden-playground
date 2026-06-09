@@ -9,36 +9,35 @@
     "start": "PORT=3001 node .next/standalone/apps/api/server.js",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
-    "check-types": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
     "build:miden-package-metadata": "cargo install --path miden-package-metadata --locked",
     "build:miden-verifier": "cargo install --path miden-verifier --locked",
     "build:project-template": "dotenvx run -f .env.local -- sh -c 'rm -rf $PACKAGES_PATH/project-template && cp -r templates/project-template $PACKAGES_PATH/project-template && cd $PACKAGES_PATH/project-template && CARGO_TARGET_DIR=$PACKAGES_PATH/target miden build --release'",
     "build:rust": "pnpm build:miden-package-metadata && pnpm build:miden-verifier && pnpm build:project-template",
-    "db:push": "pnpm drizzle-kit push"
+    "db:push": "drizzle-kit push"
   },
   "dependencies": {
-    "@dotenvx/dotenvx": "^1.65.0",
-    "archiver": "^8.0.0",
-    "dotenv": "^17.4.2",
-    "drizzle-orm": "1.0.0-beta.22",
-    "lodash": "^4.18.1",
-    "next": "^16.2.6",
-    "pg": "^8.20.0",
-    "react": "^19.2.6",
-    "smol-toml": "^1.6.1",
-    "uuid": "^14.0.0"
+    "@dotenvx/dotenvx": "1.71.0",
+    "archiver": "8.0.0",
+    "dotenv": "17.4.2",
+    "drizzle-orm": "1.0.0-rc.3",
+    "lodash": "4.18.1",
+    "next": "16.2.7",
+    "pg": "8.21.0",
+    "react": "19.2.7",
+    "smol-toml": "1.6.1",
+    "uuid": "14.0.0"
   },
   "devDependencies": {
-    "@types/archiver": "^7.0.0",
-    "@types/lodash": "^4.17.24",
-    "@types/node": "^25.6.2",
-    "@types/pg": "^8.20.0",
-    "@types/react": "^19.2.14",
+    "@types/archiver": "8.0.0",
+    "@types/lodash": "4.17.24",
+    "@types/node": "25.9.2",
+    "@types/pg": "8.20.0",
+    "@types/react": "19.2.17",
     "@workspace/eslint-config": "workspace:^",
     "@workspace/typescript-config": "workspace:*",
-    "drizzle-kit": "1.0.0-beta.22",
-    "eslint": "^9.39.4",
-    "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "drizzle-kit": "1.0.0-rc.3",
+    "eslint": "9.39.4",
+    "typescript": "6.0.3"
   }
 }
