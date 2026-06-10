@@ -29,6 +29,8 @@ dist
 .open-next
 .wrangler
 
+# Agents
+.claude
 
 # Debug
 npm-debug.log*

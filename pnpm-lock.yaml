@@ -5,7 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  '@miden-sdk/miden-sdk': 0.14.10
+  '@miden-sdk/miden-sdk': 0.14.11
 
 importers:
 
@@ -18,8 +18,8 @@ importers:
         specifier: workspace:*
         version: link:packages/typescript-config
       prettier:
-        specifier: 3.8.3
-        version: 3.8.3
+        specifier: 3.8.4
+        version: 3.8.4
       turbo:
         specifier: 2.9.16
         version: 2.9.16
@@ -100,14 +100,14 @@ importers:
         specifier: 3.1.1
         version: 3.1.1(@types/react@19.2.17)(react@19.2.7)
       '@miden-sdk/miden-sdk':
-        specifier: 0.14.10
-        version: 0.14.10
+        specifier: 0.14.11
+        version: 0.14.11
       '@miden-sdk/miden-wallet-adapter':
         specifier: 0.14.3
-        version: 0.14.3(@miden-sdk/react@0.14.10(@miden-sdk/miden-sdk@0.14.10)(@types/react@19.2.17)(react@19.2.7)(use-sync-external-store@1.6.0(react@19.2.7)))(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3)
+        version: 0.14.3(@miden-sdk/react@0.14.11(@miden-sdk/miden-sdk@0.14.11)(@types/react@19.2.17)(react@19.2.7)(use-sync-external-store@1.6.0(react@19.2.7)))(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3)
       '@miden-sdk/react':
-        specifier: 0.14.10
-        version: 0.14.10(@miden-sdk/miden-sdk@0.14.10)(@types/react@19.2.17)(react@19.2.7)(use-sync-external-store@1.6.0(react@19.2.7))
+        specifier: 0.14.11
+        version: 0.14.11(@miden-sdk/miden-sdk@0.14.11)(@types/react@19.2.17)(react@19.2.7)(use-sync-external-store@1.6.0(react@19.2.7))
       '@monaco-editor/react':
         specifier: 4.7.0
         version: 4.7.0(monaco-editor@0.55.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -116,7 +116,7 @@ importers:
         version: 16.2.7(@mdx-js/loader@3.1.1)(@mdx-js/react@3.1.1(@types/react@19.2.17)(react@19.2.7))
       '@opennextjs/cloudflare':
         specifier: 1.19.11
-        version: 1.19.11(next@16.2.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(wrangler@4.98.0)
+        version: 1.19.11(next@16.2.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(wrangler@4.99.0)
       '@openzeppelin/miden-multisig-client':
         specifier: 0.14.9
         version: 0.14.9
@@ -191,8 +191,8 @@ importers:
         specifier: 6.0.3
         version: 6.0.3
       wrangler:
-        specifier: 4.98.0
-        version: 4.98.0
+        specifier: 4.99.0
+        version: 4.99.0
 
   packages/eslint-config:
     devDependencies:
@@ -679,32 +679,32 @@ packages:
       workerd:
         optional: true
 
-  '@cloudflare/workerd-darwin-64@1.20260603.1':
-    resolution: {integrity: sha512-cEXDWu6V3ZrpmwWkM4OJE9AeXjdAgOY5rh8EHhcBVCuP5rxnzUbPzLtrVOHx0UUUAcCrFq0Xsa6mZKL1VUZsKQ==}
+  '@cloudflare/workerd-darwin-64@1.20260609.1':
+    resolution: {integrity: sha512-AK8tYLQm+8BqQMzjZ55ZfuhfIm1eCkj+Ykxz6kWXojdACwjjU03MrwdM9fBDdgzU3upXOs4e1scOFHySlfVQjA==}
     engines: {node: '>=16'}
     cpu: [x64]
     os: [darwin]
 
-  '@cloudflare/workerd-darwin-arm64@1.20260603.1':
-    resolution: {integrity: sha512-uBPK4LaWJNbbCYwPnUAehlHbbVulhVZPZsdcAhBPfZhHb3QAuAEPAQepO/P67R3V6Cni4YGx1fLbL8A5wwoaNA==}
+  '@cloudflare/workerd-darwin-arm64@1.20260609.1':
+    resolution: {integrity: sha512-4kKXfr7ZHU6xQ/R9ShdSuj1A1bEouoRcHzUWdjnuMPBlRsAAVanlxAVYISotFUulLEinayOpRFbhpsfwzrpSSw==}
     engines: {node: '>=16'}
     cpu: [arm64]
     os: [darwin]
 
-  '@cloudflare/workerd-linux-64@1.20260603.1':
-    resolution: {integrity: sha512-ht9l6/8Tk7Rp6kA4S9oFZ4X8u0VjnnFdmU/6B3fnABYKREYTKh2RdOqXqXxcp5eNJseireKnWik/hQOPK1CutQ==}
+  '@cloudflare/workerd-linux-64@1.20260609.1':
+    resolution: {integrity: sha512-T2Ebir2OPHAvvZ0HUh5mi1lN8q30sVi4lf7LIpc28AHoWtoOmJ0jA5AJK4IYJm1MKEbBldq+QsckaHOCQFmRpQ==}
     engines: {node: '>=16'}
     cpu: [x64]
     os: [linux]
 
-  '@cloudflare/workerd-linux-arm64@1.20260603.1':
-    resolution: {integrity: sha512-LJZ6x00rAjSrobV4m0ZW0TpH5ilBbKcWBzlH+y+KOUsIE/CpTuhAzKV43TbSnFLRX5+jrWKiz2v0hO91lPXy6A==}
+  '@cloudflare/workerd-linux-arm64@1.20260609.1':
+    resolution: {integrity: sha512-INfcYoSsKqEIvPL69/3RkqYoP8WUR0VEN6loWN/3tekXLoJrVOj3E5NjIetsdS8MJN6zc3st/ae4bMuWRRzoDg==}
     engines: {node: '>=16'}
     cpu: [arm64]
     os: [linux]
 
-  '@cloudflare/workerd-windows-64@1.20260603.1':
-    resolution: {integrity: sha512-DvwqkXMAJRPoDN4PxapAwhlz/6ouD+6R1ttbAEK3cWD/QBvFF5STx7Ds/9Irf+rBly3np3uHWkeX+wZnNFEuzA==}
+  '@cloudflare/workerd-windows-64@1.20260609.1':
+    resolution: {integrity: sha512-EWhfxKI1aqUr7S8xuGxgmRCumEzB8iSsCIz6oEqJN+3pZuW3EWiKDGFW4EY1BmwNINLW1eO5VMGYb8Fj6FVYxA==}
     engines: {node: '>=16'}
     cpu: [x64]
     os: [win32]
@@ -1602,8 +1602,8 @@ packages:
       '@types/react': '>=16'
       react: '>=16'
 
-  '@miden-sdk/miden-sdk@0.14.10':
-    resolution: {integrity: sha512-3CiexWFCVuvehw86EzSUGJzgHWqE1Vo+KNXbzZFeRXZ0K2SivoZxIH2J7+O7F4k54VLKJbMPgTKgZM0Jc26DAw==}
+  '@miden-sdk/miden-sdk@0.14.11':
+    resolution: {integrity: sha512-puGqlzRORGHolT53vuk78C2D90lqwRjtfUiZ3Hzf8Vp+YtYgPQ0gIrnmiWP8lLD6sZUXYqCIiW/emR0cN5l4tw==}
 
   '@miden-sdk/miden-wallet-adapter-base@0.14.3':
     resolution: {integrity: sha512-SfoIMnzP4OD4u6I8GyYvlbghXuXInw6vkQMmE+s8xTcshEiZk38MbVmmlPTtSFAhz7Z+K3nAOsW84EMn83d52A==}
@@ -1638,10 +1638,10 @@ packages:
       react: ^19.1.1
       react-dom: ^19.1.1
 
-  '@miden-sdk/react@0.14.10':
-    resolution: {integrity: sha512-w53ffbxgnoYJ4kBDhHKY9orSyKr0Uwx8Qu0YV9ZFy5lHhfNrK1uL38bDX9GNqo+7r8G6oaAofO2+8pnLUI53cg==}
+  '@miden-sdk/react@0.14.11':
+    resolution: {integrity: sha512-7E4SyemSHH6PSlicSb/Dx+URXiymluKpbJBk3BkS6aGbplOVHAwPRbKNMU4XQsQdxUutt+t4CBaYmsMWeyNfiA==}
     peerDependencies:
-      '@miden-sdk/miden-sdk': 0.14.10
+      '@miden-sdk/miden-sdk': 0.14.11
       react: '>=18.0.0'
 
   '@monaco-editor/loader@1.7.0':
@@ -4681,8 +4681,8 @@ packages:
     resolution: {integrity: sha512-OqbOk5oEQeAZ8WXWydlu9HJjz9WVdEIvamMCcXmuqUYjTknH/sqsWvhQ3vgwKFRR1HpjvNBKQ37nbJgYzGqGcg==}
     engines: {node: '>=6'}
 
-  miniflare@4.20260603.0:
-    resolution: {integrity: sha512-+kMQYB82gC8MPOuojHur3icQsUeZUEJ+Sphuo5rVC3Ri9txBLAW/mH33b9OVrpmkogQeaaqPS4tPtugJZhk5Kw==}
+  miniflare@4.20260609.0:
+    resolution: {integrity: sha512-4ZfNh9ACDa/mKKQvTSO2vigyQS2MB7dEU02KRPle4FqL7S6nek+2Fq6WGzazZbt1OORYgb4OGVLnOCx+My2NNA==}
     engines: {node: '>=22.0.0'}
     hasBin: true
 
@@ -4982,8 +4982,8 @@ packages:
     resolution: {integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==}
     engines: {node: '>= 0.8.0'}
 
-  prettier@3.8.3:
-    resolution: {integrity: sha512-7igPTM53cGHMW8xWuVTydi2KO233VFiTNyF5hLJqpilHfmn8C8gPf+PS7dUT64YcXFbiMGZxS9pCSxL/Dxm/Jw==}
+  prettier@3.8.4:
+    resolution: {integrity: sha512-N2MylSdi48+5N/6S5j+maeHbUSIzzZ5uOcX5Hm4QpV8Dkb1HFjfAKTKX6yNPJQD9AhcT3ifHNB66tWTTJDi11Q==}
     engines: {node: '>=14'}
     hasBin: true
 
@@ -5620,17 +5620,17 @@ packages:
     resolution: {integrity: sha512-BN22B5eaMMI9UMtjrGd5g5eCYPpCPDUy0FJXbYsaT5zYxjFOckS53SQDE3pWkVoWpHXVb3BrYcEN4Twa55B5cA==}
     engines: {node: '>=0.10.0'}
 
-  workerd@1.20260603.1:
-    resolution: {integrity: sha512-NPcbhI1++CS+fnELyXtsIR52en+5kwr/OrKeiQeYXGy10HxmPdsQBv9N+DU7hJIOOmBHhOGAAsoGDjyiQ2YCaA==}
+  workerd@1.20260609.1:
+    resolution: {integrity: sha512-KF/Y/8f4VoXCk87NuU6RqmO0X5fdzcrxU3XzAgoPUpnH9t1ZyzRgX1O/9sJvjItxroCBTEBzKssda02Dz9i6BA==}
     engines: {node: '>=16'}
     hasBin: true
 
-  wrangler@4.98.0:
-    resolution: {integrity: sha512-cXfFUuF4rMIvE0hiMnXjEAB27ERryaCgquBJdUoPIjFzYYE1rbRdMUkEdQ18qDPUtsPvhJdqxLntixT9OfSzQw==}
+  wrangler@4.99.0:
+    resolution: {integrity: sha512-i7GA2mZETTyq3ljWdEzM908FjLaMWZ1AaAHKaOJ8pFA/tonf2VqIWDyBGzKleIVBbNQxOTIY2wnbv0iaK3rC6g==}
     engines: {node: '>=22.0.0'}
     hasBin: true
     peerDependencies:
-      '@cloudflare/workers-types': ^4.20260603.1
+      '@cloudflare/workers-types': ^4.20260609.1
     peerDependenciesMeta:
       '@cloudflare/workers-types':
         optional: true
@@ -6470,25 +6470,25 @@ snapshots:
 
   '@cloudflare/kv-asset-handler@0.5.0': {}
 
-  '@cloudflare/unenv-preset@2.16.1(unenv@2.0.0-rc.24)(workerd@1.20260603.1)':
+  '@cloudflare/unenv-preset@2.16.1(unenv@2.0.0-rc.24)(workerd@1.20260609.1)':
     dependencies:
       unenv: 2.0.0-rc.24
     optionalDependencies:
-      workerd: 1.20260603.1
+      workerd: 1.20260609.1
 
-  '@cloudflare/workerd-darwin-64@1.20260603.1':
+  '@cloudflare/workerd-darwin-64@1.20260609.1':
     optional: true
 
-  '@cloudflare/workerd-darwin-arm64@1.20260603.1':
+  '@cloudflare/workerd-darwin-arm64@1.20260609.1':
     optional: true
 
-  '@cloudflare/workerd-linux-64@1.20260603.1':
+  '@cloudflare/workerd-linux-64@1.20260609.1':
     optional: true
 
-  '@cloudflare/workerd-linux-arm64@1.20260603.1':
+  '@cloudflare/workerd-linux-arm64@1.20260609.1':
     optional: true
 
-  '@cloudflare/workerd-windows-64@1.20260603.1':
+  '@cloudflare/workerd-windows-64@1.20260609.1':
     optional: true
 
   '@cspotcode/source-map-support@0.8.1':
@@ -7141,7 +7141,7 @@ snapshots:
       '@types/react': 19.2.17
       react: 19.2.7
 
-  '@miden-sdk/miden-sdk@0.14.10':
+  '@miden-sdk/miden-sdk@0.14.11':
     dependencies:
       dexie: 4.4.3
       glob: 11.1.0
@@ -7156,20 +7156,20 @@ snapshots:
       nanoid: 5.1.11
       typescript: 6.0.3
 
-  '@miden-sdk/miden-wallet-adapter-react@0.14.3(@miden-sdk/react@0.14.10(@miden-sdk/miden-sdk@0.14.10)(@types/react@19.2.17)(react@19.2.7)(use-sync-external-store@1.6.0(react@19.2.7)))(react@19.2.7)(typescript@6.0.3)':
+  '@miden-sdk/miden-wallet-adapter-react@0.14.3(@miden-sdk/react@0.14.11(@miden-sdk/miden-sdk@0.14.11)(@types/react@19.2.17)(react@19.2.7)(use-sync-external-store@1.6.0(react@19.2.7)))(react@19.2.7)(typescript@6.0.3)':
     dependencies:
       '@miden-sdk/miden-wallet-adapter-base': 0.14.3
       '@miden-sdk/miden-wallet-adapter-miden': 0.14.3(typescript@6.0.3)
       react: 19.2.7
     optionalDependencies:
-      '@miden-sdk/react': 0.14.10(@miden-sdk/miden-sdk@0.14.10)(@types/react@19.2.17)(react@19.2.7)(use-sync-external-store@1.6.0(react@19.2.7))
+      '@miden-sdk/react': 0.14.11(@miden-sdk/miden-sdk@0.14.11)(@types/react@19.2.17)(react@19.2.7)(use-sync-external-store@1.6.0(react@19.2.7))
     transitivePeerDependencies:
       - typescript
 
-  '@miden-sdk/miden-wallet-adapter-reactui@0.14.3(@miden-sdk/react@0.14.10(@miden-sdk/miden-sdk@0.14.10)(@types/react@19.2.17)(react@19.2.7)(use-sync-external-store@1.6.0(react@19.2.7)))(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3)':
+  '@miden-sdk/miden-wallet-adapter-reactui@0.14.3(@miden-sdk/react@0.14.11(@miden-sdk/miden-sdk@0.14.11)(@types/react@19.2.17)(react@19.2.7)(use-sync-external-store@1.6.0(react@19.2.7)))(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3)':
     dependencies:
       '@miden-sdk/miden-wallet-adapter-base': 0.14.3
-      '@miden-sdk/miden-wallet-adapter-react': 0.14.3(@miden-sdk/react@0.14.10(@miden-sdk/miden-sdk@0.14.10)(@types/react@19.2.17)(react@19.2.7)(use-sync-external-store@1.6.0(react@19.2.7)))(react@19.2.7)(typescript@6.0.3)
+      '@miden-sdk/miden-wallet-adapter-react': 0.14.3(@miden-sdk/react@0.14.11(@miden-sdk/miden-sdk@0.14.11)(@types/react@19.2.17)(react@19.2.7)(use-sync-external-store@1.6.0(react@19.2.7)))(react@19.2.7)(typescript@6.0.3)
       '@types/react': 19.2.17
       '@types/react-dom': 19.2.3(@types/react@19.2.17)
       react: 19.2.7
@@ -7178,12 +7178,12 @@ snapshots:
       - '@miden-sdk/react'
       - typescript
 
-  '@miden-sdk/miden-wallet-adapter@0.14.3(@miden-sdk/react@0.14.10(@miden-sdk/miden-sdk@0.14.10)(@types/react@19.2.17)(react@19.2.7)(use-sync-external-store@1.6.0(react@19.2.7)))(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3)':
+  '@miden-sdk/miden-wallet-adapter@0.14.3(@miden-sdk/react@0.14.11(@miden-sdk/miden-sdk@0.14.11)(@types/react@19.2.17)(react@19.2.7)(use-sync-external-store@1.6.0(react@19.2.7)))(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3)':
     dependencies:
       '@miden-sdk/miden-wallet-adapter-base': 0.14.3
       '@miden-sdk/miden-wallet-adapter-miden': 0.14.3(typescript@6.0.3)
-      '@miden-sdk/miden-wallet-adapter-react': 0.14.3(@miden-sdk/react@0.14.10(@miden-sdk/miden-sdk@0.14.10)(@types/react@19.2.17)(react@19.2.7)(use-sync-external-store@1.6.0(react@19.2.7)))(react@19.2.7)(typescript@6.0.3)
-      '@miden-sdk/miden-wallet-adapter-reactui': 0.14.3(@miden-sdk/react@0.14.10(@miden-sdk/miden-sdk@0.14.10)(@types/react@19.2.17)(react@19.2.7)(use-sync-external-store@1.6.0(react@19.2.7)))(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3)
+      '@miden-sdk/miden-wallet-adapter-react': 0.14.3(@miden-sdk/react@0.14.11(@miden-sdk/miden-sdk@0.14.11)(@types/react@19.2.17)(react@19.2.7)(use-sync-external-store@1.6.0(react@19.2.7)))(react@19.2.7)(typescript@6.0.3)
+      '@miden-sdk/miden-wallet-adapter-reactui': 0.14.3(@miden-sdk/react@0.14.11(@miden-sdk/miden-sdk@0.14.11)(@types/react@19.2.17)(react@19.2.7)(use-sync-external-store@1.6.0(react@19.2.7)))(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3)
       '@types/react': 19.2.17
       '@types/react-dom': 19.2.3(@types/react@19.2.17)
       react: 19.2.7
@@ -7192,9 +7192,9 @@ snapshots:
       - '@miden-sdk/react'
       - typescript
 
-  '@miden-sdk/react@0.14.10(@miden-sdk/miden-sdk@0.14.10)(@types/react@19.2.17)(react@19.2.7)(use-sync-external-store@1.6.0(react@19.2.7))':
+  '@miden-sdk/react@0.14.11(@miden-sdk/miden-sdk@0.14.11)(@types/react@19.2.17)(react@19.2.7)(use-sync-external-store@1.6.0(react@19.2.7))':
     dependencies:
-      '@miden-sdk/miden-sdk': 0.14.10
+      '@miden-sdk/miden-sdk': 0.14.11
       react: 19.2.7
       zustand: 5.0.14(@types/react@19.2.17)(react@19.2.7)(use-sync-external-store@1.6.0(react@19.2.7))
     transitivePeerDependencies:
@@ -7312,7 +7312,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@opennextjs/cloudflare@1.19.11(next@16.2.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(wrangler@4.98.0)':
+  '@opennextjs/cloudflare@1.19.11(next@16.2.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(wrangler@4.99.0)':
     dependencies:
       '@ast-grep/napi': 0.40.5
       '@dotenvx/dotenvx': 1.31.0
@@ -7324,7 +7324,7 @@ snapshots:
       glob: 12.0.0
       next: 16.2.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       ts-tqdm: 0.8.6
-      wrangler: 4.98.0
+      wrangler: 4.99.0
       yargs: 18.0.0
     transitivePeerDependencies:
       - encoding
@@ -7334,7 +7334,7 @@ snapshots:
 
   '@openzeppelin/miden-multisig-client@0.14.9':
     dependencies:
-      '@miden-sdk/miden-sdk': 0.14.10
+      '@miden-sdk/miden-sdk': 0.14.11
       '@noble/curves': 1.9.7
       '@noble/hashes': 2.2.0
       '@openzeppelin/guardian-client': 0.14.9
@@ -10582,12 +10582,12 @@ snapshots:
 
   mimic-fn@2.1.0: {}
 
-  miniflare@4.20260603.0:
+  miniflare@4.20260609.0:
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       sharp: 0.34.5
       undici: 7.24.8
-      workerd: 1.20260603.1
+      workerd: 1.20260609.1
       ws: 8.20.1
       youch: 4.1.0-beta.10
     transitivePeerDependencies:
@@ -10867,7 +10867,7 @@ snapshots:
 
   prelude-ls@1.2.1: {}
 
-  prettier@3.8.3: {}
+  prettier@3.8.4: {}
 
   process-nextick-args@2.0.1: {}
 
@@ -11731,24 +11731,24 @@ snapshots:
 
   word-wrap@1.2.5: {}
 
-  workerd@1.20260603.1:
+  workerd@1.20260609.1:
     optionalDependencies:
-      '@cloudflare/workerd-darwin-64': 1.20260603.1
-      '@cloudflare/workerd-darwin-arm64': 1.20260603.1
-      '@cloudflare/workerd-linux-64': 1.20260603.1
-      '@cloudflare/workerd-linux-arm64': 1.20260603.1
-      '@cloudflare/workerd-windows-64': 1.20260603.1
+      '@cloudflare/workerd-darwin-64': 1.20260609.1
+      '@cloudflare/workerd-darwin-arm64': 1.20260609.1
+      '@cloudflare/workerd-linux-64': 1.20260609.1
+      '@cloudflare/workerd-linux-arm64': 1.20260609.1
+      '@cloudflare/workerd-windows-64': 1.20260609.1
 
-  wrangler@4.98.0:
+  wrangler@4.99.0:
     dependencies:
       '@cloudflare/kv-asset-handler': 0.5.0
-      '@cloudflare/unenv-preset': 2.16.1(unenv@2.0.0-rc.24)(workerd@1.20260603.1)
+      '@cloudflare/unenv-preset': 2.16.1(unenv@2.0.0-rc.24)(workerd@1.20260609.1)
       blake3-wasm: 2.1.5
       esbuild: 0.27.3
-      miniflare: 4.20260603.0
+      miniflare: 4.20260609.0
       path-to-regexp: 6.3.0
       unenv: 2.0.0-rc.24
-      workerd: 1.20260603.1
+      workerd: 1.20260609.1
     optionalDependencies:
       fsevents: 2.3.3
     transitivePeerDependencies:
