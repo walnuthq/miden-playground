@@ -1,10 +1,6 @@
-import { mkdir, cp, readFile, writeFile } from "node:fs/promises";
 import { type NextRequest, NextResponse } from "next/server";
 import { ZipArchive } from "archiver";
-import { safeRm } from "@/lib/utils";
 import { getPackage, getDependencies } from "@/db/packages";
-import { packageExists, generatePackageDir } from "@/lib/miden-compiler";
-import { PACKAGES_PATH } from "@/lib/constants";
 
 export const GET = async (
   _: NextRequest,
@@ -12,23 +8,35 @@ export const GET = async (
 ) => {
   try {
     const { id } = await params;
-    const [exists, dbPackage] = await Promise.all([
-      packageExists(id),
-      getPackage(id),
-    ]);
+    const dbPackage = await getPackage(id);
     if (!dbPackage) {
       throw new Error("Error: Package not found");
     }
-    const { name, type, rust, dependencies } = dbPackage;
-    if (!exists) {
-      await generatePackageDir({
-        packageDir: id,
-        name,
-        type,
-        rust,
-        dependencies,
-      });
-    }
+    const dependenciesPackages =
+      dbPackage.dependencies.length > 0
+        ? await getDependencies(dbPackage.dependencies)
+        : [];
+    const files =
+      dbPackage.dependencies.length > 0
+        ? dependenciesPackages.reduce<Record<string, string>>(
+            (previousValue, currentValue) => {
+              for (const [path, content] of Object.entries(
+                currentValue.files,
+              )) {
+                previousValue[path] = content;
+              }
+              return previousValue;
+            },
+            dbPackage.files,
+          )
+        : Object.entries(dbPackage.files).reduce<Record<string, string>>(
+            (previousValue, [path, content]) => {
+              const strippedPath = path.split("/").slice(1).join("/");
+              previousValue[strippedPath] = content;
+              return previousValue;
+            },
+            {},
+          );
     // Create readable stream for the zip
     const archive = new ZipArchive({
       zlib: { level: 9 }, // max compression
@@ -49,55 +57,18 @@ export const GET = async (
         archive.on("end", () => {
           controller.close();
         });
-        await mkdir(`${PACKAGES_PATH}/${id}-export`);
-        const copyOptions = {
-          recursive: true,
-          filter: (source: string) =>
-            !source.includes("target") && !source.includes("Cargo.lock"),
-        };
-        await cp(
-          `${PACKAGES_PATH}/${id}`,
-          `${PACKAGES_PATH}/${id}-export/${name}`,
-          copyOptions,
-        );
-        let cargoToml = await readFile(
-          `${PACKAGES_PATH}/${id}-export/${name}/Cargo.toml`,
-          "utf-8",
-        );
-        const dependenciesPackages =
-          dependencies.length > 0 ? await getDependencies(dependencies) : [];
-        dependenciesPackages.forEach((dependencyPackage) => {
-          cargoToml = cargoToml.replaceAll(
-            `${PACKAGES_PATH}/${dependencyPackage.id}`,
-            `../${dependencyPackage.name}`,
-          );
-        });
-        await writeFile(
-          `${PACKAGES_PATH}/${id}-export/${name}/Cargo.toml`,
-          cargoToml,
-        );
-        await Promise.all(
-          dependenciesPackages.map((dependencyPackage) =>
-            cp(
-              `${PACKAGES_PATH}/${dependencyPackage.id}`,
-              `${PACKAGES_PATH}/${id}-export/${dependencyPackage.name}`,
-              copyOptions,
-            ),
-          ),
-        );
-        archive.directory(`${PACKAGES_PATH}/${id}-export`, false);
+        // Append files to archive
+        for (const [path, content] of Object.entries(files)) {
+          archive.append(content, { name: path });
+        }
         // Finalize (start zipping)
         await archive.finalize();
-        await safeRm(`${PACKAGES_PATH}/${id}-export`, {
-          recursive: true,
-          force: true,
-        });
       },
     });
     return new NextResponse(stream, {
       headers: {
         "Content-Type": "application/zip",
-        "Content-Disposition": `attachment; filename="${name}.zip"`,
+        "Content-Disposition": `attachment; filename="${dbPackage.name}.zip"`,
       },
     });
   } catch (error) {

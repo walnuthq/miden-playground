@@ -3,16 +3,14 @@ import { basename } from "node:path";
 import { randomUUID } from "node:crypto";
 import { readdir, readFile } from "node:fs/promises";
 import { type NextRequest, NextResponse } from "next/server";
-import { execFile, safeRm } from "@/lib/utils";
 import {
-  newPackage,
-  generateCargoToml,
+  execFile,
+  safeRm,
   parseCargoToml,
   compilePackage,
-  readPackage,
-} from "@/lib/miden-compiler";
+  createPackage,
+} from "@/lib/utils";
 import type { CompiledPackage, PackageSource } from "@/lib/types";
-import { updatePackage } from "@/db/packages";
 import { PACKAGES_PATH } from "@/lib/constants";
 
 type ImportScriptsRequestBody = {
@@ -38,12 +36,15 @@ const importScriptsFromPackageSources = async (
           },
         },
       } = parseCargoToml(cargoToml);
-      const dbPackage = await newPackage({
+      const packageId = await createPackage({
         name,
         type,
         rust,
       });
-      return { package: dbPackage, dependencies };
+      return {
+        package: { id: packageId, name, type, rust },
+        dependencies,
+      };
     }),
   );
   return Promise.all(
@@ -77,69 +78,11 @@ const importScriptsFromPackageSources = async (
             };
           },
         );
-        await generateCargoToml({
-          packageDir: dbPackage.id,
-          name: dbPackage.name,
-          type: dbPackage.type,
-          dependencies: dependenciesPackages,
-        });
-        const { stderr } = await compilePackage({
-          packageDir: dbPackage.id,
-          name: dbPackage.name,
-        });
-        if (stderr) {
-          console.error(stderr);
-          await updatePackage({
-            id: dbPackage.id,
-            status: "error",
-            dependencies: dependenciesPackages.map(({ id }) => id),
-            exports: [],
-          });
-          return {
-            ...dbPackage,
-            dependencies: dependenciesPackages,
-            status: "error",
-            error: stderr,
-            masm: "",
-            masp: "",
-            digest: "",
-            exports: [],
-          };
-        }
-        const {
-          masp,
-          digest,
-          exports,
-          dependencies: compiledDependencies,
-        } = await readPackage(dbPackage.id);
-        await updatePackage({
+        return compilePackage({
           id: dbPackage.id,
-          status: "compiled",
-          masp,
-          digest,
-          exports,
+          rust: dbPackage.rust,
           dependencies: dependenciesPackages.map(({ id }) => id),
         });
-        return {
-          ...dbPackage,
-          dependencies: dependenciesPackages.map((dependencyPackage) => {
-            const dependency = compiledDependencies.find(
-              ({ id }) => id === dependencyPackage.id,
-            );
-            return {
-              id: dependencyPackage.id,
-              name: dependencyPackage.name,
-              type: dependencyPackage.type,
-              digest: dependency?.digest ?? "",
-            };
-          }),
-          status: "compiled",
-          error: "",
-          masm: "",
-          masp,
-          digest,
-          exports,
-        };
       },
     ),
   );

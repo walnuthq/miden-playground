@@ -48,6 +48,7 @@ export const GET = async (
           const exports = dbPackage.exports as Export[];
           return {
             ...dbPackage,
+            files: dbPackage.files as Record<string, string>,
             procedureExports: exports.map(
               (manifestExport) => manifestExport.Procedure,
             ),
