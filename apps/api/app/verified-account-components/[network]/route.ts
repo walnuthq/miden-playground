@@ -22,9 +22,10 @@ import {
   insertPackage,
   getReadOnlyPackage,
 } from "@/db/packages";
-import { PACKAGES_PATH } from "@/lib/constants";
+import { PACKAGES_PATH, API_REGISTRY_URL } from "@/lib/constants";
 import { safeRm } from "@/lib/utils";
 import type { PackageSource } from "@/lib/types";
+import { projectTemplateFiles } from "@/lib/templates";
 
 type VerifyAccountComponentRequestBody = {
   accountId: string;
@@ -187,15 +188,67 @@ export const POST = async (
     const { accountId, identifier, account, packageSource, packageIds } =
       body as VerifyAccountComponentRequestBody;
     if (packageSource) {
-      const verified = await verifyAccountComponentFromSource({
+      await verifyAccountComponentFromSource({
         networkId: network,
         identifier,
         accountId,
         account,
         packageSource,
       });
+      const {
+        package: { name },
+      } = parseCargoToml(packageSource.cargoToml);
+      const files = {
+        [`${name}/.cargo/config.toml`]:
+          projectTemplateFiles[".cargo/config.toml"],
+        [`${name}/src/lib.rs`]: packageSource.rust,
+        [`${name}/Cargo.toml`]: packageSource.cargoToml,
+        [`${name}/miden-toolchain.toml`]:
+          projectTemplateFiles["miden-toolchain.toml"],
+        [`${name}/rust-toolchain.toml`]:
+          projectTemplateFiles["rust-toolchain.toml"],
+      };
+      const response = await fetch(
+        `${API_REGISTRY_URL}/v1/${network}/verified-accounts`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            accountId,
+            files,
+            entrypoint: name,
+          }),
+        },
+      );
+      const result = await response.json();
+      if (!response.ok) {
+        const { error } = result as { error: string };
+        throw new Error(error);
+      }
+      const { verified } = result as { verified: boolean };
       return NextResponse.json<VerifyAccountComponentResponse>({ verified });
     } else if (account && packageIds) {
+      const rawPackages = await Promise.all(
+        packageIds.map((packageId) => getPackage(packageId)),
+      );
+      const packages = rawPackages.filter(
+        (dbPackage) => dbPackage !== undefined,
+      );
+      await Promise.all(
+        packages.map(async (dbPackage) => {
+          await generatePackageDir({
+            packageDir: dbPackage.id,
+            name: dbPackage.name,
+            type: dbPackage.type,
+            rust: dbPackage.rust,
+            dependencies: dbPackage.dependencies,
+          });
+          await compilePackage({
+            packageDir: dbPackage.id,
+            name: dbPackage.name,
+          });
+        }),
+      );
       const verified = await verifyAccountComponentsFromPackageIds({
         networkId: network,
         identifier,
@@ -203,6 +256,32 @@ export const POST = async (
         account,
         packageIds,
       });
+      // const verifiedList = await Promise.all(
+      //   packages.map(async (dbPackage) => {
+      //     console.log(dbPackage.files);
+      //     console.log(`${API_REGISTRY_URL}/v1/${network}/verified-accounts`);
+      //     const response = await fetch(
+      //       `${API_REGISTRY_URL}/v1/${network}/verified-accounts`,
+      //       {
+      //         method: "POST",
+      //         headers: { "Content-Type": "application/json" },
+      //         body: JSON.stringify({
+      //           accountId,
+      //           files: dbPackage.files,
+      //           entrypoint: dbPackage.name,
+      //         }),
+      //       },
+      //     );
+      //     const result = await response.json();
+      //     if (!response.ok) {
+      //       const { error } = result as { error: string };
+      //       throw new Error(error);
+      //     }
+      //     const { verified } = result as { verified: boolean };
+      //     return verified;
+      //   }),
+      // );
+      // const verified = verifiedList.every((v) => v);
       return NextResponse.json<VerifyAccountComponentResponse>({ verified });
     }
     throw new Error("Error: Invalid request body.");

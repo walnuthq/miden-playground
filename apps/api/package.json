@@ -17,7 +17,7 @@
     "db:push": "drizzle-kit push"
   },
   "dependencies": {
-    "@dotenvx/dotenvx": "1.71.0",
+    "@dotenvx/dotenvx": "1.71.2",
     "archiver": "8.0.0",
     "dotenv": "17.4.2",
     "drizzle-orm": "1.0.0-rc.3",

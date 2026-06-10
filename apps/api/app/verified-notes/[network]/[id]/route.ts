@@ -56,6 +56,7 @@ export const GET = async (
         ok: true,
         noteScript: {
           ...dbPackage,
+          files: dbPackage.files as Record<string, string>,
           dependencies,
           exports,
           procedureExports: [],

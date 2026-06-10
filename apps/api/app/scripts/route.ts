@@ -6,10 +6,9 @@ import type {
   ScriptExample,
 } from "@/lib/types";
 import { basicWalletDependency } from "@/lib/default-dependencies";
-import { insertPackage } from "@/db/packages";
-import { projectTemplateFiles, templates } from "@/lib/templates";
-import { generateCargoToml } from "@/lib/utils";
-import { API_COMPILE_URL } from "@/lib/constants";
+import { templates } from "@/lib/templates";
+import { createPackage } from "@/lib/utils";
+// import { API_COMPILE_URL } from "@/lib/constants";
 
 type CreateScriptRequestBody = {
   name: string;
@@ -35,20 +34,6 @@ export const POST = async (request: NextRequest) => {
     const body = await request.json();
     const { name, type, example } = body as CreateScriptRequestBody;
     const rust = templates[example === "none" ? type : example];
-    const files = {
-      [`${name}/.cargo/config.toml`]:
-        projectTemplateFiles[".cargo/config.toml"],
-      [`${name}/src/lib.rs`]: rust,
-      [`${name}/Cargo.toml`]: generateCargoToml({
-        name,
-        type,
-        dependencies: scriptsDependencies[example],
-      }),
-      [`${name}/miden-toolchain.toml`]:
-        projectTemplateFiles["miden-toolchain.toml"],
-      [`${name}/rust-toolchain.toml`]:
-        projectTemplateFiles["rust-toolchain.toml"],
-    };
     // const response = await fetch(`${API_COMPILE_URL}/compile`, {
     //   method: "POST",
     //   headers: { "Content-Type": "application/json" },
@@ -57,11 +42,11 @@ export const POST = async (request: NextRequest) => {
     //     entrypoint: name,
     //   }),
     // });
-    const packageId = await insertPackage({
+    const packageId = await createPackage({
       name,
       type,
-      dependencies: scriptsDependencies[example].map(({ id }) => id),
-      files,
+      rust,
+      dependencies: scriptsDependencies[example],
     });
     return NextResponse.json<CreateScriptResponse>({
       package: {

@@ -19,9 +19,10 @@ import {
   insertPackage,
   getReadOnlyPackage,
 } from "@/db/packages";
-import { PACKAGES_PATH } from "@/lib/constants";
+import { API_REGISTRY_URL, PACKAGES_PATH } from "@/lib/constants";
 import { safeRm } from "@/lib/utils";
 import type { PackageSource } from "@/lib/types";
+import { projectTemplateFiles } from "@/lib/templates";
 
 type VerifyNoteRequestBody = {
   noteId: string;
@@ -205,13 +206,62 @@ export const POST = async (
     const { noteId, note, packageSource, dependencies, packageId } =
       body as VerifyNoteRequestBody;
     if (packageSource && dependencies) {
-      const verified = await verifyNoteFromSource({
+      await verifyNoteFromSource({
         networkId: network,
         noteId,
         note,
         packageSource,
         dependencies,
       });
+      const {
+        package: { name },
+      } = parseCargoToml(packageSource.cargoToml);
+      const notePackageFiles = {
+        [`${name}/.cargo/config.toml`]:
+          projectTemplateFiles[".cargo/config.toml"],
+        [`${name}/src/lib.rs`]: packageSource.rust,
+        [`${name}/Cargo.toml`]: packageSource.cargoToml,
+        [`${name}/miden-toolchain.toml`]:
+          projectTemplateFiles["miden-toolchain.toml"],
+        [`${name}/rust-toolchain.toml`]:
+          projectTemplateFiles["rust-toolchain.toml"],
+      };
+      const files = dependencies.reduce<Record<string, string>>(
+        (previousValue, currentValue) => {
+          const {
+            package: { name: dependencyName },
+          } = parseCargoToml(currentValue.cargoToml);
+          previousValue[`${dependencyName}/.cargo/config.toml`] =
+            projectTemplateFiles[".cargo/config.toml"];
+          previousValue[`${dependencyName}/src/lib.rs`] = currentValue.rust;
+          previousValue[`${dependencyName}/Cargo.toml`] =
+            currentValue.cargoToml;
+          previousValue[`${dependencyName}/miden-toolchain.toml`] =
+            projectTemplateFiles["miden-toolchain.toml"];
+          previousValue[`${dependencyName}/rust-toolchain.toml`] =
+            projectTemplateFiles["rust-toolchain.toml"];
+          return previousValue;
+        },
+        notePackageFiles,
+      );
+      const response = await fetch(
+        `${API_REGISTRY_URL}/v1/${network}/verified-notes`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            noteId,
+            files,
+            entrypoint: name,
+          }),
+        },
+      );
+      const result = await response.json();
+      if (!response.ok) {
+        const { error } = result as { error: string };
+        throw new Error(error);
+      }
+      const { verified } = result as { verified: boolean };
       return NextResponse.json<VerifyNoteResponse>({ verified });
     } else if (note && packageId) {
       const verified = await verifyNoteFromPackageId({
