@@ -91,7 +91,7 @@ const AccountMultisigProposalsTable = ({ account }: { account: Account }) => {
     switch_guardian: "Switch Guardian",
     consume_notes: "Consume notes",
     p2id: "P2ID",
-    unknown: "Unknown",
+    custom: "Custom",
   } as const;
   const proposalDescription = (metadata: ProposalMetadata) => {
     switch (metadata.proposalType) {
@@ -107,9 +107,9 @@ const AccountMultisigProposalsTable = ({ account }: { account: Account }) => {
         const recipient = wallets.find(({ id }) => id === metadata.recipientId);
         return `Send ${amount} ${faucet?.symbol} to ${recipient?.name}`;
       }
-      case "unknown":
+      case "custom":
       default: {
-        return "Unknown";
+        return "Custom";
       }
     }
   };

@@ -12,4 +12,4 @@ minimumReleaseAgeExclude:
   - wrangler@4.98.0
 
 overrides:
-  "@miden-sdk/miden-sdk": "0.14.10"
+  "@miden-sdk/miden-sdk": "0.14.11"
