@@ -23,7 +23,7 @@ import type {
   ConsumableNoteRecord as WasmConsumableNoteRecordType,
   TransactionResult as WasmTransactionResultType,
   TransactionRequest as WasmTransactionRequestType,
-} from "@miden-sdk/miden-sdk";
+} from "@miden-sdk/miden-sdk/lazy";
 import {
   useWallet,
   SendTransaction,
@@ -32,7 +32,7 @@ import {
 import { formatAmount, parseAmount } from "@/lib/utils/asset";
 import useScripts from "@/hooks/use-scripts";
 import { createTransactionFromScript } from "@/lib/web-client";
-import { normalizeAccountId } from "@miden-sdk/react";
+import { normalizeAccountId } from "@miden-sdk/react/lazy";
 import useNetwork from "@/hooks/use-network";
 import useMultisig from "@/hooks/use-multisig";
 

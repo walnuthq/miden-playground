@@ -1,6 +1,6 @@
 "use client";
 import { MoreVertical } from "lucide-react";
-import { useMiden } from "@miden-sdk/react";
+import { useMiden } from "@miden-sdk/react/lazy";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@workspace/ui/components/button";
 import { Badge } from "@workspace/ui/components/badge";

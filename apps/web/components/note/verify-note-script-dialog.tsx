@@ -21,7 +21,7 @@ import { toBase64 } from "@/lib/utils";
 import type { PackageSource } from "@/lib/types/script";
 import { parseCargoToml, fileListToPackageSources } from "@/lib/utils/script";
 import useNetwork from "@/hooks/use-network";
-import { useMiden } from "@miden-sdk/react";
+import { useMiden } from "@miden-sdk/react/lazy";
 
 const VerifyNoteScriptDialog = () => {
   const queryClient = useQueryClient();

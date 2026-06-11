@@ -1,5 +1,5 @@
 "use client";
-import { createMidenStorage } from "@miden-sdk/react";
+import { createMidenStorage } from "@miden-sdk/react/lazy";
 import { createContext, useState, type ReactNode } from "react";
 import type { NetworkId } from "@/lib/types/network";
 import { noop } from "lodash";

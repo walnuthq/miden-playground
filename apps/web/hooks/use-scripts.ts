@@ -5,7 +5,7 @@ import {
   ForeignAccount as WasmForeignAccount,
   AccountId as WasmAccountId,
   AccountStorageRequirements as WasmAccountStorageRequirements,
-} from "@miden-sdk/miden-sdk";
+} from "@miden-sdk/miden-sdk/lazy";
 import useGlobalContext from "@/components/global-context/hook";
 import type {
   Script,
@@ -30,7 +30,7 @@ import {
 import useTransactions from "@/hooks/use-transactions";
 import useTutorials from "@/hooks/use-tutorials";
 import { fromBase64 } from "@/lib/utils";
-import { useMiden } from "@miden-sdk/react";
+import { useMiden } from "@miden-sdk/react/lazy";
 
 const useScripts = () => {
   const {

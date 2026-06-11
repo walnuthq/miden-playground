@@ -4,7 +4,7 @@ import useAccounts from "@/hooks/use-accounts";
 import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import Step6Content from "@/components/tutorials/wallet-backup-using-miden-guardian/step6.mdx";
-import { normalizeAccountId, useMiden } from "@miden-sdk/react";
+import { normalizeAccountId, useMiden } from "@miden-sdk/react/lazy";
 import useNetwork from "@/hooks/use-network";
 import { GUARDIAN_WALLET_CODE } from "@/lib/constants";
 

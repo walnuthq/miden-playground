@@ -16,7 +16,7 @@ import {
   accountIdFromPrefixSuffix,
   getIdentifierPart,
 } from "@/lib/utils/account";
-import { useSyncState } from "@miden-sdk/react";
+import { useSyncState } from "@miden-sdk/react/lazy";
 
 const useCompleted = () => {
   const { networkId } = useNetwork();

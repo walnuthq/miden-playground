@@ -15,7 +15,7 @@ import AccountAddress from "@/components/lib/account-address";
 import useAccounts from "@/hooks/use-accounts";
 import useScripts from "@/hooks/use-scripts";
 import { formatAmount } from "@/lib/utils/asset";
-import { normalizeAccountId } from "@miden-sdk/react";
+import { normalizeAccountId } from "@miden-sdk/react/lazy";
 
 const TransactionNoteTable = ({ notes }: { notes: TransactionNote[] }) => {
   const { accounts, faucets } = useAccounts();

@@ -33,7 +33,7 @@ import {
 import useScripts from "@/hooks/use-scripts";
 import { formatAmount } from "@/lib/utils/asset";
 import { fromBase64 } from "@/lib/utils";
-import { normalizeAccountId, useMiden } from "@miden-sdk/react";
+import { normalizeAccountId, useMiden } from "@miden-sdk/react/lazy";
 import useMultisig from "@/hooks/use-multisig";
 
 const NoteActionsCell = ({

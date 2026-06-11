@@ -4,7 +4,7 @@ import {
   clientDeployAccount,
   storageMode,
 } from "@/lib/web-client";
-import { AuthScheme, Address as WasmAddress } from "@miden-sdk/miden-sdk";
+import { AuthScheme, Address as WasmAddress } from "@miden-sdk/miden-sdk/lazy";
 import useGlobalContext from "@/components/global-context/hook";
 import type {
   AccountStorageMode,
@@ -30,7 +30,7 @@ import {
   useCreateFaucet,
   useImportAccount,
   useMiden,
-} from "@miden-sdk/react";
+} from "@miden-sdk/react/lazy";
 import useNetwork from "@/hooks/use-network";
 
 const useAccounts = () => {

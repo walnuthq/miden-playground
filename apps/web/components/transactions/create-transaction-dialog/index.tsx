@@ -4,7 +4,7 @@ import type {
   ConsumableNoteRecord as WasmConsumableNoteRecordType,
   TransactionRequest as WasmTransactionRequestType,
   TransactionResult as WasmTransactionResultType,
-} from "@miden-sdk/miden-sdk";
+} from "@miden-sdk/miden-sdk/lazy";
 import {
   Dialog,
   DialogClose,

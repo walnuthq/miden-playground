@@ -1,5 +1,5 @@
 "use client";
-import { useTransactionHistory } from "@miden-sdk/react";
+import { useTransactionHistory } from "@miden-sdk/react/lazy";
 import type { Transaction } from "@/lib/types/transaction";
 import { formatId } from "@/lib/utils";
 import type { ColumnDef } from "@tanstack/react-table";

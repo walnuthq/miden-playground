@@ -9,7 +9,7 @@ import {
   ComboboxList,
 } from "@workspace/ui/components/combobox";
 import { getIdentifierPart } from "@/lib/utils/account";
-import { Address as WasmAddress } from "@miden-sdk/miden-sdk";
+import { Address as WasmAddress } from "@miden-sdk/miden-sdk/lazy";
 import useMultisig from "@/hooks/use-multisig";
 
 const SelectAccountCombobox = ({

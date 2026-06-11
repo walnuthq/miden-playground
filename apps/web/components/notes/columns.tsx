@@ -20,7 +20,7 @@ import {
 import useTransactions from "@/hooks/use-transactions";
 import AccountAddress from "@/components/lib/account-address";
 import useAccounts from "@/hooks/use-accounts";
-import { normalizeAccountId, useMiden } from "@miden-sdk/react";
+import { normalizeAccountId, useMiden } from "@miden-sdk/react/lazy";
 
 const InputNoteSenderCell = ({ inputNote }: { inputNote: InputNote }) => {
   const { accounts } = useAccounts();

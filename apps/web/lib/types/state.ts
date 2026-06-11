@@ -2,7 +2,7 @@ import type {
   ConsumableNoteRecord as WasmConsumableNoteRecordType,
   TransactionRequest as WasmTransactionRequestType,
   TransactionResult as WasmTransactionResultType,
-} from "@miden-sdk/miden-sdk";
+} from "@miden-sdk/miden-sdk/lazy";
 import type { Account } from "@/lib/types/account";
 import type { InputNote } from "@/lib/types/note";
 import type { Component } from "@/lib/types/component";

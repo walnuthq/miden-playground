@@ -10,7 +10,7 @@ import type {
   TransactionResult as WasmTransactionResultType,
   TransactionRequest as WasmTransactionRequestType,
   TransactionRecord as WasmTransactionRecordType,
-} from "@miden-sdk/miden-sdk";
+} from "@miden-sdk/miden-sdk/lazy";
 import useAccounts from "@/hooks/use-accounts";
 import { defaultStorageItem } from "@/lib/utils/account";
 

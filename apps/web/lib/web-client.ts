@@ -41,8 +41,8 @@ import {
   MidenArrays as WasmMidenArrays,
   Endpoint as WasmEndpoint,
   RpcClient as WasmRpcClient,
-} from "@miden-sdk/miden-sdk";
-import { normalizeAccountId } from "@miden-sdk/react";
+} from "@miden-sdk/miden-sdk/lazy";
+import { normalizeAccountId } from "@miden-sdk/react/lazy";
 import type { NetworkId } from "@/lib/types/network";
 import type {
   Account,

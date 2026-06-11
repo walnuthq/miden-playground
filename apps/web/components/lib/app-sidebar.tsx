@@ -40,7 +40,7 @@ import { defaultScriptIds } from "@/lib/types/default-scripts";
 import { defaultComponentIds } from "@/lib/types/default-components";
 import useTutorials from "@/hooks/use-tutorials";
 import useNetwork from "@/hooks/use-network";
-import { useMiden } from "@miden-sdk/react";
+import { useMiden } from "@miden-sdk/react/lazy";
 
 const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
   const isClient = useIsClient();

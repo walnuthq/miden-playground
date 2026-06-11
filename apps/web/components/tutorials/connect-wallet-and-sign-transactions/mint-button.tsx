@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { HandCoins } from "lucide-react";
-import { AccountId as WasmAccountId } from "@miden-sdk/miden-sdk";
+import { AccountId as WasmAccountId } from "@miden-sdk/miden-sdk/lazy";
 import { Spinner } from "@workspace/ui/components/spinner";
 import useAccounts from "@/hooks/use-accounts";
 import useNotes from "@/hooks/use-notes";

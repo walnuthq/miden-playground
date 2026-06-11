@@ -1,5 +1,5 @@
 // import useGlobalContext from "@/components/global-context/hook";
-import { useExportStore } from "@miden-sdk/react";
+import { useExportStore } from "@miden-sdk/react/lazy";
 
 const useProjects = () => {
   // const { dispatch } = useGlobalContext();

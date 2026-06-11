@@ -16,7 +16,7 @@ import {
   getNote,
 } from "@/lib/miden-faucet";
 import useNotes from "@/hooks/use-notes";
-import { useMiden } from "@miden-sdk/react";
+import { useMiden } from "@miden-sdk/react/lazy";
 
 // const downloadBlob = (blob: Blob, fileName: string) => {
 //   const url = URL.createObjectURL(blob);
