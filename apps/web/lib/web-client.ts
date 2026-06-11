@@ -567,12 +567,15 @@ export const wasmInputNoteToInputNote = ({
   };
 };
 
-const transactionStatus = (transactionRecord: WasmTransactionRecordType) => {
+export const transactionStatus = (
+  transactionRecord: WasmTransactionRecordType,
+  short = false,
+) => {
   const status = transactionRecord.transactionStatus();
   if (status.isPending()) {
     return "Pending";
   } else if (status.isCommitted()) {
-    return `Committed (Block: ${status.getBlockNum()})`;
+    return short ? "Committed" : `Committed #${status.getBlockNum()}`;
   } else {
     return "Discarded";
   }
@@ -602,7 +605,6 @@ export const wasmTransactionToTransaction = ({
     .map((note) => wasmNoteToNote(note));
   return {
     id: record.id().toHex(),
-    status: transactionStatus(record),
     accountId: record.accountId().toString(),
     scriptRoot:
       result.executedTransaction().txArgs().txScript()?.root().toHex() ?? "",

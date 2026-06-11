@@ -23,7 +23,6 @@ export type TransactionNote = {
 
 export type Transaction = {
   id: string;
-  status: string;
   accountId: string;
   scriptRoot: string;
   inputNotes: TransactionNote[];

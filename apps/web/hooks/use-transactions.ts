@@ -17,8 +17,6 @@ import type {
 import {
   wasmAccountToAccount,
   wasmTransactionToTransaction,
-  clientGetAllInputNotes,
-  clientGetConsumableNotes,
 } from "@/lib/web-client";
 import type { MidenInput, ProcedureExport, Script } from "@/lib/types/script";
 import { invokeProcedureCustomTransactionScript } from "@/lib/utils/script";
@@ -28,13 +26,10 @@ import {
   useMiden,
   useSyncState,
   useExecuteProgram,
-  // useTransaction,
-  // useTransactionHistory,
+  useTransaction,
 } from "@miden-sdk/react";
-import useNetwork from "@/hooks/use-network";
 
 const useTransactions = () => {
-  const { networkId } = useNetwork();
   const {
     accounts,
     submittingTransaction,
@@ -46,16 +41,13 @@ const useTransactions = () => {
     createTransactionDialogNoteIds,
     createTransactionDialogTransactionRequest,
     createTransactionDialogTransactionResult,
-    inputNotes: previousInputNotes,
-    scripts,
     transactions,
     dispatch,
   } = useGlobalContext();
   const { client } = useMiden();
   const { lastSyncTime } = useSyncState();
   const { execute: executeProgram } = useExecuteProgram();
-  // const { execute } = useTransaction();
-  // const { records } = useTransactionHistory();
+  const { execute } = useTransaction();
   const openCreateTransactionDialog = ({
     accountId = "",
     transactionType = "consume",
@@ -237,25 +229,19 @@ const useTransactions = () => {
       throw new Error("MidenClient not ready");
     }
     dispatch({ type: "SUBMITTING_TRANSACTION" });
-    const transactionId = await client.submitNewTransaction(
-      WasmAccountId.fromHex(accountId),
-      transactionRequest,
-    );
-    const transactionIdHex = transactionId.toHex();
-    // const { transactionId } = await execute({
-    //   accountId,
-    //   request: transactionRequest,
-    // });
-    // console.log("transactionId", transactionId);
+    const { transactionId } = await execute({
+      accountId,
+      request: transactionRequest,
+    });
     // if (client.usesMockChain()) {
     //   await client.proveBlock();
     // }
     // const syncSummary = await client.syncState();
     const transactions = await client.getTransactions(
-      WasmTransactionFilter.ids([WasmTransactionId.fromHex(transactionIdHex)]),
+      WasmTransactionFilter.ids([WasmTransactionId.fromHex(transactionId)]),
     );
     const transactionRecord = transactions.find(
-      (tx) => tx.id().toHex() === transactionIdHex,
+      (tx) => tx.id().toHex() === transactionId,
     );
     const nextAccount = await client.getAccount(
       WasmAccountId.fromHex(accountId),
@@ -266,24 +252,6 @@ const useTransactions = () => {
     if (!transactionRecord || !nextAccount || !previousAccount) {
       throw new Error("Transaction record or account not found");
     }
-    const inputNotes = await clientGetAllInputNotes({
-      client,
-      networkId,
-      previousInputNotes,
-      scripts,
-      updatedAt: lastSyncTime,
-    });
-    const consumableNoteIds: Record<string, string[]> = {};
-    for (const account of accounts) {
-      const consumableNotes = await clientGetConsumableNotes({
-        client,
-        accountId,
-      });
-      const noteIds = consumableNotes.map((consumableNote) =>
-        consumableNote.inputNoteRecord().id().toString(),
-      );
-      consumableNoteIds[account.id] = noteIds;
-    }
     const transaction = wasmTransactionToTransaction({
       record: transactionRecord,
       result: transactionResult,
@@ -293,18 +261,15 @@ const useTransactions = () => {
       name: previousAccount.name,
       components: previousAccount.components,
       updatedAt: lastSyncTime,
-      consumableNoteIds: consumableNoteIds[previousAccount.id],
     });
     dispatch({
       type: "SUBMIT_TRANSACTION",
       payload: {
         transaction,
         account,
-        consumableNoteIds,
-        inputNotes,
-        serializedMockChain: client.usesMockChain()
-          ? client.serializeMockChain()
-          : new Uint8Array(),
+        // serializedMockChain: client.usesMockChain()
+        //   ? client.serializeMockChain()
+        //   : new Uint8Array(),
       },
     });
     return transactionRecord;
