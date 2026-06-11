@@ -7,8 +7,8 @@ import {
   NoteType as WasmNoteType,
   NoteAttachment as WasmNoteAttachment,
   NoteArray as WasmNoteArray,
-} from "@miden-sdk/miden-sdk";
-import { useMiden } from "@miden-sdk/react";
+} from "@miden-sdk/miden-sdk/lazy";
+import { useMiden } from "@miden-sdk/react/lazy";
 import useGlobalContext from "@/components/global-context/hook";
 import type { NoteType, InputNote } from "@/lib/types/note";
 import useAccounts from "@/hooks/use-accounts";

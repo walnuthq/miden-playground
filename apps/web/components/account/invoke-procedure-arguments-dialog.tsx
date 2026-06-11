@@ -1,7 +1,7 @@
 "use client";
 import { Fragment, useState, type Dispatch, type SetStateAction } from "react";
 import { toast } from "sonner";
-import { AccountId as WasmAccountId } from "@miden-sdk/miden-sdk";
+import { AccountId as WasmAccountId } from "@miden-sdk/miden-sdk/lazy";
 import { Spinner } from "@workspace/ui/components/spinner";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";

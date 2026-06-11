@@ -8,7 +8,7 @@ import {
   TransactionFilter as WasmTransactionFilter,
   TransactionId as WasmTransactionId,
   Package as WasmPackage,
-} from "@miden-sdk/miden-sdk";
+} from "@miden-sdk/miden-sdk/lazy";
 import type { NoteType } from "@/lib/types/note";
 import type {
   CreateTransactionDialogStep,
@@ -27,7 +27,7 @@ import {
   useSyncState,
   useExecuteProgram,
   useTransaction,
-} from "@miden-sdk/react";
+} from "@miden-sdk/react/lazy";
 
 const useTransactions = () => {
   const {

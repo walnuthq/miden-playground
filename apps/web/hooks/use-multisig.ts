@@ -2,8 +2,8 @@ import { useState } from "react";
 import {
   Address as WasmAddress,
   AccountId as WasmAccountId,
-} from "@miden-sdk/miden-sdk";
-import { useMiden, useSyncState } from "@miden-sdk/react";
+} from "@miden-sdk/miden-sdk/lazy";
+import { useMiden, useSyncState } from "@miden-sdk/react/lazy";
 import {
   useWallet,
   type MessageSignerWalletAdapter,

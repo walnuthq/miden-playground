@@ -12,6 +12,14 @@ const nextConfig: NextConfig = {
       asyncWebAssembly: true,
       topLevelAwait: true,
     };
+    // Dependencies (wallet adapter, multisig client) import the eager
+    // "@miden-sdk/miden-sdk" entry, whose top-level await blocks SSR.
+    // Redirect bare specifiers to the lazy single-threaded variant.
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      "@miden-sdk/miden-sdk$": "@miden-sdk/miden-sdk/lazy",
+      "@miden-sdk/react$": "@miden-sdk/react/lazy",
+    };
     // Add WASM to asset rules
     // config.module.rules.push({
     //   test: /\.wasm$/,

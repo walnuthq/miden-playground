@@ -1,4 +1,4 @@
-import { useTransactionHistory } from "@miden-sdk/react";
+import { useTransactionHistory } from "@miden-sdk/react/lazy";
 import { transactionStatus } from "@/lib/web-client";
 import type { Transaction } from "@/lib/types/transaction";
 import {

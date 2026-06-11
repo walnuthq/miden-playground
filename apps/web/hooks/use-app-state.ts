@@ -3,7 +3,7 @@ import { uniq } from "lodash";
 import {
   Address as WasmAddress,
   AccountId as WasmAccountId,
-} from "@miden-sdk/miden-sdk";
+} from "@miden-sdk/miden-sdk/lazy";
 import {
   clientGetAllInputNotes,
   wasmAccountToAccount,
@@ -29,7 +29,7 @@ import {
   useSyncState,
   clearMidenStorage,
   useImportStore,
-} from "@miden-sdk/react";
+} from "@miden-sdk/react/lazy";
 import useNetwork from "@/hooks/use-network";
 
 const useAppState = () => {

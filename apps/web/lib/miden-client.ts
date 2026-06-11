@@ -1,4 +1,4 @@
-import { MidenClient } from "@miden-sdk/miden-sdk";
+import { MidenClient } from "@miden-sdk/miden-sdk/lazy";
 import {
   TESTNET_NOTE_TRANSPORT_URL,
   DEVNET_NOTE_TRANSPORT_URL,

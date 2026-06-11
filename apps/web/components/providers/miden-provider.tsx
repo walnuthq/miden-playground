@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { MidenProvider as RawMidenProvider } from "@miden-sdk/react";
+import { MidenProvider as RawMidenProvider } from "@miden-sdk/react/lazy";
 import useNetwork from "@/hooks/use-network";
 import { networks, noteTransportUrls } from "@/lib/miden-client";
 import Loading from "@/components/lib/loading";

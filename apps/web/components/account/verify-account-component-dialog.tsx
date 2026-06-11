@@ -21,8 +21,8 @@ import { toBase64 } from "@/lib/utils";
 import { fileListToPackageSources } from "@/lib/utils/script";
 import useNetwork from "@/hooks/use-network";
 import type { PackageSource } from "@/lib/types/script";
-import { AccountId as WasmAccountId } from "@miden-sdk/miden-sdk";
-import { useMiden } from "@miden-sdk/react";
+import { AccountId as WasmAccountId } from "@miden-sdk/miden-sdk/lazy";
+import { useMiden } from "@miden-sdk/react/lazy";
 
 const VerifyAccountComponentDialog = () => {
   const queryClient = useQueryClient();

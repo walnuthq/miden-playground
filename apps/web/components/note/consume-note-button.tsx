@@ -11,7 +11,7 @@ import {
   ConsumeTransaction,
   type MidenWalletAdapter,
 } from "@miden-sdk/miden-wallet-adapter";
-import { useMiden } from "@miden-sdk/react";
+import { useMiden } from "@miden-sdk/react/lazy";
 import { fromBase64 } from "@/lib/utils";
 
 const ConsumeNoteButton = ({

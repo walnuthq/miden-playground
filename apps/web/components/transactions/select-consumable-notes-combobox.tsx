@@ -20,7 +20,7 @@ import {
 import type {
   ConsumableNoteRecord as WasmConsumableNoteRecordType,
   InputNoteRecord as WasmInputNoteRecordType,
-} from "@miden-sdk/miden-sdk";
+} from "@miden-sdk/miden-sdk/lazy";
 import useAccounts from "@/hooks/use-accounts";
 import type { Account } from "@/lib/types/account";
 import { formatAmount } from "@/lib/utils/asset";

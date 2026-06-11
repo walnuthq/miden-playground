@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
-import type { ConsumableNoteRecord as WasmConsumableNoteRecordType } from "@miden-sdk/miden-sdk";
+import type { ConsumableNoteRecord as WasmConsumableNoteRecordType } from "@miden-sdk/miden-sdk/lazy";
 import type {
   CreateTransactionDialogStep,
   TransactionType,
@@ -10,7 +10,7 @@ import SelectTransactionTypeDropdownMenu from "@/components/transactions/select-
 import useAccounts from "@/hooks/use-accounts";
 import useNetwork from "@/hooks/use-network";
 import { clientGetConsumableNotes } from "@/lib/web-client";
-import { useMiden } from "@miden-sdk/react";
+import { useMiden } from "@miden-sdk/react/lazy";
 
 const CreateTransactionDialogSelectForm = ({
   executingAccountId,

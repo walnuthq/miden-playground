@@ -1,5 +1,5 @@
 import { uniqBy } from "lodash";
-import { Word as WasmWord } from "@miden-sdk/miden-sdk";
+import { Word as WasmWord } from "@miden-sdk/miden-sdk/lazy";
 import {
   Table,
   TableBody,

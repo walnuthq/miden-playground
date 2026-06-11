@@ -7,7 +7,7 @@ import useGlobalContext from "@/components/global-context/hook";
 import { networks } from "@/lib/types/network";
 import { cn } from "@workspace/ui/lib/utils";
 import useAppState from "@/hooks/use-app-state";
-import { useSyncState } from "@miden-sdk/react";
+import { useSyncState } from "@miden-sdk/react/lazy";
 import useNetwork from "@/hooks/use-network";
 import useExamples from "@/hooks/use-examples";
 
