@@ -1,8 +1,10 @@
 "use client";
+import { useTransactionHistory } from "@miden-sdk/react";
 import type { Transaction } from "@/lib/types/transaction";
 import { formatId } from "@/lib/utils";
 import type { ColumnDef } from "@tanstack/react-table";
 import AccountAddress from "@/components/lib/account-address";
+import { transactionStatus } from "@/lib/web-client";
 
 export const columns: ColumnDef<Transaction>[] = [
   {
@@ -13,6 +15,11 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "status",
     header: "Status",
+    cell: ({ row }) => {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const { record } = useTransactionHistory({ id: row.original.id });
+      return record ? transactionStatus(record, true) : "";
+    },
   },
   {
     accessorKey: "accountId",
@@ -26,10 +33,10 @@ export const columns: ColumnDef<Transaction>[] = [
   },
   {
     accessorKey: "inputNotes.length",
-    header: "Input Notes Count",
+    header: "Input Notes",
   },
   {
     accessorKey: "outputNotes.length",
-    header: "Output Notes Count",
+    header: "Output Notes",
   },
 ];

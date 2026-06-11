@@ -4,7 +4,6 @@ import type {
   TransactionResult as WasmTransactionResultType,
 } from "@miden-sdk/miden-sdk";
 import type { Account } from "@/lib/types/account";
-import type { InputNote } from "@/lib/types/note";
 import type {
   Transaction,
   TransactionType,
@@ -35,9 +34,7 @@ export type TransactionAction =
       payload: {
         transaction: Transaction;
         account: Account;
-        consumableNoteIds: Record<string, string[]>;
-        inputNotes: InputNote[];
-        serializedMockChain: Uint8Array;
+        // serializedMockChain: Uint8Array;
       };
     };
 
@@ -85,20 +82,11 @@ const reducer = (state: State, action: TransactionAction): State => {
         submittingTransaction: false,
         transactions: [...state.transactions, action.payload.transaction],
         accounts: [
-          ...state.accounts.slice(0, index).map((account) => ({
-            ...account,
-            consumableNoteIds:
-              action.payload.consumableNoteIds[account.id] ?? [],
-          })),
+          ...state.accounts.slice(0, index),
           action.payload.account,
-          ...state.accounts.slice(index + 1).map((account) => ({
-            ...account,
-            consumableNoteIds:
-              action.payload.consumableNoteIds[account.id] ?? [],
-          })),
+          ...state.accounts.slice(index + 1),
         ],
-        inputNotes: action.payload.inputNotes,
-        serializedMockChain: action.payload.serializedMockChain,
+        // serializedMockChain: action.payload.serializedMockChain,
       };
     }
   }

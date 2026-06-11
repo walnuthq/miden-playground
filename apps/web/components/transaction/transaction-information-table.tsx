@@ -1,3 +1,5 @@
+import { useTransactionHistory } from "@miden-sdk/react";
+import { transactionStatus } from "@/lib/web-client";
 import type { Transaction } from "@/lib/types/transaction";
 import {
   Table,
@@ -15,6 +17,7 @@ const TransactionInformationTable = ({
   transaction: Transaction;
 }) => {
   const { networkId } = useNetwork();
+  const { record } = useTransactionHistory({ id: transaction.id });
   return (
     <div className="rounded-md border">
       <Table>
@@ -38,7 +41,7 @@ const TransactionInformationTable = ({
           </TableRow>
           <TableRow>
             <TableCell>Status</TableCell>
-            <TableCell>{transaction.status}</TableCell>
+            <TableCell>{record ? transactionStatus(record) : ""}</TableCell>
           </TableRow>
           <TableRow>
             <TableCell>Account ID</TableCell>
