@@ -1,13 +1,13 @@
 import { range } from "lodash";
 import {
   type Account as WasmAccount,
-  type AccountId as WasmAccountIdType,
   type WebClient as WebClientType,
   type InputNoteRecord as WasmInputNoteRecordType,
   type NoteMetadata as WasmNoteMetadataType,
   type TransactionResult as WasmTransactionResultType,
   type InputNoteState as WasmInputNoteStateType,
   type TransactionRecord as WasmTransactionRecordType,
+  AccountId as WasmAccountIdType,
   AccountStorageMode as WasmAccountStorageMode,
   AccountType as WasmAccountType,
   AccountBuilder as WasmAccountBuilder,
@@ -34,6 +34,7 @@ import {
   FeltArray as WasmFeltArray,
   Felt as WasmFelt,
   NoteRecipient as WasmNoteRecipient,
+  TransactionFilter as WasmTransactionFilter,
   TransactionScript as WasmTransactionScript,
   TransactionRequestBuilder as WasmTransactionRequestBuilder,
   NoteFile as WasmNoteFile,
@@ -76,15 +77,9 @@ export const clientGetConsumableNotes = ({
 export const clientGetAllInputNotes = async ({
   client,
   networkId,
-  previousInputNotes,
-  scripts,
-  updatedAt,
 }: {
   client: WebClientType;
   networkId: NetworkId;
-  previousInputNotes: InputNote[];
-  scripts: Script[];
-  updatedAt?: number | null;
 }) => {
   const wasmInputNotes = await client.getInputNotes(
     new WasmNoteFilter(WasmNoteFilterTypes.All),
@@ -99,23 +94,29 @@ export const clientGetAllInputNotes = async ({
   const wasmFetchedNotes = await rpcClient.getNotesById(
     wasmInputNotes.map((wasmInputNote) => wasmInputNote.id()),
   );
-  const patchedWasmInputNotes = wasmInputNotes.map((wasmInputNote, index) => {
+  return wasmInputNotes.map((wasmInputNote, index) => {
     wasmInputNote.metadata = () => wasmFetchedNotes[index]?.metadata;
     return wasmInputNote;
   });
-  return Promise.all(
-    patchedWasmInputNotes.map((wasmInputNote) =>
-      wasmInputNoteToInputNote({
-        record: wasmInputNote,
-        previousInputNote: previousInputNotes.find(
-          ({ id }) => id === wasmInputNote.id().toString(),
-        ),
-        scripts,
-        updatedAt,
-      }),
+};
+
+export const clientGetAccounts = async ({
+  client,
+  accountIds,
+}: {
+  client: WebClientType;
+  accountIds: string[];
+}) => {
+  const wasmAccounts = await Promise.all(
+    accountIds.map((accountId) =>
+      client.getAccount(WasmAccountId.fromHex(accountId)),
     ),
   );
+  return wasmAccounts.filter((wasmAccount) => wasmAccount !== undefined);
 };
+
+export const clientGetAllTransactions = (client: WebClientType) =>
+  client.getTransactions(WasmTransactionFilter.all());
 
 export const clientDeployAccount = async ({
   client,
@@ -569,13 +570,12 @@ export const wasmInputNoteToInputNote = ({
 
 export const transactionStatus = (
   transactionRecord: WasmTransactionRecordType,
-  short = false,
 ) => {
   const status = transactionRecord.transactionStatus();
   if (status.isPending()) {
     return "Pending";
   } else if (status.isCommitted()) {
-    return short ? "Committed" : `Committed #${status.getBlockNum()}`;
+    return `Committed #${status.getBlockNum()}`;
   } else {
     return "Discarded";
   }
@@ -605,6 +605,7 @@ export const wasmTransactionToTransaction = ({
     .map((note) => wasmNoteToNote(note));
   return {
     id: record.id().toHex(),
+    status: transactionStatus(record),
     accountId: record.accountId().toString(),
     scriptRoot:
       result.executedTransaction().txArgs().txScript()?.root().toHex() ?? "",

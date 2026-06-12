@@ -31,7 +31,7 @@
   "devDependencies": {
     "@types/archiver": "8.0.0",
     "@types/lodash": "4.17.24",
-    "@types/node": "25.9.2",
+    "@types/node": "25.9.3",
     "@types/pg": "8.20.0",
     "@types/react": "19.2.17",
     "@workspace/eslint-config": "workspace:^",
