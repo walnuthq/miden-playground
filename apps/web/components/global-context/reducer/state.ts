@@ -1,5 +1,6 @@
 import type { Account } from "@/lib/types/account";
 import type { InputNote } from "@/lib/types/note";
+import type { Transaction } from "@/lib/types/transaction";
 import type { State } from "@/lib/types/state";
 
 export type StateAction =
@@ -9,6 +10,7 @@ export type StateAction =
       payload: {
         accounts: Account[];
         inputNotes: InputNote[];
+        transactions: Transaction[];
       };
     }
   | {
@@ -30,6 +32,7 @@ const reducer = (state: State, action: StateAction): State => {
         ...state,
         accounts: action.payload.accounts,
         inputNotes: action.payload.inputNotes,
+        transactions: action.payload.transactions,
         syncingState: false,
       };
     }
