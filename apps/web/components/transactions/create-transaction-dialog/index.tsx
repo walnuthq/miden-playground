@@ -45,7 +45,7 @@ const CreateTransactionDialog = () => {
   const [targetAccountId, setTargetAccountId] = useState("");
   const targetAccount = accounts.find(({ id }) => id === targetAccountId);
   const [isPublic, setIsPublic] = useState(
-    executingAccount ? executingAccount.storageMode === "public" : false,
+    executingAccount ? executingAccount.isPublic : false,
   );
   const [consumableNotes, setConsumableNotes] = useState<
     WasmConsumableNoteRecordType[]
@@ -94,9 +94,7 @@ const CreateTransactionDialog = () => {
     createTransactionDialogConsumableNotes,
   ]);
   useEffect(() => {
-    setIsPublic(
-      executingAccount ? executingAccount.storageMode === "public" : false,
-    );
+    setIsPublic(executingAccount ? executingAccount.isPublic : false);
   }, [executingAccount]);
   return (
     <Dialog

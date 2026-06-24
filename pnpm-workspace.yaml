@@ -7,5 +7,9 @@ allowBuilds:
   sharp: true
   workerd: true
 
+minimumReleaseAgeExclude:
+  - '@openzeppelin/guardian-client@0.15.0'
+  - '@openzeppelin/miden-multisig-client@0.15.0'
+
 overrides:
-  "@miden-sdk/miden-sdk": "0.14.11"
+  "@miden-sdk/miden-sdk": "0.15.2"

@@ -12,7 +12,7 @@ const useCompleted = () => {
   const [initialBalance, setInitialBalance] = useState(0n);
   const { connectedWallet } = useAccounts();
   const currentBalance = BigInt(
-    (connectedWallet?.storageMode === "private" &&
+    (connectedWallet?.isPrivate &&
       connectedWallet?.fungibleAssets.find(
         ({ faucetId }) => faucetId === midenFaucetAccountId(networkId),
       )?.amount) ??

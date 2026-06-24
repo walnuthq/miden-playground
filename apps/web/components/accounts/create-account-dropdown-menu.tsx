@@ -76,18 +76,14 @@ const CreateAccountDropdownMenu = () => {
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={openDeployMultisigDialog}
-              disabled={
-                !connectedWallet || connectedWallet.storageMode !== "private"
-              }
+              disabled={!connectedWallet || !connectedWallet.isPrivate}
             >
               <ShieldPlus />
               Deploy guardian
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => openImportAccountDialog(true)}
-              disabled={
-                !connectedWallet || connectedWallet.storageMode !== "private"
-              }
+              disabled={!connectedWallet || !connectedWallet.isPrivate}
             >
               <ShieldCheck />
               Restore guardian

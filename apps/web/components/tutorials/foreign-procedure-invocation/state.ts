@@ -28,11 +28,9 @@ const state: State = {
       routingParameters: getRoutingParametersPart(
         counterContractAddress("mtst"),
       ),
-      type: "regular-account-updatable-code",
-      storageMode: "public",
       isFaucet: false,
       isPublic: true,
-      isUpdatable: true,
+      isPrivate: false,
       isRegularAccount: true,
       isNew: false,
       components: ["auth-no-auth", "counter-contract"],

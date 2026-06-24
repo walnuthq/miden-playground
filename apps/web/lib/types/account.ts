@@ -4,18 +4,8 @@ import type {
   Proposal,
 } from "@openzeppelin/miden-multisig-client";
 
-export const accountTypes = {
-  "fungible-faucet": "Fungible Faucet",
-  "non-fungible-faucet": "Non Fungible Faucet",
-  "regular-account-immutable-code": "Regular (immutable)",
-  "regular-account-updatable-code": "Regular (updatable)",
-} as const;
-
-export type AccountType = keyof typeof accountTypes;
-
 export const accountStorageModes = {
   public: "Public",
-  network: "Network",
   private: "Private",
 } as const;
 
@@ -41,15 +31,13 @@ export type Account = {
   address: string;
   identifier: string;
   routingParameters: string;
-  type: AccountType;
-  storageMode: AccountStorageMode;
   isFaucet: boolean;
   symbol: string;
   decimals: number;
   maxSupply: string;
   totalSupply: string;
   isPublic: boolean;
-  isUpdatable: boolean;
+  isPrivate: boolean;
   isRegularAccount: boolean;
   isNew: boolean;
   nonce: number;

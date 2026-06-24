@@ -7,9 +7,8 @@ import {
   type TransactionResult as WasmTransactionResultType,
   type InputNoteState as WasmInputNoteStateType,
   type TransactionRecord as WasmTransactionRecordType,
-  AccountId as WasmAccountIdType,
+  type AccountId as WasmAccountIdType,
   AccountStorageMode as WasmAccountStorageMode,
-  AccountType as WasmAccountType,
   AccountBuilder as WasmAccountBuilder,
   AccountComponent as WasmAccountComponent,
   Note as WasmNote,
@@ -28,8 +27,8 @@ import {
   FungibleAsset as WasmFungibleAsset,
   NoteMetadata as WasmNoteMetadata,
   NoteTag as WasmNoteTag,
-  NoteAttachment as WasmNoteAttachment,
-  NoteExecutionHint as WasmNoteExecutionHint,
+  // NoteAttachment as WasmNoteAttachment,
+  // NoteExecutionHint as WasmNoteExecutionHint,
   NoteStorage as WasmNoteStorage,
   FeltArray as WasmFeltArray,
   Felt as WasmFelt,
@@ -49,7 +48,6 @@ import type {
   Account,
   AccountMultisig,
   AccountStorageMode,
-  AccountType,
   StorageItem,
 } from "@/lib/types/account";
 import {
@@ -92,7 +90,9 @@ export const clientGetAllInputNotes = async ({
   } as const;
   const rpcClient = new WasmRpcClient(endpoints[networkId]);
   const wasmFetchedNotes = await rpcClient.getNotesById(
-    wasmInputNotes.map((wasmInputNote) => wasmInputNote.id()),
+    wasmInputNotes
+      .map((wasmInputNote) => wasmInputNote.id())
+      .filter((id) => id !== undefined),
   );
   return wasmInputNotes.map((wasmInputNote, index) => {
     wasmInputNote.metadata = () => wasmFetchedNotes[index]?.metadata;
@@ -120,36 +120,25 @@ export const clientGetAllTransactions = (client: WebClientType) =>
 
 export const clientDeployAccount = async ({
   client,
-  accountType,
   storageMode,
   components,
   scripts,
 }: {
   client: WebClientType;
-  accountType: AccountType;
   storageMode: AccountStorageMode;
   components: Component[];
   scripts: Script[];
 }) => {
-  const builder = client.createCodeBuilder();
+  const builder = await client.createCodeBuilder();
   const initSeed = new Uint8Array(32);
   crypto.getRandomValues(initSeed);
-  const accountTypes = {
-    "fungible-faucet": WasmAccountType.FungibleFaucet,
-    "non-fungible-faucet": WasmAccountType.NonFungibleFaucet,
-    "regular-account-immutable-code":
-      WasmAccountType.RegularAccountImmutableCode,
-    "regular-account-updatable-code":
-      WasmAccountType.RegularAccountUpdatableCode,
-  } as const;
   const accountStorageModes = {
     public: WasmAccountStorageMode.public(),
-    network: WasmAccountStorageMode.network(),
     private: WasmAccountStorageMode.private(),
   } as const;
-  let accountBuilder = new WasmAccountBuilder(initSeed)
-    .accountType(accountTypes[accountType])
-    .storageMode(accountStorageModes[storageMode]);
+  let accountBuilder = new WasmAccountBuilder(initSeed).storageMode(
+    accountStorageModes[storageMode],
+  );
   for (const component of components) {
     if (component.scriptId === "auth-no-auth") {
       accountBuilder = accountBuilder.withNoAuthComponent();
@@ -205,7 +194,7 @@ export const createTransactionFromScript = (script: Script) => {
   return transactionRequestBuilder.build();
 };
 
-const clientCreateNoteScriptFromMasm = ({
+const clientCreateNoteScriptFromMasm = async ({
   client,
   script,
   scripts,
@@ -214,7 +203,7 @@ const clientCreateNoteScriptFromMasm = ({
   script: Script;
   scripts: Script[];
 }) => {
-  const builder = client.createCodeBuilder();
+  const builder = await client.createCodeBuilder();
   const dependencies = script.dependencies
     .map((dependency) => scripts.find(({ id }) => id === dependency.id))
     .filter((dependency) => dependency?.masm)
@@ -233,7 +222,7 @@ const clientCreateNoteScriptFromMasm = ({
 const createNoteScriptFromPackage = (script: Script) =>
   WasmNoteScript.fromPackage(WasmPackage.deserialize(fromBase64(script.masp)));
 
-export const clientCreateNoteFromScript = ({
+export const clientCreateNoteFromScript = async ({
   client,
   senderAccountId,
   recipientAccountId,
@@ -257,25 +246,26 @@ export const clientCreateNoteFromScript = ({
   scripts: Script[];
 }) => {
   const noteScript = script.masm
-    ? clientCreateNoteScriptFromMasm({ client, script, scripts })
+    ? await clientCreateNoteScriptFromMasm({ client, script, scripts })
     : createNoteScriptFromPackage(script);
   const assets = new WasmNoteAssets(
     faucetAccountId
       ? [new WasmFungibleAsset(WasmAccountId.fromHex(faucetAccountId), amount)]
       : [],
   );
-  let metadata = new WasmNoteMetadata(
+  const metadata = new WasmNoteMetadata(
     WasmAccountId.fromHex(senderAccountId),
     type === "public" ? WasmNoteType.Public : WasmNoteType.Private,
     WasmNoteTag.withAccountTarget(WasmAccountId.fromHex(recipientAccountId)),
   );
   if (networkRecipient) {
-    metadata = metadata.withAttachment(
-      WasmNoteAttachment.newNetworkAccountTarget(
-        WasmAccountId.fromHex(recipientAccountId),
-        WasmNoteExecutionHint.none(),
-      ),
-    );
+    // TODO
+    // metadata = metadata.withAttachment(
+    //   WasmNoteAttachment.newNetworkAccountTarget(
+    //     WasmAccountId.fromHex(recipientAccountId),
+    //     WasmNoteExecutionHint.none(),
+    //   ),
+    // );
   }
   const randomBigUints = new BigUint64Array(4);
   crypto.getRandomValues(randomBigUints);
@@ -354,23 +344,8 @@ export const clientExportInputNoteFile = async ({
 //   midenSdk: MidenSdk;
 // }) => client.sendPrivateNote(note, Address.fromBech32(address));
 
-const accountType = (account: WasmAccount) => {
-  if (account.isFaucet()) {
-    return "fungible-faucet";
-  } else if (account.isRegularAccount()) {
-    return account.isUpdatable()
-      ? "regular-account-updatable-code"
-      : "regular-account-immutable-code";
-  }
-  return "non-fungible-faucet";
-};
-
 export const storageMode = (accountId: WasmAccountIdType) =>
-  accountId.isPublic()
-    ? "public"
-    : accountId.isNetwork()
-      ? "network"
-      : "private";
+  accountId.isPublic() ? "public" : "private";
 
 const verifyStandardAccountComponents = (wasmAccount: WasmAccount) =>
   defaultScripts
@@ -411,10 +386,8 @@ export const wasmAccountToAccount = ({
     address,
     identifier: getIdentifierPart(address),
     routingParameters: getRoutingParametersPart(address),
-    type: accountType(wasmAccount),
-    storageMode: storageMode(wasmAccount.id()),
     isPublic: wasmAccount.isPublic(),
-    isUpdatable: wasmAccount.isUpdatable(),
+    isPrivate: wasmAccount.isPrivate(),
     isRegularAccount: wasmAccount.isRegularAccount(),
     isNew: wasmAccount.isNew(),
     isFaucet: wasmAccount.isFaucet(),
@@ -532,7 +505,7 @@ export const wasmInputNoteToInputNote = ({
   const scriptRoot = record.details().recipient().script().root().toHex();
   const script = verifyStandardNotes({ scriptRoot, scripts });
   return {
-    id: record.id().toString(),
+    id: record.id()?.toString() ?? "",
     type: noteType(record.metadata()),
     state: noteState(record.state()),
     tag: record.metadata()?.tag().asU32().toString() ?? "",
@@ -556,7 +529,7 @@ export const wasmInputNoteToInputNote = ({
       .storage()
       .items()
       .map((item) => item.toString()),
-    nullifier: record.nullifier(),
+    nullifier: record.nullifier() ?? "",
     noteFileBytes: previousInputNote
       ? previousInputNote.noteFileBytes
       : noteFileBytes

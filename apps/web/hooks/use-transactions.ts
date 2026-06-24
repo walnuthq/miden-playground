@@ -99,7 +99,7 @@ const useTransactions = () => {
       public: WasmNoteType.Public,
       private: WasmNoteType.Private,
     } as const;
-    const transactionRequest = client.newMintTransactionRequest(
+    const transactionRequest = await client.newMintTransactionRequest(
       WasmAccountId.fromHex(targetAccountId),
       WasmAccountId.fromHex(faucetId),
       wasmNoteTypes[noteType],
@@ -154,7 +154,7 @@ const useTransactions = () => {
       public: WasmNoteType.Public,
       private: WasmNoteType.Private,
     } as const;
-    const transactionRequest = client.newSendTransactionRequest(
+    const transactionRequest = await client.newSendTransactionRequest(
       WasmAccountId.fromHex(senderAccountId),
       WasmAccountId.fromHex(targetAccountId),
       WasmAccountId.fromHex(faucetId),
@@ -197,7 +197,7 @@ const useTransactions = () => {
     if (!client) {
       throw new Error("MidenClient not ready");
     }
-    const builder = client.createCodeBuilder();
+    const builder = await client.createCodeBuilder();
     const contractName = script.name.replaceAll("-", "_");
     const accountComponentLibrary = script.masm
       ? builder.buildLibrary(`external_contract::${contractName}`, script.masm)

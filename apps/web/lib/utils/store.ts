@@ -5,7 +5,7 @@ const testnetBlock0Header: StoreBlockHeader = {
   blockNum: 0,
   header: {
     __type: "Uint8Array",
-    data: "AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHgyexmGxH9AESifu4SVxM8Zqax50Fgr0zXwEQEOZJ+2dQCYU9XV+V5i6BY8OFmZ7jkPI+rKDC/QaBya4PkjE9sGxR/+JLqNoLHzmmnqDL9jD7dzp04VjXPBnXUqwfsVH98oppn/eFKvGavJ7C8FX1l1KBhANJFhYPgrG6YgtOpTAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADCAUdjrzRncdLAh6j73CERrXnBxWYJagCjoBOMSeFXRgMOleJpFjRauxf4qpDb8OekgJTWkZ8uVYRh5+tAcWJQkQp9F17WPsUgD7LO2G9qpQAAAADu1uVp",
+    data: "AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALNuyBJ0X3UhHyP6SIKVwrUIawxuMxwPM/JPBMMMJ9twNvYAK3/lR4xtKRA9JhAJ6cBEcBIXAInM46Fd+YsnJrwtKkVzO2ErNwxng3yekiYjFtfviE0CpiRBj+4mIgPamqnb1H8kW9+42yEEKLi4s+X26JrjL/M13gLnswACwlI6AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACM1C8/LAI8JjLOuYLz088pUvWhZVkVyVJaBLUQxT+9IAMOleJpFjRauxf4qpDb8OekgJTWkZ8uVYRh5+tAcWJQkSRY5URhKOaxULdbjr2c4QAAAAAXajpq",
   },
   partialBlockchainPeaks: { __type: "Uint8Array", data: "AQ==" },
   hasClientNotes: "false",
@@ -52,7 +52,10 @@ export const defaultStore = (networkId: NetworkId): Store => ({
   tags: [],
   foreignAccountCode: [],
   settings: [
-    { key: "clientVersion", value: { __type: "Uint8Array", data: "MC4xNC40" } },
+    {
+      key: "clientVersion",
+      value: { __type: "Uint8Array", data: "MC4xNS4y" },
+    },
     {
       key: "note_transport_cursor",
       value: { __type: "Uint8Array", data: "AAAAAAAAAAA=" },

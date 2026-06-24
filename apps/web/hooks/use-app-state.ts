@@ -132,7 +132,7 @@ const syncAccounts = ({
         if (account.address === connectedWallet?.address) {
           // handle new public accounts updates
           const isNewPublicWallet =
-            account.storageMode === "public" && midenWalletAssets.length === 0;
+            account.isPublic && midenWalletAssets.length === 0;
           if (isNewPublicWallet) {
             return {
               ...account,
@@ -140,7 +140,7 @@ const syncAccounts = ({
             };
           }
           // handle private accounts updates
-          if (account.storageMode === "private") {
+          if (account.isPrivate) {
             return {
               ...account,
               consumableNoteIds: consumableP2IDNoteIds,
@@ -177,7 +177,7 @@ const syncInputNotes = ({
     wasmInputNoteToInputNote({
       record: wasmInputNoteRecord,
       previousInputNote: previousInputNotes.find(
-        ({ id }) => id === wasmInputNoteRecord.id().toString(),
+        ({ id }) => id === wasmInputNoteRecord.id()?.toString(),
       ),
       scripts,
       updatedAt,
@@ -269,10 +269,8 @@ const useAppState = () => {
           client,
           accountIds: previousAccounts
             .filter(
-              ({ id, isNew, storageMode }) =>
-                id !== midenFaucetAccountId(networkId) ||
-                !isNew ||
-                storageMode !== "private",
+              ({ id, isNew, isPrivate }) =>
+                id !== midenFaucetAccountId(networkId) && !isNew && !isPrivate,
             )
             .map(({ id }) => id),
         }),

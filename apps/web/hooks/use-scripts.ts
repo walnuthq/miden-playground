@@ -133,7 +133,7 @@ const useScripts = () => {
     }
     dispatch({ type: "SUBMITTING_TRANSACTION" });
     try {
-      const builder = client.createCodeBuilder();
+      const builder = await client.createCodeBuilder();
       const contractName = script.name.replaceAll("-", "_");
       const accountComponentLibrary = script.masm
         ? builder.buildLibrary(
