@@ -109,11 +109,11 @@ const useNotes = () => {
             type === "public" ? WasmNoteType.Public : WasmNoteType.Private,
             new WasmNoteAttachment(),
           )
-        : clientCreateNoteFromScript({
+        : await clientCreateNoteFromScript({
             client,
             senderAccountId,
             recipientAccountId,
-            networkRecipient: recipientAccount.storageMode === "network",
+            networkRecipient: false, // TODO recipientAccount.storageMode === "network",
             script,
             type,
             faucetAccountId,

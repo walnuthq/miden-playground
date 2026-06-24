@@ -1,4 +1,4 @@
-import { type Account, accountTypes } from "@/lib/types/account";
+import type { Account } from "@/lib/types/account";
 import {
   Table,
   TableBody,
@@ -37,10 +37,6 @@ const AccountInformationTable = ({ account }: { account: Account }) => (
             />
           </TableCell>
         </TableRow>
-        <TableRow>
-          <TableCell>Type</TableCell>
-          <TableCell>{accountTypes[account.type]}</TableCell>
-        </TableRow>
         {account.isFaucet && (
           <>
             <TableRow>
@@ -75,16 +71,10 @@ const AccountInformationTable = ({ account }: { account: Account }) => (
           <TableCell>Storage mode</TableCell>
           <TableCell>
             <Badge
-              variant={
-                account.storageMode === "public"
-                  ? "default"
-                  : account.storageMode === "network"
-                    ? "secondary"
-                    : "destructive"
-              }
+              variant={account.isPublic ? "default" : "destructive"}
               className="capitalize"
             >
-              {account.storageMode}
+              {account.isPublic ? "Public" : "Private"}
             </Badge>
           </TableCell>
         </TableRow>

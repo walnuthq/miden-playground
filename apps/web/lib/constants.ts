@@ -35,10 +35,9 @@ export const GUARDIAN_ENDPOINT_URL =
 export const TESTNET_FAUCET_API_URL = "https://faucet-api.testnet.miden.io";
 export const DEVNET_FAUCET_API_URL =
   "https://faucet-api-devnet-miden.eu-central-8.gateway.fm";
-export const TESTNET_FAUCET_ACCOUNT_ID = "0x0a7d175ed63ec5200fb2ced86f6aa5";
+export const TESTNET_FAUCET_ACCOUNT_ID = "0x2458e5446128e6b150b75b8ebd9ce1";
 export const DEVNET_FAUCET_ACCOUNT_ID = "0x16f6c85d5652c9200879145bfdda93";
-export const TESTNET_FAUCET_ADDRESS =
-  "mtst1aq9869676clv2gq0kt8dsmm255zs6hs3_qr7qqq9wr6w";
+export const TESTNET_FAUCET_ADDRESS = "mtst1aqj93e2yvy5wdv2skadca0vuuypfnp80";
 export const DEVNET_FAUCET_ADDRESS =
   "mdev1aqt0djza2efvjgqg0y29hlw6jvn93r0a_qr7qqq9wr6w";
 

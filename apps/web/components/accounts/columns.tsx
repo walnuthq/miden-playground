@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
-import { accountTypes, type Account } from "@/lib/types/account";
+import type { Account } from "@/lib/types/account";
 import useNetwork from "@/hooks/use-network";
 import useTransactions from "@/hooks/use-transactions";
 import AccountAddress from "@/components/lib/account-address";
@@ -119,25 +119,14 @@ export const columns: ColumnDef<Account>[] = [
     ),
   },
   {
-    accessorKey: "type",
-    header: "Type",
-    cell: ({ row }) => accountTypes[row.original.type],
-  },
-  {
     accessorKey: "storageMode",
     header: "Storage mode",
     cell: ({ row }) => (
       <Badge
-        variant={
-          row.original.storageMode === "public"
-            ? "default"
-            : row.original.storageMode === "network"
-              ? "secondary"
-              : "destructive"
-        }
+        variant={row.original.isPublic ? "default" : "destructive"}
         className="capitalize"
       >
-        {row.original.storageMode}
+        {row.original.isPublic ? "Public" : "Private"}
       </Badge>
     ),
   },

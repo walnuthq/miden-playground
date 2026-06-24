@@ -8,8 +8,7 @@ import Step5Content from "@/components/tutorials/private-transfers/step5.mdx";
 const useCompleted = () => {
   const { connectedWallet } = useAccounts();
   return (
-    connectedWallet?.storageMode === "public" &&
-    connectedWallet?.consumableNoteIds.length === 0
+    connectedWallet?.isPublic && connectedWallet?.consumableNoteIds.length === 0
   );
 };
 
@@ -21,11 +20,7 @@ const Step6: TutorialStep = {
     return (
       <>
         <Step5Content
-          wallet={
-            connectedWallet?.storageMode === "public"
-              ? connectedWallet
-              : undefined
-          }
+          wallet={connectedWallet?.isPublic ? connectedWallet : undefined}
         />
         <TutorialAlert
           completed={completed}

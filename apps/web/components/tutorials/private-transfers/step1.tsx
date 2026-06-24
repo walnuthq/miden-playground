@@ -9,7 +9,7 @@ const useCompleted = () => {
   const pathname = usePathname();
   const { connectedWallet } = useAccounts();
   return (
-    connectedWallet?.storageMode === "private" &&
+    connectedWallet?.isPrivate &&
     pathname === `/accounts/${connectedWallet?.identifier}`
   );
 };

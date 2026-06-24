@@ -27,15 +27,13 @@ export const defaultAccount = (): Account => ({
   address: "",
   identifier: "",
   routingParameters: "",
-  type: "fungible-faucet",
-  storageMode: "private",
   isFaucet: false,
   symbol: "",
   decimals: 0,
   maxSupply: "",
   totalSupply: "",
   isPublic: false,
-  isUpdatable: false,
+  isPrivate: true,
   isRegularAccount: false,
   isNew: true,
   nonce: 0,
@@ -72,11 +70,9 @@ export const basicWalletAccount = ({
   storageMode: AccountStorageMode;
 }): Account => ({
   ...defaultAccount(),
-  storageMode,
   isPublic: storageMode === "public",
-  type: "regular-account-updatable-code",
+  isPrivate: storageMode === "private",
   isRegularAccount: true,
-  isUpdatable: true,
   code: BASIC_WALLET_CODE,
   components: ["auth-single-sig", "basic-wallet"],
 });
@@ -95,14 +91,13 @@ export const basicFungibleFaucetAccount = ({
   totalSupply: string;
 }): Account => ({
   ...defaultAccount(),
-  type: "fungible-faucet",
-  storageMode,
   isFaucet: true,
   symbol,
   decimals,
   maxSupply,
   totalSupply,
   isPublic: storageMode === "public",
+  isPrivate: storageMode === "private",
   code: FUNGIBLE_FAUCET_CODE,
   components: ["auth-single-sig", "basic-fungible-faucet"],
 });

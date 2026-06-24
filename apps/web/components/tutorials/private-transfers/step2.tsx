@@ -32,7 +32,7 @@ const useCompleted = () => {
       state === "committed" &&
       type === "private",
   );
-  return connectedWallet?.storageMode === "private" && !!note;
+  return connectedWallet?.isPrivate && !!note;
 };
 
 const Step2: TutorialStep = {

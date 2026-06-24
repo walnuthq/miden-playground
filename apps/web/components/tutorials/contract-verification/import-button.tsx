@@ -25,7 +25,6 @@ const ImportButton = () => {
         setLoading(true);
         await deployAccount({
           name: "Unverified Contract",
-          accountType: "regular-account-immutable-code",
           storageMode: "public",
           components: [noAuth, counterContractComponent],
           verify: false,

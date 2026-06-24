@@ -65,7 +65,6 @@ const useExamples = () => {
     }
     await deployAccount({
       name: component.name,
-      accountType: "regular-account-immutable-code",
       storageMode: "public",
       components: [authNoAuth, component],
     });

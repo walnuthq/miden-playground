@@ -12,10 +12,12 @@ const useCompleted = () => {
   const component = components.find(
     ({ id, type }) => !defaultComponentIds.includes(id) && type === "account",
   );
-  const counter = accounts.find(
-    ({ components, storageMode }) =>
-      components.includes(component?.id ?? "") && storageMode === "network",
-  );
+  // TODO
+  // const counter = accounts.find(
+  //   ({ components, storageMode }) =>
+  //     components.includes(component?.id ?? "") && storageMode === "network",
+  // );
+  const counter = accounts[0];
   const nonce = counter?.nonce ?? 0;
   return nonce > 0;
 };
@@ -28,10 +30,12 @@ const Step3: TutorialStep = {
     const component = components.find(
       ({ id, type }) => !defaultComponentIds.includes(id) && type === "account",
     );
-    const counter = accounts.find(
-      ({ components, storageMode }) =>
-        components.includes(component?.id ?? "") && storageMode === "network",
-    );
+    // TODO
+    // const counter = accounts.find(
+    //   ({ components, storageMode }) =>
+    //     components.includes(component?.id ?? "") && storageMode === "network",
+    // );
+    const counter = accounts[0];
     const completed = useCompleted();
     return (
       <>

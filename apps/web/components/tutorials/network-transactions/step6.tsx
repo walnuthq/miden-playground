@@ -13,10 +13,12 @@ const Step6: TutorialStep = {
     const component = components.find(
       ({ id, type }) => !defaultComponentIds.includes(id) && type === "account",
     );
-    const counter = accounts.find(
-      ({ components, storageMode }) =>
-        components.includes(component?.id ?? "") && storageMode === "network",
-    );
+    // TODO
+    // const counter = accounts.find(
+    //   ({ components, storageMode }) =>
+    //     components.includes(component?.id ?? "") && storageMode === "network",
+    // );
+    const counter = accounts[0];
     return <Step6Content counter={counter} />;
   },
   NextStepButton: NextTutorialButton,

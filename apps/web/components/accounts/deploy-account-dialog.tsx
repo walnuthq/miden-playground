@@ -25,9 +25,7 @@ import useAccounts from "@/hooks/use-accounts";
 import AccountAddress from "@/components/lib/account-address";
 import {
   type AccountStorageMode,
-  type AccountType,
   accountStorageModes,
-  accountTypes,
 } from "@/lib/types/account";
 import useComponents from "@/hooks/use-components";
 import { defaultComponentIds } from "@/lib/types/default-components";
@@ -37,16 +35,12 @@ const DeployAccountDialog = () => {
     useAccounts();
   const { components } = useComponents();
   const [loading, setLoading] = useState(false);
-  const [accountType, setAccountType] = useState<AccountType>(
-    "regular-account-updatable-code",
-  );
   const [storageMode, setStorageMode] = useState<AccountStorageMode>("public");
   const [authComponentId, setAuthComponentId] = useState("auth-no-auth");
   const [componentId, setComponentId] = useState("");
   const authComponent = components.find(({ id }) => id === authComponentId);
   const component = components.find(({ id }) => id === componentId);
   const onClose = () => {
-    setAccountType("regular-account-updatable-code");
     setStorageMode("public");
     setAuthComponentId("auth-no-auth");
     setComponentId("");
@@ -88,7 +82,6 @@ const DeployAccountDialog = () => {
             try {
               const account = await deployAccount({
                 name: formData.get("name")?.toString() ?? "",
-                accountType,
                 storageMode,
                 components: [authComponent, componentWithInitialValues],
               });
@@ -108,33 +101,9 @@ const DeployAccountDialog = () => {
           }}
         >
           <div className="grid grid-cols-2 gap-4">
-            <div className="grid gap-3 col-span-2">
+            <div className="grid gap-3">
               <Label htmlFor="name">Name</Label>
               <Input id="name" name="name" required />
-            </div>
-            <div className="grid gap-3">
-              <Label htmlFor="type">Type</Label>
-              <Select
-                onValueChange={(accountType) =>
-                  setAccountType(accountType as AccountType)
-                }
-                value={accountType.toString()}
-              >
-                <SelectTrigger className="w-45">
-                  <SelectValue placeholder="Select type…" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.keys(accountTypes)
-                    .filter((accountType) =>
-                      accountType.startsWith("regular-account"),
-                    )
-                    .map((accountType) => (
-                      <SelectItem key={accountType} value={accountType}>
-                        {accountTypes[accountType as AccountType]}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
             </div>
             <div className="grid gap-3">
               <Label htmlFor="storage-mode">Storage mode</Label>

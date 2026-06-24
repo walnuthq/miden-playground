@@ -41,12 +41,11 @@ const getConsumableNoteFields = (
     });
   const metadata = inputNoteRecord.metadata();
   const wasmNoteTypes = {
+    0: "private",
     1: "public",
-    2: "private",
-    3: "encrypted",
   } as const;
   return {
-    noteId: inputNoteRecord.id().toString(),
+    noteId: inputNoteRecord.id()?.toString() ?? "",
     noteType: metadata ? wasmNoteTypes[metadata.noteType()] : "public",
     noteFungibleAssets,
   };
@@ -115,7 +114,7 @@ const SelectConsumableNotesCombobox = ({
             <CommandGroup>
               {consumableNotes.map((consumableNote) => (
                 <CommandItem
-                  key={consumableNote.inputNoteRecord().id().toString()}
+                  key={consumableNote.inputNoteRecord().id()?.toString() ?? ""}
                   value={getConsumableNoteValue(
                     consumableNote.inputNoteRecord(),
                     faucets,
@@ -141,7 +140,7 @@ const SelectConsumableNotesCombobox = ({
                     className={cn(
                       "ml-auto",
                       value.includes(
-                        consumableNote.inputNoteRecord().id().toString(),
+                        consumableNote.inputNoteRecord().id()?.toString() ?? "",
                       )
                         ? "opacity-100"
                         : "opacity-0",
