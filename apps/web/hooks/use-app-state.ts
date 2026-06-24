@@ -1,13 +1,19 @@
 "use client";
-import { uniq } from "lodash";
+import { uniq /*, omit*/ } from "lodash";
 import {
   Address as WasmAddress,
-  AccountId as WasmAccountId,
+  // AccountId as WasmAccountId,
+  type Account as WasmAccount,
+  type InputNoteRecord as WasmInputNoteRecord,
+  type TransactionRecord as WasmTransactionRecord,
 } from "@miden-sdk/miden-sdk/lazy";
 import {
+  clientGetAccounts,
   clientGetAllInputNotes,
+  clientGetAllTransactions,
+  transactionStatus,
   wasmAccountToAccount,
-  // clientGetConsumableNotes,
+  wasmInputNoteToInputNote,
 } from "@/lib/web-client";
 import type { Account } from "@/lib/types/account";
 import {
@@ -19,10 +25,16 @@ import useGlobalContext from "@/components/global-context/hook";
 import type { State } from "@/lib/types/state";
 import { defaultState } from "@/lib/utils/state";
 import { noteConsumed } from "@/lib/utils/note";
-import { P2ID_NOTE_CODE, midenFaucetAddress } from "@/lib/constants";
-import { useWallet } from "@miden-sdk/miden-wallet-adapter";
+import {
+  P2ID_NOTE_CODE,
+  midenFaucetAccountId,
+  // midenFaucetAddress,
+} from "@/lib/constants";
+import { useWallet, type Asset } from "@miden-sdk/miden-wallet-adapter";
 import { storeName, defaultStore } from "@/lib/utils/store";
-import type { NoteState } from "@/lib/types/note";
+import type { NoteState, InputNote } from "@/lib/types/note";
+import type { Transaction } from "@/lib/types/transaction";
+import type { Script } from "@/lib/types/script";
 // import { useParaMiden } from "@/lib/para-miden";
 import {
   useMiden,
@@ -31,6 +43,187 @@ import {
   useImportStore,
 } from "@miden-sdk/react/lazy";
 import useNetwork from "@/hooks/use-network";
+
+const syncAccounts = ({
+  previousAccounts,
+  wasmAccounts,
+  updatedAt,
+  inputNotes,
+  connectedWallet,
+  midenWalletAssets,
+}: {
+  previousAccounts: Account[];
+  wasmAccounts: WasmAccount[];
+  updatedAt: number | null;
+  inputNotes: InputNote[];
+  connectedWallet?: Account;
+  midenWalletAssets: Asset[];
+}) => {
+  const consumableP2IDNotes = inputNotes.filter(
+    (inputNote) =>
+      !noteConsumed(inputNote) && inputNote.scriptRoot === P2ID_NOTE_CODE,
+  );
+  const accountConsumableP2IDNoteIds = (accountId: string) =>
+    consumableP2IDNotes
+      .filter(({ storage }) => {
+        const [suffix = "", prefix = ""] = storage;
+        const targetAccountId = accountIdFromPrefixSuffix(prefix, suffix);
+        return targetAccountId === accountId;
+      })
+      .map(({ id }) => id);
+  const accounts = wasmAccounts.map((wasmAccount) => {
+    const previousAccount = previousAccounts.find(
+      ({ id }) => id === wasmAccount.id().toString(),
+    );
+    if (!previousAccount) {
+      return;
+    }
+    const consumableP2IDNoteIds = accountConsumableP2IDNoteIds(
+      previousAccount.id,
+    );
+    const addressNoteTag = WasmAddress.fromBech32(
+      previousAccount.address,
+    ).toNoteTag();
+    const consumableInputNoteIds = inputNotes
+      .filter(
+        (inputNote) =>
+          !noteConsumed(inputNote) &&
+          inputNote.tag === addressNoteTag.asU32().toString(),
+      )
+      .map(({ id }) => id);
+    const consumableNoteIds = uniq([
+      ...consumableP2IDNoteIds,
+      ...consumableInputNoteIds,
+    ]);
+    return wasmAccountToAccount({
+      wasmAccount,
+      name: previousAccount.name,
+      components: previousAccount.components,
+      updatedAt,
+      consumableNoteIds,
+    });
+  });
+  const filteredAccounts = accounts.filter((account) => account !== undefined);
+  return [
+    ...filteredAccounts,
+    ...previousAccounts
+      .filter(
+        (account) => !filteredAccounts.map(({ id }) => id).includes(account.id),
+      )
+      .map((account) => {
+        const consumableP2IDNoteIds = accountConsumableP2IDNoteIds(account.id);
+        if (account.multisig) {
+          const pendingConsumableNotesProposalsNoteIds =
+            account.multisig.proposals.reduce<string[]>(
+              (previousValue, currentValue) =>
+                ["pending", "ready"].includes(currentValue.status) &&
+                currentValue.metadata.proposalType === "consume_notes"
+                  ? [...previousValue, ...currentValue.metadata.noteIds]
+                  : previousValue,
+              [],
+            );
+          return {
+            ...account,
+            consumableNoteIds: consumableP2IDNoteIds.filter(
+              (id) => !pendingConsumableNotesProposalsNoteIds.includes(id),
+            ),
+          };
+        }
+        if (account.address === connectedWallet?.address) {
+          // handle new public accounts updates
+          const isNewPublicWallet =
+            account.storageMode === "public" && midenWalletAssets.length === 0;
+          if (isNewPublicWallet) {
+            return {
+              ...account,
+              consumableNoteIds: consumableP2IDNoteIds,
+            };
+          }
+          // handle private accounts updates
+          if (account.storageMode === "private") {
+            return {
+              ...account,
+              consumableNoteIds: consumableP2IDNoteIds,
+              fungibleAssets: midenWalletAssets
+                ? midenWalletAssets.map(({ faucetId, amount }) => ({
+                    faucetId: WasmAddress.fromBech32(faucetId)
+                      .accountId()
+                      .toString(),
+                    amount,
+                  }))
+                : account.fungibleAssets,
+            };
+          }
+        }
+        return { ...account, consumableNoteIds: consumableP2IDNoteIds };
+      }),
+  ];
+};
+
+const syncInputNotes = ({
+  previousInputNotes,
+  wasmInputNoteRecords,
+  scripts,
+  updatedAt,
+  connectedWallet,
+}: {
+  previousInputNotes: InputNote[];
+  wasmInputNoteRecords: WasmInputNoteRecord[];
+  scripts: Script[];
+  updatedAt: number | null;
+  connectedWallet?: Account;
+}) => {
+  const inputNotes = wasmInputNoteRecords.map((wasmInputNoteRecord) =>
+    wasmInputNoteToInputNote({
+      record: wasmInputNoteRecord,
+      previousInputNote: previousInputNotes.find(
+        ({ id }) => id === wasmInputNoteRecord.id().toString(),
+      ),
+      scripts,
+      updatedAt,
+    }),
+  );
+  const connectedWalletP2IDNotes = previousInputNotes.filter(
+    ({ scriptRoot, storage }) => {
+      const [suffix = "", prefix = ""] = storage;
+      const targetAccountId = accountIdFromPrefixSuffix(prefix, suffix);
+      return (
+        scriptRoot === P2ID_NOTE_CODE && targetAccountId === connectedWallet?.id
+      );
+    },
+  );
+  return [
+    ...inputNotes,
+    ...connectedWalletP2IDNotes
+      .filter(
+        (inputNote) => !inputNotes.map(({ id }) => id).includes(inputNote.id),
+      )
+      .map((inputNote) => ({
+        ...inputNote,
+        state: connectedWallet?.isNew
+          ? ("committed" as NoteState)
+          : ("consumed-external" as NoteState),
+      })),
+  ];
+};
+
+const syncTransactions = ({
+  previousTransactions,
+  wasmTransactionRecords,
+}: {
+  previousTransactions: Transaction[];
+  wasmTransactionRecords: WasmTransactionRecord[];
+}) =>
+  previousTransactions.map((previousTransaction) => {
+    const record = wasmTransactionRecords.find(
+      (wasmTransactionRecord) =>
+        wasmTransactionRecord.id().toHex() === previousTransaction.id,
+    );
+    return {
+      ...previousTransaction,
+      status: record ? transactionStatus(record) : "",
+    };
+  });
 
 const useAppState = () => {
   const { networkId, switchNetwork } = useNetwork();
@@ -43,12 +236,16 @@ const useAppState = () => {
   const {
     accounts: previousAccounts,
     inputNotes: previousInputNotes,
+    transactions: previousTransactions,
     scripts,
     nextState,
     tutorialId,
     completedTutorials,
     dispatch,
   } = useGlobalContext();
+  const connectedWallet = previousAccounts.find(
+    ({ address }) => address === midenWalletAddress,
+  );
   const syncState = async () => {
     if (!client) {
       return;
@@ -62,13 +259,40 @@ const useAppState = () => {
           console.error("ERROR: fetchPrivateNotes", error);
         }
       }
-      const inputNotes = await clientGetAllInputNotes({
-        client,
-        networkId,
-        previousInputNotes,
-        scripts,
-        updatedAt: lastSyncTime,
-      });
+      const [
+        wasmAccounts,
+        wasmInputNoteRecords,
+        wasmTransactionRecords,
+        midenWalletAssets,
+      ] = await Promise.all([
+        clientGetAccounts({
+          client,
+          accountIds: previousAccounts
+            .filter(
+              ({ id, isNew, storageMode }) =>
+                id !== midenFaucetAccountId(networkId) ||
+                !isNew ||
+                storageMode !== "private",
+            )
+            .map(({ id }) => id),
+        }),
+        clientGetAllInputNotes({
+          client,
+          networkId,
+        }),
+        clientGetAllTransactions(client),
+        wallet && requestAssets ? await requestAssets() : [],
+      ]);
+      /* const inputNotes = wasmInputNoteRecords.map((wasmInputNoteRecord) =>
+        wasmInputNoteToInputNote({
+          record: wasmInputNoteRecord,
+          previousInputNote: previousInputNotes.find(
+            ({ id }) => id === wasmInputNoteRecord.id().toString(),
+          ),
+          scripts,
+          updatedAt: lastSyncTime,
+        }),
+      );
       const consumableP2IDNotes = inputNotes.filter(
         (inputNote) =>
           !noteConsumed(inputNote) && inputNote.scriptRoot === P2ID_NOTE_CODE,
@@ -249,12 +473,46 @@ const useAppState = () => {
             accounts.push(previousAccount);
           }
         }
-      }
+      } */
+      const syncedInputNotes = syncInputNotes({
+        previousInputNotes,
+        wasmInputNoteRecords,
+        scripts,
+        updatedAt: lastSyncTime,
+        connectedWallet,
+      });
+      const syncedAccounts = syncAccounts({
+        previousAccounts,
+        wasmAccounts,
+        updatedAt: lastSyncTime,
+        inputNotes: syncedInputNotes,
+        connectedWallet,
+        midenWalletAssets,
+      });
+      // const accountsSorted = accounts
+      //   .toSorted((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))
+      //   .map((account) => omit(account, "updatedAt"));
+      // const accountsStringified = JSON.stringify(accountsSorted);
+      // const syncedAccountsSorted = syncedAccounts
+      //   .toSorted((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))
+      //   .map((account) => omit(account, "updatedAt"));
+      // const syncedAccountsStringified = JSON.stringify(syncedAccountsSorted);
+      // const diff = accountsStringified !== syncedAccountsStringified;
+      // if (diff) {
+      //   console.log("ACCOUNTS");
+      //   console.log(accountsSorted);
+      //   console.log("SYNCED ACCOUNTS");
+      //   console.log(syncedAccountsSorted);
+      // }
       dispatch({
         type: "SYNC_STATE",
         payload: {
-          accounts,
-          inputNotes,
+          accounts: syncedAccounts,
+          inputNotes: syncedInputNotes,
+          transactions: syncTransactions({
+            previousTransactions,
+            wasmTransactionRecords,
+          }),
         },
       });
     } catch (error) {
