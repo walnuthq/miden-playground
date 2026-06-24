@@ -7,13 +7,13 @@
     "lint": "eslint . --max-warnings 0"
   },
   "dependencies": {
-    "@base-ui/react": "1.5.0",
+    "@base-ui/react": "1.6.0",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "cmdk": "1.1.1",
-    "lucide-react": "1.17.0",
+    "lucide-react": "1.21.0",
     "next-themes": "0.4.6",
-    "radix-ui": "1.5.0",
+    "radix-ui": "1.6.0",
     "react": "19.2.7",
     "react-dom": "19.2.7",
     "react-resizable-panels": "3.0.6",
@@ -23,15 +23,15 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "4.3.0",
+    "@tailwindcss/postcss": "4.3.1",
     "@turbo/gen": "2.9.18",
-    "@types/node": "25.9.3",
+    "@types/node": "24.13.2",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
     "eslint": "9.39.4",
-    "tailwindcss": "4.3.0",
+    "tailwindcss": "4.3.1",
     "typescript": "6.0.3"
   },
   "exports": {

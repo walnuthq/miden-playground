@@ -7,18 +7,5 @@ allowBuilds:
   sharp: true
   workerd: true
 
-minimumReleaseAgeExclude:
-  - miniflare@4.20260603.0
-  - wrangler@4.98.0
-  - '@turbo/darwin-64@2.9.18'
-  - '@turbo/darwin-arm64@2.9.18'
-  - '@turbo/gen@2.9.18'
-  - '@turbo/linux-64@2.9.18'
-  - '@turbo/linux-arm64@2.9.18'
-  - '@turbo/windows-64@2.9.18'
-  - '@turbo/windows-arm64@2.9.18'
-  - eslint-plugin-turbo@2.9.18
-  - turbo@2.9.18
-
 overrides:
   "@miden-sdk/miden-sdk": "0.14.11"
