@@ -4,12 +4,12 @@ import Image from "next/image";
 import { Button } from "@workspace/ui/components/button";
 import StartTutorialCard from "@/components/home/start-tutorial-card";
 import tutorials from "@/components/tutorials";
-import examples from "@/lib/examples";
-import LaunchExampleCard from "@/components/home/launch-example-card";
+// import examples from "@/lib/examples";
+// import LaunchExampleCard from "@/components/home/launch-example-card";
 import NewSandboxCard from "@/components/home/new-sandbox-card";
 
 const Tutorials = () => {
-  const [showMore, setShowMore] = useState(false);
+  const [showMore, setShowMore] = useState(tutorials.length < 5);
   return (
     <>
       <div>
@@ -39,24 +39,24 @@ const Tutorials = () => {
   );
 };
 
-const Examples = () => (
-  <>
-    <div>
-      <h3 className="scroll-m-20 text-3xl font-semibold tracking-tight">
-        Examples
-        <div className="bg-[#ff5500] size-2 inline-block ml-1" />
-      </h3>
-      <p className="text-black/60 text-lg">
-        Get started with Miden by exploring project templates.
-      </p>
-    </div>
-    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-      {examples.map((example) => (
-        <LaunchExampleCard key={example.id} example={example} />
-      ))}
-    </div>
-  </>
-);
+// const Examples = () => (
+//   <>
+//     <div>
+//       <h3 className="scroll-m-20 text-3xl font-semibold tracking-tight">
+//         Examples
+//         <div className="bg-[#ff5500] size-2 inline-block ml-1" />
+//       </h3>
+//       <p className="text-black/60 text-lg">
+//         Get started with Miden by exploring project templates.
+//       </p>
+//     </div>
+//     <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+//       {examples.map((example) => (
+//         <LaunchExampleCard key={example.id} example={example} />
+//       ))}
+//     </div>
+//   </>
+// );
 
 const SandboxEnvironments = () => (
   <>
@@ -98,8 +98,8 @@ const Home = () => (
     </p>
     <div className="h-px border-b border-black/20 border-dashed" />
     <Tutorials />
-    <div className="h-px border-b border-[#ff5500] border-dashed my-4" />
-    <Examples />
+    {/* <div className="h-px border-b border-[#ff5500] border-dashed my-4" />
+    <Examples /> */}
     <div className="h-px border-b border-[#ff5500] border-dashed my-4" />
     <SandboxEnvironments />
   </div>

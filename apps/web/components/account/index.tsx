@@ -12,7 +12,7 @@ const AccountIndex = ({ identifier }: { identifier: string }) => {
   const account = accounts.find((account) => account.identifier === identifier);
   const components = account?.components ?? [];
   const hasStandardComponent = components.some((component) =>
-    ["basic-wallet", "basic-fungible-faucet"].includes(component),
+    ["basic-wallet", "fungible-faucet"].includes(component),
   );
   const { data } = useQuery({
     queryKey: ["verifiedAccountComponents", networkId, identifier],

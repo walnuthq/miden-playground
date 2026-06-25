@@ -62,6 +62,7 @@ type StoreLatestAccountHeaders = {
   accountSeed?: SerializedUint8Array;
   accountCommitment: string;
   locked: boolean;
+  watched: boolean;
 };
 
 type StoreHistoricalAccountHeaders = {
@@ -75,6 +76,7 @@ type StoreHistoricalAccountHeaders = {
   accountSeed?: SerializedUint8Array;
   accountCommitment: string;
   locked: boolean;
+  watched: boolean;
 };
 
 type StoreAddress = { id: string; address: SerializedUint8Array };
