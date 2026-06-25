@@ -4,70 +4,19 @@ import {
   defaultProcedureExport,
 } from "@/lib/types";
 
-const rust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
-#![no_std]
-#![feature(alloc_error_handler)]
-
-// However, we could still use some standard library types while
-// remaining no-std compatible, if we uncommented the following lines:
-//
-// extern crate alloc;
-
-use miden::{Asset, NoteIdx, component, output_note};
-
-#[component]
-struct MyAccount;
-
-#[component]
-impl MyAccount {
-    /// Adds an asset to the account.
-    ///
-    /// This function adds the specified asset to the account's asset list.
-    ///
-    /// # Arguments
-    /// * \`asset\` - The asset to be added to the account
-    pub fn receive_asset(&mut self, asset: Asset) {
-        self.add_asset(asset);
-    }
-
-    /// Moves an asset from the account to a note.
-    ///
-    /// This function removes the specified asset from the account and adds it to
-    /// the note identified by the given index.
-    ///
-    /// # Arguments
-    /// * \`asset\` - The asset to move from the account to the note
-    /// * \`note_idx\` - The index of the note to receive the asset
-    pub fn move_asset_to_note(&mut self, asset: Asset, note_idx: NoteIdx) {
-        self.remove_asset(asset);
-        output_note::add_asset(asset, note_idx);
-    }
-}
-`;
-
-const masm = `# The MASM code of the Basic Wallet Account Component.
-#
-# See the \`BasicWallet\` Rust type's documentation for more details.
-
-pub use ::miden::standards::wallets::basic::receive_asset
-pub use ::miden::standards::wallets::basic::move_asset_to_note
-`;
-
 const basicWallet: Package = {
   ...defaultPackage(),
   id: "basic-wallet",
   name: "basic-wallet",
   type: "account",
-  rust,
-  masm,
-  digest: "0x284a73415341ff23381565be111550bc1c4f5c94cceec109f473a3dbf19ee030",
+  digest: "0x2d3dd7b37c470013f64bb7dce356cea29471f10fa35f04405452c0c59f53dc20",
   exports: [
     {
       Procedure: {
         ...defaultProcedureExport(),
         path: "::miden::standards::components::wallets::basic_wallet::move_asset_to_note",
         digest:
-          "0x6d30df4312a2c44ec842db1bee227cc045396ca91e2c47d756dcb607f2bf5f89",
+          "0xfb1c73d10de1954e9e8948964e3e77cf4e33759d2e012cb00eb10c50f2974eb4",
       },
     },
     {
@@ -75,7 +24,7 @@ const basicWallet: Package = {
         ...defaultProcedureExport(),
         path: "::miden::standards::components::wallets::basic_wallet::receive_asset",
         digest:
-          "0x75f638c65584d058542bcf4674b066ae394183021bc9b44dc2fdd97d52f9bcfb",
+          "0x6170fd6d682d91777b551fd866258f43cc657f1291f8f071500f4e56e9c153da",
       },
     },
   ],

@@ -4,9 +4,13 @@ import {
   clientDeployAccount,
   storageMode,
 } from "@/lib/web-client";
-import { AuthScheme, Address as WasmAddress } from "@miden-sdk/miden-sdk/lazy";
+import { Address as WasmAddress } from "@miden-sdk/miden-sdk/lazy";
 import useGlobalContext from "@/components/global-context/hook";
-import type { AccountStorageMode, Account } from "@/lib/types/account";
+import {
+  type AccountStorageMode,
+  type Account,
+  AuthScheme,
+} from "@/lib/types/account";
 import {
   basicWalletAccount,
   getRoutingParametersPart,
@@ -108,10 +112,11 @@ const useAccounts = () => {
     maxSupply: bigint;
   }) => {
     const faucet = await createFaucet({
+      storageMode,
+      tokenName: tokenSymbol,
       tokenSymbol,
       decimals,
       maxSupply,
-      storageMode,
       authScheme: AuthScheme.AuthRpoFalcon512,
     });
     const account = wasmAccountToAccount({

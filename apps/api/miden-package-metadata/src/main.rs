@@ -1,8 +1,8 @@
 use anyhow::{Context, Result};
 use clap::Parser;
-use miden_mast_package::{Package, PackageManifest};
+use miden_mast_package::{Dependency, Package, PackageExport};
 use miden_serde_utils::Deserializable;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use std::path::PathBuf;
 
 /// Extracts and prints metadata from a Miden package (.masp) file as JSON.
@@ -13,10 +13,16 @@ struct Args {
     masp_path: PathBuf,
 }
 
-#[derive(Serialize, Deserialize)]
-struct PackageMetadata {
+#[derive(Serialize)]
+struct PackageMetadata<'a> {
     digest: String,
-    manifest: PackageManifest,
+    manifest: ManifestMetadata<'a>,
+}
+
+#[derive(Serialize)]
+struct ManifestMetadata<'a> {
+    exports: Vec<&'a PackageExport>,
+    dependencies: Vec<&'a Dependency>,
 }
 
 fn main() -> Result<()> {
@@ -34,7 +40,10 @@ fn main() -> Result<()> {
 
     let metadata = PackageMetadata {
         digest: package.mast.digest().to_hex(),
-        manifest: package.manifest,
+        manifest: ManifestMetadata {
+            exports: package.manifest.exports().collect(),
+            dependencies: package.manifest.dependencies().collect(),
+        },
     };
 
     println!("{}", serde_json::to_string(&metadata)?);

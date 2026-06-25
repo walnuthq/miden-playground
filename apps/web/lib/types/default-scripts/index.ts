@@ -2,7 +2,7 @@ import authSingleSig from "@/lib/types/default-scripts/auth-single-sig";
 import authMultisigGuardian from "@/lib/types/default-scripts/auth-multisig-guardian";
 import authNoAuth from "@/lib/types/default-scripts/auth-no-auth";
 import base from "@/lib/types/default-scripts/base";
-import basicFungibleFaucet from "@/lib/types/default-scripts/basic-fungible-faucet";
+import fungibleFaucet from "@/lib/types/default-scripts/fungible-faucet";
 import basicWallet from "@/lib/types/default-scripts/basic-wallet";
 import counterContract from "@/lib/types/default-scripts/counter-contract";
 import p2id from "@/lib/types/default-scripts/p2id";
@@ -14,7 +14,7 @@ const defaultScripts = [
   authMultisigGuardian,
   authNoAuth,
   base,
-  basicFungibleFaucet,
+  fungibleFaucet,
   basicWallet,
   counterContract,
   p2id,

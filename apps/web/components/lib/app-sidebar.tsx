@@ -96,6 +96,7 @@ const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
       url: "/notes",
       icon: <ReceiptText />,
       items: inputNotes
+        .filter(({ id }) => id !== "")
         .sort((a, b) => b.updatedAt - a.updatedAt)
         .slice(0, 5)
         .map(({ id }) => ({
