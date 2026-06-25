@@ -159,14 +159,14 @@ const p2id: Script = {
   readOnly: true,
   rust,
   masm,
-  digest: "0x28bec4edb41a93f2abd3977cafcb4f3a1de8cbb353671e7fda021f41f145f732",
+  digest: "0xf08ea78d8d0570b219a40bfc5652c1de5adb2dfdc7ab034622dedae7837ac8ac",
   dependencies: [pick(basicWallet, "id", "name", "type", "digest")],
   procedureExports: [
     {
       ...defaultProcedureExport(),
       path: "::miden::standards::notes::p2id::run",
       digest:
-        "0x28bec4edb41a93f2abd3977cafcb4f3a1de8cbb353671e7fda021f41f145f732",
+        "0xf08ea78d8d0570b219a40bfc5652c1de5adb2dfdc7ab034622dedae7837ac8ac",
     },
   ],
 };

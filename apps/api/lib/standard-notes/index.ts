@@ -2,6 +2,7 @@ import type { Package } from "@/lib/types";
 import p2id from "@/lib/standard-notes/p2id";
 import p2ide from "@/lib/standard-notes/p2ide";
 import swap from "@/lib/standard-notes/swap";
+import pswap from "@/lib/standard-notes/pswap";
 import mint from "@/lib/standard-notes/mint";
 import burn from "@/lib/standard-notes/burn";
 
@@ -15,6 +16,9 @@ export const getStandardNoteScript = (noteScript: string): Package | null => {
     }
     case "SWAP": {
       return swap;
+    }
+    case "PSWAP": {
+      return pswap;
     }
     case "MINT": {
       return mint;

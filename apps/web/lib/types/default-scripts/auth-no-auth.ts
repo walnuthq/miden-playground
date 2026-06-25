@@ -86,13 +86,13 @@ const authNoAuth: Script = {
   readOnly: true,
   rust,
   masm,
-  digest: "0xdcc744a24dfa37ae9c7826267102a0fa7a081c28d2e1bfbd3784cbc6a7f0fa0e",
+  digest: "0xd8df6042008eb01d7cde34332c8d46a6d89a3534827874e5c6746af46dac8639",
   procedureExports: [
     {
       ...defaultProcedureExport(),
       path: "::miden::standards::components::auth::no_auth::auth_no_auth",
       digest:
-        "0xd5dbddf4f755c4b7787de8df59da61dc15d4c1bef45541e8c043e11345703ef1",
+        "0x398fcf4e22884a9415f46bf84f9e2893a311944e32c83e50b2ce0ca3972149bb",
     },
   ],
 };

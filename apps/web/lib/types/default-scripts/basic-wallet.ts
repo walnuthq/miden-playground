@@ -59,19 +59,19 @@ const basicWallet: Script = {
   readOnly: true,
   rust,
   masm,
-  digest: "0x284a73415341ff23381565be111550bc1c4f5c94cceec109f473a3dbf19ee030",
+  digest: "0x2d3dd7b37c470013f64bb7dce356cea29471f10fa35f04405452c0c59f53dc20",
   procedureExports: [
     {
       ...defaultProcedureExport(),
       path: "::miden::standards::components::wallets::basic_wallet::move_asset_to_note",
       digest:
-        "0x6d30df4312a2c44ec842db1bee227cc045396ca91e2c47d756dcb607f2bf5f89",
+        "0xfb1c73d10de1954e9e8948964e3e77cf4e33759d2e012cb00eb10c50f2974eb4",
     },
     {
       ...defaultProcedureExport(),
       path: "::miden::standards::components::wallets::basic_wallet::receive_asset",
       digest:
-        "0x75f638c65584d058542bcf4674b066ae394183021bc9b44dc2fdd97d52f9bcfb",
+        "0x6170fd6d682d91777b551fd866258f43cc657f1291f8f071500f4e56e9c153da",
     },
   ],
 };

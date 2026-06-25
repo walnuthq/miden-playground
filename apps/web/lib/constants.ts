@@ -9,15 +9,23 @@ export const EMPTY_WORD =
 export const FUNGIBLE_FAUCET_DEFAULT_DECIMALS = 6;
 export const FUNGIBLE_FAUCET_DEFAULT_MAX_SUPPLY = 100_000_000_000n;
 export const FUNGIBLE_FAUCET_CODE =
-  "0xa40162aa502c0759dfabb341f0244d7e9aa1f7e04400a06c4c1f6314ed57289e";
+  "0x33919b5e023653c50ee83293e71d77f4e687b2d128d7ec5b5c7dfc5918a8da2b";
 
 export const P2ID_NOTE_CODE =
-  "0x28bec4edb41a93f2abd3977cafcb4f3a1de8cbb353671e7fda021f41f145f732";
+  "0xf08ea78d8d0570b219a40bfc5652c1de5adb2dfdc7ab034622dedae7837ac8ac";
 export const P2IDE_NOTE_CODE =
-  "0xe32225e1fc4aa2b531e400922ef0f57349cefe195c5f74c7f736dad2aba02875";
+  "0x512ebb716b6664fc054dc22c83708f50d92d75da1159752f5cf3a0e81594a1da";
+export const SWAP_NOTE_CODE =
+  "0xb3b028d3e69dbf308f780d32ae3980ac28568289903e8f91db47de5b9e01094e";
+export const PSWAP_NOTE_CODE =
+  "0x55db5f113de3657bcc944401f85eadd270a67f58963507684c7f648a2ba9567a";
+export const MINT_NOTE_CODE =
+  "0xdc4dcae6fb3adfa8ecde42762d990c600a730b52afdde400aebf49ae2d7deee2";
+export const BURN_NOTE_CODE =
+  "0x861d8e08672e928179e1aedb1e4ec09bff641ed457025123ffb01d502f5deaeb";
 
 export const BASIC_WALLET_CODE =
-  "0x0bad1f4a00c7989a3b54f4fcbca767b9f724c7f251ed13a4c1785e2b1a0220bf";
+  "0x0fcb1b772bfa8087b382175c545972b2fe54091e5f820321337d4d1110929773";
 
 export const GUARDIAN_WALLET_CODE =
   "0x31cffd84377197f286187f0babd8496848c6711e891db24827ed4102f9f50f57";
@@ -37,7 +45,8 @@ export const DEVNET_FAUCET_API_URL =
   "https://faucet-api-devnet-miden.eu-central-8.gateway.fm";
 export const TESTNET_FAUCET_ACCOUNT_ID = "0x2458e5446128e6b150b75b8ebd9ce1";
 export const DEVNET_FAUCET_ACCOUNT_ID = "0x16f6c85d5652c9200879145bfdda93";
-export const TESTNET_FAUCET_ADDRESS = "mtst1aqj93e2yvy5wdv2skadca0vuuypfnp80";
+export const TESTNET_FAUCET_ADDRESS =
+  "mtst1aqj93e2yvy5wdv2skadca0vuuypfnp80_qr7qqq9wr6w";
 export const DEVNET_FAUCET_ADDRESS =
   "mdev1aqt0djza2efvjgqg0y29hlw6jvn93r0a_qr7qqq9wr6w";
 

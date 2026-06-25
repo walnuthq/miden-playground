@@ -440,7 +440,8 @@ export const wasmAccountToAccount = ({
     account.maxSupply = basicFungibleFaucetComponent.maxSupply().toString();
     const metadata = getItem(
       account.storage.find(
-        ({ name }) => name === "miden::standards::fungible_faucets::metadata",
+        ({ name }) =>
+          name === "miden::standards::faucets::fungible::token_config",
       ),
     );
     const [totalSupply = 0n] = WasmWord.fromHex(metadata).toU64s();

@@ -4,50 +4,19 @@ import {
   defaultProcedureExport,
 } from "@/lib/types";
 
-const masm = `# The MASM code of the Multi-Signature Authentication Component.
-#
-# See the \`AuthMultisig\` Rust type's documentation for more details.
-
-use miden::standards::auth::multisig
-
-pub use multisig::update_signers_and_threshold
-pub use multisig::get_threshold_and_num_approvers
-pub use multisig::set_procedure_threshold
-pub use multisig::get_signer_at
-pub use multisig::is_signer
-
-#! Authenticate a transaction with multi-signature support.
-#!
-#! Inputs:
-#!   Operand stack: [SALT]
-#! Outputs:
-#!   Operand stack: []
-#!
-#! Invocation: call
-@auth_script
-pub proc auth_tx_multisig(salt: word)
-    exec.multisig::auth_tx
-    # => [TX_SUMMARY_COMMITMENT]
-
-    exec.multisig::assert_new_tx
-    # => []
-end
-`;
-
-const authFalcon512RpoMultisig: Package = {
+const authMultisig: Package = {
   ...defaultPackage(),
   id: "auth-multisig",
   name: "auth-multisig",
   type: "authentication-component",
-  masm,
-  digest: "0xe87e60785d676aff840291889154aefe8d92d36d286532977e347fc979b80228",
+  digest: "0x0228b1242302f083a719fe19af06157ddbb7eb86b0954aa4d480c0b98b03ba7d",
   exports: [
     {
       Procedure: {
         ...defaultProcedureExport(),
         path: "::miden::standards::components::auth::multisig::auth_tx_multisig",
         digest:
-          "0xe9a69d090ea79ba0fc701c31ad92b54e9b289145fc73371bf7295c14b0d3b534",
+          "0x21cda5a00e54eca03447294a170f851f5149ed1bb64b9399e7569549020843ef",
       },
     },
     {
@@ -55,7 +24,7 @@ const authFalcon512RpoMultisig: Package = {
         ...defaultProcedureExport(),
         path: "::miden::standards::components::auth::multisig::get_signer_at",
         digest:
-          "0xdc955105bbe228cc5d3f8cbf93c74d847e561eb7c60c375cab8b85c7d2dc8b29",
+          "0xbb761f23b6433c4ff9f4f5be9998dd9ad145034b9748587b10ae84f9cd83165d",
       },
     },
     {
@@ -63,7 +32,7 @@ const authFalcon512RpoMultisig: Package = {
         ...defaultProcedureExport(),
         path: "::miden::standards::components::auth::multisig::get_threshold_and_num_approvers",
         digest:
-          "0xb5bcd43226fefdb86b534c957619bdfb5d7797b46a2657e6f22040673bbb17fa",
+          "0x4d55155362471cdfe1d29f14c7780e9fad10c1154c44b3ee438d5b64f0f54401",
       },
     },
     {
@@ -71,7 +40,7 @@ const authFalcon512RpoMultisig: Package = {
         ...defaultProcedureExport(),
         path: "::miden::standards::components::auth::multisig::is_signer",
         digest:
-          "0x6d7f79a7f141410d51dd39c735e1018053265b411f3929739a41cf62b6de8214",
+          "0xba3f0c8869d4cab08df131d6135a5285714a078bfb440c16eef18db5dba0e49c",
       },
     },
     {
@@ -79,7 +48,7 @@ const authFalcon512RpoMultisig: Package = {
         ...defaultProcedureExport(),
         path: "::miden::standards::components::auth::multisig::set_procedure_threshold",
         digest:
-          "0x08628d16e56ab3aa096d9c43ffda164a8a10d1a78e1b51dc955fde2e01653634",
+          "0x9bee1ea89c844874d7f3c63bba52b277a429679028dc3a4e27c54db6cf4f158d",
       },
     },
     {
@@ -87,10 +56,10 @@ const authFalcon512RpoMultisig: Package = {
         ...defaultProcedureExport(),
         path: "::miden::standards::components::auth::multisig::update_signers_and_threshold",
         digest:
-          "0x2002aa8d26cd747655342132dc0881c2a4e71aa5572ea634ebc6e13836bc508f",
+          "0xe60215c664714037ad08811093b3685a6ace65c78351263473298cce9c7600e3",
       },
     },
   ],
 };
 
-export default authFalcon512RpoMultisig;
+export default authMultisig;

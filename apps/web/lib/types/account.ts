@@ -11,6 +11,11 @@ export const accountStorageModes = {
 
 export type AccountStorageMode = keyof typeof accountStorageModes;
 
+export enum AuthScheme {
+  AuthEcdsaK256Keccak = 1,
+  AuthRpoFalcon512 = 2,
+}
+
 export type StorageItem = {
   name: string;
   type: "value" | "map";
