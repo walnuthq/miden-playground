@@ -19,9 +19,9 @@
   "dependencies": {
     "@mdx-js/loader": "3.1.1",
     "@mdx-js/react": "3.1.1",
-    "@miden-sdk/miden-sdk": "0.15.2",
+    "@miden-sdk/miden-sdk": "0.15.3",
     "@miden-sdk/miden-wallet-adapter": "0.15.1",
-    "@miden-sdk/react": "0.15.2",
+    "@miden-sdk/react": "0.15.3",
     "@monaco-editor/react": "4.7.0",
     "@next/mdx": "16.2.9",
     "@opennextjs/cloudflare": "1.19.11",

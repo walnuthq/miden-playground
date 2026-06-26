@@ -54,7 +54,7 @@ use miden::protocol::native_account
 use miden::core::word
 use miden::core::sys
 
-const COUNTER_SLOT = word("miden_counter_contract::count_map")
+const COUNTER_SLOT = word("miden_counter_contract::counter_contract::count_map")
 
 #! Inputs:  []
 #! Outputs: [count]

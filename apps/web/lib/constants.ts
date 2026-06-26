@@ -51,31 +51,31 @@ export const DEVNET_FAUCET_ADDRESS =
   "mdev1aqt0djza2efvjgqg0y29hlw6jvn93r0a_qr7qqq9wr6w";
 
 export const TESTNET_TEST_WALLET_ACCOUNT_ID =
-  "0x99d6740616be36105b9eadecefdb67";
+  "0xbd9ff94dabdb72b13b2f3e099dc721";
 export const DEVNET_TEST_WALLET_ACCOUNT_ID = "0x09530c96f7d1e910418ef59b902e78";
-export const TESTNET_TEST_WALLET_ACCOUNT_ID_PREFIX = 11085175102319244816n;
+export const TESTNET_TEST_WALLET_ACCOUNT_ID_PREFIX = 13663913906456457905n;
 export const DEVNET_TEST_WALLET_ACCOUNT_ID_PREFIX = 671894611950692624n;
-export const TESTNET_TEST_WALLET_ACCOUNT_ID_SUFFIX = 6601905336919746304n;
+export const TESTNET_TEST_WALLET_ACCOUNT_ID_SUFFIX = 4264695583165849856n;
 export const DEVNET_TEST_WALLET_ACCOUNT_ID_SUFFIX = 4723983107645929472n;
 export const TESTNET_TEST_WALLET_ADDRESS =
-  "mtst1azvavaqxz6lrvyzmn6k7em7mvuzlf0vl_qr7qqq9wr6w";
+  "mtst1az7el72d40dh9vfm9ulqn8w8yycr4h99_qr7qqq9wr6w";
 export const DEVNET_TEST_WALLET_ADDRESS =
   "mdev1aqy4xryk7lg7jyzp3m6ehypw0q7frd3g_qr7qqq9wr6w";
 
 export const TESTNET_COUNTER_CONTRACT_ACCOUNT_ID =
-  "0xf46483e37a0e13006ade581295aed5";
+  "0xace6bb1c6d84a5513bb8c3f6043e47";
 export const DEVNET_COUNTER_CONTRACT_ACCOUNT_ID =
   "0x67e2f741c3ce5c00551578346e06e2";
 export const TESTNET_COUNTER_CONTRACT_ADDRESS =
-  "mtst1ar6xfqlr0g8pxqr2mevp99dw65ukvm3j_qr7qqq9wr6w";
+  "mtst1azkwdwcudkz225fmhrplvpp7guj9nkkx_qr7qqq9wr6w";
 export const DEVNET_COUNTER_CONTRACT_ADDRESS =
   "mdev1apn79a6pc089cqz4z4urgmsxugy0krfv_qr7qqq9wr6w";
 export const COUNTER_CONTRACT_GET_COUNT_PROC_HASH =
-  "0xcc2d9b042278ba027b18d5aaef4b886ad76ce9bf3f94746811f1c731ab5c5983";
+  "0xefa7f78f54acf12062d5c8f1a897c7db26610fa1fc00ec6c49a0640032f232cb";
 export const COUNTER_CONTRACT_INCREMENT_COUNT_PROC_HASH =
-  "0x4bac397fc077a1bc17c8fd6f911419ee095d649cea4218fde7b5c085dc1bc0de";
+  "0x092911b20cdff16bc2d068b56f0b69756cd1c9c374c261c8c3de9a0cc262512e";
 export const COUNT_READER_COPY_COUNT_PROC_HASH =
-  "0xe37ab919bc9af46da35dc6c55ac68d5009756a2c6f517f4bb6a575d9067af4ed";
+  "0xf1a7cbd731dfc8263447e5ee01f06fb9835fec8a92c0385319cd92e7e4114f4a";
 
 export const midenExplorerUrl = (networkId: NetworkId) =>
   networkId === "mtst" ? TESTNET_EXPLORER_URL : DEVNET_EXPLORER_URL;

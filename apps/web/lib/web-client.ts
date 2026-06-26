@@ -100,20 +100,28 @@ export const clientGetAllInputNotes = async ({
   });
 };
 
-export const clientGetAccounts = async ({
+export const clientGetAccounts = ({
   client,
   accountIds,
 }: {
   client: WebClientType;
   accountIds: string[];
-}) => {
-  const wasmAccounts = await Promise.all(
-    accountIds.map((accountId) =>
-      client.getAccount(WasmAccountId.fromHex(accountId)),
-    ),
+}) =>
+  Promise.all(
+    accountIds.map(async (accountId) => {
+      let wasmAccount = await client.getAccount(
+        WasmAccountId.fromHex(accountId),
+      );
+      if (!wasmAccount) {
+        await client.importAccountById(WasmAccountId.fromHex(accountId));
+        wasmAccount = await client.getAccount(WasmAccountId.fromHex(accountId));
+        if (!wasmAccount) {
+          throw new Error("Account not found");
+        }
+      }
+      return wasmAccount;
+    }),
   );
-  return wasmAccounts.filter((wasmAccount) => wasmAccount !== undefined);
-};
 
 export const clientGetAllTransactions = (client: WebClientType) =>
   client.getTransactions(WasmTransactionFilter.all());
@@ -160,11 +168,11 @@ export const clientDeployAccount = async ({
           WasmPackage.deserialize(fromBase64(script.masp)),
           new WasmMidenArrays.StorageSlotArray(storageSlots),
         );
-    // const procedures = accountComponent.getProcedures();
-    // for (const procedure of procedures) {
-    //   console.log(script.id);
-    //   console.log(procedure.digest.toHex());
-    // }
+    const procedures = accountComponent.getProcedures();
+    for (const procedure of procedures) {
+      console.log(script.id);
+      console.log(procedure.digest.toHex());
+    }
     // if (script.id === "auth-no-auth") {
     // console.log(script.id);
     // console.log("get_count", accountComponent.getProcedureHash("get_count"));
@@ -625,5 +633,14 @@ export const wasmStorageSlotFromStorageSlot = (storageSlot: StorageSlot) => {
       );
     }
     return WasmStorageSlot.map(storageSlot.name, storageMap);
+  }
+};
+
+export const wasmWordFromHex = (value: string) => {
+  try {
+    return WasmWord.fromHex(value).toU64s();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (error) {
+    return new BigUint64Array([0n, 0n, 0n, 0n]);
   }
 };

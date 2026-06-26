@@ -8,7 +8,6 @@ import type {
 import { basicWalletDependency } from "@/lib/default-dependencies";
 import { templates } from "@/lib/templates";
 import { createPackage } from "@/lib/utils";
-// import { API_COMPILE_URL } from "@/lib/constants";
 
 type CreateScriptRequestBody = {
   name: string;
@@ -34,14 +33,6 @@ export const POST = async (request: NextRequest) => {
     const body = await request.json();
     const { name, type, example } = body as CreateScriptRequestBody;
     const rust = templates[example === "none" ? type : example];
-    // const response = await fetch(`${API_COMPILE_URL}/compile`, {
-    //   method: "POST",
-    //   headers: { "Content-Type": "application/json" },
-    //   body: JSON.stringify({
-    //     files,
-    //     entrypoint: name,
-    //   }),
-    // });
     const packageId = await createPackage({
       name,
       type,
