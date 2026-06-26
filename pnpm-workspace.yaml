@@ -8,8 +8,11 @@ allowBuilds:
   workerd: true
 
 minimumReleaseAgeExclude:
-  - '@openzeppelin/guardian-client@0.15.0'
-  - '@openzeppelin/miden-multisig-client@0.15.0'
+  - '@miden-sdk/miden-sdk@0.15.3'
+  - '@miden-sdk/node-darwin-arm64@0.15.3'
+  - '@miden-sdk/node-darwin-x64@0.15.3'
+  - '@miden-sdk/node-linux-x64-gnu@0.15.3'
+  - '@miden-sdk/react@0.15.3'
 
 overrides:
-  "@miden-sdk/miden-sdk": "0.15.2"
+  "@miden-sdk/miden-sdk": "0.15.3"

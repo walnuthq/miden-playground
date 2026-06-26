@@ -10,7 +10,8 @@ import Step5 from "@/components/tutorials/timelock-p2id-note/step5";
 const tutorial: Tutorial = {
   ...defaultTutorial(),
   id: "timelock-p2id-note",
-  number: 8,
+  // number: 8,
+  number: 5,
   title: "Timelock P2ID note",
   tagline: "Create your own custom time locked P2ID note.",
   description:

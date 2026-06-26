@@ -14,8 +14,8 @@ Miden Playground is brought to you by [Walnut](https://www.walnut.dev).
 
 The app requires the following dependencies:
 
-- [NodeJS](https://nodejs.org/) >= 22
-- [pnpm](https://pnpm.io/fr/) >= 10
+- [NodeJS](https://nodejs.org/) >= 24
+- [pnpm](https://pnpm.io/) >= 11
 
 ## 👩‍💻 Local Development
 

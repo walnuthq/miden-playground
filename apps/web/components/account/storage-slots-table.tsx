@@ -17,9 +17,10 @@ import { Button } from "@workspace/ui/components/button";
 import { type StorageSlot, storageSlotTypes } from "@/lib/types/component";
 import type { StorageItem } from "@/lib/types/account";
 import { getItem } from "@/lib/utils/account";
+import { wasmWordFromHex } from "@/lib/web-client";
 
 const StorageSlotValueTooltip = ({ value }: { value: string }) => {
-  const feltArray = WasmWord.fromHex(value).toU64s();
+  const feltArray = wasmWordFromHex(value);
   const [first = 0n] = feltArray.filter((felt) => felt !== 0n);
   return (
     <Tooltip>
