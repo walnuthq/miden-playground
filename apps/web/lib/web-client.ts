@@ -101,28 +101,32 @@ export const clientGetAllInputNotes = async ({
   });
 };
 
-export const clientGetAccounts = ({
+export const clientGetAccounts = async ({
   client,
   accountIds,
 }: {
   client: WebClientType;
   accountIds: string[];
-}) =>
-  Promise.all(
+}) => {
+  const accounts = await Promise.all(
     accountIds.map(async (accountId) => {
       let wasmAccount = await client.getAccount(
         WasmAccountId.fromHex(accountId),
       );
       if (!wasmAccount) {
-        await client.importAccountById(WasmAccountId.fromHex(accountId));
-        wasmAccount = await client.getAccount(WasmAccountId.fromHex(accountId));
-        if (!wasmAccount) {
-          throw new Error("Account not found");
+        try {
+          await client.importAccountById(WasmAccountId.fromHex(accountId));
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (error) {
+          return undefined;
         }
+        wasmAccount = await client.getAccount(WasmAccountId.fromHex(accountId));
       }
       return wasmAccount;
     }),
   );
+  return accounts.filter((account) => account !== undefined);
+};
 
 export const clientGetAllTransactions = (client: WebClientType) =>
   client.getTransactions(WasmTransactionFilter.all());
