@@ -23,7 +23,7 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "4.3.1",
+    "@tailwindcss/postcss": "4.3.2",
     "@turbo/gen": "2.10.0",
     "@types/node": "24.13.2",
     "@types/react": "19.2.17",
@@ -31,7 +31,7 @@
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
     "eslint": "9.39.4",
-    "tailwindcss": "4.3.1",
+    "tailwindcss": "4.3.2",
     "typescript": "6.0.3"
   },
   "exports": {
