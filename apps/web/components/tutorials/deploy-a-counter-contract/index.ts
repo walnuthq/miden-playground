@@ -12,8 +12,7 @@ import Step7 from "@/components/tutorials/deploy-a-counter-contract/step7";
 const tutorial: Tutorial = {
   ...defaultTutorial(),
   id: "deploy-a-counter-contract",
-  // number: 7,
-  number: 4,
+  number: 6,
   title: "Deploy a Counter Contract",
   tagline: "Deploy your own Counter Contract on testnet.",
   description:

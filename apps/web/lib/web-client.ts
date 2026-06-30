@@ -11,6 +11,7 @@ import {
   AccountStorageMode as WasmAccountStorageMode,
   AccountBuilder as WasmAccountBuilder,
   AccountComponent as WasmAccountComponent,
+  // Address as WasmAddress,
   Note as WasmNote,
   Word as WasmWord,
   BasicFungibleFaucetComponent as WasmBasicFungibleFaucetComponent,
@@ -62,7 +63,7 @@ import type { Script } from "@/lib/types/script";
 import { defaultProcedureExport } from "@/lib/utils/script";
 import type { StorageSlot, Component } from "@/lib/types/component";
 import defaultScripts from "@/lib/types/default-scripts";
-import { fromBase64, toBase64 } from "@/lib/utils";
+import { fromBase64, toBase64, waitUntil } from "@/lib/utils";
 
 export const clientGetConsumableNotes = ({
   client,
@@ -291,17 +292,21 @@ export const clientCreateNoteFromScript = async ({
 
 export const clientImportNoteFile = async ({
   client,
+  noteId,
   noteFileBytes,
   scripts,
 }: {
   client: WebClientType;
+  noteId: string;
   noteFileBytes: Uint8Array;
   scripts: Script[];
 }) => {
-  const noteId = await client.importNoteFile(
-    WasmNoteFile.deserialize(noteFileBytes),
-  );
-  const record = await client.getInputNote(noteId.toString());
+  await client.importNoteFile(WasmNoteFile.deserialize(noteFileBytes));
+  await waitUntil(async () => {
+    const record = await client.getInputNote(noteId);
+    return !!record;
+  });
+  const record = await client.getInputNote(noteId);
   if (!record) {
     throw new Error("Note not found");
   }
@@ -342,15 +347,15 @@ export const clientExportInputNoteFile = async ({
   }
 };
 
-// export const clientSendPrivateNote = async ({
+// export const clientSendPrivateNote = ({
 //   client,
+//   note,
 //   address,
-//   midenSdk: { Address },
 // }: {
 //   client: WebClientType;
+//   note: WasmNote;
 //   address: string;
-//   midenSdk: MidenSdk;
-// }) => client.sendPrivateNote(note, Address.fromBech32(address));
+// }) => client.sendPrivateNote(note, WasmAddress.fromBech32(address));
 
 export const storageMode = (accountId: WasmAccountIdType) =>
   accountId.isPublic() ? "public" : "private";
@@ -458,12 +463,12 @@ export const wasmAccountToAccount = ({
   return account;
 };
 
-const noteType = (metadata?: WasmNoteMetadataType) => {
+const noteType = (metadata: WasmNoteMetadataType) => {
   const wasmNoteTypes = {
     [WasmNoteType.Public]: "public",
     [WasmNoteType.Private]: "private",
   } as const;
-  return metadata ? wasmNoteTypes[metadata.noteType()] : "public";
+  return wasmNoteTypes[metadata.noteType()];
 };
 
 const noteState = (state: WasmInputNoteStateType) => {
@@ -511,15 +516,24 @@ export const wasmInputNoteToInputNote = ({
   noteFileBytes?: Uint8Array;
   updatedAt?: number | null;
 }): InputNote => {
+  const metadata = record.metadata();
   const scriptRoot = record.details().recipient().script().root().toHex();
   const script = verifyStandardNotes({ scriptRoot, scripts });
   return {
     id: record.id()?.toString() ?? "",
-    type: noteType(record.metadata()),
+    type: previousInputNote
+      ? previousInputNote.type
+      : metadata
+        ? noteType(metadata)
+        : "public",
     state: noteState(record.state()),
-    tag: record.metadata()?.tag().asU32().toString() ?? "",
+    tag: previousInputNote
+      ? previousInputNote.tag
+      : (record.metadata()?.tag().asU32().toString() ?? ""),
     serialNum: record.details().recipient().serialNum().toHex(),
-    senderId: record.metadata()?.sender().toString() ?? "",
+    senderId: previousInputNote
+      ? previousInputNote.senderId
+      : (record.metadata()?.sender().toString() ?? ""),
     scriptRoot,
     scriptId: previousInputNote
       ? previousInputNote.scriptId

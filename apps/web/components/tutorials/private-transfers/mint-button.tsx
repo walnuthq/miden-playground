@@ -67,7 +67,7 @@ const MintButton = () => {
           backendUrl: midenFaucetApiUrl(networkId),
           noteId,
         });
-        await importNoteFromFile(noteFileBytes);
+        await importNoteFromFile({ noteId, noteFileBytes });
         // const noteFileBlob = new Blob([noteFileBytes], {
         //   type: "application/octet-stream",
         // });

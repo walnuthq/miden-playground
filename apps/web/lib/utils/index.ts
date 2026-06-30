@@ -3,6 +3,17 @@ import { validate, version } from "uuid";
 export const sleep = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
+export const waitUntil = (predicate: () => Promise<boolean>, ms = 1000) =>
+  new Promise((resolve) => {
+    const id = setInterval(async () => {
+      const result = await predicate();
+      if (result) {
+        clearInterval(id);
+        resolve(result);
+      }
+    }, ms);
+  });
+
 export const formatId = (id: string) => `${id.slice(0, 10)}…${id.slice(-8)}`;
 
 export const formatValue = (value: string) =>
