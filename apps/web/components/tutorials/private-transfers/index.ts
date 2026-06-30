@@ -12,7 +12,7 @@ import Step6 from "@/components/tutorials/private-transfers/step6";
 const tutorial: Tutorial = {
   ...defaultTutorial(),
   id: "private-transfers",
-  number: 4,
+  number: 3,
   title: "Private transfers",
   tagline: "Learn how to perform privacy preserving transfers on Miden.",
   description:

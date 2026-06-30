@@ -13,7 +13,7 @@ import Step7 from "@/components/tutorials/wallet-backup-using-miden-guardian/ste
 const tutorial: Tutorial = {
   ...defaultTutorial(),
   id: "wallet-backup-using-miden-guardian",
-  number: 5,
+  number: 4,
   title: "Wallet backup using Miden Guardian",
   tagline: "Backup your wallet using a Guardian.",
   description:

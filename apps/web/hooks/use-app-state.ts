@@ -173,16 +173,18 @@ const syncInputNotes = ({
   updatedAt: number | null;
   connectedWallet?: Account;
 }) => {
-  const inputNotes = wasmInputNoteRecords.map((wasmInputNoteRecord) =>
-    wasmInputNoteToInputNote({
-      record: wasmInputNoteRecord,
-      previousInputNote: previousInputNotes.find(
-        ({ id }) => id === wasmInputNoteRecord.id()?.toString(),
-      ),
-      scripts,
-      updatedAt,
-    }),
-  );
+  const inputNotes = wasmInputNoteRecords
+    .map((wasmInputNoteRecord) =>
+      wasmInputNoteToInputNote({
+        record: wasmInputNoteRecord,
+        previousInputNote: previousInputNotes.find(
+          ({ id }) => id === wasmInputNoteRecord.id()?.toString(),
+        ),
+        scripts,
+        updatedAt,
+      }),
+    )
+    .filter(({ id }) => id !== "");
   const connectedWalletP2IDNotes = previousInputNotes.filter(
     ({ scriptRoot, storage }) => {
       const [suffix = "", prefix = ""] = storage;

@@ -43,7 +43,7 @@ const ImportNoteDialog = () => {
           onSubmit={async (event) => {
             event.preventDefault();
             setLoading(true);
-            await importNoteFromFile(noteFileBytes);
+            await importNoteFromFile({ noteId: "", noteFileBytes });
             setLoading(false);
             closeImportNoteDialog();
           }}

@@ -143,12 +143,19 @@ const useNotes = () => {
     });
     console.log({ txId });
   };
-  const importNoteFromFile = async (noteFileBytes: Uint8Array) => {
+  const importNoteFromFile = async ({
+    noteId,
+    noteFileBytes,
+  }: {
+    noteId: string;
+    noteFileBytes: Uint8Array;
+  }) => {
     if (!client) {
       throw new Error("MidenClient not ready");
     }
     const inputNote = await clientImportNoteFile({
       client,
+      noteId,
       noteFileBytes,
       scripts,
     });

@@ -17,6 +17,7 @@ import {
 } from "@/lib/miden-faucet";
 import useNotes from "@/hooks/use-notes";
 import { useMiden } from "@miden-sdk/react/lazy";
+import { sleep } from "@/lib/utils";
 
 // const downloadBlob = (blob: Blob, fileName: string) => {
 //   const url = URL.createObjectURL(blob);
@@ -67,7 +68,8 @@ const MintButton = () => {
           backendUrl: midenFaucetApiUrl(networkId),
           noteId,
         });
-        await importNoteFromFile(noteFileBytes);
+        await sleep(15000);
+        await importNoteFromFile({ noteId, noteFileBytes });
         // const noteFileBlob = new Blob([noteFileBytes], {
         //   type: "application/octet-stream",
         // });

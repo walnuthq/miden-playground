@@ -291,17 +291,17 @@ export const clientCreateNoteFromScript = async ({
 
 export const clientImportNoteFile = async ({
   client,
+  noteId,
   noteFileBytes,
   scripts,
 }: {
   client: WebClientType;
+  noteId: string;
   noteFileBytes: Uint8Array;
   scripts: Script[];
 }) => {
-  const noteId = await client.importNoteFile(
-    WasmNoteFile.deserialize(noteFileBytes),
-  );
-  const record = await client.getInputNote(noteId.toString());
+  await client.importNoteFile(WasmNoteFile.deserialize(noteFileBytes));
+  const record = await client.getInputNote(noteId);
   if (!record) {
     throw new Error("Note not found");
   }
