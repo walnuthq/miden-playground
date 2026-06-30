@@ -11,7 +11,7 @@ import Step6 from "@/components/tutorials/interact-with-the-counter-contract/ste
 const tutorial: Tutorial = {
   ...defaultTutorial(),
   id: "interact-with-the-counter-contract",
-  number: 5,
+  number: 4,
   title: "Interact with the Counter Contract",
   tagline: "Increment the count of a Counter Contract on testnet.",
   description:
