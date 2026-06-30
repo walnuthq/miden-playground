@@ -11,7 +11,7 @@ import Step6 from "@/components/tutorials/foreign-procedure-invocation/step6";
 const tutorial: Tutorial = {
   ...defaultTutorial(),
   id: "foreign-procedure-invocation",
-  number: 7,
+  number: 8,
   title: "Foreign Procedure Invocation",
   tagline:
     "Using foreign procedure invocation to craft read-only cross-contract calls.",

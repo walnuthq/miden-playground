@@ -8,11 +8,13 @@ allowBuilds:
   workerd: true
 
 minimumReleaseAgeExclude:
-  - '@miden-sdk/miden-sdk@0.15.3'
-  - '@miden-sdk/node-darwin-arm64@0.15.3'
-  - '@miden-sdk/node-darwin-x64@0.15.3'
-  - '@miden-sdk/node-linux-x64-gnu@0.15.3'
-  - '@miden-sdk/react@0.15.3'
+  - "@miden-sdk/miden-sdk@0.15.3"
+  - "@miden-sdk/node-darwin-arm64@0.15.3"
+  - "@miden-sdk/node-darwin-x64@0.15.3"
+  - "@miden-sdk/node-linux-x64-gnu@0.15.3"
+  - "@miden-sdk/react@0.15.3"
+  - "@aws-sdk/signature-v4-multi-region@3.996.35"
 
 overrides:
   "@miden-sdk/miden-sdk": "0.15.3"
+  "@aws-sdk/signature-v4-multi-region": "3.996.35"
