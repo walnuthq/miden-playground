@@ -67,7 +67,7 @@ const Step2: TutorialStep = {
                 {
                   name: storageSlotName({
                     packageName: script?.name ?? "",
-                    componentStruct: "CounterContract",
+                    traitName: "CounterContract",
                     fieldName: "count_map",
                   }),
                   type: "map",

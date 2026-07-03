@@ -9,14 +9,13 @@ export const defaultStorageSlot = (): StorageSlot => ({
 
 export const storageSlotName = ({
   packageName,
-  componentStruct,
+  traitName,
   fieldName,
 }: {
   packageName: string;
-  componentStruct: string;
+  traitName: string;
   fieldName: string;
-}) =>
-  `miden_${snakeCase(packageName)}::${snakeCase(componentStruct)}::${fieldName}`;
+}) => `${snakeCase(packageName)}::${snakeCase(traitName)}::${fieldName}`;
 
 export const defaultComponent = (): Component => ({
   id: "",

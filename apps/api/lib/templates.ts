@@ -6,15 +6,14 @@ const readFile = (filePath: string) =>
 
 export const projectTemplateFiles = {
   ".cargo/config.toml": readFile("project-template/.cargo/config.toml"),
-  "miden-toolchain.toml": readFile("project-template/miden-toolchain.toml"),
   "rust-toolchain.toml": readFile("project-template/rust-toolchain.toml"),
 } as const;
 
 export const templates = {
   account: readFile("account.rs"),
   "authentication-component": readFile("authentication-component.rs"),
-  "note-script": readFile("note-script.rs"),
-  "transaction-script": readFile("transaction-script.rs"),
+  note: readFile("note.rs"),
+  "tx-script": readFile("tx-script.rs"),
   "counter-account": readFile("counter-account.rs"),
   "p2id-note": readFile("p2id-note.rs"),
   "counter-note": readFile("counter-note.rs"),

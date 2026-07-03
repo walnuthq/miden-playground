@@ -5,7 +5,7 @@ note created by the mint transaction.
 
 Each Note has a script that defines the conditions under which it can be consumed. Consumption of a Note can be restricted to certain accounts or entities. For example, the **P2ID (Pay-to-ID)** note script locks a note to a specific account ID, allowing only that account to spend it.
 
-Our [note storage](https://docs.miden.xyz/core-concepts/protocol/note#storage) constraint specifies that only our own wallet Account ID can consume the note and receive the embedded assets, which has been enforced during the note creation process by the faucet.
+Our [note storage](https://docs.miden.xyz/reference/protocol/note#storage) constraint specifies that only our own wallet Account ID can consume the note and receive the embedded assets, which has been enforced during the note creation process by the faucet.
 
 Note storage items are encoded as a [Felt](https://docs.miden.xyz/builder/glossary/#felt) array, the decoded note storage section shows our wallet Account ID, which must be decomposed in 2 separate Felts (prefix and suffix).
 

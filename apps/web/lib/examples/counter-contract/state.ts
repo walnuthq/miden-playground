@@ -18,7 +18,7 @@ const state: State = {
         {
           name: storageSlotName({
             packageName: "counter-account",
-            componentStruct: "CounterContract",
+            traitName: "CounterContract",
             fieldName: "count_map",
           }),
           type: "map",

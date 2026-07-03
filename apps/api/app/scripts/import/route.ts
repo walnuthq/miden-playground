@@ -6,7 +6,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import {
   execFile,
   safeRm,
-  parseCargoToml,
+  parseMidenProjectToml,
   compilePackage,
   createPackage,
 } from "@/lib/utils";
@@ -27,15 +27,16 @@ const importScriptsFromPackageSources = async (
   packageSources: Record<string, PackageSource>,
 ): Promise<CompiledPackage[]> => {
   const packagesWithDependencies = await Promise.all(
-    Object.values(packageSources).map(async ({ cargoToml, rust }) => {
+    Object.values(packageSources).map(async ({ midenProjectToml, rust }) => {
       const {
         package: {
           name,
           metadata: {
-            miden: { "project-kind": type, dependencies = {} },
+            miden: { dependencies = {} },
           },
         },
-      } = parseCargoToml(cargoToml);
+        lib: { kind: type },
+      } = parseMidenProjectToml(midenProjectToml);
       const packageId = await createPackage({
         name,
         type,
@@ -62,11 +63,11 @@ const importScriptsFromPackageSources = async (
                 return packageDir === dependencyDir;
               }) ?? "";
             const packageSource = packageSources[packagePath] ?? {
-              cargoToml: "",
+              midenProjectToml: "",
             };
             const {
               package: { name: dependencyName },
-            } = parseCargoToml(packageSource.cargoToml);
+            } = parseMidenProjectToml(packageSource.midenProjectToml);
             const dependencyPackage = packagesWithDependencies.find(
               ({ package: { name } }) => name === dependencyName,
             ) ?? { package: { id: "", name: "", type: "account", digest: "" } };
@@ -124,8 +125,10 @@ const fileListToPackageSources = async (fileList: FileList) => {
     const packageSource = packagesSourcesFilesWithContent.reduce<PackageSource>(
       (previousValue, { file, content }) => ({
         ...previousValue,
-        cargoToml:
-          file.name === "Cargo.toml" ? content : previousValue.cargoToml,
+        midenProjectToml:
+          file.name === "miden-project.toml"
+            ? content
+            : previousValue.midenProjectToml,
         rust:
           file.name === "lib.rs"
             ? content
@@ -144,7 +147,7 @@ const fileListToPackageSources = async (fileList: FileList) => {
                 )
             : previousValue.rust,
       }),
-      { cargoToml: "", rust: "" },
+      { midenProjectToml: "", rust: "" },
     );
     return { ...previousValue, [currentValue]: packageSource };
   }, {});

@@ -6,7 +6,7 @@ import Step1Content from "@/components/tutorials/wallet-backup-using-miden-guard
 
 const useCompleted = () => {
   const { connectedWallet } = useAccounts();
-  return connectedWallet?.isPublic;
+  return connectedWallet?.isPrivate;
 };
 
 const Step1: TutorialStep = {

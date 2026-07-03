@@ -11,7 +11,7 @@ const useCompleted = () => {
   const { connectedWallet } = useAccounts();
   const { scripts } = useScripts();
   const script = scripts.find(
-    ({ id, type }) => !defaultScriptIds.includes(id) && type === "note-script",
+    ({ id, type }) => !defaultScriptIds.includes(id) && type === "note",
   );
   const { inputNotes } = useNotes();
   const note = inputNotes.find(

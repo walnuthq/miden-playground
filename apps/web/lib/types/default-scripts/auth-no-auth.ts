@@ -12,14 +12,21 @@ export const rust = `// Do not link against libstd (i.e. anything defined in \`s
 // extern crate alloc;
 // use alloc::vec::Vec;
 
-use miden::{component, Word};
+use miden::{Word, component, component_storage};
+
+#[component_storage]
+struct AuthComponentStorage;
+
+/// API of the no-auth authentication component.
+#[component]
+trait AuthComponent {
+    #[auth_script]
+    fn auth_procedure(&mut self, _arg: Word);
+}
 
 #[component]
-struct AuthComponent;
-
-#[component]
-impl AuthComponent {
-    pub fn auth_procedure(&mut self, _arg: Word) {
+impl AuthComponent for AuthComponentStorage {
+    fn auth_procedure(&mut self, _arg: Word) {
         // translated from MASM at
         // https://github.com/0xMiden/miden-base/blob/e4912663276ab8eebb24b84d318417cb4ea0bba3/crates/miden-lib/asm/account_components/no_auth.masm?plain=1
         let init_comm = self.get_initial_commitment();

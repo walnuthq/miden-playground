@@ -11,7 +11,7 @@ const counterMapContract: Component = {
     {
       name: storageSlotName({
         packageName: "counter-contract",
-        componentStruct: "CounterContract",
+        traitName: "CounterContract",
         fieldName: "count_map",
       }),
       type: "map",

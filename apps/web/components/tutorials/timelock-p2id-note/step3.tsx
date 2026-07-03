@@ -8,7 +8,7 @@ import { defaultScriptIds } from "@/lib/types/default-scripts";
 const useCompleted = () => {
   const { scripts } = useScripts();
   const script = scripts.find(
-    ({ id, type }) => !defaultScriptIds.includes(id) && type === "note-script",
+    ({ id, type }) => !defaultScriptIds.includes(id) && type === "note",
   );
   const firstMatches = script?.rust.match(
     /let\s+timelock_height\s*=\s*storage\[2\];/,

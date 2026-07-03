@@ -2,9 +2,12 @@
 #![no_std]
 #![feature(alloc_error_handler)]
 
-use miden::{active_note, note, AccountId, Word};
+use miden::{account, active_note, note, AccountId, Word};
 
-use crate::bindings::Account;
+/// Native account of the note: exposes the `basic-wallet` component methods (e.g.
+/// `receive_asset`) gathered from the `basic_wallet` package.
+#[account(basic_wallet::BasicWallet)]
+pub struct Wallet;
 
 #[note]
 struct P2idNote {
@@ -14,7 +17,7 @@ struct P2idNote {
 #[note]
 impl P2idNote {
     #[note_script]
-    pub fn run(self, _arg: Word, account: &mut Account) {
+    fn run(self, _arg: Word, account: &mut Wallet) {
         let current_account = account.get_id();
         assert_eq!(current_account, self.target_account_id);
 
