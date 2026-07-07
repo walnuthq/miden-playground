@@ -5,6 +5,7 @@ import {
   fileExists,
   generateMidenProjectToml,
   safeRm,
+  hasWarningThenFinished,
 } from "@/lib/utils";
 import type { Export, Dependency, MidenProjectToml } from "@/lib/types";
 import { insertPackage, getDependencies } from "@/db/packages";
@@ -118,7 +119,7 @@ export const generatePackageDir = async ({
     writeFile(
       `${PACKAGES_PATH}/${packageDir}/miden-project.toml`,
       generateMidenProjectToml({
-        name: packageDir,
+        name,
         type,
         rust,
         dependencies: dependenciesPackages,
@@ -217,14 +218,25 @@ export const compilePackage = async ({
     //   },
     // );
     console.info("cargo miden build --release");
-    const { stdout } = await execFile(
+    const { stdout, stderr } = await execFile(
       "cargo",
       ["miden", "build", "--release"],
       {
         cwd: `${PACKAGES_PATH}/${packageDir}`,
-        env: { ...process.env, CARGO_TARGET_DIR: `${PACKAGES_PATH}/target` },
+        env: {
+          ...process.env,
+          CARGO_TARGET_DIR: `${PACKAGES_PATH}/target`,
+          MIDENC_TARGET_DIR: `${PACKAGES_PATH}/target/${packageDir}`,
+        },
       },
     );
+    if (
+      stdout === "" &&
+      stderr !== "" &&
+      !hasWarningThenFinished(stderr, name)
+    ) {
+      return { stdout: "", stderr };
+    }
     return { stdout, stderr: "" };
   } catch (error) {
     const { stderr } = error as { stderr: string };
@@ -259,13 +271,22 @@ const readPackageMetadata = async (maspPath: string) => {
   };
 };
 
-export const packagePath = (packageDir: string) => {
-  const packageName = packageDir.replaceAll("-", "_");
-  return `${PACKAGES_PATH}/target/miden/release/${packageName}.masp`;
-};
+export const packagePath = ({
+  packageDir,
+  name,
+}: {
+  packageDir: string;
+  name: string;
+}) => `${PACKAGES_PATH}/target/${packageDir}/release/${name}.masp`;
 
-export const readPackage = async (packageDir: string) => {
-  const maspPath = packagePath(packageDir);
+export const readPackage = async ({
+  packageDir,
+  name,
+}: {
+  packageDir: string;
+  name: string;
+}) => {
+  const maspPath = packagePath({ packageDir, name });
   const maspBuffer = await readFile(maspPath);
   const { digest, exports, dependencies } = await readPackageMetadata(maspPath);
   return {

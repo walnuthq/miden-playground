@@ -141,7 +141,7 @@ const useNotes = () => {
       type: TransactionType.Custom,
       payload: customTransaction,
     });
-    console.log({ txId });
+    console.info({ txId });
   };
   const importNoteFromFile = async ({
     noteId,

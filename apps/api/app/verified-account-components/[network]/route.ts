@@ -22,10 +22,10 @@ import {
   insertPackage,
   getReadOnlyPackage,
 } from "@/db/packages";
-import { PACKAGES_PATH, API_REGISTRY_URL } from "@/lib/constants";
-import { generateCargoToml, safeRm } from "@/lib/utils";
+import { PACKAGES_PATH /*, API_REGISTRY_URL*/ } from "@/lib/constants";
+import { /*generateCargoToml,*/ safeRm } from "@/lib/utils";
 import type { PackageSource } from "@/lib/types";
-import { projectTemplateFiles } from "@/lib/templates";
+//import { projectTemplateFiles } from "@/lib/templates";
 
 type VerifyAccountComponentRequestBody = {
   accountId: string;
@@ -66,7 +66,7 @@ const verifyAccountComponentFromSource = async ({
     await Promise.all([deletePackageDir(id), deletePackage(id)]);
     throw new Error("Error: Account Component compilation failed.");
   }
-  const { masp, digest, exports } = await readPackage(id);
+  const { masp, digest, exports } = await readPackage({ packageDir: id, name });
   await updatePackage({
     id,
     status: "compiled",
@@ -82,7 +82,7 @@ const verifyAccountComponentFromSource = async ({
     networkId,
     resourceId: accountId,
     resourcePath: account ? resourcePath : undefined,
-    maspPath: packagePath(id),
+    maspPath: packagePath({ packageDir: id, name }),
   });
   if (account) {
     await safeRm(resourcePath);
@@ -153,7 +153,7 @@ const verifyAccountComponentsFromPackageIds = async ({
         networkId,
         resourceId: accountId,
         resourcePath,
-        maspPath: packagePath(packageId),
+        maspPath: packagePath({ packageDir: packageId, name }),
       });
       const customAccountComponent = accountComponents.find(
         (accountComponent) => accountComponent.startsWith("Custom"),
@@ -188,43 +188,43 @@ export const POST = async (
     const { accountId, identifier, account, packageSource, packageIds } =
       body as VerifyAccountComponentRequestBody;
     if (packageSource) {
-      await verifyAccountComponentFromSource({
+      const verified = await verifyAccountComponentFromSource({
         networkId: network,
         identifier,
         accountId,
         account,
         packageSource,
       });
-      const {
-        package: { name },
-      } = parseMidenProjectToml(packageSource.midenProjectToml);
-      const files = {
-        [`${name}/.cargo/config.toml`]:
-          projectTemplateFiles[".cargo/config.toml"],
-        [`${name}/src/lib.rs`]: packageSource.rust,
-        [`${name}/Cargo.toml`]: generateCargoToml({ name }),
-        [`${name}/miden-project.toml`]: packageSource.midenProjectToml,
-        [`${name}/rust-toolchain.toml`]:
-          projectTemplateFiles["rust-toolchain.toml"],
-      };
-      const response = await fetch(
-        `${API_REGISTRY_URL}/v1/${network}/verified-accounts`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            accountId,
-            files,
-            entrypoint: name,
-          }),
-        },
-      );
-      const result = await response.json();
-      if (!response.ok) {
-        const { error } = result as { error: string };
-        throw new Error(error);
-      }
-      const { verified } = result as { verified: boolean };
+      // const {
+      //   package: { name },
+      // } = parseMidenProjectToml(packageSource.midenProjectToml);
+      // const files = {
+      //   [`${name}/.cargo/config.toml`]:
+      //     projectTemplateFiles[".cargo/config.toml"],
+      //   [`${name}/src/lib.rs`]: packageSource.rust,
+      //   [`${name}/Cargo.toml`]: generateCargoToml({ name }),
+      //   [`${name}/miden-project.toml`]: packageSource.midenProjectToml,
+      //   [`${name}/rust-toolchain.toml`]:
+      //     projectTemplateFiles["rust-toolchain.toml"],
+      // };
+      // const response = await fetch(
+      //   `${API_REGISTRY_URL}/v1/${network}/verified-accounts`,
+      //   {
+      //     method: "POST",
+      //     headers: { "Content-Type": "application/json" },
+      //     body: JSON.stringify({
+      //       accountId,
+      //       files,
+      //       entrypoint: name,
+      //     }),
+      //   },
+      // );
+      // const result = await response.json();
+      // if (!response.ok) {
+      //   const { error } = result as { error: string };
+      //   throw new Error(error);
+      // }
+      // const { verified } = result as { verified: boolean };
       return NextResponse.json<VerifyAccountComponentResponse>({ verified });
     } else if (account && packageIds) {
       const rawPackages = await Promise.all(

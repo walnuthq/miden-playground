@@ -54,7 +54,7 @@ const MintButton = () => {
           amount,
           isPrivateNote: false,
         });
-        console.log({ noteId, txId });
+        console.info({ noteId, txId });
         if (connectedWallet?.isNew) {
           const accountId = WasmAccountId.fromHex(connectedWallet.id);
           addNote({

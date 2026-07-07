@@ -19,9 +19,9 @@
   "dependencies": {
     "@mdx-js/loader": "3.1.1",
     "@mdx-js/react": "3.1.1",
-    "@miden-sdk/miden-sdk": "0.15.3",
+    "@miden-sdk/miden-sdk": "0.15.4",
     "@miden-sdk/miden-wallet-adapter": "0.15.1",
-    "@miden-sdk/react": "0.15.3",
+    "@miden-sdk/react": "0.15.4",
     "@monaco-editor/react": "4.7.0",
     "@next/mdx": "16.2.10",
     "@opennextjs/cloudflare": "1.20.1",
@@ -51,6 +51,6 @@
     "@workspace/typescript-config": "workspace:*",
     "eslint": "9.39.4",
     "typescript": "6.0.3",
-    "wrangler": "4.106.0"
+    "wrangler": "4.107.0"
   }
 }

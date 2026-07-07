@@ -63,7 +63,7 @@ const ConsumeNoteButton = ({
               Number(fungibleAsset.amount),
             );
             const txId = await adapter.requestConsume(transaction);
-            console.log({ txId });
+            console.info({ txId });
           }
         } else {
           setLoading(true);

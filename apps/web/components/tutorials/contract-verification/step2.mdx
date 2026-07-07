@@ -1,11 +1,21 @@
 Try adding a new procedure to this **Counter Contract** that resets the counter value to zero.
-It must have the following body:
+It must have the following implementation:
 
 ```rust
 /// Resets the counter value to zero
-pub fn reset_count(&mut self) {
+fn reset_count(&mut self) {
     let key = Word::new([felt!(1), felt!(0), felt!(0), felt!(0)]);
     self.count_map.set(key, felt!(0));
+}
+```
+
+Don't forget to also declare the procedure signature in the **`CounterContract`** trait:
+
+```rust
+#[component]
+trait CounterContract {
+    // ...
+    fn reset_count(&mut self);
 }
 ```
 

@@ -12,7 +12,7 @@ import Step7 from "@/components/tutorials/contract-verification/step7";
 const tutorial: Tutorial = {
   ...defaultTutorial(),
   id: "contract-verification",
-  number: 12,
+  number: 10,
   title: "Contract verification",
   tagline: "Deploy and verify custom smart contracts on-chain.",
   description:

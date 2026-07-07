@@ -57,6 +57,7 @@ const useMultisig = () => {
     } = await initMultisigClient({
       midenClient,
       guardianEndpoint: GUARDIAN_ENDPOINT_URL,
+      // scheme: "ecdsa",
     });
     const signer = new MidenWalletSigner(
       { signBytes },

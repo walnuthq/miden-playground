@@ -24,13 +24,13 @@ struct IncrementNote;
 #[note]
 impl IncrementNote {
     #[note_script]
-    fn run(self, _arg: Word, account: &mut CounterAccount) { ... }
+    fn run(self, _arg: Word, account: &mut CounterContract) { ... }
 }
 ```
 
 The struct definition (**`IncrementNote`**) provides a named type for the note script.
 Unlike account contracts, note scripts don't store persistent data — the struct serves as the entry point container.
-The **`CounterAccount`** type is declared with **`#[account(counter_account::CounterContract)]`**, which binds the note to the counter account interface generated from **`miden-project.toml`**.
+The **`CounterContract`** type is declared with **`#[account(counter_account::CounterContract)]`**, which binds the note to the counter account interface generated from **`miden-project.toml`**.
 
 Learn more about [note scripts in the Miden documentation](https://docs.miden.xyz/reference/protocol/note/).
 
@@ -38,7 +38,7 @@ Learn more about [note scripts in the Miden documentation](https://docs.miden.xy
 
 ```rust
 #[note_script]
-fn run(self, _arg: Word, account: &mut CounterAccount) {
+fn run(self, _arg: Word, account: &mut CounterContract) {
     let initial_value = account.get_count();
     account.increment_count();
     let expected_value = initial_value + Felt::from_u32(1);

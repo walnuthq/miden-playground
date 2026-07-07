@@ -54,7 +54,6 @@ import type {
 import {
   defaultAccount,
   getIdentifierPart,
-  getItem,
   getRoutingParametersPart,
 } from "@/lib/utils/account";
 import type { InputNote, NoteType } from "@/lib/types/note";
@@ -64,6 +63,7 @@ import { defaultProcedureExport } from "@/lib/utils/script";
 import type { StorageSlot, Component } from "@/lib/types/component";
 import defaultScripts from "@/lib/types/default-scripts";
 import { fromBase64, toBase64, waitUntil } from "@/lib/utils";
+import { EMPTY_WORD } from "@/lib/constants";
 
 export const clientGetConsumableNotes = ({
   client,
@@ -455,14 +455,7 @@ export const wasmAccountToAccount = ({
     account.symbol = basicFungibleFaucetComponent.symbol().toString();
     account.decimals = basicFungibleFaucetComponent.decimals();
     account.maxSupply = basicFungibleFaucetComponent.maxSupply().toString();
-    const metadata = getItem(
-      account.storage.find(
-        ({ name }) =>
-          name === "miden::standards::faucets::fungible::token_config",
-      ),
-    );
-    const [totalSupply = 0n] = WasmWord.fromHex(metadata).toU64s();
-    account.totalSupply = totalSupply.toString();
+    account.totalSupply = basicFungibleFaucetComponent.tokenSupply().toString();
   }
   return account;
 };
@@ -660,5 +653,14 @@ export const wasmWordFromHex = (value: string) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     return new BigUint64Array([0n, 0n, 0n, 0n]);
+  }
+};
+
+export const newWasmWord = (u64Vec: BigUint64Array<ArrayBufferLike>) => {
+  try {
+    return new WasmWord(u64Vec).toHex();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (error) {
+    return EMPTY_WORD;
   }
 };

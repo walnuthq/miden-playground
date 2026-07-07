@@ -9,7 +9,7 @@ import tutorial8 from "@/components/tutorials/timelock-p2id-note";
 // import tutorial9 from "@/components/tutorials/network-transactions";
 import tutorial10 from "@/components/tutorials/foreign-procedure-invocation";
 import tutorial11 from "@/components/tutorials/your-first-smart-contract-and-custom-note";
-// import tutorial12 from "@/components/tutorials/contract-verification";
+import tutorial12 from "@/components/tutorials/contract-verification";
 
 if (
   typeof window !== "undefined" &&
@@ -30,7 +30,7 @@ const tutorials = [
   // tutorial9,
   tutorial10,
   tutorial11,
-  // tutorial12,
+  tutorial12,
 ];
 
 if (

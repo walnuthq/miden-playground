@@ -62,7 +62,7 @@ const MintButton = () => {
           amount,
           isPrivateNote: true,
         });
-        console.log({ noteId, txId });
+        console.info({ noteId, txId });
         const noteFileBytes = await getNote({
           backendUrl: midenFaucetApiUrl(networkId),
           noteId,
