@@ -4,17 +4,9 @@ import type {
   Package,
   ProcedureExport,
   Export,
-  Manifest,
 } from "@/lib/types";
-import {
-  getDependencies,
-  getPackage,
-  updatePackage,
-  deletePackage,
-} from "@/db/packages";
+import { getPackage, deletePackage } from "@/db/packages";
 import { compilePackage } from "@/lib/utils";
-import { API_COMPILE_URL } from "@/lib/constants";
-import { generateCargoToml } from "@/lib/utils";
 
 type GetScriptResponse = {
   package: Omit<Package, "createdAt" | "updatedAt"> & {

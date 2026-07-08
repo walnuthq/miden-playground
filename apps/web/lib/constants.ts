@@ -63,19 +63,19 @@ export const DEVNET_TEST_WALLET_ADDRESS =
   "mdev1aqy4xryk7lg7jyzp3m6ehypw0q7frd3g_qr7qqq9wr6w";
 
 export const TESTNET_COUNTER_CONTRACT_ACCOUNT_ID =
-  "0xace6bb1c6d84a5513bb8c3f6043e47";
+  "0x375fdc8d9d4a6e912e8ef6b3975d6c";
 export const DEVNET_COUNTER_CONTRACT_ACCOUNT_ID =
   "0x67e2f741c3ce5c00551578346e06e2";
 export const TESTNET_COUNTER_CONTRACT_ADDRESS =
-  "mtst1azkwdwcudkz225fmhrplvpp7guj9nkkx_qr7qqq9wr6w";
+  "mtst1aqm4lhydn49xayfw3mmt896adshf8da9_qr7qqq9wr6w";
 export const DEVNET_COUNTER_CONTRACT_ADDRESS =
   "mdev1apn79a6pc089cqz4z4urgmsxugy0krfv_qr7qqq9wr6w";
 export const COUNTER_CONTRACT_GET_COUNT_PROC_HASH =
-  "0xefa7f78f54acf12062d5c8f1a897c7db26610fa1fc00ec6c49a0640032f232cb";
+  "0x31c77b5bcebfc55d6bf71e690d6b88beb379a966296c41d1145ec09db53f666c";
 export const COUNTER_CONTRACT_INCREMENT_COUNT_PROC_HASH =
-  "0x092911b20cdff16bc2d068b56f0b69756cd1c9c374c261c8c3de9a0cc262512e";
+  "0x61d9dfb65b097b16d242dc41c4daa41159791ba0c113652b3f3fc8d5eb1f4224";
 export const COUNT_READER_COPY_COUNT_PROC_HASH =
-  "0xf1a7cbd731dfc8263447e5ee01f06fb9835fec8a92c0385319cd92e7e4114f4a";
+  "0xda25b564385a2445b50c101e975f33f9ec116731a4cffff66f3a8f3488d1683a";
 
 export const midenExplorerUrl = (networkId: NetworkId) =>
   networkId === "mtst" ? TESTNET_EXPLORER_URL : DEVNET_EXPLORER_URL;

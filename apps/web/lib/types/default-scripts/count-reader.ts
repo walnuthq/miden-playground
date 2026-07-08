@@ -44,7 +44,7 @@ use miden::protocol::tx
 use miden::core::word
 use miden::core::sys
 
-const COUNT_READER_SLOT = word("miden_count_reader::count_reader::counter")
+const COUNT_READER_SLOT = word("count_reader::count_reader::counter")
 
 # => [account_id_suffix, account_id_prefix, PROC_HASH(4), foreign_procedure_inputs(16)]
 pub proc copy_count

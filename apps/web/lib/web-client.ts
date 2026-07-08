@@ -173,11 +173,11 @@ export const clientDeployAccount = async ({
           WasmPackage.deserialize(fromBase64(script.masp)),
           new WasmMidenArrays.StorageSlotArray(storageSlots),
         );
-    const procedures = accountComponent.getProcedures();
-    for (const procedure of procedures) {
-      console.log(script.id);
-      console.log(procedure.digest.toHex());
-    }
+    // const procedures = accountComponent.getProcedures();
+    // for (const procedure of procedures) {
+    //   console.log(script.id);
+    //   console.log(procedure.digest.toHex());
+    // }
     // if (script.id === "auth-no-auth") {
     // console.log(script.id);
     // console.log("get_count", accountComponent.getProcedureHash("get_count"));
@@ -501,7 +501,7 @@ const verifyStandardNotes = ({
   scripts: Script[];
 }) =>
   scripts
-    .filter(({ type }) => type === "note-script")
+    .filter(({ type }) => type === "note")
     .find(({ procedureExports }) => {
       const [runScript = defaultProcedureExport()] = procedureExports;
       return runScript.digest === scriptRoot;

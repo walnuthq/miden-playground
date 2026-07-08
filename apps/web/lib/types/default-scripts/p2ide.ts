@@ -15,16 +15,19 @@ export const rust = `// Do not link against libstd (i.e. anything defined in \`s
 
 use miden::*;
 
-use crate::bindings::Account;
+/// Native account of the note: exposes the \`basic-wallet\` component methods (e.g.
+/// \`receive_asset\`) gathered from the \`basic_wallet\` package.
+#[account(basic_wallet::BasicWallet)]
+pub struct Wallet;
 
-fn consume_assets(account: &mut Account) {
+fn consume_assets(account: &mut Wallet) {
     let assets = active_note::get_assets();
     for asset in assets {
         account.receive_asset(asset);
     }
 }
 
-fn reclaim_assets(account: &mut Account, consuming_account: AccountId) {
+fn reclaim_assets(account: &mut Wallet, consuming_account: AccountId) {
     let creator_account = active_note::get_sender();
 
     if consuming_account == creator_account {
@@ -40,18 +43,18 @@ struct P2ideNote;
 #[note]
 impl P2ideNote {
     #[note_script]
-    pub fn run(self, _arg: Word, account: &mut Account) {
-        let storage = active_note::get_storage();
+    pub fn run(self, _arg: Word, account: &mut Wallet) {
+        let inputs = active_note::get_storage();
 
-        // make sure the number of storage items is 4
-        assert_eq((storage.len() as u32).into(), felt!(4));
+        // make sure the number of inputs is 4
+        assert_eq((inputs.len() as u32).into(), felt!(4));
 
         // P2IDE storage follows the protocol layout:
         // [target_account_id_suffix, target_account_id_prefix, reclaim_height, timelock_height]
-        let target_account_id_suffix = storage[0];
-        let target_account_id_prefix = storage[1];
-        let reclaim_height = storage[2];
-        let timelock_height = storage[3];
+        let target_account_id_suffix = inputs[0];
+        let target_account_id_prefix = inputs[1];
+        let reclaim_height = inputs[2];
+        let timelock_height = inputs[3];
 
         // get block number
         let block_number = tx::get_block_number();
@@ -229,7 +232,7 @@ const p2ide: Script = {
   ...defaultScript(),
   id: "p2ide",
   name: "p2ide",
-  type: "note-script",
+  type: "note",
   status: "compiled",
   readOnly: true,
   rust,

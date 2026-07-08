@@ -7,21 +7,58 @@ export const rust = `// Do not link against libstd (i.e. anything defined in \`s
 #![no_std]
 #![feature(alloc_error_handler)]
 
+// However, we could still use some standard library types while
+// remaining no-std compatible, if we uncommented the following lines:
+//
+// extern crate alloc;
+// use alloc::vec::Vec;
+
 use miden::*;
 
-use crate::bindings::Account;
+/// Native account of the note: exposes the \`basic-wallet\` component methods (e.g.
+/// \`receive_asset\`) gathered from the \`basic_wallet\` package.
+#[account(basic_wallet::BasicWallet)]
+pub struct Wallet;
+
+fn consume_assets(account: &mut Wallet) {
+    let assets = active_note::get_assets();
+    for asset in assets {
+        account.receive_asset(asset);
+    }
+}
+
+fn reclaim_assets(account: &mut Wallet, consuming_account: AccountId) {
+    let creator_account = active_note::get_sender();
+
+    if consuming_account == creator_account {
+        consume_assets(account);
+    } else {
+        panic!();
+    }
+}
 
 #[note]
-struct P2idNote;
+struct TimelockP2idNote;
 
 #[note]
-impl P2idNote {
+impl TimelockP2idNote {
     #[note_script]
-    pub fn run(self, _arg: Word, account: &mut Account) {
-        let storage = active_note::get_storage();
+    pub fn run(self, _arg: Word, account: &mut Wallet) {
+        let inputs = active_note::get_storage();
 
-        let target_account_id_suffix = storage[0];
-        let target_account_id_prefix = storage[1];
+        // make sure the number of inputs is 4
+        assert_eq((inputs.len() as u32).into(), felt!(4));
+
+        // P2IDE storage follows the protocol layout:
+        // [target_account_id_suffix, target_account_id_prefix, reclaim_height, timelock_height]
+        let target_account_id_suffix = inputs[0];
+        let target_account_id_prefix = inputs[1];
+        let reclaim_height = inputs[2];
+        let timelock_height = inputs[3];
+
+        // get block number
+        let block_number = tx::get_block_number();
+        assert!(block_number >= timelock_height);
 
         // get consuming account id
         let consuming_account_id = account.get_id();
@@ -29,11 +66,13 @@ impl P2idNote {
         // target account id
         let target_account_id = AccountId::new(target_account_id_prefix, target_account_id_suffix);
 
-        assert_eq!(current_account, target_account_id);
-
-        let assets = active_note::get_assets();
-        for asset in assets {
-            account.receive_asset(asset);
+        let is_target = target_account_id == consuming_account_id;
+        if is_target {
+            consume_assets(account);
+        } else {
+            assert!(reclaim_height != felt!(0));
+            assert!(block_number >= reclaim_height);
+            reclaim_assets(account, consuming_account_id);
         }
     }
 }
@@ -162,7 +201,7 @@ const timelockP2id: Script = {
   ...defaultScript(),
   id: "timelock-p2id",
   name: "timelock-p2id",
-  type: "note-script",
+  type: "note",
   status: "compiled",
   readOnly: true,
   rust,

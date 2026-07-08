@@ -1,26 +1,10 @@
-cargo-features = ["trim-paths"]
-
 [package]
 name = "counter-account"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
 
 [lib]
 crate-type = ["cdylib"]
 
 [dependencies]
-miden = { version = "0.12" }
-
-[package.metadata.component]
-package = "miden:counter-account"
-
-[package.metadata.miden]
-project-kind = "account"
-supported-types = ["RegularAccountUpdatableCode"]
-
-[profile.release]
-trim-paths = ["diagnostics", "object"]
-
-[profile.dev]
-trim-paths = ["diagnostics", "object"]
-
+miden = "0.13"

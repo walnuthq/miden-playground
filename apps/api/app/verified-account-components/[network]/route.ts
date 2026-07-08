@@ -10,7 +10,7 @@ import {
   newPackage,
   deletePackageDir,
   readPackage,
-  parseCargoToml,
+  parseMidenProjectToml,
   packagePath,
   packageExists,
   generatePackageDir,
@@ -23,7 +23,7 @@ import {
   getReadOnlyPackage,
 } from "@/db/packages";
 import { PACKAGES_PATH, API_REGISTRY_URL } from "@/lib/constants";
-import { safeRm } from "@/lib/utils";
+import { generateCargoToml, safeRm } from "@/lib/utils";
 import type { PackageSource } from "@/lib/types";
 import { projectTemplateFiles } from "@/lib/templates";
 
@@ -44,7 +44,7 @@ const verifyAccountComponentFromSource = async ({
   identifier,
   accountId,
   account,
-  packageSource: { cargoToml, rust },
+  packageSource: { midenProjectToml, rust },
 }: {
   networkId: string;
   identifier: string;
@@ -54,7 +54,7 @@ const verifyAccountComponentFromSource = async ({
 }) => {
   const {
     package: { name },
-  } = parseCargoToml(cargoToml);
+  } = parseMidenProjectToml(midenProjectToml);
   const { id } = await newPackage({
     name,
     type: "account",
@@ -197,14 +197,13 @@ export const POST = async (
       });
       const {
         package: { name },
-      } = parseCargoToml(packageSource.cargoToml);
+      } = parseMidenProjectToml(packageSource.midenProjectToml);
       const files = {
         [`${name}/.cargo/config.toml`]:
           projectTemplateFiles[".cargo/config.toml"],
         [`${name}/src/lib.rs`]: packageSource.rust,
-        [`${name}/Cargo.toml`]: packageSource.cargoToml,
-        [`${name}/miden-toolchain.toml`]:
-          projectTemplateFiles["miden-toolchain.toml"],
+        [`${name}/Cargo.toml`]: generateCargoToml({ name }),
+        [`${name}/miden-project.toml`]: packageSource.midenProjectToml,
         [`${name}/rust-toolchain.toml`]:
           projectTemplateFiles["rust-toolchain.toml"],
       };

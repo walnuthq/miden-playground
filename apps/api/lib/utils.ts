@@ -2,11 +2,12 @@ import { access, constants, rm, readdir, readFile } from "node:fs/promises";
 import { execFile as execFileCb, exec as execCb } from "node:child_process";
 import path from "node:path";
 import { promisify } from "node:util";
-import { validate, version } from "uuid";
 import type { PathLike, RmOptions } from "node:fs";
+import { kebabCase } from "lodash";
+import { validate, version } from "uuid";
 import { parse } from "smol-toml";
 import type {
-  CargoToml,
+  MidenProjectToml,
   Dependency,
   Manifest,
   PackageType,
@@ -81,13 +82,13 @@ export const createPackage = ({
   const files = {
     [`${name}/.cargo/config.toml`]: projectTemplateFiles[".cargo/config.toml"],
     [`${name}/src/lib.rs`]: rust,
-    [`${name}/Cargo.toml`]: generateCargoToml({
+    [`${name}/Cargo.toml`]: generateCargoToml({ name }),
+    [`${name}/miden-project.toml`]: generateMidenProjectToml({
       name,
       type,
+      rust,
       dependencies,
     }),
-    [`${name}/miden-toolchain.toml`]:
-      projectTemplateFiles["miden-toolchain.toml"],
     [`${name}/rust-toolchain.toml`]:
       projectTemplateFiles["rust-toolchain.toml"],
   };
@@ -97,6 +98,20 @@ export const createPackage = ({
     dependencies: dependencies.map(({ id }) => id),
     files,
   });
+};
+
+const hasWarningThenFinished = (stderr: string, name: string) => {
+  // Escape the crate name so regex metacharacters in it are treated literally
+  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const warningRe = new RegExp("^\\s*warning:\\s*`" + escaped + "`");
+  const finishedRe = /^\s*Finished\s+`release`\s+profile/;
+  const lines = stderr.split(/\r?\n/);
+  for (let i = 0; i < lines.length - 1; i++) {
+    if (warningRe.test(lines[i] ?? "") && finishedRe.test(lines[i + 1] ?? "")) {
+      return true;
+    }
+  }
+  return false;
 };
 
 export const compilePackage = async ({
@@ -118,9 +133,10 @@ export const compilePackage = async ({
   const { name, type } = dbPackage;
   const updatedFiles = dbPackage.files;
   updatedFiles[`${name}/src/lib.rs`] = rust;
-  updatedFiles[`${name}/Cargo.toml`] = generateCargoToml({
+  updatedFiles[`${name}/miden-project.toml`] = generateMidenProjectToml({
     name,
     type,
+    rust,
     dependencies: dependenciesPackages,
   });
   const files = dependenciesPackages.reduce<Record<string, string>>(
@@ -135,10 +151,7 @@ export const compilePackage = async ({
   const response = await fetch(`${API_COMPILE_URL}/compile`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      files,
-      entrypoint: name,
-    }),
+    body: JSON.stringify({ files, entrypoint: name }),
   });
   const result = await response.json();
   if (!response.ok) {
@@ -146,7 +159,7 @@ export const compilePackage = async ({
     throw new Error(error);
   }
   const { stdout, stderr } = result as { stdout: string; stderr: string };
-  if (stdout === "" && stderr !== "") {
+  if (stdout === "" && stderr !== "" && !hasWarningThenFinished(stderr, name)) {
     console.error(stderr);
     await updatePackage({
       id,
@@ -218,51 +231,72 @@ export const compilePackage = async ({
   };
 };
 
+const extractTraitName = (rust: string) => {
+  const pattern =
+    /#\[\s*component\b[^\]]*\]\s*(?:#\[[^\]]*\]\s*)*(?:pub(?:\([^)]*\))?\s+)?(?:unsafe\s+)?trait\s+([A-Za-z_]\w*)/;
+  const match = rust.match(pattern);
+  return match ? match[1] : null;
+};
+
 export const generateCargoToml = ({
   name,
-  type,
-  dependencies,
+  version = "0.1.0",
 }: {
   name: string;
-  type: string;
-  dependencies: Dependency[];
+  version?: string;
 }) => {
-  let cargoToml = `cargo-features = ["trim-paths"]\n\n`;
-  cargoToml += `[package]\n`;
+  let cargoToml = `[package]\n`;
   cargoToml += `name = "${name}"\n`;
-  cargoToml += `version = "0.1.0"\n`;
-  cargoToml += `edition = "2024"\n\n`;
+  cargoToml += `version = "${version}"\n`;
+  cargoToml += `edition = "2021"\n\n`;
   cargoToml += `[lib]\n`;
   cargoToml += `crate-type = ["cdylib"]\n\n`;
   cargoToml += `[dependencies]\n`;
-  cargoToml += `miden = { version = "0.12" }\n\n`;
-  cargoToml += `[package.metadata.component]\n`;
-  cargoToml += `package = "miden:${name}"\n\n`;
-  cargoToml += `[package.metadata.miden]\n`;
-  cargoToml += `project-kind = "${type}"\n`;
-  if (type === "account") {
-    cargoToml += `supported-types = ["RegularAccountUpdatableCode"]\n`;
-  }
-  cargoToml += "\n";
-  if (dependencies.length > 0) {
-    const midenDependencies = dependencies.map(
-      ({ name }) => `"miden:${name}" = { path = "../${name}" }`,
-    );
-    cargoToml += `[package.metadata.miden.dependencies]\n`;
-    cargoToml += `${midenDependencies.join("\n")}\n\n`;
-    const targetDependencies = dependencies.map(
-      ({ name }) =>
-        `"miden:${name}" = { path = "../${name}/target/generated-wit" }`,
-    );
-    cargoToml += `[package.metadata.component.target.dependencies]\n`;
-    cargoToml += `${targetDependencies.join("\n")}\n\n`;
-  }
-  cargoToml += `[profile.release]\n`;
-  cargoToml += `trim-paths = ["diagnostics", "object"]\n\n`;
-  cargoToml += `[profile.dev]\n`;
-  cargoToml += `trim-paths = ["diagnostics", "object"]\n\n`;
+  cargoToml += `miden = "0.13"\n`;
   return cargoToml;
 };
 
-export const parseCargoToml = (cargoToml: string) =>
-  parse(cargoToml) as CargoToml;
+export const generateMidenProjectToml = ({
+  name,
+  version = "0.1.0",
+  type,
+  rust,
+  dependencies,
+}: {
+  name: string;
+  version?: string;
+  type: string;
+  rust: string;
+  dependencies: Dependency[];
+}) => {
+  const traitName = extractTraitName(rust) ?? name;
+  let midenProjectToml = `[package]\n`;
+  midenProjectToml += `name = "${name}"\n`;
+  midenProjectToml += `version = "${version}"\n\n`;
+  midenProjectToml += `[lib]\n`;
+  midenProjectToml += `kind = "${type}"\n`;
+  midenProjectToml += `namespace = "miden:${name}/${kebabCase(traitName)}@${version}"\n\n`;
+  midenProjectToml += `[dependencies]\n`;
+  midenProjectToml += `miden-core = "*"\n`;
+  midenProjectToml += `miden-protocol = "*"\n`;
+  if (dependencies.length > 0) {
+    const midenDependencies = dependencies.map(
+      ({ name }) => `${name} = { path = "../${name}" }`,
+    );
+    midenProjectToml += `${midenDependencies.join("\n")}\n\n`;
+    const targetDependencies = dependencies.map(
+      ({ name }) => `${name} = { wit = "../${name}/target/generated-wit/" }`,
+    );
+    midenProjectToml += `[package.metadata.miden.dependencies]\n`;
+    midenProjectToml += `${targetDependencies.join("\n")}\n`;
+  }
+  midenProjectToml += "\n";
+  if (type === "account") {
+    midenProjectToml += `[package.metadata.miden]\n`;
+    midenProjectToml += `supported-types = ["RegularAccountUpdatableCode"]\n\n`;
+  }
+  return midenProjectToml;
+};
+
+export const parseMidenProjectToml = (midenProjectToml: string) =>
+  parse(midenProjectToml) as MidenProjectToml;

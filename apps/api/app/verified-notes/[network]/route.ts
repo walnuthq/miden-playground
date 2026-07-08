@@ -7,10 +7,10 @@ import {
   newPackage,
   deletePackageDir,
   readPackage,
-  parseCargoToml,
   packagePath,
   packageExists,
   generatePackageDir,
+  parseMidenProjectToml,
 } from "@/lib/miden-compiler";
 import {
   deletePackage,
@@ -20,7 +20,7 @@ import {
   getReadOnlyPackage,
 } from "@/db/packages";
 import { API_REGISTRY_URL, PACKAGES_PATH } from "@/lib/constants";
-import { safeRm } from "@/lib/utils";
+import { generateCargoToml, safeRm } from "@/lib/utils";
 import type { PackageSource } from "@/lib/types";
 import { projectTemplateFiles } from "@/lib/templates";
 
@@ -57,15 +57,11 @@ const verifyNoteFromSource = async ({
   dependencies: PackageSource[];
 }) => {
   const dependenciesPackages = await Promise.all(
-    dependencies.map(({ cargoToml, rust }) => {
+    dependencies.map(({ midenProjectToml, rust }) => {
       const {
-        package: {
-          name,
-          metadata: {
-            miden: { "project-kind": type },
-          },
-        },
-      } = parseCargoToml(cargoToml);
+        package: { name },
+        lib: { kind: type },
+      } = parseMidenProjectToml(midenProjectToml);
       return newPackage({ name, type, rust, readOnly: true });
     }),
   );
@@ -73,13 +69,11 @@ const verifyNoteFromSource = async ({
     package: {
       name: notePackageName,
       metadata: {
-        miden: {
-          "project-kind": notePackageType,
-          dependencies: rawNotePackageDependencies,
-        },
+        miden: { dependencies: rawNotePackageDependencies },
       },
     },
-  } = parseCargoToml(packageSource.cargoToml);
+    lib: { kind: notePackageType },
+  } = parseMidenProjectToml(packageSource.midenProjectToml);
   const notePackageDependencies = rawNotePackageDependencies
     ? Object.keys(rawNotePackageDependencies)
         .map((dependency) => dependency.slice(dependency.indexOf(":") + 1))
@@ -215,14 +209,13 @@ export const POST = async (
       });
       const {
         package: { name },
-      } = parseCargoToml(packageSource.cargoToml);
+      } = parseMidenProjectToml(packageSource.midenProjectToml);
       const notePackageFiles = {
         [`${name}/.cargo/config.toml`]:
           projectTemplateFiles[".cargo/config.toml"],
         [`${name}/src/lib.rs`]: packageSource.rust,
-        [`${name}/Cargo.toml`]: packageSource.cargoToml,
-        [`${name}/miden-toolchain.toml`]:
-          projectTemplateFiles["miden-toolchain.toml"],
+        [`${name}/Cargo.toml`]: generateCargoToml({ name }),
+        [`${name}/miden-project.toml`]: packageSource.midenProjectToml,
         [`${name}/rust-toolchain.toml`]:
           projectTemplateFiles["rust-toolchain.toml"],
       };
@@ -230,14 +223,15 @@ export const POST = async (
         (previousValue, currentValue) => {
           const {
             package: { name: dependencyName },
-          } = parseCargoToml(currentValue.cargoToml);
+          } = parseMidenProjectToml(currentValue.midenProjectToml);
           previousValue[`${dependencyName}/.cargo/config.toml`] =
             projectTemplateFiles[".cargo/config.toml"];
           previousValue[`${dependencyName}/src/lib.rs`] = currentValue.rust;
-          previousValue[`${dependencyName}/Cargo.toml`] =
-            currentValue.cargoToml;
-          previousValue[`${dependencyName}/miden-toolchain.toml`] =
-            projectTemplateFiles["miden-toolchain.toml"];
+          previousValue[`${dependencyName}/miden-project.toml`] =
+            currentValue.midenProjectToml;
+          previousValue[`${dependencyName}/Cargo.toml`] = generateCargoToml({
+            name: dependencyName,
+          });
           previousValue[`${dependencyName}/rust-toolchain.toml`] =
             projectTemplateFiles["rust-toolchain.toml"];
           return previousValue;

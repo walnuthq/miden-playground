@@ -42,7 +42,7 @@ const CreateNoteDialog = () => {
   const [faucetAccountId, setFaucetAccountId] = useState("");
   const [noteStorage, setNoteStorage] = useState<string[]>([]);
   const shownScripts = scripts.filter(
-    ({ id, type }) => !defaultScriptIds.includes(id) && type === "note-script",
+    ({ id, type }) => !defaultScriptIds.includes(id) && type === "note",
   );
   const onClose = () => {
     setRecipientAccountId("");

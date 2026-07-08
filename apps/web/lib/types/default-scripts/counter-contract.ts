@@ -18,26 +18,34 @@ export const rust = `// Do not link against libstd (i.e. anything defined in \`s
 //
 // extern crate alloc;
 
-use miden::{component, felt, Felt, StorageValue};
+use miden::{Felt, StorageValue, Word, component, component_storage, felt};
 
-/// Main contract structure for the counter example.
-#[component]
-struct CounterContract {
+/// Storage layout for the counter example.
+#[component_storage]
+struct CounterContractStorage {
     /// Storage slot holding the counter value.
     #[storage(description = "counter contract storage value")]
     count: StorageValue<Word>,
 }
 
+/// API of the counter contract account component.
 #[component]
-impl CounterContract {
+trait CounterContract {
     /// Returns the current counter value stored in the contract's storage value.
-    pub fn get_count(&self) -> Felt {
+    fn get_count(&self) -> Felt;
+    /// Increments the counter value stored in the contract's storage value by one.
+    fn increment_count(&mut self) -> Felt;
+}
+
+#[component]
+impl CounterContract for CounterContractStorage {
+    fn get_count(&self) -> Felt {
         // Read the value from storage
         self.count.get()
     }
 
     /// Increments the counter value stored in the contract's storage by one.
-    pub fn increment_count(&mut self) -> Felt {
+    fn increment_count(&mut self) -> Felt {
         // Read the current value
         let current_value = self.count.get();
         // Increment the value by one
@@ -54,7 +62,7 @@ use miden::protocol::native_account
 use miden::core::word
 use miden::core::sys
 
-const COUNTER_SLOT = word("miden_counter_contract::counter_contract::count")
+const COUNTER_SLOT = word("counter_contract::counter_contract::count")
 
 #! Inputs:  []
 #! Outputs: [count]

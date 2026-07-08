@@ -1,8 +1,8 @@
 export const scriptTypes = {
   library: "Library",
   account: "Account Component",
-  "note-script": "Note Script",
-  "transaction-script": "Transaction Script",
+  note: "Note Script",
+  "tx-script": "Transaction Script",
   "authentication-component": "Authentication Component",
 } as const;
 
@@ -15,8 +15,8 @@ export type ScriptExampleItem = {
 
 export const scriptExamples = {
   "counter-account": { name: "Counter Contract", type: "account" },
-  "p2id-note": { name: "P2ID Note", type: "note-script" },
-  "counter-note": { name: "Counter Note", type: "note-script" },
+  "p2id-note": { name: "P2ID Note", type: "note" },
+  "counter-note": { name: "Counter Note", type: "note" },
 } as const;
 
 export type ScriptExample = keyof typeof scriptExamples;

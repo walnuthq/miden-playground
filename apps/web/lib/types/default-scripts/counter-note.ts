@@ -15,19 +15,21 @@ export const rust = `// Do not link against libstd (i.e. anything defined in \`s
 
 use miden::*;
 
-use crate::bindings::miden::counter_contract::counter_contract;
+/// Native account of the note: exposes the \`counter-contract\` component methods gathered from the \`counter-contract\` package.
+#[account(counter_account::CounterAccount)]
+pub struct CounterAccount;
 
 #[note]
-struct CounterNote;
+struct IncrementNote;
 
 #[note]
-impl CounterNote {
+impl IncrementNote {
     #[note_script]
-    pub fn run(self, _arg: Word) {
-        let initial_value = counter_contract::get_count();
-        counter_contract::increment_count();
-        let expected_value = initial_value + felt!(1);
-        let final_value = counter_contract::get_count();
+    fn run(self, _arg: Word, account: &mut CounterAccount) {
+        let initial_value = account.get_count();
+        account.increment_count();
+        let expected_value = initial_value + Felt::from_u32(1);
+        let final_value = account.get_count();
         assert_eq(final_value, expected_value);
     }
 }
@@ -45,7 +47,7 @@ const counterNote: Script = {
   ...defaultScript(),
   id: "counter-note",
   name: "counter-note",
-  type: "note-script",
+  type: "note",
   status: "compiled",
   readOnly: true,
   rust,

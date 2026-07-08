@@ -1,7 +1,12 @@
 import { cp, writeFile, readFile } from "node:fs/promises";
-import { parse, stringify } from "smol-toml";
-import { execFile, fileExists, safeRm } from "@/lib/utils";
-import type { Export, Dependency, CargoToml } from "@/lib/types";
+import { parse } from "smol-toml";
+import {
+  execFile,
+  fileExists,
+  generateMidenProjectToml,
+  safeRm,
+} from "@/lib/utils";
+import type { Export, Dependency, MidenProjectToml } from "@/lib/types";
 import { insertPackage, getDependencies } from "@/db/packages";
 import type { PackageType } from "@/lib/types";
 import { PACKAGES_PATH, PROJECT_ROOT } from "@/lib/constants";
@@ -110,12 +115,15 @@ export const generatePackageDir = async ({
     },
   );
   await Promise.all([
-    generateCargoToml({
-      packageDir,
-      name,
-      type,
-      dependencies: dependenciesPackages,
-    }),
+    writeFile(
+      `${PACKAGES_PATH}/${packageDir}/miden-project.toml`,
+      generateMidenProjectToml({
+        name: packageDir,
+        type,
+        rust,
+        dependencies: dependenciesPackages,
+      }),
+    ),
     updateRust({ packageDir, name, rust }),
   ]);
   // await mkdir(`${PACKAGES_PATH}/${packageDir}/contracts/${name}`);
@@ -170,89 +178,6 @@ export const generatePackageDir = async ({
 //     ),
 //   );
 // };
-
-export const generateCargoToml = ({
-  packageDir,
-  name,
-  type,
-  dependencies,
-}: {
-  packageDir: string;
-  name: string;
-  type: string;
-  dependencies: Dependency[];
-}) => {
-  // let cargoToml = `[package]\n`;
-  // cargoToml += `name = "${name}"\n`;
-  // cargoToml += `version = "0.1.0"\n`;
-  // cargoToml += `edition = "2024"\n\n`;
-  // cargoToml += `[lib]\n`;
-  // cargoToml += `crate-type = ["cdylib"]\n\n`;
-  // cargoToml += `[dependencies]\n`;
-  // cargoToml += `miden = { workspace = true }\n\n`;
-  // cargoToml += `[package.metadata.component]\n`;
-  // cargoToml += `package = "miden:${name}"\n\n`;
-  // cargoToml += `[package.metadata.miden]\n`;
-  // cargoToml += `project-kind = "${type}"\n`;
-  // if (type === "account") {
-  //   cargoToml += `supported-types = ["RegularAccountUpdatableCode"]\n`;
-  // }
-  // cargoToml += "\n";
-  // if (dependencies.length > 0) {
-  //   const midenDependencies = dependencies.map(
-  //     ({ id, name }) =>
-  //       `"miden:${name}" = { path = "${PACKAGES_PATH}/${id}/contracts/${name}" }`,
-  //   );
-  //   cargoToml += `[package.metadata.miden.dependencies]\n`;
-  //   cargoToml += `${midenDependencies.join("\n")}\n\n`;
-  //   const targetDependencies = dependencies.map(
-  //     ({ id, name }) =>
-  //       `"miden:${name}" = { path = "${PACKAGES_PATH}/${id}/contracts/${name}target/generated-wit" }`,
-  //   );
-  //   cargoToml += `[package.metadata.component.target.dependencies]\n`;
-  //   cargoToml += `${targetDependencies.join("\n")}\n\n`;
-  // }
-  // return writeFile(
-  //   `${PACKAGES_PATH}/${packageDir}/contracts/${name}/Cargo.toml`,
-  //   cargoToml,
-  // );
-  let cargoToml = `cargo-features = ["trim-paths"]\n\n`;
-  cargoToml += `[package]\n`;
-  cargoToml += `name = "${name}"\n`;
-  cargoToml += `version = "0.1.0"\n`;
-  cargoToml += `edition = "2024"\n\n`;
-  cargoToml += `[lib]\n`;
-  cargoToml += `name = "${packageDir.replaceAll("-", "_")}"\n`;
-  cargoToml += `crate-type = ["cdylib"]\n\n`;
-  cargoToml += `[dependencies]\n`;
-  cargoToml += `miden = { version = "0.12" }\n\n`;
-  cargoToml += `[package.metadata.component]\n`;
-  cargoToml += `package = "miden:${name}"\n\n`;
-  cargoToml += `[package.metadata.miden]\n`;
-  cargoToml += `project-kind = "${type}"\n`;
-  if (type === "account") {
-    cargoToml += `supported-types = ["RegularAccountUpdatableCode"]\n`;
-  }
-  cargoToml += "\n";
-  if (dependencies.length > 0) {
-    const midenDependencies = dependencies.map(
-      ({ id, name }) => `"miden:${name}" = { path = "${PACKAGES_PATH}/${id}" }`,
-    );
-    cargoToml += `[package.metadata.miden.dependencies]\n`;
-    cargoToml += `${midenDependencies.join("\n")}\n\n`;
-    const targetDependencies = dependencies.map(
-      ({ id, name }) =>
-        `"miden:${name}" = { path = "${PACKAGES_PATH}/${id}/target/generated-wit" }`,
-    );
-    cargoToml += `[package.metadata.component.target.dependencies]\n`;
-    cargoToml += `${targetDependencies.join("\n")}\n\n`;
-  }
-  cargoToml += `[profile.release]\n`;
-  cargoToml += `trim-paths = ["diagnostics", "object"]\n\n`;
-  cargoToml += `[profile.dev]\n`;
-  cargoToml += `trim-paths = ["diagnostics", "object"]\n\n`;
-  return writeFile(`${PACKAGES_PATH}/${packageDir}/Cargo.toml`, cargoToml);
-};
 
 export const updateRust = ({
   packageDir,
@@ -359,8 +284,5 @@ export const deletePackageDir = async (packageDir: string) => {
   });
 };
 
-export const parseCargoToml = (cargoToml: string) =>
-  parse(cargoToml) as CargoToml;
-
-export const stringifyCargoToml = (cargoToml: CargoToml) =>
-  stringify(cargoToml);
+export const parseMidenProjectToml = (midenProjectToml: string) =>
+  parse(midenProjectToml) as MidenProjectToml;

@@ -117,7 +117,7 @@ const VerifyNoteScriptDialog = () => {
                   const notePackage = packageSourcesParsed.find(
                     ({ parsedCargoToml }) =>
                       parsedCargoToml.package.metadata.miden["project-kind"] ===
-                      "note-script",
+                      "note",
                   );
                   if (!notePackage) {
                     return;

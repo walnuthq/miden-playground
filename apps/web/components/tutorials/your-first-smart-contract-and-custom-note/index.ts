@@ -13,7 +13,7 @@ import Step8 from "@/components/tutorials/your-first-smart-contract-and-custom-n
 const tutorial: Tutorial = {
   ...defaultTutorial(),
   id: "your-first-smart-contract-and-custom-note",
-  number: 11,
+  number: 9,
   title: "Your first Smart Contract and custom note",
   tagline: "Develop custom smart contracts and notes.",
   description:

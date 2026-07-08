@@ -16,7 +16,7 @@ struct MyNote;
 #[note]
 impl MyNote {
     #[note_script]
-    pub fn run(self, _arg: Word) {
+    fn run(self, _arg: Word) {
         //
     }
 }

@@ -120,9 +120,9 @@ const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
           icon:
             type === "account" ? (
               <UserCircle className="size-4" />
-            ) : type === "note-script" ? (
+            ) : type === "note" ? (
               <File className="size-4" />
-            ) : type === "transaction-script" ? (
+            ) : type === "tx-script" ? (
               <Route className="size-4" />
             ) : (
               <Key className="size-4" />

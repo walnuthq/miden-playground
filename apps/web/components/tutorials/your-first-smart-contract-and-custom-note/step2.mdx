@@ -12,31 +12,38 @@ Miden contracts run in a **`no_std`** environment, meaning they don't link again
 
 ```rust
 use miden::{
-  component, felt, Felt, StorageMap, StorageMapAccess, Word
+  component, component_storage, felt, Felt, StorageMap, Word
 };
 ```
 
 These imports provide:
 
 - **`component`**: Macro for defining contract components
+- **`component_storage`**: Macro for defining a component's storage struct
+- **`felt`**: Macro for creating **`Felt`** literals (e.g., **`felt!(1)`**)
 - **`Felt`**/**`Word`**: Miden's native field element and word types
 - **`StorageMap`**: Key-value storage within account storage slots
-- **`StorageMapAccess`**: Needed for reading storage values (**`get_count`** function)
 
 **Contract Structure Definition**
 
 ```rust
-#[component]
-struct CounterContract {
+#[component_storage]
+struct CounterContractStorage {
     /// Storage map holding the counter value.
-    #[storage(description = "...")]
+    #[storage(description = "counter contract storage map")]
     count_map: StorageMap<Word, Felt>,
+}
+
+#[component]
+trait CounterContract {
+    fn get_count(&self) -> Felt;
+    fn increment_count(&mut self) -> Felt;
 }
 ```
 
-The **`#[component]`** attribute marks this as a Miden component.
+The **`#[component_storage]`** attribute marks the storage struct for this Miden [Account component](https://docs.miden.xyz/reference/protocol/account), while the **`#[component]`** trait defines the component's public interface.
 The **`count_map`** field is a **`StorageMap`** stored in a named storage slot of the account.
-Storage slots are identified by name rather than explicit index numbers — the slot name is derived automatically from the component's package name and field name (e.g., **`miden_counter_account::count_map`**).
+In the v0.15-aligned SDK, storage slots are identified by name rather than explicit index numbers — the slot name is derived automatically from the component's package name, trait name and field name (e.g., **`counter_account::counter_contract::count_map`**).
 
 **Important**: Storage slots in Miden hold **`Word`** values, which are composed of four field elements (**`Felt`**).
 Each **`Felt`** is a 64-bit unsigned integer (u64).
@@ -45,19 +52,19 @@ The **`StorageMap`** provides a key-value interface within a single storage slot
 **Contract Implementation**
 
 ```rust
-impl CounterContract {
+impl CounterContract for CounterContractStorage {
     // Function implementations...
 }
 ```
 
-The **`CounterContract`** implementation defines the external interface that other contracts and notes can call. This is the contract's public API.
+The **`CounterContract`** trait defines the external interface that other contracts and notes can call.
+The **`impl CounterContract for CounterContractStorage**` block provides the behavior over the component's storage.
 
 **Storage Key Strategy**
 
 ```rust
-let key = Word::from_u64_unchecked(0, 0, 0, 1);
+let key = Word::new([felt!(1), felt!(0), felt!(0), felt!(0)]);
 ```
 
-Both functions use the same fixed key **`[0, 0, 0, 1]`** to store and retrieve the counter value within the storage map.
-The **`Word::from_u64_unchecked`** constructor creates a **`Word`** from four **`u64`** values.
+Both functions in the counter contract use the same fixed key **`[1, 0, 0, 0]`** to store and retrieve the counter value within the storage map.
 This demonstrates a simple but effective storage pattern.

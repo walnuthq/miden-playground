@@ -11,7 +11,7 @@ const countReader: Component = {
     {
       name: storageSlotName({
         packageName: "count-reader",
-        componentStruct: "CountReader",
+        traitName: "CountReader",
         fieldName: "counter",
       }),
       type: "value",

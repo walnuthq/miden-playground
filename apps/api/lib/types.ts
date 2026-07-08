@@ -5,29 +5,21 @@ import type {
 } from "@/db/schema";
 
 export type ScriptExample =
-  | "none"
-  | "counter-account"
-  | "p2id-note"
-  | "counter-note";
+  "none" | "counter-account" | "p2id-note" | "counter-note";
 
-export type CargoToml = {
+export type MidenProjectToml = {
   package: {
     name: string;
     version: string;
-    edition: string;
     metadata: {
       miden: {
-        "project-kind": PackageType;
+        "supported-types": string[];
         dependencies: Record<string, { path: string }>;
-      };
-      component: {
-        package: string;
-        target: {
-          dependencies: Record<string, { path: string }>;
-        };
       };
     };
   };
+  lib: { kind: PackageType; namespace: string };
+  dependencies: Record<string, string | { path: string }>;
 };
 
 export type NewPackage = typeof packagesTable.$inferInsert;
@@ -93,7 +85,7 @@ export type Dependency = {
   digest: string;
 };
 
-export type PackageSource = { cargoToml: string; rust: string };
+export type PackageSource = { midenProjectToml: string; rust: string };
 
 export type CompiledPackage = Pick<
   Package,

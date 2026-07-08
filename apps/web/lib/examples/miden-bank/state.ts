@@ -20,7 +20,7 @@ const state: State = {
         {
           name: storageSlotName({
             packageName: "bank-account",
-            componentStruct: "Bank",
+            traitName: "Bank",
             fieldName: "initialized",
           }),
           type: "value",
@@ -29,7 +29,7 @@ const state: State = {
         {
           name: storageSlotName({
             packageName: "bank-account",
-            componentStruct: "Bank",
+            traitName: "Bank",
             fieldName: "balances",
           }),
           type: "map",

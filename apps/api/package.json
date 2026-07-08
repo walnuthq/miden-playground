@@ -17,12 +17,12 @@
     "db:push": "drizzle-kit push"
   },
   "dependencies": {
-    "@dotenvx/dotenvx": "1.75.1",
+    "@dotenvx/dotenvx": "2.0.0",
     "archiver": "8.0.0",
     "dotenv": "17.4.2",
-    "drizzle-orm": "1.0.0-rc.3",
+    "drizzle-orm": "1.0.0-rc.4",
     "lodash": "4.18.1",
-    "next": "16.2.9",
+    "next": "16.2.10",
     "pg": "8.22.0",
     "react": "19.2.7",
     "smol-toml": "1.7.0",
@@ -36,7 +36,7 @@
     "@types/react": "19.2.17",
     "@workspace/eslint-config": "workspace:^",
     "@workspace/typescript-config": "workspace:*",
-    "drizzle-kit": "1.0.0-rc.3",
+    "drizzle-kit": "1.0.0-rc.4",
     "eslint": "9.39.4",
     "typescript": "6.0.3"
   }
