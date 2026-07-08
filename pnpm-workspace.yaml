@@ -8,16 +8,21 @@ allowBuilds:
   workerd: true
 
 minimumReleaseAgeExclude:
-  - '@turbo/darwin-64@2.10.4'
-  - '@turbo/darwin-arm64@2.10.4'
-  - '@turbo/gen@2.10.4'
-  - '@turbo/linux-64@2.10.4'
-  - '@turbo/linux-arm64@2.10.4'
-  - '@turbo/windows-64@2.10.4'
-  - '@turbo/windows-arm64@2.10.4'
+  - "@turbo/darwin-64@2.10.4"
+  - "@turbo/darwin-arm64@2.10.4"
+  - "@turbo/gen@2.10.4"
+  - "@turbo/linux-64@2.10.4"
+  - "@turbo/linux-arm64@2.10.4"
+  - "@turbo/windows-64@2.10.4"
+  - "@turbo/windows-arm64@2.10.4"
   - eslint-plugin-turbo@2.10.4
   - turbo@2.10.4
+  - '@miden-sdk/miden-sdk@0.15.5'
+  - '@miden-sdk/node-darwin-arm64@0.15.5'
+  - '@miden-sdk/node-darwin-x64@0.15.5'
+  - '@miden-sdk/node-linux-x64-gnu@0.15.5'
+  - '@miden-sdk/react@0.15.5'
 
 overrides:
-  "@miden-sdk/miden-sdk": "0.15.4"
+  "@miden-sdk/miden-sdk": "0.15.5"
   "@aws-sdk/signature-v4-multi-region": "3.996.35"
