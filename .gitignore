@@ -29,6 +29,13 @@ dist
 .open-next
 .wrangler
 
+# Rust
+target/
+
+# Miden Client
+keystore/
+store.sqlite3
+
 # Agents
 .claude
 

@@ -102,8 +102,7 @@ const CreateTransactionConfigureForm = ({
       ({ faucetId }) => faucetId === faucetAccountId,
     )?.amount ?? "0";
   const shownScripts = scripts.filter(
-    ({ type, status }) =>
-      type === "transaction-script" && status === "compiled",
+    ({ type, status }) => type === "tx-script" && status === "compiled",
   );
   const script = scripts.find(({ id }) => id === scriptId);
   return (
@@ -206,7 +205,7 @@ const CreateTransactionConfigureForm = ({
               const adapter = wallet.adapter as MidenWalletAdapter;
               try {
                 const txId = await adapter.requestSend(transaction);
-                console.log({ txId });
+                console.info({ txId });
                 closeCreateTransactionDialog();
               } catch (error) {
                 console.error(error);

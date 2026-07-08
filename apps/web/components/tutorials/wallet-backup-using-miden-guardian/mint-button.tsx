@@ -49,7 +49,7 @@ const MintButton = () => {
           amount,
           isPrivateNote: false,
         });
-        console.log({ noteId, txId });
+        console.info({ noteId, txId });
         setNoteId(noteId);
       }}
     >

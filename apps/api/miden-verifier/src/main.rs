@@ -91,18 +91,14 @@ fn verify_note_script(note_script: &NoteScript, package_opt: Option<Package>) ->
     if let Some(standard_note) = StandardNote::from_script(note_script) {
         println!("{}", standard_note.name());
     } else if let Some(package) = package_opt.clone() {
-        let mut procedures = package
+        let mut procedures_digests = package
             .manifest
             .exports()
             .filter_map(|export| match export {
-                PackageExport::Procedure(procedure) => Some(procedure),
+                PackageExport::Procedure(procedure) => Some(procedure.digest),
                 _ => None,
             });
-        let run_procedure_opt =
-            procedures.find(|procedure| procedure.path.as_str().ends_with("::run"));
-        if let Some(run_procedure) = run_procedure_opt
-            && run_procedure.digest == note_script.root().into()
-        {
+        if procedures_digests.any(|digest| digest == note_script.root().into()) {
             println!("Custom({})", package.digest());
         }
     }

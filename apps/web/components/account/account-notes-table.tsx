@@ -85,7 +85,7 @@ const NoteActionsCell = ({
                   Number(fungibleAsset.amount),
                 );
                 const txId = await adapter.requestConsume(transaction);
-                console.log({ txId });
+                console.info({ txId });
               }
             } else if (account.multisig) {
               const multisig = await loadMultisig(account.id);

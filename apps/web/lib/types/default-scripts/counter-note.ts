@@ -16,8 +16,8 @@ export const rust = `// Do not link against libstd (i.e. anything defined in \`s
 use miden::*;
 
 /// Native account of the note: exposes the \`counter-contract\` component methods gathered from the \`counter-contract\` package.
-#[account(counter_account::CounterAccount)]
-pub struct CounterAccount;
+#[account(counter_account::CounterContract)]
+pub struct CounterContract;
 
 #[note]
 struct IncrementNote;
@@ -25,7 +25,7 @@ struct IncrementNote;
 #[note]
 impl IncrementNote {
     #[note_script]
-    fn run(self, _arg: Word, account: &mut CounterAccount) {
+    fn run(self, _arg: Word, account: &mut CounterContract) {
         let initial_value = account.get_count();
         account.increment_count();
         let expected_value = initial_value + Felt::from_u32(1);

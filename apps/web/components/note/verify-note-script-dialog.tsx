@@ -19,7 +19,10 @@ import useNotes from "@/hooks/use-notes";
 import { verifyNoteFromSource } from "@/lib/api";
 import { toBase64 } from "@/lib/utils";
 import type { PackageSource } from "@/lib/types/script";
-import { parseCargoToml, fileListToPackageSources } from "@/lib/utils/script";
+import {
+  parseMidenProjectToml,
+  fileListToPackageSources,
+} from "@/lib/utils/script";
 import useNetwork from "@/hooks/use-network";
 import { useMiden } from "@miden-sdk/react/lazy";
 
@@ -111,20 +114,21 @@ const VerifyNoteScriptDialog = () => {
                   const packageSourcesParsed = packageSourcesList.map(
                     (packageSource) => ({
                       ...packageSource,
-                      parsedCargoToml: parseCargoToml(packageSource.cargoToml),
+                      parsedMidenProjectToml: parseMidenProjectToml(
+                        packageSource.midenProjectToml,
+                      ),
                     }),
                   );
                   const notePackage = packageSourcesParsed.find(
-                    ({ parsedCargoToml }) =>
-                      parsedCargoToml.package.metadata.miden["project-kind"] ===
-                      "note",
+                    ({ parsedMidenProjectToml }) =>
+                      parsedMidenProjectToml.lib.kind === "note",
                   );
                   if (!notePackage) {
                     return;
                   }
                   setPackageSource(notePackage);
                   const rawNotePackageDependencies =
-                    notePackage.parsedCargoToml.package.metadata.miden
+                    notePackage.parsedMidenProjectToml.package.metadata.miden
                       .dependencies ?? {};
                   const notePackageDependencies = Object.keys(
                     rawNotePackageDependencies,

@@ -18,6 +18,7 @@ import { Button } from "@workspace/ui/components/button";
 import { scriptTypes, type Script } from "@/lib/types/script";
 import { defaultDependencies } from "@/lib/utils/script";
 import useScripts from "@/hooks/use-scripts";
+import { formatDigest } from "@/lib/utils";
 
 const DependencyActionsCell = ({
   script,
@@ -80,7 +81,7 @@ const DependenciesTable = ({ script }: { script: Script }) => (
               </Link>
             </TableCell>
             <TableCell>{scriptTypes[type]}</TableCell>
-            <TableHead>{digest}</TableHead>
+            <TableCell>{formatDigest(digest)}</TableCell>
             <TableCell>
               {!script.readOnly && (
                 <DependencyActionsCell script={script} dependencyId={id} />
@@ -92,7 +93,7 @@ const DependenciesTable = ({ script }: { script: Script }) => (
           <TableRow key={id}>
             <TableCell>{name}</TableCell>
             <TableCell>{scriptTypes[type]}</TableCell>
-            <TableCell>{digest}</TableCell>
+            <TableCell>{formatDigest(digest)}</TableCell>
             <TableCell />
           </TableRow>
         ))}

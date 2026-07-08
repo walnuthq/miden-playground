@@ -74,7 +74,7 @@ export const stdDependency: Dependency = {
   digest: "0xe5b1988c03ba3b190595c78d20f3b0fdf105048ad3edc7498cacf8676b4d9434",
 };
 
-export type PackageSource = { cargoToml: string; rust: string };
+export type PackageSource = { midenProjectToml: string; rust: string };
 
 export type Script = {
   id: string;
@@ -109,22 +109,17 @@ export type CompiledPackage = Pick<
   | "dependencies"
 >;
 
-export type CargoToml = {
+export type MidenProjectToml = {
   package: {
     name: string;
     version: string;
-    edition: string;
     metadata: {
       miden: {
-        "project-kind": ScriptType;
+        "supported-types": string[];
         dependencies: Record<string, { path: string }>;
-      };
-      component: {
-        package: string;
-        target: {
-          dependencies: Record<string, { path: string }>;
-        };
       };
     };
   };
+  lib: { kind: ScriptType; namespace: string };
+  dependencies: Record<string, string | { path: string }>;
 };

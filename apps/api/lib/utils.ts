@@ -100,7 +100,7 @@ export const createPackage = ({
   });
 };
 
-const hasWarningThenFinished = (stderr: string, name: string) => {
+export const hasWarningThenFinished = (stderr: string, name: string) => {
   // Escape the crate name so regex metacharacters in it are treated literally
   const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const warningRe = new RegExp("^\\s*warning:\\s*`" + escaped + "`");

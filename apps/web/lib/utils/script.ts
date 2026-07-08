@@ -8,7 +8,7 @@ import type {
   Dependency,
   Script,
   MidenInput,
-  CargoToml,
+  MidenProjectToml,
   CompiledPackage,
 } from "@/lib/types/script";
 import { baseDependency, stdDependency } from "@/lib/types/script";
@@ -94,8 +94,8 @@ begin
 end
 `;
 
-export const parseCargoToml = (cargoToml: string) =>
-  parse(cargoToml) as CargoToml;
+export const parseMidenProjectToml = (midenProjectToml: string) =>
+  parse(midenProjectToml) as MidenProjectToml;
 
 export const compiledPackageToScript = (
   compiledPackage: CompiledPackage,
@@ -138,7 +138,7 @@ export const readFileAsArrayBuffer = (file: File): Promise<ArrayBuffer> =>
 export const fileListToPackageSources = async (fileList: FileList) => {
   const files = Array.from(fileList);
   const packagesSourcesFiles = files.filter(({ name }) =>
-    ["Cargo.toml", "lib.rs"].includes(name),
+    ["miden-project.toml", "lib.rs"].includes(name),
   );
   const packagesSourcesFilesWithContent = await Promise.all(
     packagesSourcesFiles.map(async (packageSourceFile) => ({
@@ -150,7 +150,7 @@ export const fileListToPackageSources = async (fileList: FileList) => {
     packagesSourcesFilesWithContent,
     ({ file }) =>
       file.webkitRelativePath
-        .replace("/Cargo.toml", "")
+        .replace("/miden-project.toml", "")
         .replace("/src/lib.rs", ""),
   );
   return Object.keys(packagesSourcesFilesByPackage).reduce<
@@ -164,11 +164,13 @@ export const fileListToPackageSources = async (fileList: FileList) => {
     const packageSource = packagesSourcesFilesWithContent.reduce<PackageSource>(
       (previousValue, { file, content }) => ({
         ...previousValue,
-        cargoToml:
-          file.name === "Cargo.toml" ? content : previousValue.cargoToml,
+        midenProjectToml:
+          file.name === "miden-project.toml"
+            ? content
+            : previousValue.midenProjectToml,
         rust: file.name === "lib.rs" ? content : previousValue.rust,
       }),
-      { cargoToml: "", rust: "" },
+      { midenProjectToml: "", rust: "" },
     );
     return { ...previousValue, [currentValue]: packageSource };
   }, {});

@@ -1,5 +1,4 @@
 import { uniqBy } from "lodash";
-import { Word as WasmWord } from "@miden-sdk/miden-sdk/lazy";
 import {
   Table,
   TableBody,
@@ -17,7 +16,7 @@ import { Button } from "@workspace/ui/components/button";
 import { type StorageSlot, storageSlotTypes } from "@/lib/types/component";
 import type { StorageItem } from "@/lib/types/account";
 import { getItem } from "@/lib/utils/account";
-import { wasmWordFromHex } from "@/lib/web-client";
+import { wasmWordFromHex, newWasmWord } from "@/lib/web-client";
 
 const StorageSlotValueTooltip = ({ value }: { value: string }) => {
   const feltArray = wasmWordFromHex(value);
@@ -46,10 +45,8 @@ const StorageSlotMapTable = ({
   const keyValues = keyValuePairs.map((pair) => {
     const [key = "", value = ""] = pair.split(":");
     return {
-      key: new WasmWord(new BigUint64Array([BigInt(key), 0n, 0n, 0n])).toHex(),
-      value: new WasmWord(
-        new BigUint64Array([BigInt(value), 0n, 0n, 0n]),
-      ).toHex(),
+      key: newWasmWord(new BigUint64Array([BigInt(key), 0n, 0n, 0n])),
+      value: newWasmWord(new BigUint64Array([BigInt(value), 0n, 0n, 0n])),
     };
   });
   const entries = uniqBy([...storageItem.mapEntries, ...keyValues], "key");

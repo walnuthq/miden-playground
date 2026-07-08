@@ -57,11 +57,14 @@ const useMultisig = () => {
     } = await initMultisigClient({
       midenClient,
       guardianEndpoint: GUARDIAN_ENDPOINT_URL,
+      scheme: midenWalletSession.scheme,
     });
     const signer = new MidenWalletSigner(
       { signBytes },
       midenWalletSession.commitment,
       midenWalletSession.scheme,
+      // undefined,
+      // midenWalletSession.publicKey ?? undefined,
     );
     const newMultisig = await multisigClient.create(
       {
