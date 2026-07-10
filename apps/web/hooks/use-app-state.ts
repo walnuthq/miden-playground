@@ -271,15 +271,10 @@ const useAppState = () => {
         clientGetAccounts({
           client,
           accountIds: previousAccounts
-            .filter(({ id, isNew, isPrivate }) => {
-              if (id === midenFaucetAccountId(networkId)) {
-                return false;
-              }
-              if (id === connectedWallet?.id) {
-                return connectedWallet?.isPublic;
-              }
-              return !isNew && !isPrivate;
-            })
+            .filter(
+              ({ id, isPublic }) =>
+                id !== midenFaucetAccountId(networkId) && isPublic,
+            )
             .map(({ id }) => id),
         }),
         clientGetAllInputNotes({

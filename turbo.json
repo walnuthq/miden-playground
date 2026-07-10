@@ -10,6 +10,7 @@
     "api#build": {
       "env": [
         "NODE_ENV",
+        "NEXT_PHASE",
         "WEB_URL",
         "API_COMPILE_URL",
         "API_REGISTRY_URL",

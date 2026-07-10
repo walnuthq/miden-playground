@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Trash } from "lucide-react";
 import { Spinner } from "@workspace/ui/components/spinner";
 import { Button } from "@workspace/ui/components/button";
+import { Switch } from "@workspace/ui/components/switch";
 import {
   Select,
   SelectContent,
@@ -38,6 +39,7 @@ const CreateNoteDialog = () => {
   const [recipientAccountId, setRecipientAccountId] = useState("");
   const [scriptId, setScriptId] = useState("");
   const [noteType, setNoteType] = useState<NoteType>("public");
+  const [isNetworkNote, setIsNetworkNote] = useState(false);
   const [hasAssets, setHasAssets] = useState(false);
   const [faucetAccountId, setFaucetAccountId] = useState("");
   const [noteStorage, setNoteStorage] = useState<string[]>([]);
@@ -85,6 +87,7 @@ const CreateNoteDialog = () => {
               recipientAccountId,
               scriptId,
               type: noteType,
+              isNetworkNote,
               faucetAccountId: hasAssets ? faucetAccountId : "",
               amount,
               noteStorage,
@@ -93,8 +96,8 @@ const CreateNoteDialog = () => {
             onClose();
           }}
         >
-          <div className="grid grid-cols-2 gap-4">
-            <div className="grid gap-3 col-span-2">
+          <div className="grid grid-cols-3 gap-4">
+            <div className="grid gap-3 col-span-3">
               <Label>Recipient account</Label>
               <SelectAccountCombobox onValueChange={setRecipientAccountId} />
             </div>
@@ -135,6 +138,20 @@ const CreateNoteDialog = () => {
               </Select>
             </div>
             <div className="grid gap-3">
+              <Label htmlFor="is-network-note">Network note</Label>
+              <div className="flex items-center gap-2">
+                <Switch
+                  id="is-network-note"
+                  name="is-network-note"
+                  defaultChecked={isNetworkNote}
+                  onCheckedChange={(checked) => setIsNetworkNote(checked)}
+                />
+                <Label htmlFor="is-network-note">
+                  {isNetworkNote ? "Network note" : "Regular note"}
+                </Label>
+              </div>
+            </div>
+            <div className="grid gap-3 col-span-3">
               <Label>Note assets</Label>
               {hasAssets && (
                 <SelectAccountDropdownMenu
@@ -146,7 +163,7 @@ const CreateNoteDialog = () => {
               )}
             </div>
             {hasAssets && (
-              <div className="grid gap-3">
+              <div className="grid gap-3 col-span-3">
                 <Label htmlFor="amount">Amount</Label>
                 <Input
                   id="amount"
@@ -164,7 +181,7 @@ const CreateNoteDialog = () => {
                 />
               </div>
             )}
-            <div className="grid gap-3 col-span-2">
+            <div className="grid gap-3 col-span-3">
               <Button
                 type="button"
                 variant={hasAssets ? "destructive" : "secondary"}
@@ -173,7 +190,7 @@ const CreateNoteDialog = () => {
                 {hasAssets ? "Remove" : "Add"} note assets
               </Button>
             </div>
-            <div className="grid gap-3 col-span-2">
+            <div className="grid gap-3 col-span-3">
               <Label htmlFor="storage">Note storage</Label>
               {noteStorage.map((noteStorageItem, index) => (
                 <div key={index} className="flex items-center gap-2">

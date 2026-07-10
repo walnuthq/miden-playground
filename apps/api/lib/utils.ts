@@ -100,20 +100,6 @@ export const createPackage = ({
   });
 };
 
-export const hasWarningThenFinished = (stderr: string, name: string) => {
-  // Escape the crate name so regex metacharacters in it are treated literally
-  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const warningRe = new RegExp("^\\s*warning:\\s*`" + escaped + "`");
-  const finishedRe = /^\s*Finished\s+`release`\s+profile/;
-  const lines = stderr.split(/\r?\n/);
-  for (let i = 0; i < lines.length - 1; i++) {
-    if (warningRe.test(lines[i] ?? "") && finishedRe.test(lines[i + 1] ?? "")) {
-      return true;
-    }
-  }
-  return false;
-};
-
 export const compilePackage = async ({
   id,
   rust,
@@ -159,7 +145,7 @@ export const compilePackage = async ({
     throw new Error(error);
   }
   const { stdout, stderr } = result as { stdout: string; stderr: string };
-  if (stdout === "" && stderr !== "" && !hasWarningThenFinished(stderr, name)) {
+  if (stdout === "" && stderr !== "") {
     console.error(stderr);
     await updatePackage({
       id,
@@ -193,6 +179,7 @@ export const compilePackage = async ({
     digest: string;
     manifest: Manifest;
   };
+  console.log(manifest.exports);
   const exports = manifest.exports.filter(
     ({ Procedure: { signature } }) => signature?.abi === 3,
   );

@@ -37,6 +37,8 @@ impl IncrementNote {
 
 export const masm = `use external_contract::counter_contract
 
+#! Inputs:  []
+#! Outputs: []
 @note_script
 pub proc main
     call.counter_contract::increment_count

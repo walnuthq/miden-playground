@@ -1,8 +1,13 @@
 import { readFileSync } from "node:fs";
-import { PROJECT_ROOT } from "@/lib/constants";
+
+const projectRoot =
+  process.env.NODE_ENV !== "production" ||
+  process.env.NEXT_PHASE === "phase-production-build"
+    ? "."
+    : "../../../..";
 
 const readFile = (filePath: string) =>
-  readFileSync(`${PROJECT_ROOT}/templates/${filePath}`, "utf-8");
+  readFileSync(`${projectRoot}/templates/${filePath}`, "utf-8");
 
 export const projectTemplateFiles = {
   ".cargo/config.toml": readFile("project-template/.cargo/config.toml"),

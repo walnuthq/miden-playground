@@ -1,5 +1,9 @@
+import { config } from "dotenv";
+
 export const PROJECT_ROOT =
   process.env.NODE_ENV !== "production" ? "." : "../../../..";
+
+config({ path: `${PROJECT_ROOT}/.env.local` });
 
 export const WEB_URL = process.env.WEB_URL ?? "http://localhost:3000";
 export const API_COMPILE_URL =

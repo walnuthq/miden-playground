@@ -11,7 +11,6 @@ import {
   AccountStorageMode as WasmAccountStorageMode,
   AccountBuilder as WasmAccountBuilder,
   AccountComponent as WasmAccountComponent,
-  // Address as WasmAddress,
   Note as WasmNote,
   Word as WasmWord,
   BasicFungibleFaucetComponent as WasmBasicFungibleFaucetComponent,
@@ -28,8 +27,8 @@ import {
   FungibleAsset as WasmFungibleAsset,
   NoteMetadata as WasmNoteMetadata,
   NoteTag as WasmNoteTag,
-  // NoteAttachment as WasmNoteAttachment,
-  // NoteExecutionHint as WasmNoteExecutionHint,
+  NetworkAccountTarget as WasmNetworkAccountTarget,
+  NoteExecutionHint as WasmNoteExecutionHint,
   NoteStorage as WasmNoteStorage,
   FeltArray as WasmFeltArray,
   Felt as WasmFelt,
@@ -194,6 +193,7 @@ export const clientDeployAccount = async ({
     }
   }
   const { account } = accountBuilder.build();
+  // console.log(toBase64(account.serialize()));
   await client.newAccount(account, true);
   return account;
 };
@@ -239,7 +239,7 @@ export const clientCreateNoteFromScript = async ({
   client,
   senderAccountId,
   recipientAccountId,
-  networkRecipient,
+  isNetworkNote,
   script,
   type,
   faucetAccountId,
@@ -250,7 +250,7 @@ export const clientCreateNoteFromScript = async ({
   client: WebClientType;
   senderAccountId: string;
   recipientAccountId: string;
-  networkRecipient: boolean;
+  isNetworkNote: boolean;
   script: Script;
   type: NoteType;
   faucetAccountId: string;
@@ -271,15 +271,6 @@ export const clientCreateNoteFromScript = async ({
     type === "public" ? WasmNoteType.Public : WasmNoteType.Private,
     WasmNoteTag.withAccountTarget(WasmAccountId.fromHex(recipientAccountId)),
   );
-  if (networkRecipient) {
-    // TODO
-    // metadata = metadata.withAttachment(
-    //   WasmNoteAttachment.newNetworkAccountTarget(
-    //     WasmAccountId.fromHex(recipientAccountId),
-    //     WasmNoteExecutionHint.none(),
-    //   ),
-    // );
-  }
   const randomBigUints = new BigUint64Array(4);
   crypto.getRandomValues(randomBigUints);
   const serialNum = new WasmWord(randomBigUints);
@@ -291,7 +282,16 @@ export const clientCreateNoteFromScript = async ({
     ),
   );
   const recipient = new WasmNoteRecipient(serialNum, noteScript, storage);
-  return new WasmNote(assets, metadata, recipient);
+  const note = isNetworkNote
+    ? WasmNote.withAttachments(assets, metadata, recipient, [
+        new WasmNetworkAccountTarget(
+          WasmAccountId.fromHex(recipientAccountId),
+          WasmNoteExecutionHint.always(),
+        ).toAttachment(),
+      ])
+    : new WasmNote(assets, metadata, recipient);
+  // console.log(toBase64(note.serialize()));
+  return note;
 };
 
 export const clientImportNoteFile = async ({

@@ -5,7 +5,6 @@ import {
   fileExists,
   generateMidenProjectToml,
   safeRm,
-  hasWarningThenFinished,
 } from "@/lib/utils";
 import type { Export, Dependency, MidenProjectToml } from "@/lib/types";
 import { insertPackage, getDependencies } from "@/db/packages";
@@ -230,11 +229,7 @@ export const compilePackage = async ({
         },
       },
     );
-    if (
-      stdout === "" &&
-      stderr !== "" &&
-      !hasWarningThenFinished(stderr, name)
-    ) {
+    if (stdout === "" && stderr !== "") {
       return { stdout: "", stderr };
     }
     return { stdout, stderr: "" };

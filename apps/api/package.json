@@ -12,12 +12,12 @@
     "typecheck": "tsc --noEmit",
     "build:miden-package-metadata": "cargo install --path miden-package-metadata --locked",
     "build:miden-verifier": "cargo install --path miden-verifier --locked",
-    "build:project-template": "dotenvx run -f .env.local -- sh -c 'rm -rf $PACKAGES_PATH/project-template && cp -r templates/project-template $PACKAGES_PATH/project-template && cd $PACKAGES_PATH/project-template && CARGO_TARGET_DIR=$PACKAGES_PATH/target miden build --release'",
+    "build:project-template": "dotenvx run -f .env.local -- sh -c 'rm -rf $PACKAGES_PATH/project-template && cp -r templates/project-template $PACKAGES_PATH/project-template && cd $PACKAGES_PATH/project-template && CARGO_TARGET_DIR=$PACKAGES_PATH/target MIDENC_TARGET_DIR=$PACKAGES_PATH/target/miden cargo miden build --release'",
     "build:rust": "pnpm build:miden-package-metadata && pnpm build:miden-verifier && pnpm build:project-template",
     "db:push": "drizzle-kit push"
   },
   "dependencies": {
-    "@dotenvx/dotenvx": "2.1.5",
+    "@dotenvx/dotenvx": "2.3.1",
     "archiver": "8.0.0",
     "dotenv": "17.4.2",
     "drizzle-orm": "1.0.0-rc.4",
