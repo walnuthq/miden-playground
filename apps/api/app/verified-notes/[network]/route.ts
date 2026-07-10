@@ -245,16 +245,20 @@ export const POST = async (
           },
           notePackageFiles,
         );
-        await fetch(`${API_REGISTRY_URL}/v1/${network}/verified-notes`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            noteId,
-            files,
-            entrypoint: name,
-            source: "miden-playground",
-          }),
-        });
+        try {
+          await fetch(`${API_REGISTRY_URL}/v1/${network}/verified-notes`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              noteId,
+              files,
+              entrypoint: name,
+              source: "miden-playground",
+            }),
+          });
+        } catch (error) {
+          console.error(error);
+        }
       }
       return NextResponse.json<VerifyNoteResponse>({ verified });
     } else if (note && packageId) {

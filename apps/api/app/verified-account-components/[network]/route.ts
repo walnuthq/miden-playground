@@ -208,16 +208,20 @@ export const POST = async (
           [`${name}/rust-toolchain.toml`]:
             projectTemplateFiles["rust-toolchain.toml"],
         };
-        await fetch(`${API_REGISTRY_URL}/v1/${network}/verified-accounts`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            accountId,
-            files,
-            entrypoint: name,
-            source: "miden-playground",
-          }),
-        });
+        try {
+          await fetch(`${API_REGISTRY_URL}/v1/${network}/verified-accounts`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              accountId,
+              files,
+              entrypoint: name,
+              source: "miden-playground",
+            }),
+          });
+        } catch (error) {
+          console.error(error);
+        }
       }
       return NextResponse.json<VerifyAccountComponentResponse>({ verified });
     } else if (account && packageIds) {
