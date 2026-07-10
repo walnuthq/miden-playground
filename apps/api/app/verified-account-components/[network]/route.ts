@@ -215,6 +215,7 @@ export const POST = async (
             accountId,
             files,
             entrypoint: name,
+            source: "miden-playground",
           }),
         });
       }

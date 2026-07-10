@@ -252,6 +252,7 @@ export const POST = async (
             noteId,
             files,
             entrypoint: name,
+            source: "miden-playground",
           }),
         });
       }

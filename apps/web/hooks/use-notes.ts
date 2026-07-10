@@ -29,7 +29,7 @@ import useNetwork from "@/hooks/use-network";
 const useNotes = () => {
   const { networkId } = useNetwork();
   const {
-    tutorialId, // TODO
+    tutorialId,
     inputNotes,
     exportNoteDialogOpen,
     importNoteDialogOpen,
@@ -61,6 +61,7 @@ const useNotes = () => {
     recipientAccountId,
     scriptId,
     type,
+    isNetworkNote,
     faucetAccountId,
     amount,
     noteStorage,
@@ -69,6 +70,7 @@ const useNotes = () => {
     recipientAccountId: string;
     scriptId: string;
     type: NoteType;
+    isNetworkNote: boolean;
     faucetAccountId: string;
     amount: bigint;
     noteStorage: string[];
@@ -113,7 +115,7 @@ const useNotes = () => {
             client,
             senderAccountId,
             recipientAccountId,
-            networkRecipient: false, // TODO recipientAccount.storageMode === "network",
+            isNetworkNote,
             script,
             type,
             faucetAccountId,

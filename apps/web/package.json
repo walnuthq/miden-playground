@@ -51,6 +51,6 @@
     "@workspace/typescript-config": "workspace:*",
     "eslint": "9.39.4",
     "typescript": "6.0.3",
-    "wrangler": "4.107.1"
+    "wrangler": "4.110.0"
   }
 }
