@@ -1,9 +1,9 @@
 export const scriptTypes = {
   library: "Library",
-  account: "Account Component",
+  "account-component": "Account Component",
+  "authentication-component": "Authentication Component",
   note: "Note Script",
   "tx-script": "Transaction Script",
-  "authentication-component": "Authentication Component",
 } as const;
 
 export type ScriptType = keyof typeof scriptTypes;
@@ -14,7 +14,7 @@ export type ScriptExampleItem = {
 };
 
 export const scriptExamples = {
-  "counter-account": { name: "Counter Contract", type: "account" },
+  "counter-account": { name: "Counter Contract", type: "account-component" },
   "p2id-note": { name: "P2ID Note", type: "note" },
   "counter-note": { name: "Counter Note", type: "note" },
 } as const;
@@ -60,18 +60,18 @@ export type Dependency = {
   digest: string;
 };
 
-export const baseDependency: Dependency = {
-  id: "base",
-  name: "base",
+export const coreDependency: Dependency = {
+  id: "miden-core",
+  name: "miden-core",
   type: "library",
-  digest: "0xfdb2ca9bbbf77002ea29ed266fed210f7a75dca0d6939ad015f6925a027ad650",
+  digest: "0xcd9686a94d49ca36e2cf3f23d31016805c1dd7648d6f2e3260778a38b48e8f4b",
 };
 
-export const stdDependency: Dependency = {
-  id: "std",
-  name: "std",
+export const protocolDependency: Dependency = {
+  id: "miden-protocol",
+  name: "miden-protocol",
   type: "library",
-  digest: "0xe5b1988c03ba3b190595c78d20f3b0fdf105048ad3edc7498cacf8676b4d9434",
+  digest: "0xd358bb70b44c28ee0c4bded0a109a9228c99a962bc7d2c3a5995f465e9102bfd",
 };
 
 export type PackageSource = { midenProjectToml: string; rust: string };

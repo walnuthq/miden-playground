@@ -10,7 +10,8 @@ const useCompleted = () => {
   const { accounts } = useAccounts();
   const { components } = useComponents();
   const component = components.find(
-    ({ id, type }) => !defaultComponentIds.includes(id) && type === "account",
+    ({ id, type }) =>
+      !defaultComponentIds.includes(id) && type === "account-component",
   );
   const counter = accounts.find(
     ({ components, isPublic }) =>
@@ -26,7 +27,8 @@ const Step3: TutorialStep = {
     const { accounts } = useAccounts();
     const { components } = useComponents();
     const component = components.find(
-      ({ id, type }) => !defaultComponentIds.includes(id) && type === "account",
+      ({ id, type }) =>
+        !defaultComponentIds.includes(id) && type === "account-component",
     );
     const counter = accounts.find(
       ({ components, isPublic }) =>

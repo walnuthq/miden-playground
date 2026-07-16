@@ -6,7 +6,7 @@ import {
   defaultSignature,
 } from "@/lib/utils/script";
 import counterContract from "@/lib/types/default-scripts/counter-contract";
-import { COUNTER_NOTE_RUN_PROC_HASH } from "@/lib/constants";
+import { COUNTER_SCRIPT_RUN_PROC_HASH } from "@/lib/constants";
 
 export const rust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
 #![no_std]
@@ -14,6 +14,7 @@ export const rust = `// Do not link against libstd (i.e. anything defined in \`s
 
 // However, we could still use some standard library types while
 // remaining no-std compatible, if we uncommented the following lines:
+//
 //
 // extern crate alloc;
 // use alloc::vec::Vec;
@@ -24,37 +25,24 @@ use miden::*;
 #[account(counter_account::CounterContract)]
 pub struct CounterContract;
 
-#[note]
-struct IncrementNote;
-
-#[note]
-impl IncrementNote {
-    #[note_script]
-    fn run(self, _arg: Word, account: &mut CounterContract) {
-        let initial_value = account.get_count();
-        account.increment_count();
-        let expected_value = initial_value + Felt::from_u32(1);
-        let final_value = account.get_count();
-        assert_eq(final_value, expected_value);
-    }
+#[tx_script]
+fn run(_arg: Word, account: &mut CounterContract) {
+    account.increment_count();
 }
 `;
 
 export const masm = `use external_contract::counter_contract
 
-#! Inputs:  []
-#! Outputs: []
-@note_script
-pub proc main
+begin
     call.counter_contract::increment_count
 end
 `;
 
-const counterNote: Script = {
+const counterScript: Script = {
   ...defaultScript(),
-  id: "counter-note",
-  name: "counter-note",
-  type: "note",
+  id: "counter-script",
+  name: "counter-script",
+  type: "tx-script",
   status: "compiled",
   readOnly: true,
   rust,
@@ -63,11 +51,11 @@ const counterNote: Script = {
   procedureExports: [
     {
       ...defaultProcedureExport(),
-      path: '::"miden:increment-note/miden-increment-note@0.1.0"::run',
-      digest: COUNTER_NOTE_RUN_PROC_HASH,
+      path: '::"miden:increment-script/miden-increment-script@0.1.0"::run',
+      digest: COUNTER_SCRIPT_RUN_PROC_HASH,
       signature: { ...defaultSignature(), params: ["Word"] },
     },
   ],
 };
 
-export default counterNote;
+export default counterScript;

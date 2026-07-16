@@ -7,7 +7,8 @@ import useScripts from "@/hooks/use-scripts";
 const useCompleted = () => {
   const { scripts } = useScripts();
   const script = scripts.find(
-    ({ id, type }) => id.startsWith("counter-account_") && type === "account",
+    ({ id, type }) =>
+      id.startsWith("counter-account_") && type === "account-component",
   );
   const matches = script?.rust.matchAll(/felt!\((\d*)\)/g);
   const lastMatch = Array.from(matches ?? []).at(-1);

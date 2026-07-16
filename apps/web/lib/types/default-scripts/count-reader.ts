@@ -69,7 +69,7 @@ const countReader: Script = {
   ...defaultScript(),
   id: "count-reader",
   name: "count-reader",
-  type: "account",
+  type: "account-component",
   status: "compiled",
   readOnly: true,
   rust,

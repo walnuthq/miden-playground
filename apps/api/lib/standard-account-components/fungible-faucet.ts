@@ -8,7 +8,7 @@ const fungibleFaucet: Package = {
   ...defaultPackage(),
   id: "fungible-faucet",
   name: "fungible-faucet",
-  type: "account",
+  type: "account-component",
   digest: "0x3ca7e678c18301868e5a9f1eb4d786d56b7644ad8e76408a6068e16edd219901",
   exports: [
     {

@@ -5,7 +5,7 @@ import type {
 } from "@/db/schema";
 
 export type ScriptExample =
-  "none" | "counter-account" | "p2id-note" | "counter-note";
+  "none" | "p2id-note" | "counter-account" | "counter-note" | "counter-script";
 
 export type MidenProjectToml = {
   package: {
@@ -35,7 +35,7 @@ export type Package = Omit<
 export const defaultPackage = (): Package => ({
   id: "",
   name: "",
-  type: "account",
+  type: "account-component",
   status: "compiled",
   readOnly: true,
   rust: "",

@@ -3,7 +3,11 @@
   "compilerOptions": {
     "paths": {
       "@/*": ["./*"],
-      "@workspace/ui/*": ["../../packages/ui/src/*"]
+      "@workspace/ui/*": ["../../packages/ui/src/*"],
+      "react": ["./node_modules/@types/react"],
+      "react-dom": ["./node_modules/@types/react-dom"],
+      "@types/react": ["./node_modules/@types/react"],
+      "@types/react-dom": ["./node_modules/@types/react-dom"]
     },
     "plugins": [
       {

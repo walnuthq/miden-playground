@@ -95,7 +95,7 @@ const counterContract: Script = {
   ...defaultScript(),
   id: "counter-contract",
   name: "counter-contract",
-  type: "account",
+  type: "account-component",
   status: "compiled",
   readOnly: true,
   rust,

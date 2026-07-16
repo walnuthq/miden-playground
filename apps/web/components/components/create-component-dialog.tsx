@@ -37,7 +37,8 @@ const CreateComponentDialog = () => {
   const { scripts } = useScripts();
   const [loading, setLoading] = useState(false);
   const [scriptId, setScriptId] = useState("");
-  const [componentType, setComponentType] = useState<ComponentType>("account");
+  const [componentType, setComponentType] =
+    useState<ComponentType>("account-component");
   const componentScriptIds = components.map(({ scriptId }) => scriptId);
   const shownScripts = scripts.filter(
     ({ id, type, status }) =>
@@ -50,7 +51,7 @@ const CreateComponentDialog = () => {
   }, [componentType]);
   const onClose = () => {
     setScriptId("");
-    setComponentType("account");
+    setComponentType("account-component");
     closeCreateComponentDialog();
   };
   return (

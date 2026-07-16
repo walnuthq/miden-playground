@@ -7,10 +7,22 @@ allowBuilds:
   sharp: true
   workerd: true
 
-minimumReleaseAgeExclude:
-  - miniflare@4.20260708.1
-  - wrangler@4.110.0
-
 overrides:
   "@miden-sdk/miden-sdk": "0.15.5"
+  "@miden-sdk/react": "0.15.5"
   "@aws-sdk/signature-v4-multi-region": "3.996.35"
+
+# The published wallet-adapter packages import @miden-sdk/miden-sdk without
+# declaring it (they rely on a hoisted install). Declare it explicitly so it
+# resolves under pnpm's isolated store; the override above points it at the
+# local build.
+packageExtensions:
+  "@miden-sdk/miden-wallet-adapter-base":
+    dependencies:
+      "@miden-sdk/miden-sdk": "0.15.5"
+  "@miden-sdk/miden-wallet-adapter-miden":
+    dependencies:
+      "@miden-sdk/miden-sdk": "0.15.5"
+  "@miden-sdk/miden-wallet-adapter-react":
+    dependencies:
+      "@miden-sdk/miden-sdk": "0.15.5"

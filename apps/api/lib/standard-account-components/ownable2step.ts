@@ -8,7 +8,7 @@ const ownable2Step: Package = {
   ...defaultPackage(),
   id: "ownable2step",
   name: "ownable2step",
-  type: "account",
+  type: "account-component",
   digest: "0xf824343001efd816ef0733088543c74f1269f4bbd36051a807838f48e22c69e9",
   exports: [
     {

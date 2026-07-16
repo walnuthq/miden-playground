@@ -8,7 +8,7 @@ const authority: Package = {
   ...defaultPackage(),
   id: "authority",
   name: "authority",
-  type: "account",
+  type: "account-component",
   digest: "0xe2fa4c774948a09ff77ad89f46757ace8f2695eb1c0499450d6ed9c60e208228",
   exports: [
     {

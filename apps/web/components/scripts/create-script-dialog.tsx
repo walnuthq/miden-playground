@@ -43,7 +43,7 @@ const CreateScriptDialog = () => {
   const { createScriptDialogOpen, closeCreateScriptDialog, newScript } =
     useScripts();
   const [loading, setLoading] = useState(false);
-  const [scriptType, setScriptType] = useState<ScriptType>("account");
+  const [scriptType, setScriptType] = useState<ScriptType>("account-component");
   const [scriptExample, setScriptExample] = useState<ScriptExample | "none">(
     "none",
   );
@@ -51,7 +51,7 @@ const CreateScriptDialog = () => {
     setScriptExample("none");
   }, [scriptType]);
   const onClose = () => {
-    setScriptType("account");
+    setScriptType("account-component");
     setScriptExample("none");
     closeCreateScriptDialog();
   };

@@ -15,7 +15,7 @@ const fungibleFaucet: Script = {
   ...defaultScript(),
   id: "fungible-faucet",
   name: "fungible-faucet",
-  type: "account",
+  type: "account-component",
   status: "compiled",
   readOnly: true,
   rust,

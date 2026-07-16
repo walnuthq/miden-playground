@@ -118,7 +118,7 @@ const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
           title: name,
           url: `/scripts/${id}`,
           icon:
-            type === "account" ? (
+            type === "account-component" ? (
               <UserCircle className="size-4" />
             ) : type === "note" ? (
               <File className="size-4" />

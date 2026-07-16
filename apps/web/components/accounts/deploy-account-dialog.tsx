@@ -69,21 +69,29 @@ const DeployAccountDialog = () => {
               return;
             }
             const formData = new FormData(event.currentTarget);
+            const authComponentWithInitialValues = {
+              ...authComponent,
+              storageSlots: authComponent.storageSlots.map((storageSlot) => ({
+                ...storageSlot,
+                value: formData.get(storageSlot.name)?.toString() ?? "",
+              })),
+            };
             const componentWithInitialValues = {
               ...component,
-              storageSlots: component.storageSlots.map(
-                (storageSlot, index) => ({
-                  ...storageSlot,
-                  value: formData.get(`slot-${index}`)?.toString() ?? "",
-                }),
-              ),
+              storageSlots: component.storageSlots.map((storageSlot) => ({
+                ...storageSlot,
+                value: formData.get(storageSlot.name)?.toString() ?? "",
+              })),
             };
             setLoading(true);
             try {
               const account = await deployAccount({
                 name: formData.get("name")?.toString() ?? "",
                 storageMode,
-                components: [authComponent, componentWithInitialValues],
+                components: [
+                  authComponentWithInitialValues,
+                  componentWithInitialValues,
+                ],
               });
               toast(`${account.name} has been deployed.`, {
                 description: (
@@ -92,6 +100,7 @@ const DeployAccountDialog = () => {
               });
               onClose();
             } catch (error) {
+              console.error(error);
               const { message } = error as { message: string };
               toast.error("Error while deploying Account Component.", {
                 description: message,
@@ -164,7 +173,8 @@ const DeployAccountDialog = () => {
                   {components
                     .filter(
                       ({ id, type }) =>
-                        !defaultComponentIds.includes(id) && type === "account",
+                        !defaultComponentIds.includes(id) &&
+                        type === "account-component",
                     )
                     .map(({ id, name }) => (
                       <SelectItem key={id} value={id}>
@@ -174,17 +184,17 @@ const DeployAccountDialog = () => {
                 </SelectContent>
               </Select>
             </div>
-            {component?.storageSlots.map((storageSlot, index) => (
-              <div
-                key={`${index}-${storageSlot.name}-${storageSlot.type}-${storageSlot.value}`}
-                className="grid gap-3 col-span-2"
-              >
-                <Label htmlFor={`slot-${index}`}>
+            {[
+              ...(authComponent?.storageSlots ?? []),
+              ...(component?.storageSlots ?? []),
+            ].map((storageSlot) => (
+              <div key={storageSlot.name} className="grid gap-3 col-span-2">
+                <Label htmlFor={storageSlot.name}>
                   <pre>{storageSlot.name}</pre>
                 </Label>
                 <Input
-                  id={`slot-${index}`}
-                  name={`slot-${index}`}
+                  id={storageSlot.name}
+                  name={storageSlot.name}
                   defaultValue={storageSlot.value}
                   required={storageSlot.type === "value"}
                 />

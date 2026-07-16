@@ -5,7 +5,7 @@ const basicWallet: Component = {
   ...defaultComponent(),
   id: "basic-wallet",
   name: "Basic Wallet",
-  type: "account",
+  type: "account-component",
   scriptId: "basic-wallet",
 };
 

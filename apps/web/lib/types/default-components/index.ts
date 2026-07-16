@@ -1,17 +1,19 @@
-import authSingleSig from "@/lib/types/default-components/auth-single-sig";
 import authMultisigGuardian from "@/lib/types/default-components/auth-multisig-guardian";
+import authNetworkAccount from "@/lib/types/default-components/auth-network-account";
 import authNoAuth from "@/lib/types/default-components/auth-no-auth";
-import fungibleFaucet from "@/lib/types/default-components/fungible-faucet";
+import authSingleSig from "@/lib/types/default-components/auth-single-sig";
 import basicWallet from "@/lib/types/default-components/basic-wallet";
 import counterContract from "@/lib/types/default-components/counter-contract";
+import fungibleFaucet from "@/lib/types/default-components/fungible-faucet";
 
 const defaultComponents = [
-  authSingleSig,
   authMultisigGuardian,
+  authNetworkAccount,
   authNoAuth,
-  fungibleFaucet,
+  authSingleSig,
   basicWallet,
   counterContract,
+  fungibleFaucet,
 ];
 
 export const defaultComponentIds = defaultComponents.map(({ id }) => id);

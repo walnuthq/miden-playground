@@ -3,7 +3,7 @@ import type { Dependency } from "@/lib/types";
 export const basicWalletDependency: Dependency = {
   id: "basic-wallet",
   name: "basic-wallet",
-  type: "account",
+  type: "account-component",
   digest: "0x91b7426f61f0b17d409919f19c69131a7f658c430df38168b87b082b6ff209c2",
 };
 

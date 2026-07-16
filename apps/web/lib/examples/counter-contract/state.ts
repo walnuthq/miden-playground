@@ -12,7 +12,7 @@ const state: State = {
       ...defaultComponent(),
       id: "counter-account",
       name: "Counter Contract",
-      type: "account",
+      type: "account-component",
       scriptId: "",
       storageSlots: [
         {

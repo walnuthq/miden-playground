@@ -88,7 +88,7 @@ const counterMapContract: Script = {
   ...defaultScript(),
   id: "counter-map-contract",
   name: "counter-map-contract",
-  type: "account",
+  type: "account-component",
   status: "compiled",
   readOnly: true,
   rust,

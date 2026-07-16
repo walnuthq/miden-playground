@@ -252,7 +252,7 @@ export const generateMidenProjectToml = ({
 }: {
   name: string;
   version?: string;
-  type: string;
+  type: PackageType;
   rust: string;
   dependencies: Dependency[];
 }) => {
@@ -278,7 +278,7 @@ export const generateMidenProjectToml = ({
     midenProjectToml += `${targetDependencies.join("\n")}\n`;
   }
   midenProjectToml += "\n";
-  if (type === "account") {
+  if (type === "account-component") {
     midenProjectToml += `[package.metadata.miden]\n`;
     midenProjectToml += `supported-types = ["RegularAccountUpdatableCode"]\n\n`;
   }

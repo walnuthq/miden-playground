@@ -3,6 +3,7 @@ import { defaultState } from "@/lib/utils/state";
 import defaultScripts from "@/lib/types/default-scripts";
 import counterContractScript from "@/lib/types/default-scripts/counter-contract";
 import counterNoteScript from "@/lib/types/default-scripts/counter-note";
+import counterScriptScript from "@/lib/types/default-scripts/counter-script";
 import defaultComponents from "@/lib/types/default-components";
 import counterContractComponent from "@/lib/types/default-components/counter-contract";
 
@@ -17,7 +18,18 @@ const state: State = {
         {
           id: "counter-value-contract",
           name: "counter-value-contract",
-          type: "account",
+          type: "account-component",
+          digest: "",
+        },
+      ],
+    },
+    {
+      ...counterScriptScript,
+      dependencies: [
+        {
+          id: "counter-value-contract",
+          name: "counter-value-contract",
+          type: "account-component",
           digest: "",
         },
       ],

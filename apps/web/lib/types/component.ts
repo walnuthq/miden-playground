@@ -1,5 +1,5 @@
 export const componentTypes = {
-  account: "Account Component",
+  "account-component": "Account Component",
   "authentication-component": "Authentication Component",
 } as const;
 

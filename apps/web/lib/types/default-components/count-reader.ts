@@ -5,7 +5,7 @@ const countReader: Component = {
   ...defaultComponent(),
   id: "count-reader",
   name: "Count Reader",
-  type: "account",
+  type: "account-component",
   scriptId: "count-reader",
   storageSlots: [
     {

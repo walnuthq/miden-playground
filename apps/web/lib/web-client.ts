@@ -156,6 +156,11 @@ export const clientDeployAccount = async ({
       accountBuilder = accountBuilder.withNoAuthComponent();
       continue;
     }
+    if (component.scriptId === "auth-network-account") {
+      // console.log(component.storageSlots);
+      // const authComponent = WasmAccountComponent.createNetworkAuth();
+      // accountBuilder = accountBuilder.withAuthComponent(authComponent);
+    }
     const script = scripts.find(({ id }) => id === component.scriptId);
     if (!script) {
       continue;
