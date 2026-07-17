@@ -63,8 +63,6 @@ const useMultisig = () => {
       { signBytes },
       midenWalletSession.commitment,
       midenWalletSession.scheme,
-      // undefined,
-      // midenWalletSession.publicKey ?? undefined,
     );
     const newMultisig = await multisigClient.create(
       {
