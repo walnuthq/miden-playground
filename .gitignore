@@ -37,7 +37,11 @@ keystore/
 store.sqlite3
 
 # Agents
+.agents
 .claude
+docs/agents
+CLAUDE.md
+skills-lock.json
 
 # Debug
 npm-debug.log*
