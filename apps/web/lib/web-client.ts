@@ -157,9 +157,31 @@ export const clientDeployAccount = async ({
       continue;
     }
     if (component.scriptId === "auth-network-account") {
-      // console.log(component.storageSlots);
-      // const authComponent = WasmAccountComponent.createNetworkAuth();
-      // accountBuilder = accountBuilder.withAuthComponent(authComponent);
+      const { value: allowedNoteScriptRootsRaw } = component.storageSlots.find(
+        ({ name }) =>
+          name ===
+          "miden::standards::auth::network_account::allowed_note_scripts",
+      ) ?? { value: "" };
+      const allowedNoteScriptRoots = allowedNoteScriptRootsRaw
+        .split(",")
+        .map((keyValue) => keyValue.split(":").at(0) ?? "")
+        .filter((root) => root);
+      const { value: allowedTransactionScriptRootsRaw } =
+        component.storageSlots.find(
+          ({ name }) =>
+            name ===
+            "miden::standards::auth::network_account::allowed_tx_scripts",
+        ) ?? { value: "" };
+      const allowedTransactionScriptRoots = allowedTransactionScriptRootsRaw
+        .split(",")
+        .map((keyValue) => keyValue.split(":").at(0) ?? "")
+        .filter((root) => root);
+      const authComponent = WasmAccountComponent.createNetworkAuth(
+        allowedNoteScriptRoots.map((root) => WasmWord.fromHex(root)),
+        allowedTransactionScriptRoots.map((root) => WasmWord.fromHex(root)),
+      );
+      accountBuilder = accountBuilder.withAuthComponent(authComponent);
+      continue;
     }
     const script = scripts.find(({ id }) => id === component.scriptId);
     if (!script) {
@@ -203,13 +225,55 @@ export const clientDeployAccount = async ({
   return account;
 };
 
-export const createTransactionFromScript = (script: Script) => {
+const createTransactionFromMasm = async ({
+  client,
+  accountScript,
+  txScript,
+}: {
+  client: WebClientType;
+  accountScript: Script;
+  txScript: Script;
+}) => {
+  const builder = await client.createCodeBuilder();
+  const contractName = accountScript.name.replaceAll("-", "_");
+  const accountComponentLibrary = accountScript.masm
+    ? builder.buildLibrary(
+        `external_contract::${contractName}`,
+        accountScript.masm,
+      )
+    : WasmPackage.deserialize(fromBase64(accountScript.masp)).asLibrary();
+  builder.linkDynamicLibrary(accountComponentLibrary);
+  const transactionScript = builder.compileTxScript(txScript.masm);
+  const transactionRequestBuilder =
+    new WasmTransactionRequestBuilder().withCustomScript(transactionScript);
+  return transactionRequestBuilder.build();
+};
+
+const createTransactionFromPackage = async (script: Script) => {
   const transactionScript = WasmTransactionScript.fromPackage(
     WasmPackage.deserialize(fromBase64(script.masp)),
   );
   const transactionRequestBuilder =
     new WasmTransactionRequestBuilder().withCustomScript(transactionScript);
   return transactionRequestBuilder.build();
+};
+
+export const clientCreateTransactionFromScript = ({
+  client,
+  accountScript,
+  txScript,
+}: {
+  client: WebClientType;
+  accountScript?: Script;
+  txScript: Script;
+}) => {
+  if (txScript.masm) {
+    if (!accountScript) {
+      throw new Error("Account Script not found");
+    }
+    return createTransactionFromMasm({ client, accountScript, txScript });
+  }
+  return createTransactionFromPackage(txScript);
 };
 
 const clientCreateNoteScriptFromMasm = async ({

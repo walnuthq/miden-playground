@@ -7,10 +7,12 @@ import counterContract from "@/lib/types/default-components/counter-contract";
 import fungibleFaucet from "@/lib/types/default-components/fungible-faucet";
 
 const defaultComponents = [
-  authMultisigGuardian,
-  authNetworkAccount,
+  // authentication-component
   authNoAuth,
+  authNetworkAccount,
   authSingleSig,
+  authMultisigGuardian,
+  // account-component
   basicWallet,
   counterContract,
   fungibleFaucet,

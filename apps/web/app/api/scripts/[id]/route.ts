@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import counterMapContract from "@/lib/types/default-scripts/counter-map-contract";
 import timelockP2id from "@/lib/types/default-scripts/timelock-p2id";
 import counterNote from "@/lib/types/default-scripts/counter-note";
+import counterScript from "@/lib/types/default-scripts/counter-script";
 import { sleep } from "@/lib/utils";
 import type {
   ScriptExample,
@@ -24,6 +25,7 @@ const scripts: Record<ScriptExample | "none", Script> = {
   "counter-account": counterMapContract,
   "p2id-note": timelockP2id,
   "counter-note": counterNote,
+  "counter-script": counterScript,
 } as const;
 
 const scriptsExports: Record<ScriptExample | "none", Export[]> = {
@@ -39,6 +41,9 @@ const scriptsExports: Record<ScriptExample | "none", Export[]> = {
     Procedure: procedureExport,
   })),
   "counter-note": counterNote.procedureExports.map((procedureExport) => ({
+    Procedure: procedureExport,
+  })),
+  "counter-script": counterScript.procedureExports.map((procedureExport) => ({
     Procedure: procedureExport,
   })),
 } as const;

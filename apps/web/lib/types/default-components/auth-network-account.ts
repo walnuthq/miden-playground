@@ -4,7 +4,7 @@ import { defaultComponent } from "@/lib/utils/component";
 const authNetworkAccount: Component = {
   ...defaultComponent(),
   id: "auth-network-account",
-  name: "Auth Network Account",
+  name: "Network Account",
   type: "authentication-component",
   scriptId: "auth-network-account",
   storageSlots: [

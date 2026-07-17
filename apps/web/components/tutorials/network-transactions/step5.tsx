@@ -17,7 +17,9 @@ const useCompleted = () => {
   );
   const counter = accounts.find(
     ({ components, isPublic }) =>
-      components.includes(component?.id ?? "") && isPublic,
+      components.includes(component?.id ?? "") &&
+      isPublic &&
+      components.includes("auth-network-account"),
   );
   const currentNonce = counter?.nonce ?? 0;
   useEffect(() => {

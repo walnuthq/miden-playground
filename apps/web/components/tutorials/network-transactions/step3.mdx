@@ -1,9 +1,13 @@
 import Link from "@/components/tutorials/tutorial-link";
 
-Now that our network account is deployed, we must execute a transaction performing a procedure invocation (**`increment_count`**) creating a necessary state change for our contract to be deployed and stored on-chain.
+Now that our network account is deployed, we must execute a transaction performing a procedure invocation (**`increment_count`**) creating a necessary state change for our contract to be deployed and stored the network on-chain.
 
-In Miden, network contracts must have their state modified through a transaction to be properly registered and committed to the blockchain - simply creating the account isn't sufficient for network storage mode.
+Take some time to get familiar with the <Link href="/scripts/counter-script">counter transaction script</Link>.
 
-Navigate to your network account by <Link href={`/accounts/${props.counter.identifier}`}>clicking on its ID</Link>, on the _"Components"_ tab, you can access the account components to perform an initial transaction on this newly created smart contract.
+In Miden, public contracts must have their state modified through a transaction to be properly registered and committed to the blockchain - simply creating the account isn't sufficient.
 
-Click on the _"Invoke"_ button of **`increment_count`** to trigger a custom transaction and increment the counter.
+Navigate to your network account by <Link href={`/accounts/${props.counter.identifier}`}>clicking on its name</Link>, trigger the _"Create new transaction"_ dropdown and select the _"New custom transaction"_ option.
+
+Configure the custom transaction by selecting the **counter-script** and preview the resulting state change: the counter will be incremented by one as the **counter-script** is simply calling the account **`increment_count`** procedure.
+
+This transaction will succeed because we registered the counter-script as an allowed transaction-script in the previous step.

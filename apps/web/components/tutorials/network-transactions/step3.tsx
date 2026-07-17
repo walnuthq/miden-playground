@@ -15,7 +15,9 @@ const useCompleted = () => {
   );
   const counter = accounts.find(
     ({ components, isPublic }) =>
-      components.includes(component?.id ?? "") && isPublic,
+      components.includes(component?.id ?? "") &&
+      isPublic &&
+      components.includes("auth-network-account"),
   );
   const nonce = counter?.nonce ?? 0;
   return nonce > 0;
@@ -32,7 +34,9 @@ const Step3: TutorialStep = {
     );
     const counter = accounts.find(
       ({ components, isPublic }) =>
-        components.includes(component?.id ?? "") && isPublic,
+        components.includes(component?.id ?? "") &&
+        isPublic &&
+        components.includes("auth-network-account"),
     );
     const completed = useCompleted();
     return (
@@ -44,8 +48,8 @@ const Step3: TutorialStep = {
           titleWhenCompleted="You registered the network account."
           description={
             <p>
-              Click on the <em>"Invoke"</em> button from your newly deployed
-              network account to register and commit its state on-chain.
+              Create a new custom transaction on your newly deployed network
+              account to register and commit its state on-chain.
             </p>
           }
         />

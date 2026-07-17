@@ -17,6 +17,7 @@ export const scriptExamples = {
   "counter-account": { name: "Counter Contract", type: "account-component" },
   "p2id-note": { name: "P2ID Note", type: "note" },
   "counter-note": { name: "Counter Note", type: "note" },
+  "counter-script": { name: "Counter Note", type: "tx-script" },
 } as const;
 
 export type ScriptExample = keyof typeof scriptExamples;

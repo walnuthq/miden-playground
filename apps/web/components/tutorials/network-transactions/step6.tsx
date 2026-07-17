@@ -16,7 +16,9 @@ const Step6: TutorialStep = {
     );
     const counter = accounts.find(
       ({ components, isPublic }) =>
-        components.includes(component?.id ?? "") && isPublic,
+        components.includes(component?.id ?? "") &&
+        isPublic &&
+        components.includes("auth-network-account"),
     );
     return <Step6Content counter={counter} />;
   },
