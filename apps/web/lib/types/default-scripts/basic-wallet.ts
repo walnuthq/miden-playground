@@ -62,7 +62,7 @@ const basicWallet: Script = {
   ...defaultScript(),
   id: "basic-wallet",
   name: "basic-wallet",
-  type: "account",
+  type: "account-component",
   status: "compiled",
   readOnly: true,
   rust,

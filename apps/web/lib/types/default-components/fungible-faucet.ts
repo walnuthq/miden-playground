@@ -5,7 +5,7 @@ const fungibleFaucet: Component = {
   ...defaultComponent(),
   id: "fungible-faucet",
   name: "Fungible Faucet",
-  type: "account",
+  type: "account-component",
   scriptId: "fungible-faucet",
   storageSlots: [
     {

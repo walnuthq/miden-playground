@@ -6,7 +6,7 @@ import tutorial5 from "@/components/tutorials/wallet-backup-using-miden-guardian
 import tutorial6 from "@/components/tutorials/interact-with-the-counter-contract";
 import tutorial7 from "@/components/tutorials/deploy-a-counter-contract";
 import tutorial8 from "@/components/tutorials/timelock-p2id-note";
-// import tutorial9 from "@/components/tutorials/network-transactions";
+import tutorial9 from "@/components/tutorials/network-transactions";
 import tutorial10 from "@/components/tutorials/foreign-procedure-invocation";
 import tutorial11 from "@/components/tutorials/your-first-smart-contract-and-custom-note";
 import tutorial12 from "@/components/tutorials/contract-verification";
@@ -27,7 +27,7 @@ const tutorials = [
   tutorial6,
   tutorial7,
   tutorial8,
-  // tutorial9,
+  tutorial9,
   tutorial10,
   tutorial11,
   tutorial12,

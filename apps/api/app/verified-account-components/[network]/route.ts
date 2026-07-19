@@ -57,7 +57,7 @@ const verifyAccountComponentFromSource = async ({
   } = parseMidenProjectToml(midenProjectToml);
   const { id } = await newPackage({
     name,
-    type: "account",
+    type: "account-component",
     rust,
     readOnly: true,
   });

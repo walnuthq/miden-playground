@@ -86,7 +86,7 @@ export const generatePackageDir = async ({
 }: {
   packageDir: string;
   name: string;
-  type: string;
+  type: PackageType;
   rust: string;
   dependencies: string[];
 }) => {

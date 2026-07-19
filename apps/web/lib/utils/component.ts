@@ -20,7 +20,7 @@ export const storageSlotName = ({
 export const defaultComponent = (): Component => ({
   id: "",
   name: "",
-  type: "account",
+  type: "account-component",
   scriptId: "",
   storageSlots: [],
   updatedAt: Date.now(),

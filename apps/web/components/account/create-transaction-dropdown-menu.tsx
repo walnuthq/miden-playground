@@ -56,16 +56,29 @@ const CreateTransactionDropdownMenu = ({ account }: { account: Account }) => {
             >
               New consume transaction
             </DropdownMenuItem>
+            {account.components.includes("basic-wallet") && (
+              <DropdownMenuItem
+                onClick={() =>
+                  openCreateTransactionDialog({
+                    accountId: account.id,
+                    transactionType: "send",
+                    step: "configure",
+                  })
+                }
+              >
+                New send transaction
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem
               onClick={() =>
                 openCreateTransactionDialog({
                   accountId: account.id,
-                  transactionType: "send",
+                  transactionType: "custom",
                   step: "configure",
                 })
               }
             >
-              New send transaction
+              New custom transaction
             </DropdownMenuItem>
           </>
         )}

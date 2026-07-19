@@ -15,11 +15,13 @@ export const projectTemplateFiles = {
 } as const;
 
 export const templates = {
-  account: readFile("account.rs"),
+  library: "",
+  "account-component": readFile("account-component.rs"),
   "authentication-component": readFile("authentication-component.rs"),
   note: readFile("note.rs"),
   "tx-script": readFile("tx-script.rs"),
-  "counter-account": readFile("counter-account.rs"),
   "p2id-note": readFile("p2id-note.rs"),
+  "counter-account": readFile("counter-account.rs"),
   "counter-note": readFile("counter-note.rs"),
+  "counter-script": readFile("counter-script.rs"),
 } as const;

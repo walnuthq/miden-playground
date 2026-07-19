@@ -59,7 +59,7 @@ const ProceduresTableRow = ({
         </div>
       </TableCell>
       {account.components.includes("auth-no-auth") &&
-        component.type === "account" && (
+        component.type === "account-component" && (
           <TableCell className="flex items-center justify-between gap-2">
             <span>{result}</span>
             <Button

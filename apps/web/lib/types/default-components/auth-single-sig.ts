@@ -4,7 +4,7 @@ import { defaultComponent } from "@/lib/utils/component";
 const authSingleSig: Component = {
   ...defaultComponent(),
   id: "auth-single-sig",
-  name: "Single Sig Auth",
+  name: "Single Sig",
   type: "authentication-component",
   scriptId: "auth-single-sig",
   storageSlots: [

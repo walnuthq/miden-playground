@@ -2,6 +2,7 @@ import { pick } from "lodash";
 import type { Script } from "@/lib/types/script";
 import { defaultProcedureExport, defaultScript } from "@/lib/utils/script";
 import basicWallet from "@/lib/types/default-scripts/basic-wallet";
+import { P2ID_NOTE_CODE } from "@/lib/constants";
 
 export const rust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
 #![no_std]
@@ -162,14 +163,13 @@ const p2id: Script = {
   readOnly: true,
   rust,
   masm,
-  digest: "0xf08ea78d8d0570b219a40bfc5652c1de5adb2dfdc7ab034622dedae7837ac8ac",
+  digest: P2ID_NOTE_CODE,
   dependencies: [pick(basicWallet, "id", "name", "type", "digest")],
   procedureExports: [
     {
       ...defaultProcedureExport(),
       path: "::miden::standards::notes::p2id::run",
-      digest:
-        "0xf08ea78d8d0570b219a40bfc5652c1de5adb2dfdc7ab034622dedae7837ac8ac",
+      digest: P2ID_NOTE_CODE,
     },
   ],
 };

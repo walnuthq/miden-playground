@@ -8,7 +8,7 @@ const roleBasedAccessControl: Package = {
   ...defaultPackage(),
   id: "role-based-access-control",
   name: "role-based-access-control",
-  type: "account",
+  type: "account-component",
   digest: "0x8790c005448c81ec114fa9d6d313c7aca4d90e97df42e4d18083153e1f546fc0",
   exports: [
     {

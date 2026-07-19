@@ -23,7 +23,7 @@ const EmptyComponents = ({
   type,
   accountId,
 }: {
-  type: "account" | "authentication-component";
+  type: "account-component" | "authentication-component";
   accountId: string;
 }) => {
   const { openVerifyAccountComponentDialog } = useAccounts();
@@ -35,11 +35,12 @@ const EmptyComponents = ({
         </EmptyMedia>
         <EmptyTitle>
           This account has no verified{" "}
-          {type === "account" ? "account" : "authentication"} components
+          {type === "account-component" ? "account" : "authentication"}{" "}
+          components
         </EmptyTitle>
         <EmptyDescription>
-          Verify {type === "account" ? "account" : "authentication"} components
-          by uploading their source code.
+          Verify {type === "account-component" ? "account" : "authentication"}{" "}
+          components by uploading their source code.
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
@@ -82,8 +83,8 @@ const AccountComponents = ({
         ...defaultComponent(),
         id: script.id,
         name: script.name,
-        type: (script.type === "account"
-          ? "account"
+        type: (script.type === "account-component"
+          ? "account-component"
           : "authentication-component") as ComponentType,
         scriptId: script.id,
         // storageSlots: [], // TODO
@@ -113,7 +114,7 @@ const AccountComponents = ({
     ({ component }) => component.type === "authentication-component",
   );
   const accountComponents = componentsWithScripts.filter(
-    ({ component }) => component.type === "account",
+    ({ component }) => component.type === "account-component",
   );
   return (
     <div className="space-y-8">
@@ -143,7 +144,7 @@ const AccountComponents = ({
             Account Components
           </h4>
           {accountComponents.length === 0 ? (
-            <EmptyComponents type="account" accountId={account.id} />
+            <EmptyComponents type="account-component" accountId={account.id} />
           ) : (
             accountComponents.map(({ component, script }) => (
               <AccountComponentTable

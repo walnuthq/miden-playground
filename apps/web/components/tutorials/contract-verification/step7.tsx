@@ -14,7 +14,8 @@ const useCompleted = () => {
   const { scripts } = useScripts();
   const counter = accounts.find(({ name }) => name === "Unverified Contract");
   const script = scripts.find(
-    ({ id, type }) => !defaultScriptIds.includes(id) && type === "account",
+    ({ id, type }) =>
+      !defaultScriptIds.includes(id) && type === "account-component",
   );
   if (!counter) {
     return false;

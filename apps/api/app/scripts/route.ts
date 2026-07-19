@@ -23,9 +23,10 @@ type CreateScriptResponse = {
 
 const scriptsDependencies: Record<ScriptExample, Dependency[]> = {
   none: [],
-  "counter-account": [],
   "p2id-note": [basicWalletDependency],
+  "counter-account": [],
   "counter-note": [],
+  "counter-script": [],
 } as const;
 
 export const POST = async (request: NextRequest) => {

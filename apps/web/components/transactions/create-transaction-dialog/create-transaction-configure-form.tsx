@@ -31,10 +31,12 @@ import {
 } from "@miden-sdk/miden-wallet-adapter";
 import { formatAmount, parseAmount } from "@/lib/utils/asset";
 import useScripts from "@/hooks/use-scripts";
-import { createTransactionFromScript } from "@/lib/web-client";
-import { normalizeAccountId } from "@miden-sdk/react/lazy";
+import { clientCreateTransactionFromScript } from "@/lib/web-client";
+import { useMiden, normalizeAccountId } from "@miden-sdk/react/lazy";
 import useNetwork from "@/hooks/use-network";
 import useMultisig from "@/hooks/use-multisig";
+import { defaultComponentIds } from "@/lib/types/default-components";
+import useComponents from "@/hooks/use-components";
 
 const CreateTransactionConfigureForm = ({
   transactionType,
@@ -77,10 +79,12 @@ const CreateTransactionConfigureForm = ({
   setLoading: Dispatch<SetStateAction<boolean>>;
   setStep: Dispatch<SetStateAction<CreateTransactionDialogStep>>;
 }) => {
+  const { client } = useMiden();
   const { wallet } = useWallet();
   const { networkId } = useNetwork();
   const { accounts } = useAccounts();
   const { scripts } = useScripts();
+  const { components } = useComponents();
   const {
     newMintTransactionRequest,
     newConsumeTransactionRequest,
@@ -110,6 +114,9 @@ const CreateTransactionConfigureForm = ({
       id="create-transaction-configure-form"
       onSubmit={async (event) => {
         event.preventDefault();
+        if (!client) {
+          throw new Error("MidenClient not ready");
+        }
         const formData = new FormData(event.currentTarget);
         setLoading(true);
         if (transactionType === "mint" && executingAccount && targetAccount) {
@@ -215,7 +222,21 @@ const CreateTransactionConfigureForm = ({
           setLoading(false);
         }
         if (transactionType === "custom" && executingAccount && script) {
-          const customTransactionRequest = createTransactionFromScript(script);
+          const customComponentId = executingAccount.components.find(
+            (componentId) => !defaultComponentIds.includes(componentId),
+          );
+          const customComponent = components.find(
+            ({ id }) => id === customComponentId,
+          );
+          const accountScript = scripts.find(
+            ({ id }) => id === customComponent?.scriptId,
+          );
+          const customTransactionRequest =
+            await clientCreateTransactionFromScript({
+              client,
+              accountScript,
+              txScript: script,
+            });
           const { transactionRequest, transactionResult } =
             await newCustomTransactionRequest({
               senderAccountId: executingAccount.id,

@@ -10,10 +10,11 @@ import {
 } from "drizzle-orm/pg-core";
 
 export const packageTypeEnum = pgEnum("package_type", [
-  "account",
+  "library",
+  "account-component",
+  "authentication-component",
   "note",
   "tx-script",
-  "authentication-component",
 ]);
 
 export const packageStatusEnum = pgEnum("package_status", [
@@ -25,7 +26,7 @@ export const packageStatusEnum = pgEnum("package_status", [
 export const packagesTable = pgTable("packages", {
   id: uuid().primaryKey().defaultRandom(),
   name: varchar({ length: 255 }).notNull().default(""),
-  type: packageTypeEnum().notNull().default("account"),
+  type: packageTypeEnum().notNull().default("account-component"),
   status: packageStatusEnum().notNull().default("draft"),
   readOnly: boolean("read_only").notNull().default(false),
   rust: text().notNull().default(""),

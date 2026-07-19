@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import counterMapContract from "@/lib/types/default-scripts/counter-map-contract";
 import timelockP2id from "@/lib/types/default-scripts/timelock-p2id";
 import counterNote from "@/lib/types/default-scripts/counter-note";
+import counterScript from "@/lib/types/default-scripts/counter-script";
 import { sleep } from "@/lib/utils";
 import type {
   ScriptType,
@@ -29,6 +30,7 @@ const scriptsRust: Record<ScriptExample | "none", string> = {
   "counter-account": counterMapContract.rust,
   "p2id-note": timelockP2id.rust,
   "counter-note": counterNote.rust,
+  "counter-script": counterScript.rust,
 } as const;
 
 const scriptsDependencies: Record<ScriptExample | "none", Dependency[]> = {
@@ -36,6 +38,7 @@ const scriptsDependencies: Record<ScriptExample | "none", Dependency[]> = {
   "counter-account": counterMapContract.dependencies,
   "p2id-note": timelockP2id.dependencies,
   "counter-note": counterNote.dependencies,
+  "counter-script": counterScript.dependencies,
 } as const;
 
 export const POST = async (request: NextRequest) => {

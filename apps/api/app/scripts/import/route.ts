@@ -70,7 +70,14 @@ const importScriptsFromPackageSources = async (
             } = parseMidenProjectToml(packageSource.midenProjectToml);
             const dependencyPackage = packagesWithDependencies.find(
               ({ package: { name } }) => name === dependencyName,
-            ) ?? { package: { id: "", name: "", type: "account", digest: "" } };
+            ) ?? {
+              package: {
+                id: "",
+                name: "",
+                type: "account-component",
+                digest: "",
+              },
+            };
             return {
               id: dependencyPackage.package.id,
               name: dependencyPackage.package.name,

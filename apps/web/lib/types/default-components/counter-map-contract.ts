@@ -5,7 +5,7 @@ const counterMapContract: Component = {
   ...defaultComponent(),
   id: "counter-map-contract",
   name: "Counter Map Contract",
-  type: "account",
+  type: "account-component",
   scriptId: "counter-map-contract",
   storageSlots: [
     {

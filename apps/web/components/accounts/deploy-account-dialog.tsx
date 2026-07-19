@@ -28,23 +28,41 @@ import {
   accountStorageModes,
 } from "@/lib/types/account";
 import useComponents from "@/hooks/use-components";
+import useScripts from "@/hooks/use-scripts";
 import { defaultComponentIds } from "@/lib/types/default-components";
+import SelectScriptsCombobox from "@/components/accounts/select-scripts-combobox";
+import { formatProcedureExportPath } from "@/lib/utils/script";
 
 const DeployAccountDialog = () => {
   const { deployAccountDialogOpen, deployAccount, closeDeployAccountDialog } =
     useAccounts();
   const { components } = useComponents();
+  const { scripts } = useScripts();
   const [loading, setLoading] = useState(false);
   const [storageMode, setStorageMode] = useState<AccountStorageMode>("public");
   const [authComponentId, setAuthComponentId] = useState("auth-no-auth");
   const [componentId, setComponentId] = useState("");
+  const [allowedNoteScriptIds, setAllowedNoteScriptIds] = useState<string[]>(
+    [],
+  );
+  const [allowedTransactionScriptIds, setAllowedTransactionScriptIds] =
+    useState<string[]>([]);
   const authComponent = components.find(({ id }) => id === authComponentId);
   const component = components.find(({ id }) => id === componentId);
   const onClose = () => {
     setStorageMode("public");
     setAuthComponentId("auth-no-auth");
     setComponentId("");
+    setAllowedNoteScriptIds([]);
+    setAllowedTransactionScriptIds([]);
     closeDeployAccountDialog();
+  };
+  const scriptIdToProcedure = (scriptId: string) => {
+    const script = scripts.find(({ id }) => id === scriptId);
+    const runProcedure = script?.procedureExports.find(
+      ({ path }) => formatProcedureExportPath(path) === "run",
+    );
+    return runProcedure ? `${runProcedure.digest}:1` : "";
   };
   return (
     <Dialog
@@ -69,21 +87,50 @@ const DeployAccountDialog = () => {
               return;
             }
             const formData = new FormData(event.currentTarget);
+            const authComponentWithInitialValues =
+              authComponent.id === "auth-network-account"
+                ? {
+                    ...authComponent,
+                    storageSlots: authComponent.storageSlots.map(
+                      (storageSlot) => ({
+                        ...storageSlot,
+                        value:
+                          storageSlot.name ===
+                          "miden::standards::auth::network_account::allowed_note_scripts"
+                            ? allowedNoteScriptIds
+                                .map(scriptIdToProcedure)
+                                .join(",")
+                            : allowedTransactionScriptIds
+                                .map(scriptIdToProcedure)
+                                .join(","),
+                      }),
+                    ),
+                  }
+                : {
+                    ...authComponent,
+                    storageSlots: authComponent.storageSlots.map(
+                      (storageSlot) => ({
+                        ...storageSlot,
+                        value: formData.get(storageSlot.name)?.toString() ?? "",
+                      }),
+                    ),
+                  };
             const componentWithInitialValues = {
               ...component,
-              storageSlots: component.storageSlots.map(
-                (storageSlot, index) => ({
-                  ...storageSlot,
-                  value: formData.get(`slot-${index}`)?.toString() ?? "",
-                }),
-              ),
+              storageSlots: component.storageSlots.map((storageSlot) => ({
+                ...storageSlot,
+                value: formData.get(storageSlot.name)?.toString() ?? "",
+              })),
             };
             setLoading(true);
             try {
               const account = await deployAccount({
                 name: formData.get("name")?.toString() ?? "",
                 storageMode,
-                components: [authComponent, componentWithInitialValues],
+                components: [
+                  authComponentWithInitialValues,
+                  componentWithInitialValues,
+                ],
               });
               toast(`${account.name} has been deployed.`, {
                 description: (
@@ -92,6 +139,7 @@ const DeployAccountDialog = () => {
               });
               onClose();
             } catch (error) {
+              console.error(error);
               const { message } = error as { message: string };
               toast.error("Error while deploying Account Component.", {
                 description: message,
@@ -164,7 +212,8 @@ const DeployAccountDialog = () => {
                   {components
                     .filter(
                       ({ id, type }) =>
-                        !defaultComponentIds.includes(id) && type === "account",
+                        !defaultComponentIds.includes(id) &&
+                        type === "account-component",
                     )
                     .map(({ id, name }) => (
                       <SelectItem key={id} value={id}>
@@ -174,17 +223,45 @@ const DeployAccountDialog = () => {
                 </SelectContent>
               </Select>
             </div>
-            {component?.storageSlots.map((storageSlot, index) => (
-              <div
-                key={`${index}-${storageSlot.name}-${storageSlot.type}-${storageSlot.value}`}
-                className="grid gap-3 col-span-2"
-              >
-                <Label htmlFor={`slot-${index}`}>
+            {authComponentId === "auth-network-account" && (
+              <>
+                <div className="grid gap-3 col-span-2">
+                  <Label htmlFor="allowed-note-scripts">
+                    Allowed Note-scripts
+                  </Label>
+                  <SelectScriptsCombobox
+                    scripts={scripts.filter(({ type }) => type === "note")}
+                    value={allowedNoteScriptIds}
+                    onValueChange={setAllowedNoteScriptIds}
+                    placeholder="Select allowed note-scripts…"
+                  />
+                </div>
+                <div className="grid gap-3 col-span-2">
+                  <Label htmlFor="allowed-transaction-scripts">
+                    Allowed Transaction-scripts
+                  </Label>
+                  <SelectScriptsCombobox
+                    scripts={scripts.filter(({ type }) => type === "tx-script")}
+                    value={allowedTransactionScriptIds}
+                    onValueChange={setAllowedTransactionScriptIds}
+                    placeholder="Select allowed transaction-scripts…"
+                  />
+                </div>
+              </>
+            )}
+            {[
+              ...(authComponent?.id !== "auth-network-account"
+                ? (authComponent?.storageSlots ?? [])
+                : []),
+              ...(component?.storageSlots ?? []),
+            ].map((storageSlot) => (
+              <div key={storageSlot.name} className="grid gap-3 col-span-2">
+                <Label htmlFor={storageSlot.name}>
                   <pre>{storageSlot.name}</pre>
                 </Label>
                 <Input
-                  id={`slot-${index}`}
-                  name={`slot-${index}`}
+                  id={storageSlot.name}
+                  name={storageSlot.name}
                   defaultValue={storageSlot.value}
                   required={storageSlot.type === "value"}
                 />

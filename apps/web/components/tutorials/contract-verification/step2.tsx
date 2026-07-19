@@ -11,7 +11,8 @@ import { storageSlotName } from "@/lib/utils/component";
 const useCompleted = () => {
   const { scripts } = useScripts();
   const script = scripts.find(
-    ({ id, type }) => !defaultScriptIds.includes(id) && type === "account",
+    ({ id, type }) =>
+      !defaultScriptIds.includes(id) && type === "account-component",
   );
   const procedureExports = script?.procedureExports ?? [];
   const resetCountProcedure = procedureExports.find(
@@ -49,7 +50,8 @@ const Step2: TutorialStep = {
     const { components, newComponent } = useComponents();
     const { nextTutorialStep } = useTutorials();
     const script = scripts.find(
-      ({ id, type }) => !defaultScriptIds.includes(id) && type === "account",
+      ({ id, type }) =>
+        !defaultScriptIds.includes(id) && type === "account-component",
     );
     const component = components.find(
       ({ scriptId }) => scriptId === script?.id,
@@ -61,7 +63,7 @@ const Step2: TutorialStep = {
           if (!component) {
             newComponent({
               name: "Counter Contract",
-              type: "account",
+              type: "account-component",
               scriptId: script?.id ?? "",
               storageSlots: [
                 {

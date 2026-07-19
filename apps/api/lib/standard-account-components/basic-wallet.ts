@@ -8,7 +8,7 @@ const basicWallet: Package = {
   ...defaultPackage(),
   id: "basic-wallet",
   name: "basic-wallet",
-  type: "account",
+  type: "account-component",
   digest: "0x2d3dd7b37c470013f64bb7dce356cea29471f10fa35f04405452c0c59f53dc20",
   exports: [
     {

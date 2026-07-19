@@ -11,7 +11,7 @@ import type {
   MidenProjectToml,
   CompiledPackage,
 } from "@/lib/types/script";
-import { baseDependency, stdDependency } from "@/lib/types/script";
+import { coreDependency, protocolDependency } from "@/lib/types/script";
 
 export const defaultSignature = (): Signature => ({
   abi: 3,
@@ -27,14 +27,14 @@ export const defaultProcedureExport = (): ProcedureExport => ({
 });
 
 export const defaultDependencies = (): Dependency[] => [
-  baseDependency,
-  stdDependency,
+  coreDependency,
+  protocolDependency,
 ];
 
 export const defaultScript = (): Script => ({
   id: "",
   name: "",
-  type: "account",
+  type: "account-component",
   status: "draft",
   readOnly: false,
   rust: "",

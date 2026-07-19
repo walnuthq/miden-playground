@@ -14,7 +14,7 @@ const state: State = {
       ...defaultComponent(),
       id: "bank-account",
       name: "Bank Account",
-      type: "account",
+      type: "account-component",
       scriptId: "",
       storageSlots: [
         {
