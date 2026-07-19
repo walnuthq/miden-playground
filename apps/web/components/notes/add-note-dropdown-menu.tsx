@@ -9,11 +9,17 @@ import { Button } from "@workspace/ui/components/button";
 import useNotes from "@/hooks/use-notes";
 import useNetwork from "@/hooks/use-network";
 import useAccounts from "@/hooks/use-accounts";
+import useScripts from "@/hooks/use-scripts";
+import { defaultScriptIds } from "@/lib/types/default-scripts";
 
 const AddNoteDropdownMenu = () => {
   const { networkId } = useNetwork();
   const { connectedWallet } = useAccounts();
   const { openImportNoteDialog, openCreateNoteDialog } = useNotes();
+  const { scripts } = useScripts();
+  const noteScripts = scripts.filter(
+    ({ id, type }) => type === "note" && !defaultScriptIds.includes(id),
+  );
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -29,7 +35,7 @@ const AddNoteDropdownMenu = () => {
         </DropdownMenuItem>
         {networkId !== "mmck" && (
           <DropdownMenuItem
-            disabled={!connectedWallet}
+            disabled={!connectedWallet || noteScripts.length === 0}
             onClick={openCreateNoteDialog}
           >
             <FilePlus />

@@ -91,16 +91,25 @@ fn verify_note_script(note_script: &NoteScript, package_opt: Option<Package>) ->
     if let Some(standard_note) = StandardNote::from_script(note_script) {
         println!("{}", standard_note.name());
     } else if let Some(package) = package_opt.clone() {
-        let mut procedures_digests = package
+        let entrypoint = package
             .manifest
             .exports()
             .filter_map(|export| match export {
-                PackageExport::Procedure(procedure) => Some(procedure.digest),
+                PackageExport::Procedure(procedure) => Some(procedure),
                 _ => None,
+            })
+            .find(|procedure| {
+                procedure
+                    .signature
+                    .as_ref()
+                    .is_some_and(|signature| signature.abi as u8 == 3)
             });
-        if procedures_digests.any(|digest| digest == note_script.root().into()) {
-            println!("Custom({})", package.digest());
-        }
+        match entrypoint {
+            Some(procedure) if procedure.digest == note_script.root().into() => {
+                println!("Custom({})", package.digest());
+            }
+            _ => {},
+        };
     }
     Ok(())
 }

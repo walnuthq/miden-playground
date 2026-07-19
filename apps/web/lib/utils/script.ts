@@ -67,7 +67,16 @@ export const formatProcedureInputs = (inputs: MidenInput[]) =>
             prefix: string;
             suffix: string;
           };
+          // TODO calling convention differs between MASM and Rust
           return `push.${prefix}.${suffix}`;
+        }
+        case "Asset": {
+          const { prefix, suffix, amount } = JSON.parse(arg.value ?? "") as {
+            prefix: string;
+            suffix: string;
+            amount: string;
+          };
+          return `push.0.0.0.${amount}\npush.${prefix}.${suffix}.0.0\n`;
         }
         default: {
           return "";

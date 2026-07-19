@@ -437,7 +437,7 @@ const verifyStandardAccountComponents = (wasmAccount: WasmAccount) =>
   defaultScripts
     .filter(
       ({ type, procedureExports }) =>
-        ["account", "authentication-component"].includes(type) &&
+        ["account-component", "authentication-component"].includes(type) &&
         procedureExports.every(({ digest }) =>
           wasmAccount.code().hasProcedure(WasmWord.fromHex(digest)),
         ),

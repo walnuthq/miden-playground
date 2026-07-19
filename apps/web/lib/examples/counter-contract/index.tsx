@@ -29,7 +29,7 @@ const counterContract: Example = {
       ...defaultProcedureExport(),
       path: "get-count",
       digest:
-        "0xc8a31db7968e83b2c446d0fcbfabbab5fd752d22d31e293eafe11e018e9cc7a3",
+        "0x68a422b3714a8aecc62577beca2368591f90a583e780722f36e7d97eb3e7a393",
       signature: {
         ...defaultSignature(),
         results: ["Felt"],
@@ -40,7 +40,7 @@ const counterContract: Example = {
       ...defaultProcedureExport(),
       path: "increment-count",
       digest:
-        "0x630aff54c6265d5847a1f8ce3e007bf2c3e0753edb548a0241387cd6fdc7e386",
+        "0x498ac7ba8d658a2cf6cdf17f813da473368a8809b2de7cc88520610b5ba651e6",
       signature: {
         ...defaultSignature(),
         results: ["Felt"],

@@ -15,12 +15,10 @@ import {
   DialogTitle,
 } from "@workspace/ui/components/dialog";
 import { Label } from "@workspace/ui/components/label";
-import useAccounts from "@/hooks/use-accounts";
 import useScripts from "@/hooks/use-scripts";
 import useTransactions from "@/hooks/use-transactions";
 import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";
 import { midenExplorerUrl } from "@/lib/constants";
-import { formatAmount } from "@/lib/utils/asset";
 import type { ProcedureExport, MidenType } from "@/lib/types/script";
 import { formatProcedureExportPath } from "@/lib/utils/script";
 import useNetwork from "@/hooks/use-network";
@@ -82,40 +80,23 @@ const AssetField = ({
   id: string;
   faucetId: string;
   setFaucetId: Dispatch<SetStateAction<string>>;
-}) => {
-  const { faucets } = useAccounts();
-  const faucetAccount = faucets.find(({ id }) => id === faucetId);
-  return (
-    <>
-      <div className="grid gap-3">
-        <Label>{id} faucet</Label>
-        <SelectAccountDropdownMenu
-          value={faucetId}
-          onValueChange={setFaucetId}
-          selectFaucets
-          showFaucetsAsAssets
-        />
-      </div>
-      <div className="grid gap-3">
-        <Label htmlFor="amount">{id} amount</Label>
-        <Input
-          id={`${id}-amount`}
-          name={`${id}-amount`}
-          type="number"
-          step={formatAmount({
-            amount: "1",
-            decimals: faucetAccount?.decimals,
-          }).replaceAll(",", "")}
-          min={formatAmount({
-            amount: "1",
-            decimals: faucetAccount?.decimals,
-          }).replaceAll(",", "")}
-          required
-        />
-      </div>
-    </>
-  );
-};
+}) => (
+  <>
+    <div className="grid gap-3">
+      <Label>{id} faucet</Label>
+      <SelectAccountDropdownMenu
+        value={faucetId}
+        onValueChange={setFaucetId}
+        selectFaucets
+        showFaucetsAsAssets
+      />
+    </div>
+    <div className="grid gap-3">
+      <Label htmlFor="amount">{id} amount</Label>
+      <Input id={`${id}-amount`} name={`${id}-amount`} type="number" />
+    </div>
+  </>
+);
 
 const getParamsWithNames = (
   procedureExport: ProcedureExport,
@@ -126,10 +107,10 @@ const getParamsWithNames = (
         { name: "counter_contract_id", type: "AccountId" },
         { name: "get_count_proc_hash", type: "Word" },
       ]
-    : path === "get-balance"
+    : path === "get-depositor-balance"
       ? [
           { name: "depositor", type: "AccountId" },
-          { name: "faucet", type: "FaucetId" },
+          { name: "asset", type: "Asset" },
         ]
       : path === "deposit"
         ? [
@@ -215,13 +196,14 @@ const InvokeProcedureArgumentsDialog = () => {
                 }
                 case "Asset": {
                   const wasmAccountId = WasmAccountId.fromHex(faucetId);
+                  const amount = formData.get(`${name}-amount`);
                   return {
                     name,
                     type,
                     value: JSON.stringify({
                       prefix: wasmAccountId.prefix().toString(),
-                      suffix: wasmAccountId.suffix().toString(),
-                      amount: formData.get(`${name}-amount`)!.toString(),
+                      suffix: (wasmAccountId.suffix().asInt() + 1n).toString(),
+                      amount: amount ? amount.toString() : "0",
                     }),
                   };
                 }

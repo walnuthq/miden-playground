@@ -13,7 +13,7 @@ const midenBank: Example = {
       <strong>Building a Bank with Miden</strong> Rust tutorial in the{" "}
       <a
         className="text-[#ff5500] font-medium underline underline-offset-4"
-        href="https://docs.miden.xyz/builder/tutorials/rust-compiler/miden-bank/"
+        href="https://docs.miden.xyz/builder/tutorials/miden-bank"
         target="_blank"
         rel="noreferrer"
       >
@@ -28,12 +28,12 @@ const midenBank: Example = {
   procedureExports: [
     {
       ...defaultProcedureExport(),
-      path: "get-balance",
+      path: "get-depositor-balance",
       digest:
-        "0x107340abda40a4ec5c6dff5bcba2cc52373cce52affdd29e8bf7a6fd2eb37a14",
+        "0x0f882003db8fa3d50a3a41ddc96970410768eeaa5b28974045e6f1c8118080f3",
       signature: {
         ...defaultSignature(),
-        params: ["AccountId", "AccountId"],
+        params: ["AccountId", "Asset"],
         results: ["Felt"],
       },
       readOnly: true,
@@ -42,7 +42,7 @@ const midenBank: Example = {
       ...defaultProcedureExport(),
       path: "deposit",
       digest:
-        "0x4af6b8b449bbe5c8073a405fdfee3876010abfb4d69c0646fd09f01d1df6f8f2",
+        "0xa31e727f264e1d841838b3e282bc7a46c30e439cced2e0e30f0e0dc55be630d8",
       signature: {
         ...defaultSignature(),
         params: ["AccountId", "Asset"],
@@ -52,16 +52,16 @@ const midenBank: Example = {
       ...defaultProcedureExport(),
       path: "initialize",
       digest:
-        "0x02e5121dbb7b358b8629ed37686e1b3d8924d29005633873dd828d1cdf5e8404",
+        "0x95812a7a11402a155a41036b21f3486ab7619574c5d8abef411594e97e43b0e4",
     },
     {
       ...defaultProcedureExport(),
       path: "withdraw",
       digest:
-        "0x0de776130f49fd0880904ff8cd964aeab8fbd454bef29dbd251766b2555408e0",
+        "0x291543660e99197e13a5cd76ed7de9fd77eebf2625ac82dd0fb15450e6c1fe50",
       signature: {
         ...defaultSignature(),
-        params: ["AccountId", "Asset", "Word", "Felt", "Felt"],
+        params: ["Asset", "Word", "Felt", "Felt"],
       },
     },
   ],

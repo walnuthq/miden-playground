@@ -29,12 +29,8 @@ const importScriptsFromPackageSources = async (
   const packagesWithDependencies = await Promise.all(
     Object.values(packageSources).map(async ({ midenProjectToml, rust }) => {
       const {
-        package: {
-          name,
-          metadata: {
-            miden: { dependencies = {} },
-          },
-        },
+        package: { name },
+        dependencies,
         lib: { kind: type },
       } = parseMidenProjectToml(midenProjectToml);
       const packageId = await createPackage({
@@ -44,7 +40,16 @@ const importScriptsFromPackageSources = async (
       });
       return {
         package: { id: packageId, name, type, rust },
-        dependencies,
+        dependencies: Object.keys(dependencies).reduce<
+          Record<string, { path: string }>
+        >((previousValue, currentValue) => {
+          return ["miden-core", "miden-protocol"].includes(currentValue)
+            ? previousValue
+            : {
+                ...previousValue,
+                [currentValue]: dependencies[currentValue] as { path: string },
+              };
+        }, {}),
       };
     }),
   );
@@ -106,7 +111,7 @@ const readFileAsText = ({ webkitRelativePath }: File) =>
 const fileListToPackageSources = async (fileList: FileList) => {
   const files = Array.from(fileList);
   const packagesSourcesFiles = files.filter(({ name }) =>
-    ["Cargo.toml", "lib.rs"].includes(name),
+    ["miden-project.toml", "lib.rs"].includes(name),
   );
   const packagesSourcesFilesWithContent = await Promise.all(
     packagesSourcesFiles.map(async (packageSourceFile) => ({
@@ -118,7 +123,7 @@ const fileListToPackageSources = async (fileList: FileList) => {
     packagesSourcesFilesWithContent,
     ({ file }) =>
       file.webkitRelativePath
-        .replace("/Cargo.toml", "")
+        .replace("/miden-project.toml", "")
         .replace("/src/lib.rs", ""),
   );
   return Object.keys(packagesSourcesFilesByPackage).reduce<
@@ -144,14 +149,6 @@ const fileListToPackageSources = async (fileList: FileList) => {
                   "let key = Word::new([felt!(1), felt!(0), felt!(0), felt!(0)]);",
                 )
                 .replace("1_000_000;", "1_000_000_000;")
-                .replace(
-                  "get_balance(&self, depositor: AccountId)",
-                  "get_balance(&self, depositor: AccountId, deposit_faucet: AccountId)",
-                )
-                .replace(
-                  "[depositor.prefix, depositor.suffix, felt!(0), felt!(0)]",
-                  "[depositor.prefix, depositor.suffix, deposit_faucet.prefix, deposit_faucet.suffix]",
-                )
             : previousValue.rust,
       }),
       { midenProjectToml: "", rust: "" },
