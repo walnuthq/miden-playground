@@ -38,13 +38,19 @@ export function useMidenWallet(adapter: MessageSignerWalletAdapter | null) {
         );
         return;
       }
+      // The wallet exposes only a 32-byte Poseidon2 commitment, which is
+      // identical for both schemes, so PublicKeyFormat.parse cannot tell them
+      // apart and guesses falcon. Miden Wallet signs ECDSA (its signatures
+      // carry the EcdsaK256Keccak tag 0x01), so the guess is wrong and the
+      // server would verify a 65-byte r||s||v with the falcon parser.
+      const resolvedScheme = pk.length === 32 ? "ecdsa" : scheme;
       setConnectError(null);
       setSession({
         source: "miden-wallet",
         connected: true,
         publicKey: publicKeyHex,
         commitment,
-        scheme,
+        scheme: resolvedScheme,
       });
     };
 

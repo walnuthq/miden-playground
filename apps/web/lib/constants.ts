@@ -28,7 +28,7 @@ export const BASIC_WALLET_CODE =
   "0x0fcb1b772bfa8087b382175c545972b2fe54091e5f820321337d4d1110929773";
 
 export const GUARDIAN_WALLET_CODE =
-  "0x31cffd84377197f286187f0babd8496848c6711e891db24827ed4102f9f50f57";
+  "0x9931fbf53d3f555b37134c57208606327a32fa199d191e1a06c2abf3faec7f4b";
 
 export const TESTNET_RPC_URL = "https://rpc.testnet.miden.io";
 export const DEVNET_RPC_URL = "https://rpc.devnet.miden.io";

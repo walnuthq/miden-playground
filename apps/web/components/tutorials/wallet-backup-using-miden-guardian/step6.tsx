@@ -28,17 +28,17 @@ const Step6: TutorialStep = {
       }
       const getMultisigWalletAddress = async () => {
         const accounts = await client.getAccounts();
-        for (const account of accounts) {
-          console.log(
-            account.id().toString(),
-            account.codeCommitment().toHex(),
-          );
-        }
+        // for (const account of accounts) {
+        //   console.log(
+        //     account.id().toString(),
+        //     account.codeCommitment().toHex(),
+        //   );
+        // }
         const multisig = accounts.find(
           (account) =>
             account.codeCommitment().toHex() === GUARDIAN_WALLET_CODE,
         );
-        console.log(multisig?.id().toString());
+        // console.log(multisig?.id().toString());
         setAddress(normalizeAccountId(multisig?.id().toString() ?? ""));
       };
       getMultisigWalletAddress();
