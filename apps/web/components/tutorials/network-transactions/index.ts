@@ -11,7 +11,7 @@ import Step6 from "@/components/tutorials/network-transactions/step6";
 const tutorial: Tutorial = {
   ...defaultTutorial(),
   id: "network-transactions",
-  number: 8,
+  number: 9,
   title: "Network transactions",
   tagline:
     "Deploy and interact with smart contracts using network transactions.",

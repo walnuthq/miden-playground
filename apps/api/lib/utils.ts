@@ -179,7 +179,6 @@ export const compilePackage = async ({
     digest: string;
     manifest: Manifest;
   };
-  console.log(manifest.exports);
   const exports = manifest.exports.filter(
     ({ Procedure: { signature } }) => signature?.abi === 3,
   );

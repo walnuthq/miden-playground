@@ -44,7 +44,7 @@ const AddDependencyDialog = () => {
           .filter((defaultScriptId) => defaultScriptId !== "basic-wallet")
           .includes(id) &&
         !dependenciesIds.includes(id) &&
-        ["authentication-component", "account"].includes(type) &&
+        ["account-component", "authentication-component"].includes(type) &&
         status === "compiled",
     )
     .toReversed();
