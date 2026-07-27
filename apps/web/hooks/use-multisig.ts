@@ -56,6 +56,7 @@ const useMultisig = () => {
       guardianPublicKey,
     } = await initMultisigClient({
       midenClient,
+      networkId,
       guardianEndpoint: GUARDIAN_ENDPOINT_URL,
       scheme: midenWalletSession.scheme,
     });
@@ -117,6 +118,7 @@ const useMultisig = () => {
     const midenClient = await createMidenClient(networkId);
     const { client: multisigClient } = await initMultisigClient({
       midenClient,
+      networkId,
       guardianEndpoint: GUARDIAN_ENDPOINT_URL,
     });
     const signer = new MidenWalletSigner(

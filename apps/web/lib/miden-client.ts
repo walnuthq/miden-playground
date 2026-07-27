@@ -2,6 +2,9 @@ import { MidenClient } from "@miden-sdk/miden-sdk/lazy";
 import {
   TESTNET_NOTE_TRANSPORT_URL,
   DEVNET_NOTE_TRANSPORT_URL,
+  TESTNET_RPC_URL,
+  DEVNET_RPC_URL,
+  LOCAL_RPC_URL,
 } from "@/lib/constants";
 import type { NetworkId } from "@/lib/types/network";
 
@@ -10,6 +13,13 @@ export const networks = {
   mdev: "devnet",
   mlcl: "local",
   mmck: "local",
+} as const;
+
+export const rpcUrls = {
+  mtst: TESTNET_RPC_URL,
+  mdev: DEVNET_RPC_URL,
+  mlcl: LOCAL_RPC_URL,
+  mmck: LOCAL_RPC_URL,
 } as const;
 
 export const noteTransportUrls = {

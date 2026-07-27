@@ -94,8 +94,11 @@ export const clientGetAllInputNotes = async ({
       .map((wasmInputNote) => wasmInputNote.id())
       .filter((id) => id !== undefined),
   );
-  return wasmInputNotes.map((wasmInputNote, index) => {
-    wasmInputNote.metadata = () => wasmFetchedNotes[index]?.metadata;
+  return wasmInputNotes.map((wasmInputNote) => {
+    const wasmFetchedNote = wasmFetchedNotes.find(
+      ({ noteId }) => noteId.toString() === wasmInputNote.id()?.toString(),
+    );
+    wasmInputNote.metadata = () => wasmFetchedNote?.metadata;
     return wasmInputNote;
   });
 };
