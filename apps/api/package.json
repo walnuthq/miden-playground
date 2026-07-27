@@ -17,15 +17,15 @@
     "db:push": "drizzle-kit push"
   },
   "dependencies": {
-    "@dotenvx/dotenvx": "2.14.0",
+    "@dotenvx/dotenvx": "2.18.0",
     "archiver": "8.0.0",
     "dotenv": "17.4.2",
     "drizzle-orm": "1.0.0-rc.4",
     "lodash": "4.18.1",
-    "next": "16.2.10",
+    "next": "16.2.12",
     "pg": "8.22.0",
-    "react": "19.2.7",
-    "smol-toml": "1.7.0",
+    "react": "19.2.8",
+    "smol-toml": "1.7.1",
     "uuid": "14.0.1"
   },
   "devDependencies": {

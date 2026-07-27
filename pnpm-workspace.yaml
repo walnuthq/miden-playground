@@ -2,14 +2,19 @@ packages:
   - "apps/*"
   - "packages/*"
 
+fetchTimeout: 1200000
+fetchRetries: 10
+fetchRetryMintimeout: 20000
+fetchRetryMaxtimeout: 300000
+
 allowBuilds:
   esbuild: true
   sharp: true
   workerd: true
 
 overrides:
-  "@miden-sdk/miden-sdk": "0.15.6"
-  "@miden-sdk/react": "0.15.6"
+  "@miden-sdk/miden-sdk": "0.15.8"
+  "@miden-sdk/react": "0.15.8"
 
 # The published wallet-adapter packages import @miden-sdk/miden-sdk without
 # declaring it (they rely on a hoisted install). Declare it explicitly so it
@@ -18,10 +23,10 @@ overrides:
 packageExtensions:
   "@miden-sdk/miden-wallet-adapter-base":
     dependencies:
-      "@miden-sdk/miden-sdk": "0.15.6"
+      "@miden-sdk/miden-sdk": "0.15.8"
   "@miden-sdk/miden-wallet-adapter-miden":
     dependencies:
-      "@miden-sdk/miden-sdk": "0.15.6"
+      "@miden-sdk/miden-sdk": "0.15.8"
   "@miden-sdk/miden-wallet-adapter-react":
     dependencies:
-      "@miden-sdk/miden-sdk": "0.15.6"
+      "@miden-sdk/miden-sdk": "0.15.8"
