@@ -75,7 +75,7 @@ const VerifyNoteScriptDialog = () => {
             const { verified, error } = await verifyNoteFromSource({
               networkId,
               noteId,
-              note: toBase64(record.toInputNote().note().serialize()),
+              note: toBase64(record.toNote().serialize()),
               packageSource,
               dependencies,
             });

@@ -43,7 +43,7 @@ const CreateComponentDialog = () => {
   const shownScripts = scripts.filter(
     ({ id, type, status }) =>
       !componentScriptIds.includes(id) &&
-      type === componentType &&
+      type === "account-component" &&
       status === "compiled",
   );
   useEffect(() => {

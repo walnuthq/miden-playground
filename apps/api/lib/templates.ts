@@ -21,6 +21,7 @@ export const templates = {
   note: readFile("note.rs"),
   "tx-script": readFile("tx-script.rs"),
   "p2id-note": readFile("p2id-note.rs"),
+  "auth-no-auth": readFile("auth-no-auth.rs"),
   "counter-account": readFile("counter-account.rs"),
   "counter-note": readFile("counter-note.rs"),
   "counter-script": readFile("counter-script.rs"),

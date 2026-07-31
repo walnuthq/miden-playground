@@ -55,9 +55,9 @@ const Step2: TutorialStep = {
           description={
             <p>
               Click on the <em>"Create new account"</em> button and deploy a
-              network account by selecting the <strong>Network</strong> storage
-              mode. Use the <strong>NoAuth</strong> authentication scheme and
-              the <strong>Counter Contract</strong> component.
+              network account by selecting the <strong>Public</strong> storage
+              mode. Use the <strong>Network Account</strong> authentication
+              scheme and the <strong>Counter Contract</strong> component.
             </p>
           }
         />

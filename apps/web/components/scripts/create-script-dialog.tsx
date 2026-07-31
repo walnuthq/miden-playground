@@ -1,5 +1,4 @@
 "use client";
-import { kebabCase } from "lodash";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -37,6 +36,7 @@ import {
   type ScriptExample,
   scriptExamples,
 } from "@/lib/types/script";
+import { kebabCase } from "@/lib/utils";
 
 const CreateScriptDialog = () => {
   const router = useRouter();
@@ -100,7 +100,7 @@ const CreateScriptDialog = () => {
                   name="name"
                   required
                   minLength={2}
-                  pattern="[a-zA-Z\-\s]+"
+                  pattern="^[a-zA-Z][a-zA-Z0-9_-]{0,63}$"
                 />
                 <FieldDescription>
                   Package name, 2 characters minimum.

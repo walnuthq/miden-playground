@@ -5,7 +5,12 @@ import type {
 } from "@/db/schema";
 
 export type ScriptExample =
-  "none" | "p2id-note" | "counter-account" | "counter-note" | "counter-script";
+  | "none"
+  | "p2id-note"
+  | "auth-no-auth"
+  | "counter-account"
+  | "counter-note"
+  | "counter-script";
 
 export type MidenProjectToml = {
   package: {

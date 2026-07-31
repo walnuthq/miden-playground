@@ -11,6 +11,7 @@ import type {
   CompiledPackage,
 } from "@/lib/types/script";
 import { defaultScript } from "@/lib/utils/script";
+import authNoAuth from "@/lib/types/default-scripts/auth-no-auth";
 
 type CompileScriptRequestBody = {
   name: string;
@@ -22,8 +23,9 @@ type CompileScriptResponse = { package: CompiledPackage };
 
 const scripts: Record<ScriptExample | "none", Script> = {
   none: defaultScript(),
-  "counter-account": counterMapContract,
   "p2id-note": timelockP2id,
+  "auth-no-auth": authNoAuth,
+  "counter-account": counterMapContract,
   "counter-note": counterNote,
   "counter-script": counterScript,
 } as const;
@@ -32,14 +34,17 @@ const scriptsExports: Record<ScriptExample | "none", Export[]> = {
   none: defaultScript().procedureExports.map((procedureExport) => ({
     Procedure: procedureExport,
   })),
+  "p2id-note": timelockP2id.procedureExports.map((procedureExport) => ({
+    Procedure: procedureExport,
+  })),
+  "auth-no-auth": authNoAuth.procedureExports.map((procedureExport) => ({
+    Procedure: procedureExport,
+  })),
   "counter-account": counterMapContract.procedureExports.map(
     (procedureExport) => ({
       Procedure: procedureExport,
     }),
   ),
-  "p2id-note": timelockP2id.procedureExports.map((procedureExport) => ({
-    Procedure: procedureExport,
-  })),
   "counter-note": counterNote.procedureExports.map((procedureExport) => ({
     Procedure: procedureExport,
   })),
