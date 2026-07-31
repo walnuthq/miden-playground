@@ -24,6 +24,7 @@ type CreateScriptResponse = {
 const scriptsDependencies: Record<ScriptExample, Dependency[]> = {
   none: [],
   "p2id-note": [basicWalletDependency],
+  "auth-no-auth": [],
   "counter-account": [],
   "counter-note": [],
   "counter-script": [],
@@ -33,10 +34,12 @@ export const POST = async (request: NextRequest) => {
   try {
     const body = await request.json();
     const { name, type, example } = body as CreateScriptRequestBody;
+    const actualType =
+      type === "authentication-component" ? "account-component" : type;
     const rust = templates[example === "none" ? type : example];
     const packageId = await createPackage({
       name,
-      type,
+      type: actualType,
       rust,
       dependencies: scriptsDependencies[example],
     });
@@ -44,7 +47,7 @@ export const POST = async (request: NextRequest) => {
       package: {
         id: packageId,
         name,
-        type,
+        type: actualType,
         rust,
         dependencies: scriptsDependencies[example],
       },

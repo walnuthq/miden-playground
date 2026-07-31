@@ -40,3 +40,17 @@ export const toBase64 = (bytes: Uint8Array) => {
 
 export const isValidUUIDv4 = (uuid: string) =>
   validate(uuid) && version(uuid) === 4;
+
+export const kebabCase = (str: string) =>
+  str
+    // insert hyphen between a lower-case letter/digit and an upper-case letter
+    // e.g. "authComponent" -> "auth-Component", but "falcon512" stays untouched
+    .replace(/([a-z0-9])([A-Z])/g, "$1-$2")
+    // insert hyphen between the end of an acronym and the start of a new word
+    // e.g. "RPOFalcon" -> "RPO-Falcon"
+    .replace(/([A-Z]+)([A-Z][a-z])/g, "$1-$2")
+    // normalize existing separators (spaces, underscores, existing hyphens) to '-'
+    .replace(/[\s_]+/g, "-")
+    .replace(/-+/g, "-")
+    .toLowerCase()
+    .replace(/^-|-$/g, "");

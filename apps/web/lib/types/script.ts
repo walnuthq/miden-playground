@@ -14,8 +14,9 @@ export type ScriptExampleItem = {
 };
 
 export const scriptExamples = {
-  "counter-account": { name: "Counter Contract", type: "account-component" },
   "p2id-note": { name: "P2ID Note", type: "note" },
+  "auth-no-auth": { name: "Auth No Auth", type: "account-component" },
+  "counter-account": { name: "Counter Contract", type: "account-component" },
   "counter-note": { name: "Counter Note", type: "note" },
   "counter-script": { name: "Counter Script", type: "tx-script" },
 } as const;
