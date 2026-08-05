@@ -2,6 +2,7 @@
 import { MoreVertical } from "lucide-react";
 import { useMiden } from "@miden-sdk/react/lazy";
 import type { ColumnDef } from "@tanstack/react-table";
+import type { DataTableFeatures } from "@/lib/table";
 import { Button } from "@workspace/ui/components/button";
 import { Badge } from "@workspace/ui/components/badge";
 import {
@@ -106,7 +107,7 @@ const AccountActionsCell = ({ account }: { account: Account }) => {
   );
 };
 
-export const columns: ColumnDef<Account>[] = [
+export const columns: ColumnDef<DataTableFeatures, Account>[] = [
   {
     accessorKey: "name",
     header: "Name",
