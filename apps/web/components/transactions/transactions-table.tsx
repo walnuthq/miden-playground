@@ -2,10 +2,9 @@
 import { useRouter } from "next/navigation";
 import {
   type ColumnDef,
+  type RowData,
   flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  useReactTable,
+  useTable,
 } from "@tanstack/react-table";
 import { Input } from "@workspace/ui/components/input";
 import {
@@ -18,21 +17,21 @@ import {
 } from "@workspace/ui/components/table";
 import CreateTransactionButton from "@/components/transactions/create-transaction-button";
 import useAccounts from "@/hooks/use-accounts";
+import { type DataTableFeatures, dataTableFeatures } from "@/lib/table";
 
-const TransactionsTable = <TData, TValue>({
+const TransactionsTable = <TData extends RowData>({
   columns,
   data,
 }: {
-  columns: ColumnDef<TData, TValue>[];
+  columns: ColumnDef<DataTableFeatures, TData>[];
   data: TData[];
 }) => {
   const { connectedWallet } = useAccounts();
   const router = useRouter();
-  const table = useReactTable({
+  const table = useTable({
+    features: dataTableFeatures,
     data,
     columns,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
   });
   return (
     <div className="flex flex-col gap-4">
