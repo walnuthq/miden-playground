@@ -2,9 +2,10 @@
 import { useRouter } from "next/navigation";
 import {
   type ColumnDef,
-  type RowData,
   flexRender,
-  useTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  useReactTable,
 } from "@tanstack/react-table";
 import { Input } from "@workspace/ui/components/input";
 import {
@@ -17,20 +18,20 @@ import {
 } from "@workspace/ui/components/table";
 import { cn } from "@workspace/ui/lib/utils";
 import AddNoteDropdownMenu from "@/components/notes/add-note-dropdown-menu";
-import { type DataTableFeatures, dataTableFeatures } from "@/lib/table";
 
-const NotesTable = <TData extends RowData>({
+const NotesTable = <TData, TValue>({
   columns,
   data,
 }: {
-  columns: ColumnDef<DataTableFeatures, TData>[];
+  columns: ColumnDef<TData, TValue>[];
   data: TData[];
 }) => {
   const router = useRouter();
-  const table = useTable({
-    features: dataTableFeatures,
+  const table = useReactTable({
     data,
     columns,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
   });
   return (
     <div className="flex flex-col gap-4">
