@@ -4,7 +4,6 @@ import { type InputNote, noteStates } from "@/lib/types/note";
 import { noteConsumed } from "@/lib/utils/note";
 import { formatId, fromBase64 } from "@/lib/utils";
 import type { ColumnDef } from "@tanstack/react-table";
-import type { DataTableFeatures } from "@/lib/table";
 import { Button } from "@workspace/ui/components/button";
 import { Badge } from "@workspace/ui/components/badge";
 import {
@@ -109,7 +108,7 @@ const InputNoteActionsCell = ({ inputNote }: { inputNote: InputNote }) => {
   );
 };
 
-export const columns: ColumnDef<DataTableFeatures, InputNote>[] = [
+export const columns: ColumnDef<InputNote>[] = [
   {
     accessorKey: "id",
     header: "ID",
