@@ -2,9 +2,10 @@
 import type { Transaction } from "@/lib/types/transaction";
 import { formatId } from "@/lib/utils";
 import type { ColumnDef } from "@tanstack/react-table";
+import type { DataTableFeatures } from "@/lib/table";
 import AccountAddress from "@/components/lib/account-address";
 
-export const columns: ColumnDef<Transaction>[] = [
+export const columns: ColumnDef<DataTableFeatures, Transaction>[] = [
   {
     accessorKey: "id",
     header: "ID",

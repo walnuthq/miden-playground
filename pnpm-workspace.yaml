@@ -13,8 +13,8 @@ allowBuilds:
   workerd: true
 
 overrides:
-  "@miden-sdk/miden-sdk": "0.15.8"
-  "@miden-sdk/react": "0.15.8"
+  "@miden-sdk/miden-sdk": "0.15.9"
+  "@miden-sdk/react": "0.15.9"
 
 # The published wallet-adapter packages import @miden-sdk/miden-sdk without
 # declaring it (they rely on a hoisted install). Declare it explicitly so it
@@ -23,10 +23,10 @@ overrides:
 packageExtensions:
   "@miden-sdk/miden-wallet-adapter-base":
     dependencies:
-      "@miden-sdk/miden-sdk": "0.15.8"
+      "@miden-sdk/miden-sdk": "0.15.9"
   "@miden-sdk/miden-wallet-adapter-miden":
     dependencies:
-      "@miden-sdk/miden-sdk": "0.15.8"
+      "@miden-sdk/miden-sdk": "0.15.9"
   "@miden-sdk/miden-wallet-adapter-react":
     dependencies:
-      "@miden-sdk/miden-sdk": "0.15.8"
+      "@miden-sdk/miden-sdk": "0.15.9"
