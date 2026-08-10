@@ -2,10 +2,9 @@
 import { useRouter } from "next/navigation";
 import {
   type ColumnDef,
+  type RowData,
   flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  useReactTable,
+  useTable,
 } from "@tanstack/react-table";
 import { Input } from "@workspace/ui/components/input";
 import {
@@ -19,20 +18,20 @@ import {
 import { cn } from "@workspace/ui/lib/utils";
 import CreateAccountDropdownMenu from "@/components/accounts/create-account-dropdown-menu";
 import { getIdentifierPart } from "@/lib/utils/account";
+import { type DataTableFeatures, dataTableFeatures } from "@/lib/table";
 
-const AccountsTable = <TData, TValue>({
+const AccountsTable = <TData extends RowData>({
   columns,
   data,
 }: {
-  columns: ColumnDef<TData, TValue>[];
+  columns: ColumnDef<DataTableFeatures, TData>[];
   data: TData[];
 }) => {
   const router = useRouter();
-  const table = useReactTable({
+  const table = useTable({
+    features: dataTableFeatures,
     data,
     columns,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
   });
   return (
     <div className="flex flex-col gap-4">

@@ -1,6 +1,7 @@
 "use client";
 import { type Script, scriptTypes, scriptStatuses } from "@/lib/types/script";
 import type { ColumnDef } from "@tanstack/react-table";
+import type { DataTableFeatures } from "@/lib/table";
 import { MoreVertical } from "lucide-react";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
@@ -43,7 +44,7 @@ const ScriptActionsCell = ({ script }: { script: Script }) => {
   );
 };
 
-export const columns: ColumnDef<Script>[] = [
+export const columns: ColumnDef<DataTableFeatures, Script>[] = [
   {
     accessorKey: "id",
     header: "ID",

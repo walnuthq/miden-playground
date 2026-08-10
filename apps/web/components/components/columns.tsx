@@ -1,6 +1,7 @@
 "use client";
 import { type Component, componentTypes } from "@/lib/types/component";
 import type { ColumnDef } from "@tanstack/react-table";
+import type { DataTableFeatures } from "@/lib/table";
 import useScripts from "@/hooks/use-scripts";
 
 const ScriptCell = ({ scriptId }: { scriptId: string }) => {
@@ -9,7 +10,7 @@ const ScriptCell = ({ scriptId }: { scriptId: string }) => {
   return script?.name;
 };
 
-export const columns: ColumnDef<Component>[] = [
+export const columns: ColumnDef<DataTableFeatures, Component>[] = [
   {
     accessorKey: "id",
     header: "ID",
