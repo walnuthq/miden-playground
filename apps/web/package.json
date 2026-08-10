@@ -19,18 +19,18 @@
   "dependencies": {
     "@mdx-js/loader": "3.1.1",
     "@mdx-js/react": "3.1.1",
-    "@miden-sdk/miden-sdk": "0.15.8",
+    "@miden-sdk/miden-sdk": "0.15.9",
     "@miden-sdk/miden-wallet-adapter": "0.15.3",
-    "@miden-sdk/react": "0.15.8",
+    "@miden-sdk/react": "0.15.9",
     "@monaco-editor/react": "4.7.0",
     "@next/mdx": "16.3.0",
     "@opennextjs/cloudflare": "1.20.2",
-    "@openzeppelin/miden-multisig-client": "0.16.0",
+    "@openzeppelin/miden-multisig-client": "0.16.1",
     "@tanstack/react-query": "5.101.4",
-    "@tanstack/react-table": "9.0.0",
+    "@tanstack/react-table": "9.1.2",
     "@workspace/ui": "workspace:*",
     "lodash": "4.18.1",
-    "lucide-react": "1.28.0",
+    "lucide-react": "1.30.0",
     "next": "16.3.0",
     "next-themes": "0.4.6",
     "react": "19.2.8",
@@ -51,6 +51,6 @@
     "@workspace/typescript-config": "workspace:*",
     "eslint": "9.39.4",
     "typescript": "6.0.3",
-    "wrangler": "4.118.0"
+    "wrangler": "4.120.0"
   }
 }
