@@ -68,11 +68,18 @@ const VIEWPORT = { width: 1280, height: 900 };
 const SIDEBAR_NAV_SELECTOR = 'a[href="/accounts"]';
 const HOME_HEADING_SELECTOR = 'h3:has-text("Tutorials")';
 
-// playground.miden.xyz runs behind Vercel's Attack Challenge Mode: every request
-// is answered with HTTP 429 and a JS challenge, and only a real browser gets
-// through. Naming it explicitly turns the least obvious failure mode here into a
-// one-line diagnosis.
+// Vercel's Attack Mode answers every request with HTTP 429 and a JS challenge.
+// A browser on a residential IP clears it in about a second; the same browser on
+// a CI runner's datacenter IP never does, which is documented behaviour —
+// "non-recognized automated services may not be able to pass challenges".
+//
+// That is why a challenge is reported as `blocked` rather than `unhealthy`: it
+// is evidence about the doorman, not about the service. Treating it as an
+// outage produced a false positive on the published page, and would page
+// whoever is on call for a firewall setting.
 const VERCEL_CHALLENGE_TITLE = "Vercel Security Checkpoint";
+// Set by Vercel on any mitigated response; more reliable than sniffing titles.
+const VERCEL_MITIGATION_HEADER = "x-vercel-mitigated";
 
 // Aborts are routine (React cleanup, the Miden client tearing down streams) and
 // the analytics proxy is a third party behind a same-origin path, so neither
@@ -113,6 +120,22 @@ const failed = (
   ...check,
   health: "unhealthy",
   httpStatus: null,
+  responseTimeMs,
+  summary: null,
+  payload: null,
+  error,
+});
+
+/** Refused before it could measure: unknown, not failed. See CheckHealth. */
+const blocked = (
+  check: CheckDefinition,
+  error: string,
+  responseTimeMs: number,
+  httpStatus: number | null = null,
+): EndpointStatus => ({
+  ...check,
+  health: "blocked",
+  httpStatus,
   responseTimeMs,
   summary: null,
   payload: null,
@@ -223,6 +246,7 @@ const probeWeb = async (): Promise<EndpointStatus[]> => {
   const pageErrors: string[] = [];
   const requestFailures: string[] = [];
   let documentStatus: number | null = null;
+  let documentMitigation: string | null = null;
 
   try {
     const page = await browser.newPage({ viewport: VIEWPORT });
@@ -246,6 +270,8 @@ const probeWeb = async (): Promise<EndpointStatus[]> => {
         request.frame() === page.mainFrame()
       ) {
         documentStatus = response.status();
+        documentMitigation =
+          response.headers()[VERCEL_MITIGATION_HEADER] ?? null;
       }
     });
 
@@ -265,6 +291,23 @@ const probeWeb = async (): Promise<EndpointStatus[]> => {
       }
     } catch (error) {
       loadError = describeError(error);
+    }
+
+    // A firewall turned the probe away, so nothing downstream measured the app:
+    // the SPA never got a chance to render, and "no client errors" would only be
+    // reporting that the challenge page itself did not throw. Every check on
+    // this service is unknown, not failed.
+    const challenged =
+      documentMitigation === "challenge" ||
+      title.includes(VERCEL_CHALLENGE_TITLE);
+    if (loadError !== null && challenged) {
+      const at = elapsed();
+      const detail = `blocked by a Vercel challenge (HTTP ${documentStatus ?? 429}) — the probe never reached the app, so its health is unknown`;
+      return [
+        blocked(webChecks.load, detail, at, documentStatus),
+        blocked(webChecks.render, "not measured — the probe was blocked", at),
+        blocked(webChecks.errors, "not measured — the probe was blocked", at),
+      ];
     }
 
     const loadedAt = elapsed();
@@ -382,6 +425,12 @@ const fetchPreviousSnapshot = async (): Promise<StatusSnapshot | null> => {
 };
 
 const rollUp = (endpoints: EndpointStatus[]): ServiceHealth => {
+  // Blocked outranks everything: a service whose probe was refused has no
+  // measured health at all, and mixing that into healthy/degraded would be a
+  // claim the probe cannot support.
+  if (endpoints.some((endpoint) => endpoint.health === "blocked")) {
+    return "blocked";
+  }
   const healthy = endpoints.filter(
     (endpoint) => endpoint.health === "healthy",
   ).length;
@@ -460,8 +509,12 @@ for (const service of snapshot.services) {
     `${service.name}: ${service.health} (${healthy}/${service.endpoints.length})`,
   );
   for (const endpoint of service.endpoints) {
-    const state =
-      endpoint.health === "healthy" ? "ok" : `FAILED — ${endpoint.error}`;
+    const outcomes = {
+      healthy: "ok",
+      unhealthy: `FAILED — ${endpoint.error}`,
+      blocked: `BLOCKED — ${endpoint.error}`,
+    };
+    const state = outcomes[endpoint.health];
     console.log(
       `  ${endpoint.label} — ${state} in ${endpoint.responseTimeMs}ms`,
     );

@@ -1,13 +1,21 @@
-/** Outcome of a single check. */
-export type CheckHealth = "healthy" | "unhealthy";
+/**
+ * Outcome of a single check.
+ *
+ * `blocked` is not a failure: it means the probe was refused before it could
+ * measure anything, so the result is unknown rather than bad. A WAF challenge
+ * is the case that matters here — it says nothing about whether the service is
+ * up, and reporting it as `unhealthy` produces a false outage.
+ */
+export type CheckHealth = "healthy" | "unhealthy" | "blocked";
 
 /**
  * Rolled up across a service's checks. `degraded` matters because the web
  * service has several checks of decreasing depth — the page can load while the
  * SPA fails to render — so one failing check must not read the same as the
- * service being down.
+ * service being down. `blocked` outranks all of them: once the probe is turned
+ * away, every other check on that service is measuring the doorman.
  */
-export type ServiceHealth = "healthy" | "degraded" | "unhealthy";
+export type ServiceHealth = "healthy" | "degraded" | "unhealthy" | "blocked";
 
 /** A handful of fields lifted out of a check, rendered as a key/value list. */
 export type CheckSummary = Record<string, string | number | boolean>;

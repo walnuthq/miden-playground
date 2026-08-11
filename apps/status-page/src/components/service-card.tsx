@@ -17,18 +17,29 @@ import type {
   ServiceStatus,
 } from "@/lib/types";
 
+// `blocked` is deliberately colourless: it means "no measurement", and giving it
+// a red or amber would imply the probe learned something bad about the service.
 const healthStyles: Record<ServiceHealth, string> = {
   healthy:
     "border-green-600/50 text-green-700 dark:border-green-500/50 dark:text-green-400",
   degraded:
     "border-amber-600/50 text-amber-700 dark:border-amber-500/50 dark:text-amber-400",
   unhealthy: "",
+  blocked: "border-muted-foreground/40 text-muted-foreground",
 };
 
 const healthDots: Record<ServiceHealth, string> = {
   healthy: "bg-green-600 dark:bg-green-500",
   degraded: "bg-amber-600 dark:bg-amber-500",
   unhealthy: "bg-current",
+  blocked: "bg-muted-foreground",
+};
+
+const healthLabels: Record<ServiceHealth, string> = {
+  healthy: "Healthy",
+  degraded: "Degraded",
+  unhealthy: "Unhealthy",
+  blocked: "Unknown",
 };
 
 const HealthBadge = ({
@@ -61,9 +72,7 @@ const CheckRow = ({ endpoint }: { endpoint: EndpointStatus }) => {
             {endpoint.httpStatus !== null && `HTTP ${endpoint.httpStatus} · `}
             {endpoint.responseTimeMs}ms
           </span>
-          <HealthBadge health={health}>
-            {health === "healthy" ? "Healthy" : "Unhealthy"}
-          </HealthBadge>
+          <HealthBadge health={health}>{healthLabels[health]}</HealthBadge>
         </div>
       </div>
 
@@ -73,8 +82,15 @@ const CheckRow = ({ endpoint }: { endpoint: EndpointStatus }) => {
         // In dark mode `--destructive` is a deep red meant for fills, so error
         // text switches to `--destructive-foreground`, which the design system
         // brightens for exactly this. The two tokens are identical in light
-        // mode, so nothing changes there.
-        <p className="font-mono text-xs text-destructive dark:text-destructive-foreground">
+        // mode, so nothing changes there. A blocked check is not an error at
+        // all, so it stays muted rather than borrowing the outage colour.
+        <p
+          className={
+            endpoint.health === "blocked"
+              ? "font-mono text-xs text-muted-foreground"
+              : "font-mono text-xs text-destructive dark:text-destructive-foreground"
+          }
+        >
           {endpoint.error}
         </p>
       )}
@@ -126,9 +142,9 @@ const ServiceCard = ({ service }: { service: ServiceStatus }) => {
         <CardDescription>{service.description}</CardDescription>
         <CardAction>
           <HealthBadge health={service.health}>
-            {service.health === "healthy" && "Healthy"}
-            {service.health === "degraded" && `Degraded ${healthy}/${total}`}
-            {service.health === "unhealthy" && "Unhealthy"}
+            {service.health === "degraded"
+              ? `Degraded ${healthy}/${total}`
+              : healthLabels[service.health]}
           </HealthBadge>
         </CardAction>
       </CardHeader>
@@ -148,7 +164,9 @@ const ServiceCard = ({ service }: { service: ServiceStatus }) => {
           // `since` is carried across probes by scripts/probe.ts, so this is the
           // start of the outage rather than the time of the last check.
           <p className="text-xs text-muted-foreground">
-            {service.health === "unhealthy" ? "Down" : "Degraded"} since{" "}
+            {service.health === "unhealthy" && "Down"}
+            {service.health === "degraded" && "Degraded"}
+            {service.health === "blocked" && "Unmeasured"} since{" "}
             {formatTimestamp(service.since)}
           </p>
         )}

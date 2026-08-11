@@ -53,10 +53,7 @@ const App = () => {
     <div className="min-h-svh bg-muted/20">
       <header className="border-b bg-background">
         <div className="mx-auto flex w-full max-w-3xl items-center justify-between gap-4 px-4 py-4">
-          <h1 className="font-medium">
-            Miden Playground Status
-            <span className="ml-1 inline-block size-2 bg-[#ff5500]" />
-          </h1>
+          <h1 className="font-medium">Miden Playground Status</h1>
           <div className="flex items-center gap-3">
             <a
               href={PLAYGROUND_URL}
