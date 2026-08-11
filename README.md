@@ -69,6 +69,10 @@ When running the app locally, you can use the playground against a local node by
 
 Deployments are handled automatically by [Cloudflare](https://www.cloudflare.com/), as soon as your PR is merged to `main`.
 
+## 📈 Status
+
+The health of the deployed services is published at [walnuthq.github.io/miden-playground](https://walnuthq.github.io/miden-playground/), rebuilt every 30 minutes by GitHub Actions. See [`apps/status-page`](apps/status-page/README.md) for what it checks and how to configure it.
+
 ## 🤗 Contributing
 
 Miden Playground is built and maintained by a small team, so we would definitely love your help to fix bugs, add new features and improvements. Head on to the [issues tab](https://github.com/walnuthq/miden-playground/issues) to find a list of open contributions.

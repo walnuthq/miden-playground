@@ -21,11 +21,20 @@
     "web#build": {
       "env": ["NODE_ENV", "NEXT_PUBLIC_API_URL"]
     },
+    "status-page#build": {
+      "cache": false,
+      "outputs": ["dist/**"],
+      "env": ["WEB_URL", "API_URL", "STATUS_PAGE_BASE", "STATUS_PAGE_URL"]
+    },
+    "status-page#notify": {
+      "cache": false,
+      "env": ["SLACK_WEBHOOK_URL", "STATUS_PAGE_URL", "GITHUB_*"]
+    },
     "lint": {
       "dependsOn": ["^lint"]
     },
-    "check-types": {
-      "dependsOn": ["^check-types"]
+    "typecheck": {
+      "dependsOn": ["^typecheck"]
     },
     "dev": {
       "cache": false,

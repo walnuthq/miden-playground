@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/x-icon" href="./favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Miden Playground Status</title>
+    <script>
+      // Applies the theme before first paint, so a dark-mode viewer never sees
+      // a flash of the light page. next-themes renders an equivalent script,
+      // but it arrives via dangerouslySetInnerHTML and browsers do not execute
+      // scripts inserted that way — in a client-rendered app it never runs.
+      // Keep the storage key and values in step with the provider in main.tsx.
+      (() => {
+        try {
+          const stored = localStorage.getItem("theme");
+          const dark =
+            stored === "dark" ||
+            ((!stored || stored === "system") &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches);
+          document.documentElement.classList.toggle("dark", dark);
+          document.documentElement.style.colorScheme = dark ? "dark" : "light";
+        } catch {
+          // Storage can throw when cookies are blocked; light is a fine default.
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
