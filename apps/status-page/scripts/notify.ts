@@ -27,17 +27,20 @@ const SIX_HOURS_MS = 6 * 60 * 60 * 1000;
 const SLACK_TIMEOUT_MS = 10_000;
 
 // Slack's own palette, so the attachment stripe reads the same as every other
-// alert in the workspace.
+// alert in the workspace. `blocked` is grey on purpose — it is not an incident,
+// and colouring it red would page someone for a firewall setting.
 const colors: Record<ServiceHealth, string> = {
   healthy: "#2eb67d",
   degraded: "#ecb22e",
   unhealthy: "#e01e5a",
+  blocked: "#868686",
 };
 
 const icons: Record<ServiceHealth, string> = {
   healthy: "✅",
   degraded: "🟡",
   unhealthy: "🔴",
+  blocked: "🚧",
 };
 
 /** "1h 30m", "45m", "6h" — outage durations, not precise timings. */
@@ -116,14 +119,26 @@ const reasonToPost = (
     : null;
 };
 
+/** Present tense, without the word "down", for each non-healthy state. */
+const states: Record<Exclude<ServiceHealth, "healthy">, string> = {
+  unhealthy: "down",
+  degraded: "degraded",
+  blocked: "unmeasurable",
+};
+
 const headline = (service: ServiceStatus, reason: Reason) => {
   const icon = icons[service.health];
-  if (service.health === "healthy") return `${icon} ${service.name} recovered`;
-  const state = service.health === "unhealthy" ? "is down" : "is degraded";
-  if (reason.kind === "reminder") {
-    return `${icon} ${service.name} is still ${service.health === "unhealthy" ? "down" : "degraded"} (${reason.downFor})`;
+  if (service.health === "healthy") {
+    // Coming back from a block is not a recovery — nothing was ever known to be
+    // broken, the probe just could not see.
+    return service.previousHealth === "blocked"
+      ? `${icon} ${service.name} is measurable again`
+      : `${icon} ${service.name} recovered`;
   }
-  return `${icon} ${service.name} ${state}`;
+  const state = states[service.health];
+  return reason.kind === "reminder"
+    ? `${icon} ${service.name} is still ${state} (${reason.downFor})`
+    : `${icon} ${service.name} is ${state}`;
 };
 
 const summaryLine = (
@@ -134,11 +149,20 @@ const summaryLine = (
   // The link the reader wants first: the page that is actually broken.
   const link = `<${service.url}|${service.url.replace(/^https?:\/\//, "")}>`;
 
+  const elapsed = formatDuration(
+    new Date(checkedAt).getTime() - new Date(service.since).getTime(),
+  );
+
   if (service.health === "healthy") {
-    const downFor = formatDuration(
-      new Date(checkedAt).getTime() - new Date(service.since).getTime(),
-    );
-    return `*${link}* is back — all ${service.endpoints.length} checks passing after ${downFor} down.`;
+    return service.previousHealth === "blocked"
+      ? `*${link}* — the probe is getting through again, and all ${service.endpoints.length} checks pass. It was unmeasurable for ${elapsed}.`
+      : `*${link}* is back — all ${service.endpoints.length} checks passing after ${elapsed} down.`;
+  }
+
+  if (service.health === "blocked") {
+    // The single most important sentence this script can say: do not go and
+    // wake someone up over a firewall.
+    return `*${link}* — the probe was blocked before it could measure anything, so this is *not* a confirmed outage. Check the firewall (Vercel Attack Mode challenges CI runners) before treating it as one.`;
   }
 
   const total = service.endpoints.length;

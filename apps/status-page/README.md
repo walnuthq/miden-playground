@@ -60,10 +60,48 @@ Two details that are easy to get wrong and hard to debug:
   Aborts are routine (React cleanup, the Miden client tearing down streams) and
   `/proxy.js` is a third party behind a same-origin path.
 
+### When the challenge wins: `blocked`, not `unhealthy`
+
+Attack Mode was on when this page first shipped, and it produced a false outage.
+The same probe, same Playwright build, same browser binary:
+
+| From                               | Result                                   |
+| ---------------------------------- | ---------------------------------------- |
+| A laptop on a residential IP       | clears the challenge in ~1.8s, 3/3 green |
+| A GitHub Actions runner (Azure IP) | never clears it, times out at 30s        |
+
+Only the network differed, so this is **IP reputation, not browser
+fingerprinting** — and Vercel documents it: _"non-recognized automated services
+may not be able to pass challenges and could be blocked."_ Chasing it with
+stealth flags or a spoofed user agent would be an arms race the probe loses
+silently.
+
+So a challenge is reported as its own outcome, `blocked`, which propagates to the
+whole service. The probe cannot distinguish "the site is down" from "we were
+turned away at the door", and claiming the former costs the page its credibility
+— and pages someone at 3am for a firewall setting. When the load is blocked,
+`playground renders` and `no client errors` are marked blocked too: the SPA never
+got a chance to render, and "no uncaught exceptions" would only be saying the
+challenge page itself did not throw.
+
+Detection prefers the `x-vercel-mitigated: challenge` response header over
+sniffing the page title. Note that this header appears on the _first_ response
+even in the success case, so it only means "blocked" when the load also never
+completed.
+
+`blocked` is colourless in the UI and grey in Slack, and its message says
+outright that it is not a confirmed outage. If you ever need the probe let
+through with Attack Mode on, add a Vercel WAF Custom Rule matching a secret
+header with the **Bypass** action — `vercel.json` route rules cannot express
+`bypass`, so it has to be created in the dashboard.
+
 **A failing check never fails the build.** Every check is caught individually and
 the script always exits 0. A service is green when all its checks pass, amber
 ("degraded") when only some do, red when none do — the page can load while the
 SPA fails to render, and that must not read the same as the service being down.
+A fourth state, grey ("unknown"), means the probe was [blocked before it could
+measure](#when-the-challenge-wins-blocked-not-unhealthy) and outranks the other
+three, since none of them measured anything.
 
 ## Configuration
 
@@ -90,14 +128,21 @@ implementation would post 48 identical "web is down" messages a day and the
 channel would be muted within a week. It therefore speaks only on a transition,
 plus a reminder every 6 hours while an outage continues:
 
-| Previous               | Current             | Message                                      |
-| ---------------------- | ------------------- | -------------------------------------------- |
-| none                   | not healthy         | 🔴/🟡 the current state — new to the channel |
-| healthy                | degraded/unhealthy  | 🟡 `web` is degraded / 🔴 `web` is down      |
-| degraded ↔ unhealthy   | changed             | the new state, so escalations are visible    |
-| not healthy            | healthy             | ✅ `web` recovered — after 1h 30m down       |
-| unchanged, not healthy | 6h boundary crossed | 🔴 `web` is still down (6h)                  |
-| anything else          |                     | **silence**                                  |
+| Previous               | Current             | Message                                               |
+| ---------------------- | ------------------- | ----------------------------------------------------- |
+| none                   | not healthy         | 🔴/🟡 the current state — new to the channel          |
+| healthy                | degraded/unhealthy  | 🟡 `web` is degraded / 🔴 `web` is down               |
+| degraded ↔ unhealthy   | changed             | the new state, so escalations are visible             |
+| not healthy            | healthy             | ✅ `web` recovered — after 1h 30m down                |
+| healthy                | blocked             | 🚧 `web` is unmeasurable — explicitly _not_ an outage |
+| blocked                | healthy             | ✅ `web` is measurable again                          |
+| unchanged, not healthy | 6h boundary crossed | 🔴 `web` is still down (6h)                           |
+| anything else          |                     | **silence**                                           |
+
+`blocked` deliberately keeps the same transition and reminder cadence as the
+other states — a monitor that has been blind for six hours is worth saying out
+loud — but it is grey, captioned "not a confirmed outage", and never uses the
+word "down".
 
 Each message leads with a link to the service that is down, lists the failing
 checks with the probe's one-line diagnosis, and links to the status page and the
