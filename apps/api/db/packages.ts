@@ -71,11 +71,10 @@ export const deletePackage = (id: string) =>
 export const getDependencies = async (dependencies: string[]) => {
   const defaultDependencies = dependencies
     .filter((dependency) => !isValidUUIDv4(dependency))
-    .map((dependency) => ({
-      ...defaultDependenciesRecords[dependency as DefaultDependency],
-      rust: "",
-      files: {} as Record<string, string>,
-    }));
+    .map(
+      (dependency) =>
+        defaultDependenciesRecords[dependency as DefaultDependency],
+    );
   const dbDependencies = await db.query.packagesTable.findMany({
     columns: {
       id: true,

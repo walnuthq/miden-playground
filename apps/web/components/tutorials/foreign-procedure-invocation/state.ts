@@ -1,11 +1,7 @@
 import type { State } from "@/lib/types/state";
 import { defaultState } from "@/lib/utils/state";
 import defaultScripts from "@/lib/types/default-scripts";
-import countReaderScript from "@/lib/types/default-scripts/count-reader";
-import counterContractScript from "@/lib/types/default-scripts/counter-contract";
-import defaultComponents from "@/lib/types/default-components";
-import countReaderComponent from "@/lib/types/default-components/count-reader";
-import counterContractComponent from "@/lib/types/default-components/counter-contract";
+import counterMapContractScript from "@/lib/types/default-scripts/counter-map-contract";
 import {
   defaultAccount,
   getIdentifierPart,
@@ -36,11 +32,13 @@ const state: State = {
       components: ["auth-no-auth", "counter-contract"],
     },
   ],
-  scripts: [...defaultScripts, countReaderScript, counterContractScript],
-  components: [
-    ...defaultComponents,
-    countReaderComponent,
-    counterContractComponent,
+  scripts: [
+    ...defaultScripts,
+    {
+      ...counterMapContractScript,
+      id: "counter-account",
+      name: "counter-account",
+    },
   ],
   tutorialId: "foreign-procedure-invocation",
 };

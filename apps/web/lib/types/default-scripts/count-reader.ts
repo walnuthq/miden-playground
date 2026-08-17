@@ -6,34 +6,36 @@ import {
 } from "@/lib/utils/script";
 import { COUNT_READER_COPY_COUNT_PROC_HASH } from "@/lib/constants";
 
-export const rust = `#![no_std]
+export const rust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
+#![no_std]
 #![feature(alloc_error_handler)]
 
-extern crate alloc;
+// However, we could still use some standard library types while
+// remaining no-std compatible, if we uncommented the following lines:
+//
+// extern crate alloc;
 
-use alloc::vec::Vec;
-use miden::*;
+use miden::{account, component, component_storage, AccountId, Felt, StorageValue};
 
-/// Main contract structure for the CountReader example.
-#[component]
-struct CountReader {
-    /// Storage slot holding the counter value.
+#[account(counter_account::CounterContract)]
+pub struct CounterContract;
+
+#[component_storage]
+struct CountReaderStorage {
     #[storage(description = "count reader storage value")]
-    count: StorageValue<Word>,
+    counter: StorageValue<Felt>,
 }
 
 #[component]
-impl CountReader {
-    /// Copy the count from a source contract into the CountReader own counter.
-    /// This procedure takes 2 arguments: the CounterContract account ID to copy from and the
-    /// get_count procedure hash.
-    pub fn copy_count(&mut self, counter_account_id: AccountId, get_count_proc_hash: Digest) {
-        // Execute a foreign procedure call on the counter contract, calling get_count and return
-        // the result in a felt array
-        let result =
-            tx::execute_foreign_procedure(counter_account_id, get_count_proc_hash, Vec::new());
-        // Copy the new value received from the foreign account in storage
-        self.count.set(result[0]);
+trait CountReader {
+    fn copy_count(&mut self, counter_account_id: AccountId);
+}
+
+#[component]
+impl CountReader for CountReaderStorage {
+    fn copy_count(&mut self, counter_account_id: AccountId) {
+        let counter_account = CounterContract::new(counter_account_id);
+        self.counter.set(counter_account.get_count());
     }
 }
 `;

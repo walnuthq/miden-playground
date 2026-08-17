@@ -10,7 +10,8 @@ export type ScriptExample =
   | "auth-no-auth"
   | "counter-account"
   | "counter-note"
-  | "counter-script";
+  | "counter-script"
+  | "count-reader";
 
 export type MidenProjectToml = {
   package: {

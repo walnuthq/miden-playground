@@ -25,7 +25,7 @@ use miden::{Felt, StorageValue, Word, component, component_storage, felt};
 struct CounterContractStorage {
     /// Storage slot holding the counter value.
     #[storage(description = "counter contract storage value")]
-    count: StorageValue<Word>,
+    count: StorageValue<Felt>,
 }
 
 /// API of the counter contract account component.
