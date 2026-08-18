@@ -10,7 +10,6 @@ import {
   newPackage,
   deletePackageDir,
   readPackage,
-  parseMidenProjectToml,
   packagePath,
   packageExists,
   generatePackageDir,
@@ -23,7 +22,8 @@ import {
   getReadOnlyPackage,
 } from "@/db/packages";
 import { PACKAGES_PATH, API_REGISTRY_URL } from "@/lib/constants";
-import { generateCargoToml, safeRm } from "@/lib/utils";
+import { safeRm } from "@/lib/utils";
+import { generateCargoToml, parseMidenProjectToml } from "@/lib/toml";
 import type { PackageSource } from "@/lib/types";
 import { projectTemplateFiles } from "@/lib/templates";
 

@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import db from "@/db";
 import { packagesTable } from "@/db/schema";
 import type { NewPackage, PackageStatus, Export } from "@/lib/types";
-import { isValidUUIDv4 } from "@/lib/utils";
+import { isValidUUIDv4 } from "@/lib/uuid";
 import {
   defaultDependenciesRecords,
   type DefaultDependency,

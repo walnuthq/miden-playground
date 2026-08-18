@@ -15,7 +15,7 @@ pub struct CounterContract;
 #[component_storage]
 struct CountReaderStorage {
     #[storage(description = "count reader storage value")]
-    counter: StorageValue<Felt>,
+    count: StorageValue<Felt>,
 }
 
 #[component]
@@ -27,6 +27,6 @@ trait CountReader {
 impl CountReader for CountReaderStorage {
     fn copy_count(&mut self, counter_account_id: AccountId) {
         let counter_account = CounterContract::new(counter_account_id);
-        self.counter.set(counter_account.get_count());
+        self.count.set(counter_account.get_count());
     }
 }

@@ -20,7 +20,10 @@ import useTransactions from "@/hooks/use-transactions";
 import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";
 import { midenExplorerUrl } from "@/lib/constants";
 import type { ProcedureExport, MidenType } from "@/lib/types/script";
-import { formatProcedureExportPath } from "@/lib/utils/script";
+import {
+  formatProcedureExportPath,
+  midenRawTypeToMidenType,
+} from "@/lib/utils/script";
 import useNetwork from "@/hooks/use-network";
 
 const FeltField = ({ id }: { id: string }) => (
@@ -52,25 +55,25 @@ const AccountIdField = ({
   </div>
 );
 
-const FaucetIdField = ({
-  id,
-  faucetId,
-  setFaucetId,
-}: {
-  id: string;
-  faucetId: string;
-  setFaucetId: Dispatch<SetStateAction<string>>;
-}) => (
-  <div className="grid gap-3 col-span-2">
-    <Label>{id}</Label>
-    <SelectAccountDropdownMenu
-      value={faucetId}
-      onValueChange={setFaucetId}
-      selectFaucets
-      showFaucetsAsAssets
-    />
-  </div>
-);
+// const FaucetIdField = ({
+//   id,
+//   faucetId,
+//   setFaucetId,
+// }: {
+//   id: string;
+//   faucetId: string;
+//   setFaucetId: Dispatch<SetStateAction<string>>;
+// }) => (
+//   <div className="grid gap-3 col-span-2">
+//     <Label>{id}</Label>
+//     <SelectAccountDropdownMenu
+//       value={faucetId}
+//       onValueChange={setFaucetId}
+//       selectFaucets
+//       showFaucetsAsAssets
+//     />
+//   </div>
+// );
 
 const AssetField = ({
   id,
@@ -102,11 +105,8 @@ const getParamsWithNames = (
   procedureExport: ProcedureExport,
 ): { name: string; type: MidenType }[] => {
   const path = formatProcedureExportPath(procedureExport.path);
-  return path === "copy_count"
-    ? [
-        { name: "counter_contract_id", type: "AccountId" },
-        { name: "get_count_proc_hash", type: "Word" },
-      ]
+  return path === "copy-count"
+    ? [{ name: "counter_contract_id", type: "AccountId" }]
     : path === "get-depositor-balance"
       ? [
           { name: "depositor", type: "AccountId" },
@@ -119,7 +119,7 @@ const getParamsWithNames = (
           ]
         : procedureExport.signature.params.map((param, index) => ({
             name: `param_${index}`,
-            type: param,
+            type: midenRawTypeToMidenType(param.Struct.name),
           }));
 };
 
@@ -183,17 +183,17 @@ const InvokeProcedureArgumentsDialog = () => {
                     }),
                   };
                 }
-                case "FaucetId": {
-                  const wasmAccountId = WasmAccountId.fromHex(faucetId);
-                  return {
-                    name,
-                    type,
-                    value: JSON.stringify({
-                      prefix: wasmAccountId.prefix().toString(),
-                      suffix: wasmAccountId.suffix().toString(),
-                    }),
-                  };
-                }
+                // case "FaucetId": {
+                //   const wasmAccountId = WasmAccountId.fromHex(faucetId);
+                //   return {
+                //     name,
+                //     type,
+                //     value: JSON.stringify({
+                //       prefix: wasmAccountId.prefix().toString(),
+                //       suffix: wasmAccountId.suffix().toString(),
+                //     }),
+                //   };
+                // }
                 case "Asset": {
                   const wasmAccountId = WasmAccountId.fromHex(faucetId);
                   const amount = formData.get(`${name}-amount`);
@@ -284,13 +284,13 @@ const InvokeProcedureArgumentsDialog = () => {
                     setAccountId={setAccountId}
                   />
                 )}
-                {type === "FaucetId" && (
+                {/* type === "FaucetId" && (
                   <FaucetIdField
                     id={name}
                     faucetId={faucetId}
                     setFaucetId={setFaucetId}
                   />
-                )}
+                ) */}
                 {type === "Asset" && (
                   <AssetField
                     id={name}
@@ -311,11 +311,12 @@ const InvokeProcedureArgumentsDialog = () => {
             type="submit"
             disabled={
               loading ||
-              (procedureExport.signature.params.includes("AccountId") &&
+              (paramsWithNames.map(({ type }) => type).includes("AccountId") &&
                 !accountId) ||
-              (procedureExport.signature.params.includes("FaucetId") &&
-                !faucetId) ||
-              (procedureExport.signature.params.includes("Asset") && !faucetId)
+              // (procedureExport.signature.params.includes("FaucetId") &&
+              //   !faucetId) ||
+              (paramsWithNames.map(({ type }) => type).includes("Asset") &&
+                !faucetId)
             }
           >
             {loading && <Spinner />}

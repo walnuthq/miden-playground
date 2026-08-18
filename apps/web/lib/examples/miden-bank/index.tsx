@@ -33,8 +33,11 @@ const midenBank: Example = {
         "0x0f882003db8fa3d50a3a41ddc96970410768eeaa5b28974045e6f1c8118080f3",
       signature: {
         ...defaultSignature(),
-        params: ["AccountId", "Asset"],
-        results: ["Felt"],
+        params: [
+          { Struct: { name: "miden:base/core-types@1.0.0/account-id" } },
+          { Struct: { name: "miden:base/core-types@1.0.0/asset" } },
+        ],
+        results: [{ Struct: { name: "miden:base/core-types@1.0.0/felt" } }],
       },
       readOnly: true,
     },
@@ -45,7 +48,10 @@ const midenBank: Example = {
         "0xa31e727f264e1d841838b3e282bc7a46c30e439cced2e0e30f0e0dc55be630d8",
       signature: {
         ...defaultSignature(),
-        params: ["AccountId", "Asset"],
+        params: [
+          { Struct: { name: "miden:base/core-types@1.0.0/account-id" } },
+          { Struct: { name: "miden:base/core-types@1.0.0/asset" } },
+        ],
       },
     },
     {
@@ -61,7 +67,12 @@ const midenBank: Example = {
         "0x291543660e99197e13a5cd76ed7de9fd77eebf2625ac82dd0fb15450e6c1fe50",
       signature: {
         ...defaultSignature(),
-        params: ["Asset", "Word", "Felt", "Felt"],
+        params: [
+          { Struct: { name: "miden:base/core-types@1.0.0/asset" } },
+          { Struct: { name: "miden:base/core-types@1.0.0/word" } },
+          { Struct: { name: "miden:base/core-types@1.0.0/felt" } },
+          { Struct: { name: "miden:base/core-types@1.0.0/felt" } },
+        ],
       },
     },
   ],

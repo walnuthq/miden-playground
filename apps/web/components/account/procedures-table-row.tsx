@@ -63,11 +63,7 @@ const ProceduresTableRow = ({
           <TableCell className="flex items-center justify-between gap-2">
             <span>{result}</span>
             <Button
-              disabled={
-                loading ||
-                (account.isNew && procedureExport.readOnly) ||
-                submittingTransaction
-              }
+              disabled={loading || submittingTransaction}
               onClick={async () => {
                 setLoading(true);
                 if (procedureExport.signature.params.length === 0) {

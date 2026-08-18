@@ -53,7 +53,10 @@ const counterScript: Script = {
       ...defaultProcedureExport(),
       path: '::"miden:increment-script/miden-increment-script@0.1.0"::run',
       digest: COUNTER_SCRIPT_RUN_PROC_HASH,
-      signature: { ...defaultSignature(), params: ["Word"] },
+      signature: {
+        ...defaultSignature(),
+        params: [{ Struct: { name: "miden:base/core-types@1.0.0/word" } }],
+      },
     },
   ],
 };
