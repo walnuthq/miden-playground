@@ -5,6 +5,7 @@ import timelockP2id from "@/lib/types/default-scripts/timelock-p2id";
 import authNoAuth from "@/lib/types/default-scripts/auth-no-auth";
 import counterNote from "@/lib/types/default-scripts/counter-note";
 import counterScript from "@/lib/types/default-scripts/counter-script";
+import countReader from "@/lib/types/default-scripts/count-reader";
 import { sleep } from "@/lib/utils";
 import type {
   ScriptType,
@@ -33,6 +34,7 @@ const scriptsRust: Record<ScriptExample | "none", string> = {
   "counter-account": counterMapContract.rust,
   "counter-note": counterNote.rust,
   "counter-script": counterScript.rust,
+  "count-reader": countReader.rust,
 } as const;
 
 const scriptsDependencies: Record<ScriptExample | "none", Dependency[]> = {
@@ -42,6 +44,7 @@ const scriptsDependencies: Record<ScriptExample | "none", Dependency[]> = {
   "counter-account": counterMapContract.dependencies,
   "counter-note": counterNote.dependencies,
   "counter-script": counterScript.dependencies,
+  "count-reader": countReader.dependencies,
 } as const;
 
 export const POST = async (request: NextRequest) => {

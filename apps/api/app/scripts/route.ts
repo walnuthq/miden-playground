@@ -5,7 +5,10 @@ import type {
   PackageType,
   ScriptExample,
 } from "@/lib/types";
-import { basicWalletDependency } from "@/lib/default-dependencies";
+import {
+  basicWalletDependency,
+  counterAccountDependency,
+} from "@/lib/default-dependencies";
 import { templates } from "@/lib/templates";
 import { createPackage } from "@/lib/utils";
 
@@ -28,6 +31,7 @@ const scriptsDependencies: Record<ScriptExample, Dependency[]> = {
   "counter-account": [],
   "counter-note": [],
   "counter-script": [],
+  "count-reader": [counterAccountDependency],
 } as const;
 
 export const POST = async (request: NextRequest) => {

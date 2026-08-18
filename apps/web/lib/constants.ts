@@ -78,8 +78,6 @@ export const COUNTER_NOTE_RUN_PROC_HASH =
   "0xe8c9bd2b9d600c77edc783121d0d4194628fb06d7e4439e9a1d7ccf475cb44fe";
 export const COUNTER_SCRIPT_RUN_PROC_HASH =
   "0x9fb2d0f974a6f7eb25f252d27ff162f190aa68da91afcd77457c06556572ed32";
-export const COUNT_READER_COPY_COUNT_PROC_HASH =
-  "0xda25b564385a2445b50c101e975f33f9ec116731a4cffff66f3a8f3488d1683a";
 
 export const midenExplorerUrl = (networkId: NetworkId) =>
   networkId === "mtst" ? TESTNET_EXPLORER_URL : DEVNET_EXPLORER_URL;

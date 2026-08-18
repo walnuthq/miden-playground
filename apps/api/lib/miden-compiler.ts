@@ -1,12 +1,7 @@
 import { cp, writeFile, readFile } from "node:fs/promises";
-import { parse } from "smol-toml";
-import {
-  execFile,
-  fileExists,
-  generateMidenProjectToml,
-  safeRm,
-} from "@/lib/utils";
-import type { Export, Dependency, MidenProjectToml } from "@/lib/types";
+import { execFile, fileExists, safeRm } from "@/lib/utils";
+import { generateMidenProjectToml } from "@/lib/toml";
+import type { Export, Dependency } from "@/lib/types";
 import { insertPackage, getDependencies } from "@/db/packages";
 import type { PackageType } from "@/lib/types";
 import { PACKAGES_PATH, PROJECT_ROOT } from "@/lib/constants";
@@ -299,6 +294,3 @@ export const deletePackageDir = async (packageDir: string) => {
     force: true,
   });
 };
-
-export const parseMidenProjectToml = (midenProjectToml: string) =>
-  parse(midenProjectToml) as MidenProjectToml;

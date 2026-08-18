@@ -3,13 +3,8 @@ import { basename } from "node:path";
 import { randomUUID } from "node:crypto";
 import { readdir, readFile } from "node:fs/promises";
 import { type NextRequest, NextResponse } from "next/server";
-import {
-  execFile,
-  safeRm,
-  parseMidenProjectToml,
-  compilePackage,
-  createPackage,
-} from "@/lib/utils";
+import { execFile, safeRm, compilePackage, createPackage } from "@/lib/utils";
+import { parseMidenProjectToml } from "@/lib/toml";
 import type { CompiledPackage, PackageSource } from "@/lib/types";
 import { PACKAGES_PATH } from "@/lib/constants";
 

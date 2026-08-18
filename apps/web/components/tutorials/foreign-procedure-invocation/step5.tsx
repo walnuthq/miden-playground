@@ -10,7 +10,7 @@ const useCompleted = () => {
     components.includes("count-reader"),
   );
   const counter = accounts.find(({ components }) =>
-    components.includes("counter-contract"),
+    components.includes("counter-account"),
   );
   if (!countReader || !counter) {
     return false;

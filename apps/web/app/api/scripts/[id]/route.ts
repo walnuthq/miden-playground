@@ -3,6 +3,7 @@ import counterMapContract from "@/lib/types/default-scripts/counter-map-contract
 import timelockP2id from "@/lib/types/default-scripts/timelock-p2id";
 import counterNote from "@/lib/types/default-scripts/counter-note";
 import counterScript from "@/lib/types/default-scripts/counter-script";
+import countReader from "@/lib/types/default-scripts/count-reader";
 import { sleep } from "@/lib/utils";
 import type {
   ScriptExample,
@@ -28,6 +29,7 @@ const scripts: Record<ScriptExample | "none", Script> = {
   "counter-account": counterMapContract,
   "counter-note": counterNote,
   "counter-script": counterScript,
+  "count-reader": countReader,
 } as const;
 
 const scriptsExports: Record<ScriptExample | "none", Export[]> = {
@@ -49,6 +51,9 @@ const scriptsExports: Record<ScriptExample | "none", Export[]> = {
     Procedure: procedureExport,
   })),
   "counter-script": counterScript.procedureExports.map((procedureExport) => ({
+    Procedure: procedureExport,
+  })),
+  "count-reader": countReader.procedureExports.map((procedureExport) => ({
     Procedure: procedureExport,
   })),
 } as const;

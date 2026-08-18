@@ -7,9 +7,6 @@ You can read the initial counter value by hovering the **Counter** _"Value"_ col
 
 Click on the _"Invoke"_ button of **`copy_count`** to open a modal that will let you configure the procedure arguments.
 
-We need to select the **Counter Contract** account as the first parameter which is the source account from which to copy the counter value.
+We need to select the **Counter Contract** account as parameter which is the source account from which to copy the counter value.
 
-The **`get_count`** procedure hash can be obtained from the **Counter Contract** account component page by clicking on the _"Copy Procedure Hash"_ button next to the procedure name.
-For convenience, you can also copy it from here: <CopyButton content="Copy Procedure Hash" copy={COUNTER_CONTRACT_GET_COUNT_PROC_HASH} />
-
-After setting the procedure parameters, click on the _"Invoke"_ button to trigger a new custom transaction calling **`copy_count`**, check the storage slot value again and confirm it now holds a copy of the **Counter Contract** counter value.
+After configuring the procedure parameters, click on the _"Invoke"_ button to trigger a new custom transaction calling **`copy_count`** on the **Count Reader**, check the storage slot value again and confirm it now holds a copy of the **Counter Contract** counter value.

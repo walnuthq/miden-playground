@@ -22,6 +22,7 @@ export const createScript = async ({
 }) => {
   const apiUrl = [
     "",
+    "foreign-procedure-invocation",
     "your-first-smart-contract-and-custom-note",
     "contract-verification",
   ].includes(tutorialId)

@@ -101,7 +101,7 @@ const counterMapContract: Script = {
         "0xa5786be8056e5650452d712e1f736a2c0d07f26f061bce8186d39054e00de2dc",
       signature: {
         ...defaultSignature(),
-        results: ["Felt"],
+        results: [{ Struct: { name: "miden:base/core-types@1.0.0/felt" } }],
       },
       readOnly: true,
     },
@@ -112,7 +112,7 @@ const counterMapContract: Script = {
         "0x52bcd648b2678a5fda8024d96e01cc794ba16dc13c7ce48e9cc7a9f69cd02590",
       signature: {
         ...defaultSignature(),
-        results: ["Felt"],
+        results: [{ Struct: { name: "miden:base/core-types@1.0.0/felt" } }],
       },
     },
   ],

@@ -32,7 +32,7 @@ const counterContract: Example = {
         "0x68a422b3714a8aecc62577beca2368591f90a583e780722f36e7d97eb3e7a393",
       signature: {
         ...defaultSignature(),
-        results: ["Felt"],
+        results: [{ Struct: { name: "miden:base/core-types@1.0.0/felt" } }],
       },
       readOnly: true,
     },
@@ -43,7 +43,7 @@ const counterContract: Example = {
         "0x498ac7ba8d658a2cf6cdf17f813da473368a8809b2de7cc88520610b5ba651e6",
       signature: {
         ...defaultSignature(),
-        results: ["Felt"],
+        results: [{ Struct: { name: "miden:base/core-types@1.0.0/felt" } }],
       },
     },
   ],

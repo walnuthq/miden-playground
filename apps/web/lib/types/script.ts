@@ -19,6 +19,7 @@ export const scriptExamples = {
   "counter-account": { name: "Counter Contract", type: "account-component" },
   "counter-note": { name: "Counter Note", type: "note" },
   "counter-script": { name: "Counter Script", type: "tx-script" },
+  "count-reader": { name: "Count Reader", type: "account-component" },
 } as const;
 
 export type ScriptExample = keyof typeof scriptExamples;
@@ -31,7 +32,20 @@ export const scriptStatuses = {
 
 export type ScriptStatus = keyof typeof scriptStatuses;
 
-export type MidenType = "Felt" | "Word" | "AccountId" | "FaucetId" | "Asset";
+export const midenTypes = {
+  "miden:base/core-types@1.0.0/felt": "Felt",
+  "miden:base/core-types@1.0.0/word": "Word",
+  "miden:base/core-types@1.0.0/account-id": "AccountId",
+  "miden:base/core-types@1.0.0/asset": "Asset",
+} as const;
+
+export type MidenRawType = keyof typeof midenTypes;
+
+export type MidenType = (typeof midenTypes)[keyof typeof midenTypes];
+
+export type MidenTypeStruct = {
+  Struct: { name: MidenRawType /*repr: "Default"; size: number*/ };
+};
 
 export type MidenInput = {
   name: string;
@@ -41,8 +55,8 @@ export type MidenInput = {
 
 export type Signature = {
   abi: number;
-  params: MidenType[];
-  results: MidenType[];
+  params: MidenTypeStruct[];
+  results: MidenTypeStruct[];
 };
 
 export type ProcedureExport = {
