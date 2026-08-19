@@ -10,8 +10,14 @@ import type {
   MidenInput,
   MidenProjectToml,
   CompiledPackage,
+  MidenType,
+  MidenRawType,
 } from "@/lib/types/script";
-import { coreDependency, protocolDependency } from "@/lib/types/script";
+import {
+  coreDependency,
+  midenTypes,
+  protocolDependency,
+} from "@/lib/types/script";
 
 export const defaultSignature = (): Signature => ({
   abi: 3,
@@ -61,14 +67,14 @@ export const formatProcedureInputs = (inputs: MidenInput[]) =>
         case "Word": {
           return `push.${arg.value}`;
         }
-        case "AccountId":
-        case "FaucetId": {
+        // case "FaucetId":
+        case "AccountId": {
           const { prefix, suffix } = JSON.parse(arg.value ?? "") as {
             prefix: string;
             suffix: string;
           };
           // TODO calling convention differs between MASM and Rust
-          return `push.${prefix}.${suffix}`;
+          return `push.${suffix}.${prefix}`;
         }
         case "Asset": {
           const { prefix, suffix, amount } = JSON.parse(arg.value ?? "") as {
@@ -184,3 +190,7 @@ export const fileListToPackageSources = async (fileList: FileList) => {
     return { ...previousValue, [currentValue]: packageSource };
   }, {});
 };
+
+export const midenRawTypeToMidenType = (
+  midenRawType: MidenRawType,
+): MidenType => midenTypes[midenRawType];

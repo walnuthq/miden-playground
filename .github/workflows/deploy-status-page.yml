@@ -1,0 +1,117 @@
+name: Deploy status page
+
+# Owns the whole GitHub Pages site for this repository. A repository has exactly
+# one Pages deployment and `deploy-pages` replaces the entire site on every run,
+# so this must stay the only workflow that publishes Pages — a second one would
+# delete this one's files on each of its runs.
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/status-page/**"
+      - "packages/ui/**"
+      - ".github/workflows/deploy-status-page.yml"
+  # Refreshes the snapshot on the hour and the half hour. Note that GitHub only
+  # runs schedules on the default branch, disables them after 60 days of
+  # repository inactivity, and treats the time as best effort — use the manual
+  # trigger below when you need a refresh now.
+  schedule:
+    - cron: "0,30 * * * *"
+  workflow_dispatch:
+
+# Allow the workflow to publish to GitHub Pages.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one Pages deployment at a time; let a newer run supersede an in-flight one.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Resolve Playwright version
+        id: playwright
+        run: |
+          echo "version=$(node -p "require('./apps/status-page/package.json').devDependencies.playwright")" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+
+      # Playwright is deliberately absent from `allowBuilds` in
+      # pnpm-workspace.yaml, so `pnpm install` never downloads a browser. The
+      # probe needs exactly one, installed here.
+      - name: Install Chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pnpm --filter status-page exec playwright install --with-deps chromium
+
+      - name: Install Chromium system dependencies
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: pnpm --filter status-page exec playwright install-deps chromium
+
+      - name: Build status page
+        # Probes both services from the runner, then builds. A service being
+        # down produces a red card, not a failed build.
+        run: pnpm --filter status-page build
+        env:
+          # Repository variables (Settings -> Secrets and variables -> Actions
+          # -> Variables). Both are required: an undefined variable arrives as
+          # an empty string and the probe then falls back to its localhost
+          # defaults, which publishes a page full of connection failures.
+          WEB_URL: ${{ vars.WEB_URL }}
+          API_URL: ${{ vars.API_URL }}
+          # The probe reads the previously published snapshot from here to work
+          # out what changed since the last run. Derived from the repository
+          # when unset, so a fork reads its own state.
+          STATUS_PAGE_URL: ${{ vars.STATUS_PAGE_URL }}
+
+      - name: Notify Slack
+        # Reads the snapshot the build just wrote and posts only when a
+        # service's health changed, plus a reminder every 6h while it is still
+        # down. Writes nothing, so it is safe after the build. Without the
+        # secret it logs and exits 0 — forks stay silent.
+        run: pnpm --filter status-page notify
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          STATUS_PAGE_URL: ${{ vars.STATUS_PAGE_URL }}
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: apps/status-page/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

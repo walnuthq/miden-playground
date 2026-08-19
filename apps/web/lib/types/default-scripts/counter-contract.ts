@@ -25,7 +25,7 @@ use miden::{Felt, StorageValue, Word, component, component_storage, felt};
 struct CounterContractStorage {
     /// Storage slot holding the counter value.
     #[storage(description = "counter contract storage value")]
-    count: StorageValue<Word>,
+    count: StorageValue<Felt>,
 }
 
 /// API of the counter contract account component.
@@ -107,7 +107,7 @@ const counterContract: Script = {
       digest: COUNTER_CONTRACT_GET_COUNT_PROC_HASH,
       signature: {
         ...defaultSignature(),
-        results: ["Felt"],
+        results: [{ Struct: { name: "miden:base/core-types@1.0.0/felt" } }],
       },
       readOnly: true,
     },
@@ -117,7 +117,7 @@ const counterContract: Script = {
       digest: COUNTER_CONTRACT_INCREMENT_COUNT_PROC_HASH,
       signature: {
         ...defaultSignature(),
-        results: ["Felt"],
+        results: [{ Struct: { name: "miden:base/core-types@1.0.0/felt" } }],
       },
     },
   ],

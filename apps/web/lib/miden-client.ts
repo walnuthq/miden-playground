@@ -1,4 +1,4 @@
-import { MidenClient } from "@miden-sdk/miden-sdk/lazy";
+import { MidenClient, WasmWebClient } from "@miden-sdk/miden-sdk/lazy";
 import {
   TESTNET_NOTE_TRANSPORT_URL,
   DEVNET_NOTE_TRANSPORT_URL,
@@ -7,6 +7,9 @@ import {
   LOCAL_RPC_URL,
 } from "@/lib/constants";
 import type { NetworkId } from "@/lib/types/network";
+
+// TODO remove hotfix once it's fixed in the miden-sdk package
+(WasmWebClient as unknown as { workerMode: string }).workerMode = "module";
 
 export const networks = {
   mtst: "testnet",

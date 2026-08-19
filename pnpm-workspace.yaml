@@ -15,12 +15,12 @@ allowBuilds:
 # Point the SDK at the sibling web-sdk checkout instead of the registry. `link:`
 # symlinks the package directories, so a rebuild there (`pnpm build` in web-sdk)
 # is picked up without reinstalling here. Paths are relative to this workspace
-# root. To go back to the registry, restore the published versions:
-#   "@miden-sdk/miden-sdk": "0.16.0-alpha.1"
-#   "@miden-sdk/react": "0.16.0-alpha.1"
+# root.
+# "@miden-sdk/miden-sdk": "link:../web-sdk/crates/web-client"
+# "@miden-sdk/react": "link:../web-sdk/packages/react-sdk"
 overrides:
-  "@miden-sdk/miden-sdk": "link:../web-sdk/crates/web-client"
-  "@miden-sdk/react": "link:../web-sdk/packages/react-sdk"
+  "@miden-sdk/miden-sdk": "0.16.0-rc.2"
+  "@miden-sdk/react": "0.16.0-rc.2"
 
 # The published wallet-adapter packages import @miden-sdk/miden-sdk without
 # declaring it (they rely on a hoisted install). Declare it explicitly so it
@@ -29,10 +29,10 @@ overrides:
 packageExtensions:
   "@miden-sdk/miden-wallet-adapter-base":
     dependencies:
-      "@miden-sdk/miden-sdk": "link:../web-sdk/crates/web-client"
+      "@miden-sdk/miden-sdk": "0.16.0-rc.2"
   "@miden-sdk/miden-wallet-adapter-miden":
     dependencies:
-      "@miden-sdk/miden-sdk": "link:../web-sdk/crates/web-client"
+      "@miden-sdk/miden-sdk": "0.16.0-rc.2"
   "@miden-sdk/miden-wallet-adapter-react":
     dependencies:
-      "@miden-sdk/miden-sdk": "link:../web-sdk/crates/web-client"
+      "@miden-sdk/miden-sdk": "0.16.0-rc.2"

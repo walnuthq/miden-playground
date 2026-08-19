@@ -1,0 +1,39 @@
+{
+  "name": "status-page",
+  "version": "0.0.1",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "probe": "tsx scripts/probe.ts",
+    "notify": "tsx scripts/notify.ts",
+    "build": "pnpm probe && pnpm typecheck && vite build",
+    "dev": "pnpm probe && vite",
+    "preview": "vite preview",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.node.json --noEmit"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "4.3.3",
+    "@workspace/ui": "workspace:*",
+    "lucide-react": "1.31.0",
+    "next-themes": "0.4.6",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "tailwindcss": "4.3.3"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.3",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.4",
+    "@vitejs/plugin-react": "6.0.5",
+    "@workspace/eslint-config": "workspace:^",
+    "@workspace/typescript-config": "workspace:*",
+    "dotenv": "17.4.2",
+    "eslint": "9.39.5",
+    "playwright": "1.62.1",
+    "tsx": "4.23.12",
+    "typescript": "6.0.3",
+    "vite": "8.2.1"
+  }
+}

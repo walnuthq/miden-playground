@@ -20,9 +20,11 @@ export const templates = {
   "authentication-component": readFile("authentication-component.rs"),
   note: readFile("note.rs"),
   "tx-script": readFile("tx-script.rs"),
+  "basic-wallet": readFile("basic-wallet.rs"),
   "p2id-note": readFile("p2id-note.rs"),
   "auth-no-auth": readFile("auth-no-auth.rs"),
   "counter-account": readFile("counter-account.rs"),
   "counter-note": readFile("counter-note.rs"),
   "counter-script": readFile("counter-script.rs"),
+  "count-reader": readFile("count-reader.rs"),
 } as const;

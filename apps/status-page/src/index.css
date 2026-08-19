@@ -1,0 +1,7 @@
+/* The shared design system owns the Tailwind entry, the theme tokens and the
+   base layer. See packages/ui/src/styles/globals.css. */
+@import "@workspace/ui/globals.css";
+
+/* globals.css declares its @source globs relative to itself and only reaches
+   packages/ui's own sources, so this app has to declare its own. */
+@source "./**/*.tsx";

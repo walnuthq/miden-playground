@@ -10,7 +10,6 @@ import {
   packagePath,
   packageExists,
   generatePackageDir,
-  parseMidenProjectToml,
 } from "@/lib/miden-compiler";
 import {
   deletePackage,
@@ -20,7 +19,8 @@ import {
   getReadOnlyPackage,
 } from "@/db/packages";
 import { API_REGISTRY_URL, PACKAGES_PATH } from "@/lib/constants";
-import { generateCargoToml, safeRm } from "@/lib/utils";
+import { safeRm } from "@/lib/utils";
+import { generateCargoToml, parseMidenProjectToml } from "@/lib/toml";
 import type { PackageSource } from "@/lib/types";
 import { projectTemplateFiles } from "@/lib/templates";
 
