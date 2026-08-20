@@ -21,6 +21,9 @@ export const defaultStorageItem = (): StorageItem => ({
   mapEntries: [],
 });
 
+export const formatStorageSlotName = (path: string) =>
+  path.split("::").at(-1) ?? "";
+
 export const defaultAccount = (): Account => ({
   id: "",
   name: "",

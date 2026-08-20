@@ -26,13 +26,13 @@
     "pg": "8.23.0",
     "react": "19.2.8",
     "smol-toml": "1.8.0",
-    "uuid": "14.0.1"
+    "uuid": "14.0.2"
   },
   "devDependencies": {
     "@types/archiver": "8.0.0",
     "@types/lodash": "4.17.25",
     "@types/node": "24.13.3",
-    "@types/pg": "8.21.0",
+    "@types/pg": "8.23.1",
     "@types/react": "19.2.18",
     "@workspace/eslint-config": "workspace:^",
     "@workspace/typescript-config": "workspace:*",

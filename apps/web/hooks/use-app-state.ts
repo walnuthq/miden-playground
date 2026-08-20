@@ -57,7 +57,7 @@ const syncAccounts = ({
 }) => {
   // const wasmAccount = wasmAccounts.find(
   //   (wasmAccount) =>
-  //     wasmAccount.id().toString() === "0xe4062b9a7484b0116bd1931d4cba9f",
+  //     wasmAccount.id().toString() === "0x75e610802005d2d1514284d663ae13",
   // );
   // if (wasmAccount) {
   //   console.log(wasmAccount.code().commitment().toHex());
