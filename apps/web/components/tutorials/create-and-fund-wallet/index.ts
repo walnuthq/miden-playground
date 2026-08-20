@@ -18,6 +18,7 @@ const tutorial: Tutorial = {
   description:
     "In this first tutorial, we'll create a new wallet and discover how to fund it by creating your first Miden transactions.",
   initialRoute: "/accounts",
+  networkId: "mdev",
   state,
   store,
   steps: [Step1, Step2, Step3, Step4, Step5, Step6],

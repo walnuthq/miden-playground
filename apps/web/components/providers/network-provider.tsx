@@ -5,7 +5,7 @@ import type { NetworkId } from "@/lib/types/network";
 import { noop } from "lodash";
 
 const store = createMidenStorage("miden-playground");
-const initialNetworkId = store.get<NetworkId>("networkId") ?? "mtst";
+const initialNetworkId = store.get<NetworkId>("networkId") ?? "mdev";
 
 export const NetworkContext = createContext<{
   networkId: NetworkId;

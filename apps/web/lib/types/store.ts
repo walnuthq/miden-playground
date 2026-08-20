@@ -96,8 +96,10 @@ type StoreTransactionScript = {
 };
 
 type StoreInputNote = {
+  detailsCommitment: string;
   noteId: string;
   assets: SerializedUint8Array;
+  attachments: SerializedUint8Array;
   serialNumber: SerializedUint8Array;
   inputs: SerializedUint8Array;
   scriptRoot: string;
@@ -105,14 +107,13 @@ type StoreInputNote = {
   state: SerializedUint8Array;
   stateDiscriminant: number;
   serializedCreatedAt: string;
-  consumedBlockHeight: number;
-  consumedTxOrder: number;
-  consumerAccountId: string;
 };
 
 type StoreOutputNote = {
+  detailsCommitment: string;
   noteId: string;
   assets: SerializedUint8Array;
+  attachments: SerializedUint8Array;
   recipientDigest: string;
   metadata: SerializedUint8Array;
   nullifier: string;
@@ -126,12 +127,15 @@ type StoreNoteScript = {
   serializedNoteScript: SerializedUint8Array;
 };
 
-type StoreStateSync = { id: number; blockNum: number };
+type StoreBlockchainCheckpoint = {
+  id: number;
+  blockNum: number;
+  partialBlockchainPeaks: SerializedUint8Array;
+};
 
 export type StoreBlockHeader = {
   blockNum: number;
   header: SerializedUint8Array;
-  partialBlockchainPeaks: SerializedUint8Array;
   hasClientNotes: string;
 };
 
@@ -142,6 +146,7 @@ type StoreTag = {
   tag: string;
   sourceNoteId: string;
   sourceAccountId: string;
+  sourceSubscriptionKey: string;
 };
 
 type StoreForeignAccountCode = { accountId: string; codeRoot: string };
@@ -166,7 +171,7 @@ export type Store = {
   inputNotes: StoreInputNote[];
   outputNotes: StoreOutputNote[];
   notesScripts: StoreNoteScript[];
-  stateSync: StoreStateSync[];
+  blockchainCheckpoint: StoreBlockchainCheckpoint[];
   blockHeaders: StoreBlockHeader[];
   partialBlockchainNodes: StorePartialBlockchainNode[];
   tags: StoreTag[];

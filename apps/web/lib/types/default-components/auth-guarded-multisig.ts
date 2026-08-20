@@ -1,12 +1,12 @@
 import type { Component } from "@/lib/types/component";
 import { defaultComponent } from "@/lib/utils/component";
 
-const authMultisigGuardian: Component = {
+const authGuardedMultisig: Component = {
   ...defaultComponent(),
-  id: "auth-multisig-guardian",
+  id: "auth-guarded-multisig",
   name: "Multisig Guardian",
   type: "authentication-component",
-  scriptId: "auth-multisig-guardian",
+  scriptId: "auth-guarded-multisig",
   storageSlots: [
     {
       name: "openzeppelin::multisig::threshold_config",
@@ -41,4 +41,4 @@ const authMultisigGuardian: Component = {
   ],
 };
 
-export default authMultisigGuardian;
+export default authGuardedMultisig;

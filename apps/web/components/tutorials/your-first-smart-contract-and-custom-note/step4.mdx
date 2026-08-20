@@ -24,7 +24,7 @@ struct IncrementNote;
 #[note]
 impl IncrementNote {
     #[note_script]
-    fn run(self, _arg: Word, account: &mut CounterContract) { ... }
+    fn run(self, _arg: Word, account: &mut CounterAccount) { ... }
 }
 ```
 
@@ -38,10 +38,10 @@ Learn more about [note scripts in the Miden documentation](https://docs.miden.xy
 
 ```rust
 #[note_script]
-fn run(self, _arg: Word, account: &mut CounterContract) {
+fn run(self, _arg: Word, account: &mut CounterAccount) {
     let initial_value = account.get_count();
     account.increment_count();
-    let expected_value = initial_value + Felt::from_u32(1);
+    let expected_value = initial_value + felt!(1);
     let final_value = account.get_count();
     assert_eq(final_value, expected_value);
 }

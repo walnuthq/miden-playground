@@ -84,6 +84,10 @@ pub proc auth_network_transaction(auth_args: word)
 end
 `;
 
+// ::miden::standards::components::auth::network_account::remove_allowed_note_script 0xb2a6e6e034c35baf49c915975b884d12698f97185635ce4090b43dfd89fded01
+// ::miden::standards::components::auth::network_account::remove_allowed_tx_script 0xc1cc11b14268471327968fab4057f6dbdcc5a12e5cb25bbaddb29e2c5fbbc8dd
+// ::miden::standards::components::auth::network_account::set_fee_policy 0xda991a79b56f74d322f9a11858d0dc4fd550e7f5cf79821730de3b4bbaf33f20
+
 const authNetworkAccount: Script = {
   ...defaultScript(),
   id: "auth-network-account",
@@ -93,13 +97,73 @@ const authNetworkAccount: Script = {
   readOnly: true,
   rust,
   masm,
-  digest: "0xd11852ac8afc34bd194e01937ac25005a67134fe45606789504e519c0abefaca",
+  digest: "0x8eb432de0abf243f75991408423fae7faf86a1a4f43b9f0a805059d60303dd97",
   procedureExports: [
+    {
+      ...defaultProcedureExport(),
+      path: "::miden::standards::components::auth::network_account::add_allowed_fee_policy",
+      digest:
+        "0x13718a4dc7d1ffd9aa884aadf9a74ec0e1fab5159bebf6dda116df08dbcb9659",
+    },
+    {
+      ...defaultProcedureExport(),
+      path: "::miden::standards::components::auth::network_account::add_allowed_note_script",
+      digest:
+        "0x83cf2a01c8bd05d7e59084e7c16577dee77a99300ab4e7141fb67e5bc616b0cf",
+    },
+    {
+      ...defaultProcedureExport(),
+      path: "::miden::standards::components::auth::network_account::add_allowed_tx_script",
+      digest:
+        "0x9e92292aa78054398787a82718d71d2d163a9aa8a2d2fb7458792e2fc6255b2c",
+    },
     {
       ...defaultProcedureExport(),
       path: "::miden::standards::components::auth::network_account::auth_network_transaction",
       digest:
-        "0xc12187a6bf7a0597b7d4feba6521c767ebda2a21c02cdfdef8a4585334df7a23",
+        "0xceede7b3274e8bc0b703c940ff13c70f36e43154249761840be28e424f691dbd",
+    },
+    {
+      ...defaultProcedureExport(),
+      path: "::miden::standards::components::auth::network_account::estimate_note_fee",
+      digest:
+        "0xb0faa8a0f79c91c3d80399a3bc2298afa6dd7b570a634c09264ed8d196331d3c",
+    },
+    {
+      ...defaultProcedureExport(),
+      path: "::miden::standards::components::auth::network_account::get_fee_asset_id",
+      digest:
+        "0x30a59816a7ba87c39f16beea4b7a0bb5176db3e8e8bea190a90595e86db10b3e",
+    },
+    {
+      ...defaultProcedureExport(),
+      path: "::miden::standards::components::auth::network_account::get_fee_policy",
+      digest:
+        "0x0b83d739e3469f1a4b832a8d15c6b54acf8dc854507b8f00cf6667a54adbb29f",
+    },
+    {
+      ...defaultProcedureExport(),
+      path: "::miden::standards::components::auth::network_account::remove_allowed_fee_policy",
+      digest:
+        "0x19f5e03ef42650ffb776512497aa369541d39b11742eb3f18b6d43bb752a4e04",
+    },
+    {
+      ...defaultProcedureExport(),
+      path: "::miden::standards::components::auth::network_account::remove_allowed_note_script",
+      digest:
+        "0xb2a6e6e034c35baf49c915975b884d12698f97185635ce4090b43dfd89fded01",
+    },
+    {
+      ...defaultProcedureExport(),
+      path: "::miden::standards::components::auth::network_account::remove_allowed_tx_script",
+      digest:
+        "0xc1cc11b14268471327968fab4057f6dbdcc5a12e5cb25bbaddb29e2c5fbbc8dd",
+    },
+    {
+      ...defaultProcedureExport(),
+      path: "::miden::standards::components::auth::network_account::set_fee_policy",
+      digest:
+        "0xda991a79b56f74d322f9a11858d0dc4fd550e7f5cf79821730de3b4bbaf33f20",
     },
   ],
 };

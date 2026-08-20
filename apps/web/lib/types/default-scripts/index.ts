@@ -1,4 +1,4 @@
-import authMultisigGuardian from "@/lib/types/default-scripts/auth-multisig-guardian";
+import authGuardedMultisig from "@/lib/types/default-scripts/auth-guarded-multisig";
 import authNetworkAccount from "@/lib/types/default-scripts/auth-network-account";
 import authNoAuth from "@/lib/types/default-scripts/auth-no-auth";
 import authSingleSig from "@/lib/types/default-scripts/auth-single-sig";
@@ -11,7 +11,7 @@ import p2id from "@/lib/types/default-scripts/p2id";
 import protocol from "@/lib/types/default-scripts/protocol";
 
 const defaultScripts = [
-  authMultisigGuardian,
+  authGuardedMultisig,
   authNetworkAccount,
   authNoAuth,
   authSingleSig,

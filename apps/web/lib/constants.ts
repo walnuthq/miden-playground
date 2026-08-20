@@ -9,23 +9,23 @@ export const EMPTY_WORD =
 export const FUNGIBLE_FAUCET_DEFAULT_DECIMALS = 6;
 export const FUNGIBLE_FAUCET_DEFAULT_MAX_SUPPLY = 100_000_000_000n;
 export const FUNGIBLE_FAUCET_CODE =
-  "0x33919b5e023653c50ee83293e71d77f4e687b2d128d7ec5b5c7dfc5918a8da2b";
+  "0x1d1354f2b5893b9a71b87499722dc4f341b898ff044ddd8454a408d7e4ed0a39";
 
 export const P2ID_NOTE_CODE =
-  "0xf08ea78d8d0570b219a40bfc5652c1de5adb2dfdc7ab034622dedae7837ac8ac";
+  "0x124bbbfc18271834c6efe9b067e2e7ea3eda90030ef0c60fef906a019d39958c";
 export const P2IDE_NOTE_CODE =
-  "0x512ebb716b6664fc054dc22c83708f50d92d75da1159752f5cf3a0e81594a1da";
+  "0x052ff7dd6774b5c1a5781b407d692d2e11f1dbaf26cb6f0dc5b625f035ee9966";
 export const SWAP_NOTE_CODE =
-  "0xb3b028d3e69dbf308f780d32ae3980ac28568289903e8f91db47de5b9e01094e";
+  "0xe8766f5098287a571398c7214882e82a87e3118f737f50744753a08b7cc2c279";
 export const PSWAP_NOTE_CODE =
-  "0x55db5f113de3657bcc944401f85eadd270a67f58963507684c7f648a2ba9567a";
+  "0x3e55cbc510a1fb4b3b66c1395148c346be4fd020248a20d4a7ff4c484e41e344";
 export const MINT_NOTE_CODE =
-  "0xdc4dcae6fb3adfa8ecde42762d990c600a730b52afdde400aebf49ae2d7deee2";
+  "0x252f46cbecd62b9a435d62988253992c33cd037841ab4c1f76ea61ead16306fb";
 export const BURN_NOTE_CODE =
-  "0x861d8e08672e928179e1aedb1e4ec09bff641ed457025123ffb01d502f5deaeb";
+  "0x1106bde3e27e3ba82096917427fe798c54ce0bb5997a145d8e8157fe22b70935";
 
 export const BASIC_WALLET_CODE =
-  "0x0fcb1b772bfa8087b382175c545972b2fe54091e5f820321337d4d1110929773";
+  "0x97879b4864678ad3c7e1a2ffa09f1dc6918f3a8c358de82d8f0b3a32028f607f";
 
 export const GUARDIAN_WALLET_CODE =
   "0x9931fbf53d3f555b37134c57208606327a32fa199d191e1a06c2abf3faec7f4b";
@@ -44,11 +44,11 @@ export const TESTNET_FAUCET_API_URL = "https://faucet-api.testnet.miden.io";
 export const DEVNET_FAUCET_API_URL =
   "https://faucet-api-devnet-miden.eu-central-8.gateway.fm";
 export const TESTNET_FAUCET_ACCOUNT_ID = "0x2458e5446128e6b150b75b8ebd9ce1";
-export const DEVNET_FAUCET_ACCOUNT_ID = "0x16f6c85d5652c9200879145bfdda93";
+export const DEVNET_FAUCET_ACCOUNT_ID = "0x05abe04d292f0af102ebb6d1560dae";
 export const TESTNET_FAUCET_ADDRESS =
   "mtst1aqj93e2yvy5wdv2skadca0vuuypfnp80_qr7qqq9wr6w";
 export const DEVNET_FAUCET_ADDRESS =
-  "mdev1aqt0djza2efvjgqg0y29hlw6jvn93r0a_qr7qqq9wr6w";
+  "mdev1aqz6hczd9yhs4ugzawmdz4sd4cww4nnm_qr7qqq9wr6w";
 
 export const TESTNET_TEST_WALLET_ACCOUNT_ID =
   "0xbd9ff94dabdb72b13b2f3e099dc721";

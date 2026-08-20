@@ -167,8 +167,8 @@ const TransactionPreview = ({
         />
       )}
       <strong>
-        New nonce: {finalNonce === undefined ? accountNonce : Number(finalNonce)}
-        .
+        New nonce:{" "}
+        {finalNonce === undefined ? accountNonce : Number(finalNonce)}.
       </strong>
     </div>
   );

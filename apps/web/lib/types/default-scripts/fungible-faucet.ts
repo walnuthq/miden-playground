@@ -20,7 +20,7 @@ const fungibleFaucet: Script = {
   readOnly: true,
   rust,
   masm,
-  digest: "0x3ca7e678c18301868e5a9f1eb4d786d56b7644ad8e76408a6068e16edd219901",
+  digest: "0xafa15a803c5717efff1c00fafd997fe1ae902604a4a1464985b0107354cfa480",
   procedureExports: [
     {
       ...defaultProcedureExport(),
@@ -66,6 +66,12 @@ const fungibleFaucet: Script = {
     },
     {
       ...defaultProcedureExport(),
+      path: "::miden::standards::components::faucets::fungible_faucet::has_procedure",
+      digest:
+        "0x0b86f18d6873e91dfbe6e82e1701b7f37d351c07edf57abb92b45958cbb5cce2",
+    },
+    {
+      ...defaultProcedureExport(),
       path: "::miden::standards::components::faucets::fungible_faucet::is_description_mutable",
       digest:
         "0x8e961e99f376d0883dd3ae725cf72adc2587c41833533dfc2142ef85aa88d703",
@@ -92,37 +98,37 @@ const fungibleFaucet: Script = {
       ...defaultProcedureExport(),
       path: "::miden::standards::components::faucets::fungible_faucet::mint_and_send",
       digest:
-        "0x652806c9b3aaeffa7192bafaabb5233b594d1cbe4c34e54bcf0e933335353b77",
+        "0xd52c7f7ce1fa79da18fa9f1bef3af8ca122cfa8fe5a820293e204e02e4f7c594",
     },
     {
       ...defaultProcedureExport(),
       path: "::miden::standards::components::faucets::fungible_faucet::receive_and_burn",
       digest:
-        "0xe5f86a4535d59512396861f069ec3aca6a0e0497d2c1ce189538609d294da985",
+        "0x43f78c2fa15ec0c404cfe4442a5551a1ae301b93caa3afd8b8f106fe06de6f55",
     },
     {
       ...defaultProcedureExport(),
       path: "::miden::standards::components::faucets::fungible_faucet::set_description",
       digest:
-        "0x6f18b00fc65c7bbaf1ea6321d8a69e0638a6d297216afb0210e5e960bb95949b",
+        "0xc828574dbd80a229eb9987e62c4ecd2e2e2215dbadcca16e10fe5f934a158f0b",
     },
     {
       ...defaultProcedureExport(),
       path: "::miden::standards::components::faucets::fungible_faucet::set_external_link",
       digest:
-        "0x961d9d88455808a8240dc51ac6c747b1908ada0f114a2d5bffe17a336d76fb26",
+        "0x7a4343b5f60c256ae78d1e6cd52ecb428895625d442b894d4d3b1f32c699cc0c",
     },
     {
       ...defaultProcedureExport(),
       path: "::miden::standards::components::faucets::fungible_faucet::set_logo_uri",
       digest:
-        "0x1ee067f2fcafb72cb1453eb5f12a26ef983640cbfe307b6eaa31faf85f4e8759",
+        "0x3956ab640c1d2b3866b6e8356401677003e6807b7106aeac8129365c5e134634",
     },
     {
       ...defaultProcedureExport(),
       path: "::miden::standards::components::faucets::fungible_faucet::set_max_supply",
       digest:
-        "0x51099fa3950b5d07a2373a1b22b5bc99c9de2bee7e1a8851ab0631a3e40771c9",
+        "0x943b448eb81865f8dc52b24cfb8f654d5da0adc56144290f8af11c3b098f1778",
     },
   ],
 };

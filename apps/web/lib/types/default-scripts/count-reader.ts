@@ -13,7 +13,7 @@ export const rust = `// Do not link against libstd (i.e. anything defined in \`s
 use miden::{account, component, component_storage, AccountId, Felt, StorageValue};
 
 #[account(counter_account::CounterContract)]
-pub struct CounterContract;
+pub struct CounterAccount;
 
 #[component_storage]
 struct CountReaderStorage {
@@ -29,7 +29,7 @@ trait CountReader {
 #[component]
 impl CountReader for CountReaderStorage {
     fn copy_count(&mut self, counter_account_id: AccountId) {
-        let counter_account = CounterContract::new(counter_account_id);
+        let counter_account = CounterAccount::new(counter_account_id);
         self.count.set(counter_account.get_count());
     }
 }
