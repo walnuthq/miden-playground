@@ -13,11 +13,7 @@ import type {
   MidenType,
   MidenRawType,
 } from "@/lib/types/script";
-import {
-  coreDependency,
-  midenTypes,
-  protocolDependency,
-} from "@/lib/types/script";
+import { midenTypes } from "@/lib/types/script";
 
 export const defaultSignature = (): Signature => ({
   abi: 3,
@@ -33,8 +29,38 @@ export const defaultProcedureExport = (): ProcedureExport => ({
 });
 
 export const defaultDependencies = (): Dependency[] => [
-  coreDependency,
-  protocolDependency,
+  {
+    id: "miden-core",
+    name: "miden-core",
+    type: "library",
+    // version: "0.29.4",
+    digest:
+      "0x4d34c859654c20dc21dd6ceb792b215d1210a0e81d5d663694f265d4f1545cfe",
+  },
+  {
+    id: "miden-precompiles",
+    name: "miden-precompiles",
+    type: "library",
+    // version: "0.29.4",
+    digest:
+      "0xa75eb666b0b27bb9c4679e92956515be411ce4dc1de68af8dd291f35c4f31fbc",
+  },
+  {
+    id: "miden-protocol",
+    name: "miden-protocol",
+    type: "library",
+    // version: "0.16.0",
+    digest:
+      "0x2466538eb39da9963466cd42cb06a2dc096d09360625c79ab05d83c731ad3ba4",
+  },
+  {
+    id: "miden-tx-kernel",
+    name: "miden-tx-kernel",
+    type: "kernel",
+    // version: "0.16.0",
+    digest:
+      "0xf598b10b510e3c9343404306bd49c9aa385abcca88a90b71eb9a6b4224de7c22",
+  },
 ];
 
 export const defaultScript = (): Script => ({

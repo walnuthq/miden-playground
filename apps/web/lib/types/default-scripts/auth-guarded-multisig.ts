@@ -31,13 +31,13 @@ const authGuardedMultisig: Script = {
   readOnly: true,
   rust,
   masm,
-  digest: "0x9cd0bb72bedded46df8ac73ce6bdbf60323ce3bab1e25db0ea3d79b704b4ed2d",
+  digest: "0xedb6acb4ac6e17e6cb5426f339a6b9424269929d7628ce27637bf1c3401aa9a3",
   procedureExports: [
     {
       ...defaultProcedureExport(),
       path: "::miden::standards::components::auth::guarded_multisig::auth_tx_guarded_multisig",
       digest:
-        "0xa6aa6f69d9358535272ba433cd48d20628a5c69598e00c6dd01a22e83a5f15df",
+        "0x43fb07d62ed26993b7b13c7b411db62c5b5acffa2813e989608c41a72d7185ec",
     },
     {
       ...defaultProcedureExport(),

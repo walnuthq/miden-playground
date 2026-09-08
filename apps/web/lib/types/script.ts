@@ -1,4 +1,5 @@
 export const scriptTypes = {
+  kernel: "Kernel",
   library: "Library",
   "account-component": "Account Component",
   note: "Note Script",
@@ -72,22 +73,10 @@ export type Export = { Procedure: ProcedureExport };
 export type Dependency = {
   id: string;
   name: string;
+  // kind: "library" | "kernel" | "account-component";
+  // version: string;
   type: ScriptType;
   digest: string;
-};
-
-export const coreDependency: Dependency = {
-  id: "miden-core",
-  name: "miden-core",
-  type: "library",
-  digest: "0xcd9686a94d49ca36e2cf3f23d31016805c1dd7648d6f2e3260778a38b48e8f4b",
-};
-
-export const protocolDependency: Dependency = {
-  id: "miden-protocol",
-  name: "miden-protocol",
-  type: "library",
-  digest: "0xd358bb70b44c28ee0c4bded0a109a9228c99a962bc7d2c3a5995f465e9102bfd",
 };
 
 export type PackageSource = { midenProjectToml: string; rust: string };

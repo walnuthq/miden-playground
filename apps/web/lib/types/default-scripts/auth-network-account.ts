@@ -97,7 +97,7 @@ const authNetworkAccount: Script = {
   readOnly: true,
   rust,
   masm,
-  digest: "0x8eb432de0abf243f75991408423fae7faf86a1a4f43b9f0a805059d60303dd97",
+  digest: "0x50d1681e5324fa25d8c06e3b142fa91bfc5016a6cce93fe643063187b0aa37c0",
   procedureExports: [
     {
       ...defaultProcedureExport(),
@@ -121,7 +121,7 @@ const authNetworkAccount: Script = {
       ...defaultProcedureExport(),
       path: "::miden::standards::components::auth::network_account::auth_network_transaction",
       digest:
-        "0xceede7b3274e8bc0b703c940ff13c70f36e43154249761840be28e424f691dbd",
+        "0xe61bd7a0dcbe31f6930fb94933ce2ebbb5b95a9588fbfee798cad98484160695",
     },
     {
       ...defaultProcedureExport(),

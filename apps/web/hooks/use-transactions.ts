@@ -127,7 +127,10 @@ const useTransactions = () => {
     const notes = wasmInputNoteRecords
       .filter((inputNoteRecord) => inputNoteRecord !== undefined)
       .map((inputNoteRecord) => inputNoteRecord.toNote());
-    const transactionRequest = await client.newConsumeTransactionRequest(notes);
+    const transactionRequest = await client.newConsumeTransactionRequest(
+      notes,
+      WasmAccountId.fromHex(accountId),
+    );
     const transactionResult = await client.executeTransaction(
       WasmAccountId.fromHex(accountId),
       transactionRequest,

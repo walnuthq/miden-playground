@@ -19,8 +19,8 @@ allowBuilds:
 # "@miden-sdk/miden-sdk": "link:../web-sdk/crates/web-client"
 # "@miden-sdk/react": "link:../web-sdk/packages/react-sdk"
 overrides:
-  "@miden-sdk/miden-sdk": "0.16.0-rc.5"
-  "@miden-sdk/react": "0.16.0-rc.5"
+  "@miden-sdk/miden-sdk": "0.16.0"
+  "@miden-sdk/react": "0.16.0"
 
 # The published wallet-adapter packages import @miden-sdk/miden-sdk without
 # declaring it (they rely on a hoisted install). Declare it explicitly so it
@@ -29,10 +29,21 @@ overrides:
 packageExtensions:
   "@miden-sdk/miden-wallet-adapter-base":
     dependencies:
-      "@miden-sdk/miden-sdk": "0.16.0-rc.5"
+      "@miden-sdk/miden-sdk": "0.16.0"
   "@miden-sdk/miden-wallet-adapter-miden":
     dependencies:
-      "@miden-sdk/miden-sdk": "0.16.0-rc.5"
+      "@miden-sdk/miden-sdk": "0.16.0"
   "@miden-sdk/miden-wallet-adapter-react":
     dependencies:
-      "@miden-sdk/miden-sdk": "0.16.0-rc.5"
+      "@miden-sdk/miden-sdk": "0.16.0"
+minimumReleaseAgeExclude:
+  - '@miden-sdk/miden-sdk@0.16.0'
+  - '@miden-sdk/miden-wallet-adapter-base@0.16.0'
+  - '@miden-sdk/miden-wallet-adapter-miden@0.16.0'
+  - '@miden-sdk/miden-wallet-adapter-react@0.16.0'
+  - '@miden-sdk/miden-wallet-adapter-reactui@0.16.0'
+  - '@miden-sdk/miden-wallet-adapter@0.16.0'
+  - '@miden-sdk/node-darwin-arm64@0.16.0'
+  - '@miden-sdk/node-darwin-x64@0.16.0'
+  - '@miden-sdk/node-linux-x64-gnu@0.16.0'
+  - '@miden-sdk/react@0.16.0'
