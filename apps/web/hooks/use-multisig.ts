@@ -85,7 +85,7 @@ const useMultisig = () => {
     const account = wasmAccountToAccount({
       wasmAccount: newMultisig.account,
       name,
-      components: ["auth-multisig-guardian", "basic-wallet"],
+      components: ["auth-guarded-multisig", "basic-wallet"],
       multisig: {
         config: {
           ...config,
@@ -317,7 +317,7 @@ const useMultisig = () => {
     const account = wasmAccountToAccount({
       wasmAccount: multisig.account,
       name,
-      components: ["auth-multisig-guardian", "basic-wallet"],
+      components: ["auth-guarded-multisig", "basic-wallet"],
       multisig: {
         config: {
           ...config,

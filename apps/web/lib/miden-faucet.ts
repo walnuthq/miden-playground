@@ -1,4 +1,11 @@
+import {
+  type WebClient as WebClientType,
+  AccountId as WasmAccountId,
+} from "@miden-sdk/miden-sdk/lazy";
 import { fromBase64, fromHex } from "@/lib/utils";
+import type { NetworkId } from "@/lib/types/network";
+import { midenFaucetApiUrl } from "@/lib/constants";
+import { clientGetAllInputNotes } from "@/lib/web-client";
 
 // https://github.com/0xMiden/miden-faucet/blob/next/bin/faucet/frontend/app.js
 // Function to find a valid nonce for proof of work using the new challenge format
@@ -54,6 +61,44 @@ export const findValidNonce = async ({
       await new Promise((resolve) => setTimeout(resolve, 0));
     }
   }
+};
+
+export const getMetadata = async (backendUrl: string) => {
+  const response = await fetch(`${backendUrl}/get_metadata`);
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(`Failed to get metadata: ${message}`);
+  }
+  const result = await response.json();
+  const {
+    version,
+    id,
+    max_supply: maxSupply,
+    decimals,
+    explorer_url: explorerUrl,
+    pow_load_difficulty: powLoadDifficulty,
+    base_amount: baseAmount,
+    note_transport_url: noteTransportUrl,
+  } = result as {
+    version: string;
+    id: string;
+    max_supply: number;
+    decimals: number;
+    explorer_url: string;
+    pow_load_difficulty: number;
+    base_amount: number;
+    note_transport_url: string;
+  };
+  return {
+    version,
+    id,
+    maxSupply,
+    decimals,
+    explorerUrl,
+    powLoadDifficulty,
+    baseAmount,
+    noteTransportUrl,
+  };
 };
 
 export const getPowChallenge = async ({
@@ -133,4 +178,81 @@ export const getNote = async ({
   const result = await response.json();
   const { data_base64: dataBase64 } = result as { data_base64: string };
   return fromBase64(dataBase64);
+};
+
+export const requestFundingNote = async ({
+  networkId,
+  recipient,
+  expectedFaucet,
+  requestedAmount,
+}: {
+  networkId: NetworkId;
+  recipient: WasmAccountId;
+  expectedFaucet: WasmAccountId;
+  requestedAmount?: number;
+}) => {
+  const backendUrl = midenFaucetApiUrl(networkId);
+  const metadata = await getMetadata(backendUrl);
+  const actualFaucet = metadata.id.startsWith("0x")
+    ? WasmAccountId.fromHex(metadata.id)
+    : WasmAccountId.fromBech32(metadata.id);
+  if (actualFaucet.toString() !== expectedFaucet.toString()) {
+    throw new Error(
+      `Configured faucet ${actualFaucet} does not issue ${networkId}'s native fee asset ${expectedFaucet}`,
+    );
+  }
+  const configuredAmount = process.env.NEXT_PUBLIC_MIDEN_FEE_AMOUNT?.trim();
+  const amount =
+    requestedAmount ??
+    (configuredAmount ? Number(configuredAmount) : metadata.baseAmount);
+  if (!Number.isSafeInteger(amount) || amount <= 0) {
+    throw new Error(
+      `Invalid fee-funding amount ${String(amount)}; expected a positive safe integer`,
+    );
+  }
+  const { challenge, target } = await getPowChallenge({
+    backendUrl,
+    recipient: recipient.toString(),
+    amount: amount.toString(),
+  });
+  const nonce = await findValidNonce({ challenge, target });
+  return getTokens({
+    backendUrl,
+    challenge,
+    nonce,
+    recipient: recipient.toString(),
+    amount: amount.toString(),
+    isPrivateNote: false,
+  });
+};
+
+const FUNDING_NOTE_POLL_ATTEMPTS = 10;
+const FUNDING_NOTE_POLL_INTERVAL_MS = 2000;
+
+export const waitForFundingNote = async ({
+  client,
+  networkId,
+  noteId,
+  txId,
+}: {
+  client: WebClientType;
+  networkId: NetworkId;
+  noteId: string;
+  txId: string;
+}) => {
+  for (let attempt = 0; attempt < FUNDING_NOTE_POLL_ATTEMPTS; attempt += 1) {
+    const notes = await clientGetAllInputNotes({ client, networkId });
+    const note = notes.find((n) => n.id()?.toString() === noteId);
+    if (note?.inclusionProof()) {
+      return note;
+    }
+    if (attempt < FUNDING_NOTE_POLL_ATTEMPTS - 1) {
+      await new Promise((resolve) =>
+        setTimeout(resolve, FUNDING_NOTE_POLL_INTERVAL_MS),
+      );
+    }
+  }
+  throw new Error(
+    `Fee-funding note ${noteId} from faucet transaction ${txId} was not found after ${FUNDING_NOTE_POLL_ATTEMPTS} sync attempts`,
+  );
 };

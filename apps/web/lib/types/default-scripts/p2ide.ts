@@ -243,7 +243,7 @@ const p2ide: Script = {
   procedureExports: [
     {
       ...defaultProcedureExport(),
-      path: "::miden::standards::notes::p2id::run",
+      path: "::miden::standards::notes::p2ide::run",
       digest: P2IDE_NOTE_CODE,
     },
   ],

@@ -11,6 +11,7 @@ import type {
   TransactionRequest as WasmTransactionRequestType,
   TransactionRecord as WasmTransactionRecordType,
 } from "@miden-sdk/miden-sdk/lazy";
+import { FungibleAsset as WasmFungibleAsset } from "@miden-sdk/miden-sdk/lazy";
 import useAccounts from "@/hooks/use-accounts";
 import { defaultStorageItem } from "@/lib/utils/account";
 
@@ -52,16 +53,52 @@ const TransactionPreview = ({
   const accountId = executedTransaction.accountId().toString();
   const consumedNotes = executedTransaction.inputNotes().numNotes();
   const createdNotes = executedTransaction.outputNotes().numNotes();
-  const accountStorageDelta = executedTransaction.accountDelta().storage();
-  const accountVaultDelta = executedTransaction.accountDelta().vault();
-  const fungibleAssetDelta = accountVaultDelta.fungible();
-  const nonceDelta = executedTransaction.accountDelta().nonceDelta()?.asInt();
+  // `accountPatch()` replaced `accountDelta()` in SDK 0.16: it reports the
+  // absolute post-execution state rather than a relative change. Storage is
+  // absolute in both models, but the vault and nonce below need the account's
+  // current state to be expressed as the deltas this preview renders.
+  const accountPatch = executedTransaction.accountPatch();
+  const accountStoragePatch = accountPatch.storage();
+  const accountVaultPatch = accountPatch.vault();
+  const finalNonce = accountPatch.finalNonce()?.asInt();
   const account = accounts.find(({ id }) => id === accountId);
   const accountNonce = account?.nonce ?? 0;
   const accountStorage = account?.storage ?? [];
-  const storageDeltaValues = accountStorageDelta
+  const storageDeltaValues = accountStoragePatch
     .values()
     .map((word) => word.toHex());
+  const currentAmounts = new Map(
+    (account?.fungibleAssets ?? []).map(({ faucetId, amount }) => [
+      faucetId,
+      BigInt(amount),
+    ]),
+  );
+  const signedAmount = (amount: bigint) =>
+    amount < 0n ? amount.toString() : `+${amount}`;
+  const fungibleAssetDeltas = [
+    // Assets whose final balance changed: subtract the current balance to
+    // recover the delta.
+    ...accountVaultPatch.updatedFungibleAssets().map((asset) => {
+      const faucetId = asset.faucetId().toString();
+      return {
+        faucetId,
+        amount: signedAmount(
+          asset.amount() - (currentAmounts.get(faucetId) ?? 0n),
+        ),
+      };
+    }),
+    // Assets removed outright have no entry above; their final balance is zero,
+    // so the delta is the whole current balance.
+    ...accountVaultPatch.removedAssetIds().map((assetId) => {
+      const faucetId = WasmFungibleAsset.fromVaultKey(assetId, 0n)
+        .faucetId()
+        .toString();
+      return {
+        faucetId,
+        amount: signedAmount(-(currentAmounts.get(faucetId) ?? 0n)),
+      };
+    }),
+  ];
   const storageDelta = accountStorage
     .filter(({ type }) => type === "value")
     .map((before, index) =>
@@ -119,22 +156,20 @@ const TransactionPreview = ({
         <AccountStorageDeltaTable storageDelta={storageDelta} />
       )}
       <h5 className="font-semibold">Vault changes:</h5>
-      {fungibleAssetDelta.isEmpty() ? (
+      {fungibleAssetDeltas.length === 0 ? (
         <p className="text-muted-foreground text-sm">
           Account Vault will not be changed.
         </p>
       ) : (
         <FungibleAssetsTable
-          fungibleAssets={fungibleAssetDelta
-            .assets()
-            .map(({ faucetId, amount }) => ({
-              faucetId: faucetId.toString(),
-              amount: amount < 0n ? amount.toString() : `+${amount}`,
-            }))}
+          fungibleAssets={fungibleAssetDeltas}
           withAccountAddress={false}
         />
       )}
-      <strong>New nonce: {accountNonce + Number(nonceDelta)}.</strong>
+      <strong>
+        New nonce:{" "}
+        {finalNonce === undefined ? accountNonce : Number(finalNonce)}.
+      </strong>
     </div>
   );
 };

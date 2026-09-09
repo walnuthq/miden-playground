@@ -29,6 +29,7 @@ import {
   NoteTag as WasmNoteTag,
   NetworkAccountTarget as WasmNetworkAccountTarget,
   NoteExecutionHint as WasmNoteExecutionHint,
+  NoteScriptFee as WasmNoteScriptFee,
   NoteStorage as WasmNoteStorage,
   FeltArray as WasmFeltArray,
   Felt as WasmFelt,
@@ -64,6 +65,26 @@ import defaultScripts from "@/lib/types/default-scripts";
 import { fromBase64, toBase64, waitUntil } from "@/lib/utils";
 import { EMPTY_WORD } from "@/lib/constants";
 
+const wasmRpcClient = (networkId: NetworkId) => {
+  const endpoints = {
+    mtst: WasmEndpoint.testnet(),
+    mdev: WasmEndpoint.devnet(),
+    mlcl: WasmEndpoint.localhost(),
+    mmck: WasmEndpoint.localhost(),
+  } as const;
+  return new WasmRpcClient(endpoints[networkId]);
+};
+
+// Fees are denominated in the native asset of the chain, whose faucet is advertised
+// by every block header.
+export const clientGetBlockHeaderByNumber = async ({
+  networkId,
+  blockNum,
+}: {
+  networkId: NetworkId;
+  blockNum?: number | null;
+}) => wasmRpcClient(networkId).getBlockHeaderByNumber(blockNum);
+
 export const clientGetConsumableNotes = ({
   client,
   accountId,
@@ -82,13 +103,7 @@ export const clientGetAllInputNotes = async ({
   const wasmInputNotes = await client.getInputNotes(
     new WasmNoteFilter(WasmNoteFilterTypes.All),
   );
-  const endpoints = {
-    mtst: WasmEndpoint.testnet(),
-    mdev: WasmEndpoint.devnet(),
-    mlcl: WasmEndpoint.localhost(),
-    mmck: WasmEndpoint.localhost(),
-  } as const;
-  const rpcClient = new WasmRpcClient(endpoints[networkId]);
+  const rpcClient = wasmRpcClient(networkId);
   const wasmFetchedNotes = await rpcClient.getNotesById(
     wasmInputNotes
       .map((wasmInputNote) => wasmInputNote.id())
@@ -135,16 +150,21 @@ export const clientGetAllTransactions = (client: WebClientType) =>
 
 export const clientDeployAccount = async ({
   client,
+  networkId,
   storageMode,
   components,
   scripts,
 }: {
   client: WebClientType;
+  networkId: NetworkId;
   storageMode: AccountStorageMode;
   components: Component[];
   scripts: Script[];
 }) => {
-  const builder = await client.createCodeBuilder();
+  const [builder, blockHeader] = await Promise.all([
+    client.createCodeBuilder(),
+    clientGetBlockHeaderByNumber({ networkId }),
+  ]);
   const initSeed = new Uint8Array(32);
   crypto.getRandomValues(initSeed);
   const accountStorageModes = {
@@ -165,10 +185,11 @@ export const clientDeployAccount = async ({
           name ===
           "miden::standards::auth::network_account::allowed_note_scripts",
       ) ?? { value: "" };
-      const allowedNoteScriptRoots = allowedNoteScriptRootsRaw
+      const allowedNoteScriptFees = allowedNoteScriptRootsRaw
         .split(",")
         .map((keyValue) => keyValue.split(":").at(0) ?? "")
-        .filter((root) => root);
+        .filter((root) => root)
+        .map((root) => new WasmNoteScriptFee(WasmWord.fromHex(root), 0n));
       const { value: allowedTransactionScriptRootsRaw } =
         component.storageSlots.find(
           ({ name }) =>
@@ -178,12 +199,18 @@ export const clientDeployAccount = async ({
       const allowedTransactionScriptRoots = allowedTransactionScriptRootsRaw
         .split(",")
         .map((keyValue) => keyValue.split(":").at(0) ?? "")
-        .filter((root) => root);
-      const authComponent = WasmAccountComponent.createNetworkAuth(
-        allowedNoteScriptRoots.map((root) => WasmWord.fromHex(root)),
-        allowedTransactionScriptRoots.map((root) => WasmWord.fromHex(root)),
+        .filter((root) => root)
+        .map((root) => WasmWord.fromHex(root));
+      // Returns the auth component along with the components backing its fee policy,
+      // all of which have to be installed on the account.
+      const authComponents = WasmAccountComponent.createNetworkAuthComponents(
+        allowedNoteScriptFees,
+        blockHeader.feeFaucetId(),
+        allowedTransactionScriptRoots,
       );
-      accountBuilder = accountBuilder.withAuthComponent(authComponent);
+      for (const authComponent of authComponents) {
+        accountBuilder = accountBuilder.withComponent(authComponent);
+      }
       continue;
     }
     const script = scripts.find(({ id }) => id === component.scriptId);

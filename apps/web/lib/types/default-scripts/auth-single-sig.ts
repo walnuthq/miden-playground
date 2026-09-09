@@ -7,8 +7,8 @@ export const rust = `#![no_std]
 extern crate alloc;
 
 use miden::{
-    StorageValue, Word, component, component_storage, felt, hash_words, intrinsics::advice::adv_insert,
-    tx,
+    component, component_storage, felt, hash_words, intrinsics::advice::adv_insert, tx,
+    StorageValue, Word,
 };
 
 /// Authentication component storage/layout.
@@ -43,9 +43,14 @@ impl AuthComponent for AuthComponentStorage {
         let input_notes_commit = tx::get_input_notes_commitment();
         let output_notes_commit = tx::get_output_notes_commitment();
 
-        let salt = Word::from([felt!(0), felt!(0), ref_block_num, final_nonce]);
+        let salt = Word::from([felt!(0), felt!(0), ref_block_num.into(), final_nonce.into()]);
 
-        let tx_summary = [acct_delta_commit, input_notes_commit, output_notes_commit, salt];
+        let tx_summary = [
+            acct_delta_commit,
+            input_notes_commit,
+            output_notes_commit,
+            salt,
+        ];
         let msg: Word = hash_words(&tx_summary).into();
         // Insert tx summary into advice map under key \`msg\`
         adv_insert(msg, &tx_summary);
@@ -127,13 +132,13 @@ const authSingleSig: Script = {
   readOnly: true,
   rust,
   masm,
-  digest: "0xb3e910e90c3adc662a6c1f4860b9f310947bd1b9df52b462f2dc2096e9ce9593",
+  digest: "0x7725e15b0cdc90c6134cad4917fa38b767c952dac7dc62cfe1602fdd754c0966",
   procedureExports: [
     {
       ...defaultProcedureExport(),
       path: "::miden::standards::components::auth::singlesig::auth_tx",
       digest:
-        "0x473c89421f456ed085930056bb0b9d84681e2fbdcf93789537e1907e29cd0ab2",
+        "0xbe222199e35976af4096b828ffaa0ce8c387d818cabb4e1cb60f164d21b9854c",
     },
   ],
 };

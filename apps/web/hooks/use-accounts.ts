@@ -3,6 +3,7 @@ import {
   wasmAccountToAccount,
   clientDeployAccount,
   storageMode,
+  clientGetBlockHeaderByNumber,
 } from "@/lib/web-client";
 import { Address as WasmAddress } from "@miden-sdk/miden-sdk/lazy";
 import useGlobalContext from "@/components/global-context/hook";
@@ -30,8 +31,10 @@ import {
   useCreateFaucet,
   useImportAccount,
   useMiden,
+  useTransaction,
 } from "@miden-sdk/react/lazy";
 import useNetwork from "@/hooks/use-network";
+import { requestFundingNote, waitForFundingNote } from "@/lib/miden-faucet";
 
 const useAccounts = () => {
   const { address: midenWalletAddress, requestAssets } = useWallet();
@@ -54,10 +57,13 @@ const useAccounts = () => {
   const { client } = useMiden();
   const { createWallet } = useCreateWallet();
   const { createFaucet } = useCreateFaucet();
+  const { execute } = useTransaction();
   const { importAccount } = useImportAccount();
   const { scripts } = useScripts();
-  const wallets = accounts.filter((account) =>
-    account.components.includes("basic-wallet"),
+  const wallets = accounts.filter(
+    (account) =>
+      account.components.includes("basic-wallet") &&
+      !account.components.includes("fungible-faucet"),
   );
   const multisigs = wallets.filter((wallet) => !!wallet.multisig);
   const faucets = accounts.filter((account) => account.isFaucet);
@@ -83,12 +89,41 @@ const useAccounts = () => {
     name: string;
     storageMode: AccountStorageMode;
   }) => {
-    const wallet = await createWallet({
-      storageMode,
-      authScheme: AuthScheme.AuthRpoFalcon512,
+    if (!client) {
+      throw new Error("MidenClient not ready");
+    }
+    const [wallet, blockHeader] = await Promise.all([
+      createWallet({
+        storageMode,
+        authScheme: AuthScheme.AuthRpoFalcon512,
+      }),
+      clientGetBlockHeaderByNumber({ networkId }),
+    ]);
+    const { noteId, txId } = await requestFundingNote({
+      networkId,
+      recipient: wallet.id(),
+      expectedFaucet: blockHeader.feeFaucetId(),
     });
+    const fundingNote = await waitForFundingNote({
+      client,
+      networkId,
+      noteId,
+      txId,
+    });
+    const transactionRequest = await client.newConsumeTransactionRequest(
+      [fundingNote.toNote()],
+      wallet.id(),
+    );
+    await execute({
+      accountId: wallet.id(),
+      request: transactionRequest,
+    });
+    const fundedWallet = await client.getAccount(wallet.id());
+    if (!fundedWallet) {
+      throw new Error("Account not found");
+    }
     const account = wasmAccountToAccount({
-      wasmAccount: wallet,
+      wasmAccount: fundedWallet,
       name,
       updatedAt: lastSyncTime,
     });
@@ -111,16 +146,45 @@ const useAccounts = () => {
     decimals: number;
     maxSupply: bigint;
   }) => {
-    const faucet = await createFaucet({
-      storageMode,
-      tokenName: tokenSymbol,
-      tokenSymbol,
-      decimals,
-      maxSupply,
-      authScheme: AuthScheme.AuthRpoFalcon512,
+    if (!client) {
+      throw new Error("MidenClient not ready");
+    }
+    const [faucet, blockHeader] = await Promise.all([
+      createFaucet({
+        storageMode,
+        tokenName: tokenSymbol,
+        tokenSymbol,
+        decimals,
+        maxSupply,
+        authScheme: AuthScheme.AuthRpoFalcon512,
+      }),
+      clientGetBlockHeaderByNumber({ networkId }),
+    ]);
+    const { noteId, txId } = await requestFundingNote({
+      networkId,
+      recipient: faucet.id(),
+      expectedFaucet: blockHeader.feeFaucetId(),
     });
+    const fundingNote = await waitForFundingNote({
+      client,
+      networkId,
+      noteId,
+      txId,
+    });
+    const transactionRequest = await client.newConsumeTransactionRequest(
+      [fundingNote.toNote()],
+      faucet.id(),
+    );
+    await execute({
+      accountId: faucet.id(),
+      request: transactionRequest,
+    });
+    const fundedFaucet = await client.getAccount(faucet.id());
+    if (!fundedFaucet) {
+      throw new Error("Account not found");
+    }
     const account = wasmAccountToAccount({
-      wasmAccount: faucet,
+      wasmAccount: fundedFaucet,
       name,
       updatedAt: lastSyncTime,
     });
@@ -243,6 +307,7 @@ const useAccounts = () => {
     );
     const wasmAccount = await clientDeployAccount({
       client,
+      networkId,
       storageMode,
       components,
       scripts: componentScripts,

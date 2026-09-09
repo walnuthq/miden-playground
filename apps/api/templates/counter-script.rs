@@ -13,9 +13,9 @@ use miden::*;
 
 /// Native account of the note: exposes the `counter-contract` component methods gathered from the `counter-contract` package.
 #[account(counter_account::CounterContract)]
-pub struct CounterContract;
+pub struct CounterAccount;
 
 #[tx_script]
-fn run(_arg: Word, account: &mut CounterContract) {
+fn run(_arg: Word, account: &mut CounterAccount) {
     account.increment_count();
 }

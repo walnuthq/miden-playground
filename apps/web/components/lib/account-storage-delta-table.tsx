@@ -14,6 +14,7 @@ import {
 import { Button } from "@workspace/ui/components/button";
 import { formatValue } from "@/lib/utils";
 import type { StorageItem } from "@/lib/types/account";
+import { formatStorageSlotName } from "@/lib/utils/account";
 
 const ValueTooltip = ({ value }: { value: string }) => (
   <Tooltip>
@@ -42,9 +43,9 @@ const AccountStorageDeltaTable = ({
         </TableRow>
       </TableHeader>
       <TableBody>
-        {storageDelta.map(({ index, before, after }) => (
-          <TableRow key={index}>
-            <TableCell>{index}</TableCell>
+        {storageDelta.map(({ before, after }) => (
+          <TableRow key={before.name}>
+            <TableCell>{formatStorageSlotName(before.name)}</TableCell>
             <TableCell className="space-y-2.5">
               <p>
                 Before:

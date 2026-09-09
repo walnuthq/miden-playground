@@ -1,4 +1,4 @@
-import authMultisigGuardian from "@/lib/types/default-components/auth-multisig-guardian";
+import authGuardedMultisig from "@/lib/types/default-components/auth-guarded-multisig";
 import authNetworkAccount from "@/lib/types/default-components/auth-network-account";
 import authNoAuth from "@/lib/types/default-components/auth-no-auth";
 import authSingleSig from "@/lib/types/default-components/auth-single-sig";
@@ -11,7 +11,7 @@ const defaultComponents = [
   authNoAuth,
   authNetworkAccount,
   authSingleSig,
-  authMultisigGuardian,
+  authGuardedMultisig,
   // account-component
   basicWallet,
   counterContract,

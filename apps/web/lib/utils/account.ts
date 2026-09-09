@@ -21,6 +21,9 @@ export const defaultStorageItem = (): StorageItem => ({
   mapEntries: [],
 });
 
+export const formatStorageSlotName = (path: string) =>
+  path.split("::").at(-1) ?? "";
+
 export const defaultAccount = (): Account => ({
   id: "",
   name: "",
@@ -99,7 +102,7 @@ export const basicFungibleFaucetAccount = ({
   isPublic: storageMode === "public",
   isPrivate: storageMode === "private",
   code: FUNGIBLE_FAUCET_CODE,
-  components: ["auth-single-sig", "fungible-faucet"],
+  components: ["auth-single-sig", "basic-wallet", "fungible-faucet"],
 });
 
 export const accountIdFromPrefixSuffix = (prefix: string, suffix: string) => {

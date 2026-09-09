@@ -5,9 +5,8 @@ const testnetBlock0Header: StoreBlockHeader = {
   blockNum: 0,
   header: {
     __type: "Uint8Array",
-    data: "AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALNuyBJ0X3UhHyP6SIKVwrUIawxuMxwPM/JPBMMMJ9twNvYAK3/lR4xtKRA9JhAJ6cBEcBIXAInM46Fd+YsnJrwtKkVzO2ErNwxng3yekiYjFtfviE0CpiRBj+4mIgPamqnb1H8kW9+42yEEKLi4s+X26JrjL/M13gLnswACwlI6AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACM1C8/LAI8JjLOuYLz088pUvWhZVkVyVJaBLUQxT+9IAMOleJpFjRauxf4qpDb8OekgJTWkZ8uVYRh5+tAcWJQkSRY5URhKOaxULdbjr2c4QAAAAAXajpq",
+    data: "AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGiiazpzf2dLPa8g5qfkgCIk7sKuzxeql8hKqgpWYMJLr/1ixzi3MqIgTTMzSALNeGF/l7rPb2cOaCKcZ7iuTBUtKkVzO2ErNwxng3yekiYjFtfviE0CpiRBj+4mIgPamqnb1H8kW9+42yEEKLi4s+X26JrjL/M13gLnswACwlI6AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADrFBSA7XCrPSvzux7I6ENYxByhEEWuy72ViBxaL5XKQwUDP1KzM2YJ4VSPnlnSwplYsaAcf3OqoLdhrIqoFJQq/k4Dvz0vCjJr4ho3JgVyBm6MyktoP4N33OPujJwzurtwbUoYEB+lIsF0sWXv1PcKA4UHAAAAngShag==",
   },
-  partialBlockchainPeaks: { __type: "Uint8Array", data: "AQ==" },
   hasClientNotes: "false",
 };
 
@@ -15,9 +14,8 @@ const devnetBlock0Header: StoreBlockHeader = {
   blockNum: 0,
   header: {
     __type: "Uint8Array",
-    data: "AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHgyexmGxH9AESifu4SVxM8Zqax50Fgr0zXwEQEOZJ+2GFLXB8Oi2nnbf2wH742k8oMbzv6Vhfr9/MH48qhSjWwGxR/+JLqNoLHzmmnqDL9jD7dzp04VjXPBnXUqwfsVH98oppn/eFKvGavJ7C8FX1l1KBhANJFhYPgrG6YgtOpTAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADCAUdjrzRncdLAh6j73CERrXnBxWYJagCjoBOMSeFXRgIQfaDEFEozTyjMdQmHtvc2kjWPm7yOqTcsgnl3vZocqxb2yF1WUskgCHkUW/3akwAAAAA+Ytdp",
+    data: "AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGiiazpzf2dLPa8g5qfkgCIk7sKuzxeql8hKqgpWYMJL7KfY5FV9yXwQjouaAIrF/oMeK/K2htPQXIzMiQNivQktKkVzO2ErNwxng3yekiYjFtfviE0CpiRBj+4mIgPamqnb1H8kW9+42yEEKLi4s+X26JrjL/M13gLnswACwlI6AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADrFBSA7XCrPSvzux7I6ENYxByhEEWuy72ViBxaL5XKQwMDKz4bJfX6SUVhwsp495k/3jMZ+9zDw0nTUSR9Br6KeGAFq+BNKS8K8QLrttFWDa4AAAAA3DqDag==",
   },
-  partialBlockchainPeaks: { __type: "Uint8Array", data: "AQ==" },
   hasClientNotes: "false",
 };
 
@@ -46,23 +44,22 @@ export const defaultStore = (networkId: NetworkId): Store => ({
   inputNotes: [],
   outputNotes: [],
   notesScripts: [],
-  stateSync: [{ id: 1, blockNum: 0 }],
+  blockchainCheckpoint: [
+    {
+      id: 1,
+      blockNum: 0,
+      partialBlockchainPeaks: { __type: "Uint8Array", data: "" },
+    },
+  ],
   blockHeaders: [blockHeaders[networkId]],
   partialBlockchainNodes: [],
   tags: [],
   foreignAccountCode: [],
   settings: [
     {
+      scope: 0,
       key: "clientVersion",
-      value: { __type: "Uint8Array", data: "MC4xNS4y" },
-    },
-    {
-      key: "note_transport_cursor",
-      value: { __type: "Uint8Array", data: "AAAAAAAAAAA=" },
-    },
-    {
-      key: "rpc_limits",
-      value: { __type: "Uint8Array", data: "ZAAAAOgDAADoAwAA6AMAAA==" },
+      value: { __type: "Uint8Array", data: "MC4xNi4w" },
     },
   ],
 });
