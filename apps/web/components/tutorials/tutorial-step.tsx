@@ -16,8 +16,13 @@ import useNetwork from "@/hooks/use-network";
 const TutorialStep = ({ tutorial }: { tutorial: Tutorial }) => {
   const isMobile = useIsMobile();
   const { networkId } = useNetwork();
-  const { tutorialStep, tutorialOpen, previousTutorialStep, closeTutorial } =
-    useTutorials();
+  const {
+    tutorialStep,
+    tutorialOpen,
+    previousTutorialStep,
+    closeTutorial,
+    isTutorial,
+  } = useTutorials();
   const step = tutorial.steps[tutorialStep] ?? defaultTutorialStep();
   const NextStepButton = step.NextStepButton ?? DefaultNextStepButton;
   return (
@@ -48,9 +53,7 @@ const TutorialStep = ({ tutorial }: { tutorial: Tutorial }) => {
           <>
             {isMobile && <MobileAlert />}
             {networkId === "mmck" && <MockChainAlert />}
-            {networkId !== "mmck" && !window.midenWallet && (
-              <MidenWalletAlert />
-            )}
+            {!isTutorial && !window.midenWallet && <MidenWalletAlert />}
           </>
         )}
         {isMobile && tutorialStep === 0 && <MobileAlert />}

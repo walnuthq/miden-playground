@@ -151,7 +151,7 @@ type StoreTag = {
 
 type StoreForeignAccountCode = { accountId: string; codeRoot: string };
 
-type StoreSetting = { key: string; value: SerializedUint8Array };
+type StoreSetting = { scope: number; key: string; value: SerializedUint8Array };
 
 export type Store = {
   accountCode: StoreAccountCode[];

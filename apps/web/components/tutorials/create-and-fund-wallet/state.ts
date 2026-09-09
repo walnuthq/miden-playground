@@ -1,10 +1,14 @@
-import { basicFungibleFaucetAccount } from "@/lib/utils/account";
+import {
+  basicFungibleFaucetAccount,
+  midenFaucetAccount,
+} from "@/lib/utils/account";
 import type { State } from "@/lib/types/state";
 import { defaultState } from "@/lib/utils/state";
 
 const state: State = {
   ...defaultState(),
   accounts: [
+    midenFaucetAccount("mtst"),
     {
       ...basicFungibleFaucetAccount({
         storageMode: "public",
@@ -13,10 +17,10 @@ const state: State = {
         maxSupply: "100000000000000000",
         totalSupply: "0",
       }),
-      id: "0x3b9b49c51948ded13d374a9b497e96",
+      id: "0xc129dffc3f2f71d142068c90e3669e",
       name: "MDN Faucet",
-      address: "mdev1aqaekjw9r9yda5faxa9fkjt7jcyt2gyx_qr7qqq9wr6w",
-      identifier: "mdev1aqaekjw9r9yda5faxa9fkjt7jcyt2gyx",
+      address: "mtst1arqjnhlu8uhhr52zq6xfpcmxncg6rlza_qr7qqq9wr6w",
+      identifier: "mtst1arqjnhlu8uhhr52zq6xfpcmxncg6rlza",
       routingParameters: "qr7qqq9wr6w",
       isNew: false,
       storage: [

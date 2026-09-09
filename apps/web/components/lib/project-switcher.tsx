@@ -136,14 +136,14 @@ const ProjectSwitcher = () => {
             >
               New Testnet sandbox
             </DropdownMenuItem>
-            <DropdownMenuItem
+            {/* <DropdownMenuItem
               onClick={() => {
                 resetState("mdev");
                 router.push("/accounts");
               }}
             >
               New Devnet sandbox
-            </DropdownMenuItem>
+            </DropdownMenuItem> */}
             {/* <DropdownMenuItem
               onClick={() => {
                 resetState("mmck");

@@ -26,7 +26,10 @@ const AccountActionsCell = ({ account }: { account: Account }) => {
   const { connectedWallet, deleteAccount } = useAccounts();
   const { openCreateTransactionDialog } = useTransactions();
   const { isTutorial } = useTutorials();
-  const showMint = (isTutorial || networkId === "mmck") && account.isFaucet;
+  const showMint =
+    (isTutorial || networkId === "mmck") &&
+    account.isFaucet &&
+    account.address !== midenFaucetAddress(networkId);
   const showConsumeSend =
     (isTutorial ||
       networkId === "mmck" ||

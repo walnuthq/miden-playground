@@ -9,7 +9,7 @@ export const EMPTY_WORD =
 export const FUNGIBLE_FAUCET_DEFAULT_DECIMALS = 6;
 export const FUNGIBLE_FAUCET_DEFAULT_MAX_SUPPLY = 100_000_000_000n;
 export const FUNGIBLE_FAUCET_CODE =
-  "0x1d1354f2b5893b9a71b87499722dc4f341b898ff044ddd8454a408d7e4ed0a39";
+  "0xad98b229e2a1bb6bfa9b5e9565489268befffdccbd6d0fb47c2b83347f1ac0ca";
 
 export const P2ID_NOTE_CODE =
   "0x124bbbfc18271834c6efe9b067e2e7ea3eda90030ef0c60fef906a019d39958c";
@@ -25,7 +25,7 @@ export const BURN_NOTE_CODE =
   "0x1106bde3e27e3ba82096917427fe798c54ce0bb5997a145d8e8157fe22b70935";
 
 export const BASIC_WALLET_CODE =
-  "0x97879b4864678ad3c7e1a2ffa09f1dc6918f3a8c358de82d8f0b3a32028f607f";
+  "0x9ad6ab2c87895ed3697f616131b5d381d1447b76fae66c897e0fcd1bdd66eaf3";
 
 export const GUARDIAN_WALLET_CODE =
   "0x9931fbf53d3f555b37134c57208606327a32fa199d191e1a06c2abf3faec7f4b";
@@ -41,12 +41,11 @@ export const GUARDIAN_ENDPOINT_URL =
   process.env.NEXT_PUBLIC_GUARDIAN_ENDPOINT_URL ?? "http://localhost:3002";
 
 export const TESTNET_FAUCET_API_URL = "https://faucet-api.testnet.miden.io";
-export const DEVNET_FAUCET_API_URL =
-  "https://faucet-api-devnet-miden.eu-central-8.gateway.fm";
-export const TESTNET_FAUCET_ACCOUNT_ID = "0x2458e5446128e6b150b75b8ebd9ce1";
+export const DEVNET_FAUCET_API_URL = "https://faucet-api.devnet.miden.io";
+export const TESTNET_FAUCET_ACCOUNT_ID = "0x18101fa522c174b165efd4f70a0385";
 export const DEVNET_FAUCET_ACCOUNT_ID = "0x05abe04d292f0af102ebb6d1560dae";
 export const TESTNET_FAUCET_ADDRESS =
-  "mtst1aqj93e2yvy5wdv2skadca0vuuypfnp80_qr7qqq9wr6w";
+  "mtst1aqvpq8a9ytqhfvt9al20wzsrs56g83ec_qr7qqq9wr6w";
 export const DEVNET_FAUCET_ADDRESS =
   "mdev1aqz6hczd9yhs4ugzawmdz4sd4cww4nnm_qr7qqq9wr6w";
 

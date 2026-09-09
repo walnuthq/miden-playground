@@ -5,7 +5,7 @@ const testnetBlock0Header: StoreBlockHeader = {
   blockNum: 0,
   header: {
     __type: "Uint8Array",
-    data: "AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALNuyBJ0X3UhHyP6SIKVwrUIawxuMxwPM/JPBMMMJ9twNvYAK3/lR4xtKRA9JhAJ6cBEcBIXAInM46Fd+YsnJrwtKkVzO2ErNwxng3yekiYjFtfviE0CpiRBj+4mIgPamqnb1H8kW9+42yEEKLi4s+X26JrjL/M13gLnswACwlI6AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACM1C8/LAI8JjLOuYLz088pUvWhZVkVyVJaBLUQxT+9IAMOleJpFjRauxf4qpDb8OekgJTWkZ8uVYRh5+tAcWJQkSRY5URhKOaxULdbjr2c4QAAAAAXajpq",
+    data: "AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGiiazpzf2dLPa8g5qfkgCIk7sKuzxeql8hKqgpWYMJLr/1ixzi3MqIgTTMzSALNeGF/l7rPb2cOaCKcZ7iuTBUtKkVzO2ErNwxng3yekiYjFtfviE0CpiRBj+4mIgPamqnb1H8kW9+42yEEKLi4s+X26JrjL/M13gLnswACwlI6AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADrFBSA7XCrPSvzux7I6ENYxByhEEWuy72ViBxaL5XKQwUDP1KzM2YJ4VSPnlnSwplYsaAcf3OqoLdhrIqoFJQq/k4Dvz0vCjJr4ho3JgVyBm6MyktoP4N33OPujJwzurtwbUoYEB+lIsF0sWXv1PcKA4UHAAAAngShag==",
   },
   hasClientNotes: "false",
 };
@@ -57,8 +57,9 @@ export const defaultStore = (networkId: NetworkId): Store => ({
   foreignAccountCode: [],
   settings: [
     {
+      scope: 0,
       key: "clientVersion",
-      value: { __type: "Uint8Array", data: "MC4xNi4wLXJjLjI=" },
+      value: { __type: "Uint8Array", data: "MC4xNi4w" },
     },
   ],
 });

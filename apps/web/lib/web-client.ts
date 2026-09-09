@@ -77,10 +77,13 @@ const wasmRpcClient = (networkId: NetworkId) => {
 
 // Fees are denominated in the native asset of the chain, whose faucet is advertised
 // by every block header.
-const clientGetFeeFaucetId = async (networkId: NetworkId) => {
-  const blockHeader = await wasmRpcClient(networkId).getBlockHeaderByNumber();
-  return blockHeader.feeFaucetId();
-};
+export const clientGetBlockHeaderByNumber = async ({
+  networkId,
+  blockNum,
+}: {
+  networkId: NetworkId;
+  blockNum?: number | null;
+}) => wasmRpcClient(networkId).getBlockHeaderByNumber(blockNum);
 
 export const clientGetConsumableNotes = ({
   client,
@@ -158,9 +161,9 @@ export const clientDeployAccount = async ({
   components: Component[];
   scripts: Script[];
 }) => {
-  const [builder, feeFaucetId] = await Promise.all([
+  const [builder, blockHeader] = await Promise.all([
     client.createCodeBuilder(),
-    clientGetFeeFaucetId(networkId),
+    clientGetBlockHeaderByNumber({ networkId }),
   ]);
   const initSeed = new Uint8Array(32);
   crypto.getRandomValues(initSeed);
@@ -202,7 +205,7 @@ export const clientDeployAccount = async ({
       // all of which have to be installed on the account.
       const authComponents = WasmAccountComponent.createNetworkAuthComponents(
         allowedNoteScriptFees,
-        feeFaucetId,
+        blockHeader.feeFaucetId(),
         allowedTransactionScriptRoots,
       );
       for (const authComponent of authComponents) {

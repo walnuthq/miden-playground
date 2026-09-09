@@ -36,14 +36,3 @@ packageExtensions:
   "@miden-sdk/miden-wallet-adapter-react":
     dependencies:
       "@miden-sdk/miden-sdk": "0.16.0"
-minimumReleaseAgeExclude:
-  - '@miden-sdk/miden-sdk@0.16.0'
-  - '@miden-sdk/miden-wallet-adapter-base@0.16.0'
-  - '@miden-sdk/miden-wallet-adapter-miden@0.16.0'
-  - '@miden-sdk/miden-wallet-adapter-react@0.16.0'
-  - '@miden-sdk/miden-wallet-adapter-reactui@0.16.0'
-  - '@miden-sdk/miden-wallet-adapter@0.16.0'
-  - '@miden-sdk/node-darwin-arm64@0.16.0'
-  - '@miden-sdk/node-darwin-x64@0.16.0'
-  - '@miden-sdk/node-linux-x64-gnu@0.16.0'
-  - '@miden-sdk/react@0.16.0'
