@@ -1,0 +1,149 @@
+import type { Script } from "@/lib/types/script";
+import { defaultProcedureExport, defaultScript } from "@/lib/utils/script";
+import { TX_FEE_NOTE_CODE } from "@/lib/constants";
+
+export const rust = ``;
+
+export const masm = `use {NoteRecipient, NoteSerialNumber, NoteTag, NoteType} from miden::protocol::types
+use miden::protocol::active_note
+use miden::protocol::note
+use {NOTE_TYPE_PUBLIC} from miden::protocol::note
+use miden::standards::wallets::basic as basic_wallet
+
+# CONSTANTS
+# =================================================================================================
+
+# The number of storage items of a TX_FEE note (TX_FEE notes carry no storage).
+const NUM_STORAGE_ITEMS = 0
+
+# Memory address passed as the note storage pointer when building the recipient. Since TX_FEE notes
+# carry no storage, the pointer is never dereferenced; it only needs to be word-aligned. Passing
+# address 0 is only valid while NUM_STORAGE_ITEMS is 0.
+const STORAGE_PTR = 0
+
+# The unique note tag of TX_FEE notes (0xFEE, "fee" in hex). Its 18 least significant bits are
+# non-zero, so the tag can never collide with a default account-target tag, which has its 18 least
+# significant bits set to zero.
+# Must be kept in sync with the Rust \`TxFeeNote::TAG\` constant.
+const TX_FEE_NOTE_TAG = 0xFEE
+
+# PROCEDURES
+# =================================================================================================
+
+#! TX_FEE note script: leaves the note's assets in place for the consuming account to collect.
+#!
+#! A TX_FEE note is the canonical way for a transaction to pay its fee to the batch builder. The
+#! note does not restrict who can consume it. Its assets stay in the note, so the consuming
+#! account's own code must move them out.
+#!
+#! Inputs:  []
+#! Outputs: []
+#!
+#! Panics if:
+#! - the note carries a non-zero number of storage items.
+@note_script
+pub proc main()
+    # make sure the note carries no storage items
+    push.NUM_STORAGE_ITEMS push.STORAGE_PTR exec.active_note::get_bounded_storage drop
+    # => []
+end
+
+#! Computes the TX_FEE recipient and returns the note-creation arguments for the given serial number.
+#!
+#! This procedure handles:
+#! - Obtaining the note script root via procref
+#! - Building the recipient (TX_FEE notes carry no storage)
+#!
+#! Note creation itself is intentionally left to the caller. Use this procedure when the caller is
+#! already inside an account procedure and can create the note directly via
+#! \`exec.output_note::create\`. Otherwise use \`tx_fee::create_output_note\`, which routes creation
+#! through the account's \`create_note\` procedure and can therefore be used from note or transaction
+#! scripts.
+#!
+#! The returned arguments are always the public note type and the unique TX_FEE_NOTE_TAG note tag.
+#!
+#! Inputs:  [SERIAL_NUM]
+#! Outputs: [tag, note_type, RECIPIENT]
+#!
+#! Where:
+#! - SERIAL_NUM is the serial number of the note.
+#! - tag is the note tag to be included in the note.
+#! - note_type is the storage type of the note.
+#! - RECIPIENT is the computed recipient digest of the note (4 elements).
+#!
+#! Invocation: exec
+pub proc prepare_note(serial_num: NoteSerialNumber) -> (NoteTag, NoteType, NoteRecipient)
+    procref.main
+    # => [SCRIPT_ROOT, SERIAL_NUM]
+
+    swapw
+    # => [SERIAL_NUM, SCRIPT_ROOT]
+
+    # TX_FEE notes carry no storage, so the storage pointer is never dereferenced
+    push.NUM_STORAGE_ITEMS push.STORAGE_PTR
+    # => [storage_ptr, num_storage_items=0, SERIAL_NUM, SCRIPT_ROOT]
+
+    exec.note::compute_and_store_recipient
+    # => [RECIPIENT]
+
+    push.NOTE_TYPE_PUBLIC push.TX_FEE_NOTE_TAG
+    # => [tag, note_type, RECIPIENT]
+end
+
+#! Creates a new TX_FEE output note from the given serial number and returns its index.
+#!
+#! Note creation must originate from the account context, so this procedure routes creation through
+#! the account's \`create_note\` procedure. This lets \`tx_fee::create_output_note\` be used
+#! from contexts outside the account code, such as note or transaction scripts. Callers that are
+#! already inside an account procedure should instead use \`tx_fee::prepare_note\` together with
+#! \`exec.output_note::create\`.
+#!
+#! The created note is always public and carries the unique TX_FEE_NOTE_TAG note tag.
+#!
+#! Requires that the account exposes:
+#! - \`miden::standards::note::note_creator::create_note\` procedure.
+#!
+#! Inputs:  [SERIAL_NUM]
+#! Outputs: [note_idx]
+#!
+#! Where:
+#! - SERIAL_NUM is the serial number of the note.
+#! - note_idx is the index of the created note.
+#!
+#! Invocation: exec
+pub proc create_output_note(serial_num: NoteSerialNumber) -> u16
+    exec.prepare_note
+    # => [tag, note_type, RECIPIENT]
+
+    # pad the stack before \`call\`
+    push.0 movdn.6 push.0 movdn.6 padw padw swapdw
+    # => [tag, note_type, RECIPIENT, pad(10)]
+
+    call.basic_wallet::create_note
+    # => [note_idx, pad(15)]
+
+    movdn.15 dropw dropw dropw drop drop drop
+    # => [note_idx]
+end
+`;
+
+const txFee: Script = {
+  ...defaultScript(),
+  id: "tx-fee",
+  name: "tx-fee",
+  type: "note",
+  status: "compiled",
+  readOnly: true,
+  rust,
+  masm,
+  digest: TX_FEE_NOTE_CODE,
+  procedureExports: [
+    {
+      ...defaultProcedureExport(),
+      path: "::miden::standards::notes::tx_fee::run",
+      digest: TX_FEE_NOTE_CODE,
+    },
+  ],
+};
+
+export default txFee;

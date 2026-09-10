@@ -85,7 +85,7 @@ type StoreTransaction = {
   id: string;
   details: SerializedUint8Array;
   blockNum: number;
-  scriptRoot: string;
+  scriptRoot?: string;
   statusVariant: number;
   status: SerializedUint8Array;
 };
@@ -107,6 +107,9 @@ type StoreInputNote = {
   state: SerializedUint8Array;
   stateDiscriminant: number;
   serializedCreatedAt: string;
+  consumedBlockHeight: number;
+  consumedTxOrder: number;
+  consumerAccountId: string;
 };
 
 type StoreOutputNote = {
