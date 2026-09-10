@@ -37,6 +37,7 @@ import useNetwork from "@/hooks/use-network";
 import useMultisig from "@/hooks/use-multisig";
 import { defaultComponentIds } from "@/lib/types/default-components";
 import useComponents from "@/hooks/use-components";
+import { midenFaucetAccountId } from "@/lib/constants";
 
 const CreateTransactionConfigureForm = ({
   transactionType,
@@ -324,6 +325,9 @@ const CreateTransactionConfigureForm = ({
                 onValueChange={setFaucetAccountId}
                 selectFaucets
                 showFaucetsAsAssets
+                without={
+                  isTutorial ? midenFaucetAccountId(networkId) : undefined
+                }
               />
             </div>
             <div className="grid gap-3">

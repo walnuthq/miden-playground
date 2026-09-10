@@ -3,7 +3,6 @@ import {
   wasmAccountToAccount,
   clientDeployAccount,
   storageMode,
-  clientGetBlockHeaderByNumber,
 } from "@/lib/web-client";
 import { Address as WasmAddress } from "@miden-sdk/miden-sdk/lazy";
 import useGlobalContext from "@/components/global-context/hook";
@@ -31,10 +30,9 @@ import {
   useCreateFaucet,
   useImportAccount,
   useMiden,
-  useTransaction,
 } from "@miden-sdk/react/lazy";
 import useNetwork from "@/hooks/use-network";
-import { requestFundingNote, waitForFundingNote } from "@/lib/miden-faucet";
+import useFundAccount from "@/hooks/use-fund-account";
 
 const useAccounts = () => {
   const { address: midenWalletAddress, requestAssets } = useWallet();
@@ -57,8 +55,8 @@ const useAccounts = () => {
   const { client } = useMiden();
   const { createWallet } = useCreateWallet();
   const { createFaucet } = useCreateFaucet();
-  const { execute } = useTransaction();
   const { importAccount } = useImportAccount();
+  const { fundAccount } = useFundAccount();
   const { scripts } = useScripts();
   const wallets = accounts.filter(
     (account) =>
@@ -89,39 +87,11 @@ const useAccounts = () => {
     name: string;
     storageMode: AccountStorageMode;
   }) => {
-    if (!client) {
-      throw new Error("MidenClient not ready");
-    }
-    const [wallet, blockHeader] = await Promise.all([
-      createWallet({
-        storageMode,
-        authScheme: AuthScheme.AuthRpoFalcon512,
-      }),
-      clientGetBlockHeaderByNumber({ networkId }),
-    ]);
-    const { noteId, txId } = await requestFundingNote({
-      networkId,
-      recipient: wallet.id(),
-      expectedFaucet: blockHeader.feeFaucetId(),
+    const wallet = await createWallet({
+      storageMode,
+      authScheme: AuthScheme.AuthRpoFalcon512,
     });
-    const fundingNote = await waitForFundingNote({
-      client,
-      networkId,
-      noteId,
-      txId,
-    });
-    const transactionRequest = await client.newConsumeTransactionRequest(
-      [fundingNote.toNote()],
-      wallet.id(),
-    );
-    await execute({
-      accountId: wallet.id(),
-      request: transactionRequest,
-    });
-    const fundedWallet = await client.getAccount(wallet.id());
-    if (!fundedWallet) {
-      throw new Error("Account not found");
-    }
+    const fundedWallet = await fundAccount(wallet);
     const account = wasmAccountToAccount({
       wasmAccount: fundedWallet,
       name,
@@ -146,43 +116,15 @@ const useAccounts = () => {
     decimals: number;
     maxSupply: bigint;
   }) => {
-    if (!client) {
-      throw new Error("MidenClient not ready");
-    }
-    const [faucet, blockHeader] = await Promise.all([
-      createFaucet({
-        storageMode,
-        tokenName: tokenSymbol,
-        tokenSymbol,
-        decimals,
-        maxSupply,
-        authScheme: AuthScheme.AuthRpoFalcon512,
-      }),
-      clientGetBlockHeaderByNumber({ networkId }),
-    ]);
-    const { noteId, txId } = await requestFundingNote({
-      networkId,
-      recipient: faucet.id(),
-      expectedFaucet: blockHeader.feeFaucetId(),
+    const faucet = await createFaucet({
+      storageMode,
+      tokenName: tokenSymbol,
+      tokenSymbol,
+      decimals,
+      maxSupply,
+      authScheme: AuthScheme.AuthRpoFalcon512,
     });
-    const fundingNote = await waitForFundingNote({
-      client,
-      networkId,
-      noteId,
-      txId,
-    });
-    const transactionRequest = await client.newConsumeTransactionRequest(
-      [fundingNote.toNote()],
-      faucet.id(),
-    );
-    await execute({
-      accountId: faucet.id(),
-      request: transactionRequest,
-    });
-    const fundedFaucet = await client.getAccount(faucet.id());
-    if (!fundedFaucet) {
-      throw new Error("Account not found");
-    }
+    const fundedFaucet = await fundAccount(faucet);
     const account = wasmAccountToAccount({
       wasmAccount: fundedFaucet,
       name,

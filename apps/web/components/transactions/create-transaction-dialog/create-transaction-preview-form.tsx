@@ -52,7 +52,21 @@ const TransactionPreview = ({
   const executedTransaction = transactionResult.executedTransaction();
   const accountId = executedTransaction.accountId().toString();
   const consumedNotes = executedTransaction.inputNotes().numNotes();
-  const createdNotes = executedTransaction.outputNotes().numNotes();
+  // `userOutputNotes()` drops the kernel's `TX_FEE` note, which `outputNotes()`
+  // includes on any chain whose verification base fee is non-zero. The fee note
+  // is reported on its own below rather than counted as a created note.
+  const createdNotes = executedTransaction.userOutputNotes().length;
+  const feeNote = executedTransaction.feeNote();
+  const feeAmounts = new Map(
+    (feeNote?.assets()?.fungibleAssets() ?? []).map((asset) => [
+      asset.faucetId().toString(),
+      asset.amount(),
+    ]),
+  );
+  const feeAssets = [...feeAmounts].map(([faucetId, amount]) => ({
+    faucetId,
+    amount: amount.toString(),
+  }));
   // `accountPatch()` replaced `accountDelta()` in SDK 0.16: it reports the
   // absolute post-execution state rather than a relative change. Storage is
   // absolute in both models, but the vault and nonce below need the account's
@@ -75,6 +89,11 @@ const TransactionPreview = ({
   );
   const signedAmount = (amount: bigint) =>
     amount < 0n ? amount.toString() : `+${amount}`;
+  // The fee also leaves the account's vault, but it is reported on its own
+  // under "Transaction fees" below, so add it back here to keep it out of the
+  // vault delta instead of listing the same outflow twice.
+  const withoutFee = (faucetId: string, amount: bigint) =>
+    amount + (feeAmounts.get(faucetId) ?? 0n);
   const fungibleAssetDeltas = [
     // Assets whose final balance changed: subtract the current balance to
     // recover the delta.
@@ -82,7 +101,8 @@ const TransactionPreview = ({
       const faucetId = asset.faucetId().toString();
       return {
         faucetId,
-        amount: signedAmount(
+        amount: withoutFee(
+          faucetId,
           asset.amount() - (currentAmounts.get(faucetId) ?? 0n),
         ),
       };
@@ -95,10 +115,16 @@ const TransactionPreview = ({
         .toString();
       return {
         faucetId,
-        amount: signedAmount(-(currentAmounts.get(faucetId) ?? 0n)),
+        amount: withoutFee(faucetId, -(currentAmounts.get(faucetId) ?? 0n)),
       };
     }),
-  ];
+  ]
+    // An asset the transaction only ever moved to pay the fee nets out to zero.
+    .filter(({ amount }) => amount !== 0n)
+    .map(({ faucetId, amount }) => ({
+      faucetId,
+      amount: signedAmount(amount),
+    }));
   const storageDelta = accountStorage
     .filter(({ type }) => type === "value")
     .map((before, index) =>
@@ -163,6 +189,17 @@ const TransactionPreview = ({
       ) : (
         <FungibleAssetsTable
           fungibleAssets={fungibleAssetDeltas}
+          withAccountAddress={false}
+        />
+      )}
+      <h5 className="font-semibold">Transaction fees:</h5>
+      {feeAssets.length === 0 ? (
+        <p className="text-muted-foreground text-sm">
+          This transaction will not pay any fees.
+        </p>
+      ) : (
+        <FungibleAssetsTable
+          fungibleAssets={feeAssets}
           withAccountAddress={false}
         />
       )}

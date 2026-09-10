@@ -97,9 +97,9 @@ const useTutorials = () => {
     nextTutorialStepDisabled,
     completedTutorials,
     tutorial: tutorials.find(({ id }) => id === tutorialId),
-    isTutorial: true,
-    // tutorialId === "create-and-fund-wallet" ||
-    // tutorialId === "transfer-assets-between-wallets",
+    isTutorial:
+      tutorialId === "create-and-fund-wallet" ||
+      tutorialId === "transfer-assets-between-wallets",
     startTutorial,
     nextTutorial,
     previousTutorialStep,
