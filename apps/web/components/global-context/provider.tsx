@@ -7,11 +7,12 @@ import {
   defaultState,
   stateDeserializer,
   stateSerializer,
+  STATE_STORAGE_KEY,
 } from "@/lib/utils/state";
 import reducer, { type Action } from "@/components/global-context/reducer";
 
 const usePersistedReducer = () => {
-  const [state, setState] = useLocalStorage("state", defaultState(), {
+  const [state, setState] = useLocalStorage(STATE_STORAGE_KEY, defaultState(), {
     serializer: stateSerializer,
     deserializer: stateDeserializer,
   });

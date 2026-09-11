@@ -8,6 +8,10 @@ import type { TutorialId } from "@/lib/types/tutorial";
 import defaultScripts from "@/lib/types/default-scripts";
 import defaultComponents from "@/lib/types/default-components";
 
+// The local storage key holding the serialized app state. Exported so the
+// Miden provider can drop it when the client store it describes is deleted.
+export const STATE_STORAGE_KEY = "state";
+
 export const defaultState = (): State => ({
   // GLOBAL
   serializedMockChain: new Uint8Array(),

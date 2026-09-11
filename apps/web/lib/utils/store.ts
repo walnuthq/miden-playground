@@ -1,5 +1,5 @@
 import type { Store, StoreBlockHeader } from "@/lib/types/store";
-import type { NetworkId } from "@/lib/types/network";
+import { networks, type NetworkId } from "@/lib/types/network";
 
 const testnetBlock0Header: StoreBlockHeader = {
   blockNum: 0,
@@ -66,3 +66,115 @@ export const defaultStore = (networkId: NetworkId): Store => ({
 
 export const storeName = (networkId: NetworkId) =>
   networkId === "mmck" ? "mock_client_db" : `MidenClientDB_${networkId}`;
+
+// The web client opens its IndexedDB as `MidenClientDB_{network}`, alongside the
+// mock chain's own database (see `storeName` above).
+const MIDEN_STORE_DB_PREFIX = "MidenClientDB";
+const SETTINGS_TABLE = "settings";
+
+const midenStoreNames = async () => {
+  if (typeof indexedDB.databases !== "function") {
+    // Firefox only shipped `databases()` in 126; probe the names we can build.
+    return (Object.keys(networks) as NetworkId[]).map(storeName);
+  }
+  const databases = await indexedDB.databases();
+  return databases
+    .map(({ name }) => name)
+    .filter((name) => name !== undefined)
+    .filter(
+      (name) =>
+        name.startsWith(MIDEN_STORE_DB_PREFIX) || name === storeName("mmck"),
+    );
+};
+
+const deleteStore = (name: string) =>
+  new Promise<void>((resolve, reject) => {
+    const request = indexedDB.deleteDatabase(name);
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+    request.onblocked = () => {
+      console.warn(
+        `ERROR: deleting IndexedDB "${name}" was blocked, close the other tabs using it`,
+      );
+      resolve();
+    };
+  });
+
+// Web SDK 0.16 re-keyed the `settings` table from `key` to `[scope+key]`, which
+// Dexie can only do by dropping and recreating it — taking the `clientVersion`
+// row with it. That row is what the SDK's own "reset the store on a major/minor
+// client upgrade" check reads, so upgrading a pre-0.16 database leaves it with
+// no stored version, which the SDK treats as a brand new store and keeps: the
+// client then fails on the 0.15 rows it cannot decode ("failed to deserialize
+// data from the store: invalid value: Invalid public key"). The old key path is
+// the last evidence that a store predates 0.16, and Dexie erases it the moment
+// the client opens the database, so this has to run first.
+const isLegacyStore = (name: string) =>
+  new Promise<boolean>((resolve, reject) => {
+    const request = indexedDB.open(name);
+    let created = false;
+    request.onupgradeneeded = () => {
+      created = true;
+    };
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => {
+      const database = request.result;
+      try {
+        if (created) {
+          // Opening a database that does not exist creates an empty one; undo it.
+          database.close();
+          deleteStore(name).then(() => resolve(false), reject);
+          return;
+        }
+        if (!database.objectStoreNames.contains(SETTINGS_TABLE)) {
+          database.close();
+          resolve(true);
+          return;
+        }
+        // The key path has to be read before the connection is closed, since a
+        // closing connection refuses to open a transaction.
+        const transaction = database.transaction(SETTINGS_TABLE, "readonly");
+        const { keyPath } = transaction.objectStore(SETTINGS_TABLE);
+        transaction.abort();
+        database.close();
+        resolve(!Array.isArray(keyPath));
+      } catch (error) {
+        database.close();
+        reject(error);
+      }
+    };
+  });
+
+// Deletes every client store written before web SDK 0.16, which that version
+// can no longer read. Returns the names it deleted.
+export const deleteLegacyMidenStores = async () => {
+  if (typeof indexedDB === "undefined") {
+    return [];
+  }
+  const names = await midenStoreNames();
+  const stores = await Promise.all(
+    // Checked independently so one unreadable database cannot hide the others.
+    names.map(async (name) => {
+      try {
+        return { name, legacy: await isLegacyStore(name) };
+      } catch (error) {
+        console.error(`ERROR: isLegacyStore ${name}`, error);
+        return { name, legacy: false };
+      }
+    }),
+  );
+  const legacyNames = stores
+    .filter(({ legacy }) => legacy)
+    .map(({ name }) => name);
+  await Promise.all(legacyNames.map(deleteStore));
+  return legacyNames;
+};
+
+// Deletes every client store, whatever version wrote it.
+export const deleteMidenStores = async () => {
+  if (typeof indexedDB === "undefined") {
+    return;
+  }
+  const names = await midenStoreNames();
+  await Promise.all(names.map(deleteStore));
+};
