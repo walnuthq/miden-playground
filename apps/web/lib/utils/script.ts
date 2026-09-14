@@ -126,12 +126,10 @@ export const invokeProcedureCustomTransactionScript = ({
   procedureExport: ProcedureExport;
   procedureInputs: MidenInput[];
 }) => `${contractName ? `use external_contract::${contractName}` : ""}
-use miden::core::sys
-
-begin
+@transaction_script
+pub proc main(args: word)
     ${formatProcedureInputs(procedureInputs)}
     call.${contractName ? `${contractName}::${procedureExport.path}` : procedureExport.digest}
-    exec.sys::truncate_stack
 end
 `;
 
