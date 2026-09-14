@@ -27,7 +27,7 @@ export function useMidenWallet(adapter: MessageSignerWalletAdapter | null) {
       const pk = adapter.publicKey;
       if (!pk) {
         setConnectError(
-          "Miden Wallet connected but did not provide a public key",
+          "Bread Wallet connected but did not provide a public key",
         );
         return;
       }
@@ -40,7 +40,7 @@ export function useMidenWallet(adapter: MessageSignerWalletAdapter | null) {
       }
       // The wallet exposes only a 32-byte Poseidon2 commitment, which is
       // identical for both schemes, so PublicKeyFormat.parse cannot tell them
-      // apart and guesses falcon. Miden Wallet signs ECDSA (its signatures
+      // apart and guesses falcon. Bread Wallet signs ECDSA (its signatures
       // carry the EcdsaK256Keccak tag 0x01), so the guess is wrong and the
       // server would verify a 65-byte r||s||v with the falcon parser.
       const resolvedScheme = pk.length === 32 ? "ecdsa" : scheme;
@@ -107,7 +107,7 @@ export function useMidenWallet(adapter: MessageSignerWalletAdapter | null) {
       data: Uint8Array,
       kind: "word" | "signingInputs",
     ): Promise<Uint8Array> => {
-      if (!adapter) throw new Error("Miden Wallet not connected");
+      if (!adapter) throw new Error("Bread Wallet not connected");
       return adapter.signBytes(data, kind);
     },
     [adapter],

@@ -14,9 +14,9 @@ const tutorial: Tutorial = {
   id: "connect-wallet-and-sign-transactions",
   number: 3,
   title: "Connect wallet and sign transactions",
-  tagline: "Connect your Miden Wallet and sign transactions on testnet.",
+  tagline: "Connect your Bread Wallet and sign transactions on testnet.",
   description:
-    "This tutorial will walk you through connecting your Miden Wallet to the Miden Playground and confirming transactions on Miden testnet.",
+    "This tutorial will walk you through connecting your Bread Wallet to the Miden Playground and confirming transactions on Miden testnet.",
   initialRoute: "/accounts",
   state: {
     ...defaultState(),

@@ -1,6 +1,6 @@
 declare global {
   interface Window {
-    // Miden Wallet
+    // Bread Wallet
     midenWallet: {
       accountId?: string;
       appName?: string;

@@ -29,7 +29,7 @@ const Step1: TutorialStep = {
           description={
             <p>
               Click on the <em>"Select Wallet"</em> button in the top-right
-              corner and connect your Miden Wallet to the Playground, then once
+              corner and connect the Bread Wallet to the Playground, then once
               imported, navigate to your account details page.
             </p>
           }

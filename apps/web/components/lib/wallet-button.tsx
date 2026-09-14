@@ -54,7 +54,7 @@ const WalletButton = () => {
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuItem onClick={() => setVisible(true)}>
-          Connect With Miden Wallet
+          Connect With Bread Wallet
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => openModal?.()}>
           Connect With Para Wallet
