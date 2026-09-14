@@ -8,7 +8,7 @@ const MockChainAlert = () => (
     <AlertTitle>This tutorial uses a MockChain.</AlertTitle>
     <AlertDescription>
       All actions in this tutorial will be performed on a MockChain, an
-      environment simulating the Miden network. You won't need a Miden Wallet to
+      environment simulating the Miden network. You won't need a Bread Wallet to
       sign transactions.
     </AlertDescription>
   </TutorialAlert>
