@@ -64,17 +64,17 @@ export const DEVNET_TEST_WALLET_ADDRESS =
   "mdev1aqy4xryk7lg7jyzp3m6ehypw0q7frd3g_qr7qqq9wr6w";
 
 export const TESTNET_COUNTER_CONTRACT_ACCOUNT_ID =
-  "0x375fdc8d9d4a6e912e8ef6b3975d6c";
+  "0x35e019e378e5c691551856536748f2";
 export const DEVNET_COUNTER_CONTRACT_ACCOUNT_ID =
   "0x67e2f741c3ce5c00551578346e06e2";
 export const TESTNET_COUNTER_CONTRACT_ADDRESS =
-  "mtst1aqm4lhydn49xayfw3mmt896adshf8da9_qr7qqq9wr6w";
+  "mtst1aq67qx0r0rjudy24rpt9xe6g7gres5mv_qr7qqq9wr6w";
 export const DEVNET_COUNTER_CONTRACT_ADDRESS =
   "mdev1apn79a6pc089cqz4z4urgmsxugy0krfv_qr7qqq9wr6w";
 export const COUNTER_CONTRACT_GET_COUNT_PROC_HASH =
-  "0x31c77b5bcebfc55d6bf71e690d6b88beb379a966296c41d1145ec09db53f666c";
+  "0x54aee3c138e8fd78e4697a275fba033f5fca7d2c5f8b219f1567640c2bca974f";
 export const COUNTER_CONTRACT_INCREMENT_COUNT_PROC_HASH =
-  "0x61d9dfb65b097b16d242dc41c4daa41159791ba0c113652b3f3fc8d5eb1f4224";
+  "0xf2256e2448a495a4dee021a64fd5661a42df4e8d466eedb4a169eca97901de0c";
 export const COUNTER_NOTE_RUN_PROC_HASH =
   "0xe8c9bd2b9d600c77edc783121d0d4194628fb06d7e4439e9a1d7ccf475cb44fe";
 export const COUNTER_SCRIPT_RUN_PROC_HASH =

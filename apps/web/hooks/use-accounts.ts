@@ -164,7 +164,11 @@ const useAccounts = () => {
       address === counterContractAddress(networkId) &&
       tutorialId === "interact-with-the-counter-contract"
     ) {
-      account.components = ["auth-no-auth", "counter-value-contract"];
+      account.components = [
+        "auth-no-auth",
+        "basic-wallet",
+        "counter-value-contract",
+      ];
     }
     dispatch({
       type: "IMPORT_ACCOUNT",

@@ -32,8 +32,10 @@ struct CounterContractStorage {
 #[component]
 trait CounterContract {
     /// Returns the current counter value stored in the contract's storage value.
+    #[account_procedure]
     fn get_count(&self) -> Felt;
     /// Increments the counter value stored in the contract's storage value by one.
+    #[account_procedure]
     fn increment_count(&mut self) -> Felt;
 }
 
@@ -59,35 +61,53 @@ impl CounterContract for CounterContractStorage {
 
 export const masm = `use miden::protocol::active_account
 use miden::protocol::native_account
-use miden::core::word
 use miden::core::sys
+
+# CONSTANTS
+# =================================================================================================
 
 const COUNTER_SLOT = word("counter_contract::counter_contract::count")
 
-#! Inputs:  []
-#! Outputs: [count]
-pub proc get_count
+# PUBLIC INTERFACE
+# =================================================================================================
+
+#! Returns the current count.
+#!
+#! Inputs:  [pad(16)]
+#! Outputs: [count, pad(15)]
+#!
+#! Invocation: call
+@account_procedure
+pub proc get_count() -> felt
     push.COUNTER_SLOT[0..2] exec.active_account::get_item
-    # => [count]
+    # => [[count, 0, 0, 0], pad(16)]
 
     exec.sys::truncate_stack
-    # => [count]
+    # => [count, pad(15)]
 end
 
-#! Inputs:  []
-#! Outputs: []
-pub proc increment_count
+#! Increments the current count by one.
+#!
+#! Inputs:  [pad(16)]
+#! Outputs: [pad(16)]
+#!
+#! Invocation: call
+@account_procedure
+pub proc increment_count()
     push.COUNTER_SLOT[0..2] exec.active_account::get_item
-    # => [count]
+    # => [[count, 0, 0, 0], pad(16)]
 
     add.1
-    # => [count+1]
+    # => [[count + 1, 0, 0, 0], pad(16)]
 
     push.COUNTER_SLOT[0..2] exec.native_account::set_item
-    # => []
+    # => [OLD_VALUE, pad(16)]
+
+    dropw
+    # => [pad(16)]
 
     exec.sys::truncate_stack
-    # => []
+    # => [pad(16)]
 end
 `;
 
