@@ -17,7 +17,7 @@ const useCompleted = () => {
     components.includes(component?.id ?? ""),
   );
   const nonce = counter?.nonce ?? 0;
-  return nonce > 0;
+  return nonce >= 2;
 };
 
 const Step6: TutorialStep = {

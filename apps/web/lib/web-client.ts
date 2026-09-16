@@ -171,9 +171,9 @@ export const clientDeployAccount = async ({
     public: WasmAccountStorageMode.public(),
     private: WasmAccountStorageMode.private(),
   } as const;
-  let accountBuilder = new WasmAccountBuilder(initSeed).storageMode(
-    accountStorageModes[storageMode],
-  );
+  let accountBuilder = new WasmAccountBuilder(initSeed)
+    .storageMode(accountStorageModes[storageMode])
+    .withBasicWalletComponent();
   for (const component of components) {
     if (component.scriptId === "auth-no-auth") {
       accountBuilder = accountBuilder.withNoAuthComponent();
@@ -235,12 +235,12 @@ export const clientDeployAccount = async ({
     //   console.log(procedure.digest.toHex());
     // }
     // if (script.id === "auth-no-auth") {
-    // console.log(script.id);
-    // console.log("get_count", accountComponent.getProcedureHash("get_count"));
-    // console.log(
-    //   "increment_count",
-    //   accountComponent.getProcedureHash("increment_count"),
-    // );
+    //   console.log(script.id);
+    //   console.log("get_count", accountComponent.getProcedureHash("get_count"));
+    //   console.log(
+    //     "increment_count",
+    //     accountComponent.getProcedureHash("increment_count"),
+    //   );
     // }
     accountComponent = accountComponent.withSupportsAllTypes();
     if (component.type === "authentication-component") {

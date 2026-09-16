@@ -258,15 +258,21 @@ const useAccounts = () => {
       components,
       scripts: componentScripts,
     });
+    const fundedAccount = await fundAccount(wasmAccount);
     const packageIds = componentScriptIds.filter(
       (id) => !defaultScriptIds.includes(id),
     );
     const account = wasmAccountToAccount({
-      wasmAccount,
+      wasmAccount: fundedAccount,
       name,
-      components: components
-        .filter(({ id }) => (verify ? true : defaultComponentIds.includes(id)))
-        .map(({ id }) => id),
+      components: [
+        "basic-wallet",
+        ...components
+          .filter(({ id }) =>
+            verify ? true : defaultComponentIds.includes(id),
+          )
+          .map(({ id }) => id),
+      ],
       updatedAt: lastSyncTime,
     });
     if (verify && !tutorialId) {
