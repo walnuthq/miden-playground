@@ -19,11 +19,13 @@ export const generateCargoToml = ({
   let cargoToml = `[package]\n`;
   cargoToml += `name = "${name}"\n`;
   cargoToml += `version = "${version}"\n`;
-  cargoToml += `edition = "2021"\n\n`;
+  cargoToml += `edition = "2024"\n\n`;
   cargoToml += `[lib]\n`;
   cargoToml += `crate-type = ["cdylib"]\n\n`;
   cargoToml += `[dependencies]\n`;
-  cargoToml += `miden = "0.13"\n`;
+  cargoToml += `miden = "0.14"\n\n`;
+  cargoToml += `[build-dependencies]\n`;
+  cargoToml += `miden-sdk-build-script-support = "0.14"\n\n`;
   return cargoToml;
 };
 
@@ -46,7 +48,21 @@ export const generateMidenProjectToml = ({
   midenProjectToml += `version = "${version}"\n\n`;
   midenProjectToml += `[lib]\n`;
   midenProjectToml += `kind = "${type}"\n`;
-  midenProjectToml += `namespace = "miden:${name}/${kebabCase(traitName)}@${version}"\n\n`;
+  switch (type) {
+    case "account-component": {
+      midenProjectToml += `namespace = "miden:${name}/${kebabCase(traitName)}@${version}"\n`;
+      break;
+    }
+    case "note": {
+      midenProjectToml += `namespace = "miden:${name}/miden-${kebabCase(traitName)}@${version}"\n`;
+      break;
+    }
+    case "tx-script": {
+      midenProjectToml += `namespace = "miden:base/transaction-script@1.0.0"\n`;
+      break;
+    }
+  }
+  midenProjectToml += `path = "src/lib.rs"\n\n`;
   midenProjectToml += `[dependencies]\n`;
   midenProjectToml += `miden-core = "*"\n`;
   midenProjectToml += `miden-protocol = "*"\n`;
@@ -55,11 +71,6 @@ export const generateMidenProjectToml = ({
       ({ name }) => `${name} = { path = "../${name}" }`,
     );
     midenProjectToml += `${midenDependencies.join("\n")}\n\n`;
-    const targetDependencies = dependencies.map(
-      ({ name }) => `${name} = { wit = "../${name}/target/generated-wit/" }`,
-    );
-    midenProjectToml += `[package.metadata.miden.dependencies]\n`;
-    midenProjectToml += `${targetDependencies.join("\n")}\n`;
   }
   midenProjectToml += "\n";
   if (type === "account-component") {

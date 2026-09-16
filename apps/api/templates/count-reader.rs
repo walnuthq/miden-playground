@@ -20,6 +20,7 @@ struct CountReaderStorage {
 
 #[component]
 trait CountReader {
+    #[account_procedure]
     fn copy_count(&mut self, counter_account_id: AccountId);
 }
 

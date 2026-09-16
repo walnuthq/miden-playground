@@ -191,8 +191,8 @@ importers:
   apps/api:
     dependencies:
       '@dotenvx/dotenvx':
-        specifier: 2.25.0
-        version: 2.25.0
+        specifier: 2.26.1
+        version: 2.26.1
       archiver:
         specifier: 8.0.0
         version: 8.0.0
@@ -932,8 +932,8 @@ packages:
     resolution: {integrity: sha512-GeDxvtjiRuoyWVU9nQneId879zIyNdL05bS7RKiqMkfBSKpHMWHLoRyRqjYWLaXmX/llKO1hTlqHDmatkQAjPA==}
     hasBin: true
 
-  '@dotenvx/dotenvx@2.25.0':
-    resolution: {integrity: sha512-B7C3M4+1IjkZgL/PxjGbe5c5UmMD8/H9082RSWQ6ECDFefPjweC7+2ci78kQW7I2LDQi68qEBBTXByYKobF37g==}
+  '@dotenvx/dotenvx@2.26.1':
+    resolution: {integrity: sha512-YzWyuDsTgDotNEzYffwJdfw7nWa0BtL9nsaxHu2kM82xaGGBzTmFAAkQ+CjzGohkYljxGufDrgnhDXpcULeUtA==}
     hasBin: true
 
   '@dotenvx/primitives@3.0.2':
@@ -6998,7 +6998,7 @@ snapshots:
       picomatch: 4.0.7
       which: 4.0.0
 
-  '@dotenvx/dotenvx@2.25.0':
+  '@dotenvx/dotenvx@2.26.1':
     dependencies:
       '@dotenvx/primitives': 3.0.2
       '@dotenvx/tooling': 1.0.3

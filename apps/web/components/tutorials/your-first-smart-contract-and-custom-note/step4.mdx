@@ -19,16 +19,16 @@ The **`#[note]`** attribute on both the struct and **`impl`** block marks this a
 
 ```rust
 #[note]
-struct IncrementNote;
+struct CounterNote;
 
 #[note]
-impl IncrementNote {
+impl CounterNote {
     #[note_script]
     fn run(self, _arg: Word, account: &mut CounterAccount) { ... }
 }
 ```
 
-The struct definition (**`IncrementNote`**) provides a named type for the note script.
+The struct definition (**`CounterNote`**) provides a named type for the note script.
 Unlike account contracts, note scripts don't store persistent data — the struct serves as the entry point container.
 The **`CounterContract`** type is declared with **`#[account(counter_account::CounterContract)]`**, which binds the note to the counter account interface generated from **`miden-project.toml`**.
 
