@@ -12,6 +12,7 @@ import type {
   CompiledPackage,
   MidenType,
   MidenRawType,
+  Package,
 } from "@/lib/types/script";
 import { midenTypes } from "@/lib/types/script";
 
@@ -218,3 +219,39 @@ export const fileListToPackageSources = async (fileList: FileList) => {
 export const midenRawTypeToMidenType = (
   midenRawType: MidenRawType,
 ): MidenType => midenTypes[midenRawType];
+
+export const packageToScript = ({
+  id,
+  name,
+  type,
+  files,
+  digest,
+  masp,
+  manifest,
+  createdAt,
+  updatedAt,
+}: Package): Script => ({
+  id,
+  name,
+  type,
+  status: "compiled",
+  readOnly: true,
+  rust: files["src/lib.rs"] ?? "",
+  masm: "",
+  error: "",
+  digest,
+  masp,
+  exports: manifest.exports,
+  procedureExports: manifest.exports.map(({ Procedure: procedureExport }) => ({
+    ...procedureExport,
+    readOnly: formatProcedureExportPath(procedureExport.path).startsWith("get"),
+  })),
+  dependencies: manifest.dependencies.map((dependency) => ({
+    id: dependency.name,
+    name: dependency.name,
+    type: dependency.kind,
+    digest: dependency.digest,
+  })),
+  createdAt: new Date(createdAt).getTime(),
+  updatedAt: new Date(updatedAt).getTime(),
+});

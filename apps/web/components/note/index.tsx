@@ -10,16 +10,20 @@ const NoteIndex = ({ id }: { id: string }) => {
   const { networkId } = useNetwork();
   const { inputNotes } = useNotes();
   const inputNote = inputNotes.find((inputNote) => inputNote.id === id);
+  const scriptRoot = inputNote?.scriptRoot ?? "";
   const scriptId = inputNote?.scriptId ?? "";
   const isStandardNote = ["p2id", "p2ide"].includes(scriptId);
   const { data } = useQuery({
-    queryKey: ["verifiedNote", networkId, id],
+    queryKey: ["verifiedNote", networkId, scriptRoot],
     queryFn: () =>
       getVerifiedNote({
         networkId,
-        noteId: id,
+        script: id,
       }),
-    enabled: ["mtst", "mdev"].includes(networkId) && !isStandardNote,
+    enabled:
+      ["mtst", "mdev"].includes(networkId) &&
+      !isStandardNote &&
+      scriptRoot !== "",
   });
   const rawVerifiedNote = data?.noteScript ?? null;
   const verifiedNote = isValidUUIDv4(rawVerifiedNote?.id ?? "")

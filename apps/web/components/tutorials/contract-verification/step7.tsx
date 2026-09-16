@@ -32,7 +32,7 @@ const useCompleted = () => {
     ),
     "0x0100000000000000000000000000000000000000000000000000000000000000",
   );
-  return counter.nonce > 0 && count === EMPTY_WORD;
+  return counter.nonce >= 2 && count === EMPTY_WORD;
 };
 
 const Step7: TutorialStep = {

@@ -18,7 +18,6 @@ import {
   CustomTransaction,
   TransactionType,
 } from "@miden-sdk/miden-wallet-adapter";
-import { toBase64 } from "@/lib/utils";
 import {
   clientCreateNoteFromScript,
   clientImportNoteFile,
@@ -128,7 +127,6 @@ const useNotes = () => {
       verifyNoteFromPackageId({
         networkId,
         noteId: note.id().toString(),
-        note: toBase64(note.serialize()),
         packageId: script.id,
       });
     }

@@ -1,200 +1,18 @@
-import { writeFile } from "node:fs/promises";
 import { type NextRequest, NextResponse } from "next/server";
-import { getVerifiedNote, insertVerifiedNote } from "@/db/verified-notes";
-import { midenNoteVerifier } from "@/lib/miden-verifier";
-import {
-  compilePackage,
-  newPackage,
-  deletePackageDir,
-  readPackage,
-  packagePath,
-  packageExists,
-  generatePackageDir,
-} from "@/lib/miden-compiler";
-import {
-  deletePackage,
-  getPackage,
-  updatePackage,
-  insertPackage,
-  getReadOnlyPackage,
-} from "@/db/packages";
-import { API_REGISTRY_URL, PACKAGES_PATH } from "@/lib/constants";
-import { safeRm } from "@/lib/utils";
+import { getPackage } from "@/db/packages";
+import { API_REGISTRY_URL } from "@/lib/constants";
 import { generateCargoToml, parseMidenProjectToml } from "@/lib/toml";
 import type { PackageSource } from "@/lib/types";
 import { projectTemplateFiles } from "@/lib/templates";
 
 type VerifyNoteRequestBody = {
   noteId: string;
-  note?: string;
-  //
   packageSource?: PackageSource;
   dependencies?: PackageSource[];
-  //
   packageId?: string;
 };
 
 type VerifyNoteResponse = { verified: boolean };
-
-const deletePackages = async (packages: { id: string }[]) =>
-  Promise.all(
-    packages.map(({ id }) =>
-      Promise.all([deletePackageDir(id), deletePackage(id)]),
-    ),
-  );
-
-const verifyNoteFromSource = async ({
-  networkId,
-  noteId,
-  note,
-  packageSource,
-  dependencies,
-}: {
-  networkId: string;
-  noteId: string;
-  note?: string;
-  packageSource: PackageSource;
-  dependencies: PackageSource[];
-}) => {
-  const dependenciesPackages = await Promise.all(
-    dependencies.map(({ midenProjectToml, rust }) => {
-      const {
-        package: { name },
-        lib: { kind: type },
-      } = parseMidenProjectToml(midenProjectToml);
-      return newPackage({ name, type, rust, readOnly: true });
-    }),
-  );
-  const {
-    package: {
-      name: notePackageName,
-      metadata: {
-        miden: { dependencies: rawNotePackageDependencies },
-      },
-    },
-    lib: { kind: notePackageType },
-  } = parseMidenProjectToml(packageSource.midenProjectToml);
-  const notePackageDependencies = rawNotePackageDependencies
-    ? Object.keys(rawNotePackageDependencies)
-        .map((dependency) => dependency.slice(dependency.indexOf(":") + 1))
-        .map((dependency) =>
-          dependenciesPackages.find(({ name }) => name === dependency),
-        )
-        .filter((dependency) => dependency !== undefined)
-        .map(({ id, name, type }) => ({ id, name, type, digest: "" }))
-    : [];
-  const notePackage = await newPackage({
-    name: notePackageName,
-    type: notePackageType,
-    rust: packageSource.rust,
-    readOnly: true,
-    dependencies: notePackageDependencies,
-  });
-  const { stderr } = await compilePackage({
-    packageDir: notePackage.id,
-    name: notePackage.name,
-  });
-  if (stderr) {
-    await deletePackages([notePackage, ...dependenciesPackages]);
-    throw new Error("Error: Note Script compilation failed.");
-  }
-  const { masp, digest, exports } = await readPackage({
-    packageDir: notePackage.id,
-    name: notePackage.name,
-  });
-  await updatePackage({
-    id: notePackage.id,
-    status: "compiled",
-    digest,
-    masp,
-    exports,
-  });
-  const resourcePath = `${PACKAGES_PATH}/${noteId}.txt`;
-  if (note) {
-    await writeFile(resourcePath, note);
-  }
-  const noteScript = await midenNoteVerifier({
-    networkId,
-    resourceId: noteId,
-    resourcePath: note ? resourcePath : undefined,
-    maspPath: packagePath({
-      packageDir: notePackage.id,
-      name: notePackage.name,
-    }),
-  });
-  if (note) {
-    await safeRm(resourcePath);
-  }
-  if (!noteScript.startsWith("Custom")) {
-    await deletePackages([notePackage, ...dependenciesPackages]);
-    return false;
-  }
-  const readOnlyPackage = await getReadOnlyPackage({
-    id: notePackage.id,
-    digest,
-  });
-  if (readOnlyPackage) {
-    await deletePackages([notePackage, ...dependenciesPackages]);
-  }
-  const readOnlyPackageId = readOnlyPackage?.id ?? notePackage.id;
-  const verifiedNote = await getVerifiedNote({
-    noteId,
-    packageId: readOnlyPackageId,
-  });
-  if (verifiedNote) {
-    throw new Error("Error: Note Script already verified.");
-  }
-  await insertVerifiedNote({ networkId, noteId, packageId: readOnlyPackageId });
-  return true;
-};
-
-const verifyNoteFromPackageId = async ({
-  networkId,
-  noteId,
-  note,
-  packageId,
-}: {
-  networkId: string;
-  noteId: string;
-  note: string;
-  packageId: string;
-}) => {
-  const [exists, dbPackage] = await Promise.all([
-    packageExists(packageId),
-    getPackage(packageId),
-  ]);
-  if (!dbPackage) {
-    throw new Error(`Error: Package ${packageId} not found.`);
-  }
-  const { name, type, rust, dependencies, digest } = dbPackage;
-  if (!exists) {
-    await generatePackageDir({
-      packageDir: packageId,
-      name,
-      type,
-      rust,
-      dependencies,
-    });
-  }
-  const resourcePath = `${PACKAGES_PATH}/${noteId}.txt`;
-  await writeFile(resourcePath, note);
-  const noteScript = await midenNoteVerifier({
-    networkId,
-    resourceId: noteId,
-    resourcePath,
-    maspPath: packagePath({ packageDir: packageId, name }),
-  });
-  await safeRm(resourcePath);
-  if (!noteScript.startsWith("Custom")) {
-    return false;
-  }
-  const readOnlyPackage = await getReadOnlyPackage({ digest });
-  const readOnlyPackageId = readOnlyPackage
-    ? readOnlyPackage.id
-    : await insertPackage({ ...dbPackage, id: undefined, readOnly: true });
-  await insertVerifiedNote({ networkId, noteId, packageId: readOnlyPackageId });
-  return true;
-};
 
 export const POST = async (
   request: NextRequest,
@@ -203,74 +21,86 @@ export const POST = async (
   try {
     const { network } = await params;
     const body = await request.json();
-    const { noteId, note, packageSource, dependencies, packageId } =
+    const { noteId, packageSource, dependencies, packageId } =
       body as VerifyNoteRequestBody;
     if (packageSource && dependencies) {
-      const verified = await verifyNoteFromSource({
-        networkId: network,
-        noteId,
-        note,
-        packageSource,
-        dependencies,
-      });
-      if (note) {
-        const {
-          package: { name },
-        } = parseMidenProjectToml(packageSource.midenProjectToml);
-        const notePackageFiles = {
-          [`${name}/.cargo/config.toml`]:
-            projectTemplateFiles[".cargo/config.toml"],
-          [`${name}/src/lib.rs`]: packageSource.rust,
-          [`${name}/build.rs`]: projectTemplateFiles["build.rs"],
-          [`${name}/Cargo.toml`]: generateCargoToml({ name }),
-          [`${name}/miden-project.toml`]: packageSource.midenProjectToml,
-          [`${name}/rust-toolchain.toml`]:
-            projectTemplateFiles["rust-toolchain.toml"],
-        };
-        const files = dependencies.reduce<Record<string, string>>(
-          (previousValue, currentValue) => {
-            const {
-              package: { name: dependencyName },
-            } = parseMidenProjectToml(currentValue.midenProjectToml);
-            previousValue[`${dependencyName}/.cargo/config.toml`] =
-              projectTemplateFiles[".cargo/config.toml"];
-            previousValue[`${dependencyName}/src/lib.rs`] = currentValue.rust;
-            previousValue[`${dependencyName}/build.rs`] =
-              projectTemplateFiles["build.rs"];
-            previousValue[`${dependencyName}/miden-project.toml`] =
-              currentValue.midenProjectToml;
-            previousValue[`${dependencyName}/Cargo.toml`] = generateCargoToml({
-              name: dependencyName,
-            });
-            previousValue[`${dependencyName}/rust-toolchain.toml`] =
-              projectTemplateFiles["rust-toolchain.toml"];
-            return previousValue;
-          },
-          notePackageFiles,
-        );
-        try {
-          await fetch(`${API_REGISTRY_URL}/v1/${network}/verified-notes`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              noteId,
-              files,
-              entrypoint: name,
-              source: "miden-playground",
-            }),
+      const {
+        package: { name },
+      } = parseMidenProjectToml(packageSource.midenProjectToml);
+      const notePackageFiles = {
+        [`${name}/.cargo/config.toml`]:
+          projectTemplateFiles[".cargo/config.toml"],
+        [`${name}/src/lib.rs`]: packageSource.rust,
+        [`${name}/build.rs`]: projectTemplateFiles["build.rs"],
+        [`${name}/Cargo.toml`]: generateCargoToml({ name }),
+        [`${name}/miden-project.toml`]: packageSource.midenProjectToml,
+        [`${name}/rust-toolchain.toml`]:
+          projectTemplateFiles["rust-toolchain.toml"],
+      };
+      const files = dependencies.reduce<Record<string, string>>(
+        (previousValue, currentValue) => {
+          const {
+            package: { name: dependencyName },
+          } = parseMidenProjectToml(currentValue.midenProjectToml);
+          previousValue[`${dependencyName}/.cargo/config.toml`] =
+            projectTemplateFiles[".cargo/config.toml"];
+          previousValue[`${dependencyName}/src/lib.rs`] = currentValue.rust;
+          previousValue[`${dependencyName}/build.rs`] =
+            projectTemplateFiles["build.rs"];
+          previousValue[`${dependencyName}/miden-project.toml`] =
+            currentValue.midenProjectToml;
+          previousValue[`${dependencyName}/Cargo.toml`] = generateCargoToml({
+            name: dependencyName,
           });
-        } catch (error) {
-          console.error(error);
-        }
+          previousValue[`${dependencyName}/rust-toolchain.toml`] =
+            projectTemplateFiles["rust-toolchain.toml"];
+          return previousValue;
+        },
+        notePackageFiles,
+      );
+      const response = await fetch(
+        `${API_REGISTRY_URL}/v1/${network}/verified-notes`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            noteId,
+            files,
+            entrypoint: name,
+            source: "miden-playground",
+          }),
+        },
+      );
+      const result = await response.json();
+      if (!response.ok) {
+        const { error } = result as { error: string };
+        throw new Error(error);
       }
+      const { verified } = result as { verified: boolean };
       return NextResponse.json<VerifyNoteResponse>({ verified });
-    } else if (note && packageId) {
-      const verified = await verifyNoteFromPackageId({
-        networkId: network,
-        noteId,
-        note,
-        packageId,
-      });
+    } else if (packageId) {
+      const dbPackage = await getPackage(packageId);
+      if (!dbPackage) {
+        throw new Error(`Package with ID ${packageId} not found.`);
+      }
+      const response = await fetch(
+        `${API_REGISTRY_URL}/v1/${network}/verified-notes`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            noteId,
+            files: dbPackage.files,
+            entrypoint: dbPackage.name,
+          }),
+        },
+      );
+      const result = await response.json();
+      if (!response.ok) {
+        const { error } = result as { error: string };
+        throw new Error(error);
+      }
+      const { verified } = result as { verified: boolean };
       return NextResponse.json<VerifyNoteResponse>({ verified });
     }
     throw new Error("Error: Invalid request body.");

@@ -128,3 +128,23 @@ export type MidenProjectToml = {
   lib: { kind: ScriptType; namespace: string };
   dependencies: Record<string, string | { path: string }>;
 };
+
+export type Package = {
+  id: string;
+  name: string;
+  type: ScriptType;
+  files: Record<string, string>;
+  digest: string;
+  masp: string;
+  manifest: {
+    exports: Export[];
+    dependencies: {
+      kind: ScriptType;
+      name: string;
+      digest: string;
+      version: string;
+    }[];
+  };
+  createdAt: string;
+  updatedAt: string;
+};

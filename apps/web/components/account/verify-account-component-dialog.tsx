@@ -77,8 +77,6 @@ const VerifyAccountComponentDialog = () => {
             const { verified, error } = await verifyAccountComponentFromSource({
               networkId,
               accountId,
-              identifier: account.identifier,
-              account: toBase64(wasmAccount.serialize()),
               packageSource,
             });
             setLoading(false);

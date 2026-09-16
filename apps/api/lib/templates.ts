@@ -17,6 +17,7 @@ export const projectTemplateFiles = {
 
 export const templates = {
   library: "",
+  "authentication-component": "",
   "account-component": readFile("account-component.rs"),
   note: readFile("note.rs"),
   "tx-script": readFile("tx-script.rs"),

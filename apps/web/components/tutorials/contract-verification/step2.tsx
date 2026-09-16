@@ -18,7 +18,7 @@ const useCompleted = () => {
   const resetCountProcedure = procedureExports.find(
     ({ digest }) =>
       digest ===
-      "0x15995d7755ed534eaef7611e3cc4640bf07a71059bb7e3d1a171e4199f862a5d",
+      "0x49522a520a4fa929b6cd083ac9d5893b8ff7837395d5388ce1830221b11e2aa1",
   );
   return script?.status === "compiled" && !!resetCountProcedure;
 };

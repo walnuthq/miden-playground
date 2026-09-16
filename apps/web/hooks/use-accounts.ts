@@ -21,7 +21,6 @@ import useScripts from "@/hooks/use-scripts";
 import { counterContractAddress } from "@/lib/constants";
 import { defaultScriptIds } from "@/lib/types/default-scripts";
 import { verifyAccountComponentsFromPackageIds } from "@/lib/api";
-import { toBase64 } from "@/lib/utils";
 import { defaultComponentIds } from "@/lib/types/default-components";
 // import { useParaMiden } from "@/lib/para-miden";
 import {
@@ -282,8 +281,6 @@ const useAccounts = () => {
       verifyAccountComponentsFromPackageIds({
         networkId,
         accountId: account.id,
-        identifier: account.identifier,
-        account: toBase64(wasmAccount.serialize()),
         packageIds,
       });
     }
