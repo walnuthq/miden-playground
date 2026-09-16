@@ -18,15 +18,20 @@ import {
 import type { ComponentType, StorageSlotType } from "@/lib/types/component";
 import { defaultComponent, storageSlotName } from "@/lib/utils/component";
 import useTutorials from "@/hooks/use-tutorials";
+import { defaultComponentIds } from "@/lib/types/default-components";
 
-const EmptyComponents = ({
+const AddCustomComponents = ({
+  empty,
   type,
   accountId,
 }: {
+  empty: boolean;
   type: "account-component" | "authentication-component";
   accountId: string;
 }) => {
   const { openVerifyAccountComponentDialog } = useAccounts();
+  const componentType =
+    type === "account-component" ? "account" : "authentication";
   return (
     <Empty className="border border-dashed">
       <EmptyHeader>
@@ -34,9 +39,9 @@ const EmptyComponents = ({
           <Puzzle />
         </EmptyMedia>
         <EmptyTitle>
-          This account has no verified{" "}
-          {type === "account-component" ? "account" : "authentication"}{" "}
-          components
+          {empty
+            ? `This account has no verified custom ${componentType} components`
+            : `Add more verified custom ${componentType} components`}
         </EmptyTitle>
         <EmptyDescription>
           Verify {type === "account-component" ? "account" : "authentication"}{" "}
@@ -116,6 +121,9 @@ const AccountComponents = ({
   const accountComponents = componentsWithScripts.filter(
     ({ component }) => component.type === "account-component",
   );
+  const customAccountComponents = accountComponents.filter(
+    ({ component }) => !defaultComponentIds.includes(component.id),
+  );
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-8">
@@ -123,38 +131,32 @@ const AccountComponents = ({
           <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
             Authentication Components
           </h4>
-          {authenticationComponents.length === 0 ? (
-            <EmptyComponents
-              type="authentication-component"
-              accountId={account.id}
+          {authenticationComponents.map(({ component, script }) => (
+            <AccountComponentTable
+              key={component.id}
+              account={account}
+              component={component}
+              script={script}
             />
-          ) : (
-            authenticationComponents.map(({ component, script }) => (
-              <AccountComponentTable
-                key={component.id}
-                account={account}
-                component={component}
-                script={script}
-              />
-            ))
-          )}
+          ))}
         </div>
         <div className="flex flex-col gap-2">
           <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
             Account Components
           </h4>
-          {accountComponents.length === 0 ? (
-            <EmptyComponents type="account-component" accountId={account.id} />
-          ) : (
-            accountComponents.map(({ component, script }) => (
-              <AccountComponentTable
-                key={component.id}
-                account={account}
-                component={component}
-                script={script}
-              />
-            ))
-          )}
+          {accountComponents.map(({ component, script }) => (
+            <AccountComponentTable
+              key={component.id}
+              account={account}
+              component={component}
+              script={script}
+            />
+          ))}
+          <AddCustomComponents
+            empty={customAccountComponents.length === 0}
+            type="account-component"
+            accountId={account.id}
+          />
         </div>
       </div>
     </div>

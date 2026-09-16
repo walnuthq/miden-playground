@@ -15,6 +15,7 @@ Don't forget to also declare the procedure signature in the **`CounterContract`*
 #[component]
 trait CounterContract {
     // ...
+    #[account_procedure]
     fn reset_count(&mut self);
 }
 ```

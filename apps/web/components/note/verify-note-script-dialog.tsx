@@ -17,7 +17,6 @@ import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import useNotes from "@/hooks/use-notes";
 import { verifyNoteFromSource } from "@/lib/api";
-import { toBase64 } from "@/lib/utils";
 import type { PackageSource } from "@/lib/types/script";
 import {
   parseMidenProjectToml,
@@ -75,7 +74,6 @@ const VerifyNoteScriptDialog = () => {
             const { verified, error } = await verifyNoteFromSource({
               networkId,
               noteId,
-              note: toBase64(record.toNote().serialize()),
               packageSource,
               dependencies,
             });

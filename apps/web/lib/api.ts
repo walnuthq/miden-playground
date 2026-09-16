@@ -4,10 +4,11 @@ import type {
   CompiledPackage,
   ScriptType,
   PackageSource,
+  Package,
 } from "@/lib/types/script";
-import { formatProcedureExportPath } from "@/lib/utils/script";
+import { packageToScript } from "@/lib/utils/script";
 import { isValidUUIDv4 } from "@/lib/utils";
-import { API_URL } from "@/lib/constants";
+import { API_URL, API_REGISTRY_URL } from "@/lib/constants";
 
 export const createScript = async ({
   name,
@@ -80,14 +81,10 @@ export const deleteScript = async (scriptId: string) => {
 export const verifyAccountComponentFromSource = async ({
   networkId,
   accountId,
-  identifier,
-  account,
   packageSource,
 }: {
   networkId: string;
   accountId: string;
-  identifier: string;
-  account: string;
   packageSource: PackageSource;
 }) => {
   const response = await fetch(
@@ -96,8 +93,6 @@ export const verifyAccountComponentFromSource = async ({
       method: "POST",
       body: JSON.stringify({
         accountId,
-        identifier,
-        account,
         packageSource,
       }),
     },
@@ -113,21 +108,17 @@ export const verifyAccountComponentFromSource = async ({
 export const verifyAccountComponentsFromPackageIds = async ({
   networkId,
   accountId,
-  identifier,
-  account,
   packageIds,
 }: {
   networkId: string;
   accountId: string;
-  identifier: string;
-  account: string;
   packageIds: string[];
 }) => {
   const response = await fetch(
     `${API_URL}/verified-account-components/${networkId}`,
     {
       method: "POST",
-      body: JSON.stringify({ accountId, identifier, account, packageIds }),
+      body: JSON.stringify({ accountId, packageIds }),
     },
   );
   if (response.status === 500) {
@@ -140,45 +131,42 @@ export const verifyAccountComponentsFromPackageIds = async ({
 
 export const getVerifiedAccountComponents = async ({
   networkId,
-  identifier,
+  code,
 }: {
   networkId: string;
-  identifier: string;
-}) => {
+  code: string;
+}): Promise<
+  | { error: string; components?: undefined }
+  | { components: Script[]; error?: undefined }
+> => {
   const response = await fetch(
-    `${API_URL}/verified-account-components/${networkId}/${identifier}`,
-    {
-      method: "GET",
-    },
+    `${API_REGISTRY_URL}/v1/${networkId}/verified-accounts/code/${code}`,
   );
-  if (response.status === 500) {
-    return { error: await response.text() };
-  }
   const result = await response.json();
-  const { components } = result as { components: Script[] };
+  if (!response.ok) {
+    const { error } = result as { error: string };
+    return { error };
+  }
+  const { verifiedAccountComponents } = result as {
+    verifiedAccountComponents: {
+      package: Package;
+    }[];
+  };
   return {
-    components: components.map((component) => ({
-      ...component,
-      procedureExports: component.procedureExports.map((procedureExport) => ({
-        ...procedureExport,
-        readOnly: formatProcedureExportPath(procedureExport.path).startsWith(
-          "get",
-        ),
-      })),
-    })),
+    components: verifiedAccountComponents.map((verifiedAccountComponent) =>
+      packageToScript(verifiedAccountComponent.package),
+    ),
   };
 };
 
 export const verifyNoteFromSource = async ({
   networkId,
   noteId,
-  note,
   packageSource,
   dependencies = [],
 }: {
   networkId: string;
   noteId: string;
-  note: string;
   packageSource: PackageSource;
   dependencies?: PackageSource[];
 }) => {
@@ -186,7 +174,6 @@ export const verifyNoteFromSource = async ({
     method: "POST",
     body: JSON.stringify({
       noteId,
-      note,
       packageSource,
       dependencies,
     }),
@@ -202,17 +189,15 @@ export const verifyNoteFromSource = async ({
 export const verifyNoteFromPackageId = async ({
   networkId,
   noteId,
-  note,
   packageId,
 }: {
   networkId: string;
   noteId: string;
-  note: string;
   packageId: string;
 }) => {
   const response = await fetch(`${API_URL}/verified-notes/${networkId}`, {
     method: "POST",
-    body: JSON.stringify({ noteId, note, packageId }),
+    body: JSON.stringify({ noteId, packageId }),
   });
   if (response.status === 500) {
     return { error: await response.text() };
@@ -224,23 +209,26 @@ export const verifyNoteFromPackageId = async ({
 
 export const getVerifiedNote = async ({
   networkId,
-  noteId,
+  script,
 }: {
   networkId: string;
-  noteId: string;
-}) => {
+  script: string;
+}): Promise<
+  | { error: string; noteScript?: undefined }
+  | { noteScript: Script; error?: undefined }
+> => {
   const response = await fetch(
-    `${API_URL}/verified-notes/${networkId}/${noteId}`,
-    {
-      method: "GET",
-    },
+    `${API_REGISTRY_URL}/v1/${networkId}/verified-notes/script/${script}`,
   );
-  if (response.status === 500) {
-    return { error: await response.text() };
-  }
   const result = await response.json();
-  const { noteScript } = result as { noteScript: Script | null };
-  return { noteScript };
+  if (!response.ok) {
+    const { error } = result as { error: string };
+    return { error };
+  }
+  const { package: noteScript } = result as {
+    package: Package;
+  };
+  return { noteScript: packageToScript(noteScript) };
 };
 
 export const getScript = async (id: string) => {

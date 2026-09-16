@@ -8,21 +8,6 @@ import {
   type DefaultDependency,
 } from "@/lib/default-dependencies";
 
-export const getReadOnlyPackage = ({
-  id,
-  digest,
-}: {
-  id?: string;
-  digest: string;
-}) =>
-  db.query.packagesTable.findFirst({
-    where: {
-      NOT: id ? { id } : undefined,
-      digest,
-      readOnly: true,
-    },
-  });
-
 export const getPackage = async (id: string) => {
   const dbPackage = await db.query.packagesTable.findFirst({ where: { id } });
   return dbPackage

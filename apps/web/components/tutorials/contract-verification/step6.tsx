@@ -19,7 +19,7 @@ const useCompleted = () => {
         const { components: verifiedAccountComponents = [] } =
           await getVerifiedAccountComponents({
             networkId,
-            identifier: counter?.identifier ?? "",
+            code: counter?.code ?? "",
           });
         setCompleted(verifiedAccountComponents.length > 0);
       };

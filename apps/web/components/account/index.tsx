@@ -10,18 +10,15 @@ const AccountIndex = ({ identifier }: { identifier: string }) => {
   const { networkId } = useNetwork();
   const { accounts } = useAccounts();
   const account = accounts.find((account) => account.identifier === identifier);
-  const components = account?.components ?? [];
-  const hasStandardComponent = components.some((component) =>
-    ["basic-wallet", "fungible-faucet"].includes(component),
-  );
+  const accountCode = account?.code ?? "";
   const { data } = useQuery({
-    queryKey: ["verifiedAccountComponents", networkId, identifier],
+    queryKey: ["verifiedAccountComponents", networkId, accountCode],
     queryFn: () =>
       getVerifiedAccountComponents({
         networkId,
-        identifier,
+        code: account?.code ?? "",
       }),
-    enabled: ["mtst", "mdev"].includes(networkId) && !hasStandardComponent,
+    enabled: ["mtst", "mdev"].includes(networkId) && accountCode !== "",
   });
   const rawVerifiedAccountComponents = data?.components ?? [];
   const verifiedAccountComponents = rawVerifiedAccountComponents.filter(

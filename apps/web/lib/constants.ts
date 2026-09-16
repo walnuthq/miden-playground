@@ -2,6 +2,8 @@ import type { NetworkId } from "@/lib/types/network";
 
 export const API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+export const API_REGISTRY_URL =
+  process.env.NEXT_PUBLIC_API_REGISTRY_URL ?? "http://localhost:8081";
 
 export const EMPTY_WORD =
   "0x0000000000000000000000000000000000000000000000000000000000000000";
