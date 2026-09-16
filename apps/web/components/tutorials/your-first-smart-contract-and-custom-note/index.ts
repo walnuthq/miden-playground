@@ -1,6 +1,7 @@
 import type { Tutorial } from "@/lib/types/tutorial";
 import { defaultTutorial } from "@/lib/utils/tutorial";
 import { defaultState } from "@/lib/utils/state";
+import { midenFaucetAccount } from "@/lib/utils/account";
 import Step1 from "@/components/tutorials/your-first-smart-contract-and-custom-note/step1";
 import Step2 from "@/components/tutorials/your-first-smart-contract-and-custom-note/step2";
 import Step3 from "@/components/tutorials/your-first-smart-contract-and-custom-note/step3";
@@ -22,6 +23,7 @@ const tutorial: Tutorial = {
   initialRoute: "/scripts",
   state: {
     ...defaultState(),
+    accounts: [midenFaucetAccount("mtst")],
     tutorialId: "your-first-smart-contract-and-custom-note",
   },
   steps: [Step1, Step2, Step3, Step4, Step5, Step6, Step7, Step8],

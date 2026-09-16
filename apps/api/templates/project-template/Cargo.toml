@@ -1,10 +1,22 @@
+cargo-features = ["trim-paths"]
+
 [package]
 name = "counter-account"
+description = "A simple example of a Miden counter contract using the Account Storage API"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [lib]
 crate-type = ["cdylib"]
 
 [dependencies]
-miden = "0.13"
+miden = "0.14"
+
+[build-dependencies]
+miden-sdk-build-script-support = "0.14"
+
+[profile.release]
+trim-paths = ["diagnostics", "object"]
+
+[profile.dev]
+trim-paths = ["diagnostics", "object"]

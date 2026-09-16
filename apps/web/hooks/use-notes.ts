@@ -22,6 +22,7 @@ import { toBase64 } from "@/lib/utils";
 import {
   clientCreateNoteFromScript,
   clientImportNoteFile,
+  randomWord,
 } from "@/lib/web-client";
 import { verifyNoteFromPackageId } from "@/lib/api";
 import useNetwork from "@/hooks/use-network";
@@ -131,9 +132,15 @@ const useNotes = () => {
         packageId: script.id,
       });
     }
-    const transactionRequest = new WasmTransactionRequestBuilder()
-      .withOwnOutputNotes(new WasmNoteArray([note]))
-      .build();
+    let transactionRequestBuilder =
+      new WasmTransactionRequestBuilder().withOwnOutputNotes(
+        new WasmNoteArray([note]),
+      );
+    if (senderAccount.components.includes("auth-guarded-multisig")) {
+      transactionRequestBuilder =
+        transactionRequestBuilder.withFeeConversionSalt(randomWord());
+    }
+    const transactionRequest = transactionRequestBuilder.build();
     const customTransaction = new CustomTransaction(
       senderAccount.address,
       recipientAccount.address,

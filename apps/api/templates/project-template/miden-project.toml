@@ -7,10 +7,11 @@ kind = "account-component"
 # Full `miden:<package>/<interface>@<version>` id. The interface segment is the
 # kebab-cased component trait name (`CounterContract` -> `counter-contract`).
 namespace = "miden:counter-account/counter-contract@0.1.0"
+path = "src/lib.rs"
 
 [dependencies]
 miden-core = "*"
 miden-protocol = "*"
 
 [package.metadata.miden]
-supported-types = ["RegularAccountImmutableCode"]
+supported-types = ["RegularAccountUpdatableCode"]

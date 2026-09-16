@@ -65,6 +65,19 @@ import defaultScripts from "@/lib/types/default-scripts";
 import { fromBase64, toBase64, waitUntil } from "@/lib/utils";
 import { EMPTY_WORD } from "@/lib/constants";
 
+export const randomWord = () => {
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  const view = new DataView(bytes.buffer);
+  const u64s = new BigUint64Array([
+    view.getBigUint64(0, true),
+    view.getBigUint64(8, true),
+    view.getBigUint64(16, true),
+    view.getBigUint64(24, true),
+  ]);
+  return new WasmWord(u64s);
+};
+
 const wasmRpcClient = (networkId: NetworkId) => {
   const endpoints = {
     mtst: WasmEndpoint.testnet(),

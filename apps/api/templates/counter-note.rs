@@ -10,15 +10,17 @@
 
 use miden::*;
 
-/// Native account of the note: exposes the `counter-contract` component methods gathered from the `counter-contract` package.
+/// Native account of the note: exposes the `counter-contract` component methods gathered from the
+/// `counter-account` package. The struct cannot be named `CounterContract`, because the account
+/// reference generates a trait of that name.
 #[account(counter_account::CounterContract)]
 pub struct CounterAccount;
 
 #[note]
-struct IncrementNote;
+struct CounterNote;
 
 #[note]
-impl IncrementNote {
+impl CounterNote {
     #[note_script]
     fn run(self, _arg: Word, account: &mut CounterAccount) {
         let initial_value = account.get_count();

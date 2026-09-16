@@ -15,6 +15,7 @@ export const basicWalletDependency: Dependency & {
     "basic-wallet/.cargo/config.toml":
       projectTemplateFiles[".cargo/config.toml"],
     "basic-wallet/src/lib.rs": templates["basic-wallet"],
+    "basic-wallet/build.rs": projectTemplateFiles["build.rs"],
     "basic-wallet/Cargo.toml": generateCargoToml({
       name: "basic-wallet",
     }),
@@ -42,6 +43,7 @@ export const counterAccountDependency: Dependency & {
     "counter-account/.cargo/config.toml":
       projectTemplateFiles[".cargo/config.toml"],
     "counter-account/src/lib.rs": templates["counter-account"],
+    "counter-account/build.rs": projectTemplateFiles["build.rs"],
     "counter-account/Cargo.toml": generateCargoToml({
       name: "counter-account",
     }),

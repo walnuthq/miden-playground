@@ -203,6 +203,7 @@ export const POST = async (
           [`${name}/.cargo/config.toml`]:
             projectTemplateFiles[".cargo/config.toml"],
           [`${name}/src/lib.rs`]: packageSource.rust,
+          [`${name}/build.rs`]: projectTemplateFiles["build.rs"],
           [`${name}/Cargo.toml`]: generateCargoToml({ name }),
           [`${name}/miden-project.toml`]: packageSource.midenProjectToml,
           [`${name}/rust-toolchain.toml`]:

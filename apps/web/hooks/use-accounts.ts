@@ -213,6 +213,9 @@ const useAccounts = () => {
           identifier: getIdentifierPart(midenWalletAddress),
           routingParameters: getRoutingParametersPart(midenWalletAddress),
           fungibleAssets,
+          // TODO how to determine components for imported wallet?
+          // For now, assume it's always a multisig wallet
+          components: ["auth-guarded-multisig", "basic-wallet"],
         };
         dispatch({
           type: "IMPORT_ACCOUNT",

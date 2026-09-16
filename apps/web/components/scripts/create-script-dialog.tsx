@@ -117,7 +117,14 @@ const CreateScriptDialog = () => {
                   </SelectTrigger>
                   <SelectContent>
                     {Object.keys(scriptTypes)
-                      .filter((type) => type !== "library")
+                      .filter(
+                        (type) =>
+                          ![
+                            "kernel",
+                            "library",
+                            "authentication-component",
+                          ].includes(type),
+                      )
                       .map((type) => (
                         <SelectItem key={type} value={type}>
                           {scriptTypes[type as ScriptType]}

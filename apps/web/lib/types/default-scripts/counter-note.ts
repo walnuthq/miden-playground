@@ -25,10 +25,10 @@ use miden::*;
 pub struct CounterAccount;
 
 #[note]
-struct IncrementNote;
+struct CounterNote;
 
 #[note]
-impl IncrementNote {
+impl CounterNote {
     #[note_script]
     fn run(self, _arg: Word, account: &mut CounterAccount) {
         let initial_value = account.get_count();
@@ -63,7 +63,7 @@ const counterNote: Script = {
   procedureExports: [
     {
       ...defaultProcedureExport(),
-      path: '::"miden:increment-note/miden-increment-note@0.1.0"::run',
+      path: '::"miden:counter-note/miden-counter-note@0.1.0"::run',
       digest: COUNTER_NOTE_RUN_PROC_HASH,
       signature: {
         ...defaultSignature(),

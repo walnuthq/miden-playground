@@ -1,5 +1,6 @@
 import type { State } from "@/lib/types/state";
 import { defaultState } from "@/lib/utils/state";
+import { midenFaucetAccount } from "@/lib/utils/account";
 import defaultScripts from "@/lib/types/default-scripts";
 import counterContractScript from "@/lib/types/default-scripts/counter-contract";
 import defaultComponents from "@/lib/types/default-components";
@@ -7,6 +8,7 @@ import counterContractComponent from "@/lib/types/default-components/counter-con
 
 const state: State = {
   ...defaultState(),
+  accounts: [midenFaucetAccount("mtst")],
   scripts: [
     ...defaultScripts,
     { ...counterContractScript, id: "counter-value-contract" },
