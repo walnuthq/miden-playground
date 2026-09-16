@@ -28,8 +28,10 @@ struct CounterContractStorage {
 #[component]
 trait CounterContract {
     /// Returns the current counter value stored in the contract's storage map.
+    #[account_procedure]
     fn get_count(&self) -> Felt;
     /// Increments the counter value stored in the contract's storage map by one.
+    #[account_procedure]
     fn increment_count(&mut self) -> Felt;
 }
 
@@ -52,14 +54,24 @@ impl CounterContract for CounterContractStorage {
 
 export const masm = `use miden::protocol::active_account
 use miden::protocol::native_account
-use miden::core::word
 use miden::core::sys
+
+# CONSTANTS
+# =================================================================================================
 
 const COUNTER_SLOT = word("counter_contract::counter_contract::count_map")
 
-#! Inputs:  []
-#! Outputs: [count]
-pub proc get_count
+# PUBLIC INTERFACE
+# =================================================================================================
+
+#! Returns the current count.
+#!
+#! Inputs:  [pad(16)]
+#! Outputs: [count, pad(15)]
+#!
+#! Invocation: call
+@account_procedure
+pub proc get_count()
     push.0.0.0.1 push.COUNTER_SLOT[0..2] exec.active_account::get_map_item
     # => [count]
 
@@ -67,9 +79,14 @@ pub proc get_count
     # => [count]
 end
 
-#! Inputs:  []
-#! Outputs: []
-pub proc increment_count
+#! Increments the current count by one.
+#!
+#! Inputs:  [pad(16)]
+#! Outputs: [pad(16)]
+#!
+#! Invocation: call
+@account_procedure
+pub proc increment_count()
     push.0.0.0.1 push.COUNTER_SLOT[0..2] exec.active_account::get_map_item
     # => [count]
 
@@ -97,8 +114,6 @@ const counterMapContract: Script = {
     {
       ...defaultProcedureExport(),
       path: "get_count",
-      digest:
-        "0xa5786be8056e5650452d712e1f736a2c0d07f26f061bce8186d39054e00de2dc",
       signature: {
         ...defaultSignature(),
         results: [{ Struct: { name: "miden:base/core-types@1.0.0/felt" } }],
@@ -108,8 +123,6 @@ const counterMapContract: Script = {
     {
       ...defaultProcedureExport(),
       path: "increment_count",
-      digest:
-        "0x52bcd648b2678a5fda8024d96e01cc794ba16dc13c7ce48e9cc7a9f69cd02590",
       signature: {
         ...defaultSignature(),
         results: [{ Struct: { name: "miden:base/core-types@1.0.0/felt" } }],

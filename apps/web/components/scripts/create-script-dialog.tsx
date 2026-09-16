@@ -100,7 +100,7 @@ const CreateScriptDialog = () => {
                   name="name"
                   required
                   minLength={2}
-                  pattern="^[a-zA-Z][a-zA-Z0-9_-]{0,63}$"
+                  pattern="[a-zA-Z][a-zA-Z0-9_\-]{0,63}"
                 />
                 <FieldDescription>
                   Package name, 2 characters minimum.

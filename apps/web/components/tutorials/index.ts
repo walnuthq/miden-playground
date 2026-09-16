@@ -4,7 +4,7 @@ import tutorial2 from "@/components/tutorials/transfer-assets-between-wallets";
 //import tutorial4 from "@/components/tutorials/private-transfers";
 import tutorial5 from "@/components/tutorials/wallet-backup-using-miden-guardian";
 import tutorial6 from "@/components/tutorials/interact-with-the-counter-contract";
-// import tutorial7 from "@/components/tutorials/deploy-a-counter-contract";
+import tutorial7 from "@/components/tutorials/deploy-a-counter-contract";
 // import tutorial8 from "@/components/tutorials/timelock-p2id-note";
 // import tutorial9 from "@/components/tutorials/network-transactions";
 // import tutorial10 from "@/components/tutorials/foreign-procedure-invocation";
@@ -25,7 +25,7 @@ const tutorials = [
   //tutorial4,
   tutorial5,
   tutorial6,
-  // tutorial7,
+  tutorial7,
   // tutorial8,
   // tutorial9,
   // tutorial10,
