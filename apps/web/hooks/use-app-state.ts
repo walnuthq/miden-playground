@@ -57,11 +57,13 @@ const syncAccounts = ({
 }) => {
   // const wasmAccount = wasmAccounts.find(
   //   (wasmAccount) =>
-  //     wasmAccount.id().toString() === "0x75e610802005d2d1514284d663ae13",
+  //     wasmAccount.id().toString() === "0x8310ebba55c19a91697ab988d165fa",
   // );
   // if (wasmAccount) {
-  //   console.log(wasmAccount.code().commitment().toHex());
-  //   console.log(toBase64(wasmAccount.serialize()));
+  //   // console.log(wasmAccount.code().commitment().toHex());
+  //   // console.log(toBase64(wasmAccount.serialize()));
+  //   console.log("prefix", wasmAccount.id().prefix().asInt());
+  //   console.log("suffix", wasmAccount.id().suffix().asInt());
   // }
   const consumableP2IDNotes = inputNotes.filter(
     (inputNote) =>

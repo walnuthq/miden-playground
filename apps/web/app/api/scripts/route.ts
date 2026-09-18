@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 import counterMapContract from "@/lib/types/default-scripts/counter-map-contract";
-import timelockP2id from "@/lib/types/default-scripts/timelock-p2id";
+import p2id from "@/lib/types/default-scripts/p2id";
 import authNoAuth from "@/lib/types/default-scripts/auth-no-auth";
 import counterNote from "@/lib/types/default-scripts/counter-note";
 import counterScript from "@/lib/types/default-scripts/counter-script";
@@ -29,7 +29,7 @@ type CreateScriptResponse = {
 
 const scriptsRust: Record<ScriptExample | "none", string> = {
   none: defaultScript().rust,
-  "p2id-note": timelockP2id.rust,
+  "p2id-note": p2id.rust,
   "auth-no-auth": authNoAuth.rust,
   "counter-account": counterMapContract.rust,
   "counter-note": counterNote.rust,
@@ -39,7 +39,7 @@ const scriptsRust: Record<ScriptExample | "none", string> = {
 
 const scriptsDependencies: Record<ScriptExample | "none", Dependency[]> = {
   none: defaultScript().dependencies,
-  "p2id-note": timelockP2id.dependencies,
+  "p2id-note": p2id.dependencies,
   "auth-no-auth": authNoAuth.dependencies,
   "counter-account": counterMapContract.dependencies,
   "counter-note": counterNote.dependencies,

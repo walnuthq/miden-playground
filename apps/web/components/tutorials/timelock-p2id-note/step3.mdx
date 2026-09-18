@@ -1,4 +1,11 @@
-We assume the timelock block height will be appended as the 3rd item in the note storage, let's store it in a variable for future use:
+We assume the timelock block height will be appended as the 3rd item in the note storage, let's make sure the storage length is always 3.
+
+```rust
+// make sure the storage length is 3
+assert_eq(storage.len().into(), felt!(3));
+```
+
+Then we store the 3rd storage item in a variable for future use:
 
 ```rust
 let timelock_height = storage[2];

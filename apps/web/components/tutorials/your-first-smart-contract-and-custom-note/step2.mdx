@@ -36,7 +36,9 @@ struct CounterContractStorage {
 
 #[component]
 trait CounterContract {
+    #[account_procedure]
     fn get_count(&self) -> Felt;
+    #[account_procedure]
     fn increment_count(&mut self) -> Felt;
 }
 ```

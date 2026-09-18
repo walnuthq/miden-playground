@@ -17,8 +17,7 @@ const NoteStorageTable = ({ storage }: { storage: string[] }) => (
         </TableRow>
       </TableHeader>
       <TableBody>
-        {/* TODO remove */}
-        {storage.slice(0, 3).map((value, index) => (
+        {storage.map((value, index) => (
           <TableRow key={index}>
             <TableCell>{index}</TableCell>
             <TableCell>{BigInt(value)}</TableCell>

@@ -11,16 +11,23 @@ const useCompleted = () => {
     ({ id, type }) => !defaultScriptIds.includes(id) && type === "note",
   );
   const firstMatches = script?.rust.match(
-    /let\s+timelock_height\s*=\s*storage\[2\];/,
+    /assert_eq\(storage\.len\(\)\.into\(\),\s*felt!\(3\)\);/,
   );
   const secondMatches = script?.rust.match(
-    /let\s+block_number\s*=\s*tx::get_block_number\(\);/,
+    /let\s+timelock_height\s*=\s*storage\[2\];/,
   );
   const thirdMatches = script?.rust.match(
+    /let\s+block_number\s*=\s*tx::get_block_number\(\);/,
+  );
+  const fourthMatches = script?.rust.match(
     /assert!\s*\(\s*block_number\s*>=\s*timelock_height\s*\);/,
   );
   return (
-    script?.masm !== "" && !!firstMatches && !!secondMatches && !!thirdMatches
+    script?.masm !== "" &&
+    !!firstMatches &&
+    !!secondMatches &&
+    !!thirdMatches &&
+    !!fourthMatches
   );
 };
 

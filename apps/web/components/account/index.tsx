@@ -16,7 +16,7 @@ const AccountIndex = ({ identifier }: { identifier: string }) => {
     queryFn: () =>
       getVerifiedAccountComponents({
         networkId,
-        code: account?.code ?? "",
+        code: accountCode,
       }),
     enabled: ["mtst", "mdev"].includes(networkId) && accountCode !== "",
   });

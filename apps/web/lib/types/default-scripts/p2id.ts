@@ -8,7 +8,13 @@ export const rust = `// Do not link against libstd (i.e. anything defined in \`s
 #![no_std]
 #![feature(alloc_error_handler)]
 
-use miden::{AccountId, Word, account, active_note, note};
+// However, we could still use some standard library types while
+// remaining no-std compatible, if we uncommented the following lines:
+//
+// extern crate alloc;
+// use alloc::vec::Vec;
+
+use miden::*;
 
 /// Native account of the note: exposes the \`basic-wallet\` component methods (e.g.
 /// \`receive_asset\`) gathered from the \`basic_wallet\` package.
@@ -16,18 +22,31 @@ use miden::{AccountId, Word, account, active_note, note};
 pub struct Wallet;
 
 #[note]
-struct P2idNote {
-    target_account_id: AccountId,
-}
+struct P2idNote;
 
 #[note]
 impl P2idNote {
     #[note_script]
-    pub fn script(self, _arg: Word, account: &mut Wallet) {
-        let current_account = account.get_id();
-        assert_eq!(current_account, self.target_account_id);
+    pub fn run(self, _arg: Word, account: &mut Wallet) {
+        let storage = active_note::get_storage();
 
-        let assets = active_note::get_assets();
+        // make sure the storage length is 2
+        assert_eq(storage.len().into(), felt!(2));
+
+        // P2ID storage follows the protocol layout:
+        // [target_account_id_suffix, target_account_id_prefix, reclaim_height, timelock_height]
+        let target_account_id_suffix = storage[0];
+        let target_account_id_prefix = storage[1];
+
+        // get consuming account id
+        let consuming_account_id = account.get_id();
+
+        // target account id
+        let target_account_id = AccountId::new(target_account_id_prefix, target_account_id_suffix);
+
+        assert_eq!(consuming_account_id, target_account_id);
+
+        let assets = active_note::get_initial_assets();
         for asset in assets {
             account.receive_asset(asset);
         }

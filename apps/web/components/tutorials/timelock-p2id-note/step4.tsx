@@ -26,7 +26,7 @@ const useCompleted = () => {
     ({ senderId, scriptRoot, storage, state, type }) =>
       senderId === connectedWallet?.id &&
       scriptRoot === P2IDE_NOTE_CODE &&
-      accountIdFromPrefixSuffix(storage[1]!, storage[0]!) ===
+      accountIdFromPrefixSuffix(storage[3] ?? "", storage[2] ?? "") ===
         testWalletAccountId(networkId) &&
       state === "committed" &&
       type === "public",
@@ -46,7 +46,7 @@ const Step4: TutorialStep = {
           address={getIdentifierPart(testWalletAddress(networkId))}
           accountIdPrefix={testWalletAccountIdPrefix(networkId)}
           accountIdSuffix={testWalletAccountIdSuffix(networkId)}
-          syncHeight={syncHeight + 100}
+          syncHeight={syncHeight + 43200}
         />
         <TutorialAlert
           completed={completed}

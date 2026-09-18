@@ -1,4 +1,5 @@
 import type { Script, ProcedureExport } from "@/lib/types/script";
+import { defaultScript } from "@/lib/utils/script";
 import type { State } from "@/lib/types/state";
 
 export type ScriptAction =
@@ -95,7 +96,7 @@ const reducer = (state: State, action: ScriptAction): State => {
         scripts: [
           ...state.scripts.slice(0, index),
           {
-            ...state.scripts[index]!,
+            ...(state.scripts[index] ?? defaultScript()),
             ...action.payload.script,
             updatedAt: Date.now(),
           },

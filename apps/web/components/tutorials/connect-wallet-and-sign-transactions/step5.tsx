@@ -21,7 +21,7 @@ const useCompleted = () => {
     ({ senderId, scriptRoot, storage, state, type }) =>
       senderId === senderAccount?.id &&
       scriptRoot === P2ID_NOTE_CODE &&
-      accountIdFromPrefixSuffix(storage[1]!, storage[0]!) ===
+      accountIdFromPrefixSuffix(storage[1] ?? "", storage[0] ?? "") ===
         recipientAccount?.id &&
       state === "committed" &&
       type === "public",
