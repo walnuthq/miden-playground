@@ -7,6 +7,7 @@ import AccountAddress from "@/components/lib/account-address";
 import FungibleAssetsTable from "@/components/lib/fungible-assets-table";
 import useScripts from "@/hooks/use-scripts";
 import type { Script } from "@/lib/types/script";
+import useTutorials from "@/hooks/use-tutorials";
 
 const NoteInformation = ({
   inputNote,
@@ -16,8 +17,17 @@ const NoteInformation = ({
   serverNoteScript: Script | null;
 }) => {
   const { scripts } = useScripts();
+  const { tutorialId } = useTutorials();
   const script =
     scripts.find(({ id }) => id === inputNote.scriptId) ?? serverNoteScript;
+  const storage =
+    tutorialId === "timelock-p2id-note"
+      ? [
+          inputNote.storage[2] ?? "",
+          inputNote.storage[3] ?? "",
+          inputNote.storage[4] ?? "",
+        ]
+      : inputNote.storage;
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-2">
@@ -56,9 +66,7 @@ const NoteInformation = ({
             )}
           </div>
         </div>
-        {inputNote.storage.length > 0 && (
-          <NoteStorageTable storage={inputNote.storage} />
-        )}
+        {inputNote.storage.length > 0 && <NoteStorageTable storage={storage} />}
       </div>
       {/* TODO: better decoded note storage using inputNote.scriptId */}
       {script?.id === "p2id" && (
@@ -73,8 +81,8 @@ const NoteInformation = ({
                 value: (
                   <AccountAddress
                     id={accountIdFromPrefixSuffix(
-                      inputNote.storage[1]!,
-                      inputNote.storage[0]!,
+                      inputNote.storage[1] ?? "",
+                      inputNote.storage[0] ?? "",
                     )}
                   />
                 ),

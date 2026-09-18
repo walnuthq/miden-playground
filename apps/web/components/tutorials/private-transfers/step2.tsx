@@ -27,7 +27,7 @@ const useCompleted = () => {
       ) &&
       senderId === midenFaucetAccountId(networkId) &&
       scriptRoot === P2ID_NOTE_CODE &&
-      accountIdFromPrefixSuffix(storage[1]!, storage[0]!) ===
+      accountIdFromPrefixSuffix(storage[1] ?? "", storage[0] ?? "") ===
         connectedWallet?.id &&
       state === "committed" &&
       type === "private",

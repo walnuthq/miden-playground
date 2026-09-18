@@ -28,7 +28,8 @@ const useCompleted = () => {
       ) &&
       senderId === midenFaucetAccountId(networkId) &&
       scriptRoot === P2ID_NOTE_CODE &&
-      accountIdFromPrefixSuffix(storage[1]!, storage[0]!) === multisig?.id &&
+      accountIdFromPrefixSuffix(storage[1] ?? "", storage[0] ?? "") ===
+        multisig?.id &&
       state === "committed" &&
       type === "public",
   );

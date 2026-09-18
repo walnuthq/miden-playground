@@ -33,7 +33,7 @@ export const fromBase64 = (base64: string) =>
 export const toBase64 = (bytes: Uint8Array) => {
   const output = [];
   for (let i = 0; i < bytes.length; i++) {
-    output.push(String.fromCharCode(bytes[i]!));
+    output.push(String.fromCharCode(bytes[i] ?? 0));
   }
   return btoa(output.join(""));
 };

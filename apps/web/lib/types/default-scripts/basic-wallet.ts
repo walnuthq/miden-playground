@@ -24,6 +24,7 @@ trait BasicWallet {
     ///
     /// # Arguments
     /// * \`asset\` - The asset to be added to the account
+    #[account_procedure]
     fn receive_asset(&mut self, asset: Asset);
 
     /// Moves an asset from the account to a note.
@@ -34,6 +35,7 @@ trait BasicWallet {
     /// # Arguments
     /// * \`asset\` - The asset to move from the account to the note
     /// * \`note_idx\` - The index of the note to receive the asset
+    #[account_procedure]
     fn move_asset_to_note(&mut self, asset: Asset, note_idx: NoteIdx);
 }
 
