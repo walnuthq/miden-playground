@@ -1,13 +1,15 @@
 import Link from "@/components/tutorials/tutorial-link";
 
-Now that our network account is deployed, we must execute a transaction performing a procedure invocation (**`increment_count`**) creating a necessary state change for our contract to be deployed and stored the network on-chain.
+Our network counter being registered on-chain, let's create a public note that the network operator can consume to execute the increment function.
+This will increment the counter from 1 to 2.
 
-Take some time to get familiar with the <Link href="/scripts/counter-script">counter transaction script</Link>.
+Take some time to get familiar with the <Link href="/scripts/counter-note">counter note script</Link>.
 
-In Miden, public contracts must have their state modified through a transaction to be properly registered and committed to the blockchain - simply creating the account isn't sufficient.
+First, we fetch the current count value before the increment and then call the **`increment_count`** procedure.
+The script computes the expected count value after incrementation and compares it against the final count value returned by the Counter Contract **`get_count`** procedure.
+The note script would fail if the increment logic wasn't correctly implemented by the contract.
 
-Navigate to your network account by <Link href={`/accounts/${props.counter.identifier}`}>clicking on its name</Link>, trigger the _"Create new transaction"_ dropdown and select the _"New custom transaction"_ option.
+The next step will be to create a custom network note with this script and register it on the network by signing a transaction.
 
-Configure the custom transaction by selecting the **counter-script** and preview the resulting state change: the counter will be incremented by one as the **counter-script** is simply calling the account **`increment_count`** procedure.
-
-This transaction will succeed because we registered the counter-script as an allowed transaction-script in the previous step.
+A network note is a public note targetting a network account.
+Once it's acknowledged by the network transaction builder, it will be automatically consumed by executing a transaction against the targetted network account.

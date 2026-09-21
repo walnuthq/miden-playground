@@ -217,7 +217,10 @@ export const clientDeployAccount = async ({
       // Returns the auth component along with the components backing its fee policy,
       // all of which have to be installed on the account.
       const authComponents = WasmAccountComponent.createNetworkAuthComponents(
-        allowedNoteScriptFees,
+        [
+          ...allowedNoteScriptFees,
+          new WasmNoteScriptFee(WasmNoteScript.p2id().root(), 0n),
+        ],
         blockHeader.feeFaucetId(),
         allowedTransactionScriptRoots,
       );
@@ -287,6 +290,7 @@ const createTransactionFromMasm = async ({
     : WasmPackage.deserialize(fromBase64(accountScript.masp)).asLibrary();
   builder.linkDynamicLibrary(accountComponentLibrary);
   const transactionScript = builder.compileTxScript(txScript.masm);
+  // console.log(transactionScript.root().toHex());
   const transactionRequestBuilder =
     new WasmTransactionRequestBuilder().withCustomScript(transactionScript);
   return transactionRequestBuilder.build();

@@ -123,6 +123,7 @@ const useNotes = () => {
             noteStorage,
             scripts,
           });
+    // console.log(note.script().root());
     if (!tutorialId) {
       verifyNoteFromPackageId({
         networkId,

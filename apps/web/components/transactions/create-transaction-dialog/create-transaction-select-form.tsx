@@ -81,8 +81,8 @@ const CreateTransactionDialogSelectForm = ({
               executingAccount?.isFaucet
                 ? ["mint"]
                 : executingAccount?.components.includes("basic-wallet")
-                  ? ["consume", "send"]
-                  : ["custom"]
+                  ? ["consume", "send", "custom"]
+                  : ["consume", "custom"]
             }
           />
         </div>
