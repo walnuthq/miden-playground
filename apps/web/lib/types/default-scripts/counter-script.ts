@@ -33,7 +33,8 @@ fn run(_arg: Word, account: &mut CounterAccount) {
 
 export const masm = `use external_contract::counter_contract
 
-begin
+@transaction_script
+pub proc main(args: word)
     call.counter_contract::increment_count
 end
 `;

@@ -7,7 +7,8 @@ Choose **Network Account** for the authentication scheme and select the custom *
 
 In Miden, an account is a network account (one the network transaction builder executes on a user's behalf) if and only if it is **Public** and carries the **AuthNetworkAccount** auth component with a non-empty note-script allowlist.
 
-The allowed note-script roots and transaction-script roots are pinned at account creation: select **counter-note** for note-scripts and **counter-script** for transaction-scripts.
+The allowed note-script roots and transaction-script roots are pinned at account creation: select **counter-note** for note-scripts and leave transaction-scripts empty.
 
-When you're done configuring your contract deployment, click on the _"Deploy"_ button to create your network account.
+When you're done configuring your contract deployment, click on the _"Deploy"_ button to create your network account, it will take some time as the account is automatically funded upon deployment and registered on-chain.
+
 The key difference from regular contracts is using the **Network Account** [authentication component](https://docs.miden.xyz/reference/protocol/account/code#authentication) instead of **No Auth**, which enables the contract transactions to be executed by the network operator.
