@@ -13,6 +13,7 @@ import type {
   MidenType,
   MidenRawType,
   Package,
+  MidenTypeStruct,
 } from "@/lib/types/script";
 import { midenTypes } from "@/lib/types/script";
 
@@ -127,10 +128,13 @@ export const invokeProcedureCustomTransactionScript = ({
   procedureExport: ProcedureExport;
   procedureInputs: MidenInput[];
 }) => `${contractName ? `use external_contract::${contractName}` : ""}
+use miden::core::sys
+
 @transaction_script
 pub proc main(args: word)
     ${formatProcedureInputs(procedureInputs)}
     call.${contractName ? `${contractName}::${procedureExport.path}` : procedureExport.digest}
+    exec.sys::truncate_stack
 end
 `;
 
@@ -242,10 +246,17 @@ export const packageToScript = ({
   digest,
   masp,
   exports: manifest.exports,
-  procedureExports: manifest.exports.map(({ Procedure: procedureExport }) => ({
-    ...procedureExport,
-    readOnly: formatProcedureExportPath(procedureExport.path).startsWith("get"),
-  })),
+  procedureExports: manifest.exports
+    .filter(
+      ({ Procedure: procedureExport }) =>
+        formatProcedureExportPath(procedureExport.path) !== "init",
+    )
+    .map(({ Procedure: procedureExport }) => ({
+      ...procedureExport,
+      readOnly: formatProcedureExportPath(procedureExport.path).startsWith(
+        "get",
+      ),
+    })),
   dependencies: manifest.dependencies.map((dependency) => ({
     id: dependency.name,
     name: dependency.name,
@@ -255,3 +266,37 @@ export const packageToScript = ({
   createdAt: new Date(createdAt).getTime(),
   updatedAt: new Date(updatedAt).getTime(),
 });
+
+export const formatProcedureExportParamType = (type: MidenTypeStruct) => {
+  switch (type.Struct.name) {
+    case "miden:base/core-types@1.0.0/felt": {
+      return "felt: Felt";
+    }
+    case "miden:base/core-types@1.0.0/word": {
+      return "word: Word";
+    }
+    case "miden:base/core-types@1.0.0/account-id": {
+      return "account_id: AccountId";
+    }
+    case "miden:base/core-types@1.0.0/asset": {
+      return "asset: Asset";
+    }
+  }
+};
+
+export const formatProcedureExportResultType = (type: MidenTypeStruct) => {
+  switch (type.Struct.name) {
+    case "miden:base/core-types@1.0.0/felt": {
+      return "Felt";
+    }
+    case "miden:base/core-types@1.0.0/word": {
+      return "Word";
+    }
+    case "miden:base/core-types@1.0.0/account-id": {
+      return "AccountId";
+    }
+    case "miden:base/core-types@1.0.0/asset": {
+      return "Asset";
+    }
+  }
+};

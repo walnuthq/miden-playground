@@ -2,7 +2,7 @@ import Link from "@/components/tutorials/tutorial-link";
 
 The **Count Reader** script is similar to the previously encountered <Link href="/scripts/counter-contract">Counter Contract script</Link>, it's defining a [storage value slot](https://docs.miden.xyz/reference/protocol/account/storage#value-slots) to store its own counter value that will be copied from the **Counter Contract**.
 
-Let's focus on lines _28-31_ in the Rust source code of the **Count Reader** script, where the **`copy_count`** function is defined.
+Let's focus on lines _29-32_ in the Rust source code of the **Count Reader** script, where the **`copy_count`** function is defined.
 
 The **`copy_count`** procedure takes only one argument: the counter account ID of the source contract from which to copy the counter value.
 
