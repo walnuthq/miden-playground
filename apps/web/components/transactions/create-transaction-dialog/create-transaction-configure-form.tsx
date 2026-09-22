@@ -37,7 +37,10 @@ import useNetwork from "@/hooks/use-network";
 import useMultisig from "@/hooks/use-multisig";
 import { defaultComponentIds } from "@/lib/types/default-components";
 import useComponents from "@/hooks/use-components";
-import { midenFaucetAccountId } from "@/lib/constants";
+import {
+  FUNGIBLE_FAUCET_DEFAULT_DECIMALS,
+  midenFaucetAccountId,
+} from "@/lib/constants";
 
 const CreateTransactionConfigureForm = ({
   transactionType,
@@ -101,7 +104,11 @@ const CreateTransactionConfigureForm = ({
   const decimals =
     transactionType === "mint"
       ? executingAccount?.decimals
-      : faucetAccount?.decimals;
+      : (faucetAccount?.decimals ?? FUNGIBLE_FAUCET_DEFAULT_DECIMALS);
+  // Wallet-held faucet IDs are account IDs, matching the input expected by
+  // normalizeAccountId and the address conversion used for imported accounts.
+  const faucetAddress =
+    faucetAccount?.address ?? normalizeAccountId(faucetAccountId);
   const balance =
     executingAccount?.fungibleAssets.find(
       ({ faucetId }) => faucetId === faucetAccountId,
@@ -157,7 +164,7 @@ const CreateTransactionConfigureForm = ({
           transactionType === "send" &&
           executingAccount &&
           targetAccountId &&
-          faucetAccount
+          faucetAccountId
         ) {
           if (isTutorial || networkId === "mmck") {
             const { transactionRequest, transactionResult } =
@@ -199,7 +206,7 @@ const CreateTransactionConfigureForm = ({
               const transaction = new SendTransaction(
                 executingAccount.address,
                 normalizeAccountId(targetAccountId),
-                faucetAccount.address,
+                faucetAddress,
                 formData.getAll("is-public").includes("on")
                   ? "public"
                   : "private",
@@ -325,6 +332,9 @@ const CreateTransactionConfigureForm = ({
                 onValueChange={setFaucetAccountId}
                 selectFaucets
                 showFaucetsAsAssets
+                assetIds={executingAccount?.fungibleAssets.map(
+                  ({ faucetId }) => faucetId,
+                )}
                 without={
                   isTutorial ? midenFaucetAccountId(networkId) : undefined
                 }

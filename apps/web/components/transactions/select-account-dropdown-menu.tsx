@@ -20,6 +20,7 @@ const SelectAccountDropdownMenu = ({
   withoutFaucets = false,
   without = "",
   showFaucetsAsAssets = false,
+  assetIds = [],
 }: {
   value: string;
   onValueChange: Dispatch<SetStateAction<string>>;
@@ -28,14 +29,19 @@ const SelectAccountDropdownMenu = ({
   withoutFaucets?: boolean;
   without?: string;
   showFaucetsAsAssets?: boolean;
+  assetIds?: string[];
 }) => {
   const { accounts, wallets, faucets } = useAccounts();
   const account = accounts.find(({ id }) => id === value);
   const shownWallets = wallets.filter(({ id }) => id !== without);
   const showWallets = selectWallets && shownWallets.length > 0;
   const shownFaucets = faucets.filter(({ id }) => id !== without);
+  const shownAssetIds = assetIds.filter((id) => id !== without);
+  const selectedAssetId = shownAssetIds.find((id) => id === value);
   const showFaucets =
-    selectFaucets && shownFaucets.length > 0 && !withoutFaucets;
+    selectFaucets &&
+    (shownFaucets.length > 0 || shownAssetIds.length > 0) &&
+    !withoutFaucets;
   const faucetIds = faucets.map(({ id }) => id);
   const shownAccounts = accounts.filter(({ id }) =>
     id !== without && withoutFaucets ? !faucetIds.includes(id) : true,
@@ -54,9 +60,13 @@ const SelectAccountDropdownMenu = ({
             ? showFaucetsAsAssets
               ? account?.symbol
               : account.name
-            : disabled
-              ? "No accounts found."
-              : `Select ${showFaucetsAsAssets ? "asset" : "account"}`}
+            : selectedAssetId
+              ? `Asset ${selectedAssetId.slice(0, 10)}…`
+              : disabled
+                ? showFaucetsAsAssets
+                  ? "No assets in this wallet."
+                  : "No accounts found."
+                : `Select ${showFaucetsAsAssets ? "asset" : "account"}`}
           <ChevronsUpDown className="opacity-50" />
         </Button>
       </DropdownMenuTrigger>
@@ -99,6 +109,15 @@ const SelectAccountDropdownMenu = ({
                       {showFaucetsAsAssets ? faucet.symbol : faucet.name}
                     </DropdownMenuRadioItem>
                   ))}
+                  {shownAssetIds
+                    .filter(
+                      (id) => !shownFaucets.some((faucet) => faucet.id === id),
+                    )
+                    .map((id) => (
+                      <DropdownMenuRadioItem key={id} value={id}>
+                        {showFaucetsAsAssets ? `Asset ${id.slice(0, 10)}…` : id}
+                      </DropdownMenuRadioItem>
+                    ))}
                 </>
               )}
             </>
