@@ -190,7 +190,7 @@ const CreateTransactionDialog = () => {
                     (transactionType === "mint" && !targetAccount) ||
                     (transactionType === "consume" && noteIds.length === 0) ||
                     (transactionType === "send" &&
-                      (!targetAccountId || !faucetAccount)) ||
+                      (!targetAccountId || !faucetAccountId)) ||
                     (transactionType === "custom" && !scriptId) ||
                     loading
                   }
