@@ -31,7 +31,15 @@ export function useMidenWallet(adapter: MessageSignerWalletAdapter | null) {
         );
         return;
       }
-      const { scheme, publicKeyHex, commitment } = PublicKeyFormat.parse(pk);
+      let parsed: ReturnType<typeof PublicKeyFormat.parse>;
+      try {
+        parsed = PublicKeyFormat.parse(pk);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        setConnectError(`Failed to parse wallet public key: ${message}`);
+        return;
+      }
+      const { scheme, publicKeyHex, commitment } = parsed;
       if (!commitment) {
         setConnectError(
           `Failed to derive commitment from ${scheme} public key (len=${pk.length})`,
