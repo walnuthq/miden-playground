@@ -32,10 +32,12 @@ fn run(_arg: Word, account: &mut CounterAccount) {
 `;
 
 export const masm = `use external_contract::counter_contract
+use miden::core::sys
 
 @transaction_script
 pub proc main(args: word)
     call.counter_contract::increment_count
+    exec.sys::truncate_stack
 end
 `;
 

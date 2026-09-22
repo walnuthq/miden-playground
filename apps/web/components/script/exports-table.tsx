@@ -8,21 +8,31 @@ import {
 } from "@workspace/ui/components/table";
 import CopyButton from "@/components/lib/copy-button";
 import type { Script, ProcedureExport } from "@/lib/types/script";
-import { formatProcedureExportPath } from "@/lib/utils/script";
+import {
+  formatProcedureExportPath,
+  formatProcedureExportParamType,
+  formatProcedureExportResultType,
+} from "@/lib/utils/script";
 
 const procedureSignature = ({
   path,
   signature: { params, results },
 }: ProcedureExport) => {
   let result = `fn ${formatProcedureExportPath(path).replaceAll("-", "_")}(`;
-  result += params.map((param) => param).join(", ");
+  result += params
+    .map((param) => formatProcedureExportParamType(param))
+    .join(", ");
   result += ")";
   if (results.length > 0) {
     result += ` -> `;
     if (results.length === 1) {
-      result += "Felt";
-    } else if (results.length === 4) {
-      result += "Word";
+      result += formatProcedureExportResultType(results[0]!);
+    } else {
+      result += "(";
+      result += results
+        .map((result) => formatProcedureExportResultType(result))
+        .join(", ");
+      result += ")";
     }
   }
   return result;

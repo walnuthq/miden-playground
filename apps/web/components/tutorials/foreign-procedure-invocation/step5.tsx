@@ -15,7 +15,18 @@ const useCompleted = () => {
   if (!countReader || !counter) {
     return false;
   }
-  return countReader.storage[0]?.item === counter.storage[0]?.item;
+  const countReaderCount = countReader.storage.find(
+    ({ name }) => name === "count_reader::count_reader::count",
+  );
+  const counterCountMap = counter.storage.find(
+    ({ name }) => name === "counter_account::counter_contract::count_map",
+  );
+  const counterCountMapEntry = counterCountMap?.mapEntries.find(
+    ({ key }) =>
+      key ===
+      "0x0100000000000000000000000000000000000000000000000000000000000000",
+  );
+  return countReaderCount?.item === counterCountMapEntry?.value;
 };
 
 const Step5: TutorialStep = {

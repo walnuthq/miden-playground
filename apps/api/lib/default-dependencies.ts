@@ -37,7 +37,7 @@ export const counterAccountDependency: Dependency & {
   id: "counter-account",
   name: "counter-account",
   type: "account-component",
-  digest: "0x186a1eaab380a244ca52a3b2c50e50aac1cbc06c1c77618775d49769cd373565",
+  digest: "0x3874bfcdc769a48ae5e4e66f0ae9e50438743cdb35bdf258d1d1c3cf71575b26",
   rust: templates["counter-account"],
   files: {
     "counter-account/.cargo/config.toml":
