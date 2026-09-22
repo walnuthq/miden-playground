@@ -171,7 +171,7 @@ const CreateTransactionConfigureForm = ({
               await newSendTransactionRequest({
                 senderAccountId: executingAccount.id,
                 targetAccountId,
-                faucetId: faucetAccount.id,
+                faucetId: faucetAccountId,
                 noteType: formData.getAll("is-public").includes("on")
                   ? "public"
                   : "private",
