@@ -51,6 +51,14 @@ export type ServiceStatus = {
   previousHealth: ServiceHealth | null;
   /** ISO 8601 — when the service entered its current health. */
   since: string;
+  /**
+   * ISO 8601 — when the service entered the health it has just left, or null
+   * when there was no previous snapshot (or one written before this field
+   * existed). `since` moves to this run whenever the health changes, so it
+   * cannot measure the state being left; this is what a recovery message needs
+   * to say how long the outage lasted.
+   */
+  previousSince: string | null;
   endpoints: EndpointStatus[];
 };
 
