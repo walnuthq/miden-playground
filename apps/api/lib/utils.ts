@@ -17,7 +17,7 @@ import {
   insertPackage,
   updatePackage,
 } from "@/db/packages";
-import { API_COMPILE_URL } from "@/lib/constants";
+import { fetchApiCompile } from "@/lib/upstream";
 
 export const execFile = promisify(execFileCb);
 
@@ -95,14 +95,26 @@ export const createPackage = ({
   });
 };
 
+type CompileResponse = {
+  stdout: string;
+  stderr: string;
+  masp: string;
+  digest: string;
+  manifest: Manifest;
+  // Set when the build succeeded: the sources plus the lockfile it used.
+  files?: Record<string, string>;
+};
+
 export const compilePackage = async ({
   id,
   rust,
   dependencies,
+  signal,
 }: {
   id: string;
   rust: string;
   dependencies: string[];
+  signal?: AbortSignal;
 }): Promise<CompiledPackage> => {
   const [dbPackage, dependenciesPackages] = await Promise.all([
     getPackage(id),
@@ -129,17 +141,19 @@ export const compilePackage = async ({
     },
     updatedFiles,
   );
-  const response = await fetch(`${API_COMPILE_URL}/compile`, {
+  const {
+    stdout,
+    stderr,
+    masp,
+    digest,
+    manifest,
+    files: compiledFiles,
+  } = await fetchApiCompile<CompileResponse>("/compile", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ files, entrypoint: name }),
+    signal,
   });
-  const result = await response.json();
-  if (!response.ok) {
-    const { error } = result as { error: string };
-    throw new Error(error);
-  }
-  const { stdout, stderr } = result as { stdout: string; stderr: string };
   if (stdout === "" && stderr !== "") {
     console.error(stderr);
     await updatePackage({
@@ -169,11 +183,6 @@ export const compilePackage = async ({
       })),
     };
   }
-  const { masp, digest, manifest } = result as {
-    masp: string;
-    digest: string;
-    manifest: Manifest;
-  };
   const exports = manifest.exports.filter(
     ({ Procedure: { signature } }) => signature?.abi === 3,
   );
@@ -181,7 +190,9 @@ export const compilePackage = async ({
     id,
     status: "compiled",
     rust,
-    files: updatedFiles,
+    // The compiled sources plus the Cargo.lock the build used, sent back with
+    // the next compile to get the same dependency versions.
+    files: compiledFiles ?? updatedFiles,
     masp,
     digest,
     exports,

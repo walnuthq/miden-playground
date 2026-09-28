@@ -55,7 +55,7 @@ export const compileScript = async (script: Script) => {
       dependencies: script.dependencies.map(({ id }) => id),
     }),
   });
-  if (response.status === 500) {
+  if (!response.ok) {
     return { error: await response.text() };
   }
   const result = await response.json();
@@ -97,7 +97,7 @@ export const verifyAccountComponentFromSource = async ({
       }),
     },
   );
-  if (response.status === 500) {
+  if (!response.ok) {
     return { error: await response.text() };
   }
   const result = await response.json();
@@ -121,7 +121,7 @@ export const verifyAccountComponentsFromPackageIds = async ({
       body: JSON.stringify({ accountId, packageIds }),
     },
   );
-  if (response.status === 500) {
+  if (!response.ok) {
     return { error: await response.text() };
   }
   const result = await response.json();
@@ -178,7 +178,7 @@ export const verifyNoteFromSource = async ({
       dependencies,
     }),
   });
-  if (response.status === 500) {
+  if (!response.ok) {
     return { error: await response.text() };
   }
   const result = await response.json();
@@ -199,7 +199,7 @@ export const verifyNoteFromPackageId = async ({
     method: "POST",
     body: JSON.stringify({ noteId, packageId }),
   });
-  if (response.status === 500) {
+  if (!response.ok) {
     return { error: await response.text() };
   }
   const result = await response.json();
@@ -253,7 +253,7 @@ export const importScriptsFromPackageSources = async (
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ packageSources }),
   });
-  if (response.status === 500) {
+  if (!response.ok) {
     return { error: await response.text() };
   }
   const result = await response.json();
@@ -273,7 +273,7 @@ export const importScriptsFromGithubRepo = async ({
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ githubRepoUrl, projectDir }),
   });
-  if (response.status === 500) {
+  if (!response.ok) {
     return { error: await response.text() };
   }
   const result = await response.json();

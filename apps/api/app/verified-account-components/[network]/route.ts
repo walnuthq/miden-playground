@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getPackage } from "@/db/packages";
-import { API_REGISTRY_URL } from "@/lib/constants";
+import { fetchApiRegistry, upstreamErrorResponse } from "@/lib/upstream";
 import { generateCargoToml, parseMidenProjectToml } from "@/lib/toml";
 import type { PackageSource } from "@/lib/types";
 import { projectTemplateFiles } from "@/lib/templates";
@@ -36,25 +36,21 @@ export const POST = async (
         [`${name}/rust-toolchain.toml`]:
           projectTemplateFiles["rust-toolchain.toml"],
       };
-      const response = await fetch(
-        `${API_REGISTRY_URL}/v1/${network}/verified-accounts`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            accountId,
-            files,
-            entrypoint: name,
-            source: "miden-playground",
-          }),
-        },
-      );
-      const result = await response.json();
-      if (!response.ok) {
-        const { error } = result as { error: string };
-        throw new Error(error);
-      }
-      const { verified } = result as { verified: boolean };
+      const { verified } =
+        await fetchApiRegistry<VerifyAccountComponentResponse>(
+          `/v1/${network}/verified-accounts`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              accountId,
+              files,
+              entrypoint: name,
+              source: "miden-playground",
+            }),
+            signal: request.signal,
+          },
+        );
       return NextResponse.json<VerifyAccountComponentResponse>({ verified });
     } else if (packageIds) {
       const rawPackages = await Promise.all(
@@ -63,10 +59,13 @@ export const POST = async (
       const packages = rawPackages.filter(
         (dbPackage) => dbPackage !== undefined,
       );
-      const verifiedList = await Promise.all(
-        packages.map(async (dbPackage) => {
-          const response = await fetch(
-            `${API_REGISTRY_URL}/v1/${network}/verified-accounts`,
+      // Each verification compiles on api-compile, which builds one package at
+      // a time and answers 503 once its queue is full: verify them in turn.
+      const verifiedList: boolean[] = [];
+      for (const dbPackage of packages) {
+        const { verified } =
+          await fetchApiRegistry<VerifyAccountComponentResponse>(
+            `/v1/${network}/verified-accounts`,
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -75,17 +74,11 @@ export const POST = async (
                 files: dbPackage.files,
                 entrypoint: dbPackage.name,
               }),
+              signal: request.signal,
             },
           );
-          const result = await response.json();
-          if (!response.ok) {
-            const { error } = result as { error: string };
-            throw new Error(error);
-          }
-          const { verified } = result as { verified: boolean };
-          return verified;
-        }),
-      );
+        verifiedList.push(verified);
+      }
       const verified = verifiedList.every((v) => v);
       return NextResponse.json<VerifyAccountComponentResponse>({ verified });
     }
@@ -93,6 +86,8 @@ export const POST = async (
   } catch (error) {
     console.error(error);
     const { message } = error as { message: string };
-    return new NextResponse(message, { status: 500 });
+    return (
+      upstreamErrorResponse(error) ?? new NextResponse(message, { status: 500 })
+    );
   }
 };
