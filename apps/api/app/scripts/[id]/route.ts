@@ -7,6 +7,7 @@ import type {
 } from "@/lib/types";
 import { getPackage, deletePackage } from "@/db/packages";
 import { compilePackage } from "@/lib/utils";
+import { upstreamErrorResponse } from "@/lib/upstream";
 
 type GetScriptResponse = {
   package: Omit<Package, "createdAt" | "updatedAt"> & {
@@ -61,14 +62,21 @@ export const PATCH = async (
     const { id } = await params;
     const body = await request.json();
     const { rust, dependencies } = body as CompileScriptRequestBody;
-    const compiledPackage = await compilePackage({ id, rust, dependencies });
+    const compiledPackage = await compilePackage({
+      id,
+      rust,
+      dependencies,
+      signal: request.signal,
+    });
     return NextResponse.json<CompileScriptResponse>({
       package: compiledPackage,
     });
   } catch (error) {
     console.error(error);
     const { message } = error as { message: string };
-    return new NextResponse(message, { status: 500 });
+    return (
+      upstreamErrorResponse(error) ?? new NextResponse(message, { status: 500 })
+    );
   }
 };
 

@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getPackage } from "@/db/packages";
-import { API_REGISTRY_URL } from "@/lib/constants";
+import { fetchApiRegistry, upstreamErrorResponse } from "@/lib/upstream";
 import { generateCargoToml, parseMidenProjectToml } from "@/lib/toml";
 import type { PackageSource } from "@/lib/types";
 import { projectTemplateFiles } from "@/lib/templates";
@@ -58,8 +58,8 @@ export const POST = async (
         },
         notePackageFiles,
       );
-      const response = await fetch(
-        `${API_REGISTRY_URL}/v1/${network}/verified-notes`,
+      const { verified } = await fetchApiRegistry<VerifyNoteResponse>(
+        `/v1/${network}/verified-notes`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -69,22 +69,17 @@ export const POST = async (
             entrypoint: name,
             source: "miden-playground",
           }),
+          signal: request.signal,
         },
       );
-      const result = await response.json();
-      if (!response.ok) {
-        const { error } = result as { error: string };
-        throw new Error(error);
-      }
-      const { verified } = result as { verified: boolean };
       return NextResponse.json<VerifyNoteResponse>({ verified });
     } else if (packageId) {
       const dbPackage = await getPackage(packageId);
       if (!dbPackage) {
         throw new Error(`Package with ID ${packageId} not found.`);
       }
-      const response = await fetch(
-        `${API_REGISTRY_URL}/v1/${network}/verified-notes`,
+      const { verified } = await fetchApiRegistry<VerifyNoteResponse>(
+        `/v1/${network}/verified-notes`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -93,20 +88,17 @@ export const POST = async (
             files: dbPackage.files,
             entrypoint: dbPackage.name,
           }),
+          signal: request.signal,
         },
       );
-      const result = await response.json();
-      if (!response.ok) {
-        const { error } = result as { error: string };
-        throw new Error(error);
-      }
-      const { verified } = result as { verified: boolean };
       return NextResponse.json<VerifyNoteResponse>({ verified });
     }
     throw new Error("Error: Invalid request body.");
   } catch (error) {
     console.error(error);
     const { message } = error as { message: string };
-    return new NextResponse(message, { status: 500 });
+    return (
+      upstreamErrorResponse(error) ?? new NextResponse(message, { status: 500 })
+    );
   }
 };

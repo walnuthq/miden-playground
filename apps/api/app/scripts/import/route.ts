@@ -7,6 +7,7 @@ import { execFile, safeRm, compilePackage, createPackage } from "@/lib/utils";
 import { parseMidenProjectToml } from "@/lib/toml";
 import type { CompiledPackage, PackageSource } from "@/lib/types";
 import { PACKAGES_PATH } from "@/lib/constants";
+import { upstreamErrorResponse } from "@/lib/upstream";
 
 type ImportScriptsRequestBody = {
   packageSources?: Record<string, PackageSource>;
@@ -20,6 +21,7 @@ type ImportScriptsResponse = {
 
 const importScriptsFromPackageSources = async (
   packageSources: Record<string, PackageSource>,
+  signal?: AbortSignal,
 ): Promise<CompiledPackage[]> => {
   const packagesWithDependencies = await Promise.all(
     Object.values(packageSources).map(async ({ midenProjectToml, rust }) => {
@@ -48,52 +50,53 @@ const importScriptsFromPackageSources = async (
       };
     }),
   );
-  return Promise.all(
-    packagesWithDependencies.map(
-      async ({ package: dbPackage, dependencies }) => {
-        const dependenciesPackages = Object.keys(dependencies).map(
-          (dependency) => {
-            const { path: dependencyPath } = dependencies[dependency] ?? {
-              path: "",
-            };
-            const dependencyDir = dependencyPath.split("/").at(-1);
-            const packagePath =
-              Object.keys(packageSources).find((packagePath) => {
-                const packageDir = packagePath.split("/").at(-1);
-                return packageDir === dependencyDir;
-              }) ?? "";
-            const packageSource = packageSources[packagePath] ?? {
-              midenProjectToml: "",
-            };
-            const {
-              package: { name: dependencyName },
-            } = parseMidenProjectToml(packageSource.midenProjectToml);
-            const dependencyPackage = packagesWithDependencies.find(
-              ({ package: { name } }) => name === dependencyName,
-            ) ?? {
-              package: {
-                id: "",
-                name: "",
-                type: "account-component",
-                digest: "",
-              },
-            };
-            return {
-              id: dependencyPackage.package.id,
-              name: dependencyPackage.package.name,
-              type: dependencyPackage.package.type,
-              digest: "",
-            };
-          },
-        );
-        return compilePackage({
-          id: dbPackage.id,
-          rust: dbPackage.rust,
-          dependencies: dependenciesPackages.map(({ id }) => id),
-        });
-      },
-    ),
-  );
+  // api-compile builds one package at a time and answers 503 once its queue is
+  // full, so compile the packages in turn rather than all at once.
+  const compiledPackages: CompiledPackage[] = [];
+  for (const { package: dbPackage, dependencies } of packagesWithDependencies) {
+    const dependenciesPackages = Object.keys(dependencies).map((dependency) => {
+      const { path: dependencyPath } = dependencies[dependency] ?? {
+        path: "",
+      };
+      const dependencyDir = dependencyPath.split("/").at(-1);
+      const packagePath =
+        Object.keys(packageSources).find((packagePath) => {
+          const packageDir = packagePath.split("/").at(-1);
+          return packageDir === dependencyDir;
+        }) ?? "";
+      const packageSource = packageSources[packagePath] ?? {
+        midenProjectToml: "",
+      };
+      const {
+        package: { name: dependencyName },
+      } = parseMidenProjectToml(packageSource.midenProjectToml);
+      const dependencyPackage = packagesWithDependencies.find(
+        ({ package: { name } }) => name === dependencyName,
+      ) ?? {
+        package: {
+          id: "",
+          name: "",
+          type: "account-component",
+          digest: "",
+        },
+      };
+      return {
+        id: dependencyPackage.package.id,
+        name: dependencyPackage.package.name,
+        type: dependencyPackage.package.type,
+        digest: "",
+      };
+    });
+    compiledPackages.push(
+      await compilePackage({
+        id: dbPackage.id,
+        rust: dbPackage.rust,
+        dependencies: dependenciesPackages.map(({ id }) => id),
+        signal,
+      }),
+    );
+  }
+  return compiledPackages;
 };
 
 type File = { name: string; webkitRelativePath: string };
@@ -155,9 +158,11 @@ const fileListToPackageSources = async (fileList: FileList) => {
 const importScriptsFromGithubRepo = async ({
   githubRepoUrl,
   projectDir,
+  signal,
 }: {
   githubRepoUrl: string;
   projectDir?: string;
+  signal?: AbortSignal;
 }) => {
   const repoDir = randomUUID();
   console.info(`git clone ${githubRepoUrl} ${repoDir}`);
@@ -177,7 +182,7 @@ const importScriptsFromGithubRepo = async ({
     recursive: true,
     force: true,
   });
-  return importScriptsFromPackageSources(packageSources);
+  return importScriptsFromPackageSources(packageSources, signal);
 };
 
 export const POST = async (request: NextRequest) => {
@@ -186,7 +191,10 @@ export const POST = async (request: NextRequest) => {
     const { packageSources, githubRepoUrl, projectDir } =
       body as ImportScriptsRequestBody;
     if (packageSources) {
-      const packages = await importScriptsFromPackageSources(packageSources);
+      const packages = await importScriptsFromPackageSources(
+        packageSources,
+        request.signal,
+      );
       return NextResponse.json<ImportScriptsResponse>({ packages });
     }
     if (githubRepoUrl) {
@@ -196,6 +204,7 @@ export const POST = async (request: NextRequest) => {
       const packages = await importScriptsFromGithubRepo({
         githubRepoUrl,
         projectDir,
+        signal: request.signal,
       });
       return NextResponse.json<ImportScriptsResponse>({ packages });
     }
@@ -203,6 +212,8 @@ export const POST = async (request: NextRequest) => {
   } catch (error) {
     console.error(error);
     const { message } = error as { message: string };
-    return new NextResponse(message, { status: 500 });
+    return (
+      upstreamErrorResponse(error) ?? new NextResponse(message, { status: 500 })
+    );
   }
 };
