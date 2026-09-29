@@ -453,7 +453,7 @@ const checkedAt = new Date().toISOString();
  * so it marks the start of the current state rather than the time of this run.
  */
 const withHistory = (
-  service: Omit<ServiceStatus, "previousHealth" | "since">,
+  service: Omit<ServiceStatus, "previousHealth" | "since" | "previousSince">,
 ): ServiceStatus => {
   const before = previous?.services.find(({ id }) => id === service.id);
   // `before` is parsed from a published file that may predate these fields —
@@ -464,6 +464,10 @@ const withHistory = (
     ...service,
     previousHealth: before?.health ?? null,
     since: unchanged && before.since ? before.since : checkedAt,
+    // The start of the state being left, kept because `since` is about to stop
+    // describing it. Without this a recovery can only measure from its own
+    // timestamp, which is always zero.
+    previousSince: before?.since ?? null,
   };
 };
 
