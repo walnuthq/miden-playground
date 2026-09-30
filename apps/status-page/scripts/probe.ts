@@ -448,22 +448,40 @@ const [previous, [apiEndpoints, webEndpoints]] = await Promise.all([
 
 const checkedAt = new Date().toISOString();
 
+/** Healths that belong to the same episode: degraded ↔ unhealthy is one outage. */
+const episodeKind = (health: ServiceHealth) =>
+  health === "degraded" || health === "unhealthy" ? "outage" : health;
+
 /**
  * Carries the outage clock forward: `since` only moves when the health changes,
  * so it marks the start of the current state rather than the time of this run.
+ * `episodeSince` does the same across a whole bad episode, and survives the
+ * recovery run so the length of the outage can still be read from it.
  */
 const withHistory = (
-  service: Omit<ServiceStatus, "previousHealth" | "since">,
+  service: Omit<ServiceStatus, "previousHealth" | "since" | "episodeSince">,
 ): ServiceStatus => {
   const before = previous?.services.find(({ id }) => id === service.id);
   // `before` is parsed from a published file that may predate these fields —
   // the first run after this ships reads a snapshot with no `since` at all — so
   // it is treated as untrusted rather than as a ServiceStatus.
   const unchanged = before !== undefined && before.health === service.health;
+  // A snapshot from before `episodeSince` existed still has `since`, which is
+  // the start of its last state — the best estimate of the episode available.
+  const beforeEpisodeSince = before?.episodeSince ?? before?.since ?? null;
+  const episodeSince =
+    service.health === "healthy"
+      ? before && before.health !== "healthy"
+        ? beforeEpisodeSince
+        : null
+      : before && episodeKind(before.health) === episodeKind(service.health)
+        ? (beforeEpisodeSince ?? checkedAt)
+        : checkedAt;
   return {
     ...service,
     previousHealth: before?.health ?? null,
     since: unchanged && before.since ? before.since : checkedAt,
+    episodeSince,
   };
 };
 

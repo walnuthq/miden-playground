@@ -13,12 +13,17 @@ on:
       - "apps/status-page/**"
       - "packages/ui/**"
       - ".github/workflows/deploy-status-page.yml"
-  # Refreshes the snapshot on the hour and the half hour. Note that GitHub only
-  # runs schedules on the default branch, disables them after 60 days of
-  # repository inactivity, and treats the time as best effort — use the manual
-  # trigger below when you need a refresh now.
+  # Refreshes the status snapshot every 30 minutes, at :07 and :37. GitHub delays
+  # or drops scheduled runs under load, worst at the top and bottom of the hour,
+  # so the minutes are deliberately off-peak; on "0,30" runs landed hours apart.
+  # Off-peak improves the odds but guarantees nothing. The floor is
+  # api-compile's `/`, which proxies into a Cloudflare Container configured with
+  # `sleepAfter: "5m"`: probing more often than that would keep the container
+  # awake around the clock and bill for it. 30m stays well clear of that, so the
+  # container still sleeps between probes. Read apps/status-page/README.md before
+  # shortening this further.
   schedule:
-    - cron: "0,30 * * * *"
+    - cron: "7,37 * * * *"
   workflow_dispatch:
 
 # Allow the workflow to publish to GitHub Pages.

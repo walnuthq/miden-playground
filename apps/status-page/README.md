@@ -153,7 +153,7 @@ coloured attachments, so it is a single ping.
 
 `notify.ts` writes nothing and keeps no database. Everything it needs is in the
 snapshot, because `scripts/probe.ts` fetches the **previously published**
-`status.json` from the Pages URL before writing the new one and carries three
+`status.json` from the Pages URL before writing the new one and carries four
 fields forward:
 
 ```jsonc
@@ -161,7 +161,12 @@ fields forward:
   "checkedAt": "2026-08-10T12:00:00.000Z",
   "previousCheckedAt": "2026-08-10T11:30:00.000Z",
   "services": [
-    { "health": "unhealthy", "previousHealth": "healthy", "since": "…" },
+    {
+      "health": "unhealthy",
+      "previousHealth": "degraded",
+      "since": "…",
+      "episodeSince": "…",
+    },
   ],
 }
 ```
@@ -178,6 +183,14 @@ That is worth the paragraph it takes to explain, because it means nothing can
 desynchronise: a failed deploy or a lost snapshot cannot double-fire or silence
 the cadence, since the next run recomputes it from the same two timestamps. A
 delayed cron that skips eight hours produces one reminder, not sixteen.
+
+`episodeSince` exists for the recovery message. `since` cannot say how long an
+outage lasted: the run that recovers is a health change, so it moves `since` to
+that very run. `episodeSince` marks the start of the whole bad episode instead —
+degraded and unhealthy count as one, so an escalation does not restart it — and
+is kept on the recovery run, then cleared on the next healthy one. A blocked
+spell is its own episode, so "measurable again" reports only the time the probe
+was blind.
 
 `since` also feeds the page itself — a service that is not healthy shows "Down
 since 10 Aug 2026, 09:12 UTC" rather than only the time of the last check.
@@ -211,7 +224,7 @@ WEB_URL=http://localhost:9999 pnpm --filter status-page probe
 pnpm --filter status-page notify --dry-run
 ```
 
-Edit `health`, `previousHealth`, `since` and `previousCheckedAt` in
+Edit `health`, `previousHealth`, `since`, `episodeSince` and `previousCheckedAt` in
 `public/status.json` to reach the recovery and reminder branches. To post for
 real from your machine, put the webhook in `apps/status-page/.env` and drop
 `--dry-run`.
