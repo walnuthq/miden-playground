@@ -9,6 +9,12 @@ const extractTraitName = (rust: string) => {
   return match ? match[1] : null;
 };
 
+// api-compile's image comes with the dependencies already built for its
+// counter-contract example, and a build only reuses them with the same profile
+// and dependency versions: without `trim-paths` it rebuilds every one of them,
+// which runs past its build timeout. Keep this in step with
+// templates/project-template/Cargo.toml, and send it with the template's
+// Cargo.lock.
 export const generateCargoToml = ({
   name,
   version = "0.1.0",
@@ -16,7 +22,8 @@ export const generateCargoToml = ({
   name: string;
   version?: string;
 }) => {
-  let cargoToml = `[package]\n`;
+  let cargoToml = `cargo-features = ["trim-paths"]\n\n`;
+  cargoToml += `[package]\n`;
   cargoToml += `name = "${name}"\n`;
   cargoToml += `version = "${version}"\n`;
   cargoToml += `edition = "2024"\n\n`;
@@ -26,6 +33,10 @@ export const generateCargoToml = ({
   cargoToml += `miden = "0.14"\n\n`;
   cargoToml += `[build-dependencies]\n`;
   cargoToml += `miden-sdk-build-script-support = "0.14"\n\n`;
+  cargoToml += `[profile.release]\n`;
+  cargoToml += `trim-paths = ["diagnostics", "object"]\n\n`;
+  cargoToml += `[profile.dev]\n`;
+  cargoToml += `trim-paths = ["diagnostics", "object"]\n`;
   return cargoToml;
 };
 
