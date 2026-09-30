@@ -51,6 +51,15 @@ export type ServiceStatus = {
   previousHealth: ServiceHealth | null;
   /** ISO 8601 — when the service entered its current health. */
   since: string;
+  /**
+   * ISO 8601 — when the current, or just-ended, bad episode began; null while
+   * the service is healthy and was healthy last time too. Unlike `since` it is
+   * kept on the run that recovers, which is the one run that needs it: that is
+   * how scripts/notify.ts can say how long the outage lasted. Degraded and
+   * unhealthy count as one episode, so an escalation does not restart it; a
+   * blocked spell is its own episode, because it is not an outage.
+   */
+  episodeSince: string | null;
   endpoints: EndpointStatus[];
 };
 

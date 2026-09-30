@@ -149,14 +149,20 @@ const summaryLine = (
   // The link the reader wants first: the page that is actually broken.
   const link = `<${service.url}|${service.url.replace(/^https?:\/\//, "")}>`;
 
-  const elapsed = formatDuration(
-    new Date(checkedAt).getTime() - new Date(service.since).getTime(),
-  );
+  const total = service.endpoints.length;
+  const checks = `${total} ${total === 1 ? "check" : "checks"}`;
 
   if (service.health === "healthy") {
+    // Measured from `episodeSince`, not `since`: the health changed on this
+    // run, so `since` is now and would always read `0m`. When the start is not
+    // known the clause is left out rather than guessed.
+    const start = new Date(service.episodeSince ?? NaN).getTime();
+    const lasted = Number.isFinite(start)
+      ? formatDuration(new Date(checkedAt).getTime() - start)
+      : null;
     return service.previousHealth === "blocked"
-      ? `*${link}* — the probe is getting through again, and all ${service.endpoints.length} checks pass. It was unmeasurable for ${elapsed}.`
-      : `*${link}* is back — all ${service.endpoints.length} checks passing after ${elapsed} down.`;
+      ? `*${link}* — the probe is getting through again, and all ${checks} pass.${lasted ? ` It was unmeasurable for ${lasted}.` : ""}`
+      : `*${link}* is back — all ${checks} passing${lasted ? ` after ${lasted} down` : ""}.`;
   }
 
   if (service.health === "blocked") {
@@ -165,7 +171,6 @@ const summaryLine = (
     return `*${link}* — the probe was blocked before it could measure anything, so this is *not* a confirmed outage. Check the firewall (Vercel Attack Mode challenges CI runners) before treating it as one.`;
   }
 
-  const total = service.endpoints.length;
   const failing = service.endpoints.filter(
     (endpoint) => endpoint.health !== "healthy",
   ).length;
@@ -173,7 +178,7 @@ const summaryLine = (
     reason.kind === "reminder"
       ? `since ${formatTimestamp(service.since)}`
       : `as of ${formatTimestamp(checkedAt)}`;
-  return `*${link}* — ${failing} of ${total} ${total === 1 ? "check" : "checks"} failing ${when}.`;
+  return `*${link}* — ${failing} of ${checks} failing ${when}.`;
 };
 
 const attachmentFor = (
