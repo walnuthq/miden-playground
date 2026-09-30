@@ -78,6 +78,7 @@ export const createPackage = ({
     [`${name}/src/lib.rs`]: rust,
     [`${name}/build.rs`]: projectTemplateFiles["build.rs"],
     [`${name}/Cargo.toml`]: generateCargoToml({ name }),
+    [`${name}/Cargo.lock`]: projectTemplateFiles["Cargo.lock"],
     [`${name}/miden-project.toml`]: generateMidenProjectToml({
       name,
       type,

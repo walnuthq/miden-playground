@@ -33,6 +33,7 @@ export const POST = async (
         [`${name}/src/lib.rs`]: packageSource.rust,
         [`${name}/build.rs`]: projectTemplateFiles["build.rs"],
         [`${name}/Cargo.toml`]: generateCargoToml({ name }),
+        [`${name}/Cargo.lock`]: projectTemplateFiles["Cargo.lock"],
         [`${name}/miden-project.toml`]: packageSource.midenProjectToml,
         [`${name}/rust-toolchain.toml`]:
           projectTemplateFiles["rust-toolchain.toml"],
@@ -52,6 +53,8 @@ export const POST = async (
           previousValue[`${dependencyName}/Cargo.toml`] = generateCargoToml({
             name: dependencyName,
           });
+          previousValue[`${dependencyName}/Cargo.lock`] =
+            projectTemplateFiles["Cargo.lock"];
           previousValue[`${dependencyName}/rust-toolchain.toml`] =
             projectTemplateFiles["rust-toolchain.toml"];
           return previousValue;

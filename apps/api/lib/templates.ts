@@ -12,6 +12,8 @@ const readFile = (filePath: string) =>
 export const projectTemplateFiles = {
   ".cargo/config.toml": readFile("project-template/.cargo/config.toml"),
   "build.rs": readFile("project-template/build.rs"),
+  // The lockfile api-compile's image was warmed with (see generateCargoToml).
+  "Cargo.lock": readFile("project-template/Cargo.lock"),
   "rust-toolchain.toml": readFile("project-template/rust-toolchain.toml"),
 } as const;
 

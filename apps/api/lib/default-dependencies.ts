@@ -19,6 +19,7 @@ export const basicWalletDependency: Dependency & {
     "basic-wallet/Cargo.toml": generateCargoToml({
       name: "basic-wallet",
     }),
+    "basic-wallet/Cargo.lock": projectTemplateFiles["Cargo.lock"],
     "basic-wallet/miden-project.toml": generateMidenProjectToml({
       name: "basic-wallet",
       type: "account-component",
@@ -47,6 +48,7 @@ export const counterAccountDependency: Dependency & {
     "counter-account/Cargo.toml": generateCargoToml({
       name: "counter-account",
     }),
+    "counter-account/Cargo.lock": projectTemplateFiles["Cargo.lock"],
     "counter-account/miden-project.toml": generateMidenProjectToml({
       name: "counter-account",
       type: "account-component",
