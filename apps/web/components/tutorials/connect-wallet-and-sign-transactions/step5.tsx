@@ -24,7 +24,7 @@ const useCompleted = () => {
       accountIdFromPrefixSuffix(storage[1] ?? "", storage[0] ?? "") ===
         recipientAccount?.id &&
       state === "committed" &&
-      type === "public",
+      type === "private",
   );
   return !!note;
 };

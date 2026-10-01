@@ -7,6 +7,7 @@ import {
 } from "@miden-sdk/miden-wallet-adapter";
 import { PublicKeyFormat } from "@openzeppelin/miden-multisig-client";
 import type { ExternalWalletState } from "@/lib/types/wallet";
+import { useMiden } from "@miden-sdk/react/lazy";
 
 export function useMidenWallet(adapter: MessageSignerWalletAdapter | null) {
   const [session, setSession] = useState<ExternalWalletState>({
@@ -18,9 +19,10 @@ export function useMidenWallet(adapter: MessageSignerWalletAdapter | null) {
   });
   const [connectError, setConnectError] = useState<string | null>(null);
   const connectingRef = useRef(false);
+  const { client } = useMiden();
 
   useEffect(() => {
-    if (!adapter) return;
+    if (!adapter || !client) return;
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const handleConnect = (_address: string) => {
@@ -82,7 +84,7 @@ export function useMidenWallet(adapter: MessageSignerWalletAdapter | null) {
       adapter.off("disconnect", handleDisconnect);
       adapter.off("error", handleError);
     };
-  }, [adapter]);
+  }, [adapter, client]);
 
   const connect = useCallback(async () => {
     if (!adapter || connectingRef.current) return;
