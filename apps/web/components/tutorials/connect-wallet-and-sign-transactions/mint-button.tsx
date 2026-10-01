@@ -1,25 +1,27 @@
 import { useState, useEffect } from "react";
 import { HandCoins } from "lucide-react";
-import { AccountId as WasmAccountId } from "@miden-sdk/miden-sdk/lazy";
+import {
+  NoteFile as WasmNoteFile,
+  NoteId as WasmNoteId,
+} from "@miden-sdk/miden-sdk/lazy";
+import { useMiden } from "@miden-sdk/react/lazy";
 import { Spinner } from "@workspace/ui/components/spinner";
 import useAccounts from "@/hooks/use-accounts";
-import useNotes from "@/hooks/use-notes";
 import useNetwork from "@/hooks/use-network";
-import { defaultInputNote } from "@/lib/utils/note";
 import { Button } from "@workspace/ui/components/button";
 import {
   FUNGIBLE_FAUCET_DEFAULT_DECIMALS,
-  P2ID_NOTE_CODE,
   midenFaucetApiUrl,
-  midenFaucetAccountId,
 } from "@/lib/constants";
 import { parseAmount } from "@/lib/utils/asset";
+import { waitUntil } from "@/lib/utils";
 import { getPowChallenge, findValidNonce, getTokens } from "@/lib/miden-faucet";
+import { clientGetNotesById } from "@/lib/web-client";
 
 const MintButton = () => {
+  const { client } = useMiden();
   const { networkId } = useNetwork();
   const { connectedWallet } = useAccounts();
-  const { addNote } = useNotes();
   const [loading, setLoading] = useState(false);
   const [noteId, setNoteId] = useState("");
   useEffect(() => {
@@ -32,7 +34,7 @@ const MintButton = () => {
     <Button
       disabled={!connectedWallet || loading}
       onClick={async () => {
-        if (!connectedWallet) {
+        if (!client || !connectedWallet) {
           return;
         }
         setLoading(true);
@@ -55,26 +57,17 @@ const MintButton = () => {
           isPrivateNote: false,
         });
         console.info({ noteId, txId });
-        if (connectedWallet?.isNew) {
-          const accountId = WasmAccountId.fromHex(connectedWallet.id);
-          addNote({
-            ...defaultInputNote(),
-            id: noteId,
-            senderId: midenFaucetAccountId(networkId),
-            scriptRoot: P2ID_NOTE_CODE,
-            scriptId: "p2id",
-            fungibleAssets: [
-              { faucetId: midenFaucetAccountId(networkId), amount },
-            ],
-            storage: [
-              accountId.suffix().toString(),
-              accountId.prefix().toString(),
-            ],
+        await waitUntil(async () => {
+          const wasmFetchedNotes = await clientGetNotesById({
+            networkId,
+            noteIds: [noteId],
           });
-          setLoading(false);
-        } else {
-          setNoteId(noteId);
-        }
+          return wasmFetchedNotes.length > 0;
+        });
+        await client.importNoteFile(
+          WasmNoteFile.fromNoteId(WasmNoteId.fromHex(noteId)),
+        );
+        setLoading(false);
       }}
     >
       {loading ? <Spinner /> : <HandCoins />}

@@ -12,7 +12,7 @@ import {
   clientGetAllTransactions,
   transactionStatus,
   wasmAccountToAccount,
-  wasmInputNoteToInputNote,
+  wasmInputNoteRecordToInputNote,
 } from "@/lib/web-client";
 import type { Account } from "@/lib/types/account";
 import {
@@ -27,7 +27,7 @@ import { noteConsumed } from "@/lib/utils/note";
 import { P2ID_NOTE_CODE, midenFaucetAccountId } from "@/lib/constants";
 import { useWallet, type Asset } from "@miden-sdk/miden-wallet-adapter";
 import { storeName, defaultStore } from "@/lib/utils/store";
-import type { InputNote, NoteState } from "@/lib/types/note";
+import type { InputNote } from "@/lib/types/note";
 import type { Transaction } from "@/lib/types/transaction";
 import type { Script } from "@/lib/types/script";
 // import { toBase64 } from "@/lib/utils";
@@ -171,13 +171,13 @@ const syncInputNotes = ({
   wasmInputNoteRecords,
   scripts,
   updatedAt,
-  connectedWallet,
+  // connectedWallet,
 }: {
   previousInputNotes: InputNote[];
   wasmInputNoteRecords: WasmInputNoteRecord[];
   scripts: Script[];
   updatedAt: number | null;
-  connectedWallet?: Account;
+  // connectedWallet?: Account;
 }) => {
   // const wasmInputNoteRecord = wasmInputNoteRecords.find(
   //   (wasmInputNoteRecord) =>
@@ -190,7 +190,7 @@ const syncInputNotes = ({
   // }
   const inputNotes = wasmInputNoteRecords
     .map((wasmInputNoteRecord) =>
-      wasmInputNoteToInputNote({
+      wasmInputNoteRecordToInputNote({
         record: wasmInputNoteRecord,
         previousInputNote: previousInputNotes.find(
           ({ id }) => id === wasmInputNoteRecord.id()?.toString(),
@@ -200,28 +200,29 @@ const syncInputNotes = ({
       }),
     )
     .filter(({ id }) => id !== "");
-  const connectedWalletP2IDNotes = connectedWallet?.isPublic
-    ? previousInputNotes.filter(({ scriptRoot, storage }) => {
-        const [suffix = "", prefix = ""] = storage;
-        const targetAccountId = accountIdFromPrefixSuffix(prefix, suffix);
-        return (
-          scriptRoot === P2ID_NOTE_CODE &&
-          targetAccountId === connectedWallet?.id
-        );
-      })
-    : [];
+  // const connectedWalletP2IDNotes =
+  //   connectedWallet?.name === "Bread Wallet"
+  //     ? previousInputNotes.filter(({ scriptRoot, storage }) => {
+  //         const [suffix = "", prefix = ""] = storage;
+  //         const targetAccountId = accountIdFromPrefixSuffix(prefix, suffix);
+  //         return (
+  //           scriptRoot === P2ID_NOTE_CODE &&
+  //           targetAccountId === connectedWallet?.id
+  //         );
+  //       })
+  //     : [];
   return [
     ...inputNotes,
-    ...connectedWalletP2IDNotes
-      .filter(
-        (inputNote) => !inputNotes.map(({ id }) => id).includes(inputNote.id),
-      )
-      .map((inputNote) => ({
-        ...inputNote,
-        state: connectedWallet?.isNew
-          ? ("committed" as NoteState)
-          : ("consumed-external" as NoteState),
-      })),
+    // ...connectedWalletP2IDNotes
+    //   .filter(
+    //     (inputNote) => !inputNotes.map(({ id }) => id).includes(inputNote.id),
+    //   )
+    //   .map((inputNote) => ({
+    //     ...inputNote,
+    //     state: connectedWallet?.isNew
+    //       ? ("committed" as NoteState)
+    //       : ("consumed-external" as NoteState),
+    //   })),
   ];
 };
 
@@ -304,7 +305,7 @@ const useAppState = () => {
         wasmInputNoteRecords,
         scripts,
         updatedAt: lastSyncTime,
-        connectedWallet,
+        // connectedWallet,
       });
       const syncedAccounts = syncAccounts({
         previousAccounts,

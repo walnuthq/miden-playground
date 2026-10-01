@@ -23,6 +23,7 @@ import {
   NoteScript as WasmNoteScript,
   Package as WasmPackage,
   NoteAssets as WasmNoteAssets,
+  NoteId as WasmNoteId,
   AccountId as WasmAccountId,
   FungibleAsset as WasmFungibleAsset,
   NoteMetadata as WasmNoteMetadata,
@@ -106,6 +107,17 @@ export const clientGetConsumableNotes = ({
   accountId: string;
 }) => client.getConsumableNotes(WasmAccountId.fromHex(accountId));
 
+export const clientGetNotesById = ({
+  networkId,
+  noteIds,
+}: {
+  networkId: NetworkId;
+  noteIds: string[];
+}) =>
+  wasmRpcClient(networkId).getNotesById(
+    noteIds.map((noteId) => WasmNoteId.fromHex(noteId)),
+  );
+
 export const clientGetAllInputNotes = async ({
   client,
   networkId,
@@ -116,12 +128,12 @@ export const clientGetAllInputNotes = async ({
   const wasmInputNotes = await client.getInputNotes(
     new WasmNoteFilter(WasmNoteFilterTypes.All),
   );
-  const rpcClient = wasmRpcClient(networkId);
-  const wasmFetchedNotes = await rpcClient.getNotesById(
-    wasmInputNotes
-      .map((wasmInputNote) => wasmInputNote.id())
+  const wasmFetchedNotes = await clientGetNotesById({
+    networkId,
+    noteIds: wasmInputNotes
+      .map((wasmInputNote) => wasmInputNote.id()?.toString())
       .filter((id) => id !== undefined),
-  );
+  });
   return wasmInputNotes.map((wasmInputNote) => {
     const wasmFetchedNote = wasmFetchedNotes.find(
       ({ noteId }) => noteId.toString() === wasmInputNote.id()?.toString(),
@@ -430,7 +442,7 @@ export const clientImportNoteFile = async ({
   if (!record) {
     throw new Error("Note not found");
   }
-  return wasmInputNoteToInputNote({ record, scripts, noteFileBytes });
+  return wasmInputNoteRecordToInputNote({ record, scripts, noteFileBytes });
 };
 
 export const clientExportNoteFile = async ({
@@ -616,7 +628,7 @@ const verifyStandardNotes = ({
       return runScript.digest === scriptRoot;
     });
 
-export const wasmInputNoteToInputNote = ({
+export const wasmInputNoteRecordToInputNote = ({
   record,
   previousInputNote,
   scripts,

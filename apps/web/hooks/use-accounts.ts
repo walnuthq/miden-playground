@@ -189,8 +189,9 @@ const useAccounts = () => {
         : [];
       const accountId = WasmAddress.fromBech32(midenWalletAddress).accountId();
       const accountStorageMode = storageMode(accountId);
-      const name =
-        accountStorageMode === "private" ? "Priv Account 1" : "Miden Account 1";
+      const name = "Bread Wallet";
+      // const name =
+      //   accountStorageMode === "private" ? "Priv Account 1" : "Miden Account 1";
       try {
         const wasmAccount = await importAccount({ type: "id", accountId });
         const account = wasmAccountToAccount({
@@ -212,6 +213,7 @@ const useAccounts = () => {
           identifier: getIdentifierPart(midenWalletAddress),
           routingParameters: getRoutingParametersPart(midenWalletAddress),
           fungibleAssets,
+          isNew: fungibleAssets.length === 0,
           // TODO how to determine components for imported wallet?
           // For now, assume it's always a multisig wallet
           components: ["auth-guarded-multisig", "basic-wallet"],
