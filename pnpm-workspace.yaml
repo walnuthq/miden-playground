@@ -11,6 +11,8 @@ allowBuilds:
   esbuild: true
   sharp: true
   workerd: true
+  # Postinstall only runs a version check (pulled in by Para's wallet connectors).
+  "@reown/appkit": false
 
 # Point the SDK at the sibling web-sdk checkout instead of the registry. `link:`
 # symlinks the package directories, so a rebuild there (`pnpm build` in web-sdk)
@@ -36,3 +38,9 @@ packageExtensions:
   "@miden-sdk/miden-wallet-adapter-react":
     dependencies:
       "@miden-sdk/miden-sdk": "0.16.3"
+  # @next/mdx imports `next` types without declaring it, so it would pick up
+  # whichever hoisted copy of next pnpm chose. Declaring the peer resolves it to
+  # the importing app's own next.
+  "@next/mdx":
+    peerDependencies:
+      next: "*"

@@ -1,6 +1,8 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import type { ReactNode } from "react";
-// import "@getpara/react-sdk/styles.css";
+// Para's stylesheet ships its own Tailwind preflight, so it must come before
+// globals.css for the app's base rules (e.g. border colors) to win.
+import "@getpara/react-sdk-lite/styles.css";
 import "@miden-sdk/miden-wallet-adapter/styles.css";
 import "@workspace/ui/globals.css";
 import Providers from "@/components/providers";
@@ -25,12 +27,15 @@ const RootLayout = ({
     <body
       className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased`}
     >
-      <div className="root">
-        <Providers>
+      {/* .root (isolation: isolate, Base UI's portal setup) wraps only the page
+          content: Para renders its login iframe next to it from ParaProvider,
+          and that iframe has to stack above Para's modal portaled to body. */}
+      <Providers>
+        <div className="root">
           {children}
           <Toaster richColors />
-        </Providers>
-      </div>
+        </div>
+      </Providers>
     </body>
   </html>
 );

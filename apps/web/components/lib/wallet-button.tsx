@@ -1,67 +1,75 @@
-// import Image from "next/image";
+import Image from "next/image";
 import {
   WalletMultiButton,
-  // useWallet,
-  // useWalletModal,
+  useWallet,
+  useWalletModal,
 } from "@miden-sdk/miden-wallet-adapter";
-// import { useAccount, useModal } from "@getpara/react-sdk";
-// import {
-//   DropdownMenu,
-//   DropdownMenuContent,
-//   DropdownMenuItem,
-//   DropdownMenuTrigger,
-// } from "@workspace/ui/components/dropdown-menu";
-// import { Button } from "@workspace/ui/components/button";
-// import useAccounts from "@/hooks/use-accounts";
-// import { formatAddress } from "@/lib/utils";
-// import useGlobalContext from "@/components/global-context/hook";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@workspace/ui/components/dropdown-menu";
+import { Button } from "@workspace/ui/components/button";
+import { useParaWallet } from "@/components/providers/para-wallet-context";
 
-const WalletButton = () => {
-  return <WalletMultiButton />;
-  /* const { networkId } = useGlobalContext();
-  const { connectedWallet } = useAccounts();
-  const { connected: midenWalletConnected } = useWallet();
+const formatEvmAddress = (address: string) =>
+  `${address.slice(0, 6)}…${address.slice(-4)}`;
+
+const SelectWalletDropdown = ({
+  onSelectPara,
+}: {
+  onSelectPara?: () => void;
+}) => {
   const { setVisible } = useWalletModal();
-  const { isConnected: paraWalletConnected } = useAccount();
-  const { openModal } = useModal();
-  if (midenWalletConnected) {
-    return <WalletMultiButton />;
-  }
-  if (paraWalletConnected) {
-    return (
-      <Button
-        className="flex items-center gap-2"
-        variant="outline"
-        onClick={() => openModal?.()}
-      >
-        <Image
-          className="size-6 rounded-[4px]"
-          src="/img/para.jpg"
-          alt="Para Logo"
-          width={160}
-          height={160}
-        />
-        {connectedWallet
-          ? formatAddress(connectedWallet.address, networkId, true)
-          : "Loading Wallet…"}
-      </Button>
-    );
-  }
   return (
-    <DropdownMenu>
+    // Non-modal: Para's dialog uses its own bundled copy of Radix, and opening
+    // it while a modal menu is closing leaves `pointer-events: none` on body.
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <Button variant="outline">Select Wallet</Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent>
+      <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={() => setVisible(true)}>
-          Connect With Bread Wallet
+          Bread Wallet
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => openModal?.()}>
-          Connect With Para Wallet
-        </DropdownMenuItem>
+        {onSelectPara && (
+          <DropdownMenuItem onClick={onSelectPara}>
+            Para Wallet
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
-  );*/
+  );
+};
+
+const WalletButton = () => {
+  const { connected: breadWalletConnected } = useWallet();
+  const paraWallet = useParaWallet();
+  if (breadWalletConnected) {
+    return <WalletMultiButton />;
+  }
+  if (!paraWallet?.isConnected) {
+    return <SelectWalletDropdown onSelectPara={paraWallet?.openModal} />;
+  }
+  return (
+    <Button
+      className="flex items-center gap-2"
+      variant="outline"
+      onClick={paraWallet.openModal}
+    >
+      <Image
+        className="size-6 rounded-[4px]"
+        src="/img/para.jpg"
+        alt="Para Logo"
+        width={160}
+        height={160}
+      />
+      {paraWallet.address
+        ? formatEvmAddress(paraWallet.address)
+        : "Para Wallet"}
+    </Button>
+  );
 };
 
 export default WalletButton;

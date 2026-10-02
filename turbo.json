@@ -19,7 +19,13 @@
       ]
     },
     "web#build": {
-      "env": ["NODE_ENV", "NEXT_PUBLIC_API_URL", "NEXT_PUBLIC_API_REGISTRY_URL"]
+      "env": [
+        "NODE_ENV",
+        "NEXT_PUBLIC_API_URL",
+        "NEXT_PUBLIC_API_REGISTRY_URL",
+        "NEXT_PUBLIC_PARA_API_KEY",
+        "NEXT_PUBLIC_PARA_ENVIRONMENT"
+      ]
     },
     "status-page#build": {
       "cache": false,
