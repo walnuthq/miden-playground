@@ -12,6 +12,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import SimpleAnalyticsProvider from "@/components/providers/simple-analytics-provider";
 import { NetworkProvider } from "@/components/providers/network-provider";
 import MidenProvider from "@/components/providers/miden-provider";
+import ParaProvider from "@/components/providers/para-provider";
 import GlobalContextProvider from "@/components/global-context/provider";
 
 const walletAdapter = new MidenWalletAdapter({ appName: "Miden Playground" });
@@ -37,7 +38,9 @@ const Providers = ({ children }: { children: ReactNode }) => (
           <SimpleAnalyticsProvider>
             <NetworkProvider>
               <MidenProvider>
-                <GlobalContextProvider>{children}</GlobalContextProvider>
+                <ParaProvider queryClient={queryClient}>
+                  <GlobalContextProvider>{children}</GlobalContextProvider>
+                </ParaProvider>
               </MidenProvider>
             </NetworkProvider>
           </SimpleAnalyticsProvider>
