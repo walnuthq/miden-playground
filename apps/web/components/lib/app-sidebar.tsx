@@ -47,7 +47,8 @@ const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
   const { networkId } = useNetwork();
   const { client } = useMiden();
   const { isTutorial } = useTutorials();
-  const { accounts, connectedWallet, importConnectedWallet } = useAccounts();
+  const { accounts, needsConnectedWalletImport, importConnectedWallet } =
+    useAccounts();
   const { transactions } = useTransactions();
   const { inputNotes } = useNotes();
   const { scripts } = useScripts();
@@ -153,10 +154,21 @@ const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
   ];
   // TODO refactor using onConnect callback?
   useEffect(() => {
-    if (client && !isTutorial && networkId !== "mmck" && !connectedWallet) {
+    if (
+      client &&
+      !isTutorial &&
+      networkId !== "mmck" &&
+      needsConnectedWalletImport
+    ) {
       importConnectedWallet();
     }
-  }, [client, isTutorial, networkId, connectedWallet, importConnectedWallet]);
+  }, [
+    client,
+    isTutorial,
+    networkId,
+    needsConnectedWalletImport,
+    importConnectedWallet,
+  ]);
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>

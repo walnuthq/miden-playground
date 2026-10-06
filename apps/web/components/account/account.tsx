@@ -32,7 +32,7 @@ const Account = ({
   const searchParams = useSearchParams();
   const { networkId } = useNetwork();
   const isClient = useIsClient();
-  const { accounts, connectedWallet } = useAccounts();
+  const { accounts, isConnectedWallet } = useAccounts();
   const { isTutorial } = useTutorials();
   const { isMultisigSigner } = useMultisig();
   const account = accounts.find((account) => account.identifier === identifier);
@@ -42,7 +42,7 @@ const Account = ({
   const showCreateTransactionButton =
     isTutorial ||
     networkId === "mmck" ||
-    connectedWallet?.address === account.address ||
+    isConnectedWallet(account) ||
     account.components.includes("auth-no-auth") ||
     account.components.includes("auth-network-account") ||
     isMultisigSigner(account);

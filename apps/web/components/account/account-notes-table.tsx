@@ -23,6 +23,7 @@ import { Button } from "@workspace/ui/components/button";
 import AccountAddress from "@/components/lib/account-address";
 import useTransactions from "@/hooks/use-transactions";
 import useAccounts from "@/hooks/use-accounts";
+import useParaTransaction from "@/hooks/use-para-transaction";
 import useNotes from "@/hooks/use-notes";
 import NoteId from "@/components/lib/note-id";
 import {
@@ -46,7 +47,8 @@ const NoteActionsCell = ({
   const { client } = useMiden();
   const { wallet } = useWallet();
   const { loadMultisig, createConsumeNotesProposal } = useMultisig();
-  const { faucets, connectedWallet } = useAccounts();
+  const { faucets, connectedWallet, isParaWallet } = useAccounts();
+  const { consumeWithPara } = useParaTransaction();
   const { openCreateTransactionDialog, newConsumeTransactionRequest } =
     useTransactions();
   const [loading, setLoading] = useState(false);
@@ -61,7 +63,11 @@ const NoteActionsCell = ({
       <DropdownMenuContent align="end">
         <DropdownMenuItem
           onClick={async () => {
-            if (connectedWallet?.id === account.id) {
+            if (isParaWallet(account)) {
+              setLoading(true);
+              await consumeWithPara({ noteIds: [inputNote.id] });
+              setLoading(false);
+            } else if (connectedWallet?.id === account.id) {
               if (!client) {
                 throw new Error("MidenClient not ready");
               }

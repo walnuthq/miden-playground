@@ -5,6 +5,7 @@ import { Button } from "@workspace/ui/components/button";
 import useTransactions from "@/hooks/use-transactions";
 import type { InputNote } from "@/lib/types/note";
 import type { Account } from "@/lib/types/account";
+import useParaTransaction from "@/hooks/use-para-transaction";
 import useAccounts from "@/hooks/use-accounts";
 import {
   useWallet,
@@ -23,7 +24,8 @@ const ConsumeNoteButton = ({
 }) => {
   const { client } = useMiden();
   const { wallet } = useWallet();
-  const { faucets, connectedWallet } = useAccounts();
+  const { faucets, connectedWallet, isParaWallet } = useAccounts();
+  const { consumeWithPara } = useParaTransaction();
   const {
     createTransactionDialogOpen,
     openCreateTransactionDialog,
@@ -39,7 +41,11 @@ const ConsumeNoteButton = ({
     <Button
       variant="outline"
       onClick={async () => {
-        if (connectedWallet?.id === targetAccount.id) {
+        if (isParaWallet(targetAccount)) {
+          setLoading(true);
+          await consumeWithPara({ noteIds: [inputNote.id] });
+          setLoading(false);
+        } else if (connectedWallet?.id === targetAccount.id) {
           if (!client) {
             throw new Error("MidenClient not ready");
           }

@@ -7,6 +7,7 @@ import {
 } from "@workspace/ui/components/dropdown-menu";
 import { Button } from "@workspace/ui/components/button";
 import useTransactions from "@/hooks/use-transactions";
+import useAccounts from "@/hooks/use-accounts";
 import type { Account } from "@/lib/types/account";
 import { useMiden } from "@miden-sdk/react/lazy";
 import { clientGetConsumableNotes } from "@/lib/web-client";
@@ -14,6 +15,7 @@ import { clientGetConsumableNotes } from "@/lib/web-client";
 const CreateTransactionDropdownMenu = ({ account }: { account: Account }) => {
   const { client } = useMiden();
   const { openCreateTransactionDialog } = useTransactions();
+  const { isParaWallet } = useAccounts();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -69,17 +71,20 @@ const CreateTransactionDropdownMenu = ({ account }: { account: Account }) => {
                 New send transaction
               </DropdownMenuItem>
             )}
-            <DropdownMenuItem
-              onClick={() =>
-                openCreateTransactionDialog({
-                  accountId: account.id,
-                  transactionType: "custom",
-                  step: "configure",
-                })
-              }
-            >
-              New custom transaction
-            </DropdownMenuItem>
+            {/* Custom transactions aren't supported for Para Wallet yet. */}
+            {!isParaWallet(account) && (
+              <DropdownMenuItem
+                onClick={() =>
+                  openCreateTransactionDialog({
+                    accountId: account.id,
+                    transactionType: "custom",
+                    step: "configure",
+                  })
+                }
+              >
+                New custom transaction
+              </DropdownMenuItem>
+            )}
           </>
         )}
       </DropdownMenuContent>

@@ -39,6 +39,7 @@ import {
   useImportStore,
 } from "@miden-sdk/react/lazy";
 import useNetwork from "@/hooks/use-network";
+import { useParaWallet } from "@/components/providers/para-wallet-context";
 
 const syncAccounts = ({
   previousAccounts,
@@ -246,12 +247,17 @@ const syncTransactions = ({
 
 const useAppState = () => {
   const { networkId, switchNetwork } = useNetwork();
+  const paraWallet = useParaWallet();
   const { client } = useMiden();
   const { importStore } = useImportStore();
   const { lastSyncTime } = useSyncState();
   // const { client: paraMidenClient } = useParaMiden();
   // const client = paraMidenClient ?? defaultClient;
-  const { wallet, address: midenWalletAddress, requestAssets } = useWallet();
+  const {
+    connected: midenWalletConnected,
+    address: midenWalletAddress,
+    requestAssets,
+  } = useWallet();
   const {
     accounts: previousAccounts,
     inputNotes: previousInputNotes,
@@ -298,7 +304,9 @@ const useAppState = () => {
           networkId,
         }),
         clientGetAllTransactions(client),
-        wallet && requestAssets ? await requestAssets() : [],
+        // MidenFiSignerProvider selects its only wallet up front, so `wallet`
+        // is set before connecting; requestAssets throws until connected.
+        midenWalletConnected && requestAssets ? await requestAssets() : [],
       ]);
       const syncedInputNotes = syncInputNotes({
         previousInputNotes,
@@ -346,6 +354,9 @@ const useAppState = () => {
       storeName(networkId),
     );
     dispatch({ type: "POP_STATE" });
+    // The Para client shares this store, whose contents (the Para account
+    // included) were just replaced, and lost its connection to it.
+    paraWallet?.resetClient();
   };
   const resetState = async (newNetworkId: NetworkId) => {
     switchNetwork(newNetworkId);

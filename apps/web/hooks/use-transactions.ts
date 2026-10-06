@@ -2,6 +2,8 @@ import {
   type ConsumableNoteRecord as WasmConsumableNoteRecordType,
   type TransactionResult as WasmTransactionResultType,
   type TransactionRequest as WasmTransactionRequestType,
+  type TransactionId as WasmTransactionIdType,
+  type MidenClient,
   NoteType as WasmNoteType,
   AccountId as WasmAccountId,
   Word as WasmWord,
@@ -27,7 +29,12 @@ import {
   useSyncState,
   useExecuteProgram,
   useTransaction,
+  useSyncControl,
 } from "@miden-sdk/react/lazy";
+import { useParaWallet } from "@/components/providers/para-wallet-context";
+
+// How long a Para transaction waits for the app client's ongoing sync.
+const SYNC_IDLE_TIMEOUT_MS = 5000;
 
 const useTransactions = () => {
   const {
@@ -48,6 +55,8 @@ const useTransactions = () => {
   const { lastSyncTime } = useSyncState();
   const { execute: executeProgram } = useExecuteProgram();
   const { execute } = useTransaction();
+  const { pauseSync, resumeSync } = useSyncControl();
+  const paraWallet = useParaWallet();
   const openCreateTransactionDialog = ({
     accountId = "",
     transactionType = "consume",
@@ -240,6 +249,22 @@ const useTransactions = () => {
     //   await client.proveBlock();
     // }
     // const syncSummary = await client.syncState();
+    return recordTransaction({ accountId, transactionId, transactionResult });
+  };
+  // Adds a submitted transaction to app state, with its account's new state,
+  // both read from the store.
+  const recordTransaction = async ({
+    accountId,
+    transactionId,
+    transactionResult,
+  }: {
+    accountId: string;
+    transactionId: string;
+    transactionResult: WasmTransactionResultType;
+  }) => {
+    if (!client) {
+      throw new Error("MidenClient not ready");
+    }
     const transactions = await client.getTransactions(
       WasmTransactionFilter.ids([WasmTransactionId.fromHex(transactionId)]),
     );
@@ -277,6 +302,48 @@ const useTransactions = () => {
     });
     return transactionRecord;
   };
+  // Runs a Para Wallet transaction (executed, proven and submitted) on the
+  // Para client, whose keystore signs through Para (its modal is the
+  // confirmation), and records it. That client builds its own requests rather
+  // than relying on the app client, which may be busy syncing. Both share a
+  // store but not their transaction locks, so the app's syncing is paused
+  // meanwhile (SUBMITTING_TRANSACTION also stops the app's own syncState),
+  // waiting a bounded time for an ongoing sync to finish.
+  const submitParaTransaction = async (
+    run: (
+      paraClient: MidenClient,
+      accountId: string,
+    ) => Promise<{
+      txId: WasmTransactionIdType;
+      result: WasmTransactionResultType;
+    }>,
+  ) => {
+    if (!client || !paraWallet?.client || !paraWallet.accountId) {
+      throw new Error("Para client not ready");
+    }
+    const { client: paraClient, accountId, takeSignError } = paraWallet;
+    dispatch({ type: "SUBMITTING_TRANSACTION" });
+    pauseSync();
+    try {
+      await Promise.race([
+        (client as { waitForIdle?: () => Promise<void> }).waitForIdle?.(),
+        new Promise((resolve) => setTimeout(resolve, SYNC_IDLE_TIMEOUT_MS)),
+      ]);
+      takeSignError();
+      const { txId, result } = await run(paraClient, accountId);
+      return await recordTransaction({
+        accountId,
+        transactionId: txId.toHex(),
+        transactionResult: result,
+      });
+    } catch (error) {
+      dispatch({ type: "TRANSACTION_SUBMITTED" });
+      // The executor replaces a failed signature's error with its own.
+      throw takeSignError() ?? error;
+    } finally {
+      resumeSync();
+    }
+  };
   return {
     submittingTransaction,
     createTransactionDialogOpen,
@@ -296,6 +363,7 @@ const useTransactions = () => {
     newCustomTransactionRequest,
     readWord,
     submitNewTransaction,
+    submitParaTransaction,
   };
 };
 

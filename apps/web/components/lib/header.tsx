@@ -56,7 +56,7 @@ const SubLevelPageBreadcrumbs = () => {
 const Header = () => {
   const isClient = useIsClient();
   const { networkId } = useNetwork();
-  const { tutorialId } = useTutorials();
+  const { tutorialId, isTutorial } = useTutorials();
   const pathname = usePathname();
   const isTopLevelPage = [
     "/",
@@ -91,7 +91,15 @@ const Header = () => {
           <GithubButton />
           {isClient && <NetworkBadge />}
           {/* <ModeToggle /> */}
-          {isClient && networkId !== "mmck" && <WalletButton />}
+          {isClient && networkId !== "mmck" && !isTutorial && (
+            <WalletButton
+              enabledSigners={
+                tutorialId === "private-transfers"
+                  ? ["MidenFi", "Para"]
+                  : ["MidenFi"]
+              }
+            />
+          )}
           {isClient && tutorialId && <TutorialToggle />}
         </div>
       </div>

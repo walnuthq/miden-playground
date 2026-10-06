@@ -15,7 +15,7 @@ import { FungibleAsset as WasmFungibleAsset } from "@miden-sdk/miden-sdk/lazy";
 import useAccounts from "@/hooks/use-accounts";
 import { defaultStorageItem } from "@/lib/utils/account";
 
-const SubmitTransactionToastDescription = ({
+export const SubmitTransactionToastDescription = ({
   transactionRecord,
 }: {
   transactionRecord: WasmTransactionRecordType;

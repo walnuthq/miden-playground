@@ -25,6 +25,10 @@ const paraStubPackages = [
   "@safe-global/safe-apps-provider",
   "@safe-global/safe-apps-sdk",
   "accounts$",
+  // Loaded behind try/catch by Para's telemetry. It pulls in zone.js, which
+  // replaces the global Promise and makes the Miden store's Dexie transactions
+  // fail (PrematureCommitError), e.g. when importing a sandbox store.
+  "@opentelemetry/context-zone",
 ];
 
 const nextConfig: NextConfig = {
