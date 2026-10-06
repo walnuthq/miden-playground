@@ -21,6 +21,7 @@ import {
 import useTransactions from "@/hooks/use-transactions";
 import AccountAddress from "@/components/lib/account-address";
 import useAccounts from "@/hooks/use-accounts";
+import useParaTransaction from "@/hooks/use-para-transaction";
 import { normalizeAccountId, useMiden } from "@miden-sdk/react/lazy";
 
 const InputNoteSenderCell = ({ inputNote }: { inputNote: InputNote }) => {
@@ -39,7 +40,9 @@ const InputNoteSenderCell = ({ inputNote }: { inputNote: InputNote }) => {
 const InputNoteActionsCell = ({ inputNote }: { inputNote: InputNote }) => {
   const { client } = useMiden();
   const { wallet } = useWallet();
-  const { accounts, faucets, connectedWallet, isAuthorized } = useAccounts();
+  const { accounts, faucets, connectedWallet, isAuthorized, isParaWallet } =
+    useAccounts();
+  const { consumeWithPara } = useParaTransaction();
   const { openCreateTransactionDialog, newConsumeTransactionRequest } =
     useTransactions();
   const targetAccount = accounts.find(({ consumableNoteIds }) =>
@@ -59,7 +62,9 @@ const InputNoteActionsCell = ({ inputNote }: { inputNote: InputNote }) => {
           isAuthorized(targetAccount) && (
             <DropdownMenuItem
               onClick={async () => {
-                if (connectedWallet?.id === targetAccount.id) {
+                if (isParaWallet(targetAccount)) {
+                  await consumeWithPara({ noteIds: [inputNote.id] });
+                } else if (connectedWallet?.id === targetAccount.id) {
                   const [fungibleAsset] = inputNote.fungibleAssets;
                   const faucet = faucets.find(
                     ({ id }) => id === fungibleAsset?.faucetId,

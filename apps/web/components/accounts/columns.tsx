@@ -23,7 +23,7 @@ import { clientGetConsumableNotes } from "@/lib/web-client";
 const AccountActionsCell = ({ account }: { account: Account }) => {
   const { networkId } = useNetwork();
   const { client } = useMiden();
-  const { connectedWallet, deleteAccount } = useAccounts();
+  const { isConnectedWallet, deleteAccount } = useAccounts();
   const { openCreateTransactionDialog } = useTransactions();
   const { isTutorial } = useTutorials();
   const showMint =
@@ -31,12 +31,10 @@ const AccountActionsCell = ({ account }: { account: Account }) => {
     account.isFaucet &&
     account.address !== midenFaucetAddress(networkId);
   const showConsumeSend =
-    (isTutorial ||
-      networkId === "mmck" ||
-      connectedWallet?.address === account.address) &&
+    (isTutorial || networkId === "mmck" || isConnectedWallet(account)) &&
     !account.isFaucet;
   const showDeleteAccount =
-    account.address !== connectedWallet?.address &&
+    !isConnectedWallet(account) &&
     account.address !== midenFaucetAddress(networkId);
   if (!showMint && !showConsumeSend && !showDeleteAccount) {
     return null;

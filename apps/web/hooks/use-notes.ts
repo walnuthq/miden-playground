@@ -12,6 +12,7 @@ import { useMiden } from "@miden-sdk/react/lazy";
 import useGlobalContext from "@/components/global-context/hook";
 import type { NoteType, InputNote } from "@/lib/types/note";
 import useAccounts from "@/hooks/use-accounts";
+import useParaTransaction from "@/hooks/use-para-transaction";
 import useScripts from "@/hooks/use-scripts";
 import {
   useWallet,
@@ -39,9 +40,10 @@ const useNotes = () => {
     dispatch,
   } = useGlobalContext();
   const { client } = useMiden();
-  const { accounts } = useAccounts();
+  const { accounts, isParaWallet } = useAccounts();
   const { scripts } = useScripts();
   const { requestTransaction } = useWallet();
+  const { submitWithPara } = useParaTransaction();
   const addNote = (inputNote: InputNote) =>
     dispatch({ type: "ADD_NOTE", payload: { inputNote } });
   const openExportNoteDialog = () =>
@@ -77,9 +79,6 @@ const useNotes = () => {
   }) => {
     if (!client) {
       throw new Error("MidenClient not ready");
-    }
-    if (!requestTransaction) {
-      return;
     }
     const senderAccount = accounts.find(({ id }) => id === senderAccountId);
     if (!senderAccount) {
@@ -140,6 +139,13 @@ const useNotes = () => {
         transactionRequestBuilder.withFeeConversionSalt(randomWord());
     }
     const transactionRequest = transactionRequestBuilder.build();
+    if (isParaWallet(senderAccount)) {
+      await submitWithPara(transactionRequest);
+      return;
+    }
+    if (!requestTransaction) {
+      return;
+    }
     const customTransaction = new CustomTransaction(
       senderAccount.address,
       recipientAccount.address,

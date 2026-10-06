@@ -16,6 +16,7 @@ import { Switch } from "@workspace/ui/components/switch";
 import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";
 import SelectAccountCombobox from "@/components/transactions/select-account-combobox";
 import useAccounts from "@/hooks/use-accounts";
+import useParaTransaction from "@/hooks/use-para-transaction";
 import SelectConsumableNotesCombobox from "@/components/transactions/select-consumable-notes-combobox";
 import useTransactions from "@/hooks/use-transactions";
 import useTutorials from "@/hooks/use-tutorials";
@@ -83,7 +84,8 @@ const CreateTransactionConfigureForm = ({
   const { client } = useMiden();
   const { wallet } = useWallet();
   const { networkId } = useNetwork();
-  const { accounts } = useAccounts();
+  const { accounts, isParaWallet } = useAccounts();
+  const { consumeWithPara, sendWithPara } = useParaTransaction();
   const { scripts } = useScripts();
   const { components } = useComponents();
   const {
@@ -150,6 +152,12 @@ const CreateTransactionConfigureForm = ({
             setTransactionRequest(transactionRequest);
             setTransactionResult(transactionResult);
             setStep("preview");
+          } else if (isParaWallet(executingAccount)) {
+            // Para's signing modal is the confirmation step.
+            const transactionRecord = await consumeWithPara({ noteIds });
+            if (transactionRecord) {
+              closeCreateTransactionDialog();
+            }
           }
           setLoading(false);
         }
@@ -176,6 +184,22 @@ const CreateTransactionConfigureForm = ({
             setTransactionRequest(transactionRequest);
             setTransactionResult(transactionResult);
             setStep("preview");
+          } else if (isParaWallet(executingAccount)) {
+            // Para's signing modal is the confirmation step.
+            const transactionRecord = await sendWithPara({
+              targetAccountId,
+              faucetId: faucetAccount.id,
+              noteType: formData.getAll("is-public").includes("on")
+                ? "public"
+                : "private",
+              amount: parseAmount(
+                formData.get("amount")?.toString() ?? "0",
+                decimals,
+              ),
+            });
+            if (transactionRecord) {
+              closeCreateTransactionDialog();
+            }
           } else {
             if (!wallet) {
               return;

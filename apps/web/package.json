@@ -17,21 +17,28 @@
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
   },
   "dependencies": {
+    "@getpara/evm-wallet-connectors": "3.21.0",
+    "@getpara/react-sdk-lite": "3.21.0",
+    "@getpara/web-sdk": "3.21.0",
     "@mdx-js/loader": "3.1.1",
     "@mdx-js/react": "3.1.1",
     "@miden-sdk/miden-sdk": "0.16.3",
     "@miden-sdk/miden-wallet-adapter": "0.16.3",
+    "@miden-sdk/para": "0.16.3",
+    "@miden-sdk/para-react": "0.16.3",
     "@miden-sdk/react": "0.16.3",
     "@monaco-editor/react": "4.7.0",
-    "@next/mdx": "16.3.7",
-    "@opennextjs/cloudflare": "1.20.7",
+    "@next/mdx": "16.3.8",
+    "@opennextjs/cloudflare": "1.20.8",
+    "@opentelemetry/api": "1.9.1",
     "@openzeppelin/miden-multisig-client": "0.17.0",
-    "@tanstack/react-query": "5.104.0",
-    "@tanstack/react-table": "9.2.4",
+    "@tanstack/react-query": "5.104.1",
+    "@tanstack/react-table": "9.2.6",
+    "@wagmi/core": "3.6.5",
     "@workspace/ui": "workspace:*",
     "lodash": "4.18.1",
-    "lucide-react": "1.49.0",
-    "next": "16.3.7",
+    "lucide-react": "1.52.0",
+    "next": "16.3.8",
     "next-themes": "0.4.6",
     "react": "19.3.0",
     "react-dom": "19.3.0",
@@ -39,7 +46,9 @@
     "smol-toml": "1.9.0",
     "sonner": "2.0.8",
     "usehooks-ts": "3.1.1",
-    "uuid": "14.0.2"
+    "uuid": "14.0.2",
+    "viem": "2.57.3",
+    "wagmi": "3.7.7"
   },
   "devDependencies": {
     "@types/lodash": "4.17.25",
@@ -51,6 +60,6 @@
     "@workspace/typescript-config": "workspace:*",
     "eslint": "9.39.5",
     "typescript": "6.0.3",
-    "wrangler": "4.145.0"
+    "wrangler": "4.147.0"
   }
 }

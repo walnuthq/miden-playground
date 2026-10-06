@@ -31,7 +31,7 @@ const CreateTransactionDialogSelectForm = ({
 }) => {
   const { networkId } = useNetwork();
   const { client } = useMiden();
-  const { accounts } = useAccounts();
+  const { accounts, isParaWallet } = useAccounts();
   const executingAccount = accounts.find(({ id }) => id === executingAccountId);
   return (
     <form
@@ -80,9 +80,12 @@ const CreateTransactionDialogSelectForm = ({
             selectTypes={
               executingAccount?.isFaucet
                 ? ["mint"]
-                : executingAccount?.components.includes("basic-wallet")
-                  ? ["consume", "send", "custom"]
-                  : ["consume", "custom"]
+                : // Custom transactions aren't supported for Para Wallet yet.
+                  executingAccount && isParaWallet(executingAccount)
+                  ? ["consume", "send"]
+                  : executingAccount?.components.includes("basic-wallet")
+                    ? ["consume", "send", "custom"]
+                    : ["consume", "custom"]
             }
           />
         </div>

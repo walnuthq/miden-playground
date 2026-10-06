@@ -4,7 +4,10 @@ import {
   clientDeployAccount,
   storageMode,
 } from "@/lib/web-client";
-import { Address as WasmAddress } from "@miden-sdk/miden-sdk/lazy";
+import {
+  Address as WasmAddress,
+  AccountId as WasmAccountId,
+} from "@miden-sdk/miden-sdk/lazy";
 import useGlobalContext from "@/components/global-context/hook";
 import {
   type AccountStorageMode,
@@ -22,7 +25,7 @@ import { counterContractAddress } from "@/lib/constants";
 import { defaultScriptIds } from "@/lib/types/default-scripts";
 import { verifyAccountComponentsFromPackageIds } from "@/lib/api";
 import { defaultComponentIds } from "@/lib/types/default-components";
-// import { useParaMiden } from "@/lib/para-miden";
+import { useParaWallet } from "@/components/providers/para-wallet-context";
 import {
   useSyncState,
   useCreateWallet,
@@ -35,7 +38,7 @@ import useFundAccount from "@/hooks/use-fund-account";
 
 const useAccounts = () => {
   const { address: midenWalletAddress, requestAssets } = useWallet();
-  // const { accountId: paraWalletAccountId } = useParaMiden();
+  const paraWallet = useParaWallet();
   const { networkId } = useNetwork();
   const {
     createWalletDialogOpen,
@@ -64,9 +67,22 @@ const useAccounts = () => {
   );
   const multisigs = wallets.filter((wallet) => !!wallet.multisig);
   const faucets = accounts.filter((account) => account.isFaucet);
-  const connectedWallet = wallets.find(
-    ({ /*id,*/ address }) => address === midenWalletAddress, // || id === paraWalletAccountId,
-  );
+  const breadWallet = midenWalletAddress
+    ? wallets.find(({ address }) => address === midenWalletAddress)
+    : undefined;
+  const paraWalletAccount = paraWallet?.accountId
+    ? wallets.find(({ id }) => id === paraWallet.accountId)
+    : undefined;
+  const connectedWallet = breadWallet ?? paraWalletAccount;
+  // Para Wallet transactions go through the Para client, Bread Wallet's
+  // through the extension.
+  const isParaWallet = (account: Account) =>
+    !!paraWalletAccount && account.id === paraWalletAccount.id;
+  const isConnectedWallet = (account: Account) =>
+    account.id === breadWallet?.id || isParaWallet(account);
+  const needsConnectedWalletImport =
+    (!!midenWalletAddress && !breadWallet) ||
+    (!!paraWallet?.accountId && !paraWalletAccount);
   const isAuthorized = (targetAccount: Account) => {
     const isTutorial =
       tutorialId === "create-and-fund-wallet" ||
@@ -74,7 +90,7 @@ const useAccounts = () => {
     return (
       networkId === "mmck" ||
       isTutorial ||
-      connectedWallet?.id === targetAccount.id ||
+      isConnectedWallet(targetAccount) ||
       targetAccount.components.includes("auth-no-auth") ||
       !!targetAccount.multisig
     );
@@ -175,8 +191,31 @@ const useAccounts = () => {
     });
     return account;
   };
+  const importParaWallet = async () => {
+    if (!client || !paraWallet?.accountId || paraWalletAccount) {
+      return;
+    }
+    // The Para client set the account up in the store it shares with the
+    // app's client, so either can read it.
+    const wasmAccount =
+      (await client.getAccount(WasmAccountId.fromHex(paraWallet.accountId))) ??
+      (await paraWallet.client?.accounts.get(paraWallet.accountId));
+    if (!wasmAccount) {
+      return;
+    }
+    const account = wasmAccountToAccount({
+      wasmAccount,
+      name: "Para Wallet",
+      updatedAt: lastSyncTime,
+    });
+    dispatch({
+      type: "IMPORT_ACCOUNT",
+      payload: { account },
+    });
+  };
   const importConnectedWallet = async () => {
-    if (connectedWallet) {
+    await importParaWallet();
+    if (breadWallet) {
       return;
     }
     if (midenWalletAddress) {
@@ -224,17 +263,6 @@ const useAccounts = () => {
         });
       }
     }
-    // if (paraWalletAccountId) {
-    //   const paraWalletAddress = n({
-    //     accountId: paraWalletAccountId,
-    //     networkId,
-    //     midenSdk,
-    //   });
-    //   await importAccountByAddress({
-    //     name: "Para Wallet",
-    //     address: paraWalletAddress,
-    //   });
-    // }
   };
   const deployAccount = async ({
     name,
@@ -358,6 +386,9 @@ const useAccounts = () => {
     multisigs,
     faucets,
     connectedWallet: networkId !== "mmck" ? connectedWallet : undefined,
+    isParaWallet,
+    isConnectedWallet,
+    needsConnectedWalletImport,
     isAuthorized,
     newWallet,
     newFaucet,

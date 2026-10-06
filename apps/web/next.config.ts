@@ -3,6 +3,34 @@
 import type { NextConfig } from "next";
 import createMDX from "@next/mdx";
 
+const paraStubPackages = [
+  "@getpara/solana-wallet-connectors",
+  "@getpara/cosmos-wallet-connectors",
+  "@getpara/aa-alchemy",
+  "@getpara/aa-biconomy",
+  "@getpara/aa-cdp",
+  "@getpara/aa-gelato",
+  "@getpara/aa-pimlico",
+  "@getpara/aa-porto",
+  "@getpara/aa-rhinestone",
+  "@getpara/aa-safe",
+  "@getpara/aa-thirdweb",
+  "@getpara/aa-zerodev",
+  // Optional connectors of @getpara/web-sdk, @getpara/evm-wallet-connectors
+  // and wagmi, imported behind try/catch.
+  "@farcaster/miniapp-sdk",
+  "@farcaster/miniapp-wagmi-connector",
+  "@base-org/account",
+  "@metamask/connect-evm",
+  "@safe-global/safe-apps-provider",
+  "@safe-global/safe-apps-sdk",
+  "accounts$",
+  // Loaded behind try/catch by Para's telemetry. It pulls in zone.js, which
+  // replaces the global Promise and makes the Miden store's Dexie transactions
+  // fail (PrematureCommitError), e.g. when importing a sandbox store.
+  "@opentelemetry/context-zone",
+];
+
 const nextConfig: NextConfig = {
   transpilePackages: ["@workspace/ui"],
   webpack: (config /*, { dev, webpack }*/) => {
@@ -19,6 +47,9 @@ const nextConfig: NextConfig = {
       ...config.resolve.alias,
       "@miden-sdk/miden-sdk$": "@miden-sdk/miden-sdk/lazy",
       "@miden-sdk/react$": "@miden-sdk/react/lazy",
+      // Para lazily imports optional connectors that aren't installed; stub
+      // them like @miden-sdk/para-react's paraVitePlugin does for Vite.
+      ...Object.fromEntries(paraStubPackages.map((pkg) => [pkg, false])),
     };
     // Add WASM to asset rules
     // config.module.rules.push({
