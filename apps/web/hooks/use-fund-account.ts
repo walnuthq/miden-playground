@@ -1,6 +1,5 @@
 import { type Account as WasmAccount } from "@miden-sdk/miden-sdk/lazy";
 import { useMiden, useTransaction } from "@miden-sdk/react/lazy";
-import { clientGetBlockHeaderByNumber } from "@/lib/web-client";
 import useNetwork from "@/hooks/use-network";
 import { requestFundingNote, waitForFundingNote } from "@/lib/miden-faucet";
 
@@ -14,17 +13,16 @@ const useFundAccount = () => {
     if (!client) {
       throw new Error("MidenClient not ready");
     }
-    const blockHeader = await clientGetBlockHeaderByNumber({ networkId });
-    const { noteId, txId } = await requestFundingNote({
+    const feeFaucetId = await client.feeFaucetId();
+    const { noteId } = await requestFundingNote({
       networkId,
       recipient: account.id(),
-      expectedFaucet: blockHeader.feeFaucetId(),
     });
     const fundingNote = await waitForFundingNote({
       client,
       networkId,
       noteId,
-      txId,
+      expectedFaucet: feeFaucetId,
     });
     const transactionRequest = await client.newConsumeTransactionRequest(
       [fundingNote.toNote()],

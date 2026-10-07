@@ -2,13 +2,10 @@ import MintButton from "@/components/tutorials/private-transfers/mint-button";
 
 Now that your **Private** wallet is connected, let's fund it by requesting tokens from the **Public** [Miden Faucet](https://faucet.testnet.miden.io/).
 
-Let's use a **Private** note to keep this wallet funding secret: only the note's hash will be stored publicly.
-The Note's actual data will remain off-chain, enhancing privacy.
+The Miden Faucet only creates **Public** notes: the funding note, including its recipient and the tokens it carries, is stored on-chain.
+Your wallet itself remains **Private**: its state stays off-chain and only its commitment is stored publicly.
 
-While the faucet is a **Public** account and our wallet is **Private**, the note's data will be only known by the 2 parties involved.
-This means that from the outside world, we can observe the faucet being depleted but we can't track the intended recipient of the outgoing tokens.
-
-Click on the _"Mint"_ button to automatically request 100 tokens from the Miden Faucet privately.
+Click on the _"Mint"_ button to automatically request 100 tokens from the Miden Faucet.
 
 <MintButton />
 

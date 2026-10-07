@@ -10,6 +10,7 @@ import {
   FUNGIBLE_FAUCET_DEFAULT_DECIMALS,
   P2ID_NOTE_CODE,
   midenFaucetAccountId,
+  midenFaucetFunderAccountId,
 } from "@/lib/constants";
 import { parseAmount } from "@/lib/utils/asset";
 
@@ -25,18 +26,18 @@ const useCompleted = () => {
           amount ===
             parseAmount("100", FUNGIBLE_FAUCET_DEFAULT_DECIMALS).toString(),
       ) &&
-      senderId === midenFaucetAccountId(networkId) &&
+      senderId === midenFaucetFunderAccountId(networkId) &&
       scriptRoot === P2ID_NOTE_CODE &&
       accountIdFromPrefixSuffix(storage[1] ?? "", storage[0] ?? "") ===
         connectedWallet?.id &&
       state === "committed" &&
-      type === "private",
+      type === "public",
   );
   return connectedWallet?.isPrivate && !!note;
 };
 
 const Step2: TutorialStep = {
-  title: "Mint assets privately from the Miden Faucet.",
+  title: "Mint assets from the Miden Faucet.",
   Content: () => {
     const completed = useCompleted();
     return (

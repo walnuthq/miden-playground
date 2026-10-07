@@ -3,7 +3,7 @@ import { defaultStore } from "@/lib/utils/store";
 
 const store: Store = {
   ...defaultStore("mtst"),
-  accountCode: [
+  /* accountCode: [
     {
       root: "0xad98b229e2a1bb6bfa9b5e9565489268befffdccbd6d0fb47c2b83347f1ac0ca",
       code: {
@@ -329,7 +329,7 @@ const store: Store = {
       id: "0xc129dffc3f2f71d142068c90e3669e",
       address: { __type: "Uint8Array", data: "6MEp3/w/L3HRQgaMkONmngA=" },
     },
-  ],
+  ], */
 };
 
 export default store;

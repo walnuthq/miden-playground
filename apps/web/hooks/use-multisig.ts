@@ -77,11 +77,11 @@ const useMultisig = () => {
     );
     await newMultisig.registerOnGuardian();
     setMultisig(newMultisig);
-    const state = await newMultisig.syncState();
-    const config = AccountInspector.fromBase64(state.stateDataBase64);
+    await newMultisig.syncState();
     if (!newMultisig.account) {
       return;
     }
+    const config = AccountInspector.fromAccount(newMultisig.account);
     const account = wasmAccountToAccount({
       wasmAccount: newMultisig.account,
       name,
@@ -312,8 +312,8 @@ const useMultisig = () => {
       throw new Error("Multisig not found");
     }
     dispatch({ type: "SUBMITTING_TRANSACTION" });
-    const state = await multisig.syncState();
-    const config = AccountInspector.fromBase64(state.stateDataBase64);
+    await multisig.syncState();
+    const config = AccountInspector.fromAccount(multisig.account);
     const account = wasmAccountToAccount({
       wasmAccount: multisig.account,
       name,

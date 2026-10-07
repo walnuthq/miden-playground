@@ -156,6 +156,12 @@ type StoreForeignAccountCode = { accountId: string; codeRoot: string };
 
 type StoreSetting = { scope: number; key: string; value: SerializedUint8Array };
 
+// `witness` stays null until the first sync refreshes it.
+type StoreAccountWitness = {
+  accountId: string;
+  witness: SerializedUint8Array | null;
+};
+
 export type Store = {
   accountCode: StoreAccountCode[];
   latestAccountStorage: StoreLatestAccountStorage[];
@@ -180,4 +186,5 @@ export type Store = {
   tags: StoreTag[];
   foreignAccountCode: StoreForeignAccountCode[];
   settings: StoreSetting[];
+  accountWitnesses: StoreAccountWitness[];
 };

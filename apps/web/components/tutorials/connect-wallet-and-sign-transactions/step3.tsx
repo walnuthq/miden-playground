@@ -10,6 +10,7 @@ import {
   P2ID_NOTE_CODE,
   FUNGIBLE_FAUCET_DEFAULT_DECIMALS,
   midenFaucetAccountId,
+  midenFaucetFunderAccountId,
 } from "@/lib/constants";
 import { accountIdFromPrefixSuffix } from "@/lib/utils/account";
 import { parseAmount } from "@/lib/utils/asset";
@@ -27,7 +28,7 @@ const useCompleted = () => {
             amount ===
               parseAmount("100", FUNGIBLE_FAUCET_DEFAULT_DECIMALS).toString(),
         ) &&
-        senderId === midenFaucetAccountId(networkId) &&
+        senderId === midenFaucetFunderAccountId(networkId) &&
         scriptRoot === P2ID_NOTE_CODE &&
         accountIdFromPrefixSuffix(storage[1] ?? "", storage[0] ?? "") ===
           connectedWallet?.id &&

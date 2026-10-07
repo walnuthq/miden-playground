@@ -14,7 +14,7 @@ const useCompleted = () => {
 };
 
 const Step4: TutorialStep = {
-  title: "Consume the private note with your private wallet.",
+  title: "Consume the faucet note with your private wallet.",
   Content: () => {
     const { connectedWallet } = useAccounts();
     const completed = useCompleted();
@@ -25,7 +25,7 @@ const Step4: TutorialStep = {
         />
         <TutorialAlert
           completed={completed}
-          title="Action required: Consume the private note."
+          title="Action required: Consume the faucet note."
           titleWhenCompleted="Your wallet has been privately funded."
           description={
             <p>

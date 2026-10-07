@@ -2,14 +2,12 @@ import { EllipsisVertical } from "lucide-react";
 import Link from "@/components/tutorials/tutorial-link";
 import WalletAlert from "@/components/tutorials/wallet-alert";
 
-In the previous step, we requested 100 tokens privately from the [Miden Faucet](https://faucet.testnet.miden.io/).
+In the previous step, we requested 100 tokens from the [Miden Faucet](https://faucet.testnet.miden.io/).
 
-The resulting private output note containing our tokens must now be consumed to fund our wallet.
+The resulting public note containing our tokens must now be consumed to fund our wallet privately.
 
 Click on the <EllipsisVertical className="size-4 inline" /> icon button in the _"Consumable Notes"_ table to consume the note with your wallet.
 
-A _"Request Import Private Note"_ modal from your Bread Wallet will show up asking you to confirm importing the note containing your tokens.
-
 <WalletAlert />
 
-The private note will transition to the **Consumed** state and disappear from your wallet consumable notes.
+The note will transition to the **Consumed** state and disappear from your wallet consumable notes.

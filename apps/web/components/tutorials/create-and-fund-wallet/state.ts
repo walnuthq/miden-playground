@@ -9,7 +9,7 @@ const state: State = {
   ...defaultState(),
   accounts: [
     midenFaucetAccount("mtst"),
-    {
+    /*{
       ...basicFungibleFaucetAccount({
         storageMode: "public",
         symbol: "MDN",
@@ -253,7 +253,7 @@ const state: State = {
           ],
         },
       ],
-    },
+    },*/
   ],
   tutorialId: "create-and-fund-wallet",
 };
