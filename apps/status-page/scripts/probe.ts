@@ -66,7 +66,7 @@ const VIEWPORT = { width: 1280, height: 900 };
 // client is ready. Waiting on them proves the bundle executed, React hydrated
 // and the app painted — none of which a plain HTTP request can tell us.
 const SIDEBAR_NAV_SELECTOR = 'a[href="/accounts"]';
-const HOME_HEADING_SELECTOR = 'h3:has-text("Tutorials")';
+const HOME_HEADING_SELECTOR = 'h3:has-text("Sandbox environments")';
 
 // Vercel's Attack Mode answers every request with HTTP 429 and a JS challenge.
 // A browser on a residential IP clears it in about a second; the same browser on

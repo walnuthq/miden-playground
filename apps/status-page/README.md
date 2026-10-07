@@ -21,7 +21,7 @@ rather than the services.
 | Service | Check                | Asserts                                                                                |
 | ------- | -------------------- | -------------------------------------------------------------------------------------- |
 | web     | `page loads`         | a document titled "Miden Playground" comes back                                        |
-| web     | `playground renders` | hydrated sidebar navigation **and** the home page's `Tutorials` heading are in the DOM |
+| web     | `playground renders` | hydrated sidebar navigation **and** the home page's `Sandbox environments` heading are in the DOM |
 | web     | `no client errors`   | no uncaught exceptions, no failed same-origin requests                                 |
 | api     | `GET /`              | 200 + JSON — the card shows the payload in full                                        |
 
