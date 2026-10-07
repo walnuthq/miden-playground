@@ -132,13 +132,13 @@ const authSingleSig: Script = {
   readOnly: true,
   rust,
   masm,
-  digest: "0x7725e15b0cdc90c6134cad4917fa38b767c952dac7dc62cfe1602fdd754c0966",
+  digest: "0xca556e3d56ba394901cc8809b68c082b3388f77d17fc92c628501fc3f3d972b1",
   procedureExports: [
     {
       ...defaultProcedureExport(),
       path: "::miden::standards::components::auth::singlesig::auth_tx",
       digest:
-        "0xbe222199e35976af4096b828ffaa0ce8c387d818cabb4e1cb60f164d21b9854c",
+        "0xef78e050e8a0086115519fc1440ef6f26d94b63292a4d55f0aa1cd3451777565",
     },
   ],
 };

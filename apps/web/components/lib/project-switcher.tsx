@@ -1,20 +1,20 @@
 "use client";
 // import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronsUpDown, BadgeCheck } from "lucide-react";
+import { ChevronsUpDown /*, BadgeCheck*/ } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   // DropdownMenuLabel,
-  DropdownMenuSeparator,
+  // DropdownMenuSeparator,
   // DropdownMenuGroup,
   // DropdownMenuShortcut,
   DropdownMenuTrigger,
-  DropdownMenuSub,
-  DropdownMenuSubTrigger,
-  DropdownMenuPortal,
-  DropdownMenuSubContent,
+  // DropdownMenuSub,
+  // DropdownMenuSubTrigger,
+  // DropdownMenuPortal,
+  // DropdownMenuSubContent,
 } from "@workspace/ui/components/dropdown-menu";
 import {
   SidebarMenu,
@@ -24,15 +24,15 @@ import {
 } from "@workspace/ui/components/sidebar";
 import Logo from "@/components/lib/logo";
 import useNetwork from "@/hooks/use-network";
-import tutorials from "@/components/tutorials";
+// import tutorials from "@/components/tutorials";
 import useTutorials from "@/hooks/use-tutorials";
 // import useProjects from "@/hooks/use-projects";
 import { useIsClient } from "usehooks-ts";
 import { networks } from "@/lib/types/network";
 // import { cn } from "@workspace/ui/lib/utils";
-import { cn } from "@workspace/ui/lib/utils";
+// import { cn } from "@workspace/ui/lib/utils";
 import useAppState from "@/hooks/use-app-state";
-import examples from "@/lib/examples";
+// import examples from "@/lib/examples";
 import useExamples from "@/hooks/use-examples";
 
 const ProjectSwitcher = () => {
@@ -91,7 +91,7 @@ const ProjectSwitcher = () => {
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
             </DropdownMenuSub> */}
-            <DropdownMenuSub>
+            {/* <DropdownMenuSub>
               <DropdownMenuSubTrigger>Tutorials</DropdownMenuSubTrigger>
               <DropdownMenuPortal>
                 <DropdownMenuSubContent>
@@ -127,7 +127,7 @@ const ProjectSwitcher = () => {
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
             </DropdownMenuSub>
-            <DropdownMenuSeparator />
+            <DropdownMenuSeparator /> */}
             <DropdownMenuItem
               onClick={() => {
                 resetState("mtst");

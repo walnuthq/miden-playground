@@ -114,7 +114,7 @@ export const accountIdFromPrefixSuffix = (prefix: string, suffix: string) => {
 export const midenFaucetAccount = (networkId: NetworkId) => ({
   ...basicFungibleFaucetAccount({
     storageMode: "public",
-    symbol: "MIDEN",
+    symbol: "USDCX",
     decimals: FUNGIBLE_FAUCET_DEFAULT_DECIMALS,
     maxSupply: parseAmount(
       FUNGIBLE_FAUCET_DEFAULT_MAX_SUPPLY.toString(),

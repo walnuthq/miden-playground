@@ -1,5 +1,10 @@
 import { useState } from "react";
 import { HandCoins } from "lucide-react";
+import {
+  NoteFile as WasmNoteFile,
+  NoteId as WasmNoteId,
+} from "@miden-sdk/miden-sdk/lazy";
+import { useMiden } from "@miden-sdk/react/lazy";
 import { Spinner } from "@workspace/ui/components/spinner";
 import useNetwork from "@/hooks/use-network";
 import useAccounts from "@/hooks/use-accounts";
@@ -9,32 +14,14 @@ import {
   midenFaucetApiUrl,
 } from "@/lib/constants";
 import { parseAmount } from "@/lib/utils/asset";
-import {
-  getPowChallenge,
-  findValidNonce,
-  getTokens,
-  getNote,
-} from "@/lib/miden-faucet";
-import useNotes from "@/hooks/use-notes";
-import { useMiden } from "@miden-sdk/react/lazy";
-
-// const downloadBlob = (blob: Blob, fileName: string) => {
-//   const url = URL.createObjectURL(blob);
-//   const a = document.createElement("a");
-//   a.style.display = "none";
-//   a.href = url;
-//   a.download = fileName;
-//   document.body.appendChild(a);
-//   a.click();
-//   a.remove();
-//   URL.revokeObjectURL(url);
-// };
+import { waitUntil } from "@/lib/utils";
+import { getPowChallenge, findValidNonce, getTokens } from "@/lib/miden-faucet";
+import { clientGetNotesById } from "@/lib/web-client";
 
 const MintButton = () => {
   const { networkId } = useNetwork();
   const { client } = useMiden();
   const { connectedWallet } = useAccounts();
-  const { importNoteFromFile } = useNotes();
   const [loading, setLoading] = useState(false);
   return (
     <Button
@@ -54,24 +41,26 @@ const MintButton = () => {
           amount,
         });
         const nonce = await findValidNonce({ challenge, target });
-        const { noteId, txId } = await getTokens({
+        const { noteId } = await getTokens({
           backendUrl: midenFaucetApiUrl(networkId),
           challenge,
           nonce,
           recipient: connectedWallet.address,
           amount,
-          isPrivateNote: true,
         });
-        console.info({ noteId, txId });
-        const noteFileBytes = await getNote({
-          backendUrl: midenFaucetApiUrl(networkId),
-          noteId,
+        console.info({ noteId });
+        // The faucet only creates public notes, so wait for the note to be committed
+        // and import it by id.
+        await waitUntil(async () => {
+          const wasmFetchedNotes = await clientGetNotesById({
+            networkId,
+            noteIds: [noteId],
+          });
+          return wasmFetchedNotes.length > 0;
         });
-        await importNoteFromFile({ noteId, noteFileBytes });
-        // const noteFileBlob = new Blob([noteFileBytes], {
-        //   type: "application/octet-stream",
-        // });
-        // downloadBlob(noteFileBlob, "note.mno");
+        await client.importNoteFile(
+          WasmNoteFile.fromNoteId(WasmNoteId.fromHex(noteId)),
+        );
         setLoading(false);
       }}
     >

@@ -1,8 +1,8 @@
 import {
   type WebClient as WebClientType,
-  AccountId as WasmAccountId,
+  type AccountId as WasmAccountId,
 } from "@miden-sdk/miden-sdk/lazy";
-import { fromBase64, fromHex } from "@/lib/utils";
+import { fromHex } from "@/lib/utils";
 import type { NetworkId } from "@/lib/types/network";
 import { midenFaucetApiUrl } from "@/lib/constants";
 import { clientGetAllInputNotes } from "@/lib/web-client";
@@ -70,34 +70,34 @@ export const getMetadata = async (backendUrl: string) => {
     throw new Error(`Failed to get metadata: ${message}`);
   }
   const result = await response.json();
+  // Since 0.17 the faucet owns no account: `id` is the node's funding service account
+  // the notes are sent from, and `balance` is what it has left (absent when the funding
+  // service is unreachable).
   const {
     version,
     id,
-    max_supply: maxSupply,
     decimals,
     explorer_url: explorerUrl,
     pow_load_difficulty: powLoadDifficulty,
     base_amount: baseAmount,
-    note_transport_url: noteTransportUrl,
+    balance,
   } = result as {
     version: string;
     id: string;
-    max_supply: number;
     decimals: number;
-    explorer_url: string;
+    explorer_url: string | null;
     pow_load_difficulty: number;
     base_amount: number;
-    note_transport_url: string;
+    balance: number | null;
   };
   return {
     version,
     id,
-    maxSupply,
     decimals,
     explorerUrl,
     powLoadDifficulty,
     baseAmount,
-    noteTransportUrl,
+    balance,
   };
 };
 
@@ -131,19 +131,16 @@ export const getTokens = async ({
   nonce,
   recipient,
   amount,
-  isPrivateNote,
 }: {
   backendUrl: string;
   challenge: string;
   nonce: number;
   recipient: string;
   amount: string;
-  isPrivateNote: boolean;
 }) => {
   const response = await fetch(
     `${backendUrl}/get_tokens?${new URLSearchParams({
       account_id: recipient,
-      is_private_note: isPrivateNote ? "true" : "false",
       asset_amount: amount,
       challenge,
       nonce: nonce.toString(),
@@ -153,54 +150,25 @@ export const getTokens = async ({
     const message = await response.text();
     throw new Error(`Failed to receive tokens: ${message}`);
   }
+  // The faucet forwards the request to the node's funding service, which creates a public
+  // P2ID note and includes it in its next funding transaction: there is no faucet
+  // transaction, hence no transaction id.
   const result = await response.json();
-  const { note_id: noteId, tx_id: txId } = result as {
-    note_id: string;
-    tx_id: string;
-  };
-  return { noteId, txId };
-};
-
-export const getNote = async ({
-  backendUrl,
-  noteId,
-}: {
-  backendUrl: string;
-  noteId: string;
-}) => {
-  const response = await fetch(
-    `${backendUrl}/get_note?${new URLSearchParams({ note_id: noteId })}`,
-  );
-  if (!response.ok) {
-    const message = await response.text();
-    throw new Error(`Failed to get note: ${message}`);
-  }
-  const result = await response.json();
-  const { data_base64: dataBase64 } = result as { data_base64: string };
-  return fromBase64(dataBase64);
+  const { note_id: noteId } = result as { note_id: string };
+  return { noteId };
 };
 
 export const requestFundingNote = async ({
   networkId,
   recipient,
-  expectedFaucet,
   requestedAmount,
 }: {
   networkId: NetworkId;
   recipient: WasmAccountId;
-  expectedFaucet: WasmAccountId;
   requestedAmount?: number;
 }) => {
   const backendUrl = midenFaucetApiUrl(networkId);
   const metadata = await getMetadata(backendUrl);
-  const actualFaucet = metadata.id.startsWith("0x")
-    ? WasmAccountId.fromHex(metadata.id)
-    : WasmAccountId.fromBech32(metadata.id);
-  if (actualFaucet.toString() !== expectedFaucet.toString()) {
-    throw new Error(
-      `Configured faucet ${actualFaucet} does not issue ${networkId}'s native fee asset ${expectedFaucet}`,
-    );
-  }
   const configuredAmount = process.env.NEXT_PUBLIC_MIDEN_FEE_AMOUNT?.trim();
   const amount =
     requestedAmount ??
@@ -222,28 +190,43 @@ export const requestFundingNote = async ({
     nonce,
     recipient: recipient.toString(),
     amount: amount.toString(),
-    isPrivateNote: false,
   });
 };
 
-const FUNDING_NOTE_POLL_ATTEMPTS = 10;
+// The funding service batches requests into its next funding transaction, so the note
+// can take a while to be committed: wait up to 5 minutes like the faucet frontend does.
+const FUNDING_NOTE_POLL_ATTEMPTS = 150;
 const FUNDING_NOTE_POLL_INTERVAL_MS = 2000;
 
 export const waitForFundingNote = async ({
   client,
   networkId,
   noteId,
-  txId,
+  expectedFaucet,
 }: {
   client: WebClientType;
   networkId: NetworkId;
   noteId: string;
-  txId: string;
+  expectedFaucet: WasmAccountId;
 }) => {
   for (let attempt = 0; attempt < FUNDING_NOTE_POLL_ATTEMPTS; attempt += 1) {
     const notes = await clientGetAllInputNotes({ client, networkId });
     const note = notes.find((n) => n.id()?.toString() === noteId);
     if (note?.inclusionProof()) {
+      // The faucet metadata no longer names the issuing faucet, so check the note
+      // actually carries the chain's native fee asset.
+      const carriesFeeAsset = note
+        .details()
+        .assets()
+        .fungibleAssets()
+        .some(
+          (asset) => asset.faucetId().toString() === expectedFaucet.toString(),
+        );
+      if (!carriesFeeAsset) {
+        throw new Error(
+          `Fee-funding note ${noteId} does not carry ${networkId}'s native fee asset ${expectedFaucet}`,
+        );
+      }
       return note;
     }
     if (attempt < FUNDING_NOTE_POLL_ATTEMPTS - 1) {
@@ -253,6 +236,6 @@ export const waitForFundingNote = async ({
     }
   }
   throw new Error(
-    `Fee-funding note ${noteId} from faucet transaction ${txId} was not found after ${FUNDING_NOTE_POLL_ATTEMPTS} sync attempts`,
+    `Fee-funding note ${noteId} was not found after ${FUNDING_NOTE_POLL_ATTEMPTS} sync attempts`,
   );
 };

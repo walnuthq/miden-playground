@@ -285,7 +285,6 @@ const useAccounts = () => {
     );
     const wasmAccount = await clientDeployAccount({
       client,
-      networkId,
       storageMode,
       components,
       scripts: componentScripts,

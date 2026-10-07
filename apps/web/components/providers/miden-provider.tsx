@@ -12,7 +12,7 @@ import {
 import { Button } from "@workspace/ui/components/button";
 import useNetwork from "@/hooks/use-network";
 import { networks, noteTransportUrls } from "@/lib/miden-client";
-import { deleteLegacyMidenStores, deleteMidenStores } from "@/lib/utils/store";
+import { deleteOutdatedMidenStores, deleteMidenStores } from "@/lib/utils/store";
 import { STATE_STORAGE_KEY } from "@/lib/utils/state";
 import Logo from "@/components/lib/logo";
 import Loading from "@/components/lib/loading";
@@ -58,16 +58,17 @@ const MidenProvider = ({ children }: { children: ReactNode }) => {
   const [storeChecked, setStoreChecked] = useState(false);
   // Has to settle before `RawMidenProvider` mounts, since that is what opens
   // the store and, with it, upgrades away the only marker saying the store
-  // predates 0.16. Dropping the persisted state alongside it keeps the accounts
-  // the UI lists in step with the store that backs them.
+  // predates 0.16, or resets a store an older major/minor SDK wrote. Dropping
+  // the persisted state alongside it keeps the accounts the UI lists in step
+  // with the store that backs them.
   useEffect(() => {
-    deleteLegacyMidenStores()
-      .then((legacyStores) => {
-        if (legacyStores.length > 0) {
+    deleteOutdatedMidenStores()
+      .then((outdatedStores) => {
+        if (outdatedStores.length > 0) {
           localStorage.removeItem(STATE_STORAGE_KEY);
         }
       })
-      .catch((error) => console.error("ERROR: deleteLegacyMidenStores", error))
+      .catch((error) => console.error("ERROR: deleteOutdatedMidenStores", error))
       .finally(() => setStoreChecked(true));
   }, []);
   if (!storeChecked) {

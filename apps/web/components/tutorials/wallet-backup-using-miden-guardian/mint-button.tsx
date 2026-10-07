@@ -41,15 +41,14 @@ const MintButton = () => {
           amount,
         });
         const nonce = await findValidNonce({ challenge, target });
-        const { noteId, txId } = await getTokens({
+        const { noteId } = await getTokens({
           backendUrl: midenFaucetApiUrl(networkId),
           challenge,
           nonce,
           recipient: multisig.address,
           amount,
-          isPrivateNote: false,
         });
-        console.info({ noteId, txId });
+        console.info({ noteId });
         setNoteId(noteId);
       }}
     >

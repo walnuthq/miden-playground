@@ -89,16 +89,6 @@ const wasmRpcClient = (networkId: NetworkId) => {
   return new WasmRpcClient(endpoints[networkId]);
 };
 
-// Fees are denominated in the native asset of the chain, whose faucet is advertised
-// by every block header.
-export const clientGetBlockHeaderByNumber = async ({
-  networkId,
-  blockNum,
-}: {
-  networkId: NetworkId;
-  blockNum?: number | null;
-}) => wasmRpcClient(networkId).getBlockHeaderByNumber(blockNum);
-
 export const clientGetConsumableNotes = ({
   client,
   accountId,
@@ -175,20 +165,20 @@ export const clientGetAllTransactions = (client: WebClientType) =>
 
 export const clientDeployAccount = async ({
   client,
-  networkId,
   storageMode,
   components,
   scripts,
 }: {
   client: WebClientType;
-  networkId: NetworkId;
   storageMode: AccountStorageMode;
   components: Component[];
   scripts: Script[];
 }) => {
-  const [builder, blockHeader] = await Promise.all([
+  // Fees are denominated in the native asset of the chain, whose faucet is advertised
+  // by the protocol configuration the client receives when it syncs.
+  const [builder, feeFaucetId] = await Promise.all([
     client.createCodeBuilder(),
-    clientGetBlockHeaderByNumber({ networkId }),
+    client.feeFaucetId(),
   ]);
   const initSeed = new Uint8Array(32);
   crypto.getRandomValues(initSeed);
@@ -233,7 +223,7 @@ export const clientDeployAccount = async ({
           ...allowedNoteScriptFees,
           new WasmNoteScriptFee(WasmNoteScript.p2id().root(), 0n),
         ],
-        blockHeader.feeFaucetId(),
+        feeFaucetId,
         allowedTransactionScriptRoots,
       );
       for (const authComponent of authComponents) {

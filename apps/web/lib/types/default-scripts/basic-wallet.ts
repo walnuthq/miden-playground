@@ -69,25 +69,25 @@ const basicWallet: Script = {
   readOnly: true,
   rust,
   masm,
-  digest: "0x3cde70c72d7990cd0cb443c43cef103a2fc52d4343e5b3a51175ab51ea55683b",
+  digest: "0xf2e5b2d0bfee8029ebc6ef3ca234585452fb5c9467f41c878c9e245f59b00719",
   procedureExports: [
     {
       ...defaultProcedureExport(),
       path: "::miden::standards::components::wallets::basic_wallet::create_note",
       digest:
-        "0xf503aef4187744e1fac3d06add3fbd7d0609e196fb0701456bb9bce51c199af3",
+        "0x27641b79c8aec7ec29820c907eb5c05134b7d02cf69e7e73a5b7dcd09c803a95",
     },
     {
       ...defaultProcedureExport(),
       path: "::miden::standards::components::wallets::basic_wallet::move_asset_to_note",
       digest:
-        "0x595bc83258726a66bd904912cfd5186c07cbd902dfbc115b7d6bc8105efc57e3",
+        "0xf261e7bdd1faee5db3b0abe4bb67b153fbca6ece3e456b83eff98697f21f6a97",
     },
     {
       ...defaultProcedureExport(),
       path: "::miden::standards::components::wallets::basic_wallet::receive_asset",
       digest:
-        "0x34a56dd18f6fe5aab63198b9dcfc6467e793ebabb37d56b994b902504635da13",
+        "0xd7416b798a70aabbca510c3cd0f48ba35473b5d76dc302375157c6f563fffc15",
     },
   ],
 };
