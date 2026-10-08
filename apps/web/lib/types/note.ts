@@ -33,6 +33,8 @@ export type InputNote = {
   fungibleAssets: FungibleAsset[];
   storage: string[];
   nullifier: string;
+  // The block the note was included in, 0 until it's committed.
+  blockNum: number;
   noteFileBytes: string;
   updatedAt: number;
 };

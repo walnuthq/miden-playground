@@ -12,6 +12,7 @@ export const defaultInputNote = (): InputNote => ({
   fungibleAssets: [],
   storage: [],
   nullifier: "",
+  blockNum: 0,
   noteFileBytes: "",
   updatedAt: Date.now(),
 });

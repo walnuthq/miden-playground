@@ -7,6 +7,22 @@ import useAppState from "@/hooks/use-app-state";
 import { saEvent } from "@/lib/simple-analytics";
 import { sleep } from "@/lib/utils";
 import useNetwork from "@/hooks/use-network";
+import type { NetworkId } from "@/lib/types/network";
+import { clientGetLatestBlockNum } from "@/lib/web-client";
+
+// The chain tip a tutorial starts at (see State.tutorialStartBlockNum), 0 on the
+// mock chain or when the node can't be reached, which disables the check.
+const startBlockNum = async (networkId: NetworkId) => {
+  if (networkId === "mmck") {
+    return 0;
+  }
+  try {
+    return await clientGetLatestBlockNum(networkId);
+  } catch (error) {
+    console.error("ERROR: clientGetLatestBlockNum", error);
+    return 0;
+  }
+};
 
 const useTutorials = () => {
   const router = useRouter();
@@ -33,6 +49,7 @@ const useTutorials = () => {
     pushState({
       ...tutorial.state,
       nextStore: tutorial.store,
+      tutorialStartBlockNum: await startBlockNum(tutorial.networkId),
       completedTutorials,
     });
     saEvent("start_tutorial", {
@@ -54,6 +71,7 @@ const useTutorials = () => {
     pushState({
       ...nextTutorial.state,
       nextStore: nextTutorial.store,
+      tutorialStartBlockNum: await startBlockNum(nextTutorial.networkId),
       completedTutorials: newCompletedTutorials,
     });
     saEvent("complete_tutorial", {

@@ -3,12 +3,14 @@ import type { TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
 import Step4Content from "@/components/tutorials/connect-wallet-and-sign-transactions/step4.mdx";
+import useGlobalContext from "@/components/global-context/hook";
 import useAccounts from "@/hooks/use-accounts";
 import useNotes from "@/hooks/use-notes";
 import { P2ID_NOTE_CODE } from "@/lib/constants";
 import { accountIdFromPrefixSuffix } from "@/lib/utils/account";
 
 const useCompleted = () => {
+  const { tutorialStartBlockNum } = useGlobalContext();
   const { wallets, connectedWallet } = useAccounts();
   const senderAccount = wallets.find(
     ({ address }) => address === connectedWallet?.address,
@@ -17,14 +19,17 @@ const useCompleted = () => {
     ({ address }) => address !== connectedWallet?.address,
   );
   const { inputNotes } = useNotes();
+  // Starting the tutorial resets the client store, which can fetch notes sent
+  // in a previous run again: only count notes included since then.
   const note = inputNotes.find(
-    ({ senderId, scriptRoot, storage, state, type }) =>
+    ({ senderId, scriptRoot, storage, state, type, blockNum }) =>
       senderId === senderAccount?.id &&
       scriptRoot === P2ID_NOTE_CODE &&
       accountIdFromPrefixSuffix(storage[1] ?? "", storage[0] ?? "") ===
         recipientAccount?.id &&
       state === "committed" &&
-      type === "private",
+      type === "private" &&
+      blockNum > tutorialStartBlockNum,
   );
   return !!note;
 };

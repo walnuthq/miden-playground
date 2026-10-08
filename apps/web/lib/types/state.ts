@@ -73,6 +73,9 @@ export type State = {
   tutorialId: TutorialId;
   tutorialStep: number;
   tutorialMaxStep: number;
+  // The chain tip when the tutorial started, to tell notes created during the
+  // tutorial from older ones the reset store fetches again.
+  tutorialStartBlockNum: number;
   tutorialOpen: boolean;
   nextTutorialStepDisabled: boolean;
   completedTutorials: Set<string>;
