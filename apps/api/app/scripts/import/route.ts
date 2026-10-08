@@ -77,14 +77,14 @@ const importScriptsFromPackageSources = async (
           id: "",
           name: "",
           type: "account-component",
-          digest: "",
+          commitment: "",
         },
       };
       return {
         id: dependencyPackage.package.id,
         name: dependencyPackage.package.name,
         type: dependencyPackage.package.type,
-        digest: "",
+        commitment: "",
       };
     });
     compiledPackages.push(

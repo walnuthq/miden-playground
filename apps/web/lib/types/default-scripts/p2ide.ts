@@ -238,8 +238,8 @@ const p2ide: Script = {
   readOnly: true,
   rust,
   masm,
-  digest: P2IDE_NOTE_CODE,
-  dependencies: [pick(basicWallet, "id", "name", "type", "digest")],
+  commitment: P2IDE_NOTE_CODE,
+  dependencies: [pick(basicWallet, "id", "name", "type", "commitment")],
   procedureExports: [
     {
       ...defaultProcedureExport(),

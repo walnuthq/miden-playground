@@ -150,9 +150,7 @@ const AccountNotesTable = ({ account }: { account: Account }) => {
         </TableHeader>
         <TableBody>
           {consumableNotes.map((inputNote) => {
-            const script = scripts.find(
-              ({ digest }) => digest === inputNote.scriptRoot,
-            );
+            const script = scripts.find(({ id }) => id === inputNote.scriptId);
             const sender = accounts.find(({ id }) => id === inputNote.senderId);
             const senderAddress = normalizeAccountId(inputNote.senderId);
             return (

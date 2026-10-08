@@ -3,7 +3,7 @@ import Step2Content from "@/components/tutorials/create-and-fund-wallet/step2.md
 import useAccounts from "@/hooks/use-accounts";
 
 const Step2: TutorialStep = {
-  title: "Discover your new wallet details.",
+  title: "Explore your new wallet's details.",
   Content: () => {
     const { wallets } = useAccounts();
     const wallet = wallets.find(({ isPublic }) => isPublic);

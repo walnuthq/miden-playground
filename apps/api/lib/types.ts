@@ -47,7 +47,7 @@ export const defaultPackage = (): Package => ({
   rust: "",
   files: {},
   masm: "",
-  digest: "",
+  commitment: "",
   masp: "",
   exports: [],
   dependencies: [],
@@ -88,7 +88,7 @@ export type Dependency = {
   id: string;
   name: string;
   type: PackageType;
-  digest: string;
+  commitment: string;
 };
 
 export type PackageSource = { midenProjectToml: string; rust: string };
@@ -101,7 +101,7 @@ export type CompiledPackage = Pick<
   | "status"
   | "masm"
   | "rust"
-  | "digest"
+  | "commitment"
   | "masp"
   | "exports"
 > & {

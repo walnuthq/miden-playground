@@ -9,7 +9,7 @@ export const basicWalletDependency: Dependency & {
   id: "basic-wallet",
   name: "basic-wallet",
   type: "account-component",
-  digest: "",
+  commitment: "",
   rust: templates["basic-wallet"],
   files: {
     "basic-wallet/.cargo/config.toml":
@@ -38,7 +38,8 @@ export const counterAccountDependency: Dependency & {
   id: "counter-account",
   name: "counter-account",
   type: "account-component",
-  digest: "0x3874bfcdc769a48ae5e4e66f0ae9e50438743cdb35bdf258d1d1c3cf71575b26",
+  commitment:
+    "0x3874bfcdc769a48ae5e4e66f0ae9e50438743cdb35bdf258d1d1c3cf71575b26",
   rust: templates["counter-account"],
   files: {
     "counter-account/.cargo/config.toml":

@@ -100,7 +100,7 @@ type CompileResponse = {
   stdout: string;
   stderr: string;
   masp: string;
-  digest: string;
+  commitment: string;
   manifest: Manifest;
   // Set when the build succeeded: the sources plus the lockfile it used.
   files?: Record<string, string>;
@@ -146,7 +146,7 @@ export const compilePackage = async ({
     stdout,
     stderr,
     masp,
-    digest,
+    commitment,
     manifest,
     files: compiledFiles,
   } = await fetchApiCompile<CompileResponse>("/compile", {
@@ -173,15 +173,17 @@ export const compilePackage = async ({
       rust,
       error: stderr,
       masm: "",
-      digest: "",
+      commitment: "",
       masp: "",
       exports: [],
-      dependencies: dependenciesPackages.map(({ id, name, type, digest }) => ({
-        id,
-        name,
-        type,
-        digest,
-      })),
+      dependencies: dependenciesPackages.map(
+        ({ id, name, type, commitment }) => ({
+          id,
+          name,
+          type,
+          commitment,
+        }),
+      ),
     };
   }
   const exports = manifest.exports.filter(
@@ -195,7 +197,7 @@ export const compilePackage = async ({
     // the next compile to get the same dependency versions.
     files: compiledFiles ?? updatedFiles,
     masp,
-    digest,
+    commitment,
     exports,
     dependencies,
   });
@@ -207,7 +209,7 @@ export const compilePackage = async ({
     rust,
     error: "",
     masm: "",
-    digest,
+    commitment,
     masp,
     exports,
     dependencies: dependenciesPackages.map((dependencyPackage) => {
@@ -218,7 +220,8 @@ export const compilePackage = async ({
         id: dependencyPackage.id,
         name: dependencyPackage.name,
         type: dependencyPackage.type,
-        digest: dependency?.digest ?? "",
+        // The manifest still calls the dependency commitment `digest`.
+        commitment: dependency?.digest ?? "",
       };
     }),
   };

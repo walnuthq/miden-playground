@@ -78,11 +78,14 @@ const AccountComponents = ({
       script:
         scripts.find(({ id }) => id === component.scriptId) ?? defaultScript(),
     }));
-  const accountComponentsScriptsDigests = accountComponentsWithScripts.map(
-    ({ script }) => script.digest,
+  const accountComponentsScriptsCommitments = accountComponentsWithScripts.map(
+    ({ script }) => script.commitment,
   );
   const verifiedAccountComponentsWithScripts = verifiedAccountComponents
-    .filter(({ digest }) => !accountComponentsScriptsDigests.includes(digest))
+    .filter(
+      ({ commitment }) =>
+        !accountComponentsScriptsCommitments.includes(commitment),
+    )
     .map((script) => ({
       component: {
         ...defaultComponent(),

@@ -13,11 +13,13 @@ const useFundAccount = () => {
     if (!client) {
       throw new Error("MidenClient not ready");
     }
-    const feeFaucetId = await client.feeFaucetId();
-    const { noteId } = await requestFundingNote({
-      networkId,
-      recipient: account.id(),
-    });
+    const [{ noteId }, feeFaucetId] = await Promise.all([
+      requestFundingNote({
+        networkId,
+        recipient: account.id(),
+      }),
+      client.feeFaucetId(),
+    ]);
     const fundingNote = await waitForFundingNote({
       client,
       networkId,

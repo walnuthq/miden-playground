@@ -12,7 +12,7 @@ const tutorial: Tutorial = {
   ...defaultTutorial(),
   id: "interact-with-the-counter-contract",
   number: 6,
-  title: "Interact with the Counter Contract",
+  title: "Interact with the counter contract",
   tagline: "Increment the count of a Counter Contract on testnet.",
   description:
     "This tutorial will guide you through interacting with a Counter Contract by incrementing its counter on testnet.",

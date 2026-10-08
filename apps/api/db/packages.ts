@@ -32,7 +32,7 @@ export const updatePackage = ({
   rust,
   files,
   masp,
-  digest,
+  commitment,
   exports,
   dependencies,
 }: {
@@ -41,13 +41,13 @@ export const updatePackage = ({
   rust?: string;
   files?: Record<string, string>;
   masp?: string;
-  digest?: string;
+  commitment?: string;
   exports?: Export[];
   dependencies?: string[];
 }) =>
   db
     .update(packagesTable)
-    .set({ status, rust, files, masp, digest, exports, dependencies })
+    .set({ status, rust, files, masp, commitment, exports, dependencies })
     .where(eq(packagesTable.id, id));
 
 export const deletePackage = (id: string) =>
@@ -65,7 +65,7 @@ export const getDependencies = async (dependencies: string[]) => {
       id: true,
       name: true,
       type: true,
-      digest: true,
+      commitment: true,
       rust: true,
       files: true,
     },

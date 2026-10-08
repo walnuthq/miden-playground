@@ -9,7 +9,7 @@ const state: State = {
   ...defaultState(),
   accounts: [
     midenFaucetAccount("mtst"),
-    /*{
+    {
       ...basicFungibleFaucetAccount({
         storageMode: "public",
         symbol: "MDN",
@@ -17,10 +17,10 @@ const state: State = {
         maxSupply: "100000000000000000",
         totalSupply: "0",
       }),
-      id: "0xc129dffc3f2f71d142068c90e3669e",
+      id: "0xa297e1241c1fedd1456b7d4f3671be",
       name: "MDN Faucet",
-      address: "mtst1arqjnhlu8uhhr52zq6xfpcmxncg6rlza_qr7qqq9wr6w",
-      identifier: "mtst1arqjnhlu8uhhr52zq6xfpcmxncg6rlza",
+      address: "mtst1az3f0cfyrs07m529dd757dn3hcyj3rgd_qr7qqq9wr6w",
+      identifier: "mtst1az3f0cfyrs07m529dd757dn3hcyj3rgd",
       routingParameters: "qr7qqq9wr6w",
       isNew: false,
       storage: [
@@ -183,7 +183,7 @@ const state: State = {
         {
           name: "miden::standards::faucets::fungible::token_config",
           type: "value",
-          item: "0x00e1f5050000000000008a5d7845630106000000000000002141030000000000",
+          item: "0x000000000000000000008a5d7845630106000000000000002141030000000000",
           mapEntries: [],
         },
         {
@@ -195,7 +195,7 @@ const state: State = {
         {
           name: "miden::standards::auth::singlesig::pub_key",
           type: "value",
-          item: "0x758cd2ec80459131ecb84c2a9f7904c7e4a6677264542c6d05d551ac36b169b6",
+          item: "0x35f5520410a643ff119e57a7e2c71390ad25b0fe5833fe4837ddda9dc65add9d",
           mapEntries: [],
         },
         {
@@ -207,7 +207,7 @@ const state: State = {
         {
           name: "miden::standards::inspection::storage_schema::commitment",
           type: "value",
-          item: "0x2c286f998c003d5360daf8ffbda91061d64ac693925a5abb7774adeffad86a5a",
+          item: "0x0f5c203f2b0bba623df8ead5f75523d6ae3dfb4806cc560806f972f8b4c3dbc4",
           mapEntries: [],
         },
         {
@@ -253,7 +253,7 @@ const state: State = {
           ],
         },
       ],
-    },*/
+    },
   ],
   tutorialId: "create-and-fund-wallet",
 };

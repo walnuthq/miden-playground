@@ -132,7 +132,8 @@ const authSingleSig: Script = {
   readOnly: true,
   rust,
   masm,
-  digest: "0xca556e3d56ba394901cc8809b68c082b3388f77d17fc92c628501fc3f3d972b1",
+  commitment:
+    "0xca556e3d56ba394901cc8809b68c082b3388f77d17fc92c628501fc3f3d972b1",
   procedureExports: [
     {
       ...defaultProcedureExport(),

@@ -14,7 +14,7 @@ const tutorial: Tutorial = {
   ...defaultTutorial(),
   id: "deploy-a-counter-contract",
   number: 7,
-  title: "Deploy a Counter Contract",
+  title: "Deploy a counter contract",
   tagline: "Deploy your own Counter Contract on testnet.",
   description:
     "This tutorial will walk you through developing your own custom Counter Contract and deploying it on testnet.",

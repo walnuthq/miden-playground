@@ -13,10 +13,10 @@ const tutorial: Tutorial = {
   ...defaultTutorial(),
   id: "create-and-fund-wallet",
   number: 1,
-  title: "Create and fund wallet",
+  title: "Create and fund a wallet",
   tagline: "Create a new wallet and fund it using a faucet.",
   description:
-    "In this first tutorial, we'll create a new wallet and discover how to fund it by creating your first Miden transactions.",
+    "In this first tutorial, you'll create a new wallet and learn how to fund it by creating your first Miden Transactions.",
   initialRoute: "/accounts",
   networkId: "mtst",
   state,

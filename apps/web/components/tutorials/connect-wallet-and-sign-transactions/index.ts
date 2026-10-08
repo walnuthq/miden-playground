@@ -13,7 +13,7 @@ const tutorial: Tutorial = {
   ...defaultTutorial(),
   id: "connect-wallet-and-sign-transactions",
   number: 3,
-  title: "Connect wallet and sign transactions",
+  title: "Connect a wallet and sign Transactions",
   tagline: "Connect your Bread Wallet and sign transactions on testnet.",
   description:
     "This tutorial will walk you through connecting your Bread Wallet to the Miden Playground and confirming transactions on Miden testnet.",

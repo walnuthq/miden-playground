@@ -1,7 +1,7 @@
 import Link from "@/components/tutorials/tutorial-link";
 import Image from "next/image";
 
-A [Transaction](https://docs.miden.xyz/reference/protocol/transaction) in Miden is the state transition of a single account. A Transaction takes as input a single account and zero or more notes, and outputs the same account with an updated state, together with zero or more notes.
+A [Transaction](https://docs.miden.xyz/reference/protocol/transaction) in Miden is the state transition of a single Account. A Transaction takes a single Account and zero or more Notes as input, and outputs the same Account with an updated state, together with zero or more Notes.
 
 <Image
   className="max-h-64 object-contain"
@@ -11,11 +11,11 @@ A [Transaction](https://docs.miden.xyz/reference/protocol/transaction) in Miden 
   height={600}
 />
 
-Compared to most blockchains, where a Transaction typically involves more than one account (e.g., sender and receiver), a Transaction in Miden involves a single account.
+In most blockchains, a transaction typically involves more than one account (e.g., a sender and a receiver). In Miden, a Transaction involves a single Account.
 
-In Miden, minting 100 MDN tokens from a fungible faucet to a wallet takes two transactions, one in which the faucet creates a note containing 100 MDN and one in which the wallet consumes that note and receives the 100 MDN.
+This means that minting 100 MDN tokens from a fungible faucet to a wallet takes two Transactions: one in which the faucet creates a Note containing 100 MDN, and one in which the wallet consumes that Note and receives the 100 MDN.
 
-<Link href={`/transactions/${props.transaction?.id}`}>Click here</Link> to
-navigate to the mint transaction executed in the previous step and notice how it
-created an output note that contains our MDN assets. To actually fund our
-account we'll need to consume this note to transfer these assets in our wallet.
+<Link href={`/transactions/${props.transaction?.id}`}>Click here</Link> to view
+the mint transaction executed in the previous step, and notice how it created an
+output note that contains our MDN tokens. To actually fund our wallet, we need
+to consume this Note, which moves these assets into our wallet's vault.

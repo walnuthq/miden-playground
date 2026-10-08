@@ -20,7 +20,8 @@ const fungibleFaucet: Script = {
   readOnly: true,
   rust,
   masm,
-  digest: "0xa93f46f604b8c6b9896f18d5d6fc191f5bc3d03d20f4b6c315bd74d5c21b9011",
+  commitment:
+    "0xa93f46f604b8c6b9896f18d5d6fc191f5bc3d03d20f4b6c315bd74d5c21b9011",
   procedureExports: [
     {
       ...defaultProcedureExport(),

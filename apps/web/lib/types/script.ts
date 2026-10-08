@@ -76,7 +76,7 @@ export type Dependency = {
   // kind: "library" | "kernel" | "account-component";
   // version: string;
   type: ScriptType;
-  digest: string;
+  commitment: string;
 };
 
 export type PackageSource = { midenProjectToml: string; rust: string };
@@ -90,7 +90,7 @@ export type Script = {
   rust: string;
   masm: string;
   error: string;
-  digest: string;
+  commitment: string;
   masp: string;
   exports: Export[];
   procedureExports: ProcedureExport[];
@@ -107,7 +107,7 @@ export type CompiledPackage = Pick<
   | "status"
   | "masm"
   | "rust"
-  | "digest"
+  | "commitment"
   | "masp"
   | "exports"
   | "error"
@@ -134,7 +134,7 @@ export type Package = {
   name: string;
   type: ScriptType;
   files: Record<string, string>;
-  digest: string;
+  commitment: string;
   masp: string;
   manifest: {
     exports: Export[];

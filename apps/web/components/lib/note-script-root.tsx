@@ -11,7 +11,7 @@ import useScripts from "@/hooks/use-scripts";
 
 const NoteScriptRoot = ({ inputNote }: { inputNote: InputNote }) => {
   const { scripts } = useScripts();
-  const script = scripts.find(({ digest }) => digest === inputNote.scriptRoot);
+  const script = scripts.find(({ id }) => id === inputNote.scriptId);
   return (
     <Tooltip>
       <TooltipTrigger asChild>

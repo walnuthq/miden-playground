@@ -36,7 +36,7 @@ export const defaultDependencies = (): Dependency[] => [
     name: "miden-core",
     type: "library",
     // version: "0.29.4",
-    digest:
+    commitment:
       "0x4d34c859654c20dc21dd6ceb792b215d1210a0e81d5d663694f265d4f1545cfe",
   },
   {
@@ -44,7 +44,7 @@ export const defaultDependencies = (): Dependency[] => [
     name: "miden-precompiles",
     type: "library",
     // version: "0.29.4",
-    digest:
+    commitment:
       "0xa75eb666b0b27bb9c4679e92956515be411ce4dc1de68af8dd291f35c4f31fbc",
   },
   {
@@ -52,7 +52,7 @@ export const defaultDependencies = (): Dependency[] => [
     name: "miden-protocol",
     type: "library",
     // version: "0.16.0",
-    digest:
+    commitment:
       "0x2466538eb39da9963466cd42cb06a2dc096d09360625c79ab05d83c731ad3ba4",
   },
   {
@@ -60,7 +60,7 @@ export const defaultDependencies = (): Dependency[] => [
     name: "miden-tx-kernel",
     type: "kernel",
     // version: "0.16.0",
-    digest:
+    commitment:
       "0xf598b10b510e3c9343404306bd49c9aa385abcca88a90b71eb9a6b4224de7c22",
   },
 ];
@@ -74,7 +74,7 @@ export const defaultScript = (): Script => ({
   rust: "",
   masm: "",
   error: "",
-  digest: "",
+  commitment: "",
   masp: "",
   exports: [],
   procedureExports: [],
@@ -229,7 +229,7 @@ export const packageToScript = ({
   name,
   type,
   files,
-  digest,
+  commitment,
   masp,
   manifest,
   createdAt,
@@ -243,7 +243,7 @@ export const packageToScript = ({
   rust: files["src/lib.rs"] ?? "",
   masm: "",
   error: "",
-  digest,
+  commitment,
   masp,
   exports: manifest.exports,
   procedureExports: manifest.exports
@@ -261,7 +261,7 @@ export const packageToScript = ({
     id: dependency.name,
     name: dependency.name,
     type: dependency.kind,
-    digest: dependency.digest,
+    commitment: dependency.digest,
   })),
   createdAt: new Date(createdAt).getTime(),
   updatedAt: new Date(updatedAt).getTime(),

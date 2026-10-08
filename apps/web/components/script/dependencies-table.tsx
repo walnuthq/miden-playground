@@ -65,12 +65,12 @@ const DependenciesTable = ({ script }: { script: Script }) => (
         <TableRow>
           <TableHead>Name</TableHead>
           <TableHead>Type</TableHead>
-          <TableHead>Digest</TableHead>
+          <TableHead>Commitment</TableHead>
           <TableHead />
         </TableRow>
       </TableHeader>
       <TableBody>
-        {script.dependencies.map(({ id, name, type, digest }) => (
+        {script.dependencies.map(({ id, name, type, commitment }) => (
           <TableRow key={id}>
             <TableCell>
               <Link
@@ -81,7 +81,7 @@ const DependenciesTable = ({ script }: { script: Script }) => (
               </Link>
             </TableCell>
             <TableCell>{scriptTypes[type]}</TableCell>
-            <TableCell>{formatDigest(digest)}</TableCell>
+            <TableCell>{formatDigest(commitment)}</TableCell>
             <TableCell>
               {!script.readOnly && (
                 <DependencyActionsCell script={script} dependencyId={id} />
@@ -89,11 +89,11 @@ const DependenciesTable = ({ script }: { script: Script }) => (
             </TableCell>
           </TableRow>
         ))}
-        {defaultDependencies().map(({ id, name, type, digest }) => (
+        {defaultDependencies().map(({ id, name, type, commitment }) => (
           <TableRow key={id}>
             <TableCell>{name}</TableCell>
             <TableCell>{scriptTypes[type]}</TableCell>
-            <TableCell>{formatDigest(digest)}</TableCell>
+            <TableCell>{formatDigest(commitment)}</TableCell>
             <TableCell />
           </TableRow>
         ))}

@@ -30,12 +30,12 @@ const Step5: TutorialStep = {
         <Step5Content note={note} />
         <TutorialAlert
           completed={completed}
-          title="Action required: Consume the note."
-          titleWhenCompleted="The note has been consumed."
+          title="Action required: Consume the Note."
+          titleWhenCompleted="The Note has been consumed."
           description={
             <p>
-              Click on <em>"Consume note with {wallet?.name}"</em>, preview and
-              submit the resulting transaction.
+              Click <em>"Consume note with {wallet?.name}"</em>, then preview
+              and submit the resulting Transaction.
             </p>
           }
         />

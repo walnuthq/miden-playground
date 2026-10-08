@@ -86,7 +86,7 @@ const AddDependencyDialog = () => {
                   id: dependency.id,
                   name: dependency.name,
                   type: dependency.type,
-                  digest: dependency.digest,
+                  commitment: dependency.commitment,
                 },
               ],
             });

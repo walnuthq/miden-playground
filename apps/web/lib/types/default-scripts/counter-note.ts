@@ -59,7 +59,7 @@ const counterNote: Script = {
   readOnly: true,
   rust,
   masm,
-  dependencies: [pick(counterContract, "id", "name", "type", "digest")],
+  dependencies: [pick(counterContract, "id", "name", "type", "commitment")],
   procedureExports: [
     {
       ...defaultProcedureExport(),

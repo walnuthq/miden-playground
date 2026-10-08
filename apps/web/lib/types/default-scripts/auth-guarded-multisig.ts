@@ -31,7 +31,8 @@ const authGuardedMultisig: Script = {
   readOnly: true,
   rust,
   masm,
-  digest: "0x4ec0dd8bf5ced6e758f661aeebe4f1cc6ea6eecf66b7758968ca953a7e9c1348",
+  commitment:
+    "0x4ec0dd8bf5ced6e758f661aeebe4f1cc6ea6eecf66b7758968ca953a7e9c1348",
   procedureExports: [
     {
       ...defaultProcedureExport(),

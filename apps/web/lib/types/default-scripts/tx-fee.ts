@@ -136,7 +136,7 @@ const txFee: Script = {
   readOnly: true,
   rust,
   masm,
-  digest: TX_FEE_NOTE_CODE,
+  commitment: TX_FEE_NOTE_CODE,
   procedureExports: [
     {
       ...defaultProcedureExport(),

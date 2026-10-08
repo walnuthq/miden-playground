@@ -34,9 +34,7 @@ const TransactionNoteTable = ({ notes }: { notes: TransactionNote[] }) => {
         </TableHeader>
         <TableBody>
           {notes.map((note) => {
-            const script = scripts.find(
-              ({ digest }) => digest === note.scriptRoot,
-            );
+            const script = scripts.find(({ id }) => id === note.scriptId);
             const sender = accounts.find(({ id }) => id === note.senderId);
             const senderAddress = normalizeAccountId(note.senderId);
             return (

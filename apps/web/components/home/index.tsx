@@ -1,14 +1,14 @@
 "use client";
-// import { useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
-// import { Button } from "@workspace/ui/components/button";
-// import StartTutorialCard from "@/components/home/start-tutorial-card";
-// import tutorials from "@/components/tutorials";
-// import examples from "@/lib/examples";
-// import LaunchExampleCard from "@/components/home/launch-example-card";
+import { Button } from "@workspace/ui/components/button";
+import StartTutorialCard from "@/components/home/start-tutorial-card";
+import tutorials from "@/components/tutorials";
+import examples from "@/lib/examples";
+import LaunchExampleCard from "@/components/home/launch-example-card";
 import NewSandboxCard from "@/components/home/new-sandbox-card";
 
-/* const Tutorials = () => {
+const Tutorials = () => {
   const [showMore, setShowMore] = useState(tutorials.length < 5);
   return (
     <>
@@ -56,7 +56,7 @@ const Examples = () => (
       ))}
     </div>
   </>
-); */
+);
 
 const SandboxEnvironments = () => (
   <>
@@ -97,10 +97,10 @@ const Home = () => (
       our very own training environment.
     </p>
     <div className="h-px border-b border-black/20 border-dashed" />
-    {/* <Tutorials />
+    <Tutorials />
     <div className="h-px border-b border-[#ff5500] border-dashed my-4" />
     <Examples />
-    <div className="h-px border-b border-[#ff5500] border-dashed my-4" /> */}
+    <div className="h-px border-b border-[#ff5500] border-dashed my-4" />
     <SandboxEnvironments />
   </div>
 );

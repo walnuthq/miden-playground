@@ -27,9 +27,9 @@ const Step3: TutorialStep = {
         <TutorialAlert
           completed={completed}
           title="Action required: Submit a mint transaction."
-          titleWhenCompleted="Your mint transaction is submitted."
+          titleWhenCompleted="Your mint transaction has been submitted."
           description="Follow the instructions above to create and submit a mint
-            transaction against the faucet."
+            transaction on the faucet."
         />
       </>
     );
