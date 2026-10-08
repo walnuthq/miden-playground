@@ -13,9 +13,9 @@ const tutorial: Tutorial = {
   id: "transfer-assets-between-wallets",
   number: 2,
   title: "Transfer assets between wallets",
-  tagline: "Transfer tokens between 2 different wallets.",
+  tagline: "Transfer tokens between two wallets.",
   description:
-    "This tutorial focuses on learning how to transfer assets between 2 wallets.",
+    "In this tutorial, you'll learn how to transfer assets from one wallet to another.",
   initialRoute: "/accounts",
   state,
   store,

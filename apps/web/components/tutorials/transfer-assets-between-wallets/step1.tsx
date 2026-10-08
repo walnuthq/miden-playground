@@ -4,7 +4,7 @@ import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
 import Step1Content from "@/components/tutorials/transfer-assets-between-wallets/step1.mdx";
 
 const Step1: TutorialStep = {
-  title: "Exploring the accounts.",
+  title: "Explore the accounts.",
   Content: () => {
     const { wallets, faucets } = useAccounts();
     const walletA = wallets.find(({ name }) => name === "Wallet A");
@@ -14,9 +14,9 @@ const Step1: TutorialStep = {
       <>
         <Step1Content walletA={walletA} walletB={walletB} faucet={faucet} />
         <TutorialAlert
-          title="Explore the accounts"
-          description="Click on each account to explore its current state. Confirm that
-            Wallet A holds MDN tokens."
+          title="Explore the accounts."
+          description="Click each account to explore its current state, and confirm
+            that Wallet A holds MDN tokens."
         />
       </>
     );

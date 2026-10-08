@@ -4,7 +4,7 @@ import useTransactions from "@/hooks/use-transactions";
 import Step3Content from "@/components/tutorials/transfer-assets-between-wallets/step3.mdx";
 
 const Step3: TutorialStep = {
-  title: "Inspect transaction and output note.",
+  title: "Inspect the transaction and its output note.",
   Content: () => {
     const { wallets } = useAccounts();
     const { transactions } = useTransactions();

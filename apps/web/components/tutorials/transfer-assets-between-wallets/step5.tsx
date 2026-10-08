@@ -4,7 +4,7 @@ import NextTutorialButton from "@/components/tutorials/next-tutorial-button";
 import Step5Content from "@/components/tutorials/transfer-assets-between-wallets/step5.mdx";
 
 const Step5: TutorialStep = {
-  title: "Confirm assets have been transferred.",
+  title: "Confirm the assets have been transferred.",
   Content: () => {
     const { wallets } = useAccounts();
     const walletB = wallets.find(({ name }) => name === "Wallet B");
