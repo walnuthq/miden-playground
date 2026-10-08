@@ -1,4 +1,3 @@
-import { EllipsisVertical } from "lucide-react";
 import type { TutorialStep } from "@/lib/types/tutorial";
 import useAccounts from "@/hooks/use-accounts";
 import NextStepButton from "@/components/tutorials/next-step-button";
@@ -7,31 +6,25 @@ import Step3Content from "@/components/tutorials/private-transfers/step3.mdx";
 
 const useCompleted = () => {
   const { connectedWallet } = useAccounts();
-  return (
-    connectedWallet?.isPrivate &&
-    connectedWallet?.consumableNoteIds.length === 0
-  );
+  return connectedWallet?.name === "Para Wallet";
 };
 
-const Step4: TutorialStep = {
-  title: "Consume the faucet note with your private wallet.",
+const Step3: TutorialStep = {
+  title: "Connect a Para Wallet to the Playground.",
   Content: () => {
-    const { connectedWallet } = useAccounts();
     const completed = useCompleted();
     return (
       <>
-        <Step3Content
-          wallet={connectedWallet?.isPrivate ? connectedWallet : undefined}
-        />
+        <Step3Content />
         <TutorialAlert
           completed={completed}
-          title="Action required: Consume the faucet note."
-          titleWhenCompleted="Your wallet has been privately funded."
+          title="Action required: Connect a Para Wallet."
+          titleWhenCompleted="Your Para Wallet is connected and imported."
           description={
             <p>
-              Click on the <EllipsisVertical className="size-4 inline" /> icon
-              button on the right-most side of the consumable note row in your
-              private wallet page details to consume the note with your wallet.
+              Disconnect Bread Wallet, then click the <em>"Select Wallet"</em>{" "}
+              button, select <em>"Para Wallet"</em> and log in with your email
+              address.
             </p>
           }
         />
@@ -44,4 +37,4 @@ const Step4: TutorialStep = {
   },
 };
 
-export default Step4;
+export default Step3;

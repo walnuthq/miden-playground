@@ -1,13 +1,9 @@
-import { EllipsisVertical } from "lucide-react";
 import Link from "@/components/tutorials/tutorial-link";
-import WalletAlert from "@/components/tutorials/wallet-alert";
 
-In the previous step, we requested tokens from the [Miden Faucet](https://faucet.testnet.miden.io/).
+Your Bread Wallet is funded. Before sending tokens to the Para Wallet, we need to create it and import it into the Playground.
 
-The resulting public note containing our tokens must now be consumed to fund our wallet privately.
+The Playground signs Transactions with one wallet at a time, so start by disconnecting Bread Wallet: click your wallet address button in the top-right corner and select _"Disconnect"_. Your Bread Wallet stays listed on the accounts page.
 
-Click on the <EllipsisVertical className="size-4 inline" /> icon button in the _"Consumable Notes"_ table to consume the note with your wallet.
+Then click the _"Select Wallet"_ button and select _"Para Wallet"_. In the Para modal, enter your email address and type the verification code Para sends you by email.
 
-<WalletAlert />
-
-The note will transition to the **Consumed** state and disappear from your wallet consumable notes.
+Para creates a wallet for your email address and the Playground derives a **Public** Miden account from it. Once the Para Wallet appears on the <Link href="/accounts">accounts page</Link> with the **Public** storage mode, you can proceed to the next step.

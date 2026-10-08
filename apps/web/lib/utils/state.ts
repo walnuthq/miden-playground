@@ -70,6 +70,7 @@ export const defaultState = (): State => ({
   tutorialId: "",
   tutorialStep: 0,
   tutorialMaxStep: 0,
+  tutorialStartBlockNum: 0,
   tutorialOpen: true,
   nextTutorialStepDisabled: true,
   completedTutorials: new Set([]),
@@ -87,6 +88,7 @@ export const stateSerializer = ({
   tutorialId,
   tutorialStep,
   tutorialMaxStep,
+  tutorialStartBlockNum,
   tutorialOpen,
   nextTutorialStepDisabled,
   completedTutorials,
@@ -102,6 +104,7 @@ export const stateSerializer = ({
     tutorialId,
     tutorialStep,
     tutorialMaxStep,
+    tutorialStartBlockNum,
     tutorialOpen,
     nextTutorialStepDisabled,
     completedTutorials: [...completedTutorials],
@@ -135,6 +138,7 @@ export const stateDeserializer = (value: string): State => {
       tutorialId,
       tutorialStep,
       tutorialMaxStep,
+      tutorialStartBlockNum,
       tutorialOpen,
       nextTutorialStepDisabled,
       completedTutorials,
@@ -149,6 +153,7 @@ export const stateDeserializer = (value: string): State => {
       tutorialId?: TutorialId;
       tutorialStep?: number;
       tutorialMaxStep?: number;
+      tutorialStartBlockNum?: number;
       tutorialOpen?: boolean;
       nextTutorialStepDisabled?: boolean;
       completedTutorials?: string[];
@@ -167,6 +172,8 @@ export const stateDeserializer = (value: string): State => {
       tutorialId: tutorialId ?? initialState.tutorialId,
       tutorialStep: tutorialStep ?? initialState.tutorialStep,
       tutorialMaxStep: tutorialMaxStep ?? initialState.tutorialMaxStep,
+      tutorialStartBlockNum:
+        tutorialStartBlockNum ?? initialState.tutorialStartBlockNum,
       tutorialOpen: tutorialOpen ?? initialState.tutorialOpen,
       nextTutorialStepDisabled:
         nextTutorialStepDisabled ?? initialState.nextTutorialStepDisabled,

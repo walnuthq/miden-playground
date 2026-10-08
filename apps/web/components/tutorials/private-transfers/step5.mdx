@@ -1,14 +1,17 @@
 import { EllipsisVertical } from "lucide-react";
 import Link from "@/components/tutorials/tutorial-link";
+import { formatId } from "@/lib/utils";
 
-Disconnect your **Private** wallet from the playground and re-connect using the **Public** wallet used as recipient in the previous step.
+The private note is on its way: only the Para Wallet can consume it, which requires a consume transaction signed by the Para Wallet.
 
-From your {props.wallet ? <Link href={`/accounts/${props.wallet.identifier}`}>public wallet details page</Link> : 'public wallet details page'}, you should be able to see the **Private** note we created previously in the list of consumable notes.
+Disconnect Bread Wallet by clicking your wallet address button in the top-right corner and selecting _"Disconnect"_.
 
-Click on the <EllipsisVertical className="size-4 inline" /> icon button in the _"Consumable Notes"_ table to consume the **Private** note with your **Public** wallet.
+Then click the _"Select Wallet"_ button, select _"Para Wallet"_ and log in again with your email address and the verification code Para sends you.
 
-You might wonder how your private note data has been transported on the network and acknowledged by your **Public** wallet.
+Open your {props.wallet ? <Link href={`/accounts/${props.wallet.identifier}`}>Para Wallet details page</Link> : 'Para Wallet details page'}: the private note sent by your Bread Wallet appears in the _"Consumable Notes"_ section.
 
-Miden provides a [Note Transport Layer](https://docs.miden.xyz/reference/protocol/account/address#communicating-channel-information) to exchange private notes in a user-friendly way without sacrificing privacy as the system supports end-to-end encryption.
+If several notes are listed, for example notes left over from a previous run of this tutorial, consume the newest one: the note sent in the previous step{props.noteId ? <>, with ID <strong>{formatId(props.noteId)}</strong></> : ''}.
 
-You can always opt-out from this system and use your own private communication side channel to exchange notes.
+Click the <EllipsisVertical className="size-4 inline" /> icon button in the _"Consumable Notes"_ table and select _"Consume note with Para Wallet"_. Para opens a confirmation modal summarizing the consume transaction: approve it to sign the transaction, which moves the tokens into your Para Wallet's vault.
+
+If this is your Para Wallet's first Transaction, it also deploys the account on-chain. Once the transaction is committed, the note leaves the _"Consumable Notes"_ table.

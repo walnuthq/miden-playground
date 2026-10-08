@@ -14,9 +14,9 @@ const tutorial: Tutorial = {
   id: "private-transfers",
   number: 4,
   title: "Private transfers",
-  tagline: "Learn how to perform privacy preserving transfers on Miden.",
+  tagline: "Send assets privately from Bread Wallet to Para Wallet.",
   description:
-    "Perform transactions to move assets between wallets while preserving your privacy.",
+    "This tutorial walks you through funding a private Bread Wallet and sending assets in a private note to a public Para Wallet on Miden testnet.",
   category: "beginner",
   initialRoute: "/accounts",
   state: {

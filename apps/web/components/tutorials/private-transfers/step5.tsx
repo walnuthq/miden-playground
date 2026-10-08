@@ -4,33 +4,35 @@ import useAccounts from "@/hooks/use-accounts";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
 import Step5Content from "@/components/tutorials/private-transfers/step5.mdx";
+import useTransferNote from "@/components/tutorials/private-transfers/use-transfer-note";
 
 const useCompleted = () => {
-  const { connectedWallet } = useAccounts();
-  return (
-    connectedWallet?.isPublic && connectedWallet?.consumableNoteIds.length === 0
-  );
+  const note = useTransferNote();
+  return !!note?.state.startsWith("consumed-");
 };
 
-const Step6: TutorialStep = {
-  title: "Consume the private note with your public wallet.",
+const Step5: TutorialStep = {
+  title: "Consume the private note with your Para Wallet.",
   Content: () => {
-    const { connectedWallet } = useAccounts();
+    const { wallets } = useAccounts();
+    const note = useTransferNote();
     const completed = useCompleted();
     return (
       <>
         <Step5Content
-          wallet={connectedWallet?.isPublic ? connectedWallet : undefined}
+          wallet={wallets.find(({ name }) => name === "Para Wallet")}
+          noteId={note?.id}
         />
         <TutorialAlert
           completed={completed}
           title="Action required: Consume the private note."
-          titleWhenCompleted="Your received a private transfer."
+          titleWhenCompleted="Your Para Wallet received a private transfer."
           description={
             <p>
-              Click on the <EllipsisVertical className="size-4 inline" /> icon
-              button on the right-most side of the consumable note row in your
-              public wallet page details to consume the note with your wallet.
+              Disconnect Bread Wallet and reconnect Para Wallet. Then click the{" "}
+              <EllipsisVertical className="size-4 inline" /> icon button in the{" "}
+              <em>"Consumable Notes"</em> table of your Para Wallet details page
+              and select <em>"Consume note with Para Wallet"</em>.
             </p>
           }
         />
@@ -43,4 +45,4 @@ const Step6: TutorialStep = {
   },
 };
 
-export default Step6;
+export default Step5;

@@ -108,6 +108,11 @@ export const clientGetNotesById = ({
     noteIds.map((noteId) => WasmNoteId.fromHex(noteId)),
   );
 
+export const clientGetLatestBlockNum = async (networkId: NetworkId) => {
+  const blockHeader = await wasmRpcClient(networkId).getBlockHeaderByNumber();
+  return blockHeader.blockNum();
+};
+
 export const clientGetAllInputNotes = async ({
   client,
   networkId,
@@ -668,6 +673,11 @@ export const wasmInputNoteRecordToInputNote = ({
       .items()
       .map((item) => item.toString()),
     nullifier: record.nullifier() ?? "",
+    // Kept once known: consumed notes can drop their inclusion proof.
+    blockNum:
+      record.inclusionProof()?.location().blockNum() ??
+      previousInputNote?.blockNum ??
+      0,
     noteFileBytes: previousInputNote
       ? previousInputNote.noteFileBytes
       : noteFileBytes

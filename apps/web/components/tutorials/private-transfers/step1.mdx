@@ -1,11 +1,14 @@
-In this tutorial, we will connect our [Bread Wallet](https://chromewebstore.google.com/detail/bread-wallet-by-miden/coajhopfooegmaifelglfboehacldcbo) to the Playground and sign private transactions (mint assets, send assets to another wallet).
+import Link from "@/components/tutorials/tutorial-link";
 
-Install the browser extension and setup a new **Private** wallet, at the _Set Up Account Recovery_ step, select the **Guardian** option to enable Guardian-based recovery for your wallet.
+In this tutorial, we will transfer assets privately between two different wallets: your [Bread Wallet](https://chromewebstore.google.com/detail/bread-wallet-by-miden/coajhopfooegmaifelglfboehacldcbo) and a [Para Wallet](https://www.getpara.com/), an embedded wallet you log into with your email address.
 
-The main difference between **Public** and **Private** accounts is how their state is handled: while a public account state is entirely stored on-chain, only a commitment (hash) to a private account's state is stored on-chain.
+On Miden, every Account is either public or private, a choice encoded in its [Account ID](https://docs.miden.xyz/reference/protocol/account/id#account-type):
 
-In Miden, when you are the custodian of your account state (in the case of a private wallet), **losing this state amounts to losing your funds**, similar to losing a private key.
+- **Public Accounts**: the account state (code, storage and vault) is stored on-chain, so anyone can see its balance and activity, much like an account on most blockchains.
+- **Private Accounts**: only a commitment (hash) to the account state is stored on-chain. The state itself stays on your device, so your balance and activity remain private to you.
 
-With a Guardian protected account, a third party stores a copy of your private state that you can recover in case you lose access to your wallet but the guardian operator can see your state.
+The Bread Wallet used in this tutorial must be a **Private** account. The Para Wallet that we will create later in this tutorial is a **Public** account.
 
-Connect your **Private** wallet by clicking on _"Select Wallet"_, you will be requested access to your **Private** account state, accept and click on _"Connect"_.
+Make sure the Bread Wallet extension is pinned in your browser, then click the _"Select Wallet"_ button, select _"Bread Wallet"_ and accept the connection request in Bread Wallet.
+
+The Playground automatically imports your wallet. Once it appears on the accounts page, {props.wallet ? <Link href={`/accounts/${props.wallet.identifier}`}>click its name</Link> : 'click its name'} to inspect it and proceed to the next step.

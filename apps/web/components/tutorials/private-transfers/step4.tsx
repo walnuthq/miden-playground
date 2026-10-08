@@ -1,33 +1,17 @@
-import { useEffect, useState } from "react";
+import { EllipsisVertical } from "lucide-react";
 import type { TutorialStep } from "@/lib/types/tutorial";
-import useNetwork from "@/hooks/use-network";
-import useAccounts from "@/hooks/use-accounts";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
 import Step4Content from "@/components/tutorials/private-transfers/step4.mdx";
-import { midenFaucetAccountId } from "@/lib/constants";
+import useTransferNote from "@/components/tutorials/private-transfers/use-transfer-note";
 
 const useCompleted = () => {
-  const { networkId } = useNetwork();
-  const [initialBalance, setInitialBalance] = useState(0n);
-  const { connectedWallet } = useAccounts();
-  const currentBalance = BigInt(
-    (connectedWallet?.isPrivate &&
-      connectedWallet?.fungibleAssets.find(
-        ({ faucetId }) => faucetId === midenFaucetAccountId(networkId),
-      )?.amount) ??
-      "0",
-  );
-  useEffect(() => {
-    if (initialBalance === 0n) {
-      setInitialBalance(currentBalance);
-    }
-  }, [initialBalance, currentBalance]);
-  return initialBalance !== 0n && currentBalance < initialBalance;
+  const note = useTransferNote();
+  return note?.state === "committed" || !!note?.state.startsWith("consumed-");
 };
 
-const Step5: TutorialStep = {
-  title: "Send tokens privately to your public wallet.",
+const Step4: TutorialStep = {
+  title: "Send tokens privately to your Para Wallet.",
   Content: () => {
     const completed = useCompleted();
     return (
@@ -35,14 +19,16 @@ const Step5: TutorialStep = {
         <Step4Content />
         <TutorialAlert
           completed={completed}
-          title="Action required: Send tokens to your public wallet."
-          titleWhenCompleted="Private note with sent tokens created."
+          title="Action required: Send tokens to your Para Wallet."
+          titleWhenCompleted="The private note carrying your tokens has been created."
           description={
             <p>
-              Click on the <em>"Create new transaction"</em> button and select
-              the <em>"New send transaction"</em> option. Configure and sign a
-              send transaction to create a private note consumable by your
-              public wallet.
+              Disconnect Para Wallet and reconnect Bread Wallet. Then click the{" "}
+              <EllipsisVertical className="size-4 inline" /> icon button in your
+              Bread Wallet's row on the accounts page and select the{" "}
+              <em>"New send transaction"</em> option. Send at most 0.001 USDCX
+              to the Para Wallet in a private note, then confirm the transaction
+              in Bread Wallet.
             </p>
           }
         />
@@ -55,4 +41,4 @@ const Step5: TutorialStep = {
   },
 };
 
-export default Step5;
+export default Step4;
