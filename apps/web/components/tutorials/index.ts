@@ -2,7 +2,7 @@ import type { Tutorial } from "@/lib/types/tutorial";
 import tutorial1 from "@/components/tutorials/create-and-fund-wallet";
 import tutorial2 from "@/components/tutorials/transfer-assets-between-wallets";
 import tutorial3 from "@/components/tutorials/connect-wallet-and-sign-transactions";
-// import tutorial4 from "@/components/tutorials/private-transfers";
+import tutorial4 from "@/components/tutorials/private-transfers";
 // import tutorial5 from "@/components/tutorials/wallet-backup-using-miden-guardian";
 // import tutorial6 from "@/components/tutorials/interact-with-the-counter-contract";
 // import tutorial7 from "@/components/tutorials/deploy-a-counter-contract";
@@ -23,7 +23,7 @@ const tutorials: Tutorial[] = [
   tutorial1,
   tutorial2,
   tutorial3,
-  // tutorial4,
+  tutorial4,
   // tutorial5,
   // tutorial6,
   // tutorial7,

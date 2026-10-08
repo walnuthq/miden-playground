@@ -9,28 +9,36 @@ const useCompleted = () => {
   const pathname = usePathname();
   const { connectedWallet } = useAccounts();
   return (
-    connectedWallet?.isPrivate &&
-    pathname === `/accounts/${connectedWallet?.identifier}`
+    connectedWallet?.name === "Bread Wallet" &&
+    connectedWallet.isPrivate &&
+    pathname === `/accounts/${connectedWallet.identifier}`
   );
 };
 
 const Step1: TutorialStep = {
-  title: "Connect a private wallet to the playground.",
+  title: "Connect your private Bread Wallet to the Playground.",
   Content: () => {
+    const { connectedWallet } = useAccounts();
     const completed = useCompleted();
     return (
       <>
-        <Step1Content />
+        <Step1Content
+          wallet={
+            connectedWallet?.name === "Bread Wallet"
+              ? connectedWallet
+              : undefined
+          }
+        />
         <TutorialAlert
           completed={completed}
-          title="Action required: Connect a private wallet."
-          titleWhenCompleted="Your wallet is connected and imported."
+          title="Action required: Connect your private Bread Wallet."
+          titleWhenCompleted="Your Bread Wallet is connected and imported."
           description={
             <p>
-              Click on the <em>"Select Wallet"</em> button in the top-right
-              corner and connect a <strong>Private</strong> wallet to the
-              Playground, then once imported, navigate to your account details
-              page.
+              Click the <em>"Select Wallet"</em> button in the top-right corner
+              and select <em>"Bread Wallet"</em> to connect a{" "}
+              <strong>Private</strong> Bread Wallet account to the Playground.
+              Once your wallet is imported, open its account details page.
             </p>
           }
         />

@@ -1,14 +1,16 @@
-Your **Private** wallet is funded. The faucet note was public, so the funding itself can be observed on-chain, but from now on your wallet's balance and activity stay private.
+import { EllipsisVertical } from "lucide-react";
+import Link from "@/components/tutorials/tutorial-link";
 
-Now let's use your **Private** wallet to send some tokens to your **Public** wallet using the same private communication channel enabled by **Private** notes.
+Now let's send some tokens from your Bread Wallet to your Para Wallet. The send transaction must be signed by the sender, so you first need to switch back to Bread Wallet.
 
-**Important**: The **Public** account used must be funded, make sure to request tokens from the [Miden Faucet](https://faucet.testnet.miden.io/) if you've just created it.
+To disconnect Para Wallet, click the Para button showing your wallet address (_"0x…"_) in the top-right corner to open the Para modal. Click the profile icon button, the last of the four buttons below your balance, then click _"Disconnect"_ at the bottom of the _"Profile"_ view. Your Para Wallet stays listed on the accounts page.
 
-Click on the _"Create new transaction"_ button and select the _"New send transaction"_ option: a _"Configure send transaction"_ modal will show up.
+Then click the _"Select Wallet"_ button, select _"Bread Wallet"_ and accept the connection request to reconnect it.
 
-Click on the Bread Wallet browser extension and then click on the wallet selection dropdown to pick your public wallet.
-Copy your public wallet address to the clipboard and paste it inside the _"Target account"_ input of the send transaction modal.
+On the <Link href="/accounts">accounts page</Link>, click the <EllipsisVertical className="size-4 inline" /> icon button in your Bread Wallet's row and select the _"New send transaction"_ option to open the configuration modal.
 
-Select the **MIDEN** asset and enter an amount eg. **10** tokens, leave the note type as **Private**.
+Select **Para Wallet** as the target account and **USDCX** as the asset, then enter a small amount, **0.001 at most**: USDCx is also the asset used to pay transaction fees on testnet, so you need to keep enough of it in your Bread Wallet to cover them. Leave the note type set to **Private**.
 
-Finally, click on the _"Preview"_ button to confirm the send transaction and create a new **Private** P2ID output note embedding your sent tokens.
+Click the _"Preview"_ button: Bread Wallet will ask you to confirm the send transaction, which creates a private P2ID output note carrying your tokens that only the Para Wallet can consume.
+
+For a private note, only its hash and its metadata, such as its sender, are stored on-chain: the note details, including the assets it carries and its target account, stay off-chain. To let the Para Wallet discover and consume it, the encrypted note details are sent through the [Note Transport Layer](https://docs.miden.xyz/reference/protocol/account/address#communicating-channel-information), where the recipient can fetch them.
