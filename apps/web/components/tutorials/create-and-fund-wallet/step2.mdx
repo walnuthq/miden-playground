@@ -1,14 +1,14 @@
 import AccountAddress from "@/components/lib/account-address";
 
-Our newly created Account generated its own unique [Account ID](https://docs.miden.xyz/reference/protocol/account/id), an immutable and unique identifier for the Account. Click on the link below to access your wallet:
+Our newly created Account was assigned an [Account ID](https://docs.miden.xyz/reference/protocol/account/id), a unique and immutable identifier. Click the link below to open your wallet:
 
 <AccountAddress account={props.wallet} />
 
-This identifier is designed to contain the metadata of an Account. The metadata includes the account type, account storage mode and the version of the Account. This metadata is included in the ID to ensure it can be determined without needing the full account state.
+The ID also encodes some of the Account's metadata: its storage mode (public or private) and its version. This means the metadata can be read from the ID alone, without needing the full Account state.
 
-There are two main categories of accounts in Miden: **basic accounts** and **faucets**.
+Accounts can play different roles depending on the code they run. The two you'll use in this tutorial are **wallets** and **faucets**.
 
-- **Basic Accounts**: Basic Accounts may be either mutable (code can be changed after deployment) or immutable (code cannot be changed once deployed).
-- **Faucets**: Faucets are always immutable and can be specialized by the type of [Assets](https://docs.miden.xyz/reference/protocol/asset) they issue: either fungible or non-fungible.
+- **Wallets**: Wallets hold assets in their vault and can send and receive them using Notes.
+- **Faucets**: Faucets issue (mint) new [assets](https://docs.miden.xyz/reference/protocol/asset), which can be either fungible or non-fungible.
 
-Let's fund our wallet by requesting MDN assets (tokens) from a pre-existing fungible MDN faucet.
+Let's fund our wallet with MDN tokens minted by the MDN Faucet, an existing fungible faucet.

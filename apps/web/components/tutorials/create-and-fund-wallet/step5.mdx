@@ -1,12 +1,12 @@
 import Link from "@/components/tutorials/tutorial-link";
 
-<Link href={`/notes/${props.note?.id}`}>Click here</Link> to access the output
+<Link href={`/notes/${props.note?.id}`}>Click here</Link> to view the output
 note created by the mint transaction.
 
-Each Note has a script that defines the conditions under which it can be consumed. Consumption of a Note can be restricted to certain accounts or entities. For example, the **P2ID (Pay-to-ID)** note script locks a note to a specific account ID, allowing only that account to spend it.
+Each Note has a script that defines the conditions under which it can be consumed. Consumption of a Note can be restricted to certain Accounts or entities. For example, the **P2ID (Pay-to-ID)** note script locks a Note to a specific Account ID, so that only that Account can consume it.
 
-Our [note storage](https://docs.miden.xyz/reference/protocol/note#storage) constraint specifies that only our own wallet Account ID can consume the note and receive the embedded assets, which has been enforced during the note creation process by the faucet.
+The faucet created a P2ID note and wrote our wallet's Account ID into its [note storage](https://docs.miden.xyz/reference/protocol/note#storage). When the Note is consumed, its script checks that the consuming account's ID matches this one, so only our wallet can consume the Note and receive its assets.
 
-Note storage items are encoded as a [Felt](https://docs.miden.xyz/builder/glossary/#felt) array, the decoded note storage section shows our wallet Account ID, which must be decomposed in 2 separate Felts (prefix and suffix).
+Note storage is encoded as an array of [Felts](https://docs.miden.xyz/builder/glossary/#felt) (field elements). The decoded note storage section shows our wallet's Account ID, which is split into 2 Felts (prefix and suffix) because it doesn't fit in a single one.
 
-Consumption occurs as part of a transaction. Upon successful consumption a [nullifier](https://docs.miden.xyz/builder/glossary/#nullifier) is generated for the consumed notes to ensure they can no longer be spent and avoid double-spending.
+Consumption happens as part of a Transaction. When a Note is consumed, its [nullifier](https://docs.miden.xyz/builder/glossary/#nullifier) is recorded on-chain, which marks the Note as spent and prevents double-spending.

@@ -42,7 +42,7 @@ const Providers = ({ children }: { children: ReactNode }) => (
               // No autoConnect, see MidenFiReconnect.
             >
               <SignerSlot />
-              <MidenFiReconnect />
+              {/* <MidenFiReconnect /> */}
               <WalletModalProvider>
                 <SimpleAnalyticsProvider>
                   <ParaProvider queryClient={queryClient}>

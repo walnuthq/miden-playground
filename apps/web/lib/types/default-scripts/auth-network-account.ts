@@ -97,7 +97,8 @@ const authNetworkAccount: Script = {
   readOnly: true,
   rust,
   masm,
-  digest: "0xd16c8eedd5e0c8cc784bb329a89bc952e7616529feca6f67a99c5fb76b6b1a00",
+  commitment:
+    "0xd16c8eedd5e0c8cc784bb329a89bc952e7616529feca6f67a99c5fb76b6b1a00",
   procedureExports: [
     {
       ...defaultProcedureExport(),

@@ -695,15 +695,17 @@ export const transactionStatus = (
 export const wasmTransactionToTransaction = ({
   record,
   result,
+  scripts,
 }: {
   record: WasmTransactionRecordType;
   result: WasmTransactionResultType;
+  scripts: Script[];
 }): Transaction => {
   const inputNotes = range(
     result.executedTransaction().inputNotes().numNotes(),
   ).map((index) => {
     const note = result.executedTransaction().inputNotes().getNote(index);
-    return wasmNoteToNote(note.note());
+    return wasmNoteToNote({ note: note.note(), scripts });
   });
   const outputNotes = range(
     result.executedTransaction().outputNotes().numNotes(),
@@ -713,7 +715,7 @@ export const wasmTransactionToTransaction = ({
       return note.intoFull();
     })
     .filter((note) => note !== undefined)
-    .map((note) => wasmNoteToNote(note));
+    .map((note) => wasmNoteToNote({ note, scripts }));
   return {
     id: record.id().toHex(),
     status: transactionStatus(record),
@@ -726,24 +728,35 @@ export const wasmTransactionToTransaction = ({
   };
 };
 
-export const wasmNoteToNote = (note: WasmNote): TransactionNote => ({
-  id: note.id().toString(),
-  type: noteType(note.metadata()),
-  scriptRoot: note.recipient().script().root().toHex(),
-  senderId: note.metadata()?.sender().toString() ?? "",
-  fungibleAssets: note
-    .assets()
-    .fungibleAssets()
-    .map((fungibleAsset) => ({
-      faucetId: fungibleAsset.faucetId().toString(),
-      amount: fungibleAsset.amount().toString(),
-    })),
-  storage: note
-    .recipient()
-    .storage()
-    .items()
-    .map((item) => item.toString()),
-});
+export const wasmNoteToNote = ({
+  note,
+  scripts,
+}: {
+  note: WasmNote;
+  scripts: Script[];
+}): TransactionNote => {
+  const scriptRoot = note.recipient().script().root().toHex();
+  const script = verifyStandardNotes({ scriptRoot, scripts });
+  return {
+    id: note.id().toString(),
+    type: noteType(note.metadata()),
+    scriptRoot,
+    scriptId: script?.id ?? "",
+    senderId: note.metadata()?.sender().toString() ?? "",
+    fungibleAssets: note
+      .assets()
+      .fungibleAssets()
+      .map((fungibleAsset) => ({
+        faucetId: fungibleAsset.faucetId().toString(),
+        amount: fungibleAsset.amount().toString(),
+      })),
+    storage: note
+      .recipient()
+      .storage()
+      .items()
+      .map((item) => item.toString()),
+  };
+};
 
 export const wasmStorageSlotFromStorageSlot = (storageSlot: StorageSlot) => {
   if (storageSlot.type === "value") {

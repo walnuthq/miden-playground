@@ -1,15 +1,15 @@
 import Link from "@/components/tutorials/tutorial-link";
 
-Navigate to <Link href={`/accounts/${props.walletA.identifier}`}>Wallet A</Link> and take a look under the assets table: here are the MDN tokens we'd like to transfer to <Link href={`/accounts/${props.walletB.identifier}`}>Wallet B</Link>.
+Navigate to <Link href={`/accounts/${props.walletA.identifier}`}>Wallet A</Link> and take a look at the _"Assets"_ table: these are the MDN tokens we'd like to transfer to <Link href={`/accounts/${props.walletB.identifier}`}>Wallet B</Link>.
 
-To initiate a transfer, you first need to create a send transaction from **Wallet A** to **Wallet B**. From **Wallet A** page, click on the _"Create new transaction"_ then _"New send transaction"_.
+To start the transfer, you first need to create a send transaction from **Wallet A** to **Wallet B**. From **Wallet A**'s page, click the _"Create new transaction"_ button, then select _"New send transaction"_.
 
-A _"Configure send transaction"_ dialog will show up where you can select the recipient account (**Wallet B**), the asset you want to transfer out (**MDN tokens**) and the amount to send eg. **100** tokens.
+A _"Configure send transaction"_ dialog will open, where you can select the target account (**Wallet B**), the asset you want to send (**MDN**) and the amount, e.g. **100** tokens.
 
-As with [Accounts](https://docs.miden.xyz/reference/protocol/account/id#account-storage-mode), notes can be stored either publicly or privately:
+The _"Note type"_ field sets how the Note created by this Transaction is stored. As with [Accounts](https://docs.miden.xyz/reference/protocol/account/id#account-type), Notes can be stored either publicly or privately:
 
-- **Public mode**: The Note data is stored in the [note database](https://docs.miden.xyz/reference/protocol/state#note-database), making it fully visible on-chain.
-- **Private mode**: Only the Note's hash is stored publicly. The Note's actual data remains off-chain, enhancing privacy.
+- **Public notes**: The Note's data is stored in the [note database](https://docs.miden.xyz/reference/protocol/state#note-database), making it fully visible on-chain.
+- **Private notes**: Only a commitment (hash) of the Note is stored on-chain. The Note's details stay off-chain and are shared directly with the recipient, enhancing privacy.
 
-The preview step shows a quick summary of the changes about to be performed on **Wallet A**. When you're ready to execute the transaction click on _"Submit"_ and wait a few seconds until the proof generation is complete.
-It will take some time as it's a computation-heavy task depending on your underlying hardware.
+Leave it as it is and click _"Preview"_. The preview step summarizes the changes the Transaction will make to **Wallet A**.
+When you're ready, click _"Submit"_ to execute the Transaction. This can take a few moments, because a zero-knowledge proof of the Transaction has to be generated, which is computationally intensive.

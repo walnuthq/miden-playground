@@ -33,9 +33,9 @@ const Step2: TutorialStep = {
         <TutorialAlert
           completed={completed}
           title="Action required: Submit a send transaction."
-          titleWhenCompleted="Your send transaction is submitted."
+          titleWhenCompleted="Your send transaction has been submitted."
           description="Follow the instructions above to create and submit a send
-            transaction against Wallet A."
+            transaction from Wallet A."
         />
       </>
     );

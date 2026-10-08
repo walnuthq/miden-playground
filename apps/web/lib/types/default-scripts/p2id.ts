@@ -34,7 +34,7 @@ impl P2idNote {
         assert_eq(storage.len().into(), felt!(2));
 
         // P2ID storage follows the protocol layout:
-        // [target_account_id_suffix, target_account_id_prefix, reclaim_height, timelock_height]
+        // [target_account_id_suffix, target_account_id_prefix]
         let target_account_id_suffix = storage[0];
         let target_account_id_prefix = storage[1];
 
@@ -54,41 +54,51 @@ impl P2idNote {
 }
 `;
 
-export const masm = `use miden::protocol::active_account
-use miden::protocol::account_id
+export const masm = `use {AccountId, NoteRecipient, NoteSerialNumber, NoteTag, NoteType} from miden::protocol::types
 use miden::protocol::active_note
 use miden::protocol::note
-use miden::protocol::output_note
-use miden::standards::wallets::basic->basic_wallet
+use miden::standards::note::note_target
+use miden::standards::wallets::basic as basic_wallet
 
 # ERRORS
 # =================================================================================================
 
-const ERR_P2ID_UNEXPECTED_NUMBER_OF_STORAGE_ITEMS="P2ID note expects exactly 2 note storage items"
-
-const ERR_P2ID_TARGET_ACCT_MISMATCH="P2ID's target account address and transaction address do not match"
+const ERR_P2ID_UNEXPECTED_NUMBER_OF_STORAGE_ITEMS="P2ID note expects exactly 4 note storage items"
 
 # CONSTANTS
 # =================================================================================================
 
+# The number of storage items of a P2ID note.
+const NUM_STORAGE_ITEMS = 4
+
 const STORAGE_PTR = 0
 const TARGET_ACCOUNT_ID_SUFFIX_PTR = STORAGE_PTR
 const TARGET_ACCOUNT_ID_PREFIX_PTR = STORAGE_PTR + 1
+const SALT_0_PTR = STORAGE_PTR + 2
+const SALT_1_PTR = STORAGE_PTR + 3
 
 # PROCEDURES
 # =================================================================================================
 
-#! Pay-to-ID script: adds all assets from the note to the account, assuming ID of the account
+#! Pay-to-ID script: adds the note's remaining assets to the account, assuming ID of the account
 #! matches target account ID specified by the note storage.
 #!
 #! Requires that the account exposes:
 #! - miden::standards::wallets::basic::receive_asset procedure.
+#!
+#! Consumers: target account (note storage)
 #!
 #! Inputs:  []
 #! Outputs: []
 #!
 #! Note storage is assumed to be as follows:
 #! - target_account_id is the ID of the account for which the note is intended.
+#! - salt is two field elements included in the storage commitment. It does not affect the target
+#!   account check.
+#! The storage layout is [target_account_id_suffix, target_account_id_prefix, salt_0, salt_1].
+#!
+#! A secret salt makes brute force checks of account IDs against the storage commitment
+#! computationally infeasible. A zero salt does not provide this protection.
 #!
 #! Panics if:
 #! - Account does not expose miden::standards::wallets::basic::receive_asset procedure.
@@ -97,42 +107,43 @@ const TARGET_ACCOUNT_ID_PREFIX_PTR = STORAGE_PTR + 1
 #! - Adding a fungible asset would result in amount overflow, i.e., the total amount would be
 #!   greater than 2^63.
 @note_script
-pub proc main
+pub proc main()
     # store the note storage to memory starting at address 0
-    push.STORAGE_PTR exec.active_note::get_storage
-    # => [num_storage_items, storage_ptr]
+    push.NUM_STORAGE_ITEMS push.STORAGE_PTR exec.active_note::get_bounded_storage
+    # => [num_storage_items]
 
-    # make sure the number of storage items is 2
-    eq.2 assert.err=ERR_P2ID_UNEXPECTED_NUMBER_OF_STORAGE_ITEMS
-    # => [storage_ptr]
+    # make sure the number of storage items is NUM_STORAGE_ITEMS
+    eq.NUM_STORAGE_ITEMS assert.err=ERR_P2ID_UNEXPECTED_NUMBER_OF_STORAGE_ITEMS
+    # => []
 
     # read the target account ID from the note storage
-    drop
     mem_load.TARGET_ACCOUNT_ID_PREFIX_PTR
     mem_load.TARGET_ACCOUNT_ID_SUFFIX_PTR
     # => [target_account_id_suffix, target_account_id_prefix]
 
-    exec.active_account::get_id
-    # => [account_id_suffix, account_id_prefix, target_account_id_suffix, target_account_id_prefix]
-
-    # ensure account_id = target_account_id, fails otherwise
-    exec.account_id::is_equal assert.err=ERR_P2ID_TARGET_ACCT_MISMATCH
+    # ensure the consuming account is the target account, fails otherwise
+    exec.note_target::assert_active_account_is_target_account
     # => []
 
-    exec.basic_wallet::add_assets_to_account
+    exec.basic_wallet::move_note_assets_to_account
     # => []
 end
 
-#! Creates a new P2ID output note from the given inputs.
+#! Computes a P2ID recipient with a zero salt and returns the note-creation arguments.
 #!
 #! This procedure handles:
-#! - Writing note storage to memory in the expected layout ([suffix, prefix] to match
-#!   existing P2ID storage format)
+#! - Writing note storage to memory in the layout [suffix, prefix, 0, 0]
 #! - Obtaining the note script root via procref
-#! - Building the recipient and creating the note
+#! - Building the recipient
+#!
+#! Note creation itself is intentionally left to the caller. Use this procedure when the caller is
+#! already inside an account procedure and can create the note directly via
+#! \`exec.output_note::create\`. Otherwise use \`p2id::create_output_note\`, which routes creation
+#! through the account's \`create_note\` procedure and can therefore be used from note or transaction
+#! scripts.
 #!
 #! Inputs:  [target_id_suffix, target_id_prefix, tag, note_type, SERIAL_NUM]
-#! Outputs: [note_idx]
+#! Outputs: [tag, note_type, RECIPIENT]
 #!
 #! Where:
 #! - target_id_suffix is the suffix felt of the target account ID.
@@ -140,14 +151,22 @@ end
 #! - tag is the note tag to be included in the note.
 #! - note_type is the storage type of the note (1 = public, 2 = private).
 #! - SERIAL_NUM is the serial number of the note (4 elements).
-#! - note_idx is the index of the created note.
+#! - RECIPIENT is the computed recipient digest of the note (4 elements).
 #!
 #! Invocation: exec
-@locals(2)
-pub proc new
+@locals(4)
+pub proc prepare_note(
+    target_id: AccountId,
+    tag: NoteTag,
+    note_type: NoteType,
+    serial_num: NoteSerialNumber
+) -> (NoteTag, NoteType, NoteRecipient)
     # => [target_id_suffix, target_id_prefix, tag, note_type, SERIAL_NUM]
 
     loc_store.TARGET_ACCOUNT_ID_SUFFIX_PTR loc_store.TARGET_ACCOUNT_ID_PREFIX_PTR
+    # => [tag, note_type, SERIAL_NUM]
+
+    push.0.0 loc_store.SALT_0_PTR loc_store.SALT_1_PTR
     # => [tag, note_type, SERIAL_NUM]
 
     movdn.5 movdn.5
@@ -159,16 +178,57 @@ pub proc new
     swapw
     # => [SERIAL_NUM, SCRIPT_ROOT, tag, note_type]
 
-    push.2 locaddr.STORAGE_PTR
-    # => [storage_ptr, num_storage_items=2, SERIAL_NUM, SCRIPT_ROOT, tag, note_type]
+    push.NUM_STORAGE_ITEMS locaddr.STORAGE_PTR
+    # => [storage_ptr, num_storage_items=4, SERIAL_NUM, SCRIPT_ROOT, tag, note_type]
 
-    exec.note::build_recipient
+    exec.note::compute_and_store_recipient
     # => [RECIPIENT, tag, note_type]
 
     movup.5 movup.5
     # => [tag, note_type, RECIPIENT]
+end
 
-    exec.output_note::create
+#! Creates a P2ID output note with a zero salt and returns its index.
+#!
+#! Note creation must originate from the account context, so this procedure routes creation through
+#! the account's \`create_note\` procedure. This lets \`p2id::create_output_note\` be used from contexts
+#! outside the account code, such as note or transaction scripts. Callers that are already inside an
+#! account procedure should instead use \`p2id::prepare_note\` together with
+#! \`exec.output_note::create\`.
+#!
+#! Requires that the account exposes:
+#! - \`miden::standards::note::note_creator::create_note\` procedure.
+#!
+#! Inputs:  [target_id_suffix, target_id_prefix, tag, note_type, SERIAL_NUM]
+#! Outputs: [note_idx]
+#!
+#! Where:
+#! - target_id_suffix is the suffix felt of the target account ID.
+#! - target_id_prefix is the prefix felt of the target account ID.
+#! - tag is the note tag to be included in the note.
+#! - note_type is the type of the note, which defines how the note is to be stored (e.g., on-chain
+#!   or off-chain).
+#! - SERIAL_NUM is the serial number of the note (4 elements).
+#! - note_idx is the index of the created note.
+#!
+#! Invocation: exec
+pub proc create_output_note(
+    target_id: AccountId,
+    tag: NoteTag,
+    note_type: NoteType,
+    serial_num: NoteSerialNumber
+) -> u16
+    exec.prepare_note
+    # => [tag, note_type, RECIPIENT]
+
+    # pad the stack before \`call\`
+    push.0 movdn.6 push.0 movdn.6 padw padw swapdw
+    # => [tag, note_type, RECIPIENT, pad(10)]
+
+    call.basic_wallet::create_note
+    # => [note_idx, pad(15)]
+
+    movdn.15 dropw dropw dropw drop drop drop
     # => [note_idx]
 end
 `;
@@ -182,8 +242,8 @@ const p2id: Script = {
   readOnly: true,
   rust,
   masm,
-  digest: P2ID_NOTE_CODE,
-  dependencies: [pick(basicWallet, "id", "name", "type", "digest")],
+  commitment: P2ID_NOTE_CODE,
+  dependencies: [pick(basicWallet, "id", "name", "type", "commitment")],
   procedureExports: [
     {
       ...defaultProcedureExport(),

@@ -69,7 +69,8 @@ const basicWallet: Script = {
   readOnly: true,
   rust,
   masm,
-  digest: "0xf2e5b2d0bfee8029ebc6ef3ca234585452fb5c9467f41c878c9e245f59b00719",
+  commitment:
+    "0xf2e5b2d0bfee8029ebc6ef3ca234585452fb5c9467f41c878c9e245f59b00719",
   procedureExports: [
     {
       ...defaultProcedureExport(),

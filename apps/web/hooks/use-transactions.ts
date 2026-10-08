@@ -49,6 +49,7 @@ const useTransactions = () => {
     createTransactionDialogTransactionRequest,
     createTransactionDialogTransactionResult,
     transactions,
+    scripts,
     dispatch,
   } = useGlobalContext();
   const { client } = useMiden();
@@ -283,6 +284,7 @@ const useTransactions = () => {
     const transaction = wasmTransactionToTransaction({
       record: transactionRecord,
       result: transactionResult,
+      scripts,
     });
     const account = wasmAccountToAccount({
       wasmAccount: nextAccount,

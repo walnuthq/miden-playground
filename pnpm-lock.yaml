@@ -163,10 +163,10 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  '@miden-sdk/miden-sdk': 0.17.0
+  '@miden-sdk/miden-sdk': 0.17.1
   '@miden-sdk/react': 0.17.0
 
-packageExtensionsChecksum: sha256-xMI9l6MilitRTHQqc81AN6X3Lbk7RcsmboO53UukkHs=
+packageExtensionsChecksum: sha256-pIbTZmR3lvkiRu+freBb9yJgMepH6NG4yPWtMK+Yh5M=
 
 importers:
 
@@ -197,8 +197,8 @@ importers:
         specifier: 8.0.0
         version: 8.0.0
       dotenv:
-        specifier: 18.0.5
-        version: 18.0.5
+        specifier: 18.0.6
+        version: 18.0.6
       drizzle-orm:
         specifier: 1.0.0-rc.4
         version: 1.0.0-rc.4(@opentelemetry/api@1.9.1)(@types/pg@8.23.1)(pg@8.23.1)(zod@4.6.5)
@@ -206,8 +206,8 @@ importers:
         specifier: 4.18.1
         version: 4.18.1
       next:
-        specifier: 16.3.8
-        version: 16.3.8(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@types/node@24.13.6)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+        specifier: 16.4.0
+        version: 16.4.0(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@types/node@24.13.6)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       pg:
         specifier: 8.23.1
         version: 8.23.1
@@ -295,8 +295,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/typescript-config
       dotenv:
-        specifier: 18.0.5
-        version: 18.0.5
+        specifier: 18.0.6
+        version: 18.0.6
       eslint:
         specifier: 9.39.5
         version: 9.39.5(jiti@2.7.0)(supports-color@10.2.2)
@@ -331,29 +331,29 @@ importers:
         specifier: 3.1.1
         version: 3.1.1(@types/react@19.3.0)(react@19.3.0)
       '@miden-sdk/miden-sdk':
-        specifier: 0.17.0
-        version: 0.17.0
+        specifier: 0.17.1
+        version: 0.17.1
       '@miden-sdk/miden-wallet-adapter':
         specifier: 0.17.0
-        version: 0.17.0(@miden-sdk/miden-sdk@0.17.0)(@miden-sdk/react@0.17.0(@miden-sdk/miden-sdk@0.17.0)(@types/react@19.3.0)(react@19.3.0)(use-sync-external-store@1.4.0(react@19.3.0)))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@6.0.3)
+        version: 0.17.0(@miden-sdk/miden-sdk@0.17.1)(@miden-sdk/react@0.17.0(@miden-sdk/miden-sdk@0.17.1)(@types/react@19.3.0)(react@19.3.0)(use-sync-external-store@1.4.0(react@19.3.0)))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@6.0.3)
       '@miden-sdk/para':
         specifier: 0.17.0
-        version: 0.17.0(@getpara/web-sdk@3.21.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2))(@miden-sdk/miden-sdk@0.17.0)
+        version: 0.17.0(@getpara/web-sdk@3.21.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2))(@miden-sdk/miden-sdk@0.17.1)
       '@miden-sdk/para-react':
         specifier: 0.17.0
-        version: 0.17.0(@getpara/react-sdk-lite@3.21.0(aee0cdfb9419267c6665ec062ddecda8))(@getpara/web-sdk@3.21.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2))(@miden-sdk/miden-sdk@0.17.0)(@miden-sdk/para@0.17.0(@getpara/web-sdk@3.21.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2))(@miden-sdk/miden-sdk@0.17.0))(@miden-sdk/react@0.17.0(@miden-sdk/miden-sdk@0.17.0)(@types/react@19.3.0)(react@19.3.0)(use-sync-external-store@1.4.0(react@19.3.0)))(@tanstack/react-query@5.104.1(react@19.3.0))(react@19.3.0)
+        version: 0.17.0(@getpara/react-sdk-lite@3.21.0(aee0cdfb9419267c6665ec062ddecda8))(@getpara/web-sdk@3.21.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2))(@miden-sdk/miden-sdk@0.17.1)(@miden-sdk/para@0.17.0(@getpara/web-sdk@3.21.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2))(@miden-sdk/miden-sdk@0.17.1))(@miden-sdk/react@0.17.0(@miden-sdk/miden-sdk@0.17.1)(@types/react@19.3.0)(react@19.3.0)(use-sync-external-store@1.4.0(react@19.3.0)))(@tanstack/react-query@5.104.1(react@19.3.0))(react@19.3.0)
       '@miden-sdk/react':
         specifier: 0.17.0
-        version: 0.17.0(@miden-sdk/miden-sdk@0.17.0)(@types/react@19.3.0)(react@19.3.0)(use-sync-external-store@1.4.0(react@19.3.0))
+        version: 0.17.0(@miden-sdk/miden-sdk@0.17.1)(@types/react@19.3.0)(react@19.3.0)(use-sync-external-store@1.4.0(react@19.3.0))
       '@monaco-editor/react':
         specifier: 4.7.0
         version: 4.7.0(monaco-editor@0.57.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@next/mdx':
-        specifier: 16.3.8
-        version: 16.3.8(@mdx-js/loader@3.1.1(supports-color@10.2.2))(@mdx-js/react@3.1.1(@types/react@19.3.0)(react@19.3.0))(next@16.3.8(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@types/node@24.13.6)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))
+        specifier: 16.4.0
+        version: 16.4.0(@mdx-js/loader@3.1.1(supports-color@10.2.2))(@mdx-js/react@3.1.1(@types/react@19.3.0)(react@19.3.0))(next@16.4.0(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@types/node@24.13.6)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))
       '@opennextjs/cloudflare':
-        specifier: 1.20.8
-        version: 1.20.8(next@16.3.8(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@types/node@24.13.6)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(supports-color@10.2.2)(wrangler@4.147.0(@types/node@24.13.6))
+        specifier: 1.20.9
+        version: 1.20.9(next@16.4.0(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@types/node@24.13.6)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(supports-color@10.2.2)(wrangler@4.148.0(@types/node@24.13.6))
       '@opentelemetry/api':
         specifier: 1.9.1
         version: 1.9.1
@@ -379,8 +379,8 @@ importers:
         specifier: 1.52.0
         version: 1.52.0(@types/react@19.3.0)(react@19.3.0)
       next:
-        specifier: 16.3.8
-        version: 16.3.8(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@types/node@24.13.6)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+        specifier: 16.4.0
+        version: 16.4.0(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@types/node@24.13.6)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       next-themes:
         specifier: 0.4.6
         version: 0.4.6(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -440,8 +440,8 @@ importers:
         specifier: 6.0.3
         version: 6.0.3
       wrangler:
-        specifier: 4.147.0
-        version: 4.147.0(@types/node@24.13.6)
+        specifier: 4.148.0
+        version: 4.148.0(@types/node@24.13.6)
 
   packages/eslint-config:
     devDependencies:
@@ -449,8 +449,8 @@ importers:
         specifier: 9.39.5
         version: 9.39.5
       '@next/eslint-plugin-next':
-        specifier: 16.3.8
-        version: 16.3.8(eslint@9.39.5(jiti@2.7.0)(supports-color@10.2.2))
+        specifier: 16.4.0
+        version: 16.4.0(eslint@9.39.5(jiti@2.7.0)(supports-color@10.2.2))
       '@typescript-eslint/eslint-plugin':
         specifier: 8.71.1
         version: 8.71.1(@typescript-eslint/parser@8.71.1(eslint@9.39.5(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3))(eslint@9.39.5(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3)
@@ -939,32 +939,32 @@ packages:
       workerd:
         optional: true
 
-  '@cloudflare/workerd-darwin-64@1.20261001.1':
-    resolution: {integrity: sha512-4cgSgDf28JSw/P5Dj5GCS59hzVqS5XnmGAWNkvYHLI6ODU9idGaMMNEuhJXDkEG/lsABmlVlnCgsdh2VbKWepw==}
+  '@cloudflare/workerd-darwin-64@1.20261006.1':
+    resolution: {integrity: sha512-lCX6avJO2It9AyDEYitjmOtJRVp/xmaW0TziyoLAnfxlzozyyRbSFfIIMMCiDx/sTP1++E4VLbV+7BHSD33f0Q==}
     engines: {node: '>=16'}
     cpu: [x64]
     os: [darwin]
 
-  '@cloudflare/workerd-darwin-arm64@1.20261001.1':
-    resolution: {integrity: sha512-8ulAWruEVouNmEIsQsy9WSSCS9zkLu93W2MTwp5esiFyoPp05BNSVFIFsYSPi1pkFmBBd7fsnwMpbLkaJLaVPQ==}
+  '@cloudflare/workerd-darwin-arm64@1.20261006.1':
+    resolution: {integrity: sha512-PyFGjOaldtppnLuKsdkoYWXfLVpDjuf8u+uoykX+1Xvxo2EPmCVViq0iDKm+U7c7PRno85ehS3/MPVXyk2HwHw==}
     engines: {node: '>=16'}
     cpu: [arm64]
     os: [darwin]
 
-  '@cloudflare/workerd-linux-64@1.20261001.1':
-    resolution: {integrity: sha512-kZbTZJGrhsMOdqZ2BIybjaBRLZjYsRLWj7mcNw/6Y3hodOhp5MrNzcz4iWGwNVWwyIV+7Pl+/LX5VcgnRqdHOg==}
+  '@cloudflare/workerd-linux-64@1.20261006.1':
+    resolution: {integrity: sha512-Ntf9S8eesmVufdjaT2kzWlz6Ng9XGYTc6cHQVRKAg59lFufwsIabGeMT6U4KkrpEeSIxgHq8aPtuLbZXE19tCA==}
     engines: {node: '>=16'}
     cpu: [x64]
     os: [linux]
 
-  '@cloudflare/workerd-linux-arm64@1.20261001.1':
-    resolution: {integrity: sha512-oOk3Zj6k/8oP0FJgZBWDn7+BqbsqIMEMaV95pulHPVbwVu4wYoLfQq2hp0vkbCNsCFLqZb7cqixXdrwD54ZIow==}
+  '@cloudflare/workerd-linux-arm64@1.20261006.1':
+    resolution: {integrity: sha512-JyeDBymVWw5tVRebSsVE8ojDYxd6UlZrAseHU8G+NpIyd5wF61tXlF/axLeCUqu0pOhBFHb8I5QKi0jwrCK41Q==}
     engines: {node: '>=16'}
     cpu: [arm64]
     os: [linux]
 
-  '@cloudflare/workerd-windows-64@1.20261001.1':
-    resolution: {integrity: sha512-uRxm5W4VyBkoSaoP1BfOuH0873tE+vxsknF4sab6/5YIRvIAufChq3QDp+zlAn67PuGPGcn7W8QraA0t4ucmOQ==}
+  '@cloudflare/workerd-windows-64@1.20261006.1':
+    resolution: {integrity: sha512-nWP0URNqOBN9fa/gZ7eh/w051DwjOXN8j4lDZDYVXyQPsux6sV3DfyYZT+CjR/rt9nKBSmJT9QE9/bWT18+84w==}
     engines: {node: '>=16'}
     cpu: [x64]
     os: [win32]
@@ -984,11 +984,11 @@ packages:
     resolution: {integrity: sha512-rAtmpABkSB1yfdXqX16Ftb0cF7rQ/n48p0XiN9wXL228ORXqxXe8giRxRYZpTxgzGn20ZQgiYOYxGjg+tpkjmQ==}
     hasBin: true
 
-  '@dotenvx/primitives@3.1.0':
-    resolution: {integrity: sha512-6RYCXKc1Rwsz5pVw/IQJO/8zP+TpTm9AIzsAMin0fx5OgZ9Jcs2R51MLHidogle1TXmFnYQZxJE/Qq+JV0KGtw==}
+  '@dotenvx/primitives@3.2.0':
+    resolution: {integrity: sha512-px2WzvbSkHETxfNNQz6TxEPv4kBStrlo0sqVkWqvJ22o26/uEInZDR05zWzS5yX95QxLjzGKTXtExeHFYBU7/w==}
 
-  '@dotenvx/tooling@1.0.3':
-    resolution: {integrity: sha512-Gd6qQol/ICb4MPRWpiIH56y+pR9AVB7kPBkbhrLSGLtAiF4Qgy+k651/f2pze0Xbm3H5XewbPfIm4y9K+ic30Q==}
+  '@dotenvx/tooling@1.0.4':
+    resolution: {integrity: sha512-6XEZcRDYyszp/uneJ4MhCgTsdpGF3iajG2cKQ/STIUVKbTZkOSMNYU0xXT/fok4w4M/V36/wBHz/sUrXTX9lhg==}
 
   '@drizzle-team/brocli@0.12.1':
     resolution: {integrity: sha512-yHwomvolVafvUXhy5TdiJVkuNCxXn+bKOs2aWiWEQh/5YaV97Oa/abJz3dmx7lxgIUsUlS1Jl4mEfvJPo3YsVw==}
@@ -2477,24 +2477,24 @@ packages:
       '@types/react': '>=16'
       react: '>=16'
 
-  '@miden-sdk/miden-sdk@0.17.0':
-    resolution: {integrity: sha512-GVJkZSDgLpCuWSCBI5PvVkpqkqPdLyjqrdqAJbv6cdYaGywNqF5yVW4qwOi2p8ZKsRuNoT3Yn76PmJvWEzFsLg==}
+  '@miden-sdk/miden-sdk@0.17.1':
+    resolution: {integrity: sha512-icYnJZq83nqq11yNGDSAdc0c2Ij5oM6mN63z7WiAKtrkKTbW0Zbd8uDw1FqEn5n93aquZDCP2KSPioLKv4ZOSQ==}
 
   '@miden-sdk/miden-wallet-adapter-base@0.17.0':
     resolution: {integrity: sha512-M1200zP81oQ1HQJ7OQEOLAIJxeukXJzKiV7WWjgrbzrSulhpmLheF/sThFYoveB+IBXEbveXWcPvoHNhJdonOA==}
     peerDependencies:
-      '@miden-sdk/miden-sdk': 0.17.0
+      '@miden-sdk/miden-sdk': 0.17.1
 
   '@miden-sdk/miden-wallet-adapter-miden@0.17.0':
     resolution: {integrity: sha512-sPcCngv2+2S6wchU6zkhziRekQS32+Ndg6hFKeYX+msO4qbX2VsCFv+DPqpxp+vbZESR1vTQezvWNjpQ6NHufA==}
     peerDependencies:
-      '@miden-sdk/miden-sdk': 0.17.0
+      '@miden-sdk/miden-sdk': 0.17.1
       typescript: ^5.0.0
 
   '@miden-sdk/miden-wallet-adapter-react@0.17.0':
     resolution: {integrity: sha512-S5B0+8fEJiVSrtGwUA/t3XiP5pEv5nKj5WzZo7q3tsN80rfItaJjgIjG7QrC8CSZxQ7CxFLTZz1X+AFnF2MxdQ==}
     peerDependencies:
-      '@miden-sdk/miden-sdk': 0.17.0
+      '@miden-sdk/miden-sdk': 0.17.1
       '@miden-sdk/react': 0.17.0
       '@types/react': ^18.0.0 || ^19.0.0
       react: ^18.0.0 || ^19.0.0
@@ -2520,18 +2520,18 @@ packages:
       react: ^19.1.1
       react-dom: ^19.1.1
 
-  '@miden-sdk/node-darwin-arm64@0.17.0':
-    resolution: {integrity: sha512-40JvFqdZ0lYgphWrkegVoGwgG5hhlN5yLKpeIHOyeWv0gtLsFF/5EF5EFaWs99bSnvX7D6uLDTPECvvy2r7V7w==}
+  '@miden-sdk/node-darwin-arm64@0.17.1':
+    resolution: {integrity: sha512-LAG2/EXyPX2Q2w1Giarj5g6hYozFcMKKOnvr1Ili0CglTSy7/fijKpW8NiO73gD9GhjbmETl9qPSnajIgDHp9Q==}
     cpu: [arm64]
     os: [darwin]
 
-  '@miden-sdk/node-darwin-x64@0.17.0':
-    resolution: {integrity: sha512-0DzSU5enme5pKmroccmBjKw/7ObQ4WNC5HGrrZ7myS0IljSQQqkDRYOCKxCMXy7bdVJ/L3SgfZd1dMQiid4P1Q==}
+  '@miden-sdk/node-darwin-x64@0.17.1':
+    resolution: {integrity: sha512-PLKDyzrZ7crS9WNg1zFYc9Z+D/a5nzJOjktdBavas3Nw9AcU8bou1Rg5mhrR/b5EQg7FTAvh0NfRWcNKAGDp5w==}
     cpu: [x64]
     os: [darwin]
 
-  '@miden-sdk/node-linux-x64-gnu@0.17.0':
-    resolution: {integrity: sha512-DuciQj9Eng8a6jTa9w8QJXnJ5NIxpahxAgXWDNw3A0Ma5FYhAvzldLDdxvLCM47S7Mn/oM0b3HetsFmKCp1Obw==}
+  '@miden-sdk/node-linux-x64-gnu@0.17.1':
+    resolution: {integrity: sha512-gxJUmGyLKFJIi434hbYrpOEGGS8npdZd2baU4vbTS86cHOcH5am2WLf/UB+5odyOxfg0icaHQrrYpmEfk+gDtw==}
     cpu: [x64]
     os: [linux]
 
@@ -2541,7 +2541,7 @@ packages:
     peerDependencies:
       '@getpara/react-sdk-lite': ^3.18.0
       '@getpara/web-sdk': ^3.18.0
-      '@miden-sdk/miden-sdk': 0.17.0
+      '@miden-sdk/miden-sdk': 0.17.1
       '@miden-sdk/para': ^0.17.0
       '@miden-sdk/react': 0.17.0
       '@tanstack/react-query': ^5.0.0
@@ -2555,12 +2555,12 @@ packages:
     resolution: {integrity: sha512-dCKxuxPVFLILGJUAQtT4IrD7PXa5K1N01kaiaODLqqqxjnKA2FRYMdIBOAbuYSaKU55AYB7VN5bBCh0J2TbEig==}
     peerDependencies:
       '@getpara/web-sdk': ^3.18.0
-      '@miden-sdk/miden-sdk': 0.17.0
+      '@miden-sdk/miden-sdk': 0.17.1
 
   '@miden-sdk/react@0.17.0':
     resolution: {integrity: sha512-XbvB+WAD4Dk/xC5+p6B7x53lYnMNyTOn2QnREd6k46zrEEcNfn9vBzo7CVhwRD3zB7dW6Ionm905o+Vc/5468w==}
     peerDependencies:
-      '@miden-sdk/miden-sdk': 0.17.0
+      '@miden-sdk/miden-sdk': 0.17.1
       '@types/react': '>=18.0.0'
       react: '>=18.0.0'
     peerDependenciesMeta:
@@ -2581,14 +2581,14 @@ packages:
     resolution: {integrity: sha512-JEW4DEtBzfe8HvUYecLU9e6+XJnKDlUAIve8FvPzF3Kzs6Xo/KuZkZJsDH0wJXl/qEZbeeE7edxDNY3kMs39hQ==}
     engines: {node: '>= 18'}
 
-  '@next/env@16.3.8':
-    resolution: {integrity: sha512-Al9zqHVV7TJv0eFuOU4U7Lvv74PTih4Ch63sk2xCIpSTkE3udFnaOcnzP2lQVymiL7yS9Cj2iClUXlR3EQ5sEw==}
+  '@next/env@16.4.0':
+    resolution: {integrity: sha512-pyLlT5oafGlX8X7xjgGNXz5dNIDSxREm+qD6i9VLSZiZFopA/XWl8NM/KPmLx/8EG/++c49iid3gNWSQW1+2dQ==}
 
-  '@next/eslint-plugin-next@16.3.8':
-    resolution: {integrity: sha512-eCR9RcLTZrVS+K3+VOhi0xMdUUGNuriCHHhU1ZoABC/QQ/Gp0OWbLKQxV2/9DkmihYdYRcQWFmZXW8M1AMUXYw==}
+  '@next/eslint-plugin-next@16.4.0':
+    resolution: {integrity: sha512-ffeflB/dL8RrvWejQximw01pOpKHN692Y3FjDB82DCd0YVvXvBD6vY7mcZp27yvSVFVM6wA73xVodEKF4spizA==}
 
-  '@next/mdx@16.3.8':
-    resolution: {integrity: sha512-9Es7/Mf5cDo7dL3NEUQerl98SrwWo0QeBguKC06rX/PydHXKxgHIuXjDuxvu56oO4Yty4hn3FPIbXEOx39oQDw==}
+  '@next/mdx@16.4.0':
+    resolution: {integrity: sha512-qKI9HvbqwSo1F8ebVsia0meLm2iu/DxaB1ynWNKRn4bny0xjQJBGixzEdJ9wsPqCwPcG4Qn4z5Rai1Pee/AQFQ==}
     peerDependencies:
       '@mdx-js/loader': '>=0.15.0'
       '@mdx-js/react': '>=0.15.0'
@@ -2599,54 +2599,54 @@ packages:
       '@mdx-js/react':
         optional: true
 
-  '@next/swc-darwin-arm64@16.3.8':
-    resolution: {integrity: sha512-2JPRMh2nmQG5CiL7cXGL9AGwnPWJQ//cTtAUCT+w511QHk79SYz3LGv/pc5X643B/WEO0rvu3Yww0hqwt3kgeA==}
+  '@next/swc-darwin-arm64@16.4.0':
+    resolution: {integrity: sha512-yyZ+9MgViAKLLb5l1gPBGjRwnq3teNLb5Zx6JEw8LzNSTjlsnp+baUHFxTgl7PpjCmKf48VQfyipG1eBflb48Q==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [darwin]
 
-  '@next/swc-darwin-x64@16.3.8':
-    resolution: {integrity: sha512-GZtCCOBKJ4leVIT/Th0llWKhD1ca92lzbQiS5R5ON9QkoiFnilFsebDae1JU2a3HWoKMEmEZWGs1AGLavVM72Q==}
+  '@next/swc-darwin-x64@16.4.0':
+    resolution: {integrity: sha512-RePEEejEj1Auf5s9qEcG0JbcDP3ceNUS/ofNX8AhxzgIjTVlZIHMatlp16YplcSMpsVo/ZMQHJTjbMYJznjGUg==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [darwin]
 
-  '@next/swc-linux-arm64-gnu@16.3.8':
-    resolution: {integrity: sha512-O659ygeQYqneJ1fBKMpFxIFqYkYswu8IAS1OCKK/4f3ZgJJm1dRz4fVJZRi/kLLWjnBKnebOePA4WNv+sV1pVA==}
+  '@next/swc-linux-arm64-gnu@16.4.0':
+    resolution: {integrity: sha512-HhsyCqd+NpmvDDVY/LqkAN24f+QVvXh3ie+PfcwKinWL2Mu826JymQxJXGjAIfmJ4VlHjp4Pe/nZtXtUoEMAqw==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [linux]
     libc: [glibc]
 
-  '@next/swc-linux-arm64-musl@16.3.8':
-    resolution: {integrity: sha512-dSjKSyWpzxoO1d3DIZZcP4XJcNaKeLmxQMFOiYl5vuBRMmweIqnAhty8tAmRsvTss779cK1FtYnDMj40e4TQlg==}
+  '@next/swc-linux-arm64-musl@16.4.0':
+    resolution: {integrity: sha512-sN9Pf+Zh+RpZAOmbR7d8KAA8T61CVhawtbEJ2Bk6QrRzx6Z/6haaF4UiwBzytM96GRRRWZh9/WALIEO3npMamA==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [linux]
     libc: [musl]
 
-  '@next/swc-linux-x64-gnu@16.3.8':
-    resolution: {integrity: sha512-lbqOuz3RPRcv+o9msNsJw5x4+Y1ZwPTs6vmL6DCf7i0fZfvng/F59wyeDwqHIvV0mK//RBy/jJkZ+nCKsSMXjQ==}
+  '@next/swc-linux-x64-gnu@16.4.0':
+    resolution: {integrity: sha512-D5M5xLWQVd1CvR+L7BickM1weRfmM41x3L1NWcnKY/oyJJqr1qwaCgmu3dMAhLBOMdZwSuDCRV6DJRRpiUkbDQ==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [linux]
     libc: [glibc]
 
-  '@next/swc-linux-x64-musl@16.3.8':
-    resolution: {integrity: sha512-+316WswI8ScVgZeUd+1KGaXkHhaYQzCjvH/05TZSpJ8zBizb1a4G7DtO7F12jcBIqMOtsz9ji1t48fmKtzqsGA==}
+  '@next/swc-linux-x64-musl@16.4.0':
+    resolution: {integrity: sha512-8d5WLS6a9YalqpOgXdlbvonFu+sIgjA+CO6tGzetrpPVcUL56foa7B7664h41rAlbLi5fJwK4vWji3zf4QDy+w==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [linux]
     libc: [musl]
 
-  '@next/swc-win32-arm64-msvc@16.3.8':
-    resolution: {integrity: sha512-ji0gd4kMYUxO+1fJBIbiBVRCjzG/lloiyCccnlebvb1ZJ5qXCPZqYg4Jl1DrrixnWNMKylzgpmMWx0yNDYXlzw==}
+  '@next/swc-win32-arm64-msvc@16.4.0':
+    resolution: {integrity: sha512-sQuOIiW3snb48UwrBcDMvFA/u03qtw2LeuSIxFIQ9AJuW9UG/4Ddsfo+eV73PnZwBhyncMtsKVh7PrzMol2/fA==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [win32]
 
-  '@next/swc-win32-x64-msvc@16.3.8':
-    resolution: {integrity: sha512-WcTlaKt/TWkh5kUjdJcUmB1XgZ+1c6fz4Y9fDHL73YNSdGaUWjceeWrrlwF0nv19iABYWC4iAq1oX1w4Bn0vfg==}
+  '@next/swc-win32-x64-msvc@16.4.0':
+    resolution: {integrity: sha512-6/33lCuxpdHUy27RegyGM/5uTpF7YZd3UR4D0gpkOA/tWY5YR7msbQjqPgCZmSmxrrTLGCXYA4A8vT2H5DPGTQ==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [win32]
@@ -2727,14 +2727,14 @@ packages:
     resolution: {integrity: sha512-oGB+UxlgWcgQkgwo8GcEGwemoTFt3FIO9ababBmaGwXIoBKZ+GTy0pP185beGg7Llih/NSHSV2XAs1lnznocSg==}
     engines: {node: '>= 8'}
 
-  '@opennextjs/aws@4.1.7':
-    resolution: {integrity: sha512-ELezSARrTfxp/76cz41eQjki1AV0CuBUKOznU3w/tOk7i87x867RkkYho+gDkog9gpnGzefHdJu463o9VaabNQ==}
+  '@opennextjs/aws@4.1.8':
+    resolution: {integrity: sha512-6B6QztQccicKymlDQnvd7zIYEbzxWz3jLtMKgxN19JLQUea9jVgookSzJrRLrN68mvb/pphT/0TEMT/5Ghegcw==}
     hasBin: true
     peerDependencies:
       next: '>=15.5.27 <16 || >=16.3.8'
 
-  '@opennextjs/cloudflare@1.20.8':
-    resolution: {integrity: sha512-7rrsBqd234GBBnHITobS0gagT4/fSfHJwm+ogYTyUb7ubg3PGC06biJgL9l4DZabFeu/ucqvml80sBr5torBgg==}
+  '@opennextjs/cloudflare@1.20.9':
+    resolution: {integrity: sha512-VR5CxACoggcWmiD4NG0Rk+bdvEJoiFfe5FH4/t+G+D7bU1yXPSGpj+oAVxKFPZv3WSdJwq1H//ZjDsHEJMFaOA==}
     hasBin: true
     peerDependencies:
       next: '>=15.5.27 <16 || >=16.3.8'
@@ -2752,19 +2752,19 @@ packages:
     resolution: {integrity: sha512-gLyJlPHPZYdAk1JENA9LeHejZe1Ti77/pTeFm/nMXmQH/HFZlcS/O2XJB+L8fkbrNSqhdtlvjBVjxwUYanNH5Q==}
     engines: {node: '>=8.0.0'}
 
-  '@opentelemetry/context-zone-peer-dep@2.11.0':
-    resolution: {integrity: sha512-IpEnM1t0W2zXUiZt0Vcu4LjZ55lrBos204wSu+SDkffXvkjk4+0+21dAcdvp6wbT99ZxGqD4fvvFy0NUGtJpsQ==}
+  '@opentelemetry/context-zone-peer-dep@2.12.0':
+    resolution: {integrity: sha512-hu+N5/4WCkIARuzQgAfbn/A89UeUF555/RivBylrwgX01Xz5kL30NypBHEe2Ffi7cgnVxAz9+KklzUs60YT7PQ==}
     engines: {node: ^18.19.0 || >=20.6.0}
     peerDependencies:
       '@opentelemetry/api': '>=1.0.0 <1.10.0'
       zone.js: ^0.10.2 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^0.14.0 || ^0.15.0 || ^0.16.0
 
-  '@opentelemetry/context-zone@2.11.0':
-    resolution: {integrity: sha512-fQVCMuo/fCm7XbdoNvi06uMGNYF/Cn0Q1zQbDKpcB3GFACo48GjxC1fYZmYMerYWd8HNv4dSSxxgN2lU/gyvfg==}
+  '@opentelemetry/context-zone@2.12.0':
+    resolution: {integrity: sha512-0sl/9ApZBusUcEg9iYo1svqy+1qnRO1N5SUd5VSvKCKlTMSjjA+yWDcEGVu/j5mqjyBtV7cgj5XI5MYoW92X7g==}
     engines: {node: ^18.19.0 || >=20.6.0}
 
-  '@opentelemetry/core@2.11.0':
-    resolution: {integrity: sha512-7YP44XH0tV6+Mb54x2YGf84i7yi+31MBZlE8JwvozkxyTvXbSp10X7cI7YE49ChJ3shMJoBmCJF3+1QFBJctGA==}
+  '@opentelemetry/core@2.12.0':
+    resolution: {integrity: sha512-1HsSAuvT4/my0QrXWsyXFdWjKaPeCHsismKZgEEIb8NK13LP6DrMRlsUbvD/0F9mDWK3xDom9AMv3IscxgOnOQ==}
     engines: {node: ^18.19.0 || >=20.6.0}
     peerDependencies:
       '@opentelemetry/api': '>=1.0.0 <1.10.0'
@@ -2811,8 +2811,8 @@ packages:
     peerDependencies:
       '@opentelemetry/api': ^1.3.0
 
-  '@opentelemetry/resources@2.11.0':
-    resolution: {integrity: sha512-Ie7+8q8MDF4FAEQCKVMTx3ReUvxiIAgIiiW3c9JdmP8+HMcDy20puT+AHjexnExgnbvBxjQ9fjkFDWrikJ2jQA==}
+  '@opentelemetry/resources@2.12.0':
+    resolution: {integrity: sha512-+rSRoOdln6NhXTVcBdHSlZxJDNzwxadeweK2ltZO3tVtfp6aklABc06xclDk6ovRR+EiGgIcSbh/6NgjFhnb3A==}
     engines: {node: ^18.19.0 || >=20.6.0}
     peerDependencies:
       '@opentelemetry/api': '>=1.3.0 <1.10.0'
@@ -2835,8 +2835,8 @@ packages:
     peerDependencies:
       '@opentelemetry/api': '>=1.9.0 <1.10.0'
 
-  '@opentelemetry/sdk-trace-base@2.11.0':
-    resolution: {integrity: sha512-H19x/TX/LZdqiYOjM7fqtSxwlplC5pgelavqbQdHbhdq0q/AI/TGkM2dfGuuynTXmJPeF2HoZVoPDu+TGoW78A==}
+  '@opentelemetry/sdk-trace-base@2.12.0':
+    resolution: {integrity: sha512-JOERgZCxRM06FEJ5kEWxlSRChah6MmXDx3KwCruqEv/iEyLkTokCSemf2y1w8oIHtfrr8EVTpzebq/31vn2Cpg==}
     engines: {node: ^18.19.0 || >=20.6.0}
     peerDependencies:
       '@opentelemetry/api': '>=1.3.0 <1.10.0'
@@ -2853,8 +2853,8 @@ packages:
     peerDependencies:
       '@opentelemetry/api': '>=1.0.0 <1.10.0'
 
-  '@opentelemetry/sdk-trace@2.11.0':
-    resolution: {integrity: sha512-fFnTqGm8/G73GQVnxYi7LXa1ZVYEUvgL6XI1LpvV0bPC7WQ/ZGgKxCSl8FnlZBKto9JHHEFTO6s6CUpvvtwFrA==}
+  '@opentelemetry/sdk-trace@2.12.0':
+    resolution: {integrity: sha512-ImVuRQ6faOsTi1Wna88s2avgrrf/iDgXPigIeynkUhjstMuoQUDOJXgkez2j1mlU4btjXcXBGa+q7qKFYR3GsA==}
     engines: {node: ^18.19.0 || >=20.6.0}
     peerDependencies:
       '@opentelemetry/api': '>=1.3.0 <1.10.0'
@@ -5025,8 +5025,8 @@ packages:
     resolution: {integrity: sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow==}
     engines: {node: '>=12'}
 
-  dotenv@18.0.5:
-    resolution: {integrity: sha512-aBrGvt6KhjxbEnatqMWOMidftwsrCiCvqh1yNIGB9QyF0J+VcWkKDMsvYOEm7ZS82oiV+BT1sTOtIlAmUlTpwQ==}
+  dotenv@18.0.6:
+    resolution: {integrity: sha512-ZMVmohV6CvAJtj++pZNyggluUt6hbRdQAxc2+Z635RL6/AG/ruXv5lHnybUFoxMPL/yrTL/tsF4paZu2l7RA6Q==}
     engines: {node: '>=12'}
     hasBin: true
 
@@ -5194,8 +5194,8 @@ packages:
   ee-first@1.1.1:
     resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
 
-  electron-to-chromium@1.5.445:
-    resolution: {integrity: sha512-iX7o1nF+qNb3Bv5mLYgqfgF9Znh9e/8MKXdmbb8Gv2Q47OKIzTwEPD1oda1HrgEwYatTLJj0wQjHvIFt8Db53Q==}
+  electron-to-chromium@1.5.449:
+    resolution: {integrity: sha512-dKeYk/3SFQz+nXi5whp3OuJzeWABEG4zCtkWJ9+Vby1E1iFM2y0gElRtQvNXRPJTsj8WAF4HMP7hvP790QtJ9g==}
 
   elliptic@6.6.1:
     resolution: {integrity: sha512-RaddvvMatK2LJHqFJ+YA4WysVN5Ita9E35botqIYspQ4TkRAlCicdzKOjlyv/1Za5RyTNn7di//eEV0uTAfe3g==}
@@ -6436,8 +6436,8 @@ packages:
     resolution: {integrity: sha512-OqbOk5oEQeAZ8WXWydlu9HJjz9WVdEIvamMCcXmuqUYjTknH/sqsWvhQ3vgwKFRR1HpjvNBKQ37nbJgYzGqGcg==}
     engines: {node: '>=6'}
 
-  miniflare@5.20261001.0-alpha:
-    resolution: {integrity: sha512-GaimS5mSIOMyvd16ga+e1/QkI8cmp3z35QPHFex0DktqNQf2RVZQwMPQXdyoUreUiFP/0Gpe2MoQInTyMAD5xA==}
+  miniflare@5.20261006.0-alpha:
+    resolution: {integrity: sha512-UP3qIeQKHba59GHxBqD8H2GateacluT4vrjIpqEgH78kCSUxdu8jA0f7MH7ftRSAnnB1oOvEsDtav3xevQDbpQ==}
     engines: {node: '>=22.0.0'}
 
   minimalistic-assert@1.0.1:
@@ -6521,8 +6521,8 @@ packages:
       react: ^16.8 || ^17 || ^18 || ^19 || ^19.0.0-rc
       react-dom: ^16.8 || ^17 || ^18 || ^19 || ^19.0.0-rc
 
-  next@16.3.8:
-    resolution: {integrity: sha512-U7QEZaTini6wKrb8A8hqLLqYQyCetegKjCpJOyxk642vWoMoU1x5PyZCJFvgYgiptA8xc5j/9xYlZFO7w9Sjmw==}
+  next@16.4.0:
+    resolution: {integrity: sha512-N2C+9q89Z/oLrsepSRS4jRMtwmUZAoZuAHU0e9T6+sAB5DdhADmrnOW+zjYijlrYFmVfmQhGVGy9eMFoB7UgKg==}
     engines: {node: '>=20.9.0'}
     hasBin: true
     peerDependencies:
@@ -7845,17 +7845,17 @@ packages:
     resolution: {integrity: sha512-BN22B5eaMMI9UMtjrGd5g5eCYPpCPDUy0FJXbYsaT5zYxjFOckS53SQDE3pWkVoWpHXVb3BrYcEN4Twa55B5cA==}
     engines: {node: '>=0.10.0'}
 
-  workerd@1.20261001.1:
-    resolution: {integrity: sha512-d/SIYHFO0PT/wiFZg8in4NpRIxYuFwslX1HdylOtWkBIIUmSpkGFhK820cV84XACFylwJ48xuRoWW/8DWDPsPQ==}
+  workerd@1.20261006.1:
+    resolution: {integrity: sha512-8MadBuffZ5NdpLwZjUmsqT5QlaKXq4gjgT6wzcKeynZTICNXyePhc+5QVoKiK7+MMhFTLNrRO2KXLlpk8Q6BkA==}
     engines: {node: '>=16'}
     hasBin: true
 
-  wrangler@4.147.0:
-    resolution: {integrity: sha512-pQYRoiq8PTAxphaG69z8+GC1DkSGd19EDZehQ8zxjo/Ko3mRB6Qs1mTrd8ZuKAarLklIjTqr1lUdCK9r4q2hUg==}
+  wrangler@4.148.0:
+    resolution: {integrity: sha512-wgbll8cA/7qOMJSoYQuJrw9M9lmedGzYtg6wvUK2p/7G1KaE88jFmQ/CvtQzVUF9C8PQtC4Y5p9vbpAsJGAlpA==}
     engines: {node: '>=22.0.0'}
     hasBin: true
     peerDependencies:
-      '@cloudflare/workers-types': ^5.20261001.1
+      '@cloudflare/workers-types': ^5.20261006.1
     peerDependenciesMeta:
       '@cloudflare/workers-types':
         optional: true
@@ -8792,25 +8792,25 @@ snapshots:
 
   '@cloudflare/kv-asset-handler@0.5.0': {}
 
-  '@cloudflare/unenv-preset@2.16.2(unenv@2.0.0-rc.24)(workerd@1.20261001.1)':
+  '@cloudflare/unenv-preset@2.16.2(unenv@2.0.0-rc.24)(workerd@1.20261006.1)':
     dependencies:
       unenv: 2.0.0-rc.24
     optionalDependencies:
-      workerd: 1.20261001.1
+      workerd: 1.20261006.1
 
-  '@cloudflare/workerd-darwin-64@1.20261001.1':
+  '@cloudflare/workerd-darwin-64@1.20261006.1':
     optional: true
 
-  '@cloudflare/workerd-darwin-arm64@1.20261001.1':
+  '@cloudflare/workerd-darwin-arm64@1.20261006.1':
     optional: true
 
-  '@cloudflare/workerd-linux-64@1.20261001.1':
+  '@cloudflare/workerd-linux-64@1.20261006.1':
     optional: true
 
-  '@cloudflare/workerd-linux-arm64@1.20261001.1':
+  '@cloudflare/workerd-linux-arm64@1.20261006.1':
     optional: true
 
-  '@cloudflare/workerd-windows-64@1.20261001.1':
+  '@cloudflare/workerd-windows-64@1.20261006.1':
     optional: true
 
   '@coinbase/wallet-sdk@4.3.0':
@@ -8840,15 +8840,15 @@ snapshots:
 
   '@dotenvx/dotenvx@2.33.0':
     dependencies:
-      '@dotenvx/primitives': 3.1.0
-      '@dotenvx/tooling': 1.0.3
+      '@dotenvx/primitives': 3.2.0
+      '@dotenvx/tooling': 1.0.4
       global-agent: 3.0.0
       undici: 6.29.0
       yocto-spinner: 1.2.2
 
-  '@dotenvx/primitives@3.1.0': {}
+  '@dotenvx/primitives@3.2.0': {}
 
-  '@dotenvx/tooling@1.0.3': {}
+  '@dotenvx/tooling@1.0.4': {}
 
   '@drizzle-team/brocli@0.12.1': {}
 
@@ -9385,15 +9385,15 @@ snapshots:
       '@noble/curves': 1.9.7
       '@noble/hashes': 1.8.0
       '@opentelemetry/api': 1.9.1
-      '@opentelemetry/context-zone': 2.11.0(@opentelemetry/api@1.9.1)
-      '@opentelemetry/core': 2.11.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/context-zone': 2.12.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/core': 2.12.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/exporter-trace-otlp-http': 0.220.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/instrumentation': 0.220.0(@opentelemetry/api@1.9.1)(supports-color@10.2.2)
       '@opentelemetry/instrumentation-fetch': 0.220.0(@opentelemetry/api@1.9.1)(supports-color@10.2.2)
       '@opentelemetry/instrumentation-xml-http-request': 0.220.0(@opentelemetry/api@1.9.1)(supports-color@10.2.2)
       '@opentelemetry/otlp-transformer': 0.220.0(@opentelemetry/api@1.9.1)
-      '@opentelemetry/resources': 2.11.0(@opentelemetry/api@1.9.1)
-      '@opentelemetry/sdk-trace-base': 2.11.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/resources': 2.12.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/sdk-trace-base': 2.12.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/semantic-conventions': 1.43.0
       '@scure/base': 1.2.6
       '@types/node-forge': 1.3.14
@@ -10055,43 +10055,43 @@ snapshots:
       '@types/react': 19.3.0
       react: 19.3.0
 
-  '@miden-sdk/miden-sdk@0.17.0':
+  '@miden-sdk/miden-sdk@0.17.1':
     dependencies:
       dexie: 4.4.6
       glob: 11.1.0
     optionalDependencies:
-      '@miden-sdk/node-darwin-arm64': 0.17.0
-      '@miden-sdk/node-darwin-x64': 0.17.0
-      '@miden-sdk/node-linux-x64-gnu': 0.17.0
+      '@miden-sdk/node-darwin-arm64': 0.17.1
+      '@miden-sdk/node-darwin-x64': 0.17.1
+      '@miden-sdk/node-linux-x64-gnu': 0.17.1
 
-  '@miden-sdk/miden-wallet-adapter-base@0.17.0(@miden-sdk/miden-sdk@0.17.0)':
+  '@miden-sdk/miden-wallet-adapter-base@0.17.0(@miden-sdk/miden-sdk@0.17.1)':
     dependencies:
-      '@miden-sdk/miden-sdk': 0.17.0
+      '@miden-sdk/miden-sdk': 0.17.1
       eventemitter3: 5.0.4
 
-  '@miden-sdk/miden-wallet-adapter-miden@0.17.0(@miden-sdk/miden-sdk@0.17.0)(typescript@6.0.3)':
+  '@miden-sdk/miden-wallet-adapter-miden@0.17.0(@miden-sdk/miden-sdk@0.17.1)(typescript@6.0.3)':
     dependencies:
-      '@miden-sdk/miden-sdk': 0.17.0
-      '@miden-sdk/miden-wallet-adapter-base': 0.17.0(@miden-sdk/miden-sdk@0.17.0)
+      '@miden-sdk/miden-sdk': 0.17.1
+      '@miden-sdk/miden-wallet-adapter-base': 0.17.0(@miden-sdk/miden-sdk@0.17.1)
       typescript: 6.0.3
 
-  '@miden-sdk/miden-wallet-adapter-react@0.17.0(@miden-sdk/miden-sdk@0.17.0)(@miden-sdk/react@0.17.0(@miden-sdk/miden-sdk@0.17.0)(@types/react@19.3.0)(react@19.3.0)(use-sync-external-store@1.4.0(react@19.3.0)))(@types/react@19.3.0)(react@19.3.0)(typescript@6.0.3)':
+  '@miden-sdk/miden-wallet-adapter-react@0.17.0(@miden-sdk/miden-sdk@0.17.1)(@miden-sdk/react@0.17.0(@miden-sdk/miden-sdk@0.17.1)(@types/react@19.3.0)(react@19.3.0)(use-sync-external-store@1.4.0(react@19.3.0)))(@types/react@19.3.0)(react@19.3.0)(typescript@6.0.3)':
     dependencies:
-      '@miden-sdk/miden-sdk': 0.17.0
-      '@miden-sdk/miden-wallet-adapter-base': 0.17.0(@miden-sdk/miden-sdk@0.17.0)
-      '@miden-sdk/miden-wallet-adapter-miden': 0.17.0(@miden-sdk/miden-sdk@0.17.0)(typescript@6.0.3)
+      '@miden-sdk/miden-sdk': 0.17.1
+      '@miden-sdk/miden-wallet-adapter-base': 0.17.0(@miden-sdk/miden-sdk@0.17.1)
+      '@miden-sdk/miden-wallet-adapter-miden': 0.17.0(@miden-sdk/miden-sdk@0.17.1)(typescript@6.0.3)
       react: 19.3.0
     optionalDependencies:
-      '@miden-sdk/react': 0.17.0(@miden-sdk/miden-sdk@0.17.0)(@types/react@19.3.0)(react@19.3.0)(use-sync-external-store@1.4.0(react@19.3.0))
+      '@miden-sdk/react': 0.17.0(@miden-sdk/miden-sdk@0.17.1)(@types/react@19.3.0)(react@19.3.0)(use-sync-external-store@1.4.0(react@19.3.0))
       '@types/react': 19.3.0
     transitivePeerDependencies:
       - typescript
 
-  '@miden-sdk/miden-wallet-adapter-reactui@0.17.0(@miden-sdk/miden-sdk@0.17.0)(@miden-sdk/react@0.17.0(@miden-sdk/miden-sdk@0.17.0)(@types/react@19.3.0)(react@19.3.0)(use-sync-external-store@1.4.0(react@19.3.0)))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@6.0.3)':
+  '@miden-sdk/miden-wallet-adapter-reactui@0.17.0(@miden-sdk/miden-sdk@0.17.1)(@miden-sdk/react@0.17.0(@miden-sdk/miden-sdk@0.17.1)(@types/react@19.3.0)(react@19.3.0)(use-sync-external-store@1.4.0(react@19.3.0)))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@6.0.3)':
     dependencies:
-      '@miden-sdk/miden-wallet-adapter-base': 0.17.0(@miden-sdk/miden-sdk@0.17.0)
-      '@miden-sdk/miden-wallet-adapter-miden': 0.17.0(@miden-sdk/miden-sdk@0.17.0)(typescript@6.0.3)
-      '@miden-sdk/miden-wallet-adapter-react': 0.17.0(@miden-sdk/miden-sdk@0.17.0)(@miden-sdk/react@0.17.0(@miden-sdk/miden-sdk@0.17.0)(@types/react@19.3.0)(react@19.3.0)(use-sync-external-store@1.4.0(react@19.3.0)))(@types/react@19.3.0)(react@19.3.0)(typescript@6.0.3)
+      '@miden-sdk/miden-wallet-adapter-base': 0.17.0(@miden-sdk/miden-sdk@0.17.1)
+      '@miden-sdk/miden-wallet-adapter-miden': 0.17.0(@miden-sdk/miden-sdk@0.17.1)(typescript@6.0.3)
+      '@miden-sdk/miden-wallet-adapter-react': 0.17.0(@miden-sdk/miden-sdk@0.17.1)(@miden-sdk/react@0.17.0(@miden-sdk/miden-sdk@0.17.1)(@types/react@19.3.0)(react@19.3.0)(use-sync-external-store@1.4.0(react@19.3.0)))(@types/react@19.3.0)(react@19.3.0)(typescript@6.0.3)
       '@types/react': 19.3.0
       '@types/react-dom': 19.3.0(@types/react@19.3.0)
       react: 19.3.0
@@ -10101,12 +10101,12 @@ snapshots:
       - '@miden-sdk/react'
       - typescript
 
-  '@miden-sdk/miden-wallet-adapter@0.17.0(@miden-sdk/miden-sdk@0.17.0)(@miden-sdk/react@0.17.0(@miden-sdk/miden-sdk@0.17.0)(@types/react@19.3.0)(react@19.3.0)(use-sync-external-store@1.4.0(react@19.3.0)))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@6.0.3)':
+  '@miden-sdk/miden-wallet-adapter@0.17.0(@miden-sdk/miden-sdk@0.17.1)(@miden-sdk/react@0.17.0(@miden-sdk/miden-sdk@0.17.1)(@types/react@19.3.0)(react@19.3.0)(use-sync-external-store@1.4.0(react@19.3.0)))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@6.0.3)':
     dependencies:
-      '@miden-sdk/miden-wallet-adapter-base': 0.17.0(@miden-sdk/miden-sdk@0.17.0)
-      '@miden-sdk/miden-wallet-adapter-miden': 0.17.0(@miden-sdk/miden-sdk@0.17.0)(typescript@6.0.3)
-      '@miden-sdk/miden-wallet-adapter-react': 0.17.0(@miden-sdk/miden-sdk@0.17.0)(@miden-sdk/react@0.17.0(@miden-sdk/miden-sdk@0.17.0)(@types/react@19.3.0)(react@19.3.0)(use-sync-external-store@1.4.0(react@19.3.0)))(@types/react@19.3.0)(react@19.3.0)(typescript@6.0.3)
-      '@miden-sdk/miden-wallet-adapter-reactui': 0.17.0(@miden-sdk/miden-sdk@0.17.0)(@miden-sdk/react@0.17.0(@miden-sdk/miden-sdk@0.17.0)(@types/react@19.3.0)(react@19.3.0)(use-sync-external-store@1.4.0(react@19.3.0)))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@6.0.3)
+      '@miden-sdk/miden-wallet-adapter-base': 0.17.0(@miden-sdk/miden-sdk@0.17.1)
+      '@miden-sdk/miden-wallet-adapter-miden': 0.17.0(@miden-sdk/miden-sdk@0.17.1)(typescript@6.0.3)
+      '@miden-sdk/miden-wallet-adapter-react': 0.17.0(@miden-sdk/miden-sdk@0.17.1)(@miden-sdk/react@0.17.0(@miden-sdk/miden-sdk@0.17.1)(@types/react@19.3.0)(react@19.3.0)(use-sync-external-store@1.4.0(react@19.3.0)))(@types/react@19.3.0)(react@19.3.0)(typescript@6.0.3)
+      '@miden-sdk/miden-wallet-adapter-reactui': 0.17.0(@miden-sdk/miden-sdk@0.17.1)(@miden-sdk/react@0.17.0(@miden-sdk/miden-sdk@0.17.1)(@types/react@19.3.0)(react@19.3.0)(use-sync-external-store@1.4.0(react@19.3.0)))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@6.0.3)
       '@types/react': 19.3.0
       '@types/react-dom': 19.3.0(@types/react@19.3.0)
       react: 19.3.0
@@ -10116,34 +10116,34 @@ snapshots:
       - '@miden-sdk/react'
       - typescript
 
-  '@miden-sdk/node-darwin-arm64@0.17.0':
+  '@miden-sdk/node-darwin-arm64@0.17.1':
     optional: true
 
-  '@miden-sdk/node-darwin-x64@0.17.0':
+  '@miden-sdk/node-darwin-x64@0.17.1':
     optional: true
 
-  '@miden-sdk/node-linux-x64-gnu@0.17.0':
+  '@miden-sdk/node-linux-x64-gnu@0.17.1':
     optional: true
 
-  '@miden-sdk/para-react@0.17.0(@getpara/react-sdk-lite@3.21.0(aee0cdfb9419267c6665ec062ddecda8))(@getpara/web-sdk@3.21.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2))(@miden-sdk/miden-sdk@0.17.0)(@miden-sdk/para@0.17.0(@getpara/web-sdk@3.21.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2))(@miden-sdk/miden-sdk@0.17.0))(@miden-sdk/react@0.17.0(@miden-sdk/miden-sdk@0.17.0)(@types/react@19.3.0)(react@19.3.0)(use-sync-external-store@1.4.0(react@19.3.0)))(@tanstack/react-query@5.104.1(react@19.3.0))(react@19.3.0)':
+  '@miden-sdk/para-react@0.17.0(@getpara/react-sdk-lite@3.21.0(aee0cdfb9419267c6665ec062ddecda8))(@getpara/web-sdk@3.21.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2))(@miden-sdk/miden-sdk@0.17.1)(@miden-sdk/para@0.17.0(@getpara/web-sdk@3.21.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2))(@miden-sdk/miden-sdk@0.17.1))(@miden-sdk/react@0.17.0(@miden-sdk/miden-sdk@0.17.1)(@types/react@19.3.0)(react@19.3.0)(use-sync-external-store@1.4.0(react@19.3.0)))(@tanstack/react-query@5.104.1(react@19.3.0))(react@19.3.0)':
     dependencies:
       '@getpara/react-sdk-lite': 3.21.0(aee0cdfb9419267c6665ec062ddecda8)
       '@getpara/web-sdk': 3.21.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
-      '@miden-sdk/miden-sdk': 0.17.0
-      '@miden-sdk/para': 0.17.0(@getpara/web-sdk@3.21.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2))(@miden-sdk/miden-sdk@0.17.0)
-      '@miden-sdk/react': 0.17.0(@miden-sdk/miden-sdk@0.17.0)(@types/react@19.3.0)(react@19.3.0)(use-sync-external-store@1.4.0(react@19.3.0))
+      '@miden-sdk/miden-sdk': 0.17.1
+      '@miden-sdk/para': 0.17.0(@getpara/web-sdk@3.21.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2))(@miden-sdk/miden-sdk@0.17.1)
+      '@miden-sdk/react': 0.17.0(@miden-sdk/miden-sdk@0.17.1)(@types/react@19.3.0)(react@19.3.0)(use-sync-external-store@1.4.0(react@19.3.0))
       '@tanstack/react-query': 5.104.1(react@19.3.0)
       react: 19.3.0
 
-  '@miden-sdk/para@0.17.0(@getpara/web-sdk@3.21.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2))(@miden-sdk/miden-sdk@0.17.0)':
+  '@miden-sdk/para@0.17.0(@getpara/web-sdk@3.21.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2))(@miden-sdk/miden-sdk@0.17.1)':
     dependencies:
       '@getpara/web-sdk': 3.21.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
-      '@miden-sdk/miden-sdk': 0.17.0
+      '@miden-sdk/miden-sdk': 0.17.1
       '@noble/hashes': 2.4.0
 
-  '@miden-sdk/react@0.17.0(@miden-sdk/miden-sdk@0.17.0)(@types/react@19.3.0)(react@19.3.0)(use-sync-external-store@1.4.0(react@19.3.0))':
+  '@miden-sdk/react@0.17.0(@miden-sdk/miden-sdk@0.17.1)(@types/react@19.3.0)(react@19.3.0)(use-sync-external-store@1.4.0(react@19.3.0))':
     dependencies:
-      '@miden-sdk/miden-sdk': 0.17.0
+      '@miden-sdk/miden-sdk': 0.17.1
       react: 19.3.0
       zustand: 5.0.15(@types/react@19.3.0)(react@19.3.0)(use-sync-external-store@1.4.0(react@19.3.0))
     optionalDependencies:
@@ -10165,45 +10165,45 @@ snapshots:
 
   '@msgpack/msgpack@3.1.2': {}
 
-  '@next/env@16.3.8': {}
+  '@next/env@16.4.0': {}
 
-  '@next/eslint-plugin-next@16.3.8(eslint@9.39.5(jiti@2.7.0)(supports-color@10.2.2))':
+  '@next/eslint-plugin-next@16.4.0(eslint@9.39.5(jiti@2.7.0)(supports-color@10.2.2))':
     dependencies:
       '@eslint-community/eslint-utils': 4.9.1(eslint@9.39.5(jiti@2.7.0)(supports-color@10.2.2))
       fast-glob: 3.3.1
     transitivePeerDependencies:
       - eslint
 
-  '@next/mdx@16.3.8(@mdx-js/loader@3.1.1(supports-color@10.2.2))(@mdx-js/react@3.1.1(@types/react@19.3.0)(react@19.3.0))(next@16.3.8(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@types/node@24.13.6)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))':
+  '@next/mdx@16.4.0(@mdx-js/loader@3.1.1(supports-color@10.2.2))(@mdx-js/react@3.1.1(@types/react@19.3.0)(react@19.3.0))(next@16.4.0(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@types/node@24.13.6)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))':
     dependencies:
-      next: 16.3.8(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@types/node@24.13.6)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      next: 16.4.0(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@types/node@24.13.6)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       source-map: 0.7.6
     optionalDependencies:
       '@mdx-js/loader': 3.1.1(supports-color@10.2.2)
       '@mdx-js/react': 3.1.1(@types/react@19.3.0)(react@19.3.0)
 
-  '@next/swc-darwin-arm64@16.3.8':
+  '@next/swc-darwin-arm64@16.4.0':
     optional: true
 
-  '@next/swc-darwin-x64@16.3.8':
+  '@next/swc-darwin-x64@16.4.0':
     optional: true
 
-  '@next/swc-linux-arm64-gnu@16.3.8':
+  '@next/swc-linux-arm64-gnu@16.4.0':
     optional: true
 
-  '@next/swc-linux-arm64-musl@16.3.8':
+  '@next/swc-linux-arm64-musl@16.4.0':
     optional: true
 
-  '@next/swc-linux-x64-gnu@16.3.8':
+  '@next/swc-linux-x64-gnu@16.4.0':
     optional: true
 
-  '@next/swc-linux-x64-musl@16.3.8':
+  '@next/swc-linux-x64-musl@16.4.0':
     optional: true
 
-  '@next/swc-win32-arm64-msvc@16.3.8':
+  '@next/swc-win32-arm64-msvc@16.4.0':
     optional: true
 
-  '@next/swc-win32-x64-msvc@16.3.8':
+  '@next/swc-win32-x64-msvc@16.4.0':
     optional: true
 
   '@noble/ciphers@1.1.3': {}
@@ -10271,7 +10271,7 @@ snapshots:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.20.3
 
-  '@opennextjs/aws@4.1.7(next@16.3.8(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@types/node@24.13.6)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(supports-color@10.2.2)':
+  '@opennextjs/aws@4.1.8(next@16.4.0(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@types/node@24.13.6)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(supports-color@10.2.2)':
     dependencies:
       '@ast-grep/napi': 0.40.5
       '@aws-sdk/client-cloudfront': 3.984.0
@@ -10287,26 +10287,26 @@ snapshots:
       cookie: 1.1.1
       esbuild: 0.25.4
       express: 5.2.1(supports-color@10.2.2)
-      next: 16.3.8(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@types/node@24.13.6)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      next: 16.4.0(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@types/node@24.13.6)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       path-to-regexp: 6.3.0
       urlpattern-polyfill: 10.1.0
       yaml: 2.9.1
     transitivePeerDependencies:
       - supports-color
 
-  '@opennextjs/cloudflare@1.20.8(next@16.3.8(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@types/node@24.13.6)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(supports-color@10.2.2)(wrangler@4.147.0(@types/node@24.13.6))':
+  '@opennextjs/cloudflare@1.20.9(next@16.4.0(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@types/node@24.13.6)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(supports-color@10.2.2)(wrangler@4.148.0(@types/node@24.13.6))':
     dependencies:
       '@ast-grep/napi': 0.40.5
       '@dotenvx/dotenvx': 1.31.0
-      '@opennextjs/aws': 4.1.7(next@16.3.8(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@types/node@24.13.6)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(supports-color@10.2.2)
+      '@opennextjs/aws': 4.1.8(next@16.4.0(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@types/node@24.13.6)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(supports-color@10.2.2)
       ci-info: 4.4.0
       cloudflare: 4.5.0
       comment-json: 4.6.2
       enquirer: 2.4.1
       glob: 12.0.0
-      next: 16.3.8(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@types/node@24.13.6)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      next: 16.4.0(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@types/node@24.13.6)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       ts-tqdm: 0.8.6
-      wrangler: 4.147.0(@types/node@24.13.6)
+      wrangler: 4.148.0(@types/node@24.13.6)
       yargs: 18.2.0
     transitivePeerDependencies:
       - encoding
@@ -10318,19 +10318,19 @@ snapshots:
 
   '@opentelemetry/api@1.9.1': {}
 
-  '@opentelemetry/context-zone-peer-dep@2.11.0(@opentelemetry/api@1.9.1)(zone.js@0.16.3)':
+  '@opentelemetry/context-zone-peer-dep@2.12.0(@opentelemetry/api@1.9.1)(zone.js@0.16.3)':
     dependencies:
       '@opentelemetry/api': 1.9.1
       zone.js: 0.16.3
 
-  '@opentelemetry/context-zone@2.11.0(@opentelemetry/api@1.9.1)':
+  '@opentelemetry/context-zone@2.12.0(@opentelemetry/api@1.9.1)':
     dependencies:
-      '@opentelemetry/context-zone-peer-dep': 2.11.0(@opentelemetry/api@1.9.1)(zone.js@0.16.3)
+      '@opentelemetry/context-zone-peer-dep': 2.12.0(@opentelemetry/api@1.9.1)(zone.js@0.16.3)
       zone.js: 0.16.3
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
-  '@opentelemetry/core@2.11.0(@opentelemetry/api@1.9.1)':
+  '@opentelemetry/core@2.12.0(@opentelemetry/api@1.9.1)':
     dependencies:
       '@opentelemetry/api': 1.9.1
       '@opentelemetry/semantic-conventions': 1.43.0
@@ -10394,10 +10394,10 @@ snapshots:
       '@opentelemetry/sdk-metrics': 2.9.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/sdk-trace': 2.9.0(@opentelemetry/api@1.9.1)
 
-  '@opentelemetry/resources@2.11.0(@opentelemetry/api@1.9.1)':
+  '@opentelemetry/resources@2.12.0(@opentelemetry/api@1.9.1)':
     dependencies:
       '@opentelemetry/api': 1.9.1
-      '@opentelemetry/core': 2.11.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/core': 2.12.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/semantic-conventions': 1.43.0
 
   '@opentelemetry/resources@2.9.0(@opentelemetry/api@1.9.1)':
@@ -10420,12 +10420,12 @@ snapshots:
       '@opentelemetry/core': 2.9.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/resources': 2.9.0(@opentelemetry/api@1.9.1)
 
-  '@opentelemetry/sdk-trace-base@2.11.0(@opentelemetry/api@1.9.1)':
+  '@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1)':
     dependencies:
       '@opentelemetry/api': 1.9.1
-      '@opentelemetry/core': 2.11.0(@opentelemetry/api@1.9.1)
-      '@opentelemetry/resources': 2.11.0(@opentelemetry/api@1.9.1)
-      '@opentelemetry/sdk-trace': 2.11.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/core': 2.12.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/resources': 2.12.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/sdk-trace': 2.12.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/semantic-conventions': 1.43.0
 
   '@opentelemetry/sdk-trace-base@2.9.0(@opentelemetry/api@1.9.1)':
@@ -10442,11 +10442,11 @@ snapshots:
       '@opentelemetry/core': 2.9.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/sdk-trace-base': 2.9.0(@opentelemetry/api@1.9.1)
 
-  '@opentelemetry/sdk-trace@2.11.0(@opentelemetry/api@1.9.1)':
+  '@opentelemetry/sdk-trace@2.12.0(@opentelemetry/api@1.9.1)':
     dependencies:
       '@opentelemetry/api': 1.9.1
-      '@opentelemetry/core': 2.11.0(@opentelemetry/api@1.9.1)
-      '@opentelemetry/resources': 2.11.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/core': 2.12.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/resources': 2.12.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/semantic-conventions': 1.43.0
 
   '@opentelemetry/sdk-trace@2.9.0(@opentelemetry/api@1.9.1)':
@@ -10462,7 +10462,7 @@ snapshots:
 
   '@openzeppelin/miden-multisig-client@0.18.0':
     dependencies:
-      '@miden-sdk/miden-sdk': 0.17.0
+      '@miden-sdk/miden-sdk': 0.17.1
       '@noble/curves': 1.9.7
       '@noble/hashes': 2.4.0
       '@openzeppelin/guardian-client': 0.18.0
@@ -12968,7 +12968,7 @@ snapshots:
     dependencies:
       baseline-browser-mapping: 2.11.27
       caniuse-lite: 1.0.30001814
-      electron-to-chromium: 1.5.445
+      electron-to-chromium: 1.5.449
       node-releases: 2.0.57
       update-browserslist-db: 1.3.3(browserslist@4.29.3)
 
@@ -13305,7 +13305,7 @@ snapshots:
 
   dotenv@16.6.1: {}
 
-  dotenv@18.0.5: {}
+  dotenv@18.0.6: {}
 
   drizzle-kit@1.0.0-rc.4:
     dependencies:
@@ -13339,7 +13339,7 @@ snapshots:
 
   ee-first@1.1.1: {}
 
-  electron-to-chromium@1.5.445: {}
+  electron-to-chromium@1.5.449: {}
 
   elliptic@6.6.1:
     dependencies:
@@ -14997,12 +14997,12 @@ snapshots:
 
   mimic-fn@2.1.0: {}
 
-  miniflare@5.20261001.0-alpha(@types/node@24.13.6):
+  miniflare@5.20261006.0-alpha(@types/node@24.13.6):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       sharp: 0.35.4(@types/node@24.13.6)
       undici: 7.29.1
-      workerd: 1.20261001.1
+      workerd: 1.20261006.1
       ws: 8.21.0
       youch: 4.1.0-beta.10
     transitivePeerDependencies:
@@ -15072,9 +15072,9 @@ snapshots:
       react: 19.3.0
       react-dom: 19.3.0(react@19.3.0)
 
-  next@16.3.8(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@types/node@24.13.6)(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
+  next@16.4.0(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@types/node@24.13.6)(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
     dependencies:
-      '@next/env': 16.3.8
+      '@next/env': 16.4.0
       '@swc/helpers': 0.5.23
       baseline-browser-mapping: 2.11.27
       caniuse-lite: 1.0.30001814
@@ -15083,14 +15083,14 @@ snapshots:
       react-dom: 19.3.0(react@19.3.0)
       styled-jsx: 5.1.6(@babel/core@7.29.7(supports-color@10.2.2))(react@19.3.0)
     optionalDependencies:
-      '@next/swc-darwin-arm64': 16.3.8
-      '@next/swc-darwin-x64': 16.3.8
-      '@next/swc-linux-arm64-gnu': 16.3.8
-      '@next/swc-linux-arm64-musl': 16.3.8
-      '@next/swc-linux-x64-gnu': 16.3.8
-      '@next/swc-linux-x64-musl': 16.3.8
-      '@next/swc-win32-arm64-msvc': 16.3.8
-      '@next/swc-win32-x64-msvc': 16.3.8
+      '@next/swc-darwin-arm64': 16.4.0
+      '@next/swc-darwin-x64': 16.4.0
+      '@next/swc-linux-arm64-gnu': 16.4.0
+      '@next/swc-linux-arm64-musl': 16.4.0
+      '@next/swc-linux-x64-gnu': 16.4.0
+      '@next/swc-linux-x64-musl': 16.4.0
+      '@next/swc-win32-arm64-msvc': 16.4.0
+      '@next/swc-win32-x64-msvc': 16.4.0
       '@opentelemetry/api': 1.9.1
       sharp: 0.35.5(@types/node@24.13.6)
     transitivePeerDependencies:
@@ -16630,24 +16630,24 @@ snapshots:
 
   word-wrap@1.2.5: {}
 
-  workerd@1.20261001.1:
+  workerd@1.20261006.1:
     optionalDependencies:
-      '@cloudflare/workerd-darwin-64': 1.20261001.1
-      '@cloudflare/workerd-darwin-arm64': 1.20261001.1
-      '@cloudflare/workerd-linux-64': 1.20261001.1
-      '@cloudflare/workerd-linux-arm64': 1.20261001.1
-      '@cloudflare/workerd-windows-64': 1.20261001.1
+      '@cloudflare/workerd-darwin-64': 1.20261006.1
+      '@cloudflare/workerd-darwin-arm64': 1.20261006.1
+      '@cloudflare/workerd-linux-64': 1.20261006.1
+      '@cloudflare/workerd-linux-arm64': 1.20261006.1
+      '@cloudflare/workerd-windows-64': 1.20261006.1
 
-  wrangler@4.147.0(@types/node@24.13.6):
+  wrangler@4.148.0(@types/node@24.13.6):
     dependencies:
       '@cloudflare/kv-asset-handler': 0.5.0
-      '@cloudflare/unenv-preset': 2.16.2(unenv@2.0.0-rc.24)(workerd@1.20261001.1)
+      '@cloudflare/unenv-preset': 2.16.2(unenv@2.0.0-rc.24)(workerd@1.20261006.1)
       blake3-wasm: 2.1.5
       esbuild: 0.28.1
-      miniflare: 5.20261001.0-alpha(@types/node@24.13.6)
+      miniflare: 5.20261006.0-alpha(@types/node@24.13.6)
       path-to-regexp: 6.3.0
       unenv: 2.0.0-rc.24
-      workerd: 1.20261001.1
+      workerd: 1.20261006.1
     optionalDependencies:
       fsevents: 2.3.3
     transitivePeerDependencies:

@@ -27,12 +27,12 @@ const Step4: TutorialStep = {
         <Step4Content walletA={walletA} walletB={walletB} />
         <TutorialAlert
           completed={completed}
-          title="Action required: Consume the note."
-          titleWhenCompleted="The note has been consumed."
+          title="Action required: Consume the Note."
+          titleWhenCompleted="The Note has been consumed."
           description={
             <p>
-              Click on <em>"Consume all notes"</em>, preview and submit the
-              resulting transaction.
+              Click <em>"Consume all notes"</em>, then preview and submit the
+              resulting Transaction.
             </p>
           }
         />

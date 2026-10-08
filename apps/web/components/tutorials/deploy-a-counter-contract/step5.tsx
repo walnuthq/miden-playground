@@ -27,7 +27,7 @@ const Step5: TutorialStep = {
         <Step5Content />
         <TutorialAlert
           completed={completed}
-          title="Action required: Deploy a Counter Contract."
+          title="Action required: Deploy a counter contract."
           titleWhenCompleted="You deployed a Counter Contract."
           description={
             <p>

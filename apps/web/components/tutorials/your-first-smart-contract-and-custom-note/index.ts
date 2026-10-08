@@ -15,7 +15,7 @@ const tutorial: Tutorial = {
   ...defaultTutorial(),
   id: "your-first-smart-contract-and-custom-note",
   number: 11,
-  title: "Your first Smart Contract and custom note",
+  title: "Your first smart contract and custom note",
   tagline: "Develop custom smart contracts and notes.",
   description:
     "In this tutorial, you'll create your first smart contract and understand the structure and implementation of both the counter account contract and increment note script.",

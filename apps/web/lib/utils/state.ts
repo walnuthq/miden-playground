@@ -107,6 +107,22 @@ export const stateSerializer = ({
     completedTutorials: [...completedTutorials],
   });
 
+// Scripts persisted before the package `digest` was renamed `commitment` still
+// carry the old field, on themselves and on their dependencies.
+type LegacyScript = Omit<Script, "dependencies"> & {
+  digest?: string;
+  dependencies: (Script["dependencies"][number] & { digest?: string })[];
+};
+
+const migrateScript = ({ digest, ...script }: LegacyScript): Script => ({
+  ...script,
+  commitment: script.commitment ?? digest ?? "",
+  dependencies: script.dependencies.map(({ digest, ...dependency }) => ({
+    ...dependency,
+    commitment: dependency.commitment ?? digest ?? "",
+  })),
+});
+
 export const stateDeserializer = (value: string): State => {
   try {
     const {
@@ -128,7 +144,7 @@ export const stateDeserializer = (value: string): State => {
       accounts?: Account[];
       transactions?: Transaction[];
       inputNotes?: InputNote[];
-      scripts?: Script[];
+      scripts?: LegacyScript[];
       components?: Component[];
       tutorialId?: TutorialId;
       tutorialStep?: number;
@@ -146,7 +162,7 @@ export const stateDeserializer = (value: string): State => {
       accounts: accounts ?? initialState.accounts,
       transactions: transactions ?? initialState.transactions,
       inputNotes: inputNotes ?? initialState.inputNotes,
-      scripts: scripts ?? initialState.scripts,
+      scripts: scripts?.map(migrateScript) ?? initialState.scripts,
       components: components ?? initialState.components,
       tutorialId: tutorialId ?? initialState.tutorialId,
       tutorialStep: tutorialStep ?? initialState.tutorialStep,

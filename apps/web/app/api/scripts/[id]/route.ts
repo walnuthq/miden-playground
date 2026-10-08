@@ -84,7 +84,7 @@ export const PATCH = async (
         status: "compiled",
         masm,
         rust,
-        digest: scripts[example].digest,
+        commitment: scripts[example].commitment,
         masp: "",
         exports: scriptsExports[example],
         error: "",

@@ -123,7 +123,7 @@ export const midenFaucetAccount = (networkId: NetworkId) => ({
     totalSupply: "0",
   }),
   id: midenFaucetAccountId(networkId),
-  name: "Miden Faucet",
+  name: "USDCx Faucet",
   address: midenFaucetAddress(networkId),
   identifier: getIdentifierPart(midenFaucetAddress(networkId)),
   routingParameters: getRoutingParametersPart(midenFaucetAddress(networkId)),

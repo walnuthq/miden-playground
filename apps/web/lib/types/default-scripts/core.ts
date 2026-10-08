@@ -6,7 +6,8 @@ const core: Script = {
   id: "miden-core",
   name: "miden-core",
   type: "library",
-  digest: "0xdd25712ddf6939c3d5970b060c2c0f6dcb45d5bb15436739417820f5f0a82ec5",
+  commitment:
+    "0xdd25712ddf6939c3d5970b060c2c0f6dcb45d5bb15436739417820f5f0a82ec5",
 };
 
 export default core;

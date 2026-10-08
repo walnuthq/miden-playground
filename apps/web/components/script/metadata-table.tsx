@@ -19,8 +19,8 @@ const MetadataTable = ({ script }: { script: Script }) => (
           <TableCell>{scriptTypes[script.type]}</TableCell>
         </TableRow>
         <TableRow>
-          <TableCell>Digest</TableCell>
-          <TableCell>{script.digest}</TableCell>
+          <TableCell>Commitment</TableCell>
+          <TableCell>{script.commitment}</TableCell>
         </TableRow>
         <TableRow>
           <TableCell>Created at</TableCell>

@@ -16,6 +16,7 @@ export type TransactionNote = {
   id: string;
   type: NoteType;
   scriptRoot: string;
+  scriptId: string;
   senderId: string;
   fungibleAssets: FungibleAsset[];
   storage: string[];

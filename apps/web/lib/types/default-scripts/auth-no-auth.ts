@@ -93,7 +93,8 @@ const authNoAuth: Script = {
   readOnly: true,
   rust,
   masm,
-  digest: "0xdf9079c0a5668001295dfa427f4c03a61c6fa4cb92c0c2b7293b30a622cb2982",
+  commitment:
+    "0xdf9079c0a5668001295dfa427f4c03a61c6fa4cb92c0c2b7293b30a622cb2982",
   procedureExports: [
     {
       ...defaultProcedureExport(),

@@ -11,7 +11,7 @@ const useCompleted = () => {
 };
 
 const Step1: TutorialStep = {
-  title: "Create your first wallet Account.",
+  title: "Create your first wallet account.",
   Content: () => {
     const completed = useCompleted();
     return (
@@ -20,11 +20,11 @@ const Step1: TutorialStep = {
         <TutorialAlert
           completed={completed}
           title="Action required: Create your first public wallet."
-          titleWhenCompleted="Your first wallet is created."
+          titleWhenCompleted="Your first wallet has been created."
           description={
             <p>
-              Click on the <em>"Create new account"</em> button then select the{" "}
-              <em>"Create new wallet"</em> option to generate a wallet Account.{" "}
+              Click the <em>"Create new account"</em> button, then select the{" "}
+              <em>"Create new wallet"</em> option to generate a wallet account.{" "}
               <strong>Make sure to create a public wallet.</strong>
             </p>
           }
