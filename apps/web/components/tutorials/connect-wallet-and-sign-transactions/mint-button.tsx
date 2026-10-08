@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { HandCoins } from "lucide-react";
+import { toast } from "sonner";
 import {
   NoteFile as WasmNoteFile,
   NoteId as WasmNoteId,
@@ -9,13 +10,8 @@ import { Spinner } from "@workspace/ui/components/spinner";
 import useAccounts from "@/hooks/use-accounts";
 import useNetwork from "@/hooks/use-network";
 import { Button } from "@workspace/ui/components/button";
-import {
-  FUNGIBLE_FAUCET_DEFAULT_DECIMALS,
-  midenFaucetApiUrl,
-} from "@/lib/constants";
-import { parseAmount } from "@/lib/utils/asset";
 import { waitUntil } from "@/lib/utils";
-import { getPowChallenge, findValidNonce, getTokens } from "@/lib/miden-faucet";
+import { requestTokens } from "@/lib/miden-faucet";
 import { clientGetNotesById } from "@/lib/web-client";
 
 const MintButton = () => {
@@ -38,35 +34,30 @@ const MintButton = () => {
           return;
         }
         setLoading(true);
-        const amount = parseAmount(
-          "100",
-          FUNGIBLE_FAUCET_DEFAULT_DECIMALS,
-        ).toString();
-        const { challenge, target } = await getPowChallenge({
-          backendUrl: midenFaucetApiUrl(networkId),
-          recipient: connectedWallet.address,
-          amount,
-        });
-        const nonce = await findValidNonce({ challenge, target });
-        const { noteId } = await getTokens({
-          backendUrl: midenFaucetApiUrl(networkId),
-          challenge,
-          nonce,
-          recipient: connectedWallet.address,
-          amount,
-        });
-        console.info({ noteId });
-        await waitUntil(async () => {
-          const wasmFetchedNotes = await clientGetNotesById({
+        try {
+          const { noteId } = await requestTokens({
             networkId,
-            noteIds: [noteId],
+            recipient: connectedWallet.address,
           });
-          return wasmFetchedNotes.length > 0;
-        });
-        await client.importNoteFile(
-          WasmNoteFile.fromNoteId(WasmNoteId.fromHex(noteId)),
-        );
-        setLoading(false);
+          console.info({ noteId });
+          await waitUntil(async () => {
+            const wasmFetchedNotes = await clientGetNotesById({
+              networkId,
+              noteIds: [noteId],
+            });
+            return wasmFetchedNotes.length > 0;
+          });
+          await client.importNoteFile(
+            WasmNoteFile.fromNoteId(WasmNoteId.fromHex(noteId)),
+          );
+          setLoading(false);
+        } catch (error) {
+          console.error(error);
+          toast.error("Failed to request tokens from the faucet.", {
+            description: error instanceof Error ? error.message : String(error),
+          });
+          setLoading(false);
+        }
       }}
     >
       {loading ? <Spinner /> : <HandCoins />}

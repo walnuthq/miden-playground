@@ -7,23 +7,22 @@ import Step2 from "@/components/tutorials/connect-wallet-and-sign-transactions/s
 import Step3 from "@/components/tutorials/connect-wallet-and-sign-transactions/step3";
 import Step4 from "@/components/tutorials/connect-wallet-and-sign-transactions/step4";
 import Step5 from "@/components/tutorials/connect-wallet-and-sign-transactions/step5";
-import Step6 from "@/components/tutorials/connect-wallet-and-sign-transactions/step6";
 
 const tutorial: Tutorial = {
   ...defaultTutorial(),
   id: "connect-wallet-and-sign-transactions",
   number: 3,
   title: "Connect a wallet and sign Transactions",
-  tagline: "Connect your Bread Wallet and sign transactions on testnet.",
+  tagline: "Connect your Bread Wallet and sign Transactions on testnet.",
   description:
-    "This tutorial will walk you through connecting your Bread Wallet to the Miden Playground and confirming transactions on Miden testnet.",
+    "This tutorial walks you through connecting your Bread Wallet to the Miden Playground and signing Transactions on Miden testnet.",
   initialRoute: "/accounts",
   state: {
     ...defaultState(),
     accounts: [midenFaucetAccount("mtst")],
     tutorialId: "connect-wallet-and-sign-transactions",
   },
-  steps: [Step1, Step2, Step3, Step4, Step5, Step6],
+  steps: [Step1, Step2, Step3, Step4, Step5],
 };
 
 export default tutorial;

@@ -1,41 +1,52 @@
+import { EllipsisVertical } from "lucide-react";
 import type { TutorialStep } from "@/lib/types/tutorial";
-import useNetwork from "@/hooks/use-network";
-import useAccounts from "@/hooks/use-accounts";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
 import Step4Content from "@/components/tutorials/connect-wallet-and-sign-transactions/step4.mdx";
-import { testWalletAddress } from "@/lib/constants";
+import useAccounts from "@/hooks/use-accounts";
+import useNotes from "@/hooks/use-notes";
+import { P2ID_NOTE_CODE } from "@/lib/constants";
+import { accountIdFromPrefixSuffix } from "@/lib/utils/account";
 
 const useCompleted = () => {
   const { wallets, connectedWallet } = useAccounts();
-  const recipient = wallets.find(
-    ({ address }) => connectedWallet && address !== connectedWallet.address,
+  const senderAccount = wallets.find(
+    ({ address }) => address === connectedWallet?.address,
   );
-  return !!recipient;
+  const recipientAccount = wallets.find(
+    ({ address }) => address !== connectedWallet?.address,
+  );
+  const { inputNotes } = useNotes();
+  const note = inputNotes.find(
+    ({ senderId, scriptRoot, storage, state, type }) =>
+      senderId === senderAccount?.id &&
+      scriptRoot === P2ID_NOTE_CODE &&
+      accountIdFromPrefixSuffix(storage[1] ?? "", storage[0] ?? "") ===
+        recipientAccount?.id &&
+      state === "committed" &&
+      type === "private",
+  );
+  return !!note;
 };
 
 const Step4: TutorialStep = {
-  title: "Import another wallet in the Playground.",
+  title: "Send tokens to the recipient wallet.",
   Content: () => {
-    const { networkId } = useNetwork();
     const completed = useCompleted();
     return (
       <>
-        <Step4Content
-          account={{
-            name: "Test Wallet",
-            address: testWalletAddress(networkId),
-          }}
-        />
+        <Step4Content />
         <TutorialAlert
           completed={completed}
-          title="Action required: Import the recipient wallet."
-          titleWhenCompleted="Recipient wallet has been imported."
+          title="Action required: Send tokens to the recipient."
+          titleWhenCompleted="The output note carrying your tokens has been created."
           description={
             <p>
-              Click on the <em>"Create new account"</em> button on top of the
-              accounts page and select the <em>"Import account"</em> option to
-              import another wallet in the Playground.
+              Click the <EllipsisVertical className="size-4 inline" /> icon
+              button in your wallet's row on the accounts page and select the{" "}
+              <em>"New send transaction"</em> option. Send at most 0.001 USDCX
+              to the recipient wallet in a private note, then confirm the
+              transaction in Bread Wallet.
             </p>
           }
         />
