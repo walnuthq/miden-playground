@@ -15,7 +15,7 @@ const useCompleted = () => {
 };
 
 const Step1: TutorialStep = {
-  title: "Connect your wallet to the playground.",
+  title: "Connect your wallet to the Playground.",
   Content: () => {
     const { connectedWallet } = useAccounts();
     const completed = useCompleted();
@@ -28,9 +28,9 @@ const Step1: TutorialStep = {
           titleWhenCompleted="Your wallet is connected and imported."
           description={
             <p>
-              Click on the <em>"Select Wallet"</em> button in the top-right
-              corner and connect the Bread Wallet to the Playground, then once
-              imported, navigate to your account details page.
+              Click the <em>"Select Wallet"</em> button in the top-right corner
+              to connect Bread Wallet to the Playground. Once your wallet is
+              imported, open its account details page.
             </p>
           }
         />

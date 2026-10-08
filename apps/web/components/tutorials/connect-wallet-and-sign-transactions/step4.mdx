@@ -1,19 +1,11 @@
-import Link from "@/components/tutorials/tutorial-link";
-import AccountAddress from "@/components/lib/account-address";
-import CopyButton from "@/components/lib/copy-button";
+import { EllipsisVertical } from "lucide-react";
 
-Now that your wallet is funded, we'd like to transfer tokens to another recipient wallet.
+Now that the recipient wallet is imported, you can send it some tokens.
 
-To initiate a send transaction and transfer some tokens, you'll need to import a recipient account in the Playground.
+On the accounts page, click the <EllipsisVertical className="size-4 inline" /> icon button in your wallet's row to open the transaction menu.
 
-This can be another wallet you control or the wallet of a friend. You can also send some tokens to this test wallet:
+Select the _"New send transaction"_ option to open the configuration modal, then select the recipient wallet as the target account and **USDCX** as the asset.
 
-- **Name**: Test Wallet <CopyButton content="Copy Account Name" copy="Test Wallet" />
+Enter a small amount, **0.001 at most**: USDCx is also the asset used to pay transaction fees on testnet, so you need to keep enough of it in your wallet to cover them. Leave the note type set to **Private**.
 
-- **Address**:
-
-<AccountAddress account={props.account} withLink={false} />
-
-Head to the <Link href="/accounts">accounts page</Link> and import the recipient wallet by clicking on the _"Create new account"_ button on top of the page and selecting the _"Import account"_ option.
-
-A modal will show up requesting both a name and the address of your newly imported account.
+Click the _"Preview"_ button: Bread Wallet will ask you to confirm the send transaction, which creates a private P2ID output note carrying your tokens that only the recipient account can consume.

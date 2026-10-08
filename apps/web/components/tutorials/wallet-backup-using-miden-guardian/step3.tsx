@@ -7,12 +7,10 @@ import Step3Content from "@/components/tutorials/wallet-backup-using-miden-guard
 import useAccounts from "@/hooks/use-accounts";
 import {
   P2ID_NOTE_CODE,
-  FUNGIBLE_FAUCET_DEFAULT_DECIMALS,
   midenFaucetAccountId,
   midenFaucetFunderAccountId,
 } from "@/lib/constants";
 import { accountIdFromPrefixSuffix } from "@/lib/utils/account";
-import { parseAmount } from "@/lib/utils/asset";
 
 const useCompleted = () => {
   const { networkId } = useNetwork();
@@ -22,10 +20,7 @@ const useCompleted = () => {
   const note = inputNotes.find(
     ({ fungibleAssets, senderId, scriptRoot, storage, state, type }) =>
       fungibleAssets.some(
-        ({ faucetId, amount }) =>
-          faucetId === midenFaucetAccountId(networkId) &&
-          amount ===
-            parseAmount("100", FUNGIBLE_FAUCET_DEFAULT_DECIMALS).toString(),
+        ({ faucetId }) => faucetId === midenFaucetAccountId(networkId),
       ) &&
       senderId === midenFaucetFunderAccountId(networkId) &&
       scriptRoot === P2ID_NOTE_CODE &&
@@ -50,7 +45,7 @@ const Step3: TutorialStep = {
           titleWhenCompleted="Your mint note is ready for consumption."
           description={
             <p>
-              Click on the <em>"Mint"</em> button to automatically request 100
+              Click on the <em>"Mint"</em> button to automatically request
               tokens from the Miden Faucet. Once the note has been committed on
               testnet, you will be able to continue.
             </p>

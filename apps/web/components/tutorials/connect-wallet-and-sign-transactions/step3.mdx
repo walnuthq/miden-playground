@@ -1,11 +1,19 @@
-import { EllipsisVertical } from "lucide-react";
+import Link from "@/components/tutorials/tutorial-link";
+import AccountAddress from "@/components/lib/account-address";
+import CopyButton from "@/components/lib/copy-button";
 
-In the previous step, we requested 100 tokens from the public [Miden Faucet](https://faucet.testnet.miden.io/).
+Now that your wallet is funded, let's send some tokens to another wallet.
 
-The resulting output note containing our tokens must now be consumed to fund our wallet.
+Before you can create a send transaction, you need to import the recipient account into the Playground.
 
-Click on the <EllipsisVertical className="size-4 inline" /> icon button in the _"Consumable Notes"_ table to consume the note with your wallet.
+It can be another wallet you control or a friend's wallet. You can also send tokens to this test wallet:
 
-A _"Confirm Transaction"_ modal from your Bread Wallet will show up asking you to sign the resulting consume transaction that will transfer the tokens to your account.
+- **Name**: Test Wallet <CopyButton content="Copy Account Name" copy="Test Wallet" />
 
-The note will transition to the **Consumed** state and disappear from your wallet consumable notes.
+- **Address**:
+
+<AccountAddress account={props.account} withLink={false} />
+
+Head to the <Link href="/accounts">accounts page</Link>, click the _"Create new account"_ button at the top of the page and select the _"Import account"_ option.
+
+A modal will ask you for the name and address of the account to import.

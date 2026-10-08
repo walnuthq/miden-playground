@@ -46,26 +46,28 @@ export const GUARDIAN_ENDPOINT_URL =
 
 export const TESTNET_FAUCET_API_URL = "https://faucet-api.testnet.miden.io";
 export const DEVNET_FAUCET_API_URL = "https://faucet-api.devnet.miden.io";
-export const TESTNET_FAUCET_ACCOUNT_ID = "0x4e6fb40fd2f6a55140df2c42dfb5b7";
+// The native fee asset (USDCX) faucet, which issues the assets the faucet API hands out.
+export const TESTNET_FAUCET_ACCOUNT_ID = "0x4cbdcaffe75f0a317482224dae6436";
 export const DEVNET_FAUCET_ACCOUNT_ID = "";
-// Since faucet 0.17 the notes are sent by the node's funding service account.
+// Since faucet 0.17 the notes are sent by the node's funding service account, a basic
+// wallet holding the native asset, not by the asset's faucet.
 export const TESTNET_FAUCET_FUNDER_ACCOUNT_ID =
   "0x4e6fb40fd2f6a55140df2c42dfb5b7";
 export const DEVNET_FAUCET_FUNDER_ACCOUNT_ID =
   "0x5aaf13b1b151a9517cf4adc0ae65b0";
 export const TESTNET_FAUCET_ADDRESS =
-  "mtst1ap8xldq06tm2252qmuky9ha4kunjzkhn_qr7qqq9wr6w";
+  "mtst1apxtmjhlua0s5vt5sg3ymtnyxclasaf0_qr7qqq9wr6w";
 export const DEVNET_FAUCET_ADDRESS = "";
 
 export const TESTNET_TEST_WALLET_ACCOUNT_ID =
-  "0x8310ebba55c19a91697ab988d165fa";
+  "0xbd33811a2937d31159bc1d6fba4be5";
 export const DEVNET_TEST_WALLET_ACCOUNT_ID = "";
-export const TESTNET_TEST_WALLET_ACCOUNT_ID_PREFIX = 9444307604131125905n;
+export const TESTNET_TEST_WALLET_ACCOUNT_ID_PREFIX = 13633382446341280529n;
 export const DEVNET_TEST_WALLET_ACCOUNT_ID_PREFIX = 0n;
-export const TESTNET_TEST_WALLET_ACCOUNT_ID_SUFFIX = 7600591318420945408n;
+export const TESTNET_TEST_WALLET_ACCOUNT_ID_SUFFIX = 6466075530701300992n;
 export const DEVNET_TEST_WALLET_ACCOUNT_ID_SUFFIX = 0n;
 export const TESTNET_TEST_WALLET_ADDRESS =
-  "mtst1azp3p6a62hqe4ytf02uc35t9lgn6qjdc_qr7qqq9wr6w";
+  "mtst1az7n8qg69ymaxy2ehswklwjtu5plpwxt_qr7qqq9wr6w";
 export const DEVNET_TEST_WALLET_ADDRESS = "";
 
 export const TESTNET_COUNTER_CONTRACT_ACCOUNT_ID =

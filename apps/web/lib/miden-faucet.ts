@@ -158,7 +158,41 @@ export const getTokens = async ({
   return { noteId };
 };
 
-export const requestFundingNote = async ({
+// Requests `amount` base units for `recipient`, defaulting to the faucet's `base_amount`:
+// deployments can cap requests as low as `base_amount` (testnet: 0.01 token) and the PoW
+// difficulty grows linearly with `amount / base_amount`.
+export const requestTokens = async ({
+  networkId,
+  recipient,
+  amount: requestedAmount,
+}: {
+  networkId: NetworkId;
+  recipient: string;
+  amount?: number;
+}) => {
+  const backendUrl = midenFaucetApiUrl(networkId);
+  const amount = requestedAmount ?? (await getMetadata(backendUrl)).baseAmount;
+  if (!Number.isSafeInteger(amount) || amount <= 0) {
+    throw new Error(
+      `Invalid faucet amount ${String(amount)}; expected a positive safe integer`,
+    );
+  }
+  const { challenge, target } = await getPowChallenge({
+    backendUrl,
+    recipient,
+    amount: amount.toString(),
+  });
+  const nonce = await findValidNonce({ challenge, target });
+  return getTokens({
+    backendUrl,
+    challenge,
+    nonce,
+    recipient,
+    amount: amount.toString(),
+  });
+};
+
+export const requestFundingNote = ({
   networkId,
   recipient,
   requestedAmount,
@@ -167,29 +201,13 @@ export const requestFundingNote = async ({
   recipient: WasmAccountId;
   requestedAmount?: number;
 }) => {
-  const backendUrl = midenFaucetApiUrl(networkId);
-  const metadata = await getMetadata(backendUrl);
   const configuredAmount = process.env.NEXT_PUBLIC_MIDEN_FEE_AMOUNT?.trim();
-  const amount =
-    requestedAmount ??
-    (configuredAmount ? Number(configuredAmount) : metadata.baseAmount);
-  if (!Number.isSafeInteger(amount) || amount <= 0) {
-    throw new Error(
-      `Invalid fee-funding amount ${String(amount)}; expected a positive safe integer`,
-    );
-  }
-  const { challenge, target } = await getPowChallenge({
-    backendUrl,
+  return requestTokens({
+    networkId,
     recipient: recipient.toString(),
-    amount: amount.toString(),
-  });
-  const nonce = await findValidNonce({ challenge, target });
-  return getTokens({
-    backendUrl,
-    challenge,
-    nonce,
-    recipient: recipient.toString(),
-    amount: amount.toString(),
+    amount:
+      requestedAmount ??
+      (configuredAmount ? Number(configuredAmount) : undefined),
   });
 };
 

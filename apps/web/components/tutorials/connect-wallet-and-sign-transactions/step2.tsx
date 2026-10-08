@@ -7,12 +7,10 @@ import Step2Content from "@/components/tutorials/connect-wallet-and-sign-transac
 import useAccounts from "@/hooks/use-accounts";
 import {
   P2ID_NOTE_CODE,
-  FUNGIBLE_FAUCET_DEFAULT_DECIMALS,
   midenFaucetAccountId,
   midenFaucetFunderAccountId,
 } from "@/lib/constants";
 import { accountIdFromPrefixSuffix } from "@/lib/utils/account";
-import { parseAmount } from "@/lib/utils/asset";
 
 const useCompleted = () => {
   const { networkId } = useNetwork();
@@ -21,23 +19,20 @@ const useCompleted = () => {
   const note = inputNotes.find(
     ({ fungibleAssets, senderId, scriptRoot, storage, state, type }) =>
       fungibleAssets.some(
-        ({ faucetId, amount }) =>
-          faucetId === midenFaucetAccountId(networkId) &&
-          amount ===
-            parseAmount("100", FUNGIBLE_FAUCET_DEFAULT_DECIMALS).toString(),
+        ({ faucetId }) => faucetId === midenFaucetAccountId(networkId),
       ) &&
       senderId === midenFaucetFunderAccountId(networkId) &&
       scriptRoot === P2ID_NOTE_CODE &&
       accountIdFromPrefixSuffix(storage[1] ?? "", storage[0] ?? "") ===
         connectedWallet?.id &&
-      state === "committed" &&
+      state === "consumed-external" &&
       type === "public",
   );
   return !!note;
 };
 
 const Step2: TutorialStep = {
-  title: "Mint assets from the Miden Faucet.",
+  title: "Request tokens from the USDCx Faucet.",
   Content: () => {
     const completed = useCompleted();
     return (
@@ -46,12 +41,12 @@ const Step2: TutorialStep = {
         <TutorialAlert
           completed={completed}
           title="Action required: Request tokens from the faucet."
-          titleWhenCompleted="Your mint note is ready for consumption."
+          titleWhenCompleted="Your wallet has been funded."
           description={
             <p>
-              Click on the <em>"Mint"</em> button to automatically request 100
-              tokens from the Miden Faucet. Once the note has been committed on
-              testnet, you will be able to continue the tutorial.
+              Click the <em>"Mint"</em> button to request tokens from the USDCx
+              Faucet. Once the note has been committed on testnet and consumed
+              by your wallet, you will be able to continue the tutorial.
             </p>
           }
         />

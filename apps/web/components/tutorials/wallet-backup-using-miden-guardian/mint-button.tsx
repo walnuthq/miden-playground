@@ -1,15 +1,11 @@
 import { useState, useEffect } from "react";
 import { HandCoins } from "lucide-react";
+import { toast } from "sonner";
 import { Spinner } from "@workspace/ui/components/spinner";
 import useNetwork from "@/hooks/use-network";
 import useAccounts from "@/hooks/use-accounts";
 import { Button } from "@workspace/ui/components/button";
-import {
-  FUNGIBLE_FAUCET_DEFAULT_DECIMALS,
-  midenFaucetApiUrl,
-} from "@/lib/constants";
-import { parseAmount } from "@/lib/utils/asset";
-import { getPowChallenge, findValidNonce, getTokens } from "@/lib/miden-faucet";
+import { requestTokens } from "@/lib/miden-faucet";
 
 const MintButton = () => {
   const { networkId } = useNetwork();
@@ -31,25 +27,20 @@ const MintButton = () => {
           return;
         }
         setLoading(true);
-        const amount = parseAmount(
-          "100",
-          FUNGIBLE_FAUCET_DEFAULT_DECIMALS,
-        ).toString();
-        const { challenge, target } = await getPowChallenge({
-          backendUrl: midenFaucetApiUrl(networkId),
-          recipient: multisig.address,
-          amount,
-        });
-        const nonce = await findValidNonce({ challenge, target });
-        const { noteId } = await getTokens({
-          backendUrl: midenFaucetApiUrl(networkId),
-          challenge,
-          nonce,
-          recipient: multisig.address,
-          amount,
-        });
-        console.info({ noteId });
-        setNoteId(noteId);
+        try {
+          const { noteId } = await requestTokens({
+            networkId,
+            recipient: multisig.address,
+          });
+          console.info({ noteId });
+          setNoteId(noteId);
+        } catch (error) {
+          console.error(error);
+          toast.error("Failed to request tokens from the faucet.", {
+            description: error instanceof Error ? error.message : String(error),
+          });
+          setLoading(false);
+        }
       }}
     >
       {loading ? <Spinner /> : <HandCoins />}
