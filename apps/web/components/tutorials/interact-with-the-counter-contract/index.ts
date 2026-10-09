@@ -13,9 +13,9 @@ const tutorial: Tutorial = {
   id: "interact-with-the-counter-contract",
   number: 6,
   title: "Interact with the counter contract",
-  tagline: "Increment the count of a Counter Contract on testnet.",
+  tagline: "Increment a counter contract deployed on testnet.",
   description:
-    "This tutorial will guide you through interacting with a Counter Contract by incrementing its counter on testnet.",
+    "In this tutorial, you'll read the code of a counter contract deployed on testnet, import it into the Playground and increment its counter.",
   initialRoute: "/scripts",
   state,
   steps: [Step1, Step2, Step3, Step4, Step5, Step6],

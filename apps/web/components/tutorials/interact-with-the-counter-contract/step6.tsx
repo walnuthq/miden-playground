@@ -3,7 +3,7 @@ import NextTutorialButton from "@/components/tutorials/next-tutorial-button";
 import Step6Content from "@/components/tutorials/interact-with-the-counter-contract/step6.mdx";
 
 const Step6: TutorialStep = {
-  title: "Refresh the counter value.",
+  title: "Read the updated counter value.",
   Content: Step6Content,
   NextStepButton: NextTutorialButton,
 };
