@@ -30,9 +30,10 @@ const Step5: TutorialStep = {
           titleWhenCompleted="Your proposal has been executed."
           description={
             <p>
-              Click on the <EllipsisVertical className="size-4 inline" /> icon
-              button on the right-most side of the consume notes proposal row in
-              your guardian page details to sign and execute the proposal.
+              In the <em>"Guardian"</em> tab of your guardian wallet, click the{" "}
+              <EllipsisVertical className="size-4 inline" /> icon button in the
+              proposal row and select <em>"Sign proposal"</em>, then{" "}
+              <em>"Execute proposal"</em>.
             </p>
           }
         />

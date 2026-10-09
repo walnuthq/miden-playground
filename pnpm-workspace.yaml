@@ -21,8 +21,8 @@ allowBuilds:
 # "@miden-sdk/miden-sdk": "link:../web-sdk/crates/web-client"
 # "@miden-sdk/react": "link:../web-sdk/packages/react-sdk"
 overrides:
-  "@miden-sdk/miden-sdk": "0.17.2"
-  "@miden-sdk/react": "0.17.2"
+  "@miden-sdk/miden-sdk": "0.17.3"
+  "@miden-sdk/react": "0.17.3"
 
 # The published wallet-adapter packages import @miden-sdk/miden-sdk without
 # declaring it (they rely on a hoisted install). Declare it explicitly so it
@@ -31,13 +31,13 @@ overrides:
 packageExtensions:
   "@miden-sdk/miden-wallet-adapter-base":
     dependencies:
-      "@miden-sdk/miden-sdk": "0.17.2"
+      "@miden-sdk/miden-sdk": "0.17.3"
   "@miden-sdk/miden-wallet-adapter-miden":
     dependencies:
-      "@miden-sdk/miden-sdk": "0.17.2"
+      "@miden-sdk/miden-sdk": "0.17.3"
   "@miden-sdk/miden-wallet-adapter-react":
     dependencies:
-      "@miden-sdk/miden-sdk": "0.17.2"
+      "@miden-sdk/miden-sdk": "0.17.3"
   # @next/mdx imports `next` types without declaring it, so it would pick up
   # whichever hoisted copy of next pnpm chose. Declaring the peer resolves it to
   # the importing app's own next.
@@ -51,28 +51,25 @@ minimumReleaseAgeExclude:
   - "@getpara/react-component-library@3.22.0"
   - "@getpara/react-core@3.22.0"
   - "@getpara/react-sdk-lite@3.22.0"
-  - "@getpara/shared@1.35.0"
   - "@getpara/user-management-client@3.22.0"
   - "@getpara/viem-v2-integration@3.22.0"
   - "@getpara/wagmi-v2-connector@3.22.0"
   - "@getpara/web-sdk@3.22.0"
-  - "@miden-sdk/miden-sdk@0.17.2"
-  - "@miden-sdk/miden-wallet-adapter-base@0.17.2"
-  - "@miden-sdk/miden-wallet-adapter-miden@0.17.2"
-  - "@miden-sdk/miden-wallet-adapter-react@0.17.2"
-  - "@miden-sdk/miden-wallet-adapter-reactui@0.17.2"
-  - "@miden-sdk/miden-wallet-adapter@0.17.2"
-  - "@miden-sdk/node-darwin-arm64@0.17.2"
-  - "@miden-sdk/node-darwin-x64@0.17.2"
-  - "@miden-sdk/node-linux-x64-gnu@0.17.2"
-  - "@miden-sdk/para-react@0.17.2"
-  - "@miden-sdk/para@0.17.2"
-  - "@miden-sdk/react@0.17.2"
-  - lucide-react@1.53.0
+  - "@miden-sdk/miden-sdk@0.17.3"
+  - "@miden-sdk/miden-wallet-adapter-base@0.17.3"
+  - "@miden-sdk/miden-wallet-adapter-miden@0.17.3"
+  - "@miden-sdk/miden-wallet-adapter-react@0.17.3"
+  - "@miden-sdk/miden-wallet-adapter-reactui@0.17.3"
+  - "@miden-sdk/miden-wallet-adapter@0.17.3"
+  - "@miden-sdk/node-darwin-arm64@0.17.3"
+  - "@miden-sdk/node-darwin-x64@0.17.3"
+  - "@miden-sdk/node-linux-x64-gnu@0.17.3"
+  - "@miden-sdk/para-react@0.17.3"
+  - "@miden-sdk/para@0.17.3"
+  - "@miden-sdk/react@0.17.3"
+  - "@tanstack/react-table@9.2.8"
+  - "@tanstack/table-core@9.2.8"
+  - lucide-react@1.54.0
   - miniflare@5.20261006.1-alpha
-  - ox@0.14.54
-  - playwright-core@1.64.0
-  - playwright@1.64.0
-  - viem@2.57.4
   - vite@8.3.4
   - wrangler@4.149.0

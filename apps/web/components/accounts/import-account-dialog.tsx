@@ -41,8 +41,16 @@ const ImportAccountDialog = () => {
         onInteractOutside={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle>Import Account</DialogTitle>
-          <DialogDescription>Import account by address.</DialogDescription>
+          <DialogTitle>
+            {importAccountDialogMultisig
+              ? "Restore Guardian Wallet"
+              : "Import Account"}
+          </DialogTitle>
+          <DialogDescription>
+            {importAccountDialogMultisig
+              ? "Restore a guardian wallet from Miden Guardian by address."
+              : "Import account by address."}
+          </DialogDescription>
         </DialogHeader>
         <form
           id="import-account-form"
@@ -59,17 +67,25 @@ const ImportAccountDialog = () => {
                 name: formData.get("name")?.toString() ?? "",
                 address,
               });
-              toast(`${account.name} has been imported.`, {
-                description: (
-                  <AccountAddress account={account} withTooltip={false} />
-                ),
-              });
+              toast(
+                `${account.name} has been ${importAccountDialogMultisig ? "restored" : "imported"}.`,
+                {
+                  description: (
+                    <AccountAddress account={account} withTooltip={false} />
+                  ),
+                },
+              );
               closeImportAccountDialog();
             } catch (error) {
               const { message } = error as { message: string };
-              toast.error("Account couldn't be imported.", {
-                description: message,
-              });
+              toast.error(
+                importAccountDialogMultisig
+                  ? "Guardian wallet couldn't be restored."
+                  : "Account couldn't be imported.",
+                {
+                  description: message,
+                },
+              );
             }
             setLoading(false);
           }}
@@ -96,7 +112,13 @@ const ImportAccountDialog = () => {
           </DialogClose>
           <Button form="import-account-form" type="submit" disabled={loading}>
             {loading && <Spinner />}
-            {loading ? "Importing…" : "Import"}
+            {importAccountDialogMultisig
+              ? loading
+                ? "Restoring…"
+                : "Restore"
+              : loading
+                ? "Importing…"
+                : "Import"}
           </Button>
         </DialogFooter>
       </DialogContent>

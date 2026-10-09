@@ -35,7 +35,7 @@ const AccountMultisig = ({ account }: { account: Account }) => {
             </h4>
             {account.multisig && account.multisig.proposals.length === 0 && (
               <p className="text-muted-foreground text-sm">
-                This guardian has no proposals.
+                This guardian wallet has no proposals.
               </p>
             )}
           </div>

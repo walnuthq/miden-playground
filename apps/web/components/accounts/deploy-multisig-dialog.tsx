@@ -41,9 +41,9 @@ const DeployMultisigDialog = () => {
         onInteractOutside={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle>Deploy Guardian</DialogTitle>
+          <DialogTitle>Deploy Guardian Wallet</DialogTitle>
           <DialogDescription>
-            Deploy a new Miden Guardian wallet.
+            Deploy a new wallet backed up by Miden Guardian.
           </DialogDescription>
         </DialogHeader>
         <form

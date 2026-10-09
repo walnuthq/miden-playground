@@ -9,11 +9,10 @@
     "start": "PORT=3001 node .next/standalone/apps/api/server.js",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit",
     "db:push": "drizzle-kit push"
   },
   "dependencies": {
-    "@dotenvx/dotenvx": "2.33.0",
     "archiver": "8.0.0",
     "dotenv": "18.0.6",
     "drizzle-orm": "1.0.0-rc.4",

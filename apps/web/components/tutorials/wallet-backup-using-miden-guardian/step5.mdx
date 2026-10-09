@@ -1,14 +1,16 @@
 import { EllipsisVertical } from "lucide-react";
 import Link from "@/components/tutorials/tutorial-link";
 
-Click on the {props.account ? <Link href={`/accounts/${props.account.identifier}?tab=guardian`}>Guardian</Link> : <em>"Guardian"</em>} tab of your wallet backup to list the ongoing state changes proposals.
+Open the {props.account ? <Link href={`/accounts/${props.account.identifier}?tab=guardian`}>Guardian</Link> : <em>"Guardian"</em>} tab of your guardian wallet to list its proposals.
 
-At the moment, we only have the consume note proposal initiated in the previous step in the **Pending** state: let's sign this proposal to approve the requested change and confirm we're willing to consume the note with our guardian wallet.
+The consume note proposal created in the previous step is in the **Pending** state: it needs your signature before it can be executed.
 
-Click on the <EllipsisVertical className="size-4 inline" /> icon button in the _"Proposals"_ table to sign the consume note proposal.
+Click the <EllipsisVertical className="size-4 inline" /> icon button in the _"Proposals"_ table and select _"Sign proposal"_, then approve the _"Opaque signature request"_ prompts in Bread Wallet.
 
-After signing with your connected wallet, the proposal will transition from **Pending** to **Ready**, the final step is to execute the proposal: click on the <EllipsisVertical className="size-4 inline" /> icon button again to execute the proposal against your guardian account.
+Once signed, the proposal moves from **Pending** to **Ready**. Click the <EllipsisVertical className="size-4 inline" /> icon button again and select _"Execute proposal"_ to execute it with your guardian wallet.
 
-It will take some time for the proposal to actually go through as we need to prove the state changing transaction, send it to the Miden Guardian infrastructure and wait for settlement to confirm our new wallet state has been validated on-chain.
+This takes a few moments: the Playground builds the consume transaction with your signature and Miden Guardian's, proves it and submits it to the network. As this is the guardian wallet's first Transaction, it also registers the Account on-chain, and its fee is paid with the USDCx the note carries. Miden Guardian then updates its backup with the new state of your guardian wallet.
 
-Once this is completed, you can go back to your guardian wallet {props.account ? <Link href={`/accounts/${props.account.identifier}`}>Information</Link> : <em>"Information"</em>} tab to see your assets vault updated.
+Once the Transaction is executed, open the {props.account ? <Link href={`/accounts/${props.account.identifier}`}>Information</Link> : <em>"Information"</em>} tab of your guardian wallet to see your tokens in its asset vault.
+
+When you click _"Next step"_, the Playground simulates losing your device: it disconnects Bread Wallet and deletes the guardian wallet from the Playground.

@@ -39,12 +39,14 @@ Start up the app and see it running at http://localhost:3000
 pnpm dev
 ```
 
-### API configuration
+### Environment variables
 
-Copy `.env.local.example` to `.env.local` and populate with your own values (PostgreSQL database URL, etc).
+Each app documents its variables in a committed `.env.example`, types them in `process-env.d.ts` and declares them in `turbo.json` (keep all three in sync when adding one). Copy the examples and populate them with your own values (PostgreSQL database URL, Para API key, etc):
 
 ```sh
-cp apps/api/.env.local.example apps/api/.env.local
+cp apps/web/.env.example apps/web/.env.local
+cp apps/api/.env.example apps/api/.env.local
+cp apps/status-page/.env.example apps/status-page/.env
 ```
 
 Setup database:

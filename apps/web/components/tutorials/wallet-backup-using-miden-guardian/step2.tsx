@@ -13,7 +13,7 @@ const useCompleted = () => {
 };
 
 const Step2: TutorialStep = {
-  title: "Deploy a new guardian.",
+  title: "Deploy a guardian wallet.",
   Content: () => {
     const completed = useCompleted();
     return (
@@ -21,13 +21,12 @@ const Step2: TutorialStep = {
         <Step2Content />
         <TutorialAlert
           completed={completed}
-          title="Action required: Deploy a guardian"
-          titleWhenCompleted="Your guardian has been deployed."
+          title="Action required: Deploy a guardian wallet."
+          titleWhenCompleted="Your guardian wallet has been deployed."
           description={
             <p>
-              Click on the <em>"Create new account"</em> button and deploy a new
-              Miden Guardian secured wallet then navigate to your account
-              details page.
+              Click the <em>"Create new account"</em> button, select{" "}
+              <em>"Deploy guardian wallet"</em>, then open its details page.
             </p>
           }
         />

@@ -10,7 +10,7 @@ const useCompleted = () => {
 };
 
 const Step1: TutorialStep = {
-  title: "Connect a private wallet to the playground.",
+  title: "Connect your private Bread Wallet to the Playground.",
   Content: () => {
     const completed = useCompleted();
     return (
@@ -18,13 +18,13 @@ const Step1: TutorialStep = {
         <Step1Content />
         <TutorialAlert
           completed={completed}
-          title="Action required: Connect a private wallet."
-          titleWhenCompleted="Your wallet is connected and imported."
+          title="Action required: Connect your private Bread Wallet."
+          titleWhenCompleted="Your private Bread Wallet is connected."
           description={
             <p>
-              Click on the <em>"Select Wallet"</em> button in the top-right
-              corner and connect a <strong>Private</strong> wallet to the
-              Playground.
+              Click the <em>"Select Wallet"</em> button in the top-right corner,
+              select <em>"Bread Wallet"</em> and connect a{" "}
+              <strong>Private</strong> account to the Playground.
             </p>
           }
         />

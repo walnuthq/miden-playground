@@ -33,7 +33,7 @@ const useCompleted = () => {
 };
 
 const Step3: TutorialStep = {
-  title: "Mint assets from the Miden Faucet.",
+  title: "Request tokens from the USDCx Faucet.",
   Content: () => {
     const completed = useCompleted();
     return (
@@ -42,12 +42,12 @@ const Step3: TutorialStep = {
         <TutorialAlert
           completed={completed}
           title="Action required: Request tokens from the faucet."
-          titleWhenCompleted="Your mint note is ready for consumption."
+          titleWhenCompleted="Your guardian wallet received a note from the faucet."
           description={
             <p>
-              Click on the <em>"Mint"</em> button to automatically request
-              tokens from the Miden Faucet. Once the note has been committed on
-              testnet, you will be able to continue.
+              Click the <em>"Mint"</em> button to request tokens from the USDCx
+              Faucet. Once the note has been committed on testnet, you can
+              proceed to the next step.
             </p>
           }
         />

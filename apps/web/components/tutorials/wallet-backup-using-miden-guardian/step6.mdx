@@ -2,16 +2,20 @@ import Link from "@/components/tutorials/tutorial-link";
 import AccountAddress from "@/components/lib/account-address";
 import CopyButton from "@/components/lib/copy-button";
 
-Oh no! You lost your phone and your private wallet state is gone forever… or is it?
+Oh no! You lost your phone and your guardian wallet's state is gone forever… or is it?
 
-Luckily, you have configured a Guardian wallet backup and you only need to get access to your **Signer** wallet to restore your funds.
+Luckily, Miden Guardian holds a backup of its latest state: all you need is access to the **Signer**, your Bread Wallet. In real life, this means keeping your Bread Wallet's recovery phrase safe so you can restore it on a new device.
 
-Connect your Signer wallet back and head to the <Link href="/accounts">accounts page</Link> to restore your guardian wallet by clicking on the _"Create new account"_ button on top of the page and selecting the _"Restore guardian"_ option.
+Click the _"Select Wallet"_ button, select _"Bread Wallet"_ and accept the connection request to reconnect it.
 
-A modal will show up requesting both a name and the address of the guardian account to restore, if you haven't saved your guardian account address, here it is:
+Then, on the <Link href="/accounts">accounts page</Link>, click the _"Create new account"_ button and select the _"Restore guardian wallet"_ option.
+
+A modal asks for a name and the address of the guardian wallet to restore. If you didn't save your guardian wallet's address, here it is:
 
 - **Name**: Guardian Wallet <CopyButton content="Copy Account Name" copy="Guardian Wallet" />
 
 - **Address**:
 
 <AccountAddress account={props.account} withLink={false} />
+
+Click _"Restore"_: the Playground fetches the latest state of your guardian wallet from Miden Guardian, including the tokens you received in the previous steps.
