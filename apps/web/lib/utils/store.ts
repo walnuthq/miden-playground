@@ -3,7 +3,7 @@ import { networks, type NetworkId } from "@/lib/types/network";
 
 // The version of the web SDK's IndexedDB store (the `idxdb-store` crate version
 // it writes to the `clientVersion` setting). Bump it alongside the SDK.
-const CLIENT_VERSION = "0.17.2";
+const CLIENT_VERSION = "0.17.3";
 // The `settings` row the SDK keeps that version in.
 const SETTING_SCOPE_CLIENT = 0;
 const CLIENT_VERSION_SETTING_KEY = "clientVersion";
