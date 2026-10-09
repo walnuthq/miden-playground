@@ -15,9 +15,9 @@ const tutorial: Tutorial = {
   id: "wallet-backup-using-miden-guardian",
   number: 5,
   title: "Wallet backup using Miden Guardian",
-  tagline: "Backup your wallet using a Guardian.",
+  tagline: "Back up your private wallet with Miden Guardian.",
   description:
-    "This tutorial teaches you how to backup your private wallet state using Miden Guardian, a system that allows a device, or a group of devices, to backup and sync their state securely without trust assumptions about the server operator.",
+    "This tutorial teaches you how to back up and restore private account state with Miden Guardian, an off-chain service that backs up and syncs private account state across devices without being able to move your funds.",
   category: "advanced",
   initialRoute: "/accounts",
   state: {

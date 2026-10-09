@@ -1,10 +1,16 @@
 import Link from "@/components/tutorials/tutorial-link";
 
-Setting up a Miden Guardian secured wallet involves using 2 accounts:
+A wallet backed up by Miden Guardian involves two accounts:
 
-- **The Guardian** is where your wallet funds are secured, by storing a backup of your private account offchain and providing an interface to update, sync and restore your private state.
-- **The Signer** is a regular private wallet controlling the Guardian: it is responsible for creating it, signing transactions updating the Guardian state and as the owner, it is capable of restoring your wallet backup if you lose access to your private state.
+- **Guardian wallet**: a new **Private** wallet account that holds your funds. Miden Guardian stores a backup of its state off-chain, and every Transaction it executes requires both your signature and Miden Guardian's.
+- **Signer**: your private Bread Wallet. Its key is registered as the only signer of the guardian wallet: it approves every change to the guardian wallet, and it's what lets you restore the guardian wallet if you lose its state.
 
-Let's deploy a **Guardian** using our connected private wallet as a **Signer**: from the <Link href="/accounts">accounts page</Link>, click on _"Create new account"_ and select the _"Deploy guardian"_ option.
+Let's deploy a guardian wallet with your connected Bread Wallet as its signer: on the <Link href="/accounts">accounts page</Link>, click the _"Create new account"_ button and select the _"Deploy guardian wallet"_ option.
 
-Give your new wallet backup a name and click on the _"Deploy"_ button to create your guardian-protected wallet, you will be asked to sign the deployment configuration to add your private wallet as a registered **Signer**.
+Give your guardian wallet a name and click _"Deploy"_. This registers the guardian wallet with Miden Guardian, with your Bread Wallet as its signer.
+
+Bread Wallet will then show several _"Opaque signature request"_ prompts in a row: approve each of them. This is normal and expected, and it will happen again every time you interact with your guardian wallet in this tutorial. The Playground signs raw data, such as requests sent to Miden Guardian and proposal approvals, that Bread Wallet can't decode and display to you.
+
+Approving a signature you can't read is called **blind signing**, and it's risky: a malicious app could disguise an approval that moves your funds as an opaque request. Only approve opaque signature requests from apps you trust, and only right after an action you triggered yourself.
+
+Once it's deployed, click your guardian wallet's name on the accounts page to open its details page.

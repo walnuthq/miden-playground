@@ -27,10 +27,10 @@ const Step4: TutorialStep = {
           titleWhenCompleted="Your proposal has been created."
           description={
             <p>
-              Click on the <EllipsisVertical className="size-4 inline" /> icon
-              button on the right-most side of the consumable note row in your
-              account page details to create a consume note proposal on your
-              guardian.
+              Click the <EllipsisVertical className="size-4 inline" /> icon
+              button in the <em>"Consumable Notes"</em> table of your guardian
+              wallet and select <em>"Consume note with …"</em> to create a
+              consume note proposal.
             </p>
           }
         />

@@ -1,3 +1,15 @@
-Congratulations! You've successfully deployed and interacted with a Miden Guardian wallet, a foundational piece of what makes Miden both private and secure.
+import GuardianInfo from "@/components/tutorials/wallet-backup-using-miden-guardian/guardian-info";
 
-We recommend always using the Miden Guardian infrastructure when managing a private wallet to avoid losing your account state.
+Congratulations! You've deployed a guardian wallet, funded it through a proposal co-signed by Miden Guardian, and restored it after losing its state.
+
+Here is what you did:
+
+- **Backup**: every state change of your guardian wallet went through Miden Guardian, which always holds its latest state.
+- **Control**: Miden Guardian can't move your funds on its own, as every Transaction also requires your signature.
+- **Recovery**: as long as you control your **Signer**, you can restore your guardian wallet on any device.
+
+The guardian wallet you deployed in this tutorial was built step by step for educational purposes, so you could see how Miden Guardian works under the hood. In practice, you don't need to do any of this yourself: wallets like Bread Wallet can back up your private accounts with Miden Guardian for you, handling proposals, signatures and syncing in the background. Check your wallet's settings to confirm that your private accounts are backed up.
+
+<GuardianInfo />
+
+Miden Guardian stores the state it backs up and must be online to co-sign your Transactions, so you rely on its operator for availability and, unless the state is encrypted, for confidentiality. Read the [Miden Guardian documentation](https://docs.miden.xyz/builder/miden-guardian/) to learn more about its trust model, and [how Miden Guardian solves the privacy paradox](https://www.miden.xyz/blog/miden-guardian-solves-the-privacy-paradox) for shared accounts.

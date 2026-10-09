@@ -4,7 +4,7 @@ import { defaultComponent } from "@/lib/utils/component";
 const authGuardedMultisig: Component = {
   ...defaultComponent(),
   id: "auth-guarded-multisig",
-  name: "Multisig Guardian",
+  name: "Guarded Multisig",
   type: "authentication-component",
   scriptId: "auth-guarded-multisig",
   storageSlots: [

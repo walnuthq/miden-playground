@@ -309,7 +309,7 @@ const useMultisig = () => {
     const accountId = WasmAddress.fromBech32(address).accountId();
     const multisig = await loadMultisig(accountId.toString());
     if (!multisig || !multisig.account) {
-      throw new Error("Multisig not found");
+      throw new Error("Guardian wallet not found on Miden Guardian.");
     }
     dispatch({ type: "SUBMITTING_TRANSACTION" });
     await multisig.syncState();

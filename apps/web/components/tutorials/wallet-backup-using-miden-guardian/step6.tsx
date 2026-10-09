@@ -41,13 +41,14 @@ const Step6: TutorialStep = {
         <Step6Content account={{ name: "Guardian Wallet", address }} />
         <TutorialAlert
           completed={completed}
-          title="Action required: Restore your guardian."
-          titleWhenCompleted="Your guardian has been restored."
+          title="Action required: Restore your guardian wallet."
+          titleWhenCompleted="Your guardian wallet has been restored."
           description={
             <p>
-              Click on the <em>"Create new account"</em> button on top of the
-              accounts page and select the <em>"Restore guardian"</em> option to
-              restore your guardian wallet backup.
+              Reconnect Bread Wallet, click the <em>"Create new account"</em>{" "}
+              button on the accounts page and select the{" "}
+              <em>"Restore guardian wallet"</em> option to restore your guardian
+              wallet.
             </p>
           }
         />
