@@ -8,8 +8,8 @@ A _"Configure send transaction"_ dialog will open, where you can select the targ
 
 The _"Note type"_ field sets how the Note created by this Transaction is stored. As with [Accounts](https://docs.miden.xyz/reference/protocol/account/id#account-type), Notes can be stored either publicly or privately:
 
-- **Public notes**: The Note's data is stored in the [note database](https://docs.miden.xyz/reference/protocol/state#note-database), making it fully visible on-chain.
-- **Private notes**: Only a commitment (hash) of the Note is stored on-chain. The Note's details stay off-chain and are shared directly with the recipient, enhancing privacy.
+- **Public notes**: the Note's data is stored in the [note database](https://docs.miden.xyz/reference/protocol/state#note-database), making it fully visible on-chain.
+- **Private notes**: only a commitment (hash) of the Note is stored on-chain. The Note's details stay off-chain and are shared directly with the recipient, enhancing privacy.
 
 Leave it as it is and click _"Preview"_. The preview step summarizes the changes the Transaction will make to **Wallet A**.
 When you're ready, click _"Submit"_ to execute the Transaction. This can take a few moments, because a zero-knowledge proof of the Transaction has to be generated, which is computationally intensive.

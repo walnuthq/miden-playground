@@ -49,8 +49,8 @@ const Step4: TutorialStep = {
             <p>
               Click the <EllipsisVertical className="size-4 inline" /> icon
               button in your wallet's row on the accounts page and select the{" "}
-              <em>"New send transaction"</em> option. Send at most 0.001 USDCX
-              to the recipient wallet in a private note, then confirm the
+              <em>"New send transaction"</em> option. Send at most 10 USDCx to
+              the recipient wallet in a private note, then confirm the
               transaction in Bread Wallet.
             </p>
           }
