@@ -24,7 +24,7 @@ const useCompleted = () => {
 };
 
 const Step5: TutorialStep = {
-  title: "Invoke the Counter Contract procedures.",
+  title: "Invoke the counter contract procedures.",
   Content: () => {
     const completed = useCompleted();
     return (
@@ -32,12 +32,12 @@ const Step5: TutorialStep = {
         <Step5Content />
         <TutorialAlert
           completed={completed}
-          title="Action required: Invoke the procedure."
-          titleWhenCompleted="You have invoked the Counter Contract procedures."
+          title="Action required: Increment the counter."
+          titleWhenCompleted="Your increment transaction has been submitted."
           description={
             <p>
-              Click on the <em>"Invoke"</em> button in the <em>"Components"</em>{" "}
-              section of the account details page to invoke the{" "}
+              In the <em>"Components"</em> tab of the account details page,
+              click the <em>"Invoke"</em> button next to the{" "}
               <strong>increment_count</strong> procedure.
             </p>
           }

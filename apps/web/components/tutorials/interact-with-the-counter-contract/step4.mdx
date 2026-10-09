@@ -2,11 +2,11 @@ import Link from "@/components/tutorials/tutorial-link";
 import AccountAddress from "@/components/lib/account-address";
 import CopyButton from "@/components/lib/copy-button";
 
-Now that we have understood the implementation of the Counter Contract procedures, let's import it into the Playground to start interacting with the contract.
+Now that you understand how the counter contract's procedures are implemented, let's import the contract into the Playground to interact with it.
 
-On the <Link href="/accounts">accounts page</Link>, click on the _"Create new account"_ button on top of the page and select the _"Import account"_ option.
+Head to the <Link href="/accounts">accounts page</Link>, click the _"Create new account"_ button at the top of the page and select the _"Import account"_ option.
 
-A modal will show up requesting both the name and the address of your newly imported account, enter the Counter Contract details found just below:
+A modal will ask you for the name and address of the account to import. Enter the counter contract details below:
 
 - **Name**: Counter Contract <CopyButton content="Copy Account Name" copy="Counter Contract" />
 
@@ -14,4 +14,4 @@ A modal will show up requesting both the name and the address of your newly impo
 
 <AccountAddress account={props.counter} withLink={props.withLink} />
 
-Once the account is imported, {props.withLink ? <Link href={`/accounts/${props.counter.identifier}`}>click on its name</Link> : 'click on its name'} to navigate to the contract details page.
+Once the account is imported, {props.withLink ? <Link href={`/accounts/${props.counter.identifier}`}>click its name</Link> : 'click its name'} on the accounts page to open its details page.

@@ -18,7 +18,7 @@ const useCompleted = () => {
 };
 
 const Step4: TutorialStep = {
-  title: "Import the Counter Contract.",
+  title: "Import the counter contract.",
   Content: () => {
     const { networkId } = useNetwork();
     const { accounts } = useAccounts();
@@ -38,14 +38,14 @@ const Step4: TutorialStep = {
         />
         <TutorialAlert
           completed={completed}
-          title="Action required: Import the Counter Contract."
-          titleWhenCompleted="You have imported the Counter Contract."
+          title="Action required: Import the counter contract."
+          titleWhenCompleted="You have imported the counter contract."
           description={
             <p>
-              Click on the <em>"Create new account"</em> button on top of the
+              Click the <em>"Create new account"</em> button at the top of the
               accounts page and select the <em>"Import account"</em> option to
-              import the Counter Contract in the Playground, then navigate to
-              the account details page.
+              import the counter contract into the Playground, then open its
+              details page.
             </p>
           }
         />

@@ -1,7 +1,9 @@
-Our Counter Contract has been imported into the Playground and we can now start interacting with it.
+The counter contract has been imported into the Playground, so you can now interact with it.
 
-First, click on the _"Components"_ tab in the account details page to access the Counter Contract [account components](https://docs.miden.xyz/reference/protocol/account/components).
+First, click the _"Components"_ tab on the account details page to list the counter contract's [account components](https://docs.miden.xyz/reference/protocol/account/components).
 
-In the procedures section of the account component, click on the _"Invoke"_ button next to the **`get_count`** procedure to get the current value of the counter.
+Under _"Account Components"_, find the _"Counter Contract"_ component and click the _"Invoke"_ button next to the **`get_count`** procedure to read the current value of the counter. This procedure only reads storage, so the Playground executes it locally, without submitting a Transaction.
 
-Next, click on the _"Invoke"_ button of the **`increment_count`** procedure to invoke it and increment the previous value by one.
+Next, click the _"Invoke"_ button next to the **`increment_count`** procedure. The Playground executes a Transaction against the counter contract with a transaction script that calls this procedure, which increments the counter by one, and submits it to testnet.
+
+Under _"Authentication Components"_, notice that the counter contract uses the _"No Auth"_ [authentication component](https://docs.miden.xyz/reference/protocol/account/code#authentication): it doesn't require any signature, which is why anyone can increment its counter.

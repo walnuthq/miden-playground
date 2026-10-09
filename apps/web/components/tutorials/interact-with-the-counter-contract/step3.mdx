@@ -1,18 +1,18 @@
-In the previous step we had a look at the higher-level **Rust** source code of the Counter Contract, now let's focus on the compiled **MASM** output.
+In the previous step, we looked at the higher-level **Rust** source code of the counter contract. Now let's focus on its **MASM** implementation.
 
 Here's a breakdown of what the **`get_count`** procedure does:
 
-1. Pushes the slot ID prefix and suffix for **`counter_contract::counter_contract::count`** onto the stack.
-2. Calls **`active_account::get_item`** with the slot ID.
-3. Calls **`sys::truncate_stack`** to truncate the stack to size 16.
-4. The value returned from **`active_account::get_item`** is still on the stack and will be returned when this procedure is called.
+1. Pushes the [slot ID](https://docs.miden.xyz/reference/protocol/account/storage#slot-id) of the **`counter_contract::counter_contract::count`** slot (its prefix and suffix) onto the stack.
+2. Executes **`active_account::get_item`** to read the Word stored in that slot, which holds the count.
+3. Executes **`sys::truncate_stack`** to truncate the stack back to 16 elements.
+4. The count read by **`active_account::get_item`** is now on top of the stack, and is returned when this procedure is called.
 
 Here's a breakdown of what the **`increment_count`** procedure does:
 
-1. Pushes the slot ID prefix and suffix for **`counter_contract::counter_contract::count`** onto the stack.
-2. Calls **`active_account::get_item`** with the slot ID.
-3. Pushes **`1`** onto the stack.
-4. Adds **`1`** to the count value returned from **`active_account::get_item`**.
-5. Pushes the slot ID prefix and suffix again so we can write the updated count.
-6. Calls **`native_account::set_item`** which saves the incremented count to storage.
-7. Calls **`sys::truncate_stack`** to truncate the stack to size 16.
+1. Pushes the slot ID of the **`counter_contract::counter_contract::count`** slot onto the stack.
+2. Executes **`active_account::get_item`** to read the current count.
+3. Executes **`add.1`** to add **`1`** to the count.
+4. Pushes the slot ID again so that we can write the updated count.
+5. Executes **`native_account::set_item`**, which saves the incremented count to storage and returns the old value.
+6. Executes **`dropw`** to drop the old value from the stack.
+7. Executes **`sys::truncate_stack`** to truncate the stack back to 16 elements.
