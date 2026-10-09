@@ -6,62 +6,36 @@ import { fromHex } from "@/lib/utils";
 import type { NetworkId } from "@/lib/types/network";
 import { midenFaucetApiUrl } from "@/lib/constants";
 import { clientGetAllInputNotes } from "@/lib/web-client";
+import { solveFaucetPow } from "@/lib/faucet-pow";
 
-// https://github.com/0xMiden/miden-faucet/blob/next/bin/faucet/frontend/app.js
-// Function to find a valid nonce for proof of work using the new challenge format
-export const findValidNonce = async ({
+// The faucet rejects a challenge 30s after issuing it: give up on a challenge after 20s
+// of solving, leaving time for the round trips, and request a fresh one.
+const POW_SOLVE_WINDOW_MS = 20_000;
+const POW_CHALLENGE_ATTEMPTS = 3;
+
+// Every request asks for this many whole tokens rather than the faucet's `base_amount`
+// (testnet: 100). It is plenty to pay transaction fees, and the faucet sets the PoW
+// difficulty proportional to `amount / base_amount + 1`, so staying below `base_amount`
+// halves the work compared to requesting it.
+export const FAUCET_REQUEST_TOKENS = 10;
+
+// Finds a nonce solving the faucet's PoW challenge, or returns `null` if none is found
+// before the challenge is about to expire.
+// https://github.com/0xMiden/miden-faucet/blob/next/bin/faucet/frontend/app.js does
+// the same with one `crypto.subtle.digest` call per attempt, which is too slow to beat
+// the challenge lifetime once the faucet is under load.
+export const findValidNonce = ({
   challenge,
   target,
 }: {
   challenge: string;
   target: number;
-}) => {
-  let nonce = 0;
-  const targetNum = BigInt(target);
-  const challengeBytes = fromHex(challenge);
-
-  while (true) {
-    // Generate a random nonce
-    nonce = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
-
-    try {
-      // Convert nonce to 8-byte big-endian format to match backend
-      const nonceBytes = new ArrayBuffer(8);
-      const nonceView = new DataView(nonceBytes);
-      nonceView.setBigUint64(0, BigInt(nonce), false); // false = big-endian
-      const nonceByteArray = new Uint8Array(nonceBytes);
-
-      // Combine challenge and nonce
-      const combined = new Uint8Array(
-        challengeBytes.length + nonceByteArray.length,
-      );
-      combined.set(challengeBytes);
-      combined.set(nonceByteArray, challengeBytes.length);
-
-      // Compute SHA-256 hash using Web Crypto API
-      const hashBuffer = await crypto.subtle.digest("SHA-256", combined);
-      const hashArray = new Uint8Array(hashBuffer);
-
-      // Take the first 8 bytes of the hash and parse them as u64 in big-endian
-      const first8Bytes = hashArray.slice(0, 8);
-      const dataView = new DataView(first8Bytes.buffer);
-      const digest = dataView.getBigUint64(0, false); // false = big-endian
-
-      // Check if the hash is less than the target
-      if (digest < targetNum) {
-        return nonce;
-      }
-    } catch (error) {
-      console.error("Error computing hash:", error);
-      throw new Error("Failed to compute hash");
-    }
-
-    // Yield to browser to prevent freezing
-    if (nonce % 1000 === 0) {
-      await new Promise((resolve) => setTimeout(resolve, 0));
-    }
-  }
-};
+}) =>
+  solveFaucetPow({
+    challenge: fromHex(challenge),
+    target: BigInt(target),
+    deadline: Date.now() + POW_SOLVE_WINDOW_MS,
+  });
 
 export const getMetadata = async (backendUrl: string) => {
   const response = await fetch(`${backendUrl}/get_metadata`);
@@ -134,7 +108,7 @@ export const getTokens = async ({
 }: {
   backendUrl: string;
   challenge: string;
-  nonce: number;
+  nonce: bigint;
   recipient: string;
   amount: string;
 }) => {
@@ -158,9 +132,8 @@ export const getTokens = async ({
   return { noteId };
 };
 
-// Requests `amount` base units for `recipient`, defaulting to the faucet's `base_amount`:
-// deployments can cap requests as low as `base_amount` (testnet: 100 tokens) and the PoW
-// difficulty grows linearly with `amount / base_amount`.
+// Requests `amount` base units for `recipient`, defaulting to `FAUCET_REQUEST_TOKENS`
+// whole tokens.
 export const requestTokens = async ({
   networkId,
   recipient,
@@ -171,25 +144,35 @@ export const requestTokens = async ({
   amount?: number;
 }) => {
   const backendUrl = midenFaucetApiUrl(networkId);
-  const amount = requestedAmount ?? (await getMetadata(backendUrl)).baseAmount;
+  const amount =
+    requestedAmount ??
+    FAUCET_REQUEST_TOKENS * 10 ** (await getMetadata(backendUrl)).decimals;
   if (!Number.isSafeInteger(amount) || amount <= 0) {
     throw new Error(
       `Invalid faucet amount ${String(amount)}; expected a positive safe integer`,
     );
   }
-  const { challenge, target } = await getPowChallenge({
-    backendUrl,
-    recipient,
-    amount: amount.toString(),
-  });
-  const nonce = await findValidNonce({ challenge, target });
-  return getTokens({
-    backendUrl,
-    challenge,
-    nonce,
-    recipient,
-    amount: amount.toString(),
-  });
+  for (let attempt = 0; attempt < POW_CHALLENGE_ATTEMPTS; attempt += 1) {
+    const { challenge, target } = await getPowChallenge({
+      backendUrl,
+      recipient,
+      amount: amount.toString(),
+    });
+    const nonce = await findValidNonce({ challenge, target });
+    if (nonce === null) {
+      continue;
+    }
+    return getTokens({
+      backendUrl,
+      challenge,
+      nonce,
+      recipient,
+      amount: amount.toString(),
+    });
+  }
+  throw new Error(
+    `Could not solve the faucet's proof of work within ${POW_CHALLENGE_ATTEMPTS} challenges`,
+  );
 };
 
 export const requestFundingNote = ({
