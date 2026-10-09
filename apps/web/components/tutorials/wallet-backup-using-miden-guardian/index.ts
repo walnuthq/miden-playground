@@ -17,7 +17,7 @@ const tutorial: Tutorial = {
   title: "Wallet backup using Miden Guardian",
   tagline: "Back up your private wallet with Miden Guardian.",
   description:
-    "This tutorial teaches you how to back up and restore private account state with Miden Guardian, an off-chain service that backs up and syncs private account state across devices without being able to move your funds.",
+    "In this tutorial, you'll back up and restore a private wallet with Miden Guardian, an off-chain service that backs up and syncs private account state across devices without being able to move your funds.",
   category: "advanced",
   initialRoute: "/accounts",
   state: {

@@ -16,7 +16,7 @@ const tutorial: Tutorial = {
   title: "Private transfers",
   tagline: "Send assets privately from Bread Wallet to Para Wallet.",
   description:
-    "This tutorial walks you through funding a private Bread Wallet and sending assets in a private note to a public Para Wallet on Miden testnet.",
+    "In this tutorial, you'll fund a private Bread Wallet and send assets in a private note to a public Para Wallet on Miden testnet.",
   category: "beginner",
   initialRoute: "/accounts",
   state: {

@@ -29,8 +29,9 @@ const Step1: TutorialStep = {
           description={
             <p>
               Click the <em>"Select Wallet"</em> button in the top-right corner
-              to connect Bread Wallet to the Playground. Once your wallet is
-              imported, open its account details page.
+              and select <em>"Bread Wallet"</em> to connect it to the
+              Playground. Once your wallet is imported, open its account details
+              page.
             </p>
           }
         />

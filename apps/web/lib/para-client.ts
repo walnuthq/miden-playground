@@ -10,13 +10,10 @@ import {
   AccountComponent,
   AccountStorageMode,
   MidenClient,
+  getWasmOrThrow,
 } from "@miden-sdk/miden-sdk/lazy";
 import type { NetworkId } from "@/lib/types/network";
 import { networks, noteTransportUrls } from "@/lib/miden-client";
-
-// The ECDSA K256 Keccak value of the WASM AuthScheme enum, which the lazy SDK
-// entry doesn't export (it exports a string-valued AuthScheme instead).
-const AUTH_ECDSA_K256_KECCAK = 1;
 
 export type ParaClient = {
   client: MidenClient;
@@ -72,11 +69,14 @@ export const createParaClient = async ({
     },
   });
   const commitment = await evmPkToCommitment(publicKey);
+  // The package's `AuthScheme` export is the friendly string const; the auth
+  // component takes the numeric enum, so read it from the wasm module.
+  const { AuthScheme } = await getWasmOrThrow();
   const { account } = new AccountBuilder(new Uint8Array(32))
     .withAuthComponent(
       AccountComponent.createAuthComponentFromCommitment(
         commitment,
-        AUTH_ECDSA_K256_KECCAK,
+        AuthScheme.AuthEcdsaK256Keccak,
       ),
     )
     .storageMode(AccountStorageMode.public())

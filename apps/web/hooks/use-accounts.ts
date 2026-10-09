@@ -7,13 +7,10 @@ import {
 import {
   Address as WasmAddress,
   AccountId as WasmAccountId,
+  AuthScheme,
 } from "@miden-sdk/miden-sdk/lazy";
 import useGlobalContext from "@/components/global-context/hook";
-import {
-  type AccountStorageMode,
-  type Account,
-  AuthScheme,
-} from "@/lib/types/account";
+import type { AccountStorageMode, Account } from "@/lib/types/account";
 import {
   basicWalletAccount,
   getRoutingParametersPart,
@@ -104,7 +101,7 @@ const useAccounts = () => {
   }) => {
     const wallet = await createWallet({
       storageMode,
-      authScheme: AuthScheme.AuthRpoFalcon512,
+      authScheme: AuthScheme.Falcon,
     });
     const fundedWallet = await fundAccount(wallet);
     const account = wasmAccountToAccount({
@@ -137,7 +134,7 @@ const useAccounts = () => {
       tokenSymbol,
       decimals,
       maxSupply,
-      authScheme: AuthScheme.AuthRpoFalcon512,
+      authScheme: AuthScheme.Falcon,
     });
     const fundedFaucet = await fundAccount(faucet);
     const account = wasmAccountToAccount({

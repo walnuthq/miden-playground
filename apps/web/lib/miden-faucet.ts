@@ -159,7 +159,7 @@ export const getTokens = async ({
 };
 
 // Requests `amount` base units for `recipient`, defaulting to the faucet's `base_amount`:
-// deployments can cap requests as low as `base_amount` (testnet: 0.01 token) and the PoW
+// deployments can cap requests as low as `base_amount` (testnet: 100 tokens) and the PoW
 // difficulty grows linearly with `amount / base_amount`.
 export const requestTokens = async ({
   networkId,
