@@ -11,5 +11,5 @@
     "declaration": false,
     "declarationMap": false
   },
-  "include": ["vite.config.ts", "scripts"]
+  "include": ["process-env.d.ts", "vite.config.ts", "scripts"]
 }

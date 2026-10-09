@@ -9,6 +9,7 @@
     "verbatimModuleSyntax": true,
     "allowJs": true,
     "jsx": "preserve",
-    "noEmit": true
+    "noEmit": true,
+    "types": ["node"]
   }
 }

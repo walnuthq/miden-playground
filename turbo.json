@@ -23,14 +23,22 @@
         "NODE_ENV",
         "NEXT_PUBLIC_API_URL",
         "NEXT_PUBLIC_API_REGISTRY_URL",
+        "NEXT_PUBLIC_GUARDIAN_ENDPOINT_URL",
         "NEXT_PUBLIC_PARA_API_KEY",
-        "NEXT_PUBLIC_PARA_ENVIRONMENT"
+        "NEXT_PUBLIC_PARA_ENVIRONMENT",
+        "NEXT_PUBLIC_MIDEN_FEE_AMOUNT"
       ]
     },
     "status-page#build": {
       "cache": false,
       "outputs": ["dist/**"],
-      "env": ["WEB_URL", "API_URL", "STATUS_PAGE_BASE", "STATUS_PAGE_URL"]
+      "env": [
+        "WEB_URL",
+        "API_URL",
+        "STATUS_PAGE_URL",
+        "STATUS_PAGE_BASE",
+        "GITHUB_REPOSITORY"
+      ]
     },
     "status-page#notify": {
       "cache": false,
