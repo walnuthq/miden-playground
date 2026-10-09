@@ -9,7 +9,7 @@
     "start": "next start",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy-staging": "opennextjs-cloudflare build && opennextjs-cloudflare deploy --env staging",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
