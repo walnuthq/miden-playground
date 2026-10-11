@@ -15,9 +15,9 @@ const tutorial: Tutorial = {
   id: "deploy-a-counter-contract",
   number: 7,
   title: "Deploy a counter contract",
-  tagline: "Deploy your own Counter Contract on testnet.",
+  tagline: "Deploy your own counter contract on testnet.",
   description:
-    "This tutorial will walk you through developing your own custom Counter Contract and deploying it on testnet.",
+    "In this tutorial, you'll write your own counter contract, deploy it on testnet and increment its counter.",
   category: "advanced",
   initialRoute: "/scripts",
   state: {

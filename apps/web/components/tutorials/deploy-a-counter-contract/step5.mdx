@@ -1,11 +1,11 @@
 import Link from "@/components/tutorials/tutorial-link";
 
-Now that we both defined our [AccountCode](https://docs.miden.xyz/reference/protocol/account/code) using a script and [AccountStorage](https://docs.miden.xyz/reference/protocol/account/storage) using an account component, it's time to deploy our contract on testnet.
+Now that your account component defines both the contract's [code](https://docs.miden.xyz/reference/protocol/account/code) and its [storage](https://docs.miden.xyz/reference/protocol/account/storage) layout, it's time to deploy your counter contract on testnet.
 
-From the <Link href="/accounts">accounts page</Link>, click on _"Create new account"_ and select the _"Deploy account"_ option.
+Head to the <Link href="/accounts">accounts page</Link>, click the _"Create new account"_ button at the top of the page and select the _"Deploy account"_ option.
 
-Give your new contract a name and select **NoAuth** as authentication component: our counter contract doesn't require authentication as we allow any user to interact with it without requiring signature verification.
+Enter a name for your contract and leave the storage mode set to **Public**. Keep **No Auth** as the authentication component: it doesn't require any signature, so anyone can increment the counter, just like the contract from the previous tutorial. Then select your account component, the one you created in the previous steps.
 
-After selecting your custom **Counter Contract** account component, you will be given the opportunity to overwrite the storage slots default values.
+Once the component is selected, the storage slots it defines are listed with their default values, which you can override for this deployment. Keep the value you set in the previous step.
 
-When you're done configuring your contract deployment, click on the _"Deploy"_ button to create your account: it will take some time as the process also funds it and wait until the new account is acknowledged by testnet.
+Finally, click the _"Deploy"_ button. This takes a few moments: the Playground creates the Account, then funds it so that it can pay transaction fees. Funding the Account is its first Transaction, which also registers it on testnet.

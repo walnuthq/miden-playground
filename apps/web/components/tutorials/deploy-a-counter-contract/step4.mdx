@@ -1,10 +1,10 @@
 import CopyButton from "@/components/lib/copy-button";
 
-Designing an Account Component is twofold:
+An account component is made of two parts:
 
-- First we define a library of functions that can read and write to the storage slots of the component using a script written in Rust.
-- Next, we define the storage layout that must specify a list of storage slots, and can optionally specify initial values for each of the slots.
+- Its **code**: a library of procedures that can read and write the component's storage. Here, it's the script you compiled in the previous step.
+- Its **storage layout**: the list of storage slots the component uses, each with a type and an optional default value.
 
-Let's add a storage slot to our **Counter Contract** component, you must name it **`counter_contract::counter_contract::count_map`** <CopyButton content="Copy Storage Slot Name" copy="counter_contract::counter_contract::count_map" /> to use the same identifier that was hardcoded in the Account Component.
+Your component already has its code, so let's define its storage layout. Click the _"Add storage slot"_ button and enter **`counter_contract::counter_contract::count_map`** <CopyButton content="Copy Storage Slot Name" copy="counter_contract::counter_contract::count_map" /> as the slot name. It must match the name the contract code uses to access the slot: you can find it in the **`COUNTER_SLOT`** constant of the script's _"MASM"_ tab.
 
-Select **StorageMap** as storage slot type and set an initial default value for the counter at the fixed key **1**.
+Select the **Map** type, then click _"Add key-value pair"_ to set the initial value of the counter: enter **1** as the key, the fixed key used by the contract, and the initial count as the value, for example **0**.
