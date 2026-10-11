@@ -21,7 +21,7 @@ const useCompleted = () => {
 };
 
 const Step6: TutorialStep = {
-  title: "Interact with your Counter Contract.",
+  title: "Increment your counter contract.",
   Content: () => {
     const { accounts } = useAccounts();
     const { components } = useComponents();
@@ -38,12 +38,13 @@ const Step6: TutorialStep = {
         <Step6Content counter={counter} />
         <TutorialAlert
           completed={completed}
-          title="Action required: Invoke your Counter Contract procedure."
-          titleWhenCompleted="You invoked your Counter Contract procedure."
+          title="Action required: Increment the counter."
+          titleWhenCompleted="Your increment transaction has been submitted."
           description={
             <p>
-              Click on the <em>"Invoke"</em> button from your newly deployed
-              contract to increment the counter.
+              In the <em>"Components"</em> tab of the account details page,
+              click the <em>"Invoke"</em> button next to the{" "}
+              <strong>increment_count</strong> procedure.
             </p>
           }
         />

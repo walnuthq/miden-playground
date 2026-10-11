@@ -18,7 +18,7 @@ const useCompleted = () => {
 };
 
 const Step4: TutorialStep = {
-  title: "Create a Storage Slot.",
+  title: "Add the counter storage slot.",
   Content: () => {
     const completed = useCompleted();
     return (
@@ -26,13 +26,13 @@ const Step4: TutorialStep = {
         <Step4Content />
         <TutorialAlert
           completed={completed}
-          title="Action required: Create a Storage Slot."
-          titleWhenCompleted="You created a Storage Slot."
+          title="Action required: Add the counter storage slot."
+          titleWhenCompleted="You added the counter storage slot."
           description={
             <p>
-              Click on the <em>"Add storage slot"</em> button and create a{" "}
-              <strong>StorageMap</strong> slot with the initial counter value
-              stored at key <strong>1</strong>.
+              Click the <em>"Add storage slot"</em> button and create a{" "}
+              <strong>Map</strong> slot with the initial counter value stored at
+              key <strong>1</strong>.
             </p>
           }
         />

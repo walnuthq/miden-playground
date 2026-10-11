@@ -17,7 +17,7 @@ const useCompleted = () => {
 };
 
 const Step2: TutorialStep = {
-  title: "Compile the Counter Contract script.",
+  title: "Customize and compile the counter contract script.",
   Content: () => {
     const completed = useCompleted();
     return (
@@ -25,13 +25,13 @@ const Step2: TutorialStep = {
         <Step2Content />
         <TutorialAlert
           completed={completed}
-          title="Action required: Compile the script."
-          titleWhenCompleted="You compiled the Counter Contract script."
+          title="Action required: Change the increment value and compile the script."
+          titleWhenCompleted="You compiled your counter contract script."
           description={
             <p>
-              Click on the <em>"Compile"</em> button in the editor console to
-              compile your script. Change the increment value and make sure to
-              not introduce any errors.
+              Change the increment value to a number greater than{" "}
+              <strong>1</strong>, then click the <em>"Compile"</em> button in
+              the editor console to compile your script.
             </p>
           }
         />
