@@ -4,7 +4,7 @@ import useGlobalContext from "@/components/global-context/hook";
 import tutorials from "@/components/tutorials";
 import { defaultTutorial } from "@/lib/utils/tutorial";
 import useAppState from "@/hooks/use-app-state";
-import { saEvent } from "@/lib/simple-analytics";
+import { trackEvent } from "@simpleanalytics/next";
 import { sleep } from "@/lib/utils";
 import useNetwork from "@/hooks/use-network";
 import type { NetworkId } from "@/lib/types/network";
@@ -52,7 +52,7 @@ const useTutorials = () => {
       tutorialStartBlockNum: await startBlockNum(tutorial.networkId),
       completedTutorials,
     });
-    saEvent("start_tutorial", {
+    trackEvent("start_tutorial", {
       tutorial_id: tutorialId,
       wallet_connected: walletConnected,
     });
@@ -74,12 +74,12 @@ const useTutorials = () => {
       tutorialStartBlockNum: await startBlockNum(nextTutorial.networkId),
       completedTutorials: newCompletedTutorials,
     });
-    saEvent("complete_tutorial", {
+    trackEvent("complete_tutorial", {
       tutorial_id: tutorialId,
       wallet_connected: walletConnected,
     });
     if (nextTutorial.id) {
-      saEvent("start_tutorial", {
+      trackEvent("start_tutorial", {
         tutorial_id: nextTutorial.id,
         wallet_connected: walletConnected,
       });
@@ -91,7 +91,7 @@ const useTutorials = () => {
     dispatch({ type: "NEXT_TUTORIAL_STEP" });
     const nextTutorialStep = tutorialStep + 1;
     if (nextTutorialStep > tutorialMaxStep) {
-      saEvent("complete_tutorial_step", {
+      trackEvent("complete_tutorial_step", {
         tutorial_id: tutorialId,
         tutorial_step: tutorialStep,
         wallet_connected: walletConnected,

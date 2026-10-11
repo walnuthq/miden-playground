@@ -4,6 +4,8 @@ declare global {
     interface ProcessEnv {
       // system
       readonly NODE_ENV: "development" | "production" | "test";
+      // server
+      readonly SIMPLE_ANALYTICS_HOSTNAME?: string;
       // public
       readonly NEXT_PUBLIC_API_URL?: string;
       readonly NEXT_PUBLIC_API_REGISTRY_URL?: string;

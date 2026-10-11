@@ -2,6 +2,7 @@
 // import { fileURLToPath } from "url";
 import type { NextConfig } from "next";
 import createMDX from "@next/mdx";
+import withSimpleAnalytics from "@simpleanalytics/next/plugin";
 
 const paraStubPackages = [
   "@getpara/solana-wallet-connectors",
@@ -67,29 +68,15 @@ const nextConfig: NextConfig = {
     return config;
   },
   allowedDevOrigins: ["playground.miden.local"],
-  rewrites: () => [
-    {
-      source: "/proxy.js",
-      destination:
-        "https://simpleanalyticsexternal.com/proxy.js?hostname=playground.miden.xyz&path=/simple",
-    },
-    {
-      source: "/proxy.dev.js",
-      destination:
-        "https://simpleanalyticsexternal.com/proxy.js?hostname=playground.miden.local&path=/simple",
-    },
-    {
-      source: "/simple/:path*",
-      destination: "https://queue.simpleanalyticscdn.com/:path*",
-    },
-  ],
 };
 
 const withMDX = createMDX({
   // Add markdown plugins here, as desired
 });
 
-export default withMDX(nextConfig);
+// Proxies the Simple Analytics script and events (/proxy.js, /simple/*)
+// through our domain for SIMPLE_ANALYTICS_HOSTNAME.
+export default withSimpleAnalytics(withMDX(nextConfig));
 
 import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 initOpenNextCloudflareForDev();
