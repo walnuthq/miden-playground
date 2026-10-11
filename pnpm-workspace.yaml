@@ -44,32 +44,3 @@ packageExtensions:
   "@next/mdx":
     peerDependencies:
       next: "*"
-minimumReleaseAgeExclude:
-  - "@getpara/core-sdk@3.22.0"
-  - "@getpara/evm-wallet-connectors@3.22.0"
-  - "@getpara/react-common@3.22.0"
-  - "@getpara/react-component-library@3.22.0"
-  - "@getpara/react-core@3.22.0"
-  - "@getpara/react-sdk-lite@3.22.0"
-  - "@getpara/user-management-client@3.22.0"
-  - "@getpara/viem-v2-integration@3.22.0"
-  - "@getpara/wagmi-v2-connector@3.22.0"
-  - "@getpara/web-sdk@3.22.0"
-  - "@miden-sdk/miden-sdk@0.17.3"
-  - "@miden-sdk/miden-wallet-adapter-base@0.17.3"
-  - "@miden-sdk/miden-wallet-adapter-miden@0.17.3"
-  - "@miden-sdk/miden-wallet-adapter-react@0.17.3"
-  - "@miden-sdk/miden-wallet-adapter-reactui@0.17.3"
-  - "@miden-sdk/miden-wallet-adapter@0.17.3"
-  - "@miden-sdk/node-darwin-arm64@0.17.3"
-  - "@miden-sdk/node-darwin-x64@0.17.3"
-  - "@miden-sdk/node-linux-x64-gnu@0.17.3"
-  - "@miden-sdk/para-react@0.17.3"
-  - "@miden-sdk/para@0.17.3"
-  - "@miden-sdk/react@0.17.3"
-  - "@tanstack/react-table@9.2.8"
-  - "@tanstack/table-core@9.2.8"
-  - lucide-react@1.54.0
-  - miniflare@5.20261006.1-alpha
-  - vite@8.3.4
-  - wrangler@4.149.0

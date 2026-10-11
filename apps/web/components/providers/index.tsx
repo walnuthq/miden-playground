@@ -9,7 +9,6 @@ import {
 } from "@miden-sdk/miden-wallet-adapter";
 import { MultiSignerProvider, SignerSlot } from "@miden-sdk/react/lazy";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import SimpleAnalyticsProvider from "@/components/providers/simple-analytics-provider";
 import { NetworkProvider } from "@/components/providers/network-provider";
 import MidenProvider from "@/components/providers/miden-provider";
 import ParaProvider from "@/components/providers/para-provider";
@@ -44,11 +43,9 @@ const Providers = ({ children }: { children: ReactNode }) => (
               <SignerSlot />
               <MidenFiReconnect />
               <WalletModalProvider>
-                <SimpleAnalyticsProvider>
-                  <ParaProvider queryClient={queryClient}>
-                    <GlobalContextProvider>{children}</GlobalContextProvider>
-                  </ParaProvider>
-                </SimpleAnalyticsProvider>
+                <ParaProvider queryClient={queryClient}>
+                  <GlobalContextProvider>{children}</GlobalContextProvider>
+                </ParaProvider>
               </WalletModalProvider>
             </MidenFiSignerProvider>
           </MultiSignerProvider>

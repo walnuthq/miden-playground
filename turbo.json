@@ -26,7 +26,8 @@
         "NEXT_PUBLIC_GUARDIAN_ENDPOINT_URL",
         "NEXT_PUBLIC_PARA_API_KEY",
         "NEXT_PUBLIC_PARA_ENVIRONMENT",
-        "NEXT_PUBLIC_MIDEN_FEE_AMOUNT"
+        "NEXT_PUBLIC_MIDEN_FEE_AMOUNT",
+        "SIMPLE_ANALYTICS_HOSTNAME"
       ]
     },
     "status-page#build": {

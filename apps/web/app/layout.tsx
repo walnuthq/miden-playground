@@ -1,5 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import type { ReactNode } from "react";
+import { SimpleAnalytics } from "@simpleanalytics/next";
 // Para's stylesheet ships its own Tailwind preflight, so it must come before
 // globals.css for the app's base rules (e.g. border colors) to win.
 import "@getpara/react-sdk-lite/styles.css";
@@ -36,6 +37,7 @@ const RootLayout = ({
           <Toaster richColors />
         </div>
       </Providers>
+      <SimpleAnalytics />
     </body>
   </html>
 );
