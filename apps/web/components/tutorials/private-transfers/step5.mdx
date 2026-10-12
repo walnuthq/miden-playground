@@ -10,8 +10,8 @@ Then click the _"Select Wallet"_ button, select _"Para Wallet"_ and log in again
 
 Open your {props.wallet ? <Link href={`/accounts/${props.wallet.identifier}`}>Para Wallet details page</Link> : 'Para Wallet details page'}: the private note sent by your Bread Wallet appears in the _"Consumable Notes"_ section.
 
-If several notes are listed, for example notes left over from a previous run of this tutorial, consume the newest one: the note sent in the previous step{props.noteId ? <>, with ID <strong>{formatId(props.noteId)}</strong></> : ''}.
+If several Notes are listed, for example Notes left over from a previous run of this tutorial, consume the newest one: the Note sent in the previous step{props.noteId ? <>, with ID <strong>{formatId(props.noteId)}</strong></> : ''}.
 
-Click the <EllipsisVertical className="size-4 inline" /> icon button in the _"Consumable Notes"_ table and select _"Consume note with Para Wallet"_. Para opens a confirmation modal summarizing the consume transaction: approve it to sign the transaction, which moves the tokens into your Para Wallet's vault.
+Click the <EllipsisVertical className="size-4 inline" /> icon button in the _"Consumable Notes"_ table and select _"Consume note with Para Wallet"_. Para opens a confirmation modal summarizing the consume transaction: approve it to sign the Transaction, which moves the tokens into your Para Wallet's vault.
 
-If this is your Para Wallet's first Transaction, it also deploys the account on-chain. Once the transaction is committed, the note leaves the _"Consumable Notes"_ table.
+If this is your Para Wallet's first Transaction, it also deploys the Account on-chain. Once the Transaction is committed, the Note leaves the _"Consumable Notes"_ table.

@@ -46,8 +46,8 @@ const Step2: TutorialStep = {
           description={
             <p>
               Click the <em>"Mint"</em> button to request tokens from the USDCx
-              Faucet. Once the note has been committed on testnet and consumed
-              by your Bread Wallet, you will be able to continue the tutorial.
+              Faucet. Once the Note has been committed on testnet and consumed
+              by your Bread Wallet, you can proceed to the next step.
             </p>
           }
         />

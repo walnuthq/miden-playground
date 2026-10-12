@@ -38,7 +38,7 @@ const Step6: TutorialStep = {
           description={
             <p>
               Click the <em>"Add note"</em> button on the notes page, select the{" "}
-              <em>"Create note"</em> option and create a public Note with the{" "}
+              <em>"Create note"</em> option and create a public note with the{" "}
               <strong>counter-note</strong> script for your counter contract.
             </p>
           }

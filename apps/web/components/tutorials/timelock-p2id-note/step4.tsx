@@ -48,12 +48,12 @@ const Step4: TutorialStep = {
         />
         <TutorialAlert
           completed={completed}
-          title="Action required: Create the note."
+          title="Action required: Create the Note."
           titleWhenCompleted="You created the timelocked P2ID note."
           description={
             <p>
-              Create a note from your script with the <em>"Create Note"</em>{" "}
-              dialog, then confirm the transaction in your wallet.
+              Create a Note from your script with the <em>"Create Note"</em>{" "}
+              dialog, then confirm the Transaction in your wallet.
             </p>
           }
         />

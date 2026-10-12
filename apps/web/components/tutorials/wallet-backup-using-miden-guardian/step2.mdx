@@ -1,6 +1,6 @@
 import Link from "@/components/tutorials/tutorial-link";
 
-A wallet backed up by Miden Guardian involves two accounts:
+A wallet backed up by Miden Guardian involves two Accounts:
 
 - **Guardian wallet**: a new **Private** wallet account that holds your funds. Miden Guardian stores a backup of its state off-chain, and every Transaction it executes requires both your signature and Miden Guardian's.
 - **Signer**: your private Bread Wallet. Its key is registered as the only signer of the guardian wallet: it approves every change to the guardian wallet, and it's what lets you restore the guardian wallet if you lose its state.

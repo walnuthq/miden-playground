@@ -33,7 +33,7 @@ const Step5: TutorialStep = {
             <p>
               Click the <em>"Create new account"</em> button at the top of the
               accounts page, select the <em>"Deploy account"</em> option and
-              deploy an account using the <strong>No Auth</strong>{" "}
+              deploy an Account using the <strong>No Auth</strong>{" "}
               authentication component and your account component.
             </p>
           }
