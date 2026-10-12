@@ -1,10 +1,13 @@
 import Link from "@/components/tutorials/tutorial-link";
 
-Now that we've compiled both our **counter-account** and **counter-note** scripts, it's time to actually deploy our smart contract and interact with it using notes.
+Now that both scripts are compiled, it's time to deploy the counter contract on testnet and interact with it using a Note.
 
-From the <Link href="/accounts">accounts page</Link>, click on _"Create new account"_ and select the _"Deploy account"_ option.
+When you moved on from step 2, the Playground created a **Counter Contract** account component from your **counter-account** script. Its storage layout defines a single map slot, **`counter_account::counter_contract::count_map`**, which holds the initial count, **0**, under key **1**.
 
-Give your new contract a name and select **No Auth** as authentication component and our custom **Counter Contract** account component: our contract doesn't require authentication as we allow any user to interact with it without requiring signature verification.
-It means that any user will be able to make the counter account consume the increment note.
+Head to the <Link href="/accounts">accounts page</Link>, click the _"Create new account"_ button at the top of the page and select the _"Deploy account"_ option.
 
-When you're done configuring your contract deployment, click on the _"Deploy"_ button to create your account.
+Enter a name for your contract and leave the storage mode set to **Public**. Keep **No Auth** as the authentication component: it doesn't require any signature, so anyone can make your counter contract consume an increment note. Then select the **Counter Contract** account component.
+
+Once the component is selected, its **`counter_account::counter_contract::count_map`** storage slot is listed with its default value, **1:0**: keep it, so that the counter starts at **0**.
+
+Finally, click the _"Deploy"_ button. This takes a few moments: the Playground creates the Account, then funds it so that it can pay transaction fees. Funding the Account is its first Transaction, which also registers it on testnet.

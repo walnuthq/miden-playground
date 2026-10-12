@@ -1,4 +1,4 @@
-Let's examine the counter account contract.
+The script you created contains the Rust source code of the counter contract, the same one you deployed in the _"Deploy a counter contract"_ tutorial. Let's take a closer look at how it's structured.
 
 **No-std Environment**
 
@@ -6,23 +6,21 @@ Let's examine the counter account contract.
 #![no_std]
 ```
 
-Miden contracts run in a **`no_std`** environment, meaning they don't link against Rust's standard library. This is essential for blockchain execution where contracts need to be deterministic and lightweight.
+Miden contracts run in a **`no_std`** environment, meaning they don't link against Rust's standard library. This is essential for blockchain execution, where contracts need to be deterministic and lightweight.
 
 **Miden Library Imports**
 
 ```rust
-use miden::{
-  component, component_storage, felt, Felt, StorageMap, Word
-};
+use miden::{component, component_storage, felt, Felt, StorageMap, Word};
 ```
 
 These imports provide:
 
-- **`component`**: Macro for defining contract components
-- **`component_storage`**: Macro for defining a component's storage struct
-- **`felt`**: Macro for creating **`Felt`** literals (e.g., **`felt!(1)`**)
+- **`component`**: macro for defining contract components
+- **`component_storage`**: macro for defining a component's storage struct
+- **`felt`**: macro for creating **`Felt`** literals (e.g., **`felt!(1)`**)
 - **`Felt`**/**`Word`**: Miden's native field element and word types
-- **`StorageMap`**: Key-value storage within account storage slots
+- **`StorageMap`**: key-value storage within an account storage slot
 
 **Contract Structure Definition**
 
@@ -43,13 +41,16 @@ trait CounterContract {
 }
 ```
 
-The **`#[component_storage]`** attribute marks the storage struct for this Miden [Account component](https://docs.miden.xyz/reference/protocol/account), while the **`#[component]`** trait defines the component's public interface.
-The **`count_map`** field is a **`StorageMap`** stored in a named storage slot of the account.
-In the v0.15-aligned SDK, storage slots are identified by name rather than explicit index numbers — the slot name is derived automatically from the component's package name, trait name and field name (e.g., **`counter_account::counter_contract::count_map`**).
+The **`#[component_storage]`** attribute marks the storage struct of this [account component](https://docs.miden.xyz/reference/protocol/account/components), while the **`#[component]`** trait defines the component's interface.
+Every procedure that other contracts and notes can call must be marked with **`#[account_procedure]`**: an unmarked method isn't exported.
 
-**Important**: Storage slots in Miden hold **`Word`** values, which are composed of four field elements (**`Felt`**).
-Each **`Felt`** is a 64-bit unsigned integer (u64).
-The **`StorageMap`** provides a key-value interface within a single storage slot, allowing you to store multiple key-value pairs within the four-element word structure.
+The **`count_map`** field is a **`StorageMap`** stored in a named slot of the account storage.
+Storage slots are identified by name rather than by index: the slot name is derived from the script name, the trait name and the field name, here **`counter_account::counter_contract::count_map`**.
+That's why your script must be named **counter-account**.
+
+**Important**: [account storage](https://docs.miden.xyz/reference/protocol/account/storage) is organized into named slots, each holding either a single value or a key-value map.
+Here, **`StorageMap<Word, Felt>`** provides typed access to a map slot, converting its keys and values to and from [Words](https://docs.miden.xyz/builder/glossary/#word).
+A Word is made of four field elements ([Felts](https://docs.miden.xyz/builder/glossary/#felt)), and each Felt belongs to the Goldilocks prime field and is represented using 64 bits.
 
 **Contract Implementation**
 
@@ -60,7 +61,7 @@ impl CounterContract for CounterContractStorage {
 ```
 
 The **`CounterContract`** trait defines the external interface that other contracts and notes can call.
-The **`impl CounterContract for CounterContractStorage**` block provides the behavior over the component's storage.
+The **`impl CounterContract for CounterContractStorage`** block provides the behavior over the component's storage.
 
 **Storage Key Strategy**
 
@@ -68,5 +69,7 @@ The **`impl CounterContract for CounterContractStorage**` block provides the beh
 let key = Word::new([felt!(1), felt!(0), felt!(0), felt!(0)]);
 ```
 
-Both functions in the counter contract use the same fixed key **`[1, 0, 0, 0]`** to store and retrieve the counter value within the storage map.
+Both procedures of the counter contract use the same fixed key, **`[1, 0, 0, 0]`**, to store and retrieve the counter value within the storage map.
 This demonstrates a simple but effective storage pattern.
+
+Once you've read the contract code, click the _"Compile"_ button to compile the script.

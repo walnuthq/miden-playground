@@ -15,7 +15,7 @@ const useCompleted = () => {
 };
 
 const Step3: TutorialStep = {
-  title: "Create a new note script.",
+  title: "Create the counter note script.",
   Content: () => {
     const completed = useCompleted();
     return (
@@ -23,14 +23,15 @@ const Step3: TutorialStep = {
         <Step3Content />
         <TutorialAlert
           completed={completed}
-          title="Action required: Create a new script."
-          titleWhenCompleted="You created a note script."
+          title="Action required: Create the counter note script."
+          titleWhenCompleted="You created the counter note script and added its dependency."
           description={
             <p>
-              Click on the <em>"Create new script"</em> button and create a new{" "}
-              <strong>Note Script</strong> with the{" "}
+              Click the <em>"Create new script"</em> button and create a{" "}
+              <strong>Note Script</strong> from the{" "}
               <strong>Counter Note</strong> example, then add the{" "}
-              <strong>counter-account</strong> script as a dependency.
+              <strong>counter-account</strong> script as a dependency in the{" "}
+              <em>"Metadata"</em> tab.
             </p>
           }
         />

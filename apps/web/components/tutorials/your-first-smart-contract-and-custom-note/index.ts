@@ -16,9 +16,9 @@ const tutorial: Tutorial = {
   id: "your-first-smart-contract-and-custom-note",
   number: 11,
   title: "Your first smart contract and custom note",
-  tagline: "Develop custom smart contracts and notes.",
+  tagline: "Write a counter contract and a custom note to increment it.",
   description:
-    "In this tutorial, you'll create your first smart contract and understand the structure and implementation of both the counter account contract and increment note script.",
+    "In this tutorial, you'll write a counter contract and a custom note script, deploy the contract on testnet and increment its counter with a custom note.",
   category: "advanced",
   initialRoute: "/scripts",
   state: {

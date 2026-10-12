@@ -19,7 +19,7 @@ const useCompleted = () => {
 };
 
 const Step1: TutorialStep = {
-  title: "Create a new account script.",
+  title: "Create the counter contract script.",
   Content: () => {
     const completed = useCompleted();
     return (
@@ -27,12 +27,13 @@ const Step1: TutorialStep = {
         <Step1Content />
         <TutorialAlert
           completed={completed}
-          title="Action required: Create a new script."
-          titleWhenCompleted="You created an Account Component script."
+          title="Action required: Create the counter contract script."
+          titleWhenCompleted="You created the counter contract script."
           description={
             <p>
-              Click on the <em>"Create new script"</em> button and create a new{" "}
-              <strong>Account Component</strong> with the{" "}
+              Click the <em>"Create new script"</em> button and create an{" "}
+              <strong>Account Component</strong> script named{" "}
+              <strong>counter-account</strong> from the{" "}
               <strong>Counter Contract</strong> example.
             </p>
           }
