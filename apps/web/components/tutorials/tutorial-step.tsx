@@ -1,7 +1,7 @@
 import { X } from "lucide-react";
 import useTutorials from "@/hooks/use-tutorials";
 import type { Tutorial } from "@/lib/types/tutorial";
-import { defaultTutorialStep } from "@/lib/utils/tutorial";
+import { defaultTutorialStep, isParaOnlyTutorial } from "@/lib/utils/tutorial";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import TutorialProgress from "@/components/tutorials/tutorial-progress";
@@ -53,7 +53,9 @@ const TutorialStep = ({ tutorial }: { tutorial: Tutorial }) => {
           <>
             {isMobile && <MobileAlert />}
             {networkId === "mmck" && <MockChainAlert />}
-            {!isTutorial && !window.midenWallet && <MidenWalletAlert />}
+            {!isTutorial &&
+              !isParaOnlyTutorial(tutorial.id) &&
+              !window.midenWallet && <MidenWalletAlert />}
           </>
         )}
         {isMobile && tutorialStep === 0 && <MobileAlert />}

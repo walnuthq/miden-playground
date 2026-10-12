@@ -27,3 +27,11 @@ export const isTutorial = (tutorialId: string) =>
     // "private-transfers",
     // "timelock-p2id-note",
   ].includes(tutorialId);
+
+// Tutorials whose notes Bread Guardian wallets can't create yet (0xMiden/wallet#1422).
+export const isParaOnlyTutorial = (tutorialId: string) =>
+  [
+    "timelock-p2id-note",
+    "network-transactions",
+    "your-first-smart-contract-and-custom-note",
+  ].includes(tutorialId);

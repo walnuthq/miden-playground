@@ -6,7 +6,7 @@ import useComponents from "@/hooks/use-components";
 import { defaultComponentIds } from "@/lib/types/default-components";
 
 const Step5: TutorialStep = {
-  title: "Check the network counter value.",
+  title: "Read the updated counter value.",
   Content: () => {
     const { accounts } = useAccounts();
     const { components } = useComponents();

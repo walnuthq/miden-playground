@@ -1,7 +1,7 @@
 import Link from "@/components/tutorials/tutorial-link";
 
-Your custom note has been automatically consumed by a network transaction and you can now check that the network counter value has been incremented from 1 to 2.
+Your Note has been consumed by a network transaction, which incremented the network counter from **0** to **1**.
 
-On the <Link href={`/accounts/${props.counter.identifier}`}>network counter page</Link>, click on the _"Components"_ tab and notice the storage slot value is now 2, confirming the counter was incremented by the network transaction.
+Open the <Link href={`/accounts/${props.counter.identifier}`}>network counter</Link>'s page and click the _"Components"_ tab. Under _"Account Components"_, the value of the **`counter_contract::counter_contract::count`** storage slot is now **1**.
 
-Congratulations! You have successfully created a network smart contract and triggered a network transaction using a custom note.
+Congratulations! You have successfully deployed a network smart contract and triggered a network transaction with a custom note.

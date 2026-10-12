@@ -1,15 +1,17 @@
-In this tutorial, we will explore Network Transactions (NTXs) on Miden - a powerful feature that enables autonomous smart contract execution and public shared state management.
-Unlike local transactions that require users to execute and prove, network transactions are executed and proven by a network transaction builder.
+In this tutorial, you'll explore Network Transactions (NTXs) on Miden, a powerful feature that enables autonomous smart contract execution and public shared state management.
+Unlike local transactions, which users execute and prove themselves, network transactions are executed and proven by the network transaction builder, run by the Miden operator.
 
-We'll build a network counter smart contract using the same code as the regular counter, but with a different [authentication component](https://docs.miden.xyz/reference/protocol/account/code#authentication) to enable network execution.
+You'll deploy a network counter contract that uses the same code as the counter contract from a previous tutorial, but a different [authentication component](https://docs.miden.xyz/reference/protocol/account/code#authentication) that lets the network execute Transactions against it.
 
-Then we'll create a note interacting with the network counter and let the network transaction builder actually consume and process the note.
+Then, you'll create a Note targeting the network counter and let the network transaction builder consume it, which increments the counter.
 
-Network transactions are executed and proven by the Miden operator rather than the client. They are useful for:
+Network transactions are useful for:
 
-- **Public shared state**: Multiple users can interact with the same contract state without race conditions.
-- **Autonomous execution**: Smart contracts can execute when conditions are met without user intervention.
-- **Resource-constrained devices**: Clients that can't generate ZK proofs efficiently.
-- **AMM applications**: Using network notes, you can build sophisticated AMMs where trades execute automatically.
+- **Public shared state**: multiple users can create notes targeting the same contract, and the network transaction builder orders their execution.
+- **Autonomous execution**: smart contracts can execute when conditions are met, without user intervention.
+- **Resource-constrained devices**: clients that can't generate ZK proofs efficiently can rely on the network to do it.
+- **AMM applications**: using network notes, you can build sophisticated AMMs where trades execute automatically.
 
-The main trade-off is reduced privacy since the operator can see transaction inputs.
+The trade-off is reduced privacy: the network account's state and the notes it consumes are public, so the operator can see the transaction inputs.
+
+To learn more, read the [Network Transactions on Miden](https://docs.miden.xyz/builder/tutorials/recipes/rust/network_transactions_tutorial) tutorial in the Miden docs.

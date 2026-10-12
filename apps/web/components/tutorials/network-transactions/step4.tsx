@@ -31,7 +31,7 @@ const useCompleted = () => {
 };
 
 const Step4: TutorialStep = {
-  title: "Create a network note by executing a transaction.",
+  title: "Create the network note.",
   Content: () => {
     const completed = useCompleted();
     return (
@@ -40,9 +40,13 @@ const Step4: TutorialStep = {
         <TutorialAlert
           completed={completed}
           title="Action required: Create the network note."
-          titleWhenCompleted="You created the network note."
+          titleWhenCompleted="Your network note has been consumed."
           description={
-            <p>Follow the instructions to create your custom network note.</p>
+            <p>
+              Create a network note targeting your network counter with the{" "}
+              <em>"Create Note"</em> dialog, confirm the transaction in your
+              wallet, then wait for the network to consume the note.
+            </p>
           }
         />
       </>

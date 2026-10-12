@@ -18,6 +18,7 @@ import useTutorials from "@/hooks/use-tutorials";
 import NetworkBadge from "@/components/lib/network-badge";
 import useNetwork from "@/hooks/use-network";
 import WalletButton from "@/components/lib/wallet-button";
+import { isParaOnlyTutorial } from "@/lib/utils/tutorial";
 
 const getLink = (pathname: string) => {
   const [, route] = pathname.split("/");
@@ -96,11 +97,7 @@ const Header = () => {
               enabledSigners={
                 ["private-transfers"].includes(tutorialId)
                   ? ["MidenFi", "Para"]
-                  : [
-                        "timelock-p2id-note",
-                        "network-transactions",
-                        "your-first-smart-contract-and-custom-note",
-                      ].includes(tutorialId)
+                  : isParaOnlyTutorial(tutorialId)
                     ? ["Para"]
                     : ["MidenFi"]
               }
