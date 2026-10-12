@@ -19,3 +19,11 @@ export const defaultTutorial = (): Tutorial => ({
   store: null,
   steps: [],
 });
+
+export const isTutorial = (tutorialId: string) =>
+  [
+    "create-and-fund-wallet",
+    "transfer-assets-between-wallets",
+    // "private-transfers",
+    // "timelock-p2id-note",
+  ].includes(tutorialId);

@@ -35,6 +35,16 @@ const useMultisig = () => {
   const { client } = useMiden();
   const { lastSyncTime } = useSyncState();
   const { accounts, updateAccount } = useAccounts();
+  // Pauses syncing while `run` talks to Miden Guardian and the wallet, which
+  // can fail or be rejected at any step.
+  const whileSubmitting = async <T>(run: () => Promise<T>) => {
+    dispatch({ type: "SUBMITTING_TRANSACTION" });
+    try {
+      return await run();
+    } finally {
+      dispatch({ type: "TRANSACTION_SUBMITTED" });
+    }
+  };
   const createMultisig = async ({
     name,
     threshold,
@@ -48,61 +58,59 @@ const useMultisig = () => {
     if (!midenWalletSession.commitment || !midenWalletSession.scheme) {
       return;
     }
-    dispatch({ type: "SUBMITTING_TRANSACTION" });
-    const midenClient = await createMidenClient(networkId);
-    const {
-      client: multisigClient,
-      guardianCommitment,
-      guardianPublicKey,
-    } = await initMultisigClient({
-      midenClient,
-      networkId,
-      guardianEndpoint: GUARDIAN_ENDPOINT_URL,
-      scheme: midenWalletSession.scheme,
-    });
-    const signer = new MidenWalletSigner(
-      { signBytes },
-      midenWalletSession.commitment,
-      midenWalletSession.scheme,
-    );
-    const newMultisig = await multisigClient.create(
-      {
-        threshold,
-        signerCommitments: [signer.commitment],
+    const { commitment, scheme } = midenWalletSession;
+    return whileSubmitting(async () => {
+      const midenClient = await createMidenClient(networkId);
+      const {
+        client: multisigClient,
         guardianCommitment,
         guardianPublicKey,
-        signatureScheme: signer.scheme,
-      },
-      signer,
-    );
-    await newMultisig.registerOnGuardian();
-    setMultisig(newMultisig);
-    await newMultisig.syncState();
-    if (!newMultisig.account) {
-      return;
-    }
-    const config = AccountInspector.fromAccount(newMultisig.account);
-    const account = wasmAccountToAccount({
-      wasmAccount: newMultisig.account,
-      name,
-      components: ["auth-guarded-multisig", "basic-wallet"],
-      multisig: {
-        config: {
-          ...config,
-          vaultBalances: config.vaultBalances.map((vaultBalance) => ({
-            ...vaultBalance,
-            amount: vaultBalance.amount.toString(),
-          })),
+      } = await initMultisigClient({
+        midenClient,
+        networkId,
+        guardianEndpoint: GUARDIAN_ENDPOINT_URL,
+        scheme,
+      });
+      const signer = new MidenWalletSigner({ signBytes }, commitment, scheme);
+      const newMultisig = await multisigClient.create(
+        {
+          threshold,
+          signerCommitments: [signer.commitment],
+          guardianCommitment,
+          guardianPublicKey,
+          signatureScheme: signer.scheme,
         },
-        proposals: newMultisig.listProposals(),
-      },
-      updatedAt: lastSyncTime,
+        signer,
+      );
+      await newMultisig.registerOnGuardian();
+      setMultisig(newMultisig);
+      await newMultisig.syncState();
+      if (!newMultisig.account) {
+        return;
+      }
+      const config = AccountInspector.fromAccount(newMultisig.account);
+      const account = wasmAccountToAccount({
+        wasmAccount: newMultisig.account,
+        name,
+        components: ["auth-guarded-multisig", "basic-wallet"],
+        multisig: {
+          config: {
+            ...config,
+            vaultBalances: config.vaultBalances.map((vaultBalance) => ({
+              ...vaultBalance,
+              amount: vaultBalance.amount.toString(),
+            })),
+          },
+          proposals: newMultisig.listProposals(),
+        },
+        updatedAt: lastSyncTime,
+      });
+      dispatch({
+        type: "NEW_ACCOUNT",
+        payload: { account },
+      });
+      return account;
     });
-    dispatch({
-      type: "NEW_ACCOUNT",
-      payload: { account },
-    });
-    return account;
   };
   const loadMultisig = async (accountId: string) => {
     if (!client) {
@@ -114,19 +122,17 @@ const useMultisig = () => {
     if (multisig) {
       return multisig;
     }
-    dispatch({ type: "SUBMITTING_TRANSACTION" });
-    const midenClient = await createMidenClient(networkId);
-    const { client: multisigClient } = await initMultisigClient({
-      midenClient,
-      networkId,
-      guardianEndpoint: GUARDIAN_ENDPOINT_URL,
+    const { commitment, scheme } = midenWalletSession;
+    const { multisigClient, signer } = await whileSubmitting(async () => {
+      const midenClient = await createMidenClient(networkId);
+      const { client: multisigClient } = await initMultisigClient({
+        midenClient,
+        networkId,
+        guardianEndpoint: GUARDIAN_ENDPOINT_URL,
+      });
+      const signer = new MidenWalletSigner({ signBytes }, commitment, scheme);
+      return { multisigClient, signer };
     });
-    const signer = new MidenWalletSigner(
-      { signBytes },
-      midenWalletSession.commitment,
-      midenWalletSession.scheme,
-    );
-    dispatch({ type: "TRANSACTION_SUBMITTED" });
     const loadedMultisig = await multisigClient.load(accountId, signer);
     setMultisig(loadedMultisig);
     return loadedMultisig;
@@ -191,16 +197,17 @@ const useMultisig = () => {
     if (!previousAccount || !previousAccount.multisig) {
       return;
     }
-    dispatch({ type: "SUBMITTING_TRANSACTION" });
-    await multisig.createConsumeNotesProposal(noteIds);
-    updateAccount({
-      ...previousAccount,
-      multisig: {
-        ...previousAccount.multisig,
-        proposals: multisig.listProposals(),
-      },
+    const { multisig: previousMultisig } = previousAccount;
+    await whileSubmitting(async () => {
+      await multisig.createConsumeNotesProposal(noteIds);
+      updateAccount({
+        ...previousAccount,
+        multisig: {
+          ...previousMultisig,
+          proposals: multisig.listProposals(),
+        },
+      });
     });
-    dispatch({ type: "TRANSACTION_SUBMITTED" });
   };
   const createP2idProposal = async ({
     multisig,
@@ -219,16 +226,17 @@ const useMultisig = () => {
     if (!previousAccount || !previousAccount.multisig) {
       return;
     }
-    dispatch({ type: "SUBMITTING_TRANSACTION" });
-    await multisig.createP2idProposal(recipientId, faucetId, BigInt(amount));
-    updateAccount({
-      ...previousAccount,
-      multisig: {
-        ...previousAccount.multisig,
-        proposals: multisig.listProposals(),
-      },
+    const { multisig: previousMultisig } = previousAccount;
+    await whileSubmitting(async () => {
+      await multisig.createP2idProposal(recipientId, faucetId, BigInt(amount));
+      updateAccount({
+        ...previousAccount,
+        multisig: {
+          ...previousMultisig,
+          proposals: multisig.listProposals(),
+        },
+      });
     });
-    dispatch({ type: "TRANSACTION_SUBMITTED" });
   };
   const signProposal = async ({
     multisig,
@@ -243,16 +251,17 @@ const useMultisig = () => {
     if (!previousAccount || !previousAccount.multisig) {
       return;
     }
-    dispatch({ type: "SUBMITTING_TRANSACTION" });
-    await multisig.signProposal(proposal.id);
-    updateAccount({
-      ...previousAccount,
-      multisig: {
-        ...previousAccount.multisig,
-        proposals: multisig.listProposals(),
-      },
+    const { multisig: previousMultisig } = previousAccount;
+    await whileSubmitting(async () => {
+      await multisig.signProposal(proposal.id);
+      updateAccount({
+        ...previousAccount,
+        multisig: {
+          ...previousMultisig,
+          proposals: multisig.listProposals(),
+        },
+      });
     });
-    dispatch({ type: "TRANSACTION_SUBMITTED" });
   };
   const executeProposal = async ({
     multisig,
@@ -270,31 +279,31 @@ const useMultisig = () => {
     if (!previousAccount || !previousAccount.multisig) {
       return;
     }
-    dispatch({ type: "SUBMITTING_TRANSACTION" });
-    await multisig.executeProposal(proposal.id);
-    // updateAccount({
-    //   ...previousAccount,
-    //   multisig: { ...previousAccount.multisig, proposals },
-    // });
-    const localAccount = await client.getAccount(
-      WasmAccountId.fromHex(multisig.accountId),
-    );
-    if (!localAccount) {
-      dispatch({ type: "TRANSACTION_SUBMITTED" });
-      return;
-    }
-    const account = wasmAccountToAccount({
-      wasmAccount: localAccount,
-      name: previousAccount.name,
-      components: previousAccount.components,
-      multisig: {
-        config: previousAccount.multisig.config,
-        proposals: multisig.listProposals(),
-      },
-      updatedAt: lastSyncTime,
+    const { multisig: previousMultisig } = previousAccount;
+    await whileSubmitting(async () => {
+      await multisig.executeProposal(proposal.id);
+      // updateAccount({
+      //   ...previousAccount,
+      //   multisig: { ...previousAccount.multisig, proposals },
+      // });
+      const localAccount = await client.getAccount(
+        WasmAccountId.fromHex(multisig.accountId),
+      );
+      if (!localAccount) {
+        return;
+      }
+      const account = wasmAccountToAccount({
+        wasmAccount: localAccount,
+        name: previousAccount.name,
+        components: previousAccount.components,
+        multisig: {
+          config: previousMultisig.config,
+          proposals: multisig.listProposals(),
+        },
+        updatedAt: lastSyncTime,
+      });
+      updateAccount(account);
     });
-    updateAccount(account);
-    dispatch({ type: "TRANSACTION_SUBMITTED" });
   };
   const importMultisig = async ({
     name,
@@ -311,31 +320,35 @@ const useMultisig = () => {
     if (!multisig || !multisig.account) {
       throw new Error("Guardian wallet not found on Miden Guardian.");
     }
-    dispatch({ type: "SUBMITTING_TRANSACTION" });
-    await multisig.syncState();
-    const config = AccountInspector.fromAccount(multisig.account);
-    const account = wasmAccountToAccount({
-      wasmAccount: multisig.account,
-      name,
-      components: ["auth-guarded-multisig", "basic-wallet"],
-      multisig: {
-        config: {
-          ...config,
-          vaultBalances: config.vaultBalances.map((vaultBalance) => ({
-            ...vaultBalance,
-            amount: vaultBalance.amount.toString(),
-          })),
+    return whileSubmitting(async () => {
+      await multisig.syncState();
+      const { account: multisigAccount } = multisig;
+      if (!multisigAccount) {
+        throw new Error("Guardian wallet not found on Miden Guardian.");
+      }
+      const config = AccountInspector.fromAccount(multisigAccount);
+      const account = wasmAccountToAccount({
+        wasmAccount: multisigAccount,
+        name,
+        components: ["auth-guarded-multisig", "basic-wallet"],
+        multisig: {
+          config: {
+            ...config,
+            vaultBalances: config.vaultBalances.map((vaultBalance) => ({
+              ...vaultBalance,
+              amount: vaultBalance.amount.toString(),
+            })),
+          },
+          proposals: multisig.listProposals(),
         },
-        proposals: multisig.listProposals(),
-      },
-      updatedAt: lastSyncTime,
+        updatedAt: lastSyncTime,
+      });
+      dispatch({
+        type: "IMPORT_ACCOUNT",
+        payload: { account },
+      });
+      return account;
     });
-    dispatch({
-      type: "IMPORT_ACCOUNT",
-      payload: { account },
-    });
-    dispatch({ type: "TRANSACTION_SUBMITTED" });
-    return account;
   };
   return {
     createMultisig,

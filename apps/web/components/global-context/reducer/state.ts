@@ -28,11 +28,25 @@ const reducer = (state: State, action: StateAction): State => {
       };
     }
     case "SYNC_STATE": {
+      // The payload is built from the accounts and transactions as they were
+      // when the sync started: keep the ones added while it was running.
+      const { accounts, inputNotes, transactions } = action.payload;
       return {
         ...state,
-        accounts: action.payload.accounts,
-        inputNotes: action.payload.inputNotes,
-        transactions: action.payload.transactions,
+        accounts: [
+          ...accounts,
+          ...state.accounts.filter(
+            ({ id }) => !accounts.some((account) => account.id === id),
+          ),
+        ],
+        inputNotes,
+        transactions: [
+          ...transactions,
+          ...state.transactions.filter(
+            ({ id }) =>
+              !transactions.some((transaction) => transaction.id === id),
+          ),
+        ],
         syncingState: false,
       };
     }

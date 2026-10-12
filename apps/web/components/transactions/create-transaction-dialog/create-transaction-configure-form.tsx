@@ -1,4 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
+import { toast } from "sonner";
 import type {
   CreateTransactionDialogStep,
   TransactionType,
@@ -122,55 +123,70 @@ const CreateTransactionConfigureForm = ({
         }
         const formData = new FormData(event.currentTarget);
         setLoading(true);
-        if (transactionType === "mint" && executingAccount && targetAccount) {
-          if (isTutorial || networkId === "mmck") {
-            const { transactionRequest, transactionResult } =
-              await newMintTransactionRequest({
-                targetAccountId: targetAccount.id,
-                faucetId: executingAccount.id,
-                noteType: formData.getAll("is-public").includes("on")
-                  ? "public"
-                  : "private",
-                amount: parseAmount(
-                  formData.get("amount")?.toString() ?? "0",
-                  decimals,
-                ),
-              });
-            setTransactionRequest(transactionRequest);
-            setTransactionResult(transactionResult);
-            setStep("preview");
-          }
-          setLoading(false);
-        }
-        if (transactionType === "consume" && executingAccount) {
-          if (isTutorial || networkId === "mmck") {
-            const { transactionRequest, transactionResult } =
-              await newConsumeTransactionRequest({
-                accountId: executingAccount.id,
-                noteIds,
-              });
-            setTransactionRequest(transactionRequest);
-            setTransactionResult(transactionResult);
-            setStep("preview");
-          } else if (isParaWallet(executingAccount)) {
-            // Para's signing modal is the confirmation step.
-            const transactionRecord = await consumeWithPara({ noteIds });
-            if (transactionRecord) {
-              closeCreateTransactionDialog();
+        try {
+          if (transactionType === "mint" && executingAccount && targetAccount) {
+            if (isTutorial || networkId === "mmck") {
+              const { transactionRequest, transactionResult } =
+                await newMintTransactionRequest({
+                  targetAccountId: targetAccount.id,
+                  faucetId: executingAccount.id,
+                  noteType: formData.getAll("is-public").includes("on")
+                    ? "public"
+                    : "private",
+                  amount: parseAmount(
+                    formData.get("amount")?.toString() ?? "0",
+                    decimals,
+                  ),
+                });
+              setTransactionRequest(transactionRequest);
+              setTransactionResult(transactionResult);
+              setStep("preview");
             }
           }
-          setLoading(false);
-        }
-        if (
-          transactionType === "send" &&
-          executingAccount &&
-          targetAccountId &&
-          faucetAccount
-        ) {
-          if (isTutorial || networkId === "mmck") {
-            const { transactionRequest, transactionResult } =
-              await newSendTransactionRequest({
-                senderAccountId: executingAccount.id,
+          if (transactionType === "consume" && executingAccount) {
+            if (isTutorial || networkId === "mmck") {
+              const { transactionRequest, transactionResult } =
+                await newConsumeTransactionRequest({
+                  accountId: executingAccount.id,
+                  noteIds,
+                });
+              setTransactionRequest(transactionRequest);
+              setTransactionResult(transactionResult);
+              setStep("preview");
+            } else if (isParaWallet(executingAccount)) {
+              // Para's signing modal is the confirmation step.
+              const transactionRecord = await consumeWithPara({ noteIds });
+              if (transactionRecord) {
+                closeCreateTransactionDialog();
+              }
+            }
+          }
+          if (
+            transactionType === "send" &&
+            executingAccount &&
+            targetAccountId &&
+            faucetAccount
+          ) {
+            if (isTutorial || networkId === "mmck") {
+              const { transactionRequest, transactionResult } =
+                await newSendTransactionRequest({
+                  senderAccountId: executingAccount.id,
+                  targetAccountId,
+                  faucetId: faucetAccount.id,
+                  noteType: formData.getAll("is-public").includes("on")
+                    ? "public"
+                    : "private",
+                  amount: parseAmount(
+                    formData.get("amount")?.toString() ?? "0",
+                    decimals,
+                  ),
+                });
+              setTransactionRequest(transactionRequest);
+              setTransactionResult(transactionResult);
+              setStep("preview");
+            } else if (isParaWallet(executingAccount)) {
+              // Para's signing modal is the confirmation step.
+              const transactionRecord = await sendWithPara({
                 targetAccountId,
                 faucetId: faucetAccount.id,
                 noteType: formData.getAll("is-public").includes("on")
@@ -181,96 +197,86 @@ const CreateTransactionConfigureForm = ({
                   decimals,
                 ),
               });
-            setTransactionRequest(transactionRequest);
-            setTransactionResult(transactionResult);
-            setStep("preview");
-          } else if (isParaWallet(executingAccount)) {
-            // Para's signing modal is the confirmation step.
-            const transactionRecord = await sendWithPara({
-              targetAccountId,
-              faucetId: faucetAccount.id,
-              noteType: formData.getAll("is-public").includes("on")
-                ? "public"
-                : "private",
-              amount: parseAmount(
-                formData.get("amount")?.toString() ?? "0",
-                decimals,
-              ),
-            });
-            if (transactionRecord) {
-              closeCreateTransactionDialog();
-            }
-          } else {
-            if (!wallet) {
-              return;
-            }
-            if (executingAccount.multisig) {
-              const multisig = await loadMultisig(executingAccount.id);
-              if (!multisig) {
+              if (transactionRecord) {
+                closeCreateTransactionDialog();
+              }
+            } else {
+              if (!wallet) {
                 return;
               }
-              await createP2idProposal({
-                multisig,
-                recipientId: targetAccountId,
-                faucetId: faucetAccountId,
-                amount: parseAmount(
-                  formData.get("amount")?.toString() ?? "0",
-                  decimals,
-                ).toString(),
-              });
-              closeCreateTransactionDialog();
-            } else {
-              const transaction = new SendTransaction(
-                executingAccount.address,
-                normalizeAccountId(targetAccountId),
-                faucetAccount.address,
-                formData.getAll("is-public").includes("on")
-                  ? "public"
-                  : "private",
-                Number(
-                  parseAmount(
+              if (executingAccount.multisig) {
+                const multisig = await loadMultisig(executingAccount.id);
+                if (!multisig) {
+                  return;
+                }
+                await createP2idProposal({
+                  multisig,
+                  recipientId: targetAccountId,
+                  faucetId: faucetAccountId,
+                  amount: parseAmount(
                     formData.get("amount")?.toString() ?? "0",
                     decimals,
-                  ),
-                ),
-              );
-              const adapter = wallet.adapter as MidenWalletAdapter;
-              try {
-                const txId = await adapter.requestSend(transaction);
-                console.info({ txId });
+                  ).toString(),
+                });
                 closeCreateTransactionDialog();
-              } catch (error) {
-                console.error(error);
+              } else {
+                const transaction = new SendTransaction(
+                  executingAccount.address,
+                  normalizeAccountId(targetAccountId),
+                  faucetAccount.address,
+                  formData.getAll("is-public").includes("on")
+                    ? "public"
+                    : "private",
+                  Number(
+                    parseAmount(
+                      formData.get("amount")?.toString() ?? "0",
+                      decimals,
+                    ),
+                  ),
+                );
+                const adapter = wallet.adapter as MidenWalletAdapter;
+                try {
+                  const txId = await adapter.requestSend(transaction);
+                  console.info({ txId });
+                  closeCreateTransactionDialog();
+                } catch (error) {
+                  console.error(error);
+                }
               }
             }
           }
+          if (transactionType === "custom" && executingAccount && script) {
+            const customComponentId = executingAccount.components.find(
+              (componentId) => !defaultComponentIds.includes(componentId),
+            );
+            const customComponent = components.find(
+              ({ id }) => id === customComponentId,
+            );
+            const accountScript = scripts.find(
+              ({ id }) => id === customComponent?.scriptId,
+            );
+            const customTransactionRequest =
+              await clientCreateTransactionFromScript({
+                client,
+                accountScript,
+                txScript: script,
+              });
+            const { transactionRequest, transactionResult } =
+              await newCustomTransactionRequest({
+                senderAccountId: executingAccount.id,
+                transactionRequest: customTransactionRequest,
+              });
+            setTransactionRequest(transactionRequest);
+            setTransactionResult(transactionResult);
+            setStep("preview");
+          }
+        } catch (error) {
+          console.error(error);
+          toast.error("Transaction failed.", {
+            description: error instanceof Error ? error.message : String(error),
+          });
+        } finally {
           setLoading(false);
-        }
-        if (transactionType === "custom" && executingAccount && script) {
-          const customComponentId = executingAccount.components.find(
-            (componentId) => !defaultComponentIds.includes(componentId),
-          );
-          const customComponent = components.find(
-            ({ id }) => id === customComponentId,
-          );
-          const accountScript = scripts.find(
-            ({ id }) => id === customComponent?.scriptId,
-          );
-          const customTransactionRequest =
-            await clientCreateTransactionFromScript({
-              client,
-              accountScript,
-              txScript: script,
-            });
-          const { transactionRequest, transactionResult } =
-            await newCustomTransactionRequest({
-              senderAccountId: executingAccount.id,
-              transactionRequest: customTransactionRequest,
-            });
-          setTransactionRequest(transactionRequest);
-          setTransactionResult(transactionResult);
-          setLoading(false);
-          setStep("preview");
         }
       }}
     >

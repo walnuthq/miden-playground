@@ -1,13 +1,13 @@
-In this tutorial, we will create a custom time locked note on Miden that is an extended version of the **P2ID (Pay-to-ID)** note.
-Using custom note logic, you will learn how to program a note that can only be consumed if the transaction's reference block number is greater than or equal to our note's timelock block height.
+In this tutorial, you'll create a custom timelocked note on Miden, an extended version of the **P2ID (Pay-to-ID)** note.
+Using custom note logic, you'll learn how to program a Note that can only be consumed once the Transaction's reference block number is greater than or equal to the note's timelock block height.
 
-Creating a custom note is a two step process:
+Creating a custom note is a two-step process:
 
-- First, you develop the note script using a **Rust program** and compile it to **MASM (Miden Assembly)**.
-- Then you perform a transaction on your wallet that is responsible for creating the note on the network.
+- First, you write the [note script](https://docs.miden.xyz/reference/protocol/note#script) as a **Rust program** and compile it to **MASM (Miden Assembly)**.
+- Then, your wallet executes a Transaction that creates the Note on the network.
 
-When creating a note, you can pass arbitrary parameters called [Note Storage](https://docs.miden.xyz/reference/protocol/note#storage) and the [Note Script](https://docs.miden.xyz/reference/protocol/note#script) can access these storage items.
+When creating a Note, you can pass it arbitrary parameters, stored in its [note storage](https://docs.miden.xyz/reference/protocol/note#storage), which the note script can read.
 
-In our timelock example, we have 2 note storage items: the recipient account ID and the minimal block height before the note can be consumed.
+In our timelock example, the note storage holds 3 items: the target Account ID, split into 2 items, and the minimum block height before the Note can be consumed.
 
-Let's get started by clicking on _"Create new script"_ then choose a name and make sure to select a **Note Script** using the **P2ID Note** example.
+Let's get started: click the _"Create new script"_ button, enter a name, then select the **Note Script** type and the **P2ID Note** example.

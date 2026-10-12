@@ -59,17 +59,6 @@ export const TESTNET_FAUCET_ADDRESS =
   "mtst1apxtmjhlua0s5vt5sg3ymtnyxclasaf0_qr7qqq9wr6w";
 export const DEVNET_FAUCET_ADDRESS = "";
 
-export const TESTNET_TEST_WALLET_ACCOUNT_ID =
-  "0xbd33811a2937d31159bc1d6fba4be5";
-export const DEVNET_TEST_WALLET_ACCOUNT_ID = "";
-export const TESTNET_TEST_WALLET_ACCOUNT_ID_PREFIX = 13633382446341280529n;
-export const DEVNET_TEST_WALLET_ACCOUNT_ID_PREFIX = 0n;
-export const TESTNET_TEST_WALLET_ACCOUNT_ID_SUFFIX = 6466075530701300992n;
-export const DEVNET_TEST_WALLET_ACCOUNT_ID_SUFFIX = 0n;
-export const TESTNET_TEST_WALLET_ADDRESS =
-  "mtst1az7n8qg69ymaxy2ehswklwjtu5plpwxt_qr7qqq9wr6w";
-export const DEVNET_TEST_WALLET_ADDRESS = "";
-
 export const TESTNET_COUNTER_CONTRACT_ACCOUNT_ID =
   "0x1856bd4ea0182491283f868d0733b2";
 export const DEVNET_COUNTER_CONTRACT_ACCOUNT_ID = "";
@@ -101,26 +90,6 @@ export const midenFaucetAddress = (networkId: NetworkId) =>
 
 export const midenFaucetApiUrl = (networkId: NetworkId) =>
   networkId === "mtst" ? TESTNET_FAUCET_API_URL : DEVNET_FAUCET_API_URL;
-
-export const testWalletAccountId = (networkId: NetworkId) =>
-  networkId === "mtst"
-    ? TESTNET_TEST_WALLET_ACCOUNT_ID
-    : DEVNET_TEST_WALLET_ACCOUNT_ID;
-
-export const testWalletAccountIdPrefix = (networkId: NetworkId) =>
-  networkId === "mtst"
-    ? TESTNET_TEST_WALLET_ACCOUNT_ID_PREFIX
-    : DEVNET_TEST_WALLET_ACCOUNT_ID_PREFIX;
-
-export const testWalletAccountIdSuffix = (networkId: NetworkId) =>
-  networkId === "mtst"
-    ? TESTNET_TEST_WALLET_ACCOUNT_ID_SUFFIX
-    : DEVNET_TEST_WALLET_ACCOUNT_ID_SUFFIX;
-
-export const testWalletAddress = (networkId: NetworkId) =>
-  networkId === "mtst"
-    ? TESTNET_TEST_WALLET_ADDRESS
-    : DEVNET_TEST_WALLET_ADDRESS;
 
 export const counterContractAccountId = (networkId: NetworkId) =>
   networkId === "mtst"

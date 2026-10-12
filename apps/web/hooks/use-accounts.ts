@@ -81,9 +81,12 @@ const useAccounts = () => {
     (!!midenWalletAddress && !breadWallet) ||
     (!!paraWallet?.accountId && !paraWalletAccount);
   const isAuthorized = (targetAccount: Account) => {
-    const isTutorial =
-      tutorialId === "create-and-fund-wallet" ||
-      tutorialId === "transfer-assets-between-wallets";
+    const isTutorial = [
+      "create-and-fund-wallet",
+      "transfer-assets-between-wallets",
+      // "private-transfers",
+      "timelock-p2id-note",
+    ].includes(tutorialId);
     return (
       networkId === "mmck" ||
       isTutorial ||
@@ -95,17 +98,18 @@ const useAccounts = () => {
   const newWallet = async ({
     name,
     storageMode,
+    fund = true,
   }: {
     name: string;
     storageMode: AccountStorageMode;
+    fund?: boolean;
   }) => {
     const wallet = await createWallet({
       storageMode,
       authScheme: AuthScheme.Falcon,
     });
-    const fundedWallet = await fundAccount(wallet);
     const account = wasmAccountToAccount({
-      wasmAccount: fundedWallet,
+      wasmAccount: fund ? await fundAccount(wallet) : wallet,
       name,
       updatedAt: lastSyncTime,
     });

@@ -1,5 +1,6 @@
 "use client";
 import { MoreVertical } from "lucide-react";
+import { toast } from "sonner";
 import { type InputNote, noteStates } from "@/lib/types/note";
 import { noteConsumed } from "@/lib/utils/note";
 import { formatId, fromBase64 } from "@/lib/utils";
@@ -62,43 +63,56 @@ const InputNoteActionsCell = ({ inputNote }: { inputNote: InputNote }) => {
           isAuthorized(targetAccount) && (
             <DropdownMenuItem
               onClick={async () => {
-                if (isParaWallet(targetAccount)) {
-                  await consumeWithPara({ noteIds: [inputNote.id] });
-                } else if (connectedWallet?.id === targetAccount.id) {
-                  const [fungibleAsset] = inputNote.fungibleAssets;
-                  const faucet = faucets.find(
-                    ({ id }) => id === fungibleAsset?.faucetId,
-                  );
-                  if (!client || !wallet || !fungibleAsset || !faucet) {
-                    return;
-                  }
-                  const adapter = wallet.adapter as MidenWalletAdapter;
-                  if (inputNote.noteFileBytes) {
-                    await adapter.importPrivateNote(
-                      fromBase64(inputNote.noteFileBytes),
+                try {
+                  if (isParaWallet(targetAccount)) {
+                    await consumeWithPara({ noteIds: [inputNote.id] });
+                  } else if (connectedWallet?.id === targetAccount.id) {
+                    const [fungibleAsset] = inputNote.fungibleAssets;
+                    const faucet = faucets.find(
+                      ({ id }) => id === fungibleAsset?.faucetId,
                     );
+                    if (!client || !wallet || !fungibleAsset || !faucet) {
+                      return;
+                    }
+                    const adapter = wallet.adapter as MidenWalletAdapter;
+                    try {
+                      if (inputNote.noteFileBytes) {
+                        await adapter.importPrivateNote(
+                          fromBase64(inputNote.noteFileBytes),
+                        );
+                      } else {
+                        const transaction = new ConsumeTransaction(
+                          faucet.identifier,
+                          inputNote.id,
+                          inputNote.type === "public" ? "public" : "private",
+                          Number(fungibleAsset.amount),
+                        );
+                        const txId = await adapter.requestConsume(transaction);
+                        console.info({ txId });
+                      }
+                    } catch (error) {
+                      // Rejected in Bread Wallet.
+                      console.error(error);
+                    }
                   } else {
-                    const transaction = new ConsumeTransaction(
-                      faucet.identifier,
-                      inputNote.id,
-                      inputNote.type === "public" ? "public" : "private",
-                      Number(fungibleAsset.amount),
-                    );
-                    const txId = await adapter.requestConsume(transaction);
-                    console.info({ txId });
-                  }
-                } else {
-                  const { transactionRequest, transactionResult } =
-                    await newConsumeTransactionRequest({
+                    const { transactionRequest, transactionResult } =
+                      await newConsumeTransactionRequest({
+                        accountId: targetAccount.id,
+                        noteIds: [inputNote.id],
+                      });
+                    openCreateTransactionDialog({
                       accountId: targetAccount.id,
-                      noteIds: [inputNote.id],
+                      transactionType: "consume",
+                      step: "preview",
+                      transactionRequest,
+                      transactionResult,
                     });
-                  openCreateTransactionDialog({
-                    accountId: targetAccount.id,
-                    transactionType: "consume",
-                    step: "preview",
-                    transactionRequest,
-                    transactionResult,
+                  }
+                } catch (error) {
+                  console.error(error);
+                  toast.error("Transaction failed.", {
+                    description:
+                      error instanceof Error ? error.message : String(error),
                   });
                 }
               }}

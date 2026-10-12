@@ -1,6 +1,59 @@
 import type { Script } from "@/lib/types/script";
 import { defaultProcedureExport, defaultScript } from "@/lib/utils/script";
 
+export const masm = `use miden::protocol::native_account
+use miden::protocol::tx
+use miden::core::sys
+use {AccountId, AccountProcedureRoot} from miden::protocol::types
+
+# CONSTANTS
+# =================================================================================================
+
+const COUNT_READER_SLOT = word("miden::tutorials::count_reader")
+
+# PUBLIC INTERFACE
+# =================================================================================================
+
+#! Copies the count returned by the foreign counter into this account's storage.
+#!
+#! Inputs:  [foreign_account_id_{suffix,prefix}, FOREIGN_PROC_ROOT, pad(10)]
+#! Outputs: [pad(16)]
+#!
+#! Where:
+#! - foreign_account_id_{suffix,prefix} identifies the public counter account.
+#! - FOREIGN_PROC_ROOT is the root of its get_count procedure.
+#!
+#! Invocation: call
+@account_procedure
+@locals(6)
+pub proc copy_count(foreign_account_id: AccountId, foreign_proc_root: AccountProcedureRoot)
+    # save the foreign target while preparing its sixteen zero inputs
+    loc_store.4 loc_store.5 loc_storew_le.0 dropw
+    # => [pad(16)]
+
+    padw padw padw padw
+    # => [foreign_procedure_inputs(16), pad(16)]
+
+    padw loc_loadw_le.0 loc_load.5 loc_load.4
+    # => [foreign_account_id_suffix, foreign_account_id_prefix, FOREIGN_PROC_ROOT, foreign_procedure_inputs(16), pad(16)]
+
+    exec.tx::execute_foreign_procedure
+    # => [[count, 0, 0, 0], pad(28)]
+
+    push.COUNT_READER_SLOT[0..2]
+    # => [slot_id_suffix, slot_id_prefix, [count, 0, 0, 0], pad(28)]
+
+    exec.native_account::set_item
+    # => [OLD_VALUE, pad(28)]
+
+    dropw
+    # => [pad(28)]
+
+    exec.sys::truncate_stack
+    # => [pad(16)]
+end
+`;
+
 export const rust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
 #![no_std]
 #![feature(alloc_error_handler)]
@@ -43,6 +96,7 @@ const countReader: Script = {
   type: "account-component",
   status: "compiled",
   readOnly: true,
+  masm,
   rust,
   commitment:
     "0x5ba6dc8445398b4382390d8b1e11f07be33adc641852751fa339d7373843040a",
