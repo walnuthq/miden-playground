@@ -39,7 +39,7 @@ export const counterAccountDependency: Dependency & {
   name: "counter-account",
   type: "account-component",
   commitment:
-    "0x3874bfcdc769a48ae5e4e66f0ae9e50438743cdb35bdf258d1d1c3cf71575b26",
+    "0xb76d0a376ff5cc10f1f5d80385dd2d35f335100ed071673b1d69cb94111582ba",
   rust: templates["counter-account"],
   files: {
     "counter-account/.cargo/config.toml":

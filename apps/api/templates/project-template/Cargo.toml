@@ -10,10 +10,10 @@ edition = "2024"
 crate-type = ["cdylib"]
 
 [dependencies]
-miden = "0.14"
+miden = "0.15"
 
 [build-dependencies]
-miden-sdk-build-script-support = "0.14"
+miden-sdk-build-script-support = "0.15"
 
 [profile.release]
 trim-paths = ["diagnostics", "object"]

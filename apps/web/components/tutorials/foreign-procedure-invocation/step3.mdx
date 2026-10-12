@@ -1,9 +1,11 @@
 import Link from "@/components/tutorials/tutorial-link";
 
-The **Count Reader** script is similar to the previously encountered <Link href="/scripts/counter-contract">Counter Contract script</Link>, it's defining a [storage value slot](https://docs.miden.xyz/reference/protocol/account/storage#value-slots) to store its own counter value that will be copied from the **Counter Contract**.
+The **count-reader** script contains the Rust source code of the **Count Reader** contract. Like the counter contracts from the previous tutorials, it's an [account component](https://docs.miden.xyz/reference/protocol/account/components) with its own storage layout and procedures.
 
-Let's focus on lines _29-32_ in the Rust source code of the **Count Reader** script, where the **`copy_count`** function is defined.
+Let's focus on lines _15-19_, where its storage layout is defined. The copied count is kept in a single [value slot](https://docs.miden.xyz/reference/protocol/account/storage#value-slots) named **`count`**, which holds it as a [Felt](https://docs.miden.xyz/builder/glossary/#felt) (field element).
 
-The **`copy_count`** procedure takes only one argument: the counter account ID of the source contract from which to copy the counter value.
+At lines _12-13_, **`CounterAccount`** is declared as an Account that implements the **`CounterContract`** interface of the <Link href="/scripts/counter-account">counter-account script</Link>. This script contains the code of the counter contract you'll copy the count from, which keeps its count in a map slot, like the one you deployed in the _"Deploy a counter contract"_ tutorial. This declaration lets the **Count Reader** call the counter contract's procedures.
 
-The function creates a **`CounterContract`** instance to invoke the **`get_count`** foreign procedure to fetch the current counter value, and stores the result in [contract storage](https://docs.miden.xyz/builder/glossary/#accountstorage).
+Finally, the **`copy_count`** procedure, at lines _29-32_, takes a single argument: the ID of the counter contract to copy the count from. It calls the **`get_count`** procedure of this Account through FPI, then writes the returned value to its **`count`** slot in [account storage](https://docs.miden.xyz/builder/glossary/#accountstorage).
+
+The counter contract is a public account, so the Playground can fetch its state from the network and provide it to the Transaction executing **`copy_count`**, which runs **`get_count`** against it. To learn more, read the [foreign procedure invocation](https://docs.miden.xyz/reference/protocol/transaction#foreign-procedure-invocation-fpi-and-expiration) section of the Miden docs.

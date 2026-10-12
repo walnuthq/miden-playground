@@ -18,7 +18,7 @@ const procedureSignature = ({
   path,
   signature: { params, results },
 }: ProcedureExport) => {
-  let result = `fn ${formatProcedureExportPath(path).replaceAll("-", "_")}(`;
+  let result = `fn ${formatProcedureExportPath(path)}(`;
   result += params
     .map((param) => formatProcedureExportParamType(param))
     .join(", ");

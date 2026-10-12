@@ -12,11 +12,11 @@ const tutorial: Tutorial = {
   ...defaultTutorial(),
   id: "foreign-procedure-invocation",
   number: 10,
-  title: "Foreign Procedure Invocation",
+  title: "Foreign procedure invocation",
   tagline:
-    "Using foreign procedure invocation to craft read-only cross-contract calls.",
+    "Copy a counter contract's count with a read-only cross-contract call.",
   description:
-    "Following up on the Counter Contract tutorial, we will create a Count Reader contract that can copy its value from another contract.",
+    "In this tutorial, you'll deploy a Count Reader contract on testnet that reads the count of a counter contract with foreign procedure invocation (FPI) and copies it to its own storage.",
   category: "advanced",
   initialRoute: "/scripts",
   state,

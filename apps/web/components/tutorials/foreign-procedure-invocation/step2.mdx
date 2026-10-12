@@ -4,17 +4,17 @@ import Link from "@/components/tutorials/tutorial-link";
 <Image
   className="max-h-96 object-contain"
   src="/img/count-copy-fpi-diagram.png"
-  alt="Count copy FPI diagram"
+  alt="Count Reader FPI diagram"
   width={1100}
   height={744}
 />
 
-The diagram above depicts the **Count Reader** smart contract using foreign procedure invocation to read the count state of the counter contract. After reading the state via FPI, the **Count Reader** smart contract writes the value returned from the counter contract to storage.
+The diagram above shows the **Count Reader** smart contract using FPI to read the count of a counter contract. After reading it, the **Count Reader** writes the value returned by the counter contract to its own storage.
 
-What we'll cover:
+What you'll cover:
 
-- **Foreign Procedure Invocation** (FPI) with the Playground.
-- Building a **Count Reader** smart contract.
+- Using **foreign procedure invocation** (FPI) with the Playground.
+- Deploying a **Count Reader** smart contract.
 - Executing **cross-contract calls** in the browser.
 
-First, let's discover the <Link href="/scripts/count-reader">Count Reader</Link> script logic.
+Let's start by reading the code of the <Link href="/scripts/count-reader">count-reader script</Link> to understand how the **Count Reader** contract works.

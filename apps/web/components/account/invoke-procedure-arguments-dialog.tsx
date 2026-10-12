@@ -105,9 +105,9 @@ const getParamsWithNames = (
   procedureExport: ProcedureExport,
 ): { name: string; type: MidenType }[] => {
   const path = formatProcedureExportPath(procedureExport.path);
-  return path === "copy-count"
-    ? [{ name: "counter_contract_id", type: "AccountId" }]
-    : path === "get-depositor-balance"
+  return path === "copy_count"
+    ? [{ name: "counter_account_id", type: "AccountId" }]
+    : path === "get_depositor_balance"
       ? [
           { name: "depositor", type: "AccountId" },
           { name: "asset", type: "Asset" },

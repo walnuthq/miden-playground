@@ -10,7 +10,7 @@ const useCompleted = () => {
 };
 
 const Step2: TutorialStep = {
-  title: "What we will build.",
+  title: "Open the Count Reader script.",
   Content: () => {
     const completed = useCompleted();
     return (
@@ -18,12 +18,12 @@ const Step2: TutorialStep = {
         <Step2Content />
         <TutorialAlert
           completed={completed}
-          title="Action required: Click on the script."
-          titleWhenCompleted="You navigated to the Count Reader script."
+          title="Action required: Open the Count Reader script."
+          titleWhenCompleted="You opened the Count Reader script."
           description={
             <p>
-              Click on the <em>"Count Reader"</em> row in the scripts table to
-              start reading the script.
+              Click the <em>"count-reader"</em> row in the scripts table to open
+              the script.
             </p>
           }
         />
