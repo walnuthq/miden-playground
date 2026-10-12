@@ -48,7 +48,7 @@
     "sonner": "2.0.8",
     "usehooks-ts": "3.1.1",
     "uuid": "14.0.3",
-    "viem": "2.57.4",
+    "viem": "2.57.5",
     "wagmi": "3.7.7"
   },
   "devDependencies": {
