@@ -18,7 +18,7 @@ const useCompleted = () => {
 };
 
 const Step2: TutorialStep = {
-  title: "Understanding the Counter Account Contract.",
+  title: "Understand and compile the counter contract script.",
   Content: () => {
     const completed = useCompleted();
     return (
@@ -26,12 +26,12 @@ const Step2: TutorialStep = {
         <Step2Content />
         <TutorialAlert
           completed={completed}
-          title="Action required: Compile the script."
-          titleWhenCompleted="You compiled the script."
+          title="Action required: Compile the counter contract script."
+          titleWhenCompleted="You compiled the counter contract script."
           description={
             <p>
-              After reading and understanding the Counter Contract code, click
-              on the <em>"Compile"</em> button to compile the script.
+              Once you've read the counter contract code, click the{" "}
+              <em>"Compile"</em> button to compile the script.
             </p>
           }
         />

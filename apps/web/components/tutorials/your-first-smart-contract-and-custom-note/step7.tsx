@@ -46,13 +46,14 @@ const Step7: TutorialStep = {
         <TutorialAlert
           completed={completed}
           title="Action required: Consume the increment note."
-          titleWhenCompleted="Increment note has been consumed."
+          titleWhenCompleted="Your increment note has been consumed."
           description={
             <p>
-              Click on the <EllipsisVertical className="size-4 inline" /> icon
-              button on the right-most side of the consumable note row in the
-              counter account page details to consume the note with the counter
-              contract.
+              Under <em>"Consumable Notes"</em> on your counter contract's
+              details page, click the{" "}
+              <EllipsisVertical className="size-4 inline" /> icon button at the
+              end of your Note's row and select the{" "}
+              <em>"Consume note with …"</em> option.
             </p>
           }
         />

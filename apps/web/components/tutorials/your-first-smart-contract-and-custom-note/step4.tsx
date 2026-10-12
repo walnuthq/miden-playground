@@ -14,7 +14,7 @@ const useCompleted = () => {
 };
 
 const Step4: TutorialStep = {
-  title: "Understanding the increment count note script.",
+  title: "Understand and compile the counter note script.",
   Content: () => {
     const completed = useCompleted();
     return (
@@ -22,12 +22,12 @@ const Step4: TutorialStep = {
         <Step4Content />
         <TutorialAlert
           completed={completed}
-          title="Action required: Compile the script."
-          titleWhenCompleted="You compiled the script."
+          title="Action required: Compile the counter note script."
+          titleWhenCompleted="You compiled the counter note script."
           description={
             <p>
-              After reading and understanding the increment note code, click on
-              the <em>"Compile"</em> button to compile the script.
+              Once you've read the note script code, click the{" "}
+              <em>"Compile"</em> button to compile the script.
             </p>
           }
         />

@@ -1,23 +1,26 @@
-Now let's examine the increment note script.
+Now let's examine the note script you created.
 
 **No-std Setup**
 
-Similar to the account contract, the note script uses **`#![no_std]`** with the same allocator and panic handler setup.
+Like the counter contract, the note script uses **`#![no_std]`** and enables the **`alloc_error_handler`** language feature.
 
 **Miden Imports**
 
 ```rust
-use miden::{account, note, Felt, Word};
+use miden::*;
 ```
 
-These imports bring in the note macro, explicit account binding macro, and the basic field/word types used by the note.
+The note script imports the whole **`miden`** prelude: the **`#[note]`** and **`#[account]`** macros, the basic field and word types (**`Felt`**, **`Word`**), and free functions such as **`assert_eq`**.
 
 **Note Script Structure**
 
 Note scripts use a struct-based pattern.
-The **`#[note]`** attribute on both the struct and **`impl`** block marks this as a Miden note script component:
+The **`#[note]`** attribute on both the struct and the **`impl`** block marks this as a Miden note script:
 
 ```rust
+#[account(counter_account::CounterContract)]
+pub struct CounterAccount;
+
 #[note]
 struct CounterNote;
 
@@ -28,11 +31,13 @@ impl CounterNote {
 }
 ```
 
-The struct definition (**`CounterNote`**) provides a named type for the note script.
-Unlike account contracts, note scripts don't store persistent data — the struct serves as the entry point container.
-The **`CounterContract`** type is declared with **`#[account(counter_account::CounterContract)]`**, which binds the note to the counter account interface generated from **`miden-project.toml`**.
+The **`CounterNote`** struct provides a named type for the note script.
+Unlike account contracts, note scripts don't store persistent data: the struct serves as the entry point container.
 
-Learn more about [note scripts in the Miden documentation](https://docs.miden.xyz/reference/protocol/note/).
+The **`CounterAccount`** type is declared with **`#[account(counter_account::CounterContract)]`**, which binds it to the **`CounterContract`** interface of the **counter-account** script you added as a dependency.
+That's how the note script can call the counter contract's procedures on the Account that consumes the Note.
+
+Learn more about [Notes](https://docs.miden.xyz/reference/protocol/note/) in the Miden docs.
 
 **The Note Script Function**
 
@@ -47,14 +52,16 @@ fn run(self, _arg: Word, account: &mut CounterAccount) {
 }
 ```
 
-The **`#[note_script]`** attribute marks this function as the entry point for note execution.
+The **`#[note_script]`** attribute marks this method as the entry point of the note script, executed when the Note is consumed.
 The **`self`** parameter is required for methods in the **`impl`** block.
 The function:
 
-1. **Gets the initial counter value** using the bound counter account interface
-2. **Calls `increment_count()`** to increment the counter on the target account
-3. **Verifies the operation succeeded** by checking the final value matches expectations
+1. **Reads the initial counter value** by calling **`get_count`** on the consuming account.
+2. **Calls `increment_count`** to increment the counter.
+3. **Checks that the increment succeeded** by asserting that the final value equals the initial value plus one.
 
-This demonstrates how note scripts interact with account contracts through their public interfaces, calling functions to change state.
+If the assertion fails, the Transaction consuming the Note fails too.
 
-The counter example demonstrates a complete interaction pattern: the account contract manages persistent state, while the note script provides a mechanism to trigger state changes through note consumption.
+This example demonstrates a complete interaction pattern: the account contract manages persistent state, while the note script triggers state changes when the Note is consumed.
+
+Once you've read the note script code, click the _"Compile"_ button to compile the script.

@@ -13,7 +13,8 @@ import type {
 } from "@miden-sdk/miden-sdk/lazy";
 import { FungibleAsset as WasmFungibleAsset } from "@miden-sdk/miden-sdk/lazy";
 import useAccounts from "@/hooks/use-accounts";
-import { defaultStorageItem } from "@/lib/utils/account";
+import { getItem, getMapItem } from "@/lib/utils/account";
+import { EMPTY_WORD } from "@/lib/constants";
 
 export const SubmitTransactionToastDescription = ({
   transactionRecord,
@@ -78,9 +79,6 @@ const TransactionPreview = ({
   const account = accounts.find(({ id }) => id === accountId);
   const accountNonce = account?.nonce ?? 0;
   const accountStorage = account?.storage ?? [];
-  const storageDeltaValues = accountStoragePatch
-    .values()
-    .map((word) => word.toHex());
   const currentAmounts = new Map(
     (account?.fungibleAssets ?? []).map(({ faucetId, amount }) => [
       faucetId,
@@ -125,15 +123,43 @@ const TransactionPreview = ({
       faucetId,
       amount: signedAmount(amount),
     }));
-  const storageDelta = accountStorage
-    .filter(({ type }) => type === "value")
-    .map((before, index) =>
-      storageDeltaValues[index] !== undefined &&
-      before.item !== storageDeltaValues[index]
-        ? { index, before, after: storageDeltaValues[index] }
-        : { index, before: defaultStorageItem(), after: "" },
-    )
-    .filter(({ after }) => after !== "");
+  // Value slots report their final value, or none when the slot is removed:
+  // compare it to the account's current value to recover the change.
+  const valueStorageDelta = accountStoragePatch
+    .valueSlots()
+    .map((valueSlotPatch) => {
+      const name = valueSlotPatch.slotName;
+      const storageItem = accountStorage.find(
+        (storageItem) => storageItem.name === name,
+      );
+      return {
+        name,
+        before: getItem(storageItem),
+        after: valueSlotPatch.value?.toHex() ?? EMPTY_WORD,
+      };
+    })
+    .filter(({ before, after }) => before !== after);
+  // Map slots only report their changed entries, with each entry's final
+  // value: compare them to the account's current entries to recover the change.
+  const mapStorageDelta = accountStoragePatch
+    .mapSlots()
+    .flatMap((mapSlotPatch) => {
+      const name = mapSlotPatch.slotName;
+      const storageItem = accountStorage.find(
+        (storageItem) => storageItem.name === name,
+      );
+      return mapSlotPatch.entries().map((entry) => {
+        const key = entry.key.toHex();
+        return {
+          name,
+          key,
+          before: getMapItem(storageItem, key),
+          after: entry.value.toHex(),
+        };
+      });
+    })
+    .filter(({ before, after }) => before !== after);
+  const storageDelta = [...valueStorageDelta, ...mapStorageDelta];
   return (
     <div className="flex flex-col gap-2 text-sm">
       <h5 className="font-semibold">

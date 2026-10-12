@@ -1,11 +1,10 @@
 import Link from "@/components/tutorials/tutorial-link";
 import CopyButton from "@/components/lib/copy-button";
 
-Now that we're done with the Counter Contract script, let's create a simple increment note script that will call the **`increment_count`** procedure of our smart contract when consumed.
+Now that the counter contract is compiled, let's create the note script that calls its **`increment_count`** procedure when the Note is consumed.
 
-From the <Link href="/scripts">scripts page</Link>, click on the _"Create new script"_ button on the main _"Scripts"_ page and create a **Note Script**, you can name it anything you want eg. **counter-note** <CopyButton content="Copy Script Name" copy="counter-note" />, make sure to select the **Counter Note** example.
+Head to the <Link href="/scripts">scripts page</Link>, click the _"Create new script"_ button and enter a name, for example **counter-note** <CopyButton content="Copy Script Name" copy="counter-note" />. Then select the **Note Script** type and the **Counter Note** example.
 
-Once your script is created, we'll start by adding a dependency to the **counter-account** script we created in the first step.
-This is required as our increment note script is calling our smart contract procedures (both **`get_count`** and **`increment_count`**) so we'll need to import the [AccountComponent](https://docs.miden.xyz/builder/glossary/#accountcomponent) interface.
+Once your script is created, add the **counter-account** script as a dependency. The note script calls the counter contract's **`get_count`** and **`increment_count`** procedures, so it needs to import the interface of the [account component](https://docs.miden.xyz/builder/glossary/#accountcomponent) that defines them.
 
-On the _"Metadata"_ tab click on the _"Add dependency"_ button and select the **counter-account** script to add it as a dependency of our **counter-note** script.
+Click the _"Metadata"_ tab, then click the _"Add dependency"_ button. In the _"Add Dependency"_ dialog, select the **counter-account** script and click the _"Add"_ button.

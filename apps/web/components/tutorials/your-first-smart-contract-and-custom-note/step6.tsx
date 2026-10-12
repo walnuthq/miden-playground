@@ -25,7 +25,7 @@ const useCompleted = () => {
 };
 
 const Step6: TutorialStep = {
-  title: "Create an increment note.",
+  title: "Create the increment note.",
   Content: () => {
     const completed = useCompleted();
     return (
@@ -34,9 +34,13 @@ const Step6: TutorialStep = {
         <TutorialAlert
           completed={completed}
           title="Action required: Create the increment note."
-          titleWhenCompleted="You created the increment note."
+          titleWhenCompleted="Your increment note has been committed."
           description={
-            <p>Follow the instructions to create a custom increment note.</p>
+            <p>
+              Click the <em>"Add note"</em> button on the notes page, select the{" "}
+              <em>"Create note"</em> option and create a public Note with the{" "}
+              <strong>counter-note</strong> script for your counter contract.
+            </p>
           }
         />
       </>
