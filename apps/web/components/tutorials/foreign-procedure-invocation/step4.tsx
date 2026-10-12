@@ -15,7 +15,7 @@ const useCompleted = () => {
 };
 
 const Step4: TutorialStep = {
-  title: "Deploy the Count Reader contract.",
+  title: "Deploy your Count Reader contract.",
   Content: () => {
     const { accounts } = useAccounts();
     const countReader = accounts.find(({ components }) =>
@@ -27,13 +27,15 @@ const Step4: TutorialStep = {
         <Step4Content countReader={countReader} />
         <TutorialAlert
           completed={completed}
-          title="Action required: Deploy a Count Reader contract."
-          titleWhenCompleted="You deployed a Count Reader contract."
+          title="Action required: Deploy your Count Reader contract."
+          titleWhenCompleted="You deployed your Count Reader contract."
           description={
             <p>
-              Click on the <em>"Create new account"</em> button and deploy an{" "}
-              account using the <strong>Count Reader</strong> component, then
-              click on its account ID.
+              Click the <em>"Create new account"</em> button at the top of the
+              accounts page, select the <em>"Deploy account"</em> option and
+              deploy an account using the <strong>No Auth</strong>{" "}
+              authentication component and the <strong>Count Reader</strong>{" "}
+              account component, then click its name.
             </p>
           }
         />

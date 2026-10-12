@@ -1,12 +1,7 @@
-import CopyButton from "@/components/lib/copy-button";
-import { COUNTER_CONTRACT_GET_COUNT_PROC_HASH } from "@/lib/constants";
+Your **Count Reader** is deployed, so you can now copy the count of the **Counter Contract**, a counter contract deployed on testnet that the Playground imported for you in this tutorial.
 
-On the _"Components"_ tab of your newly deployed account, you can access the **Count Reader** component to invoke the **`copy_count`** procedure.
+Click the _"Components"_ tab on the account details page. Under _"Account Components"_, find the _"Count Reader"_ component: its **`count_reader::count_reader::count`** storage slot holds the initial count, **0**.
 
-You can read the initial counter value by hovering the **Counter** _"Value"_ column in the _"Storage Slots"_ table and confirm it was initialized to zero.
+Click the _"Invoke"_ button next to the **`copy_count`** procedure. In the _"Invoke Procedure"_ dialog, select the **Counter Contract** account as the **`counter_account_id`** argument, then click the _"Invoke"_ button.
 
-Click on the _"Invoke"_ button of **`copy_count`** to open a modal that will let you configure the procedure arguments.
-
-We need to select the **Counter Contract** account as parameter which is the source account from which to copy the counter value.
-
-After configuring the procedure parameters, click on the _"Invoke"_ button to trigger a new custom transaction calling **`copy_count`** on the **Count Reader**, check the storage slot value again and confirm it now holds a copy of the **Counter Contract** counter value.
+The Playground executes a Transaction against your **Count Reader** with a transaction script that calls **`copy_count`**, and submits it to testnet. The **Counter Contract** is passed to the Transaction as a foreign account, so that **`copy_count`** can call its **`get_count`** procedure through FPI.

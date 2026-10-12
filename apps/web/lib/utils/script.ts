@@ -83,8 +83,9 @@ export const defaultScript = (): Script => ({
   updatedAt: Date.now(),
 });
 
+// Rust packages export kebab-case names, displayed as their snake_case source names.
 export const formatProcedureExportPath = (path: string) =>
-  path.split("::").at(-1)?.replaceAll('"', "") ?? "";
+  path.split("::").at(-1)?.replaceAll('"', "").replaceAll("-", "_") ?? "";
 
 export const formatProcedureInputs = (inputs: MidenInput[]) =>
   inputs

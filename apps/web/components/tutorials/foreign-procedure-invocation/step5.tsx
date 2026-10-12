@@ -3,9 +3,12 @@ import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import Step5Content from "@/components/tutorials/foreign-procedure-invocation/step5.mdx";
 import useAccounts from "@/hooks/use-accounts";
+import useTransactions from "@/hooks/use-transactions";
+import { EMPTY_WORD } from "@/lib/constants";
 
 const useCompleted = () => {
   const { accounts } = useAccounts();
+  const { transactions } = useTransactions();
   const countReader = accounts.find(({ components }) =>
     components.includes("count-reader"),
   );
@@ -13,6 +16,12 @@ const useCompleted = () => {
     components.includes("counter-account"),
   );
   if (!countReader || !counter) {
+    return false;
+  }
+  const copyCountTransaction = transactions.find(
+    ({ accountId }) => accountId === countReader.id,
+  );
+  if (!copyCountTransaction) {
     return false;
   }
   const countReaderCount = countReader.storage.find(
@@ -26,11 +35,12 @@ const useCompleted = () => {
       key ===
       "0x0100000000000000000000000000000000000000000000000000000000000000",
   );
-  return countReaderCount?.item === counterCountMapEntry?.value;
+  // an unset map entry reads as an empty word
+  return countReaderCount?.item === (counterCountMapEntry?.value ?? EMPTY_WORD);
 };
 
 const Step5: TutorialStep = {
-  title: "Copy the count from the Counter contract.",
+  title: "Copy the Counter Contract count.",
   Content: () => {
     const completed = useCompleted();
     return (
@@ -38,12 +48,14 @@ const Step5: TutorialStep = {
         <Step5Content />
         <TutorialAlert
           completed={completed}
-          title="Action required: Invoke the copy count procedure."
-          titleWhenCompleted="You invoked the copy count procedure."
+          title="Action required: Copy the Counter Contract count."
+          titleWhenCompleted="Your Count Reader copied the Counter Contract count."
           description={
             <p>
-              Click on the <em>"Invoke"</em> button and call the{" "}
-              <strong>copy_count</strong> procedure with the correct parameters.
+              In the <em>"Components"</em> tab of your Count Reader's details
+              page, click the <em>"Invoke"</em> button next to the{" "}
+              <strong>copy_count</strong> procedure and select the{" "}
+              <strong>Counter Contract</strong> account.
             </p>
           }
         />
