@@ -3,28 +3,35 @@ import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
 import Step2Content from "@/components/tutorials/contract-verification/step2.mdx";
 import useScripts from "@/hooks/use-scripts";
-import { defaultScriptIds } from "@/lib/types/default-scripts";
+import useScriptName from "@/components/tutorials/contract-verification/use-script-name";
 import useComponents from "@/hooks/use-components";
 import useTutorials from "@/hooks/use-tutorials";
 import { storageSlotName } from "@/lib/utils/component";
 
-const useCompleted = () => {
+const useScript = () => {
   const { scripts } = useScripts();
-  const script = scripts.find(
-    ({ id, type }) =>
-      !defaultScriptIds.includes(id) && type === "account-component",
+  const scriptName = useScriptName();
+  return scripts.find(
+    ({ name, type }) => name === scriptName && type === "account-component",
   );
+};
+
+const useCompleted = () => {
+  const script = useScript();
   const procedureExports = script?.procedureExports ?? [];
+  // The procedure digests depend on the script name, which is unique to each
+  // run, so look for a `reset_count` export taking and returning nothing.
   const resetCountProcedure = procedureExports.find(
-    ({ digest }) =>
-      digest ===
-      "0x49522a520a4fa929b6cd083ac9d5893b8ff7837395d5388ce1830221b11e2aa1",
+    ({ path, signature }) =>
+      path.endsWith('::"reset-count"') &&
+      signature.params.length === 0 &&
+      signature.results.length === 0,
   );
   return script?.status === "compiled" && !!resetCountProcedure;
 };
 
 const Step2: TutorialStep = {
-  title: "Compile the script.",
+  title: "Add a procedure and compile the script.",
   Content: () => {
     const completed = useCompleted();
     return (
@@ -32,12 +39,13 @@ const Step2: TutorialStep = {
         <Step2Content />
         <TutorialAlert
           completed={completed}
-          title="Action required: Compile the script."
+          title="Action required: Add the reset_count procedure and compile."
           titleWhenCompleted="You compiled the script."
           description={
             <p>
-              Add the <strong>reset_count</strong> procedure and click on the{" "}
-              <em>"Compile"</em> button to compile the script.
+              Add the <strong>reset_count</strong> procedure to the{" "}
+              <strong>CounterContract</strong> trait and its implementation,
+              then click the <em>"Compile"</em> button.
             </p>
           }
         />
@@ -46,13 +54,9 @@ const Step2: TutorialStep = {
   },
   NextStepButton: () => {
     const completed = useCompleted();
-    const { scripts } = useScripts();
+    const script = useScript();
     const { components, newComponent } = useComponents();
     const { nextTutorialStep } = useTutorials();
-    const script = scripts.find(
-      ({ id, type }) =>
-        !defaultScriptIds.includes(id) && type === "account-component",
-    );
     const component = components.find(
       ({ scriptId }) => scriptId === script?.id,
     );

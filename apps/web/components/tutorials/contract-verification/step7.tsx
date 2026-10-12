@@ -46,14 +46,14 @@ const Step7: TutorialStep = {
         <Step7Content counter={counter} />
         <TutorialAlert
           completed={completed}
-          title="Action required: Interact with the contract."
-          titleWhenCompleted="You interacted with the contract."
+          title="Action required: Interact with the verified contract."
+          titleWhenCompleted="You interacted with the verified contract."
           description={
             <p>
-              Click on the <em>"Invoke"</em> button next to the{" "}
-              <strong>increment-count</strong> procedure to interact with the
-              verified contract, then call the <strong>reset-count</strong>{" "}
-              procedure to set the counter value back to zero.
+              Click the <em>"Invoke"</em> button next to the{" "}
+              <strong>increment_count</strong> procedure, then next to the{" "}
+              <strong>reset_count</strong> procedure to set the counter back to
+              zero.
             </p>
           }
         />

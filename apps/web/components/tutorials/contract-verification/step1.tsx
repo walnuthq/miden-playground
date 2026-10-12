@@ -5,34 +5,36 @@ import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
 import Step1Content from "@/components/tutorials/contract-verification/step1.mdx";
 import useScripts from "@/hooks/use-scripts";
 import { defaultScriptIds } from "@/lib/types/default-scripts";
+import useScriptName from "@/components/tutorials/contract-verification/use-script-name";
 
 const useCompleted = () => {
   const pathname = usePathname();
   const { scripts } = useScripts();
+  const scriptName = useScriptName();
   const script = scripts.find(
     ({ id, type }) =>
       !defaultScriptIds.includes(id) && type === "account-component",
   );
-  return (
-    pathname === `/scripts/${script?.id}` && script?.name === "counter-account"
-  );
+  return pathname === `/scripts/${script?.id}` && script?.name === scriptName;
 };
 
 const Step1: TutorialStep = {
-  title: "Create a new account script.",
+  title: "Create the counter contract script.",
   Content: () => {
     const completed = useCompleted();
+    const scriptName = useScriptName();
     return (
       <>
-        <Step1Content />
+        <Step1Content scriptName={scriptName} />
         <TutorialAlert
           completed={completed}
-          title="Action required: Create a new script."
-          titleWhenCompleted="You created an Account Component script."
+          title="Action required: Create the counter contract script."
+          titleWhenCompleted="You created the counter contract script."
           description={
             <p>
-              Click on the <em>"Create new script"</em> button and create a new{" "}
-              <strong>Account Component</strong> with the{" "}
+              Click the <em>"Create new script"</em> button and create an{" "}
+              <strong>Account Component</strong> script named{" "}
+              <strong>{scriptName}</strong> from the{" "}
               <strong>Counter Contract</strong> example.
             </p>
           }

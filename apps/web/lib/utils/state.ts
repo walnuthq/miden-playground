@@ -7,6 +7,7 @@ import type { Script } from "@/lib/types/script";
 import type { TutorialId } from "@/lib/types/tutorial";
 import defaultScripts from "@/lib/types/default-scripts";
 import defaultComponents from "@/lib/types/default-components";
+import { randomLowercaseId } from "@/lib/utils";
 
 // The local storage key holding the serialized app state. Exported so the
 // Miden provider can drop it when the client store it describes is deleted.
@@ -71,6 +72,7 @@ export const defaultState = (): State => ({
   tutorialStep: 0,
   tutorialMaxStep: 0,
   tutorialStartBlockNum: 0,
+  tutorialRunId: "",
   tutorialOpen: true,
   nextTutorialStepDisabled: true,
   completedTutorials: new Set([]),
@@ -89,6 +91,7 @@ export const stateSerializer = ({
   tutorialStep,
   tutorialMaxStep,
   tutorialStartBlockNum,
+  tutorialRunId,
   tutorialOpen,
   nextTutorialStepDisabled,
   completedTutorials,
@@ -105,6 +108,7 @@ export const stateSerializer = ({
     tutorialStep,
     tutorialMaxStep,
     tutorialStartBlockNum,
+    tutorialRunId,
     tutorialOpen,
     nextTutorialStepDisabled,
     completedTutorials: [...completedTutorials],
@@ -139,6 +143,7 @@ export const stateDeserializer = (value: string): State => {
       tutorialStep,
       tutorialMaxStep,
       tutorialStartBlockNum,
+      tutorialRunId,
       tutorialOpen,
       nextTutorialStepDisabled,
       completedTutorials,
@@ -154,6 +159,7 @@ export const stateDeserializer = (value: string): State => {
       tutorialStep?: number;
       tutorialMaxStep?: number;
       tutorialStartBlockNum?: number;
+      tutorialRunId?: string;
       tutorialOpen?: boolean;
       nextTutorialStepDisabled?: boolean;
       completedTutorials?: string[];
@@ -174,6 +180,8 @@ export const stateDeserializer = (value: string): State => {
       tutorialMaxStep: tutorialMaxStep ?? initialState.tutorialMaxStep,
       tutorialStartBlockNum:
         tutorialStartBlockNum ?? initialState.tutorialStartBlockNum,
+      // States persisted before the run id existed get one now.
+      tutorialRunId: tutorialRunId || randomLowercaseId(),
       tutorialOpen: tutorialOpen ?? initialState.tutorialOpen,
       nextTutorialStepDisabled:
         nextTutorialStepDisabled ?? initialState.nextTutorialStepDisabled,

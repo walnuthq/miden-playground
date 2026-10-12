@@ -11,7 +11,7 @@ const useCompleted = () => {
 };
 
 const Step4: TutorialStep = {
-  title: "Import an unverified Counter Contract.",
+  title: "Import an unverified contract.",
   Content: () => {
     const completed = useCompleted();
     const { accounts } = useAccounts();
@@ -25,8 +25,8 @@ const Step4: TutorialStep = {
           titleWhenCompleted="You imported the unverified contract."
           description={
             <p>
-              Click on the <em>Import</em> button to import an unverified
-              Counter Contract.
+              Click the <em>"Import"</em> button to import an unverified counter
+              contract.
             </p>
           }
         />
