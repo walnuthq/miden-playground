@@ -30,9 +30,9 @@ export const generateCargoToml = ({
   cargoToml += `[lib]\n`;
   cargoToml += `crate-type = ["cdylib"]\n\n`;
   cargoToml += `[dependencies]\n`;
-  cargoToml += `miden = "0.14"\n\n`;
+  cargoToml += `miden = "0.15"\n\n`;
   cargoToml += `[build-dependencies]\n`;
-  cargoToml += `miden-sdk-build-script-support = "0.14"\n\n`;
+  cargoToml += `miden-sdk-build-script-support = "0.15"\n\n`;
   cargoToml += `[profile.release]\n`;
   cargoToml += `trim-paths = ["diagnostics", "object"]\n\n`;
   cargoToml += `[profile.dev]\n`;
