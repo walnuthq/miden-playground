@@ -242,15 +242,24 @@ const useTransactions = () => {
       throw new Error("MidenClient not ready");
     }
     dispatch({ type: "SUBMITTING_TRANSACTION" });
-    const { transactionId } = await execute({
-      accountId,
-      request: transactionRequest,
-    });
-    // if (client.usesMockChain()) {
-    //   await client.proveBlock();
-    // }
-    // const syncSummary = await client.syncState();
-    return recordTransaction({ accountId, transactionId, transactionResult });
+    try {
+      const { transactionId } = await execute({
+        accountId,
+        request: transactionRequest,
+      });
+      // if (client.usesMockChain()) {
+      //   await client.proveBlock();
+      // }
+      // const syncSummary = await client.syncState();
+      return await recordTransaction({
+        accountId,
+        transactionId,
+        transactionResult,
+      });
+    } catch (error) {
+      dispatch({ type: "TRANSACTION_SUBMITTED" });
+      throw error;
+    }
   };
   // Adds a submitted transaction to app state, with its account's new state,
   // both read from the store.

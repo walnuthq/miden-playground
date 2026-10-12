@@ -82,18 +82,27 @@ const CreateNoteDialog = () => {
               faucetAccount?.decimals,
             );
             setLoading(true);
-            await newNote({
-              senderAccountId: connectedWallet?.id ?? "",
-              recipientAccountId,
-              scriptId,
-              type: noteType,
-              isNetworkNote,
-              faucetAccountId: hasAssets ? faucetAccountId : "",
-              amount,
-              noteStorage,
-            });
-            setLoading(false);
-            onClose();
+            try {
+              const submitted = await newNote({
+                senderAccountId: connectedWallet?.id ?? "",
+                recipientAccountId,
+                scriptId,
+                type: noteType,
+                isNetworkNote,
+                faucetAccountId: hasAssets ? faucetAccountId : "",
+                amount,
+                noteStorage,
+              });
+              // Keep the dialog open when the transaction is rejected in the
+              // wallet, to let the user try again.
+              if (submitted) {
+                onClose();
+              }
+            } catch (error) {
+              console.error(error);
+            } finally {
+              setLoading(false);
+            }
           }}
         >
           <div className="grid grid-cols-3 gap-4">

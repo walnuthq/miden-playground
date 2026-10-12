@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "sonner";
 import type { Account } from "@/lib/types/account";
 import {
   Table,
@@ -48,12 +49,21 @@ const ProposalActionsCell = ({
           <DropdownMenuItem
             onClick={async () => {
               setLoading(true);
-              const multisig = await loadMultisig(account.id);
-              if (!multisig) {
-                return;
+              try {
+                const multisig = await loadMultisig(account.id);
+                if (!multisig) {
+                  return;
+                }
+                await signProposal({ multisig, proposal });
+              } catch (error) {
+                console.error(error);
+                toast.error("Transaction failed.", {
+                  description:
+                    error instanceof Error ? error.message : String(error),
+                });
+              } finally {
+                setLoading(false);
               }
-              await signProposal({ multisig, proposal });
-              setLoading(false);
             }}
           >
             Sign proposal
@@ -63,12 +73,21 @@ const ProposalActionsCell = ({
           <DropdownMenuItem
             onClick={async () => {
               setLoading(true);
-              const multisig = await loadMultisig(account.id);
-              if (!multisig) {
-                return;
+              try {
+                const multisig = await loadMultisig(account.id);
+                if (!multisig) {
+                  return;
+                }
+                await executeProposal({ multisig, proposal });
+              } catch (error) {
+                console.error(error);
+                toast.error("Transaction failed.", {
+                  description:
+                    error instanceof Error ? error.message : String(error),
+                });
+              } finally {
+                setLoading(false);
               }
-              await executeProposal({ multisig, proposal });
-              setLoading(false);
             }}
           >
             Execute proposal

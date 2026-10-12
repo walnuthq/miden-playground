@@ -1,9 +1,13 @@
+import { useState } from "react";
+import { toast } from "sonner";
 import type { TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
 import Step3Content from "@/components/tutorials/timelock-p2id-note/step3.mdx";
 import useScripts from "@/hooks/use-scripts";
 import { defaultScriptIds } from "@/lib/types/default-scripts";
+import useAccounts from "@/hooks/use-accounts";
+import useTutorials from "@/hooks/use-tutorials";
 
 const useCompleted = () => {
   const { scripts } = useScripts();
@@ -55,7 +59,40 @@ const Step3: TutorialStep = {
   },
   NextStepButton: () => {
     const completed = useCompleted();
-    return <NextStepButton disabled={!completed} />;
+    const { wallets, newWallet } = useAccounts();
+    const { nextTutorialStep } = useTutorials();
+    const [creatingWallet, setCreatingWallet] = useState(false);
+    const testWallet = wallets.find(({ name }) => name === "Test Wallet");
+    return (
+      <NextStepButton
+        text={creatingWallet ? "Creating wallet…" : undefined}
+        disabled={!completed || creatingWallet}
+        onClick={async () => {
+          // Every user gets their own recipient wallet: a shared one piles up
+          // unconsumed notes that make the client slower to sync.
+          if (!testWallet) {
+            setCreatingWallet(true);
+            try {
+              await newWallet({
+                name: "Test Wallet",
+                storageMode: "public",
+                fund: false,
+              });
+            } catch (error) {
+              console.error(error);
+              toast.error("Failed to create the recipient wallet.", {
+                description:
+                  error instanceof Error ? error.message : String(error),
+              });
+              return;
+            } finally {
+              setCreatingWallet(false);
+            }
+          }
+          nextTutorialStep();
+        }}
+      />
+    );
   },
 };
 

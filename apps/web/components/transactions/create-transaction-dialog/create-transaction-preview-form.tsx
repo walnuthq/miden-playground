@@ -231,20 +231,28 @@ const CreateTransactionPreviewForm = ({
       onSubmit={async (event) => {
         event.preventDefault();
         setLoading(true);
-        const transactionRecord = await submitNewTransaction({
-          accountId: executingAccountId,
-          transactionRequest,
-          transactionResult,
-        });
-        toast("Successfully created transaction.", {
-          description: (
-            <SubmitTransactionToastDescription
-              transactionRecord={transactionRecord}
-            />
-          ),
-        });
-        setLoading(false);
-        onClose();
+        try {
+          const transactionRecord = await submitNewTransaction({
+            accountId: executingAccountId,
+            transactionRequest,
+            transactionResult,
+          });
+          toast("Successfully created transaction.", {
+            description: (
+              <SubmitTransactionToastDescription
+                transactionRecord={transactionRecord}
+              />
+            ),
+          });
+          onClose();
+        } catch (error) {
+          console.error(error);
+          toast.error("Transaction failed.", {
+            description: error instanceof Error ? error.message : String(error),
+          });
+        } finally {
+          setLoading(false);
+        }
       }}
     >
       <TransactionPreview transactionResult={transactionResult} />

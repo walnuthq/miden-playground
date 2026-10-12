@@ -52,17 +52,26 @@ const DeployMultisigDialog = () => {
             event.preventDefault();
             const formData = new FormData(event.currentTarget);
             setLoading(true);
-            const account = await createMultisig({
-              name: formData.get("name")!.toString(),
-              threshold: 1, //Number(formData.get("threshold")!.toString()),
-            });
-            setLoading(false);
-            toast(`${account?.name} has been deployed.`, {
-              description: (
-                <AccountAddress account={account} withTooltip={false} />
-              ),
-            });
-            onClose();
+            try {
+              const account = await createMultisig({
+                name: formData.get("name")!.toString(),
+                threshold: 1, //Number(formData.get("threshold")!.toString()),
+              });
+              toast(`${account?.name} has been deployed.`, {
+                description: (
+                  <AccountAddress account={account} withTooltip={false} />
+                ),
+              });
+              onClose();
+            } catch (error) {
+              console.error(error);
+              toast.error("Guardian wallet couldn't be deployed.", {
+                description:
+                  error instanceof Error ? error.message : String(error),
+              });
+            } finally {
+              setLoading(false);
+            }
           }}
         >
           <div className="grid grid-cols-2 gap-4">

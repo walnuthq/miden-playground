@@ -2,32 +2,26 @@ import type { TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
 import Step4Content from "@/components/tutorials/timelock-p2id-note/step4.mdx";
-import useNetwork from "@/hooks/use-network";
 import useAccounts from "@/hooks/use-accounts";
 import useNotes from "@/hooks/use-notes";
-import {
-  P2IDE_NOTE_CODE,
-  testWalletAccountId,
-  testWalletAddress,
-  testWalletAccountIdPrefix,
-  testWalletAccountIdSuffix,
-} from "@/lib/constants";
+import { P2IDE_NOTE_CODE } from "@/lib/constants";
 import {
   accountIdFromPrefixSuffix,
   getIdentifierPart,
 } from "@/lib/utils/account";
+import { AccountId as WasmAccountId } from "@miden-sdk/miden-sdk/lazy";
 import { useSyncState } from "@miden-sdk/react/lazy";
 
 const useCompleted = () => {
-  const { networkId } = useNetwork();
-  const { connectedWallet } = useAccounts();
+  const { connectedWallet, wallets } = useAccounts();
   const { inputNotes } = useNotes();
+  const testWallet = wallets.find(({ name }) => name === "Test Wallet");
   const note = inputNotes.find(
     ({ senderId, scriptRoot, storage, state, type }) =>
       senderId === connectedWallet?.id &&
       scriptRoot === P2IDE_NOTE_CODE &&
       accountIdFromPrefixSuffix(storage[3] ?? "", storage[2] ?? "") ===
-        testWalletAccountId(networkId) &&
+        testWallet?.id &&
       state === "committed" &&
       type === "public",
   );
@@ -37,15 +31,19 @@ const useCompleted = () => {
 const Step4: TutorialStep = {
   title: "Create a note by executing a transaction.",
   Content: () => {
-    const { networkId } = useNetwork();
+    const { wallets } = useAccounts();
     const { syncHeight } = useSyncState();
     const completed = useCompleted();
+    const testWallet = wallets.find(({ name }) => name === "Test Wallet");
+    const accountId = testWallet
+      ? WasmAccountId.fromHex(testWallet.id)
+      : undefined;
     return (
       <>
         <Step4Content
-          address={getIdentifierPart(testWalletAddress(networkId))}
-          accountIdPrefix={testWalletAccountIdPrefix(networkId)}
-          accountIdSuffix={testWalletAccountIdSuffix(networkId)}
+          address={getIdentifierPart(testWallet?.address ?? "")}
+          accountIdPrefix={accountId?.prefix().toString() ?? ""}
+          accountIdSuffix={accountId?.suffix().toString() ?? ""}
           syncHeight={syncHeight + 43200}
         />
         <TutorialAlert

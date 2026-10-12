@@ -95,17 +95,18 @@ const useAccounts = () => {
   const newWallet = async ({
     name,
     storageMode,
+    fund = true,
   }: {
     name: string;
     storageMode: AccountStorageMode;
+    fund?: boolean;
   }) => {
     const wallet = await createWallet({
       storageMode,
       authScheme: AuthScheme.Falcon,
     });
-    const fundedWallet = await fundAccount(wallet);
     const account = wasmAccountToAccount({
-      wasmAccount: fundedWallet,
+      wasmAccount: fund ? await fundAccount(wallet) : wallet,
       name,
       updatedAt: lastSyncTime,
     });

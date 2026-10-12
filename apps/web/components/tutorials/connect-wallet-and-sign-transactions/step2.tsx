@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { toast } from "sonner";
 import type { TutorialStep } from "@/lib/types/tutorial";
 import useNetwork from "@/hooks/use-network";
 import useNotes from "@/hooks/use-notes";
@@ -5,6 +7,7 @@ import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
 import Step2Content from "@/components/tutorials/connect-wallet-and-sign-transactions/step2.mdx";
 import useAccounts from "@/hooks/use-accounts";
+import useTutorials from "@/hooks/use-tutorials";
 import {
   P2ID_NOTE_CODE,
   midenFaucetAccountId,
@@ -55,7 +58,42 @@ const Step2: TutorialStep = {
   },
   NextStepButton: () => {
     const completed = useCompleted();
-    return <NextStepButton disabled={!completed} />;
+    const { wallets, connectedWallet, newWallet } = useAccounts();
+    const { nextTutorialStep } = useTutorials();
+    const [creatingWallet, setCreatingWallet] = useState(false);
+    const recipient = wallets.find(
+      ({ address }) => connectedWallet && address !== connectedWallet.address,
+    );
+    return (
+      <NextStepButton
+        text={creatingWallet ? "Creating wallet…" : undefined}
+        disabled={!completed || creatingWallet}
+        onClick={async () => {
+          // Every user gets their own recipient wallet: a shared one piles up
+          // unconsumed notes that make the client slower to sync.
+          if (!recipient) {
+            setCreatingWallet(true);
+            try {
+              await newWallet({
+                name: "Test Wallet",
+                storageMode: "public",
+                fund: false,
+              });
+            } catch (error) {
+              console.error(error);
+              toast.error("Failed to create the recipient wallet.", {
+                description:
+                  error instanceof Error ? error.message : String(error),
+              });
+              return;
+            } finally {
+              setCreatingWallet(false);
+            }
+          }
+          nextTutorialStep();
+        }}
+      />
+    );
   },
 };
 

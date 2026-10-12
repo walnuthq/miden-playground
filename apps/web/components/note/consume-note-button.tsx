@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import { FileInput } from "lucide-react";
 import { Spinner } from "@workspace/ui/components/spinner";
 import { Button } from "@workspace/ui/components/button";
@@ -41,50 +42,63 @@ const ConsumeNoteButton = ({
     <Button
       variant="outline"
       onClick={async () => {
-        if (isParaWallet(targetAccount)) {
-          setLoading(true);
-          await consumeWithPara({ noteIds: [inputNote.id] });
-          setLoading(false);
-        } else if (connectedWallet?.id === targetAccount.id) {
-          if (!client) {
-            throw new Error("MidenClient not ready");
-          }
-          const [fungibleAsset] = inputNote.fungibleAssets;
-          const faucet = faucets.find(
-            ({ id }) => id === fungibleAsset?.faucetId,
-          );
-          if (!wallet || !fungibleAsset || !faucet) {
-            return;
-          }
-          const adapter = wallet.adapter as MidenWalletAdapter;
-          if (inputNote.noteFileBytes) {
-            await adapter.importPrivateNote(
-              fromBase64(inputNote.noteFileBytes),
+        try {
+          if (isParaWallet(targetAccount)) {
+            setLoading(true);
+            await consumeWithPara({ noteIds: [inputNote.id] });
+            setLoading(false);
+          } else if (connectedWallet?.id === targetAccount.id) {
+            if (!client) {
+              throw new Error("MidenClient not ready");
+            }
+            const [fungibleAsset] = inputNote.fungibleAssets;
+            const faucet = faucets.find(
+              ({ id }) => id === fungibleAsset?.faucetId,
             );
+            if (!wallet || !fungibleAsset || !faucet) {
+              return;
+            }
+            const adapter = wallet.adapter as MidenWalletAdapter;
+            try {
+              if (inputNote.noteFileBytes) {
+                await adapter.importPrivateNote(
+                  fromBase64(inputNote.noteFileBytes),
+                );
+              } else {
+                const transaction = new ConsumeTransaction(
+                  faucet.identifier,
+                  inputNote.id,
+                  inputNote.type === "public" ? "public" : "private",
+                  Number(fungibleAsset.amount),
+                );
+                const txId = await adapter.requestConsume(transaction);
+                console.info({ txId });
+              }
+            } catch (error) {
+              // Rejected in Bread Wallet.
+              console.error(error);
+            }
           } else {
-            const transaction = new ConsumeTransaction(
-              faucet.identifier,
-              inputNote.id,
-              inputNote.type === "public" ? "public" : "private",
-              Number(fungibleAsset.amount),
-            );
-            const txId = await adapter.requestConsume(transaction);
-            console.info({ txId });
-          }
-        } else {
-          setLoading(true);
-          const { transactionRequest, transactionResult } =
-            await newConsumeTransactionRequest({
+            setLoading(true);
+            const { transactionRequest, transactionResult } =
+              await newConsumeTransactionRequest({
+                accountId: targetAccount.id,
+                noteIds: [inputNote.id],
+              });
+            openCreateTransactionDialog({
               accountId: targetAccount.id,
-              noteIds: [inputNote.id],
+              transactionType: "consume",
+              step: "preview",
+              transactionRequest,
+              transactionResult,
             });
-          openCreateTransactionDialog({
-            accountId: targetAccount.id,
-            transactionType: "consume",
-            step: "preview",
-            transactionRequest,
-            transactionResult,
+          }
+        } catch (error) {
+          console.error(error);
+          toast.error("Transaction failed.", {
+            description: error instanceof Error ? error.message : String(error),
           });
+          setLoading(false);
         }
       }}
       disabled={loading}

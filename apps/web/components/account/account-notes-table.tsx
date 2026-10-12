@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "sonner";
 import Link from "next/link";
 import type { Account } from "@/lib/types/account";
 import type { InputNote } from "@/lib/types/note";
@@ -63,60 +64,73 @@ const NoteActionsCell = ({
       <DropdownMenuContent align="end">
         <DropdownMenuItem
           onClick={async () => {
-            if (isParaWallet(account)) {
-              setLoading(true);
-              await consumeWithPara({ noteIds: [inputNote.id] });
-              setLoading(false);
-            } else if (connectedWallet?.id === account.id) {
-              if (!client) {
-                throw new Error("MidenClient not ready");
-              }
-              const [fungibleAsset] = inputNote.fungibleAssets;
-              const faucet = faucets.find(
-                ({ id }) => id === fungibleAsset?.faucetId,
-              );
-              if (!wallet || !fungibleAsset || !faucet) {
-                return;
-              }
-              const adapter = wallet.adapter as MidenWalletAdapter;
-              if (inputNote.noteFileBytes) {
-                await adapter.importPrivateNote(
-                  fromBase64(inputNote.noteFileBytes),
+            try {
+              if (isParaWallet(account)) {
+                setLoading(true);
+                await consumeWithPara({ noteIds: [inputNote.id] });
+              } else if (connectedWallet?.id === account.id) {
+                if (!client) {
+                  throw new Error("MidenClient not ready");
+                }
+                const [fungibleAsset] = inputNote.fungibleAssets;
+                const faucet = faucets.find(
+                  ({ id }) => id === fungibleAsset?.faucetId,
                 );
-              } else {
-                const transaction = new ConsumeTransaction(
-                  faucet.identifier,
-                  inputNote.id,
-                  inputNote.type === "public" ? "public" : "private",
-                  Number(fungibleAsset.amount),
-                );
-                const txId = await adapter.requestConsume(transaction);
-                console.info({ txId });
-              }
-            } else if (account.multisig) {
-              const multisig = await loadMultisig(account.id);
-              if (!multisig) {
-                return;
-              }
-              await createConsumeNotesProposal({
-                multisig,
-                noteIds: [inputNote.id],
-              });
-            } else {
-              setLoading(true);
-              const { transactionRequest, transactionResult } =
-                await newConsumeTransactionRequest({
-                  accountId: account.id,
+                if (!wallet || !fungibleAsset || !faucet) {
+                  return;
+                }
+                const adapter = wallet.adapter as MidenWalletAdapter;
+                try {
+                  if (inputNote.noteFileBytes) {
+                    await adapter.importPrivateNote(
+                      fromBase64(inputNote.noteFileBytes),
+                    );
+                  } else {
+                    const transaction = new ConsumeTransaction(
+                      faucet.identifier,
+                      inputNote.id,
+                      inputNote.type === "public" ? "public" : "private",
+                      Number(fungibleAsset.amount),
+                    );
+                    const txId = await adapter.requestConsume(transaction);
+                    console.info({ txId });
+                  }
+                } catch (error) {
+                  // Rejected in Bread Wallet.
+                  console.error(error);
+                }
+              } else if (account.multisig) {
+                const multisig = await loadMultisig(account.id);
+                if (!multisig) {
+                  return;
+                }
+                await createConsumeNotesProposal({
+                  multisig,
                   noteIds: [inputNote.id],
                 });
-              setLoading(false);
-              openCreateTransactionDialog({
-                accountId: account.id,
-                transactionType: "consume",
-                step: "preview",
-                transactionRequest,
-                transactionResult,
+              } else {
+                setLoading(true);
+                const { transactionRequest, transactionResult } =
+                  await newConsumeTransactionRequest({
+                    accountId: account.id,
+                    noteIds: [inputNote.id],
+                  });
+                openCreateTransactionDialog({
+                  accountId: account.id,
+                  transactionType: "consume",
+                  step: "preview",
+                  transactionRequest,
+                  transactionResult,
+                });
+              }
+            } catch (error) {
+              console.error(error);
+              toast.error("Transaction failed.", {
+                description:
+                  error instanceof Error ? error.message : String(error),
               });
+            } finally {
+              setLoading(false);
             }
           }}
         >

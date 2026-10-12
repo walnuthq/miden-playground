@@ -139,12 +139,13 @@ const useNotes = () => {
         transactionRequestBuilder.withFeeConversionSalt(randomWord());
     }
     const transactionRequest = transactionRequestBuilder.build();
+    // Resolves to whether the transaction was submitted: Para reports a
+    // rejected signature as null, Bread Wallet throws.
     if (isParaWallet(senderAccount)) {
-      await submitWithPara(transactionRequest);
-      return;
+      return !!(await submitWithPara(transactionRequest));
     }
     if (!requestTransaction) {
-      return;
+      return false;
     }
     const customTransaction = new CustomTransaction(
       senderAccount.address,
@@ -156,6 +157,7 @@ const useNotes = () => {
       payload: customTransaction,
     });
     console.info({ txId });
+    return true;
   };
   const importNoteFromFile = async ({
     noteId,
