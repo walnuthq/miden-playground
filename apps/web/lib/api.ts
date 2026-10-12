@@ -7,7 +7,7 @@ import type {
   Package,
 } from "@/lib/types/script";
 import { packageToScript } from "@/lib/utils/script";
-import { isValidUUIDv4 } from "@/lib/utils";
+import { isValidUUIDv4, toBase64 } from "@/lib/utils";
 import { API_URL, API_REGISTRY_URL } from "@/lib/constants";
 
 export const createScript = async ({
@@ -129,6 +129,25 @@ export const verifyAccountComponentsFromPackageIds = async ({
   return { verified };
 };
 
+// The registry serves compiled packages apart from their metadata, as
+// `<commitment>.masp` artifacts.
+const registryPackageToScript = async ({
+  networkId,
+  registryPackage,
+}: {
+  networkId: string;
+  registryPackage: Omit<Package, "masp">;
+}) => {
+  const response = await fetch(
+    `${API_REGISTRY_URL}/v1/${networkId}/packages/masp/${registryPackage.commitment}.masp`,
+  );
+  if (!response.ok) {
+    throw new Error(`Package ${registryPackage.commitment} masp not found.`);
+  }
+  const masp = toBase64(new Uint8Array(await response.arrayBuffer()));
+  return packageToScript({ ...registryPackage, masp });
+};
+
 export const getVerifiedAccountComponents = async ({
   networkId,
   code,
@@ -149,12 +168,17 @@ export const getVerifiedAccountComponents = async ({
   }
   const { verifiedAccountComponents } = result as {
     verifiedAccountComponents: {
-      package: Package;
+      package: Omit<Package, "masp">;
     }[];
   };
   return {
-    components: verifiedAccountComponents.map((verifiedAccountComponent) =>
-      packageToScript(verifiedAccountComponent.package),
+    components: await Promise.all(
+      verifiedAccountComponents.map((verifiedAccountComponent) =>
+        registryPackageToScript({
+          networkId,
+          registryPackage: verifiedAccountComponent.package,
+        }),
+      ),
     ),
   };
 };
@@ -226,9 +250,14 @@ export const getVerifiedNote = async ({
     return { error };
   }
   const { package: noteScript } = result as {
-    package: Package;
+    package: Omit<Package, "masp">;
   };
-  return { noteScript: packageToScript(noteScript) };
+  return {
+    noteScript: await registryPackageToScript({
+      networkId,
+      registryPackage: noteScript,
+    }),
+  };
 };
 
 export const getScript = async (id: string) => {
