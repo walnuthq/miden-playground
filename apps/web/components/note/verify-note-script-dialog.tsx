@@ -33,7 +33,10 @@ const VerifyNoteScriptDialog = () => {
     verifyNoteScriptDialogOpen,
     verifyNoteScriptDialogNoteId: noteId,
     closeVerifyNoteScriptDialog,
+    inputNotes,
   } = useNotes();
+  const scriptRoot =
+    inputNotes.find((inputNote) => inputNote.id === noteId)?.scriptRoot ?? "";
   const [loading, setLoading] = useState(false);
   const [packageSource, setPackageSource] = useState<PackageSource | null>(
     null,
@@ -82,7 +85,7 @@ const VerifyNoteScriptDialog = () => {
               if (verified) {
                 toast.success("Note script verified.");
                 queryClient.invalidateQueries({
-                  queryKey: ["verifiedNote", networkId, noteId],
+                  queryKey: ["verifiedNote", networkId, scriptRoot],
                 });
               } else {
                 toast.error("Note script couldn't be verified.");

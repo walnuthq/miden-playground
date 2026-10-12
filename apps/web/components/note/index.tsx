@@ -18,7 +18,7 @@ const NoteIndex = ({ id }: { id: string }) => {
     queryFn: () =>
       getVerifiedNote({
         networkId,
-        script: id,
+        script: scriptRoot,
       }),
     enabled:
       ["mtst", "mdev"].includes(networkId) &&

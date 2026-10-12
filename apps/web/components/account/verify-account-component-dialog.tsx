@@ -87,7 +87,7 @@ const VerifyAccountComponentDialog = () => {
                   queryKey: [
                     "verifiedAccountComponents",
                     networkId,
-                    account.identifier,
+                    account.code,
                   ],
                 });
               } else {
