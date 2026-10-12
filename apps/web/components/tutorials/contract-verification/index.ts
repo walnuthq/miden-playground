@@ -15,9 +15,9 @@ const tutorial: Tutorial = {
   id: "contract-verification",
   number: 12,
   title: "Contract verification",
-  tagline: "Deploy and verify custom smart contracts on-chain.",
+  tagline: "Verify a contract's source code so anyone can interact with it.",
   description:
-    "In this tutorial we learn how to develop custom Miden contracts, deploy them on-chain, and verify them using the Miden playground.",
+    "In this tutorial, you'll extend a counter contract, deploy it on testnet, and verify an unverified copy of it by uploading its source code to the Playground.",
   category: "advanced",
   initialRoute: "/scripts",
   state: {

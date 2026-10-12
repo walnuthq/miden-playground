@@ -1,16 +1,16 @@
 import Link from "@/components/tutorials/tutorial-link";
 
-Now that we've compiled the **Counter Contract** script, let's deploy it.
+Now that the counter contract script is compiled, let's deploy the contract on testnet.
 
-From the <Link href="/accounts">accounts page</Link>, click on _"Create new account"_ and select the _"Deploy account"_ option.
+Head to the <Link href="/accounts">accounts page</Link>, click the _"Create new account"_ button at the top of the page and select the _"Deploy account"_ option.
 
-Give your new contract a name and select **No Auth** as authentication component and our custom **Counter Contract** account component.
+Enter a name for your contract and leave the storage mode set to **Public**. Keep **No Auth** as the authentication component, then select the **Counter Contract** account component and keep the default value of its **`count_map`** storage slot.
 
-When you're done configuring your contract deployment, click on the _"Deploy"_ button to create your account.
+Finally, click the _"Deploy"_ button. This takes a few moments: the Playground creates the Account, then funds it so that it can pay transaction fees.
 
-Every contract deployed using the Miden Playground is automatically verified upon deployment.
-This is the reason why we're able to invoke our account procedures using their human-readable names such as **`get_count`** or **`reset_count`** under the _"Components"_ tab of the contract details page.
+The Playground knows the source code of this contract because you deployed it from your own script.
+That's why you can invoke its procedures by their names, such as **`get_count`** or **`reset_count`**, under the _"Components"_ tab of the contract's details page.
 
-See for yourself: {props.counter ? <Link href={`/accounts/${props.counter.identifier}?tab=components`}>click on the <em>"Components"</em> tab of your deployed account</Link> : <>click on the <em>"Components"</em> tab of your deployed account</>} to access the list of verified components your smart contract contains, you will also be able to read the underlying script source code by clicking on the _"Script"_ link.
+See for yourself: {props.counter ? <Link href={`/accounts/${props.counter.identifier}?tab=components`}>open the <em>"Components"</em> tab of your deployed contract</Link> : <>open the <em>"Components"</em> tab of your deployed contract</>} to list the components it contains. Click the script name next to _"Script"_ to read a component's source code.
 
-When a contract is verified, anyone can import it and start interacting with it on the playground as well as access the Rust source code.
+Outside of tutorials, the Playground also verifies the contracts you deploy automatically, so that anyone can import them, read their source code and interact with them.

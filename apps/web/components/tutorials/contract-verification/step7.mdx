@@ -1,13 +1,13 @@
 import AccountAddress from "@/components/lib/account-address";
 import CopyButton from "@/components/lib/copy-button";
 
-Since the contract is verified, you can call its procedures as the interface is now available to everyone.
+Now that the contract is verified, its interface is available to everyone, and you can call its procedures by name.
 
-Increment and reset the count of this newly verified **Counter Contract** to test the unlocked **Read/Write** contract feature that verification enables.
+On the imported contract's _"Components"_ tab, click the _"Invoke"_ button next to the **`increment_count`** procedure. Once the Transaction is submitted, click the _"Invoke"_ button next to the **`reset_count`** procedure to set the counter back to zero. You can click the _"Invoke"_ button next to the **`get_count`** procedure at any time to read the current value of the counter.
 
-Note that this verification process is not happening locally, meaning that anyone can now read the source of this contract and interact with it on-chain.
+This verification isn't stored in your browser: the verification service keeps it, so anyone can now read the source code of this contract and interact with it.
 
-You can test it after finishing this tutorial by importing the contract again in a new testnet sandbox environment.
+To see it for yourself after finishing this tutorial, create a new testnet sandbox environment. On the accounts page, click the _"Create new account"_ button, select the _"Import account"_ option and import the contract with the following details:
 
 - **Name**: Verified Contract <CopyButton content="Copy Account Name" copy="Verified Contract" />
 

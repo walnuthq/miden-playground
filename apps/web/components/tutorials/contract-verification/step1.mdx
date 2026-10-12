@@ -1,11 +1,12 @@
 import CopyButton from "@/components/lib/copy-button";
 
-Following up on the previous tutorial, we'll discover what is contract verification and why it's important in blockchain decentralized applications.
+In the previous tutorial, you wrote your own counter contract and deployed it on testnet. In this tutorial, you'll learn what contract verification is and why it matters.
 
-Contract verification is the process of confirming that the deployed bytecode of a smart contract on a blockchain matches its original human-readable source code.
-This ensures transparency, allowing users to inspect the contract's logic and verify that it functions as intended without hidden vulnerabilities or malicious modifications.
-It is a foundational step in building security, trust, and credibility in blockchain applications.
+Contract verification proves that the code of a contract deployed on-chain was built from a given source code.
+Once a contract is verified, anyone can read its source code, check that it does what it claims to do, and call its procedures without having to trust its author.
+It's a foundation for building trust in on-chain applications.
 
-Let's get started by clicking on _"Create new script"_ then make sure to name your script **counter-account** <CopyButton content="Copy Script Name" copy="counter-account" /> and select an **Account Component** script with the **Counter Contract** example.
+Let's start by creating the script that holds the contract code. Click the _"Create new script"_ button, enter **{props.scriptName}** <CopyButton content="Copy Script Name" copy={props.scriptName} /> as the name, then select the **Account Component** type and the **Counter Contract** example.
 
-You must name your script **counter-account** as we'll create other resources (storage slot names, depending scripts, etc.) that expect this particular name.
+Your script must be named **{props.scriptName}**: the Playground creates resources in the next steps, such as the contract's storage slot name, that expect this exact name.
+The random suffix is unique to your run of this tutorial. The script name ends up in your contract's code, so nobody else will have deployed, let alone verified, the exact same contract before you.

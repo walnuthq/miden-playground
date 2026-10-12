@@ -1,8 +1,9 @@
 import Link from "@/components/tutorials/tutorial-link";
 import { EllipsisVertical } from "lucide-react";
 
-Since the imported unverified contract was deployed using the exact same script as the **Counter Contract** created in the first step, let's export this script to download the source code on your device.
+The imported contract was built from the exact same script as the counter contract you deployed, so let's export your script to download its source code.
 
-From the <Link href="/scripts">scripts page</Link>, click on the <EllipsisVertical className="size-4 inline" /> icon button on the right-most side of the **Counter Contract** script row and then on the _"Export script"_ option to trigger the download.
+Head to the <Link href="/scripts">scripts page</Link>, click the <EllipsisVertical className="size-4 inline" /> icon button at the end of the **{props.scriptName}** script's row and select the _"Export script"_ option to download it.
 
-Unzip the downloaded archive to get a valid Miden project in the resulting folder, you can explore the project structure but make sure to not modify anything in the source code or you won't be able to verify the contract in the next step.
+Unzip the downloaded **{props.scriptName}.zip** archive into a folder: it contains a complete Miden project that you could also build locally.
+Feel free to explore it, but don't modify any file, or you won't be able to verify the contract in the next step.
