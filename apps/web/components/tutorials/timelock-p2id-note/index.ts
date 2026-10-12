@@ -12,9 +12,9 @@ const tutorial: Tutorial = {
   id: "timelock-p2id-note",
   number: 8,
   title: "Timelock P2ID note",
-  tagline: "Create your own custom time locked P2ID note.",
+  tagline: "Create your own timelocked P2ID note.",
   description:
-    "In this tutorial we create a time locked P2ID note script and discover how it can be acknowledged by the network before consumed by another account.",
+    "In this tutorial, you'll write a timelocked P2ID note script and create a note that its target account can only consume once a given block height is reached.",
   category: "advanced",
   initialRoute: "/scripts",
   state,

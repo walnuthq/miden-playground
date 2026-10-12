@@ -1,9 +1,9 @@
-You are probably familiar with the **P2ID** note as we used it in previous tutorials, but maybe it's the first time you deep dive into its actual implementation.
+You've already used **P2ID** notes in previous tutorials, but this may be the first time you look at how they're implemented.
 
-The script reads 2 values from the note storage forming the target [account ID](https://docs.miden.xyz/reference/protocol/account/id) which is decomposed in a prefix and a suffix.
-The account ID needs to be split in 2 separate 64 bits **Felt**s as note storage items are encoded as a **Felt** array and account IDs are 120 bits.
+The script starts by reading its note storage, at lines _25-33_. It contains the target [Account ID](https://docs.miden.xyz/reference/protocol/account/id), split into a suffix and a prefix: note storage items are [Felts](https://docs.miden.xyz/builder/glossary/#felt) (field elements), and an Account ID doesn't fit in a single Felt.
 
-The script then reads the consuming account ID using the account's interface function **`account::get_id`** and compares it against the note storage.
-If the 2 values are equal, the script proceeds with sending the note assets to the target account.
+At lines _35-41_, the script gets the ID of the consuming account with **`account.get_id()`** and asserts that it is equal to the target Account ID, so that only the target account can consume the Note.
 
-Now that we understand the P2ID implementation, let's add the timelock logic.
+Finally, at lines _43-46_, it adds the note's assets to the consuming account's vault with **`receive_asset`**.
+
+Now that you understand the P2ID implementation, let's add the timelock logic.

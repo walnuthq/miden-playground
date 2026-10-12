@@ -25,10 +25,10 @@ const Step1: TutorialStep = {
         <TutorialAlert
           completed={completed}
           title="Action required: Create a new script."
-          titleWhenCompleted="You created a P2ID Note script."
+          titleWhenCompleted="You created a P2ID note script."
           description={
             <p>
-              Click on the <em>"Create new script"</em> button and create a new{" "}
+              Click the <em>"Create new script"</em> button and create a new{" "}
               <strong>Note Script</strong> from the <strong>P2ID Note</strong>{" "}
               example.
             </p>

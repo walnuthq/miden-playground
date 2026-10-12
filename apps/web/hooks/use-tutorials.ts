@@ -2,7 +2,7 @@ import { useRouter } from "next/navigation";
 import { useWallet } from "@miden-sdk/miden-wallet-adapter";
 import useGlobalContext from "@/components/global-context/hook";
 import tutorials from "@/components/tutorials";
-import { defaultTutorial } from "@/lib/utils/tutorial";
+import { defaultTutorial, isTutorial } from "@/lib/utils/tutorial";
 import useAppState from "@/hooks/use-app-state";
 import { trackEvent } from "@simpleanalytics/next";
 import { sleep } from "@/lib/utils";
@@ -115,9 +115,9 @@ const useTutorials = () => {
     nextTutorialStepDisabled,
     completedTutorials,
     tutorial: tutorials.find(({ id }) => id === tutorialId),
-    isTutorial:
-      tutorialId === "create-and-fund-wallet" ||
-      tutorialId === "transfer-assets-between-wallets",
+    isTutorial: isTutorial(tutorialId),
+    // tutorialId === "create-and-fund-wallet" ||
+    // tutorialId === "transfer-assets-between-wallets",
     startTutorial,
     nextTutorial,
     previousTutorialStep,

@@ -647,13 +647,15 @@ export const wasmInputNoteRecordToInputNote = ({
         ? noteType(metadata)
         : "public",
     state: noteState(record.state()),
-    tag: previousInputNote
-      ? previousInputNote.tag
-      : (record.metadata()?.tag().asU32().toString() ?? ""),
+    // Notes can show up before their metadata is known (e.g. an expected
+    // output note): fill these in once it is.
+    tag:
+      previousInputNote?.tag ||
+      (record.metadata()?.tag().asU32().toString() ?? ""),
     serialNum: record.details().recipient().serialNum().toHex(),
-    senderId: previousInputNote
-      ? previousInputNote.senderId
-      : (record.metadata()?.sender().toString() ?? ""),
+    senderId:
+      previousInputNote?.senderId ||
+      (record.metadata()?.sender().toString() ?? ""),
     scriptRoot,
     scriptId: previousInputNote
       ? previousInputNote.scriptId

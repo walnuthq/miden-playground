@@ -81,9 +81,12 @@ const useAccounts = () => {
     (!!midenWalletAddress && !breadWallet) ||
     (!!paraWallet?.accountId && !paraWalletAccount);
   const isAuthorized = (targetAccount: Account) => {
-    const isTutorial =
-      tutorialId === "create-and-fund-wallet" ||
-      tutorialId === "transfer-assets-between-wallets";
+    const isTutorial = [
+      "create-and-fund-wallet",
+      "transfer-assets-between-wallets",
+      // "private-transfers",
+      "timelock-p2id-note",
+    ].includes(tutorialId);
     return (
       networkId === "mmck" ||
       isTutorial ||

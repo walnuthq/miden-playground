@@ -1,28 +1,28 @@
-We assume the timelock block height will be appended as the 3rd item in the note storage, let's make sure the storage length is always 3.
+The timelock block height will be the 3rd item of the note storage, so the script must now expect 3 storage items. At line _28_, change the expected storage length from **`2`** to **`3`**:
 
 ```rust
 // make sure the storage length is 3
 assert_eq(storage.len().into(), felt!(3));
 ```
 
-Then we store the 3rd storage item in a variable for future use:
+Then, after line _33_, read the 3rd storage item into a variable:
 
 ```rust
 let timelock_height = storage[2];
 ```
 
-To get the current block height, we'll use the transaction kernel `get_block_number` call:
+To get the current block height, use the transaction kernel's `get_block_number` call, which returns the Transaction's reference block number:
 
 ```rust
 let block_number = tx::get_block_number();
 ```
 
-Finally, we must check that `block_number` ≥ `timelock_height`:
+Finally, check that `block_number` ≥ `timelock_height`:
 
 ```rust
 assert!(block_number >= timelock_height);
 ```
 
-After adding the timelock logic to your script, compile it and proceed to the next step.
+Once you've added the timelock logic, compile your script and proceed to the next step.
 
-When you do, the Playground creates a new public wallet named **Test Wallet** for you: it will be the recipient of your timelock note.
+When you do, the Playground creates a new public wallet named **Test Wallet** for you: it will be the target account of your timelocked note.

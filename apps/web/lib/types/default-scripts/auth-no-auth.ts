@@ -40,11 +40,23 @@ impl AuthComponent for AuthComponentStorage {
 }
 `;
 
-export const masm = `use miden::protocol::active_account
+export const masm = `use {AuthArgs} from miden::standards::types
+use miden::protocol::active_account
 use miden::protocol::native_account
-use miden::core::word
+use miden::protocol::tx
+use miden::standards::fee
 
-#! Increment the nonce only if the account commitment has changed
+# CONSTANTS
+# =================================================================================================
+
+# Estimated upper bound on the number of cycles this auth procedure spends after pay_fee
+# returns: the account commitment comparison and the nonce increment.
+const NO_AUTH_POST_FEE_CYCLES = 1024
+
+# AUTH PROCEDURE
+# =================================================================================================
+
+#! Pay the transaction fee and increment the nonce only if the account commitment has changed
 #!
 #! This authentication procedure provides minimal authentication by checking if the account
 #! state has actually changed during transaction execution. It compares the initial account
@@ -52,19 +64,34 @@ use miden::core::word
 #! This avoids unnecessary nonce increments for transactions that don't modify
 #! the account state.
 #!
-#! Inputs:  [pad(16)]
+#! The transaction fee is paid by creating a public TX_FEE note funded from the account's
+#! vault in the native fee asset at rate 1/1 (see fee::pay_fee and fee::native_conversion_info).
+#! On chains with a zero verification base fee no note is created.
+#!
+#! Inputs:  [AUTH_ARGS, pad(12)]
 #! Outputs: [pad(16)]
+#!
+#! Invocation: call
 @auth_script
-pub proc auth_no_auth
-    # check if the account state has changed by comparing initial and final commitments
+pub proc auth_no_auth(auth_args: AuthArgs)
+    dropw
+    # => [pad(16)]
 
-    exec.active_account::get_initial_commitment
-    # => [INITIAL_COMMITMENT, pad(16)]
+    # ---- Pay the transaction fee in the native fee asset ----
+    exec.fee::native_conversion_info
+    # => [CONVERSION_INFO, pad(16)]
 
-    exec.active_account::compute_commitment
-    # => [CURRENT_COMMITMENT, INITIAL_COMMITMENT, pad(16)]
+    push.NO_AUTH_POST_FEE_CYCLES
+    # => [num_extra_cycles, CONVERSION_INFO, pad(16)]
 
-    exec.word::eq not
+    exec.tx::get_reference_block_number movdn.5
+    # => [num_extra_cycles, CONVERSION_INFO, serial_number_block, pad(16)]
+
+    exec.fee::pay_fee drop
+    # => [pad(16)]
+
+    # check if the account state has changed
+    exec.native_account::has_state_changed
     # => [has_account_state_changed, pad(16)]
 
     # check if this is a new account (i.e., nonce == 0); this check is needed because new

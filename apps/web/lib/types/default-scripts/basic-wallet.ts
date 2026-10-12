@@ -56,8 +56,9 @@ export const masm = `# The MASM code of the Basic Wallet Account Component.
 #
 # See the \`BasicWallet\` Rust type's documentation for more details.
 
-pub use ::miden::standards::wallets::basic::receive_asset
-pub use ::miden::standards::wallets::basic::move_asset_to_note
+pub use {receive_asset} from miden::standards::wallets::basic
+pub use {move_asset_to_note} from miden::standards::wallets::basic
+pub use {create_note} from miden::standards::wallets::basic
 `;
 
 const basicWallet: Script = {

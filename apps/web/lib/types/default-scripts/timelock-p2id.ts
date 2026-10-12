@@ -2,6 +2,7 @@ import { pick } from "lodash";
 import type { Script } from "@/lib/types/script";
 import { defaultScript } from "@/lib/utils/script";
 import basicWallet from "@/lib/types/default-scripts/basic-wallet";
+import { P2IDE_NOTE_CODE } from "@/lib/constants";
 
 export const rust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
 #![no_std]
@@ -78,122 +79,138 @@ impl TimelockP2idNote {
 }
 `;
 
-export const masm = `use miden::protocol::active_account
+export const masm = `use {BlockNumber} from miden::protocol::types
+use miden::protocol::active_account
 use miden::protocol::account_id
 use miden::protocol::active_note
-use miden::protocol::note
-use miden::protocol::output_note
-use miden::standards::wallets::basic->basic_wallet
-
-# ERRORS
-# =================================================================================================
-
-const ERR_P2ID_UNEXPECTED_NUMBER_OF_STORAGE_ITEMS="P2ID note expects exactly 2 note storage items"
-
-const ERR_P2ID_TARGET_ACCT_MISMATCH="P2ID's target account address and transaction address do not match"
+use miden::protocol::tx
+use miden::standards::note::note_reclaim
+use miden::standards::wallets::basic as basic_wallet
 
 # CONSTANTS
 # =================================================================================================
 
-const STORAGE_PTR = 0
-const TARGET_ACCOUNT_ID_SUFFIX_PTR = STORAGE_PTR
-const TARGET_ACCOUNT_ID_PREFIX_PTR = STORAGE_PTR + 1
+const NUM_STORAGE_ITEMS=6
 
-# PROCEDURES
+# Note storage layout (6 felts, loaded at STORAGE_PTR by get_bounded_storage):
+# - reclaimer_suffix        [0]  : suffix of the account allowed to reclaim the note
+# - reclaimer_prefix        [1]  : prefix of the account allowed to reclaim the note
+# - target_suffix           [2]  : suffix of the account for which the note is intended
+# - target_prefix           [3]  : prefix of the account for which the note is intended
+# - reclaim_block_height    [4]  : block height at which the reclaimer may reclaim (0 = disabled)
+# - timelock_block_height   [5]  : block height before which the note cannot be consumed (0 = none)
+#
+# The reclaimer is the account allowed to reclaim the note.
+const STORAGE_PTR = 0
+const RECLAIMER_SUFFIX_ITEM = STORAGE_PTR
+const RECLAIMER_PREFIX_ITEM = STORAGE_PTR + 1
+const TARGET_SUFFIX_ITEM = STORAGE_PTR + 2
+const TARGET_PREFIX_ITEM = STORAGE_PTR + 3
+const RECLAIM_HEIGHT_ITEM = STORAGE_PTR + 4
+const TIMELOCK_HEIGHT_ITEM = STORAGE_PTR + 5
+
+# ERRORS
 # =================================================================================================
 
-#! Pay-to-ID script: adds all assets from the note to the account, assuming ID of the account
-#! matches target account ID specified by the note storage.
+const ERR_P2IDE_UNEXPECTED_NUMBER_OF_STORAGE_ITEMS="P2IDE note expects exactly 6 note storage items"
+
+const ERR_P2IDE_TIMELOCK_HEIGHT_NOT_REACHED="failed to consume P2IDE note because the note is still timelocked"
+
+# HELPER PROCEDURES
+# =================================================================================================
+
+#! Helper procedure to check if the P2IDE note is unlocked.
+#!
+#! Inputs:  [current_block_height, timelock_block_height]
+#! Outputs: []
+proc assert_unlocked(
+    current_block_height: BlockNumber,
+    timelock_block_height: BlockNumber
+)
+    # check timelock_block_height <= current_block_height
+    lte assert.err=ERR_P2IDE_TIMELOCK_HEIGHT_NOT_REACHED
+    # => []
+end
+
+#! Extended Pay-to-ID note script (Reclaimable & Timelockable)
+#!
+#! Adds the note's remaining assets to the account if all of the following conditions are true:
+#! - The transaction's reference block number is greater than or equal to the note's timelock block height.
+#! - Any of the following conditions is true:
+#!   - The account ID against which the transaction is executed matches the note's target account id.
+#!   - The account ID against which the transaction is executed matches the note's reclaimer account id
+#!     and the transaction's reference block number is greater than or equal to the note's reclaim block height.
 #!
 #! Requires that the account exposes:
 #! - miden::standards::wallets::basic::receive_asset procedure.
+#!
+#! Consumers: committed accounts (note storage)
 #!
 #! Inputs:  []
 #! Outputs: []
 #!
 #! Note storage is assumed to be as follows:
+#! - reclaimer_account_id is the ID of the account allowed to reclaim the note.
 #! - target_account_id is the ID of the account for which the note is intended.
+#! - reclaim_block_height is the block height at which the note can be reclaimed by the reclaimer.
+#! - timelock_block_height is the block height at which the note can be consumed by the target.
 #!
 #! Panics if:
-#! - Account does not expose miden::standards::wallets::basic::receive_asset procedure.
-#! - Account ID of executing account is not equal to the Account ID specified via note storage.
+#! - The account does not expose miden::standards::wallets::basic::receive_asset procedure.
+#! - The note is consumed before the timelock expired, i.e. the transaction's reference block
+#!   number is less than the timelock block height.
+#! - Before reclaim block height: the account ID of the executing account is not equal to the target
+#!   account ID.
+#! - At and after reclaim block height: the account ID of the executing account is not equal to
+#!   the target account ID or reclaimer account ID.
 #! - The same non-fungible asset already exists in the account.
-#! - Adding a fungible asset would result in amount overflow, i.e., the total amount would be
+#! - Adding a fungible asset would result in an amount overflow, i.e., the total amount would be
 #!   greater than 2^63.
 @note_script
-pub proc main
-    # store the note storage to memory starting at address 0
-    push.STORAGE_PTR exec.active_note::get_storage
-    # => [num_storage_items, storage_ptr]
+pub proc main()
+    # store the note storage to memory starting at STORAGE_PTR
+    push.NUM_STORAGE_ITEMS push.STORAGE_PTR exec.active_note::get_bounded_storage
+    # => [num_storage_items]
 
-    # make sure the number of storage items is 2
-    eq.2 assert.err=ERR_P2ID_UNEXPECTED_NUMBER_OF_STORAGE_ITEMS
-    # => [storage_ptr]
+    # make sure the number of storage items is 6
+    eq.NUM_STORAGE_ITEMS assert.err=ERR_P2IDE_UNEXPECTED_NUMBER_OF_STORAGE_ITEMS
+    # => []
 
-    # read the target account ID from the note storage
-    drop
-    mem_load.TARGET_ACCOUNT_ID_PREFIX_PTR
-    mem_load.TARGET_ACCOUNT_ID_SUFFIX_PTR
+    # read the timelock block height and the current block number, then assert note is unlocked
+    mem_load.TIMELOCK_HEIGHT_ITEM exec.tx::get_reference_block_number
+    # => [current_block_height, timelock_block_height]
+
+    exec.assert_unlocked
+    # => []
+
+    # load the target account ID from note storage and compare it against the active account
+    mem_load.TARGET_PREFIX_ITEM mem_load.TARGET_SUFFIX_ITEM
     # => [target_account_id_suffix, target_account_id_prefix]
 
     exec.active_account::get_id
     # => [account_id_suffix, account_id_prefix, target_account_id_suffix, target_account_id_prefix]
 
-    # ensure account_id = target_account_id, fails otherwise
-    exec.account_id::is_equal assert.err=ERR_P2ID_TARGET_ACCT_MISMATCH
+    exec.account_id::eq
+    # => [is_target]
+
+    if.true
+        # we can safely consume the note since the active account is the target of the note
+        exec.basic_wallet::move_note_assets_to_account
+        # => []
+    else
+        # the note may only go back to the reclaimer named in the note storage, and only once its
+        # reclaim block height is reached
+        mem_load.RECLAIMER_PREFIX_ITEM mem_load.RECLAIMER_SUFFIX_ITEM
+        mem_load.RECLAIM_HEIGHT_ITEM
+        # => [reclaim_block_height, reclaimer_id_suffix, reclaimer_id_prefix]
+
+        exec.note_reclaim::assert_reclaimable
+        # => []
+
+        exec.basic_wallet::move_note_assets_to_account
+        # => []
+    end
     # => []
-
-    exec.basic_wallet::add_assets_to_account
-    # => []
-end
-
-#! Creates a new P2ID output note from the given inputs.
-#!
-#! This procedure handles:
-#! - Writing note storage to memory in the expected layout ([suffix, prefix] to match
-#!   existing P2ID storage format)
-#! - Obtaining the note script root via procref
-#! - Building the recipient and creating the note
-#!
-#! Inputs:  [target_id_suffix, target_id_prefix, tag, note_type, SERIAL_NUM]
-#! Outputs: [note_idx]
-#!
-#! Where:
-#! - target_id_suffix is the suffix felt of the target account ID.
-#! - target_id_prefix is the prefix felt of the target account ID.
-#! - tag is the note tag to be included in the note.
-#! - note_type is the storage type of the note (1 = public, 2 = private).
-#! - SERIAL_NUM is the serial number of the note (4 elements).
-#! - note_idx is the index of the created note.
-#!
-#! Invocation: exec
-@locals(2)
-pub proc new
-    # => [target_id_suffix, target_id_prefix, tag, note_type, SERIAL_NUM]
-
-    loc_store.TARGET_ACCOUNT_ID_SUFFIX_PTR loc_store.TARGET_ACCOUNT_ID_PREFIX_PTR
-    # => [tag, note_type, SERIAL_NUM]
-
-    movdn.5 movdn.5
-    # => [SERIAL_NUM, tag, note_type]
-
-    procref.main
-    # => [SCRIPT_ROOT, SERIAL_NUM, tag, note_type]
-
-    swapw
-    # => [SERIAL_NUM, SCRIPT_ROOT, tag, note_type]
-
-    push.2 locaddr.STORAGE_PTR
-    # => [storage_ptr, num_storage_items=2, SERIAL_NUM, SCRIPT_ROOT, tag, note_type]
-
-    exec.note::build_recipient
-    # => [RECIPIENT, tag, note_type]
-
-    movup.5 movup.5
-    # => [tag, note_type, RECIPIENT]
-
-    exec.output_note::create
-    # => [note_idx]
 end
 `;
 
@@ -206,8 +223,7 @@ const timelockP2id: Script = {
   readOnly: true,
   rust,
   masm,
-  commitment:
-    "0x94377a3ed496ef4282bb98b1df09f14be986f5ffed1ac5dd2f7e23e01d9c3bce",
+  commitment: P2IDE_NOTE_CODE,
   dependencies: [pick(basicWallet, "id", "name", "type", "commitment")],
 };
 

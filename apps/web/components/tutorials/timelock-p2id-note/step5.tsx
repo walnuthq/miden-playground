@@ -5,7 +5,7 @@ import useAccounts from "@/hooks/use-accounts";
 import { getIdentifierPart } from "@/lib/utils/account";
 
 const Step5: TutorialStep = {
-  title: "Check the Test Wallet consumable notes.",
+  title: "Check the Test Wallet's consumable notes.",
   Content: () => {
     const { wallets } = useAccounts();
     const testWallet = wallets.find(({ name }) => name === "Test Wallet");

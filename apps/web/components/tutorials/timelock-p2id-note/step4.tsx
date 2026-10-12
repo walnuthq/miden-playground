@@ -29,7 +29,7 @@ const useCompleted = () => {
 };
 
 const Step4: TutorialStep = {
-  title: "Create a note by executing a transaction.",
+  title: "Create the timelocked note.",
   Content: () => {
     const { wallets } = useAccounts();
     const { syncHeight } = useSyncState();
@@ -49,10 +49,11 @@ const Step4: TutorialStep = {
         <TutorialAlert
           completed={completed}
           title="Action required: Create the note."
-          titleWhenCompleted="You created the timelock P2ID note."
+          titleWhenCompleted="You created the timelocked P2ID note."
           description={
             <p>
-              Follow the instructions to create your custom timelock P2ID note.
+              Create a note from your script with the <em>"Create Note"</em>{" "}
+              dialog, then confirm the transaction in your wallet.
             </p>
           }
         />

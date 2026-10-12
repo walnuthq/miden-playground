@@ -94,9 +94,15 @@ const Header = () => {
           {isClient && networkId !== "mmck" && !isTutorial && (
             <WalletButton
               enabledSigners={
-                tutorialId === "private-transfers"
+                ["private-transfers"].includes(tutorialId)
                   ? ["MidenFi", "Para"]
-                  : ["MidenFi"]
+                  : [
+                        "timelock-p2id-note",
+                        "network-transactions",
+                        "your-first-smart-contract-and-custom-note",
+                      ].includes(tutorialId)
+                    ? ["Para"]
+                    : ["MidenFi"]
               }
             />
           )}

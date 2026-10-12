@@ -5,10 +5,35 @@ export const rust = "";
 
 export const masm = `# The MASM code of the Basic Fungible Faucet Account Component.
 #
-# See the \`BasicFungibleFaucet\` Rust type's documentation for more details.
+# See the \`FungibleFaucet\` Rust type's documentation for more details. This component
+# bundles the fungible-faucet asset minting/burning procedures and the token metadata accessors
+# (name, description, logo URI, external link, mutability config) into a single component.
 
-pub use ::miden::standards::faucets::basic_fungible::mint_and_send
-pub use ::miden::standards::faucets::basic_fungible::burn
+# Fungible token minting and burning
+pub use {mint_and_send} from miden::standards::faucets::fungible
+pub use {receive_and_burn} from miden::standards::faucets::fungible
+
+# Fungible token configuration
+pub use {get_decimals} from miden::standards::faucets::fungible
+pub use {get_token_symbol} from miden::standards::faucets::fungible
+pub use {get_token_supply} from miden::standards::faucets::fungible
+pub use {get_max_supply} from miden::standards::faucets::fungible
+pub use {set_max_supply} from miden::standards::faucets::fungible
+pub use {is_max_supply_mutable} from miden::standards::faucets::fungible
+pub use {get_token_config} from miden::standards::faucets::fungible
+
+# Code inspection
+pub use {has_procedure} from miden::standards::inspection::code_inspection
+
+# Token metadata: mandatory name + optional description, logo, external link.
+pub use {get_name} from miden::standards::faucets
+pub use {get_mutability_config} from miden::standards::faucets
+pub use {is_description_mutable} from miden::standards::faucets
+pub use {is_logo_uri_mutable} from miden::standards::faucets
+pub use {is_external_link_mutable} from miden::standards::faucets
+pub use {set_description} from miden::standards::faucets
+pub use {set_logo_uri} from miden::standards::faucets
+pub use {set_external_link} from miden::standards::faucets
 `;
 
 const fungibleFaucet: Script = {

@@ -3,22 +3,120 @@ import { defaultProcedureExport, defaultScript } from "@/lib/utils/script";
 
 export const rust = ``;
 
-export const masm = `# Multi-Signature RPO Falcon 512 Authentication Component With GUARDIAN
+export const masm = `# The MASM code of the Multi-Signature Authentication component integrated with a state guardian.
+#
+# See the \`AuthGuardedMultisig\` Rust type's documentation for more details.
 
-use openzeppelin::auth::multisig
-use openzeppelin::auth::guardian
+use miden::protocol::tx
+use miden::standards::auth::multisig
+use miden::standards::auth::guardian
+use miden::standards::auth::signature
+use miden::standards::fee
 
-type BeWord = struct @bigendian { a: felt, b: felt, c: felt, d: felt }
+pub use {update_signers_and_threshold} from miden::standards::auth::multisig
+pub use {get_threshold_and_num_approvers} from miden::standards::auth::multisig
+pub use {set_procedure_threshold} from miden::standards::auth::multisig
+pub use {get_signer_at} from miden::standards::auth::multisig
+pub use {is_signer} from miden::standards::auth::multisig
 
-pub use multisig::update_signers_and_threshold
-pub use multisig::update_procedure_threshold
-pub use guardian::update_guardian_public_key
-pub use guardian::verify_guardian_signature
+pub use {update_guardian_public_key} from miden::standards::auth::guardian
 
-pub proc auth_tx_multisig_guardian(salt: BeWord)
+#! Authenticate a transaction with multi-signature support and optional guardian verification,
+#! paying the transaction fee in the process.
+#!
+#! The fee is paid as in the multisig component, before the transaction summary is created, so
+#! the fee note is covered by the approver and guardian signatures. The cycle estimate counts the
+#! guardian as one more signer.
+#!
+#! The guardian must not be an approver, otherwise a single signature would satisfy both the
+#! multisig and the guardian check, so this procedure re-checks the invariant that
+#! \`AuthGuardedMultisigConfig::new\` enforces at deployment time. Both sides are read from the
+#! current account state, so a guardian rotation or an approver-set update performed by this
+#! transaction is covered.
+#!
+#! Inputs:
+#!   Operand stack: [AUTH_ARGS]
+#!   Advice map: { AUTH_ARGS: [BLOCK_WORD, SALT, CONVERSION_INFO] }
+#! Outputs:
+#!   Operand stack: []
+#!
+#! Where:
+#! - AUTH_ARGS and its preimage are as described in \`multisig::resolve_auth_args\`.
+#!
+#! Panics if:
+#! - insufficient number of valid approver or guardian signatures.
+#! - the approval expired at or before the transaction reference block, see
+#!   \`multisig::assert_approval_not_expired\`.
+#! - the configured guardian public key is one of the approver public keys.
+#!
+#! Invocation: call
+@auth_script
+pub proc auth_tx_guarded_multisig(auth_args: word)
+    exec.multisig::resolve_auth_args
+    # => [CONVERSION_INFO, bound_block_num, approval_expiration_block_num, SALT]
+
+    # reject an expired approval before any signature is verified.
+    # ---------------------------------------------------------------------------------------------
+
+    dup.5 exec.tx::get_reference_block_number
+    # => [reference_block_num, approval_expiration_block_num, CONVERSION_INFO, bound_block_num, approval_expiration_block_num, SALT]
+
+    exec.multisig::assert_approval_not_expired movdn.10
+    # => [CONVERSION_INFO, bound_block_num, approval_expiration_block_num, SALT, approval_expiration_delta]
+
+    # check a guardian rotation before the fee note exists, since a rotation must not create notes
+    exec.guardian::assert_rotation_policy movdn.11
+    # => [CONVERSION_INFO, bound_block_num, approval_expiration_block_num, SALT, approval_expiration_delta, is_rotation]
+
+    # Pay the transaction fee before the summary is created so that the TX_FEE note and the
+    # vault withdrawal funding it are covered by the approver and guardian signatures.
+    # ---------------------------------------------------------------------------------------------
+
+    exec.multisig::get_initial_threshold_and_num_approvers drop
+    # => [num_of_approvers, CONVERSION_INFO, bound_block_num, approval_expiration_block_num, SALT, approval_expiration_delta, is_rotation]
+
+    # count the guardian as a signer; this overestimates a guardian rotation, which skips it
+    add.1
+    # => [num_of_signers, CONVERSION_INFO, bound_block_num, approval_expiration_block_num, SALT, approval_expiration_delta, is_rotation]
+
+    exec.signature::estimate_multisig_authentication_cycles
+    # => [num_extra_cycles, CONVERSION_INFO, bound_block_num, approval_expiration_block_num, SALT, approval_expiration_delta, is_rotation]
+
+    # use the signed block for the fee note.
+    dup.5 movdn.5
+    # => [num_extra_cycles, CONVERSION_INFO, bound_block_num, bound_block_num, approval_expiration_block_num, SALT, approval_expiration_delta, is_rotation]
+
+    exec.fee::pay_fee drop
+    # => [bound_block_num, approval_expiration_block_num, SALT, approval_expiration_delta, is_rotation]
+
+    # Authenticate the transaction with the approvers and the guardian and record it for replay
+    # protection.
+    # ---------------------------------------------------------------------------------------------
+
     exec.multisig::auth_tx
-    exec.guardian::verify_guardian_signature
-    exec.multisig::assert_new_tx
+    # => [TX_SUMMARY_COMMITMENT, approval_expiration_delta, is_rotation]
+
+    dupw movup.9
+    # => [is_rotation, TX_SUMMARY_COMMITMENT, TX_SUMMARY_COMMITMENT, approval_expiration_delta]
+
+    exec.guardian::verify_signature
+    # => [TX_SUMMARY_COMMITMENT, approval_expiration_delta]
+
+    exec.guardian::get_guardian_public_key
+    # => [GUARDIAN_PUBLIC_KEY, TX_SUMMARY_COMMITMENT, approval_expiration_delta]
+
+    exec.multisig::assert_not_approver_public_key
+    # => [TX_SUMMARY_COMMITMENT, approval_expiration_delta]
+
+    exec.multisig::record_and_assert_new_tx
+    # => [approval_expiration_delta]
+
+    # apply the approval expiration after tx summary extractions since the host cross-checks
+    # the kernel expiration delta against the transaction summary delta
+    # ---------------------------------------------------------------------------------------------
+
+    exec.multisig::apply_approval_expiration
+    # => []
 end
 `;
 

@@ -36,7 +36,7 @@ const useCompleted = () => {
 };
 
 const Step3: TutorialStep = {
-  title: "Add timelock logic to the P2ID Note.",
+  title: "Add the timelock logic to the P2ID note script.",
   Content: () => {
     const completed = useCompleted();
     return (
@@ -48,9 +48,9 @@ const Step3: TutorialStep = {
           titleWhenCompleted="You compiled the timelock P2ID script."
           description={
             <p>
-              Follow the instructions to add timelock logic to your P2ID script.
-              When you're done, click on the <em>"Compile"</em> button in the
-              editor console to compile your script.
+              Follow the instructions to add the timelock logic to your P2ID
+              script, then click the <em>"Compile"</em> button in the editor
+              console to compile it.
             </p>
           }
         />
