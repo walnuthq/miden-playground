@@ -34,7 +34,7 @@ const useCompleted = () => {
 };
 
 const Step2: TutorialStep = {
-  title: "Deploy a network Counter smart contract.",
+  title: "Deploy your network counter.",
   Content: () => {
     const completed = useCompleted();
     return (
@@ -42,14 +42,16 @@ const Step2: TutorialStep = {
         <Step2Content />
         <TutorialAlert
           completed={completed}
-          title="Action required: Deploy a network Counter."
-          titleWhenCompleted="You deployed a network Counter."
+          title="Action required: Deploy your network counter."
+          titleWhenCompleted="You deployed your network counter."
           description={
             <p>
-              Click on the <em>"Create new account"</em> button and deploy a
-              network account by selecting the <strong>Public</strong> storage
-              mode. Use the <strong>Network Account</strong> authentication
-              scheme and the <strong>Counter Contract</strong> component.
+              Click the <em>"Create new account"</em> button at the top of the
+              accounts page, select the <em>"Deploy account"</em> option and
+              deploy a <strong>Public</strong> account using the{" "}
+              <strong>Network Account</strong> authentication component, the{" "}
+              <strong>Counter Contract</strong> account component and the{" "}
+              <strong>counter-note</strong> allowed note script.
             </p>
           }
         />

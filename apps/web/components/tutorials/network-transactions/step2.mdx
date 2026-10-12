@@ -1,14 +1,15 @@
 import Link from "@/components/tutorials/tutorial-link";
 
-From the <Link href="/accounts">accounts page</Link>, click on _"Create new account"_ and select the _"Deploy account"_ option.
+Let's start by deploying the network counter. Head to the <Link href="/accounts">accounts page</Link>, click the _"Create new account"_ button at the top of the page and select the _"Deploy account"_ option.
 
-Give your new contract a name and select **Public** as storage mode.
-Choose **Network Account** for the authentication scheme and select the custom **Counter Contract** account component.
+Enter a name for your contract and leave the storage mode set to **Public**. Select **Network Account** as the authentication component and the **Counter Contract** account component.
 
-In Miden, an account is a network account (one the network transaction builder executes on a user's behalf) if and only if it is **Public** and carries the **AuthNetworkAccount** auth component with a non-empty note-script allowlist.
+An Account is a network account, one that the network transaction builder executes Transactions against, if and only if it is **Public** and uses the **Network Account** authentication component. This component holds an allowlist of the note scripts the network transaction builder may execute against the Account.
 
-The allowed note-script roots and transaction-script roots are pinned at account creation: select **counter-note** for note-scripts and leave transaction-scripts empty.
+Select **counter-note** as the allowed note script and leave the allowed transaction scripts empty. The Playground also allows the **P2ID** note script, so that the Account can be funded.
 
-When you're done configuring your contract deployment, click on the _"Deploy"_ button to create your network account, it will take some time as the account is automatically funded upon deployment and registered on-chain.
+Once the account component is selected, its **`counter_contract::counter_contract::count`** storage slot is listed with its default value: keep the initial count set to **0**.
 
-The key difference from regular contracts is using the **Network Account** [authentication component](https://docs.miden.xyz/reference/protocol/account/code#authentication) instead of **No Auth**, which enables the contract transactions to be executed by the network operator.
+Finally, click the _"Deploy"_ button. This takes a few moments: the Playground creates the Account, then funds it so that it can pay transaction fees. Funding the Account is its first Transaction, which also registers it on testnet.
+
+Once a network account is registered, the network rejects Transactions submitted by users that directly update it: unlike the counter contract from the previous tutorials, which used the **No Auth** authentication component, you can't increment the network counter by invoking its procedures. Instead, users interact with it through network notes.

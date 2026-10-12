@@ -12,10 +12,10 @@ const tutorial: Tutorial = {
   id: "network-transactions",
   number: 9,
   title: "Network transactions",
-  tagline:
-    "Deploy and interact with smart contracts using network transactions.",
+  tagline: "Deploy a network counter and increment it with a network note.",
   description:
-    "In this tutorial, we will explore Network Transactions (NTXs) on Miden - a powerful feature that enables autonomous smart contract execution and public shared state management.",
+    "In this tutorial, you'll deploy a network counter contract on testnet and increment it with a network note, consumed by the network transaction builder.",
+  category: "advanced",
   initialRoute: "/accounts",
   state,
   steps: [Step1, Step2, Step3, Step4, Step5],
