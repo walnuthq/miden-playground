@@ -5,7 +5,7 @@ import tutorials from "@/components/tutorials";
 import { defaultTutorial, isTutorial } from "@/lib/utils/tutorial";
 import useAppState from "@/hooks/use-app-state";
 import { trackEvent } from "@simpleanalytics/next";
-import { sleep } from "@/lib/utils";
+import { sleep, randomLowercaseId } from "@/lib/utils";
 import useNetwork from "@/hooks/use-network";
 import type { NetworkId } from "@/lib/types/network";
 import { clientGetLatestBlockNum } from "@/lib/web-client";
@@ -50,6 +50,7 @@ const useTutorials = () => {
       ...tutorial.state,
       nextStore: tutorial.store,
       tutorialStartBlockNum: await startBlockNum(tutorial.networkId),
+      tutorialRunId: randomLowercaseId(),
       completedTutorials,
     });
     trackEvent("start_tutorial", {
@@ -72,6 +73,7 @@ const useTutorials = () => {
       ...nextTutorial.state,
       nextStore: nextTutorial.store,
       tutorialStartBlockNum: await startBlockNum(nextTutorial.networkId),
+      tutorialRunId: randomLowercaseId(),
       completedTutorials: newCompletedTutorials,
     });
     trackEvent("complete_tutorial", {

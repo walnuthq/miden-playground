@@ -1,5 +1,10 @@
 import { validate, version } from "uuid";
 
+export const randomLowercaseId = (length = 6) =>
+  Array.from(crypto.getRandomValues(new Uint8Array(length)), (byte) =>
+    String.fromCharCode(97 + (byte % 26)),
+  ).join("");
+
 export const sleep = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
 

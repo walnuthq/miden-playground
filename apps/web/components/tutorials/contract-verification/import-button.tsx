@@ -15,7 +15,7 @@ const ImportButton = () => {
     ({ id, type }) =>
       !defaultComponentIds.includes(id) && type === "account-component",
   );
-  const counter = accounts.find(({ components }) => components.length === 0);
+  const counter = accounts.find(({ name }) => name === "Unverified Contract");
   return (
     <Button
       disabled={loading || !!counter}

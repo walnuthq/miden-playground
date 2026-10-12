@@ -1,4 +1,4 @@
-In the previous step, we looked at the higher-level **Rust** source code of the counter contract. Now let's focus on its **MASM** implementation.
+In the previous step, you looked at the higher-level **Rust** source code of the counter contract. Now let's focus on its **MASM** implementation.
 
 Here's a breakdown of what the **`get_count`** procedure does:
 
@@ -12,7 +12,7 @@ Here's a breakdown of what the **`increment_count`** procedure does:
 1. Pushes the slot ID of the **`counter_contract::counter_contract::count`** slot onto the stack.
 2. Executes **`active_account::get_item`** to read the current count.
 3. Executes **`add.1`** to add **`1`** to the count.
-4. Pushes the slot ID again so that we can write the updated count.
+4. Pushes the slot ID again so that the updated count can be written.
 5. Executes **`native_account::set_item`**, which saves the incremented count to storage and returns the old value.
 6. Executes **`dropw`** to drop the old value from the stack.
 7. Executes **`sys::truncate_stack`** to truncate the stack back to 16 elements.

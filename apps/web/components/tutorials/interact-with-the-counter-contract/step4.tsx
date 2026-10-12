@@ -39,7 +39,7 @@ const Step4: TutorialStep = {
         <TutorialAlert
           completed={completed}
           title="Action required: Import the counter contract."
-          titleWhenCompleted="You have imported the counter contract."
+          titleWhenCompleted="You imported the counter contract."
           description={
             <p>
               Click the <em>"Create new account"</em> button at the top of the

@@ -44,8 +44,8 @@ const Step4: TutorialStep = {
           description={
             <p>
               Create a network note targeting your network counter with the{" "}
-              <em>"Create Note"</em> dialog, confirm the transaction in your
-              wallet, then wait for the network to consume the note.
+              <em>"Create Note"</em> dialog, confirm the Transaction in your
+              wallet, then wait for the network to consume the Note.
             </p>
           }
         />

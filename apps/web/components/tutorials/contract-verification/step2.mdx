@@ -1,5 +1,5 @@
-Try adding a new procedure to this **Counter Contract** that resets the counter value to zero.
-It must have the following implementation:
+Let's extend the counter contract with a new procedure that resets the counter value to zero.
+Add the following **`reset_count`** method inside the **`impl CounterContract for CounterContractStorage`** block, after **`increment_count`**:
 
 ```rust
 /// Resets the counter value to zero
@@ -9,7 +9,7 @@ fn reset_count(&mut self) {
 }
 ```
 
-Don't forget to also declare the procedure signature in the **`CounterContract`** trait:
+Then declare its signature in the **`CounterContract`** trait, marked with **`#[account_procedure]`** so that it's exported:
 
 ```rust
 #[component]
@@ -20,12 +20,13 @@ trait CounterContract {
 }
 ```
 
-When developing a smart contract you write human-readable Rust code and use a compiler to transpile it to [MASM](https://docs.miden.xyz/builder/glossary/#miden-assembly) code that can be executed by the [MidenVM](https://docs.miden.xyz/design/miden-vm/).
+When you develop a smart contract, you write human-readable Rust code, and a compiler turns it into [Miden Assembly (MASM)](https://docs.miden.xyz/builder/glossary/#miden-assembly) code that the [Miden VM](https://docs.miden.xyz/design/miden-vm/) can execute.
 
-Click on the _"Compile"_ button to see this process in action: the actual result of compilation is a Miden Assembly Package (MASP) containing both the MASM code and a manifest describing the package exports.
+Click the _"Compile"_ button to see this process in action. The result of the compilation is a Miden package (a **`.masp`** file), which contains both the compiled code and a manifest describing what the package exports.
 
-On the _"Metadata"_ tab, you'll find the list of exported procedures exposed by the package manifest along with their signature.
+Click the _"Metadata"_ tab: under _"Package exports"_, you'll find the procedures exported by the package, along with their signatures.
 
-The MASM code ends up being deployed on-chain but we lose the link with the original human-readable code and the interface exposed by the smart contract: the function signature of our exported procedures are necessary to invoke them using the correct arguments.
+Only the compiled code is stored on-chain, and each procedure is identified by its [MAST root](https://docs.miden.xyz/reference/protocol/account/code), a hash of its code, rather than by its name.
+The link with the original Rust source code is lost, and so are the procedure signatures, which you need to call the procedures with the right arguments.
 
-Contract verification aims at bridging the gap between on-chain deployed code and its original source and interface: we're linking them back together to grant anyone access to the Rust source code and package manifest so they know how to call the exposed procedures.
+Contract verification bridges this gap: it links the on-chain code back to its Rust source code and package manifest, so that anyone can read the source code and know how to call the exported procedures.

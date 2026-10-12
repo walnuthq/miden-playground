@@ -1,23 +1,23 @@
-The timelock block height will be the 3rd item of the note storage, so the script must now expect 3 storage items. At line _28_, change the expected storage length from **`2`** to **`3`**:
+The timelock block height will be the third item of the note storage, so the script must now expect three storage items. At line _28_, change the expected storage length from **`2`** to **`3`**:
 
 ```rust
 // make sure the storage length is 3
 assert_eq(storage.len().into(), felt!(3));
 ```
 
-Then, after line _33_, read the 3rd storage item into a variable:
+Then, after line _33_, read the third storage item into a variable:
 
 ```rust
 let timelock_height = storage[2];
 ```
 
-To get the current block height, use the transaction kernel's `get_block_number` call, which returns the Transaction's reference block number:
+To get the current block height, use the transaction kernel's **`get_block_number`** call, which returns the Transaction's reference block number:
 
 ```rust
 let block_number = tx::get_block_number();
 ```
 
-Finally, check that `block_number` ≥ `timelock_height`:
+Finally, check that **`block_number`** ≥ **`timelock_height`**:
 
 ```rust
 assert!(block_number >= timelock_height);

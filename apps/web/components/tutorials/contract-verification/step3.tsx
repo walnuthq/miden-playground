@@ -20,7 +20,7 @@ const useCompleted = () => {
 };
 
 const Step3: TutorialStep = {
-  title: "Deploy the Counter Contract.",
+  title: "Deploy the counter contract.",
   Content: () => {
     const completed = useCompleted();
     const { accounts } = useAccounts();
@@ -37,13 +37,15 @@ const Step3: TutorialStep = {
         <Step3Content counter={counter} />
         <TutorialAlert
           completed={completed}
-          title="Action required: Deploy the Counter Contract."
-          titleWhenCompleted="You deployed the Counter Contract."
+          title="Action required: Deploy the counter contract."
+          titleWhenCompleted="You deployed the counter contract."
           description={
             <p>
-              Click on the <em>"Create new account"</em> button and deploy an{" "}
-              account using the <strong>NoAuth</strong> authentication scheme
-              and the <strong>Counter Contract</strong> component.
+              On the accounts page, click the <em>"Create new account"</em>{" "}
+              button, select the <em>"Deploy account"</em> option and deploy a
+              contract with the <strong>No Auth</strong> authentication
+              component and the <strong>Counter Contract</strong> account
+              component.
             </p>
           }
         />

@@ -42,11 +42,11 @@ const Step3: TutorialStep = {
         <TutorialAlert
           completed={completed}
           title="Action required: Request tokens from the faucet."
-          titleWhenCompleted="Your guardian wallet received a note from the faucet."
+          titleWhenCompleted="Your guardian wallet received a Note from the faucet."
           description={
             <p>
               Click the <em>"Mint"</em> button to request tokens from the USDCx
-              Faucet. Once the note has been committed on testnet, you can
+              Faucet. Once the Note has been committed on testnet, you can
               proceed to the next step.
             </p>
           }

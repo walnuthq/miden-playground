@@ -6,7 +6,7 @@ Now that you understand how the counter contract's procedures are implemented, l
 
 Head to the <Link href="/accounts">accounts page</Link>, click the _"Create new account"_ button at the top of the page and select the _"Import account"_ option.
 
-A modal will ask you for the name and address of the account to import. Enter the counter contract details below:
+A dialog asks you for the name and address of the Account to import. Enter the counter contract details below:
 
 - **Name**: Counter Contract <CopyButton content="Copy Account Name" copy="Counter Contract" />
 
@@ -14,4 +14,4 @@ A modal will ask you for the name and address of the account to import. Enter th
 
 <AccountAddress account={props.counter} withLink={props.withLink} />
 
-Once the account is imported, {props.withLink ? <Link href={`/accounts/${props.counter.identifier}`}>click its name</Link> : 'click its name'} on the accounts page to open its details page.
+Once the contract is imported, {props.withLink ? <Link href={`/accounts/${props.counter.identifier}`}>click its name</Link> : 'click its name'} on the accounts page to open its details page.

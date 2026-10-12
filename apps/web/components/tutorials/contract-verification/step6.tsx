@@ -41,12 +41,13 @@ const Step6: TutorialStep = {
         <Step6Content counter={counter} />
         <TutorialAlert
           completed={completed}
-          title="Action required: Verify the contract."
-          titleWhenCompleted="You verified the contract."
+          title="Action required: Verify the imported contract."
+          titleWhenCompleted="You verified the imported contract."
           description={
             <p>
-              Click on the <em>"Verify account component"</em> button and upload
-              the contract source code.
+              On the imported contract's <em>"Components"</em> tab, click the{" "}
+              <em>"Verify account component"</em> button and upload the folder
+              you extracted from the exported script.
             </p>
           }
         />

@@ -76,6 +76,10 @@ export type State = {
   // The chain tip when the tutorial started, to tell notes created during the
   // tutorial from older ones the reset store fetches again.
   tutorialStartBlockNum: number;
+  // A random lowercase id drawn when the tutorial starts, for tutorials whose
+  // resources must not collide with other runs (lowercase letters only, so it
+  // survives snake_case conversion unchanged).
+  tutorialRunId: string;
   tutorialOpen: boolean;
   nextTutorialStepDisabled: boolean;
   completedTutorials: Set<string>;

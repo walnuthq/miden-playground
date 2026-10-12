@@ -1,9 +1,11 @@
 import Link from "@/components/tutorials/tutorial-link";
 
-Back on the <Link href={`/accounts/${props.counter?.identifier}?tab=components`}>imported contract components page</Link>, click on the _"Verify account component"_ button and upload the folder you extracted from the downloaded script archive.
+Head back to the <Link href={`/accounts/${props.counter?.identifier}?tab=components`}>imported contract's <em>"Components"</em> tab</Link> and click the _"Verify account component"_ button.
+In the _"Verify Account Component"_ dialog, select the folder you extracted in the previous step as the project directory, then click the _"Verify"_ button.
 
-This process will take some time as we need to recompile the submitted script server-side and compare the resulting [MASM](https://docs.miden.xyz/builder/glossary/#miden-assembly) code against the unverified contract [AccountCode](https://docs.miden.xyz/builder/glossary/#accountcode).
+This can take a minute or two: the verification service recompiles the source code and checks that every procedure it exports is part of the imported contract's [code](https://docs.miden.xyz/builder/glossary/#accountcode), by comparing their MAST roots.
 
-The verification will be successful if we're able to find a match and assert that the unverified account exports the same procedures defined in the uploaded source code.
+If they match, the verification succeeds and the verified [account component](https://docs.miden.xyz/builder/glossary/#accountcomponent) is listed under _"Account Components"_, with its procedures and a link to its source code.
 
-The verified [AccountComponent](https://docs.miden.xyz/builder/glossary/#accountcomponent) should be appended to the account verified components list and you will be able to start interacting with this contract within the playground.
+Verification applies to the contract's code rather than to a single Account: any Account deployed with the same code is now verified too.
+That's why your script name has a random suffix: without it, everyone running this tutorial would deploy the same code, and the contract would already be verified by the time you import it.
