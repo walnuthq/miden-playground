@@ -14,7 +14,8 @@
     "deploy-staging": "opennextjs-cloudflare build && opennextjs-cloudflare deploy --env staging",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
-    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@getpara/evm-wallet-connectors": "3.22.0",
@@ -52,6 +53,7 @@
     "wagmi": "3.7.7"
   },
   "devDependencies": {
+    "@playwright/test": "1.64.0",
     "@types/lodash": "4.17.26",
     "@types/mdx": "2.0.14",
     "@types/node": "24.19.2",

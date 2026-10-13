@@ -35,6 +35,9 @@ End-to-end QA of every Playground tutorial, run headless with agent-browser on l
 | 10 | Low | Open | Infra | The remote prover intermittently fails with `connection error: i/o timeout` (tutorial 1 wallet creation, tutorial 9 network counter deployment); retrying works. |
 | 11 | Low | Upstream (Bread) | Tutorials 4–5 | On reconnect, Bread's connect popup leaves "I understand the risk" unchecked (it's pre-checked on first connect) but keeps "Connect" enabled; clicking it shows "Error: Unable to continue without confirming" with "Retry". The Playground gives no feedback and stays on "Select Wallet". |
 | 12 | Low | Upstream (Para) | Tutorial 4 | Para's signing dialog shows raw values (`Assets: 2000000 of 0x4cbdcaffe75f0a317482224dae6436`) instead of formatted amounts and symbols. Its Profile view logs a React hydration error (`<button>` inside `<button>`) from Para's own markup. |
+| 13 | Low | Open | Tutorial 1, step 5 | The "Click here" link to the minted note is built from synced input notes, so it points to `/notes/undefined` until the next state sync picks the note up (seconds normally, much longer when testnet syncs time out). A user clicking right after "Next step" lands on a broken page. Found by the Playwright test. |
+| 14 | Low | Open | Transaction dialogs | When executing the preview fails, the "Configure … transaction" dialog stays as it is with no error message: on production, tutorial 2's send preview failed once with `error during processing of event 'miden::protocol::account::before_foreign_load'` (console only) and worked on retry. Same pattern as the silent Deploy failure. Found by the Playwright test. |
+| 15 | Low | Open | Tutorial 4, step 4 | Right after logging into Para, clicking the Para wallet button reopens Para's modal on its last screen ("Welcome Back!"), which closes by itself: the account view with the Profile button the step describes only shows on a second click. Found by the Playwright test. |
 
 ## QA setup notes
 
@@ -42,3 +45,28 @@ End-to-end QA of every Playground tutorial, run headless with agent-browser on l
 - Bread's `confirm.html` approval popups aren't listed by agent-browser: drive them over raw CDP (`/json/list`, then `Runtime.evaluate`).
 - Tutorials 10–12 need the local API (`apps/api`, `pnpm dev` on port 3001) with its Docker services running.
 - Headless Chrome reports `document.visibilityState === "hidden"`, so Sonner toasts never auto-dismiss there. That's a headless artifact, not an app bug.
+
+## Production QA — playground.miden.xyz (2026-10-13, after PR #678)
+
+Same run as above against production, with the same Bread QA wallet. Para used its production environment (OTP from `no-reply@getpara.com`, a different Para wallet than beta).
+
+| # | Tutorial | Result |
+|---|---|---|
+| 1–7 | All | ✅ Pass |
+| 8 | Timelock P2ID note | ✅ Pass on the 2nd attempt (1st Bread submission: node timeout) |
+| 9 | Network transactions | ✅ Pass on the 5th attempt (13:57 UTC); the first 4 Bread network-note submissions failed with a node timeout (12:23–13:32 UTC) |
+| 10 | Foreign procedure invocation | ✅ Pass |
+| 11 | Your first smart contract and custom note | ✅ Pass on the 2nd attempt (1st Bread submission: node timeout) |
+| 12 | Contract verification | ✅ Pass, including the optional import into a new sandbox |
+
+**Differences from the local dev QA:**
+
+- **Fixes verified:** #1 (late Para approval shows a persistent "Transaction expired." toast, cleared on retry), #5 (new tutorial 5 copy) and #9 (toasts at the bottom center) all work on production.
+- **#2 (stale consumable notes) didn't reproduce** on production in tutorials 1, 2 and 5.
+- **Faster:** wallet creation (~30s) and script creation/compilation (~2s) were faster than on local dev.
+- **Bread submissions timing out (testnet load, not a deployment difference):** Bread's `guardianPipeline` submissions failed repeatedly with `submit_proven_transaction: request to Miden node timed out; the node may be under heavy load`. This hit every network note (tutorial 9) and some custom notes (tutorials 8 and 11, which passed on retry); plain Bread sends kept working. Bread submits directly to the testnet node, and this was testnet load, not the deployment: re-running tutorial 9 on local dev at 13:55 UTC passed first try, and production passed right after at 13:57 UTC.
+- **New (medium):** when Bread fails after accepting the request, the Playground shows nothing: no error, and the step never completes. Users must open Bread's Activity to see "Transaction failed… safe to retry". This is the Bread-path counterpart of #1.
+- **New (low):** a failed Deploy Account (remote prover `i/o timeout`, #10) is silent; the dialog just returns to its Deploy button. Same behavior locally.
+- **New (low):** tutorial 11 step 7 completes when the counter has no consumable notes, not when the increment note was consumed (exposed by an extra note I sent to the counter).
+- **#11 (Bread):** the risk checkbox was also unchecked on the *first* connect to the production origin, so it isn't specific to reconnects.
+- **Unchanged:** #4 (Bread nonce shows 0) and #7 (4 raw storage items).

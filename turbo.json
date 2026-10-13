@@ -30,6 +30,10 @@
         "SIMPLE_ANALYTICS_HOSTNAME"
       ]
     },
+    "web#test:e2e": {
+      "cache": false,
+      "passThroughEnv": ["PLAYWRIGHT_*", "BREAD_*", "PARA_*", "CI"]
+    },
     "status-page#build": {
       "cache": false,
       "outputs": ["dist/**"],
