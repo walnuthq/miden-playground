@@ -19,6 +19,7 @@ import InvokeProcedureArgumentsDialog from "@/components/account/invoke-procedur
 import VerifyAccountComponentDialog from "@/components/account/verify-account-component-dialog";
 import useNetwork from "@/hooks/use-network";
 import useMultisig from "@/hooks/use-multisig";
+import { midenFaucetAddress } from "@/lib/constants";
 
 const Account = ({
   identifier,
@@ -40,12 +41,14 @@ const Account = ({
     return null;
   }
   const showCreateTransactionButton =
-    isTutorial ||
-    networkId === "mmck" ||
-    isConnectedWallet(account) ||
-    account.components.includes("auth-no-auth") ||
-    account.components.includes("auth-network-account") ||
-    isMultisigSigner(account);
+    account.address === midenFaucetAddress(networkId)
+      ? false
+      : isTutorial ||
+        networkId === "mmck" ||
+        isConnectedWallet(account) ||
+        account.components.includes("auth-no-auth") ||
+        account.components.includes("auth-network-account") ||
+        isMultisigSigner(account);
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
       <Tabs
