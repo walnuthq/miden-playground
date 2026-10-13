@@ -31,7 +31,7 @@ import { useIsClient } from "usehooks-ts";
 import { networks } from "@/lib/types/network";
 import { cn } from "@workspace/ui/lib/utils";
 import useAppState from "@/hooks/use-app-state";
-import examples from "@/lib/examples";
+// import examples from "@/lib/examples";
 import useExamples from "@/hooks/use-examples";
 
 const ProjectSwitcher = () => {
@@ -41,7 +41,7 @@ const ProjectSwitcher = () => {
   const { networkId } = useNetwork();
   const { resetState } = useAppState();
   const { tutorial, completedTutorials, startTutorial } = useTutorials();
-  const { example, launchExample } = useExamples();
+  const { example /*, launchExample*/ } = useExamples();
   // const { saveProject, loadProject } = useProjects();
   if (!isClient) {
     return null;
@@ -110,7 +110,7 @@ const ProjectSwitcher = () => {
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
             </DropdownMenuSub>
-            <DropdownMenuSeparator />
+            {/* <DropdownMenuSeparator />
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>Examples</DropdownMenuSubTrigger>
               <DropdownMenuPortal>
@@ -125,7 +125,7 @@ const ProjectSwitcher = () => {
                   ))}
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
-            </DropdownMenuSub>
+            </DropdownMenuSub> */}
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() => {
