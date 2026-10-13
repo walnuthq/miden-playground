@@ -85,9 +85,12 @@ test("tutorial 1: create and fund a wallet", async ({ page }) => {
   await test.step("6. the wallet holds 100 MDN", async () => {
     await panel.openLink("your wallet", /\/accounts\/mtst1[0-9a-z]+$/);
     await expect(
-      page.getByRole("row").filter({ hasText: "MDN Faucet" }).filter({
-        hasText: /\bMDN\b/,
-      }),
+      page
+        .getByRole("row")
+        .filter({ hasText: "MDN Faucet" })
+        .filter({
+          hasText: /\bMDN\b/,
+        }),
     ).toContainText("100");
     await expect(panel.nextTutorialButton).toBeVisible();
   });

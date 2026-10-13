@@ -37,6 +37,7 @@ End-to-end QA of every Playground tutorial, run headless with agent-browser on l
 | 12 | Low | Upstream (Para) | Tutorial 4 | Para's signing dialog shows raw values (`Assets: 2000000 of 0x4cbdcaffe75f0a317482224dae6436`) instead of formatted amounts and symbols. Its Profile view logs a React hydration error (`<button>` inside `<button>`) from Para's own markup. |
 | 13 | Low | Open | Tutorial 1, step 5 | The "Click here" link to the minted note is built from synced input notes, so it points to `/notes/undefined` until the next state sync picks the note up (seconds normally, much longer when testnet syncs time out). A user clicking right after "Next step" lands on a broken page. Found by the Playwright test. |
 | 14 | Low | Open | Transaction dialogs | When executing the preview fails, the "Configure … transaction" dialog stays as it is with no error message: on production, tutorial 2's send preview failed once with `error during processing of event 'miden::protocol::account::before_foreign_load'` (console only) and worked on retry. Same pattern as the silent Deploy failure. Found by the Playwright test. |
+| 15 | Low | Open | Tutorial 4, step 4 | Right after logging into Para, clicking the Para wallet button reopens Para's modal on its last screen ("Welcome Back!"), which closes by itself: the account view with the Profile button the step describes only shows on a second click. Found by the Playwright test. |
 
 ## QA setup notes
 

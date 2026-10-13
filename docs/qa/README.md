@@ -72,7 +72,7 @@ Retry at least once before reporting a failure as a Playground bug, and compare 
 
 ## 5. Automated tests (Playwright)
 
-`apps/web/e2e` holds Playwright tests that replay tutorials against a live Playground on testnet (`pnpm --filter web test:e2e`, `PLAYWRIGHT_BASE_URL` to target a deployment, local dev by default). Each test runs in a fresh browser context, so it's a brand-new user. Tutorials 1–3 are covered so far.
+`apps/web/e2e` holds Playwright tests that replay tutorials against a live Playground on testnet (`pnpm --filter web test:e2e`, `PLAYWRIGHT_BASE_URL` to target a deployment, local dev by default). Each test runs in a fresh browser context, so it's a brand-new user. Tutorials 1–4 are covered so far.
 
 - Helpers are in `apps/web/e2e/tutorial.ts`: `startTutorial`, `nextStep` (waits for Next step to unlock), and `tutorialPanel(page).openLink`, which waits until a step link's target is known (links built from synced state point to `.../undefined` until the next sync).
 - Scope locators to the tutorial panel (`#tutorial`): success toasts repeat names like "Wallet A".
@@ -81,6 +81,8 @@ Retry at least once before reporting a failure as a Playground bug, and compare 
 - Bread tests import `test` from `apps/web/e2e/bread.ts` and need `BREAD_EXTENSION_DIR` (the unpacked extension; skipped otherwise). The fixture launches Playwright's own Chromium (`channel: "chromium"`, headless) with the extension in a persistent context, onboards a **new wallet** in a throwaway first launch (Bread never answers dapp requests from the browser session that onboarded it), then relaunches and unlocks it from `fullpage.html`, which stays open because Bread syncs and auto-consumes from its UI. `bread.connect(page)` handles the connection popup; `bread.approve(action)` confirms the `confirm.html` popup that `action` opens and returns its text.
 - Profiles from agent-browser's Chrome can't be reused: Chrome 151 stores the extension's IndexedDB in a layout Playwright's Chromium ignores, so Bread starts with an empty account database ("Account not found in local storage"). `BREAD_PROFILE_DIR` + `BREAD_PASSWORD` only work with a profile onboarded in Playwright's Chromium.
 - Bread popup quirks under Playwright: the connect popup's risk checkbox is a visually hidden input (click it through the DOM), and after Confirm the headless popup can stay open, blank (the fixture closes it).
+- Para tests (`apps/web/e2e/para.ts`) log in with a [Para test account](https://docs.getpara.com/v3/react/testing-guide): in Para's BETA environment (local dev), emails ending in `@test.getpara.com` accept any code (`123456`), so no inbox is needed. Production uses Para PROD, where they don't exist: the tests skip themselves there, after checking the host of Para's portal iframe. BETA allows 50 users per API key, so tests reuse one account (`PARA_EMAIL`, default `playground-e2e@test.getpara.com`), whose wallet keeps notes and balance across runs.
+- Para modal quirks under Playwright: the verification code boxes are in a closed shadow root (type on the keyboard once the email field is gone); "Welcome Back!" lingers after login, and the first click on the Para button reopens it instead of the account view; the signing modal (`#para-signing-modal`) is plain DOM with Yes/No buttons.
 - Testnet flakiness applies: keep timeouts generous (`TRANSACTION_TIMEOUT`, 3 min) and expect occasional prover/node timeouts.
 
 ## 6. Reporting

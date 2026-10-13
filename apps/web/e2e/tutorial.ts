@@ -10,11 +10,15 @@ export const tutorialPanel = (page: Page) => {
   return {
     root,
     step: root.getByText(/^Step \d+ of \d+$/),
-    nextStepButton: root.getByRole("button", { name: "Next step", exact: true }),
+    nextStepButton: root.getByRole("button", {
+      name: "Next step",
+      exact: true,
+    }),
     nextTutorialButton: root.getByRole("button", { name: "Next tutorial" }),
-    // Clicks a step link (e.g. "faucet page", "Click here") once its target is known: links built from synced
-    // state (e.g. the minted note) point to ".../undefined" until the next
-    // state sync picks it up. A step can mention the same link several times.
+    // Clicks a step link (e.g. "faucet page", "Click here") once its target
+    // is known: links built from synced state (e.g. the minted note) point to
+    // ".../undefined" until the next state sync picks it up. A step can
+    // mention the same link several times.
     openLink: async (name: string, href: RegExp) => {
       const link = root
         .locator("a")

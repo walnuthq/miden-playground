@@ -32,7 +32,7 @@
     },
     "web#test:e2e": {
       "cache": false,
-      "passThroughEnv": ["PLAYWRIGHT_*", "BREAD_*", "CI"]
+      "passThroughEnv": ["PLAYWRIGHT_*", "BREAD_*", "PARA_*", "CI"]
     },
     "status-page#build": {
       "cache": false,

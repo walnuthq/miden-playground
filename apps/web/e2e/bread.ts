@@ -40,6 +40,8 @@ export type Bread = {
   // button, approving the connection request if the site isn't already
   // authorized.
   connect: (page: Page) => Promise<void>;
+  // Disconnects Bread from the Playground (its wallet stays imported).
+  disconnect: (page: Page) => Promise<void>;
   // Runs `action`, waits for the Bread popup it opens and clicks `button`.
   // Returns the popup text, e.g. to check what's being signed.
   approve: (
@@ -273,7 +275,15 @@ export const test = base.extend<{ breadProfile: BreadProfile; bread: Bread }>({
       await expect(connected).toBeVisible({ timeout: POPUP_TIMEOUT });
     };
 
-    await use({ walletPage, connect, approve });
+    const disconnect: Bread["disconnect"] = async (page) => {
+      await page.getByRole("button", { name: /Bread Wallet icon/ }).click();
+      await page.getByRole("menuitem", { name: "Disconnect" }).click();
+      await expect(
+        page.getByRole("button", { name: "Select Wallet" }),
+      ).toBeVisible();
+    };
+
+    await use({ walletPage, connect, disconnect, approve });
   },
 });
 
