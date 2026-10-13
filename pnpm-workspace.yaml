@@ -112,3 +112,4 @@ minimumReleaseAgeExclude:
   - typescript-eslint@8.71.2
   - zod@4.6.7
   - viem@2.57.5
+  - lucide-react@1.56.0
