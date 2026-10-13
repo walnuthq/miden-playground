@@ -11,6 +11,7 @@ import useAccounts from "@/hooks/use-accounts";
 import useNetwork from "@/hooks/use-network";
 import { clientGetConsumableNotes } from "@/lib/web-client";
 import { useMiden } from "@miden-sdk/react/lazy";
+import { midenFaucetAccountId } from "@/lib/constants";
 
 const CreateTransactionDialogSelectForm = ({
   executingAccountId,
@@ -69,7 +70,7 @@ const CreateTransactionDialogSelectForm = ({
                     : "custom",
               );
             }}
-            withoutFaucets={networkId !== "mmck"}
+            without={midenFaucetAccountId(networkId)}
           />
         </div>
         <div className="grid gap-3 col-span-2">
