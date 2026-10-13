@@ -34,7 +34,7 @@ const RootLayout = ({
       <Providers>
         <div className="root">
           {children}
-          <Toaster richColors />
+          <Toaster richColors position="bottom-center" />
         </div>
       </Providers>
       <SimpleAnalytics />
