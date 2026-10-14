@@ -32,7 +32,10 @@ const NewSandboxCard = ({ networkId }: { networkId: NetworkId }) => {
         ) : (
           <p>
             Choose this option to create a new empty sandbox connected to{" "}
-            {networks[networkId]}.
+            {networkId === "mlcl"
+              ? "a local node"
+              : networks[networkId].toLowerCase()}
+            .
           </p>
         )}
       </CardContent>
