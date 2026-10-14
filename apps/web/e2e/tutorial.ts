@@ -77,3 +77,37 @@ export const logBrowserErrors = (page: Page) => {
     console.log(`[page error] ${error.message.slice(0, 500)}`);
   });
 };
+
+// The selects aren't linked to their labels: find them from the label text.
+export const selectOption = async (
+  page: Page,
+  label: string,
+  option: string,
+) => {
+  await page
+    .getByRole("dialog")
+    .getByText(label, { exact: true })
+    .locator("xpath=following::button[@role='combobox'][1]")
+    .click();
+  await page.getByRole("option", { name: option, exact: true }).click();
+};
+
+// Picks an account in a dialog's "Select an account" field. Its options
+// re-render on every sync, so a click can hit a detached one: retry until the
+// pick holds. Options read "<account ID> (<name>)", and the field then shows
+// the ID.
+export const pickAccount = async (dialog: Locator, name: string) => {
+  const page = dialog.page();
+  const field = dialog.getByPlaceholder("Select an account");
+  await expect(async () => {
+    if (!(await page.getByRole("listbox").isVisible())) {
+      await field.click();
+    }
+    const option = page.getByRole("option", { name: `(${name})` });
+    const [accountId] = (await option.textContent({ timeout: 5_000 }))!.split(
+      " ",
+    );
+    await option.click({ timeout: 5_000 });
+    await expect(field).toHaveValue(accountId!, { timeout: 2_000 });
+  }).toPass({ timeout: 60_000 });
+};

@@ -69,9 +69,19 @@ test("tutorial 2: transfer assets between wallets", async ({ page }) => {
     await panel.openLink("Wallet B", /\/accounts\/mtst1[0-9a-z]+$/);
     const before = await mdnBalance(page);
     // The note shows up once the next state sync detects it.
-    const consumeAll = page.getByRole("button", { name: "Consume all notes" });
-    await expect(consumeAll).toBeVisible({ timeout: TRANSACTION_TIMEOUT });
-    await consumeAll.click();
+    // Wallet B is shared, so anyone can send it notes, including ones it
+    // can't consume, which make "Consume all notes" fail: consume only the
+    // 100 MDN note sent by Wallet A.
+    const noteRow = page
+      .getByRole("row")
+      .filter({ hasText: "(Wallet A)" })
+      .filter({ hasText: "100 MDN" })
+      .first();
+    await expect(noteRow).toBeVisible({ timeout: TRANSACTION_TIMEOUT });
+    await noteRow.getByRole("button").last().click();
+    await page
+      .getByRole("menuitem", { name: "Consume note with Wallet B" })
+      .click();
     const submit = page.getByRole("button", { name: "Submit" });
     await expect(submit).toBeVisible({ timeout: TRANSACTION_TIMEOUT });
     await submit.click();

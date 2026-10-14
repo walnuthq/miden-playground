@@ -9,6 +9,7 @@ import {
   type BrowserType,
   type Page,
 } from "@playwright/test";
+import { TRANSACTION_TIMEOUT } from "./tutorial";
 
 // Bread Wallet (Miden's browser extension) for tutorials that sign with a
 // connected wallet. Extensions only load in Playwright's own Chromium, in a
@@ -40,6 +41,9 @@ export type Bread = {
   // button, approving the connection request if the site isn't already
   // authorized.
   connect: (page: Page) => Promise<void>;
+  // Funds the wallet with USDCX from Bread's "Fund your wallet" prompt, for
+  // tutorials that expect a wallet funded in earlier tutorials.
+  fund: () => Promise<void>;
   // Disconnects Bread from the Playground (its wallet stays imported).
   disconnect: (page: Page) => Promise<void>;
   // Runs `action`, waits for the Bread popup it opens and clicks `button`.
@@ -48,6 +52,13 @@ export type Bread = {
     action: () => Promise<unknown>,
     options?: { button?: string; timeout?: number },
   ) => Promise<string>;
+  // Runs `action` and approves every Bread popup that opens until `until`
+  // resolves, e.g. the "Opaque signature request" prompts of a guardian
+  // wallet, which come in varying numbers. Returns how many were approved.
+  approveAll: (
+    action: () => Promise<unknown>,
+    until: () => Promise<unknown>,
+  ) => Promise<number>;
 };
 
 type BreadProfile = { userDataDir: string; password: string };
@@ -79,6 +90,11 @@ const launch = (
     args: [
       `--disable-extensions-except=${extensionDir}`,
       `--load-extension=${extensionDir}`,
+      // Bread centres its popups on the last focused window, and fails with
+      // "Invalid value for bounds" when one would be mostly off screen:
+      // headless Chromium's default screen is smaller than the viewport.
+      "--screen-info={0,0 2560x1600}",
+      `--window-size=${options.viewport?.width ?? 1280},${options.viewport?.height ?? 720}`,
     ],
   });
 
@@ -200,19 +216,15 @@ export const test = base.extend<{ breadProfile: BreadProfile; bread: Bread }>({
   bread: async ({ context, breadProfile }, use) => {
     const walletPage = await unlock(context, breadProfile.password);
 
-    const approve: Bread["approve"] = async (
-      action,
-      { button = "Confirm", timeout = POPUP_TIMEOUT } = {},
+    // Clicks the popup's approve button and returns the popup text.
+    const confirmPopup = async (
+      popup: Page,
+      button: string | RegExp,
+      timeout: number,
     ) => {
-      const popupPromise = context.waitForEvent("page", {
-        predicate: isConfirmPopup,
-        timeout,
-      });
-      await action();
-      const popup = await popupPromise;
       const approveButton = popup.getByRole("button", {
         name: button,
-        exact: true,
+        exact: typeof button === "string",
       });
       await expect(approveButton).toBeEnabled({ timeout });
       const text = await popup.locator("body").innerText();
@@ -233,8 +245,67 @@ export const test = base.extend<{ breadProfile: BreadProfile; bread: Bread }>({
       return text;
     };
 
+    const approve: Bread["approve"] = async (
+      action,
+      { button = "Confirm", timeout = POPUP_TIMEOUT } = {},
+    ) => {
+      const popupPromise = context.waitForEvent("page", {
+        predicate: isConfirmPopup,
+        timeout,
+      });
+      await action();
+      return confirmPopup(await popupPromise, button, timeout);
+    };
+
+    const approveAll: Bread["approveAll"] = async (action, until) => {
+      let approved = 0;
+      let done = false;
+      const popups: Page[] = [];
+      // A popup can show several queued requests in turn: keep approving
+      // until it closes or `until` resolves.
+      const drive = async (popup: Page) => {
+        const approveButton = popup.getByRole("button", {
+          name: /^(Confirm|Sign|Approve)$/,
+        });
+        while (!done && !popup.isClosed()) {
+          try {
+            await approveButton.click({ timeout: 1_000, trial: true });
+            await approveButton.click({ timeout: 1_000 });
+            approved++;
+            await approveButton.waitFor({ state: "hidden", timeout: 5_000 });
+          } catch {
+            // Not ready yet, already approved, or closed.
+          }
+        }
+      };
+      const onPage = (popup: Page) => {
+        if (isConfirmPopup(popup)) {
+          popups.push(popup);
+          void drive(popup);
+        }
+      };
+      context.on("page", onPage);
+      try {
+        await action();
+        await until();
+      } finally {
+        done = true;
+        context.off("page", onPage);
+        // Headless popups can stay open, blank, once handled.
+        for (const popup of popups) {
+          if (!popup.isClosed()) {
+            await popup.close();
+          }
+        }
+      }
+      return approved;
+    };
+
     const connect: Bread["connect"] = async (page) => {
       const connected = page.getByRole("button", { name: /Bread Wallet icon/ });
+      if (await connected.isVisible()) {
+        return;
+      }
       // Without the injected provider, the Playground offers to install Bread.
       await page.waitForFunction(() => "midenWallet" in window, null, {
         timeout: POPUP_TIMEOUT,
@@ -275,6 +346,21 @@ export const test = base.extend<{ breadProfile: BreadProfile; bread: Bread }>({
       await expect(connected).toBeVisible({ timeout: POPUP_TIMEOUT });
     };
 
+    const fund: Bread["fund"] = async () => {
+      // A wallet without USDCX shows this prompt on its home page: Bread then
+      // requests tokens from the faucet and consumes the note by itself.
+      await walletPage
+        .getByRole("button", { name: /^Fund your wallet/ })
+        .click();
+      await expect(
+        walletPage
+          .getByRole("group", { name: "Assets" })
+          .getByRole("button", { name: /^USDCX / }),
+      ).not.toHaveAccessibleName(/^USDCX 0\.00 /, {
+        timeout: 2 * TRANSACTION_TIMEOUT,
+      });
+    };
+
     const disconnect: Bread["disconnect"] = async (page) => {
       await page.getByRole("button", { name: /Bread Wallet icon/ }).click();
       await page.getByRole("menuitem", { name: "Disconnect" }).click();
@@ -283,7 +369,7 @@ export const test = base.extend<{ breadProfile: BreadProfile; bread: Bread }>({
       ).toBeVisible();
     };
 
-    await use({ walletPage, connect, disconnect, approve });
+    await use({ walletPage, connect, fund, disconnect, approve, approveAll });
   },
 });
 
