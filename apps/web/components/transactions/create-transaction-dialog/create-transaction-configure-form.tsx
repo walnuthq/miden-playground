@@ -85,7 +85,7 @@ const CreateTransactionConfigureForm = ({
   const { client } = useMiden();
   const { wallet } = useWallet();
   const { networkId } = useNetwork();
-  const { accounts, isParaWallet } = useAccounts();
+  const { accounts, isConnectedWallet, isParaWallet } = useAccounts();
   const { consumeWithPara, sendWithPara } = useParaTransaction();
   const { scripts } = useScripts();
   const { components } = useComponents();
@@ -144,7 +144,13 @@ const CreateTransactionConfigureForm = ({
             }
           }
           if (transactionType === "consume" && executingAccount) {
-            if (isTutorial || networkId === "mmck") {
+            // Accounts the Playground holds itself (e.g. No Auth contracts)
+            // consume notes locally, connected wallets sign the transaction.
+            if (
+              isTutorial ||
+              networkId === "mmck" ||
+              !isConnectedWallet(executingAccount)
+            ) {
               const { transactionRequest, transactionResult } =
                 await newConsumeTransactionRequest({
                   accountId: executingAccount.id,
