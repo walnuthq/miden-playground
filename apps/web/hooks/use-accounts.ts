@@ -284,13 +284,19 @@ const useAccounts = () => {
     const componentScripts = scripts.filter(({ id }) =>
       componentScriptIds.includes(id),
     );
-    const wasmAccount = await clientDeployAccount({
-      client,
-      storageMode,
-      components,
-      scripts: componentScripts,
-    });
-    const fundedAccount = await fundAccount(wasmAccount);
+    let fundedAccount: Awaited<ReturnType<typeof fundAccount>>;
+    try {
+      const wasmAccount = await clientDeployAccount({
+        client,
+        storageMode,
+        components,
+        scripts: componentScripts,
+      });
+      fundedAccount = await fundAccount(wasmAccount);
+    } catch (error) {
+      dispatch({ type: "TRANSACTION_SUBMITTED" });
+      throw error;
+    }
     const packageIds = componentScriptIds.filter(
       (id) => !defaultScriptIds.includes(id),
     );

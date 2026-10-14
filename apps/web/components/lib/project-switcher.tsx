@@ -2,6 +2,7 @@
 // import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronsUpDown, BadgeCheck } from "lucide-react";
+import { toast } from "sonner";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,7 +32,7 @@ import { useIsClient } from "usehooks-ts";
 import { networks } from "@/lib/types/network";
 import { cn } from "@workspace/ui/lib/utils";
 import useAppState from "@/hooks/use-app-state";
-// import examples from "@/lib/examples";
+import examples from "@/lib/examples";
 import useExamples from "@/hooks/use-examples";
 
 const ProjectSwitcher = () => {
@@ -41,7 +42,7 @@ const ProjectSwitcher = () => {
   const { networkId } = useNetwork();
   const { resetState } = useAppState();
   const { tutorial, completedTutorials, startTutorial } = useTutorials();
-  const { example /*, launchExample*/ } = useExamples();
+  const { example, launchExample } = useExamples();
   // const { saveProject, loadProject } = useProjects();
   if (!isClient) {
     return null;
@@ -110,7 +111,7 @@ const ProjectSwitcher = () => {
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
             </DropdownMenuSub>
-            {/* <DropdownMenuSeparator />
+            <DropdownMenuSeparator />
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>Examples</DropdownMenuSubTrigger>
               <DropdownMenuPortal>
@@ -118,14 +119,27 @@ const ProjectSwitcher = () => {
                   {examples.map((example) => (
                     <DropdownMenuItem
                       key={example.id}
-                      onClick={() => launchExample(example.id)}
+                      onClick={async () => {
+                        const toastId = toast.loading(
+                          `Launching ${example.title}…`,
+                        );
+                        const { error } = await launchExample(example.id);
+                        if (error !== undefined) {
+                          toast.error("Example couldn't be launched.", {
+                            id: toastId,
+                            description: error,
+                          });
+                        } else {
+                          toast.dismiss(toastId);
+                        }
+                      }}
                     >
                       {example.title}
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
-            </DropdownMenuSub> */}
+            </DropdownMenuSub>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() => {

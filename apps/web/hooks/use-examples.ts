@@ -1,4 +1,5 @@
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import useGlobalContext from "@/components/global-context/hook";
 import useAppState from "@/hooks/use-app-state";
 import { importScriptsFromGithubRepo } from "@/lib/api";
@@ -17,33 +18,36 @@ const useExamples = () => {
   const { pushState } = useAppState();
   const { deployAccount } = useAccounts();
   const { components } = useComponents();
-  const launchExample = async (exampleId: string) => {
+  const launchExample = async (
+    exampleId: string,
+  ): Promise<{ error?: string }> => {
     const example = examples.find(({ id }) => id === exampleId);
     if (!example) {
-      return;
+      return { error: "Example not found." };
     }
-    const { scripts } = await importScriptsFromGithubRepo({
+    const { scripts, error } = await importScriptsFromGithubRepo({
       githubRepoUrl: example.githubRepoUrl,
+      githubRepoRef: example.githubRepoRef,
       projectDir: example.projectDir,
-    });
+    }).catch((error: unknown) => ({
+      scripts: undefined,
+      error: error instanceof Error ? error.message : String(error),
+    }));
     if (!scripts) {
-      return;
+      return { error: error ?? "Scripts couldn't be imported." };
+    }
+    const failedScript = scripts.find(({ status }) => status === "error");
+    if (failedScript) {
+      return { error: `${failedScript.name}: ${failedScript.error}` };
     }
     switchNetwork("mtst");
     pushState({
       ...example.state,
       scripts: [
         ...example.state.scripts,
-        ...scripts.map((compiledScript) => {
-          const script = compiledPackageToScript(compiledScript);
-          return {
-            ...script,
-            procedureExports:
-              script.name === example.id
-                ? example.procedureExports
-                : script.procedureExports,
-          };
-        }),
+        ...scripts.map((compiledScript) =>
+          compiledPackageToScript(compiledScript),
+        ),
       ],
       components: example.state.components.map((component) => {
         if (defaultComponentIds.includes(component.id)) {
@@ -57,18 +61,30 @@ const useExamples = () => {
       }),
       completedTutorials,
     });
+    router.push("/accounts");
+    toast.info(`${example.title} example loaded.`, {
+      description:
+        "We're deploying an account for you to play with. It will show up here in a moment.",
+    });
+    return {};
   };
   const loadExample = async (exampleId: string) => {
     const component = components.find(({ id }) => id === exampleId);
     if (!component) {
       return;
     }
-    await deployAccount({
-      name: component.name,
-      storageMode: "public",
-      components: [authNoAuth, component],
-    });
-    router.push("/accounts");
+    try {
+      await deployAccount({
+        name: component.name,
+        storageMode: "public",
+        components: [authNoAuth, component],
+      });
+      toast.success(`${component.name} deployed.`);
+    } catch (error) {
+      toast.error(`${component.name} couldn't be deployed.`, {
+        description: error instanceof Error ? error.message : String(error),
+      });
+    }
   };
   return {
     exampleId,

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "sonner";
 import {
   Card,
   CardContent,
@@ -27,9 +28,15 @@ const LaunchExampleCard = ({ example }: { example: Example }) => {
           variant="outline"
           className="w-full bg-[#f9f9f9]"
           disabled={loading}
-          onClick={() => {
+          onClick={async () => {
             setLoading(true);
-            launchExample(example.id);
+            const { error } = await launchExample(example.id);
+            if (error !== undefined) {
+              toast.error("Example couldn't be launched.", {
+                description: error,
+              });
+              setLoading(false);
+            }
           }}
         >
           {loading && <Spinner />}

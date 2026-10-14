@@ -13,6 +13,7 @@ type ImportScriptsRequestBody = {
   packageSources?: Record<string, PackageSource>;
   githubRepoUrl?: string;
   projectDir?: string;
+  ref?: string;
 };
 
 type ImportScriptsResponse = {
@@ -50,51 +51,64 @@ const importScriptsFromPackageSources = async (
       };
     }),
   );
+  const packagesToCompile = packagesWithDependencies.map(
+    ({ package: dbPackage, dependencies }) => ({
+      package: dbPackage,
+      dependencies: Object.keys(dependencies).map((dependency) => {
+        const { path: dependencyPath } = dependencies[dependency] ?? {
+          path: "",
+        };
+        const dependencyDir = dependencyPath.split("/").at(-1);
+        const packagePath =
+          Object.keys(packageSources).find((packagePath) => {
+            const packageDir = packagePath.split("/").at(-1);
+            return packageDir === dependencyDir;
+          }) ?? "";
+        const packageSource = packageSources[packagePath] ?? {
+          midenProjectToml: "",
+        };
+        const {
+          package: { name: dependencyName },
+        } = parseMidenProjectToml(packageSource.midenProjectToml);
+        const dependencyPackage = packagesWithDependencies.find(
+          ({ package: { name } }) => name === dependencyName,
+        );
+        return dependencyPackage?.package.id ?? "";
+      }),
+    }),
+  );
   // api-compile builds one package at a time and answers 503 once its queue is
-  // full, so compile the packages in turn rather than all at once.
+  // full, so compile the packages in turn rather than all at once, each one
+  // after the packages it depends on.
   const compiledPackages: CompiledPackage[] = [];
-  for (const { package: dbPackage, dependencies } of packagesWithDependencies) {
-    const dependenciesPackages = Object.keys(dependencies).map((dependency) => {
-      const { path: dependencyPath } = dependencies[dependency] ?? {
-        path: "",
-      };
-      const dependencyDir = dependencyPath.split("/").at(-1);
-      const packagePath =
-        Object.keys(packageSources).find((packagePath) => {
-          const packageDir = packagePath.split("/").at(-1);
-          return packageDir === dependencyDir;
-        }) ?? "";
-      const packageSource = packageSources[packagePath] ?? {
-        midenProjectToml: "",
-      };
-      const {
-        package: { name: dependencyName },
-      } = parseMidenProjectToml(packageSource.midenProjectToml);
-      const dependencyPackage = packagesWithDependencies.find(
-        ({ package: { name } }) => name === dependencyName,
-      ) ?? {
-        package: {
-          id: "",
-          name: "",
-          type: "account-component",
-          commitment: "",
-        },
-      };
-      return {
-        id: dependencyPackage.package.id,
-        name: dependencyPackage.package.name,
-        type: dependencyPackage.package.type,
-        commitment: "",
-      };
-    });
+  const compiledPackageIds = new Set<string>();
+  const compile = async ({
+    package: dbPackage,
+    dependencies,
+  }: (typeof packagesToCompile)[number]) => {
+    if (compiledPackageIds.has(dbPackage.id)) {
+      return;
+    }
+    compiledPackageIds.add(dbPackage.id);
+    for (const dependency of dependencies) {
+      const dependencyPackage = packagesToCompile.find(
+        ({ package: { id } }) => id === dependency,
+      );
+      if (dependencyPackage) {
+        await compile(dependencyPackage);
+      }
+    }
     compiledPackages.push(
       await compilePackage({
         id: dbPackage.id,
         rust: dbPackage.rust,
-        dependencies: dependenciesPackages.map(({ id }) => id),
+        dependencies,
         signal,
       }),
     );
+  };
+  for (const packageToCompile of packagesToCompile) {
+    await compile(packageToCompile);
   }
   return compiledPackages;
 };
@@ -158,37 +172,47 @@ const fileListToPackageSources = async (fileList: FileList) => {
 const importScriptsFromGithubRepo = async ({
   githubRepoUrl,
   projectDir,
+  ref = "HEAD",
   signal,
 }: {
   githubRepoUrl: string;
   projectDir?: string;
+  ref?: string;
   signal?: AbortSignal;
 }) => {
-  const repoDir = randomUUID();
-  console.info(`git clone ${githubRepoUrl} ${repoDir}`);
-  await execFile("git", ["clone", githubRepoUrl, repoDir], {
-    cwd: PACKAGES_PATH,
-  });
-  const projectDirPath = `${PACKAGES_PATH}/${repoDir}${projectDir ? `/${projectDir}` : ""}`;
-  const filenames = await readdir(projectDirPath, {
-    recursive: true,
-  });
-  const fileList = filenames.map((filename) => ({
-    name: basename(filename),
-    webkitRelativePath: `${projectDirPath}/${filename}`,
-  }));
-  const packageSources = await fileListToPackageSources(fileList);
-  await safeRm(`${PACKAGES_PATH}/${repoDir}`, {
-    recursive: true,
-    force: true,
-  });
-  return importScriptsFromPackageSources(packageSources, signal);
+  const repoDir = `${PACKAGES_PATH}/${randomUUID()}`;
+  try {
+    // Fetch only the requested commit, branch or tag rather than the whole
+    // history.
+    console.info(`git fetch ${githubRepoUrl} ${ref}`);
+    await execFile("git", ["init", "--quiet", repoDir]);
+    await execFile(
+      "git",
+      ["fetch", "--quiet", "--depth", "1", githubRepoUrl, ref],
+      { cwd: repoDir },
+    );
+    await execFile("git", ["checkout", "--quiet", "FETCH_HEAD"], {
+      cwd: repoDir,
+    });
+    const projectDirPath = `${repoDir}${projectDir ? `/${projectDir}` : ""}`;
+    const filenames = await readdir(projectDirPath, {
+      recursive: true,
+    });
+    const fileList = filenames.map((filename) => ({
+      name: basename(filename),
+      webkitRelativePath: `${projectDirPath}/${filename}`,
+    }));
+    const packageSources = await fileListToPackageSources(fileList);
+    return await importScriptsFromPackageSources(packageSources, signal);
+  } finally {
+    await safeRm(repoDir, { recursive: true, force: true });
+  }
 };
 
 export const POST = async (request: NextRequest) => {
   try {
     const body = await request.json();
-    const { packageSources, githubRepoUrl, projectDir } =
+    const { packageSources, githubRepoUrl, projectDir, ref } =
       body as ImportScriptsRequestBody;
     if (packageSources) {
       const packages = await importScriptsFromPackageSources(
@@ -201,9 +225,13 @@ export const POST = async (request: NextRequest) => {
       if (!githubRepoUrl.startsWith("https://github.com/0xMiden/")) {
         throw new Error("Error: Invalid GitHub repository URL.");
       }
+      if (ref !== undefined && !/^\w[\w./-]*$/.test(ref)) {
+        throw new Error("Error: Invalid Git ref.");
+      }
       const packages = await importScriptsFromGithubRepo({
         githubRepoUrl,
         projectDir,
+        ref,
         signal: request.signal,
       });
       return NextResponse.json<ImportScriptsResponse>({ packages });
