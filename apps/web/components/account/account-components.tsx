@@ -121,28 +121,20 @@ const AccountComponents = ({
   const authenticationComponents = componentsWithScripts.filter(
     ({ component }) => component.type === "authentication-component",
   );
-  const accountComponents = componentsWithScripts.filter(
-    ({ component }) => component.type === "account-component",
-  );
+  // Every account has the basic wallet component, so list it after the others.
+  const accountComponents = componentsWithScripts
+    .filter(({ component }) => component.type === "account-component")
+    .toSorted(
+      (a, b) =>
+        Number(a.component.id === "basic-wallet") -
+        Number(b.component.id === "basic-wallet"),
+    );
   const customAccountComponents = accountComponents.filter(
     ({ component }) => !defaultComponentIds.includes(component.id),
   );
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-8">
-        <div className="flex flex-col gap-2">
-          <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
-            Authentication Components
-          </h4>
-          {authenticationComponents.map(({ component, script }) => (
-            <AccountComponentTable
-              key={component.id}
-              account={account}
-              component={component}
-              script={script}
-            />
-          ))}
-        </div>
         <div className="flex flex-col gap-2">
           <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
             Account Components
@@ -160,6 +152,19 @@ const AccountComponents = ({
             type="account-component"
             accountId={account.id}
           />
+        </div>
+        <div className="flex flex-col gap-2">
+          <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
+            Authentication Components
+          </h4>
+          {authenticationComponents.map(({ component, script }) => (
+            <AccountComponentTable
+              key={component.id}
+              account={account}
+              component={component}
+              script={script}
+            />
+          ))}
         </div>
       </div>
     </div>
