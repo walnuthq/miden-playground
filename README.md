@@ -41,7 +41,7 @@ pnpm dev
 
 ### Environment variables
 
-Each app documents its variables in a committed `.env.example`, types them in `process-env.d.ts` and declares them in `turbo.json` (keep all three in sync when adding one). `apps/api` is a Cloudflare Worker: its types are generated from `.env.example` and `wrangler.jsonc` by `pnpm --filter api cf-typegen`, and it reads them from `.dev.vars` locally. Copy the examples and populate them with your own values (PostgreSQL database URL, Para API key, etc):
+Each app documents its variables in a committed `.env.example`, types them in `process-env.d.ts` and declares them in `turbo.json` (keep all three in sync when adding one). `apps/api` is a Cloudflare Worker: its types are generated from `.env.example` and `wrangler.jsonc` by `pnpm --filter miden-playground-api cf-typegen`, and it reads them from `.dev.vars` locally. Copy the examples and populate them with your own values (PostgreSQL database URL, Para API key, etc):
 
 ```sh
 cp apps/web/.env.example apps/web/.env.local
@@ -53,13 +53,13 @@ Start PostgreSQL and setup database (`apps/api` reaches it through [Hyperdrive](
 
 ```sh
 docker compose -f apps/api/docker-compose.yml up -d
-pnpm --filter api db:push
+pnpm --filter miden-playground-api db:push
 ```
 
 Build Rust helpers:
 
 ```sh
-pnpm --filter api build:rust
+pnpm --filter miden-playground-api build:rust
 ```
 
 Install Miden Rust compiler using this guide: https://0xmiden.github.io/compiler/usage/cargo-miden.html
