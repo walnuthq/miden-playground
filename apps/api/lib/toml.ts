@@ -9,6 +9,12 @@ const extractTraitName = (rust: string) => {
   return match ? match[1] : null;
 };
 
+// The compiler derives the namespace it expects from the package name as-is,
+// while lodash's kebabCase also splits letters from digits ("p2id-note" becomes
+// "p-2-id-note"): only kebab-case trait names, not names that already are.
+const toKebabCase = (value: string) =>
+  /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value) ? value : kebabCase(value);
+
 // api-compile's image comes with the dependencies already built for its
 // counter-contract example, and a build only reuses them with the same profile
 // and dependency versions: without `trim-paths` it rebuilds every one of them,
@@ -61,11 +67,11 @@ export const generateMidenProjectToml = ({
   midenProjectToml += `kind = "${type}"\n`;
   switch (type) {
     case "account-component": {
-      midenProjectToml += `namespace = "miden:${name}/${kebabCase(traitName)}@${version}"\n`;
+      midenProjectToml += `namespace = "miden:${name}/${toKebabCase(traitName)}@${version}"\n`;
       break;
     }
     case "note": {
-      midenProjectToml += `namespace = "miden:${name}/miden-${kebabCase(traitName)}@${version}"\n`;
+      midenProjectToml += `namespace = "miden:${name}/miden-${toKebabCase(traitName)}@${version}"\n`;
       break;
     }
     case "tx-script": {
