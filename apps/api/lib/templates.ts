@@ -1,33 +1,38 @@
-import { readFileSync } from "node:fs";
-
-const projectRoot =
-  process.env.NODE_ENV !== "production" ||
-  process.env.NEXT_PHASE === "phase-production-build"
-    ? "."
-    : "../../../..";
-
-const readFile = (filePath: string) =>
-  readFileSync(`${projectRoot}/templates/${filePath}`, "utf-8");
+// Bundled as strings by the Text rule in wrangler.jsonc.
+import cargoConfigToml from "@/templates/project-template/.cargo/config.toml";
+import buildRs from "@/templates/project-template/build.rs";
+import cargoLock from "@/templates/project-template/Cargo.lock";
+import rustToolchainToml from "@/templates/project-template/rust-toolchain.toml";
+import accountComponent from "@/templates/account-component.rs";
+import note from "@/templates/note.rs";
+import txScript from "@/templates/tx-script.rs";
+import basicWallet from "@/templates/basic-wallet.rs";
+import p2idNote from "@/templates/p2id-note.rs";
+import authNoAuth from "@/templates/auth-no-auth.rs";
+import counterAccount from "@/templates/counter-account.rs";
+import counterNote from "@/templates/counter-note.rs";
+import counterScript from "@/templates/counter-script.rs";
+import countReader from "@/templates/count-reader.rs";
 
 export const projectTemplateFiles = {
-  ".cargo/config.toml": readFile("project-template/.cargo/config.toml"),
-  "build.rs": readFile("project-template/build.rs"),
+  ".cargo/config.toml": cargoConfigToml,
+  "build.rs": buildRs,
   // The lockfile api-compile's image was warmed with (see generateCargoToml).
-  "Cargo.lock": readFile("project-template/Cargo.lock"),
-  "rust-toolchain.toml": readFile("project-template/rust-toolchain.toml"),
+  "Cargo.lock": cargoLock,
+  "rust-toolchain.toml": rustToolchainToml,
 } as const;
 
 export const templates = {
   library: "",
   "authentication-component": "",
-  "account-component": readFile("account-component.rs"),
-  note: readFile("note.rs"),
-  "tx-script": readFile("tx-script.rs"),
-  "basic-wallet": readFile("basic-wallet.rs"),
-  "p2id-note": readFile("p2id-note.rs"),
-  "auth-no-auth": readFile("auth-no-auth.rs"),
-  "counter-account": readFile("counter-account.rs"),
-  "counter-note": readFile("counter-note.rs"),
-  "counter-script": readFile("counter-script.rs"),
-  "count-reader": readFile("count-reader.rs"),
+  "account-component": accountComponent,
+  note,
+  "tx-script": txScript,
+  "basic-wallet": basicWallet,
+  "p2id-note": p2idNote,
+  "auth-no-auth": authNoAuth,
+  "counter-account": counterAccount,
+  "counter-note": counterNote,
+  "counter-script": counterScript,
+  "count-reader": countReader,
 } as const;

@@ -1,8 +1,3 @@
-import { access, constants, rm, readdir, readFile } from "node:fs/promises";
-import { execFile as execFileCb, exec as execCb } from "node:child_process";
-import path from "node:path";
-import { promisify } from "node:util";
-import type { PathLike, RmOptions } from "node:fs";
 import type {
   Dependency,
   Manifest,
@@ -18,49 +13,6 @@ import {
   updatePackage,
 } from "@/db/packages";
 import { fetchApiCompile } from "@/lib/upstream";
-
-export const execFile = promisify(execFileCb);
-
-export const exec = promisify(execCb);
-
-export const fileExists = async (fileName: string) => {
-  try {
-    await access(fileName, constants.F_OK);
-    return true; // eslint-disable-next-line
-  } catch (_) {
-    return false;
-  }
-};
-
-export const safeRm = async (path: PathLike, options?: RmOptions) => {
-  try {
-    await rm(path, options);
-  } catch (error) {
-    console.error(error);
-  }
-};
-
-export const readProjectFiles = async (rootDir: string) => {
-  const entries = await readdir(rootDir, {
-    recursive: true,
-    withFileTypes: true,
-  });
-  const files = await Promise.all(
-    entries.map(async (entry) => {
-      if (!entry.isFile()) return;
-      const full = path.join(entry.parentPath, entry.name);
-      const rel = path.relative(rootDir, full);
-      if (rel.includes("target/") || rel === ".DS_Store") return;
-      return { path: rel, content: await readFile(full, "utf8") };
-    }),
-  );
-  return files
-    .filter((file) => file !== undefined)
-    .reduce<Record<string, string>>((previousValue, currentValue) => {
-      previousValue[currentValue.path] = currentValue.content;
-      return previousValue;
-    }, {});
-};
 
 export const createPackage = ({
   name,

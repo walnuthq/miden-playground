@@ -41,17 +41,18 @@ pnpm dev
 
 ### Environment variables
 
-Each app documents its variables in a committed `.env.example`, types them in `process-env.d.ts` and declares them in `turbo.json` (keep all three in sync when adding one). Copy the examples and populate them with your own values (PostgreSQL database URL, Para API key, etc):
+Each app documents its variables in a committed `.env.example`, types them in `process-env.d.ts` and declares them in `turbo.json` (keep all three in sync when adding one). `apps/api` is a Cloudflare Worker: its types are generated from `.env.example` and `wrangler.jsonc` by `pnpm --filter api cf-typegen`, and it reads them from `.dev.vars` locally. Copy the examples and populate them with your own values (PostgreSQL database URL, Para API key, etc):
 
 ```sh
 cp apps/web/.env.example apps/web/.env.local
-cp apps/api/.env.example apps/api/.env.local
+cp apps/api/.env.example apps/api/.dev.vars
 cp apps/status-page/.env.example apps/status-page/.env
 ```
 
-Setup database:
+Start PostgreSQL and setup database (`apps/api` reaches it through [Hyperdrive](https://developers.cloudflare.com/hyperdrive/), which `wrangler dev` points at this container):
 
 ```sh
+docker compose -f apps/api/docker-compose.yml up -d
 pnpm --filter api db:push
 ```
 

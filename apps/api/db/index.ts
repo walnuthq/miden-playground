@@ -1,12 +1,12 @@
-import { config } from "dotenv";
+import { Client } from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
+import { getContext } from "hono/context-storage";
 import { relations } from "@/db/relations";
-import { PROJECT_ROOT } from "@/lib/constants";
 
-config({ path: `${PROJECT_ROOT}/.env.local` });
+export const createDb = (client: Client) => drizzle({ client, relations });
 
-const db = drizzle(process.env.DATABASE_URL, {
-  relations,
-});
+export type Db = ReturnType<typeof createDb>;
 
-export default db;
+// A Worker can't share a connection between requests: the middleware in
+// index.ts opens one per request (pooled by Hyperdrive) and this returns it.
+export const getDb = () => getContext<{ Variables: { db: Db } }>().var.db;
