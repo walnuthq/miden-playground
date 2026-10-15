@@ -1,4 +1,5 @@
-// Keep in sync with .env.example and the `web#build` env list in turbo.json.
+// Keep in sync with .env.example, .env.production and the
+// `miden-playground-web#build` env list in turbo.json.
 declare global {
   namespace NodeJS {
     interface ProcessEnv {

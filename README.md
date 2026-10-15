@@ -70,7 +70,12 @@ When running the app locally, you can use the playground against a local node by
 
 ## 🚀 Deploying
 
-Deployments are handled automatically by [Cloudflare](https://www.cloudflare.com/), as soon as your PR is merged to `main`.
+Both apps run on [Cloudflare Workers](https://workers.cloudflare.com/) and are deployed by GitHub Actions when a PR is merged to `main`, each only when its sources change:
+
+- [`deploy-web-cloudflare.yml`](.github/workflows/deploy-web-cloudflare.yml) builds `apps/web` with OpenNext and deploys the `miden-playground` Worker. Its build variables are committed in `apps/web/.env.production`.
+- [`deploy-api-cloudflare.yml`](.github/workflows/deploy-api-cloudflare.yml) deploys the `miden-playground-api` Worker. Its variables and Hyperdrive binding are in `apps/api/wrangler.jsonc`.
+
+Both workflows can also be run manually (_Run workflow_ in the Actions tab), and need the `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` repository secrets.
 
 ## 📈 Status
 

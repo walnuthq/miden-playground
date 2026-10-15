@@ -8,6 +8,10 @@
   // enable_request_signal aborts `request.signal` when the client disconnects,
   // which cancels the upstream compile/verify calls it is passed to.
   "compatibility_flags": ["nodejs_compat", "enable_request_signal"],
+  // Deploys attach the custom domains listed here and detach any other.
+  "routes": [
+    { "pattern": "miden-playground-api.walnut.dev", "custom_domain": true },
+  ],
   // Production values. `wrangler dev` overrides them with .dev.vars (copied
   // from .env.example), which points at the local services.
   "vars": {

@@ -3,6 +3,11 @@
   "main": ".open-next/worker.js",
   "name": "miden-playground",
   "preview_urls": true,
+  // Deploys attach the custom domains listed here and detach any other.
+  // playground.miden.xyz is proxied by Vercel, not attached to the Worker.
+  "routes": [
+    { "pattern": "miden-playground.walnut.dev", "custom_domain": true },
+  ],
   "compatibility_date": "2025-09-12",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": {
