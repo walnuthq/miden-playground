@@ -3,8 +3,10 @@
   "main": ".open-next/worker.js",
   "name": "miden-playground",
   "preview_urls": true,
+  // playground.miden.xyz is proxied by Vercel to the workers.dev URL, which
+  // wrangler disables when routes are declared unless this is set.
+  "workers_dev": true,
   // Deploys attach the custom domains listed here and detach any other.
-  // playground.miden.xyz is proxied by Vercel, not attached to the Worker.
   "routes": [
     { "pattern": "miden-playground.walnut.dev", "custom_domain": true },
   ],
