@@ -160,7 +160,6 @@ const fileListToPackageSources = async (fileList: FileList) => {
                   "let key = Word::new([felt!(0), felt!(0), felt!(0), felt!(1)]);",
                   "let key = Word::new([felt!(1), felt!(0), felt!(0), felt!(0)]);",
                 )
-                .replace("1_000_000;", "1_000_000_000;")
             : previousValue.rust,
       }),
       { midenProjectToml: "", rust: "" },
