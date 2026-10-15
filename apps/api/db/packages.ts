@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import db from "@/db";
+import { getDb } from "@/db";
 import { packagesTable } from "@/db/schema";
 import type { NewPackage, PackageStatus, Export } from "@/lib/types";
 import { isValidUUIDv4 } from "@/lib/uuid";
@@ -9,14 +9,14 @@ import {
 } from "@/lib/default-dependencies";
 
 export const getPackage = async (id: string) => {
-  const dbPackage = await db.query.packagesTable.findFirst({ where: { id } });
+  const dbPackage = await getDb().query.packagesTable.findFirst({ where: { id } });
   return dbPackage
     ? { ...dbPackage, files: dbPackage.files as Record<string, string> }
     : undefined;
 };
 
 export const insertPackage = async (newPackage: NewPackage) => {
-  const [insertedPackage] = await db
+  const [insertedPackage] = await getDb()
     .insert(packagesTable)
     .values(newPackage)
     .returning({ id: packagesTable.id });
@@ -45,13 +45,13 @@ export const updatePackage = ({
   exports?: Export[];
   dependencies?: string[];
 }) =>
-  db
+  getDb()
     .update(packagesTable)
     .set({ status, rust, files, masp, commitment, exports, dependencies })
     .where(eq(packagesTable.id, id));
 
 export const deletePackage = (id: string) =>
-  db.delete(packagesTable).where(eq(packagesTable.id, id));
+  getDb().delete(packagesTable).where(eq(packagesTable.id, id));
 
 export const getDependencies = async (dependencies: string[]) => {
   const defaultDependencies = dependencies
@@ -60,7 +60,7 @@ export const getDependencies = async (dependencies: string[]) => {
       (dependency) =>
         defaultDependenciesRecords[dependency as DefaultDependency],
     );
-  const dbDependencies = await db.query.packagesTable.findMany({
+  const dbDependencies = await getDb().query.packagesTable.findMany({
     columns: {
       id: true,
       name: true,

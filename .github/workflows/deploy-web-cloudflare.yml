@@ -1,0 +1,56 @@
+name: Deploy web to Cloudflare
+
+on:
+  push:
+    branches: [main]
+    # Deploy only when this service or a shared dependency/workspace manifest
+    # changes — unrelated changes don't redeploy.
+    paths:
+      - "apps/web/**"
+      # Playwright specs don't ship.
+      - "!apps/web/e2e/**"
+      - "packages/ui/**"
+      - "packages/typescript-config/**"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - ".github/workflows/deploy-web-cloudflare.yml"
+  workflow_dispatch:
+
+# The job only checks out the repository: the deploy uses the Cloudflare token.
+permissions:
+  contents: read
+
+# Never run two deploys of this service at once; queue rather than cancel so an
+# in-flight deploy is not interrupted.
+concurrency:
+  group: deploy-web-cloudflare
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Builds with OpenNext (`next build` reads the build variables from
+      # apps/web/.env.production) and deploys the Worker and its assets.
+      # `pnpm run`, not `pnpm deploy`, which is a pnpm command of its own.
+      - name: Deploy web to Cloudflare
+        working-directory: apps/web
+        run: pnpm run deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import { API_COMPILE_URL, API_REGISTRY_URL } from "@/lib/constants";
 
 // A failed call to api-compile or api-registry, with the status it answered.
@@ -62,7 +61,7 @@ export const upstreamErrorResponse = (error: unknown) => {
   ) {
     return undefined;
   }
-  return new NextResponse(error.message, {
+  return new Response(error.message, {
     status: error.status,
     headers: error.retryAfter ? { "Retry-After": error.retryAfter } : {},
   });

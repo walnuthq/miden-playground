@@ -84,12 +84,10 @@ jobs:
         # down produces a red card, not a failed build.
         run: pnpm --filter status-page build
         env:
-          # Repository variables (Settings -> Secrets and variables -> Actions
-          # -> Variables). Both are required: an undefined variable arrives as
-          # an empty string and the probe then falls back to its localhost
-          # defaults, which publishes a page full of connection failures.
-          WEB_URL: ${{ vars.WEB_URL }}
-          API_URL: ${{ vars.API_URL }}
+          # Production values of the services probed (local overrides go in
+          # apps/status-page/.env.local, see .env.example).
+          WEB_URL: https://playground.miden.xyz
+          API_URL: https://miden-playground-api.walnut.dev
           # The probe reads the previously published snapshot from here to work
           # out what changed since the last run. Derived from the repository
           # when unset, so a fork reads its own state.

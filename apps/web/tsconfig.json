@@ -1,6 +1,10 @@
 {
   "extends": "@workspace/typescript-config/nextjs.json",
   "compilerOptions": {
+    // The app emits nothing. With declarations on, the OpenNext build that
+    // cloudflare-env.d.ts imports (`mainModule`) fails declaration checks.
+    "declaration": false,
+    "declarationMap": false,
     "paths": {
       "@/*": ["./*"],
       "@workspace/ui/*": ["../../packages/ui/src/*"],
@@ -22,5 +26,5 @@
     "**/*.tsx",
     ".next/types/**/*.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", ".open-next"]
 }

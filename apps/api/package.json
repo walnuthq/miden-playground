@@ -1,38 +1,37 @@
 {
-  "name": "api",
+  "name": "miden-playground-api",
   "version": "0.0.1",
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack -p 3001",
-    "build": "next build",
-    "start": "PORT=3001 node .next/standalone/apps/api/server.js",
+    "dev": "wrangler dev --port 3001",
+    "build": "wrangler deploy --dry-run --outdir dist --env production",
+    "deploy": "wrangler deploy --env production",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
-    "typecheck": "next typegen && tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "cf-typegen": "wrangler types --env-file .env.example --strict-vars=false cloudflare-env.d.ts",
     "db:push": "drizzle-kit push"
   },
   "dependencies": {
-    "archiver": "8.0.0",
-    "dotenv": "18.0.7",
     "drizzle-orm": "1.0.0-rc.4",
+    "fflate": "0.8.3",
+    "hono": "4.13.12",
     "lodash": "4.18.1",
-    "next": "16.4.0",
     "pg": "8.23.1",
-    "react": "19.3.0",
     "smol-toml": "1.9.1",
     "uuid": "14.0.3"
   },
   "devDependencies": {
-    "@types/archiver": "8.0.0",
     "@types/lodash": "4.17.26",
     "@types/node": "24.19.2",
     "@types/pg": "8.23.1",
-    "@types/react": "19.3.0",
     "@workspace/eslint-config": "workspace:^",
     "@workspace/typescript-config": "workspace:*",
+    "dotenv": "18.0.7",
     "drizzle-kit": "1.0.0-rc.4",
     "eslint": "9.39.5",
-    "typescript": "6.0.3"
+    "typescript": "6.0.3",
+    "wrangler": "4.151.0"
   }
 }

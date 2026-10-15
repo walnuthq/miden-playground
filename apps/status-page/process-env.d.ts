@@ -1,3 +1,4 @@
+// Read from .env.local locally (scripts/load-env.ts): see .env.example.
 // Keep in sync with .env.example and the `status-page#*` env lists in turbo.json.
 declare global {
   namespace NodeJS {

@@ -1,4 +1,6 @@
-// Keep in sync with .env.example and the `web#build` env list in turbo.json.
+// Build-time variables, inlined by `next build`: see .env.example.
+// Keep in sync with .env.example, .env.production and the
+// `miden-playground-web#build` env list in turbo.json.
 declare global {
   namespace NodeJS {
     interface ProcessEnv {

@@ -8,6 +8,9 @@ export default defineConfig({
   schema: "./db/schema.ts",
   dialect: "postgresql",
   dbCredentials: {
-    url: process.env.DATABASE_URL,
+    // The postgres service in docker-compose.yml by default.
+    url:
+      process.env.DATABASE_URL ??
+      "postgres://miden-playground:miden_playground_dev_password@localhost:5432/miden-playground",
   },
 });
