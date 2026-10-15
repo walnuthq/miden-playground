@@ -8,14 +8,19 @@
   // enable_request_signal aborts `request.signal` when the client disconnects,
   // which cancels the upstream compile/verify calls it is passed to.
   "compatibility_flags": ["nodejs_compat", "enable_request_signal"],
-  // WEB_URL, API_COMPILE_URL and API_REGISTRY_URL are set in the dashboard for
-  // production (see .env.example); keep them across deploys.
-  "keep_vars": true,
+  // Production values. `wrangler dev` overrides them with .dev.vars (copied
+  // from .env.example), which points at the local services.
+  "vars": {
+    "WEB_URL": "https://playground.miden.xyz",
+    "API_COMPILE_URL": "https://miden-source-code-verification-api-compile.walnut.dev",
+    "API_REGISTRY_URL": "https://miden-source-code-verification-api-registry.walnut.dev",
+  },
   "hyperdrive": [
     {
       "binding": "HYPERDRIVE",
-      // Create with `wrangler hyperdrive create miden-playground-api --connection-string ...`.
-      "id": "00000000000000000000000000000000",
+      // `miden-playground-api` (caching disabled: the API reads back what it
+      // just wrote, sslmode=require).
+      "id": "27b933dd0e7c47bf9a29803a28b62b85",
       // The postgres service in docker-compose.yml.
       "localConnectionString": "postgres://miden-playground:miden_playground_dev_password@localhost:5432/miden-playground",
     },

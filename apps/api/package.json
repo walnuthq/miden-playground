@@ -10,7 +10,7 @@
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "typecheck": "tsc --noEmit",
-    "cf-typegen": "wrangler types --env-file .env.example",
+    "cf-typegen": "wrangler types --env-file .env.example --strict-vars=false",
     "db:push": "drizzle-kit push"
   },
   "dependencies": {
