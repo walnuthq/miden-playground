@@ -1,3 +1,4 @@
+// Build-time variables, inlined by `next build`: see .env.example.
 // Keep in sync with .env.example, .env.production and the
 // `miden-playground-web#build` env list in turbo.json.
 declare global {

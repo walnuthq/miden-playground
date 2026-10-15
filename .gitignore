@@ -11,8 +11,6 @@ node_modules
 .env.development.local
 .env.test.local
 .env.production.local
-# apps/web's .dev.vars only holds public values and is committed.
-apps/api/.dev.vars
 
 # Testing
 coverage

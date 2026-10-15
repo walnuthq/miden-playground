@@ -1,6 +1,10 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "miden-playground-api",
+  // The top level is the local configuration (`wrangler dev`); production is
+  // `env.production` (`pnpm run deploy`). This name only matters if someone
+  // runs `wrangler deploy` without `--env production`: it then deploys to a
+  // separate Worker instead of overwriting production with local values.
+  "name": "miden-playground-api-dev",
   "main": "index.ts",
   "compatibility_date": "2026-10-01",
   // nodejs_compat fills `process.env` from vars and secrets (read by
@@ -8,22 +12,15 @@
   // enable_request_signal aborts `request.signal` when the client disconnects,
   // which cancels the upstream compile/verify calls it is passed to.
   "compatibility_flags": ["nodejs_compat", "enable_request_signal"],
-  // Deploys attach the custom domains listed here and detach any other.
-  "routes": [
-    { "pattern": "miden-playground-api.walnut.dev", "custom_domain": true },
-  ],
-  // Production values. `wrangler dev` overrides them with .dev.vars (copied
-  // from .env.example), which points at the local services.
+  // Local services. Override them in .env.local (see .env.example).
   "vars": {
-    "WEB_URL": "https://playground.miden.xyz",
-    "API_COMPILE_URL": "https://miden-source-code-verification-api-compile.walnut.dev",
-    "API_REGISTRY_URL": "https://miden-source-code-verification-api-registry.walnut.dev",
+    "WEB_URL": "http://localhost:3000",
+    "API_COMPILE_URL": "http://localhost:8080",
+    "API_REGISTRY_URL": "http://localhost:8081",
   },
   "hyperdrive": [
     {
       "binding": "HYPERDRIVE",
-      // `miden-playground-api` (caching disabled: the API reads back what it
-      // just wrote, sslmode=require).
       "id": "27b933dd0e7c47bf9a29803a28b62b85",
       // The postgres service in docker-compose.yml.
       "localConnectionString": "postgres://miden-playground:miden_playground_dev_password@localhost:5432/miden-playground",
@@ -45,6 +42,30 @@
       "head_sampling_rate": 1,
       "persist": true,
       "invocation_logs": true,
+    },
+  },
+  "env": {
+    // Vars and bindings aren't inherited from the top level: each environment
+    // declares its own.
+    "production": {
+      "name": "miden-playground-api",
+      // Deploys attach the custom domains listed here and detach any other.
+      "routes": [
+        { "pattern": "miden-playground-api.walnut.dev", "custom_domain": true },
+      ],
+      "vars": {
+        "WEB_URL": "https://playground.miden.xyz",
+        "API_COMPILE_URL": "https://miden-source-code-verification-api-compile.walnut.dev",
+        "API_REGISTRY_URL": "https://miden-source-code-verification-api-registry.walnut.dev",
+      },
+      "hyperdrive": [
+        {
+          "binding": "HYPERDRIVE",
+          // `miden-playground-api` (caching disabled: the API reads back what
+          // it just wrote, sslmode=require).
+          "id": "27b933dd0e7c47bf9a29803a28b62b85",
+        },
+      ],
     },
   },
 }

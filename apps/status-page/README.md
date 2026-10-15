@@ -113,11 +113,10 @@ three, since none of them measured anything.
 | `SLACK_WEBHOOK_URL` | unset — notify is a no-op | notify                         |
 | `STATUS_PAGE_BASE`  | `/miden-playground/`      | Vite's `base`                  |
 
-In CI `WEB_URL` and `API_URL` come from **repository variables of the same
-name**, and both are required: an undefined variable reaches the build as an
-empty string, the probe falls back to the localhost defaults above, and the
-published page is a wall of connection failures. `SLACK_WEBHOOK_URL` is a
-**secret**, not a variable. Locally, copy `.env.example` to `.env`.
+In CI, `WEB_URL` and `API_URL` are set in the `env` of the build step of
+`.github/workflows/deploy-status-page.yml`, and `SLACK_WEBHOOK_URL` is a
+repository **secret**. Locally, copy `.env.example` to `.env.local`: the scripts
+and `vite.config.ts` load it through `scripts/load-env.ts`.
 
 ## Slack notifications
 
@@ -226,7 +225,7 @@ pnpm --filter status-page notify --dry-run
 
 Edit `health`, `previousHealth`, `since`, `episodeSince` and `previousCheckedAt` in
 `public/status.json` to reach the recovery and reminder branches. To post for
-real from your machine, put the webhook in `apps/status-page/.env` and drop
+real from your machine, put the webhook in `apps/status-page/.env.local` and drop
 `--dry-run`.
 
 ### Limits
@@ -287,15 +286,9 @@ One-time repository setup, all under **Settings**:
    would never appear.
 2. **Environments → `github-pages`** — the deployment branch rule has to allow
    `main`, otherwise the deploy job waits for approval on its first run.
-3. **Secrets and variables → Actions → Variables** — add `WEB_URL` =
-   `https://playground.miden.xyz` and `API_URL` =
-   `https://miden-playground-api.walnut.dev`. Use _Variables_, not _Secrets_:
-   these URLs are public, and secrets would be masked in the logs. **Both are
-   required** — without them the probe falls back to localhost and every check
-   goes red.
-4. **Actions → General** — Actions must be enabled. Workflow permissions can stay
+3. **Actions → General** — Actions must be enabled. Workflow permissions can stay
    read-only, because the workflow declares its own `permissions:` block.
-5. Tick **Enforce HTTPS** under Pages once the first deploy has succeeded.
+4. Tick **Enforce HTTPS** under Pages once the first deploy has succeeded.
 
 The site lands at `https://<owner>.github.io/miden-playground/`, which is why
 `base` is `/miden-playground/` — the path depends on the repository name, not the

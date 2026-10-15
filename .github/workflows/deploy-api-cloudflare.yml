@@ -42,7 +42,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Its production vars and Hyperdrive binding are in apps/api/wrangler.jsonc.
+      # Deploys `env.production` of apps/api/wrangler.jsonc (vars, Hyperdrive
+      # binding and custom domain).
       # `pnpm run`, not `pnpm deploy`, which is a pnpm command of its own.
       - name: Deploy api to Cloudflare
         working-directory: apps/api
