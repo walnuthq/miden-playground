@@ -16,7 +16,7 @@
   "dependencies": {
     "drizzle-orm": "1.0.0-rc.4",
     "fflate": "0.8.3",
-    "hono": "4.13.12",
+    "hono": "4.13.13",
     "lodash": "4.18.1",
     "pg": "8.23.1",
     "smol-toml": "1.9.1",
@@ -28,7 +28,7 @@
     "@types/pg": "8.23.1",
     "@workspace/eslint-config": "workspace:^",
     "@workspace/typescript-config": "workspace:*",
-    "dotenv": "18.0.7",
+    "dotenv": "18.0.8",
     "drizzle-kit": "1.0.0-rc.4",
     "eslint": "9.39.5",
     "typescript": "6.0.3",
