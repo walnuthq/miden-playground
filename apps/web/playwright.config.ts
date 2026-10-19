@@ -8,6 +8,8 @@ import { defineConfig, devices } from "@playwright/test";
 // scripts).
 export default defineConfig({
   testDir: "./e2e",
+  // Checks the Bread Wallet version (see e2e/global-setup.ts).
+  globalSetup: "./e2e/global-setup.ts",
   // Tutorials share testnet accounts (faucets, wallets of the tutorial
   // stores): run them one at a time.
   fullyParallel: false,

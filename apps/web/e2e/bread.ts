@@ -1,4 +1,5 @@
 import { randomBytes } from "node:crypto";
+import { existsSync } from "node:fs";
 import { cp, mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -15,19 +16,19 @@ import { TRANSACTION_TIMEOUT } from "./tutorial";
 // connected wallet. Extensions only load in Playwright's own Chromium, in a
 // persistent context, so these tests launch their own browser.
 //
-// - BREAD_EXTENSION_DIR (required): the unpacked extension, i.e. the
-//   `MidenWallet.<version>.Testnet.zip` asset of
-//   https://github.com/0xMiden/wallet/releases. Tests using this fixture are
-//   skipped without it.
+// - The unpacked extension is installed in the repo's .bread-wallet/extension
+//   by `pnpm bread-wallet` (see .bread-wallet/update.mjs).
+//   BREAD_EXTENSION_DIR overrides it. Tests using this fixture are skipped
+//   when neither exists.
 // - By default, each test onboards a brand new Bread wallet, like a new
 //   Playground user. It has no funds: tutorials mint what they need.
 // - BREAD_PROFILE_DIR and BREAD_PASSWORD (optional): run on a copy of a
 //   Chromium profile where Bread has already been onboarded, e.g. to reuse a
 //   funded wallet. The profile must come from Playwright's Chromium: Chrome
 //   and Chromium builds can store the extension's IndexedDB differently, and
-//   Bread then starts with an empty account database. The extension ID is
-//   derived from BREAD_EXTENSION_DIR's path, so it must also be the folder the
-//   profile was onboarded with.
+//   Bread then starts with an empty account database. The extension ID comes
+//   from the `key` that `pnpm bread-wallet` adds to the manifest, so it's the
+//   same wherever the repo lives.
 
 const POPUP_TIMEOUT = 60_000;
 
@@ -63,13 +64,18 @@ export type Bread = {
 
 type BreadProfile = { userDataDir: string; password: string };
 
+const DEFAULT_EXTENSION_DIR = path.resolve(
+  import.meta.dirname,
+  "../../../.bread-wallet/extension",
+);
+
 const breadConfig = () => {
   const {
-    BREAD_EXTENSION_DIR: extensionDir,
+    BREAD_EXTENSION_DIR: extensionDir = DEFAULT_EXTENSION_DIR,
     BREAD_PROFILE_DIR: profileDir,
     BREAD_PASSWORD: password,
   } = process.env;
-  if (!extensionDir) {
+  if (!existsSync(path.join(extensionDir, "manifest.json"))) {
     return null;
   }
   return profileDir && password
@@ -168,7 +174,7 @@ export const test = base.extend<{ breadProfile: BreadProfile; bread: Bread }>({
     const config = breadConfig();
     testInfo.skip(
       !config,
-      "Set BREAD_EXTENSION_DIR to run Bread Wallet tests (see e2e/bread.ts)",
+      "Run `pnpm bread-wallet` to run Bread Wallet tests (see e2e/bread.ts)",
     );
     const { extensionDir, profile } = config!;
     const userDataDir = await mkdtemp(path.join(tmpdir(), "bread-profile-"));

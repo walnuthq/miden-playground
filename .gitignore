@@ -53,3 +53,9 @@ npm-debug.log*
 # Misc
 .DS_Store
 *.pem
+
+# Bread Wallet: the extension (installed by `pnpm bread-wallet`) and QA browser
+# profiles. Only the update script and the pinned version are committed.
+.bread-wallet/*
+!.bread-wallet/update.mjs
+!.bread-wallet/version

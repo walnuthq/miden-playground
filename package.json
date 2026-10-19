@@ -11,7 +11,8 @@
     "dev": "turbo dev",
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "bread-wallet": "node .bread-wallet/update.mjs"
   },
   "devDependencies": {
     "@workspace/eslint-config": "workspace:*",
