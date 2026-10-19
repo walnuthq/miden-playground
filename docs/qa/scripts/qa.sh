@@ -7,8 +7,8 @@
 #   QA_LOG       findings log file (default: /tmp/playground-qa-findings.md)
 #
 # Launch the browser first (see docs/qa/README.md), e.g.:
-#   agent-browser --session qa --extension ~/miden/extensions/bread-wallet \
-#     --profile ~/miden/extensions/qa-profile-2 open "$BASE"
+#   agent-browser --session qa --extension .bread-wallet/extension \
+#     --profile .bread-wallet/profiles/qa open "$BASE"
 
 QA_SCRIPTS="$(cd "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")" && pwd)"
 QA_SESSION="${QA_SESSION:-qa}"
