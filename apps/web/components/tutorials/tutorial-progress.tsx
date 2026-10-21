@@ -20,7 +20,7 @@ const TutorialProgressStep = ({
       <TooltipTrigger asChild>
         <button
           type="button"
-          aria-label={`Step ${index + 1}: ${step.title}`}
+          aria-label={`Go to step ${index + 1}`}
           className={cn("grow first:rounded-l-md last:rounded-r-md", {
             "bg-primary": index < tutorialStep || index <= tutorialMaxStep,
             "bg-primary/25 border": index === tutorialStep,
