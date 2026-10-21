@@ -4,7 +4,7 @@ import { useWallet } from "@miden-sdk/miden-wallet-adapter";
 import type { TutorialStep } from "@/lib/types/tutorial";
 import useAccounts from "@/hooks/use-accounts";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step5Content from "@/components/tutorials/wallet-backup-using-miden-guardian/step5.mdx";
 import useTutorials from "@/hooks/use-tutorials";
 
@@ -24,7 +24,7 @@ const Step5: TutorialStep = {
     return (
       <>
         <Step5Content account={multisig} />
-        <TutorialAlert
+        <TutorialStepAlert
           completed={completed}
           title="Action required: Sign and execute the proposal."
           titleWhenCompleted="Your proposal has been executed."

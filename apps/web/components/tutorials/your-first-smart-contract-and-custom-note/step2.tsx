@@ -1,6 +1,6 @@
 import type { TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step2Content from "@/components/tutorials/your-first-smart-contract-and-custom-note/step2.mdx";
 import useScripts from "@/hooks/use-scripts";
 import { defaultScriptIds } from "@/lib/types/default-scripts";
@@ -24,7 +24,7 @@ const Step2: TutorialStep = {
     return (
       <>
         <Step2Content />
-        <TutorialAlert
+        <TutorialStepAlert
           completed={completed}
           title="Action required: Compile the counter contract script."
           titleWhenCompleted="You compiled the counter contract script."

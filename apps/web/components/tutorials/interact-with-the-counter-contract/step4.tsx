@@ -2,7 +2,7 @@ import { usePathname } from "next/navigation";
 import type { TutorialStep } from "@/lib/types/tutorial";
 import useAccounts from "@/hooks/use-accounts";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step4Content from "@/components/tutorials/interact-with-the-counter-contract/step4.mdx";
 import { counterContractAddress } from "@/lib/constants";
 import { getIdentifierPart } from "@/lib/utils/account";
@@ -36,7 +36,7 @@ const Step4: TutorialStep = {
           }}
           withLink={!!counter}
         />
-        <TutorialAlert
+        <TutorialStepAlert
           completed={completed}
           title="Action required: Import the counter contract."
           titleWhenCompleted="You imported the counter contract."

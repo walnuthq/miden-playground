@@ -2,7 +2,7 @@ import { usePathname } from "next/navigation";
 import type { TutorialStep } from "@/lib/types/tutorial";
 import useAccounts from "@/hooks/use-accounts";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step1Content from "@/components/tutorials/connect-wallet-and-sign-transactions/step1.mdx";
 
 const useCompleted = () => {
@@ -22,7 +22,7 @@ const Step1: TutorialStep = {
     return (
       <>
         <Step1Content wallet={connectedWallet} />
-        <TutorialAlert
+        <TutorialStepAlert
           completed={completed}
           title="Action required: Connect your wallet."
           titleWhenCompleted="Your wallet is connected and imported."

@@ -1,6 +1,6 @@
 import type { TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step2Content from "@/components/tutorials/network-transactions/step2.mdx";
 import useAccounts from "@/hooks/use-accounts";
 import useComponents from "@/hooks/use-components";
@@ -40,7 +40,7 @@ const Step2: TutorialStep = {
     return (
       <>
         <Step2Content />
-        <TutorialAlert
+        <TutorialStepAlert
           completed={completed}
           title="Action required: Deploy your network counter."
           titleWhenCompleted="You deployed your network counter."

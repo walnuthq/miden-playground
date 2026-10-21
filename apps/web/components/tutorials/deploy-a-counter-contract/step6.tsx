@@ -1,6 +1,6 @@
 import type { TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step6Content from "@/components/tutorials/deploy-a-counter-contract/step6.mdx";
 import useAccounts from "@/hooks/use-accounts";
 import useComponents from "@/hooks/use-components";
@@ -36,7 +36,7 @@ const Step6: TutorialStep = {
     return (
       <>
         <Step6Content counter={counter} />
-        <TutorialAlert
+        <TutorialStepAlert
           completed={completed}
           title="Action required: Increment the counter."
           titleWhenCompleted="Your increment transaction has been submitted."

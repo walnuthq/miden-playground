@@ -1,5 +1,5 @@
 import type { TutorialStep } from "@/lib/types/tutorial";
-import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import Step5Content from "@/components/tutorials/foreign-procedure-invocation/step5.mdx";
 import useAccounts from "@/hooks/use-accounts";
@@ -46,7 +46,7 @@ const Step5: TutorialStep = {
     return (
       <>
         <Step5Content />
-        <TutorialAlert
+        <TutorialStepAlert
           completed={completed}
           title="Action required: Copy the Counter Contract count."
           titleWhenCompleted="Your Count Reader copied the Counter Contract count."

@@ -26,7 +26,7 @@ const LaunchExampleCard = ({ example }: { example: Example }) => {
       <CardFooter>
         <Button
           variant="outline"
-          className="w-full bg-[#f9f9f9]"
+          className="w-full bg-muted/50"
           disabled={loading}
           onClick={async () => {
             setLoading(true);

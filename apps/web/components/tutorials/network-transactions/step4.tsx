@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step4Content from "@/components/tutorials/network-transactions/step4.mdx";
 import useAccounts from "@/hooks/use-accounts";
 import useComponents from "@/hooks/use-components";
@@ -37,7 +37,7 @@ const Step4: TutorialStep = {
     return (
       <>
         <Step4Content />
-        <TutorialAlert
+        <TutorialStepAlert
           completed={completed}
           title="Action required: Create the network note."
           titleWhenCompleted="Your network note has been consumed."

@@ -17,7 +17,7 @@ const Footer = () => (
         }
       >
         <div>
-          <div className="bg-[#f50] text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
+          <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
             <MessagesSquare className="size-6" />
           </div>
           <div className="flex flex-col gap-0.5 leading-none">

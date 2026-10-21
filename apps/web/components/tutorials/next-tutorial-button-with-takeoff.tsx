@@ -20,7 +20,7 @@ const NextTutorialButton = () => {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button className="grow-2 bg-[#ff5500]">Next tutorial</Button>
+        <Button className="grow-2">Next tutorial</Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>

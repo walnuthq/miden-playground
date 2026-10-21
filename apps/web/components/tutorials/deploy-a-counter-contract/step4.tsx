@@ -1,6 +1,6 @@
 import type { TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step4Content from "@/components/tutorials/deploy-a-counter-contract/step4.mdx";
 import useComponents from "@/hooks/use-components";
 
@@ -24,7 +24,7 @@ const Step4: TutorialStep = {
     return (
       <>
         <Step4Content />
-        <TutorialAlert
+        <TutorialStepAlert
           completed={completed}
           title="Action required: Add the counter storage slot."
           titleWhenCompleted="You added the counter storage slot."

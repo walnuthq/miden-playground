@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step5Content from "@/components/tutorials/interact-with-the-counter-contract/step5.mdx";
 import useAccounts from "@/hooks/use-accounts";
 import { counterContractAddress } from "@/lib/constants";
@@ -30,7 +30,7 @@ const Step5: TutorialStep = {
     return (
       <>
         <Step5Content />
-        <TutorialAlert
+        <TutorialStepAlert
           completed={completed}
           title="Action required: Increment the counter."
           titleWhenCompleted="Your increment transaction has been submitted."

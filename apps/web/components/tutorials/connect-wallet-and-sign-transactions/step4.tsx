@@ -1,7 +1,7 @@
 import { EllipsisVertical } from "lucide-react";
 import type { TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step4Content from "@/components/tutorials/connect-wallet-and-sign-transactions/step4.mdx";
 import useGlobalContext from "@/components/global-context/hook";
 import useAccounts from "@/hooks/use-accounts";
@@ -41,7 +41,7 @@ const Step4: TutorialStep = {
     return (
       <>
         <Step4Content />
-        <TutorialAlert
+        <TutorialStepAlert
           completed={completed}
           title="Action required: Send tokens to the Test Wallet."
           titleWhenCompleted="The output note carrying your tokens has been created."

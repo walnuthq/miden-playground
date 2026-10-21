@@ -8,30 +8,41 @@ import examples from "@/lib/examples";
 import LaunchExampleCard from "@/components/home/launch-example-card";
 import NewSandboxCard from "@/components/home/new-sandbox-card";
 
+const SectionHeading = ({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
+}) => (
+  <div>
+    <h3 className="scroll-m-20 text-3xl font-semibold tracking-tight">
+      {title}
+      <span className="bg-primary size-2 inline-block ml-1" />
+    </h3>
+    <p className="text-muted-foreground text-lg">{description}</p>
+  </div>
+);
+
+const SectionSeparator = () => (
+  <div className="h-px border-b border-primary border-dashed my-4" />
+);
+
 const Tutorials = () => {
   const [showMore, setShowMore] = useState(tutorials.length < 5);
   return (
     <>
-      <div>
-        <h3 className="scroll-m-20 text-3xl font-semibold tracking-tight">
-          Tutorials
-          <div className="bg-[#ff5500] size-2 inline-block ml-1" />
-        </h3>
-        <p className="text-black/60 text-lg">
-          Discover Miden architecture through a series of interactive tutorials.
-        </p>
-      </div>
+      <SectionHeading
+        title="Tutorials"
+        description="Discover Miden architecture through a series of interactive tutorials."
+      />
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {tutorials.slice(0, showMore ? tutorials.length : 4).map((tutorial) => (
           <StartTutorialCard key={tutorial.id} tutorial={tutorial} />
         ))}
       </div>
       {!showMore && (
-        <Button
-          size="lg"
-          className="bg-[#ff5500]"
-          onClick={() => setShowMore(true)}
-        >
+        <Button size="lg" onClick={() => setShowMore(true)}>
           Show all {tutorials.length} tutorials
         </Button>
       )}
@@ -41,15 +52,10 @@ const Tutorials = () => {
 
 const Examples = () => (
   <>
-    <div>
-      <h3 className="scroll-m-20 text-3xl font-semibold tracking-tight">
-        Examples
-        <div className="bg-[#ff5500] size-2 inline-block ml-1" />
-      </h3>
-      <p className="text-black/60 text-lg">
-        Get started with Miden by exploring project templates.
-      </p>
-    </div>
+    <SectionHeading
+      title="Examples"
+      description="Get started with Miden by exploring project templates."
+    />
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       {examples.map((example) => (
         <LaunchExampleCard key={example.id} example={example} />
@@ -60,16 +66,10 @@ const Examples = () => (
 
 const SandboxEnvironments = () => (
   <>
-    <div>
-      <h3 className="scroll-m-20 text-3xl font-semibold tracking-tight">
-        Sandbox environments
-        <div className="bg-[#ff5500] size-2 inline-block ml-1" />
-      </h3>
-      <p className="text-black/60 text-lg">
-        Start building with Miden using a full-featured sandbox environment
-        within your browser.
-      </p>
-    </div>
+    <SectionHeading
+      title="Sandbox environments"
+      description="Start building with Miden using a full-featured sandbox environment within your browser."
+    />
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       <NewSandboxCard networkId="mtst" />
       {/* <NewSandboxCard networkId="mdev" /> */}
@@ -96,11 +96,11 @@ const Home = () => (
       <strong>Welcome!</strong> Experiment with Miden's novel architecture in
       our very own training environment.
     </p>
-    <div className="h-px border-b border-black/20 border-dashed" />
+    <div className="h-px border-b border-dashed" />
     <Tutorials />
-    <div className="h-px border-b border-[#ff5500] border-dashed my-4" />
+    <SectionSeparator />
     <Examples />
-    <div className="h-px border-b border-[#ff5500] border-dashed my-4" />
+    <SectionSeparator />
     <SandboxEnvironments />
   </div>
 );

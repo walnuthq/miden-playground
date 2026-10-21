@@ -2,7 +2,7 @@ import type { TutorialStep } from "@/lib/types/tutorial";
 import useAccounts from "@/hooks/use-accounts";
 import useTransactions from "@/hooks/use-transactions";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step4Content from "@/components/tutorials/transfer-assets-between-wallets/step4.mdx";
 
 const useCompleted = () => {
@@ -25,7 +25,7 @@ const Step4: TutorialStep = {
     return (
       <>
         <Step4Content walletA={walletA} walletB={walletB} />
-        <TutorialAlert
+        <TutorialStepAlert
           completed={completed}
           title="Action required: Consume the Note."
           titleWhenCompleted="The Note has been consumed."

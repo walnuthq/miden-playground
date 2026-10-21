@@ -1,7 +1,7 @@
 import { EllipsisVertical } from "lucide-react";
 import type { TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step4Content from "@/components/tutorials/private-transfers/step4.mdx";
 import useTransferNote from "@/components/tutorials/private-transfers/use-transfer-note";
 
@@ -17,7 +17,7 @@ const Step4: TutorialStep = {
     return (
       <>
         <Step4Content />
-        <TutorialAlert
+        <TutorialStepAlert
           completed={completed}
           title="Action required: Send tokens to your Para Wallet."
           titleWhenCompleted="The private note carrying your tokens has been created."

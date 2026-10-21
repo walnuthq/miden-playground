@@ -1,6 +1,6 @@
 import type { TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step5Content from "@/components/tutorials/your-first-smart-contract-and-custom-note/step5.mdx";
 import useAccounts from "@/hooks/use-accounts";
 import useScripts from "@/hooks/use-scripts";
@@ -29,7 +29,7 @@ const Step5: TutorialStep = {
     return (
       <>
         <Step5Content />
-        <TutorialAlert
+        <TutorialStepAlert
           completed={completed}
           title="Action required: Deploy your counter contract."
           titleWhenCompleted="You deployed your counter contract."

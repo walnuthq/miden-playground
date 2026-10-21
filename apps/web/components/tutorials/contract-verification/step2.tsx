@@ -1,6 +1,6 @@
 import type { TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step2Content from "@/components/tutorials/contract-verification/step2.mdx";
 import useScripts from "@/hooks/use-scripts";
 import useScriptName from "@/components/tutorials/contract-verification/use-script-name";
@@ -37,7 +37,7 @@ const Step2: TutorialStep = {
     return (
       <>
         <Step2Content />
-        <TutorialAlert
+        <TutorialStepAlert
           completed={completed}
           title="Action required: Add the reset_count procedure and compile."
           titleWhenCompleted="You compiled the script."

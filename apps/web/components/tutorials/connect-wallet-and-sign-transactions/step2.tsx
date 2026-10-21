@@ -4,7 +4,7 @@ import type { TutorialStep } from "@/lib/types/tutorial";
 import useNetwork from "@/hooks/use-network";
 import useNotes from "@/hooks/use-notes";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step2Content from "@/components/tutorials/connect-wallet-and-sign-transactions/step2.mdx";
 import useAccounts from "@/hooks/use-accounts";
 import useTutorials from "@/hooks/use-tutorials";
@@ -41,7 +41,7 @@ const Step2: TutorialStep = {
     return (
       <>
         <Step2Content />
-        <TutorialAlert
+        <TutorialStepAlert
           completed={completed}
           title="Action required: Request tokens from the faucet."
           titleWhenCompleted="Your wallet has been funded."

@@ -56,7 +56,7 @@ const ProjectSwitcher = () => {
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <div className="bg-white border flex aspect-square size-8 items-center justify-center rounded-lg">
+              <div className="bg-background border flex aspect-square size-8 items-center justify-center rounded-lg">
                 <Logo className="size-6" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">

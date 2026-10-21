@@ -1,7 +1,7 @@
 import { usePathname } from "next/navigation";
 import type { TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step1Content from "@/components/tutorials/interact-with-the-counter-contract/step1.mdx";
 
 const useCompleted = () => {
@@ -16,7 +16,7 @@ const Step1: TutorialStep = {
     return (
       <>
         <Step1Content />
-        <TutorialAlert
+        <TutorialStepAlert
           completed={completed}
           title="Action required: Open the counter contract script."
           titleWhenCompleted="You opened the counter contract script."

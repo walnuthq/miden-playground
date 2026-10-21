@@ -25,7 +25,7 @@ const NextStepButton = ({
   }, [disabled, nextTutorialStepDisabled, setNextTutorialStepDisabled]);
   return (
     <Button
-      className="relative grow-2 bg-[#ff5500]"
+      className="relative grow-2"
       disabled={disabled && tutorialStep === tutorialMaxStep}
       onClick={onClick ?? nextTutorialStep}
     >

@@ -2,7 +2,7 @@ import { usePathname } from "next/navigation";
 import type { TutorialStep } from "@/lib/types/tutorial";
 import useAccounts from "@/hooks/use-accounts";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step2Content from "@/components/tutorials/wallet-backup-using-miden-guardian/step2.mdx";
 
 const useCompleted = () => {
@@ -19,7 +19,7 @@ const Step2: TutorialStep = {
     return (
       <>
         <Step2Content />
-        <TutorialAlert
+        <TutorialStepAlert
           completed={completed}
           title="Action required: Deploy a guardian wallet."
           titleWhenCompleted="Your guardian wallet has been deployed."

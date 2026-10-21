@@ -19,20 +19,20 @@ const StartTutorialCard = ({ tutorial }: { tutorial: Tutorial }) => {
     <Card>
       <CardHeader className="gap-0">
         <div className="flex items-center justify-between">
-          <strong className="text-[#ff5500] text-sm">
+          <strong className="text-primary text-sm">
             {tutorial.number.toString().padStart(2, "0")}
           </strong>
           {completedTutorials.has(tutorial.id) ? (
-            <Badge className="text-sm bg-green-500 text-white dark:bg-green-600">
+            <Badge className="text-sm bg-success text-success-foreground">
               <BadgeCheck />
               Completed
             </Badge>
           ) : (
             <Badge
-              className={cn("capitalize text-sm text-white", {
-                "bg-[#588EFB] dark:bg-sky-600":
+              className={cn("capitalize text-sm", {
+                "bg-beginner text-beginner-foreground":
                   tutorial.category === "beginner",
-                "bg-[#9D00FF] dark:bg-amber-600":
+                "bg-advanced text-advanced-foreground":
                   tutorial.category === "advanced",
               })}
             >
@@ -49,7 +49,7 @@ const StartTutorialCard = ({ tutorial }: { tutorial: Tutorial }) => {
       <CardFooter>
         <Button
           variant="outline"
-          className="w-full bg-[#f9f9f9]"
+          className="w-full bg-muted/50"
           onClick={() => startTutorial(tutorial.id)}
         >
           Start tutorial
