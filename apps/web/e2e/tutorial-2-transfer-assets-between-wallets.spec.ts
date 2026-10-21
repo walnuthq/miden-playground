@@ -59,9 +59,11 @@ test("tutorial 2: transfer assets between wallets", async ({ page }) => {
       }),
     ).toBeVisible();
     await panel.openLink("note ID", /\/notes\/0x[0-9a-f]+$/);
+    // The note page renders once the next state sync stores the output note,
+    // which gets slower as the shared wallets' nonces grow.
     await expect(
       page.getByRole("row", { name: /Target Account ID/ }),
-    ).toContainText("(Wallet B)");
+    ).toContainText("(Wallet B)", { timeout: 60_000 });
     await nextStep(page);
   });
 
