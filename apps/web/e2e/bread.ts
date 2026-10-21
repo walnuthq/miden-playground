@@ -147,8 +147,14 @@ const onboard = async (context: BrowserContext) => {
   // provider. It varies, and providers that are offline can't be picked.
   await button("Continue").click();
   await button(/^Continue with /).click();
-  // Usage data.
-  await button("Not now").click();
+  // Usage data: not always asked, Bread can go straight to creating the
+  // wallet.
+  await expect(button("Not now").or(button("Open wallet"))).toBeVisible({
+    timeout: POPUP_TIMEOUT,
+  });
+  if (await button("Not now").isVisible()) {
+    await button("Not now").click();
+  }
   // "Open wallet" closes the onboarding tab once the account is created.
   const closed = walletPage.waitForEvent("close");
   await button("Open wallet").click({ timeout: POPUP_TIMEOUT });
