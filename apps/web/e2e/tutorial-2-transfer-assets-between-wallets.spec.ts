@@ -59,9 +59,15 @@ test("tutorial 2: transfer assets between wallets", async ({ page }) => {
       }),
     ).toBeVisible();
     await panel.openLink("note ID", /\/notes\/0x[0-9a-f]+$/);
+    // The note page renders once the next state sync stores the output note,
+    // which gets slower as the shared wallets' nonces grow.
+    // TODO: every Playground user sends from the same Wallet A and Wallet B, so
+    // their history, and the time it takes to sync them, only ever grows. This
+    // is a design flaw of the tutorial store to fix on its own; until then,
+    // this timeout will keep needing to go up.
     await expect(
       page.getByRole("row", { name: /Target Account ID/ }),
-    ).toContainText("(Wallet B)");
+    ).toContainText("(Wallet B)", { timeout: 60_000 });
     await nextStep(page);
   });
 
