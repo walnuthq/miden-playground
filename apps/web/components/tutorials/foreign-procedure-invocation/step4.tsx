@@ -1,6 +1,6 @@
 import { usePathname } from "next/navigation";
 import type { TutorialStep } from "@/lib/types/tutorial";
-import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import Step4Content from "@/components/tutorials/foreign-procedure-invocation/step4.mdx";
 import useAccounts from "@/hooks/use-accounts";
@@ -25,7 +25,7 @@ const Step4: TutorialStep = {
     return (
       <>
         <Step4Content countReader={countReader} />
-        <TutorialAlert
+        <TutorialStepAlert
           completed={completed}
           title="Action required: Deploy your Count Reader contract."
           titleWhenCompleted="You deployed your Count Reader contract."

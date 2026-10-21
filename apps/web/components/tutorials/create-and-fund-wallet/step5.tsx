@@ -1,6 +1,6 @@
 import type { TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step5Content from "@/components/tutorials/create-and-fund-wallet/step5.mdx";
 import useAccounts from "@/hooks/use-accounts";
 import useTransactions from "@/hooks/use-transactions";
@@ -28,7 +28,7 @@ const Step5: TutorialStep = {
     return (
       <>
         <Step5Content note={note} />
-        <TutorialAlert
+        <TutorialStepAlert
           completed={completed}
           title="Action required: Consume the Note."
           titleWhenCompleted="The Note has been consumed."

@@ -1,6 +1,6 @@
 import type { TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step4Content from "@/components/tutorials/timelock-p2id-note/step4.mdx";
 import useAccounts from "@/hooks/use-accounts";
 import useNotes from "@/hooks/use-notes";
@@ -46,7 +46,7 @@ const Step4: TutorialStep = {
           accountIdSuffix={accountId?.suffix().toString() ?? ""}
           syncHeight={syncHeight + 43200}
         />
-        <TutorialAlert
+        <TutorialStepAlert
           completed={completed}
           title="Action required: Create the Note."
           titleWhenCompleted="You created the timelocked P2ID note."

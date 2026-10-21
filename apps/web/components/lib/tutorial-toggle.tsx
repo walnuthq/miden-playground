@@ -17,7 +17,6 @@ const TutorialToggle = () => {
       onPressedChange={(pressed) =>
         pressed ? openTutorial() : closeTutorial()
       }
-      className="rounded-xs"
       size="sm"
     >
       {nextTutorialStepDisabled ? (

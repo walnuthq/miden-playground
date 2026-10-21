@@ -1,6 +1,6 @@
 import type { TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step4Content from "@/components/tutorials/contract-verification/step4.mdx";
 import useAccounts from "@/hooks/use-accounts";
 
@@ -19,7 +19,7 @@ const Step4: TutorialStep = {
     return (
       <>
         <Step4Content counter={counter} />
-        <TutorialAlert
+        <TutorialStepAlert
           completed={completed}
           title="Action required: Import the unverified contract."
           titleWhenCompleted="You imported the unverified contract."

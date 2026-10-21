@@ -2,7 +2,7 @@ import { EllipsisVertical } from "lucide-react";
 import type { TutorialStep } from "@/lib/types/tutorial";
 import useAccounts from "@/hooks/use-accounts";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step7Content from "@/components/tutorials/your-first-smart-contract-and-custom-note/step7.mdx";
 import useScripts from "@/hooks/use-scripts";
 import useComponents from "@/hooks/use-components";
@@ -43,7 +43,7 @@ const Step7: TutorialStep = {
     return (
       <>
         <Step7Content counter={counter} />
-        <TutorialAlert
+        <TutorialStepAlert
           completed={completed}
           title="Action required: Consume the increment note."
           titleWhenCompleted="Your increment note has been consumed."

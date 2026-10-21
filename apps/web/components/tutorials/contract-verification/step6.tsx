@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { TutorialStep } from "@/lib/types/tutorial";
 import { useInterval } from "usehooks-ts";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step6Content from "@/components/tutorials/contract-verification/step6.mdx";
 import useAccounts from "@/hooks/use-accounts";
 import { getVerifiedAccountComponents } from "@/lib/api";
@@ -39,7 +39,7 @@ const Step6: TutorialStep = {
     return (
       <>
         <Step6Content counter={counter} />
-        <TutorialAlert
+        <TutorialStepAlert
           completed={completed}
           title="Action required: Verify the imported contract."
           titleWhenCompleted="You verified the imported contract."

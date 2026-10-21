@@ -2,7 +2,7 @@ import { EllipsisVertical } from "lucide-react";
 import type { TutorialStep } from "@/lib/types/tutorial";
 import useAccounts from "@/hooks/use-accounts";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step5Content from "@/components/tutorials/private-transfers/step5.mdx";
 import useTransferNote from "@/components/tutorials/private-transfers/use-transfer-note";
 
@@ -23,7 +23,7 @@ const Step5: TutorialStep = {
           wallet={wallets.find(({ name }) => name === "Para Wallet")}
           noteId={note?.id}
         />
-        <TutorialAlert
+        <TutorialStepAlert
           completed={completed}
           title="Action required: Consume the private note."
           titleWhenCompleted="Your Para Wallet received a private transfer."

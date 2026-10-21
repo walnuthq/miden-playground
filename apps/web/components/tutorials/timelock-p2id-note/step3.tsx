@@ -2,7 +2,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import type { TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step3Content from "@/components/tutorials/timelock-p2id-note/step3.mdx";
 import useScripts from "@/hooks/use-scripts";
 import { defaultScriptIds } from "@/lib/types/default-scripts";
@@ -42,7 +42,7 @@ const Step3: TutorialStep = {
     return (
       <>
         <Step3Content />
-        <TutorialAlert
+        <TutorialStepAlert
           completed={completed}
           title="Action required: Compile the script."
           titleWhenCompleted="You compiled the timelock P2ID script."

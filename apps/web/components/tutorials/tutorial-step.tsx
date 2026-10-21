@@ -33,10 +33,7 @@ const TutorialStep = ({ tutorial }: { tutorial: Tutorial }) => {
       })}
     >
       <div className="flex items-center justify-between">
-        <Badge
-          variant="outline"
-          className="bg-[#f9f9f9] border-black/20 text-black/27"
-        >
+        <Badge variant="outline" className="bg-muted/50 text-muted-foreground">
           Step {tutorialStep + 1} of {tutorial.steps.length}
         </Badge>
         <Button variant="ghost" size="icon" onClick={closeTutorial}>

@@ -1,7 +1,7 @@
 import type { TutorialStep } from "@/lib/types/tutorial";
 import useAccounts from "@/hooks/use-accounts";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step1Content from "@/components/tutorials/wallet-backup-using-miden-guardian/step1.mdx";
 
 const useCompleted = () => {
@@ -16,7 +16,7 @@ const Step1: TutorialStep = {
     return (
       <>
         <Step1Content />
-        <TutorialAlert
+        <TutorialStepAlert
           completed={completed}
           title="Action required: Connect your private Bread Wallet."
           titleWhenCompleted="Your private Bread Wallet is connected."

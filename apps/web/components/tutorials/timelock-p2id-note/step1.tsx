@@ -1,7 +1,7 @@
 import { usePathname } from "next/navigation";
 import type { TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step1Content from "@/components/tutorials/timelock-p2id-note/step1.mdx";
 import useScripts from "@/hooks/use-scripts";
 import { defaultScriptIds } from "@/lib/types/default-scripts";
@@ -22,7 +22,7 @@ const Step1: TutorialStep = {
     return (
       <>
         <Step1Content />
-        <TutorialAlert
+        <TutorialStepAlert
           completed={completed}
           title="Action required: Create a new script."
           titleWhenCompleted="You created a P2ID note script."

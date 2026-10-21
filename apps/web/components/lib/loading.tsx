@@ -15,7 +15,7 @@ import { networks } from "@/lib/types/network";
 const Loading = () => {
   const { networkId } = useNetwork();
   const variants = {
-    mtst: "default",
+    mtst: "outline",
     mdev: "secondary",
     mlcl: "destructive",
     mmck: "default",
@@ -33,7 +33,7 @@ const Loading = () => {
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
-        <Badge variant={variants[networkId]} className="rounded-xs h-8">
+        <Badge variant={variants[networkId]} className="h-8">
           Syncing {networks[networkId]} <Spinner />
         </Badge>
       </EmptyContent>

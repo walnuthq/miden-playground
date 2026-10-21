@@ -21,7 +21,7 @@ const TutorialStepAlert = ({
   return (
     <TutorialAlert>
       {stepCompleted ? (
-        <CircleCheckBig color="var(--color-green-500)" />
+        <CircleCheckBig color="var(--color-success)" />
       ) : (
         <CircleAlert />
       )}

@@ -24,9 +24,8 @@ const queryClient = new QueryClient();
 const Providers = ({ children }: { children: ReactNode }) => (
   <NextThemesProvider
     attribute="class"
-    // defaultTheme="system"
-    // enableSystem
-    forcedTheme="light"
+    defaultTheme="system"
+    enableSystem
     disableTransitionOnChange
     enableColorScheme
   >

@@ -2,7 +2,7 @@ import type { TutorialStep } from "@/lib/types/tutorial";
 import useAccounts from "@/hooks/use-accounts";
 import useTransactions from "@/hooks/use-transactions";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step2Content from "@/components/tutorials/transfer-assets-between-wallets/step2.mdx";
 import { accountIdFromPrefixSuffix } from "@/lib/utils/account";
 
@@ -30,7 +30,7 @@ const Step2: TutorialStep = {
     return (
       <>
         <Step2Content walletA={walletA} walletB={walletB} />
-        <TutorialAlert
+        <TutorialStepAlert
           completed={completed}
           title="Action required: Submit a send transaction."
           titleWhenCompleted="Your send transaction has been submitted."

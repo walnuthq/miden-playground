@@ -1,7 +1,7 @@
 import { usePathname } from "next/navigation";
 import type { TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step3Content from "@/components/tutorials/deploy-a-counter-contract/step3.mdx";
 import useComponents from "@/hooks/use-components";
 
@@ -22,7 +22,7 @@ const Step3: TutorialStep = {
     return (
       <>
         <Step3Content />
-        <TutorialAlert
+        <TutorialStepAlert
           completed={completed}
           title="Action required: Create an account component."
           titleWhenCompleted="You created an account component."

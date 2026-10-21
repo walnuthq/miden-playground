@@ -1,6 +1,6 @@
 import type { TutorialStep } from "@/lib/types/tutorial";
 import useAccounts from "@/hooks/use-accounts";
-import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step1Content from "@/components/tutorials/transfer-assets-between-wallets/step1.mdx";
 
 const Step1: TutorialStep = {
@@ -13,7 +13,7 @@ const Step1: TutorialStep = {
     return (
       <>
         <Step1Content walletA={walletA} walletB={walletB} faucet={faucet} />
-        <TutorialAlert
+        <TutorialStepAlert
           title="Explore the accounts."
           description="Click each account to explore its current state, and confirm
             that Wallet A holds MDN tokens."

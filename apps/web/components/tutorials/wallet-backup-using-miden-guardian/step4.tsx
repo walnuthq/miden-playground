@@ -2,7 +2,7 @@ import { EllipsisVertical } from "lucide-react";
 import type { TutorialStep } from "@/lib/types/tutorial";
 import useAccounts from "@/hooks/use-accounts";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step4Content from "@/components/tutorials/wallet-backup-using-miden-guardian/step4.mdx";
 
 const useCompleted = () => {
@@ -21,7 +21,7 @@ const Step4: TutorialStep = {
     return (
       <>
         <Step4Content />
-        <TutorialAlert
+        <TutorialStepAlert
           completed={completed}
           title="Action required: Create a consume note proposal."
           titleWhenCompleted="Your proposal has been created."

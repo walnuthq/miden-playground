@@ -2,7 +2,7 @@ import type { TutorialStep } from "@/lib/types/tutorial";
 import useNetwork from "@/hooks/use-network";
 import useNotes from "@/hooks/use-notes";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step3Content from "@/components/tutorials/wallet-backup-using-miden-guardian/step3.mdx";
 import useAccounts from "@/hooks/use-accounts";
 import {
@@ -39,7 +39,7 @@ const Step3: TutorialStep = {
     return (
       <>
         <Step3Content />
-        <TutorialAlert
+        <TutorialStepAlert
           completed={completed}
           title="Action required: Request tokens from the faucet."
           titleWhenCompleted="Your guardian wallet received a Note from the faucet."

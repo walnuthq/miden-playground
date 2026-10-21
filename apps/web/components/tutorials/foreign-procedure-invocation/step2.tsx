@@ -1,7 +1,7 @@
 import { usePathname } from "next/navigation";
 import type { TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step2Content from "@/components/tutorials/foreign-procedure-invocation/step2.mdx";
 
 const useCompleted = () => {
@@ -16,7 +16,7 @@ const Step2: TutorialStep = {
     return (
       <>
         <Step2Content />
-        <TutorialAlert
+        <TutorialStepAlert
           completed={completed}
           title="Action required: Open the Count Reader script."
           titleWhenCompleted="You opened the Count Reader script."

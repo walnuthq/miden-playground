@@ -1,6 +1,6 @@
 import type { TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step2Content from "@/components/tutorials/deploy-a-counter-contract/step2.mdx";
 import useScripts from "@/hooks/use-scripts";
 
@@ -23,7 +23,7 @@ const Step2: TutorialStep = {
     return (
       <>
         <Step2Content />
-        <TutorialAlert
+        <TutorialStepAlert
           completed={completed}
           title="Action required: Change the increment value and compile the script."
           titleWhenCompleted="You compiled your counter contract script."

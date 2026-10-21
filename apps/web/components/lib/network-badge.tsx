@@ -5,7 +5,6 @@ import { Badge } from "@workspace/ui/components/badge";
 import { Spinner } from "@workspace/ui/components/spinner";
 import useGlobalContext from "@/components/global-context/hook";
 import { networks } from "@/lib/types/network";
-import { cn } from "@workspace/ui/lib/utils";
 import useAppState from "@/hooks/use-app-state";
 import { useSyncState } from "@miden-sdk/react/lazy";
 import useNetwork from "@/hooks/use-network";
@@ -57,18 +56,13 @@ const NetworkBadge = () => {
     }
   }, [exampleId, exampleAccount, loadExample]);
   const variants = {
-    mtst: "default",
+    mtst: "outline",
     mdev: "secondary",
     mlcl: "destructive",
     mmck: "default",
   } as const;
   return (
-    <Badge
-      variant={variants[networkId]}
-      className={cn("rounded-xs h-8", {
-        "bg-[#f50] text-white": networkId === "mmck",
-      })}
-    >
+    <Badge variant={variants[networkId]} className="h-8">
       {networks[networkId]} | <pre>#{syncHeight}</pre>
       {isSyncing ? <Spinner /> : <CircleDot />}
     </Badge>

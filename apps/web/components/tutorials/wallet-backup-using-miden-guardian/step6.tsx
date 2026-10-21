@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { TutorialStep } from "@/lib/types/tutorial";
 import useAccounts from "@/hooks/use-accounts";
-import TutorialAlert from "@/components/tutorials/tutorial-step-alert";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import Step6Content from "@/components/tutorials/wallet-backup-using-miden-guardian/step6.mdx";
 import { normalizeAccountId, useMiden } from "@miden-sdk/react/lazy";
@@ -39,7 +39,7 @@ const Step6: TutorialStep = {
     return (
       <>
         <Step6Content account={{ name: "Guardian Wallet", address }} />
-        <TutorialAlert
+        <TutorialStepAlert
           completed={completed}
           title="Action required: Restore your guardian wallet."
           titleWhenCompleted="Your guardian wallet has been restored."
