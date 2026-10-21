@@ -1,7 +1,7 @@
-import type { TutorialStep } from "@/lib/types/tutorial";
-import NextTutorialButton from "@/components/tutorials/next-tutorial-button";
 import Step6Content from "@/components/tutorials/foreign-procedure-invocation/step6.mdx";
+import NextTutorialButton from "@/components/tutorials/next-tutorial-button";
 import useAccounts from "@/hooks/use-accounts";
+import type { TutorialStep } from "@/lib/types/tutorial";
 
 const Step6: TutorialStep = {
   title: "Read the copied count.",

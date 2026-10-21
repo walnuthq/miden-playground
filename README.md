@@ -101,18 +101,24 @@ Once you are about to submit a pull request, prefix the name with either `chore:
 
 ### Coding conventions
 
-The project is already pre-configured with [Eslint](.eslintrc.js), [TypeScript](tsconfig.json), and [Prettier](.prettierrc). Here are some useful commands you can run to ensure your changes follow the project's coding conventions:
+The project is already pre-configured with [Biome](biome.json) for linting and formatting, and [TypeScript](tsconfig.json). Here are some useful commands you can run to ensure your changes follow the project's coding conventions:
 
-Check for any linting issues and fix:
+Check for any linting or formatting issues:
 
 ```sh
-pnpm lint --fix
+pnpm lint
+```
+
+Format the code and apply safe fixes:
+
+```sh
+pnpm format
 ```
 
 Check for any TypeScript issues:
 
 ```sh
-pnpm check-types
+pnpm typecheck
 ```
 
 ## License

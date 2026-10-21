@@ -2,15 +2,15 @@ import { execFileSync } from "node:child_process";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { expect, test, type Page } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 import { replaceInEditor } from "./editor";
 import {
   logBrowserErrors,
   nextStep,
   selectOption,
   startTutorial,
-  tutorialPanel,
   TRANSACTION_TIMEOUT,
+  tutorialPanel,
 } from "./tutorial";
 
 // Tutorial 12 needs no wallet: the contracts use No Auth. Compiling, exporting

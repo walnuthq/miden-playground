@@ -2,8 +2,8 @@
 import { useIsClient } from "usehooks-ts";
 import { columns } from "@/components/components/columns";
 import ComponentsTable from "@/components/components/components-table";
-import useComponents from "@/hooks/use-components";
 import CreateComponentDialog from "@/components/components/create-component-dialog";
+import useComponents from "@/hooks/use-components";
 import { defaultComponentIds } from "@/lib/types/default-components";
 
 const Components = () => {

@@ -1,14 +1,14 @@
-import type { Account } from "@/lib/types/account";
+import { Badge } from "@workspace/ui/components/badge";
 import {
   Table,
   TableBody,
   TableCell,
   TableRow,
 } from "@workspace/ui/components/table";
-import { Badge } from "@workspace/ui/components/badge";
 import AccountAddress from "@/components/lib/account-address";
-import { formatAmount } from "@/lib/utils/asset";
 import CopyButton from "@/components/lib/copy-button";
+import type { Account } from "@/lib/types/account";
+import { formatAmount } from "@/lib/utils/asset";
 
 const AccountInformationTable = ({ account }: { account: Account }) => (
   <div className="rounded-md border">

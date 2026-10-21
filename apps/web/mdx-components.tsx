@@ -1,6 +1,6 @@
-import type { ReactNode } from "react";
 import { SquareArrowOutUpRight } from "lucide-react";
 import type { MDXComponents } from "mdx/types";
+import type { ReactNode } from "react";
 
 const components = {
   a: ({ href, children }: { href?: string; children?: ReactNode }) => (

@@ -1,19 +1,19 @@
 import type { ParaWeb, Wallet } from "@getpara/web-sdk";
 import {
+  AccountBuilder,
+  AccountComponent,
+  AccountStorageMode,
+  getWasmOrThrow,
+  MidenClient,
+} from "@miden-sdk/miden-sdk/lazy";
+import {
   evmPkToCommitment,
   getUncompressedPublicKeyFromWallet,
   resolveEvmWallets,
   signCb,
 } from "@miden-sdk/para";
-import {
-  AccountBuilder,
-  AccountComponent,
-  AccountStorageMode,
-  MidenClient,
-  getWasmOrThrow,
-} from "@miden-sdk/miden-sdk/lazy";
-import type { NetworkId } from "@/lib/types/network";
 import { networks, noteTransportUrls } from "@/lib/miden-client";
+import type { NetworkId } from "@/lib/types/network";
 
 export type ParaClient = {
   client: MidenClient;
@@ -85,8 +85,7 @@ export const createParaClient = async ({
   try {
     // Picks up the deployed account and its current state.
     await client.accounts.import(account.id());
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (error) {
+  } catch {
     // Not on chain yet: tracked locally until its first transaction.
   }
   if (!(await client.accounts.get(account.id()))) {

@@ -1,5 +1,4 @@
-import { useState, type Dispatch, type SetStateAction } from "react";
-import useAccounts from "@/hooks/use-accounts";
+import { Address as WasmAddress } from "@miden-sdk/miden-sdk/lazy";
 import {
   Combobox,
   ComboboxContent,
@@ -8,9 +7,10 @@ import {
   ComboboxItem,
   ComboboxList,
 } from "@workspace/ui/components/combobox";
-import { getIdentifierPart } from "@/lib/utils/account";
-import { Address as WasmAddress } from "@miden-sdk/miden-sdk/lazy";
+import { type Dispatch, type SetStateAction, useState } from "react";
+import useAccounts from "@/hooks/use-accounts";
 import useMultisig from "@/hooks/use-multisig";
+import { getIdentifierPart } from "@/lib/utils/account";
 
 const SelectAccountCombobox = ({
   onValueChange,
@@ -45,8 +45,7 @@ const SelectAccountCombobox = ({
           const accountId = WasmAddress.fromBech32(inputValue).accountId();
           onValueChange(accountId.toString());
           return;
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (error) {
+        } catch {
           //
         }
         onValueChange("");

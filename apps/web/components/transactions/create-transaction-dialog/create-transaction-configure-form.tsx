@@ -1,9 +1,16 @@
-import type { Dispatch, SetStateAction } from "react";
-import { toast } from "sonner";
 import type {
-  CreateTransactionDialogStep,
-  TransactionType,
-} from "@/lib/types/transaction";
+  ConsumableNoteRecord as WasmConsumableNoteRecordType,
+  TransactionRequest as WasmTransactionRequestType,
+  TransactionResult as WasmTransactionResultType,
+} from "@miden-sdk/miden-sdk/lazy";
+import {
+  type MidenWalletAdapter,
+  SendTransaction,
+  useWallet,
+} from "@miden-sdk/miden-wallet-adapter";
+import { normalizeAccountId, useMiden } from "@miden-sdk/react/lazy";
+import { Input } from "@workspace/ui/components/input";
+import { Label } from "@workspace/ui/components/label";
 import {
   Select,
   SelectContent,
@@ -11,35 +18,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select";
-import { Label } from "@workspace/ui/components/label";
-import { Input } from "@workspace/ui/components/input";
 import { Switch } from "@workspace/ui/components/switch";
-import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";
+import type { Dispatch, SetStateAction } from "react";
+import { toast } from "sonner";
 import SelectAccountCombobox from "@/components/transactions/select-account-combobox";
-import useAccounts from "@/hooks/use-accounts";
-import useParaTransaction from "@/hooks/use-para-transaction";
+import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";
 import SelectConsumableNotesCombobox from "@/components/transactions/select-consumable-notes-combobox";
+import useAccounts from "@/hooks/use-accounts";
+import useComponents from "@/hooks/use-components";
+import useMultisig from "@/hooks/use-multisig";
+import useNetwork from "@/hooks/use-network";
+import useParaTransaction from "@/hooks/use-para-transaction";
+import useScripts from "@/hooks/use-scripts";
 import useTransactions from "@/hooks/use-transactions";
 import useTutorials from "@/hooks/use-tutorials";
-import type {
-  ConsumableNoteRecord as WasmConsumableNoteRecordType,
-  TransactionResult as WasmTransactionResultType,
-  TransactionRequest as WasmTransactionRequestType,
-} from "@miden-sdk/miden-sdk/lazy";
-import {
-  useWallet,
-  SendTransaction,
-  type MidenWalletAdapter,
-} from "@miden-sdk/miden-wallet-adapter";
-import { formatAmount, parseAmount } from "@/lib/utils/asset";
-import useScripts from "@/hooks/use-scripts";
-import { clientCreateTransactionFromScript } from "@/lib/web-client";
-import { useMiden, normalizeAccountId } from "@miden-sdk/react/lazy";
-import useNetwork from "@/hooks/use-network";
-import useMultisig from "@/hooks/use-multisig";
-import { defaultComponentIds } from "@/lib/types/default-components";
-import useComponents from "@/hooks/use-components";
 import { midenFaucetAccountId } from "@/lib/constants";
+import { defaultComponentIds } from "@/lib/types/default-components";
+import type {
+  CreateTransactionDialogStep,
+  TransactionType,
+} from "@/lib/types/transaction";
+import { formatAmount, parseAmount } from "@/lib/utils/asset";
+import { clientCreateTransactionFromScript } from "@/lib/web-client";
 
 const CreateTransactionConfigureForm = ({
   transactionType,

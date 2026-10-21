@@ -1,13 +1,13 @@
-import type { Tutorial } from "@/lib/types/tutorial";
-import { defaultTutorial } from "@/lib/utils/tutorial";
-import { defaultState } from "@/lib/utils/state";
-import { midenFaucetAccount } from "@/lib/utils/account";
 import Step1 from "@/components/tutorials/private-transfers/step1";
 import Step2 from "@/components/tutorials/private-transfers/step2";
 import Step3 from "@/components/tutorials/private-transfers/step3";
 import Step4 from "@/components/tutorials/private-transfers/step4";
 import Step5 from "@/components/tutorials/private-transfers/step5";
 import Step6 from "@/components/tutorials/private-transfers/step6";
+import type { Tutorial } from "@/lib/types/tutorial";
+import { midenFaucetAccount } from "@/lib/utils/account";
+import { defaultState } from "@/lib/utils/state";
+import { defaultTutorial } from "@/lib/utils/tutorial";
 
 const tutorial: Tutorial = {
   ...defaultTutorial(),

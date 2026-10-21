@@ -1,7 +1,4 @@
-import { useState } from "react";
-import { Play } from "lucide-react";
-import { toast } from "sonner";
-import { Spinner } from "@workspace/ui/components/spinner";
+import { Button } from "@workspace/ui/components/button";
 import {
   Card,
   CardAction,
@@ -9,10 +6,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@workspace/ui/components/card";
-import { Button } from "@workspace/ui/components/button";
-import type { Script } from "@/lib/types/script";
-import useScripts from "@/hooks/use-scripts";
+import { Spinner } from "@workspace/ui/components/spinner";
 import { cn } from "@workspace/ui/lib/utils";
+import { Play } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import useScripts from "@/hooks/use-scripts";
+import type { Script } from "@/lib/types/script";
 
 const EditorConsole = ({ script }: { script: Script }) => {
   const { compileScript } = useScripts();

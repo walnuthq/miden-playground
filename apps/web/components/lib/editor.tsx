@@ -1,6 +1,6 @@
+import MonacoEditor from "@monaco-editor/react";
 import { useTheme } from "next-themes";
 import useScripts from "@/hooks/use-scripts";
-import MonacoEditor from "@monaco-editor/react";
 import type { Script } from "@/lib/types/script";
 
 const Editor = ({

@@ -1,15 +1,17 @@
 import { eq } from "drizzle-orm";
 import { getDb } from "@/db";
 import { packagesTable } from "@/db/schema";
-import type { NewPackage, PackageStatus, Export } from "@/lib/types";
-import { isValidUUIDv4 } from "@/lib/uuid";
 import {
-  defaultDependenciesRecords,
   type DefaultDependency,
+  defaultDependenciesRecords,
 } from "@/lib/default-dependencies";
+import type { Export, NewPackage, PackageStatus } from "@/lib/types";
+import { isValidUUIDv4 } from "@/lib/uuid";
 
 export const getPackage = async (id: string) => {
-  const dbPackage = await getDb().query.packagesTable.findFirst({ where: { id } });
+  const dbPackage = await getDb().query.packagesTable.findFirst({
+    where: { id },
+  });
   return dbPackage
     ? { ...dbPackage, files: dbPackage.files as Record<string, string> }
     : undefined;

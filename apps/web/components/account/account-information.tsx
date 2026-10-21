@@ -1,12 +1,12 @@
-import type { Account } from "@/lib/types/account";
-import AccountInformationTable from "@/components/account/account-information-table";
-import FungibleAssetsTable from "@/components/lib/fungible-assets-table";
-import AccountNotesTable from "@/components/account/account-notes-table";
-import { Separator } from "@workspace/ui/components/separator";
 import { Button } from "@workspace/ui/components/button";
-import useTransactions from "@/hooks/use-transactions";
+import { Separator } from "@workspace/ui/components/separator";
+import AccountInformationTable from "@/components/account/account-information-table";
+import AccountNotesTable from "@/components/account/account-notes-table";
+import FungibleAssetsTable from "@/components/lib/fungible-assets-table";
 import useNetwork from "@/hooks/use-network";
+import useTransactions from "@/hooks/use-transactions";
 import useTutorials from "@/hooks/use-tutorials";
+import type { Account } from "@/lib/types/account";
 
 const AccountInformation = ({ account }: { account: Account }) => {
   const { networkId } = useNetwork();

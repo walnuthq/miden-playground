@@ -4,7 +4,9 @@
 //
 // Usage: node cdp.mjs <port> <url-substring> <js-expression>
 const [port, match, expr] = process.argv.slice(2);
-const targets = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json();
+const targets = await (
+  await fetch(`http://127.0.0.1:${port}/json/list`)
+).json();
 const target = targets.find((t) => t.type === "page" && t.url.includes(match));
 if (!target) {
   console.error(`no page target matching ${match}`);
@@ -26,7 +28,9 @@ ws.addEventListener("message", (event) => {
   if (exceptionDetails) console.error(JSON.stringify(exceptionDetails));
   else
     console.log(
-      typeof result.value === "string" ? result.value : JSON.stringify(result.value),
+      typeof result.value === "string"
+        ? result.value
+        : JSON.stringify(result.value),
     );
   ws.close();
 });

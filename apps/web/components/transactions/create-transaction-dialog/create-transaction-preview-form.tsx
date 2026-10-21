@@ -1,20 +1,20 @@
-import type { Dispatch, SetStateAction } from "react";
-import { toast } from "sonner";
-import useTransactions from "@/hooks/use-transactions";
-import FungibleAssetsTable from "@/components/lib/fungible-assets-table";
-import AccountAddress from "@/components/lib/account-address";
-import AccountStorageDeltaTable from "@/components/lib/account-storage-delta-table";
-import TransactionId from "@/components/lib/transaction-id";
-import NoteId from "@/components/lib/note-id";
 import type {
-  TransactionResult as WasmTransactionResultType,
-  TransactionRequest as WasmTransactionRequestType,
   TransactionRecord as WasmTransactionRecordType,
+  TransactionRequest as WasmTransactionRequestType,
+  TransactionResult as WasmTransactionResultType,
 } from "@miden-sdk/miden-sdk/lazy";
 import { FungibleAsset as WasmFungibleAsset } from "@miden-sdk/miden-sdk/lazy";
+import type { Dispatch, SetStateAction } from "react";
+import { toast } from "sonner";
+import AccountAddress from "@/components/lib/account-address";
+import AccountStorageDeltaTable from "@/components/lib/account-storage-delta-table";
+import FungibleAssetsTable from "@/components/lib/fungible-assets-table";
+import NoteId from "@/components/lib/note-id";
+import TransactionId from "@/components/lib/transaction-id";
 import useAccounts from "@/hooks/use-accounts";
-import { getItem, getMapItem } from "@/lib/utils/account";
+import useTransactions from "@/hooks/use-transactions";
 import { EMPTY_WORD } from "@/lib/constants";
+import { getItem, getMapItem } from "@/lib/utils/account";
 
 export const SubmitTransactionToastDescription = ({
   transactionRecord,

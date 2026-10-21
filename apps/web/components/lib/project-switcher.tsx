@@ -1,21 +1,17 @@
 "use client";
-// import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { ChevronsUpDown, BadgeCheck } from "lucide-react";
-import { toast } from "sonner";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuPortal,
   // DropdownMenuLabel,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   // DropdownMenuGroup,
   // DropdownMenuShortcut,
   DropdownMenuTrigger,
-  DropdownMenuSub,
-  DropdownMenuSubTrigger,
-  DropdownMenuPortal,
-  DropdownMenuSubContent,
 } from "@workspace/ui/components/dropdown-menu";
 import {
   SidebarMenu,
@@ -23,17 +19,21 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@workspace/ui/components/sidebar";
-import Logo from "@/components/lib/logo";
-import useNetwork from "@/hooks/use-network";
-import tutorials from "@/components/tutorials";
-import useTutorials from "@/hooks/use-tutorials";
+import { cn } from "@workspace/ui/lib/utils";
+import { BadgeCheck, ChevronsUpDown } from "lucide-react";
+// import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 // import useProjects from "@/hooks/use-projects";
 import { useIsClient } from "usehooks-ts";
-import { networks } from "@/lib/types/network";
-import { cn } from "@workspace/ui/lib/utils";
+import Logo from "@/components/lib/logo";
+import tutorials from "@/components/tutorials";
 import useAppState from "@/hooks/use-app-state";
-import examples from "@/lib/examples";
 import useExamples from "@/hooks/use-examples";
+import useNetwork from "@/hooks/use-network";
+import useTutorials from "@/hooks/use-tutorials";
+import examples from "@/lib/examples";
+import { networks } from "@/lib/types/network";
 
 const ProjectSwitcher = () => {
   const isClient = useIsClient();

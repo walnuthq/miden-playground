@@ -1,7 +1,7 @@
 import type { FunctionComponent } from "react";
+import type { NetworkId } from "@/lib/types/network";
 import type { State } from "@/lib/types/state";
 import type { Store } from "@/lib/types/store";
-import type { NetworkId } from "@/lib/types/network";
 
 export type TutorialId =
   | ""

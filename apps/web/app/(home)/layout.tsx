@@ -1,9 +1,9 @@
 "use client";
-import type { ReactNode } from "react";
 import {
-  SidebarProvider,
   SidebarInset,
+  SidebarProvider,
 } from "@workspace/ui/components/sidebar";
+import type { ReactNode } from "react";
 import AppSidebar from "@/components/lib/app-sidebar";
 import Header from "@/components/lib/header";
 import TutorialLayout from "@/components/tutorials/tutorial-layout";

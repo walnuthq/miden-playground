@@ -1,12 +1,12 @@
 "use client";
-import { useState } from "react";
-import { Copy, Check } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@workspace/ui/components/tooltip";
+import { Check, Copy } from "lucide-react";
+import { useState } from "react";
 import { sleep } from "@/lib/utils";
 
 const CopyButton = ({ content, copy }: { content: string; copy: string }) => {

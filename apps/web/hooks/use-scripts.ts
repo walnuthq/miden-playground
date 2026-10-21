@@ -1,36 +1,36 @@
 import {
-  Package as WasmPackage,
-  TransactionRequestBuilder as WasmTransactionRequestBuilder,
-  MidenArrays as WasmMidenArrays,
-  ForeignAccount as WasmForeignAccount,
   AccountId as WasmAccountId,
   AccountStorageRequirements as WasmAccountStorageRequirements,
+  ForeignAccount as WasmForeignAccount,
+  MidenArrays as WasmMidenArrays,
+  Package as WasmPackage,
+  TransactionRequestBuilder as WasmTransactionRequestBuilder,
 } from "@miden-sdk/miden-sdk/lazy";
+import { useMiden } from "@miden-sdk/react/lazy";
 import useGlobalContext from "@/components/global-context/hook";
+import useTransactions from "@/hooks/use-transactions";
+import useTutorials from "@/hooks/use-tutorials";
+import {
+  compileScript as apiCompileScript,
+  deleteScript as apiDeleteScript,
+  importScriptsFromGithubRepo as apiImportScriptsFromGithubRepo,
+  importScriptsFromPackageSources as apiImportScriptsFromPackageSources,
+  createScript,
+} from "@/lib/api";
 import type {
+  MidenInput,
+  PackageSource,
+  ProcedureExport,
   Script,
   ScriptExample,
   ScriptType,
-  ProcedureExport,
-  MidenInput,
-  PackageSource,
 } from "@/lib/types/script";
+import { fromBase64 } from "@/lib/utils";
 import {
+  compiledPackageToScript,
   defaultScript,
   invokeProcedureCustomTransactionScript,
-  compiledPackageToScript,
 } from "@/lib/utils/script";
-import {
-  createScript,
-  compileScript as apiCompileScript,
-  deleteScript as apiDeleteScript,
-  importScriptsFromPackageSources as apiImportScriptsFromPackageSources,
-  importScriptsFromGithubRepo as apiImportScriptsFromGithubRepo,
-} from "@/lib/api";
-import useTransactions from "@/hooks/use-transactions";
-import useTutorials from "@/hooks/use-tutorials";
-import { fromBase64 } from "@/lib/utils";
-import { useMiden } from "@miden-sdk/react/lazy";
 
 const useScripts = () => {
   const {

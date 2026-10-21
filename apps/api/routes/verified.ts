@@ -1,10 +1,10 @@
-import { createApp } from "@/lib/app";
-import { getPackage } from "@/db/packages";
 import { dbMiddleware } from "@/db/middleware";
-import { fetchApiRegistry, upstreamErrorResponse } from "@/lib/upstream";
+import { getPackage } from "@/db/packages";
+import { createApp } from "@/lib/app";
+import { projectTemplateFiles } from "@/lib/templates";
 import { generateCargoToml, parseMidenProjectToml } from "@/lib/toml";
 import type { PackageSource } from "@/lib/types";
-import { projectTemplateFiles } from "@/lib/templates";
+import { fetchApiRegistry, upstreamErrorResponse } from "@/lib/upstream";
 
 type VerifyAccountComponentRequestBody = {
   accountId: string;
@@ -107,17 +107,14 @@ const verified = createApp()
         const {
           package: { name },
         } = parseMidenProjectToml(packageSource.midenProjectToml);
-        const files = dependencies.reduce<Record<string, string>>(
-          (previousValue, currentValue) => {
+        const files: Record<string, string> = Object.assign(
+          packageSourceFiles(name, packageSource),
+          ...dependencies.map((dependency) => {
             const {
               package: { name: dependencyName },
-            } = parseMidenProjectToml(currentValue.midenProjectToml);
-            return {
-              ...previousValue,
-              ...packageSourceFiles(dependencyName, currentValue),
-            };
-          },
-          packageSourceFiles(name, packageSource),
+            } = parseMidenProjectToml(dependency.midenProjectToml);
+            return packageSourceFiles(dependencyName, dependency);
+          }),
         );
         const { verified } = await fetchApiRegistry<VerifyNoteResponse>(
           `/v1/${network}/verified-notes`,

@@ -1,19 +1,19 @@
-import { useState, useEffect } from "react";
-import { toast } from "sonner";
-import { FileInput } from "lucide-react";
-import { Spinner } from "@workspace/ui/components/spinner";
-import { Button } from "@workspace/ui/components/button";
-import useTransactions from "@/hooks/use-transactions";
-import type { InputNote } from "@/lib/types/note";
-import type { Account } from "@/lib/types/account";
-import useParaTransaction from "@/hooks/use-para-transaction";
-import useAccounts from "@/hooks/use-accounts";
 import {
-  useWallet,
   ConsumeTransaction,
   type MidenWalletAdapter,
+  useWallet,
 } from "@miden-sdk/miden-wallet-adapter";
 import { useMiden } from "@miden-sdk/react/lazy";
+import { Button } from "@workspace/ui/components/button";
+import { Spinner } from "@workspace/ui/components/spinner";
+import { FileInput } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import useAccounts from "@/hooks/use-accounts";
+import useParaTransaction from "@/hooks/use-para-transaction";
+import useTransactions from "@/hooks/use-transactions";
+import type { Account } from "@/lib/types/account";
+import type { InputNote } from "@/lib/types/note";
 import { fromBase64 } from "@/lib/utils";
 
 const ConsumeNoteButton = ({

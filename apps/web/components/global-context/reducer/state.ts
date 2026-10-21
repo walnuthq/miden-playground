@@ -1,7 +1,7 @@
 import type { Account } from "@/lib/types/account";
 import type { InputNote } from "@/lib/types/note";
-import type { Transaction } from "@/lib/types/transaction";
 import type { State } from "@/lib/types/state";
+import type { Transaction } from "@/lib/types/transaction";
 
 export type StateAction =
   | { type: "SYNCING_STATE"; payload: { syncingState: boolean } }

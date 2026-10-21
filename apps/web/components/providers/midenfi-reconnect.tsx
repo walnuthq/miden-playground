@@ -1,10 +1,10 @@
 "use client";
-import { useEffect, useRef } from "react";
-import { createMidenStorage } from "@miden-sdk/react/lazy";
 import {
   useMidenFiWallet,
   WalletReadyState,
 } from "@miden-sdk/miden-wallet-adapter";
+import { createMidenStorage } from "@miden-sdk/react/lazy";
+import { useEffect, useRef } from "react";
 
 const storage = createMidenStorage("miden-playground");
 const CONNECTED_KEY = "midenFiConnected";

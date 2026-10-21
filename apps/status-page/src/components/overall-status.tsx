@@ -1,14 +1,14 @@
 import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@workspace/ui/components/alert";
+import {
   CircleAlert,
   CircleCheck,
   ShieldQuestion,
   TriangleAlert,
 } from "lucide-react";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@workspace/ui/components/alert";
 
 import { formatTimestamp } from "@/lib/format";
 import type { ServiceStatus } from "@/lib/types";

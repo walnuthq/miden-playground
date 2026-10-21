@@ -1,28 +1,28 @@
 import { strToU8, zipSync } from "fflate";
+import { dbMiddleware } from "@/db/middleware";
+import { deletePackage, getDependencies, getPackage } from "@/db/packages";
 import { createApp } from "@/lib/app";
-import type {
-  Package,
-  Dependency,
-  PackageType,
-  ScriptExample,
-  CompiledPackage,
-  ProcedureExport,
-  Export,
-  PackageSource,
-} from "@/lib/types";
 import {
   basicWalletDependency,
   counterAccountDependency,
 } from "@/lib/default-dependencies";
-import { templates } from "@/lib/templates";
-import { compilePackage, createPackage } from "@/lib/utils";
 import {
   importScriptsFromGithubRepo,
   importScriptsFromPackageSources,
 } from "@/lib/import";
+import { templates } from "@/lib/templates";
+import type {
+  CompiledPackage,
+  Dependency,
+  Export,
+  Package,
+  PackageSource,
+  PackageType,
+  ProcedureExport,
+  ScriptExample,
+} from "@/lib/types";
 import { upstreamErrorResponse } from "@/lib/upstream";
-import { getPackage, deletePackage, getDependencies } from "@/db/packages";
-import { dbMiddleware } from "@/db/middleware";
+import { compilePackage, createPackage } from "@/lib/utils";
 
 type CreateScriptRequestBody = {
   name: string;

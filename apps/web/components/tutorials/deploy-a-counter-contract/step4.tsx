@@ -1,8 +1,8 @@
-import type { TutorialStep } from "@/lib/types/tutorial";
+import Step4Content from "@/components/tutorials/deploy-a-counter-contract/step4.mdx";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
-import Step4Content from "@/components/tutorials/deploy-a-counter-contract/step4.mdx";
 import useComponents from "@/hooks/use-components";
+import type { TutorialStep } from "@/lib/types/tutorial";
 
 const useCompleted = () => {
   const { components } = useComponents();

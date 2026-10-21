@@ -1,12 +1,12 @@
-import { useEffect, useState } from "react";
-import type { TutorialStep } from "@/lib/types/tutorial";
-import useAccounts from "@/hooks/use-accounts";
-import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
-import NextStepButton from "@/components/tutorials/next-step-button";
-import Step6Content from "@/components/tutorials/wallet-backup-using-miden-guardian/step6.mdx";
 import { normalizeAccountId, useMiden } from "@miden-sdk/react/lazy";
+import { useEffect, useState } from "react";
+import NextStepButton from "@/components/tutorials/next-step-button";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
+import Step6Content from "@/components/tutorials/wallet-backup-using-miden-guardian/step6.mdx";
+import useAccounts from "@/hooks/use-accounts";
 import useNetwork from "@/hooks/use-network";
 import { GUARDIAN_WALLET_CODE } from "@/lib/constants";
+import type { TutorialStep } from "@/lib/types/tutorial";
 
 const useCompleted = () => {
   const { multisigs } = useAccounts();
@@ -22,6 +22,7 @@ const Step6: TutorialStep = {
     const { client } = useMiden();
     const { networkId } = useNetwork();
     const [address, setAddress] = useState("");
+    // biome-ignore lint/correctness/useExhaustiveDependencies: refetch the address when the network changes.
     useEffect(() => {
       if (!client) {
         return;

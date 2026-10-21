@@ -1,12 +1,12 @@
 import { useState } from "react";
-import type { TutorialStep } from "@/lib/types/tutorial";
 import { useInterval } from "usehooks-ts";
+import Step6Content from "@/components/tutorials/contract-verification/step6.mdx";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
-import Step6Content from "@/components/tutorials/contract-verification/step6.mdx";
 import useAccounts from "@/hooks/use-accounts";
-import { getVerifiedAccountComponents } from "@/lib/api";
 import useNetwork from "@/hooks/use-network";
+import { getVerifiedAccountComponents } from "@/lib/api";
+import type { TutorialStep } from "@/lib/types/tutorial";
 
 const useCompleted = () => {
   const [completed, setCompleted] = useState(false);

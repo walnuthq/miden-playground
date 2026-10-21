@@ -1,14 +1,14 @@
-import { useEffect } from "react";
-import { useInterval } from "usehooks-ts";
-import { CircleDot } from "lucide-react";
+import { useSyncState } from "@miden-sdk/react/lazy";
 import { Badge } from "@workspace/ui/components/badge";
 import { Spinner } from "@workspace/ui/components/spinner";
+import { CircleDot } from "lucide-react";
+import { useEffect } from "react";
+import { useInterval } from "usehooks-ts";
 import useGlobalContext from "@/components/global-context/hook";
-import { networks } from "@/lib/types/network";
 import useAppState from "@/hooks/use-app-state";
-import { useSyncState } from "@miden-sdk/react/lazy";
-import useNetwork from "@/hooks/use-network";
 import useExamples from "@/hooks/use-examples";
+import useNetwork from "@/hooks/use-network";
+import { networks } from "@/lib/types/network";
 
 let callingPopState = false;
 let callingLoadExample = false;

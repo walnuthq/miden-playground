@@ -1,5 +1,5 @@
-import type { Example } from "@/lib/types/example";
 import state from "@/lib/examples/miden-bank/state";
+import type { Example } from "@/lib/types/example";
 
 const midenBank: Example = {
   id: "bank-account",

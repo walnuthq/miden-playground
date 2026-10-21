@@ -1,8 +1,8 @@
 import { pick } from "lodash";
+import { P2IDE_NOTE_CODE } from "@/lib/constants";
+import basicWallet from "@/lib/types/default-scripts/basic-wallet";
 import type { Script } from "@/lib/types/script";
 import { defaultProcedureExport, defaultScript } from "@/lib/utils/script";
-import basicWallet from "@/lib/types/default-scripts/basic-wallet";
-import { P2IDE_NOTE_CODE } from "@/lib/constants";
 
 export const rust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
 #![no_std]

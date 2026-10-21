@@ -1,12 +1,12 @@
 import { EllipsisVertical } from "lucide-react";
-import type { TutorialStep } from "@/lib/types/tutorial";
+import useGlobalContext from "@/components/global-context/hook";
+import Step4Content from "@/components/tutorials/connect-wallet-and-sign-transactions/step4.mdx";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
-import Step4Content from "@/components/tutorials/connect-wallet-and-sign-transactions/step4.mdx";
-import useGlobalContext from "@/components/global-context/hook";
 import useAccounts from "@/hooks/use-accounts";
 import useNotes from "@/hooks/use-notes";
 import { P2ID_NOTE_CODE } from "@/lib/constants";
+import type { TutorialStep } from "@/lib/types/tutorial";
 import { accountIdFromPrefixSuffix } from "@/lib/utils/account";
 
 const useCompleted = () => {

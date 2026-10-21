@@ -1,10 +1,9 @@
-import { useState, useEffect } from "react";
-import { Spinner } from "@workspace/ui/components/spinner";
 import type {
   ConsumableNoteRecord as WasmConsumableNoteRecordType,
   TransactionRequest as WasmTransactionRequestType,
   TransactionResult as WasmTransactionResultType,
 } from "@miden-sdk/miden-sdk/lazy";
+import { Button } from "@workspace/ui/components/button";
 import {
   Dialog,
   DialogClose,
@@ -14,12 +13,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@workspace/ui/components/dialog";
-import { Button } from "@workspace/ui/components/button";
-import useTransactions from "@/hooks/use-transactions";
-import useAccounts from "@/hooks/use-accounts";
-import CreateTransactionSelectForm from "@/components/transactions/create-transaction-dialog/create-transaction-select-form";
+import { Spinner } from "@workspace/ui/components/spinner";
+import { useEffect, useState } from "react";
 import CreateTransactionConfigureForm from "@/components/transactions/create-transaction-dialog/create-transaction-configure-form";
 import CreateTransactionPreviewForm from "@/components/transactions/create-transaction-dialog/create-transaction-preview-form";
+import CreateTransactionSelectForm from "@/components/transactions/create-transaction-dialog/create-transaction-select-form";
+import useAccounts from "@/hooks/use-accounts";
+import useTransactions from "@/hooks/use-transactions";
 
 const CreateTransactionDialog = () => {
   const { accounts } = useAccounts();

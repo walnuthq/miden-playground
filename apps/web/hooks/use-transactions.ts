@@ -1,37 +1,37 @@
 import {
-  type ConsumableNoteRecord as WasmConsumableNoteRecordType,
-  type TransactionResult as WasmTransactionResultType,
-  type TransactionRequest as WasmTransactionRequestType,
-  type TransactionId as WasmTransactionIdType,
   type MidenClient,
-  NoteType as WasmNoteType,
   AccountId as WasmAccountId,
-  Word as WasmWord,
+  type ConsumableNoteRecord as WasmConsumableNoteRecordType,
+  NoteType as WasmNoteType,
+  Package as WasmPackage,
   TransactionFilter as WasmTransactionFilter,
   TransactionId as WasmTransactionId,
-  Package as WasmPackage,
+  type TransactionId as WasmTransactionIdType,
+  type TransactionRequest as WasmTransactionRequestType,
+  type TransactionResult as WasmTransactionResultType,
+  Word as WasmWord,
 } from "@miden-sdk/miden-sdk/lazy";
+import {
+  useExecuteProgram,
+  useMiden,
+  useSyncControl,
+  useSyncState,
+  useTransaction,
+} from "@miden-sdk/react/lazy";
+import useGlobalContext from "@/components/global-context/hook";
+import { useParaWallet } from "@/components/providers/para-wallet-context";
 import type { NoteType } from "@/lib/types/note";
+import type { MidenInput, ProcedureExport, Script } from "@/lib/types/script";
 import type {
   CreateTransactionDialogStep,
   TransactionType,
 } from "@/lib/types/transaction";
+import { fromBase64 } from "@/lib/utils";
+import { invokeProcedureCustomTransactionScript } from "@/lib/utils/script";
 import {
   wasmAccountToAccount,
   wasmTransactionToTransaction,
 } from "@/lib/web-client";
-import type { MidenInput, ProcedureExport, Script } from "@/lib/types/script";
-import { invokeProcedureCustomTransactionScript } from "@/lib/utils/script";
-import useGlobalContext from "@/components/global-context/hook";
-import { fromBase64 } from "@/lib/utils";
-import {
-  useMiden,
-  useSyncState,
-  useExecuteProgram,
-  useTransaction,
-  useSyncControl,
-} from "@miden-sdk/react/lazy";
-import { useParaWallet } from "@/components/providers/para-wallet-context";
 
 // How long a Para transaction waits for the app client's ongoing sync.
 const SYNC_IDLE_TIMEOUT_MS = 5000;

@@ -1,17 +1,17 @@
-import { useState, useEffect } from "react";
-import { toast } from "sonner";
-import { Spinner } from "@workspace/ui/components/spinner";
-import { TableRow, TableCell } from "@workspace/ui/components/table";
-import type { Account } from "@/lib/types/account";
-import type { Script, ProcedureExport } from "@/lib/types/script";
-import { formatProcedureExportPath } from "@/lib/utils/script";
-import type { Component } from "@/lib/types/component";
 import { Button } from "@workspace/ui/components/button";
+import { Spinner } from "@workspace/ui/components/spinner";
+import { TableCell, TableRow } from "@workspace/ui/components/table";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import CopyButton from "@/components/lib/copy-button";
+import useNetwork from "@/hooks/use-network";
 import useScripts from "@/hooks/use-scripts";
 import useTransactions from "@/hooks/use-transactions";
-import CopyButton from "@/components/lib/copy-button";
 import { midenExplorerUrl } from "@/lib/constants";
-import useNetwork from "@/hooks/use-network";
+import type { Account } from "@/lib/types/account";
+import type { Component } from "@/lib/types/component";
+import type { ProcedureExport, Script } from "@/lib/types/script";
+import { formatProcedureExportPath } from "@/lib/utils/script";
 
 const ProceduresTableRow = ({
   account,

@@ -1,10 +1,10 @@
 import type { State } from "@/lib/types/state";
-import { defaultState } from "@/lib/utils/state";
 import {
-  basicWalletAccount,
   basicFungibleFaucetAccount,
+  basicWalletAccount,
   midenFaucetAccount,
 } from "@/lib/utils/account";
+import { defaultState } from "@/lib/utils/state";
 
 const state: State = {
   ...defaultState(),

@@ -1,7 +1,7 @@
-import type { Component } from "@/lib/types/component";
 import ComponentInformationTable from "@/components/component/component-information-table";
 import ComponentStorageSlotsTable from "@/components/component/component-storage-slots-table";
 import CreateStorageSlotButton from "@/components/component/create-storage-slot-button";
+import type { Component } from "@/lib/types/component";
 
 const ComponentInformation = ({ component }: { component: Component }) => (
   <div className="flex flex-col gap-8">

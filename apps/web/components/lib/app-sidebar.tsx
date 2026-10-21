@@ -1,28 +1,6 @@
 "use client";
-import { type ComponentProps, useEffect } from "react";
-import {
-  UserCircle,
-  File,
-  Route,
-  HandCoins,
-  Wallet,
-  Home,
-  FileCode,
-  Puzzle,
-  CircleX,
-  CircleDashed,
-  CircleCheckBig,
-  FileText,
-  Key,
-  ReceiptText,
-  // Signature,
-  ShieldUser,
-} from "lucide-react";
-import { useIsClient } from "usehooks-ts";
-import NavMain from "@/components/lib/nav-main";
-import { formatId } from "@/lib/utils";
-import ProjectSwitcher from "@/components/lib/project-switcher";
-import Footer from "@/components/lib/footer";
+import { useMiden } from "@miden-sdk/react/lazy";
+import { Separator } from "@workspace/ui/components/separator";
 import {
   Sidebar,
   SidebarContent,
@@ -30,17 +8,39 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@workspace/ui/components/sidebar";
-import { Separator } from "@workspace/ui/components/separator";
+import {
+  CircleCheckBig,
+  CircleDashed,
+  CircleX,
+  File,
+  FileCode,
+  FileText,
+  HandCoins,
+  Home,
+  Key,
+  Puzzle,
+  ReceiptText,
+  Route,
+  // Signature,
+  ShieldUser,
+  UserCircle,
+  Wallet,
+} from "lucide-react";
+import { type ComponentProps, useEffect } from "react";
+import { useIsClient } from "usehooks-ts";
+import Footer from "@/components/lib/footer";
+import NavMain from "@/components/lib/nav-main";
+import ProjectSwitcher from "@/components/lib/project-switcher";
 import useAccounts from "@/hooks/use-accounts";
-import useTransactions from "@/hooks/use-transactions";
+import useComponents from "@/hooks/use-components";
+import useNetwork from "@/hooks/use-network";
 import useNotes from "@/hooks/use-notes";
 import useScripts from "@/hooks/use-scripts";
-import useComponents from "@/hooks/use-components";
-import { defaultScriptIds } from "@/lib/types/default-scripts";
-import { defaultComponentIds } from "@/lib/types/default-components";
+import useTransactions from "@/hooks/use-transactions";
 import useTutorials from "@/hooks/use-tutorials";
-import useNetwork from "@/hooks/use-network";
-import { useMiden } from "@miden-sdk/react/lazy";
+import { defaultComponentIds } from "@/lib/types/default-components";
+import { defaultScriptIds } from "@/lib/types/default-scripts";
+import { formatId } from "@/lib/utils";
 
 const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
   const isClient = useIsClient();

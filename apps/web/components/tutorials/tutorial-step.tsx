@@ -1,17 +1,17 @@
+import { Badge } from "@workspace/ui/components/badge";
+import { Button } from "@workspace/ui/components/button";
+import { useIsMobile } from "@workspace/ui/hooks/use-mobile";
+import { cn } from "@workspace/ui/lib/utils";
 import { X } from "lucide-react";
+import MidenWalletAlert from "@/components/tutorials/miden-wallet-alert";
+import MobileAlert from "@/components/tutorials/mobile-alert";
+import MockChainAlert from "@/components/tutorials/mockchain-alert";
+import DefaultNextStepButton from "@/components/tutorials/next-step-button";
+import TutorialProgress from "@/components/tutorials/tutorial-progress";
+import useNetwork from "@/hooks/use-network";
 import useTutorials from "@/hooks/use-tutorials";
 import type { Tutorial } from "@/lib/types/tutorial";
 import { defaultTutorialStep } from "@/lib/utils/tutorial";
-import { Badge } from "@workspace/ui/components/badge";
-import { Button } from "@workspace/ui/components/button";
-import TutorialProgress from "@/components/tutorials/tutorial-progress";
-import { useIsMobile } from "@workspace/ui/hooks/use-mobile";
-import MobileAlert from "@/components/tutorials/mobile-alert";
-import { cn } from "@workspace/ui/lib/utils";
-import DefaultNextStepButton from "@/components/tutorials/next-step-button";
-import MockChainAlert from "@/components/tutorials/mockchain-alert";
-import MidenWalletAlert from "@/components/tutorials/miden-wallet-alert";
-import useNetwork from "@/hooks/use-network";
 
 const TutorialStep = ({ tutorial }: { tutorial: Tutorial }) => {
   const isMobile = useIsMobile();

@@ -1,17 +1,17 @@
-import type { Dispatch, SetStateAction } from "react";
 import type { ConsumableNoteRecord as WasmConsumableNoteRecordType } from "@miden-sdk/miden-sdk/lazy";
-import type {
-  CreateTransactionDialogStep,
-  TransactionType,
-} from "@/lib/types/transaction";
+import { useMiden } from "@miden-sdk/react/lazy";
 import { Label } from "@workspace/ui/components/label";
+import type { Dispatch, SetStateAction } from "react";
 import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";
 import SelectTransactionTypeDropdownMenu from "@/components/transactions/select-transaction-type-dropdown-menu";
 import useAccounts from "@/hooks/use-accounts";
 import useNetwork from "@/hooks/use-network";
-import { clientGetConsumableNotes } from "@/lib/web-client";
-import { useMiden } from "@miden-sdk/react/lazy";
 import { midenFaucetAccountId } from "@/lib/constants";
+import type {
+  CreateTransactionDialogStep,
+  TransactionType,
+} from "@/lib/types/transaction";
+import { clientGetConsumableNotes } from "@/lib/web-client";
 
 const CreateTransactionDialogSelectForm = ({
   executingAccountId,

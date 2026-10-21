@@ -1,23 +1,23 @@
 "use client";
 import {
-  useRouter,
-  usePathname,
-  useSearchParams,
-  notFound,
-} from "next/navigation";
-import type { Script } from "@/lib/types/script";
-import { useIsClient } from "usehooks-ts";
-import useScripts from "@/hooks/use-scripts";
-import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@workspace/ui/components/tabs";
+import {
+  notFound,
+  usePathname,
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
+import { useIsClient } from "usehooks-ts";
 import Editor from "@/components/lib/editor";
+import AddDependencyDialog from "@/components/script/add-dependency-dialog";
 import EditorConsole from "@/components/script/editor-console";
 import ScriptMetadata from "@/components/script/script-metadata";
-import AddDependencyDialog from "@/components/script/add-dependency-dialog";
+import useScripts from "@/hooks/use-scripts";
+import type { Script } from "@/lib/types/script";
 
 const ScriptComponent = ({
   id,

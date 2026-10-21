@@ -1,13 +1,13 @@
-import Link from "next/link";
 import { Button } from "@workspace/ui/components/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@workspace/ui/components/tooltip";
-import { formatId } from "@/lib/utils";
-import type { InputNote } from "@/lib/types/note";
+import Link from "next/link";
 import useScripts from "@/hooks/use-scripts";
+import type { InputNote } from "@/lib/types/note";
+import { formatId } from "@/lib/utils";
 
 const NoteScriptRoot = ({ inputNote }: { inputNote: InputNote }) => {
   const { scripts } = useScripts();

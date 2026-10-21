@@ -1,4 +1,3 @@
-import type { Transaction } from "@/lib/types/transaction";
 import {
   Table,
   TableBody,
@@ -6,8 +5,9 @@ import {
   TableRow,
 } from "@workspace/ui/components/table";
 import AccountAddress from "@/components/lib/account-address";
-import { midenExplorerUrl } from "@/lib/constants";
 import useNetwork from "@/hooks/use-network";
+import { midenExplorerUrl } from "@/lib/constants";
+import type { Transaction } from "@/lib/types/transaction";
 
 const TransactionInformationTable = ({
   transaction,

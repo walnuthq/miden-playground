@@ -5,8 +5,8 @@ import {
   nextStep,
   selectOption,
   startTutorial,
-  tutorialPanel,
   TRANSACTION_TIMEOUT,
+  tutorialPanel,
 } from "./tutorial";
 
 // The note is created by a new Bread Wallet (see ./bread.ts), funded from its

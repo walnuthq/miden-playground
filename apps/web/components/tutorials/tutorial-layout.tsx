@@ -1,15 +1,15 @@
 "use client";
-import { type ReactNode, useEffect, useRef } from "react";
-import useTutorials from "@/hooks/use-tutorials";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@workspace/ui/components/resizable";
+import { useIsMobile } from "@workspace/ui/hooks/use-mobile";
+import { type ReactNode, useEffect, useRef } from "react";
 import type { ImperativePanelHandle } from "react-resizable-panels";
 import { useIsClient } from "usehooks-ts";
 import TutorialStep from "@/components/tutorials/tutorial-step";
-import { useIsMobile } from "@workspace/ui/hooks/use-mobile";
+import useTutorials from "@/hooks/use-tutorials";
 
 const InnerTutorialLayout = ({ children }: { children: ReactNode }) => {
   const tutorialRef = useRef<ImperativePanelHandle | null>(null);

@@ -1,25 +1,25 @@
-import {
-  Plus,
-  Wallet,
-  HandCoins,
-  Download,
-  Upload,
-  // Signature,
-  ShieldPlus,
-  ShieldCheck,
-} from "lucide-react";
+import { Button } from "@workspace/ui/components/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
-import { Button } from "@workspace/ui/components/button";
+import {
+  Download,
+  HandCoins,
+  Plus,
+  ShieldCheck,
+  // Signature,
+  ShieldPlus,
+  Upload,
+  Wallet,
+} from "lucide-react";
 import useAccounts from "@/hooks/use-accounts";
-import useNetwork from "@/hooks/use-network";
 import useComponents from "@/hooks/use-components";
-import { defaultComponentIds } from "@/lib/types/default-components";
+import useNetwork from "@/hooks/use-network";
 import useTutorials from "@/hooks/use-tutorials";
+import { defaultComponentIds } from "@/lib/types/default-components";
 
 const CreateAccountDropdownMenu = () => {
   const { networkId } = useNetwork();
@@ -77,14 +77,14 @@ const CreateAccountDropdownMenu = () => {
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={openDeployMultisigDialog}
-              disabled={!connectedWallet || !connectedWallet.isPrivate}
+              disabled={!connectedWallet?.isPrivate}
             >
               <ShieldPlus />
               Deploy guardian wallet
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => openImportAccountDialog(true)}
-              disabled={!connectedWallet || !connectedWallet.isPrivate}
+              disabled={!connectedWallet?.isPrivate}
             >
               <ShieldCheck />
               Restore guardian wallet

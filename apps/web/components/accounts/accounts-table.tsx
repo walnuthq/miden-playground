@@ -1,9 +1,8 @@
 "use client";
-import { useRouter } from "next/navigation";
 import {
   type ColumnDef,
-  type RowData,
   flexRender,
+  type RowData,
   useTable,
 } from "@tanstack/react-table";
 import { Input } from "@workspace/ui/components/input";
@@ -16,9 +15,10 @@ import {
   TableRow,
 } from "@workspace/ui/components/table";
 import { cn } from "@workspace/ui/lib/utils";
+import { useRouter } from "next/navigation";
 import CreateAccountDropdownMenu from "@/components/accounts/create-account-dropdown-menu";
-import { getIdentifierPart } from "@/lib/utils/account";
 import { type DataTableFeatures, dataTableFeatures } from "@/lib/table";
+import { getIdentifierPart } from "@/lib/utils/account";
 
 const AccountsTable = <TData extends RowData>({
   columns,

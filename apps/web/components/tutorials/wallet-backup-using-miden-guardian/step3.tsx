@@ -1,15 +1,15 @@
-import type { TutorialStep } from "@/lib/types/tutorial";
-import useNetwork from "@/hooks/use-network";
-import useNotes from "@/hooks/use-notes";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step3Content from "@/components/tutorials/wallet-backup-using-miden-guardian/step3.mdx";
 import useAccounts from "@/hooks/use-accounts";
+import useNetwork from "@/hooks/use-network";
+import useNotes from "@/hooks/use-notes";
 import {
-  P2ID_NOTE_CODE,
   midenFaucetAccountId,
   midenFaucetFunderAccountId,
+  P2ID_NOTE_CODE,
 } from "@/lib/constants";
+import type { TutorialStep } from "@/lib/types/tutorial";
 import { accountIdFromPrefixSuffix } from "@/lib/utils/account";
 
 const useCompleted = () => {

@@ -1,18 +1,18 @@
-import { type NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
-import counterMapContract from "@/lib/types/default-scripts/counter-map-contract";
-import p2id from "@/lib/types/default-scripts/p2id";
+import { type NextRequest, NextResponse } from "next/server";
 import authNoAuth from "@/lib/types/default-scripts/auth-no-auth";
+import countReader from "@/lib/types/default-scripts/count-reader";
+import counterMapContract from "@/lib/types/default-scripts/counter-map-contract";
 import counterNote from "@/lib/types/default-scripts/counter-note";
 import counterScript from "@/lib/types/default-scripts/counter-script";
-import countReader from "@/lib/types/default-scripts/count-reader";
-import { sleep } from "@/lib/utils";
+import p2id from "@/lib/types/default-scripts/p2id";
 import type {
-  ScriptType,
-  ScriptExample,
   Dependency,
   Script,
+  ScriptExample,
+  ScriptType,
 } from "@/lib/types/script";
+import { sleep } from "@/lib/utils";
 import { defaultScript } from "@/lib/utils/script";
 
 type CreateScriptRequestBody = {

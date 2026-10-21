@@ -1,70 +1,70 @@
-import { range } from "lodash";
 import {
   type Account as WasmAccount,
-  type WebClient as WebClientType,
-  type InputNoteRecord as WasmInputNoteRecordType,
-  type NoteMetadata as WasmNoteMetadataType,
-  type TransactionResult as WasmTransactionResultType,
-  type InputNoteState as WasmInputNoteStateType,
-  type TransactionRecord as WasmTransactionRecordType,
-  type AccountId as WasmAccountIdType,
-  AccountStorageMode as WasmAccountStorageMode,
   AccountBuilder as WasmAccountBuilder,
   AccountComponent as WasmAccountComponent,
-  Note as WasmNote,
-  Word as WasmWord,
+  AccountId as WasmAccountId,
+  type AccountId as WasmAccountIdType,
+  AccountStorageMode as WasmAccountStorageMode,
   BasicFungibleFaucetComponent as WasmBasicFungibleFaucetComponent,
-  StorageSlot as WasmStorageSlot,
-  StorageMap as WasmStorageMap,
+  Endpoint as WasmEndpoint,
+  Felt as WasmFelt,
+  FeltArray as WasmFeltArray,
+  FungibleAsset as WasmFungibleAsset,
+  type InputNoteRecord as WasmInputNoteRecordType,
+  InputNoteState as WasmInputNoteState,
+  type InputNoteState as WasmInputNoteStateType,
+  MidenArrays as WasmMidenArrays,
+  NetworkAccountTarget as WasmNetworkAccountTarget,
+  Note as WasmNote,
+  NoteAssets as WasmNoteAssets,
+  NoteExecutionHint as WasmNoteExecutionHint,
+  NoteExportFormat as WasmNoteExportFormat,
+  NoteFile as WasmNoteFile,
   NoteFilter as WasmNoteFilter,
   NoteFilterTypes as WasmNoteFilterTypes,
-  NoteType as WasmNoteType,
-  InputNoteState as WasmInputNoteState,
-  NoteScript as WasmNoteScript,
-  Package as WasmPackage,
-  NoteAssets as WasmNoteAssets,
   NoteId as WasmNoteId,
-  AccountId as WasmAccountId,
-  FungibleAsset as WasmFungibleAsset,
   NoteMetadata as WasmNoteMetadata,
-  NoteTag as WasmNoteTag,
-  NetworkAccountTarget as WasmNetworkAccountTarget,
-  NoteExecutionHint as WasmNoteExecutionHint,
+  type NoteMetadata as WasmNoteMetadataType,
+  NoteRecipient as WasmNoteRecipient,
+  NoteScript as WasmNoteScript,
   NoteScriptFee as WasmNoteScriptFee,
   NoteStorage as WasmNoteStorage,
-  FeltArray as WasmFeltArray,
-  Felt as WasmFelt,
-  NoteRecipient as WasmNoteRecipient,
-  TransactionFilter as WasmTransactionFilter,
-  TransactionScript as WasmTransactionScript,
-  TransactionRequestBuilder as WasmTransactionRequestBuilder,
-  NoteFile as WasmNoteFile,
-  NoteExportFormat as WasmNoteExportFormat,
-  MidenArrays as WasmMidenArrays,
-  Endpoint as WasmEndpoint,
+  NoteTag as WasmNoteTag,
+  NoteType as WasmNoteType,
+  Package as WasmPackage,
   RpcClient as WasmRpcClient,
+  StorageMap as WasmStorageMap,
+  StorageSlot as WasmStorageSlot,
+  TransactionFilter as WasmTransactionFilter,
+  type TransactionRecord as WasmTransactionRecordType,
+  TransactionRequestBuilder as WasmTransactionRequestBuilder,
+  type TransactionResult as WasmTransactionResultType,
+  TransactionScript as WasmTransactionScript,
+  Word as WasmWord,
+  type WebClient as WebClientType,
 } from "@miden-sdk/miden-sdk/lazy";
 import { normalizeAccountId } from "@miden-sdk/react/lazy";
-import type { NetworkId } from "@/lib/types/network";
+import { range } from "lodash";
+import { EMPTY_WORD } from "@/lib/constants";
 import type {
   Account,
   AccountMultisig,
   AccountStorageMode,
   StorageItem,
 } from "@/lib/types/account";
+import type { Component, StorageSlot } from "@/lib/types/component";
+import defaultScripts from "@/lib/types/default-scripts";
+import type { NetworkId } from "@/lib/types/network";
+import type { InputNote, NoteType } from "@/lib/types/note";
+import type { Script } from "@/lib/types/script";
+import type { Transaction, TransactionNote } from "@/lib/types/transaction";
+import { fromBase64, toBase64, waitUntil } from "@/lib/utils";
 import {
   defaultAccount,
   getIdentifierPart,
   getRoutingParametersPart,
 } from "@/lib/utils/account";
-import type { InputNote, NoteType } from "@/lib/types/note";
-import type { TransactionNote, Transaction } from "@/lib/types/transaction";
-import type { Script } from "@/lib/types/script";
 import { defaultProcedureExport } from "@/lib/utils/script";
-import type { StorageSlot, Component } from "@/lib/types/component";
-import defaultScripts from "@/lib/types/default-scripts";
-import { fromBase64, toBase64, waitUntil } from "@/lib/utils";
-import { EMPTY_WORD } from "@/lib/constants";
 
 export const randomWord = () => {
   const bytes = new Uint8Array(32);
@@ -153,8 +153,7 @@ export const clientGetAccounts = async ({
       if (!wasmAccount) {
         try {
           await client.importAccountById(WasmAccountId.fromHex(accountId));
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (error) {
+        } catch {
           return undefined;
         }
         wasmAccount = await client.getAccount(WasmAccountId.fromHex(accountId));
@@ -468,8 +467,7 @@ export const clientExportInputNoteFile = async ({
   try {
     const inputNote = record.toInputNote();
     return WasmNoteFile.fromInputNote(inputNote).serialize();
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (error) {
+  } catch {
     return WasmNoteFile.fromNoteDetails(record.details()).serialize();
   }
 };
@@ -540,14 +538,13 @@ export const wasmAccountToAccount = ({
         amount: fungibleAsset.amount().toString(),
       })),
     code,
-    storage: slotNames.reduce<StorageItem[]>((previousValue, currentValue) => {
-      const item = wasmAccount.storage().getItem(currentValue);
-      const mapEntries = wasmAccount.storage().getMapEntries(currentValue);
+    storage: slotNames.flatMap<StorageItem>((name) => {
+      const item = wasmAccount.storage().getItem(name);
+      const mapEntries = wasmAccount.storage().getMapEntries(name);
       if (mapEntries && item) {
         return [
-          ...previousValue,
           {
-            name: currentValue,
+            name,
             type: "map",
             item: item.toHex(),
             mapEntries: mapEntries.map(({ key, value }) => ({ key, value })),
@@ -555,18 +552,10 @@ export const wasmAccountToAccount = ({
         ];
       }
       if (item) {
-        return [
-          ...previousValue,
-          {
-            name: currentValue,
-            type: "value",
-            item: item.toHex(),
-            mapEntries: [],
-          },
-        ];
+        return [{ name, type: "value", item: item.toHex(), mapEntries: [] }];
       }
-      return previousValue;
-    }, []),
+      return [];
+    }),
     consumableNoteIds,
     components: verifiedComponents,
     multisig,
@@ -793,8 +782,7 @@ export const wasmStorageSlotFromStorageSlot = (storageSlot: StorageSlot) => {
 export const wasmWordFromHex = (value: string) => {
   try {
     return WasmWord.fromHex(value).toU64s();
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (error) {
+  } catch {
     return new BigUint64Array([0n, 0n, 0n, 0n]);
   }
 };
@@ -802,8 +790,7 @@ export const wasmWordFromHex = (value: string) => {
 export const newWasmWord = (u64Vec: BigUint64Array<ArrayBufferLike>) => {
   try {
     return new WasmWord(u64Vec).toHex();
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (error) {
+  } catch {
     return EMPTY_WORD;
   }
 };

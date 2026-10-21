@@ -1,17 +1,17 @@
-import { useState, useEffect } from "react";
-import { HandCoins } from "lucide-react";
-import { toast } from "sonner";
 import {
   NoteFile as WasmNoteFile,
   NoteId as WasmNoteId,
 } from "@miden-sdk/miden-sdk/lazy";
 import { useMiden } from "@miden-sdk/react/lazy";
+import { Button } from "@workspace/ui/components/button";
 import { Spinner } from "@workspace/ui/components/spinner";
+import { HandCoins } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import useAccounts from "@/hooks/use-accounts";
 import useNetwork from "@/hooks/use-network";
-import { Button } from "@workspace/ui/components/button";
-import { waitUntil } from "@/lib/utils";
 import { requestTokens } from "@/lib/miden-faucet";
+import { waitUntil } from "@/lib/utils";
 import { clientGetNotesById } from "@/lib/web-client";
 
 const MintButton = () => {

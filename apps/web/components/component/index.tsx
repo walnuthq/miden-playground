@@ -1,16 +1,16 @@
 "use client";
-import { useIsClient } from "usehooks-ts";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import useComponents from "@/hooks/use-components";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@workspace/ui/components/tabs";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useIsClient } from "usehooks-ts";
 import ComponentInformation from "@/components/component/component-information";
 import ComponentScript from "@/components/component/component-script";
 import UpsertStorageSlotDialog from "@/components/component/upsert-storage-slot-dialog";
+import useComponents from "@/hooks/use-components";
 
 const Component = ({ id }: { id: string }) => {
   const router = useRouter();

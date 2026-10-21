@@ -1,9 +1,5 @@
 "use client";
-import { useState } from "react";
-import { toast } from "sonner";
-import { Spinner } from "@workspace/ui/components/spinner";
 import { Button } from "@workspace/ui/components/button";
-import { Switch } from "@workspace/ui/components/switch";
 import {
   Dialog,
   DialogClose,
@@ -15,8 +11,13 @@ import {
 } from "@workspace/ui/components/dialog";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
-import useAccounts from "@/hooks/use-accounts";
+import { Spinner } from "@workspace/ui/components/spinner";
+import { Switch } from "@workspace/ui/components/switch";
+import { useState } from "react";
+import { toast } from "sonner";
 import AccountAddress from "@/components/lib/account-address";
+import useAccounts from "@/hooks/use-accounts";
+
 // import useTutorials from "@/hooks/use-tutorials";
 
 const CreateWalletDialog = () => {

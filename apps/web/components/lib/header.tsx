@@ -1,6 +1,4 @@
 "use client";
-import { usePathname } from "next/navigation";
-import { useIsClient } from "usehooks-ts";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -11,13 +9,15 @@ import {
 } from "@workspace/ui/components/breadcrumb";
 import { Separator } from "@workspace/ui/components/separator";
 import { SidebarTrigger } from "@workspace/ui/components/sidebar";
-import TutorialToggle from "@/components/lib/tutorial-toggle";
+import { usePathname } from "next/navigation";
+import { useIsClient } from "usehooks-ts";
 import GithubButton from "@/components/lib/github-button";
 import ModeToggle from "@/components/lib/mode-toggle";
-import useTutorials from "@/hooks/use-tutorials";
 import NetworkBadge from "@/components/lib/network-badge";
-import useNetwork from "@/hooks/use-network";
+import TutorialToggle from "@/components/lib/tutorial-toggle";
 import WalletButton from "@/components/lib/wallet-button";
+import useNetwork from "@/hooks/use-network";
+import useTutorials from "@/hooks/use-tutorials";
 
 const getLink = (pathname: string) => {
   const [, route] = pathname.split("/");

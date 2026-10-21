@@ -1,10 +1,10 @@
-import Link from "next/link";
 import { Button } from "@workspace/ui/components/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@workspace/ui/components/tooltip";
+import Link from "next/link";
 import { formatId } from "@/lib/utils";
 
 const NoteId = ({ noteId }: { noteId: string }) => (

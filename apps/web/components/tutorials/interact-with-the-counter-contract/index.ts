@@ -1,5 +1,3 @@
-import type { Tutorial } from "@/lib/types/tutorial";
-import { defaultTutorial } from "@/lib/utils/tutorial";
 import state from "@/components/tutorials/interact-with-the-counter-contract/state";
 import Step1 from "@/components/tutorials/interact-with-the-counter-contract/step1";
 import Step2 from "@/components/tutorials/interact-with-the-counter-contract/step2";
@@ -7,6 +5,8 @@ import Step3 from "@/components/tutorials/interact-with-the-counter-contract/ste
 import Step4 from "@/components/tutorials/interact-with-the-counter-contract/step4";
 import Step5 from "@/components/tutorials/interact-with-the-counter-contract/step5";
 import Step6 from "@/components/tutorials/interact-with-the-counter-contract/step6";
+import type { Tutorial } from "@/lib/types/tutorial";
+import { defaultTutorial } from "@/lib/utils/tutorial";
 
 const tutorial: Tutorial = {
   ...defaultTutorial(),

@@ -9,15 +9,14 @@
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev",
-    "lint": "turbo lint",
+    "lint": "biome check .",
     "typecheck": "turbo typecheck",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "format": "biome check --write .",
     "bread-wallet": "node .bread-wallet/update.mjs"
   },
   "devDependencies": {
-    "@workspace/eslint-config": "workspace:*",
+    "@biomejs/biome": "2.5.15",
     "@workspace/typescript-config": "workspace:*",
-    "prettier": "3.9.10",
     "turbo": "2.11.9",
     "typescript": "6.0.3"
   }

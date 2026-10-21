@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import { Badge } from "@workspace/ui/components/badge";
 import {
   Card,
@@ -8,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@workspace/ui/components/card";
+import type { ReactNode } from "react";
 
 import { formatTimestamp } from "@/lib/format";
 import type {

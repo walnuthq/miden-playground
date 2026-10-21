@@ -1,11 +1,11 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 import {
   logBrowserErrors,
   nextStep,
   selectOption,
   startTutorial,
-  tutorialPanel,
   TRANSACTION_TIMEOUT,
+  tutorialPanel,
 } from "./tutorial";
 
 // Tutorial 10 needs no wallet: the Count Reader uses No Auth. It copies the

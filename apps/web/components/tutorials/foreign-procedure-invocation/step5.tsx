@@ -1,10 +1,10 @@
-import type { TutorialStep } from "@/lib/types/tutorial";
-import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
-import NextStepButton from "@/components/tutorials/next-step-button";
 import Step5Content from "@/components/tutorials/foreign-procedure-invocation/step5.mdx";
+import NextStepButton from "@/components/tutorials/next-step-button";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import useAccounts from "@/hooks/use-accounts";
 import useTransactions from "@/hooks/use-transactions";
 import { EMPTY_WORD } from "@/lib/constants";
+import type { TutorialStep } from "@/lib/types/tutorial";
 
 const useCompleted = () => {
   const { accounts } = useAccounts();

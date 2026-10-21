@@ -1,15 +1,15 @@
-import { Plus } from "lucide-react";
+import { useMiden } from "@miden-sdk/react/lazy";
+import { Button } from "@workspace/ui/components/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
-import { Button } from "@workspace/ui/components/button";
-import useTransactions from "@/hooks/use-transactions";
+import { Plus } from "lucide-react";
 import useAccounts from "@/hooks/use-accounts";
+import useTransactions from "@/hooks/use-transactions";
 import type { Account } from "@/lib/types/account";
-import { useMiden } from "@miden-sdk/react/lazy";
 import { clientGetConsumableNotes } from "@/lib/web-client";
 
 const CreateTransactionDropdownMenu = ({ account }: { account: Account }) => {

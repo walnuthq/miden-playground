@@ -7,10 +7,10 @@ import {
   TableRow,
 } from "@workspace/ui/components/table";
 import CopyButton from "@/components/lib/copy-button";
-import type { Script, ProcedureExport } from "@/lib/types/script";
+import type { ProcedureExport, Script } from "@/lib/types/script";
 import {
-  formatProcedureExportPath,
   formatProcedureExportParamType,
+  formatProcedureExportPath,
   formatProcedureExportResultType,
 } from "@/lib/utils/script";
 

@@ -1,4 +1,4 @@
-import { type Account as WasmAccount } from "@miden-sdk/miden-sdk/lazy";
+import type { Account as WasmAccount } from "@miden-sdk/miden-sdk/lazy";
 import { useMiden, useTransaction } from "@miden-sdk/react/lazy";
 import useNetwork from "@/hooks/use-network";
 import { requestFundingNote, waitForFundingNote } from "@/lib/miden-faucet";

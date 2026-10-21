@@ -1,11 +1,11 @@
-import type { TutorialStep } from "@/lib/types/tutorial";
+import Step2Content from "@/components/tutorials/contract-verification/step2.mdx";
+import useScriptName from "@/components/tutorials/contract-verification/use-script-name";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
-import Step2Content from "@/components/tutorials/contract-verification/step2.mdx";
-import useScripts from "@/hooks/use-scripts";
-import useScriptName from "@/components/tutorials/contract-verification/use-script-name";
 import useComponents from "@/hooks/use-components";
+import useScripts from "@/hooks/use-scripts";
 import useTutorials from "@/hooks/use-tutorials";
+import type { TutorialStep } from "@/lib/types/tutorial";
 import { storageSlotName } from "@/lib/utils/component";
 
 const useScript = () => {

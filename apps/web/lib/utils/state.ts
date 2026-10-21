@@ -1,12 +1,12 @@
 import type { Account } from "@/lib/types/account";
-import type { InputNote } from "@/lib/types/note";
 import type { Component } from "@/lib/types/component";
-import type { Transaction } from "@/lib/types/transaction";
-import type { State } from "@/lib/types/state";
-import type { Script } from "@/lib/types/script";
-import type { TutorialId } from "@/lib/types/tutorial";
-import defaultScripts from "@/lib/types/default-scripts";
 import defaultComponents from "@/lib/types/default-components";
+import defaultScripts from "@/lib/types/default-scripts";
+import type { InputNote } from "@/lib/types/note";
+import type { Script } from "@/lib/types/script";
+import type { State } from "@/lib/types/state";
+import type { Transaction } from "@/lib/types/transaction";
+import type { TutorialId } from "@/lib/types/tutorial";
 import { randomLowercaseId } from "@/lib/utils";
 
 // The local storage key holding the serialized app state. Exported so the

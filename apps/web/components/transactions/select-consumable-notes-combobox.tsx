@@ -1,8 +1,8 @@
 "use client";
-import { useState, type Dispatch, type SetStateAction } from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
-import { formatId } from "@/lib/utils";
-import { cn } from "@workspace/ui/lib/utils";
+import type {
+  ConsumableNoteRecord as WasmConsumableNoteRecordType,
+  InputNoteRecord as WasmInputNoteRecordType,
+} from "@miden-sdk/miden-sdk/lazy";
 import { Button } from "@workspace/ui/components/button";
 import {
   Command,
@@ -17,12 +17,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@workspace/ui/components/popover";
-import type {
-  ConsumableNoteRecord as WasmConsumableNoteRecordType,
-  InputNoteRecord as WasmInputNoteRecordType,
-} from "@miden-sdk/miden-sdk/lazy";
+import { cn } from "@workspace/ui/lib/utils";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { type Dispatch, type SetStateAction, useState } from "react";
 import useAccounts from "@/hooks/use-accounts";
 import type { Account } from "@/lib/types/account";
+import { formatId } from "@/lib/utils";
 import { formatAmount } from "@/lib/utils/asset";
 
 const getConsumableNoteFields = (
@@ -121,9 +121,7 @@ const SelectConsumableNotesCombobox = ({
                   )}
                   onSelect={(currentValue) => {
                     const [currentNoteId] = currentValue.split(",") as [string];
-                    const index = value.findIndex(
-                      (noteId) => noteId === currentNoteId,
-                    );
+                    const index = value.indexOf(currentNoteId);
                     const newValue =
                       index === -1
                         ? [...value, currentNoteId]

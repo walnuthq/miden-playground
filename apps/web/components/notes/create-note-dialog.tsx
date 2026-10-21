@@ -1,16 +1,5 @@
 "use client";
-import { useState } from "react";
-import { Trash } from "lucide-react";
-import { Spinner } from "@workspace/ui/components/spinner";
 import { Button } from "@workspace/ui/components/button";
-import { Switch } from "@workspace/ui/components/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@workspace/ui/components/select";
 import {
   Dialog,
   DialogClose,
@@ -20,16 +9,27 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@workspace/ui/components/dialog";
-import { Label } from "@workspace/ui/components/label";
 import { Input } from "@workspace/ui/components/input";
-import useNotes from "@/hooks/use-notes";
-import useScripts from "@/hooks/use-scripts";
-import { noteTypes, type NoteType } from "@/lib/types/note";
+import { Label } from "@workspace/ui/components/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select";
+import { Spinner } from "@workspace/ui/components/spinner";
+import { Switch } from "@workspace/ui/components/switch";
+import { Trash } from "lucide-react";
+import { useState } from "react";
 import SelectAccountCombobox from "@/components/transactions/select-account-combobox";
 import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";
 import useAccounts from "@/hooks/use-accounts";
-import { parseAmount, formatAmount } from "@/lib/utils/asset";
+import useNotes from "@/hooks/use-notes";
+import useScripts from "@/hooks/use-scripts";
 import { defaultScriptIds } from "@/lib/types/default-scripts";
+import { type NoteType, noteTypes } from "@/lib/types/note";
+import { formatAmount, parseAmount } from "@/lib/utils/asset";
 
 const CreateNoteDialog = () => {
   const { connectedWallet, faucets } = useAccounts();
@@ -202,6 +202,7 @@ const CreateNoteDialog = () => {
             <div className="grid gap-3 col-span-3">
               <Label htmlFor="storage">Note storage</Label>
               {noteStorage.map((noteStorageItem, index) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: rows have no stable id, only their position.
                 <div key={index} className="flex items-center gap-2">
                   <Input
                     id={`storage-${index}`}

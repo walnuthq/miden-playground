@@ -1,19 +1,19 @@
 "use client";
-import type { ReactNode } from "react";
-import { ThemeProvider as NextThemesProvider } from "next-themes";
 import {
-  MidenFiSignerProvider,
-  WalletModalProvider,
-  PrivateDataPermission,
   AllowedPrivateData,
+  MidenFiSignerProvider,
+  PrivateDataPermission,
+  WalletModalProvider,
 } from "@miden-sdk/miden-wallet-adapter";
 import { MultiSignerProvider, SignerSlot } from "@miden-sdk/react/lazy";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { NetworkProvider } from "@/components/providers/network-provider";
-import MidenProvider from "@/components/providers/miden-provider";
-import ParaProvider from "@/components/providers/para-provider";
-import MidenFiReconnect from "@/components/providers/midenfi-reconnect";
+import { ThemeProvider as NextThemesProvider } from "next-themes";
+import type { ReactNode } from "react";
 import GlobalContextProvider from "@/components/global-context/provider";
+import MidenProvider from "@/components/providers/miden-provider";
+import MidenFiReconnect from "@/components/providers/midenfi-reconnect";
+import { NetworkProvider } from "@/components/providers/network-provider";
+import ParaProvider from "@/components/providers/para-provider";
 
 const queryClient = new QueryClient();
 

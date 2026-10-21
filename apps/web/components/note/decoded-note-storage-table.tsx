@@ -1,10 +1,10 @@
-import type { ReactNode } from "react";
 import {
   Table,
   TableBody,
   TableCell,
   TableRow,
 } from "@workspace/ui/components/table";
+import type { ReactNode } from "react";
 
 const DecodedNoteStorageTable = ({
   storage,

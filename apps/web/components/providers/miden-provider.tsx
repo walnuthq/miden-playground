@@ -1,6 +1,6 @@
 "use client";
-import { type ReactNode, useEffect, useState } from "react";
 import { MidenProvider as RawMidenProvider } from "@miden-sdk/react/lazy";
+import { Button } from "@workspace/ui/components/button";
 import {
   Empty,
   EmptyContent,
@@ -9,13 +9,16 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@workspace/ui/components/empty";
-import { Button } from "@workspace/ui/components/button";
+import { type ReactNode, useEffect, useState } from "react";
+import Loading from "@/components/lib/loading";
+import Logo from "@/components/lib/logo";
 import useNetwork from "@/hooks/use-network";
 import { networks, noteTransportUrls } from "@/lib/miden-client";
-import { deleteOutdatedMidenStores, deleteMidenStores } from "@/lib/utils/store";
 import { STATE_STORAGE_KEY } from "@/lib/utils/state";
-import Logo from "@/components/lib/logo";
-import Loading from "@/components/lib/loading";
+import {
+  deleteMidenStores,
+  deleteOutdatedMidenStores,
+} from "@/lib/utils/store";
 
 const resetLocalData = async () => {
   await deleteMidenStores();
@@ -68,7 +71,9 @@ const MidenProvider = ({ children }: { children: ReactNode }) => {
           localStorage.removeItem(STATE_STORAGE_KEY);
         }
       })
-      .catch((error) => console.error("ERROR: deleteOutdatedMidenStores", error))
+      .catch((error) =>
+        console.error("ERROR: deleteOutdatedMidenStores", error),
+      )
       .finally(() => setStoreChecked(true));
   }, []);
   if (!storeChecked) {

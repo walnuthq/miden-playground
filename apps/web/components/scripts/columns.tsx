@@ -1,8 +1,5 @@
 "use client";
-import { type Script, scriptTypes, scriptStatuses } from "@/lib/types/script";
 import type { ColumnDef } from "@tanstack/react-table";
-import type { DataTableFeatures } from "@/lib/table";
-import { MoreVertical } from "lucide-react";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import {
@@ -11,8 +8,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
+import { MoreVertical } from "lucide-react";
 import useScripts from "@/hooks/use-scripts";
 import { exportScript } from "@/lib/api";
+import type { DataTableFeatures } from "@/lib/table";
+import { type Script, scriptStatuses, scriptTypes } from "@/lib/types/script";
 
 const ScriptActionsCell = ({ script }: { script: Script }) => {
   const { openDeleteScriptAlertDialog } = useScripts();

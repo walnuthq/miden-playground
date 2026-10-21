@@ -1,11 +1,11 @@
-import type { TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step2Content from "@/components/tutorials/your-first-smart-contract-and-custom-note/step2.mdx";
-import useScripts from "@/hooks/use-scripts";
-import { defaultScriptIds } from "@/lib/types/default-scripts";
 import useComponents from "@/hooks/use-components";
+import useScripts from "@/hooks/use-scripts";
 import useTutorials from "@/hooks/use-tutorials";
+import { defaultScriptIds } from "@/lib/types/default-scripts";
+import type { TutorialStep } from "@/lib/types/tutorial";
 import { storageSlotName } from "@/lib/utils/component";
 
 const useCompleted = () => {

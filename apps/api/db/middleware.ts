@@ -1,5 +1,5 @@
-import { Client } from "pg";
 import { createMiddleware } from "hono/factory";
+import { Client } from "pg";
 import { createDb } from "@/db";
 import type { AppEnv } from "@/lib/app";
 

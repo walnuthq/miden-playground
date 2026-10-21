@@ -1,15 +1,15 @@
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import useGlobalContext from "@/components/global-context/hook";
-import useAppState from "@/hooks/use-app-state";
-import { importScriptsFromGithubRepo } from "@/lib/api";
-import { compiledPackageToScript } from "@/lib/utils/script";
-import { defaultComponentIds } from "@/lib/types/default-components";
 import useAccounts from "@/hooks/use-accounts";
-import authNoAuth from "@/lib/types/default-components/auth-no-auth";
+import useAppState from "@/hooks/use-app-state";
 import useComponents from "@/hooks/use-components";
 import useNetwork from "@/hooks/use-network";
+import { importScriptsFromGithubRepo } from "@/lib/api";
 import examples from "@/lib/examples";
+import { defaultComponentIds } from "@/lib/types/default-components";
+import authNoAuth from "@/lib/types/default-components/auth-no-auth";
+import { compiledPackageToScript } from "@/lib/utils/script";
 
 const useExamples = () => {
   const router = useRouter();

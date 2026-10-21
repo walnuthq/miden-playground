@@ -1,10 +1,10 @@
-import { uniqBy } from "lodash";
+import { Button } from "@workspace/ui/components/button";
 import {
   Table,
   TableBody,
   TableCell,
-  TableHeader,
   TableHead,
+  TableHeader,
   TableRow,
 } from "@workspace/ui/components/table";
 import {
@@ -12,11 +12,11 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@workspace/ui/components/tooltip";
-import { Button } from "@workspace/ui/components/button";
-import { type StorageSlot, storageSlotTypes } from "@/lib/types/component";
+import { uniqBy } from "lodash";
 import type { StorageItem } from "@/lib/types/account";
+import { type StorageSlot, storageSlotTypes } from "@/lib/types/component";
 import { getItem } from "@/lib/utils/account";
-import { wasmWordFromHex, newWasmWord } from "@/lib/web-client";
+import { newWasmWord, wasmWordFromHex } from "@/lib/web-client";
 
 const StorageSlotValueTooltip = ({ value }: { value: string }) => {
   const feltArray = wasmWordFromHex(value);

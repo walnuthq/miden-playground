@@ -30,7 +30,8 @@ const fetchUpstream = async <T>(
   }
   // Error pages from Cloudflare or the container runtime are not JSON.
   const data = (await response.json().catch(() => undefined)) as
-    { error?: string } | undefined;
+    | { error?: string }
+    | undefined;
   if (!response.ok) {
     throw new UpstreamError(
       data?.error ?? `${service} responded ${response.status}`,

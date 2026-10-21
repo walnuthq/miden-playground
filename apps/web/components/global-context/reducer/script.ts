@@ -1,6 +1,6 @@
-import type { Script, ProcedureExport } from "@/lib/types/script";
-import { defaultScript } from "@/lib/utils/script";
+import type { ProcedureExport, Script } from "@/lib/types/script";
 import type { State } from "@/lib/types/state";
+import { defaultScript } from "@/lib/utils/script";
 
 export type ScriptAction =
   | {

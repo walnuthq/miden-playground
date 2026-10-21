@@ -1,5 +1,5 @@
+import { type NetworkId, networks } from "@/lib/types/network";
 import type { Store, StoreBlockHeader } from "@/lib/types/store";
-import { networks, type NetworkId } from "@/lib/types/network";
 
 // The version of the web SDK's IndexedDB store (the `idxdb-store` crate version
 // it writes to the `clientVersion` setting). Bump it alongside the SDK.
@@ -203,7 +203,8 @@ const isOutdatedStore = (name: string) =>
         ]);
         versionRequest.onsuccess = () => {
           const record = versionRequest.result as
-            { value?: Uint8Array } | undefined;
+            | { value?: Uint8Array }
+            | undefined;
           database.close();
           resolve(
             isOutdatedClientVersion(

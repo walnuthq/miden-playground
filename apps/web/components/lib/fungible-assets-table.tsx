@@ -6,10 +6,10 @@ import {
   TableHeader,
   TableRow,
 } from "@workspace/ui/components/table";
-import type { FungibleAsset } from "@/lib/types/asset";
-import useAccounts from "@/hooks/use-accounts";
-import AccountAddress from "@/components/lib/account-address";
 import { cn } from "@workspace/ui/lib/utils";
+import AccountAddress from "@/components/lib/account-address";
+import useAccounts from "@/hooks/use-accounts";
+import type { FungibleAsset } from "@/lib/types/asset";
 import { formatAmount } from "@/lib/utils/asset";
 
 const FungibleAssetsTable = ({

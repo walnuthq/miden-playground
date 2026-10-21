@@ -2,9 +2,9 @@
 import { useQuery } from "@tanstack/react-query";
 import Note from "@/components/note/note";
 import useNetwork from "@/hooks/use-network";
+import useNotes from "@/hooks/use-notes";
 import { getVerifiedNote } from "@/lib/api";
 import { isValidUUIDv4 } from "@/lib/utils";
-import useNotes from "@/hooks/use-notes";
 
 const NoteIndex = ({ id }: { id: string }) => {
   const { networkId } = useNetwork();

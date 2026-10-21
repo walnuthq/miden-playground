@@ -1,10 +1,10 @@
-import type { TutorialStep } from "@/lib/types/tutorial";
+import Step3Content from "@/components/tutorials/contract-verification/step3.mdx";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
-import Step3Content from "@/components/tutorials/contract-verification/step3.mdx";
+import useAccounts from "@/hooks/use-accounts";
 import useComponents from "@/hooks/use-components";
 import { defaultComponentIds } from "@/lib/types/default-components";
-import useAccounts from "@/hooks/use-accounts";
+import type { TutorialStep } from "@/lib/types/tutorial";
 
 const useCompleted = () => {
   const { accounts } = useAccounts();

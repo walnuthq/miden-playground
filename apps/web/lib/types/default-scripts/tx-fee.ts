@@ -1,6 +1,6 @@
+import { TX_FEE_NOTE_CODE } from "@/lib/constants";
 import type { Script } from "@/lib/types/script";
 import { defaultProcedureExport, defaultScript } from "@/lib/utils/script";
-import { TX_FEE_NOTE_CODE } from "@/lib/constants";
 
 export const rust = ``;
 

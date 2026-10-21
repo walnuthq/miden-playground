@@ -1,4 +1,4 @@
-import { useRouter } from "next/navigation";
+import { Button } from "@workspace/ui/components/button";
 import {
   Card,
   CardContent,
@@ -7,9 +7,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@workspace/ui/components/card";
-import { Button } from "@workspace/ui/components/button";
-import { type NetworkId, networks } from "@/lib/types/network";
+import { useRouter } from "next/navigation";
 import useAppState from "@/hooks/use-app-state";
+import { type NetworkId, networks } from "@/lib/types/network";
 
 const NewSandboxCard = ({ networkId }: { networkId: NetworkId }) => {
   const router = useRouter();

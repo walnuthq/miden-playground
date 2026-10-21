@@ -1,13 +1,13 @@
+import { SimpleAnalytics } from "@simpleanalytics/next";
 import { Geist, Geist_Mono } from "next/font/google";
 import type { ReactNode } from "react";
-import { SimpleAnalytics } from "@simpleanalytics/next";
 // Para's stylesheet ships its own Tailwind preflight, so it must come before
 // globals.css for the app's base rules (e.g. border colors) to win.
 import "@getpara/react-sdk-lite/styles.css";
 import "@miden-sdk/miden-wallet-adapter/styles.css";
 import "@workspace/ui/globals.css";
-import Providers from "@/components/providers";
 import { Toaster } from "@workspace/ui/components/sonner";
+import Providers from "@/components/providers";
 
 const fontSans = Geist({
   subsets: ["latin"],

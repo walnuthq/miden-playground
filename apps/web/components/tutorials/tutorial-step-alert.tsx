@@ -1,8 +1,8 @@
-import type { ReactNode } from "react";
 import { AlertDescription, AlertTitle } from "@workspace/ui/components/alert";
 import { CircleAlert, CircleCheckBig } from "lucide-react";
-import useTutorials from "@/hooks/use-tutorials";
+import type { ReactNode } from "react";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
+import useTutorials from "@/hooks/use-tutorials";
 
 const TutorialStepAlert = ({
   completed,

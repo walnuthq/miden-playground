@@ -1,5 +1,5 @@
-import { Plus } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
+import { Plus } from "lucide-react";
 import useScripts from "@/hooks/use-scripts";
 
 const CreateScriptButton = () => {

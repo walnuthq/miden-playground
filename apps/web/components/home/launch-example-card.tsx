@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { toast } from "sonner";
+import { Button } from "@workspace/ui/components/button";
 import {
   Card,
   CardContent,
@@ -8,10 +7,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@workspace/ui/components/card";
-import { Button } from "@workspace/ui/components/button";
 import { Spinner } from "@workspace/ui/components/spinner";
-import type { Example } from "@/lib/types/example";
+import { useState } from "react";
+import { toast } from "sonner";
 import useExamples from "@/hooks/use-examples";
+import type { Example } from "@/lib/types/example";
 
 const LaunchExampleCard = ({ example }: { example: Example }) => {
   const { launchExample } = useExamples();

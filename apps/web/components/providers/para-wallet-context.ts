@@ -1,6 +1,6 @@
 "use client";
-import { createContext, useContext } from "react";
 import type { MidenClient } from "@miden-sdk/miden-sdk/lazy";
+import { createContext, useContext } from "react";
 
 // Kept free of @miden-sdk/para-react imports: that package imports Para's
 // stylesheet, and any route segment importing it gets its own copy of that

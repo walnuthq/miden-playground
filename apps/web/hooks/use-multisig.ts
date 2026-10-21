@@ -1,28 +1,28 @@
-import { useState } from "react";
 import {
-  Address as WasmAddress,
   AccountId as WasmAccountId,
+  Address as WasmAddress,
 } from "@miden-sdk/miden-sdk/lazy";
+import {
+  type MessageSignerWalletAdapter,
+  useWallet,
+} from "@miden-sdk/miden-wallet-adapter";
 import { useMiden, useSyncState } from "@miden-sdk/react/lazy";
 import {
-  useWallet,
-  type MessageSignerWalletAdapter,
-} from "@miden-sdk/miden-wallet-adapter";
-import {
-  MidenWalletSigner,
   AccountInspector,
+  MidenWalletSigner,
   type Multisig,
   type Proposal,
 } from "@openzeppelin/miden-multisig-client";
+import { useState } from "react";
+import useGlobalContext from "@/components/global-context/hook";
+import useAccounts from "@/hooks/use-accounts";
+import { useMidenWallet } from "@/hooks/use-miden-wallet";
+import useNetwork from "@/hooks/use-network";
+import { GUARDIAN_ENDPOINT_URL } from "@/lib/constants";
+import createMidenClient from "@/lib/miden-client";
+import { initMultisigClient } from "@/lib/multisig-client";
 import type { Account } from "@/lib/types/account";
 import { wasmAccountToAccount } from "@/lib/web-client";
-import { initMultisigClient } from "@/lib/multisig-client";
-import { useMidenWallet } from "@/hooks/use-miden-wallet";
-import { GUARDIAN_ENDPOINT_URL } from "@/lib/constants";
-import useAccounts from "@/hooks/use-accounts";
-import useGlobalContext from "@/components/global-context/hook";
-import useNetwork from "@/hooks/use-network";
-import createMidenClient from "@/lib/miden-client";
 
 const useMultisig = () => {
   const [multisig, setMultisig] = useState<Multisig | null>(null);
@@ -194,7 +194,7 @@ const useMultisig = () => {
     const previousAccount = accounts.find(
       ({ id }) => id === multisig.accountId,
     );
-    if (!previousAccount || !previousAccount.multisig) {
+    if (!previousAccount?.multisig) {
       return;
     }
     const { multisig: previousMultisig } = previousAccount;
@@ -223,7 +223,7 @@ const useMultisig = () => {
     const previousAccount = accounts.find(
       ({ id }) => id === multisig.accountId,
     );
-    if (!previousAccount || !previousAccount.multisig) {
+    if (!previousAccount?.multisig) {
       return;
     }
     const { multisig: previousMultisig } = previousAccount;
@@ -248,7 +248,7 @@ const useMultisig = () => {
     const previousAccount = accounts.find(
       ({ id }) => id === multisig.accountId,
     );
-    if (!previousAccount || !previousAccount.multisig) {
+    if (!previousAccount?.multisig) {
       return;
     }
     const { multisig: previousMultisig } = previousAccount;
@@ -276,7 +276,7 @@ const useMultisig = () => {
     const previousAccount = accounts.find(
       ({ id }) => id === multisig.accountId,
     );
-    if (!previousAccount || !previousAccount.multisig) {
+    if (!previousAccount?.multisig) {
       return;
     }
     const { multisig: previousMultisig } = previousAccount;
@@ -317,7 +317,7 @@ const useMultisig = () => {
     }
     const accountId = WasmAddress.fromBech32(address).accountId();
     const multisig = await loadMultisig(accountId.toString());
-    if (!multisig || !multisig.account) {
+    if (!multisig?.account) {
       throw new Error("Guardian wallet not found on Miden Guardian.");
     }
     return whileSubmitting(async () => {

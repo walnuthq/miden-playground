@@ -1,10 +1,6 @@
 "use client";
-import { Fragment, useState, type Dispatch, type SetStateAction } from "react";
-import { toast } from "sonner";
 import { AccountId as WasmAccountId } from "@miden-sdk/miden-sdk/lazy";
-import { Spinner } from "@workspace/ui/components/spinner";
 import { Button } from "@workspace/ui/components/button";
-import { Input } from "@workspace/ui/components/input";
 import {
   Dialog,
   DialogClose,
@@ -14,17 +10,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@workspace/ui/components/dialog";
+import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
+import { Spinner } from "@workspace/ui/components/spinner";
+import { type Dispatch, Fragment, type SetStateAction, useState } from "react";
+import { toast } from "sonner";
+import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";
+import useNetwork from "@/hooks/use-network";
 import useScripts from "@/hooks/use-scripts";
 import useTransactions from "@/hooks/use-transactions";
-import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";
 import { midenExplorerUrl } from "@/lib/constants";
-import type { ProcedureExport, MidenType } from "@/lib/types/script";
+import type { MidenType, ProcedureExport } from "@/lib/types/script";
 import {
   formatProcedureExportPath,
   midenRawTypeToMidenType,
 } from "@/lib/utils/script";
-import useNetwork from "@/hooks/use-network";
 
 const FeltField = ({ id }: { id: string }) => (
   <div className="grid gap-3 col-span-2">

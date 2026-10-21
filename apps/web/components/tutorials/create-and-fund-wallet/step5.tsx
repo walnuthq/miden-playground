@@ -1,10 +1,10 @@
-import type { TutorialStep } from "@/lib/types/tutorial";
+import Step5Content from "@/components/tutorials/create-and-fund-wallet/step5.mdx";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
-import Step5Content from "@/components/tutorials/create-and-fund-wallet/step5.mdx";
 import useAccounts from "@/hooks/use-accounts";
-import useTransactions from "@/hooks/use-transactions";
 import useNotes from "@/hooks/use-notes";
+import useTransactions from "@/hooks/use-transactions";
+import type { TutorialStep } from "@/lib/types/tutorial";
 
 const useCompleted = () => {
   const { wallets } = useAccounts();

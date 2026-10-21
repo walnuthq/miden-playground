@@ -1,13 +1,13 @@
+import {
+  COUNTER_CONTRACT_GET_COUNT_PROC_HASH,
+  COUNTER_CONTRACT_INCREMENT_COUNT_PROC_HASH,
+} from "@/lib/constants";
 import type { Script } from "@/lib/types/script";
 import {
   defaultProcedureExport,
   defaultScript,
   defaultSignature,
 } from "@/lib/utils/script";
-import {
-  COUNTER_CONTRACT_GET_COUNT_PROC_HASH,
-  COUNTER_CONTRACT_INCREMENT_COUNT_PROC_HASH,
-} from "@/lib/constants";
 
 export const rust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
 #![no_std]

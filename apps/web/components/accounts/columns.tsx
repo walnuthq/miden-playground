@@ -1,23 +1,23 @@
 "use client";
-import { MoreVertical } from "lucide-react";
 import { useMiden } from "@miden-sdk/react/lazy";
 import type { ColumnDef } from "@tanstack/react-table";
-import type { DataTableFeatures } from "@/lib/table";
-import { Button } from "@workspace/ui/components/button";
 import { Badge } from "@workspace/ui/components/badge";
+import { Button } from "@workspace/ui/components/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
-import type { Account } from "@/lib/types/account";
-import useNetwork from "@/hooks/use-network";
-import useTransactions from "@/hooks/use-transactions";
+import { MoreVertical } from "lucide-react";
 import AccountAddress from "@/components/lib/account-address";
 import useAccounts from "@/hooks/use-accounts";
+import useNetwork from "@/hooks/use-network";
+import useTransactions from "@/hooks/use-transactions";
 import useTutorials from "@/hooks/use-tutorials";
 import { midenFaucetAddress } from "@/lib/constants";
+import type { DataTableFeatures } from "@/lib/table";
+import type { Account } from "@/lib/types/account";
 import { clientGetConsumableNotes } from "@/lib/web-client";
 
 const AccountActionsCell = ({ account }: { account: Account }) => {

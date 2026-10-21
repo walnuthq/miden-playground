@@ -1,9 +1,9 @@
-import { Heart, MessagesSquare } from "lucide-react";
 import {
   SidebarMenu,
-  SidebarMenuItem,
   SidebarMenuButton,
+  SidebarMenuItem,
 } from "@workspace/ui/components/sidebar";
+import { Heart, MessagesSquare } from "lucide-react";
 
 const Footer = () => (
   <SidebarMenu>

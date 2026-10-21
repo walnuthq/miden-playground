@@ -1,6 +1,6 @@
-import type { Dependency } from "@/lib/types";
-import { templates, projectTemplateFiles } from "@/lib/templates";
+import { projectTemplateFiles, templates } from "@/lib/templates";
 import { generateCargoToml, generateMidenProjectToml } from "@/lib/toml";
+import type { Dependency } from "@/lib/types";
 
 export const basicWalletDependency: Dependency & {
   rust: string;

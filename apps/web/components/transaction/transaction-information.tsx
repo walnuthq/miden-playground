@@ -1,6 +1,6 @@
-import type { Transaction } from "@/lib/types/transaction";
 import TransactionInformationTable from "@/components/transaction/transaction-information-table";
 import TransactionNoteTable from "@/components/transaction/transaction-note-table";
+import type { Transaction } from "@/lib/types/transaction";
 
 const TransactionInformation = ({
   transaction,

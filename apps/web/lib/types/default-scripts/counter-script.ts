@@ -1,12 +1,12 @@
 import { pick } from "lodash";
+import { COUNTER_SCRIPT_RUN_PROC_HASH } from "@/lib/constants";
+import counterContract from "@/lib/types/default-scripts/counter-contract";
 import type { Script } from "@/lib/types/script";
 import {
-  defaultScript,
   defaultProcedureExport,
+  defaultScript,
   defaultSignature,
 } from "@/lib/utils/script";
-import counterContract from "@/lib/types/default-scripts/counter-contract";
-import { COUNTER_SCRIPT_RUN_PROC_HASH } from "@/lib/constants";
 
 export const rust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
 #![no_std]

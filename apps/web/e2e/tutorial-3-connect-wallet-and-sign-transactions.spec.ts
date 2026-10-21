@@ -3,8 +3,8 @@ import {
   logBrowserErrors,
   nextStep,
   startTutorial,
-  tutorialPanel,
   TRANSACTION_TIMEOUT,
+  tutorialPanel,
 } from "./tutorial";
 
 // Signs with a new Bread Wallet (see ./bread.ts), funded by the tutorial's

@@ -1,5 +1,5 @@
-import { Plus } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
+import { Plus } from "lucide-react";
 import useComponents from "@/hooks/use-components";
 
 const CreateStorageSlotButton = ({ componentId }: { componentId: string }) => {

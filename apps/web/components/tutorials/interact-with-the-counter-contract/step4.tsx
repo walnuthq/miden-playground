@@ -1,12 +1,12 @@
 import { usePathname } from "next/navigation";
-import type { TutorialStep } from "@/lib/types/tutorial";
-import useAccounts from "@/hooks/use-accounts";
+import Step4Content from "@/components/tutorials/interact-with-the-counter-contract/step4.mdx";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
-import Step4Content from "@/components/tutorials/interact-with-the-counter-contract/step4.mdx";
-import { counterContractAddress } from "@/lib/constants";
-import { getIdentifierPart } from "@/lib/utils/account";
+import useAccounts from "@/hooks/use-accounts";
 import useNetwork from "@/hooks/use-network";
+import { counterContractAddress } from "@/lib/constants";
+import type { TutorialStep } from "@/lib/types/tutorial";
+import { getIdentifierPart } from "@/lib/utils/account";
 
 const useCompleted = () => {
   const pathname = usePathname();

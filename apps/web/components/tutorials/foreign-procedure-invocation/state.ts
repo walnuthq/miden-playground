@@ -1,17 +1,17 @@
-import type { State } from "@/lib/types/state";
-import { defaultState } from "@/lib/utils/state";
-import { midenFaucetAccount } from "@/lib/utils/account";
-import defaultScripts from "@/lib/types/default-scripts";
 import defaultComponents from "@/lib/types/default-components";
-import counterMapContractScript from "@/lib/types/default-scripts/counter-map-contract";
+import defaultScripts from "@/lib/types/default-scripts";
 import countReaderScript from "@/lib/types/default-scripts/count-reader";
+import counterMapContractScript from "@/lib/types/default-scripts/counter-map-contract";
+import type { State } from "@/lib/types/state";
 import {
   defaultAccount,
   getIdentifierPart,
   getRoutingParametersPart,
+  midenFaucetAccount,
 } from "@/lib/utils/account";
-import { defaultProcedureExport } from "@/lib/utils/script";
 import { defaultComponent, storageSlotName } from "@/lib/utils/component";
+import { defaultProcedureExport } from "@/lib/utils/script";
+import { defaultState } from "@/lib/utils/state";
 
 const COUNTER_CONTRACT_ID = "0x7240e428d9f88611442761fe8f572b";
 const COUNTER_CONTRACT_ADDRESS =

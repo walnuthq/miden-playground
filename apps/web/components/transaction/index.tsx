@@ -1,7 +1,7 @@
 "use client";
 import { useIsClient } from "usehooks-ts";
-import useTransactions from "@/hooks/use-transactions";
 import TransactionInformation from "@/components/transaction/transaction-information";
+import useTransactions from "@/hooks/use-transactions";
 
 const Transaction = ({ id }: { id: string }) => {
   const isClient = useIsClient();

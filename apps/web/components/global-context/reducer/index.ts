@@ -1,25 +1,25 @@
-import type { State } from "@/lib/types/state";
-import stateReducer, {
-  type StateAction,
-} from "@/components/global-context/reducer/state";
 import accountReducer, {
   type AccountAction,
 } from "@/components/global-context/reducer/account";
-import transactionReducer, {
-  type TransactionAction,
-} from "@/components/global-context/reducer/transaction";
+import componentReducer, {
+  type ComponentAction,
+} from "@/components/global-context/reducer/component";
 import noteReducer, {
   type NoteAction,
 } from "@/components/global-context/reducer/note";
 import scriptReducer, {
   type ScriptAction,
 } from "@/components/global-context/reducer/script";
-import componentReducer, {
-  type ComponentAction,
-} from "@/components/global-context/reducer/component";
+import stateReducer, {
+  type StateAction,
+} from "@/components/global-context/reducer/state";
+import transactionReducer, {
+  type TransactionAction,
+} from "@/components/global-context/reducer/transaction";
 import tutorialReducer, {
   type TutorialAction,
 } from "@/components/global-context/reducer/tutorial";
+import type { State } from "@/lib/types/state";
 
 export type Action =
   | StateAction

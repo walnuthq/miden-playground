@@ -1,14 +1,14 @@
 import {
   Table,
   TableBody,
-  TableHeader,
   TableHead,
+  TableHeader,
   TableRow,
 } from "@workspace/ui/components/table";
-import type { Account } from "@/lib/types/account";
-import type { Script } from "@/lib/types/script";
-import type { Component } from "@/lib/types/component";
 import ProceduresTableRow from "@/components/account/procedures-table-row";
+import type { Account } from "@/lib/types/account";
+import type { Component } from "@/lib/types/component";
+import type { Script } from "@/lib/types/script";
 
 const ProceduresTable = ({
   account,

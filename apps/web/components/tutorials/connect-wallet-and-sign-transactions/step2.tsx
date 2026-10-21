@@ -1,18 +1,18 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import type { TutorialStep } from "@/lib/types/tutorial";
-import useNetwork from "@/hooks/use-network";
-import useNotes from "@/hooks/use-notes";
+import Step2Content from "@/components/tutorials/connect-wallet-and-sign-transactions/step2.mdx";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
-import Step2Content from "@/components/tutorials/connect-wallet-and-sign-transactions/step2.mdx";
 import useAccounts from "@/hooks/use-accounts";
+import useNetwork from "@/hooks/use-network";
+import useNotes from "@/hooks/use-notes";
 import useTutorials from "@/hooks/use-tutorials";
 import {
-  P2ID_NOTE_CODE,
   midenFaucetAccountId,
   midenFaucetFunderAccountId,
+  P2ID_NOTE_CODE,
 } from "@/lib/constants";
+import type { TutorialStep } from "@/lib/types/tutorial";
 import { accountIdFromPrefixSuffix } from "@/lib/utils/account";
 
 const useCompleted = () => {

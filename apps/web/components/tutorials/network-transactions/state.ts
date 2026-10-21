@@ -1,12 +1,12 @@
-import type { State } from "@/lib/types/state";
-import { defaultState } from "@/lib/utils/state";
-import { midenFaucetAccount } from "@/lib/utils/account";
+import defaultComponents from "@/lib/types/default-components";
+import counterContractComponent from "@/lib/types/default-components/counter-contract";
 import defaultScripts from "@/lib/types/default-scripts";
 import counterContractScript from "@/lib/types/default-scripts/counter-contract";
 import counterNoteScript from "@/lib/types/default-scripts/counter-note";
 import counterScriptScript from "@/lib/types/default-scripts/counter-script";
-import defaultComponents from "@/lib/types/default-components";
-import counterContractComponent from "@/lib/types/default-components/counter-contract";
+import type { State } from "@/lib/types/state";
+import { midenFaucetAccount } from "@/lib/utils/account";
+import { defaultState } from "@/lib/utils/state";
 
 const state: State = {
   ...defaultState(),

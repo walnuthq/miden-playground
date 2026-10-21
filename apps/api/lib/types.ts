@@ -1,7 +1,7 @@
 import type {
+  packageStatusEnum,
   packagesTable,
   packageTypeEnum,
-  packageStatusEnum,
 } from "@/db/schema";
 
 export type ScriptExample =

@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import type { TutorialStep } from "@/lib/types/tutorial";
+import Step5Content from "@/components/tutorials/interact-with-the-counter-contract/step5.mdx";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
-import Step5Content from "@/components/tutorials/interact-with-the-counter-contract/step5.mdx";
 import useAccounts from "@/hooks/use-accounts";
-import { counterContractAddress } from "@/lib/constants";
 import useNetwork from "@/hooks/use-network";
+import { counterContractAddress } from "@/lib/constants";
+import type { TutorialStep } from "@/lib/types/tutorial";
 
 const useCompleted = () => {
   const [initialNonce, setInitialNonce] = useState(0);

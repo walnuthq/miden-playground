@@ -1,10 +1,10 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 import {
   logBrowserErrors,
   nextStep,
   startTutorial,
-  tutorialPanel,
   TRANSACTION_TIMEOUT,
+  tutorialPanel,
 } from "./tutorial";
 
 // The counter contract is deployed on testnet and anyone can increment it, so

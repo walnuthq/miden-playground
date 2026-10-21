@@ -1,6 +1,15 @@
-import { useState } from "react";
-import { toast } from "sonner";
-import type { Account } from "@/lib/types/account";
+import type {
+  Proposal,
+  ProposalMetadata,
+} from "@openzeppelin/miden-multisig-client";
+import { Button } from "@workspace/ui/components/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@workspace/ui/components/dropdown-menu";
+import { Spinner } from "@workspace/ui/components/spinner";
 import {
   Table,
   TableBody,
@@ -9,23 +18,14 @@ import {
   TableHeader,
   TableRow,
 } from "@workspace/ui/components/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@workspace/ui/components/dropdown-menu";
-import { Spinner } from "@workspace/ui/components/spinner";
 import { MoreVertical } from "lucide-react";
-import { Button } from "@workspace/ui/components/button";
+import { useState } from "react";
+import { toast } from "sonner";
+import useAccounts from "@/hooks/use-accounts";
 import useMultisig from "@/hooks/use-multisig";
-import type {
-  Proposal,
-  ProposalMetadata,
-} from "@openzeppelin/miden-multisig-client";
+import type { Account } from "@/lib/types/account";
 import { formatDigest } from "@/lib/utils";
 import { formatAmount } from "@/lib/utils/asset";
-import useAccounts from "@/hooks/use-accounts";
 
 const ProposalActionsCell = ({
   account,
@@ -126,7 +126,6 @@ const AccountMultisigProposalsTable = ({ account }: { account: Account }) => {
         const recipient = wallets.find(({ id }) => id === metadata.recipientId);
         return `Send ${amount} ${faucet?.symbol} to ${recipient?.name}`;
       }
-      case "custom":
       default: {
         return "Custom";
       }

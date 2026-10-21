@@ -1,7 +1,4 @@
 "use client";
-import { Moon, Sun } from "lucide-react";
-import { useTheme } from "next-themes";
-import { useIsClient } from "usehooks-ts";
 import { Button } from "@workspace/ui/components/button";
 import {
   DropdownMenu,
@@ -9,6 +6,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
+import { Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
+import { useIsClient } from "usehooks-ts";
 
 const ModeToggle = () => {
   const isClient = useIsClient();

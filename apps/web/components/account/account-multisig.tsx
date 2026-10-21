@@ -1,6 +1,7 @@
-import type { Account } from "@/lib/types/account";
 import AccountMultisigInformationTable from "@/components/account/account-multisig-information-table";
 import AccountMultisigProposalsTable from "@/components/account/account-multisig-proposals-table";
+import type { Account } from "@/lib/types/account";
+
 // import { Button } from "@workspace/ui/components/button";
 // import useMultisig from "@/hooks/use-multisig";
 // import useTransactions from "@/hooks/use-transactions";

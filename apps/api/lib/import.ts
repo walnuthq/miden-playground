@@ -1,8 +1,8 @@
-import { groupBy } from "lodash";
-import { compilePackage, createPackage } from "@/lib/utils";
-import { parseMidenProjectToml } from "@/lib/toml";
+import { groupBy, mapValues, omit } from "lodash";
 import { readTarGz, type TarFile } from "@/lib/tar";
+import { parseMidenProjectToml } from "@/lib/toml";
 import type { CompiledPackage, PackageSource } from "@/lib/types";
+import { compilePackage, createPackage } from "@/lib/utils";
 
 export const importScriptsFromPackageSources = async (
   packageSources: Record<string, PackageSource>,
@@ -22,16 +22,10 @@ export const importScriptsFromPackageSources = async (
       });
       return {
         package: { id: packageId, name, type, rust },
-        dependencies: Object.keys(dependencies).reduce<
-          Record<string, { path: string }>
-        >((previousValue, currentValue) => {
-          return ["miden-core", "miden-protocol"].includes(currentValue)
-            ? previousValue
-            : {
-                ...previousValue,
-                [currentValue]: dependencies[currentValue] as { path: string },
-              };
-        }, {}),
+        dependencies: omit(dependencies, [
+          "miden-core",
+          "miden-protocol",
+        ]) as Record<string, { path: string }>,
       };
     }),
   );
@@ -103,32 +97,21 @@ const filesToPackageSources = (files: TarFile[]) => {
   const packagesSourcesFilesByPackage = groupBy(files, ({ path }) =>
     path.replace("/miden-project.toml", "").replace("/src/lib.rs", ""),
   );
-  return Object.keys(packagesSourcesFilesByPackage).reduce<
-    Record<string, PackageSource>
-  >((previousValue, currentValue) => {
-    const packagesSourcesFiles = packagesSourcesFilesByPackage[currentValue];
-    if (!packagesSourcesFiles) {
-      return previousValue;
-    }
-    const packageSource = packagesSourcesFiles.reduce<PackageSource>(
-      (previousValue, { path, content }) => ({
-        ...previousValue,
-        midenProjectToml:
-          fileName(path) === "miden-project.toml"
-            ? content
-            : previousValue.midenProjectToml,
-        rust:
-          fileName(path) === "lib.rs"
-            ? content.replaceAll(
-                "let key = Word::new([felt!(0), felt!(0), felt!(0), felt!(1)]);",
-                "let key = Word::new([felt!(1), felt!(0), felt!(0), felt!(0)]);",
-              )
-            : previousValue.rust,
-      }),
-      { midenProjectToml: "", rust: "" },
-    );
-    return { ...previousValue, [currentValue]: packageSource };
-  }, {});
+  return mapValues(
+    packagesSourcesFilesByPackage,
+    (packagesSourcesFiles): PackageSource => {
+      const content = (name: string) =>
+        packagesSourcesFiles.findLast(({ path }) => fileName(path) === name)
+          ?.content ?? "";
+      return {
+        midenProjectToml: content("miden-project.toml"),
+        rust: content("lib.rs").replaceAll(
+          "let key = Word::new([felt!(0), felt!(0), felt!(0), felt!(1)]);",
+          "let key = Word::new([felt!(1), felt!(0), felt!(0), felt!(0)]);",
+        ),
+      };
+    },
+  );
 };
 
 export const importScriptsFromGithubRepo = async ({
@@ -156,7 +139,9 @@ export const importScriptsFromGithubRepo = async ({
     );
   }
   // Archive paths start with a `<repo>-<ref>/` directory.
-  const projectDirPrefix = projectDir ? `${projectDir.replace(/\/$/, "")}/` : "";
+  const projectDirPrefix = projectDir
+    ? `${projectDir.replace(/\/$/, "")}/`
+    : "";
   const files = await readTarGz(response.body, (path) => {
     const repoPath = path.slice(path.indexOf("/") + 1);
     return (

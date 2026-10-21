@@ -1,4 +1,10 @@
-import Link from "next/link";
+import { Button } from "@workspace/ui/components/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@workspace/ui/components/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -7,18 +13,12 @@ import {
   TableHeader,
   TableRow,
 } from "@workspace/ui/components/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@workspace/ui/components/dropdown-menu";
 import { MoreVertical } from "lucide-react";
-import { Button } from "@workspace/ui/components/button";
-import { scriptTypes, type Script } from "@/lib/types/script";
-import { defaultDependencies } from "@/lib/utils/script";
+import Link from "next/link";
 import useScripts from "@/hooks/use-scripts";
+import { type Script, scriptTypes } from "@/lib/types/script";
 import { formatDigest } from "@/lib/utils";
+import { defaultDependencies } from "@/lib/utils/script";
 
 const DependencyActionsCell = ({
   script,
