@@ -83,7 +83,9 @@ const SandboxEnvironments = () => (
 
 const Home = () => (
   <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-    <div className="bg-[url(/img/miden-playground-hero-bg.png)] bg-center flex items-end justify-center h-48">
+    {/* The hero artwork is transparent and drawn for a white backdrop, so it
+    stays white in dark mode instead of following the theme. */}
+    <div className="bg-white bg-[url(/img/miden-playground-hero-bg.png)] bg-center flex items-end justify-center h-48">
       <Image
         className="-mb-px"
         src="/img/miden-playground-hero-text.svg"
