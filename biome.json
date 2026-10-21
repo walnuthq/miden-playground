@@ -23,10 +23,7 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "preset": "recommended",
-      "style": {
-        "noNonNullAssertion": "off"
-      }
+      "preset": "recommended"
     }
   },
   "assist": {
@@ -48,6 +45,16 @@
     }
   },
   "overrides": [
+    {
+      "includes": ["apps/web/e2e/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noNonNullAssertion": "off"
+          }
+        }
+      }
+    },
     {
       "includes": ["**/*.jsonc"],
       "json": {

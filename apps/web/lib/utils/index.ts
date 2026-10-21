@@ -59,3 +59,11 @@ export const kebabCase = (str: string) =>
     .replace(/-+/g, "-")
     .toLowerCase()
     .replace(/^-|-$/g, "");
+
+export const formValue = (formData: FormData, name: string) => {
+  const value = formData.get(name);
+  if (value === null) {
+    throw new Error(`Missing form field "${name}".`);
+  }
+  return value.toString();
+};

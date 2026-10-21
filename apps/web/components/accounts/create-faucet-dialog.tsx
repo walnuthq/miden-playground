@@ -21,6 +21,7 @@ import {
   FUNGIBLE_FAUCET_DEFAULT_DECIMALS,
   FUNGIBLE_FAUCET_DEFAULT_MAX_SUPPLY,
 } from "@/lib/constants";
+import { formValue } from "@/lib/utils";
 import { formatAmount, parseAmount } from "@/lib/utils/asset";
 
 const CreateFaucetDialog = () => {
@@ -59,11 +60,11 @@ const CreateFaucetDialog = () => {
             const formData = new FormData(event.currentTarget);
             setLoading(true);
             const faucet = await newFaucet({
-              name: formData.get("name")!.toString(),
+              name: formValue(formData, "name"),
               storageMode: formData.getAll("is-public").includes("on")
                 ? "public"
                 : "private",
-              tokenSymbol: formData.get("token-symbol")!.toString(),
+              tokenSymbol: formValue(formData, "token-symbol"),
               decimals: Number(decimals),
               maxSupply: parseAmount(
                 formData.get("max-supply")?.toString() ?? "0",

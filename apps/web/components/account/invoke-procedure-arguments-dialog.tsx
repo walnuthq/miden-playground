@@ -21,6 +21,7 @@ import useScripts from "@/hooks/use-scripts";
 import useTransactions from "@/hooks/use-transactions";
 import { midenExplorerUrl } from "@/lib/constants";
 import type { MidenType, ProcedureExport } from "@/lib/types/script";
+import { formValue } from "@/lib/utils";
 import {
   formatProcedureExportPath,
   midenRawTypeToMidenType,
@@ -211,7 +212,7 @@ const InvokeProcedureArgumentsDialog = () => {
                   return {
                     name,
                     type,
-                    value: formData.get(name)!.toString(),
+                    value: formValue(formData, name),
                   };
                 }
               }

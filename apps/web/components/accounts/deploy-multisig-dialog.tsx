@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import AccountAddress from "@/components/lib/account-address";
 import useAccounts from "@/hooks/use-accounts";
 import useMultisig from "@/hooks/use-multisig";
+import { formValue } from "@/lib/utils";
 
 const DeployMultisigDialog = () => {
   const { createMultisig } = useMultisig();
@@ -54,7 +55,7 @@ const DeployMultisigDialog = () => {
             setLoading(true);
             try {
               const account = await createMultisig({
-                name: formData.get("name")!.toString(),
+                name: formValue(formData, "name"),
                 threshold: 1, //Number(formData.get("threshold")!.toString()),
               });
               toast(`${account?.name} has been deployed.`, {

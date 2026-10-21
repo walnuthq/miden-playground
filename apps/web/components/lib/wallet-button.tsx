@@ -79,10 +79,11 @@ const SelectWalletButton = ({ signerNames }: { signerNames: string[] }) => {
     }
     multiSigner?.connectSigner(name).catch(console.error);
   };
+  const [onlySignerName] = signerNames.length === 1 ? signerNames : [];
   return (
     <>
-      {signerNames.length === 1 ? (
-        <Button variant="outline" onClick={() => selectSigner(signerNames[0]!)}>
+      {onlySignerName ? (
+        <Button variant="outline" onClick={() => selectSigner(onlySignerName)}>
           Select Wallet
         </Button>
       ) : (

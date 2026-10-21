@@ -25,15 +25,10 @@ const procedureSignature = ({
   result += ")";
   if (results.length > 0) {
     result += ` -> `;
-    if (results.length === 1) {
-      result += formatProcedureExportResultType(results[0]!);
-    } else {
-      result += "(";
-      result += results
-        .map((result) => formatProcedureExportResultType(result))
-        .join(", ");
-      result += ")";
-    }
+    const resultTypes = results
+      .map((result) => formatProcedureExportResultType(result))
+      .join(", ");
+    result += results.length === 1 ? resultTypes : `(${resultTypes})`;
   }
   return result;
 };
