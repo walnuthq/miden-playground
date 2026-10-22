@@ -11,6 +11,9 @@
       "**",
       "!**/cloudflare-env.d.ts",
       "!pnpm-lock.yaml",
+      "!skills-lock.json",
+      "!.agents",
+      "!.claude/skills",
       "!packages/ui/src/components",
       "!**/public"
     ]

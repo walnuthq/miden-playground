@@ -1,0 +1,86 @@
+{
+  "version": 1,
+  "skills": {
+    "agent-browser": {
+      "source": "vercel-labs/agent-browser",
+      "sourceType": "github",
+      "skillPath": "skills/agent-browser/SKILL.md",
+      "computedHash": "ecc7641aea05f85ca3b11e7759d32aaf52fe05946ab4b63739c7bf78a41237a2"
+    },
+    "chain-anchored-execution": {
+      "source": "@miden-sdk/miden-sdk",
+      "sourceType": "node_modules",
+      "skillPath": "skills/chain-anchored-execution/SKILL.md",
+      "version": "0.17.6",
+      "computedHash": "551833bab05fbf80d0f20b096e90b320736288c684ffe23b77418712b69246fe"
+    },
+    "frontend-pitfalls": {
+      "source": "@miden-sdk/miden-sdk",
+      "sourceType": "node_modules",
+      "skillPath": "skills/frontend-pitfalls/SKILL.md",
+      "version": "0.17.6",
+      "computedHash": "5e1ffd1ed92aed138f77ca632f11a0a93ffd68bb3f5d9a02b28ee80670df3230"
+    },
+    "frontend-source-guide": {
+      "source": "@miden-sdk/miden-sdk",
+      "sourceType": "node_modules",
+      "skillPath": "skills/frontend-source-guide/SKILL.md",
+      "version": "0.17.6",
+      "computedHash": "426c2f69c6bfbe893842d0aa42e9bdde747ed7ba9d5952f12049a7559ae4c3f4"
+    },
+    "migrate-radix-to-base": {
+      "source": "shadcn/ui",
+      "sourceType": "github",
+      "skillPath": "skills/migrate-radix-to-base/SKILL.md",
+      "computedHash": "e1f2030ee5059be3dff0812ca0e4b995ee9fa3132176f049ebe6c90346a6755e"
+    },
+    "observability": {
+      "source": "@miden-sdk/miden-sdk",
+      "sourceType": "node_modules",
+      "skillPath": "skills/observability/SKILL.md",
+      "version": "0.17.6",
+      "computedHash": "9416b5fc63319e5d3b4cf242ac383c440b60cdb6bc68ffa93814e1bc01863dd6"
+    },
+    "para-signer": {
+      "source": "@miden-sdk/para",
+      "sourceType": "node_modules",
+      "skillPath": "skills/para-signer/SKILL.md",
+      "version": "0.17.6",
+      "computedHash": "d58e95d6f9075aa61f2bfdc434f37042844cf5c27817a375a29130236f653917"
+    },
+    "react-sdk-patterns": {
+      "source": "@miden-sdk/react",
+      "sourceType": "node_modules",
+      "skillPath": "skills/react-sdk-patterns/SKILL.md",
+      "version": "0.17.6",
+      "computedHash": "b437efe7dc87e934dc89a36e4028ae493c84ede37b061c174e6a7292bb3a7e29"
+    },
+    "shadcn": {
+      "source": "shadcn/ui",
+      "sourceType": "github",
+      "skillPath": "skills/shadcn/SKILL.md",
+      "computedHash": "b864a958765563321f485a96f4d59c0bb6539f4286ab6d8b8b66895b7ebd302d"
+    },
+    "signer-integration": {
+      "source": "@miden-sdk/miden-sdk",
+      "sourceType": "node_modules",
+      "skillPath": "skills/signer-integration/SKILL.md",
+      "version": "0.17.6",
+      "computedHash": "bfbfc7e3b2bfadb26ea8451691e13b7237fa70334e67e26e789e4fa9cf583580"
+    },
+    "testing-patterns": {
+      "source": "@miden-sdk/react",
+      "sourceType": "node_modules",
+      "skillPath": "skills/testing-patterns/SKILL.md",
+      "version": "0.17.6",
+      "computedHash": "7d100aed9004a72438f0c1c82429073cfbb03b5b1cf6c3648b4b963b9a5e1fc2"
+    },
+    "web-client-usage": {
+      "source": "@miden-sdk/miden-sdk",
+      "sourceType": "node_modules",
+      "skillPath": "skills/web-client-usage/SKILL.md",
+      "version": "0.17.6",
+      "computedHash": "6521bcd1ec2c7714a9f5d4c67ddb0172143e197e4c21f100ae7bbe7b408339f4"
+    }
+  }
+}
