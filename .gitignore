@@ -39,12 +39,10 @@ target/
 keystore/
 store.sqlite3
 
-# Agents
-.agents
-.claude
+# Agents: skills are committed (see CLAUDE.md), personal settings aren't.
+**/.claude/settings.local.json
 docs/agents
 AGENTS.md
-skills-lock.json
 
 # Debug
 npm-debug.log*
