@@ -6,17 +6,17 @@ import {
 } from "@workspace/ui/components/resizable";
 import { useIsMobile } from "@workspace/ui/hooks/use-mobile";
 import { type ReactNode, useEffect, useRef } from "react";
-import type { ImperativePanelHandle } from "react-resizable-panels";
+import type { PanelImperativeHandle } from "react-resizable-panels";
 import { useIsClient } from "usehooks-ts";
 import TutorialStep from "@/components/tutorials/tutorial-step";
 import useTutorials from "@/hooks/use-tutorials";
 
 const InnerTutorialLayout = ({ children }: { children: ReactNode }) => {
-  const tutorialRef = useRef<ImperativePanelHandle | null>(null);
+  const tutorialRef = useRef<PanelImperativeHandle | null>(null);
   const { tutorial, tutorialOpen } = useTutorials();
   const isMobile = useIsMobile();
   useEffect(() => {
-    tutorialRef?.current?.resize(tutorialOpen ? 33 : 0);
+    tutorialRef?.current?.resize(tutorialOpen ? "33%" : "0%");
   }, [tutorialOpen]);
   return isMobile ? (
     <>
@@ -24,17 +24,16 @@ const InnerTutorialLayout = ({ children }: { children: ReactNode }) => {
       {tutorial && <TutorialStep tutorial={tutorial} />}
     </>
   ) : (
-    <ResizablePanelGroup direction="horizontal">
-      <ResizablePanel id="app" order={1} defaultSize={tutorialOpen ? 67 : 100}>
+    <ResizablePanelGroup orientation="horizontal">
+      <ResizablePanel id="app" defaultSize={tutorialOpen ? "67%" : "100%"}>
         {children}
       </ResizablePanel>
       <ResizableHandle withHandle className="bg-transparent" />
       <ResizablePanel
         id="tutorial"
-        ref={tutorialRef}
-        order={2}
-        defaultSize={tutorialOpen ? 33 : 0}
-        className="bg-background border z-60 shadow-2xl"
+        panelRef={tutorialRef}
+        defaultSize={tutorialOpen ? "33%" : "0%"}
+        className="bg-background border z-10 shadow-2xl"
       >
         {tutorial && <TutorialStep tutorial={tutorial} />}
       </ResizablePanel>
