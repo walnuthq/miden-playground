@@ -239,6 +239,7 @@ export const test = base.extend<{ breadProfile: BreadProfile; bread: Bread }>({
         exact: typeof button === "string",
       });
       await expect(approveButton).toBeEnabled({ timeout });
+      // biome-ignore lint/performance/useDomNodeTextContent: rendered text keeps line breaks between fields
       const text = await popup.locator("body").innerText();
       await approveButton.click();
       // Bread closes its popup once the request is handled, but headless

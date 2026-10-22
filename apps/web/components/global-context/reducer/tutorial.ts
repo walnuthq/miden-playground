@@ -24,10 +24,7 @@ const reducer = (state: State, action: TutorialAction): State => {
       return {
         ...state,
         tutorialStep: nextTutorialStep,
-        tutorialMaxStep:
-          nextTutorialStep > state.tutorialMaxStep
-            ? nextTutorialStep
-            : state.tutorialMaxStep,
+        tutorialMaxStep: Math.max(nextTutorialStep, state.tutorialMaxStep),
       };
     }
     case "SET_TUTORIAL_STEP": {

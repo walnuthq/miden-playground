@@ -6,7 +6,6 @@ GitHub Pages at **https://walnuthq.github.io/miden-playground/**.
 ## How it works
 
 Two phases, both at build time:
-
 1. `scripts/probe.ts` runs every check and writes the results to
    `public/status.json`.
 2. Vite builds the React app, copying that snapshot into `dist/` alongside
@@ -18,12 +17,12 @@ rather than the services.
 
 ## The checks
 
-| Service | Check                | Asserts                                                                                |
-| ------- | -------------------- | -------------------------------------------------------------------------------------- |
-| web     | `page loads`         | a document titled "Miden Playground" comes back                                        |
+| Service | Check                | Asserts                                                                                           |
+| ------- | -------------------- | ------------------------------------------------------------------------------------------------- |
+| web     | `page loads`         | a document titled "Miden Playground" comes back                                                   |
 | web     | `playground renders` | hydrated sidebar navigation **and** the home page's `Sandbox environments` heading are in the DOM |
-| web     | `no client errors`   | no uncaught exceptions, no failed same-origin requests                                 |
-| api     | `GET /`              | 200 + JSON — the card shows the payload in full                                        |
+| web     | `no client errors`   | no uncaught exceptions, no failed same-origin requests                                            |
+| api     | `GET /`              | 200 + JSON — the card shows the payload in full                                                   |
 
 ### Why the web checks need a browser
 
@@ -52,7 +51,6 @@ downloaded, executed, hydrated and painted. It does **not** wait for the testnet
 sync badge, so a Miden testnet outage will not turn the card red.
 
 Two details that are easy to get wrong and hard to debug:
-
 - **The viewport must be desktop-sized.** At Chrome's default 800×600
   `useIsMobile` swaps the sidebar for a closed `Sheet` and the nav links are
   absent from the DOM entirely.
@@ -164,9 +162,9 @@ fields forward:
       "health": "unhealthy",
       "previousHealth": "degraded",
       "since": "…",
-      "episodeSince": "…",
-    },
-  ],
+      "episodeSince": "…"
+    }
+  ]
 }
 ```
 
@@ -280,7 +278,6 @@ re-run on demand from **Actions → Deploy status page → Run workflow**.
 ### Configuring GitHub Pages
 
 One-time repository setup, all under **Settings**:
-
 1. **Pages → Build and deployment → Source: `GitHub Actions`.** Not "Deploy from
    a branch" — the workflow uploads an artifact, and under the branch source it
    would never appear.
@@ -315,7 +312,6 @@ override from the header — unlike `web`, which pins itself to light with
 `localStorage`.
 
 Two things are worth knowing before touching it:
-
 - **The no-flash script lives in `index.html`, not in React.** `next-themes`
   renders an equivalent script, but it arrives through
   `dangerouslySetInnerHTML` and browsers never execute scripts inserted that

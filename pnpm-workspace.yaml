@@ -23,6 +23,17 @@ minimumReleaseAgeExclude:
   - "@miden-sdk/node-darwin-x64@0.17.6"
   - "@miden-sdk/node-linux-x64-gnu@0.17.6"
   - "@miden-sdk/node-linux-x64-musl@0.17.6"
+  - "@biomejs/biome@2.6.2"
+  - "@biomejs/cli-android-arm64@2.6.2"
+  - "@biomejs/cli-android-x64@2.6.2"
+  - "@biomejs/cli-darwin-arm64@2.6.2"
+  - "@biomejs/cli-darwin-x64@2.6.2"
+  - "@biomejs/cli-linux-arm64-musl@2.6.2"
+  - "@biomejs/cli-linux-arm64@2.6.2"
+  - "@biomejs/cli-linux-x64-musl@2.6.2"
+  - "@biomejs/cli-linux-x64@2.6.2"
+  - "@biomejs/cli-win32-arm64@2.6.2"
+  - "@biomejs/cli-win32-x64@2.6.2"
 
 allowBuilds:
   esbuild: true

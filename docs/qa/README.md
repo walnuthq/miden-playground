@@ -76,7 +76,6 @@ Retry at least once before reporting a failure as a Playground bug, and compare 
 ## 5. Automated tests (Playwright)
 
 `apps/web/e2e` holds Playwright tests that replay tutorials against a live Playground on testnet (`pnpm --filter miden-playground-web test:e2e`, `PLAYWRIGHT_BASE_URL` to target a deployment, local dev by default). Each test runs in a fresh browser context, so it's a brand-new user. All 12 tutorials are covered. Tutorials 11 and 12 need `apps/api` running locally (7 and 8 compile through mock Next.js routes), and tutorial 12 unzips the exported script with the system's `unzip`.
-
 - The examples (`example-*.spec.ts`) are covered too: they launch Counter Contract and Miden Bank from the home page, which imports and compiles their contracts from GitHub through `apps/api` (run it locally), then deploy the example account. The bank test makes a deposit from a new Bread Wallet and has the bank consume it.
 - Helpers are in `apps/web/e2e/tutorial.ts`: `startTutorial`, `nextStep` (waits for Next step to unlock), and `tutorialPanel(page).openLink`, which waits until a step link's target is known (links built from synced state point to `.../undefined` until the next sync).
 - Scope locators to the tutorial panel (`#tutorial`): success toasts repeat names like "Wallet A".

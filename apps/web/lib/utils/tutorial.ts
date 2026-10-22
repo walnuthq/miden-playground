@@ -1,9 +1,11 @@
 import type { Tutorial, TutorialStep } from "@/lib/types/tutorial";
 import { defaultState } from "@/lib/utils/state";
 
+const EmptyContent = () => null;
+
 export const defaultTutorialStep = (): TutorialStep => ({
   title: "",
-  Content: () => null,
+  Content: EmptyContent,
 });
 
 export const defaultTutorial = (): Tutorial => ({
