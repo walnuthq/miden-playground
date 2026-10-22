@@ -52,20 +52,7 @@ overrides:
   "@miden-sdk/miden-sdk": "0.17.6"
   "@miden-sdk/react": "0.17.6"
 
-# The published wallet-adapter packages import @miden-sdk/miden-sdk without
-# declaring it (they rely on a hoisted install). Declare it explicitly so it
-# resolves under pnpm's isolated store; the override above points it at the
-# local build.
 packageExtensions:
-  "@miden-sdk/miden-wallet-adapter-base":
-    dependencies:
-      "@miden-sdk/miden-sdk": "0.17.6"
-  "@miden-sdk/miden-wallet-adapter-miden":
-    dependencies:
-      "@miden-sdk/miden-sdk": "0.17.6"
-  "@miden-sdk/miden-wallet-adapter-react":
-    dependencies:
-      "@miden-sdk/miden-sdk": "0.17.6"
   # @next/mdx imports `next` types without declaring it, so it would pick up
   # whichever hoisted copy of next pnpm chose. Declaring the peer resolves it to
   # the importing app's own next.

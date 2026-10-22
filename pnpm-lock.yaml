@@ -166,7 +166,7 @@ overrides:
   '@miden-sdk/miden-sdk': 0.17.6
   '@miden-sdk/react': 0.17.6
 
-packageExtensionsChecksum: sha256-arfmA0+VM8QYyOu4MVYZgHQ3XDaUJind97hwe6f09Jk=
+packageExtensionsChecksum: sha256-GGg76Cfm9chEzeWEeOKMkdR2rxS8cCbBDdisGW8b+Ug=
 
 importers:
 
@@ -2313,6 +2313,7 @@ packages:
   '@opentelemetry/sdk-trace-web@2.9.0':
     resolution: {integrity: sha512-LS4XlzOK3e6YYdt84m15AmRR04121rKipmifi4XFZToH1h75f7F2bzHLbB1NMgIEYJ0jSKYm4VsK5mws/5kfTQ==}
     engines: {node: ^18.19.0 || >=20.6.0}
+    deprecated: Use @opentelemetry/sdk-trace package
     peerDependencies:
       '@opentelemetry/api': '>=1.0.0 <1.10.0'
 
