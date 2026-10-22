@@ -1,6 +1,12 @@
 import type { Store } from "@/lib/types/store";
 import { defaultStore } from "@/lib/utils/store";
 
+// Snapshot of the tutorial accounts taken at block 456132. Wallet A and
+// Wallet B are shared by every Playground user, so a store starting from the
+// genesis block makes each new client sync every note ever sent to them (2040
+// when this was taken), which freezes the page. Starting from a recent block
+// skips that history. Refresh this snapshot when the first sync of tutorial 2
+// gets slow again.
 const store: Store = {
   ...defaultStore("mtst"),
   accountCode: [
@@ -354,21 +360,28 @@ const store: Store = {
       vaultKey:
         "0x00000000000000000000000000000000113664ae4d228274310a5fe7ffcabd4c",
       asset:
-        "0x9926000000000000000000000000000000000000000000000000000000000000",
+        "0x0706950000000000000000000000000000000000000000000000000000000000",
+    },
+    {
+      accountId: "0xafaf4cb2ab65621128c868fc5e4d94",
+      vaultKey:
+        "0x00000000000000000000000000000000115a7d34a54d3278510a04b91c958b19",
+      asset:
+        "0x60f2beb11e000000000000000000000000000000000000000000000000000000",
     },
     {
       accountId: "0xc4266cf766bb02910d19cdb8a215a3",
       vaultKey:
         "0x00000000000000000000000000000000113664ae4d228274310a5fe7ffcabd4c",
       asset:
-        "0x2226000000000000000000000000000000000000000000000000000000000000",
+        "0xd4f4940000000000000000000000000000000000000000000000000000000000",
     },
     {
       accountId: "0xc4266cf766bb02910d19cdb8a215a3",
       vaultKey:
         "0x00000000000000000000000000000000115a7d34a54d3278510a04b91c958b19",
       asset:
-        "0x00008a5d78456301000000000000000000000000000000000000000000000000",
+        "0x209ed01d59456301000000000000000000000000000000000000000000000000",
     },
   ],
   accountAuth: [
@@ -431,11 +444,11 @@ const store: Store = {
       storageRoot:
         "0xe67facdca05e117227290cab9122dde6fa0834a3856c0d0b1de3eae9c936c119",
       vaultRoot:
-        "0xf147fff63fce38b8f2d403bbfd814041449f7da68d23f5011a415213b41ba6f5",
-      nonce: "1",
+        "0x3135524e38611192e4bca6fd4002075a41cf59e5d09321b8bd3b75ecaa9ef53f",
+      nonce: "2047",
       committed: true,
       accountCommitment:
-        "0x2c5393b9f4dc621ea05c5849f0e016755c9532345e947c9492789cf4ed1ce622",
+        "0xcb42e2a1597f1feffd327c7e35fa43796151b74d28509ca251c232f59e48ac43",
       locked: false,
       watched: false,
     },
@@ -446,11 +459,11 @@ const store: Store = {
       storageRoot:
         "0xf7f26ecdb070bc2549779379a2da6f3cdd268e77c95d6099456ec75f10fee68b",
       vaultRoot:
-        "0x1c22a202d3a7da793b01550df7c075a04384aeebe894da7499b0a004dac63d48",
-      nonce: "2",
+        "0x4a384afa27255462a9dc09cd6d13ccef478ee6a8aadbac5b8d0eb0998e119403",
+      nonce: "2084",
       committed: true,
       accountCommitment:
-        "0x90d804e93f3ae6776fab0051b1dad5789e62c2657c6de072008de14f39222283",
+        "0x62784992c0965c2cd868b17c99062ea33982384f09caeb90eb9374230d1a8969",
       locked: false,
       watched: false,
     },
@@ -458,15 +471,52 @@ const store: Store = {
   addresses: [
     {
       id: "0x198b951cb9040a5178324da5347d5a",
-      address: { __type: "Uint8Array", data: "6BmLlRy5BApReDJNpTR9WgA=" },
+      address: {
+        __type: "Uint8Array",
+        data: "6BmLlRy5BApReDJNpTR9WgA=",
+      },
     },
     {
       id: "0xafaf4cb2ab65621128c868fc5e4d94",
-      address: { __type: "Uint8Array", data: "6K+vTLKrZWIRKMho/F5NlAA=" },
+      address: {
+        __type: "Uint8Array",
+        data: "6K+vTLKrZWIRKMho/F5NlAA=",
+      },
     },
     {
       id: "0xc4266cf766bb02910d19cdb8a215a3",
-      address: { __type: "Uint8Array", data: "6MQmbPdmuwKRDRnNuKIVowA=" },
+      address: {
+        __type: "Uint8Array",
+        data: "6MQmbPdmuwKRDRnNuKIVowA=",
+      },
+    },
+  ],
+  blockchainCheckpoint: [
+    {
+      id: 1,
+      blockNum: 456132,
+      partialBlockchainPeaks: {
+        __type: "Uint8Array",
+        data: "CiIKIBXzxa8rTPV73HAr2UpNrC+FjSrWWMl0uhMAZk44Srn6CiIKIEmtWIHs6Im7TI1BdvWE6yGEGHqkIK08ISPtqLSaUq1nCiIKIKjfblvGZlGgDLuTcwJVOtZ1BwVTMWcw4kay/+V0vwsyCiIKIGeNd+uThcJ/eDI4ajougXttL14zi4qiiNNVCEULA81jCiIKINQ0sZn7Vq0fAJdVgNBEXMwZdOedUGZtCr0UlEI9UJ5cCiIKIGiamWqoOjTvllD5ctpWvzK1NnxgZVg0T9VV+Z2Ue7VQCiIKIDzgDkEqLoVLEmChHcnaLAhNU+8jBLbxO0+pUBPj96w5CiIKIBmmbsn6jxMAAEU9GEHX4DgPIcDKtExoAuJcB8GBniyBCiIKIANcv17/pwKWEuHRNCDKx5hjHFJJSps/IAVU4UWDtZrBCiIKIHYYagz2+5Bd+66GtkPvg+jz8jAt8U9P223y13/QHKp0CiIKILeSQQ1Q76h2BzmzxdhbUhCjpvjhu0y7hNOpzefJR5TM",
+      },
+    },
+  ],
+  blockHeaders: [
+    {
+      blockNum: 0,
+      header: {
+        __type: "Uint8Array",
+        data: "CAEVAZrDahoAIiIKIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKiIKIGiiazpzf2dLPa8g5qfkgCIk7sKuzxeql8hKqgpWYMJLMiIKIJO6yLz5JgBK+7ULtW6IHLtWs/Q4tbpsCYAjFni99JyBOiIKIC0qRXM7YSs3DGeDfJ6SJiMW1++ITQKmJEGP7iYiA9qaQiIKIKnb1H8kW9+42yEEKLi4s+X26JrjL/M13gLnswACwlI6SiIKIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAUkwKIwohAxxqsUO+9UEHkFicOLdV1Wej3KTsJ7kZJcYe9YPOeXLDCiMKIQO2VFQePH+0miFE9cpHLS3GE1+h7IJb3pbb4cNtg9MVcxACWgUNBwAAAGIiCiDPiNZ6QGC3/jdzkpAJ42vp6cGPsXtsxgFArjqQAH8yFw==",
+      },
+      hasClientNotes: "false",
+    },
+    {
+      blockNum: 456132,
+      header: {
+        __type: "Uint8Array",
+        data: "CAEVU/fZahoFDcT1BgAiIgog7zhI2e/L52wyqq+sh9QIQ6s1SQyjip6MA2475YpKczcqIgoghJifpxNGmRNmzVJrUZmr2TPhhsfmMUEW+HSdxvJfHykyIgogObb2Gbv4R6xxq/B88zbaol4d0Vligd3ttyOdJYI7mTY6Igogfz6Np98HUWKgdwyQZ4rgo02LNYLPCZRCaXzGmXm40EpCIgogZZAHBT4AMsJ+b1GpUuqGGzSDS2B58slfDfHmY04LGONKIgog2eKOTJ+0f6yT76L1wj89qLDHoe050n7OEQIy/W+LzjNSTAojCiEDHGqxQ771QQeQWJw4t1XVZ6PcpOwnuRklxh71g855csMKIwohA7ZUVB48f7SaIUT1ykctLcYTX6Hsglveltvhw22D0xVzEAJaBQ0HAAAAYiIKIM+I1npAYLf+N3OSkAnja+npwY+xe2zGAUCuOpAAfzIX",
+      },
+      hasClientNotes: "false",
     },
   ],
 };
