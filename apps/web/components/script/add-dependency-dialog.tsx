@@ -56,13 +56,10 @@ const AddDependencyDialog = () => {
     <Dialog
       open={addDependencyDialogOpen}
       modal={false}
+      disablePointerDismissal
       onOpenChange={(open) => !open && onClose()}
     >
-      <DialogContent
-        className="sm:max-w-160 z-100"
-        onPointerDownOutside={(e) => e.preventDefault()}
-        onInteractOutside={(e) => e.preventDefault()}
-      >
+      <DialogContent data-modal="false" className="sm:max-w-160">
         <DialogHeader>
           <DialogTitle>Add Dependency</DialogTitle>
           <DialogDescription>
@@ -99,7 +96,14 @@ const AddDependencyDialog = () => {
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-3">
               <Label htmlFor="dependency">Dependency</Label>
-              <Select onValueChange={setDependencyId} value={dependencyId}>
+              <Select
+                items={shownDependencies.map(({ id, name }) => ({
+                  value: id,
+                  label: name,
+                }))}
+                onValueChange={(value) => setDependencyId(value ?? "")}
+                value={dependencyId || null}
+              >
                 <SelectTrigger
                   className="w-45"
                   disabled={shownDependencies.length === 0}
@@ -118,8 +122,8 @@ const AddDependencyDialog = () => {
           </div>
         </form>
         <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
+          <DialogClose render={<Button variant="outline" />}>
+            Cancel
           </DialogClose>
           <Button
             form="add-dependency-form"

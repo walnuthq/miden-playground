@@ -51,13 +51,10 @@ const VerifyNoteScriptDialog = () => {
     <Dialog
       open={verifyNoteScriptDialogOpen}
       modal={false}
+      disablePointerDismissal
       onOpenChange={(open) => !open && onClose()}
     >
-      <DialogContent
-        className="sm:max-w-160 z-100"
-        onPointerDownOutside={(e) => e.preventDefault()}
-        onInteractOutside={(e) => e.preventDefault()}
-      >
+      <DialogContent data-modal="false" className="sm:max-w-160">
         <DialogHeader>
           <DialogTitle>Verify Note Script</DialogTitle>
           <DialogDescription>Verify a custom note script.</DialogDescription>
@@ -155,8 +152,8 @@ const VerifyNoteScriptDialog = () => {
           </div>
         </form>
         <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
+          <DialogClose render={<Button variant="outline" />}>
+            Cancel
           </DialogClose>
           <Button
             form="verify-note-script-form"

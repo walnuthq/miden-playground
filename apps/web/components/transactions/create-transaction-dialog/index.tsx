@@ -100,13 +100,10 @@ const CreateTransactionDialog = () => {
     <Dialog
       open={createTransactionDialogOpen}
       modal={false}
+      disablePointerDismissal
       onOpenChange={(open) => !open && onClose()}
     >
-      <DialogContent
-        className="sm:max-w-160 z-50"
-        onPointerDownOutside={(e) => e.preventDefault()}
-        onInteractOutside={(e) => e.preventDefault()}
-      >
+      <DialogContent data-modal="false" className="sm:max-w-160">
         <DialogHeader>
           <DialogTitle>
             {step === "select" && "Create new transaction"}
@@ -164,8 +161,8 @@ const CreateTransactionDialog = () => {
         )}
         <DialogFooter>
           <div className="flex w-full justify-between">
-            <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
+            <DialogClose render={<Button variant="outline" />}>
+              Cancel
             </DialogClose>
             {step === "select" && (
               <Button

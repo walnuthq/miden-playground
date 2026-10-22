@@ -90,18 +90,20 @@ const SelectConsumableNotesCombobox = ({
   const [open, setOpen] = useState(false);
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="justify-between"
-        >
-          {value.length === 0
-            ? "Select consumable notes…"
-            : `${value.length} note${value.length === 1 ? "" : "s"} selected`}
-          <ChevronsUpDown className="opacity-50" />
-        </Button>
+      <PopoverTrigger
+        render={
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className="justify-between"
+          />
+        }
+      >
+        {value.length === 0
+          ? "Select consumable notes…"
+          : `${value.length} note${value.length === 1 ? "" : "s"} selected`}
+        <ChevronsUpDown className="opacity-50" />
       </PopoverTrigger>
       <PopoverContent className="w-full min-w-96 p-0">
         <Command>

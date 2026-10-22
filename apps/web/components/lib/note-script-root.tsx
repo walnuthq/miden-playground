@@ -14,13 +14,13 @@ const NoteScriptRoot = ({ inputNote }: { inputNote: InputNote }) => {
   const script = scripts.find(({ id }) => id === inputNote.scriptId);
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <Link href={`/notes/${inputNote.id}?tab=script`}>
-          <Button className="cursor-pointer -ml-4" variant="link">
-            {formatId(inputNote.scriptRoot)}
-            {script ? ` (${script.name})` : ""}
-          </Button>
-        </Link>
+      <TooltipTrigger
+        render={<Link href={`/notes/${inputNote.id}?tab=script`} />}
+      >
+        <Button className="cursor-pointer -ml-4" variant="link">
+          {formatId(inputNote.scriptRoot)}
+          {script ? ` (${script.name})` : ""}
+        </Button>
       </TooltipTrigger>
       <TooltipContent>
         <p>

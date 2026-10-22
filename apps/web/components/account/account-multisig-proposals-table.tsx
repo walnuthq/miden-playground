@@ -38,13 +38,15 @@ const ProposalActionsCell = ({
   const [loading, setLoading] = useState(false);
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="size-8 p-0" disabled={loading}>
-          <span className="sr-only">{loading ? "Loading" : "Open menu"}</span>
-          {loading ? <Spinner /> : <MoreVertical className="size-4" />}
-        </Button>
+      <DropdownMenuTrigger
+        render={
+          <Button variant="ghost" className="size-8 p-0" disabled={loading} />
+        }
+      >
+        <span className="sr-only">{loading ? "Loading" : "Open menu"}</span>
+        {loading ? <Spinner /> : <MoreVertical className="size-4" />}
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent className="w-auto" align="end">
         {proposal.status === "pending" && (
           <DropdownMenuItem
             onClick={async () => {

@@ -43,7 +43,6 @@ store.sqlite3
 .agents
 .claude
 docs/agents
-CLAUDE.md
 AGENTS.md
 skills-lock.json
 

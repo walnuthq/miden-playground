@@ -59,13 +59,10 @@ const CreateComponentDialog = () => {
     <Dialog
       open={createComponentDialogOpen}
       modal={false}
+      disablePointerDismissal
       onOpenChange={(open) => !open && onClose()}
     >
-      <DialogContent
-        className="sm:max-w-160 z-100"
-        onPointerDownOutside={(e) => e.preventDefault()}
-        onInteractOutside={(e) => e.preventDefault()}
-      >
+      <DialogContent data-modal="false" className="sm:max-w-160">
         <DialogHeader>
           <DialogTitle>Create Component</DialogTitle>
           <DialogDescription>Create a new component.</DialogDescription>
@@ -114,7 +111,14 @@ const CreateComponentDialog = () => {
             </div>
             <div className="grid gap-3">
               <Label htmlFor="script">Script</Label>
-              <Select onValueChange={setScriptId} value={scriptId}>
+              <Select
+                items={shownScripts.map(({ id, name }) => ({
+                  value: id,
+                  label: name,
+                }))}
+                onValueChange={(value) => setScriptId(value ?? "")}
+                value={scriptId || null}
+              >
                 <SelectTrigger
                   className="w-45"
                   disabled={shownScripts.length === 0}
@@ -133,8 +137,8 @@ const CreateComponentDialog = () => {
           </div>
         </form>
         <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
+          <DialogClose render={<Button variant="outline" />}>
+            Cancel
           </DialogClose>
           <Button
             form="create-component-form"

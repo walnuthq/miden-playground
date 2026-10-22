@@ -168,13 +168,10 @@ const UpsertStorageSlotDialog = ({
     <Dialog
       open={upsertStorageSlotDialogOpen}
       modal={false}
+      disablePointerDismissal
       onOpenChange={(open) => !open && onClose()}
     >
-      <DialogContent
-        className="sm:max-w-160 z-100"
-        onPointerDownOutside={(e) => e.preventDefault()}
-        onInteractOutside={(e) => e.preventDefault()}
-      >
+      <DialogContent data-modal="false" className="sm:max-w-160">
         <DialogHeader>
           <DialogTitle>
             {storageSlot ? "Edit" : "Create"} Storage Slot
@@ -229,6 +226,7 @@ const UpsertStorageSlotDialog = ({
             <div className="grid gap-3">
               <Label htmlFor="type">Type</Label>
               <Select
+                items={storageSlotTypes}
                 onValueChange={(type) =>
                   setStorageSlotType(type as StorageSlotType)
                 }
@@ -260,8 +258,8 @@ const UpsertStorageSlotDialog = ({
           </div>
         </form>
         <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
+          <DialogClose render={<Button variant="outline" />}>
+            Cancel
           </DialogClose>
           <Button
             form="upsert-storage-slot-form"

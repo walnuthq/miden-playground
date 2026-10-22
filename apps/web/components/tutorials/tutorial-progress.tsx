@@ -17,23 +17,27 @@ const TutorialProgressStep = ({
   const { tutorialStep, tutorialMaxStep, setTutorialStep } = useTutorials();
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <button
-          type="button"
-          aria-label={`Go to step ${index + 1}`}
-          className={cn("grow first:rounded-l-md last:rounded-r-md", {
-            "bg-primary": index < tutorialStep || index <= tutorialMaxStep,
-            "bg-primary/25 border": index === tutorialStep,
-            "bg-muted/50 border":
-              index > tutorialStep && index > tutorialMaxStep,
-            "cursor-pointer": index <= tutorialMaxStep,
-            "cursor-not-allowed": index > tutorialMaxStep,
-          })}
-          onClick={
-            index <= tutorialMaxStep ? () => setTutorialStep(index) : undefined
-          }
-        />
-      </TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <button
+            type="button"
+            aria-label={`Go to step ${index + 1}`}
+            className={cn("grow first:rounded-l-md last:rounded-r-md", {
+              "bg-primary": index < tutorialStep || index <= tutorialMaxStep,
+              "bg-primary/25 border": index === tutorialStep,
+              "bg-muted/50 border":
+                index > tutorialStep && index > tutorialMaxStep,
+              "cursor-pointer": index <= tutorialMaxStep,
+              "cursor-not-allowed": index > tutorialMaxStep,
+            })}
+            onClick={
+              index <= tutorialMaxStep
+                ? () => setTutorialStep(index)
+                : undefined
+            }
+          />
+        }
+      />
       <TooltipContent>
         <p>
           Step {index + 1}: {step.title}

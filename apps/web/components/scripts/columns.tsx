@@ -22,13 +22,13 @@ const ScriptActionsCell = ({ script }: { script: Script }) => {
   }
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="size-8 p-0">
-          <span className="sr-only">Open menu</span>
-          <MoreVertical className="size-4" />
-        </Button>
+      <DropdownMenuTrigger
+        render={<Button variant="ghost" className="size-8 p-0" />}
+      >
+        <span className="sr-only">Open menu</span>
+        <MoreVertical className="size-4" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent className="w-auto" align="end">
         <DropdownMenuItem>
           <a href={exportScript(script.id)} download={`${script.name}.zip`}>
             Export script

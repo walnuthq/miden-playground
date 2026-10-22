@@ -1,4 +1,4 @@
-import { Button } from "@workspace/ui/components/button";
+import { Button, buttonVariants } from "@workspace/ui/components/button";
 import {
   Tooltip,
   TooltipContent,
@@ -42,24 +42,20 @@ const AccountAddress = ({
   const displayedAddress = formatted
     ? formatAddress(displayedAccount.address, networkId)
     : displayedAccount.address;
+  // A link styled as a button: Base UI's Button would give it role="button".
+  const accountLinkProps = {
+    href: `/accounts/${getIdentifierPart(displayedAccount.address)}`,
+    className: buttonVariants({ variant: "link", className: "-ml-4" }),
+  };
   const accountAddressContent = withTooltip ? (
     <Tooltip>
-      <TooltipTrigger asChild>
-        {withLink ? (
-          <Link
-            href={`/accounts/${getIdentifierPart(displayedAccount.address)}`}
-          >
-            <Button className="cursor-pointer -ml-4" variant="link">
-              {displayedAddress}
-              {withName && ` (${displayedAccount.name})`}
-            </Button>
-          </Link>
-        ) : (
-          <Button variant="ghost">
-            {displayedAddress}
-            {withName && ` (${displayedAccount.name})`}
-          </Button>
-        )}
+      <TooltipTrigger
+        render={
+          withLink ? <Link {...accountLinkProps} /> : <Button variant="ghost" />
+        }
+      >
+        {displayedAddress}
+        {withName && ` (${displayedAccount.name})`}
       </TooltipTrigger>
       <TooltipContent>
         <p>
@@ -69,11 +65,9 @@ const AccountAddress = ({
       </TooltipContent>
     </Tooltip>
   ) : withLink ? (
-    <Link href={`/accounts/${getIdentifierPart(displayedAccount.address)}`}>
-      <Button className="cursor-pointer -ml-4" variant="link">
-        {displayedAddress}
-        {withName && ` (${displayedAccount.name})`}
-      </Button>
+    <Link {...accountLinkProps}>
+      {displayedAddress}
+      {withName && ` (${displayedAccount.name})`}
     </Link>
   ) : (
     <span>

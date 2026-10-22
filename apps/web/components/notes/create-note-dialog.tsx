@@ -59,13 +59,10 @@ const CreateNoteDialog = () => {
     <Dialog
       open={createNoteDialogOpen}
       modal={false}
+      disablePointerDismissal
       onOpenChange={(open) => !open && onClose()}
     >
-      <DialogContent
-        className="sm:max-w-160 z-50"
-        onPointerDownOutside={(e) => e.preventDefault()}
-        onInteractOutside={(e) => e.preventDefault()}
-      >
+      <DialogContent data-modal="false" className="sm:max-w-160">
         <DialogHeader>
           <DialogTitle>Create Note</DialogTitle>
           <DialogDescription>
@@ -112,7 +109,14 @@ const CreateNoteDialog = () => {
             </div>
             <div className="grid gap-3">
               <Label htmlFor="script">Script</Label>
-              <Select onValueChange={setScriptId} value={scriptId}>
+              <Select
+                items={shownScripts.map(({ id, name }) => ({
+                  value: id,
+                  label: name,
+                }))}
+                onValueChange={(value) => setScriptId(value ?? "")}
+                value={scriptId || null}
+              >
                 <SelectTrigger
                   className="w-45"
                   disabled={shownScripts.length === 0}
@@ -155,9 +159,7 @@ const CreateNoteDialog = () => {
                   defaultChecked={isNetworkNote}
                   onCheckedChange={(checked) => setIsNetworkNote(checked)}
                 />
-                <Label htmlFor="is-network-note">
-                  {isNetworkNote ? "Network note" : "Regular note"}
-                </Label>
+                <Label>{isNetworkNote ? "Network note" : "Regular note"}</Label>
               </div>
             </div>
             <div className="grid gap-3 col-span-3">
@@ -247,8 +249,8 @@ const CreateNoteDialog = () => {
           </div>
         </form>
         <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
+          <DialogClose render={<Button variant="outline" />}>
+            Cancel
           </DialogClose>
           <Button
             form="create-note-form"

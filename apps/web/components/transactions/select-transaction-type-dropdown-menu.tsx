@@ -23,11 +23,11 @@ const SelectTransactionTypeDropdownMenu = ({
   selectTypes?: TransactionType[];
 }) => (
   <DropdownMenu>
-    <DropdownMenuTrigger asChild>
-      <Button className="justify-between" variant="secondary">
-        {transactionTypes[value]}
-        <ChevronsUpDown className="opacity-50" />
-      </Button>
+    <DropdownMenuTrigger
+      render={<Button className="justify-between" variant="secondary" />}
+    >
+      {transactionTypes[value]}
+      <ChevronsUpDown className="opacity-50" />
     </DropdownMenuTrigger>
     <DropdownMenuContent className="w-56" align="start">
       <DropdownMenuRadioGroup
@@ -35,7 +35,11 @@ const SelectTransactionTypeDropdownMenu = ({
         onValueChange={(newValue) => onValueChange(newValue as TransactionType)}
       >
         {selectTypes.map((transactionType) => (
-          <DropdownMenuRadioItem key={transactionType} value={transactionType}>
+          <DropdownMenuRadioItem
+            closeOnClick
+            key={transactionType}
+            value={transactionType}
+          >
             {transactionTypes[transactionType]}
           </DropdownMenuRadioItem>
         ))}

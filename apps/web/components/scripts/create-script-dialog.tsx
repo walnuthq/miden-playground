@@ -60,13 +60,10 @@ const CreateScriptDialog = () => {
     <Dialog
       open={createScriptDialogOpen}
       modal={false}
+      disablePointerDismissal
       onOpenChange={(open) => !open && onClose()}
     >
-      <DialogContent
-        className="sm:max-w-160 z-100"
-        onPointerDownOutside={(e) => e.preventDefault()}
-        onInteractOutside={(e) => e.preventDefault()}
-      >
+      <DialogContent data-modal="false" className="sm:max-w-160">
         <DialogHeader>
           <DialogTitle>Create Script</DialogTitle>
           <DialogDescription>Create a new script.</DialogDescription>
@@ -110,6 +107,7 @@ const CreateScriptDialog = () => {
               <Field className="grid gap-3">
                 <Label htmlFor="type">Type</Label>
                 <Select
+                  items={scriptTypes}
                   onValueChange={(type) => setScriptType(type as ScriptType)}
                   value={scriptType}
                 >
@@ -137,6 +135,15 @@ const CreateScriptDialog = () => {
               <Field className="grid gap-3">
                 <Label htmlFor="example">Example</Label>
                 <Select
+                  items={{
+                    none: "None",
+                    ...Object.fromEntries(
+                      Object.entries(scriptExamples).map(([id, { name }]) => [
+                        id,
+                        name,
+                      ]),
+                    ),
+                  }}
                   onValueChange={(value) =>
                     setScriptExample(value as ScriptExample)
                   }
@@ -167,8 +174,8 @@ const CreateScriptDialog = () => {
           </FieldSet>
         </form>
         <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
+          <DialogClose render={<Button variant="outline" />}>
+            Cancel
           </DialogClose>
           <Button form="create-script-form" type="submit" disabled={loading}>
             {loading && <Spinner />}

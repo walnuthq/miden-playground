@@ -23,8 +23,8 @@ const StorageSlotValueTooltip = ({ value }: { value: string }) => {
   const [first = 0n] = feltArray.filter((felt) => felt !== 0n);
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <Button variant="outline">{first}</Button>
+      <TooltipTrigger render={<Button variant="outline" />}>
+        {first}
       </TooltipTrigger>
       <TooltipContent>
         <p>Hex: {value}</p>

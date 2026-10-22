@@ -40,7 +40,7 @@ const InstallBreadWalletDialog = ({
   onOpenChange: (open: boolean) => void;
 }) => (
   <Dialog open={open} onOpenChange={onOpenChange}>
-    <DialogContent className="sm:max-w-sm">
+    <DialogContent data-modal="false" className="sm:max-w-sm">
       <DialogHeader>
         <DialogTitle>Discover Miden</DialogTitle>
         <DialogDescription>
@@ -91,10 +91,10 @@ const SelectWalletButton = ({ signerNames }: { signerNames: string[] }) => {
         // opening it while a modal menu is closing leaves `pointer-events:
         // none` on body.
         <DropdownMenu modal={false}>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline">Select Wallet</Button>
+          <DropdownMenuTrigger render={<Button variant="outline" />}>
+            Select Wallet
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent className="w-auto" align="end">
             {signerNames.map((name) => (
               <DropdownMenuItem key={name} onClick={() => selectSigner(name)}>
                 {signerLabels[name] ?? name}
