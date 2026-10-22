@@ -29,7 +29,7 @@
     "@workspace/typescript-config": "workspace:*",
     "dotenv": "18.0.8",
     "drizzle-kit": "1.0.0-rc.4",
-    "typescript": "6.0.3",
+    "typescript": "7.0.2",
     "wrangler": "4.151.3"
   }
 }

@@ -60,7 +60,7 @@
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "@workspace/typescript-config": "workspace:*",
-    "typescript": "6.0.3",
+    "typescript": "7.0.2",
     "wrangler": "4.151.3"
   }
 }
