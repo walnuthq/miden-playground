@@ -25,13 +25,10 @@ const ImportNoteDialog = () => {
     <Dialog
       open={importNoteDialogOpen}
       modal={false}
+      disablePointerDismissal
       onOpenChange={(open) => !open && closeImportNoteDialog()}
     >
-      <DialogContent
-        className="sm:max-w-160 z-100"
-        onPointerDownOutside={(e) => e.preventDefault()}
-        onInteractOutside={(e) => e.preventDefault()}
-      >
+      <DialogContent data-modal="false" className="sm:max-w-160">
         <DialogHeader>
           <DialogTitle>Import Note</DialogTitle>
           <DialogDescription>
@@ -73,8 +70,8 @@ const ImportNoteDialog = () => {
           </div>
         </form>
         <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
+          <DialogClose render={<Button variant="outline" />}>
+            Cancel
           </DialogClose>
           <Button
             form="import-note-form"

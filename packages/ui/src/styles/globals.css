@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "shadcn/tailwind.css";
 @source "../../../apps/**/*.{ts,tsx}";
 @source "../../../components/**/*.{ts,tsx}";
 @source "../**/*.{ts,tsx}";
@@ -145,6 +146,15 @@
 
 .root {
   isolation: isolate;
+}
+
+/* Base UI renders the dialog backdrop even for modal={false} dialogs (Radix
+   didn't). The playground's non-modal dialogs mark their popup with
+   data-modal="false" and must leave the page, e.g. the tutorial pane, usable. */
+[data-slot="dialog-overlay"]:has(
+  ~ [data-slot="dialog-content"][data-modal="false"]
+) {
+  display: none;
 }
 
 .wallet-adapter-dropdown {

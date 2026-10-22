@@ -7,6 +7,7 @@ import "@getpara/react-sdk-lite/styles.css";
 import "@miden-sdk/miden-wallet-adapter/styles.css";
 import "@workspace/ui/globals.css";
 import { Toaster } from "@workspace/ui/components/sonner";
+import { TooltipProvider } from "@workspace/ui/components/tooltip";
 import Providers from "@/components/providers";
 
 const fontSans = Geist({
@@ -33,7 +34,7 @@ const RootLayout = ({
           and that iframe has to stack above Para's modal portaled to body. */}
       <Providers>
         <div className="root">
-          {children}
+          <TooltipProvider>{children}</TooltipProvider>
           <Toaster richColors position="bottom-center" />
         </div>
       </Providers>

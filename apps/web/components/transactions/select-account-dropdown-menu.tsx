@@ -2,6 +2,7 @@ import { Button } from "@workspace/ui/components/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
@@ -45,60 +46,74 @@ const SelectAccountDropdownMenu = ({
     (selectWallets && !showWallets) || (selectFaucets && !showFaucets);
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          className="justify-between"
-          variant="secondary"
-          disabled={disabled}
-        >
-          {account
-            ? showFaucetsAsAssets
-              ? account?.symbol
-              : account.name
-            : disabled
-              ? "No accounts found."
-              : `Select ${showFaucetsAsAssets ? "asset" : "account"}`}
-          <ChevronsUpDown className="opacity-50" />
-        </Button>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            className="justify-between"
+            variant="secondary"
+            disabled={disabled}
+          />
+        }
+      >
+        {account
+          ? showFaucetsAsAssets
+            ? account?.symbol
+            : account.name
+          : disabled
+            ? "No accounts found."
+            : `Select ${showFaucetsAsAssets ? "asset" : "account"}`}
+        <ChevronsUpDown className="opacity-50" />
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="start">
         <DropdownMenuRadioGroup value={value} onValueChange={onValueChange}>
           {!showWallets && !showFaucets ? (
             shownAccounts.map((account) => (
-              <DropdownMenuRadioItem key={account.id} value={account.id}>
+              <DropdownMenuRadioItem
+                closeOnClick
+                key={account.id}
+                value={account.id}
+              >
                 {account.name}
               </DropdownMenuRadioItem>
             ))
           ) : (
             <>
               {showWallets && (
-                <>
+                <DropdownMenuGroup>
                   {showFaucets && (
                     <DropdownMenuLabel className="flex items-center gap-2">
                       <Wallet className="size-4" /> Wallets
                     </DropdownMenuLabel>
                   )}
                   {shownWallets.map((wallet) => (
-                    <DropdownMenuRadioItem key={wallet.id} value={wallet.id}>
+                    <DropdownMenuRadioItem
+                      closeOnClick
+                      key={wallet.id}
+                      value={wallet.id}
+                    >
                       {wallet.name}
                     </DropdownMenuRadioItem>
                   ))}
-                </>
+                </DropdownMenuGroup>
               )}
               {showWallets && showFaucets && <DropdownMenuSeparator />}
               {showFaucets && (
-                <>
+                <DropdownMenuGroup>
                   {showWallets && (
                     <DropdownMenuLabel className="flex items-center gap-2">
                       <HandCoins className="size-4" /> Faucets
                     </DropdownMenuLabel>
                   )}
                   {shownFaucets.map((faucet) => (
-                    <DropdownMenuRadioItem key={faucet.name} value={faucet.id}>
+                    <DropdownMenuRadioItem
+                      closeOnClick
+                      key={faucet.name}
+                      value={faucet.id}
+                    >
                       {showFaucetsAsAssets ? faucet.symbol : faucet.name}
                     </DropdownMenuRadioItem>
                   ))}
-                </>
+                </DropdownMenuGroup>
               )}
             </>
           )}

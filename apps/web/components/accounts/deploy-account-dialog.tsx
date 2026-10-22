@@ -49,6 +49,13 @@ const DeployAccountDialog = () => {
     useState<string[]>([]);
   const authComponent = components.find(({ id }) => id === authComponentId);
   const component = components.find(({ id }) => id === componentId);
+  const authComponents = components.filter(
+    ({ type }) => type === "authentication-component",
+  );
+  const accountComponents = components.filter(
+    ({ id, type }) =>
+      !defaultComponentIds.includes(id) && type === "account-component",
+  );
   const onClose = () => {
     setStorageMode("public");
     setAuthComponentId("auth-no-auth");
@@ -68,13 +75,10 @@ const DeployAccountDialog = () => {
     <Dialog
       open={deployAccountDialogOpen}
       modal={false}
+      disablePointerDismissal
       onOpenChange={(open) => !open && onClose()}
     >
-      <DialogContent
-        className="sm:max-w-160 z-100"
-        onPointerDownOutside={(e) => e.preventDefault()}
-        onInteractOutside={(e) => e.preventDefault()}
-      >
+      <DialogContent data-modal="false" className="sm:max-w-160">
         <DialogHeader>
           <DialogTitle>Deploy Account</DialogTitle>
           <DialogDescription>Deploy a new custom account.</DialogDescription>
@@ -156,6 +160,7 @@ const DeployAccountDialog = () => {
             <div className="grid gap-3">
               <Label htmlFor="storage-mode">Storage mode</Label>
               <Select
+                items={accountStorageModes}
                 onValueChange={(storageMode) =>
                   setStorageMode(storageMode as AccountStorageMode)
                 }
@@ -185,41 +190,44 @@ const DeployAccountDialog = () => {
             <div className="grid gap-3">
               <Label htmlFor="auth-component">Auth Component</Label>
               <Select
-                onValueChange={setAuthComponentId}
-                value={authComponentId}
+                items={authComponents.map(({ id, name }) => ({
+                  value: id,
+                  label: name,
+                }))}
+                onValueChange={(value) => setAuthComponentId(value ?? "")}
+                value={authComponentId || null}
               >
                 <SelectTrigger className="w-45">
                   <SelectValue placeholder="Select auth component…" />
                 </SelectTrigger>
                 <SelectContent>
-                  {components
-                    .filter(({ type }) => type === "authentication-component")
-                    .map(({ id, name }) => (
-                      <SelectItem key={id} value={id}>
-                        {name}
-                      </SelectItem>
-                    ))}
+                  {authComponents.map(({ id, name }) => (
+                    <SelectItem key={id} value={id}>
+                      {name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="grid gap-3">
               <Label htmlFor="component">Account Component</Label>
-              <Select onValueChange={setComponentId} value={componentId}>
+              <Select
+                items={accountComponents.map(({ id, name }) => ({
+                  value: id,
+                  label: name,
+                }))}
+                onValueChange={(value) => setComponentId(value ?? "")}
+                value={componentId || null}
+              >
                 <SelectTrigger className="w-45">
                   <SelectValue placeholder="Select component…" />
                 </SelectTrigger>
                 <SelectContent>
-                  {components
-                    .filter(
-                      ({ id, type }) =>
-                        !defaultComponentIds.includes(id) &&
-                        type === "account-component",
-                    )
-                    .map(({ id, name }) => (
-                      <SelectItem key={id} value={id}>
-                        {name}
-                      </SelectItem>
-                    ))}
+                  {accountComponents.map(({ id, name }) => (
+                    <SelectItem key={id} value={id}>
+                      {name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -270,8 +278,8 @@ const DeployAccountDialog = () => {
           </div>
         </form>
         <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
+          <DialogClose render={<Button variant="outline" />}>
+            Cancel
           </DialogClose>
           <Button
             form="deploy-account-form"

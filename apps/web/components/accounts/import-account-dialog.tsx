@@ -34,13 +34,10 @@ const ImportAccountDialog = () => {
     <Dialog
       open={importAccountDialogOpen}
       modal={false}
+      disablePointerDismissal
       onOpenChange={(open) => !open && closeImportAccountDialog()}
     >
-      <DialogContent
-        className="sm:max-w-160 z-100"
-        onPointerDownOutside={(e) => e.preventDefault()}
-        onInteractOutside={(e) => e.preventDefault()}
-      >
+      <DialogContent data-modal="false" className="sm:max-w-160">
         <DialogHeader>
           <DialogTitle>
             {importAccountDialogMultisig
@@ -108,8 +105,8 @@ const ImportAccountDialog = () => {
           </div>
         </form>
         <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
+          <DialogClose render={<Button variant="outline" />}>
+            Cancel
           </DialogClose>
           <Button form="import-account-form" type="submit" disabled={loading}>
             {loading && <Spinner />}

@@ -43,56 +43,50 @@ const NavMain = ({
         {items.map((item) => (
           <Collapsible
             key={item.url}
-            asChild
             //defaultOpen={item.items.length > 0}
             defaultOpen
             className="group/collapsible"
+            render={<SidebarMenuItem />}
           >
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                asChild
-                isActive={
-                  item.url === "/"
-                    ? pathname === "/"
-                    : pathname.startsWith(item.url)
-                }
-              >
-                <Link href={item.url}>
-                  {item.icon}
-                  <span>{item.title}</span>
-                </Link>
-              </SidebarMenuButton>
-              {item.items && item.items.length > 0 && (
-                <SidebarMenuAction>
-                  <CollapsibleTrigger asChild>
-                    <ChevronRight className="transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                  </CollapsibleTrigger>
-                </SidebarMenuAction>
-              )}
-              <CollapsibleContent>
-                <SidebarMenuSub className="pr-0 mr-0">
-                  {item.items?.map((subItem) => (
-                    <SidebarMenuSubItem key={subItem.url}>
-                      <SidebarMenuSubButton
-                        asChild
-                        isActive={pathname === subItem.url}
-                      >
+            <SidebarMenuButton
+              isActive={
+                item.url === "/"
+                  ? pathname === "/"
+                  : pathname.startsWith(item.url)
+              }
+              render={<Link href={item.url} />}
+            >
+              {item.icon}
+              <span>{item.title}</span>
+            </SidebarMenuButton>
+            {item.items && item.items.length > 0 && (
+              <CollapsibleTrigger render={<SidebarMenuAction />}>
+                <ChevronRight className="transition-transform duration-200 group-data-open/collapsible:rotate-90" />
+              </CollapsibleTrigger>
+            )}
+            <CollapsibleContent>
+              <SidebarMenuSub className="pr-0 mr-0">
+                {item.items?.map((subItem) => (
+                  <SidebarMenuSubItem key={subItem.url}>
+                    <SidebarMenuSubButton
+                      isActive={pathname === subItem.url}
+                      render={
                         <Link
                           href={subItem.url}
                           className="flex items-center justify-between"
-                        >
-                          <div className="flex items-center gap-1">
-                            {subItem.icon}
-                            <span>{subItem.title}</span>
-                          </div>
-                          {subItem.leftIcon}
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  ))}
-                </SidebarMenuSub>
-              </CollapsibleContent>
-            </SidebarMenuItem>
+                        />
+                      }
+                    >
+                      <div className="flex items-center gap-1">
+                        {subItem.icon}
+                        <span>{subItem.title}</span>
+                      </div>
+                      {subItem.leftIcon}
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
+                ))}
+              </SidebarMenuSub>
+            </CollapsibleContent>
           </Collapsible>
         ))}
       </SidebarMenu>

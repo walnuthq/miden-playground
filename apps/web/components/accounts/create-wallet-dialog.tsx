@@ -39,13 +39,10 @@ const CreateWalletDialog = () => {
     <Dialog
       open={createWalletDialogOpen}
       modal={false}
+      disablePointerDismissal
       onOpenChange={(open) => !open && onClose()}
     >
-      <DialogContent
-        className="sm:max-w-160 z-100"
-        onPointerDownOutside={(e) => e.preventDefault()}
-        onInteractOutside={(e) => e.preventDefault()}
-      >
+      <DialogContent data-modal="false" className="sm:max-w-160">
         <DialogHeader>
           <DialogTitle>Create Wallet</DialogTitle>
           <DialogDescription>Create a new wallet.</DialogDescription>
@@ -91,16 +88,14 @@ const CreateWalletDialog = () => {
                   defaultChecked={isPublic}
                   onCheckedChange={(checked) => setIsPublic(checked)}
                 />
-                <Label htmlFor="is-public">
-                  {isPublic ? "Public" : "Private"}
-                </Label>
+                <Label>{isPublic ? "Public" : "Private"}</Label>
               </div>
             </div>
           </div>
         </form>
         <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
+          <DialogClose render={<Button variant="outline" />}>
+            Cancel
           </DialogClose>
           <Button form="create-wallet-form" type="submit" disabled={loading}>
             {loading && <Spinner />}

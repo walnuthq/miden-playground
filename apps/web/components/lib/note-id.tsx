@@ -9,12 +9,10 @@ import { formatId } from "@/lib/utils";
 
 const NoteId = ({ noteId }: { noteId: string }) => (
   <Tooltip>
-    <TooltipTrigger asChild>
-      <Link href={`/notes/${noteId}`}>
-        <Button className="cursor-pointer -ml-4" variant="link">
-          {formatId(noteId)}
-        </Button>
-      </Link>
+    <TooltipTrigger render={<Link href={`/notes/${noteId}`} />}>
+      <Button className="cursor-pointer -ml-4" variant="link">
+        {formatId(noteId)}
+      </Button>
     </TooltipTrigger>
     <TooltipContent>
       <p>{noteId}</p>

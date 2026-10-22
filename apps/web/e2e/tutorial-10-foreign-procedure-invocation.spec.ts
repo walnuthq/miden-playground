@@ -45,8 +45,8 @@ test("tutorial 10: foreign procedure invocation", async ({ page }) => {
       .filter({ hasText: "Deploy Account" });
     await dialog.getByLabel("Name").fill("My Count Reader");
     // Public storage and No Auth are the defaults.
-    await expect(dialog.getByRole("combobox").first()).toHaveText("Public");
-    await expect(dialog.getByRole("combobox").nth(1)).toHaveText("No Auth");
+    await expect(dialog.getByRole("combobox").first()).toContainText("Public");
+    await expect(dialog.getByRole("combobox").nth(1)).toContainText("No Auth");
     await selectOption(page, "Account Component", "Count Reader");
     await expect(
       dialog.getByText("count_reader::count_reader::count"),

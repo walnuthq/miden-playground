@@ -37,13 +37,11 @@ const CreateAccountDropdownMenu = () => {
   const showImportDeployAccounts = true;
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline">
-          <Plus />
-          <span className="hidden lg:inline">Create new account</span>
-        </Button>
+      <DropdownMenuTrigger render={<Button variant="outline" />}>
+        <Plus />
+        <span className="hidden lg:inline">Create new account</span>
       </DropdownMenuTrigger>
-      <DropdownMenuContent>
+      <DropdownMenuContent className="w-auto">
         {showCreateWalletsFaucets && (
           <>
             <DropdownMenuItem onClick={openCreateWalletDialog}>

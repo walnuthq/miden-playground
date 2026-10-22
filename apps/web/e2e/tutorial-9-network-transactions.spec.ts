@@ -31,7 +31,7 @@ test("tutorial 9: network transactions", async ({ page, bread }) => {
       .getByRole("dialog")
       .filter({ hasText: "Deploy Account" });
     await dialog.getByLabel("Name").fill("Network Counter");
-    await expect(dialog.getByRole("combobox").first()).toHaveText("Public");
+    await expect(dialog.getByRole("combobox").first()).toContainText("Public");
     await selectOption(page, "Auth Component", "Network Account");
     await selectOption(page, "Account Component", "Counter Contract");
     await dialog.getByPlaceholder("Select allowed note-scripts…").click();

@@ -95,8 +95,8 @@ test("tutorial 11: your first smart contract and custom note", async ({
       .filter({ hasText: "Deploy Account" });
     await dialog.getByLabel("Name").fill("My Counter");
     // Public storage and No Auth are the defaults.
-    await expect(dialog.getByRole("combobox").first()).toHaveText("Public");
-    await expect(dialog.getByRole("combobox").nth(1)).toHaveText("No Auth");
+    await expect(dialog.getByRole("combobox").first()).toContainText("Public");
+    await expect(dialog.getByRole("combobox").nth(1)).toContainText("No Auth");
     await selectOption(page, "Account Component", "Counter Contract");
     await expect(
       dialog.getByLabel("counter_account::counter_contract::count_map"),

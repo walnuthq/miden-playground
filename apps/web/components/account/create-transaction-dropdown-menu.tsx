@@ -18,13 +18,11 @@ const CreateTransactionDropdownMenu = ({ account }: { account: Account }) => {
   const { isParaWallet } = useAccounts();
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline">
-          <Plus />
-          <span className="hidden lg:inline">Create new transaction</span>
-        </Button>
+      <DropdownMenuTrigger render={<Button variant="outline" />}>
+        <Plus />
+        <span className="hidden lg:inline">Create new transaction</span>
       </DropdownMenuTrigger>
-      <DropdownMenuContent>
+      <DropdownMenuContent className="w-auto">
         {account.isFaucet ? (
           <DropdownMenuItem
             onClick={() =>

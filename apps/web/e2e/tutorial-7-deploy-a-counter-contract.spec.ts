@@ -95,8 +95,8 @@ test("tutorial 7: deploy a counter contract", async ({ page }) => {
       .filter({ hasText: "Deploy Account" });
     await dialog.getByLabel("Name").fill("My Counter Contract");
     // Public storage and No Auth are the defaults.
-    await expect(dialog.getByRole("combobox").first()).toHaveText("Public");
-    await expect(dialog.getByRole("combobox").nth(1)).toHaveText("No Auth");
+    await expect(dialog.getByRole("combobox").first()).toContainText("Public");
+    await expect(dialog.getByRole("combobox").nth(1)).toContainText("No Auth");
     await selectOption(page, "Account Component", "My Counter");
     await expect(dialog.getByText(SLOT_NAME)).toBeVisible();
     await dialog.getByRole("button", { name: "Deploy" }).click();

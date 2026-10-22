@@ -22,21 +22,24 @@ const CopyButton = ({ content, copy }: { content: string; copy: string }) => {
     setCopied(false);
   };
   return (
-    <Tooltip delayDuration={100} open={open} onOpenChange={setOpen}>
+    <Tooltip open={open} onOpenChange={setOpen}>
       {/*<TooltipTrigger
         className="text-muted-foreground hover:text-primary hover:brightness-150"
         onClick={copied ? undefined : copyText}
       >
         {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
       </TooltipTrigger> */}
-      <TooltipTrigger asChild>
-        <Button
-          variant="secondary"
-          className="size-8"
-          onClick={copied ? undefined : copyText}
-        >
-          {copied ? <Check /> : <Copy />}
-        </Button>
+      <TooltipTrigger
+        delay={100}
+        render={
+          <Button
+            variant="secondary"
+            className="size-8"
+            onClick={copied ? undefined : copyText}
+          />
+        }
+      >
+        {copied ? <Check /> : <Copy />}
       </TooltipTrigger>
       <TooltipContent>
         <p>{copied ? "Copied!" : content}</p>

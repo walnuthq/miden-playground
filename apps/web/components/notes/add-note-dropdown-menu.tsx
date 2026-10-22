@@ -22,13 +22,11 @@ const AddNoteDropdownMenu = () => {
   );
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline">
-          <Plus />
-          <span className="hidden lg:inline">Add note</span>
-        </Button>
+      <DropdownMenuTrigger render={<Button variant="outline" />}>
+        <Plus />
+        <span className="hidden lg:inline">Add note</span>
       </DropdownMenuTrigger>
-      <DropdownMenuContent>
+      <DropdownMenuContent className="w-auto">
         <DropdownMenuItem onClick={openImportNoteDialog}>
           <FileDown />
           Import note

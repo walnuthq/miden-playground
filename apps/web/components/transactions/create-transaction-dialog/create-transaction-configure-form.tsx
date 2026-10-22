@@ -331,9 +331,7 @@ const CreateTransactionConfigureForm = ({
                   defaultChecked={isPublic}
                   onCheckedChange={(checked) => setIsPublic(checked)}
                 />
-                <Label htmlFor="is-public">
-                  {isPublic ? "Public" : "Private"}
-                </Label>
+                <Label>{isPublic ? "Public" : "Private"}</Label>
               </div>
             </div>
           </>
@@ -403,9 +401,7 @@ const CreateTransactionConfigureForm = ({
                   defaultChecked={isPublic}
                   onCheckedChange={(checked) => setIsPublic(checked)}
                 />
-                <Label htmlFor="is-public">
-                  {isPublic ? "Public" : "Private"}
-                </Label>
+                <Label>{isPublic ? "Public" : "Private"}</Label>
               </div>
             </div>
           </>
@@ -413,7 +409,14 @@ const CreateTransactionConfigureForm = ({
         {transactionType === "custom" && (
           <div className="grid gap-3 col-span-2">
             <Label>Transaction script</Label>
-            <Select onValueChange={setScriptId} value={scriptId}>
+            <Select
+              items={shownScripts.map(({ id, name }) => ({
+                value: id,
+                label: name,
+              }))}
+              onValueChange={(value) => setScriptId(value ?? "")}
+              value={scriptId || null}
+            >
               <SelectTrigger
                 className="w-45"
                 disabled={shownScripts.length === 0}

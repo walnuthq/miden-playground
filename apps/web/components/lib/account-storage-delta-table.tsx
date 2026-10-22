@@ -17,10 +17,8 @@ import { formatStorageSlotName } from "@/lib/utils/account";
 
 const ValueTooltip = ({ value }: { value: string }) => (
   <Tooltip>
-    <TooltipTrigger asChild>
-      <Button type="button" variant="ghost">
-        {formatValue(value)}
-      </Button>
+    <TooltipTrigger render={<Button type="button" variant="ghost" />}>
+      {formatValue(value)}
     </TooltipTrigger>
     <TooltipContent>
       <p>{value}</p>

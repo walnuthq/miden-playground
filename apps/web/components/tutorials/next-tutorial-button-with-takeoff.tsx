@@ -19,8 +19,8 @@ const NextTutorialButton = () => {
   }
   return (
     <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button className="grow-2">Next tutorial</Button>
+      <AlertDialogTrigger render={<Button className="grow-2" />}>
+        Next tutorial
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
