@@ -1,20 +1,20 @@
 "use client";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useIsClient } from "usehooks-ts";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@workspace/ui/components/tabs";
-import useNotes from "@/hooks/use-notes";
-import NoteInformation from "@/components/note/note-information";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useIsClient } from "usehooks-ts";
 import ConsumeNoteButton from "@/components/note/consume-note-button";
-import CreateTransactionDialog from "@/components/transactions/create-transaction-dialog";
-import { noteConsumed } from "@/lib/utils/note";
-import type { Script } from "@/lib/types/script";
-import useAccounts from "@/hooks/use-accounts";
+import NoteInformation from "@/components/note/note-information";
 import VerifyNoteScriptDialog from "@/components/note/verify-note-script-dialog";
+import CreateTransactionDialog from "@/components/transactions/create-transaction-dialog";
+import useAccounts from "@/hooks/use-accounts";
+import useNotes from "@/hooks/use-notes";
+import type { Script } from "@/lib/types/script";
+import { noteConsumed } from "@/lib/utils/note";
 
 const Note = ({
   id,

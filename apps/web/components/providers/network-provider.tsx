@@ -1,8 +1,8 @@
 "use client";
 import { createMidenStorage } from "@miden-sdk/react/lazy";
-import { createContext, useState, type ReactNode } from "react";
-import type { NetworkId } from "@/lib/types/network";
 import { noop } from "lodash";
+import { createContext, type ReactNode, useState } from "react";
+import type { NetworkId } from "@/lib/types/network";
 
 const store = createMidenStorage("miden-playground");
 const initialNetworkId = store.get<NetworkId>("networkId") ?? "mtst";

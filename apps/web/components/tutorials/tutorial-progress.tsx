@@ -3,9 +3,9 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@workspace/ui/components/tooltip";
-import type { TutorialStep } from "@/lib/types/tutorial";
-import useTutorials from "@/hooks/use-tutorials";
 import { cn } from "@workspace/ui/lib/utils";
+import useTutorials from "@/hooks/use-tutorials";
+import type { TutorialStep } from "@/lib/types/tutorial";
 
 const TutorialProgressStep = ({
   step,
@@ -18,7 +18,9 @@ const TutorialProgressStep = ({
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <div
+        <button
+          type="button"
+          aria-label={`Go to step ${index + 1}`}
           className={cn("grow first:rounded-l-md last:rounded-r-md", {
             "bg-primary": index < tutorialStep || index <= tutorialMaxStep,
             "bg-primary/25 border": index === tutorialStep,
@@ -30,9 +32,7 @@ const TutorialProgressStep = ({
           onClick={
             index <= tutorialMaxStep ? () => setTutorialStep(index) : undefined
           }
-        >
-          &nbsp;
-        </div>
+        />
       </TooltipTrigger>
       <TooltipContent>
         <p>

@@ -1,9 +1,9 @@
 "use client";
+import type { ColumnDef } from "@tanstack/react-table";
+import AccountAddress from "@/components/lib/account-address";
+import type { DataTableFeatures } from "@/lib/table";
 import type { Transaction } from "@/lib/types/transaction";
 import { formatId } from "@/lib/utils";
-import type { ColumnDef } from "@tanstack/react-table";
-import type { DataTableFeatures } from "@/lib/table";
-import AccountAddress from "@/components/lib/account-address";
 
 export const columns: ColumnDef<DataTableFeatures, Transaction>[] = [
   {

@@ -10,7 +10,7 @@ const useProjects = () => {
     console.log(JSON.parse(storeDump));
     console.log(storeDump);
     console.log("STATE");
-    const state = JSON.parse(localStorage.getItem("state")!);
+    const state = JSON.parse(localStorage.getItem("state") ?? "{}");
     state.scripts = [];
     state.components = [];
     console.log(state);

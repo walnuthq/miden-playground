@@ -1,10 +1,10 @@
-import type { AccountMultisig } from "@/lib/types/account";
 import {
   Table,
   TableBody,
   TableCell,
   TableRow,
 } from "@workspace/ui/components/table";
+import type { AccountMultisig } from "@/lib/types/account";
 
 const AccountMultisigInformationTable = ({
   multisig: {

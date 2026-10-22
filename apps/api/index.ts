@@ -1,5 +1,5 @@
-import { cors } from "hono/cors";
 import { contextStorage } from "hono/context-storage";
+import { cors } from "hono/cors";
 import { createApp } from "@/lib/app";
 import { WEB_URL } from "@/lib/constants";
 import root from "@/routes/root";

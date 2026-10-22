@@ -1,8 +1,8 @@
 "use client";
-import { type Component, componentTypes } from "@/lib/types/component";
 import type { ColumnDef } from "@tanstack/react-table";
-import type { DataTableFeatures } from "@/lib/table";
 import useScripts from "@/hooks/use-scripts";
+import type { DataTableFeatures } from "@/lib/table";
+import { type Component, componentTypes } from "@/lib/types/component";
 
 const ScriptCell = ({ scriptId }: { scriptId: string }) => {
   const { scripts } = useScripts();

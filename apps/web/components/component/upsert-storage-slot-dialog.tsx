@@ -1,16 +1,5 @@
 "use client";
-import { useState, useEffect, type Dispatch, type SetStateAction } from "react";
-import { toast } from "sonner";
-import { Trash } from "lucide-react";
-import { Spinner } from "@workspace/ui/components/spinner";
 import { Button } from "@workspace/ui/components/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@workspace/ui/components/select";
 import {
   Dialog,
   DialogClose,
@@ -22,10 +11,21 @@ import {
 } from "@workspace/ui/components/dialog";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select";
+import { Spinner } from "@workspace/ui/components/spinner";
+import { Trash } from "lucide-react";
+import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
+import { toast } from "sonner";
 import useComponents from "@/hooks/use-components";
 import { type StorageSlotType, storageSlotTypes } from "@/lib/types/component";
-import { stringToKeyValues, keyValuesToString } from "@/lib/utils/component";
 import { sleep } from "@/lib/utils";
+import { keyValuesToString, stringToKeyValues } from "@/lib/utils/component";
 
 const StorageSlotInput = ({
   storageSlotValue,
@@ -60,6 +60,7 @@ const StorageMapInput = ({
     <div className="grid gap-3 col-span-2">
       <Label htmlFor="value">Default Values</Label>
       {keyValues.map((keyValue, index) => (
+        // biome-ignore lint/suspicious/noArrayIndexKey: rows have no stable id, only their position.
         <div key={index} className="flex items-center gap-2">
           <Input
             id={`key-${index}`}

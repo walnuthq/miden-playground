@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import type { TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step3Content from "@/components/tutorials/timelock-p2id-note/step3.mdx";
-import useScripts from "@/hooks/use-scripts";
-import { defaultScriptIds } from "@/lib/types/default-scripts";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import useAccounts from "@/hooks/use-accounts";
+import useScripts from "@/hooks/use-scripts";
 import useTutorials from "@/hooks/use-tutorials";
+import { defaultScriptIds } from "@/lib/types/default-scripts";
+import type { TutorialStep } from "@/lib/types/tutorial";
 
 const useCompleted = () => {
   const { scripts } = useScripts();

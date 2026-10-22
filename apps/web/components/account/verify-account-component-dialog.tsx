@@ -1,8 +1,7 @@
 "use client";
-import { useState } from "react";
-import { toast } from "sonner";
+import { AccountId as WasmAccountId } from "@miden-sdk/miden-sdk/lazy";
+import { useMiden } from "@miden-sdk/react/lazy";
 import { useQueryClient } from "@tanstack/react-query";
-import { Spinner } from "@workspace/ui/components/spinner";
 import { Button } from "@workspace/ui/components/button";
 import {
   Dialog,
@@ -15,14 +14,14 @@ import {
 } from "@workspace/ui/components/dialog";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
+import { Spinner } from "@workspace/ui/components/spinner";
+import { useState } from "react";
+import { toast } from "sonner";
 import useAccounts from "@/hooks/use-accounts";
-import { verifyAccountComponentFromSource } from "@/lib/api";
-import { toBase64 } from "@/lib/utils";
-import { fileListToPackageSources } from "@/lib/utils/script";
 import useNetwork from "@/hooks/use-network";
+import { verifyAccountComponentFromSource } from "@/lib/api";
 import type { PackageSource } from "@/lib/types/script";
-import { AccountId as WasmAccountId } from "@miden-sdk/miden-sdk/lazy";
-import { useMiden } from "@miden-sdk/react/lazy";
+import { fileListToPackageSources } from "@/lib/utils/script";
 
 const VerifyAccountComponentDialog = () => {
   const queryClient = useQueryClient();

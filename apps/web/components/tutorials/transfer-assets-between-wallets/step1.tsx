@@ -1,7 +1,7 @@
-import type { TutorialStep } from "@/lib/types/tutorial";
-import useAccounts from "@/hooks/use-accounts";
-import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step1Content from "@/components/tutorials/transfer-assets-between-wallets/step1.mdx";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
+import useAccounts from "@/hooks/use-accounts";
+import type { TutorialStep } from "@/lib/types/tutorial";
 
 const Step1: TutorialStep = {
   title: "Explore the accounts.",

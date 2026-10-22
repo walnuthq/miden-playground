@@ -1,15 +1,15 @@
-import type { Dispatch, SetStateAction } from "react";
-import { ChevronsUpDown, HandCoins, Wallet } from "lucide-react";
+import { Button } from "@workspace/ui/components/button";
 import {
   DropdownMenu,
-  DropdownMenuLabel,
   DropdownMenuContent,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
+  DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
-import { Button } from "@workspace/ui/components/button";
+import { ChevronsUpDown, HandCoins, Wallet } from "lucide-react";
+import type { Dispatch, SetStateAction } from "react";
 import useAccounts from "@/hooks/use-accounts";
 
 const SelectAccountDropdownMenu = ({
@@ -64,13 +64,11 @@ const SelectAccountDropdownMenu = ({
       <DropdownMenuContent className="w-56" align="start">
         <DropdownMenuRadioGroup value={value} onValueChange={onValueChange}>
           {!showWallets && !showFaucets ? (
-            <>
-              {shownAccounts.map((account) => (
-                <DropdownMenuRadioItem key={account.id} value={account.id}>
-                  {account.name}
-                </DropdownMenuRadioItem>
-              ))}
-            </>
+            shownAccounts.map((account) => (
+              <DropdownMenuRadioItem key={account.id} value={account.id}>
+                {account.name}
+              </DropdownMenuRadioItem>
+            ))
           ) : (
             <>
               {showWallets && (

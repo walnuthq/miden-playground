@@ -1,12 +1,12 @@
 import { EllipsisVertical } from "lucide-react";
-import type { TutorialStep } from "@/lib/types/tutorial";
-import useAccounts from "@/hooks/use-accounts";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step7Content from "@/components/tutorials/your-first-smart-contract-and-custom-note/step7.mdx";
-import useScripts from "@/hooks/use-scripts";
+import useAccounts from "@/hooks/use-accounts";
 import useComponents from "@/hooks/use-components";
+import useScripts from "@/hooks/use-scripts";
 import { defaultScriptIds } from "@/lib/types/default-scripts";
+import type { TutorialStep } from "@/lib/types/tutorial";
 
 const useCompleted = () => {
   const { accounts } = useAccounts();

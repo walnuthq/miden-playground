@@ -3,8 +3,8 @@ import {
   MultisigClient,
   type SignatureScheme,
 } from "@openzeppelin/miden-multisig-client";
-import type { NetworkId } from "@/lib/types/network";
 import { rpcUrls } from "@/lib/miden-client";
+import type { NetworkId } from "@/lib/types/network";
 
 export const initMultisigClient = async ({
   midenClient,

@@ -1,12 +1,12 @@
-import {
-  type WebClient as WebClientType,
-  type AccountId as WasmAccountId,
+import type {
+  AccountId as WasmAccountId,
+  WebClient as WebClientType,
 } from "@miden-sdk/miden-sdk/lazy";
-import { fromHex } from "@/lib/utils";
-import type { NetworkId } from "@/lib/types/network";
 import { midenFaucetApiUrl } from "@/lib/constants";
-import { clientGetAllInputNotes } from "@/lib/web-client";
 import { solveFaucetPow } from "@/lib/faucet-pow";
+import type { NetworkId } from "@/lib/types/network";
+import { fromHex } from "@/lib/utils";
+import { clientGetAllInputNotes } from "@/lib/web-client";
 
 // The faucet rejects a challenge 30s after issuing it: give up on a challenge after 20s
 // of solving, leaving time for the round trips, and request a fresh one.

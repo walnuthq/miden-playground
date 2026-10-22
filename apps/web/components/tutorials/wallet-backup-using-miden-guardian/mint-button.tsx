@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
-import { HandCoins } from "lucide-react";
-import { toast } from "sonner";
-import { Spinner } from "@workspace/ui/components/spinner";
-import useNetwork from "@/hooks/use-network";
-import useAccounts from "@/hooks/use-accounts";
 import { Button } from "@workspace/ui/components/button";
+import { Spinner } from "@workspace/ui/components/spinner";
+import { HandCoins } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import useAccounts from "@/hooks/use-accounts";
+import useNetwork from "@/hooks/use-network";
 import { requestTokens } from "@/lib/miden-faucet";
 
 const MintButton = () => {

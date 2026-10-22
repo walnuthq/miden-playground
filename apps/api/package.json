@@ -7,8 +7,8 @@
     "dev": "wrangler dev --port 3001",
     "build": "wrangler deploy --dry-run --outdir dist --env production",
     "deploy": "wrangler deploy --env production",
-    "lint": "eslint",
-    "lint:fix": "eslint --fix",
+    "lint": "biome check .",
+    "format": "biome check --write .",
     "typecheck": "tsc --noEmit",
     "cf-typegen": "wrangler types --env-file .env.example --strict-vars=false cloudflare-env.d.ts",
     "db:push": "drizzle-kit push"
@@ -26,11 +26,9 @@
     "@types/lodash": "4.17.26",
     "@types/node": "24.19.2",
     "@types/pg": "8.23.1",
-    "@workspace/eslint-config": "workspace:^",
     "@workspace/typescript-config": "workspace:*",
     "dotenv": "18.0.8",
     "drizzle-kit": "1.0.0-rc.4",
-    "eslint": "9.39.5",
     "typescript": "6.0.3",
     "wrangler": "4.151.3"
   }

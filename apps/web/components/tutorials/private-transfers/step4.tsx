@@ -1,9 +1,9 @@
 import { EllipsisVertical } from "lucide-react";
-import type { TutorialStep } from "@/lib/types/tutorial";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step4Content from "@/components/tutorials/private-transfers/step4.mdx";
 import useTransferNote from "@/components/tutorials/private-transfers/use-transfer-note";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
+import type { TutorialStep } from "@/lib/types/tutorial";
 
 const useCompleted = () => {
   const note = useTransferNote();

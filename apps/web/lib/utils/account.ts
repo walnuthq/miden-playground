@@ -1,18 +1,19 @@
-import type { NetworkId } from "@/lib/types/network";
+import {
+  BASIC_WALLET_CODE,
+  EMPTY_WORD,
+  FUNGIBLE_FAUCET_CODE,
+  FUNGIBLE_FAUCET_DEFAULT_DECIMALS,
+  FUNGIBLE_FAUCET_DEFAULT_MAX_SUPPLY,
+  midenFaucetAccountId,
+  midenFaucetAddress,
+} from "@/lib/constants";
 import type {
   Account,
   AccountStorageMode,
   StorageItem,
 } from "@/lib/types/account";
-import {
-  BASIC_WALLET_CODE,
-  FUNGIBLE_FAUCET_CODE,
-  FUNGIBLE_FAUCET_DEFAULT_DECIMALS,
-  FUNGIBLE_FAUCET_DEFAULT_MAX_SUPPLY,
-  EMPTY_WORD,
-} from "@/lib/constants";
+import type { NetworkId } from "@/lib/types/network";
 import { parseAmount } from "@/lib/utils/asset";
-import { midenFaucetAccountId, midenFaucetAddress } from "@/lib/constants";
 
 export const defaultStorageItem = (): StorageItem => ({
   name: "",

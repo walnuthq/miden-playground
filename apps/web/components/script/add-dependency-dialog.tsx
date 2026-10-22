@@ -1,15 +1,5 @@
 "use client";
-import { useState } from "react";
-import { toast } from "sonner";
-import { Spinner } from "@workspace/ui/components/spinner";
 import { Button } from "@workspace/ui/components/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@workspace/ui/components/select";
 import {
   Dialog,
   DialogClose,
@@ -20,9 +10,19 @@ import {
   DialogTitle,
 } from "@workspace/ui/components/dialog";
 import { Label } from "@workspace/ui/components/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select";
+import { Spinner } from "@workspace/ui/components/spinner";
+import { useState } from "react";
+import { toast } from "sonner";
 import useScripts from "@/hooks/use-scripts";
-import { sleep } from "@/lib/utils";
 import { defaultScriptIds } from "@/lib/types/default-scripts";
+import { sleep } from "@/lib/utils";
 
 const AddDependencyDialog = () => {
   const {

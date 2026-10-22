@@ -3,8 +3,8 @@ import {
   logBrowserErrors,
   nextStep,
   startTutorial,
-  tutorialPanel,
   TRANSACTION_TIMEOUT,
+  tutorialPanel,
 } from "./tutorial";
 
 // Tutorial 1 needs no wallet: every transaction is signed by accounts the

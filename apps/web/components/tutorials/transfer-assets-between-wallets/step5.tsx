@@ -1,7 +1,7 @@
-import type { TutorialStep } from "@/lib/types/tutorial";
-import useAccounts from "@/hooks/use-accounts";
 import NextTutorialButton from "@/components/tutorials/next-tutorial-button";
 import Step5Content from "@/components/tutorials/transfer-assets-between-wallets/step5.mdx";
+import useAccounts from "@/hooks/use-accounts";
+import type { TutorialStep } from "@/lib/types/tutorial";
 
 const Step5: TutorialStep = {
   title: "Confirm the assets have been transferred.",

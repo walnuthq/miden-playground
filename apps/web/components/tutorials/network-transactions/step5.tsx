@@ -1,9 +1,9 @@
-import type { TutorialStep } from "@/lib/types/tutorial";
-import NextTutorialButton from "@/components/tutorials/next-tutorial-button";
 import Step5Content from "@/components/tutorials/network-transactions/step5.mdx";
+import NextTutorialButton from "@/components/tutorials/next-tutorial-button";
 import useAccounts from "@/hooks/use-accounts";
 import useComponents from "@/hooks/use-components";
 import { defaultComponentIds } from "@/lib/types/default-components";
+import type { TutorialStep } from "@/lib/types/tutorial";
 
 const Step5: TutorialStep = {
   title: "Read the updated counter value.",

@@ -4,15 +4,15 @@ import type {
   TransactionResult as WasmTransactionResultType,
 } from "@miden-sdk/miden-sdk/lazy";
 import type { Account } from "@/lib/types/account";
-import type { InputNote } from "@/lib/types/note";
 import type { Component } from "@/lib/types/component";
+import type { InputNote } from "@/lib/types/note";
+import type { ProcedureExport, Script } from "@/lib/types/script";
+import type { Store } from "@/lib/types/store";
 import type {
+  CreateTransactionDialogStep,
   Transaction,
   TransactionType,
-  CreateTransactionDialogStep,
 } from "@/lib/types/transaction";
-import type { Script, ProcedureExport } from "@/lib/types/script";
-import type { Store } from "@/lib/types/store";
 import type { TutorialId } from "@/lib/types/tutorial";
 
 export type State = {

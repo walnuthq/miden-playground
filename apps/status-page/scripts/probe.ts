@@ -2,7 +2,7 @@ import "./load-env.ts";
 import fs from "node:fs";
 import path from "node:path";
 
-import { chromium, type Browser, type Page } from "playwright";
+import { type Browser, chromium, type Page } from "playwright";
 
 import type {
   EndpointStatus,

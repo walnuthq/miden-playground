@@ -1,5 +1,5 @@
-import { MonitorCheck } from "lucide-react";
 import { AlertDescription, AlertTitle } from "@workspace/ui/components/alert";
+import { MonitorCheck } from "lucide-react";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
 
 const MobileAlert = () => (

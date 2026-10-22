@@ -2,8 +2,8 @@ import authGuardedMultisig from "@/lib/types/default-scripts/auth-guarded-multis
 import authNetworkAccount from "@/lib/types/default-scripts/auth-network-account";
 import authNoAuth from "@/lib/types/default-scripts/auth-no-auth";
 import authSingleSig from "@/lib/types/default-scripts/auth-single-sig";
-import core from "@/lib/types/default-scripts/core";
 import basicWallet from "@/lib/types/default-scripts/basic-wallet";
+import core from "@/lib/types/default-scripts/core";
 import counterContract from "@/lib/types/default-scripts/counter-contract";
 import fungibleFaucet from "@/lib/types/default-scripts/fungible-faucet";
 import p2id from "@/lib/types/default-scripts/p2id";

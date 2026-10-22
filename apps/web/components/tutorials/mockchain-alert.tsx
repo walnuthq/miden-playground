@@ -1,5 +1,5 @@
-import { FlaskConical } from "lucide-react";
 import { AlertDescription, AlertTitle } from "@workspace/ui/components/alert";
+import { FlaskConical } from "lucide-react";
 import TutorialAlert from "@/components/tutorials/tutorial-alert";
 
 const MockChainAlert = () => (

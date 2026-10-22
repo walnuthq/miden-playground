@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
 import {
+  type MidenWalletAdapter,
   useWallet,
   type GuardianInfo as WalletGuardianInfo,
-  type MidenWalletAdapter,
 } from "@miden-sdk/miden-wallet-adapter";
 import { Spinner } from "@workspace/ui/components/spinner";
+import { useEffect, useState } from "react";
 
 const guardianProviderNames: Record<
   NonNullable<WalletGuardianInfo["guardianProvider"]>,

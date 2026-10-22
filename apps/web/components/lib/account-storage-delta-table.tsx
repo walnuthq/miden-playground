@@ -1,3 +1,4 @@
+import { Button } from "@workspace/ui/components/button";
 import {
   Table,
   TableBody,
@@ -11,7 +12,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@workspace/ui/components/tooltip";
-import { Button } from "@workspace/ui/components/button";
 import { formatValue } from "@/lib/utils";
 import { formatStorageSlotName } from "@/lib/utils/account";
 

@@ -1,8 +1,9 @@
 // import { dirname } from "path";
 // import { fileURLToPath } from "url";
-import type { NextConfig } from "next";
+
 import createMDX from "@next/mdx";
 import withSimpleAnalytics from "@simpleanalytics/next/plugin";
+import type { NextConfig } from "next";
 
 const paraStubPackages = [
   "@getpara/solana-wallet-connectors",
@@ -79,4 +80,5 @@ const withMDX = createMDX({
 export default withSimpleAnalytics(withMDX(nextConfig));
 
 import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
+
 initOpenNextCloudflareForDev();

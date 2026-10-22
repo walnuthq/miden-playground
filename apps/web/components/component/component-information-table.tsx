@@ -1,12 +1,12 @@
-import Link from "next/link";
-import { type Component, componentTypes } from "@/lib/types/component";
 import {
   Table,
   TableBody,
   TableCell,
   TableRow,
 } from "@workspace/ui/components/table";
+import Link from "next/link";
 import useScripts from "@/hooks/use-scripts";
+import { type Component, componentTypes } from "@/lib/types/component";
 
 const ComponentInformationTable = ({ component }: { component: Component }) => {
   const { scripts } = useScripts();

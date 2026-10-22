@@ -4,10 +4,10 @@ import { cp, mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import {
-  test as base,
-  expect,
   type BrowserContext,
   type BrowserType,
+  test as base,
+  expect,
   type Page,
 } from "@playwright/test";
 import { TRANSACTION_TIMEOUT } from "./tutorial";

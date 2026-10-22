@@ -1,18 +1,18 @@
 import { type NextRequest, NextResponse } from "next/server";
+import authNoAuth from "@/lib/types/default-scripts/auth-no-auth";
+import countReader from "@/lib/types/default-scripts/count-reader";
 import counterMapContract from "@/lib/types/default-scripts/counter-map-contract";
-import timelockP2id from "@/lib/types/default-scripts/timelock-p2id";
 import counterNote from "@/lib/types/default-scripts/counter-note";
 import counterScript from "@/lib/types/default-scripts/counter-script";
-import countReader from "@/lib/types/default-scripts/count-reader";
-import { sleep } from "@/lib/utils";
+import timelockP2id from "@/lib/types/default-scripts/timelock-p2id";
 import type {
-  ScriptExample,
+  CompiledPackage,
   Export,
   Script,
-  CompiledPackage,
+  ScriptExample,
 } from "@/lib/types/script";
+import { sleep } from "@/lib/utils";
 import { defaultScript } from "@/lib/utils/script";
-import authNoAuth from "@/lib/types/default-scripts/auth-no-auth";
 
 type CompileScriptRequestBody = {
   name: string;

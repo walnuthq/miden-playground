@@ -1,8 +1,8 @@
-import { toast } from "sonner";
 import type { TransactionRequest as WasmTransactionRequestType } from "@miden-sdk/miden-sdk/lazy";
+import { toast } from "sonner";
+import { SubmitTransactionToastDescription } from "@/components/transactions/create-transaction-dialog/create-transaction-preview-form";
 import useTransactions from "@/hooks/use-transactions";
 import type { NoteType } from "@/lib/types/note";
-import { SubmitTransactionToastDescription } from "@/components/transactions/create-transaction-dialog/create-transaction-preview-form";
 
 // Para's sign callback rejects with this when its confirmation modal is
 // dismissed (@miden-sdk/para signCb).

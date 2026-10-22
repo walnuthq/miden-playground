@@ -1,19 +1,19 @@
-import { groupBy } from "lodash";
+import { groupBy, mapValues } from "lodash";
 import { parse } from "smol-toml";
 import { EMPTY_WORD } from "@/lib/constants";
 import type {
-  Signature,
-  ProcedureExport,
-  PackageSource,
+  CompiledPackage,
   Dependency,
-  Script,
   MidenInput,
   MidenProjectToml,
-  CompiledPackage,
-  MidenType,
   MidenRawType,
-  Package,
+  MidenType,
   MidenTypeStruct,
+  Package,
+  PackageSource,
+  ProcedureExport,
+  Script,
+  Signature,
 } from "@/lib/types/script";
 import { midenTypes } from "@/lib/types/script";
 
@@ -198,27 +198,19 @@ export const fileListToPackageSources = async (fileList: FileList) => {
         .replace("/miden-project.toml", "")
         .replace("/src/lib.rs", ""),
   );
-  return Object.keys(packagesSourcesFilesByPackage).reduce<
-    Record<string, PackageSource>
-  >((previousValue, currentValue) => {
-    const packagesSourcesFilesWithContent =
-      packagesSourcesFilesByPackage[currentValue];
-    if (!packagesSourcesFilesWithContent) {
-      return previousValue;
-    }
-    const packageSource = packagesSourcesFilesWithContent.reduce<PackageSource>(
-      (previousValue, { file, content }) => ({
-        ...previousValue,
-        midenProjectToml:
-          file.name === "miden-project.toml"
-            ? content
-            : previousValue.midenProjectToml,
-        rust: file.name === "lib.rs" ? content : previousValue.rust,
-      }),
-      { midenProjectToml: "", rust: "" },
-    );
-    return { ...previousValue, [currentValue]: packageSource };
-  }, {});
+  return mapValues(
+    packagesSourcesFilesByPackage,
+    (packagesSourcesFilesWithContent): PackageSource => {
+      const content = (name: string) =>
+        packagesSourcesFilesWithContent.findLast(
+          ({ file }) => file.name === name,
+        )?.content ?? "";
+      return {
+        midenProjectToml: content("miden-project.toml"),
+        rust: content("lib.rs"),
+      };
+    },
+  );
 };
 
 export const midenRawTypeToMidenType = (

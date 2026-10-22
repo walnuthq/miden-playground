@@ -1,5 +1,5 @@
-import Link from "next/link";
-import { CircleCheckBig } from "lucide-react";
+import { normalizeAccountId } from "@miden-sdk/react/lazy";
+import { Badge } from "@workspace/ui/components/badge";
 import {
   Table,
   TableBody,
@@ -8,14 +8,14 @@ import {
   TableHeader,
   TableRow,
 } from "@workspace/ui/components/table";
-import { Badge } from "@workspace/ui/components/badge";
-import NoteId from "@/components/lib/note-id";
-import type { TransactionNote } from "@/lib/types/transaction";
+import { CircleCheckBig } from "lucide-react";
+import Link from "next/link";
 import AccountAddress from "@/components/lib/account-address";
+import NoteId from "@/components/lib/note-id";
 import useAccounts from "@/hooks/use-accounts";
 import useScripts from "@/hooks/use-scripts";
+import type { TransactionNote } from "@/lib/types/transaction";
 import { formatAmount } from "@/lib/utils/asset";
-import { normalizeAccountId } from "@miden-sdk/react/lazy";
 
 const TransactionNoteTable = ({ notes }: { notes: TransactionNote[] }) => {
   const { accounts, faucets } = useAccounts();

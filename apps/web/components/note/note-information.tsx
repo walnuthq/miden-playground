@@ -1,13 +1,13 @@
-import type { InputNote } from "@/lib/types/note";
-import { accountIdFromPrefixSuffix } from "@/lib/utils/account";
-import NoteInformationTable from "@/components/note/note-information-table";
-import NoteStorageTable from "@/components/note/note-storage-table";
-import DecodedNoteStorageTable from "@/components/note/decoded-note-storage-table";
 import AccountAddress from "@/components/lib/account-address";
 import FungibleAssetsTable from "@/components/lib/fungible-assets-table";
+import DecodedNoteStorageTable from "@/components/note/decoded-note-storage-table";
+import NoteInformationTable from "@/components/note/note-information-table";
+import NoteStorageTable from "@/components/note/note-storage-table";
 import useScripts from "@/hooks/use-scripts";
-import type { Script } from "@/lib/types/script";
 import useTutorials from "@/hooks/use-tutorials";
+import type { InputNote } from "@/lib/types/note";
+import type { Script } from "@/lib/types/script";
+import { accountIdFromPrefixSuffix } from "@/lib/utils/account";
 
 const NoteInformation = ({
   inputNote,

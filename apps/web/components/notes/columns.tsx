@@ -1,29 +1,29 @@
 "use client";
-import { MoreVertical } from "lucide-react";
-import { toast } from "sonner";
-import { type InputNote, noteStates } from "@/lib/types/note";
-import { noteConsumed } from "@/lib/utils/note";
-import { formatId, fromBase64 } from "@/lib/utils";
+import {
+  ConsumeTransaction,
+  type MidenWalletAdapter,
+  useWallet,
+} from "@miden-sdk/miden-wallet-adapter";
+import { normalizeAccountId, useMiden } from "@miden-sdk/react/lazy";
 import type { ColumnDef } from "@tanstack/react-table";
-import type { DataTableFeatures } from "@/lib/table";
-import { Button } from "@workspace/ui/components/button";
 import { Badge } from "@workspace/ui/components/badge";
+import { Button } from "@workspace/ui/components/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
-import {
-  useWallet,
-  ConsumeTransaction,
-  type MidenWalletAdapter,
-} from "@miden-sdk/miden-wallet-adapter";
-import useTransactions from "@/hooks/use-transactions";
+import { MoreVertical } from "lucide-react";
+import { toast } from "sonner";
 import AccountAddress from "@/components/lib/account-address";
 import useAccounts from "@/hooks/use-accounts";
 import useParaTransaction from "@/hooks/use-para-transaction";
-import { normalizeAccountId, useMiden } from "@miden-sdk/react/lazy";
+import useTransactions from "@/hooks/use-transactions";
+import type { DataTableFeatures } from "@/lib/table";
+import { type InputNote, noteStates } from "@/lib/types/note";
+import { formatId, fromBase64 } from "@/lib/utils";
+import { noteConsumed } from "@/lib/utils/note";
 
 const InputNoteSenderCell = ({ inputNote }: { inputNote: InputNote }) => {
   const { accounts } = useAccounts();

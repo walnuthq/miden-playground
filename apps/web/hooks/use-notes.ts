@@ -1,31 +1,31 @@
 import {
   AccountId as WasmAccountId,
-  TransactionRequestBuilder as WasmTransactionRequestBuilder,
-  Note as WasmNote,
-  NoteAssets as WasmNoteAssets,
   FungibleAsset as WasmFungibleAsset,
-  NoteType as WasmNoteType,
-  NoteAttachment as WasmNoteAttachment,
+  Note as WasmNote,
   NoteArray as WasmNoteArray,
+  NoteAssets as WasmNoteAssets,
+  NoteAttachment as WasmNoteAttachment,
+  NoteType as WasmNoteType,
+  TransactionRequestBuilder as WasmTransactionRequestBuilder,
 } from "@miden-sdk/miden-sdk/lazy";
-import { useMiden } from "@miden-sdk/react/lazy";
-import useGlobalContext from "@/components/global-context/hook";
-import type { NoteType, InputNote } from "@/lib/types/note";
-import useAccounts from "@/hooks/use-accounts";
-import useParaTransaction from "@/hooks/use-para-transaction";
-import useScripts from "@/hooks/use-scripts";
 import {
-  useWallet,
   CustomTransaction,
   TransactionType,
+  useWallet,
 } from "@miden-sdk/miden-wallet-adapter";
+import { useMiden } from "@miden-sdk/react/lazy";
+import useGlobalContext from "@/components/global-context/hook";
+import useAccounts from "@/hooks/use-accounts";
+import useNetwork from "@/hooks/use-network";
+import useParaTransaction from "@/hooks/use-para-transaction";
+import useScripts from "@/hooks/use-scripts";
+import { verifyNoteFromPackageId } from "@/lib/api";
+import type { InputNote, NoteType } from "@/lib/types/note";
 import {
   clientCreateNoteFromScript,
   clientImportNoteFile,
   randomWord,
 } from "@/lib/web-client";
-import { verifyNoteFromPackageId } from "@/lib/api";
-import useNetwork from "@/hooks/use-network";
 
 const useNotes = () => {
   const { networkId } = useNetwork();

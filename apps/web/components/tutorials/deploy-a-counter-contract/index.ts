@@ -1,7 +1,3 @@
-import type { Tutorial } from "@/lib/types/tutorial";
-import { defaultTutorial } from "@/lib/utils/tutorial";
-import { defaultState } from "@/lib/utils/state";
-import { midenFaucetAccount } from "@/lib/utils/account";
 import Step1 from "@/components/tutorials/deploy-a-counter-contract/step1";
 import Step2 from "@/components/tutorials/deploy-a-counter-contract/step2";
 import Step3 from "@/components/tutorials/deploy-a-counter-contract/step3";
@@ -9,6 +5,10 @@ import Step4 from "@/components/tutorials/deploy-a-counter-contract/step4";
 import Step5 from "@/components/tutorials/deploy-a-counter-contract/step5";
 import Step6 from "@/components/tutorials/deploy-a-counter-contract/step6";
 import Step7 from "@/components/tutorials/deploy-a-counter-contract/step7";
+import type { Tutorial } from "@/lib/types/tutorial";
+import { midenFaucetAccount } from "@/lib/utils/account";
+import { defaultState } from "@/lib/utils/state";
+import { defaultTutorial } from "@/lib/utils/tutorial";
 
 const tutorial: Tutorial = {
   ...defaultTutorial(),

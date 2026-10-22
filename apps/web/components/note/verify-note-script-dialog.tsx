@@ -1,8 +1,6 @@
 "use client";
-import { useState } from "react";
-import { toast } from "sonner";
+import { useMiden } from "@miden-sdk/react/lazy";
 import { useQueryClient } from "@tanstack/react-query";
-import { Spinner } from "@workspace/ui/components/spinner";
 import { Button } from "@workspace/ui/components/button";
 import {
   Dialog,
@@ -15,15 +13,17 @@ import {
 } from "@workspace/ui/components/dialog";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
+import { Spinner } from "@workspace/ui/components/spinner";
+import { useState } from "react";
+import { toast } from "sonner";
+import useNetwork from "@/hooks/use-network";
 import useNotes from "@/hooks/use-notes";
 import { verifyNoteFromSource } from "@/lib/api";
 import type { PackageSource } from "@/lib/types/script";
 import {
-  parseMidenProjectToml,
   fileListToPackageSources,
+  parseMidenProjectToml,
 } from "@/lib/utils/script";
-import useNetwork from "@/hooks/use-network";
-import { useMiden } from "@miden-sdk/react/lazy";
 
 const VerifyNoteScriptDialog = () => {
   const queryClient = useQueryClient();

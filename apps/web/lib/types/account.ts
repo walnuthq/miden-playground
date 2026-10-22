@@ -1,8 +1,8 @@
-import type { FungibleAsset } from "@/lib/types/asset";
 import type {
   DetectedMultisigConfig,
   Proposal,
 } from "@openzeppelin/miden-multisig-client";
+import type { FungibleAsset } from "@/lib/types/asset";
 
 export const accountStorageModes = {
   public: "Public",

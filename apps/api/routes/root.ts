@@ -1,5 +1,5 @@
 import { createApp } from "@/lib/app";
-import { WEB_URL, API_COMPILE_URL, API_REGISTRY_URL } from "@/lib/constants";
+import { API_COMPILE_URL, API_REGISTRY_URL, WEB_URL } from "@/lib/constants";
 
 const root = createApp().get("/", (c) =>
   c.json({

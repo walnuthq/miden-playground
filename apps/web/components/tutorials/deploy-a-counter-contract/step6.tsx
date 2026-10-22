@@ -1,10 +1,10 @@
-import type { TutorialStep } from "@/lib/types/tutorial";
+import Step6Content from "@/components/tutorials/deploy-a-counter-contract/step6.mdx";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
-import Step6Content from "@/components/tutorials/deploy-a-counter-contract/step6.mdx";
 import useAccounts from "@/hooks/use-accounts";
 import useComponents from "@/hooks/use-components";
 import { defaultComponentIds } from "@/lib/types/default-components";
+import type { TutorialStep } from "@/lib/types/tutorial";
 
 const useCompleted = () => {
   const { accounts } = useAccounts();

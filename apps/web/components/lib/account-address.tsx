@@ -1,14 +1,14 @@
-import Link from "next/link";
 import { Button } from "@workspace/ui/components/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@workspace/ui/components/tooltip";
-import { formatAddress, getIdentifierPart } from "@/lib/utils/account";
-import useNetwork from "@/hooks/use-network";
-import useAccounts from "@/hooks/use-accounts";
+import Link from "next/link";
 import CopyButton from "@/components/lib/copy-button";
+import useAccounts from "@/hooks/use-accounts";
+import useNetwork from "@/hooks/use-network";
+import { formatAddress, getIdentifierPart } from "@/lib/utils/account";
 
 const AccountAddress = ({
   id = "",

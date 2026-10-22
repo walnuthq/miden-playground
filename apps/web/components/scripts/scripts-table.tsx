@@ -1,9 +1,8 @@
 "use client";
-import { useRouter } from "next/navigation";
 import {
   type ColumnDef,
-  type RowData,
   flexRender,
+  type RowData,
   useTable,
 } from "@tanstack/react-table";
 import { Input } from "@workspace/ui/components/input";
@@ -15,9 +14,10 @@ import {
   TableHeader,
   TableRow,
 } from "@workspace/ui/components/table";
-import ImportProjectButton from "@/components/scripts/import-project-button";
-import CreateScriptButton from "@/components/scripts/create-script-button";
 import { cn } from "@workspace/ui/lib/utils";
+import { useRouter } from "next/navigation";
+import CreateScriptButton from "@/components/scripts/create-script-button";
+import ImportProjectButton from "@/components/scripts/import-project-button";
 import { type DataTableFeatures, dataTableFeatures } from "@/lib/table";
 
 const ScriptsTable = <TData extends RowData>({

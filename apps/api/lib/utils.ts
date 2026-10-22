@@ -1,17 +1,17 @@
-import type {
-  Dependency,
-  Manifest,
-  PackageType,
-  CompiledPackage,
-} from "@/lib/types";
-import { projectTemplateFiles } from "@/lib/templates";
-import { generateCargoToml, generateMidenProjectToml } from "@/lib/toml";
 import {
   getDependencies,
   getPackage,
   insertPackage,
   updatePackage,
 } from "@/db/packages";
+import { projectTemplateFiles } from "@/lib/templates";
+import { generateCargoToml, generateMidenProjectToml } from "@/lib/toml";
+import type {
+  CompiledPackage,
+  Dependency,
+  Manifest,
+  PackageType,
+} from "@/lib/types";
 import { fetchApiCompile } from "@/lib/upstream";
 
 export const createPackage = ({

@@ -1,7 +1,3 @@
-import { useState } from "react";
-import { Spinner } from "@workspace/ui/components/spinner";
-import { toast } from "sonner";
-import useScripts from "@/hooks/use-scripts";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,6 +8,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@workspace/ui/components/alert-dialog";
+import { Spinner } from "@workspace/ui/components/spinner";
+import { useState } from "react";
+import { toast } from "sonner";
+import useScripts from "@/hooks/use-scripts";
 
 const DeleteScriptAlertDialog = () => {
   const {

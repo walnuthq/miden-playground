@@ -1,11 +1,11 @@
-import type { TutorialStep } from "@/lib/types/tutorial";
+import Step2Content from "@/components/tutorials/network-transactions/step2.mdx";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
-import Step2Content from "@/components/tutorials/network-transactions/step2.mdx";
 import useAccounts from "@/hooks/use-accounts";
 import useComponents from "@/hooks/use-components";
-import { defaultComponentIds } from "@/lib/types/default-components";
 import { COUNTER_NOTE_RUN_PROC_HASH } from "@/lib/constants";
+import { defaultComponentIds } from "@/lib/types/default-components";
+import type { TutorialStep } from "@/lib/types/tutorial";
 
 const useCompleted = () => {
   const { accounts } = useAccounts();

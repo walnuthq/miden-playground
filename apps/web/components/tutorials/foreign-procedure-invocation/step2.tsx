@@ -1,8 +1,8 @@
 import { usePathname } from "next/navigation";
-import type { TutorialStep } from "@/lib/types/tutorial";
+import Step2Content from "@/components/tutorials/foreign-procedure-invocation/step2.mdx";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
-import Step2Content from "@/components/tutorials/foreign-procedure-invocation/step2.mdx";
+import type { TutorialStep } from "@/lib/types/tutorial";
 
 const useCompleted = () => {
   const pathname = usePathname();

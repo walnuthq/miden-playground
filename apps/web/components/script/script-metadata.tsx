@@ -1,10 +1,10 @@
-import { Plus } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
-import type { Script } from "@/lib/types/script";
-import MetadataTable from "@/components/script/metadata-table";
-import ExportsTable from "@/components/script/exports-table";
+import { Plus } from "lucide-react";
 import DependenciesTable from "@/components/script/dependencies-table";
+import ExportsTable from "@/components/script/exports-table";
+import MetadataTable from "@/components/script/metadata-table";
 import useScripts from "@/hooks/use-scripts";
+import type { Script } from "@/lib/types/script";
 
 const ScriptMetadata = ({ script }: { script: Script }) => {
   const { openAddDependencyDialog } = useScripts();

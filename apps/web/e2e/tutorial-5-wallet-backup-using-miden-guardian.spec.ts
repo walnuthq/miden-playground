@@ -3,8 +3,8 @@ import {
   logBrowserErrors,
   nextStep,
   startTutorial,
-  tutorialPanel,
   TRANSACTION_TIMEOUT,
+  tutorialPanel,
 } from "./tutorial";
 
 // Deploys a guardian wallet signed by a new Bread Wallet (see ./bread.ts),

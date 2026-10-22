@@ -1,16 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-import { Spinner } from "@workspace/ui/components/spinner";
 import { Button } from "@workspace/ui/components/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@workspace/ui/components/select";
 import {
   Dialog,
   DialogClose,
@@ -22,8 +11,19 @@ import {
 } from "@workspace/ui/components/dialog";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
-import useScripts from "@/hooks/use-scripts";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select";
+import { Spinner } from "@workspace/ui/components/spinner";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import useComponents from "@/hooks/use-components";
+import useScripts from "@/hooks/use-scripts";
 import { type ComponentType, componentTypes } from "@/lib/types/component";
 
 const CreateComponentDialog = () => {
@@ -46,6 +46,7 @@ const CreateComponentDialog = () => {
       type === "account-component" &&
       status === "compiled",
   );
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reset the selected script when the component type changes.
   useEffect(() => {
     setScriptId("");
   }, [componentType]);

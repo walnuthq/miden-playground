@@ -1,11 +1,35 @@
 "use client";
-import { uniq } from "lodash";
 import {
-  Address as WasmAddress,
   type Account as WasmAccount,
+  Address as WasmAddress,
   type InputNoteRecord as WasmInputNoteRecord,
   type TransactionRecord as WasmTransactionRecord,
 } from "@miden-sdk/miden-sdk/lazy";
+import { type Asset, useWallet } from "@miden-sdk/miden-wallet-adapter";
+import {
+  clearMidenStorage,
+  useImportStore,
+  useMiden,
+  useSyncState,
+} from "@miden-sdk/react/lazy";
+import { uniq } from "lodash";
+import useGlobalContext from "@/components/global-context/hook";
+import { useParaWallet } from "@/components/providers/para-wallet-context";
+import useNetwork from "@/hooks/use-network";
+import { midenFaucetAccountId, P2ID_NOTE_CODE } from "@/lib/constants";
+import type { Account } from "@/lib/types/account";
+import type { NetworkId } from "@/lib/types/network";
+import type { InputNote } from "@/lib/types/note";
+import type { Script } from "@/lib/types/script";
+import type { State } from "@/lib/types/state";
+import type { Transaction } from "@/lib/types/transaction";
+import {
+  accountIdFromPrefixSuffix,
+  midenFaucetAccount,
+} from "@/lib/utils/account";
+import { noteConsumed } from "@/lib/utils/note";
+import { defaultState } from "@/lib/utils/state";
+import { defaultStore, storeName } from "@/lib/utils/store";
 import {
   clientGetAccounts,
   clientGetAllInputNotes,
@@ -14,32 +38,6 @@ import {
   wasmAccountToAccount,
   wasmInputNoteRecordToInputNote,
 } from "@/lib/web-client";
-import type { Account } from "@/lib/types/account";
-import {
-  accountIdFromPrefixSuffix,
-  midenFaucetAccount,
-} from "@/lib/utils/account";
-import type { NetworkId } from "@/lib/types/network";
-import useGlobalContext from "@/components/global-context/hook";
-import type { State } from "@/lib/types/state";
-import { defaultState } from "@/lib/utils/state";
-import { noteConsumed } from "@/lib/utils/note";
-import { P2ID_NOTE_CODE, midenFaucetAccountId } from "@/lib/constants";
-import { useWallet, type Asset } from "@miden-sdk/miden-wallet-adapter";
-import { storeName, defaultStore } from "@/lib/utils/store";
-import type { InputNote } from "@/lib/types/note";
-import type { Transaction } from "@/lib/types/transaction";
-import type { Script } from "@/lib/types/script";
-// import { toBase64 } from "@/lib/utils";
-// import { useParaMiden } from "@/lib/para-miden";
-import {
-  useMiden,
-  useSyncState,
-  clearMidenStorage,
-  useImportStore,
-} from "@miden-sdk/react/lazy";
-import useNetwork from "@/hooks/use-network";
-import { useParaWallet } from "@/components/providers/para-wallet-context";
 
 const syncAccounts = ({
   previousAccounts,
@@ -78,12 +76,12 @@ const syncAccounts = ({
         return targetAccountId === accountId;
       })
       .map(({ id }) => id);
-  const accounts = wasmAccounts.map((wasmAccount) => {
+  const accounts = wasmAccounts.flatMap((wasmAccount) => {
     const previousAccount = previousAccounts.find(
       ({ id }) => id === wasmAccount.id().toString(),
     );
     if (!previousAccount) {
-      return;
+      return [];
     }
     const consumableP2IDNoteIds = accountConsumableP2IDNoteIds(
       previousAccount.id,
@@ -102,32 +100,29 @@ const syncAccounts = ({
       ...consumableP2IDNoteIds,
       ...consumableInputNoteIds,
     ]);
-    return wasmAccountToAccount({
-      wasmAccount,
-      name: previousAccount.name,
-      components: previousAccount.components,
-      updatedAt,
-      consumableNoteIds,
-    });
+    return [
+      wasmAccountToAccount({
+        wasmAccount,
+        name: previousAccount.name,
+        components: previousAccount.components,
+        updatedAt,
+        consumableNoteIds,
+      }),
+    ];
   });
-  const filteredAccounts = accounts.filter((account) => account !== undefined);
   return [
-    ...filteredAccounts,
+    ...accounts,
     ...previousAccounts
-      .filter(
-        (account) => !filteredAccounts.map(({ id }) => id).includes(account.id),
-      )
+      .filter((account) => !accounts.map(({ id }) => id).includes(account.id))
       .map((account) => {
         const consumableP2IDNoteIds = accountConsumableP2IDNoteIds(account.id);
         if (account.multisig) {
           const pendingConsumableNotesProposalsNoteIds =
-            account.multisig.proposals.reduce<string[]>(
-              (previousValue, currentValue) =>
-                ["pending", "ready"].includes(currentValue.status) &&
-                currentValue.metadata.proposalType === "consume_notes"
-                  ? [...previousValue, ...currentValue.metadata.noteIds]
-                  : previousValue,
-              [],
+            account.multisig.proposals.flatMap(({ status, metadata }) =>
+              ["pending", "ready"].includes(status) &&
+              metadata.proposalType === "consume_notes"
+                ? metadata.noteIds
+                : [],
             );
           return {
             ...account,

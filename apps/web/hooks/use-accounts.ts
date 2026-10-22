@@ -1,37 +1,37 @@
+import {
+  AuthScheme,
+  AccountId as WasmAccountId,
+  Address as WasmAddress,
+} from "@miden-sdk/miden-sdk/lazy";
 import { useWallet } from "@miden-sdk/miden-wallet-adapter";
 import {
-  wasmAccountToAccount,
-  clientDeployAccount,
-  storageMode,
-} from "@/lib/web-client";
-import {
-  Address as WasmAddress,
-  AccountId as WasmAccountId,
-  AuthScheme,
-} from "@miden-sdk/miden-sdk/lazy";
-import useGlobalContext from "@/components/global-context/hook";
-import type { AccountStorageMode, Account } from "@/lib/types/account";
-import {
-  basicWalletAccount,
-  getRoutingParametersPart,
-  getIdentifierPart,
-} from "@/lib/utils/account";
-import type { Component } from "@/lib/types/component";
-import useScripts from "@/hooks/use-scripts";
-import { counterContractAddress } from "@/lib/constants";
-import { defaultScriptIds } from "@/lib/types/default-scripts";
-import { verifyAccountComponentsFromPackageIds } from "@/lib/api";
-import { defaultComponentIds } from "@/lib/types/default-components";
-import { useParaWallet } from "@/components/providers/para-wallet-context";
-import {
-  useSyncState,
-  useCreateWallet,
   useCreateFaucet,
+  useCreateWallet,
   useImportAccount,
   useMiden,
+  useSyncState,
 } from "@miden-sdk/react/lazy";
-import useNetwork from "@/hooks/use-network";
+import useGlobalContext from "@/components/global-context/hook";
+import { useParaWallet } from "@/components/providers/para-wallet-context";
 import useFundAccount from "@/hooks/use-fund-account";
+import useNetwork from "@/hooks/use-network";
+import useScripts from "@/hooks/use-scripts";
+import { verifyAccountComponentsFromPackageIds } from "@/lib/api";
+import { counterContractAddress } from "@/lib/constants";
+import type { Account, AccountStorageMode } from "@/lib/types/account";
+import type { Component } from "@/lib/types/component";
+import { defaultComponentIds } from "@/lib/types/default-components";
+import { defaultScriptIds } from "@/lib/types/default-scripts";
+import {
+  basicWalletAccount,
+  getIdentifierPart,
+  getRoutingParametersPart,
+} from "@/lib/utils/account";
+import {
+  clientDeployAccount,
+  storageMode,
+  wasmAccountToAccount,
+} from "@/lib/web-client";
 
 const useAccounts = () => {
   const { address: midenWalletAddress, requestAssets } = useWallet();
@@ -243,8 +243,7 @@ const useAccounts = () => {
           type: "IMPORT_ACCOUNT",
           payload: { account },
         });
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (error) {
+      } catch {
         const account = {
           ...basicWalletAccount({ storageMode: accountStorageMode }),
           id: accountId.toString(),

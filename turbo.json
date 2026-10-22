@@ -49,9 +49,6 @@
       "cache": false,
       "env": ["SLACK_WEBHOOK_URL", "STATUS_PAGE_URL", "GITHUB_*"]
     },
-    "lint": {
-      "dependsOn": ["^lint"]
-    },
     "typecheck": {
       "dependsOn": ["^typecheck"]
     },

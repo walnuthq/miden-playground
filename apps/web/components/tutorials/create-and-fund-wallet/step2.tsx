@@ -1,6 +1,6 @@
-import type { TutorialStep } from "@/lib/types/tutorial";
 import Step2Content from "@/components/tutorials/create-and-fund-wallet/step2.mdx";
 import useAccounts from "@/hooks/use-accounts";
+import type { TutorialStep } from "@/lib/types/tutorial";
 
 const Step2: TutorialStep = {
   title: "Explore your new wallet's details.",

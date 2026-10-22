@@ -1,13 +1,13 @@
-import type { TutorialStep } from "@/lib/types/tutorial";
+import Step7Content from "@/components/tutorials/contract-verification/step7.mdx";
 import NextTutorialButton from "@/components/tutorials/next-tutorial-button";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
-import Step7Content from "@/components/tutorials/contract-verification/step7.mdx";
 import useAccounts from "@/hooks/use-accounts";
 import useScripts from "@/hooks/use-scripts";
-import { defaultScriptIds } from "@/lib/types/default-scripts";
-import { storageSlotName } from "@/lib/utils/component";
-import { getMapItem } from "@/lib/utils/account";
 import { EMPTY_WORD } from "@/lib/constants";
+import { defaultScriptIds } from "@/lib/types/default-scripts";
+import type { TutorialStep } from "@/lib/types/tutorial";
+import { getMapItem } from "@/lib/utils/account";
+import { storageSlotName } from "@/lib/utils/component";
 
 const useCompleted = () => {
   const { accounts } = useAccounts();

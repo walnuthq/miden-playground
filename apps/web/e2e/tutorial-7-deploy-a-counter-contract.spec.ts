@@ -1,13 +1,13 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
+import { replaceInEditor, waitForEditorText } from "./editor";
 import {
   logBrowserErrors,
   nextStep,
-  startTutorial,
-  tutorialPanel,
   selectOption,
+  startTutorial,
   TRANSACTION_TIMEOUT,
+  tutorialPanel,
 } from "./tutorial";
-import { replaceInEditor, waitForEditorText } from "./editor";
 
 // The script is created and compiled by the web app's mock API routes
 // (app/api/scripts), not apps/api.

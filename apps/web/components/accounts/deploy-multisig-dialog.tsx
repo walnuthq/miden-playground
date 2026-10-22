@@ -1,7 +1,4 @@
 "use client";
-import { useState } from "react";
-import { toast } from "sonner";
-import { Spinner } from "@workspace/ui/components/spinner";
 import { Button } from "@workspace/ui/components/button";
 import {
   Dialog,
@@ -14,9 +11,13 @@ import {
 } from "@workspace/ui/components/dialog";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
-import useAccounts from "@/hooks/use-accounts";
+import { Spinner } from "@workspace/ui/components/spinner";
+import { useState } from "react";
+import { toast } from "sonner";
 import AccountAddress from "@/components/lib/account-address";
+import useAccounts from "@/hooks/use-accounts";
 import useMultisig from "@/hooks/use-multisig";
+import { formValue } from "@/lib/utils";
 
 const DeployMultisigDialog = () => {
   const { createMultisig } = useMultisig();
@@ -54,7 +55,7 @@ const DeployMultisigDialog = () => {
             setLoading(true);
             try {
               const account = await createMultisig({
-                name: formData.get("name")!.toString(),
+                name: formValue(formData, "name"),
                 threshold: 1, //Number(formData.get("threshold")!.toString()),
               });
               toast(`${account?.name} has been deployed.`, {

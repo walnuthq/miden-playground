@@ -1,8 +1,8 @@
 import { usePathname } from "next/navigation";
-import type { TutorialStep } from "@/lib/types/tutorial";
+import Step1Content from "@/components/tutorials/interact-with-the-counter-contract/step1.mdx";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
-import Step1Content from "@/components/tutorials/interact-with-the-counter-contract/step1.mdx";
+import type { TutorialStep } from "@/lib/types/tutorial";
 
 const useCompleted = () => {
   const pathname = usePathname();

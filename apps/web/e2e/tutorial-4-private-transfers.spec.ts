@@ -4,8 +4,8 @@ import {
   logBrowserErrors,
   nextStep,
   startTutorial,
-  tutorialPanel,
   TRANSACTION_TIMEOUT,
+  tutorialPanel,
 } from "./tutorial";
 
 // Sends USDCx privately from a new Bread Wallet (see ./bread.ts) to a Para

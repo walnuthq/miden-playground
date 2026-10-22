@@ -1,17 +1,10 @@
-import { useState } from "react";
-import Image from "next/image";
 import {
+  useWallet,
   WalletMultiButton,
   WalletReadyState,
-  useWallet,
 } from "@miden-sdk/miden-wallet-adapter";
 import { useMultiSigner } from "@miden-sdk/react/lazy";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@workspace/ui/components/dropdown-menu";
+import { Button } from "@workspace/ui/components/button";
 import {
   Dialog,
   DialogContent,
@@ -19,7 +12,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@workspace/ui/components/dialog";
-import { Button } from "@workspace/ui/components/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@workspace/ui/components/dropdown-menu";
+import Image from "next/image";
+import { useState } from "react";
 import { useParaWallet } from "@/components/providers/para-wallet-context";
 
 const signerLabels: Record<string, string> = {
@@ -79,10 +79,11 @@ const SelectWalletButton = ({ signerNames }: { signerNames: string[] }) => {
     }
     multiSigner?.connectSigner(name).catch(console.error);
   };
+  const [onlySignerName] = signerNames.length === 1 ? signerNames : [];
   return (
     <>
-      {signerNames.length === 1 ? (
-        <Button variant="outline" onClick={() => selectSigner(signerNames[0]!)}>
+      {onlySignerName ? (
+        <Button variant="outline" onClick={() => selectSigner(onlySignerName)}>
           Select Wallet
         </Button>
       ) : (

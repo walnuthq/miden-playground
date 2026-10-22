@@ -1,9 +1,8 @@
 "use client";
-import { useRouter } from "next/navigation";
 import {
   type ColumnDef,
-  type RowData,
   flexRender,
+  type RowData,
   useTable,
 } from "@tanstack/react-table";
 import { Input } from "@workspace/ui/components/input";
@@ -15,6 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@workspace/ui/components/table";
+import { useRouter } from "next/navigation";
 import CreateComponentButton from "@/components/components/create-component-button";
 import { type DataTableFeatures, dataTableFeatures } from "@/lib/table";
 

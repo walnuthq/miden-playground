@@ -1,10 +1,10 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
-import { getVerifiedAccountComponents } from "@/lib/api";
 import Account from "@/components/account/account";
-import { isValidUUIDv4 } from "@/lib/utils";
 import useAccounts from "@/hooks/use-accounts";
 import useNetwork from "@/hooks/use-network";
+import { getVerifiedAccountComponents } from "@/lib/api";
+import { isValidUUIDv4 } from "@/lib/utils";
 
 const AccountIndex = ({ identifier }: { identifier: string }) => {
   const { networkId } = useNetwork();

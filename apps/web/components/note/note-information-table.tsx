@@ -1,21 +1,21 @@
-import Link from "next/link";
+import { normalizeAccountId } from "@miden-sdk/react/lazy";
+import { Badge } from "@workspace/ui/components/badge";
+import { Button } from "@workspace/ui/components/button";
 import {
   Table,
   TableBody,
   TableCell,
   TableRow,
 } from "@workspace/ui/components/table";
-import { Badge } from "@workspace/ui/components/badge";
-import { Button } from "@workspace/ui/components/button";
-import { type InputNote, noteStates } from "@/lib/types/note";
-import AccountAddress from "@/components/lib/account-address";
 import { CircleCheckBig } from "lucide-react";
+import Link from "next/link";
+import AccountAddress from "@/components/lib/account-address";
 import useAccounts from "@/hooks/use-accounts";
-import useNotes from "@/hooks/use-notes";
-import type { Script } from "@/lib/types/script";
-import { midenExplorerUrl } from "@/lib/constants";
-import { normalizeAccountId } from "@miden-sdk/react/lazy";
 import useNetwork from "@/hooks/use-network";
+import useNotes from "@/hooks/use-notes";
+import { midenExplorerUrl } from "@/lib/constants";
+import { type InputNote, noteStates } from "@/lib/types/note";
+import type { Script } from "@/lib/types/script";
 
 const NoteInformationTable = ({
   inputNote,

@@ -1,8 +1,8 @@
-import type { TutorialStep } from "@/lib/types/tutorial";
+import Step4Content from "@/components/tutorials/contract-verification/step4.mdx";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
-import Step4Content from "@/components/tutorials/contract-verification/step4.mdx";
 import useAccounts from "@/hooks/use-accounts";
+import type { TutorialStep } from "@/lib/types/tutorial";
 
 const useCompleted = () => {
   const { accounts } = useAccounts();

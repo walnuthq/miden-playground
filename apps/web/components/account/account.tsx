@@ -1,25 +1,25 @@
 "use client";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useIsClient } from "usehooks-ts";
-import useAccounts from "@/hooks/use-accounts";
-import useTutorials from "@/hooks/use-tutorials";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@workspace/ui/components/tabs";
-import type { Script } from "@/lib/types/script";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useIsClient } from "usehooks-ts";
+import AccountComponents from "@/components/account/account-components";
 import AccountInformation from "@/components/account/account-information";
 import AccountMultisig from "@/components/account/account-multisig";
-import AccountComponents from "@/components/account/account-components";
-import CreateTransactionDialog from "@/components/transactions/create-transaction-dialog";
 import CreateTransactionDropdownMenu from "@/components/account/create-transaction-dropdown-menu";
 import InvokeProcedureArgumentsDialog from "@/components/account/invoke-procedure-arguments-dialog";
 import VerifyAccountComponentDialog from "@/components/account/verify-account-component-dialog";
-import useNetwork from "@/hooks/use-network";
+import CreateTransactionDialog from "@/components/transactions/create-transaction-dialog";
+import useAccounts from "@/hooks/use-accounts";
 import useMultisig from "@/hooks/use-multisig";
+import useNetwork from "@/hooks/use-network";
+import useTutorials from "@/hooks/use-tutorials";
 import { midenFaucetAddress } from "@/lib/constants";
+import type { Script } from "@/lib/types/script";
 
 const Account = ({
   identifier,

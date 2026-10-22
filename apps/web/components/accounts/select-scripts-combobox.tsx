@@ -1,4 +1,3 @@
-import { type Dispatch, type SetStateAction, useMemo } from "react";
 import {
   Combobox,
   ComboboxChip,
@@ -11,6 +10,7 @@ import {
   ComboboxValue,
   useComboboxAnchor,
 } from "@workspace/ui/components/combobox";
+import { type Dispatch, type SetStateAction, useMemo } from "react";
 import type { Script } from "@/lib/types/script";
 
 const SelectScriptsCombobox = ({

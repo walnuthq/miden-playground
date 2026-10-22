@@ -1,12 +1,12 @@
+import { Badge } from "@workspace/ui/components/badge";
 import {
   Empty,
+  EmptyContent,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-  EmptyContent,
 } from "@workspace/ui/components/empty";
-import { Badge } from "@workspace/ui/components/badge";
 import { Spinner } from "@workspace/ui/components/spinner";
 import Logo from "@/components/lib/logo";
 import useNetwork from "@/hooks/use-network";

@@ -1,6 +1,6 @@
 import { Button } from "@workspace/ui/components/button";
-import useTutorials from "@/hooks/use-tutorials";
 import tutorials from "@/components/tutorials";
+import useTutorials from "@/hooks/use-tutorials";
 
 const NextTutorialButton = ({ disabled = false }: { disabled?: boolean }) => {
   const { tutorial, nextTutorial } = useTutorials();

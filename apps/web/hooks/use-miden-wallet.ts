@@ -1,13 +1,13 @@
 "use client";
-import { useState, useEffect, useRef, useCallback } from "react";
 import {
   type MessageSignerWalletAdapter,
-  WalletAdapterNetwork,
   PrivateDataPermission,
+  WalletAdapterNetwork,
 } from "@miden-sdk/miden-wallet-adapter";
-import { PublicKeyFormat } from "@openzeppelin/miden-multisig-client";
-import type { ExternalWalletState } from "@/lib/types/wallet";
 import { useMiden } from "@miden-sdk/react/lazy";
+import { PublicKeyFormat } from "@openzeppelin/miden-multisig-client";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { ExternalWalletState } from "@/lib/types/wallet";
 
 export function useMidenWallet(adapter: MessageSignerWalletAdapter | null) {
   const [session, setSession] = useState<ExternalWalletState>({
@@ -24,7 +24,6 @@ export function useMidenWallet(adapter: MessageSignerWalletAdapter | null) {
   useEffect(() => {
     if (!adapter || !client) return;
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const handleConnect = (_address: string) => {
       const pk = adapter.publicKey;
       if (!pk) {

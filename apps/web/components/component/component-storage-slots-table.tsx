@@ -1,3 +1,10 @@
+import { Button } from "@workspace/ui/components/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@workspace/ui/components/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -6,16 +13,9 @@ import {
   TableHeader,
   TableRow,
 } from "@workspace/ui/components/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@workspace/ui/components/dropdown-menu";
 import { MoreVertical } from "lucide-react";
-import { Button } from "@workspace/ui/components/button";
-import { type Component, storageSlotTypes } from "@/lib/types/component";
 import useComponents from "@/hooks/use-components";
+import { type Component, storageSlotTypes } from "@/lib/types/component";
 
 const StorageSlotActionsCell = ({
   component,

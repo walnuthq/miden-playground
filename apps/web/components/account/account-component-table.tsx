@@ -1,15 +1,15 @@
-import Link from "next/link";
-import type { Account } from "@/lib/types/account";
-import type { Script } from "@/lib/types/script";
-import type { Component } from "@/lib/types/component";
 import {
   Table,
   TableBody,
   TableCell,
   TableRow,
 } from "@workspace/ui/components/table";
-import StorageSlotsTable from "@/components/account/storage-slots-table";
+import Link from "next/link";
 import ProceduresTable from "@/components/account/procedures-table";
+import StorageSlotsTable from "@/components/account/storage-slots-table";
+import type { Account } from "@/lib/types/account";
+import type { Component } from "@/lib/types/component";
+import type { Script } from "@/lib/types/script";
 
 const AccountComponentTable = ({
   account,

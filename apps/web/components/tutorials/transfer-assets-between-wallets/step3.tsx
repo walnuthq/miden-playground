@@ -1,7 +1,7 @@
-import type { TutorialStep } from "@/lib/types/tutorial";
+import Step3Content from "@/components/tutorials/transfer-assets-between-wallets/step3.mdx";
 import useAccounts from "@/hooks/use-accounts";
 import useTransactions from "@/hooks/use-transactions";
-import Step3Content from "@/components/tutorials/transfer-assets-between-wallets/step3.mdx";
+import type { TutorialStep } from "@/lib/types/tutorial";
 
 const Step3: TutorialStep = {
   title: "Inspect the transaction and its output note.",

@@ -1,11 +1,11 @@
-import type { Tutorial } from "@/lib/types/tutorial";
-import { defaultTutorial } from "@/lib/utils/tutorial";
 import state from "@/components/tutorials/timelock-p2id-note/state";
 import Step1 from "@/components/tutorials/timelock-p2id-note/step1";
 import Step2 from "@/components/tutorials/timelock-p2id-note/step2";
 import Step3 from "@/components/tutorials/timelock-p2id-note/step3";
 import Step4 from "@/components/tutorials/timelock-p2id-note/step4";
 import Step5 from "@/components/tutorials/timelock-p2id-note/step5";
+import type { Tutorial } from "@/lib/types/tutorial";
+import { defaultTutorial } from "@/lib/utils/tutorial";
 
 const tutorial: Tutorial = {
   ...defaultTutorial(),

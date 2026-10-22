@@ -1,6 +1,6 @@
-import { Client } from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { getContext } from "hono/context-storage";
+import type { Client } from "pg";
 import { relations } from "@/db/relations";
 
 export const createDb = (client: Client) => drizzle({ client, relations });

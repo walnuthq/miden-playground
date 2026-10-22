@@ -1,11 +1,11 @@
 "use client";
 import { useIsClient } from "usehooks-ts";
 import { columns } from "@/components/notes/columns";
-import NotesTable from "@/components/notes/notes-table";
-import useNotes from "@/hooks/use-notes";
-import CreateTransactionDialog from "@/components/transactions/create-transaction-dialog";
 import CreateNoteDialog from "@/components/notes/create-note-dialog";
 import ImportNoteDialog from "@/components/notes/import-note-dialog";
+import NotesTable from "@/components/notes/notes-table";
+import CreateTransactionDialog from "@/components/transactions/create-transaction-dialog";
+import useNotes from "@/hooks/use-notes";
 
 const Notes = () => {
   const { inputNotes } = useNotes();

@@ -7,8 +7,8 @@
     "dev": "next dev --webpack -p 3000",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "eslint",
-    "lint:fix": "eslint --fix",
+    "lint": "biome check .",
+    "format": "biome check --write .",
     "typecheck": "next typegen && tsc --noEmit",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy-staging": "opennextjs-cloudflare build && opennextjs-cloudflare deploy --env staging",
@@ -59,9 +59,7 @@
     "@types/node": "24.19.2",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
-    "@workspace/eslint-config": "workspace:^",
     "@workspace/typescript-config": "workspace:*",
-    "eslint": "9.39.5",
     "typescript": "6.0.3",
     "wrangler": "4.151.3"
   }

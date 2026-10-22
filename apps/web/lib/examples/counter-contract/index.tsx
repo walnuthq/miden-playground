@@ -1,5 +1,5 @@
-import type { Example } from "@/lib/types/example";
 import state from "@/lib/examples/counter-contract/state";
+import type { Example } from "@/lib/types/example";
 
 const counterContract: Example = {
   id: "counter-account",

@@ -1,12 +1,12 @@
-import { useRouter } from "next/navigation";
-import { EllipsisVertical } from "lucide-react";
 import { useWallet } from "@miden-sdk/miden-wallet-adapter";
-import type { TutorialStep } from "@/lib/types/tutorial";
-import useAccounts from "@/hooks/use-accounts";
+import { EllipsisVertical } from "lucide-react";
+import { useRouter } from "next/navigation";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step5Content from "@/components/tutorials/wallet-backup-using-miden-guardian/step5.mdx";
+import useAccounts from "@/hooks/use-accounts";
 import useTutorials from "@/hooks/use-tutorials";
+import type { TutorialStep } from "@/lib/types/tutorial";
 
 const useCompleted = () => {
   const { multisigs } = useAccounts();

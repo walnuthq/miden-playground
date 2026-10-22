@@ -1,5 +1,5 @@
 import { snakeCase } from "lodash";
-import type { StorageSlot, Component } from "@/lib/types/component";
+import type { Component, StorageSlot } from "@/lib/types/component";
 
 export const defaultStorageSlot = (): StorageSlot => ({
   name: "",

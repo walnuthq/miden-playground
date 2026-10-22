@@ -1,14 +1,14 @@
+import { API_REGISTRY_URL, API_URL } from "@/lib/constants";
 import type {
+  CompiledPackage,
+  Package,
+  PackageSource,
   Script,
   ScriptExample,
-  CompiledPackage,
   ScriptType,
-  PackageSource,
-  Package,
 } from "@/lib/types/script";
-import { packageToScript } from "@/lib/utils/script";
 import { isValidUUIDv4, toBase64 } from "@/lib/utils";
-import { API_URL, API_REGISTRY_URL } from "@/lib/constants";
+import { packageToScript } from "@/lib/utils/script";
 
 export const createScript = async ({
   name,

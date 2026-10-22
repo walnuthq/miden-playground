@@ -1,10 +1,10 @@
 import { MidenClient, WasmWebClient } from "@miden-sdk/miden-sdk/lazy";
 import {
-  TESTNET_NOTE_TRANSPORT_URL,
   DEVNET_NOTE_TRANSPORT_URL,
-  TESTNET_RPC_URL,
   DEVNET_RPC_URL,
   LOCAL_RPC_URL,
+  TESTNET_NOTE_TRANSPORT_URL,
+  TESTNET_RPC_URL,
 } from "@/lib/constants";
 import type { NetworkId } from "@/lib/types/network";
 

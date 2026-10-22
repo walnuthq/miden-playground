@@ -1,4 +1,5 @@
-import { BadgeCheck } from "lucide-react";
+import { Badge } from "@workspace/ui/components/badge";
+import { Button } from "@workspace/ui/components/button";
 import {
   Card,
   CardContent,
@@ -7,11 +8,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@workspace/ui/components/card";
-import { Button } from "@workspace/ui/components/button";
-import { Badge } from "@workspace/ui/components/badge";
+import { cn } from "@workspace/ui/lib/utils";
+import { BadgeCheck } from "lucide-react";
 import useTutorials from "@/hooks/use-tutorials";
 import type { Tutorial } from "@/lib/types/tutorial";
-import { cn } from "@workspace/ui/lib/utils";
 
 const StartTutorialCard = ({ tutorial }: { tutorial: Tutorial }) => {
   const { completedTutorials, startTutorial } = useTutorials();

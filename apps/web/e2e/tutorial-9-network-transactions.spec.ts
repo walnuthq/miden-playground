@@ -5,8 +5,8 @@ import {
   pickAccount,
   selectOption,
   startTutorial,
-  tutorialPanel,
   TRANSACTION_TIMEOUT,
+  tutorialPanel,
 } from "./tutorial";
 
 // The network note is created by a new Bread Wallet (see ./bread.ts), funded

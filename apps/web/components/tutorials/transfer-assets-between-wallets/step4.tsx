@@ -1,9 +1,9 @@
-import type { TutorialStep } from "@/lib/types/tutorial";
+import NextStepButton from "@/components/tutorials/next-step-button";
+import Step4Content from "@/components/tutorials/transfer-assets-between-wallets/step4.mdx";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import useAccounts from "@/hooks/use-accounts";
 import useTransactions from "@/hooks/use-transactions";
-import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
-import Step4Content from "@/components/tutorials/transfer-assets-between-wallets/step4.mdx";
+import type { TutorialStep } from "@/lib/types/tutorial";
 
 const useCompleted = () => {
   const { wallets } = useAccounts();

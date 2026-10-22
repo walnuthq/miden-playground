@@ -1,16 +1,16 @@
-import type { TutorialStep } from "@/lib/types/tutorial";
+import { AccountId as WasmAccountId } from "@miden-sdk/miden-sdk/lazy";
+import { useSyncState } from "@miden-sdk/react/lazy";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import Step4Content from "@/components/tutorials/timelock-p2id-note/step4.mdx";
+import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import useAccounts from "@/hooks/use-accounts";
 import useNotes from "@/hooks/use-notes";
 import { P2IDE_NOTE_CODE } from "@/lib/constants";
+import type { TutorialStep } from "@/lib/types/tutorial";
 import {
   accountIdFromPrefixSuffix,
   getIdentifierPart,
 } from "@/lib/utils/account";
-import { AccountId as WasmAccountId } from "@miden-sdk/miden-sdk/lazy";
-import { useSyncState } from "@miden-sdk/react/lazy";
 
 const useCompleted = () => {
   const { connectedWallet, wallets } = useAccounts();

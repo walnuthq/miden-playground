@@ -1,7 +1,3 @@
-import type { Tutorial } from "@/lib/types/tutorial";
-import { defaultTutorial } from "@/lib/utils/tutorial";
-import { defaultState } from "@/lib/utils/state";
-import { midenFaucetAccount } from "@/lib/utils/account";
 import Step1 from "@/components/tutorials/your-first-smart-contract-and-custom-note/step1";
 import Step2 from "@/components/tutorials/your-first-smart-contract-and-custom-note/step2";
 import Step3 from "@/components/tutorials/your-first-smart-contract-and-custom-note/step3";
@@ -10,6 +6,10 @@ import Step5 from "@/components/tutorials/your-first-smart-contract-and-custom-n
 import Step6 from "@/components/tutorials/your-first-smart-contract-and-custom-note/step6";
 import Step7 from "@/components/tutorials/your-first-smart-contract-and-custom-note/step7";
 import Step8 from "@/components/tutorials/your-first-smart-contract-and-custom-note/step8";
+import type { Tutorial } from "@/lib/types/tutorial";
+import { midenFaucetAccount } from "@/lib/utils/account";
+import { defaultState } from "@/lib/utils/state";
+import { defaultTutorial } from "@/lib/utils/tutorial";
 
 const tutorial: Tutorial = {
   ...defaultTutorial(),

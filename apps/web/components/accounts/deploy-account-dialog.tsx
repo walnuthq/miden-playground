@@ -1,15 +1,5 @@
 "use client";
-import { useState } from "react";
-import { toast } from "sonner";
-import { Spinner } from "@workspace/ui/components/spinner";
 import { Button } from "@workspace/ui/components/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@workspace/ui/components/select";
 import {
   Dialog,
   DialogClose,
@@ -21,16 +11,26 @@ import {
 } from "@workspace/ui/components/dialog";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
-import useAccounts from "@/hooks/use-accounts";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select";
+import { Spinner } from "@workspace/ui/components/spinner";
+import { useState } from "react";
+import { toast } from "sonner";
+import SelectScriptsCombobox from "@/components/accounts/select-scripts-combobox";
 import AccountAddress from "@/components/lib/account-address";
+import useAccounts from "@/hooks/use-accounts";
+import useComponents from "@/hooks/use-components";
+import useScripts from "@/hooks/use-scripts";
 import {
   type AccountStorageMode,
   accountStorageModes,
 } from "@/lib/types/account";
-import useComponents from "@/hooks/use-components";
-import useScripts from "@/hooks/use-scripts";
 import { defaultComponentIds } from "@/lib/types/default-components";
-import SelectScriptsCombobox from "@/components/accounts/select-scripts-combobox";
 import { formatProcedureExportPath } from "@/lib/utils/script";
 
 const DeployAccountDialog = () => {

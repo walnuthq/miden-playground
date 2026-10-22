@@ -1,8 +1,8 @@
-import type { State } from "@/lib/types/state";
-import { defaultState } from "@/lib/utils/state";
-import { storageSlotName, defaultComponent } from "@/lib/utils/component";
 import defaultComponents from "@/lib/types/default-components";
+import type { State } from "@/lib/types/state";
 import { midenFaucetAccount } from "@/lib/utils/account";
+import { defaultComponent, storageSlotName } from "@/lib/utils/component";
+import { defaultState } from "@/lib/utils/state";
 
 const state: State = {
   ...defaultState(),

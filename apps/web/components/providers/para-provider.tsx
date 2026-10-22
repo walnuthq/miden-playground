@@ -1,4 +1,8 @@
 "use client";
+import type { ParaWeb, Wallet } from "@getpara/web-sdk";
+import { ParaSignerProvider, useParaSigner } from "@miden-sdk/para-react";
+import { SignerSlot } from "@miden-sdk/react/lazy";
+import type { QueryClient } from "@tanstack/react-query";
 import {
   type ReactNode,
   useCallback,
@@ -6,10 +10,6 @@ import {
   useMemo,
   useState,
 } from "react";
-import type { QueryClient } from "@tanstack/react-query";
-import type { ParaWeb, Wallet } from "@getpara/web-sdk";
-import { ParaSignerProvider, useParaSigner } from "@miden-sdk/para-react";
-import { SignerSlot } from "@miden-sdk/react/lazy";
 import { ParaWalletContext } from "@/components/providers/para-wallet-context";
 import useNetwork from "@/hooks/use-network";
 import { createParaClient, type ParaClient } from "@/lib/para-client";

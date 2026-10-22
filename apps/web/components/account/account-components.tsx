@@ -1,11 +1,3 @@
-import { Puzzle } from "lucide-react";
-import type { Account } from "@/lib/types/account";
-import type { Script } from "@/lib/types/script";
-import { defaultScript } from "@/lib/utils/script";
-import AccountComponentTable from "@/components/account/account-component-table";
-import useAccounts from "@/hooks/use-accounts";
-import useScripts from "@/hooks/use-scripts";
-import useComponents from "@/hooks/use-components";
 import { Button } from "@workspace/ui/components/button";
 import {
   Empty,
@@ -15,10 +7,18 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@workspace/ui/components/empty";
-import type { ComponentType, StorageSlotType } from "@/lib/types/component";
-import { defaultComponent, storageSlotName } from "@/lib/utils/component";
+import { Puzzle } from "lucide-react";
+import AccountComponentTable from "@/components/account/account-component-table";
+import useAccounts from "@/hooks/use-accounts";
+import useComponents from "@/hooks/use-components";
+import useScripts from "@/hooks/use-scripts";
 import useTutorials from "@/hooks/use-tutorials";
+import type { Account } from "@/lib/types/account";
+import type { ComponentType, StorageSlotType } from "@/lib/types/component";
 import { defaultComponentIds } from "@/lib/types/default-components";
+import type { Script } from "@/lib/types/script";
+import { defaultComponent, storageSlotName } from "@/lib/utils/component";
+import { defaultScript } from "@/lib/utils/script";
 
 const AddCustomComponents = ({
   empty,

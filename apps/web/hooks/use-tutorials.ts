@@ -1,13 +1,13 @@
-import { useRouter } from "next/navigation";
 import { useWallet } from "@miden-sdk/miden-wallet-adapter";
+import { trackEvent } from "@simpleanalytics/next";
+import { useRouter } from "next/navigation";
 import useGlobalContext from "@/components/global-context/hook";
 import tutorials from "@/components/tutorials";
-import { defaultTutorial, isTutorial } from "@/lib/utils/tutorial";
 import useAppState from "@/hooks/use-app-state";
-import { trackEvent } from "@simpleanalytics/next";
-import { sleep, randomLowercaseId } from "@/lib/utils";
 import useNetwork from "@/hooks/use-network";
 import type { NetworkId } from "@/lib/types/network";
+import { randomLowercaseId, sleep } from "@/lib/utils";
+import { defaultTutorial, isTutorial } from "@/lib/utils/tutorial";
 import { clientGetLatestBlockNum } from "@/lib/web-client";
 
 // The chain tip a tutorial starts at (see State.tutorialStartBlockNum), 0 on the

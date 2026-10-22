@@ -1,8 +1,18 @@
-import { useState } from "react";
-import { toast } from "sonner";
-import Link from "next/link";
-import type { Account } from "@/lib/types/account";
-import type { InputNote } from "@/lib/types/note";
+import {
+  ConsumeTransaction,
+  type MidenWalletAdapter,
+  useWallet,
+} from "@miden-sdk/miden-wallet-adapter";
+import { normalizeAccountId, useMiden } from "@miden-sdk/react/lazy";
+import { Badge } from "@workspace/ui/components/badge";
+import { Button } from "@workspace/ui/components/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@workspace/ui/components/dropdown-menu";
+import { Spinner } from "@workspace/ui/components/spinner";
 import {
   Table,
   TableBody,
@@ -11,32 +21,22 @@ import {
   TableHeader,
   TableRow,
 } from "@workspace/ui/components/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@workspace/ui/components/dropdown-menu";
-import { Spinner } from "@workspace/ui/components/spinner";
-import { Badge } from "@workspace/ui/components/badge";
-import { MoreVertical, CircleCheckBig } from "lucide-react";
-import { Button } from "@workspace/ui/components/button";
+import { CircleCheckBig, MoreVertical } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
+import { toast } from "sonner";
 import AccountAddress from "@/components/lib/account-address";
-import useTransactions from "@/hooks/use-transactions";
-import useAccounts from "@/hooks/use-accounts";
-import useParaTransaction from "@/hooks/use-para-transaction";
-import useNotes from "@/hooks/use-notes";
 import NoteId from "@/components/lib/note-id";
-import {
-  useWallet,
-  ConsumeTransaction,
-  type MidenWalletAdapter,
-} from "@miden-sdk/miden-wallet-adapter";
-import useScripts from "@/hooks/use-scripts";
-import { formatAmount } from "@/lib/utils/asset";
-import { fromBase64 } from "@/lib/utils";
-import { normalizeAccountId, useMiden } from "@miden-sdk/react/lazy";
+import useAccounts from "@/hooks/use-accounts";
 import useMultisig from "@/hooks/use-multisig";
+import useNotes from "@/hooks/use-notes";
+import useParaTransaction from "@/hooks/use-para-transaction";
+import useScripts from "@/hooks/use-scripts";
+import useTransactions from "@/hooks/use-transactions";
+import type { Account } from "@/lib/types/account";
+import type { InputNote } from "@/lib/types/note";
+import { fromBase64 } from "@/lib/utils";
+import { formatAmount } from "@/lib/utils/asset";
 
 const NoteActionsCell = ({
   account,
