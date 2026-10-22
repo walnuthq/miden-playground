@@ -1,6 +1,6 @@
 import Link from "@/components/tutorials/tutorial-link";
 
-Navigate to <Link href={`/accounts/${props.walletA.identifier}`}>Wallet A</Link> and take a look at the _"Assets"_ table: these are the MDN tokens you'll transfer to <Link href={`/accounts/${props.walletB.identifier}`}>Wallet B</Link>.
+Navigate to <Link href={`/accounts/${props.walletA.identifier}`}>Wallet A</Link> and take a look at the _"Assets"_ table: these are the MDN tokens you'll transfer to <Link href={`/accounts/${props.walletB?.identifier}`}>Wallet B</Link>.
 
 To start the transfer, you first need to create a send transaction from **Wallet A** to **Wallet B**. From **Wallet A**'s page, click the _"Create new transaction"_ button, then select _"New send transaction"_.
 
