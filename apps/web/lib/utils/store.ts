@@ -2,8 +2,10 @@ import { type NetworkId, networks } from "@/lib/types/network";
 import type { Store, StoreBlockHeader } from "@/lib/types/store";
 
 // The version of the web SDK's IndexedDB store (the `idxdb-store` crate version
-// it writes to the `clientVersion` setting). Bump it alongside the SDK.
-const CLIENT_VERSION = "0.17.3";
+// it writes to the `clientVersion` setting). Bump it alongside the SDK: it
+// stamps the stores seeded from `defaultStore`, and the SDK refuses to import a
+// store stamped by a client newer than the running one.
+const CLIENT_VERSION = "0.17.6";
 // The `settings` row the SDK keeps that version in.
 const SETTING_SCOPE_CLIENT = 0;
 const CLIENT_VERSION_SETTING_KEY = "clientVersion";
@@ -126,45 +128,40 @@ const deleteStore = (name: string) =>
     };
   });
 
-const majorMinor = (version: string) => {
-  const match = /^(\d+)\.(\d+)\.\d+/.exec(version);
-  return match ? [Number(match[1]), Number(match[2])] : null;
-};
+// The SDK's one clear on its move from resetting stores to migrating them (its
+// Dexie schema version 8, from 0.17.4): opening a store at an older schema
+// version clears it if its stamp is missing or a version below 0.17.0 (a
+// prerelease of it included). Every later upgrade migrates the store in place.
+const MIGRATION_SCHEMA_VERSION = 8;
+const MIGRATION_BASELINE = [0, 17, 0];
 
-// Mirrors the SDK's own check: a store written by an older major/minor client
-// is one the SDK resets when it opens it, and so is one whose version does not
-// parse. A store with no version at all is kept, as the SDK does.
-const isOutdatedClientVersion = (storedVersion: string | null) => {
+const isBelowMigrationBaseline = (storedVersion: string | null) => {
   if (storedVersion === null) {
-    return false;
-  }
-  const stored = majorMinor(storedVersion);
-  const [currentMajor = 0, currentMinor = 0] = majorMinor(CLIENT_VERSION) ?? [];
-  if (!stored) {
     return true;
   }
-  const [storedMajor = 0, storedMinor = 0] = stored;
-  return (
-    storedMajor < currentMajor ||
-    (storedMajor === currentMajor && storedMinor < currentMinor)
+  const match = /^(\d+)\.(\d+)\.(\d+)(-.+)?$/.exec(storedVersion);
+  if (!match) {
+    // The SDK keeps a store whose stamp isn't a version.
+    return false;
+  }
+  const [, major, minor, patch, prerelease] = match;
+  const version = [Number(major), Number(minor), Number(patch)];
+  const index = version.findIndex(
+    (part, index) => part !== MIGRATION_BASELINE[index],
   );
+  if (index === -1) {
+    return prerelease !== undefined;
+  }
+  return (version[index] ?? 0) < (MIGRATION_BASELINE[index] ?? 0);
 };
 
-// Web SDK 0.16 re-keyed the `settings` table from `key` to `[scope+key]`, which
-// Dexie can only do by dropping and recreating it — taking the `clientVersion`
-// row with it. That row is what the SDK's own "reset the store on a major/minor
-// client upgrade" check reads, so upgrading a pre-0.16 database leaves it with
-// no stored version, which the SDK treats as a brand new store and keeps: the
-// client then fails on the 0.15 rows it cannot decode ("failed to deserialize
-// data from the store: invalid value: Invalid public key"). The old key path is
-// the last evidence that a store predates 0.16, and Dexie erases it the moment
-// the client opens the database, so this has to run first.
-//
-// From 0.16 on the `clientVersion` row survives, and the SDK resets a store
-// written by an older major/minor client itself (e.g. a 0.16 store opened by
-// 0.17). It does so silently though, so the accounts, notes and transactions
-// the persisted app state lists would outlive the store backing them: the
-// store is flagged here too, so both are dropped together.
+// A store the SDK clears when it opens it (see MIGRATION_BASELINE). It does so
+// silently, so the accounts, notes and transactions the persisted app state
+// lists would outlive the store backing them: the store is flagged here so
+// both are dropped together. A store from before 0.16 is flagged by its
+// `settings` key path: 0.16 re-keyed that table from `key` to `[scope+key]`,
+// which Dexie does by recreating it, taking the version stamp with it, so this
+// has to run before the client opens the database.
 const isOutdatedStore = (name: string) =>
   new Promise<boolean>((resolve, reject) => {
     const request = indexedDB.open(name);
@@ -180,6 +177,13 @@ const isOutdatedStore = (name: string) =>
           // Opening a database that does not exist creates an empty one; undo it.
           database.close();
           deleteStore(name).then(() => resolve(false), reject);
+          return;
+        }
+        // Dexie stores schema version N as IndexedDB version N * 10 (plus
+        // schema patches).
+        if (Math.floor(database.version / 10) >= MIGRATION_SCHEMA_VERSION) {
+          database.close();
+          resolve(false);
           return;
         }
         if (!database.objectStoreNames.contains(SETTINGS_TABLE)) {
@@ -207,7 +211,7 @@ const isOutdatedStore = (name: string) =>
             | undefined;
           database.close();
           resolve(
-            isOutdatedClientVersion(
+            isBelowMigrationBaseline(
               record?.value ? new TextDecoder().decode(record.value) : null,
             ),
           );
@@ -223,9 +227,8 @@ const isOutdatedStore = (name: string) =>
     };
   });
 
-// Deletes every client store written by an older major/minor web SDK, which
-// the current one cannot read (pre-0.16) or resets anyway. Returns the names it
-// deleted.
+// Deletes every client store the SDK would clear when opening it. Returns the
+// names it deleted.
 export const deleteOutdatedMidenStores = async () => {
   if (typeof indexedDB === "undefined") {
     return [];

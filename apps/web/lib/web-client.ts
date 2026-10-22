@@ -472,6 +472,10 @@ export const clientExportInputNoteFile = async ({
   }
 };
 
+// Since SDK 0.17.2 a failed private-note send is final: sync() no longer
+// retries it. If the playground sends private notes itself, prefer
+// useTransaction({ privateNoteTarget }) and handle its PrivateNoteDeliveryError
+// by resending the undelivered notes with useResendPrivateNotes.
 // export const clientSendPrivateNote = ({
 //   client,
 //   note,

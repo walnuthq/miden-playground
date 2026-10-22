@@ -29,9 +29,7 @@ export type ParaClient = {
 // createParaMidenClient (all-zero seed, so the id is the same for a given
 // wallet), but built here to control the client:
 // - useWorker: false, since the worker relays the sign callback with a 30s
-//   timeout (the Para confirmation modal can take longer) and keeps its own
-//   in-memory account state, which misses an account inserted after it
-//   started (web-sdk#222: "account data wasn't found");
+//   timeout, and the Para confirmation modal can take longer;
 // - proverUrl, to prove on the network's remote prover rather than locally.
 // No storeName: it shares MidenProvider's store (MidenClientDB_<network>), so
 // the app's own client reads the account and transactions it writes, and
@@ -69,8 +67,9 @@ export const createParaClient = async ({
     },
   });
   const commitment = await evmPkToCommitment(publicKey);
-  // The package's `AuthScheme` export is the friendly string const; the auth
-  // component takes the numeric enum, so read it from the wasm module.
+  // The package's `AuthScheme` export is the friendly string const, which
+  // only the account creation methods resolve; the auth component takes the
+  // numeric enum, so read it from the wasm module.
   const { AuthScheme } = await getWasmOrThrow();
   const { account } = new AccountBuilder(new Uint8Array(32))
     .withAuthComponent(

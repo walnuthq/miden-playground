@@ -317,9 +317,11 @@ const useTransactions = () => {
   // Para client, whose keystore signs through Para (its modal is the
   // confirmation), and records it. That client builds its own requests rather
   // than relying on the app client, which may be busy syncing. Both share a
-  // store but not their transaction locks, so the app's syncing is paused
+  // store, whose lock keeps their syncs and note imports from interleaving,
+  // but a transaction doesn't take it, so the app's syncing is paused
   // meanwhile (SUBMITTING_TRANSACTION also stops the app's own syncState),
-  // waiting a bounded time for an ongoing sync to finish.
+  // waiting a bounded time for an ongoing sync to finish. `waitForIdle` is
+  // typed on MidenClient but not on the WasmWebClient useMiden returns.
   const submitParaTransaction = async (
     run: (
       paraClient: MidenClient,

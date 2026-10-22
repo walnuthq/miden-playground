@@ -8,7 +8,9 @@ import {
 } from "@/lib/constants";
 import type { NetworkId } from "@/lib/types/network";
 
-// TODO remove hotfix once it's fixed in the miden-sdk package
+// "auto" picks the classic worker on Safari/WebKit, which can't find the WASM
+// after a webpack/Next.js production build (web-sdk#286); the SDK documents
+// "module" for Next.js. `workerMode` is missing from the SDK's types.
 (WasmWebClient as unknown as { workerMode: string }).workerMode = "module";
 
 export const networks = {
