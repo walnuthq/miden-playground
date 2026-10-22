@@ -36,16 +36,6 @@ const state: State = {
       isNew: false,
       // fa and s
     },
-    {
-      ...basicWalletAccount({ storageMode: "public" }),
-      id: "0xafaf4cb2ab65621128c868fc5e4d94",
-      name: "Wallet B",
-      address: "mtst1azh67n9j4djkyyfgep50chjdjsju652t_qr7qqq9wr6w",
-      identifier: "mtst1azh67n9j4djkyyfgep50chjdjsju652t",
-      routingParameters: "qr7qqq9wr6w",
-      isNew: false,
-      //
-    },
   ],
   tutorialId: "transfer-assets-between-wallets",
 };

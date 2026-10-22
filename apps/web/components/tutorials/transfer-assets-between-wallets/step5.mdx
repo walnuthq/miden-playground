@@ -1,6 +1,6 @@
 import Link from "@/components/tutorials/tutorial-link";
 
-The _"Assets"_ table of <Link href={`/accounts/${props.walletB.identifier}`}>Wallet B</Link> should now list the MDN tokens you transferred.
+The _"Assets"_ table of <Link href={`/accounts/${props.walletB?.identifier}`}>Wallet B</Link> should now list the MDN tokens you transferred, along with the USDCx left after paying the fee. Its nonce went from 0 to 1: the consume transaction was its first.
 
 Congratulations! You have successfully used the Miden Playground to transfer assets between two wallets.
 

@@ -31,8 +31,8 @@ const Step4: TutorialStep = {
           titleWhenCompleted="The Note has been consumed."
           description={
             <p>
-              Click <em>"Consume all notes"</em>, then preview and submit the
-              resulting Transaction.
+              Click <em>"Consume all notes"</em> to consume both notes at once,
+              then preview and submit the resulting Transaction.
             </p>
           }
         />

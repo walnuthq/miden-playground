@@ -7,9 +7,9 @@ import {
   tutorialPanel,
 } from "./tutorial";
 
-// Wallet A, Wallet B and the MDN Faucet are created by the tutorial store and
-// shared by every Playground user, so balances are compared before and after
-// rather than checked against fixed values.
+// Wallet A and the MDN Faucet are created by the tutorial store and shared by
+// every Playground user, so Wallet A's balance is only checked loosely. Wallet B
+// is created for each user, empty.
 const mdnBalance = async (page: Page) => {
   const row = page.getByRole("row").filter({ hasText: "MDN Faucet" });
   const amount = (await row.getByRole("cell").last().textContent()) ?? "";
@@ -26,6 +26,10 @@ test("tutorial 2: transfer assets between wallets", async ({ page }) => {
   await test.step("1. explore the accounts", async () => {
     await panel.openLink("Wallet A", /\/accounts\/mtst1[0-9a-z]+$/);
     expect(await mdnBalance(page)).toBeGreaterThanOrEqual(100);
+    await panel.openLink("Wallet B", /\/accounts\/mtst1[0-9a-z]+$/);
+    await expect(page.getByRole("row", { name: /^Nonce/ })).toHaveText(
+      /^Nonce\s*0$/,
+    );
     await nextStep(page);
   });
 
@@ -59,42 +63,37 @@ test("tutorial 2: transfer assets between wallets", async ({ page }) => {
       }),
     ).toBeVisible();
     await panel.openLink("note ID", /\/notes\/0x[0-9a-f]+$/);
-    // The note page renders once the next state sync stores the output note,
-    // which gets slower as the shared wallets' nonces grow.
-    // TODO: every Playground user sends from the same Wallet A and Wallet B, so
-    // their history, and the time it takes to sync them, only ever grows. This
-    // is a design flaw of the tutorial store to fix on its own; until then,
-    // this timeout will keep needing to go up.
+    // The note page renders once the next state sync stores the output note.
     await expect(
       page.getByRole("row", { name: /Target Account ID/ }),
     ).toContainText("(Wallet B)", { timeout: 60_000 });
-    await nextStep(page);
+    // Unlocks once the fee note requested for Wallet B is committed: the
+    // faucet batches requests, which can take a few minutes.
+    await nextStep(page, { timeout: 2 * TRANSACTION_TIMEOUT });
   });
 
-  await test.step("4. consume the note with Wallet B", async () => {
+  await test.step("4. consume the MDN and fee notes with Wallet B", async () => {
     await panel.openLink("Wallet B", /\/accounts\/mtst1[0-9a-z]+$/);
-    const before = await mdnBalance(page);
-    // The note shows up once the next state sync detects it.
-    // Wallet B is shared, so anyone can send it notes, including ones it
-    // can't consume, which make "Consume all notes" fail: consume only the
-    // 100 MDN note sent by Wallet A.
-    const noteRow = page
-      .getByRole("row")
-      .filter({ hasText: "(Wallet A)" })
-      .filter({ hasText: "100 MDN" })
-      .first();
-    await expect(noteRow).toBeVisible({ timeout: TRANSACTION_TIMEOUT });
-    await noteRow.getByRole("button").last().click();
-    await page
-      .getByRole("menuitem", { name: "Consume note with Wallet B" })
-      .click();
-    const submit = page.getByRole("button", { name: "Submit" });
-    await expect(submit).toBeVisible({ timeout: TRANSACTION_TIMEOUT });
-    await submit.click();
+    // Wallet B is new and empty: it pays the fee out of the USDCx note the
+    // Playground requested for it, consumed along with the MDN note.
+    await expect(
+      page.getByRole("row").filter({ hasText: "(Wallet A)" }).filter({
+        hasText: "100 MDN",
+      }),
+    ).toBeVisible({ timeout: TRANSACTION_TIMEOUT });
+    await page.getByRole("button", { name: "Consume all notes" }).click();
+    const dialog = page.getByRole("dialog", { name: /consume transaction$/ });
+    await expect(
+      dialog.getByText(/2 notes will be consumed as a result/),
+    ).toBeVisible({ timeout: TRANSACTION_TIMEOUT });
+    await dialog.getByRole("button", { name: "Submit" }).click();
     await nextStep(page);
     await expect
       .poll(() => mdnBalance(page), { timeout: TRANSACTION_TIMEOUT })
-      .toBeGreaterThanOrEqual(before + 100);
+      .toBe(100);
+    await expect(page.getByRole("row", { name: /^Nonce/ })).toHaveText(
+      /^Nonce\s*1$/,
+    );
   });
 
   await test.step("5. Wallet B holds the transferred MDN", async () => {

@@ -1,16 +1,15 @@
 import NextStepButton from "@/components/tutorials/next-step-button";
 import Step2Content from "@/components/tutorials/transfer-assets-between-wallets/step2.mdx";
+import useWalletB from "@/components/tutorials/transfer-assets-between-wallets/use-wallet-b";
+import WalletBAlert from "@/components/tutorials/transfer-assets-between-wallets/wallet-b-alert";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
-import useAccounts from "@/hooks/use-accounts";
 import useTransactions from "@/hooks/use-transactions";
 import type { TutorialStep } from "@/lib/types/tutorial";
 import { accountIdFromPrefixSuffix } from "@/lib/utils/account";
 
 const useCompleted = () => {
-  const { wallets } = useAccounts();
+  const { walletA, walletB } = useWalletB();
   const { transactions } = useTransactions();
-  const walletA = wallets.find(({ name }) => name === "Wallet A");
-  const walletB = wallets.find(({ name }) => name === "Wallet B");
   const transaction = transactions.find(({ accountId, outputNotes }) => {
     const [outputNote] = outputNotes;
     const [suffix = "", prefix = ""] = outputNote?.storage ?? [];
@@ -23,9 +22,7 @@ const useCompleted = () => {
 const Step2: TutorialStep = {
   title: "Submit a send transaction.",
   Content: () => {
-    const { wallets } = useAccounts();
-    const walletA = wallets.find(({ name }) => name === "Wallet A");
-    const walletB = wallets.find(({ name }) => name === "Wallet B");
+    const { walletA, walletB } = useWalletB();
     const completed = useCompleted();
     return (
       <>
@@ -37,6 +34,7 @@ const Step2: TutorialStep = {
           description="Follow the instructions above to create and submit a send
             transaction from Wallet A."
         />
+        <WalletBAlert />
       </>
     );
   },
