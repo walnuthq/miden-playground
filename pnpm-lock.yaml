@@ -334,8 +334,8 @@ importers:
         specifier: 1.9.1
         version: 1.9.1
       '@openzeppelin/miden-multisig-client':
-        specifier: 0.18.2
-        version: 0.18.2
+        specifier: 0.18.3
+        version: 0.18.3
       '@simpleanalytics/next':
         specifier: 1.1.1
         version: 1.1.1(next@16.4.2(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@playwright/test@1.64.1)(@types/node@24.19.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react@19.3.1)
@@ -2333,12 +2333,12 @@ packages:
     resolution: {integrity: sha512-eSYWTm620tTk45EKSedaUL8MFYI8hW164hIXsgIHyxu3VobUB3fFCu5t0hQby6OoWRPsG1KkKUG2M5UadiLiVg==}
     engines: {node: '>=14'}
 
-  '@openzeppelin/guardian-client@0.18.2':
-    resolution: {integrity: sha512-IcZ4+h4nfD9xmVqksgQuXUYhQzpkRyl7wIavjYM+oyDu/1DpxzM6FR+BQsNDldrnwdyNkiqxbMs64mEnRf+1FA==}
+  '@openzeppelin/guardian-client@0.18.3':
+    resolution: {integrity: sha512-zwXjMXkKirh+eqdlA6S/fppdSutrItGOuqDuFaPYqVLn99jpPEDmrPBOQv2v4jKpbfkKeFfs96hBumFxGFiwvQ==}
     engines: {node: '>=18'}
 
-  '@openzeppelin/miden-multisig-client@0.18.2':
-    resolution: {integrity: sha512-0Xzp0KsRikhRvJEsbOmH5E139ADnHcKn26By/Rztoly6CE7YezSMWPweHAIK9E12gLQDa5WgueTyo0sxOjBbYQ==}
+  '@openzeppelin/miden-multisig-client@0.18.3':
+    resolution: {integrity: sha512-y8zLxRMzqjaNRpv6lOh1hknAPOFneqGWNIFCGYJ6ZQUVqBPXdiXDj43jyqoFTMrBi9GB7JqANQhttJdkL9SANw==}
     engines: {node: '>=18'}
 
   '@oxc-project/types@0.154.0':
@@ -8684,14 +8684,14 @@ snapshots:
 
   '@opentelemetry/semantic-conventions@1.43.0': {}
 
-  '@openzeppelin/guardian-client@0.18.2': {}
+  '@openzeppelin/guardian-client@0.18.3': {}
 
-  '@openzeppelin/miden-multisig-client@0.18.2':
+  '@openzeppelin/miden-multisig-client@0.18.3':
     dependencies:
       '@miden-sdk/miden-sdk': 0.17.6
       '@noble/curves': 1.9.7
       '@noble/hashes': 2.4.0
-      '@openzeppelin/guardian-client': 0.18.2
+      '@openzeppelin/guardian-client': 0.18.3
 
   '@oxc-project/types@0.154.0': {}
 
