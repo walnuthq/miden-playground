@@ -20,21 +20,29 @@ const mdnBalance = async (page: Page) => {
 test("tutorial 2: transfer assets between wallets", async ({ page }) => {
   logBrowserErrors(page);
   const panel = tutorialPanel(page);
+  // The URL changes before the account page renders the new account: wait for
+  // it, or a menu opened on the old page gets unmounted mid-click.
+  const openWallet = async (name: string) => {
+    await panel.openLink(name, /\/accounts\/mtst1[0-9a-z]+$/);
+    await expect(page.getByRole("row", { name: /^Name/ })).toHaveText(
+      new RegExp(`^Name\\s*${name}$`),
+    );
+  };
   await startTutorial(page, "Transfer assets between wallets");
   await expect(page).toHaveURL(/\/accounts$/);
 
   await test.step("1. explore the accounts", async () => {
-    await panel.openLink("Wallet A", /\/accounts\/mtst1[0-9a-z]+$/);
-    expect(await mdnBalance(page)).toBeGreaterThanOrEqual(100);
-    await panel.openLink("Wallet B", /\/accounts\/mtst1[0-9a-z]+$/);
+    await openWallet("Wallet B");
     await expect(page.getByRole("row", { name: /^Nonce/ })).toHaveText(
       /^Nonce\s*0$/,
     );
+    await openWallet("Wallet A");
+    expect(await mdnBalance(page)).toBeGreaterThanOrEqual(100);
     await nextStep(page);
   });
 
   await test.step("2. send 100 MDN from Wallet A to Wallet B", async () => {
-    await panel.openLink("Wallet A", /\/accounts\/mtst1[0-9a-z]+$/);
+    await openWallet("Wallet A");
     await page.getByRole("button", { name: "Create new transaction" }).click();
     await page.getByRole("menuitem", { name: "New send transaction" }).click();
     // Titled "Configure send transaction", then "Preview send transaction".
@@ -73,7 +81,7 @@ test("tutorial 2: transfer assets between wallets", async ({ page }) => {
   });
 
   await test.step("4. consume the MDN and fee notes with Wallet B", async () => {
-    await panel.openLink("Wallet B", /\/accounts\/mtst1[0-9a-z]+$/);
+    await openWallet("Wallet B");
     // Wallet B is new and empty: it pays the fee out of the USDCx note the
     // Playground requested for it, consumed along with the MDN note.
     await expect(
