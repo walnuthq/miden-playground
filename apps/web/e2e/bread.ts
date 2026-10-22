@@ -365,13 +365,29 @@ export const test = base.extend<{ breadProfile: BreadProfile; bread: Bread }>({
       await walletPage
         .getByRole("button", { name: /^Fund your wallet/ })
         .click();
-      await expect(
-        walletPage
-          .getByRole("group", { name: "Assets" })
-          .getByRole("button", { name: /^USDCX / }),
-      ).not.toHaveAccessibleName(/^USDCX 0\.00 /, {
-        timeout: 2 * TRANSACTION_TIMEOUT,
-      });
+      // Wait for a positive balance, not just for "0.00" to go away: while
+      // Bread loads (or fails to load) the balance, the row only shows the
+      // token and its price change, e.g. "USDCX USDCX +0.00%".
+      const usdcx = walletPage
+        .getByRole("group", { name: "Assets" })
+        .getByRole("button", { name: /^USDCX / });
+      await expect
+        .poll(
+          async () => {
+            const text = await usdcx
+              .textContent({ timeout: 1_000 })
+              .catch(() => null);
+            // Amounts, without percentages (the text has no spaces).
+            return (text?.match(/\d[\d,]*(\.\d+)?%?/g) ?? [])
+              .filter((amount) => !amount.endsWith("%"))
+              .some((amount) => Number(amount.replaceAll(",", "")) > 0);
+          },
+          {
+            message: "Bread's USDCX balance stays empty",
+            timeout: 2 * TRANSACTION_TIMEOUT,
+          },
+        )
+        .toBe(true);
     };
 
     const disconnect: Bread["disconnect"] = async (page) => {
