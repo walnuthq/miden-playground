@@ -182,8 +182,8 @@ importers:
         specifier: 2.11.10
         version: 2.11.10
       typescript:
-        specifier: 6.0.3
-        version: 6.0.3
+        specifier: 7.0.2
+        version: 7.0.2
 
   apps/api:
     dependencies:
@@ -228,8 +228,8 @@ importers:
         specifier: 1.0.0-rc.4
         version: 1.0.0-rc.4
       typescript:
-        specifier: 6.0.3
-        version: 6.0.3
+        specifier: 7.0.2
+        version: 7.0.2
       wrangler:
         specifier: 4.151.3
         version: 4.151.3(@types/node@24.19.2)
@@ -283,8 +283,8 @@ importers:
         specifier: 4.23.15
         version: 4.23.15
       typescript:
-        specifier: 6.0.3
-        version: 6.0.3
+        specifier: 7.0.2
+        version: 7.0.2
       vite:
         specifier: 8.3.5
         version: 8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.36.0)(tsx@4.23.15)(yaml@2.9.1)
@@ -293,10 +293,10 @@ importers:
     dependencies:
       '@getpara/evm-wallet-connectors':
         specifier: 3.23.0
-        version: 3.23.0(@tanstack/react-query@5.104.5(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(@wagmi/core@3.6.7(@tanstack/query-core@5.104.5)(@types/react@19.3.0)(react@19.3.1)(typescript@6.0.3)(use-sync-external-store@1.4.0(react@19.3.1))(viem@2.57.7(typescript@6.0.3)(zod@3.22.4)))(aws4fetch@1.0.20)(debug@4.4.3(supports-color@10.2.2))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@10.2.2)(typescript@6.0.3)(viem@2.57.7(typescript@6.0.3)(zod@3.22.4))(wagmi@3.7.9(@safe-global/safe-apps-provider@0.18.6(typescript@6.0.3)(zod@3.22.4))(@safe-global/safe-apps-sdk@9.1.0(typescript@6.0.3)(zod@3.22.4))(@tanstack/query-core@5.104.5)(@tanstack/react-query@5.104.5(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(@walletconnect/ethereum-provider@2.23.0(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@6.0.3)(zod@3.22.4))(react@19.3.1)(typescript@6.0.3)(viem@2.57.7(typescript@6.0.3)(zod@3.22.4)))(zod@3.22.4)
+        version: 3.23.0(@tanstack/react-query@5.104.5(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(@wagmi/core@3.6.7(@tanstack/query-core@5.104.5)(@types/react@19.3.0)(react@19.3.1)(typescript@7.0.2)(use-sync-external-store@1.4.0(react@19.3.1))(viem@2.57.7(typescript@7.0.2)(zod@3.22.4)))(aws4fetch@1.0.20)(debug@4.4.3(supports-color@10.2.2))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@10.2.2)(typescript@7.0.2)(viem@2.57.7(typescript@7.0.2)(zod@3.22.4))(wagmi@3.7.9(@safe-global/safe-apps-provider@0.18.6(typescript@7.0.2)(zod@3.22.4))(@safe-global/safe-apps-sdk@9.1.0(typescript@7.0.2)(zod@3.22.4))(@tanstack/query-core@5.104.5)(@tanstack/react-query@5.104.5(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(@walletconnect/ethereum-provider@2.23.0(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@7.0.2)(zod@3.22.4))(react@19.3.1)(typescript@7.0.2)(viem@2.57.7(typescript@7.0.2)(zod@3.22.4)))(zod@3.22.4)
       '@getpara/react-sdk-lite':
         specifier: 3.23.0
-        version: 3.23.0(08738035b386080e09355c5de37eca6f)
+        version: 3.23.0(1c7ca9bd90077447c164de5b307b1513)
       '@getpara/web-sdk':
         specifier: 3.23.0
         version: 3.23.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
@@ -311,13 +311,13 @@ importers:
         version: 0.17.6
       '@miden-sdk/miden-wallet-adapter':
         specifier: 0.17.6
-        version: 0.17.6(@miden-sdk/miden-sdk@0.17.6)(@miden-sdk/react@0.17.6(@miden-sdk/miden-sdk@0.17.6)(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.4.0(react@19.3.1)))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(typescript@6.0.3)
+        version: 0.17.6(@miden-sdk/miden-sdk@0.17.6)(@miden-sdk/react@0.17.6(@miden-sdk/miden-sdk@0.17.6)(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.4.0(react@19.3.1)))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(typescript@7.0.2)
       '@miden-sdk/para':
         specifier: 0.17.6
         version: 0.17.6(@getpara/web-sdk@3.23.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2))(@miden-sdk/miden-sdk@0.17.6)
       '@miden-sdk/para-react':
         specifier: 0.17.6
-        version: 0.17.6(@getpara/react-sdk-lite@3.23.0(08738035b386080e09355c5de37eca6f))(@getpara/web-sdk@3.23.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2))(@miden-sdk/miden-sdk@0.17.6)(@miden-sdk/para@0.17.6(@getpara/web-sdk@3.23.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2))(@miden-sdk/miden-sdk@0.17.6))(@miden-sdk/react@0.17.6(@miden-sdk/miden-sdk@0.17.6)(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.4.0(react@19.3.1)))(@tanstack/react-query@5.104.5(@types/react@19.3.0)(react@19.3.1))(react@19.3.1)
+        version: 0.17.6(@getpara/react-sdk-lite@3.23.0(1c7ca9bd90077447c164de5b307b1513))(@getpara/web-sdk@3.23.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2))(@miden-sdk/miden-sdk@0.17.6)(@miden-sdk/para@0.17.6(@getpara/web-sdk@3.23.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2))(@miden-sdk/miden-sdk@0.17.6))(@miden-sdk/react@0.17.6(@miden-sdk/miden-sdk@0.17.6)(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.4.0(react@19.3.1)))(@tanstack/react-query@5.104.5(@types/react@19.3.0)(react@19.3.1))(react@19.3.1)
       '@miden-sdk/react':
         specifier: 0.17.6
         version: 0.17.6(@miden-sdk/miden-sdk@0.17.6)(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.4.0(react@19.3.1))
@@ -328,8 +328,8 @@ importers:
         specifier: 16.4.2
         version: 16.4.2(@mdx-js/loader@3.1.1(supports-color@10.2.2))(@mdx-js/react@3.1.1(@types/react@19.3.0)(react@19.3.1))(next@16.4.2(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@playwright/test@1.64.1)(@types/node@24.19.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))
       '@opennextjs/cloudflare':
-        specifier: 1.20.12
-        version: 1.20.12(next@16.4.2(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@playwright/test@1.64.1)(@types/node@24.19.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(supports-color@10.2.2)(wrangler@4.151.3(@types/node@24.19.2))
+        specifier: 1.20.13
+        version: 1.20.13(next@16.4.2(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@playwright/test@1.64.1)(@types/node@24.19.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(supports-color@10.2.2)(wrangler@4.151.3(@types/node@24.19.2))
       '@opentelemetry/api':
         specifier: 1.9.1
         version: 1.9.1
@@ -347,7 +347,7 @@ importers:
         version: 9.3.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@wagmi/core':
         specifier: 3.6.7
-        version: 3.6.7(@tanstack/query-core@5.104.5)(@types/react@19.3.0)(react@19.3.1)(typescript@6.0.3)(use-sync-external-store@1.4.0(react@19.3.1))(viem@2.57.7(typescript@6.0.3)(zod@3.22.4))
+        version: 3.6.7(@tanstack/query-core@5.104.5)(@types/react@19.3.0)(react@19.3.1)(typescript@7.0.2)(use-sync-external-store@1.4.0(react@19.3.1))(viem@2.57.7(typescript@7.0.2)(zod@3.22.4))
       '@workspace/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -386,10 +386,10 @@ importers:
         version: 14.0.3
       viem:
         specifier: 2.57.7
-        version: 2.57.7(typescript@6.0.3)(zod@3.22.4)
+        version: 2.57.7(typescript@7.0.2)(zod@3.22.4)
       wagmi:
         specifier: 3.7.9
-        version: 3.7.9(@safe-global/safe-apps-provider@0.18.6(typescript@6.0.3)(zod@3.22.4))(@safe-global/safe-apps-sdk@9.1.0(typescript@6.0.3)(zod@3.22.4))(@tanstack/query-core@5.104.5)(@tanstack/react-query@5.104.5(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(@walletconnect/ethereum-provider@2.23.0(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@6.0.3)(zod@3.22.4))(react@19.3.1)(typescript@6.0.3)(viem@2.57.7(typescript@6.0.3)(zod@3.22.4))
+        version: 3.7.9(@safe-global/safe-apps-provider@0.18.6(typescript@7.0.2)(zod@3.22.4))(@safe-global/safe-apps-sdk@9.1.0(typescript@7.0.2)(zod@3.22.4))(@tanstack/query-core@5.104.5)(@tanstack/react-query@5.104.5(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(@walletconnect/ethereum-provider@2.23.0(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@7.0.2)(zod@3.22.4))(react@19.3.1)(typescript@7.0.2)(viem@2.57.7(typescript@7.0.2)(zod@3.22.4))
     devDependencies:
       '@playwright/test':
         specifier: 1.64.1
@@ -413,8 +413,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/typescript-config
       typescript:
-        specifier: 6.0.3
-        version: 6.0.3
+        specifier: 7.0.2
+        version: 7.0.2
       wrangler:
         specifier: 4.151.3
         version: 4.151.3(@types/node@24.19.2)
@@ -485,8 +485,8 @@ importers:
         specifier: 4.3.3
         version: 4.3.3
       typescript:
-        specifier: 6.0.3
-        version: 6.0.3
+        specifier: 7.0.2
+        version: 7.0.2
 
 packages:
 
@@ -2282,14 +2282,14 @@ packages:
     resolution: {integrity: sha512-oGB+UxlgWcgQkgwo8GcEGwemoTFt3FIO9ababBmaGwXIoBKZ+GTy0pP185beGg7Llih/NSHSV2XAs1lnznocSg==}
     engines: {node: '>= 8'}
 
-  '@opennextjs/aws@4.1.11':
-    resolution: {integrity: sha512-cew0cUgGZF/Kr/C+Z1qvmAdKj4Va5cRho+aB6Ci/5ILd+QDdrR2LVaC/6Qm12KVF37vSLDK7lPDd/KdvvCoNEw==}
+  '@opennextjs/aws@4.1.12':
+    resolution: {integrity: sha512-tZm1rBTRY6MVOOPCxvx0oZIg3b2Z5u0TzDm9D4Wy1cZpMp8Rjfex20gRQeEn0o6dsXpVQCE8q65TjsCFJA5Fpw==}
     hasBin: true
     peerDependencies:
       next: '>=15.5.28 <16 || >=16.4.1'
 
-  '@opennextjs/cloudflare@1.20.12':
-    resolution: {integrity: sha512-ZU1j7hMuOFaa0RHT/wrPXQKEEqzkkoc3fHaHy0Xrx4K0zZdSXGQbwbSHCnbjPRGXblCuWo+ur6UUkl0o9kVhrg==}
+  '@opennextjs/cloudflare@1.20.13':
+    resolution: {integrity: sha512-Rhcvsx/PlQzOslleCBttG+r2o16lOFazKbULxiN33CYexm8S1Fd00mn3tU2w76PIaqO9evzgVKInOpR/fTMc0Q==}
     hasBin: true
     peerDependencies:
       next: '>=15.5.28 <16 || >=16.4.1'
@@ -3551,6 +3551,126 @@ packages:
 
   '@types/validate-npm-package-name@4.0.2':
     resolution: {integrity: sha512-lrpDziQipxCEeK5kWxvljWYhUvOiB2A9izZd9B2AFarYAkqZshb4lPbRs7zKEic6eGtH8V/2qJW+dPp9OtF6bw==}
+
+  '@typescript/typescript-aix-ppc64@7.0.2':
+    resolution: {integrity: sha512-MTKKkWB7p/0E9xi1d1tHtZ5PiLkGEMIq88pK2CubZjOsLtYTLqhgIgi6zepFa+9GHZ6h05NMCkQxGKiPXMxXtQ==}
+    engines: {node: '>=16.20.0'}
+    cpu: [ppc64]
+    os: [aix]
+
+  '@typescript/typescript-darwin-arm64@7.0.2':
+    resolution: {integrity: sha512-gowzar9MwS/aRWp6f3a4KUqzRjAZjOsmGNCM6LcTgXum+dBfgsBVMN+AgvOCCbguXyick6LJhpBszxMebJ8syA==}
+    engines: {node: '>=16.20.0'}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@typescript/typescript-darwin-x64@7.0.2':
+    resolution: {integrity: sha512-SZ9xZInqApNlNGc9s0W1VSsktYSOe9cFqNOIqmN1Gs8SmkjKZYFt017G4VwPxASInODuAdbTW7sXiFUf893RgA==}
+    engines: {node: '>=16.20.0'}
+    cpu: [x64]
+    os: [darwin]
+
+  '@typescript/typescript-freebsd-arm64@7.0.2':
+    resolution: {integrity: sha512-W5NH4y/J0plIIS5b2xvTEkU7JFxyqdMAOgf+Ilhl0vHQXKO5dZoxd+C/jEtq56c4F3wk71RB4BMRQ2XdI+bwYQ==}
+    engines: {node: '>=16.20.0'}
+    cpu: [arm64]
+    os: [freebsd]
+
+  '@typescript/typescript-freebsd-x64@7.0.2':
+    resolution: {integrity: sha512-UMGDx5sTpzNw3WiPebH7l90IWfJggEd+egHt/q6p7/Cm3zqoV7VxkGXt+3DxPIw8CcmvAB0j3sVVfbhX+M4Tpw==}
+    engines: {node: '>=16.20.0'}
+    cpu: [x64]
+    os: [freebsd]
+
+  '@typescript/typescript-linux-arm64@7.0.2':
+    resolution: {integrity: sha512-Qh4eU4/y3yDjnfjjyPYihMj5/ODIlmt+Bzu17OI+fiSRDW57QmU5SiN63exPRNJPKUzcc1INa1NXdrJ+MqHjUQ==}
+    engines: {node: '>=16.20.0'}
+    cpu: [arm64]
+    os: [linux]
+
+  '@typescript/typescript-linux-arm@7.0.2':
+    resolution: {integrity: sha512-gffT3xPz9sR7j/YJExkyPntrI0P2EP9XbOyWzth2/Gs0RstK+90RBcO0ncXoXy/beYll1SXw846Nf2zdnEz0QQ==}
+    engines: {node: '>=16.20.0'}
+    cpu: [arm]
+    os: [linux]
+
+  '@typescript/typescript-linux-loong64@7.0.2':
+    resolution: {integrity: sha512-uEHck9i8hoAzXPiYRib1O7miOnz23SxIeVl6F4LXox+qov1K35jHcEW6VHKvZI+pyvl7fZEP4MCU5LYvIq1GuQ==}
+    engines: {node: '>=16.20.0'}
+    cpu: [loong64]
+    os: [linux]
+
+  '@typescript/typescript-linux-mips64el@7.0.2':
+    resolution: {integrity: sha512-R4KvAMnE43W5Qeqb0Ly56O3mWMWIAgsMyz36DCaycd5nbg/9kzm0liw3JocfRqyJY0KPmzFjbswozXyW0DnIYA==}
+    engines: {node: '>=16.20.0'}
+    cpu: [mips64el]
+    os: [linux]
+
+  '@typescript/typescript-linux-ppc64@7.0.2':
+    resolution: {integrity: sha512-DORx5b3sd/4S7eayxm4FQv+A7CrkUIGRaHiwI8oiHTAI1fAPWhF4J0vAlkC8biAlHSVVwxMQ3tjZ2/DVbnQiiA==}
+    engines: {node: '>=16.20.0'}
+    cpu: [ppc64]
+    os: [linux]
+
+  '@typescript/typescript-linux-riscv64@7.0.2':
+    resolution: {integrity: sha512-wf0jqEDOjrPRnKwYRyyJDRo11KMbvMFrU+q4zqKyChODBzvlkbhNQfKvLxQCcwTpdDaXSHZTVuh0JoCrKCUMHQ==}
+    engines: {node: '>=16.20.0'}
+    cpu: [riscv64]
+    os: [linux]
+
+  '@typescript/typescript-linux-s390x@7.0.2':
+    resolution: {integrity: sha512-IkwJc3L7yhytWd/ewjyxNDfOmswCm9GWMJT/ue/dU4aZNbwZeYAetq42VyLmsmSjvoX7z74X6ZaYCtzAr0EuGw==}
+    engines: {node: '>=16.20.0'}
+    cpu: [s390x]
+    os: [linux]
+
+  '@typescript/typescript-linux-x64@7.0.2':
+    resolution: {integrity: sha512-EYdf2cNg7rgCWJnxCdJ+F3V39O8ihb37eHAu1LK8oAFizgTQbPOK7zHHXbPt8rX24COqODXeI3sIf0fCXG7H/A==}
+    engines: {node: '>=16.20.0'}
+    cpu: [x64]
+    os: [linux]
+
+  '@typescript/typescript-netbsd-arm64@7.0.2':
+    resolution: {integrity: sha512-+polYF4MF04aPpO5FTkHran9yUQDSXqy5GiSDKpsll5jy3l3+g9QLhpf39T+ePtefhXLOGrLl0QIjkQP6VnelA==}
+    engines: {node: '>=16.20.0'}
+    cpu: [arm64]
+    os: [netbsd]
+
+  '@typescript/typescript-netbsd-x64@7.0.2':
+    resolution: {integrity: sha512-8YIT0EHM/3dq10ZOVF/A7pc/YSMtbcecct4rWtexrnSCHOPcpC2KTLXfTCR6vDpnSiY12heNb1GiN/wu+T/FyA==}
+    engines: {node: '>=16.20.0'}
+    cpu: [x64]
+    os: [netbsd]
+
+  '@typescript/typescript-openbsd-arm64@7.0.2':
+    resolution: {integrity: sha512-APT8+ClYnuYm1u9+kgGXoMj2VzWzcymwh2gNSQVySHfkRDGOTVkoWLjCmOQSaO+PoqQ57B0flRp9SA+7GnnkzQ==}
+    engines: {node: '>=16.20.0'}
+    cpu: [arm64]
+    os: [openbsd]
+
+  '@typescript/typescript-openbsd-x64@7.0.2':
+    resolution: {integrity: sha512-yX7s+Q0Dln0Dt9tEzZsAjXXR/+ytBM7AlglaqyeMPxQszJ1JhlJdZ6jLA+IzldHtflX81em7lDao1xXu+aRRkg==}
+    engines: {node: '>=16.20.0'}
+    cpu: [x64]
+    os: [openbsd]
+
+  '@typescript/typescript-sunos-x64@7.0.2':
+    resolution: {integrity: sha512-dLJDGaLZ1D4HPQn62u1n8mBDkJREwMsAkCdkwd4Ieqw+x3TUyTsqY0YiBCtE6H6OzzgGk3iuZ3vFWRS+E8/d1g==}
+    engines: {node: '>=16.20.0'}
+    cpu: [x64]
+    os: [sunos]
+
+  '@typescript/typescript-win32-arm64@7.0.2':
+    resolution: {integrity: sha512-Gyl1Vy6OsWesLzmq+EP0Fb7b4Nid5232AvcA2SFcdYreldpNtYFFofPjnt62y9hQy7VTaZp65ICJjuAQRaVcIQ==}
+    engines: {node: '>=16.20.0'}
+    cpu: [arm64]
+    os: [win32]
+
+  '@typescript/typescript-win32-x64@7.0.2':
+    resolution: {integrity: sha512-0BQ3HkAHHlKLSp1qRvf3SUhGpGsDuhB/jgFw75guyqbxJqEaS0Cw/VFO8i2nHglJUzQCRtMMR/IBAKE3ETMC4g==}
+    engines: {node: '>=16.20.0'}
+    cpu: [x64]
+    os: [win32]
 
   '@ungap/structured-clone@1.4.0':
     resolution: {integrity: sha512-1mEZtMKPM09vDmQt5y7YvmN2+DFTP7Tg0EWXdic8/C6VRnpb33e4ghisCIE3WZjsE2N8mf+QV1Zqh7ZFYLWInQ==}
@@ -6447,9 +6567,9 @@ packages:
     resolution: {integrity: sha512-faYHw0anBbc/kWF3zFTEnxSFOAGUX9GFbOBthvDdLsIlEoWOFOtS0zgCiQYwIskL9iGXZL3kAXD8OoZ4GmMATA==}
     engines: {node: '>= 18'}
 
-  typescript@6.0.3:
-    resolution: {integrity: sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw==}
-    engines: {node: '>=14.17'}
+  typescript@7.0.2:
+    resolution: {integrity: sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA==}
+    engines: {node: '>=16.20.0'}
     hasBin: true
 
   ua-is-frozen@0.1.2:
@@ -8277,21 +8397,21 @@ snapshots:
       - debug
       - supports-color
 
-  '@getpara/evm-wallet-connectors@3.23.0(@tanstack/react-query@5.104.5(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(@wagmi/core@3.6.7(@tanstack/query-core@5.104.5)(@types/react@19.3.0)(react@19.3.1)(typescript@6.0.3)(use-sync-external-store@1.4.0(react@19.3.1))(viem@2.57.7(typescript@6.0.3)(zod@3.22.4)))(aws4fetch@1.0.20)(debug@4.4.3(supports-color@10.2.2))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@10.2.2)(typescript@6.0.3)(viem@2.57.7(typescript@6.0.3)(zod@3.22.4))(wagmi@3.7.9(@safe-global/safe-apps-provider@0.18.6(typescript@6.0.3)(zod@3.22.4))(@safe-global/safe-apps-sdk@9.1.0(typescript@6.0.3)(zod@3.22.4))(@tanstack/query-core@5.104.5)(@tanstack/react-query@5.104.5(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(@walletconnect/ethereum-provider@2.23.0(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@6.0.3)(zod@3.22.4))(react@19.3.1)(typescript@6.0.3)(viem@2.57.7(typescript@6.0.3)(zod@3.22.4)))(zod@3.22.4)':
+  '@getpara/evm-wallet-connectors@3.23.0(@tanstack/react-query@5.104.5(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(@wagmi/core@3.6.7(@tanstack/query-core@5.104.5)(@types/react@19.3.0)(react@19.3.1)(typescript@7.0.2)(use-sync-external-store@1.4.0(react@19.3.1))(viem@2.57.7(typescript@7.0.2)(zod@3.22.4)))(aws4fetch@1.0.20)(debug@4.4.3(supports-color@10.2.2))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@10.2.2)(typescript@7.0.2)(viem@2.57.7(typescript@7.0.2)(zod@3.22.4))(wagmi@3.7.9(@safe-global/safe-apps-provider@0.18.6(typescript@7.0.2)(zod@3.22.4))(@safe-global/safe-apps-sdk@9.1.0(typescript@7.0.2)(zod@3.22.4))(@tanstack/query-core@5.104.5)(@tanstack/react-query@5.104.5(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(@walletconnect/ethereum-provider@2.23.0(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@7.0.2)(zod@3.22.4))(react@19.3.1)(typescript@7.0.2)(viem@2.57.7(typescript@7.0.2)(zod@3.22.4)))(zod@3.22.4)':
     dependencies:
       '@coinbase/wallet-sdk': 4.3.0
       '@getpara/react-common': 3.23.0(debug@4.4.3(supports-color@10.2.2))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@10.2.2)
-      '@getpara/wagmi-v2-connector': 3.23.0(@wagmi/core@3.6.7(@tanstack/query-core@5.104.5)(@types/react@19.3.0)(react@19.3.1)(typescript@6.0.3)(use-sync-external-store@1.4.0(react@19.3.1))(viem@2.57.7(typescript@6.0.3)(zod@3.22.4)))(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)(viem@2.57.7(typescript@6.0.3)(zod@3.22.4))
+      '@getpara/wagmi-v2-connector': 3.23.0(@wagmi/core@3.6.7(@tanstack/query-core@5.104.5)(@types/react@19.3.0)(react@19.3.1)(typescript@7.0.2)(use-sync-external-store@1.4.0(react@19.3.1))(viem@2.57.7(typescript@7.0.2)(zod@3.22.4)))(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)(viem@2.57.7(typescript@7.0.2)(zod@3.22.4))
       '@getpara/web-sdk': 3.23.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
-      '@safe-global/safe-apps-provider': 0.18.6(typescript@6.0.3)(zod@3.22.4)
-      '@safe-global/safe-apps-sdk': 9.1.0(typescript@6.0.3)(zod@3.22.4)
+      '@safe-global/safe-apps-provider': 0.18.6(typescript@7.0.2)(zod@3.22.4)
+      '@safe-global/safe-apps-sdk': 9.1.0(typescript@7.0.2)(zod@3.22.4)
       '@tanstack/react-query': 5.104.5(@types/react@19.3.0)(react@19.3.1)
-      '@wagmi/core': 3.6.7(@tanstack/query-core@5.104.5)(@types/react@19.3.0)(react@19.3.1)(typescript@6.0.3)(use-sync-external-store@1.4.0(react@19.3.1))(viem@2.57.7(typescript@6.0.3)(zod@3.22.4))
-      '@walletconnect/ethereum-provider': 2.23.0(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@6.0.3)(zod@3.22.4)
+      '@wagmi/core': 3.6.7(@tanstack/query-core@5.104.5)(@types/react@19.3.0)(react@19.3.1)(typescript@7.0.2)(use-sync-external-store@1.4.0(react@19.3.1))(viem@2.57.7(typescript@7.0.2)(zod@3.22.4))
+      '@walletconnect/ethereum-provider': 2.23.0(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@7.0.2)(zod@3.22.4)
       react: 19.3.1
       react-dom: 19.3.1(react@19.3.1)
-      viem: 2.57.7(typescript@6.0.3)(zod@3.22.4)
-      wagmi: 3.7.9(@safe-global/safe-apps-provider@0.18.6(typescript@6.0.3)(zod@3.22.4))(@safe-global/safe-apps-sdk@9.1.0(typescript@6.0.3)(zod@3.22.4))(@tanstack/query-core@5.104.5)(@tanstack/react-query@5.104.5(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(@walletconnect/ethereum-provider@2.23.0(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@6.0.3)(zod@3.22.4))(react@19.3.1)(typescript@6.0.3)(viem@2.57.7(typescript@6.0.3)(zod@3.22.4))
+      viem: 2.57.7(typescript@7.0.2)(zod@3.22.4)
+      wagmi: 3.7.9(@safe-global/safe-apps-provider@0.18.6(typescript@7.0.2)(zod@3.22.4))(@safe-global/safe-apps-sdk@9.1.0(typescript@7.0.2)(zod@3.22.4))(@tanstack/query-core@5.104.5)(@tanstack/react-query@5.104.5(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(@walletconnect/ethereum-provider@2.23.0(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@7.0.2)(zod@3.22.4))(react@19.3.1)(typescript@7.0.2)(viem@2.57.7(typescript@7.0.2)(zod@3.22.4))
       zustand: 4.5.7(@types/react@19.3.0)(react@19.3.1)
       zustand-sync-tabs: 0.2.3(zustand@4.5.7(@types/react@19.3.0)(react@19.3.1))
     transitivePeerDependencies:
@@ -8378,15 +8498,15 @@ snapshots:
       - '@types/react-dom'
       - tailwindcss
 
-  '@getpara/react-core@3.23.0(@getpara/viem-v2-integration@3.23.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)(viem@2.57.7(typescript@6.0.3)(zod@3.22.4)))(@tanstack/react-query@5.104.5(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(debug@4.4.3(supports-color@10.2.2))(react@19.3.1)(supports-color@10.2.2)(use-sync-external-store@1.4.0(react@19.3.1))(viem@2.57.7(typescript@6.0.3)(zod@3.22.4))':
+  '@getpara/react-core@3.23.0(@getpara/viem-v2-integration@3.23.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)(viem@2.57.7(typescript@7.0.2)(zod@3.22.4)))(@tanstack/react-query@5.104.5(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(debug@4.4.3(supports-color@10.2.2))(react@19.3.1)(supports-color@10.2.2)(use-sync-external-store@1.4.0(react@19.3.1))(viem@2.57.7(typescript@7.0.2)(zod@3.22.4))':
     dependencies:
       '@getpara/core-sdk': 3.23.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
       '@tanstack/react-query': 5.104.5(@types/react@19.3.0)(react@19.3.1)
       react: 19.3.1
       zustand: 5.0.15(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.4.0(react@19.3.1))
     optionalDependencies:
-      '@getpara/viem-v2-integration': 3.23.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)(viem@2.57.7(typescript@6.0.3)(zod@3.22.4))
-      viem: 2.57.7(typescript@6.0.3)(zod@3.22.4)
+      '@getpara/viem-v2-integration': 3.23.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)(viem@2.57.7(typescript@7.0.2)(zod@3.22.4))
+      viem: 2.57.7(typescript@7.0.2)(zod@3.22.4)
     transitivePeerDependencies:
       - '@types/react'
       - debug
@@ -8394,12 +8514,12 @@ snapshots:
       - supports-color
       - use-sync-external-store
 
-  '@getpara/react-sdk-lite@3.23.0(08738035b386080e09355c5de37eca6f)':
+  '@getpara/react-sdk-lite@3.23.0(1c7ca9bd90077447c164de5b307b1513)':
     dependencies:
       '@getpara/core-sdk': 3.23.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
       '@getpara/react-common': 3.23.0(debug@4.4.3(supports-color@10.2.2))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@10.2.2)
       '@getpara/react-component-library': 3.23.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(tailwindcss@4.3.3)
-      '@getpara/react-core': 3.23.0(@getpara/viem-v2-integration@3.23.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)(viem@2.57.7(typescript@6.0.3)(zod@3.22.4)))(@tanstack/react-query@5.104.5(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(debug@4.4.3(supports-color@10.2.2))(react@19.3.1)(supports-color@10.2.2)(use-sync-external-store@1.4.0(react@19.3.1))(viem@2.57.7(typescript@6.0.3)(zod@3.22.4))
+      '@getpara/react-core': 3.23.0(@getpara/viem-v2-integration@3.23.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)(viem@2.57.7(typescript@7.0.2)(zod@3.22.4)))(@tanstack/react-query@5.104.5(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(debug@4.4.3(supports-color@10.2.2))(react@19.3.1)(supports-color@10.2.2)(use-sync-external-store@1.4.0(react@19.3.1))(viem@2.57.7(typescript@7.0.2)(zod@3.22.4))
       '@getpara/shared': 1.37.0
       '@getpara/user-management-client': 3.23.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
       '@getpara/web-sdk': 3.23.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
@@ -8417,9 +8537,9 @@ snapshots:
       web-vitals: 5.3.0
       zustand: 4.5.7(@types/react@19.3.0)(react@19.3.1)
     optionalDependencies:
-      '@getpara/evm-wallet-connectors': 3.23.0(@tanstack/react-query@5.104.5(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(@wagmi/core@3.6.7(@tanstack/query-core@5.104.5)(@types/react@19.3.0)(react@19.3.1)(typescript@6.0.3)(use-sync-external-store@1.4.0(react@19.3.1))(viem@2.57.7(typescript@6.0.3)(zod@3.22.4)))(aws4fetch@1.0.20)(debug@4.4.3(supports-color@10.2.2))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@10.2.2)(typescript@6.0.3)(viem@2.57.7(typescript@6.0.3)(zod@3.22.4))(wagmi@3.7.9(@safe-global/safe-apps-provider@0.18.6(typescript@6.0.3)(zod@3.22.4))(@safe-global/safe-apps-sdk@9.1.0(typescript@6.0.3)(zod@3.22.4))(@tanstack/query-core@5.104.5)(@tanstack/react-query@5.104.5(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(@walletconnect/ethereum-provider@2.23.0(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@6.0.3)(zod@3.22.4))(react@19.3.1)(typescript@6.0.3)(viem@2.57.7(typescript@6.0.3)(zod@3.22.4)))(zod@3.22.4)
-      '@getpara/viem-v2-integration': 3.23.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)(viem@2.57.7(typescript@6.0.3)(zod@3.22.4))
-      viem: 2.57.7(typescript@6.0.3)(zod@3.22.4)
+      '@getpara/evm-wallet-connectors': 3.23.0(@tanstack/react-query@5.104.5(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(@wagmi/core@3.6.7(@tanstack/query-core@5.104.5)(@types/react@19.3.0)(react@19.3.1)(typescript@7.0.2)(use-sync-external-store@1.4.0(react@19.3.1))(viem@2.57.7(typescript@7.0.2)(zod@3.22.4)))(aws4fetch@1.0.20)(debug@4.4.3(supports-color@10.2.2))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@10.2.2)(typescript@7.0.2)(viem@2.57.7(typescript@7.0.2)(zod@3.22.4))(wagmi@3.7.9(@safe-global/safe-apps-provider@0.18.6(typescript@7.0.2)(zod@3.22.4))(@safe-global/safe-apps-sdk@9.1.0(typescript@7.0.2)(zod@3.22.4))(@tanstack/query-core@5.104.5)(@tanstack/react-query@5.104.5(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(@walletconnect/ethereum-provider@2.23.0(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@7.0.2)(zod@3.22.4))(react@19.3.1)(typescript@7.0.2)(viem@2.57.7(typescript@7.0.2)(zod@3.22.4)))(zod@3.22.4)
+      '@getpara/viem-v2-integration': 3.23.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)(viem@2.57.7(typescript@7.0.2)(zod@3.22.4))
+      viem: 2.57.7(typescript@7.0.2)(zod@3.22.4)
     transitivePeerDependencies:
       - '@cosmjs/amino'
       - '@cosmjs/proto-signing'
@@ -8451,21 +8571,21 @@ snapshots:
       - debug
       - supports-color
 
-  '@getpara/viem-v2-integration@3.23.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)(viem@2.57.7(typescript@6.0.3)(zod@3.22.4))':
+  '@getpara/viem-v2-integration@3.23.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)(viem@2.57.7(typescript@7.0.2)(zod@3.22.4))':
     dependencies:
       '@getpara/core-sdk': 3.23.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
-      viem: 2.57.7(typescript@6.0.3)(zod@3.22.4)
+      viem: 2.57.7(typescript@7.0.2)(zod@3.22.4)
     transitivePeerDependencies:
       - debug
       - supports-color
 
-  '@getpara/wagmi-v2-connector@3.23.0(@wagmi/core@3.6.7(@tanstack/query-core@5.104.5)(@types/react@19.3.0)(react@19.3.1)(typescript@6.0.3)(use-sync-external-store@1.4.0(react@19.3.1))(viem@2.57.7(typescript@6.0.3)(zod@3.22.4)))(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)(viem@2.57.7(typescript@6.0.3)(zod@3.22.4))':
+  '@getpara/wagmi-v2-connector@3.23.0(@wagmi/core@3.6.7(@tanstack/query-core@5.104.5)(@types/react@19.3.0)(react@19.3.1)(typescript@7.0.2)(use-sync-external-store@1.4.0(react@19.3.1))(viem@2.57.7(typescript@7.0.2)(zod@3.22.4)))(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)(viem@2.57.7(typescript@7.0.2)(zod@3.22.4))':
     dependencies:
-      '@getpara/viem-v2-integration': 3.23.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)(viem@2.57.7(typescript@6.0.3)(zod@3.22.4))
+      '@getpara/viem-v2-integration': 3.23.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)(viem@2.57.7(typescript@7.0.2)(zod@3.22.4))
       '@getpara/web-sdk': 3.23.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
-      '@wagmi/core': 3.6.7(@tanstack/query-core@5.104.5)(@types/react@19.3.0)(react@19.3.1)(typescript@6.0.3)(use-sync-external-store@1.4.0(react@19.3.1))(viem@2.57.7(typescript@6.0.3)(zod@3.22.4))
+      '@wagmi/core': 3.6.7(@tanstack/query-core@5.104.5)(@types/react@19.3.0)(react@19.3.1)(typescript@7.0.2)(use-sync-external-store@1.4.0(react@19.3.1))(viem@2.57.7(typescript@7.0.2)(zod@3.22.4))
       eventemitter3: 5.0.4
-      viem: 2.57.7(typescript@6.0.3)(zod@3.22.4)
+      viem: 2.57.7(typescript@7.0.2)(zod@3.22.4)
     transitivePeerDependencies:
       - debug
       - supports-color
@@ -8833,17 +8953,17 @@ snapshots:
       '@miden-sdk/miden-sdk': 0.17.6
       eventemitter3: 5.0.4
 
-  '@miden-sdk/miden-wallet-adapter-miden@0.17.6(@miden-sdk/miden-sdk@0.17.6)(typescript@6.0.3)':
+  '@miden-sdk/miden-wallet-adapter-miden@0.17.6(@miden-sdk/miden-sdk@0.17.6)(typescript@7.0.2)':
     dependencies:
       '@miden-sdk/miden-sdk': 0.17.6
       '@miden-sdk/miden-wallet-adapter-base': 0.17.6(@miden-sdk/miden-sdk@0.17.6)
-      typescript: 6.0.3
+      typescript: 7.0.2
 
-  '@miden-sdk/miden-wallet-adapter-react@0.17.6(@miden-sdk/miden-sdk@0.17.6)(@miden-sdk/react@0.17.6(@miden-sdk/miden-sdk@0.17.6)(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.4.0(react@19.3.1)))(@types/react@19.3.0)(react@19.3.1)(typescript@6.0.3)':
+  '@miden-sdk/miden-wallet-adapter-react@0.17.6(@miden-sdk/miden-sdk@0.17.6)(@miden-sdk/react@0.17.6(@miden-sdk/miden-sdk@0.17.6)(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.4.0(react@19.3.1)))(@types/react@19.3.0)(react@19.3.1)(typescript@7.0.2)':
     dependencies:
       '@miden-sdk/miden-sdk': 0.17.6
       '@miden-sdk/miden-wallet-adapter-base': 0.17.6(@miden-sdk/miden-sdk@0.17.6)
-      '@miden-sdk/miden-wallet-adapter-miden': 0.17.6(@miden-sdk/miden-sdk@0.17.6)(typescript@6.0.3)
+      '@miden-sdk/miden-wallet-adapter-miden': 0.17.6(@miden-sdk/miden-sdk@0.17.6)(typescript@7.0.2)
       react: 19.3.1
     optionalDependencies:
       '@miden-sdk/react': 0.17.6(@miden-sdk/miden-sdk@0.17.6)(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.4.0(react@19.3.1))
@@ -8851,11 +8971,11 @@ snapshots:
     transitivePeerDependencies:
       - typescript
 
-  '@miden-sdk/miden-wallet-adapter-reactui@0.17.6(@miden-sdk/miden-sdk@0.17.6)(@miden-sdk/react@0.17.6(@miden-sdk/miden-sdk@0.17.6)(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.4.0(react@19.3.1)))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(typescript@6.0.3)':
+  '@miden-sdk/miden-wallet-adapter-reactui@0.17.6(@miden-sdk/miden-sdk@0.17.6)(@miden-sdk/react@0.17.6(@miden-sdk/miden-sdk@0.17.6)(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.4.0(react@19.3.1)))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(typescript@7.0.2)':
     dependencies:
       '@miden-sdk/miden-wallet-adapter-base': 0.17.6(@miden-sdk/miden-sdk@0.17.6)
-      '@miden-sdk/miden-wallet-adapter-miden': 0.17.6(@miden-sdk/miden-sdk@0.17.6)(typescript@6.0.3)
-      '@miden-sdk/miden-wallet-adapter-react': 0.17.6(@miden-sdk/miden-sdk@0.17.6)(@miden-sdk/react@0.17.6(@miden-sdk/miden-sdk@0.17.6)(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.4.0(react@19.3.1)))(@types/react@19.3.0)(react@19.3.1)(typescript@6.0.3)
+      '@miden-sdk/miden-wallet-adapter-miden': 0.17.6(@miden-sdk/miden-sdk@0.17.6)(typescript@7.0.2)
+      '@miden-sdk/miden-wallet-adapter-react': 0.17.6(@miden-sdk/miden-sdk@0.17.6)(@miden-sdk/react@0.17.6(@miden-sdk/miden-sdk@0.17.6)(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.4.0(react@19.3.1)))(@types/react@19.3.0)(react@19.3.1)(typescript@7.0.2)
       '@types/react': 19.3.0
       '@types/react-dom': 19.3.0(@types/react@19.3.0)
       react: 19.3.1
@@ -8865,12 +8985,12 @@ snapshots:
       - '@miden-sdk/react'
       - typescript
 
-  '@miden-sdk/miden-wallet-adapter@0.17.6(@miden-sdk/miden-sdk@0.17.6)(@miden-sdk/react@0.17.6(@miden-sdk/miden-sdk@0.17.6)(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.4.0(react@19.3.1)))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(typescript@6.0.3)':
+  '@miden-sdk/miden-wallet-adapter@0.17.6(@miden-sdk/miden-sdk@0.17.6)(@miden-sdk/react@0.17.6(@miden-sdk/miden-sdk@0.17.6)(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.4.0(react@19.3.1)))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(typescript@7.0.2)':
     dependencies:
       '@miden-sdk/miden-wallet-adapter-base': 0.17.6(@miden-sdk/miden-sdk@0.17.6)
-      '@miden-sdk/miden-wallet-adapter-miden': 0.17.6(@miden-sdk/miden-sdk@0.17.6)(typescript@6.0.3)
-      '@miden-sdk/miden-wallet-adapter-react': 0.17.6(@miden-sdk/miden-sdk@0.17.6)(@miden-sdk/react@0.17.6(@miden-sdk/miden-sdk@0.17.6)(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.4.0(react@19.3.1)))(@types/react@19.3.0)(react@19.3.1)(typescript@6.0.3)
-      '@miden-sdk/miden-wallet-adapter-reactui': 0.17.6(@miden-sdk/miden-sdk@0.17.6)(@miden-sdk/react@0.17.6(@miden-sdk/miden-sdk@0.17.6)(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.4.0(react@19.3.1)))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(typescript@6.0.3)
+      '@miden-sdk/miden-wallet-adapter-miden': 0.17.6(@miden-sdk/miden-sdk@0.17.6)(typescript@7.0.2)
+      '@miden-sdk/miden-wallet-adapter-react': 0.17.6(@miden-sdk/miden-sdk@0.17.6)(@miden-sdk/react@0.17.6(@miden-sdk/miden-sdk@0.17.6)(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.4.0(react@19.3.1)))(@types/react@19.3.0)(react@19.3.1)(typescript@7.0.2)
+      '@miden-sdk/miden-wallet-adapter-reactui': 0.17.6(@miden-sdk/miden-sdk@0.17.6)(@miden-sdk/react@0.17.6(@miden-sdk/miden-sdk@0.17.6)(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.4.0(react@19.3.1)))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(typescript@7.0.2)
       '@types/react': 19.3.0
       '@types/react-dom': 19.3.0(@types/react@19.3.0)
       react: 19.3.1
@@ -8892,9 +9012,9 @@ snapshots:
   '@miden-sdk/node-linux-x64-musl@0.17.6':
     optional: true
 
-  '@miden-sdk/para-react@0.17.6(@getpara/react-sdk-lite@3.23.0(08738035b386080e09355c5de37eca6f))(@getpara/web-sdk@3.23.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2))(@miden-sdk/miden-sdk@0.17.6)(@miden-sdk/para@0.17.6(@getpara/web-sdk@3.23.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2))(@miden-sdk/miden-sdk@0.17.6))(@miden-sdk/react@0.17.6(@miden-sdk/miden-sdk@0.17.6)(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.4.0(react@19.3.1)))(@tanstack/react-query@5.104.5(@types/react@19.3.0)(react@19.3.1))(react@19.3.1)':
+  '@miden-sdk/para-react@0.17.6(@getpara/react-sdk-lite@3.23.0(1c7ca9bd90077447c164de5b307b1513))(@getpara/web-sdk@3.23.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2))(@miden-sdk/miden-sdk@0.17.6)(@miden-sdk/para@0.17.6(@getpara/web-sdk@3.23.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2))(@miden-sdk/miden-sdk@0.17.6))(@miden-sdk/react@0.17.6(@miden-sdk/miden-sdk@0.17.6)(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.4.0(react@19.3.1)))(@tanstack/react-query@5.104.5(@types/react@19.3.0)(react@19.3.1))(react@19.3.1)':
     dependencies:
-      '@getpara/react-sdk-lite': 3.23.0(08738035b386080e09355c5de37eca6f)
+      '@getpara/react-sdk-lite': 3.23.0(1c7ca9bd90077447c164de5b307b1513)
       '@getpara/web-sdk': 3.23.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
       '@miden-sdk/miden-sdk': 0.17.6
       '@miden-sdk/para': 0.17.6(@getpara/web-sdk@3.23.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2))(@miden-sdk/miden-sdk@0.17.6)
@@ -9053,7 +9173,7 @@ snapshots:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.20.3
 
-  '@opennextjs/aws@4.1.11(next@16.4.2(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@playwright/test@1.64.1)(@types/node@24.19.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(supports-color@10.2.2)':
+  '@opennextjs/aws@4.1.12(next@16.4.2(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@playwright/test@1.64.1)(@types/node@24.19.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(supports-color@10.2.2)':
     dependencies:
       '@ast-grep/napi': 0.45.3
       '@aws-sdk/client-cloudfront': 3.984.0
@@ -9076,11 +9196,11 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@opennextjs/cloudflare@1.20.12(next@16.4.2(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@playwright/test@1.64.1)(@types/node@24.19.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(supports-color@10.2.2)(wrangler@4.151.3(@types/node@24.19.2))':
+  '@opennextjs/cloudflare@1.20.13(next@16.4.2(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@playwright/test@1.64.1)(@types/node@24.19.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(supports-color@10.2.2)(wrangler@4.151.3(@types/node@24.19.2))':
     dependencies:
       '@ast-grep/napi': 0.45.3
       '@dotenvx/dotenvx': 2.35.0
-      '@opennextjs/aws': 4.1.11(next@16.4.2(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@playwright/test@1.64.1)(@types/node@24.19.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(supports-color@10.2.2)
+      '@opennextjs/aws': 4.1.12(next@16.4.2(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@playwright/test@1.64.1)(@types/node@24.19.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(supports-color@10.2.2)
       ci-info: 4.4.0
       cloudflare: 4.5.0
       comment-json: 4.6.2
@@ -9795,24 +9915,24 @@ snapshots:
 
   '@radix-ui/rect@1.1.3': {}
 
-  '@reown/appkit-common@1.8.11(typescript@6.0.3)(zod@3.22.4)':
+  '@reown/appkit-common@1.8.11(typescript@7.0.2)(zod@3.22.4)':
     dependencies:
       big.js: 6.2.2
       dayjs: 1.11.13
-      viem: 2.57.7(typescript@6.0.3)(zod@3.22.4)
+      viem: 2.57.7(typescript@7.0.2)(zod@3.22.4)
     transitivePeerDependencies:
       - bufferutil
       - typescript
       - utf-8-validate
       - zod
 
-  '@reown/appkit-controllers@1.8.11(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@6.0.3)(zod@3.22.4)':
+  '@reown/appkit-controllers@1.8.11(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@7.0.2)(zod@3.22.4)':
     dependencies:
-      '@reown/appkit-common': 1.8.11(typescript@6.0.3)(zod@3.22.4)
-      '@reown/appkit-wallet': 1.8.11(typescript@6.0.3)
-      '@walletconnect/universal-provider': 2.22.4(aws4fetch@1.0.20)(typescript@6.0.3)(zod@3.22.4)
+      '@reown/appkit-common': 1.8.11(typescript@7.0.2)(zod@3.22.4)
+      '@reown/appkit-wallet': 1.8.11(typescript@7.0.2)
+      '@walletconnect/universal-provider': 2.22.4(aws4fetch@1.0.20)(typescript@7.0.2)(zod@3.22.4)
       valtio: 2.1.7(@types/react@19.3.0)(react@19.3.1)
-      viem: 2.57.7(typescript@6.0.3)(zod@3.22.4)
+      viem: 2.57.7(typescript@7.0.2)(zod@3.22.4)
     transitivePeerDependencies:
       - '@azure/app-configuration'
       - '@azure/cosmos'
@@ -9841,12 +9961,12 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@reown/appkit-pay@1.8.11(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@6.0.3)(zod@3.22.4)':
+  '@reown/appkit-pay@1.8.11(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@7.0.2)(zod@3.22.4)':
     dependencies:
-      '@reown/appkit-common': 1.8.11(typescript@6.0.3)(zod@3.22.4)
-      '@reown/appkit-controllers': 1.8.11(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@6.0.3)(zod@3.22.4)
-      '@reown/appkit-ui': 1.8.11(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@6.0.3)(zod@3.22.4)
-      '@reown/appkit-utils': 1.8.11(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@6.0.3)(valtio@2.1.7(@types/react@19.3.0)(react@19.3.1))(zod@3.22.4)
+      '@reown/appkit-common': 1.8.11(typescript@7.0.2)(zod@3.22.4)
+      '@reown/appkit-controllers': 1.8.11(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@7.0.2)(zod@3.22.4)
+      '@reown/appkit-ui': 1.8.11(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@7.0.2)(zod@3.22.4)
+      '@reown/appkit-utils': 1.8.11(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@7.0.2)(valtio@2.1.7(@types/react@19.3.0)(react@19.3.1))(zod@3.22.4)
       lit: 3.3.0
       valtio: 2.1.7(@types/react@19.3.0)(react@19.3.1)
     transitivePeerDependencies:
@@ -9881,13 +10001,13 @@ snapshots:
     dependencies:
       buffer: 6.0.3
 
-  '@reown/appkit-scaffold-ui@1.8.11(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@6.0.3)(valtio@2.1.7(@types/react@19.3.0)(react@19.3.1))(zod@3.22.4)':
+  '@reown/appkit-scaffold-ui@1.8.11(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@7.0.2)(valtio@2.1.7(@types/react@19.3.0)(react@19.3.1))(zod@3.22.4)':
     dependencies:
-      '@reown/appkit-common': 1.8.11(typescript@6.0.3)(zod@3.22.4)
-      '@reown/appkit-controllers': 1.8.11(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@6.0.3)(zod@3.22.4)
-      '@reown/appkit-ui': 1.8.11(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@6.0.3)(zod@3.22.4)
-      '@reown/appkit-utils': 1.8.11(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@6.0.3)(valtio@2.1.7(@types/react@19.3.0)(react@19.3.1))(zod@3.22.4)
-      '@reown/appkit-wallet': 1.8.11(typescript@6.0.3)
+      '@reown/appkit-common': 1.8.11(typescript@7.0.2)(zod@3.22.4)
+      '@reown/appkit-controllers': 1.8.11(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@7.0.2)(zod@3.22.4)
+      '@reown/appkit-ui': 1.8.11(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@7.0.2)(zod@3.22.4)
+      '@reown/appkit-utils': 1.8.11(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@7.0.2)(valtio@2.1.7(@types/react@19.3.0)(react@19.3.1))(zod@3.22.4)
+      '@reown/appkit-wallet': 1.8.11(typescript@7.0.2)
       lit: 3.3.0
     transitivePeerDependencies:
       - '@azure/app-configuration'
@@ -9918,12 +10038,12 @@ snapshots:
       - valtio
       - zod
 
-  '@reown/appkit-ui@1.8.11(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@6.0.3)(zod@3.22.4)':
+  '@reown/appkit-ui@1.8.11(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@7.0.2)(zod@3.22.4)':
     dependencies:
       '@phosphor-icons/webcomponents': 2.1.5
-      '@reown/appkit-common': 1.8.11(typescript@6.0.3)(zod@3.22.4)
-      '@reown/appkit-controllers': 1.8.11(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@6.0.3)(zod@3.22.4)
-      '@reown/appkit-wallet': 1.8.11(typescript@6.0.3)
+      '@reown/appkit-common': 1.8.11(typescript@7.0.2)(zod@3.22.4)
+      '@reown/appkit-controllers': 1.8.11(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@7.0.2)(zod@3.22.4)
+      '@reown/appkit-wallet': 1.8.11(typescript@7.0.2)
       lit: 3.3.0
       qrcode: 1.5.3
     transitivePeerDependencies:
@@ -9954,17 +10074,17 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@reown/appkit-utils@1.8.11(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@6.0.3)(valtio@2.1.7(@types/react@19.3.0)(react@19.3.1))(zod@3.22.4)':
+  '@reown/appkit-utils@1.8.11(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@7.0.2)(valtio@2.1.7(@types/react@19.3.0)(react@19.3.1))(zod@3.22.4)':
     dependencies:
-      '@reown/appkit-common': 1.8.11(typescript@6.0.3)(zod@3.22.4)
-      '@reown/appkit-controllers': 1.8.11(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@6.0.3)(zod@3.22.4)
+      '@reown/appkit-common': 1.8.11(typescript@7.0.2)(zod@3.22.4)
+      '@reown/appkit-controllers': 1.8.11(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@7.0.2)(zod@3.22.4)
       '@reown/appkit-polyfills': 1.8.11
-      '@reown/appkit-wallet': 1.8.11(typescript@6.0.3)
+      '@reown/appkit-wallet': 1.8.11(typescript@7.0.2)
       '@wallet-standard/wallet': 1.1.0
       '@walletconnect/logger': 3.0.0
-      '@walletconnect/universal-provider': 2.22.4(aws4fetch@1.0.20)(typescript@6.0.3)(zod@3.22.4)
+      '@walletconnect/universal-provider': 2.22.4(aws4fetch@1.0.20)(typescript@7.0.2)(zod@3.22.4)
       valtio: 2.1.7(@types/react@19.3.0)(react@19.3.1)
-      viem: 2.57.7(typescript@6.0.3)(zod@3.22.4)
+      viem: 2.57.7(typescript@7.0.2)(zod@3.22.4)
     transitivePeerDependencies:
       - '@azure/app-configuration'
       - '@azure/cosmos'
@@ -9993,9 +10113,9 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@reown/appkit-wallet@1.8.11(typescript@6.0.3)':
+  '@reown/appkit-wallet@1.8.11(typescript@7.0.2)':
     dependencies:
-      '@reown/appkit-common': 1.8.11(typescript@6.0.3)(zod@3.22.4)
+      '@reown/appkit-common': 1.8.11(typescript@7.0.2)(zod@3.22.4)
       '@reown/appkit-polyfills': 1.8.11
       '@walletconnect/logger': 3.0.0
       zod: 3.22.4
@@ -10004,21 +10124,21 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@reown/appkit@1.8.11(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@6.0.3)(zod@3.22.4)':
+  '@reown/appkit@1.8.11(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@7.0.2)(zod@3.22.4)':
     dependencies:
-      '@reown/appkit-common': 1.8.11(typescript@6.0.3)(zod@3.22.4)
-      '@reown/appkit-controllers': 1.8.11(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@6.0.3)(zod@3.22.4)
-      '@reown/appkit-pay': 1.8.11(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@6.0.3)(zod@3.22.4)
+      '@reown/appkit-common': 1.8.11(typescript@7.0.2)(zod@3.22.4)
+      '@reown/appkit-controllers': 1.8.11(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@7.0.2)(zod@3.22.4)
+      '@reown/appkit-pay': 1.8.11(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@7.0.2)(zod@3.22.4)
       '@reown/appkit-polyfills': 1.8.11
-      '@reown/appkit-scaffold-ui': 1.8.11(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@6.0.3)(valtio@2.1.7(@types/react@19.3.0)(react@19.3.1))(zod@3.22.4)
-      '@reown/appkit-ui': 1.8.11(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@6.0.3)(zod@3.22.4)
-      '@reown/appkit-utils': 1.8.11(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@6.0.3)(valtio@2.1.7(@types/react@19.3.0)(react@19.3.1))(zod@3.22.4)
-      '@reown/appkit-wallet': 1.8.11(typescript@6.0.3)
-      '@walletconnect/universal-provider': 2.22.4(aws4fetch@1.0.20)(typescript@6.0.3)(zod@3.22.4)
+      '@reown/appkit-scaffold-ui': 1.8.11(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@7.0.2)(valtio@2.1.7(@types/react@19.3.0)(react@19.3.1))(zod@3.22.4)
+      '@reown/appkit-ui': 1.8.11(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@7.0.2)(zod@3.22.4)
+      '@reown/appkit-utils': 1.8.11(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@7.0.2)(valtio@2.1.7(@types/react@19.3.0)(react@19.3.1))(zod@3.22.4)
+      '@reown/appkit-wallet': 1.8.11(typescript@7.0.2)
+      '@walletconnect/universal-provider': 2.22.4(aws4fetch@1.0.20)(typescript@7.0.2)(zod@3.22.4)
       bs58: 6.0.0
       semver: 7.7.2
       valtio: 2.1.7(@types/react@19.3.0)(react@19.3.1)
-      viem: 2.57.7(typescript@6.0.3)(zod@3.22.4)
+      viem: 2.57.7(typescript@7.0.2)(zod@3.22.4)
     optionalDependencies:
       '@lit/react': 1.0.8(@types/react@19.3.0)
     transitivePeerDependencies:
@@ -10096,9 +10216,9 @@ snapshots:
 
   '@rolldown/pluginutils@1.0.1': {}
 
-  '@safe-global/safe-apps-provider@0.18.6(typescript@6.0.3)(zod@3.22.4)':
+  '@safe-global/safe-apps-provider@0.18.6(typescript@7.0.2)(zod@3.22.4)':
     dependencies:
-      '@safe-global/safe-apps-sdk': 9.1.0(typescript@6.0.3)(zod@3.22.4)
+      '@safe-global/safe-apps-sdk': 9.1.0(typescript@7.0.2)(zod@3.22.4)
       events: 3.3.0
     transitivePeerDependencies:
       - bufferutil
@@ -10106,10 +10226,10 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@safe-global/safe-apps-sdk@9.1.0(typescript@6.0.3)(zod@3.22.4)':
+  '@safe-global/safe-apps-sdk@9.1.0(typescript@7.0.2)(zod@3.22.4)':
     dependencies:
       '@safe-global/safe-gateway-typescript-sdk': 3.23.1
-      viem: 2.57.7(typescript@6.0.3)(zod@3.22.4)
+      viem: 2.57.7(typescript@7.0.2)(zod@3.22.4)
     transitivePeerDependencies:
       - bufferutil
       - typescript
@@ -10627,6 +10747,66 @@ snapshots:
 
   '@types/validate-npm-package-name@4.0.2': {}
 
+  '@typescript/typescript-aix-ppc64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-darwin-arm64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-darwin-x64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-freebsd-arm64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-freebsd-x64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-linux-arm64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-linux-arm@7.0.2':
+    optional: true
+
+  '@typescript/typescript-linux-loong64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-linux-mips64el@7.0.2':
+    optional: true
+
+  '@typescript/typescript-linux-ppc64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-linux-riscv64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-linux-s390x@7.0.2':
+    optional: true
+
+  '@typescript/typescript-linux-x64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-netbsd-arm64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-netbsd-x64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-openbsd-arm64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-openbsd-x64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-sunos-x64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-win32-arm64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-win32-x64@7.0.2':
+    optional: true
+
   '@ungap/structured-clone@1.4.0': {}
 
   '@vitejs/plugin-react@6.1.2(vite@8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.36.0)(tsx@4.23.15)(yaml@2.9.1))':
@@ -10634,25 +10814,25 @@ snapshots:
       '@rolldown/pluginutils': 1.0.1
       vite: 8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.36.0)(tsx@4.23.15)(yaml@2.9.1)
 
-  '@wagmi/connectors@8.2.2(@safe-global/safe-apps-provider@0.18.6(typescript@6.0.3)(zod@3.22.4))(@safe-global/safe-apps-sdk@9.1.0(typescript@6.0.3)(zod@3.22.4))(@wagmi/core@3.6.7(@tanstack/query-core@5.104.5)(@types/react@19.3.0)(react@19.3.1)(typescript@6.0.3)(use-sync-external-store@1.4.0(react@19.3.1))(viem@2.57.7(typescript@6.0.3)(zod@3.22.4)))(@walletconnect/ethereum-provider@2.23.0(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@6.0.3)(zod@3.22.4))(typescript@6.0.3)(viem@2.57.7(typescript@6.0.3)(zod@3.22.4))':
+  '@wagmi/connectors@8.2.2(@safe-global/safe-apps-provider@0.18.6(typescript@7.0.2)(zod@3.22.4))(@safe-global/safe-apps-sdk@9.1.0(typescript@7.0.2)(zod@3.22.4))(@wagmi/core@3.6.7(@tanstack/query-core@5.104.5)(@types/react@19.3.0)(react@19.3.1)(typescript@7.0.2)(use-sync-external-store@1.4.0(react@19.3.1))(viem@2.57.7(typescript@7.0.2)(zod@3.22.4)))(@walletconnect/ethereum-provider@2.23.0(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@7.0.2)(zod@3.22.4))(typescript@7.0.2)(viem@2.57.7(typescript@7.0.2)(zod@3.22.4))':
     dependencies:
-      '@wagmi/core': 3.6.7(@tanstack/query-core@5.104.5)(@types/react@19.3.0)(react@19.3.1)(typescript@6.0.3)(use-sync-external-store@1.4.0(react@19.3.1))(viem@2.57.7(typescript@6.0.3)(zod@3.22.4))
-      viem: 2.57.7(typescript@6.0.3)(zod@3.22.4)
+      '@wagmi/core': 3.6.7(@tanstack/query-core@5.104.5)(@types/react@19.3.0)(react@19.3.1)(typescript@7.0.2)(use-sync-external-store@1.4.0(react@19.3.1))(viem@2.57.7(typescript@7.0.2)(zod@3.22.4))
+      viem: 2.57.7(typescript@7.0.2)(zod@3.22.4)
     optionalDependencies:
-      '@safe-global/safe-apps-provider': 0.18.6(typescript@6.0.3)(zod@3.22.4)
-      '@safe-global/safe-apps-sdk': 9.1.0(typescript@6.0.3)(zod@3.22.4)
-      '@walletconnect/ethereum-provider': 2.23.0(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@6.0.3)(zod@3.22.4)
-      typescript: 6.0.3
+      '@safe-global/safe-apps-provider': 0.18.6(typescript@7.0.2)(zod@3.22.4)
+      '@safe-global/safe-apps-sdk': 9.1.0(typescript@7.0.2)(zod@3.22.4)
+      '@walletconnect/ethereum-provider': 2.23.0(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@7.0.2)(zod@3.22.4)
+      typescript: 7.0.2
 
-  '@wagmi/core@3.6.7(@tanstack/query-core@5.104.5)(@types/react@19.3.0)(react@19.3.1)(typescript@6.0.3)(use-sync-external-store@1.4.0(react@19.3.1))(viem@2.57.7(typescript@6.0.3)(zod@3.22.4))':
+  '@wagmi/core@3.6.7(@tanstack/query-core@5.104.5)(@types/react@19.3.0)(react@19.3.1)(typescript@7.0.2)(use-sync-external-store@1.4.0(react@19.3.1))(viem@2.57.7(typescript@7.0.2)(zod@3.22.4))':
     dependencies:
       eventemitter3: 5.0.1
-      mipd: 0.0.7(typescript@6.0.3)
-      viem: 2.57.7(typescript@6.0.3)(zod@3.22.4)
+      mipd: 0.0.7(typescript@7.0.2)
+      viem: 2.57.7(typescript@7.0.2)(zod@3.22.4)
       zustand: 5.0.0(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.4.0(react@19.3.1))
     optionalDependencies:
       '@tanstack/query-core': 5.104.5
-      typescript: 6.0.3
+      typescript: 7.0.2
     transitivePeerDependencies:
       - '@types/react'
       - immer
@@ -10665,7 +10845,7 @@ snapshots:
     dependencies:
       '@wallet-standard/base': 1.1.1
 
-  '@walletconnect/core@2.22.4(aws4fetch@1.0.20)(typescript@6.0.3)(zod@3.22.4)':
+  '@walletconnect/core@2.22.4(aws4fetch@1.0.20)(typescript@7.0.2)(zod@3.22.4)':
     dependencies:
       '@walletconnect/heartbeat': 1.2.2
       '@walletconnect/jsonrpc-provider': 1.0.14
@@ -10679,7 +10859,7 @@ snapshots:
       '@walletconnect/safe-json': 1.0.2
       '@walletconnect/time': 1.0.2
       '@walletconnect/types': 2.22.4(aws4fetch@1.0.20)
-      '@walletconnect/utils': 2.22.4(aws4fetch@1.0.20)(typescript@6.0.3)(zod@3.22.4)
+      '@walletconnect/utils': 2.22.4(aws4fetch@1.0.20)(typescript@7.0.2)(zod@3.22.4)
       '@walletconnect/window-getters': 1.0.1
       es-toolkit: 1.39.3
       events: 3.3.0
@@ -10709,7 +10889,7 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@walletconnect/core@2.23.0(aws4fetch@1.0.20)(typescript@6.0.3)(zod@3.22.4)':
+  '@walletconnect/core@2.23.0(aws4fetch@1.0.20)(typescript@7.0.2)(zod@3.22.4)':
     dependencies:
       '@walletconnect/heartbeat': 1.2.2
       '@walletconnect/jsonrpc-provider': 1.0.14
@@ -10723,7 +10903,7 @@ snapshots:
       '@walletconnect/safe-json': 1.0.2
       '@walletconnect/time': 1.0.2
       '@walletconnect/types': 2.23.0(aws4fetch@1.0.20)
-      '@walletconnect/utils': 2.23.0(aws4fetch@1.0.20)(typescript@6.0.3)(zod@3.22.4)
+      '@walletconnect/utils': 2.23.0(aws4fetch@1.0.20)(typescript@7.0.2)(zod@3.22.4)
       '@walletconnect/window-getters': 1.0.1
       es-toolkit: 1.39.3
       events: 3.3.0
@@ -10757,19 +10937,19 @@ snapshots:
     dependencies:
       tslib: 1.14.1
 
-  '@walletconnect/ethereum-provider@2.23.0(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@6.0.3)(zod@3.22.4)':
+  '@walletconnect/ethereum-provider@2.23.0(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@7.0.2)(zod@3.22.4)':
     dependencies:
-      '@reown/appkit': 1.8.11(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@6.0.3)(zod@3.22.4)
+      '@reown/appkit': 1.8.11(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@7.0.2)(zod@3.22.4)
       '@walletconnect/jsonrpc-http-connection': 1.0.8
       '@walletconnect/jsonrpc-provider': 1.0.14
       '@walletconnect/jsonrpc-types': 1.0.4
       '@walletconnect/jsonrpc-utils': 1.0.8
       '@walletconnect/keyvaluestorage': 1.1.1(aws4fetch@1.0.20)
       '@walletconnect/logger': 3.0.0
-      '@walletconnect/sign-client': 2.23.0(aws4fetch@1.0.20)(typescript@6.0.3)(zod@3.22.4)
+      '@walletconnect/sign-client': 2.23.0(aws4fetch@1.0.20)(typescript@7.0.2)(zod@3.22.4)
       '@walletconnect/types': 2.23.0(aws4fetch@1.0.20)
-      '@walletconnect/universal-provider': 2.23.0(aws4fetch@1.0.20)(typescript@6.0.3)(zod@3.22.4)
-      '@walletconnect/utils': 2.23.0(aws4fetch@1.0.20)(typescript@6.0.3)(zod@3.22.4)
+      '@walletconnect/universal-provider': 2.23.0(aws4fetch@1.0.20)(typescript@7.0.2)(zod@3.22.4)
+      '@walletconnect/utils': 2.23.0(aws4fetch@1.0.20)(typescript@7.0.2)(zod@3.22.4)
       events: 3.3.0
     transitivePeerDependencies:
       - '@azure/app-configuration'
@@ -10892,16 +11072,16 @@ snapshots:
     dependencies:
       tslib: 1.14.1
 
-  '@walletconnect/sign-client@2.22.4(aws4fetch@1.0.20)(typescript@6.0.3)(zod@3.22.4)':
+  '@walletconnect/sign-client@2.22.4(aws4fetch@1.0.20)(typescript@7.0.2)(zod@3.22.4)':
     dependencies:
-      '@walletconnect/core': 2.22.4(aws4fetch@1.0.20)(typescript@6.0.3)(zod@3.22.4)
+      '@walletconnect/core': 2.22.4(aws4fetch@1.0.20)(typescript@7.0.2)(zod@3.22.4)
       '@walletconnect/events': 1.0.1
       '@walletconnect/heartbeat': 1.2.2
       '@walletconnect/jsonrpc-utils': 1.0.8
       '@walletconnect/logger': 3.0.0
       '@walletconnect/time': 1.0.2
       '@walletconnect/types': 2.22.4(aws4fetch@1.0.20)
-      '@walletconnect/utils': 2.22.4(aws4fetch@1.0.20)(typescript@6.0.3)(zod@3.22.4)
+      '@walletconnect/utils': 2.22.4(aws4fetch@1.0.20)(typescript@7.0.2)(zod@3.22.4)
       events: 3.3.0
     transitivePeerDependencies:
       - '@azure/app-configuration'
@@ -10928,16 +11108,16 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@walletconnect/sign-client@2.23.0(aws4fetch@1.0.20)(typescript@6.0.3)(zod@3.22.4)':
+  '@walletconnect/sign-client@2.23.0(aws4fetch@1.0.20)(typescript@7.0.2)(zod@3.22.4)':
     dependencies:
-      '@walletconnect/core': 2.23.0(aws4fetch@1.0.20)(typescript@6.0.3)(zod@3.22.4)
+      '@walletconnect/core': 2.23.0(aws4fetch@1.0.20)(typescript@7.0.2)(zod@3.22.4)
       '@walletconnect/events': 1.0.1
       '@walletconnect/heartbeat': 1.2.2
       '@walletconnect/jsonrpc-utils': 1.0.8
       '@walletconnect/logger': 3.0.0
       '@walletconnect/time': 1.0.2
       '@walletconnect/types': 2.23.0(aws4fetch@1.0.20)
-      '@walletconnect/utils': 2.23.0(aws4fetch@1.0.20)(typescript@6.0.3)(zod@3.22.4)
+      '@walletconnect/utils': 2.23.0(aws4fetch@1.0.20)(typescript@7.0.2)(zod@3.22.4)
       events: 3.3.0
     transitivePeerDependencies:
       - '@azure/app-configuration'
@@ -11026,7 +11206,7 @@ snapshots:
       - ioredis
       - uploadthing
 
-  '@walletconnect/universal-provider@2.22.4(aws4fetch@1.0.20)(typescript@6.0.3)(zod@3.22.4)':
+  '@walletconnect/universal-provider@2.22.4(aws4fetch@1.0.20)(typescript@7.0.2)(zod@3.22.4)':
     dependencies:
       '@walletconnect/events': 1.0.1
       '@walletconnect/jsonrpc-http-connection': 1.0.8
@@ -11035,9 +11215,9 @@ snapshots:
       '@walletconnect/jsonrpc-utils': 1.0.8
       '@walletconnect/keyvaluestorage': 1.1.1(aws4fetch@1.0.20)
       '@walletconnect/logger': 3.0.0
-      '@walletconnect/sign-client': 2.22.4(aws4fetch@1.0.20)(typescript@6.0.3)(zod@3.22.4)
+      '@walletconnect/sign-client': 2.22.4(aws4fetch@1.0.20)(typescript@7.0.2)(zod@3.22.4)
       '@walletconnect/types': 2.22.4(aws4fetch@1.0.20)
-      '@walletconnect/utils': 2.22.4(aws4fetch@1.0.20)(typescript@6.0.3)(zod@3.22.4)
+      '@walletconnect/utils': 2.22.4(aws4fetch@1.0.20)(typescript@7.0.2)(zod@3.22.4)
       es-toolkit: 1.39.3
       events: 3.3.0
     transitivePeerDependencies:
@@ -11066,7 +11246,7 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@walletconnect/universal-provider@2.23.0(aws4fetch@1.0.20)(typescript@6.0.3)(zod@3.22.4)':
+  '@walletconnect/universal-provider@2.23.0(aws4fetch@1.0.20)(typescript@7.0.2)(zod@3.22.4)':
     dependencies:
       '@walletconnect/events': 1.0.1
       '@walletconnect/jsonrpc-http-connection': 1.0.8
@@ -11075,9 +11255,9 @@ snapshots:
       '@walletconnect/jsonrpc-utils': 1.0.8
       '@walletconnect/keyvaluestorage': 1.1.1(aws4fetch@1.0.20)
       '@walletconnect/logger': 3.0.0
-      '@walletconnect/sign-client': 2.23.0(aws4fetch@1.0.20)(typescript@6.0.3)(zod@3.22.4)
+      '@walletconnect/sign-client': 2.23.0(aws4fetch@1.0.20)(typescript@7.0.2)(zod@3.22.4)
       '@walletconnect/types': 2.23.0(aws4fetch@1.0.20)
-      '@walletconnect/utils': 2.23.0(aws4fetch@1.0.20)(typescript@6.0.3)(zod@3.22.4)
+      '@walletconnect/utils': 2.23.0(aws4fetch@1.0.20)(typescript@7.0.2)(zod@3.22.4)
       es-toolkit: 1.39.3
       events: 3.3.0
     transitivePeerDependencies:
@@ -11106,7 +11286,7 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@walletconnect/utils@2.22.4(aws4fetch@1.0.20)(typescript@6.0.3)(zod@3.22.4)':
+  '@walletconnect/utils@2.22.4(aws4fetch@1.0.20)(typescript@7.0.2)(zod@3.22.4)':
     dependencies:
       '@msgpack/msgpack': 3.1.2
       '@noble/ciphers': 1.3.0
@@ -11126,7 +11306,7 @@ snapshots:
       blakejs: 1.2.1
       bs58: 6.0.0
       detect-browser: 5.3.0
-      ox: 0.9.3(typescript@6.0.3)(zod@3.22.4)
+      ox: 0.9.3(typescript@7.0.2)(zod@3.22.4)
       uint8arrays: 3.1.1
     transitivePeerDependencies:
       - '@azure/app-configuration'
@@ -11151,7 +11331,7 @@ snapshots:
       - uploadthing
       - zod
 
-  '@walletconnect/utils@2.23.0(aws4fetch@1.0.20)(typescript@6.0.3)(zod@3.22.4)':
+  '@walletconnect/utils@2.23.0(aws4fetch@1.0.20)(typescript@7.0.2)(zod@3.22.4)':
     dependencies:
       '@msgpack/msgpack': 3.1.2
       '@noble/ciphers': 1.3.0
@@ -11171,7 +11351,7 @@ snapshots:
       blakejs: 1.2.1
       bs58: 6.0.0
       detect-browser: 5.3.0
-      ox: 0.9.3(typescript@6.0.3)(zod@3.22.4)
+      ox: 0.9.3(typescript@7.0.2)(zod@3.22.4)
       uint8arrays: 3.1.1
     transitivePeerDependencies:
       - '@azure/app-configuration'
@@ -11205,14 +11385,14 @@ snapshots:
       '@walletconnect/window-getters': 1.0.1
       tslib: 1.14.1
 
-  abitype@1.2.3(typescript@6.0.3)(zod@3.22.4):
+  abitype@1.2.3(typescript@7.0.2)(zod@3.22.4):
     optionalDependencies:
-      typescript: 6.0.3
+      typescript: 7.0.2
       zod: 3.22.4
 
-  abitype@1.3.0(typescript@6.0.3)(zod@3.22.4):
+  abitype@1.3.0(typescript@7.0.2)(zod@3.22.4):
     optionalDependencies:
-      typescript: 6.0.3
+      typescript: 7.0.2
       zod: 3.22.4
 
   abort-controller@3.0.0:
@@ -12998,9 +13178,9 @@ snapshots:
 
   minipass@7.1.3: {}
 
-  mipd@0.0.7(typescript@6.0.3):
+  mipd@0.0.7(typescript@7.0.2):
     optionalDependencies:
-      typescript: 6.0.3
+      typescript: 7.0.2
 
   mkdirp@3.0.1: {}
 
@@ -13154,7 +13334,7 @@ snapshots:
       string-width: 7.2.0
       strip-ansi: 7.2.0
 
-  ox@0.14.56(typescript@6.0.3)(zod@3.22.4):
+  ox@0.14.56(typescript@7.0.2)(zod@3.22.4):
     dependencies:
       '@adraffy/ens-normalize': 1.11.1
       '@noble/ciphers': 1.3.0
@@ -13162,14 +13342,14 @@ snapshots:
       '@noble/hashes': 1.8.0
       '@scure/bip32': 1.7.0
       '@scure/bip39': 1.6.0
-      abitype: 1.2.3(typescript@6.0.3)(zod@3.22.4)
+      abitype: 1.2.3(typescript@7.0.2)(zod@3.22.4)
       eventemitter3: 5.0.1
     optionalDependencies:
-      typescript: 6.0.3
+      typescript: 7.0.2
     transitivePeerDependencies:
       - zod
 
-  ox@0.9.3(typescript@6.0.3)(zod@3.22.4):
+  ox@0.9.3(typescript@7.0.2)(zod@3.22.4):
     dependencies:
       '@adraffy/ens-normalize': 1.11.1
       '@noble/ciphers': 1.3.0
@@ -13177,10 +13357,10 @@ snapshots:
       '@noble/hashes': 1.8.0
       '@scure/bip32': 1.7.0
       '@scure/bip39': 1.6.0
-      abitype: 1.3.0(typescript@6.0.3)(zod@3.22.4)
+      abitype: 1.3.0(typescript@7.0.2)(zod@3.22.4)
       eventemitter3: 5.0.1
     optionalDependencies:
-      typescript: 6.0.3
+      typescript: 7.0.2
     transitivePeerDependencies:
       - zod
 
@@ -14006,7 +14186,28 @@ snapshots:
       media-typer: 1.1.1
       mime-types: 3.0.2
 
-  typescript@6.0.3: {}
+  typescript@7.0.2:
+    optionalDependencies:
+      '@typescript/typescript-aix-ppc64': 7.0.2
+      '@typescript/typescript-darwin-arm64': 7.0.2
+      '@typescript/typescript-darwin-x64': 7.0.2
+      '@typescript/typescript-freebsd-arm64': 7.0.2
+      '@typescript/typescript-freebsd-x64': 7.0.2
+      '@typescript/typescript-linux-arm': 7.0.2
+      '@typescript/typescript-linux-arm64': 7.0.2
+      '@typescript/typescript-linux-loong64': 7.0.2
+      '@typescript/typescript-linux-mips64el': 7.0.2
+      '@typescript/typescript-linux-ppc64': 7.0.2
+      '@typescript/typescript-linux-riscv64': 7.0.2
+      '@typescript/typescript-linux-s390x': 7.0.2
+      '@typescript/typescript-linux-x64': 7.0.2
+      '@typescript/typescript-netbsd-arm64': 7.0.2
+      '@typescript/typescript-netbsd-x64': 7.0.2
+      '@typescript/typescript-openbsd-arm64': 7.0.2
+      '@typescript/typescript-openbsd-x64': 7.0.2
+      '@typescript/typescript-sunos-x64': 7.0.2
+      '@typescript/typescript-win32-arm64': 7.0.2
+      '@typescript/typescript-win32-x64': 7.0.2
 
   ua-is-frozen@0.1.2: {}
 
@@ -14184,18 +14385,18 @@ snapshots:
       d3-time: 3.1.0
       d3-timer: 3.0.1
 
-  viem@2.57.7(typescript@6.0.3)(zod@3.22.4):
+  viem@2.57.7(typescript@7.0.2)(zod@3.22.4):
     dependencies:
       '@noble/curves': 1.9.1
       '@noble/hashes': 1.8.0
       '@scure/bip32': 1.7.0
       '@scure/bip39': 1.6.0
-      abitype: 1.2.3(typescript@6.0.3)(zod@3.22.4)
+      abitype: 1.2.3(typescript@7.0.2)(zod@3.22.4)
       isows: 1.0.7(ws@8.21.0)
-      ox: 0.14.56(typescript@6.0.3)(zod@3.22.4)
+      ox: 0.14.56(typescript@7.0.2)(zod@3.22.4)
       ws: 8.21.0
     optionalDependencies:
-      typescript: 6.0.3
+      typescript: 7.0.2
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -14217,16 +14418,16 @@ snapshots:
       tsx: 4.23.15
       yaml: 2.9.1
 
-  wagmi@3.7.9(@safe-global/safe-apps-provider@0.18.6(typescript@6.0.3)(zod@3.22.4))(@safe-global/safe-apps-sdk@9.1.0(typescript@6.0.3)(zod@3.22.4))(@tanstack/query-core@5.104.5)(@tanstack/react-query@5.104.5(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(@walletconnect/ethereum-provider@2.23.0(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@6.0.3)(zod@3.22.4))(react@19.3.1)(typescript@6.0.3)(viem@2.57.7(typescript@6.0.3)(zod@3.22.4)):
+  wagmi@3.7.9(@safe-global/safe-apps-provider@0.18.6(typescript@7.0.2)(zod@3.22.4))(@safe-global/safe-apps-sdk@9.1.0(typescript@7.0.2)(zod@3.22.4))(@tanstack/query-core@5.104.5)(@tanstack/react-query@5.104.5(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(@walletconnect/ethereum-provider@2.23.0(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@7.0.2)(zod@3.22.4))(react@19.3.1)(typescript@7.0.2)(viem@2.57.7(typescript@7.0.2)(zod@3.22.4)):
     dependencies:
       '@tanstack/react-query': 5.104.5(@types/react@19.3.0)(react@19.3.1)
-      '@wagmi/connectors': 8.2.2(@safe-global/safe-apps-provider@0.18.6(typescript@6.0.3)(zod@3.22.4))(@safe-global/safe-apps-sdk@9.1.0(typescript@6.0.3)(zod@3.22.4))(@wagmi/core@3.6.7(@tanstack/query-core@5.104.5)(@types/react@19.3.0)(react@19.3.1)(typescript@6.0.3)(use-sync-external-store@1.4.0(react@19.3.1))(viem@2.57.7(typescript@6.0.3)(zod@3.22.4)))(@walletconnect/ethereum-provider@2.23.0(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@6.0.3)(zod@3.22.4))(typescript@6.0.3)(viem@2.57.7(typescript@6.0.3)(zod@3.22.4))
-      '@wagmi/core': 3.6.7(@tanstack/query-core@5.104.5)(@types/react@19.3.0)(react@19.3.1)(typescript@6.0.3)(use-sync-external-store@1.4.0(react@19.3.1))(viem@2.57.7(typescript@6.0.3)(zod@3.22.4))
+      '@wagmi/connectors': 8.2.2(@safe-global/safe-apps-provider@0.18.6(typescript@7.0.2)(zod@3.22.4))(@safe-global/safe-apps-sdk@9.1.0(typescript@7.0.2)(zod@3.22.4))(@wagmi/core@3.6.7(@tanstack/query-core@5.104.5)(@types/react@19.3.0)(react@19.3.1)(typescript@7.0.2)(use-sync-external-store@1.4.0(react@19.3.1))(viem@2.57.7(typescript@7.0.2)(zod@3.22.4)))(@walletconnect/ethereum-provider@2.23.0(@types/react@19.3.0)(aws4fetch@1.0.20)(react@19.3.1)(typescript@7.0.2)(zod@3.22.4))(typescript@7.0.2)(viem@2.57.7(typescript@7.0.2)(zod@3.22.4))
+      '@wagmi/core': 3.6.7(@tanstack/query-core@5.104.5)(@types/react@19.3.0)(react@19.3.1)(typescript@7.0.2)(use-sync-external-store@1.4.0(react@19.3.1))(viem@2.57.7(typescript@7.0.2)(zod@3.22.4))
       react: 19.3.1
       use-sync-external-store: 1.4.0(react@19.3.1)
-      viem: 2.57.7(typescript@6.0.3)(zod@3.22.4)
+      viem: 2.57.7(typescript@7.0.2)(zod@3.22.4)
     optionalDependencies:
-      typescript: 6.0.3
+      typescript: 7.0.2
     transitivePeerDependencies:
       - '@base-org/account'
       - '@coinbase/wallet-sdk'
