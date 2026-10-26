@@ -1,7 +1,0 @@
-Your **Count Reader** is deployed, so you can now copy the count of the **Counter Contract**, a counter contract deployed on testnet that the Playground imported for you in this tutorial.
-
-Click the _"Components"_ tab on the account details page. Under _"Account Components"_, find the _"Count Reader"_ component: its **`count_reader::count_reader::count`** storage slot holds the initial count, **0**.
-
-Click the _"Invoke"_ button next to the **`copy_count`** procedure. In the _"Invoke Procedure"_ dialog, select the **Counter Contract** account as the **`counter_account_id`** argument, then click the _"Invoke"_ button.
-
-The Playground executes a Transaction against your **Count Reader** with a transaction script that calls **`copy_count`**, and submits it to testnet. The **Counter Contract** is passed to the Transaction as a foreign account, so that **`copy_count`** can call its **`get_count`** procedure through FPI.

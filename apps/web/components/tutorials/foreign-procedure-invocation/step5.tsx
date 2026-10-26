@@ -1,5 +1,5 @@
-import Step5Content from "@/components/tutorials/foreign-procedure-invocation/step5.mdx";
 import NextStepButton from "@/components/tutorials/next-step-button";
+import { InlineCode } from "@/components/tutorials/prose";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import useAccounts from "@/hooks/use-accounts";
 import useTransactions from "@/hooks/use-transactions";
@@ -45,7 +45,50 @@ const Step5: TutorialStep = {
     const completed = useCompleted();
     return (
       <>
-        <Step5Content />
+        <p>
+          Your <strong>Count Reader</strong> is deployed, so you can now copy
+          the count of the <strong>Counter Contract</strong>, a counter contract
+          deployed on testnet that the Playground imported for you in this
+          tutorial.
+        </p>
+        <p>
+          Click the <em>"Components"</em> tab on the account details page. Under{" "}
+          <em>"Account Components"</em>, find the <em>"Count Reader"</em>{" "}
+          component: its{" "}
+          <strong>
+            <InlineCode>count_reader::count_reader::count</InlineCode>
+          </strong>{" "}
+          storage slot holds the initial count, <strong>0</strong>.
+        </p>
+        <p>
+          Click the <em>"Invoke"</em> button next to the{" "}
+          <strong>
+            <InlineCode>copy_count</InlineCode>
+          </strong>{" "}
+          procedure. In the <em>"Invoke Procedure"</em> dialog, select the{" "}
+          <strong>Counter Contract</strong> account as the{" "}
+          <strong>
+            <InlineCode>counter_account_id</InlineCode>
+          </strong>{" "}
+          argument, then click the <em>"Invoke"</em> button.
+        </p>
+        <p>
+          The Playground executes a Transaction against your{" "}
+          <strong>Count Reader</strong> with a transaction script that calls{" "}
+          <strong>
+            <InlineCode>copy_count</InlineCode>
+          </strong>
+          , and submits it to testnet. The <strong>Counter Contract</strong> is
+          passed to the Transaction as a foreign account, so that{" "}
+          <strong>
+            <InlineCode>copy_count</InlineCode>
+          </strong>{" "}
+          can call its{" "}
+          <strong>
+            <InlineCode>get_count</InlineCode>
+          </strong>{" "}
+          procedure through FPI.
+        </p>
         <TutorialStepAlert
           completed={completed}
           title="Action required: Copy the Counter Contract count."

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import Step3Content from "@/components/tutorials/timelock-p2id-note/step3.mdx";
+import { CodeBlock, InlineCode } from "@/components/tutorials/prose";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import useAccounts from "@/hooks/use-accounts";
 import useScripts from "@/hooks/use-scripts";
@@ -41,7 +41,57 @@ const Step3: TutorialStep = {
     const completed = useCompleted();
     return (
       <>
-        <Step3Content />
+        <p>
+          The timelock block height will be the third item of the note storage,
+          so the script must now expect three storage items. At line <em>28</em>
+          , change the expected storage length from{" "}
+          <strong>
+            <InlineCode>2</InlineCode>
+          </strong>{" "}
+          to{" "}
+          <strong>
+            <InlineCode>3</InlineCode>
+          </strong>
+          :
+        </p>
+        <CodeBlock
+          code={`// make sure the storage length is 3
+assert_eq(storage.len().into(), felt!(3));`}
+        />
+        <p>
+          Then, after line <em>33</em>, read the third storage item into a
+          variable:
+        </p>
+        <CodeBlock code={`let timelock_height = storage[2];`} />
+        <p>
+          To get the current block height, use the transaction kernel's{" "}
+          <strong>
+            <InlineCode>get_block_number</InlineCode>
+          </strong>{" "}
+          call, which returns the Transaction's reference block number:
+        </p>
+        <CodeBlock code={`let block_number = tx::get_block_number();`} />
+        <p>
+          Finally, check that{" "}
+          <strong>
+            <InlineCode>block_number</InlineCode>
+          </strong>{" "}
+          ≥{" "}
+          <strong>
+            <InlineCode>timelock_height</InlineCode>
+          </strong>
+          :
+        </p>
+        <CodeBlock code={`assert!(block_number >= timelock_height);`} />
+        <p>
+          Once you've added the timelock logic, compile your script and proceed
+          to the next step.
+        </p>
+        <p>
+          When you do, the Playground creates a new public wallet named{" "}
+          <strong>Test Wallet</strong> for you: it will be the target account of
+          your timelocked note.
+        </p>
         <TutorialStepAlert
           completed={completed}
           title="Action required: Compile the script."

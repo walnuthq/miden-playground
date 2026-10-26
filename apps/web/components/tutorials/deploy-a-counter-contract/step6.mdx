@@ -1,7 +1,0 @@
-import Link from "@/components/tutorials/tutorial-link";
-
-Your counter contract is deployed, so you can now interact with it. <Link href={`/accounts/${props.counter.identifier}`}>Click its name</Link> on the accounts page to open its details page, then click the _"Components"_ tab.
-
-Under _"Account Components"_, find your component and click the _"Invoke"_ button next to the **`get_count`** procedure to read the initial value of the counter. This procedure only reads storage, so the Playground executes it locally, without submitting a Transaction.
-
-Next, click the _"Invoke"_ button next to the **`increment_count`** procedure. The Playground executes a Transaction against your counter contract with a transaction script that calls this procedure, which increments the counter by the value you chose, and submits it to testnet.
