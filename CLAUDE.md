@@ -16,6 +16,10 @@ Skills are installed per project with the `skills` CLI (`pnpm dlx skills ...`) a
 
 When bumping `@miden-sdk/*`, also update `CLIENT_VERSION` in `apps/web/lib/utils/store.ts` to the new version. It stamps the stores the tutorials seed from `defaultStore`, and the SDK refuses to import a store stamped by a client newer than the running one. Bump the `@miden-sdk/*` pins in `pnpm-workspace.yaml` `overrides` too. If the new version is younger than pnpm's minimum release age, exempt exactly that version of each package in `minimumReleaseAgeExclude`, and remove the entries once it ages out.
 
+# Next.js → Vite migration (in progress)
+
+`apps/web` is moving from Next.js/OpenNext to Vite + React Router + a Cloudflare Worker, one PR per step, as planned in `VITE_MIGRATION.md` (repo root). Read it before touching routing, build or deploy config, and update its status line when a step lands. Before writing Vite config, read the `frontend-pitfalls` (FP3, FP8, FP17, FP18) and `para-signer` ("Bundler setup") skills, and `vite-wasm-setup` once the Vite step has installed `@miden-sdk/vite-plugin`. That package is the skill's only source, and it is kept as a devDependency without being registered in `vite.config.ts`; the plan explains why. Tailwind goes through `@tailwindcss/vite` (as in `apps/status-page`), not PostCSS. Keep `WasmWebClient.workerMode = "module"` in `apps/web/lib/miden-client.ts` until step 4 has tested `auto` on Safari.
+
 # UI components
 
 `packages/ui/src/components` holds stock shadcn components (style `base-vega`, Base UI primitives, `cn` from the `cn` package). Keep them byte-identical to the CLI output so they can be refreshed with `pnpm dlx shadcn@latest add <name> --overwrite` (run in `packages/ui`); Biome ignores that directory on purpose. They need `@import "shadcn/tailwind.css"` in `globals.css` for their `data-*` custom variants.

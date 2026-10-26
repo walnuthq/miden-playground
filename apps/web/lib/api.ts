@@ -1,4 +1,9 @@
 import { API_REGISTRY_URL, API_URL } from "@/lib/constants";
+import {
+  mockCompileScript,
+  mockCreateScript,
+  mockDeleteScript,
+} from "@/lib/mock-api";
 import type {
   CompiledPackage,
   Package,
@@ -21,15 +26,17 @@ export const createScript = async ({
   example: ScriptExample | "none";
   tutorialId: string;
 }) => {
-  const apiUrl = [
-    "",
-    "foreign-procedure-invocation",
-    "your-first-smart-contract-and-custom-note",
-    "contract-verification",
-  ].includes(tutorialId)
-    ? API_URL
-    : "/api";
-  const response = await fetch(`${apiUrl}/scripts`, {
+  if (
+    ![
+      "",
+      "foreign-procedure-invocation",
+      "your-first-smart-contract-and-custom-note",
+      "contract-verification",
+    ].includes(tutorialId)
+  ) {
+    return { script: await mockCreateScript({ name, type, example }) };
+  }
+  const response = await fetch(`${API_URL}/scripts`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name, type, example }),
@@ -45,8 +52,14 @@ export const createScript = async ({
 };
 
 export const compileScript = async (script: Script) => {
-  const apiUrl = isValidUUIDv4(script.id) ? API_URL : "/api";
-  const response = await fetch(`${apiUrl}/scripts/${script.id}`, {
+  if (!isValidUUIDv4(script.id)) {
+    try {
+      return { script: await mockCompileScript(script) };
+    } catch (error) {
+      return { error: (error as Error).message };
+    }
+  }
+  const response = await fetch(`${API_URL}/scripts/${script.id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -64,8 +77,10 @@ export const compileScript = async (script: Script) => {
 };
 
 export const deleteScript = async (scriptId: string) => {
-  const apiUrl = isValidUUIDv4(scriptId) ? API_URL : "/api";
-  const response = await fetch(`${apiUrl}/scripts/${scriptId}`, {
+  if (!isValidUUIDv4(scriptId)) {
+    return { script: await mockDeleteScript(scriptId) };
+  }
+  const response = await fetch(`${API_URL}/scripts/${scriptId}`, {
     method: "DELETE",
   });
   if (response.status === 500) {

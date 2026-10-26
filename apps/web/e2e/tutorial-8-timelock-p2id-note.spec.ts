@@ -11,7 +11,7 @@ import {
 
 // The note is created by a new Bread Wallet (see ./bread.ts), funded from its
 // "Fund your wallet" prompt first. The note script is created and compiled by
-// the web app's mock API routes (app/api/scripts), not apps/api.
+// the web app's local mocks (lib/mock-api.ts), not apps/api.
 test("tutorial 8: timelock P2ID note", async ({ page, bread }) => {
   logBrowserErrors(page);
   const panel = tutorialPanel(page);

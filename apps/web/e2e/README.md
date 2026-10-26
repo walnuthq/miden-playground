@@ -6,7 +6,7 @@ Playwright tests for the tutorials and examples. They run against a live Playgro
 
 1. Install Playwright's Chromium once: `pnpm exec playwright install chromium`.
 2. Start the Playground (`pnpm dev` in `apps/web`, port 3000), unless you set `PLAYWRIGHT_BASE_URL`.
-3. For the specs that compile scripts, start `apps/api` too (`pnpm dev` in `apps/api`, port 3001), with its Docker services (postgres and the compile service) up. These specs are the two examples and tutorials 11 and 12. Tutorials 7 and 8 compile through mock routes in `apps/web` and don't need it.
+3. For the specs that compile scripts, start `apps/api` too (`pnpm dev` in `apps/api`, port 3001), with its Docker services (postgres and the compile service) up. These specs are the two examples and tutorials 11 and 12. Tutorials 7 and 8 compile through local mocks in `apps/web/lib/mock-api.ts` and don't need it.
 4. For the specs that use Bread Wallet, install it from the repo root with `pnpm bread-wallet`. It downloads the version pinned in `.bread-wallet/version` to `.bread-wallet/extension` (gitignored). Each run warns when it's missing or outdated. `pnpm bread-wallet latest` upgrades to the newest [wallet release](https://github.com/0xMiden/wallet/releases) and pins it: commit `.bread-wallet/version`.
 
 ## Environment variables
