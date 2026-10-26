@@ -1,6 +1,6 @@
 # Migrating `apps/web` from Next.js to Vite
 
-Status: step 1 in review (branch `refactor/mock-api-local-helpers`), steps 2–4 not started. First audit 2026-10-26 on `main` at `02ce1e6`; re-audit 2026-10-26 on `main` at `4d134d3` (deps update #706: the inventory below still holds, the corrections are folded into the steps and listed in "Re-audit changes" at the end). The re-audit's three open decisions (vite-plugin for its skill only, `@tailwindcss/vite`, `workerMode = "module"`) were confirmed on 2026-10-26 and are in the table below.
+Status: step 1 done (#707, merged as `cdf88c8`, deployed and checked on production 2026-10-26). Step 2 in review (branch `refactor/tutorial-mdx-to-tsx`). Steps 3–4 not started. First audit 2026-10-26 on `main` at `02ce1e6`; re-audit 2026-10-26 on `main` at `4d134d3` (deps update #706: the inventory below still holds, the corrections are folded into the steps and listed in "Re-audit changes" at the end). The re-audit's three open decisions (vite-plugin for its skill only, `@tailwindcss/vite`, `workerMode = "module"`) were confirmed on 2026-10-26 and are in the table below.
 
 This is the brief for an implementing agent. Implement it in the PR order below, **one PR per step**, plan mode first for each. Every step lists its context, exact files, decisions already taken and how to verify. Re-check the facts marked _(verify)_ when you start a step, the tree may have moved.
 
@@ -47,6 +47,16 @@ The Miden SDK skills and tooling target Vite (`@miden-sdk/vite-plugin`, `@miden-
 4. **Post-cutover cleanup** (docs, optional alias removal, R2 bucket, memory).
 
 Steps 1 and 2 are framework-independent and shrink step 3 to plumbing. Each PR must pass `pnpm lint` and `pnpm typecheck` at the root, and the verification listed in the step.
+
+Gotchas met in step 1, likely again later:
+- Biome also formats Markdown: after editing this file, run `pnpm format` (or `pnpm exec biome check --write VITE_MIGRATION.md`) or `pnpm lint` fails.
+- Deleting Next routes leaves stale `apps/web/.next/types/**` that break `pnpm typecheck` (`next typegen` doesn't prune them): `rm -rf apps/web/.next/types`.
+- The first e2e run on a freshly started `next dev` can time out while routes compile on demand. Load the page once (or rerun) before reading a failure as a regression.
+- The Bread-based specs (tutorials 3, 4, 5, 8, 9, 11) can fail in `bread.fund()` ("Bread's USDCX balance stays empty"), the known Bread faucet issue, before reaching any Playground code. Cover the Playground part with an ad hoc spec that skips the Bread fixture.
+
+Gotchas met in step 2:
+- Biome lints `<img>` (`lint/performance/noImgElement`, a Next.js-domain rule) as a warning in the two converted steps. It turns off with `next` in step 3; don't suppress it.
+- Step screenshots seeded without a store: 6 steps used to throw on `main` (unguarded `props.counter.identifier` / `props.walletA.identifier`) and now render with `?.`. They have no `main` baseline.
 
 Repo conventions that apply to every PR (from `CLAUDE.md` and memory):
 - Never edit `packages/ui/src/components/*` (stock shadcn, byte-identical to the CLI).
@@ -113,13 +123,16 @@ All mocks currently `await sleep(400)` (`sleep` in `lib/utils`).
 - Add small shared prose components replicating `mdx-components.tsx`, e.g. in `components/tutorials/prose.tsx`: `ExternalLink` (the `a` override), `BulletList` / `NumberedList` (the `ul`/`ol` overrides), `InlineCode` (the `code` override), and `CodeBlock` (`<pre><code className="font-mono text-xs">{code}</code></pre>` taking a string, so Rust braces don't need JSX escaping; pass a template literal and keep the exact whitespace). Use them wherever markdown generated those elements; keep `TutorialLink` for explicit `<Link>`.
 - MDX → JSX mapping to get right: paragraphs → `<p>`; `**x**` → `<strong>`; `_x_`/`*x*` → `<em>`; `` `x` `` → `<InlineCode>`; `**\`x\`**`→`<strong><InlineCode>x</InlineCode></strong>`; `[t](url)`→`<ExternalLink href="url">t</ExternalLink>`; soft line breaks inside a paragraph become a single space (watch `{" "}` at JSX line ends); typographic characters (`≥`, quotes, `—`) stay as written (MDX has no smartypants here).
 - Inline the content into each `stepN.tsx`: either as the JSX returned by `Content`, or as a local `const StepNContent = ({ transaction }: { … }) => (<>…</>)` component in the same file when the step passes props, typed with the real types instead of MDX's untyped `props`. Delete the `.mdx` file.
-- `next/image` in the 2 MDX files: in this step, keep using `next/image` (still on Next) or switch straight to `<img>` with the same `src`, `alt`, `width`, `height`, `className`. Switching now saves step 3 work.
+- `next/image` in the 2 MDX files (`create-and-fund-wallet/step4`, `foreign-procedure-invocation/step2`): switch straight to `<img>` with the same `src`, `alt`, `width`, `height`, `className` (decided: saves step 3 work). Next's `<Image>` adds `loading="lazy"` and `decoding="async"`; keep `loading="lazy"` on the `<img>`. The 2 other `next/image` uses (`components/home/index.tsx`, `components/lib/wallet-button.tsx`) stay for step 3, to keep this PR to the MDX.
 - Remove: `@next/mdx`, `@mdx-js/loader`, `@mdx-js/react`, `@types/mdx` from `apps/web/package.json`; `mdx.d.ts`; `mdx-components.tsx`; the `createMDX` wrapper in `next.config.ts` (keep `withSimpleAnalytics(nextConfig)`); the `packageExtensions."@next/mdx"` block in `pnpm-workspace.yaml`. Run `pnpm install` to update the lockfile.
 
 ### Verify
 
 - `pnpm typecheck`, `pnpm lint`, `pnpm build` (still `next build`).
-- Visual diff: before converting, screenshot every tutorial step (agent-browser, `tutorials-qa` skill) on `main`; after, compare. At minimum compare the steps with code blocks, lists, the video and images, and a step with `props` (`create-and-fund-wallet/step4`).
+- Visual diff, before vs after, for **all 73 steps**. Take the baseline from production (https://playground.miden.xyz, which serves `main` until this PR merges) or a `main` dev server, and the after from the branch's dev server, both at the same viewport (Playwright's 1440×900).
+  - Steps are gated: "Next step" stays disabled at the furthest step until its on-chain action is done, so don't walk the tutorials. Jump straight to a step by seeding the persisted state and reloading: `localStorage.setItem("state", JSON.stringify({ tutorialId: "<tutorial dir name>", tutorialStep: N - 1, tutorialMaxStep: N - 1, tutorialOpen: true }))` for `stepN` (`steps` is 0-based, see `components/tutorials/<id>/index.ts`; the deserializer in `lib/utils/state.ts` fills the other fields with defaults). The step text renders without the tutorial's store; links and values built from synced state show placeholders (e.g. `.../undefined`), identically on both sides.
+  - Screenshot only the tutorial panel (`#tutorial`) to keep diffs stable. The panel scrolls, so long steps are clipped at 900 px: use a tall viewport (e.g. 1440×4000) for the screenshots. Pin the color scheme on both sides (Playwright `colorScheme: "light"`), since the app follows the system theme. Recipe checked on production for `create-and-fund-wallet` step 4 on 2026-10-26. A throwaway Playwright script in `apps/web/e2e/` (deleted before committing, as in step 1) is the easiest way to loop over the 12 tutorials × steps. Compare pixel-wise (e.g. `pixelmatch`, or Playwright's `toHaveScreenshot` against baselines generated from `main`) and look at every non-empty diff by eye.
+  - Must-look steps: the fenced Rust blocks, the lists, the video (`transfer-assets-between-wallets/step4`), the two images, and steps with `props` (`create-and-fund-wallet/step4`).
 - `grep -r "\.mdx" apps/web --exclude-dir=node_modules` returns nothing.
 
 ---
