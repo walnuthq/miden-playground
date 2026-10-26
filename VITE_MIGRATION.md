@@ -65,6 +65,7 @@ Gotchas met in step 3:
 - The `*` route renders inside the sidebar layout (Next's 404 had none), so the header's breadcrumbs had to handle unknown first segments.
 - next-themes still renders its (inert) `<script>`, which React 19 reports on every client render: `scriptProps={{ type: "application/json" }}` marks it as a data block. The anti-flash script is in `index.html`.
 - Para is only offered by the wallet button in the private-transfers tutorial (`components/lib/header.tsx`): check the signer dropdown there.
+- Para's provider renders nothing until Para has initialized, and Para rejects origins its key doesn't allow (403 `origin not authorized`): a production build served on `localhost:8787` (`pnpm preview`) is a blank page, as it was with OpenNext. To test the built app locally, build with the BETA key and serve it on port 3000: `vite build --mode development && wrangler dev --port 3000` (stop `vite` first).
 - Local `.env*.local` files need `VITE_*` names; a stale `NEXT_PUBLIC_*` file silently falls back to the defaults (no Para, local API).
 
 Repo conventions that apply to every PR (from `CLAUDE.md` and memory):
