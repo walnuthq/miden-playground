@@ -23,11 +23,3 @@ allowBuilds:
 overrides:
   "@miden-sdk/miden-sdk": "0.17.6"
   "@miden-sdk/react": "0.17.6"
-
-packageExtensions:
-  # @next/mdx imports `next` types without declaring it, so it would pick up
-  # whichever hoisted copy of next pnpm chose. Declaring the peer resolves it to
-  # the importing app's own next.
-  "@next/mdx":
-    peerDependencies:
-      next: "*"

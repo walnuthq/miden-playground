@@ -1,7 +1,6 @@
 // import { dirname } from "path";
 // import { fileURLToPath } from "url";
 
-import createMDX from "@next/mdx";
 import withSimpleAnalytics from "@simpleanalytics/next/plugin";
 import type { NextConfig } from "next";
 
@@ -71,13 +70,9 @@ const nextConfig: NextConfig = {
   allowedDevOrigins: ["playground.miden.local"],
 };
 
-const withMDX = createMDX({
-  // Add markdown plugins here, as desired
-});
-
 // Proxies the Simple Analytics script and events (/proxy.js, /simple/*)
 // through our domain for SIMPLE_ANALYTICS_HOSTNAME.
-export default withSimpleAnalytics(withMDX(nextConfig));
+export default withSimpleAnalytics(nextConfig);
 
 import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 
