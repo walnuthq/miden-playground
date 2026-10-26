@@ -1,0 +1,10 @@
+/* The shared design system owns the Tailwind entry, the theme tokens and the
+   base layer. See packages/ui/src/styles/globals.css, whose @source globs
+   already cover apps/web. */
+@import "@workspace/ui/globals.css";
+
+/* Geist, loaded from @fontsource-variable in main.tsx. */
+@theme {
+  --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, monospace;
+}

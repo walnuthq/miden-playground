@@ -1,4 +1,3 @@
-"use client";
 import { useIsClient } from "usehooks-ts";
 import { columns } from "@/components/transactions/columns";
 import CreateTransactionDialog from "@/components/transactions/create-transaction-dialog";

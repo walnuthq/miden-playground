@@ -4,7 +4,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@workspace/ui/components/tooltip";
-import Link from "next/link";
+import { Link } from "react-router";
 import CopyButton from "@/components/lib/copy-button";
 import useAccounts from "@/hooks/use-accounts";
 import useNetwork from "@/hooks/use-network";
@@ -44,7 +44,7 @@ const AccountAddress = ({
     : displayedAccount.address;
   // A link styled as a button: Base UI's Button would give it role="button".
   const accountLinkProps = {
-    href: `/accounts/${getIdentifierPart(displayedAccount.address)}`,
+    to: `/accounts/${getIdentifierPart(displayedAccount.address)}`,
     className: buttonVariants({ variant: "link", className: "-ml-4" }),
   };
   const accountAddressContent = withTooltip ? (

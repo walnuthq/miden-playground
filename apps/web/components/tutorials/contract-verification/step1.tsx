@@ -1,4 +1,4 @@
-import { usePathname } from "next/navigation";
+import { useLocation } from "react-router";
 import CopyButton from "@/components/lib/copy-button";
 import useScriptName from "@/components/tutorials/contract-verification/use-script-name";
 import NextStepButton from "@/components/tutorials/next-step-button";
@@ -8,7 +8,7 @@ import { defaultScriptIds } from "@/lib/types/default-scripts";
 import type { TutorialStep } from "@/lib/types/tutorial";
 
 const useCompleted = () => {
-  const pathname = usePathname();
+  const { pathname } = useLocation();
   const { scripts } = useScripts();
   const scriptName = useScriptName();
   const script = scripts.find(

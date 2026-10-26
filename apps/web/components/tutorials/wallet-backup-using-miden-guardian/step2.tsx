@@ -1,4 +1,4 @@
-import { usePathname } from "next/navigation";
+import { useLocation } from "react-router";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import { BulletList } from "@/components/tutorials/prose";
 import TutorialLink from "@/components/tutorials/tutorial-link";
@@ -7,7 +7,7 @@ import useAccounts from "@/hooks/use-accounts";
 import type { TutorialStep } from "@/lib/types/tutorial";
 
 const useCompleted = () => {
-  const pathname = usePathname();
+  const { pathname } = useLocation();
   const { multisigs } = useAccounts();
   const [multisig] = multisigs;
   return pathname === `/accounts/${multisig?.identifier}`;

@@ -7,12 +7,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@workspace/ui/components/card";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router";
 import useAppState from "@/hooks/use-app-state";
 import { type NetworkId, networks } from "@/lib/types/network";
 
 const NewSandboxCard = ({ networkId }: { networkId: NetworkId }) => {
-  const router = useRouter();
+  const navigate = useNavigate();
   const { resetState } = useAppState();
   return (
     <Card>
@@ -45,7 +45,7 @@ const NewSandboxCard = ({ networkId }: { networkId: NetworkId }) => {
           className="w-full bg-muted/50"
           onClick={() => {
             resetState(networkId);
-            router.push("/accounts");
+            navigate("/accounts");
           }}
         >
           Create new sandbox environment

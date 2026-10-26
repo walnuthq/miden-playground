@@ -1,6 +1,4 @@
-"use client";
 import { Button } from "@workspace/ui/components/button";
-import Image from "next/image";
 import { useState } from "react";
 import LaunchExampleCard from "@/components/home/launch-example-card";
 import NewSandboxCard from "@/components/home/new-sandbox-card";
@@ -74,7 +72,7 @@ const SandboxEnvironments = () => (
       <NewSandboxCard networkId="mtst" />
       {/* <NewSandboxCard networkId="mdev" /> */}
       {/* <NewSandboxCard networkId="mmck" /> */}
-      {/* process.env.NODE_ENV === "development" && (
+      {/* import.meta.env.DEV && (
         <NewSandboxCard networkId="mlcl" />
       )*/}
     </div>
@@ -86,12 +84,13 @@ const Home = () => (
     {/* The hero artwork is transparent and drawn for a white backdrop, so it
     stays white in dark mode instead of following the theme. */}
     <div className="bg-white bg-[url(/img/miden-playground-hero-bg.png)] bg-center flex items-end justify-center h-48">
-      <Image
+      <img
         className="-mb-px"
         src="/img/miden-playground-hero-text.svg"
         alt="Miden Playground Hero Text"
         width={255}
         height={45}
+        loading="lazy"
       />
     </div>
     <p className="text-xl">

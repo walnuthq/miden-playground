@@ -1,4 +1,3 @@
-"use client";
 import {
   ConsumeTransaction,
   type MidenWalletAdapter,

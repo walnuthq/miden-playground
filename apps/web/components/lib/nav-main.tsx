@@ -1,4 +1,3 @@
-"use client";
 import {
   Collapsible,
   CollapsibleContent,
@@ -16,9 +15,8 @@ import {
   SidebarMenuSubItem,
 } from "@workspace/ui/components/sidebar";
 import { ChevronRight } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
+import { Link, useLocation } from "react-router";
 
 const NavMain = ({
   items,
@@ -35,7 +33,7 @@ const NavMain = ({
     }[];
   }[];
 }) => {
-  const pathname = usePathname();
+  const { pathname } = useLocation();
   return (
     <SidebarGroup>
       {/* <SidebarGroupLabel>Platform</SidebarGroupLabel> */}
@@ -54,7 +52,7 @@ const NavMain = ({
                   ? pathname === "/"
                   : pathname.startsWith(item.url)
               }
-              render={<Link href={item.url} />}
+              render={<Link to={item.url} />}
             >
               {item.icon}
               <span>{item.title}</span>
@@ -72,7 +70,7 @@ const NavMain = ({
                       isActive={pathname === subItem.url}
                       render={
                         <Link
-                          href={subItem.url}
+                          to={subItem.url}
                           className="flex items-center justify-between"
                         />
                       }

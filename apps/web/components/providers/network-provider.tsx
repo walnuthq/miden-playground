@@ -1,4 +1,3 @@
-"use client";
 import { createMidenStorage } from "@miden-sdk/react/lazy";
 import { noop } from "lodash";
 import { createContext, type ReactNode, useState } from "react";

@@ -1,4 +1,3 @@
-"use client";
 import {
   type ColumnDef,
   flexRender,
@@ -15,7 +14,7 @@ import {
   TableRow,
 } from "@workspace/ui/components/table";
 import { cn } from "@workspace/ui/lib/utils";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router";
 import CreateScriptButton from "@/components/scripts/create-script-button";
 import ImportProjectButton from "@/components/scripts/import-project-button";
 import { type DataTableFeatures, dataTableFeatures } from "@/lib/table";
@@ -27,7 +26,7 @@ const ScriptsTable = <TData extends RowData>({
   columns: ColumnDef<DataTableFeatures, TData>[];
   data: TData[];
 }) => {
-  const router = useRouter();
+  const navigate = useNavigate();
   const table = useTable({
     features: dataTableFeatures,
     data,
@@ -82,7 +81,7 @@ const ScriptsTable = <TData extends RowData>({
                       })}
                       onClick={() =>
                         cell.column.id !== "actions" &&
-                        router.push(`/scripts/${cell.row.getValue("id")}`)
+                        navigate(`/scripts/${cell.row.getValue("id")}`)
                       }
                     >
                       {flexRender(

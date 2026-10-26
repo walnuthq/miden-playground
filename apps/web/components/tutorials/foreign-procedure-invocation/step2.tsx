@@ -1,4 +1,4 @@
-import { usePathname } from "next/navigation";
+import { useLocation } from "react-router";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import { BulletList } from "@/components/tutorials/prose";
 import TutorialLink from "@/components/tutorials/tutorial-link";
@@ -6,7 +6,7 @@ import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import type { TutorialStep } from "@/lib/types/tutorial";
 
 const useCompleted = () => {
-  const pathname = usePathname();
+  const { pathname } = useLocation();
   return pathname === "/scripts/count-reader";
 };
 

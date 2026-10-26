@@ -1,10 +1,10 @@
 import { useWallet } from "@miden-sdk/miden-wallet-adapter";
-import { trackEvent } from "@simpleanalytics/next";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router";
 import useGlobalContext from "@/components/global-context/hook";
 import tutorials from "@/components/tutorials";
 import useAppState from "@/hooks/use-app-state";
 import useNetwork from "@/hooks/use-network";
+import { trackEvent } from "@/lib/analytics";
 import type { NetworkId } from "@/lib/types/network";
 import { randomLowercaseId, sleep } from "@/lib/utils";
 import { defaultTutorial, isTutorial } from "@/lib/utils/tutorial";
@@ -25,7 +25,7 @@ const startBlockNum = async (networkId: NetworkId) => {
 };
 
 const useTutorials = () => {
-  const router = useRouter();
+  const navigate = useNavigate();
   const { connected: walletConnected } = useWallet();
   const { switchNetwork } = useNetwork();
   const {
@@ -43,7 +43,7 @@ const useTutorials = () => {
     if (!tutorial) {
       return;
     }
-    router.push(tutorial.initialRoute);
+    navigate(tutorial.initialRoute);
     await sleep(400);
     switchNetwork(tutorial.networkId);
     pushState({
@@ -64,7 +64,7 @@ const useTutorials = () => {
       return;
     }
     const nextTutorial = tutorials[tutorial.number] ?? defaultTutorial();
-    router.push(nextTutorial.initialRoute);
+    navigate(nextTutorial.initialRoute);
     await sleep(400);
     const newCompletedTutorials = new Set([...completedTutorials]);
     newCompletedTutorials.add(tutorial.id);

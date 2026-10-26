@@ -1,4 +1,3 @@
-"use client";
 import { useMiden } from "@miden-sdk/react/lazy";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@workspace/ui/components/badge";

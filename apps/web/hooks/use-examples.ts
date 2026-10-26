@@ -1,4 +1,4 @@
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import useGlobalContext from "@/components/global-context/hook";
 import useAccounts from "@/hooks/use-accounts";
@@ -12,7 +12,7 @@ import authNoAuth from "@/lib/types/default-components/auth-no-auth";
 import { compiledPackageToScript } from "@/lib/utils/script";
 
 const useExamples = () => {
-  const router = useRouter();
+  const navigate = useNavigate();
   const { switchNetwork } = useNetwork();
   const { completedTutorials, exampleId } = useGlobalContext();
   const { pushState } = useAppState();
@@ -61,7 +61,7 @@ const useExamples = () => {
       }),
       completedTutorials,
     });
-    router.push("/accounts");
+    navigate("/accounts");
     toast.info(`${example.title} example loaded.`, {
       description:
         "We're deploying an account for you to play with. It will show up here in a moment.",

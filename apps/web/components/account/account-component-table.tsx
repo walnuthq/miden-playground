@@ -4,7 +4,7 @@ import {
   TableCell,
   TableRow,
 } from "@workspace/ui/components/table";
-import Link from "next/link";
+import { Link } from "react-router";
 import ProceduresTable from "@/components/account/procedures-table";
 import StorageSlotsTable from "@/components/account/storage-slots-table";
 import type { Account } from "@/lib/types/account";
@@ -32,7 +32,7 @@ const AccountComponentTable = ({
           <TableCell>
             <Link
               className="text-primary font-medium underline underline-offset-4"
-              href={`/scripts/${component.scriptId}`}
+              to={`/scripts/${component.scriptId}`}
             >
               {script.name}
             </Link>

@@ -1,4 +1,3 @@
-"use client";
 import {
   type ColumnDef,
   flexRender,
@@ -14,7 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@workspace/ui/components/table";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router";
 import CreateTransactionButton from "@/components/transactions/create-transaction-button";
 import useAccounts from "@/hooks/use-accounts";
 import { type DataTableFeatures, dataTableFeatures } from "@/lib/table";
@@ -27,7 +26,7 @@ const TransactionsTable = <TData extends RowData>({
   data: TData[];
 }) => {
   const { connectedWallet } = useAccounts();
-  const router = useRouter();
+  const navigate = useNavigate();
   const table = useTable({
     features: dataTableFeatures,
     data,
@@ -78,7 +77,7 @@ const TransactionsTable = <TData extends RowData>({
                       key={cell.id}
                       className="cursor-pointer"
                       onClick={() =>
-                        router.push(`/transactions/${cell.row.getValue("id")}`)
+                        navigate(`/transactions/${cell.row.getValue("id")}`)
                       }
                     >
                       {flexRender(

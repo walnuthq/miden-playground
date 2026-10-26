@@ -1,4 +1,3 @@
-"use client";
 import { useIsClient } from "usehooks-ts";
 import { columns } from "@/components/notes/columns";
 import CreateNoteDialog from "@/components/notes/create-note-dialog";

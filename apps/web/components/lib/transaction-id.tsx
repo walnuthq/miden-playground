@@ -4,12 +4,12 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@workspace/ui/components/tooltip";
-import Link from "next/link";
+import { Link } from "react-router";
 import { formatId } from "@/lib/utils";
 
 const TransactionId = ({ transactionId }: { transactionId: string }) => (
   <Tooltip>
-    <TooltipTrigger render={<Link href={`/transactions/${transactionId}`} />}>
+    <TooltipTrigger render={<Link to={`/transactions/${transactionId}`} />}>
       <Button className="cursor-pointer -ml-4" variant="link">
         {formatId(transactionId)}
       </Button>

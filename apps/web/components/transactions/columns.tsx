@@ -1,4 +1,3 @@
-"use client";
 import type { ColumnDef } from "@tanstack/react-table";
 import AccountAddress from "@/components/lib/account-address";
 import type { DataTableFeatures } from "@/lib/table";

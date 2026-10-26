@@ -1,11 +1,10 @@
-"use client";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@workspace/ui/components/tabs";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useLocation, useNavigate, useSearchParams } from "react-router";
 import { useIsClient } from "usehooks-ts";
 import ComponentInformation from "@/components/component/component-information";
 import ComponentScript from "@/components/component/component-script";
@@ -13,9 +12,9 @@ import UpsertStorageSlotDialog from "@/components/component/upsert-storage-slot-
 import useComponents from "@/hooks/use-components";
 
 const Component = ({ id }: { id: string }) => {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const [searchParams] = useSearchParams();
   const isClient = useIsClient();
   const {
     components,
@@ -31,7 +30,7 @@ const Component = ({ id }: { id: string }) => {
       <Tabs
         value={searchParams.get("tab") ?? "information"}
         onValueChange={(value) =>
-          router.push(
+          navigate(
             value === "information"
               ? pathname
               : `${pathname}?${new URLSearchParams({ tab: value })}`,

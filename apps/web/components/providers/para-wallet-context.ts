@@ -1,4 +1,3 @@
-"use client";
 import type { MidenClient } from "@miden-sdk/miden-sdk/lazy";
 import { createContext, useContext } from "react";
 

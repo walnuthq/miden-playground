@@ -1,4 +1,3 @@
-"use client";
 import {
   type ColumnDef,
   flexRender,
@@ -14,7 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@workspace/ui/components/table";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router";
 import CreateComponentButton from "@/components/components/create-component-button";
 import { type DataTableFeatures, dataTableFeatures } from "@/lib/table";
 
@@ -25,7 +24,7 @@ const ComponentsTable = <TData extends RowData>({
   columns: ColumnDef<DataTableFeatures, TData>[];
   data: TData[];
 }) => {
-  const router = useRouter();
+  const navigate = useNavigate();
   const table = useTable({
     features: dataTableFeatures,
     data,
@@ -74,7 +73,7 @@ const ComponentsTable = <TData extends RowData>({
                       key={cell.id}
                       className="cursor-pointer"
                       onClick={() =>
-                        router.push(`/components/${cell.row.getValue("id")}`)
+                        navigate(`/components/${cell.row.getValue("id")}`)
                       }
                     >
                       {flexRender(

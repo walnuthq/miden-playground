@@ -4,7 +4,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@workspace/ui/components/tooltip";
-import Link from "next/link";
+import { Link } from "react-router";
 import useScripts from "@/hooks/use-scripts";
 import type { InputNote } from "@/lib/types/note";
 import { formatId } from "@/lib/utils";
@@ -15,7 +15,7 @@ const NoteScriptRoot = ({ inputNote }: { inputNote: InputNote }) => {
   return (
     <Tooltip>
       <TooltipTrigger
-        render={<Link href={`/notes/${inputNote.id}?tab=script`} />}
+        render={<Link to={`/notes/${inputNote.id}?tab=script`} />}
       >
         <Button className="cursor-pointer -ml-4" variant="link">
           {formatId(inputNote.scriptRoot)}

@@ -1,4 +1,4 @@
-import { usePathname } from "next/navigation";
+import { useLocation } from "react-router";
 import AccountAddress from "@/components/lib/account-address";
 import CopyButton from "@/components/lib/copy-button";
 import NextStepButton from "@/components/tutorials/next-step-button";
@@ -13,7 +13,7 @@ import type { TutorialStep } from "@/lib/types/tutorial";
 import { getIdentifierPart } from "@/lib/utils/account";
 
 const useCompleted = () => {
-  const pathname = usePathname();
+  const { pathname } = useLocation();
   const { networkId } = useNetwork();
   return (
     pathname ===

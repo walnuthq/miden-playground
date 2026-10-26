@@ -1,4 +1,3 @@
-"use client";
 import { Button } from "@workspace/ui/components/button";
 import {
   Dialog,
@@ -26,8 +25,8 @@ import {
   SelectValue,
 } from "@workspace/ui/components/select";
 import { Spinner } from "@workspace/ui/components/spinner";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import useScripts from "@/hooks/use-scripts";
 import {
@@ -39,7 +38,7 @@ import {
 import { kebabCase } from "@/lib/utils";
 
 const CreateScriptDialog = () => {
-  const router = useRouter();
+  const navigate = useNavigate();
   const { createScriptDialogOpen, closeCreateScriptDialog, newScript } =
     useScripts();
   const [loading, setLoading] = useState(false);
@@ -82,7 +81,7 @@ const CreateScriptDialog = () => {
             setLoading(false);
             if (script) {
               toast(`${script.name} has been created.`);
-              router.push(`/scripts/${script.id}`);
+              navigate(`/scripts/${script.id}`);
               onClose();
             } else {
               toast.error("Failed to create script.", { description: error });

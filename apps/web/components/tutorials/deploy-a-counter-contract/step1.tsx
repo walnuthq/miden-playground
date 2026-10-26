@@ -1,4 +1,4 @@
-import { usePathname } from "next/navigation";
+import { useLocation } from "react-router";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import { ExternalLink } from "@/components/tutorials/prose";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
@@ -6,7 +6,7 @@ import useScripts from "@/hooks/use-scripts";
 import type { TutorialStep } from "@/lib/types/tutorial";
 
 const useCompleted = () => {
-  const pathname = usePathname();
+  const { pathname } = useLocation();
   const { scripts } = useScripts();
   const script = scripts.find(
     ({ id, type }) =>

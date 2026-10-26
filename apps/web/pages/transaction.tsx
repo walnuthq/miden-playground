@@ -1,11 +1,8 @@
+import { useParams } from "react-router";
 import Transaction from "@/components/transaction";
 
-const TransactionPage = async ({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) => {
-  const { id } = await params;
+const TransactionPage = () => {
+  const { id = "" } = useParams();
   return <Transaction id={id} />;
 };
 

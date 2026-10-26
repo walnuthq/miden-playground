@@ -1,4 +1,3 @@
-"use client";
 import type { ColumnDef } from "@tanstack/react-table";
 import useScripts from "@/hooks/use-scripts";
 import type { DataTableFeatures } from "@/lib/table";

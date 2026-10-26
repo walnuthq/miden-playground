@@ -1,4 +1,3 @@
-"use client";
 import type {
   ConsumableNoteRecord as WasmConsumableNoteRecordType,
   InputNoteRecord as WasmInputNoteRecordType,

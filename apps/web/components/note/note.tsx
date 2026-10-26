@@ -1,11 +1,10 @@
-"use client";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@workspace/ui/components/tabs";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useLocation, useNavigate, useSearchParams } from "react-router";
 import { useIsClient } from "usehooks-ts";
 import ConsumeNoteButton from "@/components/note/consume-note-button";
 import NoteInformation from "@/components/note/note-information";
@@ -23,9 +22,9 @@ const Note = ({
   id: string;
   serverNoteScript: Script | null;
 }) => {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const [searchParams] = useSearchParams();
   const isClient = useIsClient();
   const { accounts, isAuthorized } = useAccounts();
   const { inputNotes } = useNotes();
@@ -43,7 +42,7 @@ const Note = ({
       <Tabs
         value={searchParams.get("tab") ?? "information"}
         onValueChange={(value) =>
-          router.push(
+          navigate(
             value === "information"
               ? pathname
               : `${pathname}?${new URLSearchParams({ tab: value })}`,

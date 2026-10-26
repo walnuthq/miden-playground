@@ -14,7 +14,7 @@ import {
   TableRow,
 } from "@workspace/ui/components/table";
 import { MoreVertical } from "lucide-react";
-import Link from "next/link";
+import { Link } from "react-router";
 import useScripts from "@/hooks/use-scripts";
 import { type Script, scriptTypes } from "@/lib/types/script";
 import { formatDigest } from "@/lib/utils";
@@ -74,7 +74,7 @@ const DependenciesTable = ({ script }: { script: Script }) => (
           <TableRow key={id}>
             <TableCell>
               <Link
-                href={`/scripts/${id}`}
+                to={`/scripts/${id}`}
                 className="text-primary font-medium underline underline-offset-4"
               >
                 {name}

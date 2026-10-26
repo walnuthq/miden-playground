@@ -1,4 +1,3 @@
-"use client";
 import { useQuery } from "@tanstack/react-query";
 import Note from "@/components/note/note";
 import useNetwork from "@/hooks/use-network";
