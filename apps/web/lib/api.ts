@@ -1,9 +1,5 @@
 import { API_REGISTRY_URL, API_URL } from "@/lib/constants";
-import {
-  mockCompileScript,
-  mockCreateScript,
-  mockDeleteScript,
-} from "@/lib/mock-api";
+import { mockCompileScript, mockCreateScript } from "@/lib/mock-api";
 import type {
   CompiledPackage,
   Package,
@@ -77,9 +73,6 @@ export const compileScript = async (script: Script) => {
 };
 
 export const deleteScript = async (scriptId: string) => {
-  if (!isValidUUIDv4(scriptId)) {
-    return { script: await mockDeleteScript(scriptId) };
-  }
   const response = await fetch(`${API_URL}/scripts/${scriptId}`, {
     method: "DELETE",
   });

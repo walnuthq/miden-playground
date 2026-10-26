@@ -125,8 +125,3 @@ export const mockCompileScript = async ({
     dependencies: structuredClone(script.dependencies),
   };
 };
-
-export const mockDeleteScript = async (id: string) => {
-  await sleep(1000);
-  return { id };
-};
