@@ -15,7 +15,7 @@
     "bread-wallet": "node .bread-wallet/update.mjs"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.6.2",
+    "@biomejs/biome": "2.6.3",
     "@workspace/typescript-config": "workspace:*",
     "turbo": "2.11.10",
     "typescript": "7.0.2"
