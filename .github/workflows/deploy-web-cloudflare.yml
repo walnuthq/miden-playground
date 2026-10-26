@@ -45,7 +45,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Builds with OpenNext (`next build` reads the build variables from
+      # Builds with Vite (`vite build` reads the build variables from
       # apps/web/.env.production) and deploys the Worker and its assets.
       # `pnpm run`, not `pnpm deploy`, which is a pnpm command of its own.
       - name: Deploy web to Cloudflare

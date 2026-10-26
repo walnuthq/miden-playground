@@ -1,2 +1,7 @@
-/_next/static/*
+/assets/*
   Cache-Control: public,max-age=31536000,immutable
+
+# Client hints for Simple Analytics (what @simpleanalytics/next added).
+/*
+  Accept-CH: Sec-CH-Viewport-Width, Sec-CH-Viewport-Height, Viewport-Width, Sec-CH-Lang, Lang
+  Vary: Sec-CH-Viewport-Width, Sec-CH-Viewport-Height, Viewport-Width, Sec-CH-Lang, Lang

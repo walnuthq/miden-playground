@@ -1,5 +1,7 @@
 declare global {
   interface Window {
+    // Simple Analytics
+    sa_event?: (name: string, metadata?: Record<string, unknown>) => void;
     // Bread Wallet
     midenWallet: {
       accountId?: string;

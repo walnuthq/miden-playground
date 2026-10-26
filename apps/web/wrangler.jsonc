@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "main": ".open-next/worker.js",
+  "main": "worker/index.ts",
   "name": "miden-playground",
   "preview_urls": true,
   // playground.miden.xyz is proxied by Vercel to the workers.dev URL, which
@@ -12,21 +12,21 @@
   ],
   "compatibility_date": "2025-09-12",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  // The Vite build. Unknown paths get index.html, for the client-side router.
+  // Only the Simple Analytics paths run the Worker, everything else is served
+  // straight from the assets.
   "assets": {
-    "directory": ".open-next/assets",
+    "directory": "./dist",
     "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/proxy.js", "/auto-events.js", "/simple/*"],
   },
-  "r2_buckets": [
-    // Use R2 incremental cache
-    // See https://opennext.js.org/cloudflare/caching
-    {
-      "binding": "NEXT_INC_CACHE_R2_BUCKET",
-      // Create the bucket before deploying
-      // You can change the bucket name if you want
-      // See https://developers.cloudflare.com/workers/wrangler/commands/#r2-bucket-create
-      "bucket_name": "miden-playground-cache",
-    },
-  ],
+  "vars": {
+    // Simple Analytics: domain the tracking script and events are proxied for
+    // (worker/index.ts). Pageviews are reported under the domain the app is
+    // served on. Emptied in .dev.vars for local `wrangler dev`.
+    "SIMPLE_ANALYTICS_HOSTNAME": "playground.miden.xyz",
+  },
   "observability": {
     "enabled": false,
     "head_sampling_rate": 1,
