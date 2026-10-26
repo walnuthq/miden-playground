@@ -16,7 +16,7 @@ How to QA the Playground tutorials end to end with a headless browser, Bread Wal
 - Launch with a persistent profile so the wallet survives between sessions:
   `agent-browser --session qa --extension .bread-wallet/extension --profile .bread-wallet/profiles/qa open <url>`
 - `pnpm bread-wallet` adds a fixed `key` to the manifest, so the extension ID is always `jifbolkleeelimchpheclfmbehmcgffc`, wherever the repo or a worktree lives, and profiles survive upgrades. Wallet UI: `chrome-extension://jifbolkleeelimchpheclfmbehmcgffc/fullpage.html`. Activity is behind the bell icon (labelled "Unread").
-- First-time onboarding: Get started → password → Guardian (take the suggested "Continue with …" provider: offline providers can't be picked) → "Not now" for telemetry. New accounts are **private** and Guardian-backed. Fund through the tutorials' Mint button (tutorial 3) or the wallet's "Fund your wallet".
+- First-time onboarding: since Bread 1.17.7, a new install opens on invite-only Mainnet ("I have a code"). First open `fullpage.html#/developer-settings`, keep the **Testnet** preset and click "Save & continue" (0xMiden/wallet#1813), then: Get started → testnet notice ("I understand") → password → Guardian (take the suggested "Continue with …" provider: offline providers can't be picked) → "Not now" for telemetry. New accounts are **private** and Guardian-backed. Fund through the tutorials' Mint button (tutorial 3) or the wallet's "Fund your wallet".
 
 ### Para
 
