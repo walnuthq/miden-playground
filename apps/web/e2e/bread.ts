@@ -128,11 +128,25 @@ const onboard = async (context: BrowserContext) => {
   const button = (name: string | RegExp) =>
     walletPage.getByRole("button", { name, exact: typeof name === "string" });
   const password = `e2e-${randomBytes(12).toString("hex")}-1`;
-  await expect(button("Get started")).toBeVisible({ timeout: POPUP_TIMEOUT });
+  // Since 1.17.7, a new install onboards on Mainnet, which is invite-only,
+  // unless a network was saved in Developer Settings before setup
+  // (0xMiden/wallet#1813). The Testnet build presets Testnet: save it.
+  await expect(button("I have a code")).toBeVisible({
+    timeout: POPUP_TIMEOUT,
+  });
   // "Pin Bread" hint, shown over the welcome page.
   if (await button("Got it").isVisible()) {
     await button("Got it").click();
   }
+  await walletPage.goto(
+    new URL("fullpage.html#/developer-settings", walletPage.url()).href,
+  );
+  await walletPage.getByTestId("dev-endpoint-preset-testnet").click();
+  await walletPage.getByTestId("dev-endpoints-save").click();
+  await expect(button("Get started")).toBeVisible({ timeout: POPUP_TIMEOUT });
+  // Saving reloads the service worker's client, within 4 s: an account
+  // created before that would be lost with the discarded client.
+  await walletPage.waitForTimeout(5_000);
   await button("Get started").click();
   // Testnet warning.
   await button("I understand").click();
