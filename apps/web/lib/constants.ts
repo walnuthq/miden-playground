@@ -1,9 +1,8 @@
 import type { NetworkId } from "@/lib/types/network";
 
-export const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+export const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
 export const API_REGISTRY_URL =
-  process.env.NEXT_PUBLIC_API_REGISTRY_URL ?? "http://localhost:8081";
+  import.meta.env.VITE_API_REGISTRY_URL ?? "http://localhost:8081";
 
 export const EMPTY_WORD =
   "0x0000000000000000000000000000000000000000000000000000000000000000";
@@ -42,7 +41,7 @@ export const DEVNET_NOTE_TRANSPORT_URL = "https://transport.devnet.miden.io";
 export const TESTNET_EXPLORER_URL = "https://testnet.midenscan.com";
 export const DEVNET_EXPLORER_URL = "https://devnet.midenscan.com";
 export const GUARDIAN_ENDPOINT_URL =
-  process.env.NEXT_PUBLIC_GUARDIAN_ENDPOINT_URL ?? "http://localhost:3002";
+  import.meta.env.VITE_GUARDIAN_ENDPOINT_URL ?? "http://localhost:3002";
 
 export const TESTNET_FAUCET_API_URL = "https://faucet-api.testnet.miden.io";
 export const DEVNET_FAUCET_API_URL = "https://faucet-api.devnet.miden.io";
