@@ -14,7 +14,7 @@ Skills are installed per project with the `skills` CLI (`pnpm dlx skills ...`) a
 
 # Upgrading the Miden packages
 
-When bumping `@miden-sdk/*`, also update `CLIENT_VERSION` in `apps/web/lib/utils/store.ts` to the new version. It stamps the stores the tutorials seed from `defaultStore`, and the SDK refuses to import a store stamped by a client newer than the running one. Bump every `@miden-sdk/*` pin in `pnpm-workspace.yaml` too (`minimumReleaseAgeExclude`, `overrides`).
+When bumping `@miden-sdk/*`, also update `CLIENT_VERSION` in `apps/web/lib/utils/store.ts` to the new version. It stamps the stores the tutorials seed from `defaultStore`, and the SDK refuses to import a store stamped by a client newer than the running one. Bump the `@miden-sdk/*` pins in `pnpm-workspace.yaml` `overrides` too. If the new version is younger than pnpm's minimum release age, exempt exactly that version of each package in `minimumReleaseAgeExclude`, and remove the entries once it ages out.
 
 # UI components
 

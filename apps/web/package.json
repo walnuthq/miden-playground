@@ -18,9 +18,9 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
-    "@getpara/evm-wallet-connectors": "3.23.0",
-    "@getpara/react-sdk-lite": "3.23.0",
-    "@getpara/web-sdk": "3.23.0",
+    "@getpara/evm-wallet-connectors": "3.24.0",
+    "@getpara/react-sdk-lite": "3.24.0",
+    "@getpara/web-sdk": "3.24.0",
     "@mdx-js/loader": "3.1.1",
     "@mdx-js/react": "3.1.1",
     "@miden-sdk/miden-sdk": "0.17.6",
@@ -29,7 +29,7 @@
     "@miden-sdk/para-react": "0.17.6",
     "@miden-sdk/react": "0.17.6",
     "@monaco-editor/react": "4.7.0",
-    "@next/mdx": "16.4.2",
+    "@next/mdx": "16.4.3",
     "@opennextjs/cloudflare": "1.20.13",
     "@opentelemetry/api": "1.9.1",
     "@openzeppelin/miden-multisig-client": "0.18.3",
@@ -40,27 +40,27 @@
     "@workspace/ui": "workspace:*",
     "lodash": "4.18.1",
     "lucide-react": "1.61.0",
-    "next": "16.4.2",
+    "next": "16.4.3",
     "next-themes": "0.4.6",
     "react": "19.3.1",
     "react-dom": "19.3.1",
-    "react-resizable-panels": "4.14.8",
+    "react-resizable-panels": "4.15.0",
     "smol-toml": "1.9.1",
     "sonner": "2.0.8",
     "usehooks-ts": "3.1.1",
     "uuid": "14.0.3",
-    "viem": "2.57.7",
+    "viem": "2.57.11",
     "wagmi": "3.7.9"
   },
   "devDependencies": {
     "@playwright/test": "1.64.1",
-    "@types/lodash": "4.17.26",
+    "@types/lodash": "4.17.27",
     "@types/mdx": "2.0.14",
     "@types/node": "24.19.2",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "@workspace/typescript-config": "workspace:*",
     "typescript": "7.0.2",
-    "wrangler": "4.151.3"
+    "wrangler": "4.152.0"
   }
 }
