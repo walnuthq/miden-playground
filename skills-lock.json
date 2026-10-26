@@ -75,6 +75,13 @@
       "version": "0.17.6",
       "computedHash": "7d100aed9004a72438f0c1c82429073cfbb03b5b1cf6c3648b4b963b9a5e1fc2"
     },
+    "vite-wasm-setup": {
+      "source": "@miden-sdk/vite-plugin",
+      "sourceType": "node_modules",
+      "skillPath": "skills/vite-wasm-setup/SKILL.md",
+      "version": "0.17.5",
+      "computedHash": "53bab09a52f7e87359e5ee67cb38ab6dd229070596ab9dc8cba92c996c1d3563"
+    },
     "web-client-usage": {
       "source": "@miden-sdk/miden-sdk",
       "sourceType": "node_modules",

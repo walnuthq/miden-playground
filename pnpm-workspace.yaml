@@ -9,7 +9,6 @@ fetchRetryMaxtimeout: 300000
 
 allowBuilds:
   esbuild: true
-  sharp: true
   workerd: true
   # Postinstall only runs a version check (pulled in by Para's wallet connectors).
   "@reown/appkit": false
@@ -20,6 +19,14 @@ allowBuilds:
 # root.
 # "@miden-sdk/miden-sdk": "link:../web-sdk/crates/web-client"
 # "@miden-sdk/react": "link:../web-sdk/packages/react-sdk"
+# @miden-sdk/vite-plugin is installed in apps/web only for the vite-wasm-setup
+# skill it ships (not registered in vite.config.ts) and peers on Vite <= 6.
+peerDependencyRules:
+  allowedVersions:
+    "@miden-sdk/vite-plugin>vite": "8"
+
 overrides:
   "@miden-sdk/miden-sdk": "0.17.6"
   "@miden-sdk/react": "0.17.6"
+minimumReleaseAgeExclude:
+  - "@cloudflare/workers-types@5.20261026.1"
