@@ -9,8 +9,8 @@ import {
   tutorialPanel,
 } from "./tutorial";
 
-// The script is created and compiled by the web app's mock API routes
-// (app/api/scripts), not apps/api.
+// The script is created and compiled by the web app's local mocks
+// (lib/mock-api.ts), not apps/api.
 // The deployed contract is new, so its count goes from 0 to INCREMENT.
 const INCREMENT = 5;
 const SLOT_NAME = "counter_contract::counter_contract::count_map";
