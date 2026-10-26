@@ -1,9 +1,0 @@
-The script you created contains the Rust source code of a counter contract. Unlike the contract from the previous tutorial, which kept its counter in a value slot, this one stores it in a [map slot](https://docs.miden.xyz/reference/protocol/account/storage#map-slots).
-
-Let's focus on lines _13-18_, where its storage layout is defined. The counter is kept in a single map slot named **`count_map`**. A map slot holds a **StorageMap**, a key-value store whose keys are [Words](https://docs.miden.xyz/builder/glossary/#word). Here, the counter is stored as a [Felt](https://docs.miden.xyz/builder/glossary/#felt) (field element) under a fixed key.
-
-The **`get_count`** procedure, at lines _33-36_, builds this fixed key, a Word whose first element is **`1`**, then reads the value stored under it in the contract's [account storage](https://docs.miden.xyz/builder/glossary/#accountstorage) and returns it.
-
-Finally, the **`increment_count`** procedure, at lines _38-44_, reads the current value the same way, adds one to it, writes the new value back under the same key and returns it.
-
-To make this contract your own, change the increment value at line _41_ from **`1`** to a greater number, for example **`felt!(5)`**. Then compile the script to [Miden Assembly](https://docs.miden.xyz/builder/glossary/#miden-assembly) (MASM): once it's compiled, the _"MASM"_ tab shows your new increment value in the **`add`** instruction of **`increment_count`**.

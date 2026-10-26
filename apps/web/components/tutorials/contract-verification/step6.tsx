@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useInterval } from "usehooks-ts";
-import Step6Content from "@/components/tutorials/contract-verification/step6.mdx";
 import NextStepButton from "@/components/tutorials/next-step-button";
+import { ExternalLink } from "@/components/tutorials/prose";
+import TutorialLink from "@/components/tutorials/tutorial-link";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import useAccounts from "@/hooks/use-accounts";
 import useNetwork from "@/hooks/use-network";
 import { getVerifiedAccountComponents } from "@/lib/api";
+import type { Account } from "@/lib/types/account";
 import type { TutorialStep } from "@/lib/types/tutorial";
 
 const useCompleted = () => {
@@ -29,6 +31,45 @@ const useCompleted = () => {
   );
   return completed;
 };
+
+const Step6Content = ({ counter }: { counter?: Account }) => (
+  <>
+    <p>
+      Head back to the{" "}
+      <TutorialLink href={`/accounts/${counter?.identifier}?tab=components`}>
+        imported contract's <em>"Components"</em> tab
+      </TutorialLink>{" "}
+      and click the <em>"Verify account component"</em> button. In the{" "}
+      <em>"Verify Account Component"</em> dialog, select the folder you
+      extracted in the previous step as the project directory, then click the{" "}
+      <em>"Verify"</em> button.
+    </p>
+    <p>
+      This can take a minute or two: the verification service recompiles the
+      source code and checks that every procedure it exports is part of the
+      imported contract's{" "}
+      <ExternalLink href="https://docs.miden.xyz/builder/glossary/#accountcode">
+        code
+      </ExternalLink>
+      , by comparing their MAST roots.
+    </p>
+    <p>
+      If they match, the verification succeeds and the verified{" "}
+      <ExternalLink href="https://docs.miden.xyz/builder/glossary/#accountcomponent">
+        account component
+      </ExternalLink>{" "}
+      is listed under <em>"Account Components"</em>, with its procedures and a
+      link to its source code.
+    </p>
+    <p>
+      Verification applies to the contract's code rather than to a single
+      Account: any Account deployed with the same code is now verified too.
+      That's why your script name has a random suffix: without it, everyone
+      running this tutorial would deploy the same code, and the contract would
+      already be verified by the time you import it.
+    </p>
+  </>
+);
 
 const Step6: TutorialStep = {
   title: "Verify the imported contract.",

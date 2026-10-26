@@ -1,6 +1,8 @@
+import CopyButton from "@/components/lib/copy-button";
 import NextStepButton from "@/components/tutorials/next-step-button";
+import { ExternalLink, InlineCode } from "@/components/tutorials/prose";
+import TutorialLink from "@/components/tutorials/tutorial-link";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
-import Step3Content from "@/components/tutorials/your-first-smart-contract-and-custom-note/step3.mdx";
 import useScripts from "@/hooks/use-scripts";
 import { defaultScriptIds } from "@/lib/types/default-scripts";
 import type { TutorialStep } from "@/lib/types/tutorial";
@@ -20,7 +22,44 @@ const Step3: TutorialStep = {
     const completed = useCompleted();
     return (
       <>
-        <Step3Content />
+        <p>
+          Now that the counter contract is compiled, let's create the note
+          script that calls its{" "}
+          <strong>
+            <InlineCode>increment_count</InlineCode>
+          </strong>{" "}
+          procedure when the Note is consumed.
+        </p>
+        <p>
+          Head to the <TutorialLink href="/scripts">scripts page</TutorialLink>,
+          click the <em>"Create new script"</em> button and enter a name, for
+          example <strong>counter-note</strong>{" "}
+          <CopyButton content="Copy Script Name" copy="counter-note" />. Then
+          select the <strong>Note Script</strong> type and the{" "}
+          <strong>Counter Note</strong> example.
+        </p>
+        <p>
+          Once your script is created, add the <strong>counter-account</strong>{" "}
+          script as a dependency. The note script calls the counter contract's{" "}
+          <strong>
+            <InlineCode>get_count</InlineCode>
+          </strong>{" "}
+          and{" "}
+          <strong>
+            <InlineCode>increment_count</InlineCode>
+          </strong>{" "}
+          procedures, so it needs to import the interface of the{" "}
+          <ExternalLink href="https://docs.miden.xyz/builder/glossary/#accountcomponent">
+            account component
+          </ExternalLink>{" "}
+          that defines them.
+        </p>
+        <p>
+          Click the <em>"Metadata"</em> tab, then click the{" "}
+          <em>"Add dependency"</em> button. In the <em>"Add Dependency"</em>{" "}
+          dialog, select the <strong>counter-account</strong> script and click
+          the <em>"Add"</em> button.
+        </p>
         <TutorialStepAlert
           completed={completed}
           title="Action required: Create the counter note script."

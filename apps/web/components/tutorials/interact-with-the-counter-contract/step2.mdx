@@ -1,8 +1,0 @@
-Let's focus on lines _13-18_ of the counter contract's Rust source code, where its storage layout is defined.
-The counter is kept in a single [value slot](https://docs.miden.xyz/reference/protocol/account/storage#value-slots) named **`count`**. A value slot stores a single [Word](https://docs.miden.xyz/builder/glossary/#word) of data, and here it holds the counter as a [Felt](https://docs.miden.xyz/builder/glossary/#felt) (field element).
-
-The **`get_count`** procedure, at lines _33-36_, reads the value of the **`count`** slot from the contract's [account storage](https://docs.miden.xyz/builder/glossary/#accountstorage) and returns it.
-
-Finally, the **`increment_count`** procedure, at lines _39-47_, reads the current value the same way, adds one to it, writes the new value back to the **`count`** slot and returns it.
-
-The next step walks through the same procedures written in **MASM**, the assembly language of the Miden VM. To follow along, click the _"MASM"_ tab. If you're not interested in these low-level details, feel free to skip it.

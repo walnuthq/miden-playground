@@ -1,6 +1,7 @@
 import NextStepButton from "@/components/tutorials/next-step-button";
+import { ExternalLink } from "@/components/tutorials/prose";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
-import Step3Content from "@/components/tutorials/wallet-backup-using-miden-guardian/step3.mdx";
+import MintButton from "@/components/tutorials/wallet-backup-using-miden-guardian/mint-button";
 import useAccounts from "@/hooks/use-accounts";
 import useNetwork from "@/hooks/use-network";
 import useNotes from "@/hooks/use-notes";
@@ -38,7 +39,28 @@ const Step3: TutorialStep = {
     const completed = useCompleted();
     return (
       <>
-        <Step3Content />
+        <p>
+          Now that your guardian wallet is deployed, let's fund it by requesting
+          tokens from the public{" "}
+          <ExternalLink href="https://faucet.testnet.miden.io/">
+            USDCx Faucet
+          </ExternalLink>
+          .
+        </p>
+        <p>
+          Click the <em>"Mint"</em> button to request <strong>10 USDCx</strong>{" "}
+          from the faucet. They are sent directly to your guardian wallet in a
+          public note.
+        </p>
+        <MintButton />
+        <p>
+          Once the request completes, wait a few more seconds for the Note sent
+          by the USDCx Faucet to be committed on testnet.
+        </p>
+        <p>
+          The Note containing your tokens then automatically appears in the{" "}
+          <em>"Consumable Notes"</em> section of your guardian wallet.
+        </p>
         <TutorialStepAlert
           completed={completed}
           title="Action required: Request tokens from the faucet."

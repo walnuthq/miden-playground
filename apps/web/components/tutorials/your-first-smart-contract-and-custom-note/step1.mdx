@@ -1,9 +1,0 @@
-import CopyButton from "@/components/lib/copy-button";
-
-In the previous tutorials, you deployed a counter contract and incremented its counter, first by invoking its procedures, then with a network note. In this tutorial, you'll write both sides of this interaction: a counter contract, and a custom note script that increments the counter of the Account that consumes the Note.
-
-You'll learn how both scripts are structured, deploy the counter contract on testnet, then create a Note with your note script and consume it with the counter contract. This tutorial is based on the [Your First Smart Contract](https://docs.miden.xyz/builder/get-started/your-first-smart-contract/) guide in the Miden docs, which builds the same contracts in a local Rust project.
-
-Let's start by creating the script that holds the contract code. Click the _"Create new script"_ button, enter **counter-account** <CopyButton content="Copy Script Name" copy="counter-account" /> as the name, then select the **Account Component** type and the **Counter Contract** example.
-
-Your script must be named **counter-account**: the Playground creates resources in the next steps, such as the contract's storage slot name, that expect this exact name.

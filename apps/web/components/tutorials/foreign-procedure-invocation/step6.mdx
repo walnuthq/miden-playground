@@ -1,9 +1,0 @@
-import Link from "@/components/tutorials/tutorial-link";
-
-Your Transaction has been submitted: under _"Account Components"_, the **`count_reader::count_reader::count`** storage slot of your **Count Reader** now holds a copy of the **Counter Contract** count.
-
-To compare them, open the {props.counter ? <Link href={`/accounts/${props.counter.identifier}`}>Counter Contract</Link> : 'Counter Contract'}'s details page, click the _"Components"_ tab and click the _"Invoke"_ button next to the **`get_count`** procedure to read its current count.
-
-Congratulations! You have successfully used the Miden Playground to perform your first foreign procedure invocation.
-
-In this tutorial, you deployed a smart contract that calls the **`get_count`** procedure of the **Counter Contract** through FPI, then saves the returned value to its own storage.

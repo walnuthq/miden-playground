@@ -1,9 +1,0 @@
-import Link from "@/components/tutorials/tutorial-link";
-
-[Account components](https://docs.miden.xyz/reference/protocol/account/components) are reusable building blocks that define part of an Account's [code](https://docs.miden.xyz/reference/protocol/account/code) and [storage](https://docs.miden.xyz/reference/protocol/account/storage). Several account components are combined to build an Account.
-
-For example, a wallet account, capable of holding assets and requiring authentication to move them, can be built by combining a **BasicWallet** component with a **Falcon512Poseidon2** authentication component. The **BasicWallet** component contains the code to move assets in and out of the account vault. The authentication component stores the user's public key and contains the code to verify signatures against it.
-
-Your counter contract will be an Account built from your own account component, which contains the counter code, and an authentication component.
-
-Head to the <Link href="/components">components page</Link> and click the _"Create new component"_ button. Enter a name, select the **Account Component** type and select the script you created in the first step.
