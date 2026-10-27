@@ -30,7 +30,7 @@
     "@monaco-editor/react": "4.7.0",
     "@opentelemetry/api": "1.9.1",
     "@openzeppelin/miden-multisig-client": "0.18.3",
-    "@tanstack/react-query": "5.104.5",
+    "@tanstack/react-query": "5.105.0",
     "@tanstack/react-table": "9.3.1",
     "@wagmi/core": "3.6.7",
     "@workspace/ui": "workspace:*",
