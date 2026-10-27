@@ -5,7 +5,6 @@ import {
   TabsTrigger,
 } from "@workspace/ui/components/tabs";
 import { useLocation, useNavigate, useSearchParams } from "react-router";
-import { useIsClient } from "usehooks-ts";
 import ConsumeNoteButton from "@/components/note/consume-note-button";
 import NoteInformation from "@/components/note/note-information";
 import VerifyNoteScriptDialog from "@/components/note/verify-note-script-dialog";
@@ -25,11 +24,10 @@ const Note = ({
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [searchParams] = useSearchParams();
-  const isClient = useIsClient();
   const { accounts, isAuthorized } = useAccounts();
   const { inputNotes } = useNotes();
   const inputNote = inputNotes.find((inputNote) => inputNote.id === id);
-  if (!isClient || !inputNote) {
+  if (!inputNote) {
     return null;
   }
   const targetAccount = accounts.find(({ consumableNoteIds }) =>

@@ -5,7 +5,6 @@ import {
   TabsTrigger,
 } from "@workspace/ui/components/tabs";
 import { useLocation, useNavigate, useSearchParams } from "react-router";
-import { useIsClient } from "usehooks-ts";
 import ComponentInformation from "@/components/component/component-information";
 import ComponentScript from "@/components/component/component-script";
 import UpsertStorageSlotDialog from "@/components/component/upsert-storage-slot-dialog";
@@ -15,14 +14,13 @@ const Component = ({ id }: { id: string }) => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [searchParams] = useSearchParams();
-  const isClient = useIsClient();
   const {
     components,
     upsertStorageSlotDialogComponentId: componentId,
     upsertStorageSlotDialogStorageSlotName: storageSlotName,
   } = useComponents();
   const component = components.find((component) => component.id === id);
-  if (!isClient || !component) {
+  if (!component) {
     return null;
   }
   return (
