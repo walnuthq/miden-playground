@@ -23,7 +23,6 @@
     "zod": "4.6.7"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "4.3.3",
     "@turbo/gen": "2.11.10",
     "@types/node": "24.19.2",
     "@types/react": "19.3.0",
@@ -34,7 +33,6 @@
   },
   "exports": {
     "./globals.css": "./src/styles/globals.css",
-    "./postcss.config": "./postcss.config.mjs",
     "./lib/*": "./src/lib/*.ts",
     "./components/*": "./src/components/*.tsx",
     "./hooks/*": "./src/hooks/*.ts"
