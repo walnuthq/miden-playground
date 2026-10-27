@@ -1,6 +1,6 @@
 # Migrating `apps/web` from Next.js to Vite
 
-Status: step 1 done (#707, merged as `cdf88c8`, deployed and checked on production 2026-10-26). Step 2 done (#708, merged as `fd0da7a`, deployed and checked on production 2026-10-26). Step 3 done (#709, merged as `6e16862`; its trailing-slash redirect broke starting tutorials and was fixed by #712, merged as `9d795a3`; deployed and checked on production 2026-10-27: full e2e suite, Para PROD login, analytics proxy). Step 4 not started. First audit 2026-10-26 on `main` at `02ce1e6`; re-audit 2026-10-26 on `main` at `4d134d3` (deps update #706: the inventory below still holds, the corrections are folded into the steps and listed in "Re-audit changes" at the end). The re-audit's three open decisions (vite-plugin for its skill only, `@tailwindcss/vite`, `workerMode = "module"`) were confirmed on 2026-10-26 and are in the table below.
+Status: step 1 done (#707, merged as `cdf88c8`, deployed and checked on production 2026-10-26). Step 2 done (#708, merged as `fd0da7a`, deployed and checked on production 2026-10-26). Step 3 done (#709, merged as `6e16862`; its trailing-slash redirect broke starting tutorials and was fixed by #712, merged as `9d795a3`; deployed and checked on production 2026-10-27: full e2e suite, Para PROD login, analytics proxy). Step 4 done except the R2 bucket deletion (see its outcomes); "Optional, later" items still open. First audit 2026-10-26 on `main` at `02ce1e6`; re-audit 2026-10-26 on `main` at `4d134d3` (deps update #706: the inventory below still holds, the corrections are folded into the steps and listed in "Re-audit changes" at the end). The re-audit's three open decisions (vite-plugin for its skill only, `@tailwindcss/vite`, `workerMode = "module"`) were confirmed on 2026-10-26 and are in the table below.
 
 This is the brief for an implementing agent. Implement it in the PR order below, **one PR per step**, plan mode first for each. Every step lists its context, exact files, decisions already taken and how to verify. Re-check the facts marked _(verify)_ when you start a step, the tree may have moved.
 
@@ -436,6 +436,12 @@ Delete: `next.config.ts`, `open-next.config.ts`, `next-env.d.ts`, `cloudflare-en
 - Root `.gitignore`: drop the Next entries (`next-env.d.ts`, `.next/`, `.open-next`) after deleting the local leftovers (`apps/*/.next`, `apps/*/next-env.d.ts`, `apps/web/.open-next`); see the step 3 gotchas. (`nextjs.json` and the turbo `.next/**` outputs went in step 3.)
 - Claude memory: retire "Next upgrade → OpenNext check" (`next-upgrade-opennext-check.md`), update "Miden package versions match SDK" if the pin rules change.
 - Optional later: `@tailwindcss/vite` instead of PostCSS, `@cloudflare/vite-plugin`, upstream `@miden-sdk/vite-plugin` / `paraVitePlugin` once they support Vite 8.
+
+Outcomes (2026-10-27):
+- Eager entries: kept. The app imports `@miden-sdk/miden-sdk` and `@miden-sdk/react`, and the `/lazy` aliases are gone. Same bundle (+1.5 KB JS), one `.wasm` file and URL. A cold load on the built app (`wrangler dev`, Chromium, median of 3) gets to a synced network badge in 3.16 s instead of 3.67 s at 40 Mbps (the WASM fetch starts at module evaluation), and in about 2.0 s either way unthrottled. Full e2e suite passed on the built app, with Para BETA (14/14).
+- `workerMode = "auto"`: rejected. In WebKit (Playwright) the classic worker resolves `new URL("assets/miden_client_web.wasm", self.location.href)` from `/assets/`, so it requests `/assets/assets/miden_client_web.wasm` (unhashed), gets the SPA fallback's HTML and fails with `CompileError: WebAssembly.Module doesn't parse at byte 0`. The client never initializes. `"module"` syncs in WebKit in about 2.6 s. The reason is now in the comment in `lib/miden-client.ts`.
+- `@tailwindcss/vite` was already done in step 3: no app uses PostCSS any more.
+- The R2 bucket `miden-playground-cache` still exists: delete it only on explicit request.
 
 ## Risks
 

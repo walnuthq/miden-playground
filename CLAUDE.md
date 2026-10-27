@@ -16,9 +16,15 @@ Skills are installed per project with the `skills` CLI (`pnpm dlx skills ...`) a
 
 When bumping `@miden-sdk/*`, also update `CLIENT_VERSION` in `apps/web/lib/utils/store.ts` to the new version. It stamps the stores the tutorials seed from `defaultStore`, and the SDK refuses to import a store stamped by a client newer than the running one. Bump the `@miden-sdk/*` pins in `pnpm-workspace.yaml` `overrides` too. If the new version is younger than pnpm's minimum release age, exempt exactly that version of each package in `minimumReleaseAgeExclude`, and remove the entries once it ages out.
 
-# Next.js → Vite migration (in progress)
+# Vite build (`apps/web`)
 
-`apps/web` is moving from Next.js/OpenNext to Vite + React Router + a Cloudflare Worker, one PR per step, as planned in `VITE_MIGRATION.md` (repo root). Read it before touching routing, build or deploy config, and update its status line when a step lands. Before writing Vite config, read the `frontend-pitfalls` (FP3, FP8, FP17, FP18) and `para-signer` ("Bundler setup") skills, and `vite-wasm-setup` once the Vite step has installed `@miden-sdk/vite-plugin`. That package is the skill's only source, and it is kept as a devDependency without being registered in `vite.config.ts`; the plan explains why. Tailwind goes through `@tailwindcss/vite` (as in `apps/status-page`), not PostCSS. Keep `WasmWebClient.workerMode = "module"` in `apps/web/lib/miden-client.ts` until step 4 has tested `auto` on Safari.
+`apps/web` is a Vite SPA with React Router, served by a Cloudflare Worker (static assets with SPA fallback, plus the Simple Analytics proxy in `worker/`). `VITE_MIGRATION.md` (repo root) records how it got there and the gotchas met on the way. Before changing `apps/web/vite.config.ts`, read the `vite-wasm-setup`, `frontend-pitfalls` (FP3, FP8, FP17, FP18) and `para-signer` ("Bundler setup") skills.
+- `vite.config.ts` replicates the Miden and Para Vite plugins inline. Re-check it on every Para or SDK bump: the list of stubbed optional Para packages (a new optional connector fails to resolve; `@opentelemetry/context-zone` must stay stubbed or zone.js breaks the store's Dexie transactions), and the `@miden-sdk/react` externalization in dev pre-bundling (without it the signer providers can't see `MidenProvider`).
+- The app imports the eager entries (`@miden-sdk/miden-sdk`, `@miden-sdk/react`), like its dependencies. Don't import `/lazy`: two entries mean two WASM instances (`WASM_CLASS_MISMATCH`).
+- Keep `WasmWebClient.workerMode = "module"` in `apps/web/lib/miden-client.ts`: `auto` breaks the client on Safari (the comment there says why).
+- `@miden-sdk/vite-plugin` is a devDependency only for the `vite-wasm-setup` skill it ships, and is not registered: it peers on Vite ≤ 6 and forces `resolve.preserveSymlinks`, which breaks pnpm. Bump it with the SDK, but look up its own latest version: it is versioned separately. Once it supports Vite 8 and drops `preserveSymlinks`, register it and remove its `peerDependencyRules` entry in `pnpm-workspace.yaml`.
+- Tailwind goes through `@tailwindcss/vite`, not PostCSS.
+- Dev pre-bundling and the production build can diverge, and merging to `main` deploys. After a bump of Vite, Para or the SDK, test the built app: `vite build --mode development && wrangler dev --port 3000` in `apps/web` (port 3000 and the BETA Para key, which Para's production key would reject on localhost), then the e2e suite against it.
 
 # UI components
 
