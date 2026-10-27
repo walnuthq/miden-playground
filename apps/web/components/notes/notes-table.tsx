@@ -1,4 +1,3 @@
-"use client";
 import {
   type ColumnDef,
   flexRender,
@@ -15,7 +14,7 @@ import {
   TableRow,
 } from "@workspace/ui/components/table";
 import { cn } from "@workspace/ui/lib/utils";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router";
 import AddNoteDropdownMenu from "@/components/notes/add-note-dropdown-menu";
 import { type DataTableFeatures, dataTableFeatures } from "@/lib/table";
 
@@ -26,7 +25,7 @@ const NotesTable = <TData extends RowData>({
   columns: ColumnDef<DataTableFeatures, TData>[];
   data: TData[];
 }) => {
-  const router = useRouter();
+  const navigate = useNavigate();
   const table = useTable({
     features: dataTableFeatures,
     data,
@@ -80,7 +79,7 @@ const NotesTable = <TData extends RowData>({
                       })}
                       onClick={() =>
                         cell.column.id !== "actions" &&
-                        router.push(`/notes/${cell.row.getValue("id")}`)
+                        navigate(`/notes/${cell.row.getValue("id")}`)
                       }
                     >
                       {flexRender(

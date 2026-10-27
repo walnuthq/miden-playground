@@ -1,4 +1,3 @@
-"use client";
 import {
   type ColumnDef,
   flexRender,
@@ -15,7 +14,7 @@ import {
   TableRow,
 } from "@workspace/ui/components/table";
 import { cn } from "@workspace/ui/lib/utils";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router";
 import CreateAccountDropdownMenu from "@/components/accounts/create-account-dropdown-menu";
 import { type DataTableFeatures, dataTableFeatures } from "@/lib/table";
 import { getIdentifierPart } from "@/lib/utils/account";
@@ -27,7 +26,7 @@ const AccountsTable = <TData extends RowData>({
   columns: ColumnDef<DataTableFeatures, TData>[];
   data: TData[];
 }) => {
-  const router = useRouter();
+  const navigate = useNavigate();
   const table = useTable({
     features: dataTableFeatures,
     data,
@@ -81,7 +80,7 @@ const AccountsTable = <TData extends RowData>({
                       })}
                       onClick={() =>
                         !["address", "actions"].includes(cell.column.id) &&
-                        router.push(
+                        navigate(
                           `/accounts/${getIdentifierPart(cell.row.getValue("address"))}`,
                         )
                       }

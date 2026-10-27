@@ -1,4 +1,3 @@
-"use client";
 import { useIsClient } from "usehooks-ts";
 import TransactionInformation from "@/components/transaction/transaction-information";
 import useTransactions from "@/hooks/use-transactions";

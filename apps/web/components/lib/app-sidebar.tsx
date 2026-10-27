@@ -1,4 +1,3 @@
-"use client";
 import { useMiden } from "@miden-sdk/react/lazy";
 import { Separator } from "@workspace/ui/components/separator";
 import {

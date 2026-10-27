@@ -1,4 +1,3 @@
-"use client";
 import { MidenProvider as RawMidenProvider } from "@miden-sdk/react/lazy";
 import { Button } from "@workspace/ui/components/button";
 import {

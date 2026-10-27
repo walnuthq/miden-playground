@@ -4,12 +4,12 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@workspace/ui/components/tooltip";
-import Link from "next/link";
+import { Link } from "react-router";
 import { formatId } from "@/lib/utils";
 
 const NoteId = ({ noteId }: { noteId: string }) => (
   <Tooltip>
-    <TooltipTrigger render={<Link href={`/notes/${noteId}`} />}>
+    <TooltipTrigger render={<Link to={`/notes/${noteId}`} />}>
       <Button className="cursor-pointer -ml-4" variant="link">
         {formatId(noteId)}
       </Button>

@@ -1,4 +1,3 @@
-"use client";
 import { useQuery } from "@tanstack/react-query";
 import Script from "@/components/script/script";
 import { getScript } from "@/lib/api";

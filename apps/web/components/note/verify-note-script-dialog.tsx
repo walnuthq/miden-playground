@@ -1,4 +1,3 @@
-"use client";
 import { useMiden } from "@miden-sdk/react/lazy";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@workspace/ui/components/button";

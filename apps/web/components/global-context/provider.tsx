@@ -1,4 +1,3 @@
-"use client";
 import { type ReactNode, useCallback, useReducer } from "react";
 import { useLocalStorage } from "usehooks-ts";
 import GlobalContext from "@/components/global-context";

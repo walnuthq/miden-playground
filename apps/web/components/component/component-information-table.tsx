@@ -4,7 +4,7 @@ import {
   TableCell,
   TableRow,
 } from "@workspace/ui/components/table";
-import Link from "next/link";
+import { Link } from "react-router";
 import useScripts from "@/hooks/use-scripts";
 import { type Component, componentTypes } from "@/lib/types/component";
 
@@ -32,7 +32,7 @@ const ComponentInformationTable = ({ component }: { component: Component }) => {
             <TableCell>
               <Link
                 className="text-primary font-medium underline underline-offset-4"
-                href={`/scripts/${script?.id}`}
+                to={`/scripts/${script?.id}`}
               >
                 {script?.name}
               </Link>

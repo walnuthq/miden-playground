@@ -1,4 +1,3 @@
-"use client";
 import { useIsClient } from "usehooks-ts";
 import { columns } from "@/components/components/columns";
 import ComponentsTable from "@/components/components/components-table";

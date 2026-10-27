@@ -1,11 +1,10 @@
-"use client";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@workspace/ui/components/tabs";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useLocation, useNavigate, useSearchParams } from "react-router";
 import { useIsClient } from "usehooks-ts";
 import AccountComponents from "@/components/account/account-components";
 import AccountInformation from "@/components/account/account-information";
@@ -28,9 +27,9 @@ const Account = ({
   identifier: string;
   verifiedAccountComponents: Script[];
 }) => {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const [searchParams] = useSearchParams();
   const { networkId } = useNetwork();
   const isClient = useIsClient();
   const { accounts, isConnectedWallet } = useAccounts();
@@ -54,7 +53,7 @@ const Account = ({
       <Tabs
         value={searchParams.get("tab") ?? "information"}
         onValueChange={(value) =>
-          router.push(
+          navigate(
             value === "information"
               ? pathname
               : `${pathname}?${new URLSearchParams({ tab: value })}`,

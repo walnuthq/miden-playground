@@ -1,4 +1,3 @@
-"use client";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -9,7 +8,7 @@ import {
 } from "@workspace/ui/components/breadcrumb";
 import { Separator } from "@workspace/ui/components/separator";
 import { SidebarTrigger } from "@workspace/ui/components/sidebar";
-import { usePathname } from "next/navigation";
+import { useLocation } from "react-router";
 import { useIsClient } from "usehooks-ts";
 import GithubButton from "@/components/lib/github-button";
 import ModeToggle from "@/components/lib/mode-toggle";
@@ -37,15 +36,20 @@ const getPage = (pathname: string) => {
 };
 
 const SubLevelPageBreadcrumbs = () => {
-  const pathname = usePathname();
-  const { href, title } = getLink(pathname);
+  const { pathname } = useLocation();
+  // Undefined for unknown paths, which render the not-found page.
+  const link = getLink(pathname);
   const page = getPage(pathname);
   return (
     <>
-      <BreadcrumbItem className="hidden md:block">
-        <BreadcrumbLink href={href}>{title}</BreadcrumbLink>
-      </BreadcrumbItem>
-      <BreadcrumbSeparator className="hidden md:block" />
+      {link && (
+        <>
+          <BreadcrumbItem className="hidden md:block">
+            <BreadcrumbLink href={link.href}>{link.title}</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator className="hidden md:block" />
+        </>
+      )}
       <BreadcrumbItem className="truncate">
         <BreadcrumbPage className="truncate">{page}</BreadcrumbPage>
       </BreadcrumbItem>
@@ -57,7 +61,7 @@ const Header = () => {
   const isClient = useIsClient();
   const { networkId } = useNetwork();
   const { tutorialId, isTutorial } = useTutorials();
-  const pathname = usePathname();
+  const { pathname } = useLocation();
   const isTopLevelPage = [
     "/",
     "/accounts",

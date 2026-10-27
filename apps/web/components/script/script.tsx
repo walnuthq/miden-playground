@@ -1,18 +1,13 @@
-"use client";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@workspace/ui/components/tabs";
-import {
-  notFound,
-  usePathname,
-  useRouter,
-  useSearchParams,
-} from "next/navigation";
+import { useLocation, useNavigate, useSearchParams } from "react-router";
 import { useIsClient } from "usehooks-ts";
 import Editor from "@/components/lib/editor";
+import NotFound from "@/components/lib/not-found";
 import AddDependencyDialog from "@/components/script/add-dependency-dialog";
 import EditorConsole from "@/components/script/editor-console";
 import ScriptMetadata from "@/components/script/script-metadata";
@@ -26,9 +21,9 @@ const ScriptComponent = ({
   id: string;
   serverScript?: Script;
 }) => {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const [searchParams] = useSearchParams();
   const isClient = useIsClient();
   const { scripts } = useScripts();
   if (!isClient) {
@@ -36,7 +31,7 @@ const ScriptComponent = ({
   }
   const script = scripts.find((script) => script.id === id) ?? serverScript;
   if (!script) {
-    notFound();
+    return <NotFound />;
   }
   const defaultTab = script.rust !== "" ? "rust" : "masm";
   const tab = searchParams.get("tab") ?? defaultTab;
@@ -45,7 +40,7 @@ const ScriptComponent = ({
       <Tabs
         value={tab}
         onValueChange={(value) =>
-          router.push(
+          navigate(
             value === "rust"
               ? pathname
               : `${pathname}?${new URLSearchParams({ tab: value })}`,

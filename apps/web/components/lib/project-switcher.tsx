@@ -1,4 +1,3 @@
-"use client";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,7 +21,7 @@ import {
 import { cn } from "@workspace/ui/lib/utils";
 import { BadgeCheck, ChevronsUpDown } from "lucide-react";
 // import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router";
 import { toast } from "sonner";
 // import useProjects from "@/hooks/use-projects";
 import { useIsClient } from "usehooks-ts";
@@ -38,7 +37,7 @@ import { networks } from "@/lib/types/network";
 const ProjectSwitcher = () => {
   const isClient = useIsClient();
   const { isMobile } = useSidebar();
-  const router = useRouter();
+  const navigate = useNavigate();
   const { networkId } = useNetwork();
   const { resetState } = useAppState();
   const { tutorial, completedTutorials, startTutorial } = useTutorials();
@@ -146,7 +145,7 @@ const ProjectSwitcher = () => {
             <DropdownMenuItem
               onClick={() => {
                 resetState("mtst");
-                router.push("/accounts");
+                navigate("/accounts");
               }}
             >
               New Testnet sandbox
@@ -154,7 +153,7 @@ const ProjectSwitcher = () => {
             {/* <DropdownMenuItem
               onClick={() => {
                 resetState("mdev");
-                router.push("/accounts");
+                navigate("/accounts");
               }}
             >
               New Devnet sandbox
@@ -162,16 +161,16 @@ const ProjectSwitcher = () => {
             {/* <DropdownMenuItem
               onClick={() => {
                 resetState("mmck");
-                router.push("/accounts");
+                navigate("/accounts");
               }}
             >
               New MockChain sandbox
             </DropdownMenuItem> */}
-            {/* process.env.NODE_ENV === "development" && (
+            {/* import.meta.env.DEV && (
               <DropdownMenuItem
                 onClick={() => {
                   resetState("mlcl");
-                  router.push("/accounts");
+                  navigate("/accounts");
                 }}
               >
                 New Local sandbox

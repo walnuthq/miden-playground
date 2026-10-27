@@ -29,6 +29,12 @@ export const tutorialPanel = (page: Page) => {
       });
       await link.click();
       await expect(page).toHaveURL(href);
+      // React Router updates the URL before it renders the new page: wait for
+      // the header breadcrumb, rendered with the page, to catch up.
+      const [, route, resource] = new URL(page.url()).pathname.split("/");
+      await expect(
+        page.locator('header [data-slot="breadcrumb-page"]'),
+      ).toHaveText(resource ?? (route || "home"));
     },
   };
 };

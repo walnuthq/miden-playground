@@ -1,4 +1,4 @@
-import { usePathname } from "next/navigation";
+import { useLocation } from "react-router";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import { InlineCode } from "@/components/tutorials/prose";
 import TutorialLink from "@/components/tutorials/tutorial-link";
@@ -8,7 +8,7 @@ import type { Account } from "@/lib/types/account";
 import type { TutorialStep } from "@/lib/types/tutorial";
 
 const useCompleted = () => {
-  const pathname = usePathname();
+  const { pathname } = useLocation();
   const { accounts } = useAccounts();
   const countReader = accounts.find(({ components }) =>
     components.includes("count-reader"),

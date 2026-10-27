@@ -1,4 +1,3 @@
-"use client";
 import { noop } from "lodash";
 import { type ActionDispatch, createContext } from "react";
 import type { Action } from "@/components/global-context/reducer";

@@ -18,7 +18,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
-import Image from "next/image";
 import { useState } from "react";
 import { useParaWallet } from "@/components/providers/para-wallet-context";
 
@@ -143,12 +142,13 @@ const WalletButton = ({
         variant="outline"
         onClick={() => connectedSigner.connect()}
       >
-        <Image
+        <img
           className="size-6 rounded-[4px]"
           src="/img/para.jpg"
           alt="Para Logo"
           width={160}
           height={160}
+          loading="lazy"
         />
         {paraWallet?.address
           ? formatEvmAddress(paraWallet.address)

@@ -184,7 +184,7 @@ export const requestFundingNote = ({
   recipient: WasmAccountId;
   requestedAmount?: number;
 }) => {
-  const configuredAmount = process.env.NEXT_PUBLIC_MIDEN_FEE_AMOUNT?.trim();
+  const configuredAmount = import.meta.env.VITE_MIDEN_FEE_AMOUNT?.trim();
   return requestTokens({
     networkId,
     recipient: recipient.toString(),

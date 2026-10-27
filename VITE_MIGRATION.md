@@ -1,6 +1,6 @@
 # Migrating `apps/web` from Next.js to Vite
 
-Status: step 1 done (#707, merged as `cdf88c8`, deployed and checked on production 2026-10-26). Step 2 in review (branch `refactor/tutorial-mdx-to-tsx`). Steps 3–4 not started. First audit 2026-10-26 on `main` at `02ce1e6`; re-audit 2026-10-26 on `main` at `4d134d3` (deps update #706: the inventory below still holds, the corrections are folded into the steps and listed in "Re-audit changes" at the end). The re-audit's three open decisions (vite-plugin for its skill only, `@tailwindcss/vite`, `workerMode = "module"`) were confirmed on 2026-10-26 and are in the table below.
+Status: step 1 done (#707, merged as `cdf88c8`, deployed and checked on production 2026-10-26). Step 2 done (#708, merged as `fd0da7a`, deployed and checked on production 2026-10-26). Step 3 in review (#709, branch `refactor/vite-react-router`). Step 4 not started. First audit 2026-10-26 on `main` at `02ce1e6`; re-audit 2026-10-26 on `main` at `4d134d3` (deps update #706: the inventory below still holds, the corrections are folded into the steps and listed in "Re-audit changes" at the end). The re-audit's three open decisions (vite-plugin for its skill only, `@tailwindcss/vite`, `workerMode = "module"`) were confirmed on 2026-10-26 and are in the table below.
 
 This is the brief for an implementing agent. Implement it in the PR order below, **one PR per step**, plan mode first for each. Every step lists its context, exact files, decisions already taken and how to verify. Re-check the facts marked _(verify)_ when you start a step, the tree may have moved.
 
@@ -57,6 +57,17 @@ Gotchas met in step 1, likely again later:
 Gotchas met in step 2:
 - Biome lints `<img>` (`lint/performance/noImgElement`, a Next.js-domain rule) as a warning in the two converted steps. It turns off with `next` in step 3; don't suppress it.
 - Step screenshots seeded without a store: 6 steps used to throw on `main` (unguarded `props.counter.identifier` / `props.walletA.identifier`) and now render with `?.`. They have no `main` baseline.
+
+Gotchas met in step 3:
+- `apps/api` is a plain Worker, but local checkouts keep stale `apps/api/.next/` and `next-env.d.ts` from an older setup. Removing the Next entries from the root `.gitignore` makes Biome lint them (thousands of errors), so they stay until step 4 (delete the leftovers first).
+- `vite.config.ts` can't use `vite-env.d.ts`'s types: it's typechecked by `tsconfig.node.json` (with `e2e/` and `playwright.config.ts`, which need `node` types), the Worker by `worker/tsconfig.json` (`@cloudflare/workers-types` + `wrangler types --include-runtime=false`), the app by `tsconfig.json`.
+- React Router updates the URL before it commits the new page (Next did it after). `e2e/tutorial.ts` `openLink` now also waits for the header breadcrumb; a spec that asserts page content right after `toHaveURL` can match the previous page.
+- The `*` route renders inside the sidebar layout (Next's 404 had none), so the header's breadcrumbs had to handle unknown first segments.
+- next-themes still renders its (inert) `<script>`, which React 19 reports on every client render: `scriptProps={{ type: "application/json" }}` marks it as a data block. The anti-flash script is in `index.html`.
+- Para is only offered by the wallet button in the private-transfers tutorial (`components/lib/header.tsx`): check the signer dropdown there.
+- Para's provider renders nothing until Para has initialized, and Para rejects origins its key doesn't allow (403 `origin not authorized`): a production build served on `localhost:8787` (`pnpm preview`) is a blank page, as it was with OpenNext. To test the built app locally, build with the BETA key and serve it on port 3000: `vite build --mode development && wrangler dev --port 3000` (stop `vite` first).
+- Worker preview URLs (`<version>-miden-playground.walnuthq.workers.dev`) have the same problem: Para's production key rejects them (the deployed OpenNext version's preview URL is blank too). Only the `qa` preview alias is allowed in the Para dashboard: upload with `pnpm upload --preview-alias qa` and QA on `https://qa-miden-playground.walnuthq.workers.dev`. The production API and registry allow that alias in CORS too (`apps/api/index.ts`, the registry's `ALLOWED_ORIGINS`), so every tutorial and example runs on it; other preview URLs can't call them. Para's test accounts only exist in BETA, so the e2e Para tests skip themselves on the `qa` alias; for them, upload a production build with only Para switched to BETA (`VITE_PARA_API_KEY=<beta key> VITE_PARA_ENVIRONMENT=BETA vite build && wrangler versions upload`; shell variables win over `.env` files).
+- Local `.env*.local` files need `VITE_*` names; a stale `NEXT_PUBLIC_*` file silently falls back to the defaults (no Para, local API).
 
 Repo conventions that apply to every PR (from `CLAUDE.md` and memory):
 - Never edit `packages/ui/src/components/*` (stock shadcn, byte-identical to the CLI).
@@ -421,7 +432,7 @@ Delete: `next.config.ts`, `open-next.config.ts`, `next-env.d.ts`, `cloudflare-en
 - `packages/ui`: drop the `./postcss.config` export, `postcss.config.mjs` and the `@tailwindcss/postcss` devDependency if nothing uses them anymore (3.2).
 - Fix the stale `forcedTheme` comment in `apps/status-page/src/main.tsx` (3.5).
 - Delete the R2 bucket `miden-playground-cache` (`wrangler r2 bucket delete miden-playground-cache`) after the new deploy is live. Ask before running it: irreversible.
-- Remove `packages/typescript-config/nextjs.json` if not done; root `turbo.json` `build.outputs` `.next/**`.
+- Root `.gitignore`: drop the Next entries (`next-env.d.ts`, `.next/`, `.open-next`) after deleting the local leftovers (`apps/*/.next`, `apps/*/next-env.d.ts`, `apps/web/.open-next`); see the step 3 gotchas. (`nextjs.json` and the turbo `.next/**` outputs went in step 3.)
 - Claude memory: retire "Next upgrade → OpenNext check" (`next-upgrade-opennext-check.md`), update "Miden package versions match SDK" if the pin rules change.
 - Optional later: `@tailwindcss/vite` instead of PostCSS, `@cloudflare/vite-plugin`, upstream `@miden-sdk/vite-plugin` / `paraVitePlugin` once they support Vite 8.
 

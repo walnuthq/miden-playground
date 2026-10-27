@@ -22,8 +22,8 @@ import {
   TableRow,
 } from "@workspace/ui/components/table";
 import { CircleCheckBig, MoreVertical } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
+import { Link } from "react-router";
 import { toast } from "sonner";
 import AccountAddress from "@/components/lib/account-address";
 import NoteId from "@/components/lib/note-id";
@@ -178,7 +178,7 @@ const AccountNotesTable = ({ account }: { account: Account }) => {
                   {script ? (
                     <Link
                       className="text-primary font-medium underline underline-offset-4 flex items-center gap-2"
-                      href={`/scripts/${script.id}`}
+                      to={`/scripts/${script.id}`}
                     >
                       {script.name}
                       <CircleCheckBig

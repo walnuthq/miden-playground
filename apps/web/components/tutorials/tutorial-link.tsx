@@ -1,5 +1,5 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
+import { Link } from "react-router";
 
 const TutorialLink = ({
   href,
@@ -9,7 +9,7 @@ const TutorialLink = ({
   children: ReactNode;
 }) => (
   <Link
-    href={href}
+    to={href}
     className="text-primary font-medium underline underline-offset-4"
   >
     {children}

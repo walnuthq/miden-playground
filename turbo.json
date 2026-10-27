@@ -5,7 +5,7 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": [".next/**", "!.next/cache/**"]
+      "outputs": ["dist/**"]
     },
     "miden-playground-api#build": {
       "outputs": ["dist/**"],
@@ -18,16 +18,15 @@
       ]
     },
     "miden-playground-web#build": {
-      "outputs": [".next/**", "!.next/cache/**"],
+      "outputs": ["dist/**"],
       "env": [
         "NODE_ENV",
-        "NEXT_PUBLIC_API_URL",
-        "NEXT_PUBLIC_API_REGISTRY_URL",
-        "NEXT_PUBLIC_GUARDIAN_ENDPOINT_URL",
-        "NEXT_PUBLIC_PARA_API_KEY",
-        "NEXT_PUBLIC_PARA_ENVIRONMENT",
-        "NEXT_PUBLIC_MIDEN_FEE_AMOUNT",
-        "SIMPLE_ANALYTICS_HOSTNAME"
+        "VITE_API_URL",
+        "VITE_API_REGISTRY_URL",
+        "VITE_GUARDIAN_ENDPOINT_URL",
+        "VITE_PARA_API_KEY",
+        "VITE_PARA_ENVIRONMENT",
+        "VITE_MIDEN_FEE_AMOUNT"
       ]
     },
     "miden-playground-web#test:e2e": {

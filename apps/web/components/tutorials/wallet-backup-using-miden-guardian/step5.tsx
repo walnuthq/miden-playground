@@ -1,6 +1,6 @@
 import { useWallet } from "@miden-sdk/miden-wallet-adapter";
 import { EllipsisVertical } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialLink from "@/components/tutorials/tutorial-link";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
@@ -99,7 +99,7 @@ const Step5: TutorialStep = {
     );
   },
   NextStepButton: () => {
-    const router = useRouter();
+    const navigate = useNavigate();
     const { disconnect } = useWallet();
     const { multisigs, deleteAccount } = useAccounts();
     const { nextTutorialStep } = useTutorials();
@@ -113,7 +113,7 @@ const Step5: TutorialStep = {
           if (multisig) {
             disconnect();
             deleteAccount(multisig.id);
-            router.push("/accounts");
+            navigate("/accounts");
           }
         }}
       />

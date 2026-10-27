@@ -1,4 +1,3 @@
-"use client";
 import { useIsClient } from "usehooks-ts";
 import { columns } from "@/components/scripts/columns";
 import CreateScriptDialog from "@/components/scripts/create-script-dialog";

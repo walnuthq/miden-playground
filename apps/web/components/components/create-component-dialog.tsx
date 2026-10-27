@@ -1,4 +1,3 @@
-"use client";
 import { Button } from "@workspace/ui/components/button";
 import {
   Dialog,
@@ -19,15 +18,15 @@ import {
   SelectValue,
 } from "@workspace/ui/components/select";
 import { Spinner } from "@workspace/ui/components/spinner";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import useComponents from "@/hooks/use-components";
 import useScripts from "@/hooks/use-scripts";
 import { type ComponentType, componentTypes } from "@/lib/types/component";
 
 const CreateComponentDialog = () => {
-  const router = useRouter();
+  const navigate = useNavigate();
   const {
     components,
     createComponentDialogOpen,
@@ -81,7 +80,7 @@ const CreateComponentDialog = () => {
             setLoading(false);
             onClose();
             toast(`${component.name} has been created.`);
-            router.push(`/components/${component.id}`);
+            navigate(`/components/${component.id}`);
           }}
         >
           <div className="grid grid-cols-2 gap-4">

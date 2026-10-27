@@ -1,8 +1,12 @@
 {
-  "extends": "@workspace/typescript-config/nextjs.json",
+  "extends": "@workspace/typescript-config/react-library.json",
   "compilerOptions": {
-    // The app emits nothing. With declarations on, the OpenNext build that
-    // cloudflare-env.d.ts imports (`mainModule`) fails declaration checks.
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "types": ["vite/client"],
+    "verbatimModuleSyntax": true,
+    "noEmit": true,
     "declaration": false,
     "declarationMap": false,
     "paths": {
@@ -12,19 +16,15 @@
       "react-dom": ["./node_modules/@types/react-dom"],
       "@types/react": ["./node_modules/@types/react"],
       "@types/react-dom": ["./node_modules/@types/react-dom"]
-    },
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ]
+    }
   },
-  "include": [
-    "next-env.d.ts",
-    "next.config.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts"
-  ],
-  "exclude": ["node_modules", ".open-next"]
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "worker",
+    "e2e",
+    "playwright.config.ts",
+    "vite.config.ts"
+  ]
 }

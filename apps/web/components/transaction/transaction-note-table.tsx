@@ -9,7 +9,7 @@ import {
   TableRow,
 } from "@workspace/ui/components/table";
 import { CircleCheckBig } from "lucide-react";
-import Link from "next/link";
+import { Link } from "react-router";
 import AccountAddress from "@/components/lib/account-address";
 import NoteId from "@/components/lib/note-id";
 import useAccounts from "@/hooks/use-accounts";
@@ -46,7 +46,7 @@ const TransactionNoteTable = ({ notes }: { notes: TransactionNote[] }) => {
                   {script ? (
                     <Link
                       className="text-primary font-medium underline underline-offset-4 flex items-center gap-2"
-                      href={`/scripts/${script.id}`}
+                      to={`/scripts/${script.id}`}
                     >
                       {script.name}
                       <CircleCheckBig

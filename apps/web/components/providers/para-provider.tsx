@@ -1,4 +1,3 @@
-"use client";
 import type { ParaWeb, Wallet } from "@getpara/web-sdk";
 import { ParaSignerProvider, useParaSigner } from "@miden-sdk/para-react";
 import { SignerSlot } from "@miden-sdk/react/lazy";
@@ -94,10 +93,10 @@ const ParaProvider = ({
   queryClient: QueryClient;
   children: ReactNode;
 }) =>
-  process.env.NEXT_PUBLIC_PARA_API_KEY ? (
+  import.meta.env.VITE_PARA_API_KEY ? (
     <ParaSignerProvider
-      apiKey={process.env.NEXT_PUBLIC_PARA_API_KEY}
-      environment={process.env.NEXT_PUBLIC_PARA_ENVIRONMENT ?? "BETA"}
+      apiKey={import.meta.env.VITE_PARA_API_KEY}
+      environment={import.meta.env.VITE_PARA_ENVIRONMENT ?? "BETA"}
       appName="Miden Playground"
       queryClient={queryClient}
       // Only Para's embedded wallets count as connected, so external wallets
