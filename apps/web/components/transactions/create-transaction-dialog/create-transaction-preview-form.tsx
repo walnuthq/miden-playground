@@ -2,8 +2,8 @@ import type {
   TransactionRecord as WasmTransactionRecordType,
   TransactionRequest as WasmTransactionRequestType,
   TransactionResult as WasmTransactionResultType,
-} from "@miden-sdk/miden-sdk/lazy";
-import { FungibleAsset as WasmFungibleAsset } from "@miden-sdk/miden-sdk/lazy";
+} from "@miden-sdk/miden-sdk";
+import { FungibleAsset as WasmFungibleAsset } from "@miden-sdk/miden-sdk";
 import type { Dispatch, SetStateAction } from "react";
 import { toast } from "sonner";
 import AccountAddress from "@/components/lib/account-address";

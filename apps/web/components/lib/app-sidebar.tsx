@@ -1,4 +1,4 @@
-import { useMiden } from "@miden-sdk/react/lazy";
+import { useMiden } from "@miden-sdk/react";
 import { Separator } from "@workspace/ui/components/separator";
 import {
   Sidebar,
@@ -26,7 +26,6 @@ import {
   Wallet,
 } from "lucide-react";
 import { type ComponentProps, useEffect } from "react";
-import { useIsClient } from "usehooks-ts";
 import Footer from "@/components/lib/footer";
 import NavMain from "@/components/lib/nav-main";
 import ProjectSwitcher from "@/components/lib/project-switcher";
@@ -42,7 +41,6 @@ import { defaultScriptIds } from "@/lib/types/default-scripts";
 import { formatId } from "@/lib/utils";
 
 const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
-  const isClient = useIsClient();
   const { networkId } = useNetwork();
   const { client } = useMiden();
   const { isTutorial } = useTutorials();
@@ -174,9 +172,9 @@ const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
         <ProjectSwitcher />
       </SidebarHeader>
       <SidebarContent>
-        {isClient && <NavMain items={items} />}
+        <NavMain items={items} />
         <Separator />
-        {isClient && <NavMain items={editorItems} />}
+        <NavMain items={editorItems} />
       </SidebarContent>
       <SidebarFooter>
         <Footer />

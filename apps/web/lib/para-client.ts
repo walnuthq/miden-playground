@@ -5,7 +5,7 @@ import {
   AccountStorageMode,
   getWasmOrThrow,
   MidenClient,
-} from "@miden-sdk/miden-sdk/lazy";
+} from "@miden-sdk/miden-sdk";
 import {
   evmPkToCommitment,
   getUncompressedPublicKeyFromWallet,

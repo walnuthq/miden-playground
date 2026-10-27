@@ -1,12 +1,10 @@
-import { useIsClient } from "usehooks-ts";
 import TransactionInformation from "@/components/transaction/transaction-information";
 import useTransactions from "@/hooks/use-transactions";
 
 const Transaction = ({ id }: { id: string }) => {
-  const isClient = useIsClient();
   const { transactions } = useTransactions();
   const transaction = transactions.find((transaction) => transaction.id === id);
-  if (!isClient || !transaction) {
+  if (!transaction) {
     return null;
   }
   return (

@@ -6,7 +6,7 @@ import { nodePolyfills } from "vite-plugin-node-polyfills";
 // The Miden and Para Vite plugins (@miden-sdk/vite-plugin, paraVitePlugin from
 // @miden-sdk/para-react/vite) are replicated here instead of registered: the
 // Miden one forces resolve.preserveSymlinks (breaks pnpm), and Para's stubs
-// only 12 of the packages below. See VITE_MIGRATION.md (3.1).
+// only 12 of the packages below. CLAUDE.md says when to switch to them.
 
 const stubPackages = [
   "@getpara/solana-wallet-connectors",
@@ -85,16 +85,7 @@ export default defineConfig({
     simpleAnalytics,
   ],
   resolve: {
-    alias: [
-      { find: "@", replacement: import.meta.dirname },
-      // Dependencies (wallet adapter, multisig client) import the eager
-      // entries, the app the lazy ones: one entry means one WASM instance.
-      {
-        find: /^@miden-sdk\/miden-sdk$/,
-        replacement: "@miden-sdk/miden-sdk/lazy",
-      },
-      { find: /^@miden-sdk\/react$/, replacement: "@miden-sdk/react/lazy" },
-    ],
+    alias: [{ find: "@", replacement: import.meta.dirname }],
     dedupe: [
       "@miden-sdk/miden-sdk",
       "@miden-sdk/react",

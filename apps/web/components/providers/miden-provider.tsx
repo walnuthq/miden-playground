@@ -1,4 +1,4 @@
-import { MidenProvider as RawMidenProvider } from "@miden-sdk/react/lazy";
+import { MidenProvider as RawMidenProvider } from "@miden-sdk/react";
 import { Button } from "@workspace/ui/components/button";
 import {
   Empty,

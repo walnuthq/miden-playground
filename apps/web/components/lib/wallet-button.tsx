@@ -3,7 +3,7 @@ import {
   WalletMultiButton,
   WalletReadyState,
 } from "@miden-sdk/miden-wallet-adapter";
-import { useMultiSigner } from "@miden-sdk/react/lazy";
+import { useMultiSigner } from "@miden-sdk/react";
 import { Button } from "@workspace/ui/components/button";
 import {
   Dialog,

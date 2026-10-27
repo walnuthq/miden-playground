@@ -1,6 +1,6 @@
 import type { ParaWeb, Wallet } from "@getpara/web-sdk";
 import { ParaSignerProvider, useParaSigner } from "@miden-sdk/para-react";
-import { SignerSlot } from "@miden-sdk/react/lazy";
+import { SignerSlot } from "@miden-sdk/react";
 import type { QueryClient } from "@tanstack/react-query";
 import {
   type ReactNode,

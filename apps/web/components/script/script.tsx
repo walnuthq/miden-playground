@@ -5,7 +5,6 @@ import {
   TabsTrigger,
 } from "@workspace/ui/components/tabs";
 import { useLocation, useNavigate, useSearchParams } from "react-router";
-import { useIsClient } from "usehooks-ts";
 import Editor from "@/components/lib/editor";
 import NotFound from "@/components/lib/not-found";
 import AddDependencyDialog from "@/components/script/add-dependency-dialog";
@@ -24,11 +23,7 @@ const ScriptComponent = ({
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [searchParams] = useSearchParams();
-  const isClient = useIsClient();
   const { scripts } = useScripts();
-  if (!isClient) {
-    return null;
-  }
   const script = scripts.find((script) => script.id === id) ?? serverScript;
   if (!script) {
     return <NotFound />;

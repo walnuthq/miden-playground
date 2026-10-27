@@ -7,13 +7,13 @@ import {
   NoteAttachment as WasmNoteAttachment,
   NoteType as WasmNoteType,
   TransactionRequestBuilder as WasmTransactionRequestBuilder,
-} from "@miden-sdk/miden-sdk/lazy";
+} from "@miden-sdk/miden-sdk";
 import {
   CustomTransaction,
   TransactionType,
   useWallet,
 } from "@miden-sdk/miden-wallet-adapter";
-import { useMiden } from "@miden-sdk/react/lazy";
+import { useMiden } from "@miden-sdk/react";
 import useGlobalContext from "@/components/global-context/hook";
 import useAccounts from "@/hooks/use-accounts";
 import useNetwork from "@/hooks/use-network";

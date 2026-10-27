@@ -1,4 +1,4 @@
-import { formatAssetAmount, parseAssetAmount } from "@miden-sdk/react/lazy";
+import { formatAssetAmount, parseAssetAmount } from "@miden-sdk/react";
 import { FUNGIBLE_FAUCET_DEFAULT_DECIMALS } from "@/lib/constants";
 
 export type FungibleAsset = { faucetId: string; amount: string };

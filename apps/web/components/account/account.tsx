@@ -5,7 +5,6 @@ import {
   TabsTrigger,
 } from "@workspace/ui/components/tabs";
 import { useLocation, useNavigate, useSearchParams } from "react-router";
-import { useIsClient } from "usehooks-ts";
 import AccountComponents from "@/components/account/account-components";
 import AccountInformation from "@/components/account/account-information";
 import AccountMultisig from "@/components/account/account-multisig";
@@ -31,12 +30,11 @@ const Account = ({
   const { pathname } = useLocation();
   const [searchParams] = useSearchParams();
   const { networkId } = useNetwork();
-  const isClient = useIsClient();
   const { accounts, isConnectedWallet } = useAccounts();
   const { isTutorial } = useTutorials();
   const { isMultisigSigner } = useMultisig();
   const account = accounts.find((account) => account.identifier === identifier);
-  if (!isClient || !account) {
+  if (!account) {
     return null;
   }
   const showCreateTransactionButton =

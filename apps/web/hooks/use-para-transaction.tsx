@@ -1,4 +1,4 @@
-import type { TransactionRequest as WasmTransactionRequestType } from "@miden-sdk/miden-sdk/lazy";
+import type { TransactionRequest as WasmTransactionRequestType } from "@miden-sdk/miden-sdk";
 import { toast } from "sonner";
 import { SubmitTransactionToastDescription } from "@/components/transactions/create-transaction-dialog/create-transaction-preview-form";
 import useTransactions from "@/hooks/use-transactions";

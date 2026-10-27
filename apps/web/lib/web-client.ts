@@ -42,8 +42,8 @@ import {
   TransactionScript as WasmTransactionScript,
   Word as WasmWord,
   type WebClient as WebClientType,
-} from "@miden-sdk/miden-sdk/lazy";
-import { normalizeAccountId } from "@miden-sdk/react/lazy";
+} from "@miden-sdk/miden-sdk";
+import { normalizeAccountId } from "@miden-sdk/react";
 import { range } from "lodash";
 import { EMPTY_WORD } from "@/lib/constants";
 import type {

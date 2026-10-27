@@ -7,14 +7,9 @@ import {
 } from "@workspace/ui/components/dropdown-menu";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useIsClient } from "usehooks-ts";
 
 const ModeToggle = () => {
-  const isClient = useIsClient();
   const { setTheme } = useTheme();
-  if (!isClient) {
-    return null;
-  }
   return (
     <DropdownMenu>
       <DropdownMenuTrigger render={<Button variant="outline" size="icon" />}>

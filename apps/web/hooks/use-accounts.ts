@@ -2,7 +2,7 @@ import {
   AuthScheme,
   AccountId as WasmAccountId,
   Address as WasmAddress,
-} from "@miden-sdk/miden-sdk/lazy";
+} from "@miden-sdk/miden-sdk";
 import { useWallet } from "@miden-sdk/miden-wallet-adapter";
 import {
   useCreateFaucet,
@@ -10,7 +10,7 @@ import {
   useImportAccount,
   useMiden,
   useSyncState,
-} from "@miden-sdk/react/lazy";
+} from "@miden-sdk/react";
 import useGlobalContext from "@/components/global-context/hook";
 import { useParaWallet } from "@/components/providers/para-wallet-context";
 import useFundAccount from "@/hooks/use-fund-account";

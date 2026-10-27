@@ -2,7 +2,7 @@ import {
   useMidenFiWallet,
   WalletReadyState,
 } from "@miden-sdk/miden-wallet-adapter";
-import { createMidenStorage } from "@miden-sdk/react/lazy";
+import { createMidenStorage } from "@miden-sdk/react";
 import { useEffect, useRef } from "react";
 
 const storage = createMidenStorage("miden-playground");

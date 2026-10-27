@@ -6,7 +6,6 @@ import {
 import { useIsMobile } from "@workspace/ui/hooks/use-mobile";
 import { type ReactNode, useEffect, useRef } from "react";
 import type { PanelImperativeHandle } from "react-resizable-panels";
-import { useIsClient } from "usehooks-ts";
 import TutorialStep from "@/components/tutorials/tutorial-step";
 import useTutorials from "@/hooks/use-tutorials";
 
@@ -42,10 +41,6 @@ const InnerTutorialLayout = ({ children }: { children: ReactNode }) => {
 
 const TutorialLayout = ({ children }: { children: ReactNode }) => {
   const { tutorialId } = useTutorials();
-  const isClient = useIsClient();
-  if (!isClient) {
-    return null;
-  }
   return tutorialId ? (
     <InnerTutorialLayout>{children}</InnerTutorialLayout>
   ) : (

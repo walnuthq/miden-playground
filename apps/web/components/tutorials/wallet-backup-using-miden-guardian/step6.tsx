@@ -1,4 +1,4 @@
-import { normalizeAccountId, useMiden } from "@miden-sdk/react/lazy";
+import { normalizeAccountId, useMiden } from "@miden-sdk/react";
 import { useEffect, useState } from "react";
 import AccountAddress from "@/components/lib/account-address";
 import CopyButton from "@/components/lib/copy-button";

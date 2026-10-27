@@ -1,4 +1,3 @@
-import { useIsClient } from "usehooks-ts";
 import AccountsTable from "@/components/accounts/accounts-table";
 import { columns } from "@/components/accounts/columns";
 import CreateFaucetDialog from "@/components/accounts/create-faucet-dialog";
@@ -11,13 +10,9 @@ import useAccounts from "@/hooks/use-accounts";
 
 const Accounts = () => {
   const { accounts } = useAccounts();
-  const isClient = useIsClient();
-  if (!isClient) {
-    return null;
-  }
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-      {isClient && <AccountsTable columns={columns} data={accounts} />}
+      <AccountsTable columns={columns} data={accounts} />
       <CreateWalletDialog />
       <CreateFaucetDialog />
       <ImportAccountDialog />

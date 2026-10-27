@@ -1,5 +1,5 @@
-import { AccountId as WasmAccountId } from "@miden-sdk/miden-sdk/lazy";
-import { useSyncState } from "@miden-sdk/react/lazy";
+import { AccountId as WasmAccountId } from "@miden-sdk/miden-sdk";
+import { useSyncState } from "@miden-sdk/react";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import TutorialLink from "@/components/tutorials/tutorial-link";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";

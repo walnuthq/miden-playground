@@ -10,9 +10,9 @@ if (!rootElement) {
   throw new Error("Root element #root not found");
 }
 
-// Unlike apps/web, which pins itself to light with `forcedTheme`, the status
-// page follows the system preference and lets the reader override it. The
-// inline script in index.html applies the same choice before first paint.
+// Like apps/web, the status page follows the system preference and lets the
+// reader override it. The inline script in index.html applies the same choice
+// before first paint.
 createRoot(rootElement).render(
   <StrictMode>
     <ThemeProvider

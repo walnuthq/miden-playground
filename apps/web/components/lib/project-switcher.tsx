@@ -24,7 +24,6 @@ import { BadgeCheck, ChevronsUpDown } from "lucide-react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 // import useProjects from "@/hooks/use-projects";
-import { useIsClient } from "usehooks-ts";
 import Logo from "@/components/lib/logo";
 import tutorials from "@/components/tutorials";
 import useAppState from "@/hooks/use-app-state";
@@ -35,7 +34,6 @@ import examples from "@/lib/examples";
 import { networks } from "@/lib/types/network";
 
 const ProjectSwitcher = () => {
-  const isClient = useIsClient();
   const { isMobile } = useSidebar();
   const navigate = useNavigate();
   const { networkId } = useNetwork();
@@ -43,9 +41,6 @@ const ProjectSwitcher = () => {
   const { tutorial, completedTutorials, startTutorial } = useTutorials();
   const { example, launchExample } = useExamples();
   // const { saveProject, loadProject } = useProjects();
-  if (!isClient) {
-    return null;
-  }
   return (
     <SidebarMenu>
       <SidebarMenuItem>

@@ -1,7 +1,7 @@
 import type {
   ConsumableNoteRecord as WasmConsumableNoteRecordType,
   InputNoteRecord as WasmInputNoteRecordType,
-} from "@miden-sdk/miden-sdk/lazy";
+} from "@miden-sdk/miden-sdk";
 import { Button } from "@workspace/ui/components/button";
 import {
   Command,

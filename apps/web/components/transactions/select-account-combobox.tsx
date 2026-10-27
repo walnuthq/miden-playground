@@ -1,4 +1,4 @@
-import { Address as WasmAddress } from "@miden-sdk/miden-sdk/lazy";
+import { Address as WasmAddress } from "@miden-sdk/miden-sdk";
 import {
   Combobox,
   ComboboxContent,

@@ -10,14 +10,14 @@ import {
   type TransactionRequest as WasmTransactionRequestType,
   type TransactionResult as WasmTransactionResultType,
   Word as WasmWord,
-} from "@miden-sdk/miden-sdk/lazy";
+} from "@miden-sdk/miden-sdk";
 import {
   useExecuteProgram,
   useMiden,
   useSyncControl,
   useSyncState,
   useTransaction,
-} from "@miden-sdk/react/lazy";
+} from "@miden-sdk/react";
 import useGlobalContext from "@/components/global-context/hook";
 import { useParaWallet } from "@/components/providers/para-wallet-context";
 import type { NoteType } from "@/lib/types/note";

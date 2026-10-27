@@ -1,4 +1,4 @@
-import type { MidenClient } from "@miden-sdk/miden-sdk/lazy";
+import type { MidenClient } from "@miden-sdk/miden-sdk";
 import { createContext, useContext } from "react";
 
 // Kept free of @miden-sdk/para-react imports: that package imports Para's

@@ -3,7 +3,7 @@ import {
   type MidenWalletAdapter,
   useWallet,
 } from "@miden-sdk/miden-wallet-adapter";
-import { useMiden } from "@miden-sdk/react/lazy";
+import { useMiden } from "@miden-sdk/react";
 import { Button } from "@workspace/ui/components/button";
 import { Spinner } from "@workspace/ui/components/spinner";
 import { FileInput } from "lucide-react";

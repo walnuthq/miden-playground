@@ -1,5 +1,5 @@
-import type { ConsumableNoteRecord as WasmConsumableNoteRecordType } from "@miden-sdk/miden-sdk/lazy";
-import { useMiden } from "@miden-sdk/react/lazy";
+import type { ConsumableNoteRecord as WasmConsumableNoteRecordType } from "@miden-sdk/miden-sdk";
+import { useMiden } from "@miden-sdk/react";
 import { Label } from "@workspace/ui/components/label";
 import type { Dispatch, SetStateAction } from "react";
 import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";

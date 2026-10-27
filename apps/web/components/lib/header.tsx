@@ -9,7 +9,6 @@ import {
 import { Separator } from "@workspace/ui/components/separator";
 import { SidebarTrigger } from "@workspace/ui/components/sidebar";
 import { useLocation } from "react-router";
-import { useIsClient } from "usehooks-ts";
 import GithubButton from "@/components/lib/github-button";
 import ModeToggle from "@/components/lib/mode-toggle";
 import NetworkBadge from "@/components/lib/network-badge";
@@ -58,7 +57,6 @@ const SubLevelPageBreadcrumbs = () => {
 };
 
 const Header = () => {
-  const isClient = useIsClient();
   const { networkId } = useNetwork();
   const { tutorialId, isTutorial } = useTutorials();
   const { pathname } = useLocation();
@@ -90,9 +88,9 @@ const Header = () => {
         </Breadcrumb>
         <div className="ml-auto flex items-center gap-2">
           <GithubButton />
-          {isClient && <NetworkBadge />}
+          <NetworkBadge />
           <ModeToggle />
-          {isClient && networkId !== "mmck" && !isTutorial && (
+          {networkId !== "mmck" && !isTutorial && (
             <WalletButton
               enabledSigners={
                 ["private-transfers"].includes(tutorialId)
@@ -101,7 +99,7 @@ const Header = () => {
               }
             />
           )}
-          {isClient && tutorialId && <TutorialToggle />}
+          {tutorialId && <TutorialToggle />}
         </div>
       </div>
     </header>
