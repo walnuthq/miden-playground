@@ -8,9 +8,10 @@ import {
 } from "@/lib/constants";
 import type { NetworkId } from "@/lib/types/network";
 
-// "auto" picks the classic worker on Safari/WebKit, which couldn't find the
-// WASM after a webpack build (web-sdk#286) and is untested with Vite's
-// `worker.format: "es"`. "module" is what production has been validated with.
+// "auto" picks the classic worker on Safari/WebKit, which can't find the WASM
+// in our Vite build: it resolves `assets/miden_client_web.wasm` against its
+// own URL (/assets/assets/…, unhashed) and gets the SPA's HTML. "module" works
+// in Safari too.
 // `workerMode` is missing from the SDK's types.
 (WasmWebClient as unknown as { workerMode: string }).workerMode = "module";
 
