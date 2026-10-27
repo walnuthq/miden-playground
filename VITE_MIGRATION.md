@@ -435,7 +435,7 @@ Delete: `next.config.ts`, `open-next.config.ts`, `next-env.d.ts`, `cloudflare-en
 - Delete the R2 bucket `miden-playground-cache` (`wrangler r2 bucket delete miden-playground-cache`) after the new deploy is live. Ask before running it: irreversible.
 - Root `.gitignore`: drop the Next entries (`next-env.d.ts`, `.next/`, `.open-next`) after deleting the local leftovers (`apps/*/.next`, `apps/*/next-env.d.ts`, `apps/web/.open-next`); see the step 3 gotchas. (`nextjs.json` and the turbo `.next/**` outputs went in step 3.)
 - Claude memory: retire "Next upgrade → OpenNext check" (`next-upgrade-opennext-check.md`), update "Miden package versions match SDK" if the pin rules change.
-- Optional later: `@tailwindcss/vite` instead of PostCSS, `@cloudflare/vite-plugin`, upstream `@miden-sdk/vite-plugin` / `paraVitePlugin` once they support Vite 8.
+- Optional later: `@cloudflare/vite-plugin` (3.9: runs the Worker in `vite dev`, but changes how `wrangler.jsonc` is consumed). Register `@miden-sdk/vite-plugin` once it supports Vite 8 and drops `preserveSymlinks`, and `paraVitePlugin` once its stub list covers ours (it has no Vite version problem). `CLAUDE.md` has both conditions. `@tailwindcss/vite` was done in step 3.
 
 Outcomes (2026-10-27):
 - Eager entries: kept. The app imports `@miden-sdk/miden-sdk` and `@miden-sdk/react`, and the `/lazy` aliases are gone. Same bundle (+1.5 KB JS), one `.wasm` file and URL. A cold load on the built app (`wrangler dev`, Chromium, median of 3) gets to a synced network badge in 3.16 s instead of 3.67 s at 40 Mbps (the WASM fetch starts at module evaluation), and in about 2.0 s either way unthrottled. Full e2e suite passed on the built app, with Para BETA (14/14).
