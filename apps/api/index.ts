@@ -10,6 +10,9 @@ const allowedOrigins = [
   WEB_URL,
   // The web Worker's own domain; WEB_URL is the one Vercel proxies to it.
   "https://miden-playground.walnut.dev",
+  // The web Worker's `qa` preview alias (`wrangler versions upload
+  // --preview-alias qa`), for QA before a deploy.
+  "https://qa-miden-playground.walnuthq.workers.dev",
   "https://testnet.midenscan.com",
   "https://devnet.midenscan.com",
   "https://explorer.devnet.miden.io",
