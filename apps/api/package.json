@@ -30,6 +30,6 @@
     "dotenv": "18.0.9",
     "drizzle-kit": "1.0.0-rc.4",
     "typescript": "7.0.2",
-    "wrangler": "4.152.0"
+    "wrangler": "4.153.0"
   }
 }
