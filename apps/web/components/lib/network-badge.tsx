@@ -1,4 +1,4 @@
-import { useSyncState } from "@miden-sdk/react/lazy";
+import { useSyncState } from "@miden-sdk/react";
 import { Badge } from "@workspace/ui/components/badge";
 import { Spinner } from "@workspace/ui/components/spinner";
 import { CircleDot } from "lucide-react";

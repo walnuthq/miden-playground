@@ -4,7 +4,7 @@ import {
   PrivateDataPermission,
   WalletModalProvider,
 } from "@miden-sdk/miden-wallet-adapter";
-import { MultiSignerProvider, SignerSlot } from "@miden-sdk/react/lazy";
+import { MultiSignerProvider, SignerSlot } from "@miden-sdk/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "next-themes";
 import type { ReactNode } from "react";

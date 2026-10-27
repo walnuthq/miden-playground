@@ -1,4 +1,4 @@
-import { useMiden } from "@miden-sdk/react/lazy";
+import { useMiden } from "@miden-sdk/react";
 import { Separator } from "@workspace/ui/components/separator";
 import {
   Sidebar,

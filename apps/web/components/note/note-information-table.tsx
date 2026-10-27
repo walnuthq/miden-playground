@@ -1,4 +1,4 @@
-import { normalizeAccountId } from "@miden-sdk/react/lazy";
+import { normalizeAccountId } from "@miden-sdk/react";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import {

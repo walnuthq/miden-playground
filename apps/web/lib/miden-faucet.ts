@@ -1,7 +1,7 @@
 import type {
   AccountId as WasmAccountId,
   WebClient as WebClientType,
-} from "@miden-sdk/miden-sdk/lazy";
+} from "@miden-sdk/miden-sdk";
 import { midenFaucetApiUrl } from "@/lib/constants";
 import { solveFaucetPow } from "@/lib/faucet-pow";
 import type { NetworkId } from "@/lib/types/network";

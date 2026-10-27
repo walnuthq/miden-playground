@@ -85,16 +85,7 @@ export default defineConfig({
     simpleAnalytics,
   ],
   resolve: {
-    alias: [
-      { find: "@", replacement: import.meta.dirname },
-      // Dependencies (wallet adapter, multisig client) import the eager
-      // entries, the app the lazy ones: one entry means one WASM instance.
-      {
-        find: /^@miden-sdk\/miden-sdk$/,
-        replacement: "@miden-sdk/miden-sdk/lazy",
-      },
-      { find: /^@miden-sdk\/react$/, replacement: "@miden-sdk/react/lazy" },
-    ],
+    alias: [{ find: "@", replacement: import.meta.dirname }],
     dedupe: [
       "@miden-sdk/miden-sdk",
       "@miden-sdk/react",

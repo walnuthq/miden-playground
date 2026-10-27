@@ -1,4 +1,4 @@
-import { MidenClient, WasmWebClient } from "@miden-sdk/miden-sdk/lazy";
+import { MidenClient, WasmWebClient } from "@miden-sdk/miden-sdk";
 import {
   DEVNET_NOTE_TRANSPORT_URL,
   DEVNET_RPC_URL,

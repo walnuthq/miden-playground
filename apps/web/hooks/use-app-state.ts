@@ -3,14 +3,14 @@ import {
   Address as WasmAddress,
   type InputNoteRecord as WasmInputNoteRecord,
   type TransactionRecord as WasmTransactionRecord,
-} from "@miden-sdk/miden-sdk/lazy";
+} from "@miden-sdk/miden-sdk";
 import { type Asset, useWallet } from "@miden-sdk/miden-wallet-adapter";
 import {
   clearMidenStorage,
   useImportStore,
   useMiden,
   useSyncState,
-} from "@miden-sdk/react/lazy";
+} from "@miden-sdk/react";
 import { uniq } from "lodash";
 import useGlobalContext from "@/components/global-context/hook";
 import { useParaWallet } from "@/components/providers/para-wallet-context";

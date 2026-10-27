@@ -1,4 +1,4 @@
-import { useMiden } from "@miden-sdk/react/lazy";
+import { useMiden } from "@miden-sdk/react";
 import { Button } from "@workspace/ui/components/button";
 import {
   DropdownMenu,

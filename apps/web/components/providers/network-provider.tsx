@@ -1,4 +1,4 @@
-import { createMidenStorage } from "@miden-sdk/react/lazy";
+import { createMidenStorage } from "@miden-sdk/react";
 import { noop } from "lodash";
 import { createContext, type ReactNode, useState } from "react";
 import type { NetworkId } from "@/lib/types/network";

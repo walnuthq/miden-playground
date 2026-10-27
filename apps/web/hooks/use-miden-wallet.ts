@@ -3,7 +3,7 @@ import {
   PrivateDataPermission,
   WalletAdapterNetwork,
 } from "@miden-sdk/miden-wallet-adapter";
-import { useMiden } from "@miden-sdk/react/lazy";
+import { useMiden } from "@miden-sdk/react";
 import { PublicKeyFormat } from "@openzeppelin/miden-multisig-client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ExternalWalletState } from "@/lib/types/wallet";

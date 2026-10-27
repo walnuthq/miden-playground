@@ -2,13 +2,13 @@ import type {
   ConsumableNoteRecord as WasmConsumableNoteRecordType,
   TransactionRequest as WasmTransactionRequestType,
   TransactionResult as WasmTransactionResultType,
-} from "@miden-sdk/miden-sdk/lazy";
+} from "@miden-sdk/miden-sdk";
 import {
   type MidenWalletAdapter,
   SendTransaction,
   useWallet,
 } from "@miden-sdk/miden-wallet-adapter";
-import { normalizeAccountId, useMiden } from "@miden-sdk/react/lazy";
+import { normalizeAccountId, useMiden } from "@miden-sdk/react";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import {

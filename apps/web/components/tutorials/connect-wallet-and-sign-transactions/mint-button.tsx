@@ -1,8 +1,8 @@
 import {
   NoteFile as WasmNoteFile,
   NoteId as WasmNoteId,
-} from "@miden-sdk/miden-sdk/lazy";
-import { useMiden } from "@miden-sdk/react/lazy";
+} from "@miden-sdk/miden-sdk";
+import { useMiden } from "@miden-sdk/react";
 import { Button } from "@workspace/ui/components/button";
 import { Spinner } from "@workspace/ui/components/spinner";
 import { HandCoins } from "lucide-react";

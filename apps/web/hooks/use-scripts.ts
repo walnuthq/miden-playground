@@ -5,8 +5,8 @@ import {
   MidenArrays as WasmMidenArrays,
   Package as WasmPackage,
   TransactionRequestBuilder as WasmTransactionRequestBuilder,
-} from "@miden-sdk/miden-sdk/lazy";
-import { useMiden } from "@miden-sdk/react/lazy";
+} from "@miden-sdk/miden-sdk";
+import { useMiden } from "@miden-sdk/react";
 import useGlobalContext from "@/components/global-context/hook";
 import useTransactions from "@/hooks/use-transactions";
 import useTutorials from "@/hooks/use-tutorials";

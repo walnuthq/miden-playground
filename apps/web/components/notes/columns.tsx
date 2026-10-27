@@ -3,7 +3,7 @@ import {
   type MidenWalletAdapter,
   useWallet,
 } from "@miden-sdk/miden-wallet-adapter";
-import { normalizeAccountId, useMiden } from "@miden-sdk/react/lazy";
+import { normalizeAccountId, useMiden } from "@miden-sdk/react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";

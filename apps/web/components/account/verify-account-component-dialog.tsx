@@ -1,5 +1,5 @@
-import { AccountId as WasmAccountId } from "@miden-sdk/miden-sdk/lazy";
-import { useMiden } from "@miden-sdk/react/lazy";
+import { AccountId as WasmAccountId } from "@miden-sdk/miden-sdk";
+import { useMiden } from "@miden-sdk/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@workspace/ui/components/button";
 import {

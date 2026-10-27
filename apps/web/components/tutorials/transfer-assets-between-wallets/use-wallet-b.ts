@@ -1,4 +1,4 @@
-import { AccountId as WasmAccountId } from "@miden-sdk/miden-sdk/lazy";
+import { AccountId as WasmAccountId } from "@miden-sdk/miden-sdk";
 import { useEffect, useSyncExternalStore } from "react";
 import { toast } from "sonner";
 import useAccounts from "@/hooks/use-accounts";

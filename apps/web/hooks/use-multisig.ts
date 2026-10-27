@@ -1,12 +1,12 @@
 import {
   AccountId as WasmAccountId,
   Address as WasmAddress,
-} from "@miden-sdk/miden-sdk/lazy";
+} from "@miden-sdk/miden-sdk";
 import {
   type MessageSignerWalletAdapter,
   useWallet,
 } from "@miden-sdk/miden-wallet-adapter";
-import { useMiden, useSyncState } from "@miden-sdk/react/lazy";
+import { useMiden, useSyncState } from "@miden-sdk/react";
 import {
   AccountInspector,
   MidenWalletSigner,
