@@ -101,6 +101,14 @@ A fourth state, grey ("unknown"), means the probe was [blocked before it could
 measure](#when-the-challenge-wins-blocked-not-unhealthy) and outranks the other
 three, since none of them measured anything.
 
+**A failing web probe is retried once** before it is reported. A push touching
+`packages/ui/**` deploys the web app and runs this probe at the same moment, and
+a page loaded mid-deploy can fetch chunks from the version being replaced and
+never render — a false "degraded". The retry starts a new browser session after
+45s, longer than the deploy's upload, so it loads a single version. A real outage
+fails both attempts and is reported about two minutes later than before;
+`blocked` is never retried.
+
 ## Configuration
 
 | Variable            | Default                   | Used by                        |

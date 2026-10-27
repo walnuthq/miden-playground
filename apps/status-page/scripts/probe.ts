@@ -52,6 +52,11 @@ const WEB_NAVIGATION_TIMEOUT_MS = 30_000;
 // The playground hydrates and hands off from the Miden client provider in ~5s
 // against production; this leaves room for a cold cache and a slow runner.
 const WEB_RENDER_TIMEOUT_MS = 60_000;
+// A push that touches packages/ui deploys the web app and runs this probe at the
+// same moment, and a page loaded mid-deploy can request chunks from the version
+// being replaced and never render. The retry loads the page afresh, after a
+// pause longer than a web deploy's upload (~25s), so it sees one version.
+const WEB_RETRY_DELAY_MS = 45_000;
 
 const EXPECTED_TITLE = "Miden Playground";
 
@@ -384,6 +389,21 @@ const probeWeb = async (): Promise<EndpointStatus[]> => {
 };
 
 /**
+ * One retry, in a new browser session, before reporting a failure. A real outage
+ * fails both attempts and costs one extra run; a deploy caught mid-swap passes
+ * the second. `blocked` is not retried: the challenge would win again.
+ */
+const probeWebWithRetry = async (): Promise<EndpointStatus[]> => {
+  const first = await probeWeb();
+  if (!first.some((endpoint) => endpoint.health === "unhealthy")) return first;
+  console.log(
+    `web: failed on the first attempt, retrying in ${WEB_RETRY_DELAY_MS / 1000}s`,
+  );
+  await new Promise((resolve) => setTimeout(resolve, WEB_RETRY_DELAY_MS));
+  return probeWeb();
+};
+
+/**
  * Best effort by design: a 404 on the very first deploy, a network blip or a
  * malformed body all mean "no previous state", never a failed build. The worst
  * consequence is a repeated notification, never a missed one.
@@ -443,7 +463,7 @@ const rollUp = (endpoints: EndpointStatus[]): ServiceHealth => {
 // someone is looking at it.
 const [previous, [apiEndpoints, webEndpoints]] = await Promise.all([
   fetchPreviousSnapshot(),
-  Promise.all([Promise.all([probeApiRoot()]), probeWeb()]),
+  Promise.all([Promise.all([probeApiRoot()]), probeWebWithRetry()]),
 ]);
 
 const checkedAt = new Date().toISOString();
