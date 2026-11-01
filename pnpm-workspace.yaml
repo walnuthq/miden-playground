@@ -26,7 +26,5 @@ peerDependencyRules:
     "@miden-sdk/vite-plugin>vite": "8"
 
 overrides:
-  "@miden-sdk/miden-sdk": "0.17.6"
-  "@miden-sdk/react": "0.17.6"
-minimumReleaseAgeExclude:
-  - "@cloudflare/workers-types@5.20261026.1"
+  "@miden-sdk/miden-sdk": "0.17.8"
+  "@miden-sdk/react": "0.17.8"
