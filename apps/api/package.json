@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "@types/lodash": "4.17.27",
-    "@types/node": "24.19.2",
+    "@types/node": "26.6.6",
     "@types/pg": "8.23.1",
     "@workspace/typescript-config": "workspace:*",
     "dotenv": "18.0.9",
