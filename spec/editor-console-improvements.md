@@ -1,7 +1,7 @@
 # Scripts editor and console improvements
 
 Status: proposal, written 2026-11-02. Done: item 1 (PR #731), item 2 (PR
-#732), item 3 (PR TBD). Next: items 4–6, as one "editor and console" pass
+#732), item 3 (PR #735). Next: items 4–6, as one "editor and console" pass
 (see "Scoring").
 
 The code editor UX of the scripts feature (`/scripts/:id`) is behind other
@@ -278,7 +278,7 @@ Proposal:
 - Request failures (network, 5xx) go in the console as errors, and the toast
   can stay for when the console is hidden.
 
-Done in PR TBD. What shipped:
+Done in PR #735. What shipped:
 
 - `lib/console-log.ts`: the log, per script id, in a module-level store read
   with `useSyncExternalStore`. In memory only (not in `State`, not saved with
