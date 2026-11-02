@@ -22,8 +22,8 @@
     {
       "binding": "HYPERDRIVE",
       "id": "27b933dd0e7c47bf9a29803a28b62b85",
-      // The postgres service in docker-compose.yml.
-      "localConnectionString": "postgres://miden-playground:miden_playground_dev_password@localhost:5432/miden-playground",
+      // Local database: DATABASE_URL in .env (override it in .env.local),
+      // through CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE.
     },
   ],
   // Bundle the Rust templates and project files as strings (lib/templates.ts).

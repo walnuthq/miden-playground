@@ -8,6 +8,7 @@
       "outputs": ["dist/**"]
     },
     "miden-playground-api#build": {
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**"],
       "passThroughEnv": [
         "NODE_ENV",
@@ -18,6 +19,7 @@
       ]
     },
     "miden-playground-web#build": {
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**"],
       "env": [
         "NODE_ENV",
