@@ -1,8 +1,8 @@
 # Scripts editor and console improvements
 
 Status: proposal, written 2026-11-02. Done: item 1 (PR #731), item 2 (PR
-#732), item 3 (PR #735). Next: items 4–6, as one "editor and console" pass
-(see "Scoring").
+#732), item 3 (PR #735), item 4 (PR #736). Next: items 5–6, as one "editor
+and console" pass (see "Scoring").
 
 The code editor UX of the scripts feature (`/scripts/:id`) is behind other
 blockchain playgrounds. This document compares it with Solana Playground
@@ -171,7 +171,7 @@ What the user sees today, from the production run:
 | 1   | Fix stale editor on script switch                         | 5      | S      | Done     |
 | 2   | Compile errors in the editor (markers, click to jump)     | 5      | M      | Done     |
 | 3   | A real console (history, levels, timing, warnings, clear) | 5      | S–M    | Done     |
-| 4   | Cleaner compiler output, with a "show full output" toggle | 4      | S      | P1       |
+| 4   | Cleaner compiler output, with a "show full output" toggle | 4      | S      | Done     |
 | 5   | IDE-style resizable layout, console panel states          | 4      | S–M    | P1       |
 | 6   | Keyboard shortcuts (compile, console)                     | 3      | S      | P1       |
 | 7   | MASM syntax highlighting                                  | 3      | S      | P2       |
@@ -313,6 +313,26 @@ miden-project-…)`, the `wide-arithmetic` unstable-feature warning and its
 note, and rewrite `/tmp/miden-project-XXXX/<name>/` paths to nothing. Add a
 "Show full output" toggle in the console. Do it in the web app (pure
 function over the text, unit-testable) so the raw output stays available.
+
+Done in PR #736. What shipped:
+
+- `lib/utils/compiler-output.ts` (`cleanCompilerOutput`), applied when
+  rendering only: the stored output, the markers and the counts use the raw
+  text. It drops the lines above, plus cargo's `Finished …` line and its
+  summaries (`generated N warnings`, `could not compile …`): their counts
+  included the hidden `wide-arithmetic` warning, and the console's summary
+  already gives them. Only the `/tmp/miden-project-XXXX/` prefix is stripped
+  from paths, not the package directory, so a dependency's `src/lib.rs` never
+  links to the script's own file. Blank lines are collapsed.
+- `rustc --explain EXXXX`, which can't be run here, becomes a link to
+  `https://doc.rust-lang.org/error_codes/EXXXX.html`; web links in the output
+  open in a new tab.
+- A "Show full output" toggle in the console header, kept in localStorage
+  for every script; Copy copies what's shown. A successful compile keeps its
+  stderr in the entry, so the full view shows it, and the clean view shows
+  nothing when it's only noise. No per-entry "N lines hidden" note.
+- Unit tests over every fixture (no diagnostic lost, idempotent); e2e step
+  in `e2e/script-diagnostics.spec.ts`.
 
 ### 5. IDE-style resizable layout (P1, impact 4, effort S–M)
 
