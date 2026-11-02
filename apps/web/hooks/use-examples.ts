@@ -15,7 +15,7 @@ const useExamples = () => {
   const navigate = useNavigate();
   const { switchNetwork } = useNetwork();
   const { completedTutorials, exampleId } = useGlobalContext();
-  const { pushState } = useAppState();
+  const { leaveTutorial, pushState } = useAppState();
   const { deployAccount } = useAccounts();
   const { components } = useComponents();
   const launchExample = async (
@@ -38,6 +38,7 @@ const useExamples = () => {
     if (failedScript) {
       return { error: `${failedScript.name}: ${failedScript.error}` };
     }
+    const tutorialProgress = await leaveTutorial();
     switchNetwork("mtst");
     pushState({
       ...example.state,
@@ -58,6 +59,7 @@ const useExamples = () => {
         };
       }),
       completedTutorials,
+      tutorialProgress,
     });
     navigate("/accounts");
     toast.info(`${example.title} example loaded.`, {

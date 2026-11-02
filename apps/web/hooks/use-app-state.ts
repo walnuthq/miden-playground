@@ -11,15 +11,18 @@ import {
   useMiden,
   useSyncState,
 } from "@miden-sdk/react";
+import { toast } from "sonner";
 import useGlobalContext from "@/components/global-context/hook";
 import { useParaWallet } from "@/components/providers/para-wallet-context";
 import useNetwork from "@/hooks/use-network";
+import useProjects from "@/hooks/use-projects";
 import { midenFaucetAccountId, P2ID_NOTE_CODE } from "@/lib/constants";
 import type { Account } from "@/lib/types/account";
 import type { NetworkId } from "@/lib/types/network";
 import type { InputNote } from "@/lib/types/note";
 import type { Script } from "@/lib/types/script";
 import type { State } from "@/lib/types/state";
+import type { Store } from "@/lib/types/store";
 import type { Transaction } from "@/lib/types/transaction";
 import {
   accountIdFromPrefixSuffix,
@@ -240,7 +243,7 @@ const syncTransactions = ({
 const useAppState = () => {
   const { networkId, switchNetwork } = useNetwork();
   const paraWallet = useParaWallet();
-  const { client } = useMiden();
+  const { client, sync } = useMiden();
   const { importStore } = useImportStore();
   const { lastSyncTime } = useSyncState();
   // const { client: paraMidenClient } = useParaMiden();
@@ -257,9 +260,13 @@ const useAppState = () => {
     scripts,
     nextState,
     tutorialId,
+    tutorialStep,
+    tutorialMaxStep,
     completedTutorials,
+    tutorialProgress,
     dispatch,
   } = useGlobalContext();
+  const { saveProject } = useProjects();
   const connectedWallet = previousAccounts.find(
     ({ address }) => address === midenWalletAddress,
   );
@@ -331,37 +338,102 @@ const useAppState = () => {
       dispatch({ type: "SYNCING_STATE", payload: { syncingState: false } });
     }
   };
-  const pushState = (nextState: State) =>
+  // Saves the active tutorial, if any, so it can be resumed, and returns the
+  // tutorial progress to carry into the next state. Call it before leaving the
+  // tutorial, and before switching networks: it exports the current store.
+  const leaveTutorial = async () => {
+    if (tutorialId === "") {
+      return tutorialProgress;
+    }
+    try {
+      await saveProject("tutorial", tutorialId);
+      return {
+        ...tutorialProgress,
+        [tutorialId]: {
+          step: tutorialStep,
+          maxStep: tutorialMaxStep,
+          savedAt: Date.now(),
+        },
+      };
+    } catch (error) {
+      console.error("ERROR: leaveTutorial", error);
+      return tutorialProgress;
+    }
+  };
+  // Queues the next state, imported by `popState`. The active tutorial of the
+  // next state has no progress entry: its progress is the state itself.
+  const pushState = (nextState: State) => {
+    const withProgress = (state: State) => ({
+      ...state,
+      tutorialProgress: Object.fromEntries(
+        Object.entries(state.tutorialProgress).filter(
+          ([id]) => id !== state.tutorialId,
+        ),
+      ),
+    });
     dispatch({
       type: "PUSH_STATE",
-      payload: { nextState },
+      payload: {
+        nextState: {
+          ...withProgress(nextState),
+          fallbackState: nextState.fallbackState
+            ? withProgress(nextState.fallbackState)
+            : null,
+        },
+      },
     });
+  };
+  const storeDump = (store: Store | string | null) =>
+    typeof store === "string"
+      ? store
+      : JSON.stringify(store ?? defaultStore(networkId));
   const popState = async () => {
     if (!nextState) {
       return;
     }
+    const { nextStore, fallbackState } = nextState;
     await clearMidenStorage();
-    await importStore(
-      JSON.stringify(nextState.nextStore ?? defaultStore(networkId)),
-      storeName(networkId),
-    );
-    dispatch({ type: "POP_STATE" });
+    try {
+      // Synced below, so a sync failure isn't taken for a failed import.
+      await importStore(storeDump(nextStore), storeName(networkId), {
+        skipSync: true,
+      });
+      dispatch({ type: "POP_STATE" });
+    } catch (error) {
+      if (!fallbackState) {
+        throw error;
+      }
+      // A saved project the running client refuses (e.g. written by a newer
+      // one): start over from the fallback instead.
+      console.error("ERROR: importStore", error);
+      await importStore(
+        storeDump(fallbackState.nextStore),
+        storeName(networkId),
+        { skipSync: true },
+      );
+      dispatch({ type: "POP_STATE", payload: { state: fallbackState } });
+      toast.warning("Your saved progress couldn't be restored.", {
+        description: "The tutorial starts over.",
+      });
+    }
     // The Para client shares this store, whose contents (the Para account
     // included) were just replaced, and lost its connection to it.
     paraWallet?.resetClient();
+    sync().catch((error) => console.error("ERROR: sync", error));
   };
   const resetState = async (newNetworkId: NetworkId) => {
+    const nextTutorialProgress = await leaveTutorial();
     switchNetwork(newNetworkId);
-    // console.log(newNetworkId, midenFaucetAccount(newNetworkId));
-    // await sleep(1000);
     pushState({
       ...defaultState(),
       accounts: [midenFaucetAccount(newNetworkId)],
       completedTutorials,
+      tutorialProgress: nextTutorialProgress,
     });
   };
   return {
     syncState,
+    leaveTutorial,
     pushState,
     popState,
     resetState,

@@ -4,8 +4,10 @@ import useGlobalContext from "@/components/global-context/hook";
 import tutorials from "@/components/tutorials";
 import useAppState from "@/hooks/use-app-state";
 import useNetwork from "@/hooks/use-network";
+import useProjects from "@/hooks/use-projects";
 import { trackEvent } from "@/lib/analytics";
 import type { NetworkId } from "@/lib/types/network";
+import type { Tutorial, TutorialId } from "@/lib/types/tutorial";
 import { randomLowercaseId, sleep } from "@/lib/utils";
 import { defaultTutorial, isTutorial } from "@/lib/utils/tutorial";
 import { clientGetLatestBlockNum } from "@/lib/web-client";
@@ -35,26 +37,96 @@ const useTutorials = () => {
     tutorialOpen,
     nextTutorialStepDisabled,
     completedTutorials,
+    tutorialProgress,
     dispatch,
   } = useGlobalContext();
-  const { pushState } = useAppState();
-  const startTutorial = async (tutorialId: string) => {
-    const tutorial = tutorials.find(({ id }) => id === tutorialId);
-    if (!tutorial) {
-      return;
+  const { leaveTutorial, pushState } = useAppState();
+  const { loadProject, deleteProject } = useProjects();
+  // Switches to a tutorial: resumes it when it has saved progress (unless
+  // `restart`), starts it over otherwise. The active tutorial is saved first,
+  // unless it was just completed or is the one restarted.
+  const enterTutorial = async (
+    tutorial: Tutorial,
+    {
+      restart = false,
+      completedTutorial,
+    }: { restart?: boolean; completedTutorial?: Tutorial } = {},
+  ) => {
+    const nextTutorialProgress =
+      completedTutorial || tutorial.id === tutorialId
+        ? tutorialProgress
+        : await leaveTutorial();
+    const newCompletedTutorials = new Set([...completedTutorials]);
+    if (completedTutorial) {
+      newCompletedTutorials.add(completedTutorial.id);
+      await deleteProject("tutorial", completedTutorial.id).catch((error) =>
+        console.error("ERROR: deleteProject", error),
+      );
+    }
+    const savedProject =
+      tutorial.id && !restart && nextTutorialProgress[tutorial.id]
+        ? await loadProject("tutorial", tutorial.id, tutorial.networkId).catch(
+            (error) => {
+              console.error("ERROR: loadProject", error);
+              return null;
+            },
+          )
+        : null;
+    if (restart && tutorial.id) {
+      await deleteProject("tutorial", tutorial.id).catch((error) =>
+        console.error("ERROR: deleteProject", error),
+      );
     }
     navigate(tutorial.initialRoute);
     await sleep(400);
     switchNetwork(tutorial.networkId);
-    pushState({
+    const freshState = {
       ...tutorial.state,
       nextStore: tutorial.store,
       tutorialStartBlockNum: await startBlockNum(tutorial.networkId),
       tutorialRunId: randomLowercaseId(),
-      completedTutorials,
+      completedTutorials: newCompletedTutorials,
+      tutorialProgress: nextTutorialProgress,
+    };
+    pushState(
+      savedProject
+        ? {
+            ...savedProject.state,
+            nextStore: savedProject.store,
+            fallbackState: freshState,
+            completedTutorials: newCompletedTutorials,
+            tutorialProgress: nextTutorialProgress,
+          }
+        : freshState,
+    );
+    return { resumed: savedProject !== null };
+  };
+  const startTutorial = async (id: string) => {
+    const tutorial = tutorials.find((tutorial) => tutorial.id === id);
+    if (!tutorial) {
+      return;
+    }
+    // Already active: carry on where it is.
+    if (tutorial.id === tutorialId) {
+      navigate(tutorial.initialRoute);
+      openTutorial();
+      return;
+    }
+    const { resumed } = await enterTutorial(tutorial);
+    trackEvent(resumed ? "resume_tutorial" : "start_tutorial", {
+      tutorial_id: tutorial.id,
+      wallet_connected: walletConnected,
     });
+  };
+  // Drops a tutorial's saved progress and starts it over.
+  const restartTutorial = async (id: string) => {
+    const tutorial = tutorials.find((tutorial) => tutorial.id === id);
+    if (!tutorial) {
+      return;
+    }
+    await enterTutorial(tutorial, { restart: true });
     trackEvent("start_tutorial", {
-      tutorial_id: tutorialId,
+      tutorial_id: tutorial.id,
       wallet_connected: walletConnected,
     });
   };
@@ -64,29 +136,28 @@ const useTutorials = () => {
       return;
     }
     const nextTutorial = tutorials[tutorial.number] ?? defaultTutorial();
-    navigate(nextTutorial.initialRoute);
-    await sleep(400);
-    const newCompletedTutorials = new Set([...completedTutorials]);
-    newCompletedTutorials.add(tutorial.id);
-    switchNetwork(tutorial.networkId);
-    pushState({
-      ...nextTutorial.state,
-      nextStore: nextTutorial.store,
-      tutorialStartBlockNum: await startBlockNum(nextTutorial.networkId),
-      tutorialRunId: randomLowercaseId(),
-      completedTutorials: newCompletedTutorials,
+    const { resumed } = await enterTutorial(nextTutorial, {
+      completedTutorial: tutorial,
     });
     trackEvent("complete_tutorial", {
       tutorial_id: tutorialId,
       wallet_connected: walletConnected,
     });
     if (nextTutorial.id) {
-      trackEvent("start_tutorial", {
+      trackEvent(resumed ? "resume_tutorial" : "start_tutorial", {
         tutorial_id: nextTutorial.id,
         wallet_connected: walletConnected,
       });
     }
   };
+  // A tutorial's progress: the live state for the active tutorial, its saved
+  // progress for one left unfinished, null otherwise.
+  const tutorialStatus = (id: TutorialId) =>
+    id !== "" && id === tutorialId
+      ? { step: tutorialStep, maxStep: tutorialMaxStep, active: true }
+      : tutorialProgress[id]
+        ? { ...tutorialProgress[id], active: false }
+        : null;
   const previousTutorialStep = () =>
     dispatch({ type: "PREVIOUS_TUTORIAL_STEP" });
   const nextTutorialStep = () => {
@@ -120,7 +191,10 @@ const useTutorials = () => {
     isTutorial: isTutorial(tutorialId),
     // tutorialId === "create-and-fund-wallet" ||
     // tutorialId === "transfer-assets-between-wallets",
+    tutorialProgress,
+    tutorialStatus,
     startTutorial,
+    restartTutorial,
     nextTutorial,
     previousTutorialStep,
     setTutorialStep,

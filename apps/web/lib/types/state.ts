@@ -6,6 +6,7 @@ import type {
 import type { Account } from "@/lib/types/account";
 import type { Component } from "@/lib/types/component";
 import type { InputNote } from "@/lib/types/note";
+import type { TutorialProgress } from "@/lib/types/project";
 import type { ProcedureExport, Script } from "@/lib/types/script";
 import type { Store } from "@/lib/types/store";
 import type {
@@ -20,7 +21,12 @@ export type State = {
   serializedMockChain: Uint8Array;
   syncingState: boolean;
   nextState: State | null;
-  nextStore: Store | null;
+  // The store to import with `nextState`: a `Store`, or a store dump as
+  // `exportStore()` returns it (a saved project).
+  nextStore: Store | string | null;
+  // What to switch to instead when `nextStore` can't be imported (a saved
+  // project the running client refuses), with its own `nextStore`.
+  fallbackState: State | null;
   // ACCOUNTS
   createWalletDialogOpen: boolean;
   createFaucetDialogOpen: boolean;
@@ -83,6 +89,9 @@ export type State = {
   tutorialOpen: boolean;
   nextTutorialStepDisabled: boolean;
   completedTutorials: Set<string>;
+  // The tutorials left unfinished, saved as projects to resume them. The
+  // active tutorial has no entry: its progress is the state itself.
+  tutorialProgress: Partial<Record<TutorialId, TutorialProgress>>;
   // EXAMPLES
   exampleId: string;
 };

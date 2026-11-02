@@ -16,6 +16,14 @@ Skills are installed per project with the `skills` CLI (`pnpm dlx skills ...`) a
 
 When bumping `@miden-sdk/*`, also update `CLIENT_VERSION` in `apps/web/lib/utils/store.ts` to the new version. It stamps the stores the tutorials seed from `defaultStore`, and the SDK refuses to import a store stamped by a client newer than the running one. Bump the `@miden-sdk/*` pins in `pnpm-workspace.yaml` `overrides` too, and regenerate the examples' compiled snapshots (see "Examples"). If the new version is younger than pnpm's minimum release age, exempt exactly that version of each package in `minimumReleaseAgeExclude`, and remove the entries once it ages out.
 
+# Saved projects and resumable tutorials
+
+A saved project is the app state (`stateSerializer`) plus the client store as `exportStore()` dumps it, secret keys included (`apps/web/lib/utils/project.ts`, `hooks/use-projects.ts`). Leaving a tutorial saves it, and starting it again resumes it (`hooks/use-tutorials.ts`). Its step shows from `State.tutorialProgress`, without reading the snapshots.
+- Snapshots go in their own IndexedDB database, `PlaygroundProjects`. Never put "miden" in its name, in any case: `clearMidenStorage()`, which runs before every store import, deletes every database whose name contains it.
+- `leaveTutorial()` exports the current store, so call it before `switchNetwork`.
+- Snapshots carry the client version that wrote them. An SDK bump migrates them on import, but a rollback makes the SDK refuse them. `popState` then starts the tutorial over from `fallbackState`.
+- A testnet reset invalidates them: `isRestorable` compares their genesis header with `genesisBlockHeader` in `lib/utils/store.ts`, so update that header with the reset.
+
 # Examples
 
 The examples launched from the home page (`apps/web/lib/examples`) get their packages from `apps/api/examples/<dir>`. That is a copy of each upstream project's `miden-project.toml` and `src/lib.rs`, the only files the API reads, plus `compiled.json`, their initial compile output. `POST /scripts/examples/:exampleId` inserts those packages already compiled, without calling api-compile. Later edits recompile through `PATCH /scripts/:id` as usual.

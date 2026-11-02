@@ -13,6 +13,7 @@ import Loading from "@/components/lib/loading";
 import Logo from "@/components/lib/logo";
 import useNetwork from "@/hooks/use-network";
 import { networks, noteTransportUrls } from "@/lib/miden-client";
+import { deleteProjects } from "@/lib/utils/project";
 import { STATE_STORAGE_KEY } from "@/lib/utils/state";
 import {
   deleteMidenStores,
@@ -21,6 +22,7 @@ import {
 
 const resetLocalData = async () => {
   await deleteMidenStores();
+  await deleteProjects();
   localStorage.removeItem(STATE_STORAGE_KEY);
   window.location.reload();
 };
@@ -43,8 +45,8 @@ const InitializationError = ({ error }: { error: Error }) => {
           {isNewerStoreError(error)
             ? "The data this browser stores for the playground was written by a newer version, which this one cannot read."
             : "The data this browser stores for the playground may have been written by an older version."}{" "}
-          Resetting it deletes the local accounts, notes and transactions, then
-          reloads the page.
+          Resetting it deletes the local accounts, notes and transactions, and
+          the saved tutorial progress, then reloads the page.
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
@@ -75,6 +77,8 @@ const MidenProvider = ({ children }: { children: ReactNode }) => {
       .then((outdatedStores) => {
         if (outdatedStores.length > 0) {
           localStorage.removeItem(STATE_STORAGE_KEY);
+          // Saved projects come from the same outdated client.
+          return deleteProjects();
         }
       })
       .catch((error) =>

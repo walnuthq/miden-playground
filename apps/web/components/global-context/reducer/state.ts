@@ -17,7 +17,8 @@ export type StateAction =
       type: "PUSH_STATE";
       payload: { nextState: State };
     }
-  | { type: "POP_STATE" };
+  // Switches to the queued next state, or to `state` instead (its fallback).
+  | { type: "POP_STATE"; payload?: { state: State } };
 
 const reducer = (state: State, action: StateAction): State => {
   switch (action.type) {
@@ -57,12 +58,15 @@ const reducer = (state: State, action: StateAction): State => {
       };
     }
     case "POP_STATE": {
-      if (!state.nextState) {
+      const nextState = action.payload?.state ?? state.nextState;
+      if (!nextState) {
         return state;
       }
       return {
-        ...state.nextState,
+        ...nextState,
         nextState: null,
+        nextStore: null,
+        fallbackState: null,
       };
     }
   }
