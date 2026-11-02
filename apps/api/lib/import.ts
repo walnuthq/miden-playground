@@ -156,6 +156,7 @@ export const importExample = async (
       status: "compiled",
       rust,
       error: "",
+      warnings: "",
       masm: "",
       commitment,
       masp,

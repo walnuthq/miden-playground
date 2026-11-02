@@ -54,3 +54,7 @@ export const replaceInEditor = async (
     { search, replace },
   );
 };
+
+// The editor console's summary of a successful compile, e.g. `Compiled
+// counter-account in 3.9 s.` or `… in 3.9 s (1 warning).`.
+export const COMPILED = /^Compiled \S+ in \d+\.\d s/;

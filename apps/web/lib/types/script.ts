@@ -97,7 +97,11 @@ export type Script = {
   readOnly: boolean;
   rust: string;
   masm: string;
+  // The last compile's output: rustc's rendered errors when it failed, its
+  // warnings when it succeeded. The API stores neither: a script fetched from
+  // it (or saved before `warnings` existed) may lack them.
   error: string;
+  warnings: string;
   commitment: string;
   masp: string;
   exports: Export[];
@@ -119,6 +123,7 @@ export type CompiledPackage = Pick<
   | "masp"
   | "exports"
   | "error"
+  | "warnings"
   | "dependencies"
 >;
 

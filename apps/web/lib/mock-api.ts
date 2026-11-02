@@ -122,6 +122,7 @@ export const mockCompileScript = async ({
     masp: "",
     exports: structuredClone(scriptsExports[example]),
     error: "",
+    warnings: "",
     dependencies: structuredClone(script.dependencies),
   };
 };

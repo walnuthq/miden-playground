@@ -1,5 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
-import { replaceInEditor, waitForEditorText } from "./editor";
+import { COMPILED, replaceInEditor, waitForEditorText } from "./editor";
 import {
   logBrowserErrors,
   nextStep,
@@ -49,7 +49,7 @@ test("tutorial 7: deploy a counter contract", async ({ page }) => {
   await test.step(`2. increment by ${INCREMENT} and compile`, async () => {
     await replaceInEditor(page, "felt!(1)", `felt!(${INCREMENT})`);
     await page.getByRole("button", { name: "Compile" }).click();
-    await expect(page.getByText("Script compiled successfully.")).toBeVisible({
+    await expect(page.getByText(COMPILED).last()).toBeVisible({
       timeout: TRANSACTION_TIMEOUT,
     });
     await page.getByRole("tab", { name: "MASM" }).click();
