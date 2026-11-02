@@ -226,9 +226,12 @@ Done. What shipped:
   edits: decorations track them, and the markers are moved on each change.
   A successful compile clears them.
 - The console renders `src/lib.rs:L:C` as links that put the cursor there,
-  following edits made since the compile. The console starts with the last
-  error (kept in local state), and the Rust tab stays mounted, so markers,
-  undo history and the console survive a look at the Metadata tab.
+  following edits made since the compile, and switch to the Rust tab first
+  when clicked from another tab. The console starts with the last error (kept
+  in local state). It now shows on every tab, Metadata included (it used to
+  be hidden there): dependencies change the compile result, and unmounting it
+  lost its output. The Rust tab stays mounted, so markers, undo history and
+  the console survive a look at the Metadata tab.
 - E2E: `e2e/script-diagnostics.spec.ts`.
 
 Why the text is parsed instead of cargo's JSON: `cargo miden build` forwards

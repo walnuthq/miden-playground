@@ -84,12 +84,39 @@ test("script: compile errors in the editor", async ({ page }) => {
       "// moved\n#[component]\nimpl",
     );
     expect((await markers(page))[0]?.startLineNumber).toBe(errorLine + 1);
-    await page.getByRole("tab", { name: "Metadata" }).click();
-    await page.getByRole("tab", { name: "Rust" }).click();
     await page
       .getByRole("button", { name: `src/lib.rs:${errorLine}:`, exact: false })
       .click();
     expect(await cursorLine(page)).toBe(errorLine + 1);
+    // Away from the location, for the next step.
+    await page.evaluate(() =>
+      (
+        window as unknown as {
+          monaco: {
+            editor: {
+              getEditors: () => {
+                setPosition: (position: object) => void;
+              }[];
+            };
+          };
+        }
+      ).monaco.editor
+        .getEditors()[0]
+        ?.setPosition({ lineNumber: 1, column: 1 }),
+    );
+  });
+
+  await test.step("a location clicked on the Metadata tab", async () => {
+    // The console stays on every tab: its link opens the Rust tab.
+    await page.getByRole("tab", { name: "Metadata" }).click();
+    await page
+      .getByRole("button", { name: `src/lib.rs:${errorLine}:`, exact: false })
+      .click();
+    await expect(page.getByRole("tab", { name: "Rust" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await expect.poll(() => cursorLine(page)).toBe(errorLine + 1);
   });
 
   await test.step("a successful compile clears the markers", async () => {
@@ -99,5 +126,8 @@ test("script: compile errors in the editor", async ({ page }) => {
       timeout: TRANSACTION_TIMEOUT,
     });
     expect(await markers(page)).toEqual([]);
+    // The console keeps its output across tabs.
+    await page.getByRole("tab", { name: "Metadata" }).click();
+    await expect(page.getByText("Script compiled successfully.")).toBeVisible();
   });
 });
