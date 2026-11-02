@@ -1,7 +1,6 @@
-import { pick } from "lodash";
 import { COUNTER_SCRIPT_RUN_PROC_HASH } from "@/lib/constants";
 import counterContract from "@/lib/types/default-scripts/counter-contract";
-import type { Script } from "@/lib/types/script";
+import { type Script, toDependency } from "@/lib/types/script";
 import {
   defaultProcedureExport,
   defaultScript,
@@ -50,7 +49,7 @@ const counterScript: Script = {
   readOnly: true,
   rust,
   masm,
-  dependencies: [pick(counterContract, "id", "name", "type", "commitment")],
+  dependencies: [toDependency(counterContract)],
   procedureExports: [
     {
       ...defaultProcedureExport(),

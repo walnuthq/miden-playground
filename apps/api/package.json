@@ -17,13 +17,10 @@
     "drizzle-orm": "1.0.0-rc.5",
     "fflate": "0.8.3",
     "hono": "4.13.16",
-    "lodash": "4.18.1",
     "pg": "8.23.1",
-    "smol-toml": "1.9.1",
-    "uuid": "14.0.3"
+    "smol-toml": "1.9.1"
   },
   "devDependencies": {
-    "@types/lodash": "4.17.27",
     "@types/node": "26.6.6",
     "@types/pg": "8.23.1",
     "@workspace/typescript-config": "workspace:*",

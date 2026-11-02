@@ -1,4 +1,3 @@
-import { groupBy, mapValues } from "lodash";
 import { parse } from "smol-toml";
 import { EMPTY_WORD } from "@/lib/constants";
 import type {
@@ -191,25 +190,32 @@ export const fileListToPackageSources = async (fileList: FileList) => {
       content: await readFileAsText(packageSourceFile),
     })),
   );
-  const packagesSourcesFilesByPackage = groupBy(
+  const packagesSourcesFilesByPackage = Object.groupBy(
     packagesSourcesFilesWithContent,
     ({ file }) =>
       file.webkitRelativePath
         .replace("/miden-project.toml", "")
         .replace("/src/lib.rs", ""),
   );
-  return mapValues(
-    packagesSourcesFilesByPackage,
-    (packagesSourcesFilesWithContent): PackageSource => {
-      const content = (name: string) =>
-        packagesSourcesFilesWithContent.findLast(
-          ({ file }) => file.name === name,
-        )?.content ?? "";
-      return {
-        midenProjectToml: content("miden-project.toml"),
-        rust: content("lib.rs"),
-      };
-    },
+  return Object.fromEntries(
+    Object.entries(packagesSourcesFilesByPackage).map(
+      ([packageDir, packagesSourcesFilesWithContent = []]): [
+        string,
+        PackageSource,
+      ] => {
+        const content = (name: string) =>
+          packagesSourcesFilesWithContent.findLast(
+            ({ file }) => file.name === name,
+          )?.content ?? "";
+        return [
+          packageDir,
+          {
+            midenProjectToml: content("miden-project.toml"),
+            rust: content("lib.rs"),
+          },
+        ];
+      },
+    ),
   );
 };
 

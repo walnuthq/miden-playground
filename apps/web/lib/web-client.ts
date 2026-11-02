@@ -44,7 +44,6 @@ import {
   type WebClient as WebClientType,
 } from "@miden-sdk/miden-sdk";
 import { normalizeAccountId } from "@miden-sdk/react";
-import { range } from "lodash";
 import { EMPTY_WORD } from "@/lib/constants";
 import type {
   Account,
@@ -706,14 +705,16 @@ export const wasmTransactionToTransaction = ({
   result: WasmTransactionResultType;
   scripts: Script[];
 }): Transaction => {
-  const inputNotes = range(
-    result.executedTransaction().inputNotes().numNotes(),
+  const inputNotes = Array.from(
+    { length: result.executedTransaction().inputNotes().numNotes() },
+    (_, index) => index,
   ).map((index) => {
     const note = result.executedTransaction().inputNotes().getNote(index);
     return wasmNoteToNote({ note: note.note(), scripts });
   });
-  const outputNotes = range(
-    result.executedTransaction().outputNotes().numNotes(),
+  const outputNotes = Array.from(
+    { length: result.executedTransaction().outputNotes().numNotes() },
+    (_, index) => index,
   )
     .map((index) => {
       const note = result.executedTransaction().outputNotes().getNote(index);

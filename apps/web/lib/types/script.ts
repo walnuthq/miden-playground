@@ -79,6 +79,14 @@ export type Dependency = {
   commitment: string;
 };
 
+// The dependency fields of a script (or any wider object).
+export const toDependency = ({
+  id,
+  name,
+  type,
+  commitment,
+}: Dependency): Dependency => ({ id, name, type, commitment });
+
 export type PackageSource = { midenProjectToml: string; rust: string };
 
 export type Script = {

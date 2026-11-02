@@ -12,7 +12,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@workspace/ui/components/tooltip";
-import { uniqBy } from "lodash";
 import type { StorageItem } from "@/lib/types/account";
 import { type StorageSlot, storageSlotTypes } from "@/lib/types/component";
 import { getItem } from "@/lib/utils/account";
@@ -49,7 +48,17 @@ const StorageSlotMapTable = ({
       value: newWasmWord(new BigUint64Array([BigInt(value), 0n, 0n, 0n])),
     };
   });
-  const entries = uniqBy([...storageItem.mapEntries, ...keyValues], "key");
+  // First entry per key, compared by identity like lodash's uniqBy.
+  const seenKeys = new Set<unknown>();
+  const entries = [...storageItem.mapEntries, ...keyValues].filter(
+    ({ key }) => {
+      if (seenKeys.has(key)) {
+        return false;
+      }
+      seenKeys.add(key);
+      return true;
+    },
+  );
   return (
     <div className="rounded-md border">
       <Table>

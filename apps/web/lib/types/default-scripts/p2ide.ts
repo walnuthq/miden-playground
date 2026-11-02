@@ -1,7 +1,6 @@
-import { pick } from "lodash";
 import { P2IDE_NOTE_CODE } from "@/lib/constants";
 import basicWallet from "@/lib/types/default-scripts/basic-wallet";
-import type { Script } from "@/lib/types/script";
+import { type Script, toDependency } from "@/lib/types/script";
 import { defaultProcedureExport, defaultScript } from "@/lib/utils/script";
 
 export const rust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
@@ -224,7 +223,7 @@ const p2ide: Script = {
   rust,
   masm,
   commitment: P2IDE_NOTE_CODE,
-  dependencies: [pick(basicWallet, "id", "name", "type", "commitment")],
+  dependencies: [toDependency(basicWallet)],
   procedureExports: [
     {
       ...defaultProcedureExport(),
