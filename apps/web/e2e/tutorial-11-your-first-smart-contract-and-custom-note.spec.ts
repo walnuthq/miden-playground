@@ -29,7 +29,8 @@ const createScript = async (
 };
 
 const compile = async (page: Page) => {
-  // The Compile button is under the editor, in the Rust tab.
+  // From the Rust tab, where step 4 has users read the code (the console, with
+  // the Compile button, shows on every tab).
   await page.getByRole("tab", { name: "Rust" }).click();
   await page.getByRole("button", { name: "Compile" }).click();
   await expect(

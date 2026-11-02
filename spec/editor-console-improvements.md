@@ -1,6 +1,7 @@
 # Scripts editor and console improvements
 
-Status: proposal, written 2026-11-02. Item 1 (P0) is being fixed first.
+Status: proposal, written 2026-11-02. Done: item 1 (PR #731), item 2 (PR
+#732). Next: items 3–6, as one "editor and console" pass (see "Scoring").
 
 The code editor UX of the scripts feature (`/scripts/:id`) is behind other
 blockchain playgrounds. This document compares it with Solana Playground
@@ -101,6 +102,9 @@ Test UI:
 
 ## Our current implementation
 
+As of the proposal, before items 1 and 2: see their "Done" notes for what
+changed since.
+
 - `apps/web/pages/script.tsx`: the `/scripts/:id` route; renders
   `components/script/index.tsx`, which fetches the script from the API when it
   isn't in local state and renders `components/script/script.tsx`.
@@ -163,8 +167,8 @@ What the user sees today, from the production run:
 
 | #   | Improvement                                               | Impact | Effort | Priority |
 | --- | --------------------------------------------------------- | ------ | ------ | -------- |
-| 1   | Fix stale editor on script switch                         | 5      | S      | P0       |
-| 2   | Compile errors in the editor (markers, click to jump)     | 5      | M      | P1       |
+| 1   | Fix stale editor on script switch                         | 5      | S      | Done     |
+| 2   | Compile errors in the editor (markers, click to jump)     | 5      | M      | Done     |
 | 3   | A real console (history, levels, timing, warnings, clear) | 5      | S–M    | P1       |
 | 4   | Cleaner compiler output, with a "show full output" toggle | 4      | S      | P1       |
 | 5   | IDE-style resizable layout, console panel states          | 4      | S–M    | P1       |
@@ -208,28 +212,48 @@ Acceptance: switch between two scripts from the sidebar; the editor shows
 each script's code, the console is empty after the switch, and editing B
 never changes A.
 
+Done in PR #731, as described above.
+
 ### 2. Compile errors in the editor (P1, impact 5, effort M)
 
 Solana Playground: error markers in the overview ruler; TS diagnostics on
 hover with "View Problem".
 
-Proposal:
+Done in PR #732. What shipped:
 
-- Parse `--> src/lib.rs:LINE:COL` blocks out of the compiler output (or,
-  better, have api-compile run `cargo miden build` with
-  `--message-format=json` and return structured diagnostics: level, message,
-  spans, suggestions).
-- Set Monaco markers (`monaco.editor.setModelMarkers`) on the Rust model:
-  squiggles, ruler marks, hover with the message, F8 navigation.
-- In the console, render each diagnostic location as a link that focuses the
-  editor and reveals the line.
-- Clear the markers when the user edits, or keep them until the next compile
-  (decide; VS Code keeps them).
+- `lib/utils/diagnostics.ts` parses rustc's rendered diagnostics out of
+  `script.error`: severity, code, message with its `help:` / `note:` lines,
+  and the primary span (`-->` location, width from the carets). Summaries
+  (`could not compile …`, `generated 1 warning`) and diagnostics without a
+  location are skipped. Unit tests (`pnpm test` in apps/web) run on real
+  api-compile outputs in `lib/utils/fixtures/compile-errors/`.
+- `components/lib/editor.tsx` sets Monaco markers for `src/lib.rs` (squiggles,
+  overview ruler, hover, F8). They stay until the next compile and follow
+  edits: decorations track them, and the markers are moved on each change.
+  A successful compile clears them.
+- The console renders `src/lib.rs:L:C` as links that put the cursor there,
+  following edits made since the compile, and switch to the Rust tab first
+  when clicked from another tab. The console starts with the last error (kept
+  in local state). It now shows on every tab, Metadata included (it used to
+  be hidden there): dependencies change the compile result, and unmounting it
+  lost its output. The Rust tab stays mounted, so markers, undo history and
+  the console survive a look at the Metadata tab.
+- E2E: `e2e/script-diagnostics.spec.ts`.
 
-Notes: the user only edits `src/lib.rs`; diagnostics pointing at other files
-(dependencies, generated code) stay in the console only. The API stores
-`error: stderr` on the package; structured diagnostics would need a new field
-(e.g. `diagnostics: Diagnostic[]`) or parsing on the client.
+Why the text is parsed instead of cargo's JSON: `cargo miden build` forwards
+its arguments to midenc, which already runs cargo with `--message-format
+json-render-diagnostics` but keeps only the `.wasm` artifacts from the JSON
+(`midenc-compile/src/rust.rs`, `run_cargo_inner`). Getting structured
+diagnostics would take a compiler change first, then api-compile, the API and
+the database.
+
+Limits:
+
+- The API doesn't store the error text, so a script fetched from the API in
+  error (another browser, a shared link) shows no markers until it's compiled
+  again.
+- midenc's own errors (after rustc succeeds) aren't parsed. None came up while
+  testing; add their format if they point at `src/lib.rs`.
 
 ### 3. A real console (P1, impact 5, effort S–M)
 

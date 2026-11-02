@@ -1,0 +1,32 @@
+Command failed: cargo miden build --release --offline
+   Compiling diag-sample v0.1.0 (/tmp/miden-project-czZt3e/diag-sample)
+warning: unstable feature specified for `-Ctarget-feature`: `wide-arithmetic`
+  |
+  = note: this feature is not stably supported; its behavior can change in the future
+
+error[E0596]: cannot borrow `self.count_map` as mutable, as it is behind a `&` reference
+  --> src/lib.rs:37:9
+   |
+37 |         self.count_map.set(key, felt!(2));
+   |         ^^^^^^^^^^^^^^ `self` is a `&` reference, so it cannot be borrowed as mutable
+   |
+help: consider changing this to be a mutable reference in the `impl` method and the `trait` definition
+   |
+25 ~     fn get_count(&mut self) -> Felt;
+26 |     /// Increments the counter value stored in the contract's storage map by one.
+...
+32 | impl CounterContract for CounterContractStorage {
+33 ~     fn get_count(&mut self) -> Felt {
+   |
+
+warning: unused variable: `unused`
+  --> src/lib.rs:48:13
+   |
+48 |         let unused = 1;
+   |             ^^^^^^ help: if this is intentional, prefix it with an underscore: `_unused`
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+For more information about this error, try `rustc --explain E0596`.
+warning: `diag-sample` (lib) generated 2 warnings
+error: could not compile `diag-sample` (lib) due to 1 previous error; 2 warnings emitted

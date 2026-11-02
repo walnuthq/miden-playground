@@ -38,6 +38,14 @@ The examples launched from the home page (`apps/web/lib/examples`) get their pac
 The "Create script" dialog creates scripts from `apps/api/templates/*.rs` (`lib/templates.ts`): each type with no example, and each example of the web app's `scriptExamples` (`apps/web/lib/types/script.ts`). Every one must compile. `pnpm templates:check` in `apps/api` creates and compiles each through the local API (`pnpm dev`, with api-compile running), then deletes them. Run it after editing a template, and after bumping the SDK, the api-compile image or `templates/project-template`: SDK API changes break templates silently (0.15 replaced `Asset.key: Word` with `Asset.id: AssetId`).
 - The counter note and counter script examples import `counter_account` but come without it: tutorial 11 teaches adding the user's own `counter-account` script as a dependency. The check does the same (`userDependencies`), so keep it in sync when an example gains such a dependency.
 
+# Script editor (`/scripts/:id`)
+
+`spec/editor-console-improvements.md` is the roadmap for the editor and console (15 scored items). Its status line says what's done and what's next; mark items done there, with their PR, as they ship.
+- Compile errors come as rustc's rendered text in `script.error`, parsed by `apps/web/lib/utils/diagnostics.ts` into Monaco markers and console links. cargo's JSON isn't available: midenc consumes it and keeps only the `.wasm` artifacts. When the compiler or api-compile changes its output, re-capture the fixtures in `lib/utils/fixtures/compile-errors/` and run `pnpm test` in apps/web (`node:test`, plain node).
+- The API doesn't store `error`: a script fetched from it has none, so guard with `script.error ?? ""`.
+- Tutorials outside the list in `apps/web/lib/api.ts` (`createScript`) use `lib/mock-api.ts`: script ids aren't UUIDs, and compiling never reaches the API or api-compile. It always succeeds, with no error text. Run tutorials 6, 7 and 8 after changing the script page.
+- The Rust tab stays mounted on the other tabs (`keepMounted`), so the hidden editor stays in the DOM and in `monaco.editor.getEditors()`. Scope e2e locators to the visible tab. The console shows on every tab of an editable script, and its links open the Rust tab.
+
 # Vite build (`apps/web`)
 
 `apps/web` is a Vite SPA with React Router, served by a Cloudflare Worker (static assets with SPA fallback, plus the Simple Analytics proxy in `worker/`). Before changing `apps/web/vite.config.ts`, read the `vite-wasm-setup`, `frontend-pitfalls` (FP3, FP8, FP17, FP18) and `para-signer` ("Bundler setup") skills.
