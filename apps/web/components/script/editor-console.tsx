@@ -13,11 +13,22 @@ import { useState } from "react";
 import { toast } from "sonner";
 import useScripts from "@/hooks/use-scripts";
 import type { Script } from "@/lib/types/script";
+import { splitLocations } from "@/lib/utils/diagnostics";
 
-const EditorConsole = ({ script }: { script: Script }) => {
+export type EditorLocation = { line: number; column: number };
+
+const EditorConsole = ({
+  script,
+  onRevealLocation,
+}: {
+  script: Script;
+  onRevealLocation: (location: EditorLocation) => void;
+}) => {
   const { compileScript } = useScripts();
   const [loading, setLoading] = useState(false);
-  const [content, setContent] = useState("");
+  // Starts with the last compile's error, if any. The API doesn't store it: a
+  // script fetched from there has none.
+  const [content, setContent] = useState(script.error ?? "");
   const compile = async () => {
     setLoading(true);
     const { script: compiledScript, error } = await compileScript(script);
@@ -49,7 +60,21 @@ const EditorConsole = ({ script }: { script: Script }) => {
             "text-destructive": !!script.error,
           })}
         >
-          {content}
+          {splitLocations(content).map((part, index) =>
+            "line" in part ? (
+              <button
+                // biome-ignore lint/suspicious/noArrayIndexKey: static parts.
+                key={index}
+                type="button"
+                className="cursor-pointer underline underline-offset-2 hover:text-foreground"
+                onClick={() => onRevealLocation(part)}
+              >
+                {part.text}
+              </button>
+            ) : (
+              part.text
+            ),
+          )}
         </pre>
       </CardContent>
     </Card>

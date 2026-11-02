@@ -6,9 +6,11 @@
     "moduleResolution": "bundler",
     "types": ["node"],
     "verbatimModuleSyntax": true,
+    "allowImportingTsExtensions": true,
     "noEmit": true,
     "declaration": false,
     "declarationMap": false
   },
-  "include": ["vite.config.ts", "playwright.config.ts", "e2e"]
+  "include": ["vite.config.ts", "playwright.config.ts", "e2e", "**/*.test.ts"],
+  "exclude": ["node_modules", "dist"]
 }

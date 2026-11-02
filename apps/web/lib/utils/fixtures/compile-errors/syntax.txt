@@ -1,0 +1,35 @@
+Command failed: cargo miden build --release --offline
+   Compiling diag-sample v0.1.0 (/tmp/miden-project-mlpqKj/diag-sample)
+warning: unstable feature specified for `-Ctarget-feature`: `wide-arithmetic`
+  |
+  = note: this feature is not stably supported; its behavior can change in the future
+
+error: expected one of `!` or `::`, found doc comment `/// Increments the counter value stored in the contract's storage map by one.`
+  --> src/lib.rs:26:5
+   |
+22 | trait CounterContract {
+   |                       - while parsing this item list starting here
+...
+25 |     fn get_count(&self) -> Felt; oops
+   |                                      - expected one of `!` or `::`
+26 |     /// Increments the counter value stored in the contract's storage map by one.
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unexpected token
+...
+29 | }
+   | - the item list ends here
+   |
+help: add a space before the last `/` to write a regular comment
+   |
+26 |     // / Increments the counter value stored in the contract's storage map by one.
+   |       +
+
+error: The `component` macro only supports a component trait or a trait implementation block.
+  --> src/lib.rs:21:1
+   |
+21 | #[component]
+   | ^^^^^^^^^^^^
+   |
+   = note: this error originates in the attribute macro `component` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: `diag-sample` (lib) generated 1 warning
+error: could not compile `diag-sample` (lib) due to 2 previous errors; 1 warning emitted
