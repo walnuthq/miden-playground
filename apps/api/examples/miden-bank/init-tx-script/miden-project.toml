@@ -1,0 +1,13 @@
+[package]
+name = "init-tx-script"
+version = "0.1.0"
+
+[lib]
+path = "src/lib.rs"
+kind = "tx-script"
+namespace = "miden:base/transaction-script@1.0.0"
+
+[dependencies]
+miden-core = "*"
+miden-protocol = "*"
+bank-account = { path = "../bank-account" }

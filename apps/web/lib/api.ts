@@ -298,19 +298,11 @@ export const importScriptsFromPackageSources = async (
   return { scripts: packages };
 };
 
-export const importScriptsFromGithubRepo = async ({
-  githubRepoUrl,
-  githubRepoRef,
-  projectDir,
-}: {
-  githubRepoUrl: string;
-  githubRepoRef?: string;
-  projectDir?: string;
-}) => {
-  const response = await fetch(`${API_URL}/scripts/import`, {
+// Creates the example's packages from their precompiled sources
+// (apps/api/examples).
+export const importExample = async (exampleId: string) => {
+  const response = await fetch(`${API_URL}/scripts/examples/${exampleId}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ githubRepoUrl, ref: githubRepoRef, projectDir }),
   });
   if (!response.ok) {
     return { error: await response.text() };

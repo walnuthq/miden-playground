@@ -6,6 +6,7 @@
     "moduleResolution": "bundler",
     "types": ["node"],
     "noEmit": true,
+    "allowImportingTsExtensions": true,
     "declaration": false,
     "declarationMap": false,
     "paths": {

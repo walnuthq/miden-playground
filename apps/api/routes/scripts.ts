@@ -7,7 +7,8 @@ import {
   counterAccountDependency,
 } from "@/lib/default-dependencies";
 import {
-  importScriptsFromGithubRepo,
+  ExampleNotFoundError,
+  importExample,
   importScriptsFromPackageSources,
 } from "@/lib/import";
 import { templates } from "@/lib/templates";
@@ -63,10 +64,7 @@ type CompileScriptRequestBody = {
 type CompileScriptResponse = { package: CompiledPackage };
 
 type ImportScriptsRequestBody = {
-  packageSources?: Record<string, PackageSource>;
-  githubRepoUrl?: string;
-  projectDir?: string;
-  ref?: string;
+  packageSources: Record<string, PackageSource>;
 };
 
 type ImportScriptsResponse = {
@@ -105,34 +103,34 @@ const scripts = createApp()
   })
   .post("/import", async (c) => {
     try {
-      const { packageSources, githubRepoUrl, projectDir, ref } =
-        await c.req.json<ImportScriptsRequestBody>();
-      if (packageSources) {
-        const packages = await importScriptsFromPackageSources(
-          packageSources,
-          c.req.raw.signal,
-        );
-        return c.json<ImportScriptsResponse>({ packages });
+      const { packageSources } = await c.req.json<ImportScriptsRequestBody>();
+      if (!packageSources) {
+        throw new Error("Error: Invalid request body.");
       }
-      if (githubRepoUrl) {
-        if (!githubRepoUrl.startsWith("https://github.com/0xMiden/")) {
-          throw new Error("Error: Invalid GitHub repository URL.");
-        }
-        if (ref !== undefined && !/^\w[\w./-]*$/.test(ref)) {
-          throw new Error("Error: Invalid Git ref.");
-        }
-        const packages = await importScriptsFromGithubRepo({
-          githubRepoUrl,
-          projectDir,
-          ref,
-          signal: c.req.raw.signal,
-        });
-        return c.json<ImportScriptsResponse>({ packages });
-      }
-      throw new Error("Error: Invalid request body.");
+      const packages = await importScriptsFromPackageSources(
+        packageSources,
+        c.req.raw.signal,
+      );
+      return c.json<ImportScriptsResponse>({ packages });
     } catch (error) {
       console.error(error);
       const { message } = error as { message: string };
+      return upstreamErrorResponse(error) ?? c.text(message, 500);
+    }
+  })
+  .post("/examples/:exampleId", async (c) => {
+    try {
+      const packages = await importExample(
+        c.req.param("exampleId"),
+        c.req.raw.signal,
+      );
+      return c.json<ImportScriptsResponse>({ packages });
+    } catch (error) {
+      console.error(error);
+      const { message } = error as { message: string };
+      if (error instanceof ExampleNotFoundError) {
+        return c.text(message, 404);
+      }
       return upstreamErrorResponse(error) ?? c.text(message, 500);
     }
   })

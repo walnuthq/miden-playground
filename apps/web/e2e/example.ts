@@ -1,9 +1,9 @@
 import { expect, type Locator, type Page } from "@playwright/test";
 import { TRANSACTION_TIMEOUT } from "./tutorial";
 
-// Launching an example imports its contracts from GitHub and compiles them
-// through apps/api (run it along with the dev server), opens the accounts
-// page, then deploys the example's account in the background.
+// Launching an example creates its precompiled packages through apps/api (run
+// it along with the dev server), opens the accounts page, then deploys the
+// example's account in the background.
 export const launchExample = async (
   page: Page,
   { title, accountName }: { title: string; accountName: string },
@@ -18,7 +18,6 @@ export const launchExample = async (
   const launch = card.getByRole("button", { name: "Launch example" });
   await expect(launch).toBeVisible({ timeout: TRANSACTION_TIMEOUT });
   await launch.click();
-  // Compiling can take a while when api-compile's cache is cold.
   await expect(page).toHaveURL(/\/accounts$/, { timeout: TRANSACTION_TIMEOUT });
   await expect(page.getByText(`${title} example loaded.`)).toBeVisible();
   await expect(page.getByText(`${accountName} deployed.`)).toBeVisible({

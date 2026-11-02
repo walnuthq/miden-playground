@@ -20,9 +20,6 @@ const counterContract: Example = {
       .
     </p>
   ),
-  githubRepoUrl: "https://github.com/0xMiden/project-template",
-  githubRepoRef: "e941949b1cb244f1557ace1c58dca0dc7a898da8",
-  projectDir: "contracts",
   state,
 };
 

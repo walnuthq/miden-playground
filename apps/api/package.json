@@ -11,7 +11,8 @@
     "format": "biome check --write .",
     "typecheck": "tsc --noEmit",
     "cf-typegen": "wrangler types --env-file .env.example --strict-vars=false cloudflare-env.d.ts",
-    "db:push": "drizzle-kit push"
+    "db:push": "drizzle-kit push",
+    "examples:compile": "node scripts/compile-examples.ts"
   },
   "dependencies": {
     "drizzle-orm": "1.0.0-rc.5",

@@ -6,9 +6,5 @@ export type Example = {
   title: string;
   tagline: string;
   description: ReactNode;
-  githubRepoUrl: string;
-  // Commit, branch or tag to import, so the example doesn't change under us.
-  githubRepoRef?: string;
-  projectDir?: string;
   state: State;
 };
