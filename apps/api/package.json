@@ -14,9 +14,9 @@
     "db:push": "drizzle-kit push"
   },
   "dependencies": {
-    "drizzle-orm": "1.0.0-rc.4",
+    "drizzle-orm": "1.0.0-rc.5",
     "fflate": "0.8.3",
-    "hono": "4.13.14",
+    "hono": "4.13.16",
     "lodash": "4.18.1",
     "pg": "8.23.1",
     "smol-toml": "1.9.1",
@@ -28,7 +28,7 @@
     "@types/pg": "8.23.1",
     "@workspace/typescript-config": "workspace:*",
     "dotenv": "18.0.9",
-    "drizzle-kit": "1.0.0-rc.4",
+    "drizzle-kit": "1.0.0-rc.5",
     "typescript": "7.0.2",
     "wrangler": "4.156.0"
   }
