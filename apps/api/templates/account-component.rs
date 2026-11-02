@@ -35,12 +35,12 @@ impl MyAccount for MyAccountStorage {
     fn set_asset_qty(&mut self, pub_key: Word, asset: Asset, qty: Felt) {
         let owner_key = self.owner_public_key.get();
         if pub_key == owner_key {
-            self.asset_qty_map.set(asset.key, qty);
+            self.asset_qty_map.set(Word::from(asset.id), qty);
         }
     }
 
     /// Returns the stored quantity for `asset`, or 0 if not present.
     fn get_asset_qty(&self, asset: Asset) -> Felt {
-        self.asset_qty_map.get(asset.key)
+        self.asset_qty_map.get(Word::from(asset.id))
     }
 }
