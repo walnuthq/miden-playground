@@ -4,8 +4,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "probe": "tsx scripts/probe.ts",
-    "notify": "tsx scripts/notify.ts",
+    "probe": "node scripts/probe.ts",
+    "notify": "node scripts/notify.ts",
     "build": "pnpm probe && pnpm typecheck && vite build",
     "dev": "pnpm probe && vite",
     "preview": "vite preview",
@@ -28,9 +28,7 @@
     "@types/react-dom": "19.3.0",
     "@vitejs/plugin-react": "6.1.2",
     "@workspace/typescript-config": "workspace:*",
-    "dotenv": "18.0.9",
     "playwright": "1.64.1",
-    "tsx": "4.23.15",
     "typescript": "7.0.2",
     "vite": "8.3.5"
   }

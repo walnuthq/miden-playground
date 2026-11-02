@@ -27,7 +27,6 @@
     "@types/node": "26.6.6",
     "@types/pg": "8.23.1",
     "@workspace/typescript-config": "workspace:*",
-    "dotenv": "18.0.9",
     "drizzle-kit": "1.0.0-rc.5",
     "typescript": "7.0.2",
     "wrangler": "4.156.0"
