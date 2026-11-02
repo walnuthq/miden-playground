@@ -14,7 +14,7 @@ Skills are installed per project with the `skills` CLI (`pnpm dlx skills ...`) a
 
 # Upgrading the Miden packages
 
-When bumping `@miden-sdk/*`, also update `CLIENT_VERSION` in `apps/web/lib/utils/store.ts` to the new version. It stamps the stores the tutorials seed from `defaultStore`, and the SDK refuses to import a store stamped by a client newer than the running one. Bump the `@miden-sdk/*` pins in `pnpm-workspace.yaml` `overrides` too, and regenerate the examples' compiled snapshots (see "Examples"). If the new version is younger than pnpm's minimum release age, exempt exactly that version of each package in `minimumReleaseAgeExclude`, and remove the entries once it ages out.
+When bumping `@miden-sdk/*`, also update `CLIENT_VERSION` in `apps/web/lib/utils/store.ts` to the new version. It stamps the stores the tutorials seed from `defaultStore`, and the SDK refuses to import a store stamped by a client newer than the running one. Bump the `@miden-sdk/*` pins in `pnpm-workspace.yaml` `overrides` too, regenerate the examples' compiled snapshots (see "Examples"), and check that the script templates still compile (see "Script templates"). If the new version is younger than pnpm's minimum release age, exempt exactly that version of each package in `minimumReleaseAgeExclude`, and remove the entries once it ages out.
 
 # Saved projects and resumable tutorials
 
@@ -32,6 +32,11 @@ The examples launched from the home page (`apps/web/lib/examples`) get their pac
 - The snapshots are bundled into the API Worker: each note's masp is ~560 KB of base64 (it embeds its dependencies). The two examples bring the upload to ~840 KiB gzipped, so watch the Worker size limit when adding examples.
 - `compiled.json` stores a hash of the sources. When they don't match, the API logs a warning and compiles live, so a forgotten regeneration after an edit is only slow. A compiler bump leaves the hash unchanged, though: regenerate by hand, or launching an example serves stale packages.
 - Register a new example in `apps/api/examples/index.ts`, keyed by the web app's example id. Its `compiled.json` import needs the `as unknown as CompiledExample` cast: real manifests have structured signature params, which the `ProcedureSignature.params: string[]` type doesn't model.
+
+# Script templates
+
+The "Create script" dialog creates scripts from `apps/api/templates/*.rs` (`lib/templates.ts`): each type with no example, and each example of the web app's `scriptExamples` (`apps/web/lib/types/script.ts`). Every one must compile. `pnpm templates:check` in `apps/api` creates and compiles each through the local API (`pnpm dev`, with api-compile running), then deletes them. Run it after editing a template, and after bumping the SDK, the api-compile image or `templates/project-template`: SDK API changes break templates silently (0.15 replaced `Asset.key: Word` with `Asset.id: AssetId`).
+- The counter note and counter script examples import `counter_account` but come without it: tutorial 11 teaches adding the user's own `counter-account` script as a dependency. The check does the same (`userDependencies`), so keep it in sync when an example gains such a dependency.
 
 # Vite build (`apps/web`)
 
