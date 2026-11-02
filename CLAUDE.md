@@ -27,6 +27,26 @@ When bumping `@miden-sdk/*`, also update `CLIENT_VERSION` in `apps/web/lib/utils
 - Tailwind goes through `@tailwindcss/vite`, not PostCSS.
 - Dev pre-bundling and the production build can diverge, and merging to `main` deploys. After a bump of Vite, Para or the SDK, test the built app: `vite build --mode development && wrangler dev --port 3000` in `apps/web` (port 3000 and the BETA Para key, which Para's production key would reject on localhost), then the e2e suite against it.
 
+# Node and tooling
+
+Node 26 (`engines.node`, `node-version` in the three deploy workflows), with `@types/node` on the same major. Node only runs tooling: the apps run on Workers and in the browser.
+- TypeScript scripts run with plain `node` (built-in type stripping, no `tsx`), e.g. `apps/status-page/scripts/*.ts`. They need `.ts` extensions on relative imports and `import type` for types, and can't use enums, namespaces, parameter properties or tsconfig path aliases. `tsc --noEmit` stays the only type checker: Node strips types without checking them.
+- Env files are loaded with `process.loadEnvFile` (no `dotenv`), behind an `existsSync` guard because it throws when the file is missing (CI has no `.env.local`). It never overwrites a variable that's already set, so load the most specific file first.
+- In `turbo.json`, a `<package>#<task>` entry replaces the generic task instead of extending it: repeat what it needs, like `"inputs": ["$TURBO_DEFAULT$", ".env*"]`, or git-ignored `.env*.local` edits won't invalidate the cache.
+- After `pnpm remove`, run `pnpm install --frozen-lockfile --force` if a build can't resolve a package the lockfile still lists: pnpm can prune a package directory that's still needed. To check a lockfile change the way CI does, run a clean frozen install and build in a temporary `git worktree`.
+
+# Environment variables
+
+Vite and Wrangler conventions: `.env` and `.env.[mode]` hold committed defaults, and `.env*.local` (git-ignored) holds personal overrides. The shell wins over both. Each app documents its variables in `.env.example`, and the README has the full table.
+- `apps/api`: `DATABASE_URL` in the committed `.env` (the docker-compose database) is the one local database setting. drizzle-kit reads it, and so does `wrangler dev`, through `CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE=${DATABASE_URL}` in the same file, which overrides the Hyperdrive binding locally (there is no `localConnectionString` in `wrangler.jsonc`). Override it in `.env.local` or the shell. A remote `DATABASE_URL` exported in the shell (e.g. for `db:push`) also redirects a `wrangler dev` started from that shell. Production connects through the Hyperdrive `id` and never reads these files.
+- Don't add a `.dev.vars` to `apps/api`: Wrangler ignores `.env` files when one exists. `apps/web/.dev.vars` exists on purpose, to keep the `VITE_*` files out of the Worker's local env.
+
+# No lodash or uuid
+
+Use built-ins (`Object.groupBy`, with `lib` at `ES2024` in the api and web tsconfigs; `new Set`, `Object.fromEntries`, `crypto.randomUUID`), not `lodash` or `uuid`.
+- `apps/api/lib/case.ts` (`kebabCase`) and `apps/web/lib/utils/case.ts` (`snakeCase`) port lodash's word splitting, quirks included (`P2IDNote` → `p-2-id-note`). They build names the Miden compiler checks (the component namespace in `lib/toml.ts`, storage slot names in `storageSlotName`), so keep them identical to lodash and to each other. Don't swap them for a simpler regex.
+- `kebabCase` in `apps/web/lib/utils` is a different helper, for script names and ids.
+
 # UI components
 
 `packages/ui/src/components` holds stock shadcn components (style `base-vega`, Base UI primitives, `cn` from the `cn` package). Keep them byte-identical to the CLI output so they can be refreshed with `pnpm dlx shadcn@latest add <name> --overwrite` (run in `packages/ui`); Biome ignores that directory on purpose. They need `@import "shadcn/tailwind.css"` in `globals.css` for their `data-*` custom variants.
