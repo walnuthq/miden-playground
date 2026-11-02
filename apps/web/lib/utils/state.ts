@@ -19,6 +19,7 @@ export const defaultState = (): State => ({
   syncingState: false,
   nextState: null,
   nextStore: null,
+  fallbackState: null,
   // ACCOUNTS
   createWalletDialogOpen: false,
   createFaucetDialogOpen: false,
@@ -76,6 +77,7 @@ export const defaultState = (): State => ({
   tutorialOpen: true,
   nextTutorialStepDisabled: true,
   completedTutorials: new Set([]),
+  tutorialProgress: {},
   // EXAMPLES
   exampleId: "",
 });
@@ -95,6 +97,7 @@ export const stateSerializer = ({
   tutorialOpen,
   nextTutorialStepDisabled,
   completedTutorials,
+  tutorialProgress,
 }: State) =>
   JSON.stringify({
     serializedMockChain:
@@ -112,6 +115,7 @@ export const stateSerializer = ({
     tutorialOpen,
     nextTutorialStepDisabled,
     completedTutorials: [...completedTutorials],
+    tutorialProgress,
   });
 
 // Scripts persisted before the package `digest` was renamed `commitment` still
@@ -147,6 +151,7 @@ export const stateDeserializer = (value: string): State => {
       tutorialOpen,
       nextTutorialStepDisabled,
       completedTutorials,
+      tutorialProgress,
     } = JSON.parse(value) as {
       blockNum?: number;
       serializedMockChain?: string;
@@ -163,6 +168,7 @@ export const stateDeserializer = (value: string): State => {
       tutorialOpen?: boolean;
       nextTutorialStepDisabled?: boolean;
       completedTutorials?: string[];
+      tutorialProgress?: State["tutorialProgress"];
     };
     const initialState = defaultState();
     return {
@@ -188,6 +194,7 @@ export const stateDeserializer = (value: string): State => {
       completedTutorials: completedTutorials
         ? new Set(completedTutorials)
         : initialState.completedTutorials,
+      tutorialProgress: tutorialProgress ?? initialState.tutorialProgress,
     };
   } catch (error) {
     console.error("ERROR: stateDeserializer", error);

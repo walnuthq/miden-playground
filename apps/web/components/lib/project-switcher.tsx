@@ -19,11 +19,10 @@ import {
   useSidebar,
 } from "@workspace/ui/components/sidebar";
 import { cn } from "@workspace/ui/lib/utils";
-import { BadgeCheck, ChevronsUpDown } from "lucide-react";
+import { BadgeCheck, ChevronsUpDown, CircleDashed } from "lucide-react";
 // import { useEffect } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
-// import useProjects from "@/hooks/use-projects";
 import Logo from "@/components/lib/logo";
 import tutorials from "@/components/tutorials";
 import useAppState from "@/hooks/use-app-state";
@@ -38,9 +37,9 @@ const ProjectSwitcher = () => {
   const navigate = useNavigate();
   const { networkId } = useNetwork();
   const { resetState } = useAppState();
-  const { tutorial, completedTutorials, startTutorial } = useTutorials();
+  const { tutorial, completedTutorials, tutorialStatus, startTutorial } =
+    useTutorials();
   const { example, launchExample } = useExamples();
-  // const { saveProject, loadProject } = useProjects();
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -74,36 +73,37 @@ const ProjectSwitcher = () => {
             side={isMobile ? "bottom" : "right"}
             sideOffset={4}
           >
-            {/* <DropdownMenuSub>
-              <DropdownMenuSubTrigger>Projects</DropdownMenuSubTrigger>
-              <DropdownMenuPortal>
-                <DropdownMenuSubContent>
-                  <DropdownMenuItem onClick={() => saveProject()}>
-                    Save project
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => loadProject()}>
-                    Load project
-                  </DropdownMenuItem>
-                </DropdownMenuSubContent>
-              </DropdownMenuPortal>
-            </DropdownMenuSub> */}
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>Tutorials</DropdownMenuSubTrigger>
               <DropdownMenuPortal>
                 <DropdownMenuSubContent>
-                  {tutorials.map((tutorial) => (
-                    <DropdownMenuItem
-                      key={tutorial.id}
-                      onClick={() => startTutorial(tutorial.id)}
-                    >
-                      <BadgeCheck
-                        className={cn("size-4 text-transparent", {
-                          "text-green-500": completedTutorials.has(tutorial.id),
-                        })}
-                      />{" "}
-                      {tutorial.number}. {tutorial.title}
-                    </DropdownMenuItem>
-                  ))}
+                  {tutorials.map((tutorial) => {
+                    const status = tutorialStatus(tutorial.id);
+                    return (
+                      <DropdownMenuItem
+                        key={tutorial.id}
+                        onClick={() => startTutorial(tutorial.id)}
+                      >
+                        <BadgeCheck
+                          className={cn("size-4 text-transparent", {
+                            "text-green-500": completedTutorials.has(
+                              tutorial.id,
+                            ),
+                          })}
+                        />{" "}
+                        {tutorial.number}. {tutorial.title}
+                        {status && (
+                          <span
+                            className="ml-auto flex items-center gap-1 pl-2 text-xs text-muted-foreground"
+                            title="In progress"
+                          >
+                            <CircleDashed className="size-3" />
+                            {status.step + 1}/{tutorial.steps.length}
+                          </span>
+                        )}
+                      </DropdownMenuItem>
+                    );
+                  })}
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
             </DropdownMenuSub>

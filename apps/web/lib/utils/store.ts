@@ -35,6 +35,12 @@ const blockHeaders = {
   mmck: testnetBlock0Header,
 } as const;
 
+// The genesis block header a store of the network starts from, to tell a saved
+// store from an older chain (before a network reset). Empty when unknown: the
+// local and mock chains seed testnet's header but have their own genesis.
+export const genesisBlockHeader = (networkId: NetworkId) =>
+  networkId === "mtst" ? testnetBlock0Header.header.data : "";
+
 export const defaultStore = (networkId: NetworkId): Store => ({
   accountCode: [],
   latestAccountStorage: [],
