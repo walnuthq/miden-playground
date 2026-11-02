@@ -1,159 +1,167 @@
-import { readTarGz, type TarFile } from "@/lib/tar";
+import { examples } from "@/examples";
+import { sourcesHash } from "@/examples/hash";
 import { parseMidenProjectToml } from "@/lib/toml";
-import type { CompiledPackage, PackageSource } from "@/lib/types";
+import type { CompiledPackage, Dependency, PackageSource } from "@/lib/types";
 import { compilePackage, createPackage } from "@/lib/utils";
 
-export const importScriptsFromPackageSources = async (
+const lastSegment = (path: string) => path.split("/").at(-1);
+
+// Parses the packages' miden-project.toml and resolves their path dependencies
+// to package names, then orders them so each package comes after the ones it
+// depends on.
+const resolvePackageSources = (
   packageSources: Record<string, PackageSource>,
-  signal?: AbortSignal,
-): Promise<CompiledPackage[]> => {
-  const packagesWithDependencies = await Promise.all(
-    Object.values(packageSources).map(async ({ midenProjectToml, rust }) => {
+) => {
+  const packages = Object.entries(packageSources).map(
+    ([packagePath, { midenProjectToml, rust }]) => {
       const {
         package: { name },
         dependencies,
         lib: { kind: type },
       } = parseMidenProjectToml(midenProjectToml);
-      const packageId = await createPackage({
-        name,
-        type,
-        rust,
-      });
-      return {
-        package: { id: packageId, name, type, rust },
-        dependencies: Object.fromEntries(
-          Object.entries(dependencies).filter(
-            ([dependency]) =>
-              dependency !== "miden-core" && dependency !== "miden-protocol",
-          ),
-        ) as Record<string, { path: string }>,
-      };
-    }),
+      return { packagePath, name, type, rust, dependencies };
+    },
   );
-  const packagesToCompile = packagesWithDependencies.map(
-    ({ package: dbPackage, dependencies }) => ({
-      package: dbPackage,
-      dependencies: Object.keys(dependencies).map((dependency) => {
-        const { path: dependencyPath } = dependencies[dependency] ?? {
-          path: "",
-        };
-        const dependencyDir = dependencyPath.split("/").at(-1);
-        const packagePath =
-          Object.keys(packageSources).find((packagePath) => {
-            const packageDir = packagePath.split("/").at(-1);
-            return packageDir === dependencyDir;
-          }) ?? "";
-        const packageSource = packageSources[packagePath] ?? {
-          midenProjectToml: "",
-        };
-        const {
-          package: { name: dependencyName },
-        } = parseMidenProjectToml(packageSource.midenProjectToml);
-        const dependencyPackage = packagesWithDependencies.find(
-          ({ package: { name } }) => name === dependencyName,
+  const resolved = packages.map(({ name, type, rust, dependencies }) => ({
+    name,
+    type,
+    rust,
+    dependencies: Object.entries(dependencies)
+      .filter(
+        ([dependency]) =>
+          dependency !== "miden-core" && dependency !== "miden-protocol",
+      )
+      .flatMap(([, dependency]) => {
+        if (typeof dependency === "string") {
+          return [];
+        }
+        const dependencyDir = lastSegment(dependency.path);
+        const dependencyPackage = packages.find(
+          ({ packagePath }) => lastSegment(packagePath) === dependencyDir,
         );
-        return dependencyPackage?.package.id ?? "";
+        return dependencyPackage ? [dependencyPackage.name] : [];
       }),
-    }),
+  }));
+  const ordered: typeof resolved = [];
+  const visiting = new Set<string>();
+  const visit = (resolvedPackage: (typeof resolved)[number]) => {
+    if (visiting.has(resolvedPackage.name)) {
+      return;
+    }
+    visiting.add(resolvedPackage.name);
+    for (const dependency of resolvedPackage.dependencies) {
+      const dependencyPackage = resolved.find(
+        ({ name }) => name === dependency,
+      );
+      if (dependencyPackage) {
+        visit(dependencyPackage);
+      }
+    }
+    ordered.push(resolvedPackage);
+  };
+  for (const resolvedPackage of resolved) {
+    visit(resolvedPackage);
+  }
+  return ordered;
+};
+
+export const importScriptsFromPackageSources = async (
+  packageSources: Record<string, PackageSource>,
+  signal?: AbortSignal,
+): Promise<CompiledPackage[]> => {
+  const packages = resolvePackageSources(packageSources);
+  const packageIds = new Map(
+    await Promise.all(
+      packages.map(
+        async ({ name, type, rust }) =>
+          [name, await createPackage({ name, type, rust })] as const,
+      ),
+    ),
   );
   // api-compile builds one package at a time and answers 503 once its queue is
   // full, so compile the packages in turn rather than all at once, each one
   // after the packages it depends on.
   const compiledPackages: CompiledPackage[] = [];
-  const compiledPackageIds = new Set<string>();
-  const compile = async ({
-    package: dbPackage,
-    dependencies,
-  }: (typeof packagesToCompile)[number]) => {
-    if (compiledPackageIds.has(dbPackage.id)) {
-      return;
-    }
-    compiledPackageIds.add(dbPackage.id);
-    for (const dependency of dependencies) {
-      const dependencyPackage = packagesToCompile.find(
-        ({ package: { id } }) => id === dependency,
-      );
-      if (dependencyPackage) {
-        await compile(dependencyPackage);
-      }
-    }
+  for (const { name, rust, dependencies } of packages) {
     compiledPackages.push(
       await compilePackage({
-        id: dbPackage.id,
-        rust: dbPackage.rust,
-        dependencies,
+        id: packageIds.get(name) ?? "",
+        rust,
+        dependencies: dependencies.map(
+          (dependency) => packageIds.get(dependency) ?? "",
+        ),
         signal,
       }),
     );
-  };
-  for (const packageToCompile of packagesToCompile) {
-    await compile(packageToCompile);
   }
   return compiledPackages;
 };
 
-const fileName = (path: string) => path.split("/").at(-1) ?? "";
+export class ExampleNotFoundError extends Error {}
 
-const filesToPackageSources = (files: TarFile[]) => {
-  const packagesSourcesFilesByPackage = Object.groupBy(files, ({ path }) =>
-    path.replace("/miden-project.toml", "").replace("/src/lib.rs", ""),
-  );
-  return Object.fromEntries(
-    Object.entries(packagesSourcesFilesByPackage).map(
-      ([packageDir, packagesSourcesFiles = []]): [string, PackageSource] => {
-        const content = (name: string) =>
-          packagesSourcesFiles.findLast(({ path }) => fileName(path) === name)
-            ?.content ?? "";
-        return [
-          packageDir,
-          {
-            midenProjectToml: content("miden-project.toml"),
-            rust: content("lib.rs").replaceAll(
-              "let key = Word::new([felt!(0), felt!(0), felt!(0), felt!(1)]);",
-              "let key = Word::new([felt!(1), felt!(0), felt!(0), felt!(0)]);",
-            ),
-          },
-        ];
-      },
-    ),
-  );
-};
-
-export const importScriptsFromGithubRepo = async ({
-  githubRepoUrl,
-  projectDir,
-  ref = "HEAD",
-  signal,
-}: {
-  githubRepoUrl: string;
-  projectDir?: string;
-  ref?: string;
-  signal?: AbortSignal;
-}) => {
-  // Download only the requested commit, branch or tag, as an archive.
-  const [owner, repo] = new URL(githubRepoUrl).pathname
-    .replace(/\.git$/, "")
-    .split("/")
-    .filter(Boolean);
-  const archiveUrl = `https://codeload.github.com/${owner}/${repo}/tar.gz/${ref}`;
-  console.info(`fetch ${archiveUrl}`);
-  const response = await fetch(archiveUrl, { signal });
-  if (!response.ok || !response.body) {
-    throw new Error(
-      `Error: Could not download ${githubRepoUrl} at ${ref} (${response.status}).`,
-    );
+// Creates the packages of an example from its precompiled snapshot
+// (examples/*/compiled.json), without calling api-compile. Falls back to
+// compiling the sources when they were edited since the snapshot was taken.
+export const importExample = async (
+  exampleId: string,
+  signal?: AbortSignal,
+): Promise<CompiledPackage[]> => {
+  const example = examples[exampleId];
+  if (!example) {
+    throw new ExampleNotFoundError("Error: Example not found.");
   }
-  // Archive paths start with a `<repo>-<ref>/` directory.
-  const projectDirPrefix = projectDir
-    ? `${projectDir.replace(/\/$/, "")}/`
-    : "";
-  const files = await readTarGz(response.body, (path) => {
-    const repoPath = path.slice(path.indexOf("/") + 1);
-    return (
-      repoPath.startsWith(projectDirPrefix) &&
-      ["miden-project.toml", "lib.rs"].includes(fileName(repoPath))
+  const { sources, compiled } = example;
+  if ((await sourcesHash(sources)) !== compiled.sourcesHash) {
+    console.warn(
+      `Example ${exampleId}: sources changed since compiled.json was generated (run pnpm examples:compile), compiling them.`,
     );
-  });
-  const packageSources = filesToPackageSources(files);
-  return importScriptsFromPackageSources(packageSources, signal);
+    return importScriptsFromPackageSources(sources, signal);
+  }
+  const createdPackages = new Map<string, Dependency>();
+  const compiledPackages: CompiledPackage[] = [];
+  for (const { name, type, rust, dependencies } of resolvePackageSources(
+    sources,
+  )) {
+    const compiledPackage = compiled.packages[name];
+    if (!compiledPackage) {
+      throw new Error(`Error: ${name} is missing from compiled.json.`);
+    }
+    const { masp, commitment, exports } = compiledPackage;
+    const packageDependencies = dependencies.map((dependency) => {
+      const createdPackage = createdPackages.get(dependency);
+      if (!createdPackage) {
+        throw new Error(`Error: ${name} dependency ${dependency} not found.`);
+      }
+      return {
+        ...createdPackage,
+        // The commitment the package was compiled against.
+        commitment:
+          compiledPackage.dependencies.find(
+            (compiledDependency) => compiledDependency.name === dependency,
+          )?.commitment ?? createdPackage.commitment,
+      };
+    });
+    const id = await createPackage({
+      name,
+      type,
+      rust,
+      dependencies: packageDependencies,
+      compiled: { masp, commitment, exports },
+    });
+    createdPackages.set(name, { id, name, type, commitment });
+    compiledPackages.push({
+      id,
+      name,
+      type,
+      status: "compiled",
+      rust,
+      error: "",
+      masm: "",
+      commitment,
+      masp,
+      exports,
+      dependencies: packageDependencies,
+    });
+  }
+  return compiledPackages;
 };

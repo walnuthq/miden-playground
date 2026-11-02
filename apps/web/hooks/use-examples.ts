@@ -5,7 +5,7 @@ import useAccounts from "@/hooks/use-accounts";
 import useAppState from "@/hooks/use-app-state";
 import useComponents from "@/hooks/use-components";
 import useNetwork from "@/hooks/use-network";
-import { importScriptsFromGithubRepo } from "@/lib/api";
+import { importExample } from "@/lib/api";
 import examples from "@/lib/examples";
 import { defaultComponentIds } from "@/lib/types/default-components";
 import authNoAuth from "@/lib/types/default-components/auth-no-auth";
@@ -25,14 +25,12 @@ const useExamples = () => {
     if (!example) {
       return { error: "Example not found." };
     }
-    const { scripts, error } = await importScriptsFromGithubRepo({
-      githubRepoUrl: example.githubRepoUrl,
-      githubRepoRef: example.githubRepoRef,
-      projectDir: example.projectDir,
-    }).catch((error: unknown) => ({
-      scripts: undefined,
-      error: error instanceof Error ? error.message : String(error),
-    }));
+    const { scripts, error } = await importExample(example.id).catch(
+      (error: unknown) => ({
+        scripts: undefined,
+        error: error instanceof Error ? error.message : String(error),
+      }),
+    );
     if (!scripts) {
       return { error: error ?? "Scripts couldn't be imported." };
     }

@@ -1,0 +1,13 @@
+[package]
+name = "withdraw-request-note"
+version = "0.1.0"
+
+[lib]
+path = "src/lib.rs"
+kind = "note"
+namespace = "miden:withdraw-request-note/miden-withdraw-request-note@0.1.0"
+
+[dependencies]
+miden-core = "*"
+miden-protocol = "*"
+bank-account = { path = "../bank-account" }

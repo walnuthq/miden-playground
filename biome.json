@@ -15,7 +15,8 @@
       "!.agents",
       "!.claude/skills",
       "!packages/ui/src/components",
-      "!**/public"
+      "!**/public",
+      "!apps/api/examples/*/compiled.json"
     ]
   },
   "formatter": {

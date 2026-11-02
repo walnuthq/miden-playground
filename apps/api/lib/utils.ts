@@ -9,6 +9,7 @@ import { generateCargoToml, generateMidenProjectToml } from "@/lib/toml";
 import type {
   CompiledPackage,
   Dependency,
+  Export,
   Manifest,
   PackageType,
 } from "@/lib/types";
@@ -19,11 +20,15 @@ export const createPackage = ({
   type,
   rust,
   dependencies = [],
+  compiled,
 }: {
   name: string;
   type: PackageType;
   rust: string;
   dependencies?: Dependency[];
+  // Compile output known ahead of time (examples/*/compiled.json): the package
+  // is inserted compiled instead of as a draft.
+  compiled?: { masp: string; commitment: string; exports: Export[] };
 }) => {
   const files = {
     [`${name}/.cargo/config.toml`]: projectTemplateFiles[".cargo/config.toml"],
@@ -45,6 +50,7 @@ export const createPackage = ({
     type,
     dependencies: dependencies.map(({ id }) => id),
     files,
+    ...(compiled && { status: "compiled" as const, rust, ...compiled }),
   });
 };
 

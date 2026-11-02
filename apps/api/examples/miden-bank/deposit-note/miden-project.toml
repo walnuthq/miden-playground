@@ -1,0 +1,13 @@
+[package]
+name = "deposit-note"
+version = "0.1.0"
+
+[lib]
+path = "src/lib.rs"
+kind = "note"
+namespace = "miden:deposit-note/miden-deposit-note@0.1.0"
+
+[dependencies]
+miden-core = "*"
+miden-protocol = "*"
+bank-account = { path = "../bank-account" }

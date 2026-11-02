@@ -14,7 +14,15 @@ Skills are installed per project with the `skills` CLI (`pnpm dlx skills ...`) a
 
 # Upgrading the Miden packages
 
-When bumping `@miden-sdk/*`, also update `CLIENT_VERSION` in `apps/web/lib/utils/store.ts` to the new version. It stamps the stores the tutorials seed from `defaultStore`, and the SDK refuses to import a store stamped by a client newer than the running one. Bump the `@miden-sdk/*` pins in `pnpm-workspace.yaml` `overrides` too. If the new version is younger than pnpm's minimum release age, exempt exactly that version of each package in `minimumReleaseAgeExclude`, and remove the entries once it ages out.
+When bumping `@miden-sdk/*`, also update `CLIENT_VERSION` in `apps/web/lib/utils/store.ts` to the new version. It stamps the stores the tutorials seed from `defaultStore`, and the SDK refuses to import a store stamped by a client newer than the running one. Bump the `@miden-sdk/*` pins in `pnpm-workspace.yaml` `overrides` too, and regenerate the examples' compiled snapshots (see "Examples"). If the new version is younger than pnpm's minimum release age, exempt exactly that version of each package in `minimumReleaseAgeExclude`, and remove the entries once it ages out.
+
+# Examples
+
+The examples launched from the home page (`apps/web/lib/examples`) get their packages from `apps/api/examples/<dir>`. That is a copy of each upstream project's `miden-project.toml` and `src/lib.rs`, the only files the API reads, plus `compiled.json`, their initial compile output. `POST /scripts/examples/:exampleId` inserts those packages already compiled, without calling api-compile. Later edits recompile through `PATCH /scripts/:id` as usual.
+- Edit the sources in place. They may drift from upstream on purpose (e.g. the counter's map key).
+- Regenerate the snapshots with `pnpm examples:compile` in `apps/api`, with the local API (`pnpm dev`) and api-compile running. Do it after editing an example, and after bumping the SDK, the api-compile image or `templates/project-template`.
+- `compiled.json` stores a hash of the sources. When they don't match, the API logs a warning and compiles live, so a forgotten regeneration after an edit is only slow. A compiler bump leaves the hash unchanged, though: regenerate by hand, or launching an example serves stale packages.
+- Register a new example in `apps/api/examples/index.ts`, keyed by the web app's example id.
 
 # Vite build (`apps/web`)
 

@@ -22,9 +22,6 @@ const midenBank: Example = {
       script before making deposits.
     </p>
   ),
-  githubRepoUrl: "https://github.com/0xMiden/tutorials",
-  githubRepoRef: "9baa774000ea75804e4b0b9f59ce67a658b5f7d2",
-  projectDir: "examples/miden-bank/contracts",
   state,
 };
 

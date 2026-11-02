@@ -13,7 +13,6 @@ import useTutorials from "@/hooks/use-tutorials";
 import {
   compileScript as apiCompileScript,
   deleteScript as apiDeleteScript,
-  importScriptsFromGithubRepo as apiImportScriptsFromGithubRepo,
   importScriptsFromPackageSources as apiImportScriptsFromPackageSources,
   createScript,
 } from "@/lib/api";
@@ -231,29 +230,6 @@ const useScripts = () => {
     }
     return { scripts, error };
   };
-  const importScriptsFromGithubRepo = async ({
-    githubRepoUrl,
-    projectDir,
-  }: {
-    githubRepoUrl: string;
-    projectDir?: string;
-  }) => {
-    const { scripts, error } = await apiImportScriptsFromGithubRepo({
-      githubRepoUrl,
-      projectDir,
-    });
-    if (scripts) {
-      dispatch({
-        type: "IMPORT_SCRIPTS",
-        payload: {
-          scripts: scripts.map((compiledScript) =>
-            compiledPackageToScript(compiledScript),
-          ),
-        },
-      });
-    }
-    return { scripts, error };
-  };
   const setReadOnlyProcedureResult = ({
     digest,
     result,
@@ -295,7 +271,6 @@ const useScripts = () => {
     openImportProjectDialog,
     closeImportProjectDialog,
     importScriptsFromPackageSources,
-    importScriptsFromGithubRepo,
     setReadOnlyProcedureResult,
   };
 };
