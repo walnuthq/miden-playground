@@ -1,10 +1,10 @@
-import { kebabCase } from "lodash";
 import useGlobalContext from "@/components/global-context/hook";
 import type {
   Component,
   ComponentType,
   StorageSlot,
 } from "@/lib/types/component";
+import { kebabCase } from "@/lib/utils";
 import { defaultComponent } from "@/lib/utils/component";
 
 const useComponents = () => {

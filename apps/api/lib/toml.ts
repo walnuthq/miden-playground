@@ -1,5 +1,5 @@
-import { kebabCase } from "lodash";
 import { parse } from "smol-toml";
+import { kebabCase } from "@/lib/case";
 import type { Dependency, MidenProjectToml, PackageType } from "@/lib/types";
 
 const extractTraitName = (rust: string) => {
@@ -10,7 +10,7 @@ const extractTraitName = (rust: string) => {
 };
 
 // The compiler derives the namespace it expects from the package name as-is,
-// while lodash's kebabCase also splits letters from digits ("p2id-note" becomes
+// while kebabCase (lodash's, see lib/case.ts) also splits letters from digits ("p2id-note" becomes
 // "p-2-id-note"): only kebab-case trait names, not names that already are.
 const toKebabCase = (value: string) =>
   /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value) ? value : kebabCase(value);

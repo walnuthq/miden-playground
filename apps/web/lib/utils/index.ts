@@ -1,5 +1,3 @@
-import { validate, version } from "uuid";
-
 export const randomLowercaseId = (length = 6) =>
   Array.from(crypto.getRandomValues(new Uint8Array(length)), (byte) =>
     String.fromCharCode(97 + (byte % 26)),
@@ -43,8 +41,12 @@ export const toBase64 = (bytes: Uint8Array) => {
   return btoa(output.join(""));
 };
 
-export const isValidUUIDv4 = (uuid: string) =>
-  validate(uuid) && version(uuid) === 4;
+// A version 4 UUID with the RFC 9562 variant, as `uuid`'s validate() and
+// version() === 4 accepted.
+const reUUIDv4 =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+export const isValidUUIDv4 = (uuid: string) => reUUIDv4.test(uuid);
 
 export const kebabCase = (str: string) =>
   str

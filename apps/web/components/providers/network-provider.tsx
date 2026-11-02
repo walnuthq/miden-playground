@@ -1,5 +1,4 @@
 import { createMidenStorage } from "@miden-sdk/react";
-import { noop } from "lodash";
 import { createContext, type ReactNode, useState } from "react";
 import type { NetworkId } from "@/lib/types/network";
 
@@ -11,7 +10,7 @@ export const NetworkContext = createContext<{
   switchNetwork: (newNetworkId: NetworkId) => void;
 }>({
   networkId: initialNetworkId,
-  switchNetwork: noop,
+  switchNetwork: () => {},
 });
 
 export const NetworkProvider = ({ children }: { children: ReactNode }) => {

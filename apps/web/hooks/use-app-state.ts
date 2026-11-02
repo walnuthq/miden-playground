@@ -11,7 +11,6 @@ import {
   useMiden,
   useSyncState,
 } from "@miden-sdk/react";
-import { uniq } from "lodash";
 import useGlobalContext from "@/components/global-context/hook";
 import { useParaWallet } from "@/components/providers/para-wallet-context";
 import useNetwork from "@/hooks/use-network";
@@ -95,10 +94,9 @@ const syncAccounts = ({
           inputNote.tag === addressNoteTag.asU32().toString(),
       )
       .map(({ id }) => id);
-    const consumableNoteIds = uniq([
-      ...consumableP2IDNoteIds,
-      ...consumableInputNoteIds,
-    ]);
+    const consumableNoteIds = [
+      ...new Set([...consumableP2IDNoteIds, ...consumableInputNoteIds]),
+    ];
     return [
       wasmAccountToAccount({
         wasmAccount,

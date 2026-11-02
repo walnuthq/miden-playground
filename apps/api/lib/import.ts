@@ -1,4 +1,3 @@
-import { groupBy, mapValues, omit } from "lodash";
 import { readTarGz, type TarFile } from "@/lib/tar";
 import { parseMidenProjectToml } from "@/lib/toml";
 import type { CompiledPackage, PackageSource } from "@/lib/types";
@@ -22,10 +21,12 @@ export const importScriptsFromPackageSources = async (
       });
       return {
         package: { id: packageId, name, type, rust },
-        dependencies: omit(dependencies, [
-          "miden-core",
-          "miden-protocol",
-        ]) as Record<string, { path: string }>,
+        dependencies: Object.fromEntries(
+          Object.entries(dependencies).filter(
+            ([dependency]) =>
+              dependency !== "miden-core" && dependency !== "miden-protocol",
+          ),
+        ) as Record<string, { path: string }>,
       };
     }),
   );
@@ -94,23 +95,27 @@ export const importScriptsFromPackageSources = async (
 const fileName = (path: string) => path.split("/").at(-1) ?? "";
 
 const filesToPackageSources = (files: TarFile[]) => {
-  const packagesSourcesFilesByPackage = groupBy(files, ({ path }) =>
+  const packagesSourcesFilesByPackage = Object.groupBy(files, ({ path }) =>
     path.replace("/miden-project.toml", "").replace("/src/lib.rs", ""),
   );
-  return mapValues(
-    packagesSourcesFilesByPackage,
-    (packagesSourcesFiles): PackageSource => {
-      const content = (name: string) =>
-        packagesSourcesFiles.findLast(({ path }) => fileName(path) === name)
-          ?.content ?? "";
-      return {
-        midenProjectToml: content("miden-project.toml"),
-        rust: content("lib.rs").replaceAll(
-          "let key = Word::new([felt!(0), felt!(0), felt!(0), felt!(1)]);",
-          "let key = Word::new([felt!(1), felt!(0), felt!(0), felt!(0)]);",
-        ),
-      };
-    },
+  return Object.fromEntries(
+    Object.entries(packagesSourcesFilesByPackage).map(
+      ([packageDir, packagesSourcesFiles = []]): [string, PackageSource] => {
+        const content = (name: string) =>
+          packagesSourcesFiles.findLast(({ path }) => fileName(path) === name)
+            ?.content ?? "";
+        return [
+          packageDir,
+          {
+            midenProjectToml: content("miden-project.toml"),
+            rust: content("lib.rs").replaceAll(
+              "let key = Word::new([felt!(0), felt!(0), felt!(0), felt!(1)]);",
+              "let key = Word::new([felt!(1), felt!(0), felt!(0), felt!(0)]);",
+            ),
+          },
+        ];
+      },
+    ),
   );
 };
 
