@@ -1,7 +1,8 @@
 # Scripts editor and console improvements
 
 Status: proposal, written 2026-11-02. Done: item 1 (PR #731), item 2 (PR
-#732). Next: items 3–6, as one "editor and console" pass (see "Scoring").
+#732), item 3 (PR #735). Next: items 4–6, as one "editor and console" pass
+(see "Scoring").
 
 The code editor UX of the scripts feature (`/scripts/:id`) is behind other
 blockchain playgrounds. This document compares it with Solana Playground
@@ -169,7 +170,7 @@ What the user sees today, from the production run:
 | --- | --------------------------------------------------------- | ------ | ------ | -------- |
 | 1   | Fix stale editor on script switch                         | 5      | S      | Done     |
 | 2   | Compile errors in the editor (markers, click to jump)     | 5      | M      | Done     |
-| 3   | A real console (history, levels, timing, warnings, clear) | 5      | S–M    | P1       |
+| 3   | A real console (history, levels, timing, warnings, clear) | 5      | S–M    | Done     |
 | 4   | Cleaner compiler output, with a "show full output" toggle | 4      | S      | P1       |
 | 5   | IDE-style resizable layout, console panel states          | 4      | S–M    | P1       |
 | 6   | Keyboard shortcuts (compile, console)                     | 3      | S      | P1       |
@@ -276,6 +277,30 @@ Proposal:
 - Clear button, auto-scroll to the bottom, copy output.
 - Request failures (network, 5xx) go in the console as errors, and the toast
   can stay for when the console is hidden.
+
+Done in PR #735. What shipped:
+
+- `lib/console-log.ts`: the log, per script id, in a module-level store read
+  with `useSyncExternalStore`. In memory only (not in `State`, not saved with
+  projects): it survives script switches and tabs, not a reload. A script
+  whose last compile failed starts with a `Last compile failed` entry.
+- Entries `[HH:MM:SS] summary` colored by level (info muted, success
+  `text-success`, warning a new `--warning` token, error `text-destructive`),
+  then the compiler output, its `error…:` / `warning…:` header lines colored
+  (`outputLineSeverity`). Summaries: `Compiling <name>…`, `Compiled <name> in
+  3.9 s (1 warning).`, `Compilation failed in 2.1 s (1 error).`, with the
+  counts from the located diagnostics (`countDiagnostics`), and `Compile
+  request failed after …: <message>` (the toast stays).
+- Only the latest compile's entry links its locations: the editor follows
+  edits from that compile only. Older entries show them as dimmed text.
+- Copy (the whole log as text) and Clear buttons; auto-scroll to new entries
+  unless scrolled up; the log is `h-48` until item 5.
+- The API returns a successful build's stderr as `warnings` (not stored, like
+  `error`). The console shows it only when it has located warnings (the
+  `wide-arithmetic` note alone is noise), and the editor marks them.
+- E2E: `e2e/script-diagnostics.spec.ts` (history, warnings, clear); the
+  compile success text the tutorials' specs wait for is `COMPILED` in
+  `e2e/editor.ts`.
 
 ### 4. Cleaner compiler output (P1, impact 4, effort S)
 

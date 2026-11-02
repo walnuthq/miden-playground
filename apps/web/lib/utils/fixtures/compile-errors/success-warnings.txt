@@ -1,0 +1,15 @@
+   Compiling counter-account v0.1.0 (/tmp/miden-project-eCGR2d/counter-account)
+warning: unstable feature specified for `-Ctarget-feature`: `wide-arithmetic`
+  |
+  = note: this feature is not stably supported; its behavior can change in the future
+
+warning: unused variable: `unused`
+  --> src/lib.rs:34:13
+   |
+34 |         let unused = 1;
+   |             ^^^^^^ help: if this is intentional, prefix it with an underscore: `_unused`
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: `counter-account` (lib) generated 2 warnings (run `cargo fix --lib -p counter-account` to apply 1 suggestion)
+    Finished `release` profile [optimized] target(s) in 1.19s

@@ -105,7 +105,10 @@ export type CompiledPackage = Pick<
   | "masp"
   | "exports"
 > & {
+  // rustc's rendered output: the failed build's in `error`, a successful one's
+  // (warnings) in `warnings`. Neither is stored.
   error: string;
+  warnings: string;
   dependencies: Dependency[];
 };
 

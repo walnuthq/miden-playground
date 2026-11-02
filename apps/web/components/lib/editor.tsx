@@ -115,7 +115,8 @@ const Editor = ({
         ? // The API doesn't store errors: a script fetched from there has none.
           (script.error ?? "")
         : script.status === "compiled"
-          ? ""
+          ? // A successful compile's warnings.
+            (script.warnings ?? "")
           : undefined;
   useEffect(() => {
     const model = mounted?.editor.getModel();

@@ -1,5 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
-import { replaceInEditor, waitForEditorText } from "./editor";
+import { COMPILED, replaceInEditor, waitForEditorText } from "./editor";
 import { launchExample } from "./example";
 import { logBrowserErrors, TRANSACTION_TIMEOUT } from "./tutorial";
 
@@ -40,6 +40,7 @@ const cursorLine = (page: Page) =>
 
 // Monaco's MarkerSeverity.
 const ERROR = 8;
+const WARNING = 4;
 
 test("script: compile errors in the editor", async ({ page }) => {
   logBrowserErrors(page);
@@ -122,12 +123,55 @@ test("script: compile errors in the editor", async ({ page }) => {
   await test.step("a successful compile clears the markers", async () => {
     await replaceInEditor(page, "missing_key", "key");
     await page.getByRole("button", { name: "Re-compile" }).click();
-    await expect(page.getByText("Script compiled successfully.")).toBeVisible({
+    await expect(page.getByText(COMPILED).last()).toBeVisible({
       timeout: TRANSACTION_TIMEOUT,
     });
     expect(await markers(page)).toEqual([]);
     // The console keeps its output across tabs.
     await page.getByRole("tab", { name: "Metadata" }).click();
-    await expect(page.getByText("Script compiled successfully.")).toBeVisible();
+    await expect(page.getByText(COMPILED).last()).toBeVisible();
+  });
+
+  await test.step("the console keeps a history", async () => {
+    // The failed compile is still there, its locations no longer links: they
+    // predate the latest compile.
+    await expect(
+      page.getByText(/^Compilation failed in \d+\.\d s \(1 error/),
+    ).toBeVisible();
+    await expect(
+      page.getByText(`src/lib.rs:${errorLine}:`, { exact: false }).first(),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /^src\/lib\.rs:\d+:\d+$/ }),
+    ).toHaveCount(0);
+  });
+
+  await test.step("a successful compile's warnings", async () => {
+    await page.getByRole("tab", { name: "Rust" }).click();
+    await replaceInEditor(
+      page,
+      "self.count_map.get(key)\n    }",
+      "let unused = 1;\n        self.count_map.get(key)\n    }",
+    );
+    await page.getByRole("button", { name: "Compile" }).click();
+    await expect(
+      page.getByText(/^Compiled \S+ in \d+\.\d s \(1 warning\)\.$/),
+    ).toBeVisible({ timeout: TRANSACTION_TIMEOUT });
+    await expect(
+      page.getByRole("button", { name: /^src\/lib\.rs:\d+:\d+$/ }),
+    ).toHaveCount(1);
+    expect(await markers(page)).toEqual([
+      expect.objectContaining({
+        severity: WARNING,
+        message: expect.stringContaining("unused variable: `unused`"),
+      }),
+    ]);
+  });
+
+  await test.step("clear the console", async () => {
+    await page.getByRole("button", { name: "Clear console" }).click();
+    await expect(
+      page.getByText("Compile the script to see its output here."),
+    ).toBeVisible();
   });
 });

@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, test } from "node:test";
-import { parseDiagnostics, splitLocations } from "./diagnostics.ts";
+import {
+  countDiagnostics,
+  outputLineSeverity,
+  parseDiagnostics,
+  splitLocations,
+} from "./diagnostics.ts";
 
 // Real outputs of the local api-compile for the counter contract example's
 // account component, each broken a different way.
@@ -12,6 +17,21 @@ const fixture = (name: string) =>
   );
 
 describe("parseDiagnostics", () => {
+  test("successful compile's warnings (the API's `warnings`)", () => {
+    assert.deepEqual(parseDiagnostics(fixture("success-warnings")), [
+      {
+        severity: "warning",
+        message:
+          // The caret line's inline `help:` isn't kept, only `= note:` lines.
+          "unused variable: `unused`\nnote: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default",
+        file: "src/lib.rs",
+        line: 34,
+        column: 13,
+        endColumn: 19,
+      },
+    ]);
+  });
+
   test("syntax error, with secondary labels and a help suggestion", () => {
     assert.deepEqual(parseDiagnostics(fixture("syntax")), [
       {
@@ -171,5 +191,38 @@ describe("splitLocations", () => {
     assert.deepEqual(splitLocations("Script compiled successfully."), [
       { text: "Script compiled successfully." },
     ]);
+  });
+});
+
+describe("countDiagnostics", () => {
+  test("counts located diagnostics only", () => {
+    assert.deepEqual(countDiagnostics(fixture("warning-and-error")), {
+      errors: 1,
+      warnings: 1,
+    });
+    assert.deepEqual(countDiagnostics(fixture("success-warnings")), {
+      errors: 0,
+      warnings: 1,
+    });
+    assert.deepEqual(countDiagnostics(""), { errors: 0, warnings: 0 });
+  });
+});
+
+describe("outputLineSeverity", () => {
+  test("header lines only", () => {
+    assert.equal(
+      outputLineSeverity("error[E0425]: cannot find value"),
+      "error",
+    );
+    assert.equal(
+      outputLineSeverity("warning: unused variable: `x`"),
+      "warning",
+    );
+    assert.equal(
+      outputLineSeverity("\u001b[1m\u001b[31merror\u001b[0m: x"),
+      "error",
+    );
+    assert.equal(outputLineSeverity("  --> src/lib.rs:34:13"), undefined);
+    assert.equal(outputLineSeverity("   = note: on by default"), undefined);
   });
 });

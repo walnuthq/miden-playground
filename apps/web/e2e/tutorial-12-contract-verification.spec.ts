@@ -3,7 +3,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { expect, type Page, test } from "@playwright/test";
-import { replaceInEditor } from "./editor";
+import { COMPILED, replaceInEditor } from "./editor";
 import {
   logBrowserErrors,
   nextStep,
@@ -77,9 +77,9 @@ test("tutorial 12: contract verification", async ({ page }) => {
         ].join("\n"),
       );
       await page.getByRole("button", { name: "Compile" }).click();
-      await expect(page.getByText("Script compiled successfully.")).toBeVisible(
-        { timeout: TRANSACTION_TIMEOUT },
-      );
+      await expect(page.getByText(COMPILED).last()).toBeVisible({
+        timeout: TRANSACTION_TIMEOUT,
+      });
       await page.getByRole("tab", { name: "Metadata" }).click();
       // Listed under "Package exports".
       await expect(

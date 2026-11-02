@@ -8,7 +8,15 @@ import { Check, Copy } from "lucide-react";
 import { useState } from "react";
 import { sleep } from "@/lib/utils";
 
-const CopyButton = ({ content, copy }: { content: string; copy: string }) => {
+const CopyButton = ({
+  content,
+  copy,
+  disabled,
+}: {
+  content: string;
+  copy: string;
+  disabled?: boolean;
+}) => {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const copyText = async () => {
@@ -34,6 +42,7 @@ const CopyButton = ({ content, copy }: { content: string; copy: string }) => {
           <Button
             variant="secondary"
             className="size-8"
+            disabled={disabled}
             onClick={copied ? undefined : copyText}
           />
         }

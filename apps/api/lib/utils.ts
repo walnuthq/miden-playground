@@ -130,6 +130,7 @@ export const compilePackage = async ({
       status: "error",
       rust,
       error: stderr,
+      warnings: "",
       masm: "",
       commitment: "",
       masp: "",
@@ -166,6 +167,8 @@ export const compilePackage = async ({
     status: "compiled",
     rust,
     error: "",
+    // A successful build still reports its warnings on stderr.
+    warnings: stderr,
     masm: "",
     commitment,
     masp,

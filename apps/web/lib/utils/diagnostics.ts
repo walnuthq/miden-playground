@@ -100,6 +100,26 @@ export const parseDiagnostics = (output: string): Diagnostic[] => {
   return diagnostics;
 };
 
+// The severity of a diagnostic's header line (`error[E0425]: …`,
+// `warning: …`), to color it in the console. Undefined for any other line.
+export const outputLineSeverity = (
+  line: string,
+): DiagnosticSeverity | undefined =>
+  HEADER.exec(line.replace(ANSI_ESCAPE, ""))?.[1] as
+    | DiagnosticSeverity
+    | undefined;
+
+// How many errors and warnings an output reports, from its located
+// diagnostics (summaries such as `could not compile …` aren't counted).
+export const countDiagnostics = (output: string) => {
+  const diagnostics = parseDiagnostics(output);
+  return {
+    errors: diagnostics.filter(({ severity }) => severity === "error").length,
+    warnings: diagnostics.filter(({ severity }) => severity === "warning")
+      .length,
+  };
+};
+
 export type OutputPart =
   | { text: string }
   | { text: string; line: number; column: number };

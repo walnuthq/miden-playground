@@ -1,5 +1,6 @@
 import type { Page } from "@playwright/test";
 import { expect, test } from "./bread";
+import { COMPILED } from "./editor";
 import {
   logBrowserErrors,
   nextStep,
@@ -33,9 +34,9 @@ const compile = async (page: Page) => {
   // the Compile button, shows on every tab).
   await page.getByRole("tab", { name: "Rust" }).click();
   await page.getByRole("button", { name: "Compile" }).click();
-  await expect(
-    page.getByText("Script compiled successfully.").last(),
-  ).toBeVisible({ timeout: TRANSACTION_TIMEOUT });
+  await expect(page.getByText(COMPILED).last()).toBeVisible({
+    timeout: TRANSACTION_TIMEOUT,
+  });
 };
 
 test("tutorial 11: your first smart contract and custom note", async ({

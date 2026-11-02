@@ -40,7 +40,7 @@ While the modal is stuck, the page polls `POST /touch?regenerate=false&flowId=<i
 
 **What we saw in `PreloadIFrame`**
 - The preload iframe (`/v2/warm?...`) loads several times around startup. Some of those loads are aborted (status -1 in the trace).
-- In one run, a `/v2/warm` reload started about 750 ms *after* `auth/start`, during the login. That run went through. In the failing runs the login started as close to page load, while those startup reloads were still happening.
+- In one run, a `/v2/warm` reload started about 750 ms _after_ `auth/start`, during the login. That run went through. In the failing runs the login started as close to page load, while those startup reloads were still happening.
 - More `/v2/warm` loads followed later in the session.
 - During that time the parent app's `ParaProvider` rendered only twice, both at startup. So the reloads aren't caused by the parent re-rendering.
 

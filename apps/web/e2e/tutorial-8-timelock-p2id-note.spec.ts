@@ -1,5 +1,5 @@
 import { expect, test } from "./bread";
-import { replaceInEditor } from "./editor";
+import { COMPILED, replaceInEditor } from "./editor";
 import {
   logBrowserErrors,
   nextStep,
@@ -53,7 +53,7 @@ test("tutorial 8: timelock P2ID note", async ({ page, bread }) => {
       ].join("\n"),
     );
     await page.getByRole("button", { name: "Compile" }).click();
-    await expect(page.getByText("Script compiled successfully.")).toBeVisible({
+    await expect(page.getByText(COMPILED).last()).toBeVisible({
       timeout: TRANSACTION_TIMEOUT,
     });
     // Moving on creates the Test Wallet, the note's target account.
