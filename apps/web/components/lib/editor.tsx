@@ -89,7 +89,7 @@ const Editor = ({
   script,
   language = "rust",
   readOnly = false,
-  height = "61vh",
+  height = "100%",
   onMount,
 }: {
   script: Script;

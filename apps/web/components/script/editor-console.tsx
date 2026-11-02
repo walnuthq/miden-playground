@@ -1,11 +1,4 @@
 import { Button } from "@workspace/ui/components/button";
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@workspace/ui/components/card";
 import { Spinner } from "@workspace/ui/components/spinner";
 import { Toggle } from "@workspace/ui/components/toggle";
 import {
@@ -14,7 +7,16 @@ import {
   TooltipTrigger,
 } from "@workspace/ui/components/tooltip";
 import { cn } from "@workspace/ui/lib/utils";
-import { Play, ScrollText, Trash2 } from "lucide-react";
+import {
+  Maximize2,
+  Minimize2,
+  PanelBottomClose,
+  PanelBottomOpen,
+  Play,
+  ScrollText,
+  Trash2,
+} from "lucide-react";
+import type { ReactNode } from "react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import CopyButton from "@/components/lib/copy-button";
@@ -38,6 +40,13 @@ import {
 } from "@/lib/utils/diagnostics";
 
 export type EditorLocation = { line: number; column: number };
+
+// Collapsed: only the header bar shows. Maximized: the editor is hidden.
+export type ConsoleState = "collapsed" | "normal" | "maximized";
+
+// The console panel's height when collapsed, in px: its header bar (`h-12`)
+// and the panel's top and bottom borders.
+export const CONSOLE_HEADER_HEIGHT = 50;
 
 const levelClassNames: Record<ConsoleLevel, string> = {
   info: "text-muted-foreground",
@@ -146,11 +155,47 @@ const Entry = ({
   );
 };
 
+const IconButton = ({
+  label,
+  disabled,
+  onClick,
+  children,
+}: {
+  label: string;
+  disabled?: boolean;
+  onClick: () => void;
+  children: ReactNode;
+}) => (
+  <Tooltip>
+    <TooltipTrigger
+      delay={100}
+      render={
+        <Button
+          variant="secondary"
+          className="size-8"
+          aria-label={label}
+          disabled={disabled}
+          onClick={onClick}
+        />
+      }
+    >
+      {children}
+    </TooltipTrigger>
+    <TooltipContent>
+      <p>{label}</p>
+    </TooltipContent>
+  </Tooltip>
+);
+
 const EditorConsole = ({
   script,
+  state,
+  onStateChange,
   onRevealLocation,
 }: {
   script: Script;
+  state: ConsoleState;
+  onStateChange: (state: ConsoleState) => void;
   onRevealLocation: (location: EditorLocation) => void;
 }) => {
   const { compileScript } = useScripts();
@@ -186,6 +231,10 @@ const EditorConsole = ({
   // The latest compile result: only its locations link to the editor.
   const latestCompileId = entries.findLast(({ compile }) => compile)?.id;
   const compile = async () => {
+    // A collapsed console opens itself to show the output.
+    if (state === "collapsed") {
+      onStateChange("normal");
+    }
     setLoading(true);
     stickToBottom.current = true;
     append({ level: "info", text: `Compiling ${script.name}…` });
@@ -221,62 +270,89 @@ const EditorConsole = ({
     });
   };
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Editor Console</CardTitle>
-        <CardAction className="flex gap-2">
-          <Tooltip>
-            <TooltipTrigger
-              delay={100}
-              render={
-                <Toggle
-                  variant="outline"
-                  size="sm"
-                  aria-label="Show full output"
-                  pressed={fullOutput}
-                  onPressedChange={setFullOutput}
-                />
-              }
-            >
-              <ScrollText />
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{fullOutput ? "Show clean output" : "Show full output"}</p>
-            </TooltipContent>
-          </Tooltip>
-          <CopyButton
-            content="Copy output"
-            copy={consoleLogText(entries, fullOutput)}
-            disabled={entries.length === 0}
-          />
-          <Tooltip>
-            <TooltipTrigger
-              delay={100}
-              render={
-                <Button
-                  variant="secondary"
-                  className="size-8"
-                  aria-label="Clear console"
-                  disabled={entries.length === 0}
-                  onClick={clear}
-                />
-              }
-            >
-              <Trash2 />
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Clear console</p>
-            </TooltipContent>
-          </Tooltip>
-          <Button disabled={loading} onClick={compile}>
-            {loading ? <Spinner /> : <Play />}
-            {loading ? "Compiling…" : script.error ? "Re-compile" : "Compile"}
-          </Button>
-        </CardAction>
-      </CardHeader>
-      <CardContent
+    <section
+      aria-label="Editor Console"
+      className="flex h-full flex-col overflow-hidden rounded-xl border bg-card text-card-foreground"
+    >
+      <div className="flex h-12 shrink-0 items-center gap-2 px-3">
+        <button
+          type="button"
+          className="mr-auto cursor-pointer truncate text-sm font-medium"
+          onClick={() =>
+            onStateChange(state === "collapsed" ? "normal" : "collapsed")
+          }
+        >
+          Editor Console
+        </button>
+        {state === "collapsed" ? (
+          <IconButton
+            label="Restore console"
+            onClick={() => onStateChange("normal")}
+          >
+            <PanelBottomOpen />
+          </IconButton>
+        ) : (
+          <IconButton
+            label="Minimize console"
+            onClick={() => onStateChange("collapsed")}
+          >
+            <PanelBottomClose />
+          </IconButton>
+        )}
+        {state === "maximized" ? (
+          <IconButton
+            label="Restore editor"
+            onClick={() => onStateChange("normal")}
+          >
+            <Minimize2 />
+          </IconButton>
+        ) : (
+          <IconButton
+            label="Maximize console"
+            onClick={() => onStateChange("maximized")}
+          >
+            <Maximize2 />
+          </IconButton>
+        )}
+        <Tooltip>
+          <TooltipTrigger
+            delay={100}
+            render={
+              <Toggle
+                variant="outline"
+                size="sm"
+                aria-label="Show full output"
+                pressed={fullOutput}
+                onPressedChange={setFullOutput}
+              />
+            }
+          >
+            <ScrollText />
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{fullOutput ? "Show clean output" : "Show full output"}</p>
+          </TooltipContent>
+        </Tooltip>
+        <CopyButton
+          content="Copy output"
+          copy={consoleLogText(entries, fullOutput)}
+          disabled={entries.length === 0}
+        />
+        <IconButton
+          label="Clear console"
+          disabled={entries.length === 0}
+          onClick={clear}
+        >
+          <Trash2 />
+        </IconButton>
+        <Button disabled={loading} onClick={compile}>
+          {loading ? <Spinner /> : <Play />}
+          {loading ? "Compiling…" : script.error ? "Re-compile" : "Compile"}
+        </Button>
+      </div>
+      <div
         ref={scrollRef}
-        className="h-48 overflow-y-auto"
+        className="min-h-0 flex-1 overflow-y-auto border-t px-3 py-2"
         onScroll={({ currentTarget }) => {
           stickToBottom.current =
             currentTarget.scrollHeight -
@@ -305,8 +381,8 @@ const EditorConsole = ({
             ))
           )}
         </pre>
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   );
 };
 
