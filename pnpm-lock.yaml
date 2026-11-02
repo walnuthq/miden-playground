@@ -219,9 +219,6 @@ importers:
       '@workspace/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
-      dotenv:
-        specifier: 18.0.9
-        version: 18.0.9
       drizzle-kit:
         specifier: 1.0.0-rc.5
         version: 1.0.0-rc.5(drizzle-orm@1.0.0-rc.5(@cloudflare/workers-types@5.20261101.1)(@opentelemetry/api@1.9.1)(@types/pg@8.23.1)(pg@8.23.1)(zod@4.6.7))
@@ -271,15 +268,9 @@ importers:
       '@workspace/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
-      dotenv:
-        specifier: 18.0.9
-        version: 18.0.9
       playwright:
         specifier: 1.64.1
         version: 1.64.1
-      tsx:
-        specifier: 4.23.15
-        version: 4.23.15
       typescript:
         specifier: 7.0.2
         version: 7.0.2
@@ -3663,11 +3654,6 @@ packages:
   dotenv@17.4.2:
     resolution: {integrity: sha512-nI4U3TottKAcAD9LLud4Cb7b2QztQMUEfHbvhTH09bqXTxnSie8WnjPALV/WMCrJZ6UV/qHJ6L03OqO3LcdYZw==}
     engines: {node: '>=12'}
-
-  dotenv@18.0.9:
-    resolution: {integrity: sha512-3fVOW4cB02R066PUSwn8O4TJyz9NckQl7F81blIbaq9jKBm2tSmOKky7ZHIXzGvkVPXCSn6jkpziBPZdGFs8Tw==}
-    engines: {node: '>=12'}
-    hasBin: true
 
   drizzle-kit@1.0.0-rc.5:
     resolution: {integrity: sha512-8glQN7iFK3e1aOIoRit1NtslcsqE/rnlqNw/1jUC5Ph4RFVh/E5Jricxd6Nu2ugj2HlFZlZ6O4006AwqJ9e24g==}
@@ -9796,8 +9782,6 @@ snapshots:
 
   dotenv@17.4.2: {}
 
-  dotenv@18.0.9: {}
-
   drizzle-kit@1.0.0-rc.5(drizzle-orm@1.0.0-rc.5(@cloudflare/workers-types@5.20261101.1)(@opentelemetry/api@1.9.1)(@types/pg@8.23.1)(pg@8.23.1)(zod@4.6.7)):
     optionalDependencies:
       drizzle-orm: 1.0.0-rc.5(@cloudflare/workers-types@5.20261101.1)(@opentelemetry/api@1.9.1)(@types/pg@8.23.1)(pg@8.23.1)(zod@4.6.7)
@@ -11537,6 +11521,7 @@ snapshots:
       esbuild: 0.28.2
     optionalDependencies:
       fsevents: 2.3.3
+    optional: true
 
   tty-browserify@0.0.1: {}
 

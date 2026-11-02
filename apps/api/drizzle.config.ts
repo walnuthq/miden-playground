@@ -1,7 +1,10 @@
-import { config } from "dotenv";
+import { existsSync } from "node:fs";
 import { defineConfig } from "drizzle-kit";
 
-config({ path: ".env.local" });
+// Variables already set take precedence over the file.
+if (existsSync(".env.local")) {
+  process.loadEnvFile(".env.local");
+}
 
 export default defineConfig({
   out: "./drizzle",
