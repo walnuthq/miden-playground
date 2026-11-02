@@ -6,6 +6,7 @@
     "moduleResolution": "bundler",
     "types": ["vite/client"],
     "verbatimModuleSyntax": true,
+    "allowImportingTsExtensions": true,
     "noEmit": true,
     "declaration": false,
     "declarationMap": false,

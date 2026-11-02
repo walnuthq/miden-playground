@@ -7,13 +7,14 @@ import {
   CardTitle,
 } from "@workspace/ui/components/card";
 import { Spinner } from "@workspace/ui/components/spinner";
+import { Toggle } from "@workspace/ui/components/toggle";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@workspace/ui/components/tooltip";
 import { cn } from "@workspace/ui/lib/utils";
-import { Play, Trash2 } from "lucide-react";
+import { Play, ScrollText, Trash2 } from "lucide-react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import CopyButton from "@/components/lib/copy-button";
@@ -22,10 +23,12 @@ import {
   type ConsoleEntry,
   type ConsoleLevel,
   consoleLogText,
+  displayedOutput,
   formatConsoleTime,
   formatDuration,
   hasConsoleLog,
   useConsoleLog,
+  useFullOutput,
 } from "@/lib/console-log";
 import type { Script } from "@/lib/types/script";
 import {
@@ -64,6 +67,8 @@ const countsSuffix = ({
 // Within this distance of the bottom, new entries keep the log scrolled down.
 const STICK_TO_BOTTOM_PX = 16;
 
+const LINK_CLASS_NAME = "underline underline-offset-2 hover:text-foreground";
+
 const Output = ({
   output,
   onRevealLocation,
@@ -73,60 +78,73 @@ const Output = ({
   // which the editor follows edits from.
   onRevealLocation?: (location: EditorLocation) => void;
 }) =>
-  output
-    .trimEnd()
-    .split("\n")
-    .map((line, lineIndex) => {
-      const severity = outputLineSeverity(line);
-      return (
-        <div
-          // biome-ignore lint/suspicious/noArrayIndexKey: static lines.
-          key={lineIndex}
-          className={cn("min-h-[1lh]", severity && levelClassNames[severity])}
-        >
-          {splitLocations(line).map((part, index) =>
-            "line" in part && onRevealLocation ? (
-              <button
-                // biome-ignore lint/suspicious/noArrayIndexKey: static parts.
-                key={index}
-                type="button"
-                className="cursor-pointer underline underline-offset-2 hover:text-foreground"
-                onClick={() => onRevealLocation(part)}
-              >
-                {part.text}
-              </button>
-            ) : (
-              part.text
-            ),
-          )}
-        </div>
-      );
-    });
+  output.split("\n").map((line, lineIndex) => {
+    const severity = outputLineSeverity(line);
+    return (
+      <div
+        // biome-ignore lint/suspicious/noArrayIndexKey: static lines.
+        key={lineIndex}
+        className={cn("min-h-[1lh]", severity && levelClassNames[severity])}
+      >
+        {splitLocations(line).map((part, index) =>
+          "href" in part ? (
+            <a
+              // biome-ignore lint/suspicious/noArrayIndexKey: static parts.
+              key={index}
+              href={part.href}
+              target="_blank"
+              rel="noreferrer"
+              className={LINK_CLASS_NAME}
+            >
+              {part.text}
+            </a>
+          ) : "line" in part && onRevealLocation ? (
+            <button
+              // biome-ignore lint/suspicious/noArrayIndexKey: static parts.
+              key={index}
+              type="button"
+              className={cn("cursor-pointer", LINK_CLASS_NAME)}
+              onClick={() => onRevealLocation(part)}
+            >
+              {part.text}
+            </button>
+          ) : (
+            part.text
+          ),
+        )}
+      </div>
+    );
+  });
 
 const Entry = ({
-  entry: { timestamp, level, text, output },
+  entry: { timestamp, level, text, output: rawOutput },
   latest,
+  fullOutput,
   onRevealLocation,
 }: {
   entry: ConsoleEntry;
   latest: boolean;
+  fullOutput: boolean;
   onRevealLocation: (location: EditorLocation) => void;
-}) => (
-  <div className={cn({ "opacity-70": !latest && output })}>
-    <div>
-      <span className="text-muted-foreground">
-        [{formatConsoleTime(timestamp)}]
-      </span>{" "}
-      <span className={levelClassNames[level]}>{text}</span>
+}) => {
+  const output = displayedOutput(rawOutput, fullOutput);
+  return (
+    <div className={cn({ "opacity-70": !latest && output })}>
+      <div>
+        <span className="text-muted-foreground">
+          [{formatConsoleTime(timestamp)}]
+        </span>{" "}
+        <span className={levelClassNames[level]}>{text}</span>
+      </div>
+      {output && (
+        <Output
+          output={output}
+          onRevealLocation={latest ? onRevealLocation : undefined}
+        />
+      )}
     </div>
-    {output && (
-      <Output
-        output={output}
-        onRevealLocation={latest ? onRevealLocation : undefined}
-      />
-    )}
-  </div>
-);
+  );
+};
 
 const EditorConsole = ({
   script,
@@ -137,6 +155,7 @@ const EditorConsole = ({
 }) => {
   const { compileScript } = useScripts();
   const { entries, append, clear } = useConsoleLog(script.id);
+  const [fullOutput, setFullOutput] = useFullOutput();
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const stickToBottom = useRef(true);
@@ -196,8 +215,8 @@ const EditorConsole = ({
     append({
       level: counts.warnings > 0 ? "warning" : "success",
       text: `Compiled ${script.name} in ${duration}${countsSuffix(counts)}.`,
-      // Without located warnings it's only build noise.
-      output: counts.warnings > 0 ? warnings : undefined,
+      // Without located warnings, the clean output is empty.
+      output: warnings || undefined,
       compile: true,
     });
   };
@@ -206,9 +225,28 @@ const EditorConsole = ({
       <CardHeader>
         <CardTitle>Editor Console</CardTitle>
         <CardAction className="flex gap-2">
+          <Tooltip>
+            <TooltipTrigger
+              delay={100}
+              render={
+                <Toggle
+                  variant="outline"
+                  size="sm"
+                  aria-label="Show full output"
+                  pressed={fullOutput}
+                  onPressedChange={setFullOutput}
+                />
+              }
+            >
+              <ScrollText />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{fullOutput ? "Show clean output" : "Show full output"}</p>
+            </TooltipContent>
+          </Tooltip>
           <CopyButton
             content="Copy output"
-            copy={consoleLogText(entries)}
+            copy={consoleLogText(entries, fullOutput)}
             disabled={entries.length === 0}
           />
           <Tooltip>
@@ -261,6 +299,7 @@ const EditorConsole = ({
                 key={entry.id}
                 entry={entry}
                 latest={entry.id === latestCompileId}
+                fullOutput={fullOutput}
                 onRevealLocation={onRevealLocation}
               />
             ))

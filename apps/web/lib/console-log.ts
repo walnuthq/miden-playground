@@ -1,4 +1,5 @@
 import { useCallback, useSyncExternalStore } from "react";
+import { cleanCompilerOutput } from "@/lib/utils/compiler-output";
 
 // The editor console's log, per script. Kept in memory only: not in the app
 // state, so it is neither persisted nor saved with projects. It survives
@@ -78,15 +79,40 @@ export const formatConsoleTime = (timestamp: number) =>
     hour12: false,
   });
 
-// The log as plain text, to copy it.
-export const consoleLogText = (entries: ConsoleEntry[]) =>
+// The compiler output an entry shows: cleaned of build noise, unless the
+// console shows the full output.
+export const displayedOutput = (output: string | undefined, full: boolean) =>
+  (full ? output?.trimEnd() : output && cleanCompilerOutput(output)) ?? "";
+
+// The log as plain text, to copy it, as shown.
+export const consoleLogText = (entries: ConsoleEntry[], full: boolean) =>
   entries
     .map(({ timestamp, text, output }) =>
-      [`[${formatConsoleTime(timestamp)}] ${text}`, output?.trimEnd()]
+      [
+        `[${formatConsoleTime(timestamp)}] ${text}`,
+        displayedOutput(output, full),
+      ]
         .filter(Boolean)
         .join("\n"),
     )
     .join("\n\n");
+
+// "Show full output", for every script, kept across reloads.
+const FULL_OUTPUT_KEY = "editor-console-full-output";
+
+const getFullOutput = () => localStorage.getItem(FULL_OUTPUT_KEY) === "true";
+
+const setFullOutput = (full: boolean) => {
+  if (full) {
+    localStorage.setItem(FULL_OUTPUT_KEY, "true");
+  } else {
+    localStorage.removeItem(FULL_OUTPUT_KEY);
+  }
+  notify();
+};
+
+export const useFullOutput = () =>
+  [useSyncExternalStore(subscribe, getFullOutput), setFullOutput] as const;
 
 export const formatDuration = (durationMs: number) =>
   `${(durationMs / 1000).toFixed(1)} s`;
