@@ -1,6 +1,7 @@
 # Scripts editor and console improvements
 
-Status: proposal, written 2026-11-02. Done: item 1 (PR #731), item 2.
+Status: proposal, written 2026-11-02. Done: item 1 (PR #731), item 2 (PR
+#732). Next: items 3–6, as one "editor and console" pass (see "Scoring").
 
 The code editor UX of the scripts feature (`/scripts/:id`) is behind other
 blockchain playgrounds. This document compares it with Solana Playground
@@ -100,6 +101,9 @@ Test UI:
   menu (Cmd+K) gets most of the benefit for a form-driven app like ours.
 
 ## Our current implementation
+
+As of the proposal, before items 1 and 2: see their "Done" notes for what
+changed since.
 
 - `apps/web/pages/script.tsx`: the `/scripts/:id` route; renders
   `components/script/index.tsx`, which fetches the script from the API when it
@@ -208,12 +212,14 @@ Acceptance: switch between two scripts from the sidebar; the editor shows
 each script's code, the console is empty after the switch, and editing B
 never changes A.
 
+Done in PR #731, as described above.
+
 ### 2. Compile errors in the editor (P1, impact 5, effort M)
 
 Solana Playground: error markers in the overview ruler; TS diagnostics on
 hover with "View Problem".
 
-Done. What shipped:
+Done in PR #732. What shipped:
 
 - `lib/utils/diagnostics.ts` parses rustc's rendered diagnostics out of
   `script.error`: severity, code, message with its `help:` / `note:` lines,
