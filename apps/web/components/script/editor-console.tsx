@@ -272,7 +272,7 @@ const EditorConsole = ({
   return (
     <section
       aria-label="Editor Console"
-      className="flex h-full flex-col overflow-hidden rounded-xl border bg-card text-card-foreground"
+      className="flex h-full flex-col overflow-hidden border bg-card text-card-foreground"
     >
       <div className="flex h-12 shrink-0 items-center gap-2 px-3">
         <button

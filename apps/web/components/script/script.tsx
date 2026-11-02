@@ -145,7 +145,7 @@ const ScriptComponent = ({
     </>
   );
   return (
-    <div className={cn("flex flex-col gap-4 p-4 pt-0", PAGE_HEIGHT_CLASS_NAME)}>
+    <div className={cn("flex flex-col gap-4 px-4", PAGE_HEIGHT_CLASS_NAME)}>
       <Tabs
         className="min-h-0 flex-1"
         value={tab}
@@ -186,7 +186,7 @@ const ScriptComponent = ({
             >
               {tabs}
             </ResizablePanel>
-            <ResizableHandle withHandle className="my-1 bg-transparent" />
+            <ResizableHandle withHandle className="bg-transparent" />
             <ResizablePanel
               id="console"
               panelRef={consolePanelRef}
