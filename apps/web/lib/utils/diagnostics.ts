@@ -32,7 +32,7 @@ export type Diagnostic = {
 export const SCRIPT_FILE = "src/lib.rs";
 
 // biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI escapes.
-const ANSI_ESCAPE = /\u001b\[[0-9;]*m/g;
+export const ANSI_ESCAPE = /\u001b\[[0-9;]*m/g;
 const HEADER = /^(error|warning)(?:\[(E\d+)\])?: (.+)$/;
 const LOCATION = /^\s*--> (.+):(\d+):(\d+)$/;
 // An annotation line: the gutter without a line number, e.g. `   |    ^^^ …`.
@@ -122,25 +122,28 @@ export const countDiagnostics = (output: string) => {
 
 export type OutputPart =
   | { text: string }
-  | { text: string; line: number; column: number };
+  | { text: string; line: number; column: number }
+  | { text: string; href: string };
 
-// Not preceded by a path: `../dep/src/lib.rs` is another package's file.
-const SCRIPT_LOCATION = /(?<![\w./-])src\/lib\.rs:(\d+):(\d+)/g;
+// A location in the script's file, not preceded by a path (`../dep/src/lib.rs`
+// is another package's file), or a web link (e.g. an error code's docs).
+const LINK =
+  /(?<![\w./-])src\/lib\.rs:(\d+):(\d+)|https:\/\/[^\s`'"<>]+[^\s`'"<>.,;:)]/g;
 
-// Splits compiler output around the locations in the script's file, so they
-// can be rendered as links to the editor.
+// Splits compiler output around the locations in the script's file and web
+// links, so they can be rendered as links to the editor or the web.
 export const splitLocations = (text: string): OutputPart[] => {
   const parts: OutputPart[] = [];
   let index = 0;
-  for (const match of text.matchAll(SCRIPT_LOCATION)) {
+  for (const match of text.matchAll(LINK)) {
     if (match.index > index) {
       parts.push({ text: text.slice(index, match.index) });
     }
-    parts.push({
-      text: match[0],
-      line: Number(match[1]),
-      column: Number(match[2]),
-    });
+    parts.push(
+      match[1]
+        ? { text: match[0], line: Number(match[1]), column: Number(match[2]) }
+        : { text: match[0], href: match[0] },
+    );
     index = match.index + match[0].length;
   }
   if (index < text.length) {

@@ -78,6 +78,23 @@ test("script: compile errors in the editor", async ({ page }) => {
     ]);
   });
 
+  await test.step("clean output, full output on demand", async () => {
+    // The build noise is hidden, rustc's --explain points to the docs.
+    await expect(page.getByText(/^Command failed:/)).toHaveCount(0);
+    await expect(
+      page.getByRole("link", { name: /error_codes\/E0425\.html$/ }),
+    ).toHaveAttribute(
+      "href",
+      "https://doc.rust-lang.org/error_codes/E0425.html",
+    );
+    const fullOutput = page.getByRole("button", { name: "Show full output" });
+    await fullOutput.click();
+    await expect(page.getByText(/^Command failed:/)).toBeVisible();
+    await expect(page.getByText(/rustc --explain E0425/)).toBeVisible();
+    await fullOutput.click();
+    await expect(page.getByText(/^Command failed:/)).toHaveCount(0);
+  });
+
   await test.step("the location follows edits", async () => {
     await replaceInEditor(
       page,

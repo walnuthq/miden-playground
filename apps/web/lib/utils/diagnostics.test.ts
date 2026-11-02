@@ -187,6 +187,24 @@ describe("splitLocations", () => {
     );
   });
 
+  test("web links", () => {
+    assert.deepEqual(
+      splitLocations(
+        "see https://doc.rust-lang.org/error_codes/E0425.html. (`https://a.b/c`)",
+      ),
+      [
+        { text: "see " },
+        {
+          text: "https://doc.rust-lang.org/error_codes/E0425.html",
+          href: "https://doc.rust-lang.org/error_codes/E0425.html",
+        },
+        { text: ". (`" },
+        { text: "https://a.b/c", href: "https://a.b/c" },
+        { text: "`)" },
+      ],
+    );
+  });
+
   test("text without locations", () => {
     assert.deepEqual(splitLocations("Script compiled successfully."), [
       { text: "Script compiled successfully." },
