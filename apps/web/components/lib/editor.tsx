@@ -2,6 +2,7 @@ import MonacoEditor, { type Monaco, type OnMount } from "@monaco-editor/react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import useScripts from "@/hooks/use-scripts";
+import { MASM_LANGUAGE_ID, registerMasm } from "@/lib/masm/language";
 import type { Script } from "@/lib/types/script";
 import {
   type Diagnostic,
@@ -153,7 +154,8 @@ const Editor = ({
     <MonacoEditor
       height={height}
       theme={resolvedTheme === "dark" ? "vs-dark" : "light"}
-      defaultLanguage={language === "rust" ? "rust" : "javascript"}
+      defaultLanguage={language === "rust" ? "rust" : MASM_LANGUAGE_ID}
+      beforeMount={registerMasm}
       defaultValue={language === "rust" ? script.rust : script.masm}
       // line={36}
       onMount={(editor, monaco) => {

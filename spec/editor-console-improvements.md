@@ -2,7 +2,8 @@
 
 Status: proposal, written 2026-11-02. Done: item 1 (PR #731), item 2 (PR
 #732), item 3 (PR #735), item 4 (PR #736), item 5 (PR #737), item 6 (PR
-#742), which completes the "editor and console" pass (see "Scoring").
+#742), which completes the "editor and console" pass (see "Scoring"), item 7
+(PR #745).
 
 The code editor UX of the scripts feature (`/scripts/:id`) is behind other
 blockchain playgrounds. This document compares it with Solana Playground
@@ -174,7 +175,7 @@ What the user sees today, from the production run:
 | 4   | Cleaner compiler output, with a "show full output" toggle | 4      | S      | Done     |
 | 5   | IDE-style resizable layout, console panel states          | 4      | S–M    | Done     |
 | 6   | Keyboard shortcuts (compile, console)                     | 3      | S      | P1       |
-| 7   | MASM syntax highlighting                                  | 3      | S      | P2       |
+| 7   | MASM syntax highlighting                                  | 3      | S      | Done     |
 | 8   | Miden SDK autocomplete, snippets and hover docs           | 4      | M / L  | P2       |
 | 9   | Tutorials next to the live editor                         | 4      | M      | P2       |
 | 10  | Fill in boilerplate automatically on compile              | 3      | M      | P2       |
@@ -415,6 +416,40 @@ JavaScript. Register a `masm` language with a Monarch tokenizer (comments
 `#`, keywords `proc`, `export`, `begin`, `end`, `if.true`, `else`, `while.true`,
 `repeat`, `use`, instructions, numbers, hex, procedure names). Reuse an
 existing grammar if one is published (e.g. from the Miden VS Code extension).
+
+Upstream sources (2026-11-03):
+
+- The VS Code extension's `syntaxes/masm.tmLanguage.json` has comments,
+  strings, numbers and ~15 keywords, no instructions: VS Code colors MASM with
+  miden-lsp's semantic tokens.
+- tree-sitter-masm (`queries/highlights.scm`) lists the instructions, but was
+  last updated for the 0.22 syntax, isn't on npm, and would need a WASM build
+  and `web-tree-sitter`. miden-lsp's open PR #12 drops it for the assembler's
+  `miden-assembly-syntax-cst`.
+- miden-lsp is a native server over a project on disk: not usable in the
+  browser as is (see item 8).
+- The assembler in miden-vm is the source of truth: its CST parser's
+  instruction tables (`spelling`, `prefix`, `keyword`), keyword calls and
+  builtin types.
+
+Done in PR #745. What shipped:
+
+- `lib/masm/vocabulary.ts` extracts the keywords, builtin types and
+  instructions (153 at v0.35.0) from miden-vm's
+  `assembly-syntax/src/parser/cst/{instructions,fragments}.rs` and
+  `assembly-syntax-cst/src/parser.rs`. `pnpm masm:sync` writes them to
+  `lib/masm/vocabulary.json`, at the tag of the `miden-assembly-syntax` in the
+  API's project template lockfile (0.35.0, the web SDK's too); `pnpm
+  masm:check` reports drift. It fails if the upstream tables change shape.
+- `lib/masm/language.ts`: a `masm` Monarch tokenizer registered in the
+  editor's `beforeMount`: doc comments (`#!`), comments, attributes (`@…`),
+  keywords, control flow and invocations (`if`, `while`, `exec`, `call`, …),
+  instructions (`adv.*` included), builtin types, constants (`UPPER_CASE`,
+  `true`), numbers, strings, procedure names and callee paths
+  (`exec.tx::get_block_number`). It uses token types the built-in themes
+  color, so the Rust tab is unchanged.
+- Unit tests for the extraction; e2e `e2e/script-masm.spec.ts` (language,
+  token types, colors on a built-in script's MASM tab).
 
 ### 8. Miden SDK autocomplete, snippets and hover docs (P2, impact 4, effort M / L)
 

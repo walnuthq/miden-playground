@@ -11,6 +11,12 @@
     "declaration": false,
     "declarationMap": false
   },
-  "include": ["vite.config.ts", "playwright.config.ts", "e2e", "**/*.test.ts"],
+  "include": [
+    "vite.config.ts",
+    "playwright.config.ts",
+    "e2e",
+    "scripts",
+    "**/*.test.ts"
+  ],
   "exclude": ["node_modules", "dist"]
 }
