@@ -1,12 +1,12 @@
 # End-to-end tests
 
-Playwright tests for the tutorials and examples. They run against a live Playground on testnet, so transactions are proven and submitted for real: expect minutes per test. Tests run one at a time because they share testnet accounts.
+Playwright tests for the tutorials, the examples and the script editor (`script-*.spec.ts`: header, Explorer, diagnostics, console layout, shortcuts, MASM highlighting, editor settings). They run against a live Playground on testnet, so transactions are proven and submitted for real: expect minutes per test. Tests run one at a time because they share testnet accounts.
 
 ## Prerequisites
 
 1. Install Playwright's Chromium once: `pnpm exec playwright install chromium`.
 2. Start the Playground (`pnpm dev` in `apps/web`, port 3000), unless you set `PLAYWRIGHT_BASE_URL`.
-3. For the specs that create scripts on the API, start `apps/api` too (`pnpm dev` in `apps/api`, port 3001), with its Docker services up. The two examples only need postgres: their packages come precompiled (`apps/api/examples`). Tutorials 11 and 12 compile, so they also need the compile service. Tutorials 7 and 8 compile through local mocks in `apps/web/lib/mock-api.ts` and don't need it.
+3. For the specs that create scripts on the API, start `apps/api` too (`pnpm dev` in `apps/api`, port 3001), with its Docker services up. The two examples only need postgres: their packages come precompiled (`apps/api/examples`). Tutorials 11 and 12 and the script editor specs compile, so they also need the compile service. Tutorials 7 and 8 compile through local mocks in `apps/web/lib/mock-api.ts` and don't need it.
 4. For the specs that use Bread Wallet, install it from the repo root with `pnpm bread-wallet`. It downloads the version pinned in `.bread-wallet/version` to `.bread-wallet/extension` (gitignored). Each run warns when it's missing or outdated. `pnpm bread-wallet latest` upgrades to the newest [wallet release](https://github.com/0xMiden/wallet/releases) and pins it: commit `.bread-wallet/version`.
 
 ## Environment variables
