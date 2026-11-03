@@ -3,6 +3,7 @@ import { ExternalLink, InlineCode } from "@/components/tutorials/prose";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import useScripts from "@/hooks/use-scripts";
 import type { TutorialStep } from "@/lib/types/tutorial";
+import { scriptSource } from "@/lib/utils/script-files";
 
 const useCompleted = () => {
   const { scripts } = useScripts();
@@ -10,7 +11,8 @@ const useCompleted = () => {
     ({ id, type }) =>
       id.startsWith("counter-account_") && type === "account-component",
   );
-  const matches = script?.rust.matchAll(/felt!\((\d*)\)/g);
+  const source = script ? scriptSource(script) : "";
+  const matches = source.matchAll(/felt!\((\d*)\)/g);
   const lastMatch = Array.from(matches ?? []).at(-1);
   const incrementValue = Number(lastMatch?.at(1));
   return script?.masm !== "" && incrementValue > 1;

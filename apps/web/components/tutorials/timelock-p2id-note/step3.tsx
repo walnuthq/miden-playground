@@ -8,22 +8,24 @@ import useScripts from "@/hooks/use-scripts";
 import useTutorials from "@/hooks/use-tutorials";
 import { defaultScriptIds } from "@/lib/types/default-scripts";
 import type { TutorialStep } from "@/lib/types/tutorial";
+import { scriptSource } from "@/lib/utils/script-files";
 
 const useCompleted = () => {
   const { scripts } = useScripts();
   const script = scripts.find(
     ({ id, type }) => !defaultScriptIds.includes(id) && type === "note",
   );
-  const firstMatches = script?.rust.match(
+  const source = script ? scriptSource(script) : "";
+  const firstMatches = source.match(
     /assert_eq\(storage\.len\(\)\.into\(\),\s*felt!\(3\)\);/,
   );
-  const secondMatches = script?.rust.match(
+  const secondMatches = source.match(
     /let\s+timelock_height\s*=\s*storage\[2\];/,
   );
-  const thirdMatches = script?.rust.match(
+  const thirdMatches = source.match(
     /let\s+block_number\s*=\s*tx::get_block_number\(\);/,
   );
-  const fourthMatches = script?.rust.match(
+  const fourthMatches = source.match(
     /assert!\s*\(\s*block_number\s*>=\s*timelock_height\s*\);/,
   );
   return (

@@ -21,9 +21,10 @@ import type {
   PackageType,
   ProcedureExport,
   ScriptExample,
+  ScriptFiles,
 } from "@/lib/types";
 import { upstreamErrorResponse } from "@/lib/upstream";
-import { compilePackage, createPackage } from "@/lib/utils";
+import { compilePackage, createPackage, scriptFiles } from "@/lib/utils";
 
 type CreateScriptRequestBody = {
   name: string;
@@ -32,8 +33,9 @@ type CreateScriptRequestBody = {
 };
 
 type CreateScriptResponse = {
-  package: Pick<Package, "id" | "name" | "type" | "rust"> & {
+  package: Pick<Package, "id" | "name" | "type"> & {
     dependencies: Dependency[];
+    files: ScriptFiles;
   };
 };
 
@@ -48,7 +50,8 @@ const scriptsDependencies: Record<ScriptExample, Dependency[]> = {
 } as const;
 
 type GetScriptResponse = {
-  package: Omit<Package, "createdAt" | "updatedAt"> & {
+  package: Omit<Package, "files" | "createdAt" | "updatedAt"> & {
+    files: ScriptFiles;
     procedureExports: ProcedureExport[];
     createdAt: number;
     updatedAt: number;
@@ -56,8 +59,11 @@ type GetScriptResponse = {
 };
 
 type CompileScriptRequestBody = {
-  name: string;
-  rust: string;
+  // The edited files: `src/lib.rs` only, the manifests are generated.
+  files?: ScriptFiles;
+  // Sent instead of `files` by the web app before they replaced it: tabs
+  // opened before the deploy still compile.
+  rust?: string;
   dependencies: string[];
 };
 
@@ -79,19 +85,18 @@ const scripts = createApp()
         await c.req.json<CreateScriptRequestBody>();
       const actualType =
         type === "authentication-component" ? "account-component" : type;
-      const rust = templates[example === "none" ? type : example];
-      const packageId = await createPackage({
+      const { id, files } = await createPackage({
         name,
         type: actualType,
-        rust,
+        source: templates[example === "none" ? type : example],
         dependencies: scriptsDependencies[example],
       });
       return c.json<CreateScriptResponse>({
         package: {
-          id: packageId,
+          id,
           name,
           type: actualType,
-          rust,
+          files,
           dependencies: scriptsDependencies[example],
         },
       });
@@ -145,6 +150,7 @@ const scripts = createApp()
       return c.json<GetScriptResponse>({
         package: {
           ...dbPackage,
+          files: scriptFiles(dbPackage.name, dbPackage.files),
           procedureExports: exports.map(
             (manifestExport) => manifestExport.Procedure,
           ),
@@ -162,11 +168,15 @@ const scripts = createApp()
   .patch("/:id", async (c) => {
     try {
       const id = c.req.param("id");
-      const { rust, dependencies } =
+      const { files, rust, dependencies } =
         await c.req.json<CompileScriptRequestBody>();
+      const source = files?.["src/lib.rs"] ?? rust;
+      if (source === undefined) {
+        throw new Error("Error: Invalid request body.");
+      }
       const compiledPackage = await compilePackage({
         id,
-        rust,
+        source,
         dependencies,
         signal: c.req.raw.signal,
       });

@@ -30,9 +30,9 @@ const createScript = async (
 };
 
 const compile = async (page: Page) => {
-  // From the Rust tab, where step 4 has users read the code (the console, with
+  // From the Explorer tab, where step 4 has users read the code (the console, with
   // the Compile button, shows on every tab).
-  await page.getByRole("tab", { name: "Rust" }).click();
+  await page.getByRole("tab", { name: "Explorer" }).click();
   await page.getByRole("button", { name: "Compile" }).click();
   await expect(page.getByText(COMPILED).last()).toBeVisible({
     timeout: TRANSACTION_TIMEOUT,
@@ -72,7 +72,7 @@ test("tutorial 11: your first smart contract and custom note", async ({
       type: "Note Script",
       example: "Counter Note",
     });
-    await page.getByRole("tab", { name: "Metadata" }).click();
+    await page.getByRole("tab", { name: "Manifest" }).click();
     await page.getByRole("button", { name: "Add dependency" }).click();
     const dialog = page
       .getByRole("dialog")

@@ -1,5 +1,6 @@
 import type { Script } from "@/lib/types/script";
 import { defaultProcedureExport, defaultScript } from "@/lib/utils/script";
+import { sourceFiles } from "@/lib/utils/script-files";
 
 export const rust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
 #![no_std]
@@ -68,7 +69,7 @@ const basicWallet: Script = {
   type: "account-component",
   status: "compiled",
   readOnly: true,
-  rust,
+  files: sourceFiles(rust),
   masm,
   commitment:
     "0xf2e5b2d0bfee8029ebc6ef3ca234585452fb5c9467f41c878c9e245f59b00719",

@@ -28,9 +28,6 @@ export type Diagnostic = {
   endColumn?: number;
 };
 
-// The file a script's code is compiled from.
-export const SCRIPT_FILE = "src/lib.rs";
-
 // biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI escapes.
 export const ANSI_ESCAPE = /\u001b\[[0-9;]*m/g;
 const HEADER = /^(error|warning)(?:\[(E\d+)\])?: (.+)$/;

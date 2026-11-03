@@ -46,7 +46,7 @@ const userDependencies: Partial<Record<ScriptExample, ScriptExample>> = {
 
 type CreatedPackage = {
   id: string;
-  rust: string;
+  files: { "src/lib.rs": string };
   dependencies: { id: string }[];
 };
 
@@ -89,12 +89,18 @@ const createScript = async (
 };
 
 const compileScript = async (
-  { id, rust }: CreatedPackage,
+  { id, files }: CreatedPackage,
   dependencies: string[],
 ) => {
   const { package: compiled } = await request<{ package: CompiledPackage }>(
     `/scripts/${id}`,
-    { method: "PATCH", body: JSON.stringify({ rust, dependencies }) },
+    {
+      method: "PATCH",
+      body: JSON.stringify({
+        files: { "src/lib.rs": files["src/lib.rs"] },
+        dependencies,
+      }),
+    },
   );
   return compiled;
 };

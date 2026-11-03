@@ -11,22 +11,25 @@ import type {
   Export,
   Script,
   ScriptExample,
+  ScriptFiles,
   ScriptType,
 } from "@/lib/types/script";
 import { sleep } from "@/lib/utils";
 import { defaultScript } from "@/lib/utils/script";
+import { scriptSource } from "@/lib/utils/script-files";
 
 // Stand-ins for apps/api in the tutorials that don't compile real scripts (see
 // lib/api.ts). Script ids are `<example>_<uuid>`.
 
-const scriptsRust: Record<ScriptExample | "none", string> = {
-  none: defaultScript().rust,
-  "p2id-note": p2id.rust,
-  "auth-no-auth": authNoAuth.rust,
-  "counter-account": counterMapContract.rust,
-  "counter-note": counterNote.rust,
-  "counter-script": counterScript.rust,
-  "count-reader": countReader.rust,
+// The scripts have their source only: no manifests without the API.
+const scriptsFiles: Record<ScriptExample | "none", ScriptFiles> = {
+  none: defaultScript().files,
+  "p2id-note": p2id.files,
+  "auth-no-auth": authNoAuth.files,
+  "counter-account": counterMapContract.files,
+  "counter-note": counterNote.files,
+  "counter-script": counterScript.files,
+  "count-reader": countReader.files,
 } as const;
 
 const scriptsDependencies: Record<ScriptExample | "none", Dependency[]> = {
@@ -84,13 +87,15 @@ export const mockCreateScript = async ({
   name: string;
   type: ScriptType;
   example: ScriptExample | "none";
-}): Promise<Pick<Script, "id" | "name" | "type" | "rust" | "dependencies">> => {
+}): Promise<
+  Pick<Script, "id" | "name" | "type" | "files" | "dependencies">
+> => {
   await sleep(1000);
   return {
     id: `${example}_${crypto.randomUUID()}`,
     name,
     type,
-    rust: scriptsRust[example],
+    files: structuredClone(scriptsFiles[example]),
     dependencies: structuredClone(scriptsDependencies[example]),
   };
 };
@@ -98,15 +103,15 @@ export const mockCreateScript = async ({
 export const mockCompileScript = async ({
   id,
   name,
-  rust,
-}: Pick<Script, "id" | "name" | "rust">): Promise<CompiledPackage> => {
+  files,
+}: Pick<Script, "id" | "name" | "files">): Promise<CompiledPackage> => {
   await sleep(1000);
   const [rawExample] = id.split("_");
   const example = rawExample as ScriptExample;
   const script = scripts[example];
   let masm = script.masm;
   if (example === "counter-account") {
-    const matches = rust.matchAll(/felt!\((\d*)\)/g);
+    const matches = scriptSource({ files }).matchAll(/felt!\((\d*)\)/g);
     const lastMatch = Array.from(matches ?? []).at(-1);
     const incrementValue = Number(lastMatch?.at(1));
     masm = masm.replace("add.1", `add.${incrementValue}`);
@@ -117,7 +122,7 @@ export const mockCompileScript = async ({
     type: script.type,
     status: "compiled",
     masm,
-    rust,
+    files,
     commitment: script.commitment,
     masp: "",
     exports: structuredClone(scriptsExports[example]),

@@ -6,25 +6,47 @@ import {
 } from "@/db/packages";
 import { projectTemplateFiles } from "@/lib/templates";
 import { generateCargoToml, generateMidenProjectToml } from "@/lib/toml";
-import type {
-  CompiledPackage,
-  Dependency,
-  Export,
-  Manifest,
-  PackageType,
+import {
+  type CompiledPackage,
+  type Dependency,
+  type Export,
+  type Manifest,
+  type PackageType,
+  type ScriptFiles,
+  scriptFilePaths,
 } from "@/lib/types";
 import { fetchApiCompile } from "@/lib/upstream";
 
-export const createPackage = ({
+// The package files the web app gets: its source and manifests, without the
+// `<name>/` prefix they're stored under (the build's files are a project dir
+// next to its dependencies').
+export const scriptFiles = (
+  name: string,
+  files: Record<string, string>,
+): ScriptFiles =>
+  Object.fromEntries(
+    scriptFilePaths.flatMap((path) => {
+      const content = files[`${name}/${path}`];
+      return content === undefined ? [] : [[path, content]];
+    }),
+  );
+
+// The source of a package, from its stored files.
+export const packageSource = (name: string, files: Record<string, string>) =>
+  files[`${name}/src/lib.rs`] ?? "";
+
+// Creates a package from its source (`src/lib.rs`), with the project files
+// around it, and returns its id and the files the web app shows.
+export const createPackage = async ({
   name,
   type,
-  rust,
+  source,
   dependencies = [],
   compiled,
 }: {
   name: string;
   type: PackageType;
-  rust: string;
+  source: string;
   dependencies?: Dependency[];
   // Compile output known ahead of time (examples/*/compiled.json): the package
   // is inserted compiled instead of as a draft.
@@ -37,26 +59,27 @@ export const createPackage = ({
 }) => {
   const files = {
     [`${name}/.cargo/config.toml`]: projectTemplateFiles[".cargo/config.toml"],
-    [`${name}/src/lib.rs`]: rust,
+    [`${name}/src/lib.rs`]: source,
     [`${name}/build.rs`]: projectTemplateFiles["build.rs"],
     [`${name}/Cargo.toml`]: generateCargoToml({ name }),
     [`${name}/Cargo.lock`]: projectTemplateFiles["Cargo.lock"],
     [`${name}/miden-project.toml`]: generateMidenProjectToml({
       name,
       type,
-      rust,
+      rust: source,
       dependencies,
     }),
     [`${name}/rust-toolchain.toml`]:
       projectTemplateFiles["rust-toolchain.toml"],
   };
-  return insertPackage({
+  const id = await insertPackage({
     name,
     type,
     dependencies: dependencies.map(({ id }) => id),
     files,
-    ...(compiled && { status: "compiled" as const, rust, ...compiled }),
+    ...(compiled && { status: "compiled" as const, ...compiled }),
   });
+  return { id, files: scriptFiles(name, files) };
 };
 
 type CompileResponse = {
@@ -80,12 +103,13 @@ const masmSource = (masm: CompileResponse["masm"]) =>
 
 export const compilePackage = async ({
   id,
-  rust,
+  source,
   dependencies,
   signal,
 }: {
   id: string;
-  rust: string;
+  // The new `src/lib.rs`.
+  source: string;
   dependencies: string[];
   signal?: AbortSignal;
 }): Promise<CompiledPackage> => {
@@ -98,11 +122,11 @@ export const compilePackage = async ({
   }
   const { name, type } = dbPackage;
   const updatedFiles = dbPackage.files;
-  updatedFiles[`${name}/src/lib.rs`] = rust;
+  updatedFiles[`${name}/src/lib.rs`] = source;
   updatedFiles[`${name}/miden-project.toml`] = generateMidenProjectToml({
     name,
     type,
-    rust,
+    rust: source,
     dependencies: dependenciesPackages,
   });
   const files = dependenciesPackages.reduce<Record<string, string>>(
@@ -143,7 +167,6 @@ export const compilePackage = async ({
     await updatePackage({
       id,
       status: "error",
-      rust,
       files: updatedFiles,
       // No MASM for code that doesn't build.
       masm: "",
@@ -155,7 +178,7 @@ export const compilePackage = async ({
       name,
       type,
       status: "error",
-      rust,
+      files: scriptFiles(name, updatedFiles),
       error: stderr,
       warnings: "",
       masm: "",
@@ -179,13 +202,13 @@ export const compilePackage = async ({
     console.warn(`${name}: no MASM (${masmOutput.error})`);
   }
   const masm = masmSource(masmOutput);
+  // The compiled sources plus the Cargo.lock the build used, sent back with the
+  // next compile to get the same dependency versions.
+  const storedFiles = compiledFiles ?? updatedFiles;
   await updatePackage({
     id,
     status: "compiled",
-    rust,
-    // The compiled sources plus the Cargo.lock the build used, sent back with
-    // the next compile to get the same dependency versions.
-    files: compiledFiles ?? updatedFiles,
+    files: storedFiles,
     masm,
     masp,
     commitment,
@@ -197,7 +220,7 @@ export const compilePackage = async ({
     name,
     type,
     status: "compiled",
-    rust,
+    files: scriptFiles(name, storedFiles),
     error: "",
     // A successful build still reports its warnings on stderr.
     warnings: stderr,

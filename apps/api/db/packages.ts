@@ -31,7 +31,6 @@ export const insertPackage = async (newPackage: NewPackage) => {
 export const updatePackage = ({
   id,
   status,
-  rust,
   files,
   masm,
   masp,
@@ -41,7 +40,6 @@ export const updatePackage = ({
 }: {
   id: string;
   status?: PackageStatus;
-  rust?: string;
   files?: Record<string, string>;
   masm?: string;
   masp?: string;
@@ -53,7 +51,6 @@ export const updatePackage = ({
     .update(packagesTable)
     .set({
       status,
-      rust,
       files,
       masm,
       masp,
@@ -79,7 +76,6 @@ export const getDependencies = async (dependencies: string[]) => {
       name: true,
       type: true,
       commitment: true,
-      rust: true,
       files: true,
     },
     where: {

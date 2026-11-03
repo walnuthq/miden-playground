@@ -106,7 +106,7 @@ trait CounterContract {
           what the package exports.
         </p>
         <p>
-          Click the <em>"Metadata"</em> tab: under <em>"Package exports"</em>,
+          Click the <em>"Manifest"</em> tab: under <em>"Package exports"</em>,
           you'll find the procedures exported by the package, along with their
           signatures.
         </p>

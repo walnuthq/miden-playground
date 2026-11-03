@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import useScripts from "@/hooks/use-scripts";
 import { defaultScriptIds } from "@/lib/types/default-scripts";
 import { sleep } from "@/lib/utils";
+import { filesWithDependency } from "@/lib/utils/script-files";
 
 const AddDependencyDialog = () => {
   const {
@@ -85,6 +86,8 @@ const AddDependencyDialog = () => {
                   commitment: dependency.commitment,
                 },
               ],
+              // Shown until the next compile, which regenerates the file.
+              files: filesWithDependency(script.files, dependency.name, "add"),
             });
             await sleep(400);
             setLoading(false);

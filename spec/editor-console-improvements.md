@@ -3,7 +3,7 @@
 Status: proposal, written 2026-11-02. Done: item 1 (PR #731), item 2 (PR
 #732), item 3 (PR #735), item 4 (PR #736), item 5 (PR #737), item 6 (PR
 #742), which completes the "editor and console" pass (see "Scoring"), item 7
-(PR #745), item 12 (header; its tabs part is left for later).
+(PR #745), item 12 (header, Explorer with file tabs).
 
 The code editor UX of the scripts feature (`/scripts/:id`) is behind other
 blockchain playgrounds. This document compares it with Solana Playground
@@ -528,7 +528,9 @@ mostly a shortcut to them.
 - Later: tabs for several open scripts, and showing `miden-project.toml` as a
   read-only (or editable) file next to `lib.rs`.
 
-Done (header only). What shipped:
+Done. What shipped, in two parts:
+
+Header:
 
 - The breadcrumb of `/scripts/:id` shows the script's name, whatever its id:
   a UUID from the API, `<example>_<uuid>` from the mock API (tutorials 6–8),
@@ -545,6 +547,33 @@ Done (header only). What shipped:
 - Undoing back to the compiled source keeps the draft: the last compiled
   source isn't stored.
 - E2E: `e2e/script-header.spec.ts`, and the mock id in tutorial 7.
+
+Explorer (the files part of "Later"; tabs for several open scripts are not
+planned):
+
+- The tabs are Explorer (was Rust), MASM and Manifest (was Metadata). The
+  Explorer, after miden-source-code-verification's web-viewer, lists the
+  script's `src/lib.rs`, `Cargo.toml` and `miden-project.toml` and opens them
+  as editor tabs with close buttons, `src/lib.rs` alone at first. The
+  manifests are read-only (Monaco's `ini`, there's no TOML language). Built-in
+  and mock API scripts have no manifests: their explorer lists `src/lib.rs`.
+  The explorer's width is resizable and saved.
+- `Script.files` (those 3 files) replaced `Script.rust`, in the web app and
+  the API. The API returns them without the `<name>/` prefix they're stored
+  under, from every route that returns a package (`GET` returned all 7 stored
+  files before). `PATCH /scripts/:id` takes `files["src/lib.rs"]`, and still
+  the legacy `rust` from web apps loaded before the deploy. `packages.rust`
+  is dropped by `pnpm db:migrate-drop-rust` (backfills `files` where it
+  differed: none locally), run after the deploy. Persisted state, saved
+  projects and tutorial snapshots migrate on load.
+- Add / Remove dependency patch `miden-project.toml` right away; the next
+  compile replaces it with the API's regenerated file.
+- The `src/lib.rs` editor stays mounted while hidden or closed: a console
+  link reopens its tab and reveals the location.
+- Tutorials 11 and 12 say "Manifest"; tutorial 11 points at the dependency
+  in `miden-project.toml`.
+- Unit tests for the TOML patch and the file tree; e2e
+  `e2e/script-explorer.spec.ts`, tab renames in the other specs.
 
 ### 13. Format code (P3, impact 2, effort M)
 

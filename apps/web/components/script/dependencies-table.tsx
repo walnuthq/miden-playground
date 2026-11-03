@@ -19,6 +19,7 @@ import useScripts from "@/hooks/use-scripts";
 import { type Script, scriptTypes } from "@/lib/types/script";
 import { formatDigest } from "@/lib/utils";
 import { defaultDependencies } from "@/lib/utils/script";
+import { filesWithDependency } from "@/lib/utils/script-files";
 
 const DependencyActionsCell = ({
   script,
@@ -42,12 +43,21 @@ const DependencyActionsCell = ({
             const index = script.dependencies.findIndex(
               ({ id }) => id === dependencyId,
             );
+            const dependency = script.dependencies[index];
+            if (!dependency) {
+              return;
+            }
             updateScript({
               id: script.id,
               dependencies: [
                 ...script.dependencies.slice(0, index),
                 ...script.dependencies.slice(index + 1),
               ],
+              files: filesWithDependency(
+                script.files,
+                dependency.name,
+                "remove",
+              ),
             });
           }}
         >

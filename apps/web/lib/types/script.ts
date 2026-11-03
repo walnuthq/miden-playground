@@ -87,7 +87,22 @@ export const toDependency = ({
   commitment,
 }: Dependency): Dependency => ({ id, name, type, commitment });
 
+// The body of the API's `POST /scripts/import`: a project's sources.
 export type PackageSource = { midenProjectToml: string; rust: string };
+
+// The files of a script the editor shows, by path in its project. Only
+// `src/lib.rs` is edited: the API generates the manifests. The built-in
+// scripts and the mock API's have no manifests, the MASM-only built-ins no
+// file at all.
+export const scriptFilePaths = [
+  "src/lib.rs",
+  "Cargo.toml",
+  "miden-project.toml",
+] as const;
+
+export type ScriptFilePath = (typeof scriptFilePaths)[number];
+
+export type ScriptFiles = Partial<Record<ScriptFilePath, string>>;
 
 export type Script = {
   id: string;
@@ -95,7 +110,7 @@ export type Script = {
   type: ScriptType;
   status: ScriptStatus;
   readOnly: boolean;
-  rust: string;
+  files: ScriptFiles;
   masm: string;
   // The last compile's output: rustc's rendered errors when it failed, its
   // warnings when it succeeded. The API stores neither: a script fetched from
@@ -118,7 +133,7 @@ export type CompiledPackage = Pick<
   | "type"
   | "status"
   | "masm"
-  | "rust"
+  | "files"
   | "commitment"
   | "masp"
   | "exports"

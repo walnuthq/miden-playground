@@ -80,7 +80,7 @@ test("tutorial 12: contract verification", async ({ page }) => {
       await expect(page.getByText(COMPILED).last()).toBeVisible({
         timeout: TRANSACTION_TIMEOUT,
       });
-      await page.getByRole("tab", { name: "Metadata" }).click();
+      await page.getByRole("tab", { name: "Manifest" }).click();
       // Listed under "Package exports".
       await expect(
         page.getByRole("row", { name: "reset_count fn reset_count()" }),
