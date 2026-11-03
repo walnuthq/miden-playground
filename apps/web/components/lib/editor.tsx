@@ -2,6 +2,7 @@ import MonacoEditor, { type Monaco, type OnMount } from "@monaco-editor/react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import useScripts from "@/hooks/use-scripts";
+import { updateEditorSettings, useEditorSettings } from "@/lib/editor-settings";
 import { MASM_LANGUAGE_ID, registerMasm } from "@/lib/masm/language";
 import type { Script, ScriptFilePath } from "@/lib/types/script";
 import { type Diagnostic, parseDiagnostics } from "@/lib/utils/diagnostics";
@@ -111,6 +112,7 @@ const Editor = ({
   const content = file === "masm" ? script.masm : (script.files[file] ?? "");
   const { resolvedTheme } = useTheme();
   const { updateScript } = useScripts();
+  const { minimap, fontSize } = useEditorSettings();
   const [mounted, setMounted] = useState<{
     editor: CodeEditor;
     monaco: Monaco;
@@ -179,6 +181,18 @@ const Editor = ({
             syncMarkers(monaco, model);
           }
         });
+        // Also in the gear menu above the editor; here for VS Code habits
+        // (right click, F1). Per editor, unlike `addCommand`.
+        editor.addAction({
+          id: "playground.toggleMinimap",
+          label: "Toggle Minimap",
+          contextMenuGroupId: "9_settings",
+          run: () =>
+            updateEditorSettings({
+              minimap: !editor.getOption(monaco.editor.EditorOption.minimap)
+                .enabled,
+            }),
+        });
         setMounted({ editor, monaco });
         onMount?.(editor, monaco);
       }}
@@ -194,7 +208,8 @@ const Editor = ({
               })
       }
       options={{
-        minimap: { enabled: false },
+        minimap: { enabled: minimap },
+        fontSize,
         wordWrap: "on",
         readOnly: readOnly || !isSource,
         scrollBeyondLastLine: false,
