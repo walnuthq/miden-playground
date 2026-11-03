@@ -28,3 +28,11 @@ peerDependencyRules:
 overrides:
   "@miden-sdk/miden-sdk": "0.17.8"
   "@miden-sdk/react": "0.17.8"
+  # Security fixes for transitive dependencies (Dependabot alerts). Remove each
+  # once the packages that pull it in (Para, monaco-editor, the node polyfills)
+  # ship the patched version.
+  "node-forge": "^1.4.2"
+  "dompurify": "^3.4.17"
+  "follow-redirects": "^1.16.2"
+  "qs": "^6.16.1"
+  "bn.js@4": "^4.12.3"
