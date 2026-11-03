@@ -192,14 +192,14 @@ test("script: a compiled script's MASM", async ({ page }) => {
     await expect.poll(() => masmModel(page)).toContain('pub proc "get-count"(');
   });
 
-  await test.step("an edit hides it, a compile brings it back", async () => {
+  await test.step("an edit disables it, a compile brings it back", async () => {
     await page.getByRole("tab", { name: "Explorer" }).click();
     await replaceInEditor(
       page,
       "current_value + felt!(1);",
       "current_value + felt!(1234567);",
     );
-    await expect(masmTab).toBeHidden();
+    await expect(masmTab).toBeDisabled();
     await compile();
     await expect(page.getByText(COMPILED)).toBeVisible({
       timeout: TRANSACTION_TIMEOUT,
@@ -215,6 +215,11 @@ test("script: a compiled script's MASM", async ({ page }) => {
     await expect(
       page.getByRole("button", { name: /^src\/lib\.rs:\d+:\d+$/ }).first(),
     ).toBeVisible({ timeout: TRANSACTION_TIMEOUT });
-    await expect(masmTab).toBeHidden();
+    await expect(masmTab).toBeDisabled();
+    // Its panel, from a link, says how to get it.
+    await page.goto(`${page.url()}?tab=masm`);
+    await expect(
+      page.getByText("Compile the script to see its Miden Assembly."),
+    ).toBeVisible();
   });
 });

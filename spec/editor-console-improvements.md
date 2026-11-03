@@ -463,7 +463,7 @@ Follow-up in PR #746: compiled Rust scripts get a MASM tab too.
   account, transaction and note builders branch on `assembledFromMasm`
   (no package) instead.
 - The tab shows the latest successful build's MASM: an edit hides it, a
-  compile brings it back. The read-only editor follows `script.masm` (Monaco
+  compile brings it back (since item 12 the tab stays, disabled, see there). The read-only editor follows `script.masm` (Monaco
   `value`), so a compile started from the MASM tab updates it.
 - E2E: the compiled script test in `e2e/script-masm.spec.ts`.
 
@@ -557,7 +557,11 @@ planned):
   as editor tabs with close buttons, `src/lib.rs` alone at first. The
   manifests are read-only (Monaco's `ini`, there's no TOML language). Built-in
   and mock API scripts have no manifests: their explorer lists `src/lib.rs`.
-  The explorer's width is resizable and saved.
+  The explorer is 215 px wide (resizable, saved after a drag), the width of
+  the three tabs above it: the MASM tab always shows, disabled with a tooltip
+  until a compile succeeds, so the tabs keep their width. Its panel, opened
+  without MASM (a failed compile from it, a `?tab=masm` link), says to
+  compile.
 - `Script.files` (those 3 files) replaced `Script.rust`, in the web app and
   the API. The API returns them without the `<name>/` prefix they're stored
   under, from every route that returns a package (`GET` returned all 7 stored
