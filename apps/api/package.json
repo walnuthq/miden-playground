@@ -12,7 +12,6 @@
     "typecheck": "tsc --noEmit",
     "cf-typegen": "wrangler types --env-file .env.example --strict-vars=false cloudflare-env.d.ts",
     "db:push": "drizzle-kit push",
-    "db:migrate-drop-rust": "node scripts/migrate-drop-packages-rust.ts",
     "examples:compile": "node scripts/compile-examples.ts",
     "templates:check": "node scripts/check-lockfile.ts && node scripts/check-templates.ts",
     "lockfile:check": "node scripts/check-lockfile.ts",
