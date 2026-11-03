@@ -1,8 +1,8 @@
 # Scripts editor and console improvements
 
 Status: proposal, written 2026-11-02. Done: item 1 (PR #731), item 2 (PR
-#732), item 3 (PR #735), item 4 (PR #736), item 5 (PR #737). Next: item
-6, the last of the "editor and console" pass (see "Scoring").
+#732), item 3 (PR #735), item 4 (PR #736), item 5 (PR #737), item 6 (PR
+#742), which completes the "editor and console" pass (see "Scoring").
 
 The code editor UX of the scripts feature (`/scripts/:id`) is behind other
 blockchain playgrounds. This document compares it with Solana Playground
@@ -384,6 +384,29 @@ Proposal: Cmd/Ctrl+S and Cmd/Ctrl+Enter to compile (register through Monaco
 `addCommand` so they work while the editor has focus, and prevent the
 browser's "save page"), Cmd/Ctrl+J to toggle the console, Cmd/Ctrl+L to clear
 it. Show them in tooltips (`Compile (⌘S)`).
+
+Done in PR #742. What shipped:
+
+- Cmd+S and Cmd+Enter (Ctrl elsewhere) do what the Compile button does: open
+  a collapsed console, compile, log. Edits are already kept locally on every
+  keystroke, and the API only gets the source with a compile (`PATCH
+  /scripts/:id` saves and compiles), so compiling is the save. Cmd+J toggles
+  the console (a maximized one collapses, like VS Code's panel), Cmd+L clears
+  it. No maximize shortcut: macOS keeps Cmd+M to minimize the window.
+- One capture-phase `keydown` listener on the window
+  (`hooks/use-script-shortcuts.ts`), not Monaco's `addCommand`: the
+  shortcuts work wherever the focus is (console, Metadata tab), standalone
+  Monaco shares `addCommand` bindings across editors (the page has two), and
+  the capture phase runs before Monaco's own bindings (Cmd+Enter inserts a
+  line, Cmd+L selects one) and stops the browser's (save page, address bar,
+  downloads). Not registered on read-only scripts. Inside a dialog only
+  Cmd+S is caught, to stop the save page.
+- Cmd or Ctrl follows `navigator.platform`: `userAgentData` follows an
+  emulated user agent (Playwright's Desktop Chrome says Windows on a Mac).
+- The tooltips of Compile, Minimize / Restore console and Clear console show
+  the shortcut with the stock shadcn `Kbd`; the accessible names don't
+  change.
+- E2E: `e2e/script-shortcuts.spec.ts`.
 
 ### 7. MASM syntax highlighting (P2, impact 3, effort S)
 

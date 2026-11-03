@@ -1,4 +1,5 @@
 import { Button } from "@workspace/ui/components/button";
+import { Kbd } from "@workspace/ui/components/kbd";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -11,6 +12,11 @@ import {
   TabsList,
   TabsTrigger,
 } from "@workspace/ui/components/tabs";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@workspace/ui/components/tooltip";
 import { cn } from "@workspace/ui/lib/utils";
 import { Play } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -32,7 +38,11 @@ import EditorConsole, {
 } from "@/components/script/editor-console";
 import ScriptMetadata from "@/components/script/script-metadata";
 import useCompileScript from "@/hooks/use-compile-script";
+import useScriptShortcuts, {
+  shortcutLabel,
+} from "@/hooks/use-script-shortcuts";
 import useScripts from "@/hooks/use-scripts";
+import { clearConsoleLog } from "@/lib/console-log";
 import type { Script } from "@/lib/types/script";
 
 // Puts the cursor on a location of the last compile's output. The code may have
@@ -81,6 +91,40 @@ const ScriptComponent = ({
   const { compile, compiling } = useCompileScript(script);
   const defaultTab = script?.rust !== "" ? "rust" : "masm";
   const tab = searchParams.get("tab") ?? defaultTab;
+  const consoleState: ConsoleState = consoleCollapsed
+    ? "collapsed"
+    : editorCollapsed
+      ? "maximized"
+      : "normal";
+  const setConsoleState = (state: ConsoleState) => {
+    if (state === "collapsed") {
+      editorPanelRef.current?.expand();
+      consolePanelRef.current?.collapse();
+    } else if (state === "maximized") {
+      consolePanelRef.current?.expand();
+      editorPanelRef.current?.collapse();
+    } else {
+      consolePanelRef.current?.expand();
+      editorPanelRef.current?.expand();
+    }
+  };
+  // The Compile button and Cmd/Ctrl+S: a collapsed console opens itself to
+  // show the output.
+  const compileAndShow = () => {
+    if (compiling) {
+      return;
+    }
+    consolePanelRef.current?.expand();
+    compile();
+  };
+  useScriptShortcuts({
+    enabled: script !== undefined && !script.readOnly,
+    onCompile: compileAndShow,
+    // A maximized console hides, like VS Code's panel.
+    onToggleConsole: () =>
+      setConsoleState(consoleState === "collapsed" ? "normal" : "collapsed"),
+    onClearConsole: () => clearConsoleLog(id),
+  });
   useEffect(() => {
     const editor = editorRef.current;
     const location = pendingReveal.current;
@@ -106,23 +150,6 @@ const ScriptComponent = ({
     } else {
       pendingReveal.current = location;
       navigate(pathname);
-    }
-  };
-  const consoleState: ConsoleState = consoleCollapsed
-    ? "collapsed"
-    : editorCollapsed
-      ? "maximized"
-      : "normal";
-  const setConsoleState = (state: ConsoleState) => {
-    if (state === "collapsed") {
-      editorPanelRef.current?.expand();
-      consolePanelRef.current?.collapse();
-    } else if (state === "maximized") {
-      consolePanelRef.current?.expand();
-      editorPanelRef.current?.collapse();
-    } else {
-      consolePanelRef.current?.expand();
-      editorPanelRef.current?.expand();
     }
   };
   const tabs = (
@@ -169,21 +196,24 @@ const ScriptComponent = ({
             <TabsTrigger value="metadata">Metadata</TabsTrigger>
           </TabsList>
           {!script.readOnly && (
-            <Button
-              disabled={compiling}
-              onClick={() => {
-                // A collapsed console opens itself to show the output.
-                consolePanelRef.current?.expand();
-                compile();
-              }}
-            >
-              {compiling ? <Spinner /> : <Play />}
-              {compiling
-                ? "Compiling…"
-                : script.error
-                  ? "Re-compile"
-                  : "Compile"}
-            </Button>
+            <Tooltip>
+              <TooltipTrigger
+                delay={300}
+                render={
+                  <Button disabled={compiling} onClick={compileAndShow} />
+                }
+              >
+                {compiling ? <Spinner /> : <Play />}
+                {compiling
+                  ? "Compiling…"
+                  : script.error
+                    ? "Re-compile"
+                    : "Compile"}
+              </TooltipTrigger>
+              <TooltipContent>
+                Compile <Kbd>{shortcutLabel("S")}</Kbd>
+              </TooltipContent>
+            </Tooltip>
           )}
         </div>
         {script.readOnly ? (
