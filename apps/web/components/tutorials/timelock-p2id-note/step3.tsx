@@ -99,8 +99,8 @@ assert_eq(storage.len().into(), felt!(3));`}
           description={
             <p>
               Follow the instructions to add the timelock logic to your P2ID
-              script, then click the <em>"Compile"</em> button in the editor
-              console to compile it.
+              script, then click the <em>"Compile"</em> button above the
+              editor to compile it.
             </p>
           }
         />

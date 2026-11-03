@@ -1,7 +1,7 @@
 # Scripts editor and console improvements
 
 Status: proposal, written 2026-11-02. Done: item 1 (PR #731), item 2 (PR
-#732), item 3 (PR #735), item 4 (PR #736), item 5 (PR pending). Next: item
+#732), item 3 (PR #735), item 4 (PR #736), item 5 (PR #737). Next: item
 6, the last of the "editor and console" pass (see "Scoring").
 
 The code editor UX of the scripts feature (`/scripts/:id`) is behind other
@@ -349,7 +349,7 @@ Proposal:
 - Replace the fixed `61vh` / `85vh` / `h-32` heights.
 - Keep the `Rust` / `MASM` / `Metadata` tabs above the editor.
 
-Done in PR pending. What shipped:
+Done in PR #737. What shipped:
 
 - The script page is the viewport's height below the header (`100svh` minus
   `h-16`, or `h-12` with the icon sidebar); the window no longer scrolls. The
