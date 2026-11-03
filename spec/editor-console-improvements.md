@@ -3,7 +3,7 @@
 Status: proposal, written 2026-11-02. Done: item 1 (PR #731), item 2 (PR
 #732), item 3 (PR #735), item 4 (PR #736), item 5 (PR #737), item 6 (PR
 #742), which completes the "editor and console" pass (see "Scoring"), item 7
-(PR #TBD).
+(PR #745).
 
 The code editor UX of the scripts feature (`/scripts/:id`) is behind other
 blockchain playgrounds. This document compares it with Solana Playground
@@ -432,7 +432,7 @@ Upstream sources (2026-11-03):
   instruction tables (`spelling`, `prefix`, `keyword`), keyword calls and
   builtin types.
 
-Done in PR #TBD. What shipped:
+Done in PR #745. What shipped:
 
 - `lib/masm/vocabulary.ts` extracts the keywords, builtin types and
   instructions (153 at v0.35.0) from miden-vm's
