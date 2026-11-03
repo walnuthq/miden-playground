@@ -38,6 +38,12 @@ The examples launched from the home page (`apps/web/lib/examples`) get their pac
 The "Create script" dialog creates scripts from `apps/api/templates/*.rs` (`lib/templates.ts`): each type with no example, and each example of the web app's `scriptExamples` (`apps/web/lib/types/script.ts`). Every one must compile. `pnpm templates:check` in `apps/api` creates and compiles each through the local API (`pnpm dev`, with api-compile running), then deletes them. Run it after editing a template, and after bumping the SDK, the api-compile image or `templates/project-template`: SDK API changes break templates silently (0.15 replaced `Asset.key: Word` with `Asset.id: AssetId`).
 - The counter note and counter script examples import `counter_account` but come without it: tutorial 11 teaches adding the user's own `counter-account` script as a dependency. The check does the same (`userDependencies`), so keep it in sync when an example gains such a dependency.
 
+# Project template lockfile
+
+Every package the API creates starts from `apps/api/templates/project-template/Cargo.lock`, and api-compile builds `--offline` against the crates its image warmed from its own examples' lockfiles (miden-source-code-verification, `apps/api-compile/examples`). They must pin the same registry crates: when they drift (a `cargo update` there), each build downloads and rebuilds the crates that differ, which took 176 s on production, and the container loses them when it sleeps after 5 idle minutes.
+- `pnpm lockfile:check` in `apps/api` compares the template with api-compile's `GET /lockfile` (`API_COMPILE_URL`, default the local one); `pnpm lockfile:sync` rewrites the template. `templates:check` runs the check first. Run it after any lockfile change in api-compile, and after bumping the SDK or the api-compile image.
+- The API sends `warmLockfile: true` to `POST /compile`: a stale lockfile (the template's, or one stored with a package, which api-compile returns and the API sends back on the next compile) is re-resolved offline against the cache instead, and the updated one comes back and is stored. `/verify` never re-resolves: it must build the exact lockfile it gets.
+
 # Script editor (`/scripts/:id`)
 
 `spec/editor-console-improvements.md` is the roadmap for the editor and console (15 scored items). Its status line says what's done and what's next; mark items done there, with their PR, as they ship.

@@ -110,7 +110,11 @@ export const compilePackage = async ({
   } = await fetchApiCompile<CompileResponse>("/compile", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ files, entrypoint: name }),
+    // A stored lockfile can pin other crate versions than api-compile's warm
+    // cache (it moves with api-compile's own lockfiles): re-resolve it against
+    // the cache rather than download and rebuild them. The build sends the
+    // updated lockfile back, stored below.
+    body: JSON.stringify({ files, entrypoint: name, warmLockfile: true }),
     signal,
   });
   if (stdout === "" && stderr !== "") {
