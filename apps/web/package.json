@@ -33,7 +33,7 @@
     "@monaco-editor/react": "4.7.0",
     "@opentelemetry/api": "1.9.1",
     "@openzeppelin/miden-multisig-client": "0.18.3",
-    "@tanstack/react-query": "5.105.1",
+    "@tanstack/react-query": "5.105.3",
     "@tanstack/react-table": "9.3.1",
     "@wagmi/core": "3.6.7",
     "@workspace/ui": "workspace:*",
@@ -53,16 +53,16 @@
     "@cloudflare/workers-types": "5.20261102.1",
     "@miden-sdk/vite-plugin": "0.17.5",
     "@playwright/test": "1.64.1",
-    "@tailwindcss/vite": "4.3.3",
+    "@tailwindcss/vite": "4.3.4",
     "@types/node": "26.6.6",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "@vitejs/plugin-react": "6.2.1",
     "@workspace/typescript-config": "workspace:*",
-    "tailwindcss": "4.3.3",
+    "tailwindcss": "4.3.4",
     "typescript": "7.0.2",
     "vite": "8.3.5",
     "vite-plugin-node-polyfills": "0.28.0",
-    "wrangler": "4.156.1"
+    "wrangler": "4.156.2"
   }
 }

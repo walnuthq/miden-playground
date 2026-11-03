@@ -10,7 +10,9 @@ import TutorialLayout from "@/components/tutorials/tutorial-layout";
 const SidebarLayout = () => (
   <SidebarProvider>
     <AppSidebar />
-    <SidebarInset>
+    {/* min-w-0: a flex item, it would otherwise grow to its widest content
+        (an editor Monaco has laid out in pixels) instead of the window. */}
+    <SidebarInset className="min-w-0">
       <TutorialLayout>
         <Header />
         <Outlet />

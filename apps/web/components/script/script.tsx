@@ -55,6 +55,8 @@ const reveal = (editor: CodeEditor, location: EditorLocation) => {
   editor.focus();
 };
 
+const NO_MASM = "Compile the script to see its Miden Assembly.";
+
 // The script page fills the viewport below the header (`h-16`, `h-12` with the
 // icon sidebar), so the editor and the console scroll, not the page.
 const PAGE_HEIGHT_CLASS_NAME =
@@ -199,11 +201,17 @@ const ScriptComponent = ({ id, script }: { id: string; script?: Script }) => {
           }}
         />
       </TabsContent>
-      {script.masm && (
-        <TabsContent value="masm" className="h-full">
+      <TabsContent value="masm" className="h-full">
+        {script.masm ? (
           <Editor script={script} file="masm" readOnly />
-        </TabsContent>
-      )}
+        ) : (
+          // Shown when the MASM goes while its tab is open: a failed compile
+          // started from it (Cmd+S), or a `?tab=masm` link to a draft.
+          <p className="flex h-full items-center justify-center border p-6 text-xs text-muted-foreground">
+            {NO_MASM}
+          </p>
+        )}
+      </TabsContent>
       <TabsContent value="manifest" className="h-full overflow-y-auto">
         <ScriptManifest script={script} />
       </TabsContent>
@@ -226,7 +234,25 @@ const ScriptComponent = ({ id, script }: { id: string; script?: Script }) => {
         <div className="flex items-center justify-between gap-2">
           <TabsList>
             <TabsTrigger value="explorer">Explorer</TabsTrigger>
-            {script.masm && <TabsTrigger value="masm">MASM</TabsTrigger>}
+            {/* Always there, so the tabs keep their width (the Explorer's
+                files line up with them): disabled until a compile succeeds.
+                A disabled tab ignores the pointer: the tooltip goes on a
+                wrapper. */}
+            {script.masm ? (
+              <TabsTrigger value="masm">MASM</TabsTrigger>
+            ) : (
+              <Tooltip>
+                <TooltipTrigger
+                  delay={300}
+                  render={<span className="flex h-full flex-1" />}
+                >
+                  <TabsTrigger value="masm" disabled>
+                    MASM
+                  </TabsTrigger>
+                </TooltipTrigger>
+                <TooltipContent>{NO_MASM}</TooltipContent>
+              </Tooltip>
+            )}
             <TabsTrigger value="manifest">Manifest</TabsTrigger>
           </TabsList>
           {!script.readOnly && (

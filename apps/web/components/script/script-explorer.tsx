@@ -56,7 +56,7 @@ const ScriptExplorer = ({
       defaultLayout={defaultLayout}
       onLayoutChanged={onLayoutChanged}
     >
-      <ResizablePanel id="files" defaultSize="18%" minSize="10%">
+      <ResizablePanel id="files" defaultSize={215} minSize={120}>
         <FileExplorer
           tree={buildFileTree(paths)}
           activePath={shownPath}
@@ -64,7 +64,7 @@ const ScriptExplorer = ({
         />
       </ResizablePanel>
       <ResizableHandle className="bg-border" />
-      <ResizablePanel id="editors" defaultSize="82%" minSize="40%">
+      <ResizablePanel id="editors" minSize="40%">
         <div className="flex h-full min-w-0 flex-col">
           <EditorTabs
             openPaths={shownPaths}

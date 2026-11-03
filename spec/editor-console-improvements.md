@@ -3,7 +3,7 @@
 Status: proposal, written 2026-11-02. Done: item 1 (PR #731), item 2 (PR
 #732), item 3 (PR #735), item 4 (PR #736), item 5 (PR #737), item 6 (PR
 #742), which completes the "editor and console" pass (see "Scoring"), item 7
-(PR #745), item 12 (header, Explorer with file tabs).
+(PR #745), item 12 (PR #747: header, Explorer with file tabs).
 
 The code editor UX of the scripts feature (`/scripts/:id`) is behind other
 blockchain playgrounds. This document compares it with Solana Playground
@@ -463,7 +463,7 @@ Follow-up in PR #746: compiled Rust scripts get a MASM tab too.
   account, transaction and note builders branch on `assembledFromMasm`
   (no package) instead.
 - The tab shows the latest successful build's MASM: an edit hides it, a
-  compile brings it back. The read-only editor follows `script.masm` (Monaco
+  compile brings it back (since item 12 the tab stays, disabled, see there). The read-only editor follows `script.masm` (Monaco
   `value`), so a compile started from the MASM tab updates it.
 - E2E: the compiled script test in `e2e/script-masm.spec.ts`.
 
@@ -557,15 +557,21 @@ planned):
   as editor tabs with close buttons, `src/lib.rs` alone at first. The
   manifests are read-only (Monaco's `ini`, there's no TOML language). Built-in
   and mock API scripts have no manifests: their explorer lists `src/lib.rs`.
-  The explorer's width is resizable and saved.
+  The explorer is 215 px wide (resizable, saved after a drag), the width of
+  the three tabs above it: the MASM tab always shows, disabled with a tooltip
+  until a compile succeeds, so the tabs keep their width. Its panel, opened
+  without MASM (a failed compile from it, a `?tab=masm` link), says to
+  compile.
 - `Script.files` (those 3 files) replaced `Script.rust`, in the web app and
   the API. The API returns them without the `<name>/` prefix they're stored
   under, from every route that returns a package (`GET` returned all 7 stored
-  files before). `PATCH /scripts/:id` takes `files["src/lib.rs"]`, and still
-  the legacy `rust` from web apps loaded before the deploy. `packages.rust`
-  is dropped by `pnpm db:migrate-drop-rust` (backfills `files` where it
-  differed: none locally), run after the deploy. Persisted state, saved
-  projects and tutorial snapshots migrate on load.
+  files before). `PATCH /scripts/:id` takes `files["src/lib.rs"]` (the
+  legacy `rust`, for web apps loaded before the deploy, was dropped in a
+  follow-up). `packages.rust` was dropped on production after the deploy by
+  a one-off migration script (it backfilled `files` where they differed:
+  none), removed since; `pnpm db:push` drops it from an older local
+  database. Persisted state, saved projects and tutorial snapshots migrate on
+  load.
 - Add / Remove dependency patch `miden-project.toml` right away; the next
   compile replaces it with the API's regenerated file.
 - The `src/lib.rs` editor stays mounted while hidden or closed: a console

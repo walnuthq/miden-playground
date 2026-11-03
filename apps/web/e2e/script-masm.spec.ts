@@ -5,6 +5,10 @@ import { logBrowserErrors, TRANSACTION_TIMEOUT } from "./tutorial";
 
 type Token = { offset: number; type: string };
 
+// Real scrollbars, as on desktop browsers: headless Chromium hides them, and
+// the read-only editor's widening loop needs one.
+test.use({ launchOptions: { ignoreDefaultArgs: ["--hide-scrollbars"] } });
+
 // Monaco's tokens for each line of `text` in `language`, as `[word, type]`
 // pairs (whitespace skipped).
 const tokenize = (page: Page, text: string, language = "masm") =>
@@ -192,14 +196,32 @@ test("script: a compiled script's MASM", async ({ page }) => {
     await expect.poll(() => masmModel(page)).toContain('pub proc "get-count"(');
   });
 
-  await test.step("an edit hides it, a compile brings it back", async () => {
+  await test.step("typing in it doesn't widen the page", async () => {
+    // Monaco's "Cannot edit in read-only editor" message brought up a
+    // scrollbar, and the editor grew by its width on each key: the page's
+    // flex items kept the editor's pixel width as their minimum.
+    const pageWidth = () =>
+      page.evaluate(() => document.documentElement.scrollWidth);
+    const width = await pageWidth();
+    await page
+      .getByRole("tabpanel")
+      .locator(".monaco-editor .view-lines")
+      .click({ position: { x: 100, y: 5 } });
+    await page.keyboard.type("abcdef", { delay: 100 });
+    await expect(
+      page.locator(".monaco-editor-overlaymessage").first(),
+    ).toBeVisible();
+    expect(await pageWidth()).toBe(width);
+  });
+
+  await test.step("an edit disables it, a compile brings it back", async () => {
     await page.getByRole("tab", { name: "Explorer" }).click();
     await replaceInEditor(
       page,
       "current_value + felt!(1);",
       "current_value + felt!(1234567);",
     );
-    await expect(masmTab).toBeHidden();
+    await expect(masmTab).toBeDisabled();
     await compile();
     await expect(page.getByText(COMPILED)).toBeVisible({
       timeout: TRANSACTION_TIMEOUT,
@@ -215,6 +237,11 @@ test("script: a compiled script's MASM", async ({ page }) => {
     await expect(
       page.getByRole("button", { name: /^src\/lib\.rs:\d+:\d+$/ }).first(),
     ).toBeVisible({ timeout: TRANSACTION_TIMEOUT });
-    await expect(masmTab).toBeHidden();
+    await expect(masmTab).toBeDisabled();
+    // Its panel, from a link, says how to get it.
+    await page.goto(`${page.url()}?tab=masm`);
+    await expect(
+      page.getByText("Compile the script to see its Miden Assembly."),
+    ).toBeVisible();
   });
 });
