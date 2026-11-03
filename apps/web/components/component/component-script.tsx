@@ -8,7 +8,7 @@ const ComponentScript = ({ component }: { component: Component }) => {
   if (!script) {
     return null;
   }
-  return <Editor script={script} language="rust" readOnly height="85vh" />;
+  return <Editor script={script} readOnly height="85vh" />;
 };
 
 export default ComponentScript;

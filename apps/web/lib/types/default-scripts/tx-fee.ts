@@ -1,6 +1,7 @@
 import { TX_FEE_NOTE_CODE } from "@/lib/constants";
 import type { Script } from "@/lib/types/script";
 import { defaultProcedureExport, defaultScript } from "@/lib/utils/script";
+import { sourceFiles } from "@/lib/utils/script-files";
 
 export const rust = ``;
 
@@ -136,7 +137,7 @@ const txFee: Script = {
   type: "note",
   status: "compiled",
   readOnly: true,
-  rust,
+  files: sourceFiles(rust),
   masm,
   commitment: TX_FEE_NOTE_CODE,
   procedureExports: [

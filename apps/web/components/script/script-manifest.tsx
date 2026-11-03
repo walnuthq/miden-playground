@@ -6,7 +6,7 @@ import MetadataTable from "@/components/script/metadata-table";
 import useScripts from "@/hooks/use-scripts";
 import type { Script } from "@/lib/types/script";
 
-const ScriptMetadata = ({ script }: { script: Script }) => {
+const ScriptManifest = ({ script }: { script: Script }) => {
   const { openAddDependencyDialog } = useScripts();
   return (
     <div className="flex flex-col gap-8">
@@ -45,4 +45,4 @@ const ScriptMetadata = ({ script }: { script: Script }) => {
   );
 };
 
-export default ScriptMetadata;
+export default ScriptManifest;

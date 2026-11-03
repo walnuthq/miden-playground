@@ -6,6 +6,7 @@ import {
   defaultScript,
   defaultSignature,
 } from "@/lib/utils/script";
+import { sourceFiles } from "@/lib/utils/script-files";
 
 export const rust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
 #![no_std]
@@ -47,7 +48,7 @@ const counterScript: Script = {
   type: "tx-script",
   status: "compiled",
   readOnly: true,
-  rust,
+  files: sourceFiles(rust),
   masm,
   dependencies: [toDependency(counterContract)],
   procedureExports: [

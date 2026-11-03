@@ -124,13 +124,13 @@ test("script: compile errors in the editor", async ({ page }) => {
     );
   });
 
-  await test.step("a location clicked on the Metadata tab", async () => {
-    // The console stays on every tab: its link opens the Rust tab.
-    await page.getByRole("tab", { name: "Metadata" }).click();
+  await test.step("a location clicked on the Manifest tab", async () => {
+    // The console stays on every tab: its link opens the Explorer tab.
+    await page.getByRole("tab", { name: "Manifest" }).click();
     await page
       .getByRole("button", { name: `src/lib.rs:${errorLine}:`, exact: false })
       .click();
-    await expect(page.getByRole("tab", { name: "Rust" })).toHaveAttribute(
+    await expect(page.getByRole("tab", { name: "Explorer" })).toHaveAttribute(
       "aria-selected",
       "true",
     );
@@ -145,7 +145,7 @@ test("script: compile errors in the editor", async ({ page }) => {
     });
     expect(await markers(page)).toEqual([]);
     // The console keeps its output across tabs.
-    await page.getByRole("tab", { name: "Metadata" }).click();
+    await page.getByRole("tab", { name: "Manifest" }).click();
     await expect(page.getByText(COMPILED).last()).toBeVisible();
   });
 
@@ -164,7 +164,7 @@ test("script: compile errors in the editor", async ({ page }) => {
   });
 
   await test.step("a successful compile's warnings", async () => {
-    await page.getByRole("tab", { name: "Rust" }).click();
+    await page.getByRole("tab", { name: "Explorer" }).click();
     await replaceInEditor(
       page,
       "self.count_map.get(key)\n    }",

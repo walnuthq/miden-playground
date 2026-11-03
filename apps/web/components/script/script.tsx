@@ -36,14 +36,15 @@ import EditorConsole, {
   type ConsoleState,
   type EditorLocation,
 } from "@/components/script/editor-console";
-import ScriptMetadata from "@/components/script/script-metadata";
+import ScriptExplorer from "@/components/script/script-explorer";
+import ScriptManifest from "@/components/script/script-manifest";
 import useCompileScript from "@/hooks/use-compile-script";
 import useScriptShortcuts, {
   shortcutLabel,
 } from "@/hooks/use-script-shortcuts";
-import useScripts from "@/hooks/use-scripts";
 import { clearConsoleLog } from "@/lib/console-log";
-import type { Script } from "@/lib/types/script";
+import type { Script, ScriptFilePath } from "@/lib/types/script";
+import { SCRIPT_FILE, scriptSource } from "@/lib/utils/script-files";
 
 // Puts the cursor on a location of the last compile's output. The code may have
 // changed since the compile: follow the location.
@@ -59,21 +60,34 @@ const reveal = (editor: CodeEditor, location: EditorLocation) => {
 const PAGE_HEIGHT_CLASS_NAME =
   "h-[calc(100svh-4rem)] group-has-data-[collapsible=icon]/sidebar-wrapper:h-[calc(100svh-3rem)]";
 
-const ScriptComponent = ({
-  id,
-  serverScript,
-}: {
-  id: string;
-  serverScript?: Script;
-}) => {
+const ScriptComponent = ({ id, script }: { id: string; script?: Script }) => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [searchParams] = useSearchParams();
-  const { scripts } = useScripts();
-  // The Rust editor, for the console's links to its locations.
+  // The source's editor, for the console's links to its locations.
   const editorRef = useRef<CodeEditor | null>(null);
-  // A link clicked on another tab, revealed once the Rust tab shows.
+  // A link clicked while the source is hidden (another tab or file), revealed
+  // once it shows.
   const pendingReveal = useRef<EditorLocation | null>(null);
+  // The Explorer's open files, the source only at first.
+  const [openPaths, setOpenPaths] = useState<ScriptFilePath[]>([SCRIPT_FILE]);
+  const [activePath, setActivePath] = useState<ScriptFilePath | null>(
+    SCRIPT_FILE,
+  );
+  const openFile = (path: ScriptFilePath) => {
+    setOpenPaths((paths) => (paths.includes(path) ? paths : [...paths, path]));
+    setActivePath(path);
+  };
+  // Closing the active tab activates the one that takes its place, or the new
+  // last one.
+  const closeFile = (path: ScriptFilePath) => {
+    const index = openPaths.indexOf(path);
+    const remaining = openPaths.filter((openPath) => openPath !== path);
+    setOpenPaths(remaining);
+    if (path === activePath) {
+      setActivePath(remaining[Math.min(index, remaining.length - 1)] ?? null);
+    }
+  };
   // The editor/console split. The console is collapsed to its header bar, or
   // maximized by collapsing the editor.
   const editorPanelRef = useRef<PanelImperativeHandle | null>(null);
@@ -87,10 +101,18 @@ const ScriptComponent = ({
     storage: localStorage,
     onlySaveAfterUserInteractions: true,
   });
-  const script = scripts.find((script) => script.id === id) ?? serverScript;
   const { compile, compiling } = useCompileScript(script);
-  const defaultTab = script?.rust !== "" ? "rust" : "masm";
-  const tab = searchParams.get("tab") ?? defaultTab;
+  // The MASM-only built-ins have no source.
+  const defaultTab =
+    script && scriptSource(script) === "" ? "masm" : "explorer";
+  // The tabs were called `rust` and `metadata` before the Explorer.
+  const tabParam = searchParams.get("tab");
+  const tab =
+    tabParam === "rust"
+      ? "explorer"
+      : tabParam === "metadata"
+        ? "manifest"
+        : (tabParam ?? defaultTab);
   const consoleState: ConsoleState = consoleCollapsed
     ? "collapsed"
     : editorCollapsed
@@ -128,51 +150,62 @@ const ScriptComponent = ({
   useEffect(() => {
     const editor = editorRef.current;
     const location = pendingReveal.current;
-    if (tab !== "rust" || !editor || !location) {
+    if (
+      tab !== "explorer" ||
+      activePath !== SCRIPT_FILE ||
+      !editor ||
+      !location
+    ) {
       return;
     }
     pendingReveal.current = null;
     // Measure it now it's visible, or the reveal centers in a zero-size view.
     editor.layout();
     reveal(editor, location);
-  }, [tab]);
+  }, [tab, activePath]);
   if (!script) {
     return <NotFound />;
   }
-  // The console shows on every tab, but its locations are in the Rust code:
-  // switch to it first. The editor stays mounted on the other tabs.
+  // The console shows on every tab, but its locations are in the source:
+  // show it first, in the Explorer, opening its tab again if it was closed.
+  // Its editor stays mounted meanwhile.
   const revealLocation = (location: EditorLocation) => {
     // Maximized console: show the editor again.
     editorPanelRef.current?.expand();
     const editor = editorRef.current;
-    if (tab === "rust" && editor) {
+    if (tab === "explorer" && activePath === SCRIPT_FILE && editor) {
       reveal(editor, location);
-    } else {
-      pendingReveal.current = location;
+      return;
+    }
+    pendingReveal.current = location;
+    openFile(SCRIPT_FILE);
+    if (tab !== "explorer") {
       navigate(pathname);
     }
   };
   const tabs = (
     <>
-      {/* Kept mounted across tabs: its undo history, scroll position and
-          compile markers survive a look at the metadata. */}
-      <TabsContent value="rust" keepMounted className="h-full">
-        <Editor
+      {/* Kept mounted across tabs: the source's undo history, scroll
+          position and compile markers survive a look at the manifest. */}
+      <TabsContent value="explorer" keepMounted className="h-full">
+        <ScriptExplorer
           script={script}
-          language="rust"
-          readOnly={script.readOnly}
-          onMount={(editor) => {
+          openPaths={openPaths}
+          activePath={activePath}
+          onOpen={openFile}
+          onClose={closeFile}
+          onMountSource={(editor) => {
             editorRef.current = editor;
           }}
         />
       </TabsContent>
       {script.masm && (
         <TabsContent value="masm" className="h-full">
-          <Editor script={script} language="masm" readOnly />
+          <Editor script={script} file="masm" readOnly />
         </TabsContent>
       )}
-      <TabsContent value="metadata" className="h-full overflow-y-auto">
-        <ScriptMetadata script={script} />
+      <TabsContent value="manifest" className="h-full overflow-y-auto">
+        <ScriptManifest script={script} />
       </TabsContent>
     </>
   );
@@ -181,9 +214,10 @@ const ScriptComponent = ({
       <Tabs
         className="min-h-0 flex-1"
         value={tab}
+        // The default tab (MASM for the MASM-only built-ins) has no `?tab=`.
         onValueChange={(value) =>
           navigate(
-            value === "rust"
+            value === defaultTab
               ? pathname
               : `${pathname}?${new URLSearchParams({ tab: value })}`,
           )
@@ -191,9 +225,9 @@ const ScriptComponent = ({
       >
         <div className="flex items-center justify-between gap-2">
           <TabsList>
-            <TabsTrigger value="rust">Rust</TabsTrigger>
+            <TabsTrigger value="explorer">Explorer</TabsTrigger>
             {script.masm && <TabsTrigger value="masm">MASM</TabsTrigger>}
-            <TabsTrigger value="metadata">Metadata</TabsTrigger>
+            <TabsTrigger value="manifest">Manifest</TabsTrigger>
           </TabsList>
           {!script.readOnly && (
             <Tooltip>

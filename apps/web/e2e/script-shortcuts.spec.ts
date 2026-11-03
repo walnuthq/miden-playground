@@ -51,7 +51,7 @@ test("script: keyboard shortcuts", async ({ page }) => {
   });
 
   await test.step("Cmd/Ctrl+Enter compiles from another tab", async () => {
-    await page.getByRole("tab", { name: "Metadata" }).click();
+    await page.getByRole("tab", { name: "Manifest" }).click();
     await page.keyboard.press("ControlOrMeta+Enter");
     await expect(compiled).toHaveCount(3, { timeout: TRANSACTION_TIMEOUT });
   });

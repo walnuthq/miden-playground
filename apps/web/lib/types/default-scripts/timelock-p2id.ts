@@ -2,6 +2,7 @@ import { P2IDE_NOTE_CODE } from "@/lib/constants";
 import basicWallet from "@/lib/types/default-scripts/basic-wallet";
 import { type Script, toDependency } from "@/lib/types/script";
 import { defaultScript } from "@/lib/utils/script";
+import { sourceFiles } from "@/lib/utils/script-files";
 
 export const rust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
 #![no_std]
@@ -220,7 +221,7 @@ const timelockP2id: Script = {
   type: "note",
   status: "compiled",
   readOnly: true,
-  rust,
+  files: sourceFiles(rust),
   masm,
   commitment: P2IDE_NOTE_CODE,
   dependencies: [toDependency(basicWallet)],

@@ -4,6 +4,7 @@ import {
   defaultScript,
   defaultSignature,
 } from "@/lib/utils/script";
+import { sourceFiles } from "@/lib/utils/script-files";
 
 export const rust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
 #![no_std]
@@ -108,7 +109,7 @@ const counterMapContract: Script = {
   type: "account-component",
   status: "compiled",
   readOnly: true,
-  rust,
+  files: sourceFiles(rust),
   masm,
   procedureExports: [
     {

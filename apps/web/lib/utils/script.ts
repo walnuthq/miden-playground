@@ -14,7 +14,7 @@ import type {
   Script,
   Signature,
 } from "@/lib/types/script";
-import { midenTypes } from "@/lib/types/script";
+import { midenTypes, scriptFilePaths } from "@/lib/types/script";
 
 export const defaultSignature = (): Signature => ({
   abi: 3,
@@ -70,7 +70,7 @@ export const defaultScript = (): Script => ({
   type: "account-component",
   status: "draft",
   readOnly: false,
-  rust: "",
+  files: {},
   masm: "",
   error: "",
   warnings: "",
@@ -250,7 +250,12 @@ export const packageToScript = ({
   type,
   status: "compiled",
   readOnly: true,
-  rust: files["src/lib.rs"] ?? "",
+  // Its source and manifests, at the root of the verified upload.
+  files: Object.fromEntries(
+    scriptFilePaths.flatMap((path) =>
+      files[path] === undefined ? [] : [[path, files[path]]],
+    ),
+  ),
   masm: "",
   error: "",
   warnings: "",

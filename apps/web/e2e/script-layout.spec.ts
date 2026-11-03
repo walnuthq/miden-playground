@@ -84,7 +84,10 @@ test("script: editor and console layout", async ({ page }) => {
   });
 
   await test.step("a dragged size is remembered", async () => {
-    const handle = page.locator("[data-slot=resizable-handle]");
+    // The editor/console split's, not the Explorer's vertical one.
+    const handle = page.locator(
+      '[data-slot=resizable-handle][aria-orientation="horizontal"]',
+    );
     const box = await handle.boundingBox();
     if (!box) {
       throw new Error("no resize handle");

@@ -3,12 +3,9 @@ import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import useScripts from "@/hooks/use-scripts";
 import { MASM_LANGUAGE_ID, registerMasm } from "@/lib/masm/language";
-import type { Script } from "@/lib/types/script";
-import {
-  type Diagnostic,
-  parseDiagnostics,
-  SCRIPT_FILE,
-} from "@/lib/utils/diagnostics";
+import type { Script, ScriptFilePath } from "@/lib/types/script";
+import { type Diagnostic, parseDiagnostics } from "@/lib/utils/diagnostics";
+import { SCRIPT_FILE } from "@/lib/utils/script-files";
 
 export type CodeEditor = Parameters<OnMount>[0];
 
@@ -86,19 +83,32 @@ const toMarker = (
   };
 };
 
+// Monaco has no TOML language: `ini` colors its sections, keys and strings.
+const languages: Record<ScriptFilePath | "masm", string> = {
+  "src/lib.rs": "rust",
+  "Cargo.toml": "ini",
+  "miden-project.toml": "ini",
+  masm: MASM_LANGUAGE_ID,
+};
+
+// One of the script's files, or its MASM. Only its source (`src/lib.rs`) is
+// edited, and gets the compile markers: the manifests are the API's, the MASM
+// the compiler's.
 const Editor = ({
   script,
-  language = "rust",
+  file = SCRIPT_FILE,
   readOnly = false,
   height = "100%",
   onMount,
 }: {
   script: Script;
-  language?: "rust" | "masm";
+  file?: ScriptFilePath | "masm";
   readOnly?: boolean;
   height?: string;
   onMount?: OnMount;
 }) => {
+  const isSource = file === SCRIPT_FILE;
+  const content = file === "masm" ? script.masm : (script.files[file] ?? "");
   const { resolvedTheme } = useTheme();
   const { updateScript } = useScripts();
   const [mounted, setMounted] = useState<{
@@ -110,7 +120,7 @@ const Editor = ({
   // syncMarkers) until the next compile replaces them. A draft loaded with an
   // older error shows none, since its code changed since.
   const compileOutput =
-    language !== "rust" || readOnly
+    !isSource || readOnly
       ? undefined
       : script.status === "error"
         ? // The API doesn't store errors: a script fetched from there has none.
@@ -154,12 +164,13 @@ const Editor = ({
     <MonacoEditor
       height={height}
       theme={resolvedTheme === "dark" ? "vs-dark" : "light"}
-      defaultLanguage={language === "rust" ? "rust" : MASM_LANGUAGE_ID}
+      defaultLanguage={languages[file]}
       beforeMount={registerMasm}
-      defaultValue={language === "rust" ? script.rust : script.masm}
-      // The read-only MASM follows each compile, including one started from
-      // the MASM tab (Cmd+S), which doesn't remount it.
-      value={language === "masm" ? script.masm : undefined}
+      defaultValue={content}
+      // The read-only files follow each compile, including one started from
+      // their tab (Cmd+S), which doesn't remount them, and miden-project.toml
+      // follows the dependencies added or removed.
+      value={isSource ? undefined : content}
       // line={36}
       onMount={(editor, monaco) => {
         editor.onDidChangeModelContent(() => {
@@ -172,20 +183,20 @@ const Editor = ({
         onMount?.(editor, monaco);
       }}
       onChange={
-        readOnly
+        readOnly || !isSource
           ? undefined
           : (content) =>
               updateScript({
                 id: script.id,
                 status: "draft",
-                rust: content ?? "",
+                files: { ...script.files, [SCRIPT_FILE]: content ?? "" },
                 masm: "",
               })
       }
       options={{
         minimap: { enabled: false },
         wordWrap: "on",
-        readOnly,
+        readOnly: readOnly || !isSource,
         scrollBeyondLastLine: false,
         // Lays out again when shown, e.g. back from a hidden tab.
         automaticLayout: true,

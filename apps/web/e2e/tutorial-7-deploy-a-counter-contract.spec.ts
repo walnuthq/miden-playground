@@ -1,5 +1,10 @@
 import { expect, type Page, test } from "@playwright/test";
-import { COMPILED, replaceInEditor, waitForEditorText } from "./editor";
+import {
+  COMPILED,
+  replaceInEditor,
+  scriptHeader,
+  waitForEditorText,
+} from "./editor";
 import {
   logBrowserErrors,
   nextStep,
@@ -43,6 +48,8 @@ test("tutorial 7: deploy a counter contract", async ({ page }) => {
     // The Playground opens the new script, whose ID comes from the example's
     // package name.
     await expect(page).toHaveURL(/\/scripts\/counter-account_[0-9a-f-]+$/);
+    // The header shows the script's name, not its ID.
+    await expect(scriptHeader(page).name).toHaveText("my-counter");
     await nextStep(page);
   });
 

@@ -44,7 +44,6 @@ export const defaultPackage = (): Package => ({
   type: "account-component",
   status: "compiled",
   readOnly: true,
-  rust: "",
   files: {},
   masm: "",
   commitment: "",
@@ -91,25 +90,31 @@ export type Dependency = {
   commitment: string;
 };
 
+// The body of `POST /scripts/import`: a project's sources, by package dir.
 export type PackageSource = { midenProjectToml: string; rust: string };
+
+// The files of a package the web app shows (and edits: `src/lib.rs` only),
+// without the `<name>/` prefix they're stored under.
+export const scriptFilePaths = [
+  "src/lib.rs",
+  "Cargo.toml",
+  "miden-project.toml",
+] as const;
+
+export type ScriptFilePath = (typeof scriptFilePaths)[number];
+
+export type ScriptFiles = Partial<Record<ScriptFilePath, string>>;
 
 export type CompiledPackage = Pick<
   Package,
-  | "id"
-  | "name"
-  | "type"
-  | "status"
-  | "masm"
-  | "rust"
-  | "commitment"
-  | "masp"
-  | "exports"
+  "id" | "name" | "type" | "status" | "masm" | "commitment" | "masp" | "exports"
 > & {
   // rustc's rendered output: the failed build's in `error`, a successful one's
   // (warnings) in `warnings`. Neither is stored.
   error: string;
   warnings: string;
   dependencies: Dependency[];
+  files: ScriptFiles;
 };
 
 export type Manifest = { exports: Export[]; dependencies: PackageDependency[] };

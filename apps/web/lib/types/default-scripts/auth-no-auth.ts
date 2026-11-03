@@ -1,5 +1,6 @@
 import type { Script } from "@/lib/types/script";
 import { defaultProcedureExport, defaultScript } from "@/lib/utils/script";
+import { sourceFiles } from "@/lib/utils/script-files";
 
 export const rust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
 #![no_std]
@@ -118,7 +119,7 @@ const authNoAuth: Script = {
   type: "authentication-component",
   status: "compiled",
   readOnly: true,
-  rust,
+  files: sourceFiles(rust),
   masm,
   commitment:
     "0xdf9079c0a5668001295dfa427f4c03a61c6fa4cb92c0c2b7293b30a622cb2982",

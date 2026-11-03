@@ -55,10 +55,12 @@ const Step3: TutorialStep = {
           that defines them.
         </p>
         <p>
-          Click the <em>"Metadata"</em> tab, then click the{" "}
+          Click the <em>"Manifest"</em> tab, then click the{" "}
           <em>"Add dependency"</em> button. In the <em>"Add Dependency"</em>{" "}
           dialog, select the <strong>counter-account</strong> script and click
-          the <em>"Add"</em> button.
+          the <em>"Add"</em> button. The dependency also shows in the script's{" "}
+          <InlineCode>miden-project.toml</InlineCode>, which you can open from
+          the <em>"Explorer"</em> tab.
         </p>
         <TutorialStepAlert
           completed={completed}
@@ -70,7 +72,7 @@ const Step3: TutorialStep = {
               <strong>Note Script</strong> from the{" "}
               <strong>Counter Note</strong> example, then add the{" "}
               <strong>counter-account</strong> script as a dependency in the{" "}
-              <em>"Metadata"</em> tab.
+              <em>"Manifest"</em> tab.
             </p>
           }
         />

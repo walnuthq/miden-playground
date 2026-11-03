@@ -3,14 +3,12 @@ import { generateCargoToml, generateMidenProjectToml } from "@/lib/toml";
 import type { Dependency } from "@/lib/types";
 
 export const basicWalletDependency: Dependency & {
-  rust: string;
   files: Record<string, string>;
 } = {
   id: "basic-wallet",
   name: "basic-wallet",
   type: "account-component",
   commitment: "",
-  rust: templates["basic-wallet"],
   files: {
     "basic-wallet/.cargo/config.toml":
       projectTemplateFiles[".cargo/config.toml"],
@@ -32,7 +30,6 @@ export const basicWalletDependency: Dependency & {
 };
 
 export const counterAccountDependency: Dependency & {
-  rust: string;
   files: Record<string, string>;
 } = {
   id: "counter-account",
@@ -40,7 +37,6 @@ export const counterAccountDependency: Dependency & {
   type: "account-component",
   commitment:
     "0xb76d0a376ff5cc10f1f5d80385dd2d35f335100ed071673b1d69cb94111582ba",
-  rust: templates["counter-account"],
   files: {
     "counter-account/.cargo/config.toml":
       projectTemplateFiles[".cargo/config.toml"],

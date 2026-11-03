@@ -1,5 +1,6 @@
 import type { Script } from "@/lib/types/script";
 import { defaultProcedureExport, defaultScript } from "@/lib/utils/script";
+import { sourceFiles } from "@/lib/utils/script-files";
 
 export const rust = `#![no_std]
 #![feature(alloc_error_handler)]
@@ -164,7 +165,7 @@ const authSingleSig: Script = {
   type: "authentication-component",
   status: "compiled",
   readOnly: true,
-  rust,
+  files: sourceFiles(rust),
   masm,
   commitment:
     "0xca556e3d56ba394901cc8809b68c082b3388f77d17fc92c628501fc3f3d972b1",

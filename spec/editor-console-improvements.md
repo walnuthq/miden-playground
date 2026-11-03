@@ -3,7 +3,7 @@
 Status: proposal, written 2026-11-02. Done: item 1 (PR #731), item 2 (PR
 #732), item 3 (PR #735), item 4 (PR #736), item 5 (PR #737), item 6 (PR
 #742), which completes the "editor and console" pass (see "Scoring"), item 7
-(PR #745).
+(PR #745), item 12 (header, Explorer with file tabs).
 
 The code editor UX of the scripts feature (`/scripts/:id`) is behind other
 blockchain playgrounds. This document compares it with Solana Playground
@@ -180,7 +180,7 @@ What the user sees today, from the production run:
 | 9   | Tutorials next to the live editor                         | 4      | M      | P2       |
 | 10  | Fill in boilerplate automatically on compile              | 3      | M      | P2       |
 | 11  | Call a script's procedures from its page                  | 4      | M–L    | P2       |
-| 12  | Header and tabs (name, dirty state, open scripts)         | 3      | S–M    | P2       |
+| 12  | Header and tabs (name, dirty state, open scripts)         | 3      | S–M    | Done     |
 | 13  | Format code (rustfmt)                                     | 2      | M      | P3       |
 | 14  | Editor settings (word wrap, Vim, font size)               | 2      | S      | P3       |
 | 15  | Command menu (instead of a terminal)                      | 2      | L      | P3       |
@@ -527,6 +527,53 @@ mostly a shortcut to them.
   name, not only in the sidebar.
 - Later: tabs for several open scripts, and showing `miden-project.toml` as a
   read-only (or editable) file next to `lib.rs`.
+
+Done. What shipped, in two parts:
+
+Header:
+
+- The breadcrumb of `/scripts/:id` shows the script's name, whatever its id:
+  a UUID from the API, `<example>_<uuid>` from the mock API (tutorials 6–8),
+  or a built-in's name. A script fetched from the API shares the page's query
+  (`hooks/use-script.ts`); an unknown id shows as is, above the not-found
+  page.
+- Next to the name: a dot while the script is a draft (`status` becomes
+  `draft` on every edit, so edited since its last compile, or never
+  compiled), not on read-only scripts, and the status badge (Draft /
+  Compiled / Error). Both sit outside `BreadcrumbPage`, whose text stays the
+  name alone (the tutorials' e2e `openLink` waits on it).
+- The breadcrumb no longer wraps: with the tutorial panel open, the name
+  truncates and the dot and badge stay.
+- Undoing back to the compiled source keeps the draft: the last compiled
+  source isn't stored.
+- E2E: `e2e/script-header.spec.ts`, and the mock id in tutorial 7.
+
+Explorer (the files part of "Later"; tabs for several open scripts are not
+planned):
+
+- The tabs are Explorer (was Rust), MASM and Manifest (was Metadata). The
+  Explorer, after miden-source-code-verification's web-viewer, lists the
+  script's `src/lib.rs`, `Cargo.toml` and `miden-project.toml` and opens them
+  as editor tabs with close buttons, `src/lib.rs` alone at first. The
+  manifests are read-only (Monaco's `ini`, there's no TOML language). Built-in
+  and mock API scripts have no manifests: their explorer lists `src/lib.rs`.
+  The explorer's width is resizable and saved.
+- `Script.files` (those 3 files) replaced `Script.rust`, in the web app and
+  the API. The API returns them without the `<name>/` prefix they're stored
+  under, from every route that returns a package (`GET` returned all 7 stored
+  files before). `PATCH /scripts/:id` takes `files["src/lib.rs"]`, and still
+  the legacy `rust` from web apps loaded before the deploy. `packages.rust`
+  is dropped by `pnpm db:migrate-drop-rust` (backfills `files` where it
+  differed: none locally), run after the deploy. Persisted state, saved
+  projects and tutorial snapshots migrate on load.
+- Add / Remove dependency patch `miden-project.toml` right away; the next
+  compile replaces it with the API's regenerated file.
+- The `src/lib.rs` editor stays mounted while hidden or closed: a console
+  link reopens its tab and reveals the location.
+- Tutorials 11 and 12 say "Manifest"; tutorial 11 points at the dependency
+  in `miden-project.toml`.
+- Unit tests for the TOML patch and the file tree; e2e
+  `e2e/script-explorer.spec.ts`, tab renames in the other specs.
 
 ### 13. Format code (P3, impact 2, effort M)
 

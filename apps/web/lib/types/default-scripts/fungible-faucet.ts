@@ -1,5 +1,6 @@
 import type { Script } from "@/lib/types/script";
 import { defaultProcedureExport, defaultScript } from "@/lib/utils/script";
+import { sourceFiles } from "@/lib/utils/script-files";
 
 export const rust = "";
 
@@ -43,7 +44,7 @@ const fungibleFaucet: Script = {
   type: "account-component",
   status: "compiled",
   readOnly: true,
-  rust,
+  files: sourceFiles(rust),
   masm,
   commitment:
     "0xa93f46f604b8c6b9896f18d5d6fc191f5bc3d03d20f4b6c315bd74d5c21b9011",

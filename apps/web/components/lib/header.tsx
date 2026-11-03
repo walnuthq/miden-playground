@@ -1,3 +1,4 @@
+import { Badge } from "@workspace/ui/components/badge";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -15,7 +16,9 @@ import NetworkBadge from "@/components/lib/network-badge";
 import TutorialToggle from "@/components/lib/tutorial-toggle";
 import WalletButton from "@/components/lib/wallet-button";
 import useNetwork from "@/hooks/use-network";
+import useScript from "@/hooks/use-script";
 import useTutorials from "@/hooks/use-tutorials";
+import { scriptStatuses } from "@/lib/types/script";
 
 const getLink = (pathname: string) => {
   const [, route] = pathname.split("/");
@@ -34,6 +37,46 @@ const getPage = (pathname: string) => {
   return resource;
 };
 
+// A script's page shows its name, not its id (a UUID, or `<example>_<uuid>`
+// for the mock API's), then its compile status: a dot while it's a draft,
+// edited since its last compile, and a badge. Both sit outside
+// `BreadcrumbPage`, whose text is the name alone.
+const ScriptBreadcrumb = ({ id }: { id: string }) => {
+  const script = useScript(id);
+  if (!script) {
+    return (
+      <BreadcrumbItem className="truncate">
+        <BreadcrumbPage className="truncate">{id}</BreadcrumbPage>
+      </BreadcrumbItem>
+    );
+  }
+  const { name, status, readOnly } = script;
+  return (
+    <BreadcrumbItem className="min-w-0">
+      <BreadcrumbPage className="truncate">{name}</BreadcrumbPage>
+      {status === "draft" && !readOnly && (
+        <span
+          role="img"
+          aria-label="Edited since the last compile"
+          title="Edited since the last compile"
+          className="size-2 shrink-0 rounded-full bg-foreground/60"
+        />
+      )}
+      <Badge
+        variant={
+          status === "error"
+            ? "destructive"
+            : status === "draft"
+              ? "secondary"
+              : "outline"
+        }
+      >
+        {scriptStatuses[status]}
+      </Badge>
+    </BreadcrumbItem>
+  );
+};
+
 const SubLevelPageBreadcrumbs = () => {
   const { pathname } = useLocation();
   // Undefined for unknown paths, which render the not-found page.
@@ -49,9 +92,13 @@ const SubLevelPageBreadcrumbs = () => {
           <BreadcrumbSeparator className="hidden md:block" />
         </>
       )}
-      <BreadcrumbItem className="truncate">
-        <BreadcrumbPage className="truncate">{page}</BreadcrumbPage>
-      </BreadcrumbItem>
+      {link?.href === "/scripts" ? (
+        <ScriptBreadcrumb id={page ?? ""} />
+      ) : (
+        <BreadcrumbItem className="truncate">
+          <BreadcrumbPage className="truncate">{page}</BreadcrumbPage>
+        </BreadcrumbItem>
+      )}
     </>
   );
 };
@@ -74,7 +121,7 @@ const Header = () => {
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mr-2 data-vertical:h-4" />
         <Breadcrumb className="truncate">
-          <BreadcrumbList>
+          <BreadcrumbList className="flex-nowrap">
             {isTopLevelPage ? (
               <BreadcrumbItem>
                 <BreadcrumbPage className="capitalize">

@@ -74,7 +74,10 @@ export const importScriptsFromPackageSources = async (
     await Promise.all(
       packages.map(
         async ({ name, type, rust }) =>
-          [name, await createPackage({ name, type, rust })] as const,
+          [
+            name,
+            (await createPackage({ name, type, source: rust })).id,
+          ] as const,
       ),
     ),
   );
@@ -86,7 +89,7 @@ export const importScriptsFromPackageSources = async (
     compiledPackages.push(
       await compilePackage({
         id: packageIds.get(name) ?? "",
-        rust,
+        source: rust,
         dependencies: dependencies.map(
           (dependency) => packageIds.get(dependency) ?? "",
         ),
@@ -143,10 +146,10 @@ export const importExample = async (
           )?.commitment ?? createdPackage.commitment,
       };
     });
-    const id = await createPackage({
+    const { id, files } = await createPackage({
       name,
       type,
-      rust,
+      source: rust,
       dependencies: packageDependencies,
       compiled: { masm, masp, commitment, exports },
     });
@@ -156,7 +159,7 @@ export const importExample = async (
       name,
       type,
       status: "compiled",
-      rust,
+      files,
       error: "",
       warnings: "",
       masm,

@@ -193,7 +193,7 @@ test("script: a compiled script's MASM", async ({ page }) => {
   });
 
   await test.step("an edit hides it, a compile brings it back", async () => {
-    await page.getByRole("tab", { name: "Rust" }).click();
+    await page.getByRole("tab", { name: "Explorer" }).click();
     await replaceInEditor(
       page,
       "current_value + felt!(1);",
@@ -209,7 +209,7 @@ test("script: a compiled script's MASM", async ({ page }) => {
   });
 
   await test.step("a failed compile has none", async () => {
-    await page.getByRole("tab", { name: "Rust" }).click();
+    await page.getByRole("tab", { name: "Explorer" }).click();
     await replaceInEditor(page, "felt!(1234567);", "felt!(1234567;");
     await compile();
     await expect(
