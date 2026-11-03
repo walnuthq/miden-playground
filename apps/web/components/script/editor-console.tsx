@@ -1,5 +1,4 @@
 import { Button } from "@workspace/ui/components/button";
-import { Spinner } from "@workspace/ui/components/spinner";
 import { Toggle } from "@workspace/ui/components/toggle";
 import {
   Tooltip,
@@ -12,22 +11,19 @@ import {
   Minimize2,
   PanelBottomClose,
   PanelBottomOpen,
-  Play,
   ScrollText,
   Trash2,
 } from "lucide-react";
 import type { ReactNode } from "react";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { toast } from "sonner";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import CopyButton from "@/components/lib/copy-button";
-import useScripts from "@/hooks/use-scripts";
 import {
   type ConsoleEntry,
   type ConsoleLevel,
   consoleLogText,
+  countsSuffix,
   displayedOutput,
   formatConsoleTime,
-  formatDuration,
   hasConsoleLog,
   useConsoleLog,
   useFullOutput,
@@ -44,33 +40,15 @@ export type EditorLocation = { line: number; column: number };
 // Collapsed: only the header bar shows. Maximized: the editor is hidden.
 export type ConsoleState = "collapsed" | "normal" | "maximized";
 
-// The console panel's height when collapsed, in px: its header bar (`h-12`)
+// The console panel's height when collapsed, in px: its header bar (`h-10`)
 // and the panel's top and bottom borders.
-export const CONSOLE_HEADER_HEIGHT = 50;
+export const CONSOLE_HEADER_HEIGHT = 42;
 
 const levelClassNames: Record<ConsoleLevel, string> = {
   info: "text-muted-foreground",
   success: "text-success",
   warning: "text-warning",
   error: "text-destructive",
-};
-
-const plural = (count: number, noun: string) =>
-  `${count} ${noun}${count === 1 ? "" : "s"}`;
-
-// `(1 error, 2 warnings)`, or nothing when the output reports none.
-const countsSuffix = ({
-  errors,
-  warnings,
-}: {
-  errors: number;
-  warnings: number;
-}) => {
-  const counts = [
-    errors > 0 && plural(errors, "error"),
-    warnings > 0 && plural(warnings, "warning"),
-  ].filter(Boolean);
-  return counts.length > 0 ? ` (${counts.join(", ")})` : "";
 };
 
 // Within this distance of the bottom, new entries keep the log scrolled down.
@@ -171,8 +149,8 @@ const IconButton = ({
       delay={100}
       render={
         <Button
-          variant="secondary"
-          className="size-8"
+          variant="ghost"
+          size="icon-sm"
           aria-label={label}
           disabled={disabled}
           onClick={onClick}
@@ -187,21 +165,42 @@ const IconButton = ({
   </Tooltip>
 );
 
+// The header bar's status: the latest entry, as one text node (`[10:25:25]
+// Compiled counter-account in 3.9 s.`), or the empty log's placeholder.
+const Status = ({ entry }: { entry?: ConsoleEntry }) => (
+  <p
+    className={cn(
+      "mr-auto min-w-0 truncate font-mono text-xs",
+      entry ? levelClassNames[entry.level] : "text-muted-foreground",
+    )}
+    title={
+      entry
+        ? `[${formatConsoleTime(entry.timestamp)}] ${entry.text}`
+        : undefined
+    }
+  >
+    {entry
+      ? `[${formatConsoleTime(entry.timestamp)}] ${entry.text}`
+      : "Compile the script to see its output here."}
+  </p>
+);
+
 const EditorConsole = ({
   script,
+  compiling,
   state,
   onStateChange,
   onRevealLocation,
 }: {
   script: Script;
+  // A compile started from the page: the log follows its output.
+  compiling: boolean;
   state: ConsoleState;
   onStateChange: (state: ConsoleState) => void;
   onRevealLocation: (location: EditorLocation) => void;
 }) => {
-  const { compileScript } = useScripts();
   const { entries, append, clear } = useConsoleLog(script.id);
   const [fullOutput, setFullOutput] = useFullOutput();
-  const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const stickToBottom = useRef(true);
   // Starts with the last compile's error, if any, the first time the script
@@ -221,6 +220,13 @@ const EditorConsole = ({
       });
     }
   }, []);
+  // A new compile scrolls down to its output, even if scrolled up. Declared
+  // before the effect below, which runs after it in the same commit.
+  useLayoutEffect(() => {
+    if (compiling) {
+      stickToBottom.current = true;
+    }
+  }, [compiling]);
   // biome-ignore lint/correctness/useExhaustiveDependencies: on new entries.
   useLayoutEffect(() => {
     const scroll = scrollRef.current;
@@ -230,60 +236,13 @@ const EditorConsole = ({
   }, [entries.length]);
   // The latest compile result: only its locations link to the editor.
   const latestCompileId = entries.findLast(({ compile }) => compile)?.id;
-  const compile = async () => {
-    // A collapsed console opens itself to show the output.
-    if (state === "collapsed") {
-      onStateChange("normal");
-    }
-    setLoading(true);
-    stickToBottom.current = true;
-    append({ level: "info", text: `Compiling ${script.name}…` });
-    const start = performance.now();
-    const { script: compiledScript, error } = await compileScript(script);
-    const duration = formatDuration(performance.now() - start);
-    setLoading(false);
-    if (!compiledScript) {
-      append({
-        level: "error",
-        text: `Compile request failed after ${duration}: ${error || "unknown error"}`,
-      });
-      toast.error("Script compilation failed.", { description: error });
-      return;
-    }
-    if (compiledScript.error) {
-      append({
-        level: "error",
-        text: `Compilation failed in ${duration}${countsSuffix(countDiagnostics(compiledScript.error))}.`,
-        output: compiledScript.error,
-        compile: true,
-      });
-      return;
-    }
-    const warnings = compiledScript.warnings ?? "";
-    const counts = countDiagnostics(warnings);
-    append({
-      level: counts.warnings > 0 ? "warning" : "success",
-      text: `Compiled ${script.name} in ${duration}${countsSuffix(counts)}.`,
-      // Without located warnings, the clean output is empty.
-      output: warnings || undefined,
-      compile: true,
-    });
-  };
   return (
     <section
       aria-label="Editor Console"
       className="flex h-full flex-col overflow-hidden border bg-card text-card-foreground"
     >
-      <div className="flex h-12 shrink-0 items-center gap-2 px-3">
-        <button
-          type="button"
-          className="mr-auto cursor-pointer truncate text-sm font-medium"
-          onClick={() =>
-            onStateChange(state === "collapsed" ? "normal" : "collapsed")
-          }
-        >
-          Editor Console
-        </button>
+      <div className="flex h-10 shrink-0 items-center gap-1 pr-1 pl-3">
+        <Status entry={entries.at(-1)} />
         {state === "collapsed" ? (
           <IconButton
             label="Restore console"
@@ -319,7 +278,6 @@ const EditorConsole = ({
             delay={100}
             render={
               <Toggle
-                variant="outline"
                 size="sm"
                 aria-label="Show full output"
                 pressed={fullOutput}
@@ -337,6 +295,7 @@ const EditorConsole = ({
           content="Copy output"
           copy={consoleLogText(entries, fullOutput)}
           disabled={entries.length === 0}
+          variant="ghost"
         />
         <IconButton
           label="Clear console"
@@ -345,10 +304,6 @@ const EditorConsole = ({
         >
           <Trash2 />
         </IconButton>
-        <Button disabled={loading} onClick={compile}>
-          {loading ? <Spinner /> : <Play />}
-          {loading ? "Compiling…" : script.error ? "Re-compile" : "Compile"}
-        </Button>
       </div>
       <div
         ref={scrollRef}
@@ -361,25 +316,20 @@ const EditorConsole = ({
             STICK_TO_BOTTOM_PX;
         }}
       >
+        {/* Empty until the first compile: the header bar says so. */}
         <pre
           className="flex flex-col gap-2 font-mono text-xs"
           aria-live="polite"
         >
-          {entries.length === 0 ? (
-            <span className="text-muted-foreground">
-              Compile the script to see its output here.
-            </span>
-          ) : (
-            entries.map((entry) => (
-              <Entry
-                key={entry.id}
-                entry={entry}
-                latest={entry.id === latestCompileId}
-                fullOutput={fullOutput}
-                onRevealLocation={onRevealLocation}
-              />
-            ))
-          )}
+          {entries.map((entry) => (
+            <Entry
+              key={entry.id}
+              entry={entry}
+              latest={entry.id === latestCompileId}
+              fullOutput={fullOutput}
+              onRevealLocation={onRevealLocation}
+            />
+          ))}
         </pre>
       </div>
     </section>

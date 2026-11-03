@@ -1,8 +1,10 @@
+import { Button } from "@workspace/ui/components/button";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@workspace/ui/components/resizable";
+import { Spinner } from "@workspace/ui/components/spinner";
 import {
   Tabs,
   TabsContent,
@@ -10,6 +12,7 @@ import {
   TabsTrigger,
 } from "@workspace/ui/components/tabs";
 import { cn } from "@workspace/ui/lib/utils";
+import { Play } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import {
   type PanelImperativeHandle,
@@ -28,6 +31,7 @@ import EditorConsole, {
   type EditorLocation,
 } from "@/components/script/editor-console";
 import ScriptMetadata from "@/components/script/script-metadata";
+import useCompileScript from "@/hooks/use-compile-script";
 import useScripts from "@/hooks/use-scripts";
 import type { Script } from "@/lib/types/script";
 
@@ -74,6 +78,7 @@ const ScriptComponent = ({
     onlySaveAfterUserInteractions: true,
   });
   const script = scripts.find((script) => script.id === id) ?? serverScript;
+  const { compile, compiling } = useCompileScript(script);
   const defaultTab = script?.rust !== "" ? "rust" : "masm";
   const tab = searchParams.get("tab") ?? defaultTab;
   useEffect(() => {
@@ -157,11 +162,30 @@ const ScriptComponent = ({
           )
         }
       >
-        <TabsList>
-          <TabsTrigger value="rust">Rust</TabsTrigger>
-          {script.masm && <TabsTrigger value="masm">MASM</TabsTrigger>}
-          <TabsTrigger value="metadata">Metadata</TabsTrigger>
-        </TabsList>
+        <div className="flex items-center justify-between gap-2">
+          <TabsList>
+            <TabsTrigger value="rust">Rust</TabsTrigger>
+            {script.masm && <TabsTrigger value="masm">MASM</TabsTrigger>}
+            <TabsTrigger value="metadata">Metadata</TabsTrigger>
+          </TabsList>
+          {!script.readOnly && (
+            <Button
+              disabled={compiling}
+              onClick={() => {
+                // A collapsed console opens itself to show the output.
+                consolePanelRef.current?.expand();
+                compile();
+              }}
+            >
+              {compiling ? <Spinner /> : <Play />}
+              {compiling
+                ? "Compiling…"
+                : script.error
+                  ? "Re-compile"
+                  : "Compile"}
+            </Button>
+          )}
+        </div>
         {script.readOnly ? (
           <div className="min-h-0 flex-1">{tabs}</div>
         ) : (
@@ -202,6 +226,7 @@ const ScriptComponent = ({
             >
               <EditorConsole
                 script={script}
+                compiling={compiling}
                 state={consoleState}
                 onStateChange={setConsoleState}
                 onRevealLocation={revealLocation}

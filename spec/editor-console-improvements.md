@@ -359,12 +359,18 @@ Done in PR pending. What shipped:
 - Sizes are saved in localStorage (`useDefaultLayout`, id
   `script-editor-layout`), after drags only: the buttons' states aren't
   saved, so a reload never opens with the editor hidden.
-- The console is a plain bordered panel (not a `Card`, so its collapsed
-  height is exact: `CONSOLE_HEADER_HEIGHT`), its log fills the rest.
-  Minimize / Restore console collapses it to its header bar (clicking the
-  title toggles it too); Maximize console / Restore editor collapses the
-  editor panel. The state comes from the panels (`isCollapsed`), not from
-  separate state, so drags and buttons agree.
+- The Compile button sits at the right of the tabs row (where IDEs put
+  Run), not in the console: `hooks/use-compile-script.ts` compiles and logs.
+- The console is a square bordered panel docked under the editor (no gap, no
+  bottom padding), not a `Card`, so its collapsed height is exact
+  (`CONSOLE_HEADER_HEIGHT`). It has no title: its header bar shows the latest
+  log line, as one text node (`[10:25:25] Compiled counter-account in 3.9
+  s.`), or the empty log's placeholder, so a minimized console still reads
+  as a status bar. Its accessible name stays "Editor Console". Ghost icon
+  buttons on the right: Minimize / Restore console collapses it to that bar;
+  Maximize console / Restore editor collapses the editor panel; then full
+  output, copy and clear. The state comes from the panels (`isCollapsed`),
+  not from separate state, so drags and buttons agree.
 - A compile opens a collapsed console, and a location link shows a hidden
   editor before moving the cursor.
 - E2E: `e2e/script-layout.spec.ts` (no page scroll, minimize then compile,

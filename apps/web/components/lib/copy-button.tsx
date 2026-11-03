@@ -12,10 +12,12 @@ const CopyButton = ({
   content,
   copy,
   disabled,
+  variant = "secondary",
 }: {
   content: string;
   copy: string;
   disabled?: boolean;
+  variant?: "secondary" | "ghost";
 }) => {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -40,7 +42,7 @@ const CopyButton = ({
         delay={100}
         render={
           <Button
-            variant="secondary"
+            variant={variant}
             className="size-8"
             disabled={disabled}
             onClick={copied ? undefined : copyText}
