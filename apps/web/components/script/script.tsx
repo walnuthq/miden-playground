@@ -41,7 +41,6 @@ import useCompileScript from "@/hooks/use-compile-script";
 import useScriptShortcuts, {
   shortcutLabel,
 } from "@/hooks/use-script-shortcuts";
-import useScripts from "@/hooks/use-scripts";
 import { clearConsoleLog } from "@/lib/console-log";
 import type { Script } from "@/lib/types/script";
 
@@ -59,17 +58,10 @@ const reveal = (editor: CodeEditor, location: EditorLocation) => {
 const PAGE_HEIGHT_CLASS_NAME =
   "h-[calc(100svh-4rem)] group-has-data-[collapsible=icon]/sidebar-wrapper:h-[calc(100svh-3rem)]";
 
-const ScriptComponent = ({
-  id,
-  serverScript,
-}: {
-  id: string;
-  serverScript?: Script;
-}) => {
+const ScriptComponent = ({ id, script }: { id: string; script?: Script }) => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [searchParams] = useSearchParams();
-  const { scripts } = useScripts();
   // The Rust editor, for the console's links to its locations.
   const editorRef = useRef<CodeEditor | null>(null);
   // A link clicked on another tab, revealed once the Rust tab shows.
@@ -87,7 +79,6 @@ const ScriptComponent = ({
     storage: localStorage,
     onlySaveAfterUserInteractions: true,
   });
-  const script = scripts.find((script) => script.id === id) ?? serverScript;
   const { compile, compiling } = useCompileScript(script);
   const defaultTab = script?.rust !== "" ? "rust" : "masm";
   const tab = searchParams.get("tab") ?? defaultTab;

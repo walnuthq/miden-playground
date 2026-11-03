@@ -58,3 +58,17 @@ export const replaceInEditor = async (
 // The editor console's summary of a successful compile, e.g. `Compiled
 // counter-account in 3.9 s.` or `… in 3.9 s (1 warning).`.
 export const COMPILED = /^Compiled \S+ in \d+\.\d s/;
+
+// The script page's breadcrumb: the script's name, a dot while it's edited
+// since its last compile, and its compile status.
+export const scriptHeader = (page: Page) => {
+  // Not the whole header: the network badge is a badge too.
+  const header = page.locator("header").getByRole("navigation", {
+    name: "breadcrumb",
+  });
+  return {
+    name: header.locator('[data-slot="breadcrumb-page"]'),
+    dirty: header.getByRole("img", { name: "Edited since the last compile" }),
+    status: header.locator('[data-slot="badge"]'),
+  };
+};
