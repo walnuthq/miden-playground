@@ -155,13 +155,20 @@ the API, so it doesn't prove the route attaches.
 >
 > **Step 1 (now, no impact on traffic):** add these TXT records so the
 > certificate can be issued ahead of time:
-> - `TXT  _cf-custom-hostname.playground  <value>`
-> - `TXT  _acme-challenge.playground  <value>`
-  >
+>
+> ```
+> TXT  _cf-custom-hostname.playground  <value>
+> TXT  _acme-challenge.playground  <value>
+> ```
+>
 > **Step 2 (when we confirm the certificate is active):** replace the current
-> `playground` CNAME (`…vercel-dns-016.com`) with:
-> - `CNAME  playground  saas-fallback.walnut.dev`, **DNS only (grey cloud)**
-  >
+> `playground` CNAME (`…vercel-dns-016.com`) with this record, **DNS only
+> (grey cloud)**:
+>
+> ```
+> CNAME  playground  saas-fallback.walnut.dev
+> ```
+>
 > The switch should cause no downtime. We'll keep the Vercel proxy running
 > until DNS has propagated and remove it after that. You can take the hostname
 > back at any time by removing the CNAME. Thanks!
