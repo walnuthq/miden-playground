@@ -83,6 +83,16 @@ export const defaultScript = (): Script => ({
   updatedAt: Date.now(),
 });
 
+// Whether a script is built from its MASM source rather than from its package:
+// the built-in scripts and the mock API's (tutorials), which have no package.
+// A compiled Rust script has both: its `masm` is the compiler's Miden Assembly,
+// shown in the MASM tab, which calls library procedures without including them
+// and doesn't reassemble into the package. Never branch on `masm` alone.
+export const assembledFromMasm = ({
+  masm,
+  masp,
+}: Pick<Script, "masm" | "masp">) => masp === "" && masm !== "";
+
 // Rust packages export kebab-case names, displayed as their snake_case source names.
 export const formatProcedureExportPath = (path: string) =>
   path.split("::").at(-1)?.replaceAll('"', "").replaceAll("-", "_") ?? "";

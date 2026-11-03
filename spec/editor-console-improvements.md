@@ -451,6 +451,22 @@ Done in PR #745. What shipped:
 - Unit tests for the extraction; e2e `e2e/script-masm.spec.ts` (language,
   token types, colors on a built-in script's MASM tab).
 
+Follow-up in PR #TBD: compiled Rust scripts get a MASM tab too.
+
+- The API asks api-compile for the build's MASM (`masm: true` in `POST
+  /compile`, miden-source-code-verification #78) and stores it in
+  `packages.masm`, which existed unused; a failed compile clears it. The
+  examples' `compiled.json` carry it (+25 KB gzipped).
+- In the web app `script.masm` used to mean "assemble this script from its
+  MASM". Compiled Rust scripts now have both a package and MASM that doesn't
+  reassemble (it calls library procedures without including them), so the
+  account, transaction and note builders branch on `assembledFromMasm`
+  (no package) instead.
+- The tab shows the latest successful build's MASM: an edit hides it, a
+  compile brings it back. The read-only editor follows `script.masm` (Monaco
+  `value`), so a compile started from the MASM tab updates it.
+- E2E: the compiled script test in `e2e/script-masm.spec.ts`.
+
 ### 8. Miden SDK autocomplete, snippets and hover docs (P2, impact 4, effort M / L)
 
 Solana Playground: Rust CodeLens and snippets, typed TS globals.

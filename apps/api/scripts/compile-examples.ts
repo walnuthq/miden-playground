@@ -19,6 +19,7 @@ type CompiledPackage = {
   type: string;
   status: "draft" | "compiled" | "error";
   error: string;
+  masm: string;
   masp: string;
   commitment: string;
   exports: unknown[];
@@ -74,10 +75,11 @@ const compileExample = async (dir: string) => {
     sourcesHash: await sourcesHash(sources),
     packages: Object.fromEntries(
       packages.map(
-        ({ name, type, masp, commitment, exports, dependencies }) => [
+        ({ name, type, masm, masp, commitment, exports, dependencies }) => [
           name,
           {
             type,
+            masm,
             masp,
             commitment,
             exports,

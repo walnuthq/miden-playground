@@ -63,7 +63,7 @@ import {
   getIdentifierPart,
   getRoutingParametersPart,
 } from "@/lib/utils/account";
-import { defaultProcedureExport } from "@/lib/utils/script";
+import { assembledFromMasm, defaultProcedureExport } from "@/lib/utils/script";
 
 export const randomWord = () => {
   const bytes = new Uint8Array(32);
@@ -241,7 +241,7 @@ export const clientDeployAccount = async ({
     const storageSlots = component.storageSlots.map((storageSlot) =>
       wasmStorageSlotFromStorageSlot(storageSlot),
     );
-    let accountComponent = script.masm
+    let accountComponent = assembledFromMasm(script)
       ? WasmAccountComponent.compile(
           builder.compileAccountComponentCode(script.masm),
           storageSlots,
@@ -287,7 +287,7 @@ const createTransactionFromMasm = async ({
 }) => {
   const builder = await client.createCodeBuilder();
   const contractName = accountScript.name.replaceAll("-", "_");
-  const accountComponentLibrary = accountScript.masm
+  const accountComponentLibrary = assembledFromMasm(accountScript)
     ? builder.buildLibrary(
         `external_contract::${contractName}`,
         accountScript.masm,
@@ -319,7 +319,7 @@ export const clientCreateTransactionFromScript = ({
   accountScript?: Script;
   txScript: Script;
 }) => {
-  if (txScript.masm) {
+  if (assembledFromMasm(txScript)) {
     if (!accountScript) {
       throw new Error("Account Script not found");
     }
@@ -340,8 +340,8 @@ const clientCreateNoteScriptFromMasm = async ({
   const builder = await client.createCodeBuilder();
   const dependencies = script.dependencies
     .map((dependency) => scripts.find(({ id }) => id === dependency.id))
-    .filter((dependency) => dependency?.masm)
-    .filter((dependency) => dependency !== undefined);
+    .filter((dependency) => dependency !== undefined)
+    .filter((dependency) => assembledFromMasm(dependency));
   for (const dependency of dependencies) {
     const contractName = dependency.name.replaceAll("-", "_");
     const accountComponentLibrary = builder.buildLibrary(
@@ -379,7 +379,7 @@ export const clientCreateNoteFromScript = async ({
   noteStorage: string[];
   scripts: Script[];
 }) => {
-  const noteScript = script.masm
+  const noteScript = assembledFromMasm(script)
     ? await clientCreateNoteScriptFromMasm({ client, script, scripts })
     : createNoteScriptFromPackage(script);
   const assets = new WasmNoteAssets(

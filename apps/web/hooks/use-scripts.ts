@@ -26,6 +26,7 @@ import type {
 } from "@/lib/types/script";
 import { fromBase64 } from "@/lib/utils";
 import {
+  assembledFromMasm,
   compiledPackageToScript,
   defaultScript,
   invokeProcedureCustomTransactionScript,
@@ -134,7 +135,7 @@ const useScripts = () => {
     try {
       const builder = await client.createCodeBuilder();
       const contractName = script.name.replaceAll("-", "_");
-      const accountComponentLibrary = script.masm
+      const accountComponentLibrary = assembledFromMasm(script)
         ? builder.buildLibrary(
             `external_contract::${contractName}`,
             script.masm,
@@ -143,7 +144,7 @@ const useScripts = () => {
       builder.linkDynamicLibrary(accountComponentLibrary);
       const transactionScript = builder.compileTxScript(
         invokeProcedureCustomTransactionScript({
-          contractName: script.masm ? contractName : undefined,
+          contractName: assembledFromMasm(script) ? contractName : undefined,
           procedureExport,
           procedureInputs,
         }),

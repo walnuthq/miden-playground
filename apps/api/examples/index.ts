@@ -28,6 +28,8 @@ export type CompiledExample = {
     string,
     {
       type: PackageType;
+      // The build's Miden Assembly, for the MASM tab.
+      masm?: string;
       masp: string;
       commitment: string;
       exports: Export[];

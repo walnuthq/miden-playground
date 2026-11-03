@@ -28,7 +28,12 @@ export const createPackage = ({
   dependencies?: Dependency[];
   // Compile output known ahead of time (examples/*/compiled.json): the package
   // is inserted compiled instead of as a draft.
-  compiled?: { masp: string; commitment: string; exports: Export[] };
+  compiled?: {
+    masm: string;
+    masp: string;
+    commitment: string;
+    exports: Export[];
+  };
 }) => {
   const files = {
     [`${name}/.cargo/config.toml`]: projectTemplateFiles[".cargo/config.toml"],
@@ -62,7 +67,16 @@ type CompileResponse = {
   manifest: Manifest;
   // Set when the build succeeded: the sources plus the lockfile it used.
   files?: Record<string, string>;
+  // The release build's Miden Assembly, sent for `masm: true`: its `error` when
+  // unavailable (or over api-compile's 4 MiB limit). Missing from an
+  // api-compile that predates it.
+  masm?: { source: string } | { error: string };
 };
+
+// The MASM tab's content: for reading only, it calls library procedures
+// without including them, so it doesn't reassemble into the package.
+const masmSource = (masm: CompileResponse["masm"]) =>
+  masm && "source" in masm ? masm.source : "";
 
 export const compilePackage = async ({
   id,
@@ -107,6 +121,7 @@ export const compilePackage = async ({
     commitment,
     manifest,
     files: compiledFiles,
+    masm: masmOutput,
   } = await fetchApiCompile<CompileResponse>("/compile", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -114,7 +129,13 @@ export const compilePackage = async ({
     // cache (it moves with api-compile's own lockfiles): re-resolve it against
     // the cache rather than download and rebuild them. The build sends the
     // updated lockfile back, stored below.
-    body: JSON.stringify({ files, entrypoint: name, warmLockfile: true }),
+    // `masm`: also return the build's Miden Assembly, for the MASM tab.
+    body: JSON.stringify({
+      files,
+      entrypoint: name,
+      warmLockfile: true,
+      masm: true,
+    }),
     signal,
   });
   if (stdout === "" && stderr !== "") {
@@ -124,6 +145,8 @@ export const compilePackage = async ({
       status: "error",
       rust,
       files: updatedFiles,
+      // No MASM for code that doesn't build.
+      masm: "",
       dependencies,
       exports: [],
     });
@@ -152,6 +175,10 @@ export const compilePackage = async ({
   const exports = manifest.exports.filter(
     ({ Procedure: { signature } }) => signature?.abi === 3,
   );
+  if (masmOutput && "error" in masmOutput) {
+    console.warn(`${name}: no MASM (${masmOutput.error})`);
+  }
+  const masm = masmSource(masmOutput);
   await updatePackage({
     id,
     status: "compiled",
@@ -159,6 +186,7 @@ export const compilePackage = async ({
     // The compiled sources plus the Cargo.lock the build used, sent back with
     // the next compile to get the same dependency versions.
     files: compiledFiles ?? updatedFiles,
+    masm,
     masp,
     commitment,
     exports,
@@ -173,7 +201,7 @@ export const compilePackage = async ({
     error: "",
     // A successful build still reports its warnings on stderr.
     warnings: stderr,
-    masm: "",
+    masm,
     commitment,
     masp,
     exports,

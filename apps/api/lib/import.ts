@@ -127,6 +127,8 @@ export const importExample = async (
       throw new Error(`Error: ${name} is missing from compiled.json.`);
     }
     const { masp, commitment, exports } = compiledPackage;
+    // Snapshots taken before api-compile returned MASM have none.
+    const masm = compiledPackage.masm ?? "";
     const packageDependencies = dependencies.map((dependency) => {
       const createdPackage = createdPackages.get(dependency);
       if (!createdPackage) {
@@ -146,7 +148,7 @@ export const importExample = async (
       type,
       rust,
       dependencies: packageDependencies,
-      compiled: { masp, commitment, exports },
+      compiled: { masm, masp, commitment, exports },
     });
     createdPackages.set(name, { id, name, type, commitment });
     compiledPackages.push({
@@ -157,7 +159,7 @@ export const importExample = async (
       rust,
       error: "",
       warnings: "",
-      masm: "",
+      masm,
       commitment,
       masp,
       exports,

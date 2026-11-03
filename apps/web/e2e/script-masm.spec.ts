@@ -1,6 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
-import { waitForEditorText } from "./editor";
-import { logBrowserErrors } from "./tutorial";
+import { COMPILED, replaceInEditor, waitForEditorText } from "./editor";
+import { launchExample } from "./example";
+import { logBrowserErrors, TRANSACTION_TIMEOUT } from "./tutorial";
 
 type Token = { offset: number; type: string };
 
@@ -149,5 +150,71 @@ test("script: MASM syntax highlighting", async ({ page }) => {
     const name = await color("increment_count");
     const comment = await color("Returns the current count");
     expect(new Set([proc, name, comment]).size).toBe(3);
+  });
+});
+
+// The MASM model's language and text, once the tab has mounted its editor.
+const masmModel = (page: Page) =>
+  page.evaluate(() => {
+    const model = (
+      window as unknown as {
+        monaco: {
+          editor: {
+            getModels: () => {
+              getValue: () => string;
+              getLanguageId: () => string;
+              isDisposed: () => boolean;
+            }[];
+          };
+        };
+      }
+    ).monaco.editor
+      .getModels()
+      .find((model) => model.getLanguageId() === "masm" && !model.isDisposed());
+    return model?.getValue();
+  });
+
+test("script: a compiled script's MASM", async ({ page }) => {
+  logBrowserErrors(page);
+  const masmTab = page.getByRole("tab", { name: "MASM" });
+  const compile = async () => {
+    await page.getByRole("button", { name: "Compile" }).click();
+  };
+
+  await test.step("an example's script has its MASM", async () => {
+    await launchExample(page, {
+      title: "Counter Contract",
+      accountName: "Counter Contract",
+    });
+    await page.getByRole("link", { name: "counter-account" }).click();
+    await waitForEditorText(page, "fn get_count(&self) -> Felt {");
+    await masmTab.click();
+    await expect.poll(() => masmModel(page)).toContain('pub proc "get-count"(');
+  });
+
+  await test.step("an edit hides it, a compile brings it back", async () => {
+    await page.getByRole("tab", { name: "Rust" }).click();
+    await replaceInEditor(
+      page,
+      "current_value + felt!(1);",
+      "current_value + felt!(1234567);",
+    );
+    await expect(masmTab).toBeHidden();
+    await compile();
+    await expect(page.getByText(COMPILED)).toBeVisible({
+      timeout: TRANSACTION_TIMEOUT,
+    });
+    await masmTab.click();
+    await expect.poll(() => masmModel(page)).toContain("push.1234567");
+  });
+
+  await test.step("a failed compile has none", async () => {
+    await page.getByRole("tab", { name: "Rust" }).click();
+    await replaceInEditor(page, "felt!(1234567);", "felt!(1234567;");
+    await compile();
+    await expect(
+      page.getByRole("button", { name: /^src\/lib\.rs:\d+:\d+$/ }).first(),
+    ).toBeVisible({ timeout: TRANSACTION_TIMEOUT });
+    await expect(masmTab).toBeHidden();
   });
 });

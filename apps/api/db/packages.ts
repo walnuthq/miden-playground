@@ -33,6 +33,7 @@ export const updatePackage = ({
   status,
   rust,
   files,
+  masm,
   masp,
   commitment,
   exports,
@@ -42,6 +43,7 @@ export const updatePackage = ({
   status?: PackageStatus;
   rust?: string;
   files?: Record<string, string>;
+  masm?: string;
   masp?: string;
   commitment?: string;
   exports?: Export[];
@@ -49,7 +51,16 @@ export const updatePackage = ({
 }) =>
   getDb()
     .update(packagesTable)
-    .set({ status, rust, files, masp, commitment, exports, dependencies })
+    .set({
+      status,
+      rust,
+      files,
+      masm,
+      masp,
+      commitment,
+      exports,
+      dependencies,
+    })
     .where(eq(packagesTable.id, id));
 
 export const deletePackage = (id: string) =>
