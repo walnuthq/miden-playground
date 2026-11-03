@@ -451,7 +451,7 @@ Done in PR #745. What shipped:
 - Unit tests for the extraction; e2e `e2e/script-masm.spec.ts` (language,
   token types, colors on a built-in script's MASM tab).
 
-Follow-up in PR #TBD: compiled Rust scripts get a MASM tab too.
+Follow-up in PR #746: compiled Rust scripts get a MASM tab too.
 
 - The API asks api-compile for the build's MASM (`masm: true` in `POST
   /compile`, miden-source-code-verification #78) and stores it in
