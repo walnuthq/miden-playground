@@ -157,6 +157,9 @@ const Editor = ({
       defaultLanguage={language === "rust" ? "rust" : MASM_LANGUAGE_ID}
       beforeMount={registerMasm}
       defaultValue={language === "rust" ? script.rust : script.masm}
+      // The read-only MASM follows each compile, including one started from
+      // the MASM tab (Cmd+S), which doesn't remount it.
+      value={language === "masm" ? script.masm : undefined}
       // line={36}
       onMount={(editor, monaco) => {
         editor.onDidChangeModelContent(() => {

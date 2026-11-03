@@ -30,6 +30,7 @@ The examples launched from the home page (`apps/web/lib/examples`) get their pac
 - Edit the sources in place. They may drift from upstream on purpose (e.g. the counter's map key).
 - Regenerate the snapshots with `pnpm examples:compile` in `apps/api`, with the local API (`pnpm dev`) and api-compile running. The local api-compile image must match production's, since its output ships as is. Do it after editing an example, and after bumping the SDK, the api-compile image or `templates/project-template`.
 - The snapshots are bundled into the API Worker: each note's masp is ~560 KB of base64 (it embeds its dependencies). The two examples bring the upload to ~840 KiB gzipped, so watch the Worker size limit when adding examples.
+- `compiled.json` also holds each package's MASM (the MASM tab of a launched example's scripts).
 - `compiled.json` stores a hash of the sources. When they don't match, the API logs a warning and compiles live, so a forgotten regeneration after an edit is only slow. A compiler bump leaves the hash unchanged, though: regenerate by hand, or launching an example serves stale packages.
 - Register a new example in `apps/api/examples/index.ts`, keyed by the web app's example id. Its `compiled.json` import needs the `as unknown as CompiledExample` cast: real manifests have structured signature params, which the `ProcedureSignature.params: string[]` type doesn't model.
 
@@ -55,6 +56,7 @@ Every package the API creates starts from `apps/api/templates/project-template/C
 - The Compile button sits in the tabs row, above the editor (`hooks/use-compile-script.ts`), not in the console. Tutorial steps say where it is (`deploy-a-counter-contract/step2.tsx`, `timelock-p2id-note/step3.tsx`): update them when it moves.
 - Tutorials outside the list in `apps/web/lib/api.ts` (`createScript`) use `lib/mock-api.ts`: script ids aren't UUIDs, and compiling never reaches the API or api-compile. It always succeeds, with no error text. Run tutorials 6, 7 and 8 after changing the script page.
 - The Rust tab stays mounted on the other tabs (`keepMounted`), so the hidden editor stays in the DOM and in `monaco.editor.getEditors()`. Scope e2e locators to the visible tab. The console shows on every tab of an editable script, and its links open the Rust tab.
+- `script.masm` is the MASM tab's content. A compiled Rust script gets it from api-compile (`masm: true` in `POST /compile`), stored in `packages.masm`; it's cleared by an edit or a failed compile. That MASM is for reading: it calls library procedures without including them, so it doesn't reassemble. Scripts without a package (the built-in ones, the mock API's) are assembled from their `masm` instead: branch on `assembledFromMasm` (`lib/utils/script.ts`), never on `masm` alone.
 
 # MASM highlighting
 

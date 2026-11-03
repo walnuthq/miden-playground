@@ -27,7 +27,10 @@ import type {
   TransactionType,
 } from "@/lib/types/transaction";
 import { fromBase64 } from "@/lib/utils";
-import { invokeProcedureCustomTransactionScript } from "@/lib/utils/script";
+import {
+  assembledFromMasm,
+  invokeProcedureCustomTransactionScript,
+} from "@/lib/utils/script";
 import {
   wasmAccountToAccount,
   wasmTransactionToTransaction,
@@ -212,13 +215,13 @@ const useTransactions = () => {
     }
     const builder = await client.createCodeBuilder();
     const contractName = script.name.replaceAll("-", "_");
-    const accountComponentLibrary = script.masm
+    const accountComponentLibrary = assembledFromMasm(script)
       ? builder.buildLibrary(`external_contract::${contractName}`, script.masm)
       : WasmPackage.deserialize(fromBase64(script.masp)).asLibrary();
     builder.linkDynamicLibrary(accountComponentLibrary);
     const transactionScript = builder.compileTxScript(
       invokeProcedureCustomTransactionScript({
-        contractName: script.masm ? contractName : undefined,
+        contractName: assembledFromMasm(script) ? contractName : undefined,
         procedureExport,
         procedureInputs,
       }),
