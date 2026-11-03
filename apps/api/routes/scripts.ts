@@ -61,9 +61,6 @@ type GetScriptResponse = {
 type CompileScriptRequestBody = {
   // The edited files: `src/lib.rs` only, the manifests are generated.
   files?: ScriptFiles;
-  // Sent instead of `files` by the web app before they replaced it: tabs
-  // opened before the deploy still compile.
-  rust?: string;
   dependencies: string[];
 };
 
@@ -168,9 +165,9 @@ const scripts = createApp()
   .patch("/:id", async (c) => {
     try {
       const id = c.req.param("id");
-      const { files, rust, dependencies } =
+      const { files, dependencies } =
         await c.req.json<CompileScriptRequestBody>();
-      const source = files?.["src/lib.rs"] ?? rust;
+      const source = files?.["src/lib.rs"];
       if (source === undefined) {
         throw new Error("Error: Invalid request body.");
       }

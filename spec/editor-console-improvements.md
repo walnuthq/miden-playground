@@ -3,7 +3,7 @@
 Status: proposal, written 2026-11-02. Done: item 1 (PR #731), item 2 (PR
 #732), item 3 (PR #735), item 4 (PR #736), item 5 (PR #737), item 6 (PR
 #742), which completes the "editor and console" pass (see "Scoring"), item 7
-(PR #745), item 12 (header, Explorer with file tabs).
+(PR #745), item 12 (PR #747: header, Explorer with file tabs).
 
 The code editor UX of the scripts feature (`/scripts/:id`) is behind other
 blockchain playgrounds. This document compares it with Solana Playground
@@ -561,10 +561,11 @@ planned):
 - `Script.files` (those 3 files) replaced `Script.rust`, in the web app and
   the API. The API returns them without the `<name>/` prefix they're stored
   under, from every route that returns a package (`GET` returned all 7 stored
-  files before). `PATCH /scripts/:id` takes `files["src/lib.rs"]`, and still
-  the legacy `rust` from web apps loaded before the deploy. `packages.rust`
-  is dropped by `pnpm db:migrate-drop-rust` (backfills `files` where it
-  differed: none locally), run after the deploy. Persisted state, saved
+  files before). `PATCH /scripts/:id` takes `files["src/lib.rs"]` (the
+  legacy `rust`, for web apps loaded before the deploy, was dropped in a
+  follow-up). `packages.rust` is dropped by `pnpm db:migrate-drop-rust`
+  (backfills `files` where it differed: none locally), run on production
+  after the deploy. Persisted state, saved
   projects and tutorial snapshots migrate on load.
 - Add / Remove dependency patch `miden-project.toml` right away; the next
   compile replaces it with the API's regenerated file.
