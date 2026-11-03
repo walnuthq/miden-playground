@@ -15,7 +15,9 @@
     "upload": "vite build && wrangler versions upload",
     "cf-typegen": "wrangler types --include-runtime=false worker/worker-configuration.d.ts",
     "test": "node --test 'lib/**/*.test.ts'",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "masm:sync": "node scripts/sync-masm-vocabulary.ts",
+    "masm:check": "node scripts/sync-masm-vocabulary.ts --check"
   },
   "dependencies": {
     "@fontsource-variable/geist": "5.3.0",

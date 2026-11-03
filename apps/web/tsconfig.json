@@ -25,6 +25,7 @@
     "dist",
     "worker",
     "e2e",
+    "scripts",
     "**/*.test.ts",
     "playwright.config.ts",
     "vite.config.ts"

@@ -16,7 +16,8 @@
       "!.claude/skills",
       "!packages/ui/src/components",
       "!**/public",
-      "!apps/api/examples/*/compiled.json"
+      "!apps/api/examples/*/compiled.json",
+      "!apps/web/lib/masm/vocabulary.json"
     ]
   },
   "formatter": {
