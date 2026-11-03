@@ -31,6 +31,6 @@
     "@workspace/typescript-config": "workspace:*",
     "drizzle-kit": "1.0.0-rc.5",
     "typescript": "7.0.2",
-    "wrangler": "4.156.1"
+    "wrangler": "4.156.2"
   }
 }
