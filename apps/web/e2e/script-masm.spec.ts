@@ -143,17 +143,23 @@ test("script: MASM syntax highlighting", async ({ page }) => {
   });
 
   await test.step("the MASM tab is colored", async () => {
-    // Keywords and comments get different colors than plain text.
+    // Keywords and comments get different colors than plain text. Monaco can
+    // render a line before tokenizing it (one color for the whole line), so
+    // poll until the colors show.
     const panel = page.getByRole("tabpanel");
     const color = (text: string) =>
       panel
         .locator(".view-line span span", { hasText: text })
         .first()
         .evaluate((element) => getComputedStyle(element).color);
-    const proc = await color("proc");
-    const name = await color("increment_count");
-    const comment = await color("Returns the current count");
-    expect(new Set([proc, name, comment]).size).toBe(3);
+    await expect
+      .poll(async () => {
+        const proc = await color("proc");
+        const name = await color("increment_count");
+        const comment = await color("Returns the current count");
+        return new Set([proc, name, comment]).size;
+      })
+      .toBe(3);
   });
 });
 

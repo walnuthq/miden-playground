@@ -103,7 +103,9 @@ trait CounterContract {
             <InlineCode>.masp</InlineCode>
           </strong>{" "}
           file), which contains both the compiled code and a manifest describing
-          what the package exports.
+          what the package exports. If the compiler reports an error instead,
+          the console under the editor shows it and the editor underlines the
+          faulty code: click the error's location in the console to jump to it.
         </p>
         <p>
           Click the <em>"Manifest"</em> tab: under <em>"Package exports"</em>,

@@ -127,6 +127,17 @@ Check for any TypeScript issues:
 pnpm typecheck
 ```
 
+### Tests
+
+Unit tests (`node:test`, plain node) cover the web app's pure helpers, such as the compile diagnostics parser, the console's output cleanup, the MASM vocabulary and the manifest patch. `masm:check` reports when the MASM vocabulary is out of date with the assembler:
+
+```sh
+pnpm --filter miden-playground-web test
+pnpm --filter miden-playground-web masm:check
+```
+
+The end-to-end tests (Playwright) run the tutorials, the examples and the script editor against a live Playground on testnet, with the app on port 3000 and the API on port 3001. See [`apps/web/e2e`](apps/web/e2e/README.md).
+
 ## License
 
 [MIT](LICENSE)

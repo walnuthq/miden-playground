@@ -1,10 +1,12 @@
 # Scripts editor and console improvements
 
-Status: proposal, written 2026-11-02. Done: item 1 (PR #731), item 2 (PR
-#732), item 3 (PR #735), item 4 (PR #736), item 5 (PR #737), item 6 (PR
-#742), which completes the "editor and console" pass (see "Scoring"), item 7
-(PR #745), item 12 (PR #747: header, Explorer with file tabs), item 14
-(minimap and font size; word wrap and Vim dropped).
+Status: proposal, written 2026-11-02; the first pass shipped 2026-11-03.
+Done: item 1 (PR #731), item 2 (PR #732), item 3 (PR #735), item 4 (PR
+#736), item 5 (PR #737), item 6 (PR #742), which completes the "editor and
+console" pass (see "Scoring"), item 7 (PRs #745 and #746), item 12 (PRs #747
+and #748: header, Explorer with file tabs), item 14 (PR #749: minimap and font
+size; word wrap and Vim dropped). Next: the P2 items 8 to 11, each a separate
+product decision; then 13 and 15.
 
 The code editor UX of the scripts feature (`/scripts/:id`) is behind other
 blockchain playgrounds. This document compares it with Solana Playground
@@ -175,7 +177,7 @@ What the user sees today, from the production run:
 | 3   | A real console (history, levels, timing, warnings, clear) | 5      | S–M    | Done     |
 | 4   | Cleaner compiler output, with a "show full output" toggle | 4      | S      | Done     |
 | 5   | IDE-style resizable layout, console panel states          | 4      | S–M    | Done     |
-| 6   | Keyboard shortcuts (compile, console)                     | 3      | S      | P1       |
+| 6   | Keyboard shortcuts (compile, console)                     | 3      | S      | Done     |
 | 7   | MASM syntax highlighting                                  | 3      | S      | Done     |
 | 8   | Miden SDK autocomplete, snippets and hover docs           | 4      | M / L  | P2       |
 | 9   | Tutorials next to the live editor                         | 4      | M      | P2       |
@@ -529,7 +531,7 @@ mostly a shortcut to them.
 - Later: tabs for several open scripts, and showing `miden-project.toml` as a
   read-only (or editable) file next to `lib.rs`.
 
-Done. What shipped, in two parts:
+Done in PRs #747 and #748. What shipped, in two parts:
 
 Header:
 
@@ -593,7 +595,7 @@ endpoint) or as rustfmt WASM in the browser. Optional format on compile.
 Word wrap toggle (always on today), Vim keybindings (`monaco-vim`), font size,
 minimap. Stored in local settings.
 
-Done. What shipped:
+Done in PR #749. What shipped:
 
 - A gear button ("Editor settings") in the tabs row, left of Compile, also on
   read-only scripts, opens a menu: Minimap (a checkbox, on by default) and
