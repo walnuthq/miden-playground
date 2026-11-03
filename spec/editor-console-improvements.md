@@ -3,7 +3,8 @@
 Status: proposal, written 2026-11-02. Done: item 1 (PR #731), item 2 (PR
 #732), item 3 (PR #735), item 4 (PR #736), item 5 (PR #737), item 6 (PR
 #742), which completes the "editor and console" pass (see "Scoring"), item 7
-(PR #745), item 12 (PR #747: header, Explorer with file tabs).
+(PR #745), item 12 (PR #747: header, Explorer with file tabs), item 14
+(minimap and font size; word wrap and Vim dropped).
 
 The code editor UX of the scripts feature (`/scripts/:id`) is behind other
 blockchain playgrounds. This document compares it with Solana Playground
@@ -182,7 +183,7 @@ What the user sees today, from the production run:
 | 11  | Call a script's procedures from its page                  | 4      | M–L    | P2       |
 | 12  | Header and tabs (name, dirty state, open scripts)         | 3      | S–M    | Done     |
 | 13  | Format code (rustfmt)                                     | 2      | M      | P3       |
-| 14  | Editor settings (word wrap, Vim, font size)               | 2      | S      | P3       |
+| 14  | Editor settings (minimap, font size)                      | 2      | S      | Done     |
 | 15  | Command menu (instead of a terminal)                      | 2      | L      | P3       |
 
 Suggested order: 1 now; 2–6 together as one "editor and console" pass (mostly
@@ -591,6 +592,25 @@ endpoint) or as rustfmt WASM in the browser. Optional format on compile.
 
 Word wrap toggle (always on today), Vim keybindings (`monaco-vim`), font size,
 minimap. Stored in local settings.
+
+Done. What shipped:
+
+- A gear button ("Editor settings") in the tabs row, left of Compile, also on
+  read-only scripts, opens a menu: Minimap (a checkbox, on by default) and
+  Font size (10 to 20 px, default Monaco's own: 12 px on macOS, 14 elsewhere).
+  More settings go in that menu.
+- One setting for every editor of the page (`src/lib.rs`, the manifests, the
+  MASM) and every script, in localStorage (`lib/editor-settings.ts`, key
+  `editor-settings`), followed across tabs. Not in `State`, so not saved with
+  projects.
+- Each editor also has a "Toggle Minimap" action, in its right-click menu
+  and the F1 command palette, like VS Code's. It's an `addAction` per editor,
+  not an `addCommand` (shared across editors, see item 6).
+- Not done: a word wrap toggle (it stays on: scripts are short, and wrapping
+  keeps long MASM lines readable without horizontal scrolling) and Vim mode
+  (a `monaco-vim` dependency, and its Esc and Ctrl bindings would compete
+  with the page's shortcuts, for few users).
+- E2E: `e2e/script-editor-settings.spec.ts`.
 
 ### 15. Command menu (P3, impact 2, effort L)
 

@@ -36,6 +36,7 @@ import EditorConsole, {
   type ConsoleState,
   type EditorLocation,
 } from "@/components/script/editor-console";
+import EditorSettingsMenu from "@/components/script/editor-settings-menu";
 import ScriptExplorer from "@/components/script/script-explorer";
 import ScriptManifest from "@/components/script/script-manifest";
 import useCompileScript from "@/hooks/use-compile-script";
@@ -255,26 +256,29 @@ const ScriptComponent = ({ id, script }: { id: string; script?: Script }) => {
             )}
             <TabsTrigger value="manifest">Manifest</TabsTrigger>
           </TabsList>
-          {!script.readOnly && (
-            <Tooltip>
-              <TooltipTrigger
-                delay={300}
-                render={
-                  <Button disabled={compiling} onClick={compileAndShow} />
-                }
-              >
-                {compiling ? <Spinner /> : <Play />}
-                {compiling
-                  ? "Compiling…"
-                  : script.error
-                    ? "Re-compile"
-                    : "Compile"}
-              </TooltipTrigger>
-              <TooltipContent>
-                Compile <Kbd>{shortcutLabel("S")}</Kbd>
-              </TooltipContent>
-            </Tooltip>
-          )}
+          <div className="flex items-center gap-1">
+            <EditorSettingsMenu />
+            {!script.readOnly && (
+              <Tooltip>
+                <TooltipTrigger
+                  delay={300}
+                  render={
+                    <Button disabled={compiling} onClick={compileAndShow} />
+                  }
+                >
+                  {compiling ? <Spinner /> : <Play />}
+                  {compiling
+                    ? "Compiling…"
+                    : script.error
+                      ? "Re-compile"
+                      : "Compile"}
+                </TooltipTrigger>
+                <TooltipContent>
+                  Compile <Kbd>{shortcutLabel("S")}</Kbd>
+                </TooltipContent>
+              </Tooltip>
+            )}
+          </div>
         </div>
         {script.readOnly ? (
           <div className="min-h-0 flex-1">{tabs}</div>
