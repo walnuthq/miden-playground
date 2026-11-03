@@ -1,4 +1,5 @@
 import { Button } from "@workspace/ui/components/button";
+import { Kbd } from "@workspace/ui/components/kbd";
 import { Toggle } from "@workspace/ui/components/toggle";
 import {
   Tooltip,
@@ -17,6 +18,7 @@ import {
 import type { ReactNode } from "react";
 import { useEffect, useLayoutEffect, useRef } from "react";
 import CopyButton from "@/components/lib/copy-button";
+import { shortcutLabel } from "@/hooks/use-script-shortcuts";
 import {
   type ConsoleEntry,
   type ConsoleLevel,
@@ -133,13 +135,16 @@ const Entry = ({
   );
 };
 
+// Its accessible name is the label alone: the shortcut shows in the tooltip.
 const IconButton = ({
   label,
+  shortcut,
   disabled,
   onClick,
   children,
 }: {
   label: string;
+  shortcut?: string;
   disabled?: boolean;
   onClick: () => void;
   children: ReactNode;
@@ -161,6 +166,7 @@ const IconButton = ({
     </TooltipTrigger>
     <TooltipContent>
       <p>{label}</p>
+      {shortcut && <Kbd>{shortcutLabel(shortcut)}</Kbd>}
     </TooltipContent>
   </Tooltip>
 );
@@ -246,6 +252,7 @@ const EditorConsole = ({
         {state === "collapsed" ? (
           <IconButton
             label="Restore console"
+            shortcut="J"
             onClick={() => onStateChange("normal")}
           >
             <PanelBottomOpen />
@@ -253,6 +260,7 @@ const EditorConsole = ({
         ) : (
           <IconButton
             label="Minimize console"
+            shortcut="J"
             onClick={() => onStateChange("collapsed")}
           >
             <PanelBottomClose />
@@ -299,6 +307,7 @@ const EditorConsole = ({
         />
         <IconButton
           label="Clear console"
+          shortcut="L"
           disabled={entries.length === 0}
           onClick={clear}
         >
