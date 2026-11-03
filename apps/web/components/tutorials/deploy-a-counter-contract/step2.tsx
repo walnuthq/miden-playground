@@ -105,8 +105,8 @@ const Step2: TutorialStep = {
           description={
             <p>
               Change the increment value to a number greater than{" "}
-              <strong>1</strong>, then click the <em>"Compile"</em> button in
-              the editor console to compile your script.
+              <strong>1</strong>, then click the <em>"Compile"</em> button above
+              the editor to compile your script.
             </p>
           }
         />

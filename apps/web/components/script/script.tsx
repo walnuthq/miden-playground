@@ -1,10 +1,23 @@
+import { Button } from "@workspace/ui/components/button";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@workspace/ui/components/resizable";
+import { Spinner } from "@workspace/ui/components/spinner";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@workspace/ui/components/tabs";
-import { useEffect, useRef } from "react";
+import { cn } from "@workspace/ui/lib/utils";
+import { Play } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import {
+  type PanelImperativeHandle,
+  useDefaultLayout,
+} from "react-resizable-panels";
 import { useLocation, useNavigate, useSearchParams } from "react-router";
 import Editor, {
   type CodeEditor,
@@ -13,9 +26,12 @@ import Editor, {
 import NotFound from "@/components/lib/not-found";
 import AddDependencyDialog from "@/components/script/add-dependency-dialog";
 import EditorConsole, {
+  CONSOLE_HEADER_HEIGHT,
+  type ConsoleState,
   type EditorLocation,
 } from "@/components/script/editor-console";
 import ScriptMetadata from "@/components/script/script-metadata";
+import useCompileScript from "@/hooks/use-compile-script";
 import useScripts from "@/hooks/use-scripts";
 import type { Script } from "@/lib/types/script";
 
@@ -27,6 +43,11 @@ const reveal = (editor: CodeEditor, location: EditorLocation) => {
   editor.revealPositionInCenter(position);
   editor.focus();
 };
+
+// The script page fills the viewport below the header (`h-16`, `h-12` with the
+// icon sidebar), so the editor and the console scroll, not the page.
+const PAGE_HEIGHT_CLASS_NAME =
+  "h-[calc(100svh-4rem)] group-has-data-[collapsible=icon]/sidebar-wrapper:h-[calc(100svh-3rem)]";
 
 const ScriptComponent = ({
   id,
@@ -43,7 +64,21 @@ const ScriptComponent = ({
   const editorRef = useRef<CodeEditor | null>(null);
   // A link clicked on another tab, revealed once the Rust tab shows.
   const pendingReveal = useRef<EditorLocation | null>(null);
+  // The editor/console split. The console is collapsed to its header bar, or
+  // maximized by collapsing the editor.
+  const editorPanelRef = useRef<PanelImperativeHandle | null>(null);
+  const consolePanelRef = useRef<PanelImperativeHandle | null>(null);
+  const [editorCollapsed, setEditorCollapsed] = useState(false);
+  const [consoleCollapsed, setConsoleCollapsed] = useState(false);
+  // Only drags are saved: a reload never opens with the editor hidden.
+  const { defaultLayout, onLayoutChanged } = useDefaultLayout({
+    id: "script-editor-layout",
+    panelIds: ["editor", "console"],
+    storage: localStorage,
+    onlySaveAfterUserInteractions: true,
+  });
   const script = scripts.find((script) => script.id === id) ?? serverScript;
+  const { compile, compiling } = useCompileScript(script);
   const defaultTab = script?.rust !== "" ? "rust" : "masm";
   const tab = searchParams.get("tab") ?? defaultTab;
   useEffect(() => {
@@ -63,6 +98,8 @@ const ScriptComponent = ({
   // The console shows on every tab, but its locations are in the Rust code:
   // switch to it first. The editor stays mounted on the other tabs.
   const revealLocation = (location: EditorLocation) => {
+    // Maximized console: show the editor again.
+    editorPanelRef.current?.expand();
     const editor = editorRef.current;
     if (tab === "rust" && editor) {
       reveal(editor, location);
@@ -71,9 +108,51 @@ const ScriptComponent = ({
       navigate(pathname);
     }
   };
+  const consoleState: ConsoleState = consoleCollapsed
+    ? "collapsed"
+    : editorCollapsed
+      ? "maximized"
+      : "normal";
+  const setConsoleState = (state: ConsoleState) => {
+    if (state === "collapsed") {
+      editorPanelRef.current?.expand();
+      consolePanelRef.current?.collapse();
+    } else if (state === "maximized") {
+      consolePanelRef.current?.expand();
+      editorPanelRef.current?.collapse();
+    } else {
+      consolePanelRef.current?.expand();
+      editorPanelRef.current?.expand();
+    }
+  };
+  const tabs = (
+    <>
+      {/* Kept mounted across tabs: its undo history, scroll position and
+          compile markers survive a look at the metadata. */}
+      <TabsContent value="rust" keepMounted className="h-full">
+        <Editor
+          script={script}
+          language="rust"
+          readOnly={script.readOnly}
+          onMount={(editor) => {
+            editorRef.current = editor;
+          }}
+        />
+      </TabsContent>
+      {script.masm && (
+        <TabsContent value="masm" className="h-full">
+          <Editor script={script} language="masm" readOnly />
+        </TabsContent>
+      )}
+      <TabsContent value="metadata" className="h-full overflow-y-auto">
+        <ScriptMetadata script={script} />
+      </TabsContent>
+    </>
+  );
   return (
-    <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+    <div className={cn("flex flex-col gap-4 px-4", PAGE_HEIGHT_CLASS_NAME)}>
       <Tabs
+        className="min-h-0 flex-1"
         value={tab}
         onValueChange={(value) =>
           navigate(
@@ -83,44 +162,78 @@ const ScriptComponent = ({
           )
         }
       >
-        <TabsList>
-          <TabsTrigger value="rust">Rust</TabsTrigger>
-          {script.masm && <TabsTrigger value="masm">MASM</TabsTrigger>}
-          <TabsTrigger value="metadata">Metadata</TabsTrigger>
-        </TabsList>
-        <div className="flex flex-col gap-4">
-          {/* Kept mounted across tabs: its undo history, scroll position and
-              compile markers survive a look at the metadata. */}
-          <TabsContent value="rust" keepMounted>
-            <Editor
-              script={script}
-              language="rust"
-              readOnly={script.readOnly}
-              height={script.readOnly ? "85vh" : "61vh"}
-              onMount={(editor) => {
-                editorRef.current = editor;
-              }}
-            />
-          </TabsContent>
-          {script.masm && (
-            <TabsContent value="masm">
-              <Editor
-                script={script}
-                language="masm"
-                readOnly
-                height={script.readOnly ? "85vh" : "61vh"}
-              />
-            </TabsContent>
-          )}
-          <TabsContent value="metadata">
-            <div className={script.readOnly ? "h-[85vh]" : "h-[61vh]"}>
-              <ScriptMetadata script={script} />
-            </div>
-          </TabsContent>
+        <div className="flex items-center justify-between gap-2">
+          <TabsList>
+            <TabsTrigger value="rust">Rust</TabsTrigger>
+            {script.masm && <TabsTrigger value="masm">MASM</TabsTrigger>}
+            <TabsTrigger value="metadata">Metadata</TabsTrigger>
+          </TabsList>
           {!script.readOnly && (
-            <EditorConsole script={script} onRevealLocation={revealLocation} />
+            <Button
+              disabled={compiling}
+              onClick={() => {
+                // A collapsed console opens itself to show the output.
+                consolePanelRef.current?.expand();
+                compile();
+              }}
+            >
+              {compiling ? <Spinner /> : <Play />}
+              {compiling
+                ? "Compiling…"
+                : script.error
+                  ? "Re-compile"
+                  : "Compile"}
+            </Button>
           )}
         </div>
+        {script.readOnly ? (
+          <div className="min-h-0 flex-1">{tabs}</div>
+        ) : (
+          <ResizablePanelGroup
+            orientation="vertical"
+            className="min-h-0 flex-1"
+            defaultLayout={defaultLayout}
+            onLayoutChanged={onLayoutChanged}
+          >
+            <ResizablePanel
+              id="editor"
+              panelRef={editorPanelRef}
+              collapsible
+              collapsedSize={0}
+              minSize="20%"
+              defaultSize="65%"
+              onResize={() =>
+                setEditorCollapsed(
+                  editorPanelRef.current?.isCollapsed() ?? false,
+                )
+              }
+            >
+              {tabs}
+            </ResizablePanel>
+            <ResizableHandle withHandle className="bg-transparent" />
+            <ResizablePanel
+              id="console"
+              panelRef={consolePanelRef}
+              collapsible
+              collapsedSize={CONSOLE_HEADER_HEIGHT}
+              minSize={CONSOLE_HEADER_HEIGHT + 96}
+              defaultSize="35%"
+              onResize={() =>
+                setConsoleCollapsed(
+                  consolePanelRef.current?.isCollapsed() ?? false,
+                )
+              }
+            >
+              <EditorConsole
+                script={script}
+                compiling={compiling}
+                state={consoleState}
+                onStateChange={setConsoleState}
+                onRevealLocation={revealLocation}
+              />
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        )}
       </Tabs>
       <AddDependencyDialog />
     </div>

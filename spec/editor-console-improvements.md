@@ -1,8 +1,8 @@
 # Scripts editor and console improvements
 
 Status: proposal, written 2026-11-02. Done: item 1 (PR #731), item 2 (PR
-#732), item 3 (PR #735), item 4 (PR #736). Next: items 5–6, as one "editor
-and console" pass (see "Scoring").
+#732), item 3 (PR #735), item 4 (PR #736), item 5 (PR #737). Next: item
+6, the last of the "editor and console" pass (see "Scoring").
 
 The code editor UX of the scripts feature (`/scripts/:id`) is behind other
 blockchain playgrounds. This document compares it with Solana Playground
@@ -172,7 +172,7 @@ What the user sees today, from the production run:
 | 2   | Compile errors in the editor (markers, click to jump)     | 5      | M      | Done     |
 | 3   | A real console (history, levels, timing, warnings, clear) | 5      | S–M    | Done     |
 | 4   | Cleaner compiler output, with a "show full output" toggle | 4      | S      | Done     |
-| 5   | IDE-style resizable layout, console panel states          | 4      | S–M    | P1       |
+| 5   | IDE-style resizable layout, console panel states          | 4      | S–M    | Done     |
 | 6   | Keyboard shortcuts (compile, console)                     | 3      | S      | P1       |
 | 7   | MASM syntax highlighting                                  | 3      | S      | P2       |
 | 8   | Miden SDK autocomplete, snippets and hover docs           | 4      | M / L  | P2       |
@@ -348,6 +348,33 @@ Proposal:
   itself when a compile starts.
 - Replace the fixed `61vh` / `85vh` / `h-32` heights.
 - Keep the `Rust` / `MASM` / `Metadata` tabs above the editor.
+
+Done in PR #737. What shipped:
+
+- The script page is the viewport's height below the header (`100svh` minus
+  `h-16`, or `h-12` with the icon sidebar); the window no longer scrolls. The
+  tabs stay on top, then a vertical `Resizable` split: the tab content
+  (editor, MASM, or the metadata, which scrolls inside it) above, the console
+  below. A read-only script has no console, and its editor fills the page.
+- Sizes are saved in localStorage (`useDefaultLayout`, id
+  `script-editor-layout`), after drags only: the buttons' states aren't
+  saved, so a reload never opens with the editor hidden.
+- The Compile button sits at the right of the tabs row (where IDEs put
+  Run), not in the console: `hooks/use-compile-script.ts` compiles and logs.
+- The console is a square bordered panel docked under the editor (no gap, no
+  bottom padding), not a `Card`, so its collapsed height is exact
+  (`CONSOLE_HEADER_HEIGHT`). It has no title: its header bar shows the latest
+  log line, as one text node (`[10:25:25] Compiled counter-account in 3.9
+  s.`), or the empty log's placeholder, so a minimized console still reads
+  as a status bar. Its accessible name stays "Editor Console". Ghost icon
+  buttons on the right: Minimize / Restore console collapses it to that bar;
+  Maximize console / Restore editor collapses the editor panel; then full
+  output, copy and clear. The state comes from the panels (`isCollapsed`),
+  not from separate state, so drags and buttons agree.
+- A compile opens a collapsed console, and a location link shows a hidden
+  editor before moving the cursor.
+- E2E: `e2e/script-layout.spec.ts` (no page scroll, minimize then compile,
+  maximize then a location, a dragged size kept across a reload).
 
 ### 6. Keyboard shortcuts (P1, impact 3, effort S)
 

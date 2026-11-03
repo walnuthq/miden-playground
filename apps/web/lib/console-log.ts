@@ -116,3 +116,21 @@ export const useFullOutput = () =>
 
 export const formatDuration = (durationMs: number) =>
   `${(durationMs / 1000).toFixed(1)} s`;
+
+const plural = (count: number, noun: string) =>
+  `${count} ${noun}${count === 1 ? "" : "s"}`;
+
+// `(1 error, 2 warnings)`, or nothing when the output reports none.
+export const countsSuffix = ({
+  errors,
+  warnings,
+}: {
+  errors: number;
+  warnings: number;
+}) => {
+  const counts = [
+    errors > 0 && plural(errors, "error"),
+    warnings > 0 && plural(warnings, "warning"),
+  ].filter(Boolean);
+  return counts.length > 0 ? ` (${counts.join(", ")})` : "";
+};
