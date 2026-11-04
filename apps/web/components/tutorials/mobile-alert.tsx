@@ -8,8 +8,9 @@ const MobileAlert = () => (
     <AlertTitle>This tutorial is best viewed on a desktop browser.</AlertTitle>
     <AlertDescription>
       While the playground should be usable on mobile, please note that you'll
-      have a better experience using a desktop browser. Click on the book icon
-      above to toggle the tutorial panel.
+      have a better experience using a desktop browser. Close this panel to
+      follow a step in the playground, and tap the bar at the bottom of the
+      screen to open it again: it reopens by itself once a step is done.
     </AlertDescription>
   </TutorialAlert>
 );
