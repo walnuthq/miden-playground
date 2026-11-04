@@ -99,6 +99,7 @@ export const stateSerializer = ({
   nextTutorialStepDisabled,
   completedTutorials,
   tutorialProgress,
+  exampleId,
 }: State) =>
   JSON.stringify({
     serializedMockChain:
@@ -117,6 +118,7 @@ export const stateSerializer = ({
     nextTutorialStepDisabled,
     completedTutorials: [...completedTutorials],
     tutorialProgress,
+    exampleId,
   });
 
 // Scripts persisted before the package `digest` was renamed `commitment` still
@@ -163,6 +165,7 @@ export const stateDeserializer = (value: string): State => {
       nextTutorialStepDisabled,
       completedTutorials,
       tutorialProgress,
+      exampleId,
     } = JSON.parse(value) as {
       blockNum?: number;
       serializedMockChain?: string;
@@ -180,6 +183,7 @@ export const stateDeserializer = (value: string): State => {
       nextTutorialStepDisabled?: boolean;
       completedTutorials?: string[];
       tutorialProgress?: State["tutorialProgress"];
+      exampleId?: string;
     };
     const initialState = defaultState();
     return {
@@ -206,6 +210,7 @@ export const stateDeserializer = (value: string): State => {
         ? new Set(completedTutorials)
         : initialState.completedTutorials,
       tutorialProgress: tutorialProgress ?? initialState.tutorialProgress,
+      exampleId: exampleId ?? initialState.exampleId,
     };
   } catch (error) {
     console.error("ERROR: stateDeserializer", error);
