@@ -68,7 +68,12 @@ export type ProcedureExport = {
   digest: string;
   signature: Signature;
   attributes: { attrs: string[] };
-  readOnly?: boolean;
+  // Whether it only reads state, so its Invoke button runs it locally
+  // (`canInvokeProcedure`). api-compile reads it from the MAST and the API
+  // stores it with each export: `null` when it can't be told, missing from
+  // packages compiled before api-compile reported it. A script's
+  // `procedureExports` always hold a boolean (`isReadOnlyProcedure`).
+  readOnly?: boolean | null;
 };
 
 export type Export = { Procedure: ProcedureExport };

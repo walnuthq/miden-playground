@@ -9,7 +9,7 @@ import type {
   ScriptType,
 } from "@/lib/types/script";
 import { isValidUUIDv4, toBase64 } from "@/lib/utils";
-import { packageToScript } from "@/lib/utils/script";
+import { isReadOnlyProcedure, packageToScript } from "@/lib/utils/script";
 import { SCRIPT_FILE, scriptSource } from "@/lib/utils/script-files";
 
 export const createScript = async ({
@@ -279,7 +279,16 @@ export const getScript = async (id: string) => {
   }
   const result = await response.json();
   const { package: script } = result as { package: Script };
-  return { script };
+  return {
+    script: {
+      ...script,
+      // The API passes the stored flag through, unresolved.
+      procedureExports: script.procedureExports.map((procedureExport) => ({
+        ...procedureExport,
+        readOnly: isReadOnlyProcedure(procedureExport),
+      })),
+    },
+  };
 };
 
 export const exportScript = (id: string) => `${API_URL}/scripts/${id}/export`;

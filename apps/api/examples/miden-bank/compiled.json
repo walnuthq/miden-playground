@@ -325,7 +325,8 @@
                   "Marker": "account_procedure"
                 }
               ]
-            }
+            },
+            "readOnly": true
           }
         },
         {
@@ -629,7 +630,8 @@
                   "Marker": "account_procedure"
                 }
               ]
-            }
+            },
+            "readOnly": false
           }
         },
         {
@@ -649,7 +651,8 @@
                   "Marker": "account_procedure"
                 }
               ]
-            }
+            },
+            "readOnly": false
           }
         },
         {
@@ -1029,7 +1032,8 @@
                   "Marker": "account_procedure"
                 }
               ]
-            }
+            },
+            "readOnly": false
           }
         }
       ],
@@ -1156,7 +1160,8 @@
                   "Marker": "note_script"
                 }
               ]
-            }
+            },
+            "readOnly": null
           }
         }
       ],
@@ -1288,7 +1293,8 @@
                   "Marker": "transaction_script"
                 }
               ]
-            }
+            },
+            "readOnly": null
           }
         }
       ],
@@ -1420,7 +1426,8 @@
                   "Marker": "note_script"
                 }
               ]
-            }
+            },
+            "readOnly": null
           }
         }
       ],

@@ -263,12 +263,14 @@ const authNetworkAccount: Script = {
       path: "::miden::standards::components::auth::network_account::get_fee_asset_id",
       digest:
         "0x30a1d60fb7039cfd548ccd6e5483a7210e2cced5db3a8d807c7cd263ec6bab5e",
+      readOnly: true,
     },
     {
       ...defaultProcedureExport(),
       path: "::miden::standards::components::auth::network_account::get_fee_policy",
       digest:
         "0x32b9d2f5d10512438d93724b03524f6bc778a84e09b68abd343b7d3a028e9631",
+      readOnly: true,
     },
     {
       ...defaultProcedureExport(),
