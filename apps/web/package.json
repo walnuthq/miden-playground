@@ -46,7 +46,7 @@
     "smol-toml": "1.9.1",
     "sonner": "2.0.8",
     "usehooks-ts": "3.1.1",
-    "viem": "2.57.15",
+    "viem": "2.57.16",
     "wagmi": "3.7.11"
   },
   "devDependencies": {
