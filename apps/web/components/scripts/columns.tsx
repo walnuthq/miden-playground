@@ -1,5 +1,4 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import {
   DropdownMenu,
@@ -8,10 +7,11 @@ import {
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
 import { MoreVertical } from "lucide-react";
+import ScriptStatusBadge from "@/components/scripts/script-status-badge";
 import useScripts from "@/hooks/use-scripts";
 import { exportScript } from "@/lib/api";
 import type { DataTableFeatures } from "@/lib/table";
-import { type Script, scriptStatuses, scriptTypes } from "@/lib/types/script";
+import { type Script, scriptTypes } from "@/lib/types/script";
 
 const ScriptActionsCell = ({ script }: { script: Script }) => {
   const { openDeleteScriptAlertDialog } = useScripts();
@@ -60,13 +60,7 @@ export const columns: ColumnDef<DataTableFeatures, Script>[] = [
   {
     accessorKey: "status",
     header: "Status",
-    cell: ({ row }) => (
-      <Badge
-        variant={row.original.status === "draft" ? "secondary" : "default"}
-      >
-        {scriptStatuses[row.original.status]}
-      </Badge>
-    ),
+    cell: ({ row }) => <ScriptStatusBadge status={row.original.status} />,
   },
   {
     id: "actions",
