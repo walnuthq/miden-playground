@@ -1,10 +1,30 @@
+import { packageTypeEnum } from "@/db/schema";
 import { examples } from "@/examples";
 import { sourcesHash } from "@/examples/hash";
 import { parseMidenProjectToml } from "@/lib/toml";
-import type { CompiledPackage, Dependency, PackageSource } from "@/lib/types";
+import type {
+  CompiledPackage,
+  Dependency,
+  MidenProjectToml,
+  PackageSource,
+  PackageType,
+} from "@/lib/types";
 import { compilePackage, createPackage } from "@/lib/utils";
 
 const lastSegment = (path: string) => path.split("/").at(-1);
+
+// Upstream projects name the transaction script kind in full (the miden-bank
+// tutorial's init-tx-script); the playground's package type is the short one.
+const packageTypeAliases: Record<string, PackageType> = {
+  "transaction-script": "tx-script",
+};
+
+const toPackageType = (kind: string | undefined) => {
+  const type = kind ? (packageTypeAliases[kind] ?? kind) : undefined;
+  return packageTypeEnum.enumValues.find((value) => value === type);
+};
+
+const packageTypeNames = packageTypeEnum.enumValues.join(", ");
 
 // Parses the packages' miden-project.toml and resolves their path dependencies
 // to package names, then orders them so each package comes after the ones it
@@ -14,34 +34,73 @@ const resolvePackageSources = (
 ) => {
   const packages = Object.entries(packageSources).map(
     ([packagePath, { midenProjectToml, rust }]) => {
-      const {
-        package: { name },
-        dependencies,
-        lib: { kind: type },
-      } = parseMidenProjectToml(midenProjectToml);
-      return { packagePath, name, type, rust, dependencies };
+      const fail = (reason: string) => {
+        throw new Error(`Error: ${packagePath}: ${reason}`);
+      };
+      let manifest: Partial<MidenProjectToml>;
+      try {
+        manifest = parseMidenProjectToml(midenProjectToml ?? "");
+      } catch (error) {
+        const { message } = error as { message: string };
+        return fail(`invalid miden-project.toml: ${message}`);
+      }
+      const name = manifest.package?.name;
+      const type = toPackageType(manifest.lib?.kind);
+      if (!name) {
+        return fail("miden-project.toml has no [package] name.");
+      }
+      if (!type) {
+        return fail(
+          `miden-project.toml has no valid [lib] kind (one of ${packageTypeNames}).`,
+        );
+      }
+      if (!rust) {
+        return fail("src/lib.rs is missing or empty.");
+      }
+      return {
+        packagePath,
+        name,
+        type,
+        rust,
+        dependencies: manifest.dependencies ?? {},
+      };
     },
   );
-  const resolved = packages.map(({ name, type, rust, dependencies }) => ({
-    name,
-    type,
-    rust,
-    dependencies: Object.entries(dependencies)
-      .filter(
-        ([dependency]) =>
-          dependency !== "miden-core" && dependency !== "miden-protocol",
-      )
-      .flatMap(([, dependency]) => {
-        if (typeof dependency === "string") {
-          return [];
-        }
-        const dependencyDir = lastSegment(dependency.path);
-        const dependencyPackage = packages.find(
-          ({ packagePath }) => lastSegment(packagePath) === dependencyDir,
-        );
-        return dependencyPackage ? [dependencyPackage.name] : [];
-      }),
-  }));
+  for (const [index, { name, packagePath }] of packages.entries()) {
+    const duplicate = packages.findIndex((other) => other.name === name);
+    if (duplicate !== index) {
+      throw new Error(
+        `Error: ${packagePath} and ${packages[duplicate]?.packagePath} are both named ${name}.`,
+      );
+    }
+  }
+  const resolved = packages.map(
+    ({ packagePath, name, type, rust, dependencies }) => ({
+      name,
+      type,
+      rust,
+      dependencies: Object.entries(dependencies)
+        .filter(
+          ([dependency]) =>
+            dependency !== "miden-core" && dependency !== "miden-protocol",
+        )
+        .flatMap(([dependencyName, dependency]) => {
+          if (typeof dependency === "string") {
+            return [];
+          }
+          const dependencyDir = lastSegment(dependency.path);
+          const dependencyPackage = packages.find(
+            ({ packagePath }) => lastSegment(packagePath) === dependencyDir,
+          );
+          if (!dependencyPackage) {
+            throw new Error(
+              `Error: ${packagePath} depends on ${dependencyName} (path = "${dependency.path}"), which isn't in the imported folder: import the folder that holds both.`,
+            );
+          }
+          return [dependencyPackage.name];
+        }),
+    }),
+  );
   const ordered: typeof resolved = [];
   const visiting = new Set<string>();
   const visit = (resolvedPackage: (typeof resolved)[number]) => {

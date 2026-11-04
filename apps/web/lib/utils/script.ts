@@ -15,6 +15,7 @@ import type {
   Signature,
 } from "@/lib/types/script";
 import { midenTypes, scriptFilePaths } from "@/lib/types/script";
+import { findPackages } from "@/lib/utils/project-files";
 
 export const defaultSignature = (): Signature => ({
   abi: 3,
@@ -190,42 +191,32 @@ export const readFileAsArrayBuffer = (file: File): Promise<ArrayBuffer> =>
     fileReader.readAsArrayBuffer(file);
   });
 
-export const fileListToPackageSources = async (fileList: FileList) => {
-  const files = Array.from(fileList);
-  const packagesSourcesFiles = files.filter(({ name }) =>
-    ["miden-project.toml", "lib.rs"].includes(name),
+// The packages of a picked folder, keyed by directory (the API resolves
+// `path = "../<dir>"` dependencies against its last segment). Only their
+// manifests and sources are read: the folder can list thousands of files from
+// target/.
+export const fileListToPackageSources = async (
+  fileList: FileList,
+): Promise<Record<string, PackageSource>> => {
+  const files = new Map(
+    Array.from(fileList, (file) => [file.webkitRelativePath, file]),
   );
-  const packagesSourcesFilesWithContent = await Promise.all(
-    packagesSourcesFiles.map(async (packageSourceFile) => ({
-      file: packageSourceFile,
-      content: await readFileAsText(packageSourceFile),
-    })),
-  );
-  const packagesSourcesFilesByPackage = Object.groupBy(
-    packagesSourcesFilesWithContent,
-    ({ file }) =>
-      file.webkitRelativePath
-        .replace("/miden-project.toml", "")
-        .replace("/src/lib.rs", ""),
-  );
+  const read = (path: string) => {
+    const file = files.get(path);
+    return file ? readFileAsText(file) : Promise.resolve("");
+  };
   return Object.fromEntries(
-    Object.entries(packagesSourcesFilesByPackage).map(
-      ([packageDir, packagesSourcesFilesWithContent = []]): [
-        string,
-        PackageSource,
-      ] => {
-        const content = (name: string) =>
-          packagesSourcesFilesWithContent.findLast(
-            ({ file }) => file.name === name,
-          )?.content ?? "";
-        return [
-          packageDir,
-          {
-            midenProjectToml: content("miden-project.toml"),
-            rust: content("lib.rs"),
-          },
-        ];
-      },
+    await Promise.all(
+      findPackages([...files.keys()]).map(
+        async ({ directory, manifestPath, sourcePath }) =>
+          [
+            directory,
+            {
+              midenProjectToml: await read(manifestPath),
+              rust: await read(sourcePath),
+            },
+          ] as const,
+      ),
     ),
   );
 };
