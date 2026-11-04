@@ -20,12 +20,44 @@ import useNetwork from "@/hooks/use-network";
 import useParaTransaction from "@/hooks/use-para-transaction";
 import useScripts from "@/hooks/use-scripts";
 import { verifyNoteFromPackageId } from "@/lib/api";
+import type { NetworkId } from "@/lib/types/network";
 import type { InputNote, NoteType } from "@/lib/types/note";
 import {
   clientCreateNoteFromScript,
+  clientGetNotesById,
   clientImportNoteFile,
   randomWord,
 } from "@/lib/web-client";
+
+// The verification service imports a note from the node to verify its script,
+// so it can only be asked once the note is committed: check for it every few
+// seconds, for as long as a transaction can take to be committed.
+const NOTE_COMMIT_POLL_INTERVAL = 3_000;
+const NOTE_COMMIT_POLL_ATTEMPTS = 60;
+
+const verifyNoteOnceCommitted = async ({
+  networkId,
+  noteId,
+  packageId,
+}: {
+  networkId: NetworkId;
+  noteId: string;
+  packageId: string;
+}) => {
+  for (let attempt = 0; attempt < NOTE_COMMIT_POLL_ATTEMPTS; attempt += 1) {
+    const notes = await clientGetNotesById({
+      networkId,
+      noteIds: [noteId],
+    }).catch(() => []);
+    if (notes.length > 0) {
+      return verifyNoteFromPackageId({ networkId, noteId, packageId });
+    }
+    await new Promise((resolve) =>
+      setTimeout(resolve, NOTE_COMMIT_POLL_INTERVAL),
+    );
+  }
+  throw new Error(`Note ${noteId} wasn't committed: its script isn't verified`);
+};
 
 const useNotes = () => {
   const { networkId } = useNetwork();
@@ -123,13 +155,18 @@ const useNotes = () => {
             scripts,
           });
     // console.log(note.script().root());
-    if (!tutorialId) {
-      verifyNoteFromPackageId({
-        networkId,
-        noteId: note.id().toString(),
-        packageId: script.id,
-      });
-    }
+    // Verified once submitted: the verification service imports the note
+    // from the node. Read its ID now: the note array below takes the note.
+    const noteId = note.id().toString();
+    const verifyNote = () => {
+      if (!tutorialId) {
+        verifyNoteOnceCommitted({
+          networkId,
+          noteId,
+          packageId: script.id,
+        }).catch((error) => console.error("ERROR: verifyNote", error));
+      }
+    };
     let transactionRequestBuilder =
       new WasmTransactionRequestBuilder().withOwnOutputNotes(
         new WasmNoteArray([note]),
@@ -142,7 +179,11 @@ const useNotes = () => {
     // Resolves to whether the transaction was submitted: Para reports a
     // rejected signature as null, Bread Wallet throws.
     if (isParaWallet(senderAccount)) {
-      return !!(await submitWithPara(transactionRequest));
+      const submitted = !!(await submitWithPara(transactionRequest));
+      if (submitted) {
+        verifyNote();
+      }
+      return submitted;
     }
     if (!requestTransaction) {
       return false;
@@ -157,6 +198,7 @@ const useNotes = () => {
       payload: customTransaction,
     });
     console.info({ txId });
+    verifyNote();
     return true;
   };
   const importNoteFromFile = async ({

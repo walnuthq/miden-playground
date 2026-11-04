@@ -5,6 +5,7 @@ import authSingleSig from "@/lib/types/default-scripts/auth-single-sig";
 import basicWallet from "@/lib/types/default-scripts/basic-wallet";
 import core from "@/lib/types/default-scripts/core";
 import counterContract from "@/lib/types/default-scripts/counter-contract";
+import feeSponsorship from "@/lib/types/default-scripts/fee-sponsorship";
 import fungibleFaucet from "@/lib/types/default-scripts/fungible-faucet";
 import p2id from "@/lib/types/default-scripts/p2id";
 // import p2ide from "@/lib/types/default-scripts/p2ide";
@@ -19,6 +20,7 @@ const defaultScripts = [
   core,
   basicWallet,
   counterContract,
+  feeSponsorship,
   fungibleFaucet,
   p2id,
   // p2ide,

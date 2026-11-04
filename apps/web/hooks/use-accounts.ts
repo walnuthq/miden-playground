@@ -29,6 +29,7 @@ import {
 } from "@/lib/utils/account";
 import {
   clientDeployAccount,
+  clientNetworkNoteFee,
   storageMode,
   wasmAccountToAccount,
 } from "@/lib/web-client";
@@ -285,13 +286,19 @@ const useAccounts = () => {
     );
     let fundedAccount: Awaited<ReturnType<typeof fundAccount>>;
     try {
+      const isNetworkAccount = componentScriptIds.includes(
+        "auth-network-account",
+      );
       const wasmAccount = await clientDeployAccount({
         client,
         storageMode,
         components,
         scripts: componentScripts,
+        networkNoteFee: isNetworkAccount
+          ? await clientNetworkNoteFee(networkId)
+          : 0n,
       });
-      fundedAccount = await fundAccount(wasmAccount);
+      fundedAccount = await fundAccount(wasmAccount, { isNetworkAccount });
     } catch (error) {
       dispatch({ type: "TRANSACTION_SUBMITTED" });
       throw error;

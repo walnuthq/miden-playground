@@ -1,11 +1,12 @@
 import {
   type MessageSignerWalletAdapter,
   PrivateDataPermission,
-  WalletAdapterNetwork,
 } from "@miden-sdk/miden-wallet-adapter";
 import { useMiden } from "@miden-sdk/react";
 import { PublicKeyFormat } from "@openzeppelin/miden-multisig-client";
 import { useCallback, useEffect, useRef, useState } from "react";
+import useNetwork from "@/hooks/use-network";
+import { walletAdapterNetworks } from "@/lib/miden-client";
 import type { ExternalWalletState } from "@/lib/types/wallet";
 
 export function useMidenWallet(adapter: MessageSignerWalletAdapter | null) {
@@ -19,6 +20,7 @@ export function useMidenWallet(adapter: MessageSignerWalletAdapter | null) {
   const [connectError, setConnectError] = useState<string | null>(null);
   const connectingRef = useRef(false);
   const { client } = useMiden();
+  const { networkId } = useNetwork();
 
   useEffect(() => {
     if (!adapter || !client) return;
@@ -90,12 +92,12 @@ export function useMidenWallet(adapter: MessageSignerWalletAdapter | null) {
     try {
       await adapter.connect(
         PrivateDataPermission.UponRequest,
-        WalletAdapterNetwork.Testnet,
+        walletAdapterNetworks[networkId],
       );
     } finally {
       connectingRef.current = false;
     }
-  }, [adapter]);
+  }, [adapter, networkId]);
 
   const disconnect = useCallback(async () => {
     if (!adapter) return;

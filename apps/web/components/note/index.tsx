@@ -11,7 +11,13 @@ const NoteIndex = ({ id }: { id: string }) => {
   const inputNote = inputNotes.find((inputNote) => inputNote.id === id);
   const scriptRoot = inputNote?.scriptRoot ?? "";
   const scriptId = inputNote?.scriptId ?? "";
-  const isStandardNote = ["p2id", "p2ide"].includes(scriptId);
+  // Standard notes are recognized by their built-in script, not verified.
+  const isStandardNote = [
+    "p2id",
+    "p2ide",
+    "tx-fee",
+    "fee-sponsorship",
+  ].includes(scriptId);
   const { data } = useQuery({
     queryKey: ["verifiedNote", networkId, scriptRoot],
     queryFn: () =>
@@ -20,7 +26,7 @@ const NoteIndex = ({ id }: { id: string }) => {
         script: scriptRoot,
       }),
     enabled:
-      ["mtst", "mdev"].includes(networkId) &&
+      ["mm", "mtst", "mdev"].includes(networkId) &&
       !isStandardNote &&
       scriptRoot !== "",
   });

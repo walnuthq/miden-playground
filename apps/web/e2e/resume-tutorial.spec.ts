@@ -125,7 +125,7 @@ test("resume a tutorial left for an example or a sandbox", async ({ page }) => {
   await test.step("leave it for a new sandbox", async () => {
     await page.goto("/");
     await page
-      .getByRole("button", { name: "Create new sandbox environment" })
+      .getByRole("button", { name: "Create new Testnet sandbox" })
       .click();
     await expect(page).toHaveURL(/\/accounts$/);
     await expect(page.getByRole("row", { name: /USDCx Faucet/ })).toBeVisible();

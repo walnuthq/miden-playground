@@ -24,6 +24,10 @@ export const MINT_NOTE_CODE =
   "0xb4c2ff092b6e0aebacd11c290f1cafb72dd53a98e489755f00361a0bba986344";
 export const BURN_NOTE_CODE =
   "0x3d951250cb118282a37b8ee9395f3e3b3c30fab4dbe8c6b0093acfeed3ba04af";
+// The FEE_SPONSORSHIP note a transaction's fee payment creates alongside each
+// note it sends to a network account (`NoteScript.feeSponsorship()`).
+export const FEE_SPONSORSHIP_NOTE_CODE =
+  "0x595a98a56dc7bc62047b0fd9af7e81805f30e0320c6c0eca044826d34abe595c";
 export const TX_FEE_NOTE_CODE =
   "0xc37eff1b503b0eb3630b85744a1f61b80a30f2798f5ab74b502dd4812d493999";
 
@@ -32,6 +36,25 @@ export const BASIC_WALLET_CODE =
 
 export const GUARDIAN_WALLET_CODE =
   "0x062fa269af71775aaf1231cd543294390c6df661447a0037d236371eb7e9876e";
+
+// Partner Mainnet: invite-only, real funds. The SDK has no "mainnet" shorthand,
+// so these are passed as full URLs. No faucet API: accounts are funded from the
+// connected Bread Wallet.
+export const MAINNET_RPC_URL = "https://rpc.mainnet.miden.io";
+export const MAINNET_PROVER_URL = "https://tx-prover.mainnet.miden.io";
+export const MAINNET_NOTE_TRANSPORT_URL = "https://transport.mainnet.miden.io";
+export const MAINNET_EXPLORER_URL = "https://explorer.mainnet.miden.io";
+// What Bread Wallet sends a new mainnet (network) account, in USDCX base units
+// (6 decimals): 0.001 USDCX. A fee is `verificationBaseFee` (7 on mainnet as of
+// 2026-11) × (⌊log₂(cycles)⌋ + 1): ~126-140 units for the deploy transaction
+// consuming this note, which leaves a buffer for a few more. Senders of network
+// notes pay for their consumption (`clientNetworkNoteFee`), so the buffer isn't
+// drained. Re-check it if the base fee changes.
+export const MAINNET_FUNDING_AMOUNT = 1_000;
+// The native fee asset (USDCX) faucet.
+export const MAINNET_FAUCET_ACCOUNT_ID = "0xe69e6ca6e39df1b10c1e5399399feb";
+export const MAINNET_FAUCET_ADDRESS =
+  "mm1arnfum9xuwwlrvgvrefejwvlavn3vk24_qr7qqq9wr6w";
 
 export const TESTNET_RPC_URL = "https://rpc.testnet.miden.io";
 export const DEVNET_RPC_URL = "https://rpc.devnet.miden.io";
@@ -74,22 +97,52 @@ export const COUNTER_SCRIPT_RUN_PROC_HASH =
   "0xb08de5ec2961a2b3c3641d278230c091d46ac37bab78d50a5c140368020ea3cf";
 
 export const midenExplorerUrl = (networkId: NetworkId) =>
-  networkId === "mtst" ? TESTNET_EXPLORER_URL : DEVNET_EXPLORER_URL;
+  ({
+    mm: MAINNET_EXPLORER_URL,
+    mtst: TESTNET_EXPLORER_URL,
+    mdev: DEVNET_EXPLORER_URL,
+    mlcl: DEVNET_EXPLORER_URL,
+    mmck: DEVNET_EXPLORER_URL,
+  })[networkId];
 
 export const midenFaucetAccountId = (networkId: NetworkId) =>
-  networkId === "mtst" ? TESTNET_FAUCET_ACCOUNT_ID : DEVNET_FAUCET_ACCOUNT_ID;
+  ({
+    mm: MAINNET_FAUCET_ACCOUNT_ID,
+    mtst: TESTNET_FAUCET_ACCOUNT_ID,
+    mdev: DEVNET_FAUCET_ACCOUNT_ID,
+    mlcl: DEVNET_FAUCET_ACCOUNT_ID,
+    mmck: DEVNET_FAUCET_ACCOUNT_ID,
+  })[networkId];
 
+// Mainnet has no faucet API and no funding service account.
 export const midenFaucetFunderAccountId = (networkId: NetworkId) =>
-  networkId === "mtst"
-    ? TESTNET_FAUCET_FUNDER_ACCOUNT_ID
-    : DEVNET_FAUCET_FUNDER_ACCOUNT_ID;
+  ({
+    mm: "",
+    mtst: TESTNET_FAUCET_FUNDER_ACCOUNT_ID,
+    mdev: DEVNET_FAUCET_FUNDER_ACCOUNT_ID,
+    mlcl: DEVNET_FAUCET_FUNDER_ACCOUNT_ID,
+    mmck: DEVNET_FAUCET_FUNDER_ACCOUNT_ID,
+  })[networkId];
 
 export const midenFaucetAddress = (networkId: NetworkId) =>
-  networkId === "mtst" ? TESTNET_FAUCET_ADDRESS : DEVNET_FAUCET_ADDRESS;
+  ({
+    mm: MAINNET_FAUCET_ADDRESS,
+    mtst: TESTNET_FAUCET_ADDRESS,
+    mdev: DEVNET_FAUCET_ADDRESS,
+    mlcl: DEVNET_FAUCET_ADDRESS,
+    mmck: DEVNET_FAUCET_ADDRESS,
+  })[networkId];
 
 export const midenFaucetApiUrl = (networkId: NetworkId) =>
-  networkId === "mtst" ? TESTNET_FAUCET_API_URL : DEVNET_FAUCET_API_URL;
+  ({
+    mm: "",
+    mtst: TESTNET_FAUCET_API_URL,
+    mdev: DEVNET_FAUCET_API_URL,
+    mlcl: DEVNET_FAUCET_API_URL,
+    mmck: DEVNET_FAUCET_API_URL,
+  })[networkId];
 
+// The tutorials' counter contract is deployed on testnet only.
 export const counterContractAccountId = (networkId: NetworkId) =>
   networkId === "mtst"
     ? TESTNET_COUNTER_CONTRACT_ACCOUNT_ID

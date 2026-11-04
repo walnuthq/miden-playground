@@ -240,3 +240,43 @@ export const waitForFundingNote = async ({
     `Fee-funding note ${noteId} was not found after ${FUNDING_NOTE_POLL_ATTEMPTS} sync attempts`,
   );
 };
+
+// Waits for a committed note to the account carrying the chain's native fee
+// asset, for funding that doesn't come with a note id (mainnet: a P2ID sent
+// from Bread Wallet). The client's auto-sync brings it in.
+export const waitForConsumableFeeNote = async ({
+  client,
+  accountId,
+  expectedFaucet,
+}: {
+  client: WebClientType;
+  accountId: WasmAccountId;
+  expectedFaucet: WasmAccountId;
+}) => {
+  for (let attempt = 0; attempt < FUNDING_NOTE_POLL_ATTEMPTS; attempt += 1) {
+    const consumableNotes = await client.getConsumableNotes(accountId);
+    const note = consumableNotes
+      .map((consumableNote) => consumableNote.inputNoteRecord())
+      .find((inputNote) =>
+        inputNote
+          .details()
+          .assets()
+          .fungibleAssets()
+          .some(
+            (asset) =>
+              asset.faucetId().toString() === expectedFaucet.toString(),
+          ),
+      );
+    if (note) {
+      return note;
+    }
+    if (attempt < FUNDING_NOTE_POLL_ATTEMPTS - 1) {
+      await new Promise((resolve) =>
+        setTimeout(resolve, FUNDING_NOTE_POLL_INTERVAL_MS),
+      );
+    }
+  }
+  throw new Error(
+    `No funding note for ${accountId} was found after ${FUNDING_NOTE_POLL_ATTEMPTS} sync attempts`,
+  );
+};

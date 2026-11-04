@@ -1,4 +1,5 @@
 export const networks = {
+  mm: "Mainnet",
   mtst: "Testnet",
   mdev: "Devnet",
   mlcl: "Local",

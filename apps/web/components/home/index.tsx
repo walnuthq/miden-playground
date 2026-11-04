@@ -70,6 +70,7 @@ const SandboxEnvironments = () => (
     />
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       <NewSandboxCard networkId="mtst" />
+      <NewSandboxCard networkId="mm" />
       {/* <NewSandboxCard networkId="mdev" /> */}
       {/* <NewSandboxCard networkId="mmck" /> */}
       {/* import.meta.env.DEV && (

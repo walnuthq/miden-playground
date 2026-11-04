@@ -13,8 +13,28 @@ import MidenProvider from "@/components/providers/miden-provider";
 import MidenFiReconnect from "@/components/providers/midenfi-reconnect";
 import { NetworkProvider } from "@/components/providers/network-provider";
 import ParaProvider from "@/components/providers/para-provider";
+import useNetwork from "@/hooks/use-network";
+import { walletAdapterNetworks } from "@/lib/miden-client";
 
 const queryClient = new QueryClient();
+
+// Bread Wallet connects to the sandbox's network. Not keyed by it: that would
+// remount the app mid-`resetState`. MidenFiReconnect reconnects a connected
+// wallet when the network changes instead.
+const BreadWalletProvider = ({ children }: { children: ReactNode }) => {
+  const { networkId } = useNetwork();
+  return (
+    <MidenFiSignerProvider
+      appName="Miden Playground"
+      network={walletAdapterNetworks[networkId]}
+      privateDataPermission={PrivateDataPermission.Auto}
+      allowedPrivateData={AllowedPrivateData.All}
+      // No autoConnect, see MidenFiReconnect.
+    >
+      {children}
+    </MidenFiSignerProvider>
+  );
+};
 
 // Signer providers register with MultiSignerProvider through <SignerSlot />
 // for the wallet dropdown. They sit inside MidenProvider: they load SDK classes
@@ -33,24 +53,24 @@ const Providers = ({ children }: { children: ReactNode }) => (
   >
     <QueryClientProvider client={queryClient}>
       <NetworkProvider>
-        <MidenProvider>
-          <MultiSignerProvider>
-            <MidenFiSignerProvider
-              appName="Miden Playground"
-              privateDataPermission={PrivateDataPermission.Auto}
-              allowedPrivateData={AllowedPrivateData.All}
-              // No autoConnect, see MidenFiReconnect.
-            >
-              <SignerSlot />
-              <MidenFiReconnect />
-              <WalletModalProvider>
-                <ParaProvider queryClient={queryClient}>
-                  <GlobalContextProvider>{children}</GlobalContextProvider>
-                </ParaProvider>
-              </WalletModalProvider>
-            </MidenFiSignerProvider>
-          </MultiSignerProvider>
-        </MidenProvider>
+        {/* Above MidenProvider, which unmounts its children while the client
+        re-initializes (e.g. on a network switch): the state queued for the
+        new network (`nextState`, not persisted) has to survive it. */}
+        <GlobalContextProvider>
+          <MidenProvider>
+            <MultiSignerProvider>
+              <BreadWalletProvider>
+                <SignerSlot />
+                <MidenFiReconnect />
+                <WalletModalProvider>
+                  <ParaProvider queryClient={queryClient}>
+                    {children}
+                  </ParaProvider>
+                </WalletModalProvider>
+              </BreadWalletProvider>
+            </MultiSignerProvider>
+          </MidenProvider>
+        </GlobalContextProvider>
       </NetworkProvider>
     </QueryClientProvider>
   </ThemeProvider>

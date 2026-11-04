@@ -15,6 +15,7 @@ import { networks } from "@/lib/types/network";
 const Loading = () => {
   const { networkId } = useNetwork();
   const variants = {
+    mm: "default",
     mtst: "outline",
     mdev: "secondary",
     mlcl: "destructive",

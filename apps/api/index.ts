@@ -17,6 +17,7 @@ const allowedOrigins = [
   "https://devnet.midenscan.com",
   "https://explorer.devnet.miden.io",
   "https://explorer.testnet.miden.io",
+  "https://explorer.mainnet.miden.io",
 ];
 
 const app = createApp()

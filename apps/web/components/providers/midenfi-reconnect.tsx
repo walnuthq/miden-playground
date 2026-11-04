@@ -4,6 +4,7 @@ import {
 } from "@miden-sdk/miden-wallet-adapter";
 import { createMidenStorage } from "@miden-sdk/react";
 import { useEffect, useRef } from "react";
+import useNetwork from "@/hooks/use-network";
 
 const storage = createMidenStorage("miden-playground");
 const CONNECTED_KEY = "midenFiConnected";
@@ -15,9 +16,25 @@ const CONNECTED_KEY = "midenFiConnected";
 // connected at most once per page load, and forgets it as soon as it
 // disconnects, so a disconnect or a dismissed prompt sticks.
 const MidenFiReconnect = () => {
-  const { wallet, connected, connecting, connect } = useMidenFiWallet();
+  const { wallet, connected, connecting, connect, disconnect } =
+    useMidenFiWallet();
+  const { networkId } = useNetwork();
   const wasConnected = useRef(false);
   const reconnected = useRef(false);
+  const connectedNetworkId = useRef(networkId);
+  // A session is for one network: on a switch (e.g. testnet to mainnet
+  // sandbox), reconnect a connected wallet so it prompts for the new one.
+  useEffect(() => {
+    if (connectedNetworkId.current === networkId) {
+      return;
+    }
+    connectedNetworkId.current = networkId;
+    if (connected) {
+      disconnect()
+        .then(() => connect())
+        .catch(console.error);
+    }
+  }, [networkId, connected, connect, disconnect]);
   useEffect(() => {
     if (connected) {
       wasConnected.current = true;

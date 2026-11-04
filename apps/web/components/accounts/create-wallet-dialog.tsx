@@ -14,8 +14,10 @@ import { Spinner } from "@workspace/ui/components/spinner";
 import { Switch } from "@workspace/ui/components/switch";
 import { useState } from "react";
 import { toast } from "sonner";
+import MainnetAllowlistAlert from "@/components/accounts/mainnet-allowlist-alert";
 import AccountAddress from "@/components/lib/account-address";
 import useAccounts from "@/hooks/use-accounts";
+import useNetwork from "@/hooks/use-network";
 
 // import useTutorials from "@/hooks/use-tutorials";
 
@@ -28,6 +30,7 @@ const CreateWalletDialog = () => {
   } = useAccounts();
   // const { tutorialId } = useTutorials();
   const [isPublic, setIsPublic] = useState(true);
+  const { networkId } = useNetwork();
   const [loading, setLoading] = useState(false);
   const onClose = () => {
     setIsPublic(true);
@@ -46,6 +49,7 @@ const CreateWalletDialog = () => {
           <DialogTitle>Create Wallet</DialogTitle>
           <DialogDescription>Create a new wallet.</DialogDescription>
         </DialogHeader>
+        {networkId === "mm" && <MainnetAllowlistAlert />}
         <form
           id="create-wallet-form"
           onSubmit={async (event) => {
@@ -96,7 +100,11 @@ const CreateWalletDialog = () => {
           <DialogClose render={<Button variant="outline" />}>
             Cancel
           </DialogClose>
-          <Button form="create-wallet-form" type="submit" disabled={loading}>
+          <Button
+            form="create-wallet-form"
+            type="submit"
+            disabled={loading || networkId === "mm"}
+          >
             {loading && <Spinner />}
             {loading ? "Creating…" : "Create"}
           </Button>
