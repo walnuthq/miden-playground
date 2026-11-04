@@ -15,8 +15,10 @@ export const DEFAULT_FONT_SIZE = isMac ? 12 : 14;
 
 export const FONT_SIZES = [10, 12, 14, 16, 18, 20];
 
+// No minimap by default on a phone, where it takes a fifth of the editor's
+// width (below the sidebar's mobile breakpoint, `useIsMobile`'s).
 const DEFAULT_SETTINGS: EditorSettings = {
-  minimap: true,
+  minimap: !window.matchMedia("(max-width: 767px)").matches,
   fontSize: DEFAULT_FONT_SIZE,
 };
 

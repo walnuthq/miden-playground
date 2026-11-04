@@ -16,6 +16,7 @@ const EditorTabs = ({
   panelId,
   onSelect,
   onClose,
+  className,
 }: {
   openPaths: string[];
   activePath: string | null;
@@ -23,11 +24,15 @@ const EditorTabs = ({
   panelId: string;
   onSelect: (path: string) => void;
   onClose: (path: string) => void;
+  className?: string;
 }) => (
   <div
     role="tablist"
     aria-label="Open files"
-    className="flex h-8 shrink-0 overflow-x-auto border-b bg-muted/50"
+    className={cn(
+      "flex h-8 shrink-0 overflow-x-auto border-b bg-muted/50",
+      className,
+    )}
   >
     {openPaths.map((path) => {
       const isActive = path === activePath;

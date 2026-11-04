@@ -17,6 +17,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@workspace/ui/components/tooltip";
+import { useIsMobile } from "@workspace/ui/hooks/use-mobile";
 import { cn } from "@workspace/ui/lib/utils";
 import { Play } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -43,6 +44,7 @@ import useCompileScript from "@/hooks/use-compile-script";
 import useScriptShortcuts, {
   shortcutLabel,
 } from "@/hooks/use-script-shortcuts";
+import useTutorials from "@/hooks/use-tutorials";
 import { clearConsoleLog } from "@/lib/console-log";
 import type { Script, ScriptFilePath } from "@/lib/types/script";
 import { assembledFromMasm } from "@/lib/utils/script";
@@ -65,6 +67,8 @@ const NO_RUST =
 // icon sidebar), so the editor and the console scroll, not the page.
 const PAGE_HEIGHT_CLASS_NAME =
   "h-[calc(100svh-4rem)] group-has-data-[collapsible=icon]/sidebar-wrapper:h-[calc(100svh-3rem)]";
+// On a phone, a tutorial's closed panel (`h-12`) sits below the page too.
+const MOBILE_TUTORIAL_PAGE_HEIGHT_CLASS_NAME = "h-[calc(100svh-7rem)]";
 
 const ScriptComponent = ({ id, script }: { id: string; script?: Script }) => {
   const navigate = useNavigate();
@@ -100,9 +104,13 @@ const ScriptComponent = ({ id, script }: { id: string; script?: Script }) => {
   const consolePanelRef = useRef<PanelImperativeHandle | null>(null);
   const [editorCollapsed, setEditorCollapsed] = useState(false);
   const [consoleCollapsed, setConsoleCollapsed] = useState(false);
+  // A phone has no height to spare: its console starts collapsed to its
+  // header bar (compiling opens it), and its split is saved apart.
+  const isMobile = useIsMobile();
+  const { tutorialId } = useTutorials();
   // Only drags are saved: a reload never opens with the editor hidden.
   const { defaultLayout, onLayoutChanged } = useDefaultLayout({
-    id: "script-editor-layout",
+    id: isMobile ? "script-editor-layout-mobile" : "script-editor-layout",
     panelIds: ["editor", "console"],
     storage: localStorage,
     onlySaveAfterUserInteractions: true,
@@ -231,7 +239,14 @@ const ScriptComponent = ({ id, script }: { id: string; script?: Script }) => {
     </>
   );
   return (
-    <div className={cn("flex flex-col gap-4 px-4", PAGE_HEIGHT_CLASS_NAME)}>
+    <div
+      className={cn(
+        "flex flex-col gap-4 px-4",
+        isMobile && tutorialId
+          ? MOBILE_TUTORIAL_PAGE_HEIGHT_CLASS_NAME
+          : PAGE_HEIGHT_CLASS_NAME,
+      )}
+    >
       <Tabs
         className="min-h-0 flex-1"
         value={tab}
@@ -321,7 +336,7 @@ const ScriptComponent = ({ id, script }: { id: string; script?: Script }) => {
               collapsible
               collapsedSize={0}
               minSize="20%"
-              defaultSize="65%"
+              defaultSize={isMobile ? undefined : "65%"}
               onResize={() =>
                 setEditorCollapsed(
                   editorPanelRef.current?.isCollapsed() ?? false,
@@ -337,7 +352,7 @@ const ScriptComponent = ({ id, script }: { id: string; script?: Script }) => {
               collapsible
               collapsedSize={CONSOLE_HEADER_HEIGHT}
               minSize={CONSOLE_HEADER_HEIGHT + 96}
-              defaultSize="35%"
+              defaultSize={isMobile ? CONSOLE_HEADER_HEIGHT : "35%"}
               onResize={() =>
                 setConsoleCollapsed(
                   consolePanelRef.current?.isCollapsed() ?? false,
