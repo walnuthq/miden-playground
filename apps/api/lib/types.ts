@@ -68,6 +68,11 @@ export type ProcedureExport = {
   digest: string;
   signature: ProcedureSignature | null;
   attributes: { attrs: string[] };
+  // Whether the procedure is read-only, as api-compile reads it from the MAST
+  // (`readOnly` next to the manifest, which doesn't record it): `null` when it
+  // can't be told. Missing from packages compiled before api-compile reported
+  // it: they get it on their next compile.
+  readOnly?: boolean | null;
 };
 
 export const defaultProcedureExport = (): ProcedureExport => ({

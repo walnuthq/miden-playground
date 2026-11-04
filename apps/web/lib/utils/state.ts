@@ -160,11 +160,15 @@ const migrateScript = ({
   })),
 });
 
-// A state persisted (or saved in a project) before a built-in script was added
-// lacks it: add the missing ones, which recognize standard notes (e.g.
-// fee-sponsorship) by their script root.
+// The built-in scripts as the code defines them. A state persisted (or saved in
+// a project) holds a copy of each, which can predate a change to it (e.g. its
+// procedures' `readOnly` flags): built-ins can't be edited, so the code's
+// version replaces it. One added since is missing: add it, as built-ins
+// recognize standard notes (e.g. fee-sponsorship) by their script root.
 const withDefaultScripts = (scripts: Script[]) => [
-  ...scripts,
+  ...scripts.map(
+    (script) => defaultScripts.find(({ id }) => id === script.id) ?? script,
+  ),
   ...defaultScripts.filter(
     ({ id }) => !scripts.some((script) => script.id === id),
   ),

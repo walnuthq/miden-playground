@@ -88,6 +88,9 @@ type CompileResponse = {
   masp: string;
   commitment: string;
   manifest: Manifest;
+  // Whether each exported procedure is read-only, by export path: `null` when
+  // it can't be told. Missing from an api-compile that predates it.
+  readOnly?: Record<string, boolean | null>;
   // Set when the build succeeded: the sources plus the lockfile it used.
   files?: Record<string, string>;
   // The release build's Miden Assembly, sent for `masm: true`: its `error` when
@@ -144,6 +147,7 @@ export const compilePackage = async ({
     masp,
     commitment,
     manifest,
+    readOnly = {},
     files: compiledFiles,
     masm: masmOutput,
   } = await fetchApiCompile<CompileResponse>("/compile", {
@@ -195,9 +199,15 @@ export const compilePackage = async ({
       ),
     };
   }
-  const exports = manifest.exports.filter(
-    ({ Procedure: { signature } }) => signature?.abi === 3,
-  );
+  const exports = manifest.exports
+    .filter(({ Procedure: { signature } }) => signature?.abi === 3)
+    // Stored with each export, in the `exports` column.
+    .map(({ Procedure: procedureExport }) => ({
+      Procedure: {
+        ...procedureExport,
+        readOnly: readOnly[procedureExport.path],
+      },
+    }));
   if (masmOutput && "error" in masmOutput) {
     console.warn(`${name}: no MASM (${masmOutput.error})`);
   }

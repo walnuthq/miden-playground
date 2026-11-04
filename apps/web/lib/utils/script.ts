@@ -98,6 +98,15 @@ export const assembledFromMasm = ({
 export const formatProcedureExportPath = (path: string) =>
   path.split("::").at(-1)?.replaceAll('"', "").replaceAll("-", "_") ?? "";
 
+// api-compile's answer when it has one. Otherwise, when it can't tell or the
+// package predates it, the name: a `get…` procedure. A wrong guess only costs
+// a local run whose changes are discarded: nothing is submitted.
+export const isReadOnlyProcedure = ({
+  path,
+  readOnly,
+}: Pick<ProcedureExport, "path" | "readOnly">) =>
+  readOnly ?? formatProcedureExportPath(path).startsWith("get");
+
 export const formatProcedureInputs = (inputs: MidenInput[]) =>
   inputs
     .toReversed()
@@ -163,9 +172,7 @@ export const compiledPackageToScript = (
     : compiledPackage.exports.map((manifestExport) => ({
         ...defaultProcedureExport(),
         ...manifestExport.Procedure,
-        readOnly: formatProcedureExportPath(
-          manifestExport.Procedure.path,
-        ).startsWith("get"),
+        readOnly: isReadOnlyProcedure(manifestExport.Procedure),
       })),
 });
 
@@ -260,9 +267,7 @@ export const packageToScript = ({
     )
     .map(({ Procedure: procedureExport }) => ({
       ...procedureExport,
-      readOnly: formatProcedureExportPath(procedureExport.path).startsWith(
-        "get",
-      ),
+      readOnly: isReadOnlyProcedure(procedureExport),
     })),
   dependencies: manifest.dependencies.map((dependency) => ({
     id: dependency.name,

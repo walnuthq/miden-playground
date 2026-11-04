@@ -144,18 +144,21 @@ const authGuardedMultisig: Script = {
       path: "::miden::standards::components::auth::guarded_multisig::get_signer_at",
       digest:
         "0xa3dfe78fbde4360b3672d7c706d9e089d7b1fd4095fc3da0c5fa02996d91c037",
+      readOnly: true,
     },
     {
       ...defaultProcedureExport(),
       path: "::miden::standards::components::auth::guarded_multisig::get_threshold_and_num_approvers",
       digest:
         "0xa8b67a43d85279823c2ee823bd5498075a11e78906c834bdaf0e0d5471d43013",
+      readOnly: true,
     },
     {
       ...defaultProcedureExport(),
       path: "::miden::standards::components::auth::guarded_multisig::is_signer",
       digest:
         "0x7ccc1a2ab4eeaf7504540fc0845df07021137ab75778d998c72a46dce3f0b4a3",
+      readOnly: true,
     },
     {
       ...defaultProcedureExport(),

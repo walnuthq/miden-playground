@@ -54,72 +54,84 @@ const fungibleFaucet: Script = {
       path: "::miden::standards::components::faucets::fungible_faucet::get_decimals",
       digest:
         "0x4c044331e53b8e73f41c0fc3b7062aae9d1fbba992fab6f7712b4e57eba2f00a",
+      readOnly: true,
     },
     {
       ...defaultProcedureExport(),
       path: "::miden::standards::components::faucets::fungible_faucet::get_max_supply",
       digest:
         "0xbadfef39d5fa02a6265396ebe78a100812101c9ae4157b42c47c5538c9ffa358",
+      readOnly: true,
     },
     {
       ...defaultProcedureExport(),
       path: "::miden::standards::components::faucets::fungible_faucet::get_mutability_config",
       digest:
         "0x13765f07d07d6d1678c1e6460c095594fee87f1aaec0a9887cf50cd106490746",
+      readOnly: true,
     },
     {
       ...defaultProcedureExport(),
       path: "::miden::standards::components::faucets::fungible_faucet::get_name",
       digest:
         "0x8841f58fd93a421ff55b7f24795f564b3b05b09776d8b69336f2b9d9dc8d9886",
+      readOnly: true,
     },
     {
       ...defaultProcedureExport(),
       path: "::miden::standards::components::faucets::fungible_faucet::get_token_config",
       digest:
         "0xbd962fe14d6d47cc3741f23c4fb085c74b3d253db27617d711d13f37a416c991",
+      readOnly: true,
     },
     {
       ...defaultProcedureExport(),
       path: "::miden::standards::components::faucets::fungible_faucet::get_token_supply",
       digest:
         "0x35a0ce33a5522830cafc949508db51758f4c0ac991926e87a8a3857509e47002",
+      readOnly: true,
     },
     {
       ...defaultProcedureExport(),
       path: "::miden::standards::components::faucets::fungible_faucet::get_token_symbol",
       digest:
         "0xb6930e1958d4260af1eea7d05077511e744e0c5e273fa5e219ab98523c674107",
+      readOnly: true,
     },
     {
       ...defaultProcedureExport(),
       path: "::miden::standards::components::faucets::fungible_faucet::has_procedure",
       digest:
         "0x97a695d6dbe6f5d87fdf3826945cf87c0d888e59ba1519c3d4367571d7a46fc2",
+      readOnly: true,
     },
     {
       ...defaultProcedureExport(),
       path: "::miden::standards::components::faucets::fungible_faucet::is_description_mutable",
       digest:
         "0xc88b05401001101e0902602fbf0efd22559ed1d00b77432e9ae4a885dbf8ac32",
+      readOnly: true,
     },
     {
       ...defaultProcedureExport(),
       path: "::miden::standards::components::faucets::fungible_faucet::is_external_link_mutable",
       digest:
         "0x07df237d515ebd1db5bff9ae56ad83bca3d6550bffaa026547f3c25cedece5af",
+      readOnly: true,
     },
     {
       ...defaultProcedureExport(),
       path: "::miden::standards::components::faucets::fungible_faucet::is_logo_uri_mutable",
       digest:
         "0x870ef2b9f8ab83a24d7ecb90622ab0b8bef804f260275566075731ab22373f0a",
+      readOnly: true,
     },
     {
       ...defaultProcedureExport(),
       path: "::miden::standards::components::faucets::fungible_faucet::is_max_supply_mutable",
       digest:
         "0x9cd2854d86fe9fb70ce75b9b7a30b9ccb243ef7858e64119936dd5137d0f425c",
+      readOnly: true,
     },
     {
       ...defaultProcedureExport(),
