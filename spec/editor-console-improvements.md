@@ -572,9 +572,9 @@ planned):
   legacy `rust`, for web apps loaded before the deploy, was dropped in a
   follow-up). `packages.rust` was dropped on production after the deploy by
   a one-off migration script (it backfilled `files` where they differed:
-  none), removed since; `pnpm db:push` drops it from an older local
-  database. Persisted state, saved projects and tutorial snapshots migrate on
-  load.
+  none), removed since. Schema changes now ship as Drizzle migrations,
+  applied by the api deploy workflow (README, "Database migrations").
+  Persisted state, saved projects and tutorial snapshots migrate on load.
 - Add / Remove dependency patch `miden-project.toml` right away; the next
   compile replaces it with the API's regenerated file.
 - The `src/lib.rs` editor stays mounted while hidden or closed: a console

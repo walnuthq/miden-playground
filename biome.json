@@ -17,6 +17,7 @@
       "!packages/ui/src/components",
       "!**/public",
       "!apps/api/examples/*/compiled.json",
+      "!apps/api/drizzle",
       "!apps/web/lib/masm/vocabulary.json"
     ]
   },

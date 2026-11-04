@@ -58,11 +58,11 @@ cp apps/api/.env.example apps/api/.env.local
 cp apps/status-page/.env.example apps/status-page/.env.local
 ```
 
-Start PostgreSQL and setup database. `DATABASE_URL` (committed default in `apps/api/.env`, override in `.env.local`) is used both by `db:push` and by `wrangler dev`, which points the API's [Hyperdrive](https://developers.cloudflare.com/hyperdrive/) binding at it:
+Start PostgreSQL and setup database. `DATABASE_URL` (committed default in `apps/api/.env`, override in `.env.local`) is used both by drizzle-kit and by `wrangler dev`, which points the API's [Hyperdrive](https://developers.cloudflare.com/hyperdrive/) binding at it. `db:migrate` applies the migrations in `apps/api/drizzle` (see [Database migrations](#database-migrations)):
 
 ```sh
 docker compose -f apps/api/docker-compose.yml up -d
-pnpm --filter miden-playground-api db:push
+pnpm --filter miden-playground-api db:migrate
 ```
 
 Build Rust helpers:
@@ -81,9 +81,19 @@ When running the app locally, you can use the playground against a local node by
 
 Both apps run on [Cloudflare Workers](https://workers.cloudflare.com/) and are deployed by GitHub Actions when a PR is merged to `main`, each only when its sources change:
 - [`deploy-web-cloudflare.yml`](.github/workflows/deploy-web-cloudflare.yml) builds `apps/web` with Vite and deploys the `miden-playground` Worker, which serves the build as static assets (with SPA fallback) and proxies Simple Analytics. Its build variables are committed in `apps/web/.env.production`.
-- [`deploy-api-cloudflare.yml`](.github/workflows/deploy-api-cloudflare.yml) deploys the `miden-playground-api` Worker (`wrangler deploy --env production`). Its variables, Hyperdrive binding and custom domain are in `env.production` in `apps/api/wrangler.jsonc`.
+- [`deploy-api-cloudflare.yml`](.github/workflows/deploy-api-cloudflare.yml) applies the pending database migrations, then deploys the `miden-playground-api` Worker (`wrangler deploy --env production`). Its variables, Hyperdrive binding and custom domain are in `env.production` in `apps/api/wrangler.jsonc`.
 
-Both workflows can also be run manually (_Run workflow_ in the Actions tab), and need the `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` repository secrets.
+Both workflows can also be run manually (_Run workflow_ in the Actions tab), and need the `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` repository secrets. The api workflow also needs `DATABASE_URL`.
+
+### Database migrations
+
+The api workflow applies pending [Drizzle](https://orm.drizzle.team/) migrations (`apps/api/drizzle`) to the production database, then deploys the Worker. It connects with the `DATABASE_URL` repository secret: a direct Postgres connection string to the database Hyperdrive fronts, reachable from GitHub's runners. A migration that fails stops the deploy.
+
+Until the deploy finishes, and for longer if it fails, the Worker still running is the previous version, on the new schema. So each migration must keep working with the code already deployed. Adding a table, or a column that is nullable or has a default, is safe. Renaming or dropping something takes two releases: first ship code that no longer uses it, then the migration that removes it (as `packages.rust` was dropped).
+
+After editing `apps/api/db/schema.ts`, generate a migration with `pnpm --filter miden-playground-api db:generate --name <what_it_does>`, check it with `db:migrate` on your local database, and commit it with the schema change. Don't change production with `db:push`: it bypasses the migration journal the workflow relies on. Use `db:push` only on throwaway local databases.
+
+The first migration, `*_baseline`, is the schema production had when migrations were introduced (production had been set up with `db:push`). It was recorded as applied there by hand, without running it. On a local database created with `db:push` before then, `db:migrate` fails (`type "package_status" already exists`): reset it with `docker compose -f apps/api/docker-compose.yml down -v`, then `up -d` and `db:migrate`.
 
 To try a build of `apps/web` before merging, upload it as a preview version with the `qa` alias and test it on `https://qa-miden-playground.walnuthq.workers.dev`:
 
