@@ -145,9 +145,13 @@ const ScriptComponent = ({ id, script }: { id: string; script?: Script }) => {
   useScriptShortcuts({
     enabled: script !== undefined && !script.readOnly,
     onCompile: compileAndShow,
-    // A maximized console hides, like VS Code's panel.
+    // A maximized console hides, like VS Code's panel. Asks the panel, not
+    // `consoleState`: that one waits for the re-render after `onResize`, so a
+    // second press before it would collapse the console again.
     onToggleConsole: () =>
-      setConsoleState(consoleState === "collapsed" ? "normal" : "collapsed"),
+      setConsoleState(
+        consolePanelRef.current?.isCollapsed() ? "normal" : "collapsed",
+      ),
     onClearConsole: () => clearConsoleLog(id),
   });
   useEffect(() => {

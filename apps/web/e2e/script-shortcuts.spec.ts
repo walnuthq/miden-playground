@@ -56,6 +56,25 @@ test("script: keyboard shortcuts", async ({ page }) => {
     await expect(compiled).toHaveCount(3, { timeout: TRANSACTION_TIMEOUT });
   });
 
+  await test.step("Cmd/Ctrl+J twice in a row toggles twice", async () => {
+    // Two presses in one task, with no re-render in between: the second
+    // one used to collapse the console again (it read a stale state).
+    const before = await consoleHeight(page);
+    await page.evaluate(() => {
+      const isMac = /mac|iphone|ipad/i.test(navigator.platform);
+      for (let i = 0; i < 2; i++) {
+        window.dispatchEvent(
+          new KeyboardEvent("keydown", {
+            key: "j",
+            metaKey: isMac,
+            ctrlKey: !isMac,
+          }),
+        );
+      }
+    });
+    await expect.poll(() => consoleHeight(page)).toBe(before);
+  });
+
   await test.step("Cmd/Ctrl+J toggles the console", async () => {
     await page.keyboard.press("ControlOrMeta+j");
     await expect.poll(() => consoleHeight(page)).toBeLessThan(COLLAPSED_HEIGHT);
