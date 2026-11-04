@@ -1,0 +1,230 @@
+import { FEE_SPONSORSHIP_NOTE_CODE } from "@/lib/constants";
+import type { Script } from "@/lib/types/script";
+import { defaultProcedureExport, defaultScript } from "@/lib/utils/script";
+import { sourceFiles } from "@/lib/utils/script-files";
+
+export const rust = ``;
+
+// miden-standards 0.17.1 asm/standards/notes/fee_sponsorship.masm, verbatim.
+// The fee payment of a transaction creating a note for a network account
+// creates one of these, paying the fee the network account charges for
+// consuming it.
+export const masm = `use {AccountId, BlockNumber, NoteArgs, NoteId, NoteRecipient, NoteSerialNumber, NoteTag, NoteType} from miden::protocol::types
+use miden::protocol::active_note
+use miden::protocol::input_note
+use miden::protocol::note
+
+use miden::standards::note::note_reclaim
+use miden::standards::wallets::basic as basic_wallet
+
+# CONSTANTS
+# =================================================================================================
+
+#! The memory address at which the note storage is written.
+const STORAGE_PTR = 0
+
+# Note storage layout (7 items, loaded at STORAGE_PTR by get_bounded_storage):
+# - FEATURE_NOTE_ID       [0..3] : ID of the feature note this sponsorship pays for
+# - reclaimer_suffix      [4]    : suffix of the account allowed to reclaim the note
+# - reclaimer_prefix      [5]    : prefix of the account allowed to reclaim the note
+# - reclaim_block_height  [6]    : block height at or after which the reclaimer may reclaim (0 = disabled)
+
+#! The offset of the FEATURE_NOTE_ID in the note's storage.
+pub const FEATURE_NOTE_ID_ITEM_OFFSET = 0
+
+const FEATURE_NOTE_ID_ITEM = STORAGE_PTR + FEATURE_NOTE_ID_ITEM_OFFSET
+const RECLAIMER_SUFFIX_ITEM = STORAGE_PTR + 4
+const RECLAIMER_PREFIX_ITEM = STORAGE_PTR + 5
+const RECLAIM_HEIGHT_ITEM = STORAGE_PTR + 6
+
+#! The number of storage items of a FEE_SPONSORSHIP note.
+const NUM_STORAGE_ITEMS = 7
+
+#! The number of assets in a FEE_SPONSORSHIP note.
+pub const NUM_ASSETS = 1
+
+# ERRORS
+# =================================================================================================
+
+const ERR_FEE_SPONSORSHIP_UNEXPECTED_NUMBER_OF_STORAGE_ITEMS = "fee sponsorship note expects exactly 7 note storage items"
+
+const ERR_FEE_SPONSORSHIP_MUST_CONTAIN_EXACTLY_ONE_ASSET = "fee sponsorship note must contain exactly one asset"
+
+# NOTE SCRIPT
+# =================================================================================================
+
+#! FEE_SPONSORSHIP script: verifies that the bound feature note is consumed by the same
+#! transaction; otherwise it attempts a reclaim.
+#!
+#! The note carries the fee for exactly one feature note, named by the note ID in its storage. The
+#! fee is a single asset; carrying exactly one asset keeps fee collection simple.
+#!
+#! The note does not restrict who may consume it; it only requires the bound feature note to be
+#! consumed alongside it. Consumption rights are thereby inherited from the feature note: whoever
+#! may consume the feature note may take its sponsorship in the same transaction.
+#!
+#! Two checks keep sponsorships and feature notes paired:
+#! - the consuming account's auth procedure is expected to enforce that each feature note's cost is
+#!   covered, so a feature note cannot be consumed without its fee being paid.
+#! - this script enforces that the sponsorship is never consumed by itself, preventing its fee from
+#!   being collected without the sponsored work happening.
+#!
+#! If the note is never consumed alongside its bound feature note, the reclaimer may reclaim it
+#! once the reclaim block height is reached; once the feature note is consumed by some other
+#! transaction, reclaim is the only way to recover the assets.
+#!
+#! The reclaim path requires that the consuming account exposes:
+#! - miden::standards::wallets::basic::receive_asset procedure.
+#!
+#! Consumers: unrestricted - the note pays for one feature note and may only be consumed alongside
+#!   it, so consumption rights are inherited from that note; the reclaim path is restricted to the
+#!   reclaimer named in the note storage
+#!
+#! Inputs:  [NOTE_ARGS, pad(12)]
+#! Outputs: [pad(16)]
+#!
+#! Where:
+#! - NOTE_ARGS are the note arguments, which this script ignores.
+#!
+#! Note storage is assumed to be as follows:
+#! - FEATURE_NOTE_ID is the ID of the feature note this sponsorship pays for.
+#! - reclaimer_{suffix, prefix} identify the account allowed to reclaim the note.
+#! - reclaim_block_height is the block height at or after which the reclaimer may reclaim the note,
+#!   or 0 if reclaim is disabled.
+#!
+#! Panics if:
+#! - the number of note storage items is not 7.
+#! - the note does not carry exactly one asset.
+#! - the bound feature note is not consumed by this transaction, and the note cannot be reclaimed
+#!   (reclaim is disabled, the reclaim block height is not reached, or the active account is not
+#!   the reclaimer).
+#! - the note is reclaimed and the reclaiming account does not expose the
+#!   miden::standards::wallets::basic::receive_asset procedure.
+@note_script
+pub proc main(note_args: NoteArgs)
+    dropw
+    # => [pad(16)]
+
+    push.NUM_STORAGE_ITEMS push.STORAGE_PTR exec.active_note::get_bounded_storage
+    # => [num_storage_items, pad(16)]
+
+    eq.NUM_STORAGE_ITEMS assert.err=ERR_FEE_SPONSORSHIP_UNEXPECTED_NUMBER_OF_STORAGE_ITEMS
+    # => [pad(16)]
+
+    exec.active_note::get_initial_num_assets
+    # => [num_assets, pad(16)]
+
+    eq.NUM_ASSETS assert.err=ERR_FEE_SPONSORSHIP_MUST_CONTAIN_EXACTLY_ONE_ASSET
+    # => [pad(16)]
+
+    padw mem_loadw_le.FEATURE_NOTE_ID_ITEM
+    # => [FEATURE_NOTE_ID, pad(16)]
+
+    # The pairing check stops a sponsorship from being consumed on its own, and it runs in this
+    # script rather than in the consuming account because the sponsor trusts neither the consuming
+    # account nor the transaction builder.
+    exec.input_note::find_note
+    # => [is_found, feature_note_idx, pad(16)]
+
+    swap drop
+    # => [is_found, pad(16)]
+
+    # with the feature note present, the sponsorship path is a no-op: the assets stay in the note
+    # for the consuming account to collect, and who may get here is decided by the feature note's
+    # own consumption rules. Invert the flag so the branch below handles the absent case (reclaim).
+    not
+    # => [is_absent, pad(16)]
+
+    if.true
+        # reclaim path: without the feature note the assets may only return to the reclaimer named
+        # in the note storage
+        mem_load.RECLAIMER_PREFIX_ITEM mem_load.RECLAIMER_SUFFIX_ITEM mem_load.RECLAIM_HEIGHT_ITEM
+        # => [reclaim_block_height, reclaimer_id_suffix, reclaimer_id_prefix, pad(16)]
+
+        exec.note_reclaim::assert_reclaimable
+        # => [pad(16)]
+
+        exec.basic_wallet::move_note_assets_to_account
+        # => [pad(16)]
+    end
+    # => [pad(16)]
+end
+
+# NOTE PREPARATION
+# =================================================================================================
+
+#! Computes the FEE_SPONSORSHIP recipient and returns the note-creation arguments for the given
+#! inputs.
+#!
+#! Builds the storage and recipient from the inputs. Note creation itself is intentionally left to
+#! the caller; use this procedure when the caller is already inside an account procedure and can
+#! create the note directly via \`output_note::create\`.
+#!
+#! Inputs:  [FEATURE_NOTE_ID, reclaimer_id_suffix, reclaimer_id_prefix, reclaim_block_height, tag, note_type, SERIAL_NUM]
+#! Outputs: [tag, note_type, RECIPIENT]
+#!
+#! Where:
+#! - FEATURE_NOTE_ID is the ID of the feature note this sponsorship pays for.
+#! - reclaimer_id_{suffix,prefix} identify the account allowed to reclaim the note.
+#! - reclaim_block_height is the block height at or after which the reclaimer may reclaim the note,
+#!   or 0 if reclaim is disabled.
+#! - tag is the note tag to be included in the note.
+#! - note_type is the storage type of the note (1 = public, 2 = private).
+#! - SERIAL_NUM is the serial number of the note.
+#! - RECIPIENT is the computed recipient digest of the note.
+#!
+#! Invocation: exec
+@locals(7)
+pub proc prepare_note(
+    feature_note_id: NoteId,
+    reclaimer: AccountId,
+    reclaim_block_height: BlockNumber,
+    tag: NoteTag,
+    note_type: NoteType,
+    serial_num: NoteSerialNumber
+) -> (NoteTag, NoteType, NoteRecipient)
+    # store the 7 storage items into locals in the layout the note script expects
+    loc_storew_le.FEATURE_NOTE_ID_ITEM dropw
+    loc_store.RECLAIMER_SUFFIX_ITEM loc_store.RECLAIMER_PREFIX_ITEM loc_store.RECLAIM_HEIGHT_ITEM
+    # => [tag, note_type, SERIAL_NUM]
+
+    movdn.5 movdn.5
+    # => [SERIAL_NUM, tag, note_type]
+
+    procref.main
+    # => [SCRIPT_ROOT, SERIAL_NUM, tag, note_type]
+
+    swapw
+    # => [SERIAL_NUM, SCRIPT_ROOT, tag, note_type]
+
+    push.NUM_STORAGE_ITEMS locaddr.STORAGE_PTR
+    # => [storage_ptr, num_storage_items, SERIAL_NUM, SCRIPT_ROOT, tag, note_type]
+
+    exec.note::compute_and_store_recipient
+    # => [RECIPIENT, tag, note_type]
+
+    movup.5 movup.5
+    # => [tag, note_type, RECIPIENT]
+end
+`;
+
+const feeSponsorship: Script = {
+  ...defaultScript(),
+  id: "fee-sponsorship",
+  name: "fee-sponsorship",
+  type: "note",
+  status: "compiled",
+  readOnly: true,
+  files: sourceFiles(rust),
+  masm,
+  commitment: FEE_SPONSORSHIP_NOTE_CODE,
+  procedureExports: [
+    {
+      ...defaultProcedureExport(),
+      path: "::miden::standards::notes::fee_sponsorship::run",
+      digest: FEE_SPONSORSHIP_NOTE_CODE,
+    },
+  ],
+};
+
+export default feeSponsorship;

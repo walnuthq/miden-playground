@@ -24,6 +24,10 @@ export const MINT_NOTE_CODE =
   "0xb4c2ff092b6e0aebacd11c290f1cafb72dd53a98e489755f00361a0bba986344";
 export const BURN_NOTE_CODE =
   "0x3d951250cb118282a37b8ee9395f3e3b3c30fab4dbe8c6b0093acfeed3ba04af";
+// The FEE_SPONSORSHIP note a transaction's fee payment creates alongside each
+// note it sends to a network account (`NoteScript.feeSponsorship()`).
+export const FEE_SPONSORSHIP_NOTE_CODE =
+  "0x595a98a56dc7bc62047b0fd9af7e81805f30e0320c6c0eca044826d34abe595c";
 export const TX_FEE_NOTE_CODE =
   "0xc37eff1b503b0eb3630b85744a1f61b80a30f2798f5ab74b502dd4812d493999";
 

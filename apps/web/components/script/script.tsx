@@ -45,6 +45,7 @@ import useScriptShortcuts, {
 } from "@/hooks/use-script-shortcuts";
 import { clearConsoleLog } from "@/lib/console-log";
 import type { Script, ScriptFilePath } from "@/lib/types/script";
+import { assembledFromMasm } from "@/lib/utils/script";
 import { SCRIPT_FILE, scriptSource } from "@/lib/utils/script-files";
 
 // Puts the cursor on a location of the last compile's output. The code may have
@@ -57,6 +58,8 @@ const reveal = (editor: CodeEditor, location: EditorLocation) => {
 };
 
 const NO_MASM = "Compile the script to see its Miden Assembly.";
+const NO_RUST =
+  "This script is written in Miden Assembly: it has no Rust source.";
 
 // The script page fills the viewport below the header (`h-16`, `h-12` with the
 // icon sidebar), so the editor and the console scroll, not the page.
@@ -105,17 +108,22 @@ const ScriptComponent = ({ id, script }: { id: string; script?: Script }) => {
     onlySaveAfterUserInteractions: true,
   });
   const { compile, compiling } = useCompileScript(script);
-  // The MASM-only built-ins have no source.
-  const defaultTab =
-    script && scriptSource(script) === "" ? "masm" : "explorer";
+  // The MASM-only built-ins have no Rust source, so no files for the Explorer.
+  // Not just an empty source: an editable script's can be cleared, and the
+  // mock API's scripts are assembled from MASM but have Rust.
+  const masmOnly =
+    !!script && assembledFromMasm(script) && scriptSource(script) === "";
+  const defaultTab = masmOnly ? "masm" : "explorer";
   // The tabs were called `rust` and `metadata` before the Explorer.
   const tabParam = searchParams.get("tab");
-  const tab =
+  const requestedTab =
     tabParam === "rust"
       ? "explorer"
       : tabParam === "metadata"
         ? "manifest"
         : (tabParam ?? defaultTab);
+  // A `?tab=explorer` link to a MASM-only script shows its MASM.
+  const tab = masmOnly && requestedTab === "explorer" ? "masm" : requestedTab;
   const consoleState: ConsoleState = consoleCollapsed
     ? "collapsed"
     : editorCollapsed
@@ -238,7 +246,21 @@ const ScriptComponent = ({ id, script }: { id: string; script?: Script }) => {
       >
         <div className="flex items-center justify-between gap-2">
           <TabsList>
-            <TabsTrigger value="explorer">Explorer</TabsTrigger>
+            {masmOnly ? (
+              <Tooltip>
+                <TooltipTrigger
+                  delay={300}
+                  render={<span className="flex h-full flex-1" />}
+                >
+                  <TabsTrigger value="explorer" disabled>
+                    Explorer
+                  </TabsTrigger>
+                </TooltipTrigger>
+                <TooltipContent>{NO_RUST}</TooltipContent>
+              </Tooltip>
+            ) : (
+              <TabsTrigger value="explorer">Explorer</TabsTrigger>
+            )}
             {/* Always there, so the tabs keep their width (the Explorer's
                 files line up with them): disabled until a compile succeeds.
                 A disabled tab ignores the pointer: the tooltip goes on a

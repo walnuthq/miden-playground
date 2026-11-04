@@ -147,6 +147,16 @@ const migrateScript = ({
   })),
 });
 
+// A state persisted (or saved in a project) before a built-in script was added
+// lacks it: add the missing ones, which recognize standard notes (e.g.
+// fee-sponsorship) by their script root.
+const withDefaultScripts = (scripts: Script[]) => [
+  ...scripts,
+  ...defaultScripts.filter(
+    ({ id }) => !scripts.some((script) => script.id === id),
+  ),
+];
+
 export const stateDeserializer = (value: string): State => {
   try {
     const {
@@ -194,7 +204,9 @@ export const stateDeserializer = (value: string): State => {
       accounts: accounts ?? initialState.accounts,
       transactions: transactions ?? initialState.transactions,
       inputNotes: inputNotes ?? initialState.inputNotes,
-      scripts: scripts?.map(migrateScript) ?? initialState.scripts,
+      scripts: scripts
+        ? withDefaultScripts(scripts.map(migrateScript))
+        : initialState.scripts,
       components: components ?? initialState.components,
       tutorialId: tutorialId ?? initialState.tutorialId,
       tutorialStep: tutorialStep ?? initialState.tutorialStep,

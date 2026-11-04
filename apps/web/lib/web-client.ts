@@ -681,9 +681,9 @@ export const wasmInputNoteRecordToInputNote = ({
       previousInputNote?.senderId ||
       (record.metadata()?.sender().toString() ?? ""),
     scriptRoot,
-    scriptId: previousInputNote
-      ? previousInputNote.scriptId
-      : (script?.id ?? ""),
+    // A note recorded before its script was known (e.g. a standard note added
+    // since) gets it now.
+    scriptId: previousInputNote?.scriptId || (script?.id ?? ""),
     fungibleAssets: record
       .details()
       .assets()
