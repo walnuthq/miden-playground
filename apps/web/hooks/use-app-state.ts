@@ -28,6 +28,7 @@ import {
   accountIdFromPrefixSuffix,
   midenFaucetAccount,
 } from "@/lib/utils/account";
+import { mainnetSandboxStarter } from "@/lib/utils/mainnet-sandbox";
 import { noteConsumed } from "@/lib/utils/note";
 import { defaultState } from "@/lib/utils/state";
 import { defaultStore, storeName } from "@/lib/utils/store";
@@ -421,12 +422,31 @@ const useAppState = () => {
     paraWallet?.resetClient();
     sync().catch((error) => console.error("ERROR: sync", error));
   };
+  // A Mainnet sandbox doesn't start empty (see mainnetSandboxStarter); without
+  // the API, it does, with a warning.
+  const sandboxStarter = async (newNetworkId: NetworkId) => {
+    if (newNetworkId !== "mm") {
+      return { scripts: [], components: [] };
+    }
+    try {
+      return await mainnetSandboxStarter();
+    } catch (error) {
+      toast.warning("The counter scripts couldn't be added.", {
+        description: error instanceof Error ? error.message : String(error),
+      });
+      return { scripts: [], components: [] };
+    }
+  };
   const resetState = async (newNetworkId: NetworkId) => {
+    const starter = await sandboxStarter(newNetworkId);
     const nextTutorialProgress = await leaveTutorial();
     switchNetwork(newNetworkId);
+    const initialState = defaultState();
     pushState({
-      ...defaultState(),
+      ...initialState,
       accounts: [midenFaucetAccount(newNetworkId)],
+      scripts: [...initialState.scripts, ...starter.scripts],
+      components: [...initialState.components, ...starter.components],
       completedTutorials,
       tutorialProgress: nextTutorialProgress,
     });

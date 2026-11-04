@@ -12,7 +12,7 @@ import {
   resolveEvmWallets,
   signCb,
 } from "@miden-sdk/para";
-import { networks, noteTransportUrls } from "@/lib/miden-client";
+import { networks, noteTransportUrls, provers } from "@/lib/miden-client";
 import type { NetworkId } from "@/lib/types/network";
 
 export type ParaClient = {
@@ -51,7 +51,7 @@ export const createParaClient = async ({
   const client = await MidenClient.create({
     rpcUrl: networks[networkId],
     noteTransportUrl: noteTransportUrls[networkId],
-    proverUrl: networks[networkId],
+    proverUrl: provers[networkId],
     useWorker: false,
     keystore: {
       getKey: async () => undefined,

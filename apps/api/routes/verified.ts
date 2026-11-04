@@ -1,5 +1,5 @@
 import { dbMiddleware } from "@/db/middleware";
-import { getPackage } from "@/db/packages";
+import { getDependencies, getPackage } from "@/db/packages";
 import { createApp } from "@/lib/app";
 import { projectTemplateFiles } from "@/lib/templates";
 import { generateCargoToml, parseMidenProjectToml } from "@/lib/toml";
@@ -32,6 +32,24 @@ const packageSourceFiles = (name: string, packageSource: PackageSource) => ({
   [`${name}/miden-project.toml`]: packageSource.midenProjectToml,
   [`${name}/rust-toolchain.toml`]: projectTemplateFiles["rust-toolchain.toml"],
 });
+
+// The files api-compile needs to build a stored package: its own, plus its
+// dependencies', which its miden-project.toml points to by path
+// (`../<dependency>`). Without them the build fails, e.g. for a note calling
+// an account component.
+const packageFilesWithDependencies = async (
+  dbPackage: NonNullable<Awaited<ReturnType<typeof getPackage>>>,
+) => {
+  const dependencies =
+    dbPackage.dependencies.length > 0
+      ? await getDependencies(dbPackage.dependencies)
+      : [];
+  return Object.assign(
+    {},
+    dbPackage.files,
+    ...dependencies.map(({ files }) => files),
+  ) as Record<string, string>;
+};
 
 const verified = createApp()
   .use("/verified-account-components/*", dbMiddleware)
@@ -80,7 +98,7 @@ const verified = createApp()
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                   accountId,
-                  files: dbPackage.files,
+                  files: await packageFilesWithDependencies(dbPackage),
                   entrypoint: dbPackage.name,
                 }),
                 signal: c.req.raw.signal,
@@ -143,7 +161,7 @@ const verified = createApp()
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               noteId,
-              files: dbPackage.files,
+              files: await packageFilesWithDependencies(dbPackage),
               entrypoint: dbPackage.name,
             }),
             signal: c.req.raw.signal,

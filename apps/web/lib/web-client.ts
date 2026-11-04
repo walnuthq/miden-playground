@@ -44,7 +44,7 @@ import {
   type WebClient as WebClientType,
 } from "@miden-sdk/miden-sdk";
 import { normalizeAccountId } from "@miden-sdk/react";
-import { EMPTY_WORD } from "@/lib/constants";
+import { EMPTY_WORD, MAINNET_RPC_URL } from "@/lib/constants";
 import type {
   Account,
   AccountMultisig,
@@ -80,12 +80,13 @@ export const randomWord = () => {
 
 const wasmRpcClient = (networkId: NetworkId) => {
   const endpoints = {
-    mtst: WasmEndpoint.testnet(),
-    mdev: WasmEndpoint.devnet(),
-    mlcl: WasmEndpoint.localhost(),
-    mmck: WasmEndpoint.localhost(),
+    mm: () => new WasmEndpoint(MAINNET_RPC_URL),
+    mtst: () => WasmEndpoint.testnet(),
+    mdev: () => WasmEndpoint.devnet(),
+    mlcl: () => WasmEndpoint.localhost(),
+    mmck: () => WasmEndpoint.localhost(),
   } as const;
-  return new WasmRpcClient(endpoints[networkId]);
+  return new WasmRpcClient(endpoints[networkId]());
 };
 
 export const clientGetConsumableNotes = ({
@@ -166,16 +167,41 @@ export const clientGetAccounts = async ({
 export const clientGetAllTransactions = (client: WebClientType) =>
   client.getTransactions(WasmTransactionFilter.all());
 
+// Upper bound we assume for the cycles of a network transaction consuming one of
+// the playground's custom notes (the standards' benchmarked P2ID is ~2^16).
+const NETWORK_NOTE_CONSUMPTION_LOG_CYCLES = 20;
+
+// The fee a network account charges the sender of each of its allowed custom
+// notes, through the FEE_SPONSORSHIP note the sender's fee payment creates for
+// every network note (miden-standards `fee::pay_fee`). It mirrors miden-tx's
+// `NetworkNotePricer`: base fee × (⌊log₂(cycles)⌋ + 1), plus its default
+// one-cycle safety margin. Charged on mainnet only, so the account's own
+// balance just pays for its deployment; elsewhere notes stay free, as the
+// tutorials' senders aren't funded for it.
+export const clientNetworkNoteFee = async (networkId: NetworkId) => {
+  if (networkId !== "mm") {
+    return 0n;
+  }
+  const blockHeader = await wasmRpcClient(networkId).getBlockHeaderByNumber();
+  return (
+    BigInt(blockHeader.verificationBaseFee()) *
+    BigInt(NETWORK_NOTE_CONSUMPTION_LOG_CYCLES + 2)
+  );
+};
+
 export const clientDeployAccount = async ({
   client,
   storageMode,
   components,
   scripts,
+  networkNoteFee = 0n,
 }: {
   client: WebClientType;
   storageMode: AccountStorageMode;
   components: Component[];
   scripts: Script[];
+  // What the account's custom notes cost their senders (network accounts only).
+  networkNoteFee?: bigint;
 }) => {
   // Fees are denominated in the native asset of the chain, whose faucet is advertised
   // by the protocol configuration the client receives when it syncs.
@@ -207,7 +233,10 @@ export const clientDeployAccount = async ({
         .split(",")
         .map((keyValue) => keyValue.split(":").at(0) ?? "")
         .filter((root) => root)
-        .map((root) => new WasmNoteScriptFee(WasmWord.fromHex(root), 0n));
+        .map(
+          (root) =>
+            new WasmNoteScriptFee(WasmWord.fromHex(root), networkNoteFee),
+        );
       const { value: allowedTransactionScriptRootsRaw } =
         component.storageSlots.find(
           ({ name }) =>
@@ -224,6 +253,9 @@ export const clientDeployAccount = async ({
       const authComponents = WasmAccountComponent.createNetworkAuthComponents(
         [
           ...allowedNoteScriptFees,
+          // P2ID stays free: a plain P2ID (e.g. the funding note from Bread
+          // Wallet) isn't a network note, so no sponsorship comes with it, and
+          // a priced note without one fails the network transaction.
           new WasmNoteScriptFee(WasmNoteScript.p2id().root(), 0n),
         ],
         feeFaucetId,

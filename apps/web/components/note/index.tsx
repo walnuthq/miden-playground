@@ -20,7 +20,7 @@ const NoteIndex = ({ id }: { id: string }) => {
         script: scriptRoot,
       }),
     enabled:
-      ["mtst", "mdev"].includes(networkId) &&
+      ["mm", "mtst", "mdev"].includes(networkId) &&
       !isStandardNote &&
       scriptRoot !== "",
   });

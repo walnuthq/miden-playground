@@ -8,13 +8,14 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@workspace/ui/components/empty";
-import { type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
+import useGlobalContext from "@/components/global-context/hook";
 import Loading from "@/components/lib/loading";
 import Logo from "@/components/lib/logo";
 import useNetwork from "@/hooks/use-network";
-import { networks, noteTransportUrls } from "@/lib/miden-client";
+import { networks, noteTransportUrls, provers } from "@/lib/miden-client";
 import { deleteProjects } from "@/lib/utils/project";
-import { STATE_STORAGE_KEY } from "@/lib/utils/state";
+import { defaultState, STATE_STORAGE_KEY } from "@/lib/utils/state";
 import {
   deleteMidenStores,
   deleteOutdatedMidenStores,
@@ -66,7 +67,20 @@ const InitializationError = ({ error }: { error: Error }) => {
 
 const MidenProvider = ({ children }: { children: ReactNode }) => {
   const { networkId } = useNetwork();
+  const { dispatch } = useGlobalContext();
   const [storeChecked, setStoreChecked] = useState(false);
+  // Memoized: the SDK's provider re-initializes the client (unmounting the
+  // app) whenever the config object changes, and this component re-renders
+  // on every app state change (it reads the global context).
+  const config = useMemo(
+    () => ({
+      rpcUrl: networks[networkId],
+      noteTransportUrl: noteTransportUrls[networkId],
+      autoSyncInterval: 5000,
+      prover: provers[networkId],
+    }),
+    [networkId],
+  );
   // Has to settle before `RawMidenProvider` mounts, since that is what opens
   // the store and, with it, upgrades away the only marker saying the store
   // predates 0.16, or clears a store a pre-0.17 SDK wrote. Dropping the
@@ -76,7 +90,9 @@ const MidenProvider = ({ children }: { children: ReactNode }) => {
     deleteOutdatedMidenStores()
       .then((outdatedStores) => {
         if (outdatedStores.length > 0) {
-          localStorage.removeItem(STATE_STORAGE_KEY);
+          // GlobalContextProvider, above this one, has already loaded the
+          // persisted state: reset it in memory (and in storage) too.
+          dispatch({ type: "POP_STATE", payload: { state: defaultState() } });
           // Saved projects come from the same outdated client.
           return deleteProjects();
         }
@@ -85,18 +101,14 @@ const MidenProvider = ({ children }: { children: ReactNode }) => {
         console.error("ERROR: deleteOutdatedMidenStores", error),
       )
       .finally(() => setStoreChecked(true));
-  }, []);
+    // `dispatch` is stable: this runs once.
+  }, [dispatch]);
   if (!storeChecked) {
     return <Loading />;
   }
   return (
     <RawMidenProvider
-      config={{
-        rpcUrl: networks[networkId],
-        noteTransportUrl: noteTransportUrls[networkId],
-        autoSyncInterval: 5000,
-        prover: networks[networkId],
-      }}
+      config={config}
       loadingComponent={<Loading />}
       errorComponent={(error) => <InitializationError error={error} />}
     >

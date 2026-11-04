@@ -17,7 +17,7 @@ const AccountIndex = ({ identifier }: { identifier: string }) => {
         networkId,
         code: accountCode,
       }),
-    enabled: ["mtst", "mdev"].includes(networkId) && accountCode !== "",
+    enabled: ["mm", "mtst", "mdev"].includes(networkId) && accountCode !== "",
   });
   const rawVerifiedAccountComponents = data?.components ?? [];
   const verifiedAccountComponents = rawVerifiedAccountComponents.filter(

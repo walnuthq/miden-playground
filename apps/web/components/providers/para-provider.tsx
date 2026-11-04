@@ -69,7 +69,8 @@ const ParaWalletBridge = ({ children }: { children: ReactNode }) => {
   );
   return (
     <ParaWalletContext value={paraWallet}>
-      {wallet && (
+      {/* Para isn't offered on mainnet (Bread Wallet only). */}
+      {wallet && networkId !== "mm" && (
         <ParaClientLoader
           key={`${wallet.id}:${networkId}:${epoch}`}
           para={para}

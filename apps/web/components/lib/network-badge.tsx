@@ -56,6 +56,7 @@ const NetworkBadge = () => {
     }
   }, [exampleId, exampleAccount, loadExample]);
   const variants = {
+    mm: "default",
     mtst: "outline",
     mdev: "secondary",
     mlcl: "destructive",

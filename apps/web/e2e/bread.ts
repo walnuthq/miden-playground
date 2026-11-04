@@ -24,7 +24,10 @@ import { TRANSACTION_TIMEOUT } from "./tutorial";
 //   Playground user. It has no funds: tutorials mint what they need.
 // - BREAD_PROFILE_DIR and BREAD_PASSWORD (optional): run on a copy of a
 //   Chromium profile where Bread has already been onboarded, e.g. to reuse a
-//   funded wallet. The profile must come from Playwright's Chromium: Chrome
+//   funded wallet. With BREAD_PROFILE_IN_PLACE=1, run on the profile itself
+//   instead of a copy: a wallet that transacts on a real chain (the Mainnet
+//   one) must keep its state, or its copy's transactions leave the profile's
+//   account behind the chain. Tests sharing it then can't run in parallel. The profile must come from Playwright's Chromium: Chrome
 //   and Chromium builds can store the extension's IndexedDB differently, and
 //   Bread then starts with an empty account database. The extension ID comes
 //   from the `key` that `pnpm bread-wallet` adds to the manifest, so it's the
@@ -74,12 +77,16 @@ const breadConfig = () => {
     BREAD_EXTENSION_DIR: extensionDir = DEFAULT_EXTENSION_DIR,
     BREAD_PROFILE_DIR: profileDir,
     BREAD_PASSWORD: password,
+    BREAD_PROFILE_IN_PLACE: inPlace,
   } = process.env;
   if (!existsSync(path.join(extensionDir, "manifest.json"))) {
     return null;
   }
   return profileDir && password
-    ? { extensionDir, profile: { dir: profileDir, password } }
+    ? {
+        extensionDir,
+        profile: { dir: profileDir, password, inPlace: inPlace === "1" },
+      }
     : { extensionDir, profile: null };
 };
 
@@ -189,7 +196,8 @@ const unlock = async (context: BrowserContext, password: string) => {
 };
 
 export const test = base.extend<{ breadProfile: BreadProfile; bread: Bread }>({
-  // The profile the test's browser runs on: a fresh copy, deleted afterwards.
+  // The profile the test's browser runs on: a fresh copy, deleted afterwards,
+  // or the configured profile itself with BREAD_PROFILE_IN_PLACE=1.
   breadProfile: async ({ playwright }, use, testInfo) => {
     const config = breadConfig();
     testInfo.skip(
@@ -197,6 +205,10 @@ export const test = base.extend<{ breadProfile: BreadProfile; bread: Bread }>({
       "Run `pnpm bread-wallet` to run Bread Wallet tests (see e2e/bread.ts)",
     );
     const { extensionDir, profile } = config!;
+    if (profile?.inPlace) {
+      await use({ userDataDir: profile.dir, password: profile.password });
+      return;
+    }
     const userDataDir = await mkdtemp(path.join(tmpdir(), "bread-profile-"));
     try {
       if (profile) {
