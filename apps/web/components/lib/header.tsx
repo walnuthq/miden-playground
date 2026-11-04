@@ -1,4 +1,3 @@
-import { Badge } from "@workspace/ui/components/badge";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -15,10 +14,10 @@ import ModeToggle from "@/components/lib/mode-toggle";
 import NetworkBadge from "@/components/lib/network-badge";
 import TutorialToggle from "@/components/lib/tutorial-toggle";
 import WalletButton from "@/components/lib/wallet-button";
+import ScriptStatusBadge from "@/components/scripts/script-status-badge";
 import useNetwork from "@/hooks/use-network";
 import useScript from "@/hooks/use-script";
 import useTutorials from "@/hooks/use-tutorials";
-import { scriptStatuses } from "@/lib/types/script";
 
 const getLink = (pathname: string) => {
   const [, route] = pathname.split("/");
@@ -62,17 +61,7 @@ const ScriptBreadcrumb = ({ id }: { id: string }) => {
           className="size-2 shrink-0 rounded-full bg-foreground/60"
         />
       )}
-      <Badge
-        variant={
-          status === "error"
-            ? "destructive"
-            : status === "draft"
-              ? "secondary"
-              : "outline"
-        }
-      >
-        {scriptStatuses[status]}
-      </Badge>
+      <ScriptStatusBadge status={status} />
     </BreadcrumbItem>
   );
 };
