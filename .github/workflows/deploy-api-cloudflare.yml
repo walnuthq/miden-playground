@@ -42,6 +42,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Before the deploy, so the new code never runs on an old schema; a failed
+      # migration stops the job with nothing deployed. Already-applied
+      # migrations are skipped. The old code keeps serving on the new schema
+      # until the deploy finishes, so migrations must stay compatible with it
+      # (see "Database migrations" in the README).
+      - name: Migrate the database
+        working-directory: apps/api
+        run: pnpm db:migrate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
       # Deploys `env.production` of apps/api/wrangler.jsonc (vars, Hyperdrive
       # binding and custom domain).
       # `pnpm run`, not `pnpm deploy`, which is a pnpm command of its own.
