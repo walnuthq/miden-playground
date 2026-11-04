@@ -3,7 +3,10 @@ export const scriptTypes = {
   library: "Library",
   "account-component": "Account Component",
   note: "Note Script",
-  "tx-script": "Transaction Script",
+  // Miden's canonical name (`TargetType` in miden-mast-package), not the
+  // "tx-script" alias, which states persisted before the rename still hold
+  // (migrateScript).
+  "transaction-script": "Transaction Script",
   "authentication-component": "Authentication Component",
 } as const;
 
@@ -19,7 +22,7 @@ export const scriptExamples = {
   "auth-no-auth": { name: "Auth No Auth", type: "account-component" },
   "counter-account": { name: "Counter Contract", type: "account-component" },
   "counter-note": { name: "Counter Note", type: "note" },
-  "counter-script": { name: "Counter Script", type: "tx-script" },
+  "counter-script": { name: "Counter Script", type: "transaction-script" },
   "count-reader": { name: "Count Reader", type: "account-component" },
 } as const;
 

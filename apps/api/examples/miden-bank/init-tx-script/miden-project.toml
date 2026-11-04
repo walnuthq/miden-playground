@@ -4,7 +4,7 @@ version = "0.1.0"
 
 [lib]
 path = "src/lib.rs"
-kind = "tx-script"
+kind = "transaction-script"
 namespace = "miden:base/transaction-script@1.0.0"
 
 [dependencies]

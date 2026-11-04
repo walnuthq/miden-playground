@@ -3,7 +3,7 @@ import type { Component } from "@/lib/types/component";
 import defaultComponents from "@/lib/types/default-components";
 import defaultScripts from "@/lib/types/default-scripts";
 import type { InputNote } from "@/lib/types/note";
-import type { Script } from "@/lib/types/script";
+import type { Script, ScriptType } from "@/lib/types/script";
 import type { State } from "@/lib/types/state";
 import type { Transaction } from "@/lib/types/transaction";
 import type { TutorialId } from "@/lib/types/tutorial";
@@ -125,11 +125,22 @@ export const stateSerializer = ({
 // carry the old field, on themselves and on their dependencies. Those
 // persisted before `files` have their source in `rust` (saved projects and
 // tutorial snapshots too, which load through here).
-type LegacyScript = Omit<Script, "dependencies" | "files"> & {
+// Transaction scripts persisted before the playground used Miden's canonical
+// kind name are typed "tx-script", themselves and as dependencies.
+type LegacyScriptType = ScriptType | "tx-script";
+
+const migrateScriptType = (type: LegacyScriptType): ScriptType =>
+  type === "tx-script" ? "transaction-script" : type;
+
+type LegacyScript = Omit<Script, "type" | "dependencies" | "files"> & {
+  type: LegacyScriptType;
   digest?: string;
   rust?: string;
   files?: Script["files"];
-  dependencies: (Script["dependencies"][number] & { digest?: string })[];
+  dependencies: (Omit<Script["dependencies"][number], "type"> & {
+    type: LegacyScriptType;
+    digest?: string;
+  })[];
 };
 
 const migrateScript = ({
@@ -139,10 +150,12 @@ const migrateScript = ({
   ...script
 }: LegacyScript): Script => ({
   ...script,
+  type: migrateScriptType(script.type),
   files: files ?? sourceFiles(rust ?? ""),
   commitment: script.commitment ?? digest ?? "",
   dependencies: script.dependencies.map(({ digest, ...dependency }) => ({
     ...dependency,
+    type: migrateScriptType(dependency.type),
     commitment: dependency.commitment ?? digest ?? "",
   })),
 });

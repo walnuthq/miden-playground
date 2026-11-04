@@ -1,30 +1,16 @@
-import { packageTypeEnum } from "@/db/schema";
 import { examples } from "@/examples";
 import { sourcesHash } from "@/examples/hash";
+import { packageTypeNames, toPackageType } from "@/lib/package-type";
 import { parseMidenProjectToml } from "@/lib/toml";
 import type {
   CompiledPackage,
   Dependency,
   MidenProjectToml,
   PackageSource,
-  PackageType,
 } from "@/lib/types";
 import { compilePackage, createPackage } from "@/lib/utils";
 
 const lastSegment = (path: string) => path.split("/").at(-1);
-
-// Upstream projects name the transaction script kind in full (the miden-bank
-// tutorial's init-tx-script); the playground's package type is the short one.
-const packageTypeAliases: Record<string, PackageType> = {
-  "transaction-script": "tx-script",
-};
-
-const toPackageType = (kind: string | undefined) => {
-  const type = kind ? (packageTypeAliases[kind] ?? kind) : undefined;
-  return packageTypeEnum.enumValues.find((value) => value === type);
-};
-
-const packageTypeNames = packageTypeEnum.enumValues.join(", ");
 
 // Parses the packages' miden-project.toml and resolves their path dependencies
 // to package names, then orders them so each package comes after the ones it

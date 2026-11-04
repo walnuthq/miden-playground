@@ -113,6 +113,7 @@ The api deploy workflow runs `pnpm db:migrate` (Drizzle, `apps/api/drizzle`) aga
 - The first migration (`*_baseline`) was recorded as applied on production by hand (production was built with `db:push`). Never edit or rename it: the migrator matches applied migrations by folder name.
 - After bumping `drizzle-kit`, run `pnpm exec drizzle-kit check` in `apps/api`. If it asks for `drizzle-kit up`, run that and commit the rewritten `drizzle/*/snapshot.json` files with the bump, or the deploy's `db:migrate` fails. `up` must leave every `migration.sql` unchanged. Then `drizzle-kit generate --explain` should report no changes.
 - Test migrations on a throwaway database (`CREATE DATABASE` in the docker-compose Postgres), never on production.
+- Transaction scripts are typed `transaction-script`, the canonical name of Miden's `TargetType` (miden-mast-package). `tx-script` is only an alias, which cargo-miden's templates still write in manifests. `toPackageType` (`apps/api/lib/package-type.ts`) maps the aliases `TargetType` parses, and `migrateScript` maps persisted web states. `package_type` still has the legacy `tx-script` value, which old rows hold and reads normalize. Pending release: a migration that converts those rows and recreates the enum without it (`ADD VALUE` can't be used in the transaction that adds it, so it couldn't ship with the first one).
 
 # Environment variables
 

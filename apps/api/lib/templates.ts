@@ -13,7 +13,7 @@ import cargoConfigToml from "@/templates/project-template/.cargo/config.toml";
 import buildRs from "@/templates/project-template/build.rs";
 import cargoLock from "@/templates/project-template/Cargo.lock";
 import rustToolchainToml from "@/templates/project-template/rust-toolchain.toml";
-import txScript from "@/templates/tx-script.rs";
+import transactionScript from "@/templates/transaction-script.rs";
 
 export const projectTemplateFiles = {
   ".cargo/config.toml": cargoConfigToml,
@@ -28,7 +28,7 @@ export const templates = {
   "authentication-component": "",
   "account-component": accountComponent,
   note,
-  "tx-script": txScript,
+  "transaction-script": transactionScript,
   "basic-wallet": basicWallet,
   "p2id-note": p2idNote,
   "auth-no-auth": authNoAuth,

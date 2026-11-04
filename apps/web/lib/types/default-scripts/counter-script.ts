@@ -45,7 +45,7 @@ const counterScript: Script = {
   ...defaultScript(),
   id: "counter-script",
   name: "counter-script",
-  type: "tx-script",
+  type: "transaction-script",
   status: "compiled",
   readOnly: true,
   files: sourceFiles(rust),

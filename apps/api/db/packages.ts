@@ -5,15 +5,30 @@ import {
   type DefaultDependency,
   defaultDependenciesRecords,
 } from "@/lib/default-dependencies";
-import type { Export, NewPackage, PackageStatus } from "@/lib/types";
+import { toPackageType } from "@/lib/package-type";
+import type {
+  DbPackageType,
+  Export,
+  NewPackage,
+  PackageStatus,
+  PackageType,
+} from "@/lib/types";
 import { isValidUUIDv4 } from "@/lib/uuid";
+
+// A stored type, the legacy "tx-script" read as "transaction-script".
+const storedPackageType = (type: DbPackageType): PackageType =>
+  toPackageType(type) ?? "library";
 
 export const getPackage = async (id: string) => {
   const dbPackage = await getDb().query.packagesTable.findFirst({
     where: { id },
   });
   return dbPackage
-    ? { ...dbPackage, files: dbPackage.files as Record<string, string> }
+    ? {
+        ...dbPackage,
+        type: storedPackageType(dbPackage.type),
+        files: dbPackage.files as Record<string, string>,
+      }
     : undefined;
 };
 
@@ -88,6 +103,7 @@ export const getDependencies = async (dependencies: string[]) => {
     ...defaultDependencies,
     ...dbDependencies.map((dbDependency) => ({
       ...dbDependency,
+      type: storedPackageType(dbDependency.type),
       files: dbDependency.files as Record<string, string>,
     })),
   ];
