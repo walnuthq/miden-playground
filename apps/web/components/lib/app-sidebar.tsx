@@ -6,6 +6,7 @@ import {
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
+  useSidebar,
 } from "@workspace/ui/components/sidebar";
 import {
   CircleCheckBig,
@@ -26,6 +27,7 @@ import {
   Wallet,
 } from "lucide-react";
 import { type ComponentProps, useEffect } from "react";
+import { useLocation } from "react-router";
 import Footer from "@/components/lib/footer";
 import NavMain from "@/components/lib/nav-main";
 import ProjectSwitcher from "@/components/lib/project-switcher";
@@ -50,6 +52,15 @@ const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
   const { inputNotes } = useNotes();
   const { scripts } = useScripts();
   const { components } = useComponents();
+  // On mobile the sidebar is a sheet over the page: close it once a link (or
+  // the project switcher) navigates, or it hides the page it just opened.
+  // `key` changes on every navigation, a link to the current path included.
+  const { key: locationKey } = useLocation();
+  const { setOpenMobile } = useSidebar();
+  // biome-ignore lint/correctness/useExhaustiveDependencies: runs on navigation.
+  useEffect(() => {
+    setOpenMobile(false);
+  }, [locationKey, setOpenMobile]);
   const items = [
     {
       title: "Home",
