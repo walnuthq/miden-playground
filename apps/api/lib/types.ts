@@ -55,12 +55,9 @@ export const defaultPackage = (): Package => ({
   updatedAt: new Date(0),
 });
 
-// The values of the package_type column, legacy ones included.
-export type DbPackageType = (typeof packageTypeEnum.enumValues)[number];
-
 // A package's type: Miden's `TargetType` names (miden-mast-package), plus the
-// playground's authentication-component. Never the legacy "tx-script".
-export type PackageType = Exclude<DbPackageType, "tx-script">;
+// playground's authentication-component.
+export type PackageType = (typeof packageTypeEnum.enumValues)[number];
 
 export type PackageStatus = (typeof packageStatusEnum.enumValues)[number];
 
