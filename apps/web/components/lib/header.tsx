@@ -61,7 +61,9 @@ const ScriptBreadcrumb = ({ id }: { id: string }) => {
           className="size-2 shrink-0 rounded-full bg-foreground/60"
         />
       )}
-      <ScriptStatusBadge status={status} />
+      {/* On a phone the name needs the room: the status shows in the
+          sidebar too. */}
+      <ScriptStatusBadge status={status} className="hidden sm:inline-flex" />
     </BreadcrumbItem>
   );
 };
@@ -114,7 +116,9 @@ const Header = () => {
           orientation="vertical"
           className="mr-2 data-vertical:h-4 data-vertical:self-center"
         />
-        <Breadcrumb className="truncate">
+        {/* min-w-0: the breadcrumb gives way (truncates) before the buttons
+            push the row past a phone's width. */}
+        <Breadcrumb className="min-w-0 truncate">
           <BreadcrumbList className="flex-nowrap">
             {isTopLevelPage ? (
               <BreadcrumbItem>
@@ -127,8 +131,8 @@ const Header = () => {
             )}
           </BreadcrumbList>
         </Breadcrumb>
-        <div className="ml-auto flex items-center gap-2">
-          <GithubButton />
+        <div className="ml-auto flex shrink-0 items-center gap-2">
+          <GithubButton className="hidden md:block" />
           <NetworkBadge />
           <ModeToggle />
           {networkId !== "mmck" && !isTutorial && (

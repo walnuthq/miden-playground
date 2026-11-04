@@ -63,8 +63,17 @@ const NetworkBadge = () => {
     mmck: "default",
   } as const;
   return (
-    <Badge variant={variants[networkId]} className="h-8">
-      {networks[networkId]} | <pre>#{syncHeight}</pre>
+    <Badge
+      variant={variants[networkId]}
+      className="h-8"
+      title={`${networks[networkId]} | #${syncHeight}`}
+    >
+      {/* The block height doesn't fit a phone's header. */}
+      <span>
+        {networks[networkId]}
+        <span className="hidden sm:inline"> |</span>
+      </span>
+      <pre className="hidden sm:block">#{syncHeight}</pre>
       {isSyncing ? <Spinner /> : <CircleDot />}
     </Badge>
   );

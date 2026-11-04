@@ -1,7 +1,8 @@
 import { Button } from "@workspace/ui/components/button";
 
-const GithubButton = () => (
+const GithubButton = ({ className }: { className?: string }) => (
   <a
+    className={className}
     href="https://github.com/walnuthq/miden-playground"
     target="_blank"
     rel="noreferrer"
