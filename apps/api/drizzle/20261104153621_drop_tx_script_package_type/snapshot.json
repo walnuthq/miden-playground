@@ -1,0 +1,49 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "0b8def42-bfb0-46ff-8ed9-7fcb35b786a0",
+  "prevIds": [
+    "0da9a186-070b-4e34-b22a-5c7ef82b08dc"
+  ],
+  "footprints": [
+    {
+      "statementType": "recreate_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "package_type"
+      ],
+      "writes": [
+        "s|enum|public.package_type",
+        "n|enum|public.package_type",
+        "e|enum|public.package_type",
+        "n|type|public.package_type",
+        "s|colprop|public.packages.type.type",
+        "s|colprop|public.packages.type.default"
+      ],
+      "reads": [
+        "n|sch|public",
+        "n|tbl|public.packages",
+        "n|sch|public",
+        "n|col|public.packages.type"
+      ],
+      "sqlHash": "ea32f1a90fb389c3"
+    }
+  ],
+  "deltas": [
+    {
+      "op": "alter",
+      "key": "enums\u0000[\"public\",\"package_type\"]",
+      "set": {
+        "values": [
+          "library",
+          "account-component",
+          "authentication-component",
+          "note",
+          "transaction-script"
+        ]
+      }
+    }
+  ]
+}
