@@ -11,6 +11,7 @@ import {
   importExample,
   importScriptsFromPackageSources,
 } from "@/lib/import";
+import { toPackageType } from "@/lib/package-type";
 import { templates } from "@/lib/templates";
 import type {
   CompiledPackage,
@@ -18,7 +19,6 @@ import type {
   Export,
   Package,
   PackageSource,
-  PackageType,
   ProcedureExport,
   ScriptExample,
   ScriptFiles,
@@ -28,7 +28,7 @@ import { compilePackage, createPackage, scriptFiles } from "@/lib/utils";
 
 type CreateScriptRequestBody = {
   name: string;
-  type: PackageType;
+  type: string;
   example: ScriptExample;
 };
 
@@ -80,12 +80,19 @@ const scripts = createApp()
     try {
       const { name, type, example } =
         await c.req.json<CreateScriptRequestBody>();
+      // A web app loaded before the rename can still send "tx-script".
+      const packageType = toPackageType(type);
+      if (!packageType) {
+        return c.text(`Error: Invalid script type ${type}.`, 400);
+      }
       const actualType =
-        type === "authentication-component" ? "account-component" : type;
+        packageType === "authentication-component"
+          ? "account-component"
+          : packageType;
       const { id, files } = await createPackage({
         name,
         type: actualType,
-        source: templates[example === "none" ? type : example],
+        source: templates[example === "none" ? packageType : example],
         dependencies: scriptsDependencies[example],
       });
       return c.json<CreateScriptResponse>({

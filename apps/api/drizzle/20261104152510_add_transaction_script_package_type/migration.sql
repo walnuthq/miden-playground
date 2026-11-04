@@ -1,0 +1,1 @@
+ALTER TYPE "package_type" ADD VALUE 'transaction-script';

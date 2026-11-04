@@ -110,7 +110,8 @@ const CreateTransactionConfigureForm = ({
       ({ faucetId }) => faucetId === faucetAccountId,
     )?.amount ?? "0";
   const shownScripts = scripts.filter(
-    ({ type, status }) => type === "tx-script" && status === "compiled",
+    ({ type, status }) =>
+      type === "transaction-script" && status === "compiled",
   );
   const script = scripts.find(({ id }) => id === scriptId);
   return (

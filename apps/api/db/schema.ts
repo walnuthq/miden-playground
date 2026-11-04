@@ -14,7 +14,12 @@ export const packageTypeEnum = pgEnum("package_type", [
   "account-component",
   "authentication-component",
   "note",
+  // Legacy: what the playground called transaction scripts before it used
+  // Miden's canonical name, "transaction-script". Rows still holding it are
+  // read as "transaction-script" (toPackageType); a later release converts
+  // them and drops the value (see lib/package-type.ts).
   "tx-script",
+  "transaction-script",
 ]);
 
 export const packageStatusEnum = pgEnum("package_status", [

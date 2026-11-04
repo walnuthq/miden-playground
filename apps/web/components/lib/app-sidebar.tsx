@@ -120,7 +120,7 @@ const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
               <UserCircle className="size-4" />
             ) : type === "note" ? (
               <File className="size-4" />
-            ) : type === "tx-script" ? (
+            ) : type === "transaction-script" ? (
               <Route className="size-4" />
             ) : (
               <Key className="size-4" />

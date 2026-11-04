@@ -24,7 +24,8 @@ export type MidenProjectToml = {
       };
     };
   };
-  lib: { kind: PackageType; namespace: string };
+  // Any name `TargetType` parses (see toPackageType), aliases included.
+  lib: { kind: string; namespace: string };
   dependencies: Record<string, string | { path: string }>;
 };
 
@@ -54,7 +55,12 @@ export const defaultPackage = (): Package => ({
   updatedAt: new Date(0),
 });
 
-export type PackageType = (typeof packageTypeEnum.enumValues)[number];
+// The values of the package_type column, legacy ones included.
+export type DbPackageType = (typeof packageTypeEnum.enumValues)[number];
+
+// A package's type: Miden's `TargetType` names (miden-mast-package), plus the
+// playground's authentication-component. Never the legacy "tx-script".
+export type PackageType = Exclude<DbPackageType, "tx-script">;
 
 export type PackageStatus = (typeof packageStatusEnum.enumValues)[number];
 

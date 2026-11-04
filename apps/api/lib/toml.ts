@@ -74,7 +74,7 @@ export const generateMidenProjectToml = ({
       midenProjectToml += `namespace = "miden:${name}/miden-${toKebabCase(traitName)}@${version}"\n`;
       break;
     }
-    case "tx-script": {
+    case "transaction-script": {
       midenProjectToml += `namespace = "miden:base/transaction-script@1.0.0"\n`;
       break;
     }

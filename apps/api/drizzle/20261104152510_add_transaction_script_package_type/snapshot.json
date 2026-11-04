@@ -1,0 +1,41 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "0da9a186-070b-4e34-b22a-5c7ef82b08dc",
+  "prevIds": [
+    "9cd5369f-dcdc-455d-b8e2-5493a0f27b90"
+  ],
+  "footprints": [
+    {
+      "statementType": "alter_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "package_type"
+      ],
+      "writes": [
+        "s|enum|public.package_type"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "alter",
+      "key": "enums\u0000[\"public\",\"package_type\"]",
+      "set": {
+        "values": [
+          "library",
+          "account-component",
+          "authentication-component",
+          "note",
+          "tx-script",
+          "transaction-script"
+        ]
+      }
+    }
+  ]
+}

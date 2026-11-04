@@ -248,7 +248,9 @@ const DeployAccountDialog = () => {
                     Allowed Transaction-scripts
                   </Label>
                   <SelectScriptsCombobox
-                    scripts={scripts.filter(({ type }) => type === "tx-script")}
+                    scripts={scripts.filter(
+                      ({ type }) => type === "transaction-script",
+                    )}
                     value={allowedTransactionScriptIds}
                     onValueChange={setAllowedTransactionScriptIds}
                     placeholder="Select allowed transaction-scripts…"
