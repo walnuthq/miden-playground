@@ -16,7 +16,12 @@ import {
 import { cn } from "@workspace/ui/lib/utils";
 import { useNavigate } from "react-router";
 import AddNoteDropdownMenu from "@/components/notes/add-note-dropdown-menu";
-import { type DataTableFeatures, dataTableFeatures } from "@/lib/table";
+import { mobileHiddenColumns } from "@/components/notes/columns";
+import {
+  type DataTableFeatures,
+  dataTableFeatures,
+  mobileColumnClassName,
+} from "@/lib/table";
 
 const NotesTable = <TData extends RowData>({
   columns,
@@ -52,7 +57,13 @@ const NotesTable = <TData extends RowData>({
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
+                  <TableHead
+                    key={header.id}
+                    className={mobileColumnClassName(
+                      header.column.id,
+                      mobileHiddenColumns,
+                    )}
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -74,9 +85,15 @@ const NotesTable = <TData extends RowData>({
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
-                      className={cn({
-                        "cursor-pointer": cell.column.id !== "actions",
-                      })}
+                      className={cn(
+                        {
+                          "cursor-pointer": cell.column.id !== "actions",
+                        },
+                        mobileColumnClassName(
+                          cell.column.id,
+                          mobileHiddenColumns,
+                        ),
+                      )}
                       onClick={() =>
                         cell.column.id !== "actions" &&
                         navigate(`/notes/${cell.row.getValue("id")}`)

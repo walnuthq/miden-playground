@@ -13,10 +13,16 @@ import {
   TableHeader,
   TableRow,
 } from "@workspace/ui/components/table";
+import { cn } from "@workspace/ui/lib/utils";
 import { useNavigate } from "react-router";
+import { mobileHiddenColumns } from "@/components/transactions/columns";
 import CreateTransactionButton from "@/components/transactions/create-transaction-button";
 import useAccounts from "@/hooks/use-accounts";
-import { type DataTableFeatures, dataTableFeatures } from "@/lib/table";
+import {
+  type DataTableFeatures,
+  dataTableFeatures,
+  mobileColumnClassName,
+} from "@/lib/table";
 
 const TransactionsTable = <TData extends RowData>({
   columns,
@@ -53,7 +59,13 @@ const TransactionsTable = <TData extends RowData>({
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
+                  <TableHead
+                    key={header.id}
+                    className={mobileColumnClassName(
+                      header.column.id,
+                      mobileHiddenColumns,
+                    )}
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -75,7 +87,13 @@ const TransactionsTable = <TData extends RowData>({
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
-                      className="cursor-pointer"
+                      className={cn(
+                        "cursor-pointer",
+                        mobileColumnClassName(
+                          cell.column.id,
+                          mobileHiddenColumns,
+                        ),
+                      )}
                       onClick={() =>
                         navigate(`/transactions/${cell.row.getValue("id")}`)
                       }

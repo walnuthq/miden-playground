@@ -8,6 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
+import { useIsMobile } from "@workspace/ui/hooks/use-mobile";
 import { MoreVertical } from "lucide-react";
 import AccountAddress from "@/components/lib/account-address";
 import useAccounts from "@/hooks/use-accounts";
@@ -107,6 +108,22 @@ const AccountActionsCell = ({ account }: { account: Account }) => {
   );
 };
 
+// Columns the table hides on phones (`mobileColumnClassName`).
+// No copy button on a phone, where it pushes the row actions off-screen: the
+// account's page has one.
+const AccountAddressCell = ({ address }: { address: string }) => {
+  const isMobile = useIsMobile();
+  return (
+    <AccountAddress
+      address={address}
+      withName={false}
+      withCopyButton={!isMobile}
+    />
+  );
+};
+
+export const mobileHiddenColumns = ["storageMode", "nonce"];
+
 export const columns: ColumnDef<DataTableFeatures, Account>[] = [
   {
     accessorKey: "name",
@@ -115,9 +132,7 @@ export const columns: ColumnDef<DataTableFeatures, Account>[] = [
   {
     accessorKey: "address",
     header: "ID",
-    cell: ({ row }) => (
-      <AccountAddress address={row.original.address} withName={false} />
-    ),
+    cell: ({ row }) => <AccountAddressCell address={row.original.address} />,
   },
   {
     accessorKey: "storageMode",

@@ -4,6 +4,15 @@ import type { DataTableFeatures } from "@/lib/table";
 import type { Transaction } from "@/lib/types/transaction";
 import { formatId } from "@/lib/utils";
 
+// Columns the table hides on phones (`mobileColumnClassName`), by column id
+// (an accessor key with its dots replaced by underscores).
+export const mobileHiddenColumns = [
+  "accountId",
+  "scriptRoot",
+  "inputNotes.length",
+  "outputNotes.length",
+];
+
 export const columns: ColumnDef<DataTableFeatures, Transaction>[] = [
   {
     accessorKey: "id",
