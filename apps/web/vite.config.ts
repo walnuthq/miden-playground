@@ -1,7 +1,16 @@
+import { readdir, readFile, writeFile } from "node:fs/promises";
+import { join } from "node:path";
+import { promisify } from "node:util";
+import {
+  brotliCompress as brotliCompressCallback,
+  constants as zlibConstants,
+} from "node:zlib";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig, type Plugin } from "vite";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
+
+const brotliCompress = promisify(brotliCompressCallback);
 
 // The Miden and Para Vite plugins (@miden-sdk/vite-plugin, paraVitePlugin from
 // @miden-sdk/para-react/vite) are replicated here instead of registered: the
@@ -200,6 +209,40 @@ const preloadLazyLayouts = {
   },
 } satisfies Plugin;
 
+// Cloudflare compresses the client WASM on the fly, to 5.8 MB of brotli. Level
+// 11 gets it to 4.0 MB, the largest gain on a phone's first visit, so the build
+// writes it next to the WASM (~35 s) and the Worker serves it (worker/index.ts).
+// Fails the build if there's no WASM to compress, so that an SDK change can't
+// silently bring the slower download back.
+const precompressWasm = {
+  name: "precompress-wasm",
+  apply: "build",
+  writeBundle: async ({ dir = "dist" }) => {
+    const assets = join(dir, "assets");
+    const wasmFiles = (await readdir(assets)).filter((file) =>
+      file.endsWith(".wasm"),
+    );
+    if (wasmFiles.length === 0) {
+      throw new Error(`precompress-wasm: no .wasm file in ${assets}`);
+    }
+    await Promise.all(
+      wasmFiles.map(async (file) => {
+        const wasm = await readFile(join(assets, file));
+        const compressed = await brotliCompress(wasm, {
+          params: {
+            [zlibConstants.BROTLI_PARAM_QUALITY]:
+              zlibConstants.BROTLI_MAX_QUALITY,
+            // The largest window browsers decode (the default is 22).
+            [zlibConstants.BROTLI_PARAM_LGWIN]: 24,
+            [zlibConstants.BROTLI_PARAM_SIZE_HINT]: wasm.length,
+          },
+        });
+        await writeFile(join(assets, `${file}.br`), compressed);
+      }),
+    );
+  },
+} satisfies Plugin;
+
 export default defineConfig({
   plugins: [
     stubs,
@@ -210,6 +253,7 @@ export default defineConfig({
     simpleAnalytics,
     shellIsSdkFree,
     preloadLazyLayouts,
+    precompressWasm,
   ],
   resolve: {
     alias: [{ find: "@", replacement: import.meta.dirname }],
