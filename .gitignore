@@ -30,7 +30,7 @@ target/
 keystore/
 store.sqlite3
 
-# Agents: skills are committed (see CLAUDE.md), personal settings aren't.
+# Agents: skills are committed (see docs/claude/skills.md), personal settings aren't.
 **/.claude/settings.local.json
 docs/agents
 AGENTS.md

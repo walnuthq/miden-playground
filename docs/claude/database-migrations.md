@@ -1,0 +1,9 @@
+# Database migrations
+
+The api deploy workflow runs `pnpm db:migrate` (Drizzle, `apps/api/drizzle`) against production before `wrangler deploy`, with the `DATABASE_URL` repository secret. README "Database migrations" has the rules.
+- Every change to `apps/api/db/schema.ts` ships with its migration: `pnpm db:generate --name <what_it_does>` in `apps/api`, committed unedited unless it needs a data step. Never `db:push` production, and no one-off migration scripts: a data backfill goes in the migration's SQL.
+- A migration must work with the API that's already deployed, which keeps serving until the new one is live: add nullable or defaulted columns; drop or rename in a second release, once no deployed code uses the old name.
+- The first migration (`*_baseline`) was recorded as applied on production by hand (production was built with `db:push`). Never edit or rename it: the migrator matches applied migrations by folder name.
+- After bumping `drizzle-kit`, run `pnpm exec drizzle-kit check` in `apps/api`. If it asks for `drizzle-kit up`, run that and commit the rewritten `drizzle/*/snapshot.json` files with the bump, or the deploy's `db:migrate` fails. `up` must leave every `migration.sql` unchanged. Then `drizzle-kit generate --explain` should report no changes.
+- Test migrations on a throwaway database (`CREATE DATABASE` in the docker-compose Postgres), never on production.
+- Transaction scripts are typed `transaction-script`, the canonical name of Miden's `TargetType` (miden-mast-package). `tx-script` is only an alias, which cargo-miden's templates still write in manifests. `toPackageType` (`apps/api/lib/package-type.ts`) maps the aliases `TargetType` parses, and `migrateScript` maps persisted web states. The migration `drop_tx_script_package_type` converted the stored rows and recreated `package_type` without `tx-script`. Keep `migrateScript`'s mapping: browser states and saved projects never pass through the database.

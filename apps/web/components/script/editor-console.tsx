@@ -173,6 +173,9 @@ const IconButton = ({
 
 // The header bar's status: the latest entry, as one text node (`[10:25:25]
 // Compiled counter-account in 3.9 s.`), or the empty log's placeholder.
+// Keep it one text node and not a button: the e2e specs' anchored regexes
+// (`/^Compiled …/`) and `getByRole("button", { name: "Compile" })` (a
+// case-insensitive substring) would match it too, and fail on two elements.
 const Status = ({ entry }: { entry?: ConsoleEntry }) => (
   <p
     className={cn(
