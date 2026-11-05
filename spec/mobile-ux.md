@@ -18,18 +18,18 @@ Delegated proving was already in place everywhere it matters. The app client
 on the network's remote prover (testnet, devnet, mainnet). Only the Local
 network proves in the browser.
 
-| Item | What shipped |
-|---|---|
-| Sidebar | The phone sidebar (a sheet) closes after navigating. |
-| Header | Fits down to 320 px: the GitHub button and the badge's block height hide, and the breadcrumb truncates first. |
-| Tables | Secondary columns hide below `md` (CSS only), so row actions stay on screen. Nested tables (account components) go under their label. Below `sm`, account names wrap and IDs give way, and the digest's copy button hides. |
-| Script editor | A files menu replaces the file tree. The console starts collapsed, and the minimap is off by default. The tabs row wraps under ~380 px. |
-| Tutorial panel | A bottom panel instead of a full-screen takeover. It reopens by itself when a step's action is done, and toasts move to the top. |
-| App shell | While the Miden client (then Para) initializes, the real layout renders from the app state with actions disabled, instead of a blank loader. Built from view/container splits of the real components. See the caveat in "Left out". |
-| Background sync | Auto-sync and the app's own sync pause while the tab is hidden. That's 0 requests a minute instead of ~92 to the node and the note transport. |
-| Phone e2e | `e2e/mobile` runs in `mobile-safari` (iPhone 14, WebKit), `mobile-chrome` (Pixel 7) and `mobile-small` (Galaxy S9+, 320 px). The specs found and fixed: a transaction preview's Submit pushed off-screen, icon buttons without an accessible name, and three 320 px overflows. |
-| Read-only editor on phones | Monaco is read-only below 768 px. Tutorials 7, 8 and 12, the only steps that ask for typed code, have "Add to my script" buttons that insert it. Desktop users can type or use them. |
-| Tutorial copy | One wording for both layouts. Icon-only buttons are named with their icon (`ButtonName`), with no sidebar references; "click" stays. |
+| Item                       | What shipped                                                                                                                                                                                                                                                                   |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Sidebar                    | The phone sidebar (a sheet) closes after navigating.                                                                                                                                                                                                                           |
+| Header                     | Fits down to 320 px: the GitHub button and the badge's block height hide, and the breadcrumb truncates first.                                                                                                                                                                  |
+| Tables                     | Secondary columns hide below `md` (CSS only), so row actions stay on screen. Nested tables (account components) go under their label. Below `sm`, account names wrap and IDs give way, and the digest's copy button hides.                                                     |
+| Script editor              | A files menu replaces the file tree. The console starts collapsed, and the minimap is off by default. The tabs row wraps under ~380 px.                                                                                                                                        |
+| Tutorial panel             | A bottom panel instead of a full-screen takeover. It reopens by itself when a step's action is done, and toasts move to the top.                                                                                                                                               |
+| App shell                  | While the Miden client (then Para) initializes, the real layout renders from the app state with actions disabled, instead of a blank loader. Built from view/container splits of the real components. See the caveat in "Left out".                                            |
+| Background sync            | Auto-sync and the app's own sync pause while the tab is hidden. That's 0 requests a minute instead of ~92 to the node and the note transport.                                                                                                                                  |
+| Phone e2e                  | `e2e/mobile` runs in `mobile-safari` (iPhone 14, WebKit), `mobile-chrome` (Pixel 7) and `mobile-small` (Galaxy S9+, 320 px). The specs found and fixed: a transaction preview's Submit pushed off-screen, icon buttons without an accessible name, and three 320 px overflows. |
+| Read-only editor on phones | Monaco is read-only below 768 px. Tutorials 7, 8 and 12, the only steps that ask for typed code, have "Add to my script" buttons that insert it. Desktop users can type or use them.                                                                                           |
+| Tutorial copy              | One wording for both layouts. Icon-only buttons are named with their icon (`ButtonName`), with no sidebar references; "click" stays.                                                                                                                                           |
 
 ## Left out
 
@@ -47,11 +47,11 @@ throttling, medians of 3; `performance` marks from a `MutationObserver` on the
 home page's "Show all N tutorials" button: visible = shell, enabled = app).
 Before, with the one static graph:
 
-| Profile | DOMContentLoaded | WASM fetch | Shell | App usable |
-|---|---|---|---|---|
-| Production, 4G-ish (9 Mbps, 170 ms RTT, 4× CPU) | 2.0 s | 2.1 → 7.4 s (5.5 MB brotli) | 7.9 s | 10.4 s |
-| Local `wrangler dev` build, same profile | 2.0 s | 2.2 → 8.0 s (6.2 MB: wrangler's brotli level) | 8.5 s | 10.7 s |
-| Local, LTE-ish (30 Mbps, 60 ms RTT, 2× CPU) | 0.7 s | 0.8 → 2.5 s | 2.7 s | 5.0 s |
+| Profile                                         | DOMContentLoaded | WASM fetch                                    | Shell | App usable |
+| ----------------------------------------------- | ---------------- | --------------------------------------------- | ----- | ---------- |
+| Production, 4G-ish (9 Mbps, 170 ms RTT, 4× CPU) | 2.0 s            | 2.1 → 7.4 s (5.5 MB brotli)                   | 7.9 s | 10.4 s     |
+| Local `wrangler dev` build, same profile        | 2.0 s            | 2.2 → 8.0 s (6.2 MB: wrangler's brotli level) | 8.5 s | 10.7 s     |
+| Local, LTE-ish (30 Mbps, 60 ms RTT, 2× CPU)     | 0.7 s            | 0.8 → 2.5 s                                   | 2.7 s | 5.0 s      |
 
 The 42 modulepreloaded JS chunks (1.2 MB brotli) saturated the link until the
 eager entry evaluated, then the WASM download is bandwidth-bound. Bytes are
@@ -60,10 +60,10 @@ what gate the usable app (item 2); the shell was gated by the module graph.
 After the split (local build, same profiles; the entry's graph is 30 chunks,
 ~240 KB brotli):
 
-| Profile | DOMContentLoaded | WASM fetch | Shell | App usable |
-|---|---|---|---|---|
-| Local, 4G-ish | 1.4 s | 2.7 → 8.6 s | 1.5 s | 10.7 s |
-| Local, LTE-ish | 0.5 s | 0.9 → 2.7 s | 0.6 s | 4.2 s |
+| Profile        | DOMContentLoaded | WASM fetch  | Shell | App usable |
+| -------------- | ---------------- | ----------- | ----- | ---------- |
+| Local, 4G-ish  | 1.4 s            | 2.7 → 8.6 s | 1.5 s | 10.7 s     |
+| Local, LTE-ish | 0.5 s            | 0.9 → 2.7 s | 0.6 s | 4.2 s      |
 
 Without the low-priority modulepreloads for the lazy layouts (below), the app
 came 0.4–0.65 s later than before the split: their chunks were only

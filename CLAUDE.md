@@ -2,23 +2,23 @@
 
 Before working in one of these areas, read its file in `docs/claude/`. Their rules aren't loaded otherwise.
 
-| Working on | Read |
-| --- | --- |
-| Skills (`.claude/skills`, `.agents/skills`, `skills-lock.json`) | `skills.md` |
-| Bumping `@miden-sdk/*` | `upgrading-miden.md`, then `examples.md`, `script-templates.md`, `masm-highlighting.md` |
-| Saved projects, resumable tutorials, `PlaygroundProjects`, network resets | `saved-projects.md` |
-| Mainnet sandbox (`mm`), Bread Wallet, fees, network notes, built-in note scripts, note verification | `mainnet-sandbox.md` |
-| Home-page examples, `compiled.json`, `pnpm examples:compile` | `examples.md` |
-| Read-only procedures, the Invoke button | `read-only-procedures.md` |
-| `apps/api/templates/*.rs`, `pnpm templates:check` | `script-templates.md` |
-| `templates/project-template/Cargo.lock`, `pnpm lockfile:check`/`sync`, api-compile image bumps | `project-template-lockfile.md` |
-| Script page (`/scripts/:id`): editor, console, diagnostics, tabs, shortcuts, its e2e specs | `script-editor.md` |
-| Tutorial steps (`apps/web/components/tutorials`) | `tutorial-copy.md` |
-| Layout, responsive classes, dialogs, anything that renders on a phone | `phone-layout.md` |
-| MASM tab highlighting, `pnpm masm:sync` | `masm-highlighting.md` |
-| `apps/web/vite.config.ts`, Vite/Para/SDK bumps, testing the built app | `vite-build.md` |
-| `apps/api/db/schema.ts`, Drizzle migrations, `drizzle-kit` bumps | `database-migrations.md` |
-| `.env*` files, `DATABASE_URL`, `.dev.vars` | `environment-variables.md` |
+| Working on                                                                                                  | Read                                                                                    |
+| ----------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Skills (`.claude/skills`, `.agents/skills`, `skills-lock.json`)                                             | `skills.md`                                                                             |
+| Bumping `@miden-sdk/*`                                                                                      | `upgrading-miden.md`, then `examples.md`, `script-templates.md`, `masm-highlighting.md` |
+| Saved projects, resumable tutorials, `PlaygroundProjects`, network resets                                   | `saved-projects.md`                                                                     |
+| Mainnet sandbox (`mm`), Bread Wallet, fees, network notes, built-in note scripts, note verification         | `mainnet-sandbox.md`                                                                    |
+| Home-page examples, `compiled.json`, `pnpm examples:compile`                                                | `examples.md`                                                                           |
+| Read-only procedures, the Invoke button                                                                     | `read-only-procedures.md`                                                               |
+| `apps/api/templates/*.rs`, `pnpm templates:check`                                                           | `script-templates.md`                                                                   |
+| `templates/project-template/Cargo.lock`, `pnpm lockfile:check`/`sync`, api-compile image bumps              | `project-template-lockfile.md`                                                          |
+| Script page (`/scripts/:id`): editor, console, diagnostics, tabs, shortcuts, its e2e specs                  | `script-editor.md`                                                                      |
+| Tutorial steps (`apps/web/components/tutorials`), adding a tutorial                                         | `tutorial-copy.md`                                                                      |
+| Layout, responsive classes, dialogs, the app shell and its SDK-free entry, anything that renders on a phone | `phone-layout.md`                                                                       |
+| MASM tab highlighting, `pnpm masm:sync`                                                                     | `masm-highlighting.md`                                                                  |
+| `apps/web/vite.config.ts` and its build plugins, Vite/Para/SDK bumps, testing the built app                 | `vite-build.md`                                                                         |
+| `apps/api/db/schema.ts`, Drizzle migrations, `drizzle-kit` bumps                                            | `database-migrations.md`                                                                |
+| `.env*` files, `DATABASE_URL`, `.dev.vars`                                                                  | `environment-variables.md`                                                              |
 
 # UI changes and e2e specs
 
@@ -27,7 +27,9 @@ These bite in tasks that don't look like script-page or tutorial work.
 - The script page's console header bar stays one text node, not a button: `getByRole("button", { name: "Compile" })` is a case-insensitive substring match, and a second match fails the specs.
 - The Explorer tab and the `src/lib.rs` editor stay mounted when hidden (first in `monaco.editor.getEditors()`): scope e2e locators to the visible tab. Specs wait for a compile with `COMPILED` from `e2e/editor.ts`, not the console's text.
 - Tutorials outside the list in `apps/web/lib/api.ts` (`createScript`) use the mock API, where compiling always succeeds. Run tutorials 6, 7 and 8 after changing the script page.
+- The example and sandbox specs launch an example through `apps/api`: run it on port 3001 next to the web app on 3000, or "Launch example" never navigates.
 - Below 768 px the app has a phone layout. After any layout change, run the `e2e/mobile` projects (`mobile-safari`, `mobile-chrome`, `mobile-small`) and keep each page from overflowing down to 320 px.
+- The app shell (`AppShell`, the layout with every action disabled) paints before the SDK's chunks and WASM load, so the entry's static module graph (`main.tsx`, `routes.tsx`, the shell and the `*View` modules it renders) imports nothing from `@miden-sdk/*` or `@getpara/*`, not even through an app hook: `vite build` fails otherwise. A view needing the client gets a container (`header.tsx` around `header-view.tsx`). The rules are in `phone-layout.md`.
 
 # Database schema
 
