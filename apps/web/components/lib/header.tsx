@@ -8,6 +8,7 @@ import {
 } from "@workspace/ui/components/breadcrumb";
 import { Separator } from "@workspace/ui/components/separator";
 import { SidebarTrigger } from "@workspace/ui/components/sidebar";
+import type { ReactNode } from "react";
 import { useLocation } from "react-router";
 import GithubButton from "@/components/lib/github-button";
 import ModeToggle from "@/components/lib/mode-toggle";
@@ -94,9 +95,10 @@ const SubLevelPageBreadcrumbs = () => {
   );
 };
 
-const Header = () => {
-  const { networkId } = useNetwork();
-  const { tutorialId, isTutorial } = useTutorials();
+// The header row: sidebar trigger, breadcrumb, then `actions` on the right.
+// Free of the Miden client's hooks, so the app shell (shown while the client
+// initializes) renders it too, with its own actions.
+export const HeaderView = ({ actions }: { actions: ReactNode }) => {
   const { pathname } = useLocation();
   const isTopLevelPage = [
     "/",
@@ -132,6 +134,20 @@ const Header = () => {
           </BreadcrumbList>
         </Breadcrumb>
         <div className="ml-auto flex shrink-0 items-center gap-2">
+          {actions}
+        </div>
+      </div>
+    </header>
+  );
+};
+
+const Header = () => {
+  const { networkId } = useNetwork();
+  const { tutorialId, isTutorial } = useTutorials();
+  return (
+    <HeaderView
+      actions={
+        <>
           <GithubButton className="hidden md:block" />
           <NetworkBadge />
           <ModeToggle />
@@ -145,9 +161,9 @@ const Header = () => {
             />
           )}
           {tutorialId && <TutorialToggle />}
-        </div>
-      </div>
-    </header>
+        </>
+      }
+    />
   );
 };
 
