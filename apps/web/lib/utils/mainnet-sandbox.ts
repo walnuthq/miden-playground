@@ -12,9 +12,9 @@ const COUNTER_EXAMPLE_ID = "counter-account";
 // Wallet, increments. The API inserts them precompiled (compiled.json), as when
 // launching the example, without its auto-deployed account: Partner Mainnet
 // only creates invited accounts and network accounts.
-export const mainnetSandboxStarter = async (): Promise<
-  Pick<State, "scripts" | "components">
-> => {
+export type SandboxStarter = Pick<State, "scripts" | "components">;
+
+export const mainnetSandboxStarter = async (): Promise<SandboxStarter> => {
   const { scripts, error } = await importExample(COUNTER_EXAMPLE_ID);
   if (!scripts) {
     throw new Error(error ?? "Scripts couldn't be imported.");

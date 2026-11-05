@@ -9,22 +9,25 @@ import { tutorialMetas } from "@/components/tutorials/meta";
 import { exampleMetas } from "@/lib/examples/meta";
 import { type NetworkId, networks } from "@/lib/types/network";
 
-// The project shown under "Miden Playground": the tutorial, the example, or
-// the network's sandbox. From the tutorials' and examples' metadata, not the
-// tutorials and examples themselves (whose steps and states need the SDK):
-// the app shell shows it before the SDK loads.
+// The project shown under "Miden Playground": the saved project's name, else
+// the tutorial, the example, or the network's sandbox. From the tutorials' and
+// examples' metadata, not the tutorials and examples themselves (whose steps
+// and states need the SDK): the app shell shows it before the SDK loads.
 export const projectTitle = ({
+  projectName,
   tutorialId,
   exampleId,
   networkId,
 }: {
+  projectName: string;
   tutorialId: string;
   exampleId: string;
   networkId: NetworkId;
 }) =>
-  tutorialMetas.find(({ id }) => id === tutorialId)?.title ??
-  exampleMetas.find(({ id }) => id === exampleId)?.title ??
-  `${networks[networkId]} sandbox`;
+  projectName ||
+  (tutorialMetas.find(({ id }) => id === tutorialId)?.title ??
+    exampleMetas.find(({ id }) => id === exampleId)?.title ??
+    `${networks[networkId]} sandbox`);
 
 export const ProjectSwitcherButtonContent = ({ title }: { title: string }) => (
   <>

@@ -19,7 +19,14 @@ import {
   useSidebar,
 } from "@workspace/ui/components/sidebar";
 import { cn } from "@workspace/ui/lib/utils";
-import { BadgeCheck, CircleDashed } from "lucide-react";
+import {
+  BadgeCheck,
+  Check,
+  CircleDashed,
+  Copy,
+  Save,
+  Trash2,
+} from "lucide-react";
 // import { useEffect } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
@@ -31,19 +38,85 @@ import tutorials from "@/components/tutorials";
 import useAppState from "@/hooks/use-app-state";
 import useExamples from "@/hooks/use-examples";
 import useNetwork from "@/hooks/use-network";
+import useSavedProjects from "@/hooks/use-saved-projects";
 import useTutorials from "@/hooks/use-tutorials";
 import examples from "@/lib/examples";
+import { networks } from "@/lib/types/network";
+import type { ProjectMeta } from "@/lib/types/project";
 
-// The project switcher with its menu (tutorials, examples, new sandboxes).
-// `ProjectSwitcherView` (SDK-free) is the button alone, for the app shell.
+const errorMessage = (error: unknown) =>
+  error instanceof Error ? error.message : String(error);
+
+// The project switcher with its menu (tutorials, examples, saved projects,
+// new sandboxes). `ProjectSwitcherView` (SDK-free) is the button alone, for
+// the app shell.
 const ProjectSwitcher = () => {
-  const { isMobile } = useSidebar();
+  const { isMobile, setOpenMobile } = useSidebar();
   const navigate = useNavigate();
   const { networkId } = useNetwork();
   const { resetState } = useAppState();
-  const { tutorial, completedTutorials, tutorialStatus, startTutorial } =
-    useTutorials();
+  const {
+    tutorial,
+    tutorialId,
+    completedTutorials,
+    tutorialStatus,
+    startTutorial,
+  } = useTutorials();
   const { example, launchExample } = useExamples();
+  const {
+    projectId,
+    projectName,
+    projects,
+    saveActiveProject,
+    openProject,
+    openSaveProjectDialog,
+    openDeleteProjectDialog,
+  } = useSavedProjects();
+  // The Save dialog (Save as, and Save without an active project) and the
+  // delete confirmation render next to the sidebar (AppSidebar), not here: on
+  // a phone the sidebar is a sheet, which unmounts this switcher when it
+  // closes, and it closes so the dialog shows over the page, not the sheet.
+  const openSaveDialog = (saveAs: boolean) => {
+    setOpenMobile(false);
+    openSaveProjectDialog(saveAs);
+  };
+  const openDeleteDialog = () => {
+    setOpenMobile(false);
+    openDeleteProjectDialog();
+  };
+  const title = projectTitle({
+    projectName,
+    tutorialId: tutorial?.id ?? "",
+    exampleId: example?.id ?? "",
+    networkId,
+  });
+  const save = async () => {
+    if (!projectId) {
+      openSaveDialog(false);
+      return;
+    }
+    try {
+      await saveActiveProject();
+      toast.success("Project saved.", { description: projectName });
+    } catch (error) {
+      console.error("ERROR: saveActiveProject", error);
+      toast.error("The project couldn't be saved.", {
+        description: errorMessage(error),
+      });
+    }
+  };
+  const open = async (project: ProjectMeta) => {
+    const toastId = toast.loading(`Opening ${project.name}…`);
+    const { error } = await openProject(project.id);
+    if (error !== undefined) {
+      toast.error(`${project.name} couldn't be opened.`, {
+        id: toastId,
+        description: error,
+      });
+    } else {
+      toast.dismiss(toastId);
+    }
+  };
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -56,13 +129,7 @@ const ProjectSwitcher = () => {
               />
             }
           >
-            <ProjectSwitcherButtonContent
-              title={projectTitle({
-                tutorialId: tutorial?.id ?? "",
-                exampleId: example?.id ?? "",
-                networkId,
-              })}
-            />
+            <ProjectSwitcherButtonContent title={title} />
           </DropdownMenuTrigger>
           <DropdownMenuContent
             className="w-(--anchor-width) min-w-56 rounded-lg"
@@ -133,6 +200,55 @@ const ProjectSwitcher = () => {
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
             </DropdownMenuSub>
+            {/* Saving and opening projects is for sandboxes and examples: a
+                tutorial saves itself when left, and resumes from its card. */}
+            {tutorialId === "" && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>Projects</DropdownMenuSubTrigger>
+                  <DropdownMenuPortal>
+                    <DropdownMenuSubContent>
+                      <DropdownMenuItem onClick={save}>
+                        <Save className="size-4" /> Save
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => openSaveDialog(true)}>
+                        <Copy className="size-4" /> Save as…
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        disabled={!projectId}
+                        onClick={openDeleteDialog}
+                      >
+                        <Trash2 className="size-4" /> Delete project
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      {projects.length === 0 && (
+                        <DropdownMenuItem disabled>
+                          No saved projects
+                        </DropdownMenuItem>
+                      )}
+                      {projects.map((project) => (
+                        <DropdownMenuItem
+                          key={project.id}
+                          onClick={() => open(project)}
+                        >
+                          <Check
+                            className={cn("size-4 text-transparent", {
+                              "text-green-500": project.id === projectId,
+                            })}
+                          />{" "}
+                          {project.name}{" "}
+                          {/* Opening it switches to its network. */}
+                          <span className="ml-auto pl-2 text-xs text-muted-foreground">
+                            {networks[project.networkId]}
+                          </span>
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuSubContent>
+                  </DropdownMenuPortal>
+                </DropdownMenuSub>
+              </>
+            )}
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() => {
