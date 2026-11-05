@@ -1,3 +1,4 @@
+import ApplyCodeButton from "@/components/tutorials/apply-code-button";
 import useScriptName from "@/components/tutorials/contract-verification/use-script-name";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import {
@@ -11,6 +12,7 @@ import useScripts from "@/hooks/use-scripts";
 import useTutorials from "@/hooks/use-tutorials";
 import type { TutorialStep } from "@/lib/types/tutorial";
 import { storageSlotName } from "@/lib/utils/component";
+import { resetCountEdits } from "@/lib/utils/tutorial-code";
 
 const useScript = () => {
   const { scripts } = useScripts();
@@ -38,6 +40,7 @@ const Step2: TutorialStep = {
   title: "Add a procedure and compile the script.",
   Content: () => {
     const completed = useCompleted();
+    const script = useScript();
     return (
       <>
         <p>
@@ -64,6 +67,11 @@ fn reset_count(&mut self) {
     let key = Word::new([felt!(1), felt!(0), felt!(0), felt!(0)]);
     self.count_map.set(key, felt!(0));
 }`}
+          action={
+            // Also declares it in the trait (the next snippet): both are
+            // needed to compile.
+            <ApplyCodeButton script={script} edits={resetCountEdits} upTo={1} />
+          }
         />
         <p>
           Then declare its signature in the{" "}
@@ -83,6 +91,9 @@ trait CounterContract {
     #[account_procedure]
     fn reset_count(&mut self);
 }`}
+          action={
+            <ApplyCodeButton script={script} edits={resetCountEdits} upTo={0} />
+          }
         />
         <p>
           When you develop a smart contract, you write human-readable Rust code,
@@ -135,8 +146,9 @@ trait CounterContract {
           description={
             <p>
               Add the <strong>reset_count</strong> procedure to the{" "}
-              <strong>CounterContract</strong> trait and its implementation,
-              then click the <em>"Compile"</em> button.
+              <strong>CounterContract</strong> trait and its implementation (or
+              use the buttons under the code), then click the <em>"Compile"</em>{" "}
+              button.
             </p>
           }
         />

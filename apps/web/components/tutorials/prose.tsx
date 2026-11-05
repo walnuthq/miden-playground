@@ -32,9 +32,24 @@ export const InlineCode = ({ children }: { children: ReactNode }) => (
   <code className="font-mono text-xs">{children}</code>
 );
 
-// Takes the code as a string so that braces need no JSX escaping.
-export const CodeBlock = ({ code }: { code: string }) => (
-  <pre>
-    <InlineCode>{code}</InlineCode>
-  </pre>
-);
+// Takes the code as a string so that braces need no JSX escaping. `action`
+// (a button adding the code to the user's script) goes under it, on the right.
+export const CodeBlock = ({
+  code,
+  action,
+}: {
+  code: string;
+  action?: ReactNode;
+}) =>
+  action ? (
+    <div className="flex flex-col gap-2">
+      <pre>
+        <InlineCode>{code}</InlineCode>
+      </pre>
+      <div className="flex justify-end">{action}</div>
+    </div>
+  ) : (
+    <pre>
+      <InlineCode>{code}</InlineCode>
+    </pre>
+  );

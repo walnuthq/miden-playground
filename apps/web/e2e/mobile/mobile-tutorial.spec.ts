@@ -7,16 +7,11 @@ import {
   TRANSACTION_TIMEOUT,
   tutorialPanel,
 } from "../tutorial";
-import { expectHeaderFits, expectNoHorizontalOverflow } from "./layout";
-
-// Closes the tutorial panel to its bar, which names the step.
-const closePanel = async (page: Page, step: number) => {
-  const panel = tutorialPanel(page);
-  await panel.root.getByRole("button", { name: "Close tutorial" }).click();
-  const bar = page.getByRole("button", { name: "Open tutorial" });
-  await expect(bar).toBeVisible();
-  await expect(bar).toContainText(`Step ${step} of 6`);
-};
+import {
+  closePanel,
+  expectHeaderFits,
+  expectNoHorizontalOverflow,
+} from "./layout";
 
 // The panel opened again by itself once its step's action was done, scrolled
 // to its Next button.

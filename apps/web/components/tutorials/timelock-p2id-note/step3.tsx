@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
+import ApplyCodeButton from "@/components/tutorials/apply-code-button";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import { CodeBlock, InlineCode } from "@/components/tutorials/prose";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
@@ -9,31 +10,20 @@ import useTutorials from "@/hooks/use-tutorials";
 import { defaultScriptIds } from "@/lib/types/default-scripts";
 import type { TutorialStep } from "@/lib/types/tutorial";
 import { scriptSource } from "@/lib/utils/script-files";
+import { timelockEdits } from "@/lib/utils/tutorial-code";
 
-const useCompleted = () => {
+const useScript = () => {
   const { scripts } = useScripts();
-  const script = scripts.find(
+  return scripts.find(
     ({ id, type }) => !defaultScriptIds.includes(id) && type === "note",
   );
+};
+
+const useCompleted = () => {
+  const script = useScript();
   const source = script ? scriptSource(script) : "";
-  const firstMatches = source.match(
-    /assert_eq\(storage\.len\(\)\.into\(\),\s*felt!\(3\)\);/,
-  );
-  const secondMatches = source.match(
-    /let\s+timelock_height\s*=\s*storage\[2\];/,
-  );
-  const thirdMatches = source.match(
-    /let\s+block_number\s*=\s*tx::get_block_number\(\);/,
-  );
-  const fourthMatches = source.match(
-    /assert!\s*\(\s*block_number\s*>=\s*timelock_height\s*\);/,
-  );
   return (
-    script?.masm !== "" &&
-    !!firstMatches &&
-    !!secondMatches &&
-    !!thirdMatches &&
-    !!fourthMatches
+    script?.masm !== "" && timelockEdits.every((edit) => edit.applied(source))
   );
 };
 
@@ -41,6 +31,17 @@ const Step3: TutorialStep = {
   title: "Add the timelock logic to the P2ID note script.",
   Content: () => {
     const completed = useCompleted();
+    const script = useScript();
+    // The buttons add each snippet, and the earlier ones it builds on.
+    const addButton = (upTo: number) => (
+      <ApplyCodeButton
+        script={script}
+        edits={timelockEdits}
+        upTo={upTo}
+        label={upTo === 0 ? "Apply to my script" : undefined}
+        appliedLabel={upTo === 0 ? "Applied" : undefined}
+      />
+    );
     return (
       <>
         <p>
@@ -59,12 +60,16 @@ const Step3: TutorialStep = {
         <CodeBlock
           code={`// make sure the storage length is 3
 assert_eq(storage.len().into(), felt!(3));`}
+          action={addButton(0)}
         />
         <p>
           Then, after line <em>33</em>, read the third storage item into a
           variable:
         </p>
-        <CodeBlock code={`let timelock_height = storage[2];`} />
+        <CodeBlock
+          code={`let timelock_height = storage[2];`}
+          action={addButton(1)}
+        />
         <p>
           To get the current block height, use the transaction kernel's{" "}
           <strong>
@@ -72,7 +77,10 @@ assert_eq(storage.len().into(), felt!(3));`}
           </strong>{" "}
           call, which returns the Transaction's reference block number:
         </p>
-        <CodeBlock code={`let block_number = tx::get_block_number();`} />
+        <CodeBlock
+          code={`let block_number = tx::get_block_number();`}
+          action={addButton(2)}
+        />
         <p>
           Finally, check that{" "}
           <strong>
@@ -84,7 +92,10 @@ assert_eq(storage.len().into(), felt!(3));`}
           </strong>
           :
         </p>
-        <CodeBlock code={`assert!(block_number >= timelock_height);`} />
+        <CodeBlock
+          code={`assert!(block_number >= timelock_height);`}
+          action={addButton(3)}
+        />
         <p>
           Once you've added the timelock logic, compile your script and proceed
           to the next step.
@@ -101,8 +112,8 @@ assert_eq(storage.len().into(), felt!(3));`}
           description={
             <p>
               Follow the instructions to add the timelock logic to your P2ID
-              script, then click the <em>"Compile"</em> button above the editor
-              to compile it.
+              script (or use the buttons under the code), then click the{" "}
+              <em>"Compile"</em> button above the editor to compile it.
             </p>
           }
         />

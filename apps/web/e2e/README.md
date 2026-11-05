@@ -42,9 +42,10 @@ The specs in `mobile/` run in two phone projects: `mobile-safari` (iPhone 14, We
 - the sidebar, which closes after navigating;
 - the script editor's files menu and its collapsed console;
 - the tutorial's bottom panel, which reopens by itself when a step is done;
-- the app shell shown while the Miden client starts.
+- the app shell shown while the Miden client starts;
+- the read-only code editor, and the tutorial buttons that add the code a step asks for (tutorials 7, 8 and 12, in `mobile-tutorial-code.spec.ts`).
 
-`mobile-sandbox.spec.ts` launches the counter example, so it needs `apps/api`, and compiles a script, so it needs the compile service too. Headless WebKit starts the client in a couple of seconds against a local server, but takes about 30 s against production, where it downloads the WASM.
+`mobile-sandbox.spec.ts` launches the counter example, so it needs `apps/api`, and compiles a script, so it needs the compile service too, as does tutorial 12 in `mobile-tutorial-code.spec.ts`. Headless WebKit starts the client in a couple of seconds against a local server, but takes about 30 s against production, where it downloads the WASM.
 
 ## Mainnet
 

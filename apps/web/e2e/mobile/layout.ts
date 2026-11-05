@@ -1,4 +1,5 @@
 import { expect, type Locator, type Page } from "@playwright/test";
+import { tutorialPanel } from "../tutorial";
 
 // Nothing wider than the screen: a phone browser would zoom the whole page out
 // to fit it (the header once made a 390 px screen 420 px wide).
@@ -49,4 +50,13 @@ export const navigateWithSidebar = async (
   await sidebar.getByRole("link", { name: title, exact: true }).click();
   await expect(page).toHaveURL(url);
   await expect(sidebar).toBeHidden();
+};
+
+// Closes the tutorial panel to its bar, which names the step.
+export const closePanel = async (page: Page, step: number) => {
+  const panel = tutorialPanel(page);
+  await panel.root.getByRole("button", { name: "Close tutorial" }).click();
+  const bar = page.getByRole("button", { name: "Open tutorial" });
+  await expect(bar).toBeVisible();
+  await expect(bar).toContainText(new RegExp(`Step ${step} of \\d+`));
 };
