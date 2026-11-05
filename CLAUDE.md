@@ -2,26 +2,24 @@
 
 Before working in one of these areas, read its file in `docs/claude/`. Their rules aren't loaded otherwise.
 
-| Working on                                                                                                        | Read                                                                                    |
-| ----------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| Skills (`.claude/skills`, `.agents/skills`, `skills-lock.json`)                                                   | `skills.md`                                                                             |
-| Bumping `@miden-sdk/*`                                                                                            | `upgrading-miden.md`, then `examples.md`, `script-templates.md`, `masm-highlighting.md` |
-| Saved projects, resumable tutorials, `PlaygroundProjects`, network resets                                         | `saved-projects.md`                                                                     |
-| Mainnet sandbox (`mm`), Bread Wallet, fees, network notes, built-in note scripts, note verification               | `mainnet-sandbox.md`                                                                    |
-| Home-page examples, `compiled.json`, `pnpm examples:compile`                                                      | `examples.md`                                                                           |
-| Read-only procedures, the Invoke button                                                                           | `read-only-procedures.md`                                                               |
-| `apps/api/templates/*.rs`, `pnpm templates:check`                                                                 | `script-templates.md`                                                                   |
-| `templates/project-template/Cargo.lock`, `pnpm lockfile:check`/`sync`, api-compile image bumps                    | `project-template-lockfile.md`                                                          |
-| Script page (`/scripts/:id`): editor, console, diagnostics, tabs, shortcuts, its e2e specs                        | `script-editor.md`                                                                      |
-| Tutorial steps (`apps/web/components/tutorials`), adding a tutorial                                               | `tutorial-copy.md`                                                                      |
-| Layout, responsive classes, dialogs, the app shell and its SDK-free entry, anything that renders on a phone       | `phone-layout.md`                                                                       |
-| `packages/ui`, shadcn components, Base UI APIs (`render`, `Select`, dialogs), overlays                            | `ui-components.md`                                                                      |
-| `apps/api/lib/case.ts`, `apps/web/lib/utils/case.ts`, `storageSlotName`, the component namespace in `lib/toml.ts` | `case-helpers.md`                                                                       |
-| MASM tab highlighting, `pnpm masm:sync`                                                                           | `masm-highlighting.md`                                                                  |
-| `apps/web/vite.config.ts` and its build plugins, Vite/Para/SDK bumps, testing the built app                       | `vite-build.md`                                                                         |
-| `apps/api/db/schema.ts` (every change ships with its migration), Drizzle migrations, `drizzle-kit` bumps          | `database-migrations.md`                                                                |
-| `.env*` files, `DATABASE_URL`, `.dev.vars`                                                                        | `environment-variables.md`                                                              |
-| Node scripts, `process.loadEnvFile`, `turbo.json`, `pnpm add`/`remove`, Node and `@types/node` bumps              | `node-tooling.md`                                                                       |
+- Skills (`.claude/skills`, `.agents/skills`, `skills-lock.json`): `skills.md`.
+- Bumping `@miden-sdk/*`: `upgrading-miden.md`, then `examples.md`, `script-templates.md`, `masm-highlighting.md`.
+- Saved projects, resumable tutorials, `PlaygroundProjects`, network resets: `saved-projects.md`.
+- Mainnet sandbox (`mm`), Bread Wallet, fees, network notes, built-in note scripts, note verification: `mainnet-sandbox.md`.
+- Home-page examples, `compiled.json`, `pnpm examples:compile`: `examples.md`.
+- Read-only procedures, the Invoke button: `read-only-procedures.md`.
+- `apps/api/templates/*.rs`, `pnpm templates:check`: `script-templates.md`.
+- `templates/project-template/Cargo.lock`, `pnpm lockfile:check`/`sync`, api-compile image bumps: `project-template-lockfile.md`.
+- Script page (`/scripts/:id`): editor, console, diagnostics, tabs, shortcuts, its e2e specs: `script-editor.md`.
+- Tutorial steps (`apps/web/components/tutorials`), adding a tutorial: `tutorial-copy.md`.
+- Layout, responsive classes, dialogs, the app shell and its SDK-free entry, anything that renders on a phone: `phone-layout.md`.
+- `packages/ui`, shadcn components, Base UI APIs (`render`, `Select`, dialogs), overlays: `ui-components.md`.
+- `apps/api/lib/case.ts`, `apps/web/lib/utils/case.ts`, `storageSlotName`, the component namespace in `lib/toml.ts`: `case-helpers.md`.
+- MASM tab highlighting, `pnpm masm:sync`: `masm-highlighting.md`.
+- `apps/web/vite.config.ts` and its build plugins, Vite/Para/SDK bumps, testing the built app: `vite-build.md`.
+- `apps/api/db/schema.ts` (every change ships with its migration), Drizzle migrations, `drizzle-kit` bumps: `database-migrations.md`.
+- `.env*` files, `DATABASE_URL`, `.dev.vars`: `environment-variables.md`.
+- Node scripts, `process.loadEnvFile`, `turbo.json`, `pnpm add`/`remove`, Node and `@types/node` bumps: `node-tooling.md`.
 
 # Rules that bite outside their area
 
