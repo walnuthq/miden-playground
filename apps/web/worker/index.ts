@@ -69,7 +69,6 @@ const serveWasm = async (request: Request, env: Env, url: URL) => {
       const responseHeaders = new Headers(precompressed.headers);
       responseHeaders.set("content-type", "application/wasm");
       responseHeaders.set("content-encoding", "br");
-      responseHeaders.append("vary", "Accept-Encoding");
       return new Response(precompressed.body, {
         status: precompressed.status,
         headers: responseHeaders,
@@ -78,10 +77,7 @@ const serveWasm = async (request: Request, env: Env, url: URL) => {
       });
     }
   }
-  const asset = await env.ASSETS.fetch(request);
-  const response = new Response(asset.body, asset);
-  response.headers.append("vary", "Accept-Encoding");
-  return response;
+  return env.ASSETS.fetch(request);
 };
 
 export default {

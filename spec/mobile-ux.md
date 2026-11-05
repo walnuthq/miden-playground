@@ -1,8 +1,8 @@
 # Mobile UX
 
 Status: first pass shipped in PR #760 (merged and deployed 2026-11-05);
-item 1 of "Left out" (the shell before the WASM) shipped on 2026-11-05 too.
-Left: items 2 to 4. Item 2 is the remaining gain for a phone's first visit.
+items 1 and 2 of "Left out" (the shell before the WASM, the precompressed WASM)
+shipped on 2026-11-05 too. Left: items 3 and 4.
 
 The playground was built for desktop. A pass at iPhone 14 size (390 px) on
 2026-11-04 listed fixes, scored by priority and effort. This document records
@@ -91,7 +91,10 @@ download starts at 0.2 s instead of 2.1 s, but ends only 0.4 s earlier (4G)
 or 0.15 s (LTE), since the link was already busy with the JS. WebKit never
 reuses it, whatever the `crossorigin`, `type` and `fetchpriority` attributes:
 the main thread downloads the WASM twice, in parallel, and logs "preloaded
-using link preload but not used". A phone on Safari would get slower.
+using link preload but not used". A phone on Safari would get slower. Not
+rechecked in real Safari: Playwright's WebKit has no HTTP cache (see item 2),
+so that double download may not happen there. Chromium's small gain doesn't
+justify reopening it.
 
 **Not the answer: the `/lazy` entry.** It's the entry that defers the WASM,
 but `docs/claude/vite-build.md` forbids it: two entries mean two WASM instances
@@ -99,28 +102,25 @@ but `docs/claude/vite-build.md` forbids it: two entries mean two WASM instances
 behind the lazy root route instead.
 
 **Measuring.** Production, or a local `vite build --mode development` served
-by `wrangler dev` (brotli like production), a fresh browser context per
-visit, throttled over CDP as above: unthrottled localhost serves the 21 MB
-WASM almost instantly.
+by `wrangler dev`, a fresh browser context per visit, throttled over CDP as
+above: unthrottled localhost serves the 21 MB WASM almost instantly. Local
+sizes aren't production's: `wrangler dev` sends browsers gzip (see
+`docs/claude/vite-build.md`).
 
-### 2. Precompressed WASM
+### 2. Precompressed WASM: done
 
-The client WASM is 21.6 MB raw. Cloudflare compresses it on the fly to 5.8 MB
-of brotli; at brotli level 11 it would be 4.0 MB (−32%). On a phone's first
-visit that download is the largest part of the wait (see item 1). Workers
-static assets don't serve prebuilt `.br` files, so this needs Worker code
-(`apps/web/worker`). For the matching request, it would return the
-precompressed file with `Content-Encoding: br`, an immutable cache header and
-the WASM content type. It must also not break the SDK's streaming compile.
-
-**Implementation** (`feat/precompressed-wasm`). `precompressWasm` in
-`vite.config.ts` writes `assets/*.wasm.br` (3.97 MB, ~35 s of build time), and
-the Worker serves it for `/assets/*.wasm` with `encodeBody: "manual"`. Clients
+Shipped in #768 on 2026-11-05. The client WASM is 21.6 MB raw, and it was the
+largest part of a phone's first visit (see item 1). Workers static assets don't
+serve prebuilt `.br` files, so `precompressWasm` in `vite.config.ts` writes
+`assets/*.wasm.br` (3.97 MB; ~35 s of build time locally, ~59 s on CI), and the
+Worker serves it for `/assets/*.wasm` with `encodeBody: "manual"`. Clients
 without brotli, and a missing `.br`, get the raw asset. Rules in
 `docs/claude/vite-build.md`.
 
-**Measured** on a `wrangler versions upload` preview URL, so on Cloudflare's
-edge but not behind Vercel's proxy, against production. Chromium, fresh context,
+**Measured** on a `wrangler versions upload` preview URL before the merge, so on
+Cloudflare's edge but not behind Vercel's proxy, against production. After the
+deploy, `playground.miden.xyz` serves browsers the same 3,968,598 bytes through
+Vercel, and the timings weren't repeated there. Chromium, fresh context,
 9 Mbps, 170 ms RTT, no CPU throttling, medians of 3. The preview was a
 `--mode development` build.
 
@@ -130,16 +130,37 @@ edge but not behind Vercel's proxy, against production. Chromium, fresh context,
 | WASM download | 5.46 s     | 3.91 s  | −1.5 s |
 | App usable    | 8.86 s     | 7.70 s  | −1.2 s |
 
-Browsers advertise zstd, and Cloudflare's on-the-fly compression answers them
-with it (WebKit, production), so 5.60 MB is the real baseline, not brotli's
-5.8 MB. `instantiateStreaming` resolves on the brotli response in Chromium and
+Browsers advertise zstd, and Cloudflare's on-the-fly compression answered them
+with it, so 5.60 MB was the real baseline, not the 5.8 MB of brotli that curl
+got. `instantiateStreaming` resolves on the brotli response in Chromium and
 WebKit.
 
-**Found on the way, not fixed: WebKit downloads the WASM twice.** On a fresh
-visit, the page and the web worker each fetch it. Playwright WebKit made two full
-downloads with no request interception (`wrangler dev`, 6.39 MB each), where
-Chromium's second request is ~700 bytes. Not checked on a real iPhone. If Safari
-does the same, a first visit costs twice the WASM's size there.
+**No double download.** The page and the SDK's web worker each load the WASM,
+and the HTTP cache serves the worker's. Fresh visit, logging server in front of
+the build, 2026-11-05:
+
+| Browser           | WASM requests reaching the server                     |
+| ----------------- | ----------------------------------------------------- |
+| Safari 27.2       | 1 (the worker script and its WASM chunk did load)     |
+| Chromium          | 1, then a 304 for the worker's (~700 bytes)           |
+| Playwright WebKit | 2 full downloads, and a third for a same-page `fetch` |
+
+Playwright's WebKit doesn't use an HTTP cache, so don't count downloads with it.
+No real iPhone or iOS simulator was checked; Safari on macOS is the closest.
+
+Chromium's 304 came from a `Vary` on client hints in `public/_headers`, inherited
+from `@simpleanalytics/next`: the worker's fetch doesn't send them. No response
+depends on them, so `Vary` is now `Accept-Encoding` alone. `Accept-CH` stays, and
+Chromium still sends the hints that the Worker's analytics proxy forwards. Same
+build on two preview URLs, alternating, Chromium, 9 Mbps, 170 ms RTT, medians of
+5:
+
+|                                | Vary on hints | `Vary: Accept-Encoding` |
+| ------------------------------ | ------------- | ----------------------- |
+| Worker's WASM, first visit     | 304           | From cache              |
+| WASM revalidations on a reload | 2             | 0                       |
+| App usable, reload             | 1.62 s        | 1.26 s                  |
+| App usable, first visit        | 8.37 s        | 7.74 s (within noise)   |
 
 ### 3. Para in parallel with the Miden client
 
