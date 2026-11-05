@@ -23,7 +23,7 @@ const CreateTransactionButton = ({
       }
     >
       <Plus />
-      <span className="hidden lg:inline">Create new transaction</span>
+      <span className="sr-only lg:not-sr-only">Create new transaction</span>
     </Button>
   );
 };

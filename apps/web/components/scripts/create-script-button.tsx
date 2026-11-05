@@ -7,7 +7,7 @@ const CreateScriptButton = () => {
   return (
     <Button variant="outline" onClick={openCreateScriptDialog}>
       <Plus />
-      <span className="hidden lg:inline">Create new script</span>
+      <span className="sr-only lg:not-sr-only">Create new script</span>
     </Button>
   );
 };

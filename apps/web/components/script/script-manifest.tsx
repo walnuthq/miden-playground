@@ -35,7 +35,7 @@ const ScriptManifest = ({ script }: { script: Script }) => {
               onClick={() => openAddDependencyDialog({ scriptId: script.id })}
             >
               <Plus />
-              <span className="hidden lg:inline">Add dependency</span>
+              <span className="sr-only lg:not-sr-only">Add dependency</span>
             </Button>
           )}
         </div>

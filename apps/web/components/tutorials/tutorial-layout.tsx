@@ -47,7 +47,11 @@ const MobileTutorialPanel = ({ tutorial }: { tutorial: Tutorial }) => {
   }, [tutorialStep]);
   const step = tutorial.steps[tutorialStep] ?? defaultTutorialStep();
   return (
-    <div className="sticky bottom-0 z-10 mt-auto rounded-t-xl border-t bg-background shadow-[0_-8px_24px_rgb(0_0_0/0.25)]">
+    // `id`: the e2e helpers find the panel by it, as on desktop.
+    <div
+      id="tutorial"
+      className="sticky bottom-0 z-10 mt-auto rounded-t-xl border-t bg-background shadow-[0_-8px_24px_rgb(0_0_0/0.25)]"
+    >
       {/* Mounted while closed: its step's Next button reports whether the
           step is done (`nextTutorialStepDisabled`). */}
       <div

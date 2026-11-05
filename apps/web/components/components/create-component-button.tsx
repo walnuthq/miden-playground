@@ -7,7 +7,7 @@ const CreateComponentButton = () => {
   return (
     <Button variant="outline" onClick={openCreateComponentDialog}>
       <Plus />
-      <span className="hidden lg:inline">Create new component</span>
+      <span className="sr-only lg:not-sr-only">Create new component</span>
     </Button>
   );
 };

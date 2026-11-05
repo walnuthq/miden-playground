@@ -7,7 +7,7 @@ const ImportProjectButton = () => {
   return (
     <Button variant="outline" onClick={openImportProjectDialog}>
       <FolderDown />
-      <span className="hidden lg:inline">Import Project</span>
+      <span className="sr-only lg:not-sr-only">Import Project</span>
     </Button>
   );
 };

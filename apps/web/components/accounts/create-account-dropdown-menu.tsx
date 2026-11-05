@@ -39,7 +39,7 @@ const CreateAccountDropdownMenu = () => {
     <DropdownMenu>
       <DropdownMenuTrigger render={<Button variant="outline" />}>
         <Plus />
-        <span className="hidden lg:inline">Create new account</span>
+        <span className="sr-only lg:not-sr-only">Create new account</span>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-auto">
         {showCreateWalletsFaucets && (

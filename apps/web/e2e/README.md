@@ -1,10 +1,10 @@
 # End-to-end tests
 
-Playwright tests for the tutorials, the examples and the script editor (`script-*.spec.ts`: header, Explorer, diagnostics, console layout, shortcuts, MASM highlighting, editor settings). They run against a live Playground on testnet, so transactions are proven and submitted for real: expect minutes per test. Tests run one at a time because they share testnet accounts.
+Playwright tests for the tutorials, the examples, the script editor (`script-*.spec.ts`: header, Explorer, diagnostics, console layout, shortcuts, MASM highlighting, editor settings) and the phone layout (`mobile/`). They run against a live Playground on testnet, so transactions are proven and submitted for real: expect minutes per test. Tests run one at a time because they share testnet accounts.
 
 ## Prerequisites
 
-1. Install Playwright's Chromium once: `pnpm exec playwright install chromium`.
+1. Install Playwright's browsers once: `pnpm exec playwright install chromium webkit` (WebKit for the iPhone project).
 2. Start the Playground (`pnpm dev` in `apps/web`, port 3000), unless you set `PLAYWRIGHT_BASE_URL`.
 3. For the specs that create scripts on the API, start `apps/api` too (`pnpm dev` in `apps/api`, port 3001), with its Docker services up. The two examples only need postgres: their packages come precompiled (`apps/api/examples`). Tutorials 11 and 12 and the script editor specs compile, so they also need the compile service. Tutorials 7 and 8 compile through local mocks in `apps/web/lib/mock-api.ts` and don't need it.
 4. For the specs that use Bread Wallet, install it from the repo root with `pnpm bread-wallet`. It downloads the version pinned in `.bread-wallet/version` to `.bread-wallet/extension` (gitignored). Each run warns when it's missing or outdated. `pnpm bread-wallet latest` upgrades to the newest [wallet release](https://github.com/0xMiden/wallet/releases) and pins it: commit `.bread-wallet/version`.
@@ -30,7 +30,21 @@ pnpm bread-wallet                              # from the repo root
 cd apps/web
 pnpm test:e2e                                  # all specs
 pnpm test:e2e e2e/example-miden-bank.spec.ts   # one spec
+pnpm test:e2e --project=chromium               # desktop specs only
+pnpm test:e2e --project=mobile-safari          # phone specs on WebKit (iPhone 14)
 ```
+
+## Mobile
+
+The specs in `mobile/` run in two phone projects: `mobile-safari` (iPhone 14, WebKit, 390 px wide) and `mobile-chrome` (Pixel 7, Chromium, 412 px). The `chromium` project, at 1440×900, skips them. They check:
+- that pages don't overflow the screen's width (a phone would zoom the whole page out);
+- that controls a wider layout pushes off-screen stay on it: the header's buttons, the tables' row menus, the procedures' Invoke buttons;
+- the sidebar, which closes after navigating;
+- the script editor's files menu and its collapsed console;
+- the tutorial's bottom panel, which reopens by itself when a step is done;
+- the app shell shown while the Miden client starts.
+
+`mobile-sandbox.spec.ts` launches the counter example, so it needs `apps/api`, and compiles a script, so it needs the compile service too. Headless WebKit starts the client in a couple of seconds against a local server, but takes about 30 s against production, where it downloads the WASM.
 
 ## Mainnet
 

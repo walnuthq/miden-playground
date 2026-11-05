@@ -20,7 +20,7 @@ const CreateTransactionDropdownMenu = ({ account }: { account: Account }) => {
     <DropdownMenu>
       <DropdownMenuTrigger render={<Button variant="outline" />}>
         <Plus />
-        <span className="hidden lg:inline">Create new transaction</span>
+        <span className="sr-only lg:not-sr-only">Create new transaction</span>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-auto">
         {account.isFaucet ? (
