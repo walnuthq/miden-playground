@@ -28,8 +28,9 @@ const PauseSyncWhenHidden = () => {
       sync().catch(console.error);
     }
   }, [visible, isPaused, pauseSync, resumeSync, sync]);
-  // Unmounted while the client re-initializes (MidenProvider unmounts the
-  // app): don't leave the new client paused.
+  // The pause is the SDK store's, which outlives this component: don't leave
+  // the client paused when unmounted. (A network switch doesn't unmount it:
+  // the providers stay above MidenClientGate.)
   useEffect(
     () => () => {
       if (ownsPause.current) {

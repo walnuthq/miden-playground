@@ -19,9 +19,11 @@ import useNetwork from "@/hooks/use-network";
 // state, every action disabled until the client is ready. Shown three times
 // in a row on a first visit, with the same markup each time, so nothing
 // flashes: as the root route's HydrateFallback (routes.tsx) before the SDK's
-// chunks and WASM load, then as MidenProvider's `loadingComponent` while the
-// client initializes, then as Para's `fallback`. So: no state in here that
-// has to survive a remount.
+// chunks and WASM load, then, under the SDK-bound providers, as Para's
+// `fallback` until Para's client is ready and as MidenClientGate's stand-in
+// for the page until the Miden client is (both initialize in parallel). The
+// gate shows it again on every network switch, which re-initializes the
+// client. So: no state in here that has to survive a remount.
 //
 // It renders outside the SDK's context, and before the SDK exists at all, so
 // its module graph imports nothing from the SDK or Para (the build checks:

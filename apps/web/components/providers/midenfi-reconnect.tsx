@@ -12,8 +12,13 @@ const CONNECTED_KEY = "midenFiConnected";
 // the wallet is selected but disconnected: the provider reselects its only
 // wallet right after a disconnect or a dismissed connection request, so the
 // extension prompt would keep coming back. This reconnects a wallet that was
-// connected at most once per page load, and forgets it as soon as it
-// disconnects, so a disconnect or a dismissed prompt sticks.
+// connected at most once per page load and per network, and forgets it as
+// soon as it disconnects, so a disconnect or a dismissed prompt sticks.
+//
+// A session is for one network: on a switch (e.g. testnet to mainnet sandbox),
+// a connected wallet is disconnected, and reconnected like a remembered one,
+// so it prompts for the new network. (The provider stays mounted across the
+// switch: it sits above MidenClientGate.)
 const MidenFiReconnect = () => {
   const { wallet, connected, connecting, connect, disconnect } =
     useMidenFiWallet();
@@ -21,29 +26,34 @@ const MidenFiReconnect = () => {
   const wasConnected = useRef(false);
   const reconnected = useRef(false);
   const connectedNetworkId = useRef(networkId);
-  // A session is for one network: on a switch (e.g. testnet to mainnet
-  // sandbox), reconnect a connected wallet so it prompts for the new one.
+  // Set while a switch disconnects the wallet: that disconnect keeps the
+  // connection remembered.
+  const switching = useRef(false);
   useEffect(() => {
-    if (connectedNetworkId.current === networkId) {
-      return;
+    const switched = connectedNetworkId.current !== networkId;
+    if (switched) {
+      connectedNetworkId.current = networkId;
+      reconnected.current = false;
     }
-    connectedNetworkId.current = networkId;
-    if (connected) {
-      disconnect()
-        .then(() => connect())
-        .catch(console.error);
-    }
-  }, [networkId, connected, connect, disconnect]);
-  useEffect(() => {
     if (connected) {
       wasConnected.current = true;
       storage.set(CONNECTED_KEY, true);
+      if (switched) {
+        switching.current = true;
+        disconnect().catch((error) => {
+          switching.current = false;
+          console.error(error);
+        });
+      }
       return;
     }
     if (wasConnected.current) {
       wasConnected.current = false;
-      storage.remove(CONNECTED_KEY);
-      return;
+      if (!switching.current) {
+        storage.remove(CONNECTED_KEY);
+        return;
+      }
+      switching.current = false;
     }
     const installed =
       wallet?.readyState === WalletReadyState.Installed ||
@@ -58,7 +68,14 @@ const MidenFiReconnect = () => {
     }
     reconnected.current = true;
     connect().catch(console.error);
-  }, [wallet?.readyState, connected, connecting, connect]);
+  }, [
+    networkId,
+    wallet?.readyState,
+    connected,
+    connecting,
+    connect,
+    disconnect,
+  ]);
   return null;
 };
 

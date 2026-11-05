@@ -6,16 +6,21 @@ import {
 } from "@miden-sdk/miden-wallet-adapter";
 import { MultiSignerProvider, SignerSlot } from "@miden-sdk/react";
 import type { ReactNode } from "react";
-import MidenProvider from "@/components/providers/miden-provider";
+import MidenProvider, {
+  MidenClientGate,
+} from "@/components/providers/miden-provider";
 import MidenFiReconnect from "@/components/providers/midenfi-reconnect";
-import ParaProvider from "@/components/providers/para-provider";
+import ParaProvider, {
+  ParaWalletProvider,
+} from "@/components/providers/para-provider";
 import PauseSyncWhenHidden from "@/components/providers/pause-sync-when-hidden";
 import useNetwork from "@/hooks/use-network";
 import { walletAdapterNetworks } from "@/lib/miden-client";
 
 // Bread Wallet connects to the sandbox's network. Not keyed by it: that would
-// remount the app mid-`resetState`. MidenFiReconnect reconnects a connected
-// wallet when the network changes instead.
+// remount the providers below it, and the page, mid-`resetState`.
+// MidenFiReconnect reconnects a connected wallet when the network changes
+// instead.
 const BreadWalletProvider = ({ children }: { children: ReactNode }) => {
   const { networkId } = useNetwork();
   return (
@@ -40,6 +45,9 @@ const BreadWalletProvider = ({ children }: { children: ReactNode }) => {
 // for the wallet dropdown. They sit inside MidenProvider: they load SDK classes
 // when connecting, which needs the WASM module MidenProvider initializes, and
 // MidenProvider keeps using the local keystore rather than the active signer.
+// And above MidenClientGate, which shows the app shell in place of the page
+// while the client initializes: they stay mounted, with their connections,
+// across a network switch (which re-initializes the client).
 const Providers = ({ children }: { children: ReactNode }) => (
   <MidenProvider>
     <MultiSignerProvider>
@@ -48,7 +56,11 @@ const Providers = ({ children }: { children: ReactNode }) => (
         <MidenFiReconnect />
         <PauseSyncWhenHidden />
         <WalletModalProvider>
-          <ParaProvider>{children}</ParaProvider>
+          <ParaProvider>
+            <MidenClientGate>
+              <ParaWalletProvider>{children}</ParaWalletProvider>
+            </MidenClientGate>
+          </ParaProvider>
         </WalletModalProvider>
       </BreadWalletProvider>
     </MultiSignerProvider>

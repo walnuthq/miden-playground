@@ -11,11 +11,11 @@ const switcher = (page: Page) =>
 
 const networkBadge = (page: Page) => page.locator('header [data-slot="badge"]');
 
-// Waits for the app to be live on `network` after a switch to it. The badge
-// names the new network at once, still with the old client's block height;
-// then the client re-initializes, unmounting the app for the app shell, whose
-// badge has no height; then the new client syncs and the height is back.
-// Opening the menu before the re-initialization would lose it.
+// Waits for the app to be live on `network` after a switch to it: the switch
+// replaces the page with the app shell, whose badge names the new network
+// without a block height, until the client has re-initialized and synced. The
+// page then stays (projects.spec opens a menu right away: it used to be
+// remounted a few more times by the signer providers settling).
 const expectNetworkSwitch = async (
   page: Page,
   network: "Testnet" | "Mainnet",
@@ -29,14 +29,6 @@ const expectNetworkSwitch = async (
   await expect(networkBadge(page)).toContainText(/#\d+/, {
     timeout: TRANSACTION_TIMEOUT,
   });
-  // The app remounts a few more times in the seconds after the client
-  // initialized (the signer providers settling), which would close a menu
-  // opened meanwhile: wait for the page to stay mounted a while.
-  await expect(async () => {
-    const main = await page.locator("main").elementHandle();
-    await page.waitForTimeout(3000);
-    expect(await main?.evaluate((element) => element.isConnected)).toBe(true);
-  }).toPass({ timeout: TRANSACTION_TIMEOUT });
 };
 
 // Opens the Projects submenu and returns it (the submenu is the last menu
