@@ -5,18 +5,13 @@ import Step3 from "@/components/tutorials/interact-with-the-counter-contract/ste
 import Step4 from "@/components/tutorials/interact-with-the-counter-contract/step4";
 import Step5 from "@/components/tutorials/interact-with-the-counter-contract/step5";
 import Step6 from "@/components/tutorials/interact-with-the-counter-contract/step6";
+import { tutorialMeta } from "@/components/tutorials/meta";
 import type { Tutorial } from "@/lib/types/tutorial";
 import { defaultTutorial } from "@/lib/utils/tutorial";
 
 const tutorial: Tutorial = {
   ...defaultTutorial(),
-  id: "interact-with-the-counter-contract",
-  number: 6,
-  title: "Interact with the counter contract",
-  tagline: "Increment a counter contract deployed on testnet.",
-  description:
-    "In this tutorial, you'll read the code of a counter contract deployed on testnet, import it into the Playground and increment its counter.",
-  initialRoute: "/scripts",
+  ...tutorialMeta("interact-with-the-counter-contract"),
   state,
   steps: [Step1, Step2, Step3, Step4, Step5, Step6],
 };

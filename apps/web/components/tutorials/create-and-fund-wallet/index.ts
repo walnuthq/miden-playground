@@ -6,18 +6,13 @@ import Step4 from "@/components/tutorials/create-and-fund-wallet/step4";
 import Step5 from "@/components/tutorials/create-and-fund-wallet/step5";
 import Step6 from "@/components/tutorials/create-and-fund-wallet/step6";
 import store from "@/components/tutorials/create-and-fund-wallet/store";
+import { tutorialMeta } from "@/components/tutorials/meta";
 import type { Tutorial } from "@/lib/types/tutorial";
 import { defaultTutorial } from "@/lib/utils/tutorial";
 
 const tutorial: Tutorial = {
   ...defaultTutorial(),
-  id: "create-and-fund-wallet",
-  number: 1,
-  title: "Create and fund a wallet",
-  tagline: "Create a new wallet and fund it using a faucet.",
-  description:
-    "In this first tutorial, you'll create a new wallet and learn how to fund it by creating your first Miden Transactions.",
-  initialRoute: "/accounts",
+  ...tutorialMeta("create-and-fund-wallet"),
   networkId: "mtst",
   state,
   store,

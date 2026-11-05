@@ -5,6 +5,7 @@ import Step4 from "@/components/tutorials/deploy-a-counter-contract/step4";
 import Step5 from "@/components/tutorials/deploy-a-counter-contract/step5";
 import Step6 from "@/components/tutorials/deploy-a-counter-contract/step6";
 import Step7 from "@/components/tutorials/deploy-a-counter-contract/step7";
+import { tutorialMeta } from "@/components/tutorials/meta";
 import type { Tutorial } from "@/lib/types/tutorial";
 import { midenFaucetAccount } from "@/lib/utils/account";
 import { defaultState } from "@/lib/utils/state";
@@ -12,14 +13,7 @@ import { defaultTutorial } from "@/lib/utils/tutorial";
 
 const tutorial: Tutorial = {
   ...defaultTutorial(),
-  id: "deploy-a-counter-contract",
-  number: 7,
-  title: "Deploy a counter contract",
-  tagline: "Deploy your own counter contract on testnet.",
-  description:
-    "In this tutorial, you'll write your own counter contract, deploy it on testnet and increment its counter.",
-  category: "advanced",
-  initialRoute: "/scripts",
+  ...tutorialMeta("deploy-a-counter-contract"),
   state: {
     ...defaultState(),
     accounts: [midenFaucetAccount("mtst")],

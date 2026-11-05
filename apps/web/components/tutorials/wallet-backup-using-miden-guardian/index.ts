@@ -1,3 +1,4 @@
+import { tutorialMeta } from "@/components/tutorials/meta";
 import Step1 from "@/components/tutorials/wallet-backup-using-miden-guardian/step1";
 import Step2 from "@/components/tutorials/wallet-backup-using-miden-guardian/step2";
 import Step3 from "@/components/tutorials/wallet-backup-using-miden-guardian/step3";
@@ -12,14 +13,7 @@ import { defaultTutorial } from "@/lib/utils/tutorial";
 
 const tutorial: Tutorial = {
   ...defaultTutorial(),
-  id: "wallet-backup-using-miden-guardian",
-  number: 5,
-  title: "Wallet backup using Miden Guardian",
-  tagline: "Back up your private wallet with Miden Guardian.",
-  description:
-    "In this tutorial, you'll back up and restore a private wallet with Miden Guardian, an off-chain service that backs up and syncs private account state across devices without being able to move your funds.",
-  category: "advanced",
-  initialRoute: "/accounts",
+  ...tutorialMeta("wallet-backup-using-miden-guardian"),
   state: {
     ...defaultState(),
     accounts: [midenFaucetAccount("mtst")],

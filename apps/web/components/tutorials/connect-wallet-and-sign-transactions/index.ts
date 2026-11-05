@@ -3,6 +3,7 @@ import Step2 from "@/components/tutorials/connect-wallet-and-sign-transactions/s
 import Step3 from "@/components/tutorials/connect-wallet-and-sign-transactions/step3";
 import Step4 from "@/components/tutorials/connect-wallet-and-sign-transactions/step4";
 import Step5 from "@/components/tutorials/connect-wallet-and-sign-transactions/step5";
+import { tutorialMeta } from "@/components/tutorials/meta";
 import type { Tutorial } from "@/lib/types/tutorial";
 import { midenFaucetAccount } from "@/lib/utils/account";
 import { defaultState } from "@/lib/utils/state";
@@ -10,13 +11,7 @@ import { defaultTutorial } from "@/lib/utils/tutorial";
 
 const tutorial: Tutorial = {
   ...defaultTutorial(),
-  id: "connect-wallet-and-sign-transactions",
-  number: 3,
-  title: "Connect a wallet and sign transactions",
-  tagline: "Connect your Bread Wallet and sign transactions on testnet.",
-  description:
-    "In this tutorial, you'll connect your Bread Wallet to the Miden Playground and sign transactions on Miden testnet.",
-  initialRoute: "/accounts",
+  ...tutorialMeta("connect-wallet-and-sign-transactions"),
   state: {
     ...defaultState(),
     accounts: [midenFaucetAccount("mtst")],

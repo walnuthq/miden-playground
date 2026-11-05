@@ -1,3 +1,4 @@
+import { tutorialMeta } from "@/components/tutorials/meta";
 import Step1 from "@/components/tutorials/private-transfers/step1";
 import Step2 from "@/components/tutorials/private-transfers/step2";
 import Step3 from "@/components/tutorials/private-transfers/step3";
@@ -11,14 +12,7 @@ import { defaultTutorial } from "@/lib/utils/tutorial";
 
 const tutorial: Tutorial = {
   ...defaultTutorial(),
-  id: "private-transfers",
-  number: 4,
-  title: "Private transfers",
-  tagline: "Send assets privately from Bread Wallet to Para Wallet.",
-  description:
-    "In this tutorial, you'll fund a private Bread Wallet and send assets in a private note to a public Para Wallet on Miden testnet.",
-  category: "beginner",
-  initialRoute: "/accounts",
+  ...tutorialMeta("private-transfers"),
   state: {
     ...defaultState(),
     accounts: [midenFaucetAccount("mtst")],

@@ -76,6 +76,130 @@ const simpleAnalytics = {
   ],
 } satisfies Plugin;
 
+// The app shell paints before the SDK's chunks: the entry (main.tsx), the
+// routes and the shell import nothing from the SDK or Para, whose eager entry
+// awaits the WASM at module load, so a static import graph that reached it
+// would wait for the WASM too. The SDK comes in with the lazy root layout.
+// Fails the build if the entry chunk's static imports reach either package:
+// the deploy workflow builds, so a slip (a view importing a client hook, say)
+// can't ship a slower first visit. docs/claude/phone-layout.md has the rules.
+const shellIsSdkFree = {
+  name: "shell-is-sdk-free",
+  apply: "build",
+  generateBundle: (_options, bundle) => {
+    const chunks = Object.values(bundle).filter(
+      (output) => output.type === "chunk",
+    );
+    // The HTML page is the entry's facade: find it by the module it bundles.
+    const entry = chunks.find(
+      (chunk) =>
+        chunk.isEntry && chunk.moduleIds.some((id) => id.endsWith("/main.tsx")),
+    );
+    if (!entry) {
+      throw new Error("shell-is-sdk-free: no entry chunk for main.tsx");
+    }
+    const byFileName = new Map(chunks.map((chunk) => [chunk.fileName, chunk]));
+    // Which chunk first imported each one, to print the path to the culprit.
+    const importedBy = new Map<string, string | null>([[entry.fileName, null]]);
+    const queue = [entry.fileName];
+    for (let fileName = queue.shift(); fileName; fileName = queue.shift()) {
+      const chunk = byFileName.get(fileName);
+      if (!chunk) {
+        continue;
+      }
+      // Their stylesheets are fine (main.tsx imports two, for the cascade
+      // order): only their code awaits the WASM.
+      const culprit = chunk.moduleIds.find(
+        (id) =>
+          /node_modules\/@(miden-sdk|getpara)\//.test(id) &&
+          !id.endsWith(".css"),
+      );
+      if (culprit) {
+        const path: string[] = [];
+        for (
+          let f: string | null = fileName;
+          f;
+          f = importedBy.get(f) ?? null
+        ) {
+          path.unshift(f);
+        }
+        throw new Error(
+          `shell-is-sdk-free: the entry's static imports reach ${culprit.replace(/.*node_modules\//, "")} via ${path.join(" > ")}. The app shell's graph must stay SDK-free (docs/claude/phone-layout.md).`,
+        );
+      }
+      for (const imported of chunk.imports) {
+        if (!importedBy.has(imported)) {
+          importedBy.set(imported, fileName);
+          queue.push(imported);
+        }
+      }
+    }
+  },
+} satisfies Plugin;
+
+// The root layout and the app's layout are lazy routes (routes.tsx), so the
+// entry's graph stays SDK-free; left to the router, their chunks would only
+// be requested once the entry has run, a round trip or more after index.html
+// lists the entry's, and the usable app would come later than before the
+// split. So index.html modulepreloads them too, after the entry's own chunks
+// and at low priority: fetched and compiled alongside the shell, run when the
+// router imports them. Vite's preload helper skips chunks already linked.
+const preloadLazyLayouts = {
+  name: "preload-lazy-layouts",
+  apply: "build",
+  transformIndexHtml: {
+    order: "post",
+    handler: (_html, { bundle }) => {
+      const chunks = Object.values(bundle ?? {}).filter(
+        (output) => output.type === "chunk",
+      );
+      const byFileName = new Map(
+        chunks.map((chunk) => [chunk.fileName, chunk]),
+      );
+      // A chunk and everything it imports statically.
+      const closure = (fileNames: string[]) => {
+        const seen = new Set<string>();
+        const queue = [...fileNames];
+        for (let fileName = queue.shift(); fileName; fileName = queue.shift()) {
+          if (!seen.has(fileName)) {
+            seen.add(fileName);
+            queue.push(...(byFileName.get(fileName)?.imports ?? []));
+          }
+        }
+        return seen;
+      };
+      const entry = chunks.find(
+        (chunk) =>
+          chunk.isEntry &&
+          chunk.moduleIds.some((id) => id.endsWith("/main.tsx")),
+      );
+      const layouts = chunks.filter((chunk) =>
+        /\/components\/lib\/(root-layout|sidebar-layout)\.tsx$/.test(
+          chunk.facadeModuleId ?? "",
+        ),
+      );
+      if (!entry || layouts.length !== 2) {
+        throw new Error(
+          `preload-lazy-layouts: expected the entry chunk and the two layout chunks, found ${entry ? 1 : 0} and ${layouts.length}`,
+        );
+      }
+      const alreadyPreloaded = closure([entry.fileName]);
+      return [...closure(layouts.map((chunk) => chunk.fileName))]
+        .filter((fileName) => !alreadyPreloaded.has(fileName))
+        .map((fileName) => ({
+          tag: "link",
+          attrs: {
+            rel: "modulepreload",
+            crossorigin: true,
+            fetchpriority: "low",
+            href: `/${fileName}`,
+          },
+          injectTo: "head",
+        }));
+    },
+  },
+} satisfies Plugin;
+
 export default defineConfig({
   plugins: [
     stubs,
@@ -84,6 +208,8 @@ export default defineConfig({
     // Para needs these Node builtins (what paraVitePlugin adds).
     nodePolyfills({ include: ["buffer", "crypto", "stream", "util"] }),
     simpleAnalytics,
+    shellIsSdkFree,
+    preloadLazyLayouts,
   ],
   resolve: {
     alias: [{ find: "@", replacement: import.meta.dirname }],

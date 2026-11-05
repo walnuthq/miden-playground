@@ -12,7 +12,10 @@ export type TutorialStep = {
   NextStepButton?: FunctionComponent;
 };
 
-export type Tutorial = {
+// What the home page and the project switcher show of a tutorial
+// (components/tutorials/meta.ts): the app shell renders them before the SDK
+// loads, which the step components import.
+export type TutorialMeta = {
   id: TutorialId;
   number: number;
   title: string;
@@ -20,6 +23,12 @@ export type Tutorial = {
   description: string;
   category: "beginner" | "advanced";
   initialRoute: string;
+  // `steps.length`, for the cards before the steps load; checked against the
+  // steps in components/tutorials/index.ts (dev only).
+  stepCount: number;
+};
+
+export type Tutorial = TutorialMeta & {
   networkId: NetworkId;
   state: State;
   store: Store | null;

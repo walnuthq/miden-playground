@@ -2,11 +2,10 @@ import {
   useMidenFiWallet,
   WalletReadyState,
 } from "@miden-sdk/miden-wallet-adapter";
-import { createMidenStorage } from "@miden-sdk/react";
 import { useEffect, useRef } from "react";
 import useNetwork from "@/hooks/use-network";
+import storage from "@/lib/utils/storage";
 
-const storage = createMidenStorage("miden-playground");
 const CONNECTED_KEY = "midenFiConnected";
 
 // Stands in for MidenFiSignerProvider's autoConnect, which reconnects whenever

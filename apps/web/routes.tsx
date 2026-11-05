@@ -1,8 +1,7 @@
 import type { ComponentType } from "react";
 import { createBrowserRouter } from "react-router";
+import AppShell from "@/components/lib/app-shell";
 import NotFound from "@/components/lib/not-found";
-import RootLayout from "@/components/lib/root-layout";
-import SidebarLayout from "@/components/lib/sidebar-layout";
 
 // Splits each page into its own chunk, as Next did per route.
 const page = (load: () => Promise<{ default: ComponentType }>) => async () => ({
@@ -11,12 +10,16 @@ const page = (load: () => Promise<{ default: ComponentType }>) => async () => ({
 
 const router = createBrowserRouter([
   {
-    Component: RootLayout,
-    // Rendered while the first page's chunk loads.
-    HydrateFallback: () => null,
+    // Lazy, like the layout and the pages: the root layout's providers pull
+    // in the SDK, whose eager entry awaits the WASM. Until that module loads,
+    // the router renders the fallback alone, inside the router context: the
+    // app shell, from the SDK-free graph the entry imports (main.tsx). The
+    // three lazy modules load in parallel from the start.
+    lazy: page(() => import("@/components/lib/root-layout")),
+    HydrateFallback: AppShell,
     children: [
       {
-        Component: SidebarLayout,
+        lazy: page(() => import("@/components/lib/sidebar-layout")),
         children: [
           { index: true, lazy: page(() => import("@/pages/home")) },
           { path: "accounts", lazy: page(() => import("@/pages/accounts")) },
