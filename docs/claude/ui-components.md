@@ -5,4 +5,5 @@
 - Never edit those files. Put layout tweaks in `className` at the call site, and anything global in `packages/ui/src/styles/globals.css`.
 - No z-index overrides on overlays: Base UI portals popups to body in open order, so the stock `z-50` stacks correctly.
 - Non-modal dialogs (`modal={false}`) also pass `disablePointerDismissal` to `Dialog` and `data-modal="false"` to `DialogContent`; a rule in `globals.css` hides their backdrop, which Base UI renders even for non-modal dialogs. Dialogs with wide content need sizing classes on a phone: see `phone-layout.md`.
+- `AlertDialogAction` is a plain `Button`, not a close trigger (`AlertDialogCancel` is one): control the dialog's `open` and close it in the action's `onClick`.
 - Base UI APIs: `render={<X />}` instead of `asChild` (plus `nativeButton={false}` when `X` isn't a button), `Select` needs `items` for `SelectValue` to show labels, and `onValueChange` can receive `null`.

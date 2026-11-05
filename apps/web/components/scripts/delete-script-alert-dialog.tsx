@@ -46,6 +46,8 @@ const DeleteScriptAlertDialog = () => {
               );
               setLoading(false);
               if (script) {
+                // AlertDialogAction is a plain button, not a close trigger.
+                closeDeleteScriptAlertDialog();
                 const deletedScript = scripts.find(
                   ({ id }) => id === script.id,
                 );

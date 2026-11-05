@@ -1,7 +1,8 @@
 import { formatAssetAmount, parseAssetAmount } from "@miden-sdk/react";
 import { FUNGIBLE_FAUCET_DEFAULT_DECIMALS } from "@/lib/constants";
 
-export type FungibleAsset = { faucetId: string; amount: string };
+// Unused at the moment.
+// export type FungibleAsset = { faucetId: string; amount: string };
 
 export const formatAmount = ({
   amount,

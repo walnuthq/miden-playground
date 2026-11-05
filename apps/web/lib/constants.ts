@@ -16,14 +16,15 @@ export const P2ID_NOTE_CODE =
   "0xfb8052cf499c8923513fe112e2a4812b005738194759903e1aa6cab3f7334ada";
 export const P2IDE_NOTE_CODE =
   "0x775c7e6b99171d8eb3808ea84588bd439ef81016e4cf950c3edafbffc13d0643";
-export const SWAP_NOTE_CODE =
-  "0x2363589b463de87885a11bebc90dc838785ed80f2bea559d670f103442a3f223";
-export const PSWAP_NOTE_CODE =
-  "0x8caafbeead87a70f6b95ad35caf01fb33ed84e8b05190af0fbd5f67719323fed";
-export const MINT_NOTE_CODE =
-  "0xb4c2ff092b6e0aebacd11c290f1cafb72dd53a98e489755f00361a0bba986344";
-export const BURN_NOTE_CODE =
-  "0x3d951250cb118282a37b8ee9395f3e3b3c30fab4dbe8c6b0093acfeed3ba04af";
+// Unused at the moment.
+// export const SWAP_NOTE_CODE =
+//   "0x2363589b463de87885a11bebc90dc838785ed80f2bea559d670f103442a3f223";
+// export const PSWAP_NOTE_CODE =
+//   "0x8caafbeead87a70f6b95ad35caf01fb33ed84e8b05190af0fbd5f67719323fed";
+// export const MINT_NOTE_CODE =
+//   "0xb4c2ff092b6e0aebacd11c290f1cafb72dd53a98e489755f00361a0bba986344";
+// export const BURN_NOTE_CODE =
+//   "0x3d951250cb118282a37b8ee9395f3e3b3c30fab4dbe8c6b0093acfeed3ba04af";
 // The FEE_SPONSORSHIP note a transaction's fee payment creates alongside each
 // note it sends to a network account (`NoteScript.feeSponsorship()`).
 export const FEE_SPONSORSHIP_NOTE_CODE =
@@ -81,9 +82,10 @@ export const TESTNET_FAUCET_ADDRESS =
   "mtst1apxtmjhlua0s5vt5sg3ymtnyxclasaf0_qr7qqq9wr6w";
 export const DEVNET_FAUCET_ADDRESS = "";
 
-export const TESTNET_COUNTER_CONTRACT_ACCOUNT_ID =
-  "0x1856bd4ea0182491283f868d0733b2";
-export const DEVNET_COUNTER_CONTRACT_ACCOUNT_ID = "";
+// Unused at the moment.
+// export const TESTNET_COUNTER_CONTRACT_ACCOUNT_ID =
+//   "0x1856bd4ea0182491283f868d0733b2";
+// export const DEVNET_COUNTER_CONTRACT_ACCOUNT_ID = "";
 export const TESTNET_COUNTER_CONTRACT_ADDRESS =
   "mtst1aqv9d02w5qvzfyfg87rg6penkg2fgqyc_qr7qqq9wr6w";
 export const DEVNET_COUNTER_CONTRACT_ADDRESS = "";
@@ -142,12 +144,13 @@ export const midenFaucetApiUrl = (networkId: NetworkId) =>
     mmck: DEVNET_FAUCET_API_URL,
   })[networkId];
 
-// The tutorials' counter contract is deployed on testnet only.
-export const counterContractAccountId = (networkId: NetworkId) =>
-  networkId === "mtst"
-    ? TESTNET_COUNTER_CONTRACT_ACCOUNT_ID
-    : DEVNET_COUNTER_CONTRACT_ACCOUNT_ID;
+// Unused at the moment.
+// export const counterContractAccountId = (networkId: NetworkId) =>
+//   networkId === "mtst"
+//     ? TESTNET_COUNTER_CONTRACT_ACCOUNT_ID
+//     : DEVNET_COUNTER_CONTRACT_ACCOUNT_ID;
 
+// The tutorials' counter contract is deployed on testnet only.
 export const counterContractAddress = (networkId: NetworkId) =>
   networkId === "mtst"
     ? TESTNET_COUNTER_CONTRACT_ADDRESS
