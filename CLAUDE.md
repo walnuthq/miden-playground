@@ -88,6 +88,13 @@ Every package the API creates starts from `apps/api/templates/project-template/C
 - `script.masm` is the MASM tab's content. A compiled Rust script gets it from api-compile (`masm: true` in `POST /compile`), stored in `packages.masm`; it's cleared by an edit or a failed compile. That MASM is for reading: it calls library procedures without including them, so it doesn't reassemble. Scripts without a package (the built-in ones, the mock API's) are assembled from their `masm` instead: branch on `assembledFromMasm` (`lib/utils/script.ts`), never on `masm` alone.
 - On a phone (< 768 px) the source editor is read-only (Monaco's `readOnly` option, not the `readOnly` prop, so `onChange` stays attached). The tutorial steps that ask for code (7 step 2, 8 step 3, 12 step 2) have buttons that add it: the edits are in `lib/utils/tutorial-code.ts`, anchored on the starting sources (`counter-map-contract`, `p2id` in `lib/types/default-scripts`, `apps/api/templates/counter-account.rs`) and tested against them. Rerun `pnpm test` after changing those sources or the steps' code. The buttons edit the open editor's model (registered in `lib/source-editors.ts`), so Cmd/Ctrl+Z undoes them.
 
+# Tutorial copy
+
+Tutorial steps (`apps/web/components/tutorials`) have one wording for the desktop and the phone layout, not one per device.
+- Below `lg`, the pages' create buttons ("Create new account", "Create new script", "Add note"…) and the note page's "Consume note with …" show their icon only: name them with `ButtonName` (`prose.tsx`), which shows the icon and the label. Labelled buttons and menu items take `<em>"…"</em>`.
+- Refer to places outside the panel only if they hold on both layouts ("above the editor", "next to the procedure", "at the top of the page"), or link to them: on a phone the sidebar is hidden, and the panel sits at the bottom.
+- "Click" is fine on both.
+
 # MASM highlighting
 
 The MASM tab's Monaco language (`apps/web/lib/masm/language.ts`, a Monarch tokenizer) takes its keywords, types and instructions from `lib/masm/vocabulary.json`, which `pnpm masm:sync` in `apps/web` extracts from the assembler's own sources in 0xMiden/miden-vm (`lib/masm/vocabulary.ts`), at the tag of the `miden-assembly-syntax` in `apps/api/templates/project-template/Cargo.lock`. `pnpm masm:check` fails when the file is out of date.

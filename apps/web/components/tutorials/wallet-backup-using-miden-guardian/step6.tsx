@@ -1,9 +1,10 @@
 import { normalizeAccountId, useMiden } from "@miden-sdk/react";
+import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import AccountAddress from "@/components/lib/account-address";
 import CopyButton from "@/components/lib/copy-button";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import { BulletList } from "@/components/tutorials/prose";
+import { BulletList, ButtonName } from "@/components/tutorials/prose";
 import TutorialLink from "@/components/tutorials/tutorial-link";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import useAccounts from "@/hooks/use-accounts";
@@ -40,8 +41,8 @@ const Step6Content = ({
     </p>
     <p>
       Then, on the <TutorialLink href="/accounts">accounts page</TutorialLink>,
-      click the <em>"Create new account"</em> button and select the{" "}
-      <em>"Restore guardian wallet"</em> option.
+      click the <ButtonName icon={Plus}>Create new account</ButtonName> button
+      and select the <em>"Restore guardian wallet"</em> option.
     </p>
     <p>
       A dialog asks for a name and the address of the guardian wallet to
@@ -100,8 +101,9 @@ const Step6: TutorialStep = {
           titleWhenCompleted="Your guardian wallet has been restored."
           description={
             <p>
-              Reconnect Bread Wallet, click the <em>"Create new account"</em>{" "}
-              button on the accounts page and select the{" "}
+              Reconnect Bread Wallet, click the{" "}
+              <ButtonName icon={Plus}>Create new account</ButtonName> button on
+              the accounts page and select the{" "}
               <em>"Restore guardian wallet"</em> option to restore your guardian
               wallet.
             </p>

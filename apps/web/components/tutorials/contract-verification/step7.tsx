@@ -1,7 +1,12 @@
+import { Plus } from "lucide-react";
 import AccountAddress from "@/components/lib/account-address";
 import CopyButton from "@/components/lib/copy-button";
 import NextTutorialButton from "@/components/tutorials/next-tutorial-button";
-import { BulletList, InlineCode } from "@/components/tutorials/prose";
+import {
+  BulletList,
+  ButtonName,
+  InlineCode,
+} from "@/components/tutorials/prose";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import useAccounts from "@/hooks/use-accounts";
 import useScripts from "@/hooks/use-scripts";
@@ -70,8 +75,9 @@ const Step7Content = ({ counter }: { counter?: Account }) => (
     <p>
       To see it for yourself after finishing this tutorial, create a new testnet
       sandbox environment. On the accounts page, click the{" "}
-      <em>"Create new account"</em> button, select the <em>"Import account"</em>{" "}
-      option and import the contract with the following details:
+      <ButtonName icon={Plus}>Create new account</ButtonName> button, select the{" "}
+      <em>"Import account"</em> option and import the contract with the
+      following details:
     </p>
     <BulletList>
       <li>

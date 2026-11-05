@@ -1,5 +1,6 @@
+import { Plus } from "lucide-react";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import { ExternalLink } from "@/components/tutorials/prose";
+import { ButtonName, ExternalLink } from "@/components/tutorials/prose";
 import TutorialLink from "@/components/tutorials/tutorial-link";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import useAccounts from "@/hooks/use-accounts";
@@ -39,8 +40,8 @@ const Step5: TutorialStep = {
         <p>
           Head to the{" "}
           <TutorialLink href="/accounts">accounts page</TutorialLink>, click the{" "}
-          <em>"Create new account"</em> button at the top of the page and select
-          the <em>"Deploy account"</em> option.
+          <ButtonName icon={Plus}>Create new account</ButtonName> button at the
+          top of the page and select the <em>"Deploy account"</em> option.
         </p>
         <p>
           Enter a name for your contract and leave the storage mode set to{" "}
@@ -67,10 +68,11 @@ const Step5: TutorialStep = {
           titleWhenCompleted="You deployed your counter contract."
           description={
             <p>
-              Click the <em>"Create new account"</em> button at the top of the
-              accounts page, select the <em>"Deploy account"</em> option and
-              deploy an Account using the <strong>No Auth</strong>{" "}
-              authentication component and your account component.
+              Click the <ButtonName icon={Plus}>Create new account</ButtonName>{" "}
+              button at the top of the accounts page, select the{" "}
+              <em>"Deploy account"</em> option and deploy an Account using the{" "}
+              <strong>No Auth</strong> authentication component and your account
+              component.
             </p>
           }
         />

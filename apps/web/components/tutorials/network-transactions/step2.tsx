@@ -1,5 +1,6 @@
+import { Plus } from "lucide-react";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import { InlineCode } from "@/components/tutorials/prose";
+import { ButtonName, InlineCode } from "@/components/tutorials/prose";
 import TutorialLink from "@/components/tutorials/tutorial-link";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import useAccounts from "@/hooks/use-accounts";
@@ -43,8 +44,8 @@ const Step2: TutorialStep = {
         <p>
           Let's start by deploying the network counter. Head to the{" "}
           <TutorialLink href="/accounts">accounts page</TutorialLink>, click the{" "}
-          <em>"Create new account"</em> button at the top of the page and select
-          the <em>"Deploy account"</em> option.
+          <ButtonName icon={Plus}>Create new account</ButtonName> button at the
+          top of the page and select the <em>"Deploy account"</em> option.
         </p>
         <p>
           Enter a name for your contract and leave the storage mode set to{" "}
@@ -94,9 +95,10 @@ const Step2: TutorialStep = {
           titleWhenCompleted="You deployed your network counter."
           description={
             <p>
-              Click the <em>"Create new account"</em> button at the top of the
-              accounts page, select the <em>"Deploy account"</em> option and
-              deploy a <strong>Public</strong> account using the{" "}
+              Click the <ButtonName icon={Plus}>Create new account</ButtonName>{" "}
+              button at the top of the accounts page, select the{" "}
+              <em>"Deploy account"</em> option and deploy a{" "}
+              <strong>Public</strong> account using the{" "}
               <strong>Network Account</strong> authentication component, the{" "}
               <strong>Counter Contract</strong> account component and the{" "}
               <strong>counter-note</strong> allowed note script.

@@ -1,6 +1,7 @@
+import { Plus } from "lucide-react";
 import { useLocation } from "react-router";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import { ExternalLink } from "@/components/tutorials/prose";
+import { ButtonName, ExternalLink } from "@/components/tutorials/prose";
 import TutorialLink from "@/components/tutorials/tutorial-link";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import useComponents from "@/hooks/use-components";
@@ -54,9 +55,9 @@ const Step3: TutorialStep = {
         <p>
           Head to the{" "}
           <TutorialLink href="/components">components page</TutorialLink> and
-          click the <em>"Create new component"</em> button. Enter a name, select
-          the <strong>Account Component</strong> type and select the script you
-          created in the first step.
+          click the <ButtonName icon={Plus}>Create new component</ButtonName>{" "}
+          button. Enter a name, select the <strong>Account Component</strong>{" "}
+          type and select the script you created in the first step.
         </p>
         <TutorialStepAlert
           completed={completed}
@@ -64,9 +65,10 @@ const Step3: TutorialStep = {
           titleWhenCompleted="You created an account component."
           description={
             <p>
-              Click the <em>"Create new component"</em> button and create an{" "}
-              <strong>Account Component</strong> from the script you created in
-              the first step.
+              Click the{" "}
+              <ButtonName icon={Plus}>Create new component</ButtonName> button
+              and create an <strong>Account Component</strong> from the script
+              you created in the first step.
             </p>
           }
         />

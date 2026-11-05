@@ -1,7 +1,8 @@
+import { Plus } from "lucide-react";
 import { useLocation } from "react-router";
 import CopyButton from "@/components/lib/copy-button";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import { ExternalLink } from "@/components/tutorials/prose";
+import { ButtonName, ExternalLink } from "@/components/tutorials/prose";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import useScripts from "@/hooks/use-scripts";
 import { defaultScriptIds } from "@/lib/types/default-scripts";
@@ -44,8 +45,8 @@ const Step1: TutorialStep = {
         </p>
         <p>
           Let's start by creating the script that holds the contract code. Click
-          the <em>"Create new script"</em> button, enter{" "}
-          <strong>counter-account</strong>{" "}
+          the <ButtonName icon={Plus}>Create new script</ButtonName> button,
+          enter <strong>counter-account</strong>{" "}
           <CopyButton content="Copy Script Name" copy="counter-account" /> as
           the name, then select the <strong>Account Component</strong> type and
           the <strong>Counter Contract</strong> example.
@@ -61,9 +62,9 @@ const Step1: TutorialStep = {
           titleWhenCompleted="You created the counter contract script."
           description={
             <p>
-              Click the <em>"Create new script"</em> button and create an{" "}
-              <strong>Account Component</strong> script named{" "}
-              <strong>counter-account</strong> from the{" "}
+              Click the <ButtonName icon={Plus}>Create new script</ButtonName>{" "}
+              button and create an <strong>Account Component</strong> script
+              named <strong>counter-account</strong> from the{" "}
               <strong>Counter Contract</strong> example.
             </p>
           }

@@ -1,6 +1,11 @@
+import { Plus } from "lucide-react";
 import { useLocation } from "react-router";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import { BulletList, ExternalLink } from "@/components/tutorials/prose";
+import {
+  BulletList,
+  ButtonName,
+  ExternalLink,
+} from "@/components/tutorials/prose";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import useScripts from "@/hooks/use-scripts";
 import { defaultScriptIds } from "@/lib/types/default-scripts";
@@ -57,9 +62,10 @@ const Step1: TutorialStep = {
           before the Note can be consumed.
         </p>
         <p>
-          Let's get started: click the <em>"Create new script"</em> button,
-          enter a name, then select the <strong>Note Script</strong> type and
-          the <strong>P2ID Note</strong> example.
+          Let's get started: click the{" "}
+          <ButtonName icon={Plus}>Create new script</ButtonName> button, enter a
+          name, then select the <strong>Note Script</strong> type and the{" "}
+          <strong>P2ID Note</strong> example.
         </p>
         <TutorialStepAlert
           completed={completed}
@@ -67,9 +73,9 @@ const Step1: TutorialStep = {
           titleWhenCompleted="You created a P2ID note script."
           description={
             <p>
-              Click the <em>"Create new script"</em> button and create a new{" "}
-              <strong>Note Script</strong> from the <strong>P2ID Note</strong>{" "}
-              example.
+              Click the <ButtonName icon={Plus}>Create new script</ButtonName>{" "}
+              button and create a new <strong>Note Script</strong> from the{" "}
+              <strong>P2ID Note</strong> example.
             </p>
           }
         />

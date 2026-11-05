@@ -1,5 +1,6 @@
+import { Plus } from "lucide-react";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import { ExternalLink } from "@/components/tutorials/prose";
+import { ButtonName, ExternalLink } from "@/components/tutorials/prose";
 import TutorialLink from "@/components/tutorials/tutorial-link";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import useAccounts from "@/hooks/use-accounts";
@@ -39,10 +40,11 @@ const Step3Content = ({ faucet }: { faucet?: Account }) => (
       <TutorialLink href={`/accounts/${faucet?.identifier}`}>
         faucet page
       </TutorialLink>
-      , click the <em>"Create new transaction"</em> button, then select{" "}
-      <em>"New mint transaction"</em>. A <em>"Configure mint transaction"</em>{" "}
-      dialog will open, where you can select the target account (your newly
-      created wallet) and enter an amount, e.g. <strong>100</strong> tokens.
+      , click the <ButtonName icon={Plus}>Create new transaction</ButtonName>{" "}
+      button, then select <em>"New mint transaction"</em>. A{" "}
+      <em>"Configure mint transaction"</em> dialog will open, where you can
+      select the target account (your newly created wallet) and enter an amount,
+      e.g. <strong>100</strong> tokens.
     </p>
     <p>
       The{" "}

@@ -1,5 +1,7 @@
+import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import NextStepButton from "@/components/tutorials/next-step-button";
+import { ButtonName } from "@/components/tutorials/prose";
 import TutorialLink from "@/components/tutorials/tutorial-link";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import useAccounts from "@/hooks/use-accounts";
@@ -43,8 +45,8 @@ const Step4: TutorialStep = {
         </p>
         <p>
           From the <TutorialLink href="/notes">notes page</TutorialLink>, click
-          the <em>"Add note"</em> button and select the <em>"Create note"</em>{" "}
-          option.
+          the <ButtonName icon={Plus}>Add note</ButtonName> button and select
+          the <em>"Create note"</em> option.
         </p>
         <p>
           A <em>"Create Note"</em> dialog shows up to help you configure the

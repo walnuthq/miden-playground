@@ -1,4 +1,4 @@
-import { SquareArrowOutUpRight } from "lucide-react";
+import { type LucideIcon, SquareArrowOutUpRight } from "lucide-react";
 import type { ReactNode } from "react";
 
 // Tutorial step prose, styled as the markdown of the former MDX steps.
@@ -53,3 +53,20 @@ export const CodeBlock = ({
       <InlineCode>{code}</InlineCode>
     </pre>
   );
+
+// A button named as it looks, its icon then its label: below `lg`, buttons
+// like "Create new account" show their icon only, so naming both reads right
+// on any screen. Only for those: labelled buttons and menu items take
+// <em>"…"</em>.
+export const ButtonName = ({
+  icon: Icon,
+  children,
+}: {
+  icon: LucideIcon;
+  children: ReactNode;
+}) => (
+  <em>
+    <Icon aria-hidden className="mr-0.5 inline size-4 align-text-bottom" />
+    &quot;{children}&quot;
+  </em>
+);

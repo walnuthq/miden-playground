@@ -1,5 +1,6 @@
+import { FileInput } from "lucide-react";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import { ExternalLink } from "@/components/tutorials/prose";
+import { ButtonName, ExternalLink } from "@/components/tutorials/prose";
 import TutorialLink from "@/components/tutorials/tutorial-link";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import useAccounts from "@/hooks/use-accounts";
@@ -78,8 +79,11 @@ const Step5: TutorialStep = {
           titleWhenCompleted="The Note has been consumed."
           description={
             <p>
-              Click <em>"Consume note with {wallet?.name}"</em>, then preview
-              and submit the resulting Transaction.
+              Click{" "}
+              <ButtonName icon={FileInput}>
+                Consume note with {wallet?.name}
+              </ButtonName>
+              , then preview and submit the resulting Transaction.
             </p>
           }
         />
