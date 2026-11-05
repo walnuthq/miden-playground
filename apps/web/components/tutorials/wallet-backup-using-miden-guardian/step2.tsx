@@ -1,6 +1,7 @@
+import { Plus } from "lucide-react";
 import { useLocation } from "react-router";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import { BulletList } from "@/components/tutorials/prose";
+import { BulletList, ButtonName } from "@/components/tutorials/prose";
 import TutorialLink from "@/components/tutorials/tutorial-link";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import useAccounts from "@/hooks/use-accounts";
@@ -38,8 +39,8 @@ const Step2: TutorialStep = {
           Let's deploy a guardian wallet with your connected Bread Wallet as its
           signer: on the{" "}
           <TutorialLink href="/accounts">accounts page</TutorialLink>, click the{" "}
-          <em>"Create new account"</em> button and select the{" "}
-          <em>"Deploy guardian wallet"</em> option.
+          <ButtonName icon={Plus}>Create new account</ButtonName> button and
+          select the <em>"Deploy guardian wallet"</em> option.
         </p>
         <p>
           Give your guardian wallet a name and click <em>"Deploy"</em>. This
@@ -71,8 +72,9 @@ const Step2: TutorialStep = {
           titleWhenCompleted="Your guardian wallet has been deployed."
           description={
             <p>
-              Click the <em>"Create new account"</em> button, select{" "}
-              <em>"Deploy guardian wallet"</em>, then open its details page.
+              Click the <ButtonName icon={Plus}>Create new account</ButtonName>{" "}
+              button, select <em>"Deploy guardian wallet"</em>, then open its
+              details page.
             </p>
           }
         />

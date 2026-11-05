@@ -12,7 +12,7 @@ const CreateStorageSlotButton = ({ componentId }: { componentId: string }) => {
       }
     >
       <Plus />
-      <span className="hidden lg:inline">Add storage slot</span>
+      <span className="sr-only lg:not-sr-only">Add storage slot</span>
     </Button>
   );
 };

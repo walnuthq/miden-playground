@@ -31,6 +31,8 @@ export default defineConfig({
   projects: [
     {
       name: "chromium",
+      // The desktop layout: the mobile specs run in the projects below.
+      testIgnore: /mobile\//,
       use: {
         ...devices["Desktop Chrome"],
         // Set after the device preset, which would otherwise override it.
@@ -38,6 +40,25 @@ export default defineConfig({
         // mobile layout.
         viewport: { width: 1440, height: 900 },
       },
+    },
+    // The phone layout (e2e/mobile), on both phone engines: Safari's WebKit
+    // (much slower to start the client headless) and Chrome for Android.
+    {
+      name: "mobile-safari",
+      testMatch: /mobile\/.*\.spec\.ts/,
+      use: { ...devices["iPhone 14"] },
+    },
+    {
+      name: "mobile-chrome",
+      testMatch: /mobile\/.*\.spec\.ts/,
+      use: { ...devices["Pixel 7"] },
+    },
+    // The narrowest phones (320 px): every page of a sandbox must fit there
+    // too.
+    {
+      name: "mobile-small",
+      testMatch: /mobile\/mobile-sandbox\.spec\.ts/,
+      use: { ...devices["Galaxy S9+"] },
     },
   ],
 });

@@ -36,7 +36,12 @@ const TutorialStep = ({ tutorial }: { tutorial: Tutorial }) => {
         <Badge variant="outline" className="bg-muted/50 text-muted-foreground">
           Step {tutorialStep + 1} of {tutorial.steps.length}
         </Badge>
-        <Button variant="ghost" size="icon" onClick={closeTutorial}>
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Close tutorial"
+          onClick={closeTutorial}
+        >
           <X />
         </Button>
       </div>

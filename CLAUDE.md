@@ -86,6 +86,27 @@ Every package the API creates starts from `apps/api/templates/project-template/C
 - Adding or removing a dependency patches `miden-project.toml` locally (`filesWithDependency`, in the API generator's format); the next compile replaces it with the API's. Keep the patch in step with `generateMidenProjectToml` in `apps/api/lib/toml.ts`.
 - The Explorer tab stays mounted on the other tabs (`keepMounted`), and so does the `src/lib.rs` editor while another file shows or its tab is closed: the hidden editor stays in the DOM and in `monaco.editor.getEditors()` (it's the first one). Scope e2e locators to the visible tab. The console shows on every tab of an editable script, and its links open `src/lib.rs` in the Explorer.
 - `script.masm` is the MASM tab's content. A compiled Rust script gets it from api-compile (`masm: true` in `POST /compile`), stored in `packages.masm`; it's cleared by an edit or a failed compile. That MASM is for reading: it calls library procedures without including them, so it doesn't reassemble. Scripts without a package (the built-in ones, the mock API's) are assembled from their `masm` instead: branch on `assembledFromMasm` (`lib/utils/script.ts`), never on `masm` alone.
+- On a phone (< 768 px) the source editor is read-only (Monaco's `readOnly` option, not the `readOnly` prop, so `onChange` stays attached). The tutorial steps that ask for code (7 step 2, 8 step 3, 12 step 2) have buttons that add it: the edits are in `lib/utils/tutorial-code.ts`, anchored on the starting sources (`counter-map-contract`, `p2id` in `lib/types/default-scripts`, `apps/api/templates/counter-account.rs`) and tested against them. Rerun `pnpm test` after changing those sources or the steps' code. The buttons edit the open editor's model (registered in `lib/source-editors.ts`), so Cmd/Ctrl+Z undoes them.
+
+# Tutorial copy
+
+Tutorial steps (`apps/web/components/tutorials`) have one wording for the desktop and the phone layout, not one per device.
+- Below `lg`, the pages' create buttons ("Create new account", "Create new script", "Add note"…) and the note page's "Consume note with …" show their icon only: name them with `ButtonName` (`prose.tsx`), which shows the icon and the label. Labelled buttons and menu items take `<em>"…"</em>`.
+- Refer to places outside the panel only if they hold on both layouts ("above the editor", "next to the procedure", "at the top of the page"), or link to them: on a phone the sidebar is hidden, and the panel sits at the bottom.
+- "Click" is fine on both.
+
+# Phone layout
+
+Below 768 px (`useIsMobile`, the sidebar's breakpoint) the web app has a phone layout; desktop renders as before. `e2e/mobile` checks it in the `mobile-safari` (iPhone 14, WebKit, 390 px) and `mobile-chrome` (Pixel 7, 412 px) projects, and `mobile-small` (Galaxy S9+, 320 px) runs the sandbox spec: run them after any layout change, and keep each page from overflowing the screen's width down to 320 px (a phone zooms the whole page out).
+- Header: the GitHub button and the network badge's block height hide, and the breadcrumb truncates (`min-w-0`) before the action row (`shrink-0`) overflows. It fits down to 320 px.
+- The sidebar is a sheet: `AppSidebarView` closes it on navigation.
+- Tables hide secondary columns with CSS (`mobileHiddenColumns` in each `columns.tsx`, `mobileColumnClassName` in `lib/table.ts`), so row actions stay on screen. A nested table goes under its label (`NestedTableRow`). Below `sm` (the 320 px phones), the accounts table wraps names and clips IDs (`narrowColumnClassNames`), and the procedures table hides the digest's copy button. `expectWithinWidth` checks an element against its clipping containers too, so a row action hidden inside a scrolling table fails it.
+- The stock dialog is a grid whose column won't shrink below its content: a dialog with wide content (tables) needs `grid-cols-[minmax(0,1fr)]`, plus `max-h-[calc(100dvh-2rem)] overflow-y-auto`, at the call site (the transaction dialog has both).
+- Buttons that show only their icon below `lg` keep their label as `sr-only lg:not-sr-only`, for an accessible name. Tutorial copy names them with `ButtonName` (see "Tutorial copy").
+- Script editor: the tabs row wraps under ~380 px (the settings and Compile go under the tabs), a files menu replaces the file tree, the console starts collapsed (split saved as `script-editor-layout-mobile`), the minimap is off by default, and the source is read-only (see "Script editor").
+- The tutorial is a panel stuck to the bottom of the screen (`MobileTutorialPanel`, `id="tutorial"` like the desktop panel), which reopens when a step's action is done. Toasts show at the top.
+- While the Miden client initializes, `MidenProvider`'s `loadingComponent` is `AppShell`, on every screen. It's also Para's `fallback` (`ParaProvider`): Para holds its children back until its own client is ready (`waitForReady`), after the Miden client, which showed an empty page between the shell and the app. It renders outside the SDK's context, so it uses the presentational views (`AppSidebarView`, `HeaderView`, `NetworkBadgeView`, `ProjectSwitcherView`, the home cards' `*View`) fed from `useGlobalContext`. Keep those views free of SDK hooks, and of app hooks built on them.
+- Syncing pauses while the tab is hidden (`PauseSyncWhenHidden`, `NetworkBadge`'s interval): it pauses only an auto-sync that isn't paused yet, and resumes only its own pause.
 
 # MASM highlighting
 

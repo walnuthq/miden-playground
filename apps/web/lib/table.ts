@@ -16,3 +16,11 @@ export const dataTableFeatures = tableFeatures({
 });
 
 export type DataTableFeatures = typeof dataTableFeatures;
+
+// Below `md`, a table shows only the columns a phone can fit, and its row
+// actions. Hidden with CSS, not column visibility: the table still reads the
+// hidden columns' values (filters, row links).
+export const mobileColumnClassName = (
+  columnId: string,
+  hiddenOnMobile: readonly string[],
+) => (hiddenOnMobile.includes(columnId) ? "hidden md:table-cell" : undefined);

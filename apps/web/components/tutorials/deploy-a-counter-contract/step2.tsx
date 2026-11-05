@@ -1,27 +1,31 @@
+import ApplyCodeButton from "@/components/tutorials/apply-code-button";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import { ExternalLink, InlineCode } from "@/components/tutorials/prose";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import useScripts from "@/hooks/use-scripts";
 import type { TutorialStep } from "@/lib/types/tutorial";
 import { scriptSource } from "@/lib/utils/script-files";
+import { INCREMENT, increaseIncrementEdits } from "@/lib/utils/tutorial-code";
 
-const useCompleted = () => {
+const useScript = () => {
   const { scripts } = useScripts();
-  const script = scripts.find(
+  return scripts.find(
     ({ id, type }) =>
       id.startsWith("counter-account_") && type === "account-component",
   );
+};
+
+const useCompleted = () => {
+  const script = useScript();
   const source = script ? scriptSource(script) : "";
-  const matches = source.matchAll(/felt!\((\d*)\)/g);
-  const lastMatch = Array.from(matches ?? []).at(-1);
-  const incrementValue = Number(lastMatch?.at(1));
-  return script?.masm !== "" && incrementValue > 1;
+  return script?.masm !== "" && !!increaseIncrementEdits[0]?.applied(source);
 };
 
 const Step2: TutorialStep = {
   title: "Customize and compile the counter contract script.",
   Content: () => {
     const completed = useCompleted();
+    const script = useScript();
     return (
       <>
         <p>
@@ -100,6 +104,14 @@ const Step2: TutorialStep = {
           </strong>
           .
         </p>
+        <div className="flex justify-end">
+          <ApplyCodeButton
+            script={script}
+            edits={increaseIncrementEdits}
+            label={`Change it to felt!(${INCREMENT}) for me`}
+            appliedLabel="Increment value changed"
+          />
+        </div>
         <TutorialStepAlert
           completed={completed}
           title="Action required: Change the increment value and compile the script."
@@ -107,8 +119,8 @@ const Step2: TutorialStep = {
           description={
             <p>
               Change the increment value to a number greater than{" "}
-              <strong>1</strong>, then click the <em>"Compile"</em> button above
-              the editor to compile your script.
+              <strong>1</strong> (or use the button above), then click the{" "}
+              <em>"Compile"</em> button above the editor to compile your script.
             </p>
           }
         />

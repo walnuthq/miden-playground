@@ -1,5 +1,6 @@
 import { Toaster } from "@workspace/ui/components/sonner";
 import { TooltipProvider } from "@workspace/ui/components/tooltip";
+import { useIsMobile } from "@workspace/ui/hooks/use-mobile";
 import { Navigate, Outlet, ScrollRestoration, useLocation } from "react-router";
 import Providers from "@/components/providers";
 
@@ -20,6 +21,16 @@ const TrailingSlashRedirect = () => {
   );
 };
 
+// On a phone the tutorial panel takes the bottom of the screen, and a toast
+// there would cover its buttons. A component of its own, not to re-render
+// RootLayout (see above).
+const AppToaster = () => {
+  const isMobile = useIsMobile();
+  return (
+    <Toaster richColors position={isMobile ? "top-center" : "bottom-center"} />
+  );
+};
+
 const RootLayout = () => (
   <Providers>
     <TrailingSlashRedirect />
@@ -30,7 +41,7 @@ const RootLayout = () => (
       <TooltipProvider>
         <Outlet />
       </TooltipProvider>
-      <Toaster richColors position="bottom-center" />
+      <AppToaster />
     </div>
     <ScrollRestoration />
   </Providers>

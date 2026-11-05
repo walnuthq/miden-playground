@@ -1,6 +1,11 @@
+import { Plus } from "lucide-react";
 import CopyButton from "@/components/lib/copy-button";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import { ExternalLink, InlineCode } from "@/components/tutorials/prose";
+import {
+  ButtonName,
+  ExternalLink,
+  InlineCode,
+} from "@/components/tutorials/prose";
 import TutorialLink from "@/components/tutorials/tutorial-link";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import useScripts from "@/hooks/use-scripts";
@@ -32,8 +37,8 @@ const Step3: TutorialStep = {
         </p>
         <p>
           Head to the <TutorialLink href="/scripts">scripts page</TutorialLink>,
-          click the <em>"Create new script"</em> button and enter a name, for
-          example <strong>counter-note</strong>{" "}
+          click the <ButtonName icon={Plus}>Create new script</ButtonName>{" "}
+          button and enter a name, for example <strong>counter-note</strong>{" "}
           <CopyButton content="Copy Script Name" copy="counter-note" />. Then
           select the <strong>Note Script</strong> type and the{" "}
           <strong>Counter Note</strong> example.
@@ -56,9 +61,10 @@ const Step3: TutorialStep = {
         </p>
         <p>
           Click the <em>"Manifest"</em> tab, then click the{" "}
-          <em>"Add dependency"</em> button. In the <em>"Add Dependency"</em>{" "}
-          dialog, select the <strong>counter-account</strong> script and click
-          the <em>"Add"</em> button. The dependency also shows in the script's{" "}
+          <ButtonName icon={Plus}>Add dependency</ButtonName> button. In the{" "}
+          <em>"Add Dependency"</em> dialog, select the{" "}
+          <strong>counter-account</strong> script and click the <em>"Add"</em>{" "}
+          button. The dependency also shows in the script's{" "}
           <InlineCode>miden-project.toml</InlineCode>, which you can open from
           the <em>"Explorer"</em> tab.
         </p>
@@ -68,8 +74,8 @@ const Step3: TutorialStep = {
           titleWhenCompleted="You created the counter note script and added its dependency."
           description={
             <p>
-              Click the <em>"Create new script"</em> button and create a{" "}
-              <strong>Note Script</strong> from the{" "}
+              Click the <ButtonName icon={Plus}>Create new script</ButtonName>{" "}
+              button and create a <strong>Note Script</strong> from the{" "}
               <strong>Counter Note</strong> example, then add the{" "}
               <strong>counter-account</strong> script as a dependency in the{" "}
               <em>"Manifest"</em> tab.

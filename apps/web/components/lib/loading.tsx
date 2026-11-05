@@ -12,6 +12,8 @@ import Logo from "@/components/lib/logo";
 import useNetwork from "@/hooks/use-network";
 import { networks } from "@/lib/types/network";
 
+// The app shell's page while the Miden client initializes, on every page but
+// the home page (which the shell shows, actions disabled).
 const Loading = () => {
   const { networkId } = useNetwork();
   const variants = {
@@ -22,7 +24,7 @@ const Loading = () => {
     mmck: "default",
   } as const;
   return (
-    <Empty className="h-screen">
+    <Empty className="flex-1">
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <Logo className="size-8" />

@@ -10,6 +10,7 @@ import type { NetworkId } from "@/lib/types/network";
 import type { Tutorial, TutorialId } from "@/lib/types/tutorial";
 import { randomLowercaseId, sleep } from "@/lib/utils";
 import { defaultTutorial, isTutorial } from "@/lib/utils/tutorial";
+import { tutorialStatus as getTutorialStatus } from "@/lib/utils/tutorial-status";
 import { clientGetLatestBlockNum } from "@/lib/web-client";
 
 // The chain tip a tutorial starts at (see State.tutorialStartBlockNum), 0 on the
@@ -150,14 +151,11 @@ const useTutorials = () => {
       });
     }
   };
-  // A tutorial's progress: the live state for the active tutorial, its saved
-  // progress for one left unfinished, null otherwise.
   const tutorialStatus = (id: TutorialId) =>
-    id !== "" && id === tutorialId
-      ? { step: tutorialStep, maxStep: tutorialMaxStep, active: true }
-      : tutorialProgress[id]
-        ? { ...tutorialProgress[id], active: false }
-        : null;
+    getTutorialStatus(
+      { tutorialId, tutorialStep, tutorialMaxStep, tutorialProgress },
+      id,
+    );
   const previousTutorialStep = () =>
     dispatch({ type: "PREVIOUS_TUTORIAL_STEP" });
   const nextTutorialStep = () => {

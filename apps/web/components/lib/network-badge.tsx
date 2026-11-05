@@ -6,12 +6,53 @@ import { useEffect } from "react";
 import { useInterval } from "usehooks-ts";
 import useGlobalContext from "@/components/global-context/hook";
 import useAppState from "@/hooks/use-app-state";
+import useDocumentVisible from "@/hooks/use-document-visible";
 import useExamples from "@/hooks/use-examples";
 import useNetwork from "@/hooks/use-network";
-import { networks } from "@/lib/types/network";
+import { type NetworkId, networks } from "@/lib/types/network";
 
 let callingPopState = false;
 let callingLoadExample = false;
+
+const variants = {
+  mm: "default",
+  mtst: "outline",
+  mdev: "secondary",
+  mlcl: "destructive",
+  mmck: "default",
+} as const;
+
+// The network and its sync height, with a spinner while syncing. The app shell
+// shows it without a height while the Miden client initializes.
+export const NetworkBadgeView = ({
+  networkId,
+  syncHeight,
+  syncing,
+}: {
+  networkId: NetworkId;
+  syncHeight?: number;
+  syncing: boolean;
+}) => (
+  <Badge
+    variant={variants[networkId]}
+    className="h-8"
+    title={
+      syncHeight === undefined
+        ? `Syncing ${networks[networkId]}`
+        : `${networks[networkId]} | #${syncHeight}`
+    }
+  >
+    {/* The block height doesn't fit a phone's header. */}
+    <span>
+      {networks[networkId]}
+      {syncHeight !== undefined && <span className="hidden sm:inline"> |</span>}
+    </span>
+    {syncHeight !== undefined && (
+      <pre className="hidden sm:block">#{syncHeight}</pre>
+    )}
+    {syncing ? <Spinner /> : <CircleDot />}
+  </Badge>
+);
 
 const NetworkBadge = () => {
   const { syncHeight, isSyncing } = useSyncState();
@@ -22,8 +63,12 @@ const NetworkBadge = () => {
   const exampleAccount = accounts.find(({ components }) =>
     components.includes(exampleId),
   );
+  // Not while the tab is hidden: it would keep querying the node and the note
+  // transport for nobody. It ticks again within 2.5 s of the tab showing.
+  const visible = useDocumentVisible();
   const useIntervalTriggered =
     networkId !== "mmck" &&
+    visible &&
     !isSyncing &&
     !syncingState &&
     !submittingTransaction;
@@ -55,18 +100,12 @@ const NetworkBadge = () => {
       callLoadExample();
     }
   }, [exampleId, exampleAccount, loadExample]);
-  const variants = {
-    mm: "default",
-    mtst: "outline",
-    mdev: "secondary",
-    mlcl: "destructive",
-    mmck: "default",
-  } as const;
   return (
-    <Badge variant={variants[networkId]} className="h-8">
-      {networks[networkId]} | <pre>#{syncHeight}</pre>
-      {isSyncing ? <Spinner /> : <CircleDot />}
-    </Badge>
+    <NetworkBadgeView
+      networkId={networkId}
+      syncHeight={syncHeight}
+      syncing={isSyncing}
+    />
   );
 };
 

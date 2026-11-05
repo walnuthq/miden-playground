@@ -104,7 +104,7 @@ const ConsumeNoteButton = ({
       disabled={loading}
     >
       {loading ? <Spinner /> : <FileInput />}
-      <span className="hidden lg:inline">
+      <span className="sr-only lg:not-sr-only">
         {loading
           ? "Consuming note…"
           : `Consume note with ${targetAccount.name}`}

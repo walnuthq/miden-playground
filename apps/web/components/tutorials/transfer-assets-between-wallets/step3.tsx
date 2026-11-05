@@ -21,9 +21,9 @@ const Step3Content = ({
     <p>
       Your send transaction has been submitted. You can inspect it by{" "}
       <TutorialLink href={`/transactions/${transaction?.id}`}>
-        opening the first item
+        opening it
       </TutorialLink>{" "}
-      under the <em>"Transactions"</em> menu in the sidebar.
+      on the transactions page.
     </p>
     <p>
       Notice how your MDN tokens have been placed in an output note created by

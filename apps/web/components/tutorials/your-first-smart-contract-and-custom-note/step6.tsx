@@ -1,4 +1,6 @@
+import { Plus } from "lucide-react";
 import NextStepButton from "@/components/tutorials/next-step-button";
+import { ButtonName } from "@/components/tutorials/prose";
 import TutorialLink from "@/components/tutorials/tutorial-link";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import useAccounts from "@/hooks/use-accounts";
@@ -38,8 +40,8 @@ const Step6: TutorialStep = {
         </p>
         <p>
           From the <TutorialLink href="/notes">notes page</TutorialLink>, click
-          the <em>"Add note"</em> button and select the <em>"Create note"</em>{" "}
-          option.
+          the <ButtonName icon={Plus}>Add note</ButtonName> button and select
+          the <em>"Create note"</em> option.
         </p>
         <p>
           A <em>"Create Note"</em> dialog shows up to help you configure the
@@ -69,9 +71,10 @@ const Step6: TutorialStep = {
           titleWhenCompleted="Your increment note has been committed."
           description={
             <p>
-              Click the <em>"Add note"</em> button on the notes page, select the{" "}
-              <em>"Create note"</em> option and create a public note with the{" "}
-              <strong>counter-note</strong> script for your counter contract.
+              Click the <ButtonName icon={Plus}>Add note</ButtonName> button on
+              the notes page, select the <em>"Create note"</em> option and
+              create a public note with the <strong>counter-note</strong> script
+              for your counter contract.
             </p>
           }
         />

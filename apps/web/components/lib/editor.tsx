@@ -1,9 +1,11 @@
 import MonacoEditor, { type Monaco, type OnMount } from "@monaco-editor/react";
+import { useIsMobile } from "@workspace/ui/hooks/use-mobile";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import useScripts from "@/hooks/use-scripts";
 import { updateEditorSettings, useEditorSettings } from "@/lib/editor-settings";
 import { MASM_LANGUAGE_ID, registerMasm } from "@/lib/masm/language";
+import { registerSourceEditor } from "@/lib/source-editors";
 import type { Script, ScriptFilePath } from "@/lib/types/script";
 import { type Diagnostic, parseDiagnostics } from "@/lib/utils/diagnostics";
 import { SCRIPT_FILE } from "@/lib/utils/script-files";
@@ -113,6 +115,11 @@ const Editor = ({
   const { resolvedTheme } = useTheme();
   const { updateScript } = useScripts();
   const { minimap, fontSize } = useEditorSettings();
+  // No editing on a phone, where Monaco handles touch poorly: tutorials that
+  // ask for code there add it with their buttons (lib/utils/tutorial-code).
+  // Through the editor's option, not `readOnly`: the buttons edit the model,
+  // and `onChange` reports their edits to the app state.
+  const isMobile = useIsMobile();
   const [mounted, setMounted] = useState<{
     editor: CodeEditor;
     monaco: Monaco;
@@ -193,6 +200,9 @@ const Editor = ({
                 .enabled,
             }),
         });
+        if (isSource) {
+          registerSourceEditor(script.id, editor);
+        }
         setMounted({ editor, monaco });
         onMount?.(editor, monaco);
       }}
@@ -211,7 +221,16 @@ const Editor = ({
         minimap: { enabled: minimap },
         fontSize,
         wordWrap: "on",
-        readOnly: readOnly || !isSource,
+        readOnly: readOnly || !isSource || isMobile,
+        // No virtual keyboard on a phone.
+        domReadOnly: isMobile,
+        readOnlyMessage:
+          isMobile && isSource && !readOnly
+            ? {
+                value:
+                  "Editing isn't available on phones: tutorials add their code with their buttons.",
+              }
+            : undefined,
         scrollBeyondLastLine: false,
         // Lays out again when shown, e.g. back from a hidden tab.
         automaticLayout: true,

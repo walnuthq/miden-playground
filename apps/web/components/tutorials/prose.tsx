@@ -1,4 +1,4 @@
-import { SquareArrowOutUpRight } from "lucide-react";
+import { type LucideIcon, SquareArrowOutUpRight } from "lucide-react";
 import type { ReactNode } from "react";
 
 // Tutorial step prose, styled as the markdown of the former MDX steps.
@@ -32,9 +32,41 @@ export const InlineCode = ({ children }: { children: ReactNode }) => (
   <code className="font-mono text-xs">{children}</code>
 );
 
-// Takes the code as a string so that braces need no JSX escaping.
-export const CodeBlock = ({ code }: { code: string }) => (
-  <pre>
-    <InlineCode>{code}</InlineCode>
-  </pre>
+// Takes the code as a string so that braces need no JSX escaping. `action`
+// (a button adding the code to the user's script) goes under it, on the right.
+export const CodeBlock = ({
+  code,
+  action,
+}: {
+  code: string;
+  action?: ReactNode;
+}) =>
+  action ? (
+    <div className="flex flex-col gap-2">
+      <pre>
+        <InlineCode>{code}</InlineCode>
+      </pre>
+      <div className="flex justify-end">{action}</div>
+    </div>
+  ) : (
+    <pre>
+      <InlineCode>{code}</InlineCode>
+    </pre>
+  );
+
+// A button named as it looks, its icon then its label: below `lg`, buttons
+// like "Create new account" show their icon only, so naming both reads right
+// on any screen. Only for those: labelled buttons and menu items take
+// <em>"…"</em>.
+export const ButtonName = ({
+  icon: Icon,
+  children,
+}: {
+  icon: LucideIcon;
+  children: ReactNode;
+}) => (
+  <em>
+    <Icon aria-hidden className="mr-0.5 inline size-4 align-text-bottom" />
+    &quot;{children}&quot;
+  </em>
 );

@@ -103,7 +103,14 @@ const CreateTransactionDialog = () => {
       disablePointerDismissal
       onOpenChange={(open) => !open && onClose()}
     >
-      <DialogContent data-modal="false" className="sm:max-w-160">
+      {/* A column that can shrink to the dialog's width (a grid's can't, by
+          default): the preview's wide tables scroll inside it instead of
+          pushing the footer's Submit off a phone's screen. Taller than the
+          screen, the dialog scrolls. */}
+      <DialogContent
+        data-modal="false"
+        className="max-h-[calc(100dvh-2rem)] grid-cols-[minmax(0,1fr)] overflow-y-auto sm:max-w-160"
+      >
         <DialogHeader>
           <DialogTitle>
             {step === "select" && "Create new transaction"}

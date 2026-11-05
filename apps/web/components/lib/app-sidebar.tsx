@@ -6,6 +6,7 @@ import {
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
+  useSidebar,
 } from "@workspace/ui/components/sidebar";
 import {
   CircleCheckBig,
@@ -25,31 +26,25 @@ import {
   UserCircle,
   Wallet,
 } from "lucide-react";
-import { type ComponentProps, useEffect } from "react";
+import { type ComponentProps, type ReactNode, useEffect } from "react";
+import { useLocation } from "react-router";
+import useGlobalContext from "@/components/global-context/hook";
 import Footer from "@/components/lib/footer";
 import NavMain from "@/components/lib/nav-main";
 import ProjectSwitcher from "@/components/lib/project-switcher";
 import useAccounts from "@/hooks/use-accounts";
-import useComponents from "@/hooks/use-components";
 import useNetwork from "@/hooks/use-network";
-import useNotes from "@/hooks/use-notes";
-import useScripts from "@/hooks/use-scripts";
-import useTransactions from "@/hooks/use-transactions";
 import useTutorials from "@/hooks/use-tutorials";
 import { defaultComponentIds } from "@/lib/types/default-components";
 import { defaultScriptIds } from "@/lib/types/default-scripts";
 import { formatId } from "@/lib/utils";
 
-const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
-  const { networkId } = useNetwork();
-  const { client } = useMiden();
-  const { isTutorial } = useTutorials();
-  const { accounts, needsConnectedWalletImport, importConnectedWallet } =
-    useAccounts();
-  const { transactions } = useTransactions();
-  const { inputNotes } = useNotes();
-  const { scripts } = useScripts();
-  const { components } = useComponents();
+// The sidebar's links, with the latest accounts, transactions, notes, scripts
+// and components of the project. From the app state alone, not the Miden
+// client, so the app shell shows them too.
+const useSidebarItems = () => {
+  const { accounts, transactions, inputNotes, scripts, components } =
+    useGlobalContext();
   const items = [
     {
       title: "Home",
@@ -149,6 +144,47 @@ const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
         })),
     },
   ];
+  return { items, editorItems };
+};
+
+// The sidebar, with `header` on top (the project switcher). Free of the Miden
+// client's hooks: the app shell (shown while the client initializes) renders
+// it too.
+export const AppSidebarView = ({
+  header,
+  ...props
+}: ComponentProps<typeof Sidebar> & { header: ReactNode }) => {
+  const { items, editorItems } = useSidebarItems();
+  // On mobile the sidebar is a sheet over the page: close it once a link (or
+  // the project switcher) navigates, or it hides the page it just opened.
+  // `key` changes on every navigation, a link to the current path included.
+  const { key: locationKey } = useLocation();
+  const { setOpenMobile } = useSidebar();
+  // biome-ignore lint/correctness/useExhaustiveDependencies: runs on navigation.
+  useEffect(() => {
+    setOpenMobile(false);
+  }, [locationKey, setOpenMobile]);
+  return (
+    <Sidebar collapsible="icon" {...props}>
+      <SidebarHeader>{header}</SidebarHeader>
+      <SidebarContent>
+        <NavMain items={items} />
+        <Separator />
+        <NavMain items={editorItems} />
+      </SidebarContent>
+      <SidebarFooter>
+        <Footer />
+      </SidebarFooter>
+      <SidebarRail />
+    </Sidebar>
+  );
+};
+
+const AppSidebar = (props: ComponentProps<typeof Sidebar>) => {
+  const { networkId } = useNetwork();
+  const { client } = useMiden();
+  const { isTutorial } = useTutorials();
+  const { needsConnectedWalletImport, importConnectedWallet } = useAccounts();
   // TODO refactor using onConnect callback?
   useEffect(() => {
     if (
@@ -166,22 +202,7 @@ const AppSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
     needsConnectedWalletImport,
     importConnectedWallet,
   ]);
-  return (
-    <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader>
-        <ProjectSwitcher />
-      </SidebarHeader>
-      <SidebarContent>
-        <NavMain items={items} />
-        <Separator />
-        <NavMain items={editorItems} />
-      </SidebarContent>
-      <SidebarFooter>
-        <Footer />
-      </SidebarFooter>
-      <SidebarRail />
-    </Sidebar>
-  );
+  return <AppSidebarView header={<ProjectSwitcher />} {...props} />;
 };
 
 export default AppSidebar;

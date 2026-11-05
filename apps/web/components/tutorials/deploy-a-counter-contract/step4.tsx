@@ -1,6 +1,11 @@
+import { Plus } from "lucide-react";
 import CopyButton from "@/components/lib/copy-button";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import { BulletList, InlineCode } from "@/components/tutorials/prose";
+import {
+  BulletList,
+  ButtonName,
+  InlineCode,
+} from "@/components/tutorials/prose";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import useComponents from "@/hooks/use-components";
 import type { TutorialStep } from "@/lib/types/tutorial";
@@ -38,7 +43,8 @@ const Step4: TutorialStep = {
         </BulletList>
         <p>
           Your component already has its code, so let's define its storage
-          layout. Click the <em>"Add storage slot"</em> button and enter{" "}
+          layout. Click the{" "}
+          <ButtonName icon={Plus}>Add storage slot</ButtonName> button and enter{" "}
           <strong>
             <InlineCode>
               counter_contract::counter_contract::count_map
@@ -68,9 +74,9 @@ const Step4: TutorialStep = {
           titleWhenCompleted="You added the counter storage slot."
           description={
             <p>
-              Click the <em>"Add storage slot"</em> button and create a{" "}
-              <strong>Map</strong> slot with the initial counter value stored at
-              key <strong>1</strong>.
+              Click the <ButtonName icon={Plus}>Add storage slot</ButtonName>{" "}
+              button and create a <strong>Map</strong> slot with the initial
+              counter value stored at key <strong>1</strong>.
             </p>
           }
         />

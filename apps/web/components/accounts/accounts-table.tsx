@@ -15,8 +15,16 @@ import {
 } from "@workspace/ui/components/table";
 import { cn } from "@workspace/ui/lib/utils";
 import { useNavigate } from "react-router";
+import {
+  mobileHiddenColumns,
+  narrowColumnClassNames,
+} from "@/components/accounts/columns";
 import CreateAccountDropdownMenu from "@/components/accounts/create-account-dropdown-menu";
-import { type DataTableFeatures, dataTableFeatures } from "@/lib/table";
+import {
+  type DataTableFeatures,
+  dataTableFeatures,
+  mobileColumnClassName,
+} from "@/lib/table";
 import { getIdentifierPart } from "@/lib/utils/account";
 
 const AccountsTable = <TData extends RowData>({
@@ -51,7 +59,16 @@ const AccountsTable = <TData extends RowData>({
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
+                  <TableHead
+                    key={header.id}
+                    className={cn(
+                      mobileColumnClassName(
+                        header.column.id,
+                        mobileHiddenColumns,
+                      ),
+                      narrowColumnClassNames[header.column.id],
+                    )}
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -73,11 +90,18 @@ const AccountsTable = <TData extends RowData>({
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
-                      className={cn({
-                        "cursor-pointer": !["address", "actions"].includes(
+                      className={cn(
+                        {
+                          "cursor-pointer": !["address", "actions"].includes(
+                            cell.column.id,
+                          ),
+                        },
+                        mobileColumnClassName(
                           cell.column.id,
+                          mobileHiddenColumns,
                         ),
-                      })}
+                        narrowColumnClassNames[cell.column.id],
+                      )}
                       onClick={() =>
                         !["address", "actions"].includes(cell.column.id) &&
                         navigate(

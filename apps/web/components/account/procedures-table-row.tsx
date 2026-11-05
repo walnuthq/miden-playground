@@ -72,10 +72,14 @@ const ProceduresTableRow = ({
       <TableCell>
         <div className="flex items-center gap-2">
           {formatProcedureExportPath(procedureExport.path)}
-          <CopyButton
-            content="Copy Procedure Digest"
-            copy={procedureExport.digest}
-          />
+          {/* Not on the narrowest phones, where it pushes the Invoke button
+              off the table. */}
+          <span className="contents max-sm:hidden">
+            <CopyButton
+              content="Copy Procedure Digest"
+              copy={procedureExport.digest}
+            />
+          </span>
         </div>
       </TableCell>
       {showResultColumn &&

@@ -9,7 +9,9 @@ export const tutorialPanel = (page: Page) => {
   const root = page.locator("#tutorial");
   return {
     root,
-    step: root.getByText(/^Step \d+ of \d+$/),
+    // Visible: on a phone the closed panel's bar shows the step, and the
+    // panel's own (hidden) badge matches too.
+    step: root.getByText(/^Step \d+ of \d+$/).filter({ visible: true }),
     nextStepButton: root.getByRole("button", {
       name: "Next step",
       exact: true,

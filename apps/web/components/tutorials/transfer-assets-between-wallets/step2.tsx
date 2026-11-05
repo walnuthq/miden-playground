@@ -1,5 +1,10 @@
+import { Plus } from "lucide-react";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import { BulletList, ExternalLink } from "@/components/tutorials/prose";
+import {
+  BulletList,
+  ButtonName,
+  ExternalLink,
+} from "@/components/tutorials/prose";
 import useWalletB from "@/components/tutorials/transfer-assets-between-wallets/use-wallet-b";
 import WalletBAlert from "@/components/tutorials/transfer-assets-between-wallets/wallet-b-alert";
 import TutorialLink from "@/components/tutorials/tutorial-link";
@@ -45,8 +50,8 @@ const Step2Content = ({
       To start the transfer, you first need to create a send transaction from{" "}
       <strong>Wallet A</strong> to <strong>Wallet B</strong>. From{" "}
       <strong>Wallet A</strong>'s page, click the{" "}
-      <em>"Create new transaction"</em> button, then select{" "}
-      <em>"New send transaction"</em>.
+      <ButtonName icon={Plus}>Create new transaction</ButtonName> button, then
+      select <em>"New send transaction"</em>.
     </p>
     <p>
       A <em>"Configure send transaction"</em> dialog will open, where you can

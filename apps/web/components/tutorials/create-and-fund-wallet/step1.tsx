@@ -1,5 +1,10 @@
+import { Plus } from "lucide-react";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import { BulletList, ExternalLink } from "@/components/tutorials/prose";
+import {
+  BulletList,
+  ButtonName,
+  ExternalLink,
+} from "@/components/tutorials/prose";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import useAccounts from "@/hooks/use-accounts";
 import type { TutorialStep } from "@/lib/types/tutorial";
@@ -57,8 +62,9 @@ const Step1: TutorialStep = {
           titleWhenCompleted="Your first wallet has been created."
           description={
             <p>
-              Click the <em>"Create new account"</em> button, then select the{" "}
-              <em>"Create new wallet"</em> option to generate a wallet account.{" "}
+              Click the <ButtonName icon={Plus}>Create new account</ButtonName>{" "}
+              button, then select the <em>"Create new wallet"</em> option to
+              generate a wallet account.{" "}
               <strong>Make sure to create a public wallet.</strong>
             </p>
           }

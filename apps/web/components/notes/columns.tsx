@@ -127,6 +127,9 @@ const InputNoteActionsCell = ({ inputNote }: { inputNote: InputNote }) => {
   );
 };
 
+// Columns the table hides on phones (`mobileColumnClassName`).
+export const mobileHiddenColumns = ["type", "tag", "senderId"];
+
 export const columns: ColumnDef<DataTableFeatures, InputNote>[] = [
   {
     accessorKey: "id",

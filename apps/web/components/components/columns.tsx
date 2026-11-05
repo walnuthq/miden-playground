@@ -9,6 +9,9 @@ const ScriptCell = ({ scriptId }: { scriptId: string }) => {
   return script?.name;
 };
 
+// Columns the table hides on phones (`mobileColumnClassName`).
+export const mobileHiddenColumns = ["id", "script"];
+
 export const columns: ColumnDef<DataTableFeatures, Component>[] = [
   {
     accessorKey: "id",

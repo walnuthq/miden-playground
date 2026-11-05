@@ -8,8 +8,16 @@ const variants = {
 } as const satisfies Record<ScriptStatus, string>;
 
 // A script's compile status, the same in the scripts list and on its page.
-const ScriptStatusBadge = ({ status }: { status: ScriptStatus }) => (
-  <Badge variant={variants[status]}>{scriptStatuses[status]}</Badge>
+const ScriptStatusBadge = ({
+  status,
+  className,
+}: {
+  status: ScriptStatus;
+  className?: string;
+}) => (
+  <Badge variant={variants[status]} className={className}>
+    {scriptStatuses[status]}
+  </Badge>
 );
 
 export default ScriptStatusBadge;

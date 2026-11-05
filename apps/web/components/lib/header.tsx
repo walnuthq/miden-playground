@@ -8,6 +8,7 @@ import {
 } from "@workspace/ui/components/breadcrumb";
 import { Separator } from "@workspace/ui/components/separator";
 import { SidebarTrigger } from "@workspace/ui/components/sidebar";
+import type { ReactNode } from "react";
 import { useLocation } from "react-router";
 import GithubButton from "@/components/lib/github-button";
 import ModeToggle from "@/components/lib/mode-toggle";
@@ -61,7 +62,9 @@ const ScriptBreadcrumb = ({ id }: { id: string }) => {
           className="size-2 shrink-0 rounded-full bg-foreground/60"
         />
       )}
-      <ScriptStatusBadge status={status} />
+      {/* On a phone the name needs the room: the status shows in the
+          sidebar too. */}
+      <ScriptStatusBadge status={status} className="hidden sm:inline-flex" />
     </BreadcrumbItem>
   );
 };
@@ -92,9 +95,10 @@ const SubLevelPageBreadcrumbs = () => {
   );
 };
 
-const Header = () => {
-  const { networkId } = useNetwork();
-  const { tutorialId, isTutorial } = useTutorials();
+// The header row: sidebar trigger, breadcrumb, then `actions` on the right.
+// Free of the Miden client's hooks, so the app shell (shown while the client
+// initializes) renders it too, with its own actions.
+export const HeaderView = ({ actions }: { actions: ReactNode }) => {
   const { pathname } = useLocation();
   const isTopLevelPage = [
     "/",
@@ -114,7 +118,9 @@ const Header = () => {
           orientation="vertical"
           className="mr-2 data-vertical:h-4 data-vertical:self-center"
         />
-        <Breadcrumb className="truncate">
+        {/* min-w-0: the breadcrumb gives way (truncates) before the buttons
+            push the row past a phone's width. */}
+        <Breadcrumb className="min-w-0 truncate">
           <BreadcrumbList className="flex-nowrap">
             {isTopLevelPage ? (
               <BreadcrumbItem>
@@ -127,8 +133,22 @@ const Header = () => {
             )}
           </BreadcrumbList>
         </Breadcrumb>
-        <div className="ml-auto flex items-center gap-2">
-          <GithubButton />
+        <div className="ml-auto flex shrink-0 items-center gap-2">
+          {actions}
+        </div>
+      </div>
+    </header>
+  );
+};
+
+const Header = () => {
+  const { networkId } = useNetwork();
+  const { tutorialId, isTutorial } = useTutorials();
+  return (
+    <HeaderView
+      actions={
+        <>
+          <GithubButton className="hidden md:block" />
           <NetworkBadge />
           <ModeToggle />
           {networkId !== "mmck" && !isTutorial && (
@@ -141,9 +161,9 @@ const Header = () => {
             />
           )}
           {tutorialId && <TutorialToggle />}
-        </div>
-      </div>
-    </header>
+        </>
+      }
+    />
   );
 };
 

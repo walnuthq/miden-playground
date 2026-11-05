@@ -1,8 +1,9 @@
+import { Plus } from "lucide-react";
 import { useLocation } from "react-router";
 import AccountAddress from "@/components/lib/account-address";
 import CopyButton from "@/components/lib/copy-button";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import { BulletList } from "@/components/tutorials/prose";
+import { BulletList, ButtonName } from "@/components/tutorials/prose";
 import TutorialLink from "@/components/tutorials/tutorial-link";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import useAccounts from "@/hooks/use-accounts";
@@ -36,8 +37,8 @@ const Step4Content = ({
     </p>
     <p>
       Head to the <TutorialLink href="/accounts">accounts page</TutorialLink>,
-      click the <em>"Create new account"</em> button at the top of the page and
-      select the <em>"Import account"</em> option.
+      click the <ButtonName icon={Plus}>Create new account</ButtonName> button
+      at the top of the page and select the <em>"Import account"</em> option.
     </p>
     <p>
       A dialog asks you for the name and address of the Account to import. Enter
@@ -96,10 +97,10 @@ const Step4: TutorialStep = {
           titleWhenCompleted="You imported the counter contract."
           description={
             <p>
-              Click the <em>"Create new account"</em> button at the top of the
-              accounts page and select the <em>"Import account"</em> option to
-              import the counter contract into the Playground, then open its
-              details page.
+              Click the <ButtonName icon={Plus}>Create new account</ButtonName>{" "}
+              button at the top of the accounts page and select the{" "}
+              <em>"Import account"</em> option to import the counter contract
+              into the Playground, then open its details page.
             </p>
           }
         />

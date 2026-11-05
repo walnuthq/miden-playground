@@ -10,7 +10,7 @@ import {
 } from "@workspace/ui/components/empty";
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import useGlobalContext from "@/components/global-context/hook";
-import Loading from "@/components/lib/loading";
+import AppShell from "@/components/lib/app-shell";
 import Logo from "@/components/lib/logo";
 import useNetwork from "@/hooks/use-network";
 import { networks, noteTransportUrls, provers } from "@/lib/miden-client";
@@ -104,12 +104,12 @@ const MidenProvider = ({ children }: { children: ReactNode }) => {
     // `dispatch` is stable: this runs once.
   }, [dispatch]);
   if (!storeChecked) {
-    return <Loading />;
+    return <AppShell />;
   }
   return (
     <RawMidenProvider
       config={config}
-      loadingComponent={<Loading />}
+      loadingComponent={<AppShell />}
       errorComponent={(error) => <InitializationError error={error} />}
     >
       {children}

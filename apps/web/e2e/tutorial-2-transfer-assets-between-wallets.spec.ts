@@ -61,10 +61,7 @@ test("tutorial 2: transfer assets between wallets", async ({ page }) => {
   });
 
   await test.step("3. inspect the transaction and its output note", async () => {
-    await panel.openLink(
-      "opening the first item",
-      /\/transactions\/0x[0-9a-f]+$/,
-    );
+    await panel.openLink("opening it", /\/transactions\/0x[0-9a-f]+$/);
     await expect(
       page.getByRole("row").filter({ hasText: "p2id" }).filter({
         hasText: "100 MDN",
