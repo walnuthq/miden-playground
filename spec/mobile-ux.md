@@ -94,7 +94,7 @@ the main thread downloads the WASM twice, in parallel, and logs "preloaded
 using link preload but not used". A phone on Safari would get slower.
 
 **Not the answer: the `/lazy` entry.** It's the entry that defers the WASM,
-but CLAUDE.md forbids it: two entries mean two WASM instances
+but `docs/claude/vite-build.md` forbids it: two entries mean two WASM instances
 (`WASM_CLASS_MISMATCH`). The split keeps the one eager entry and moves it
 behind the lazy root route instead.
 
