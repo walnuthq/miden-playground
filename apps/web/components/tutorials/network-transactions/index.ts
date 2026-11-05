@@ -1,3 +1,4 @@
+import { tutorialMeta } from "@/components/tutorials/meta";
 import state from "@/components/tutorials/network-transactions/state";
 import Step1 from "@/components/tutorials/network-transactions/step1";
 import Step2 from "@/components/tutorials/network-transactions/step2";
@@ -9,14 +10,7 @@ import { defaultTutorial } from "@/lib/utils/tutorial";
 
 const tutorial: Tutorial = {
   ...defaultTutorial(),
-  id: "network-transactions",
-  number: 9,
-  title: "Network transactions",
-  tagline: "Deploy a network counter and increment it with a network note.",
-  description:
-    "In this tutorial, you'll deploy a network counter contract on testnet and increment it with a network note, consumed by the network transaction builder.",
-  category: "advanced",
-  initialRoute: "/accounts",
+  ...tutorialMeta("network-transactions"),
   state,
   steps: [Step1, Step2, Step3, Step4, Step5],
 };

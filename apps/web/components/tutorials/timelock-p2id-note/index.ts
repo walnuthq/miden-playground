@@ -1,3 +1,4 @@
+import { tutorialMeta } from "@/components/tutorials/meta";
 import state from "@/components/tutorials/timelock-p2id-note/state";
 import Step1 from "@/components/tutorials/timelock-p2id-note/step1";
 import Step2 from "@/components/tutorials/timelock-p2id-note/step2";
@@ -9,14 +10,7 @@ import { defaultTutorial } from "@/lib/utils/tutorial";
 
 const tutorial: Tutorial = {
   ...defaultTutorial(),
-  id: "timelock-p2id-note",
-  number: 8,
-  title: "Timelock P2ID note",
-  tagline: "Create your own timelocked P2ID note.",
-  description:
-    "In this tutorial, you'll write a timelocked P2ID note script and create a Note that its target account can only consume once a given block height is reached.",
-  category: "advanced",
-  initialRoute: "/scripts",
+  ...tutorialMeta("timelock-p2id-note"),
   state,
   steps: [Step1, Step2, Step3, Step4, Step5],
 };

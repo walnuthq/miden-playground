@@ -19,59 +19,23 @@ import {
   useSidebar,
 } from "@workspace/ui/components/sidebar";
 import { cn } from "@workspace/ui/lib/utils";
-import { BadgeCheck, ChevronsUpDown, CircleDashed } from "lucide-react";
+import { BadgeCheck, CircleDashed } from "lucide-react";
 // import { useEffect } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
-import Logo from "@/components/lib/logo";
+import {
+  ProjectSwitcherButtonContent,
+  projectTitle,
+} from "@/components/lib/project-switcher-view";
 import tutorials from "@/components/tutorials";
 import useAppState from "@/hooks/use-app-state";
 import useExamples from "@/hooks/use-examples";
 import useNetwork from "@/hooks/use-network";
 import useTutorials from "@/hooks/use-tutorials";
 import examples from "@/lib/examples";
-import { type NetworkId, networks } from "@/lib/types/network";
 
-// The project shown under "Miden Playground": the tutorial, the example, or
-// the network's sandbox.
-export const projectTitle = ({
-  tutorialId,
-  exampleId,
-  networkId,
-}: {
-  tutorialId: string;
-  exampleId: string;
-  networkId: NetworkId;
-}) =>
-  tutorials.find(({ id }) => id === tutorialId)?.title ??
-  examples.find(({ id }) => id === exampleId)?.title ??
-  `${networks[networkId]} sandbox`;
-
-const ProjectSwitcherButtonContent = ({ title }: { title: string }) => (
-  <>
-    <div className="bg-background border flex aspect-square size-8 items-center justify-center rounded-lg">
-      <Logo className="size-6" />
-    </div>
-    <div className="grid flex-1 text-left text-sm leading-tight">
-      <span className="truncate font-medium">Miden Playground</span>
-      <span className="truncate text-xs">{title}</span>
-    </div>
-    <ChevronsUpDown className="ml-auto" />
-  </>
-);
-
-// The switcher's button alone, without its menu, for the app shell (shown
-// while the Miden client initializes): the menu's actions need the client.
-export const ProjectSwitcherView = ({ title }: { title: string }) => (
-  <SidebarMenu>
-    <SidebarMenuItem>
-      <SidebarMenuButton size="lg">
-        <ProjectSwitcherButtonContent title={title} />
-      </SidebarMenuButton>
-    </SidebarMenuItem>
-  </SidebarMenu>
-);
-
+// The project switcher with its menu (tutorials, examples, new sandboxes).
+// `ProjectSwitcherView` (SDK-free) is the button alone, for the app shell.
 const ProjectSwitcher = () => {
   const { isMobile } = useSidebar();
   const navigate = useNavigate();

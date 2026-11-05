@@ -5,6 +5,7 @@ import Step4 from "@/components/tutorials/contract-verification/step4";
 import Step5 from "@/components/tutorials/contract-verification/step5";
 import Step6 from "@/components/tutorials/contract-verification/step6";
 import Step7 from "@/components/tutorials/contract-verification/step7";
+import { tutorialMeta } from "@/components/tutorials/meta";
 import type { Tutorial } from "@/lib/types/tutorial";
 import { midenFaucetAccount } from "@/lib/utils/account";
 import { defaultState } from "@/lib/utils/state";
@@ -12,14 +13,7 @@ import { defaultTutorial } from "@/lib/utils/tutorial";
 
 const tutorial: Tutorial = {
   ...defaultTutorial(),
-  id: "contract-verification",
-  number: 12,
-  title: "Contract verification",
-  tagline: "Verify a contract's source code so anyone can interact with it.",
-  description:
-    "In this tutorial, you'll extend a counter contract, deploy it on testnet, and verify an unverified copy of it by uploading its source code to the Playground.",
-  category: "advanced",
-  initialRoute: "/scripts",
+  ...tutorialMeta("contract-verification"),
   state: {
     ...defaultState(),
     accounts: [midenFaucetAccount("mtst")],

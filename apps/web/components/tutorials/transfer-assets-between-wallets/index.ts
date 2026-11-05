@@ -1,3 +1,4 @@
+import { tutorialMeta } from "@/components/tutorials/meta";
 import state from "@/components/tutorials/transfer-assets-between-wallets/state";
 import Step1 from "@/components/tutorials/transfer-assets-between-wallets/step1";
 import Step2 from "@/components/tutorials/transfer-assets-between-wallets/step2";
@@ -10,13 +11,7 @@ import { defaultTutorial } from "@/lib/utils/tutorial";
 
 const tutorial: Tutorial = {
   ...defaultTutorial(),
-  id: "transfer-assets-between-wallets",
-  number: 2,
-  title: "Transfer assets between wallets",
-  tagline: "Transfer tokens between two wallets.",
-  description:
-    "In this tutorial, you'll learn how to transfer assets from one wallet to another.",
-  initialRoute: "/accounts",
+  ...tutorialMeta("transfer-assets-between-wallets"),
   state,
   store,
   steps: [Step1, Step2, Step3, Step4, Step5],

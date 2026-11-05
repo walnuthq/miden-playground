@@ -1,9 +1,8 @@
 # Mobile UX
 
-Status: first pass shipped in PR #760 (merged and deployed 2026-11-05).
-Left: four items, described in "Left out". The first two are the remaining
-gains for a phone's first visit; item 1 was measured and designed on
-2026-11-05, pending a go.
+Status: first pass shipped in PR #760 (merged and deployed 2026-11-05);
+item 1 of "Left out" (the shell before the WASM) shipped on 2026-11-05 too.
+Left: items 2 to 4. Item 2 is the remaining gain for a phone's first visit.
 
 The playground was built for desktop. A pass at iPhone 14 size (390 px) on
 2026-11-04 listed fixes, scored by priority and effort. This document records
@@ -19,42 +18,71 @@ Delegated proving was already in place everywhere it matters. The app client
 on the network's remote prover (testnet, devnet, mainnet). Only the Local
 network proves in the browser.
 
-| Item | What shipped |
-|---|---|
-| Sidebar | The phone sidebar (a sheet) closes after navigating. |
-| Header | Fits down to 320 px: the GitHub button and the badge's block height hide, and the breadcrumb truncates first. |
-| Tables | Secondary columns hide below `md` (CSS only), so row actions stay on screen. Nested tables (account components) go under their label. Below `sm`, account names wrap and IDs give way, and the digest's copy button hides. |
-| Script editor | A files menu replaces the file tree. The console starts collapsed, and the minimap is off by default. The tabs row wraps under ~380 px. |
-| Tutorial panel | A bottom panel instead of a full-screen takeover. It reopens by itself when a step's action is done, and toasts move to the top. |
-| App shell | While the Miden client (then Para) initializes, the real layout renders from the app state with actions disabled, instead of a blank loader. Built from view/container splits of the real components. See the caveat in "Left out". |
-| Background sync | Auto-sync and the app's own sync pause while the tab is hidden. That's 0 requests a minute instead of ~92 to the node and the note transport. |
-| Phone e2e | `e2e/mobile` runs in `mobile-safari` (iPhone 14, WebKit), `mobile-chrome` (Pixel 7) and `mobile-small` (Galaxy S9+, 320 px). The specs found and fixed: a transaction preview's Submit pushed off-screen, icon buttons without an accessible name, and three 320 px overflows. |
-| Read-only editor on phones | Monaco is read-only below 768 px. Tutorials 7, 8 and 12, the only steps that ask for typed code, have "Add to my script" buttons that insert it. Desktop users can type or use them. |
-| Tutorial copy | One wording for both layouts. Icon-only buttons are named with their icon (`ButtonName`), with no sidebar references; "click" stays. |
+| Item                       | What shipped                                                                                                                                                                                                                                                                   |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Sidebar                    | The phone sidebar (a sheet) closes after navigating.                                                                                                                                                                                                                           |
+| Header                     | Fits down to 320 px: the GitHub button and the badge's block height hide, and the breadcrumb truncates first.                                                                                                                                                                  |
+| Tables                     | Secondary columns hide below `md` (CSS only), so row actions stay on screen. Nested tables (account components) go under their label. Below `sm`, account names wrap and IDs give way, and the digest's copy button hides.                                                     |
+| Script editor              | A files menu replaces the file tree. The console starts collapsed, and the minimap is off by default. The tabs row wraps under ~380 px.                                                                                                                                        |
+| Tutorial panel             | A bottom panel instead of a full-screen takeover. It reopens by itself when a step's action is done, and toasts move to the top.                                                                                                                                               |
+| App shell                  | While the Miden client (then Para) initializes, the real layout renders from the app state with actions disabled, instead of a blank loader. Built from view/container splits of the real components. See the caveat in "Left out".                                            |
+| Background sync            | Auto-sync and the app's own sync pause while the tab is hidden. That's 0 requests a minute instead of ~92 to the node and the note transport.                                                                                                                                  |
+| Phone e2e                  | `e2e/mobile` runs in `mobile-safari` (iPhone 14, WebKit), `mobile-chrome` (Pixel 7) and `mobile-small` (Galaxy S9+, 320 px). The specs found and fixed: a transaction preview's Submit pushed off-screen, icon buttons without an accessible name, and three 320 px overflows. |
+| Read-only editor on phones | Monaco is read-only below 768 px. Tutorials 7, 8 and 12, the only steps that ask for typed code, have "Add to my script" buttons that insert it. Desktop users can type or use them.                                                                                           |
+| Tutorial copy              | One wording for both layouts. Icon-only buttons are named with their icon (`ButtonName`), with no sidebar references; "click" stays.                                                                                                                                           |
 
 ## Left out
 
-### 1. App shell before the WASM loads (first visits)
+### 1. App shell before the WASM loads (first visits): done
 
-Scoped on 2026-11-05, not started. The shell only paints once the client WASM
-is downloaded and compiled: the SDK's eager entry (`@miden-sdk/miden-sdk`,
-which `@miden-sdk/react` uses) awaits the WASM when its module loads, and
-every app module, the shell included, is in that one static graph. On a
-reload, with the WASM cached, the shell paints at ~0.6 s.
+Shipped on 2026-11-05 (the entry split, below). Before it, the shell only
+painted once the client WASM was downloaded and compiled: the SDK's eager
+entry (`@miden-sdk/miden-sdk`, which `@miden-sdk/react` uses) awaits the WASM
+when its module loads, and every app module, the shell included, was in that
+one static graph. On a reload, with the WASM cached, the shell painted at
+~0.6 s.
 
 **Measured** (fresh browser context per visit, Pixel 7 emulation, CDP
 throttling, medians of 3; `performance` marks from a `MutationObserver` on the
-home page's "Show all N tutorials" button: visible = shell, enabled = app):
+home page's "Show all N tutorials" button: visible = shell, enabled = app).
+Before, with the one static graph:
 
-| Profile | DOMContentLoaded | WASM fetch | Shell | App usable |
-|---|---|---|---|---|
-| Production, 4G-ish (9 Mbps, 170 ms RTT, 4× CPU) | 2.0 s | 2.1 → 7.4 s (5.5 MB brotli) | 7.9 s | 10.4 s |
-| Local `wrangler dev` build, same profile | 2.0 s | 2.2 → 8.0 s (6.2 MB: wrangler's brotli level) | 8.5 s | 10.7 s |
-| Local, LTE-ish (30 Mbps, 60 ms RTT, 2× CPU) | 0.7 s | 0.8 → 2.5 s | 2.7 s | 5.0 s |
+| Profile                                         | DOMContentLoaded | WASM fetch                                    | Shell | App usable |
+| ----------------------------------------------- | ---------------- | --------------------------------------------- | ----- | ---------- |
+| Production, 4G-ish (9 Mbps, 170 ms RTT, 4× CPU) | 2.0 s            | 2.1 → 7.4 s (5.5 MB brotli)                   | 7.9 s | 10.4 s     |
+| Local `wrangler dev` build, same profile        | 2.0 s            | 2.2 → 8.0 s (6.2 MB: wrangler's brotli level) | 8.5 s | 10.7 s     |
+| Local, LTE-ish (30 Mbps, 60 ms RTT, 2× CPU)     | 0.7 s            | 0.8 → 2.5 s                                   | 2.7 s | 5.0 s      |
 
-The 42 modulepreloaded JS chunks (1.2 MB brotli) saturate the link until the
-eager entry evaluates, then the WASM download is bandwidth-bound. Bytes are
-what gate the usable app (item 2); the shell is gated by the module graph.
+The 42 modulepreloaded JS chunks (1.2 MB brotli) saturated the link until the
+eager entry evaluated, then the WASM download is bandwidth-bound. Bytes are
+what gate the usable app (item 2); the shell was gated by the module graph.
+
+After the split (local build, same profiles; the entry's graph is 30 chunks,
+~240 KB brotli):
+
+| Profile        | DOMContentLoaded | WASM fetch  | Shell | App usable |
+| -------------- | ---------------- | ----------- | ----- | ---------- |
+| Local, 4G-ish  | 1.4 s            | 2.7 → 8.6 s | 1.5 s | 10.7 s     |
+| Local, LTE-ish | 0.5 s            | 0.9 → 2.7 s | 0.6 s | 4.2 s      |
+
+Without the low-priority modulepreloads for the lazy layouts (below), the app
+came 0.4–0.65 s later than before the split: their chunks were only
+discovered once the entry had run.
+
+**What shipped.** The entry's static module graph (`main.tsx`, `routes.tsx`,
+`AppShell` and the `*View` modules it renders) imports nothing from the SDK
+or Para; `vite build` fails if it does (`shellIsSdkFree` in
+`vite.config.ts`). The root route and the app's layout are lazy, with
+`AppShell` as the root's `HydrateFallback`, so the router renders the shell
+alone, inside its context, until the root layout (where `Providers` pulls the
+SDK in) has loaded. The shell's providers (theme, query client, network, app
+state) are `OuterProviders`, around the router. Tutorials and examples reach
+the shell through metadata modules (`components/tutorials/meta.ts`,
+`lib/examples/meta.tsx`), their steps and states staying with the SDK.
+`index.html` also modulepreloads the two layout chunks and their static
+imports at low priority (`preloadLazyLayouts`), so the usable app doesn't
+move. An e2e holds the `.wasm` request and asserts the shell meanwhile
+(`e2e/mobile/mobile-shell.spec.ts`). Rules in `docs/claude/phone-layout.md`.
 
 **Tried and dropped: preloading the WASM from `index.html`**
 (`<link rel="preload" as="fetch" crossorigin fetchpriority="low">`, injected
@@ -65,44 +93,15 @@ reuses it, whatever the `crossorigin`, `type` and `fetchpriority` attributes:
 the main thread downloads the WASM twice, in parallel, and logs "preloaded
 using link preload but not used". A phone on Safari would get slower.
 
-**What it takes: an entry that imports nothing from the SDK.** Designed, not
-built:
-- `main.tsx` renders `OuterProviders` (theme, query client, network, global
-  context: SDK-free, no router hooks) around the router. The root route gets
-  `lazy: () => import("…/root-layout")` and `HydrateFallback: AppShell`, so
-  the shell renders before the SDK chunks (React Router renders a lazy root's
-  fallback alone while its module loads; `useLocation` works there). The
-  inner providers (Miden, signers, Para) stay in `RootLayout`. The shell then
-  mounts up to three times in a row (fallback, store check, `loadingComponent`)
-  with the same markup, so no flash.
-- The shell's closure reaches the SDK through seven edges, each a mechanical
-  view/container split into a new file: `app-sidebar.tsx` (`useMiden`),
-  `header.tsx` (`WalletButton`), `network-badge.tsx` (`useSyncState`),
-  `project-switcher.tsx` and `home/index.tsx` (the tutorials index, whose
-  steps import the SDK), `sidebar-layout.tsx` (`AppLayout` moves out), and
-  `network-provider.tsx` (`createMidenStorage` → a local helper on the same
-  `miden-playground:networkId` key). The tutorial cards and `projectTitle`
-  need a `components/tutorials/meta.ts` (id, number, title, tagline,
-  description, category, `stepCount`) that the step modules don't import.
-- A Vite `generateBundle` guard fails the build if the entry chunk's static
-  import graph holds a module under `@miden-sdk/` or `@getpara/`; the deploy
-  workflow runs `vite build`, and there are no PR checks.
-- An e2e that holds the `.wasm` request (`page.route`) and asserts the shell
-  meanwhile.
-- The app's chunks get discovered one round trip later than from
-  `index.html`'s modulepreloads; inject them from the bundle if that shows.
+**Not the answer: the `/lazy` entry.** It's the entry that defers the WASM,
+but CLAUDE.md forbids it: two entries mean two WASM instances
+(`WASM_CLASS_MISMATCH`). The split keeps the one eager entry and moves it
+behind the lazy root route instead.
 
-Expected: the shell at ≈ DOMContentLoaded + 0.3 s (≈ 2.3 s on the 4G
-profile, ≈ 1 s on LTE, against 7.9 s and 2.7 s today). The usable app, and
-reloads, don't move. About 14 files, no behavior change; worth it only for
-the first-visit wait.
-
-- **The `/lazy` entry is not the answer.** It's the entry that defers the
-  WASM, but CLAUDE.md forbids it: two entries mean two WASM instances
-  (`WASM_CLASS_MISMATCH`).
-- **Measure on production** (a fresh browser context per visit), not
-  localhost: it serves the 21 MB WASM almost instantly, unless throttled over
-  CDP as above.
+**Measuring.** Production, or a local `vite build --mode development` served
+by `wrangler dev` (brotli like production), a fresh browser context per
+visit, throttled over CDP as above: unthrottled localhost serves the 21 MB
+WASM almost instantly.
 
 ### 2. Precompressed WASM
 

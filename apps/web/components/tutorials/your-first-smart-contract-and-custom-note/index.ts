@@ -1,3 +1,4 @@
+import { tutorialMeta } from "@/components/tutorials/meta";
 import Step1 from "@/components/tutorials/your-first-smart-contract-and-custom-note/step1";
 import Step2 from "@/components/tutorials/your-first-smart-contract-and-custom-note/step2";
 import Step3 from "@/components/tutorials/your-first-smart-contract-and-custom-note/step3";
@@ -13,14 +14,7 @@ import { defaultTutorial } from "@/lib/utils/tutorial";
 
 const tutorial: Tutorial = {
   ...defaultTutorial(),
-  id: "your-first-smart-contract-and-custom-note",
-  number: 11,
-  title: "Your first smart contract and custom note",
-  tagline: "Write a counter contract and a custom note to increment it.",
-  description:
-    "In this tutorial, you'll write a counter contract and a custom note script, deploy the contract on testnet and increment its counter with a custom note.",
-  category: "advanced",
-  initialRoute: "/scripts",
+  ...tutorialMeta("your-first-smart-contract-and-custom-note"),
   state: {
     ...defaultState(),
     accounts: [midenFaucetAccount("mtst")],

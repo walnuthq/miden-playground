@@ -1,59 +1,18 @@
 import { useSyncState } from "@miden-sdk/react";
-import { Badge } from "@workspace/ui/components/badge";
-import { Spinner } from "@workspace/ui/components/spinner";
-import { CircleDot } from "lucide-react";
 import { useEffect } from "react";
 import { useInterval } from "usehooks-ts";
 import useGlobalContext from "@/components/global-context/hook";
+import { NetworkBadgeView } from "@/components/lib/network-badge-view";
 import useAppState from "@/hooks/use-app-state";
 import useDocumentVisible from "@/hooks/use-document-visible";
 import useExamples from "@/hooks/use-examples";
 import useNetwork from "@/hooks/use-network";
-import { type NetworkId, networks } from "@/lib/types/network";
 
 let callingPopState = false;
 let callingLoadExample = false;
 
-const variants = {
-  mm: "default",
-  mtst: "outline",
-  mdev: "secondary",
-  mlcl: "destructive",
-  mmck: "default",
-} as const;
-
-// The network and its sync height, with a spinner while syncing. The app shell
-// shows it without a height while the Miden client initializes.
-export const NetworkBadgeView = ({
-  networkId,
-  syncHeight,
-  syncing,
-}: {
-  networkId: NetworkId;
-  syncHeight?: number;
-  syncing: boolean;
-}) => (
-  <Badge
-    variant={variants[networkId]}
-    className="h-8"
-    title={
-      syncHeight === undefined
-        ? `Syncing ${networks[networkId]}`
-        : `${networks[networkId]} | #${syncHeight}`
-    }
-  >
-    {/* The block height doesn't fit a phone's header. */}
-    <span>
-      {networks[networkId]}
-      {syncHeight !== undefined && <span className="hidden sm:inline"> |</span>}
-    </span>
-    {syncHeight !== undefined && (
-      <pre className="hidden sm:block">#{syncHeight}</pre>
-    )}
-    {syncing ? <Spinner /> : <CircleDot />}
-  </Badge>
-);
-
+// The live network badge: `NetworkBadgeView` (SDK-free, the app shell's too)
+// with the client's sync state, and the app's own sync loop.
 const NetworkBadge = () => {
   const { syncHeight, isSyncing } = useSyncState();
   const { networkId } = useNetwork();

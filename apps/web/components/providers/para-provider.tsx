@@ -1,7 +1,7 @@
 import type { ParaWeb, Wallet } from "@getpara/web-sdk";
 import { ParaSignerProvider, useParaSigner } from "@miden-sdk/para-react";
 import { SignerSlot } from "@miden-sdk/react";
-import type { QueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   type ReactNode,
   useCallback,
@@ -88,14 +88,10 @@ const ParaWalletBridge = ({ children }: { children: ReactNode }) => {
 // become MidenProvider's external keystore, holding the client back until Para
 // connects and moving it to a per-wallet store. Para only drives the wallet
 // connection here, registered with MultiSignerProvider through <SignerSlot />.
-const ParaProvider = ({
-  queryClient,
-  children,
-}: {
-  queryClient: QueryClient;
-  children: ReactNode;
-}) =>
-  import.meta.env.VITE_PARA_API_KEY ? (
+const ParaProvider = ({ children }: { children: ReactNode }) => {
+  // The app's query client (OuterProviders), shared with Para.
+  const queryClient = useQueryClient();
+  return import.meta.env.VITE_PARA_API_KEY ? (
     <ParaSignerProvider
       apiKey={import.meta.env.VITE_PARA_API_KEY}
       environment={import.meta.env.VITE_PARA_ENVIRONMENT ?? "BETA"}
@@ -119,5 +115,6 @@ const ParaProvider = ({
   ) : (
     children
   );
+};
 
 export default ParaProvider;
