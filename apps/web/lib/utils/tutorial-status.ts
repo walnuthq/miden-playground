@@ -1,11 +1,19 @@
-import type { TutorialProgress } from "@/lib/types/project";
-import type { TutorialId } from "@/lib/types/tutorial";
+// Relative, like `lib/types/tutorial-id.ts` has no imports: this module has a
+// `node --test` (tsconfig.node.json), where `@/` imports don't resolve.
+import type { TutorialId } from "../types/tutorial-id.ts";
 
 export type TutorialStatus = {
   step: number;
   maxStep: number;
   // The tutorial in progress, as opposed to one left unfinished.
   active: boolean;
+};
+
+// The fields of a saved `TutorialProgress` (lib/types/project.ts) the status
+// reads. Not imported: that type chains into `@/` imports (see above).
+type Progress = {
+  step: number;
+  maxStep: number;
 };
 
 // A tutorial's progress: the live state for the active tutorial, its saved
@@ -21,7 +29,7 @@ export const tutorialStatus = (
     tutorialId: TutorialId;
     tutorialStep: number;
     tutorialMaxStep: number;
-    tutorialProgress: Partial<Record<TutorialId, TutorialProgress>>;
+    tutorialProgress: Partial<Record<TutorialId, Progress>>;
   },
   id: TutorialId,
 ): TutorialStatus | null => {

@@ -2,21 +2,9 @@ import type { FunctionComponent } from "react";
 import type { NetworkId } from "@/lib/types/network";
 import type { State } from "@/lib/types/state";
 import type { Store } from "@/lib/types/store";
+import type { TutorialId } from "@/lib/types/tutorial-id";
 
-export type TutorialId =
-  | ""
-  | "create-and-fund-wallet"
-  | "transfer-assets-between-wallets"
-  | "connect-wallet-and-sign-transactions"
-  | "private-transfers"
-  | "interact-with-the-counter-contract"
-  | "deploy-a-counter-contract"
-  | "timelock-p2id-note"
-  | "network-transactions"
-  | "foreign-procedure-invocation"
-  | "your-first-smart-contract-and-custom-note"
-  | "contract-verification"
-  | "wallet-backup-using-miden-guardian";
+export type { TutorialId };
 
 export type TutorialStep = {
   title: string;
