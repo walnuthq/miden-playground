@@ -209,7 +209,10 @@ const ScriptComponent = ({ id, script }: { id: string; script?: Script }) => {
   const tabs = (
     <>
       {/* Kept mounted across tabs: the source's undo history, scroll
-          position and compile markers survive a look at the manifest. */}
+          position and compile markers survive a look at the manifest. The
+          hidden `src/lib.rs` editor stays in the DOM and first in
+          `monaco.editor.getEditors()`: scope e2e locators to the visible
+          tab. */}
       <TabsContent value="explorer" keepMounted className="h-full">
         <ScriptExplorer
           script={script}

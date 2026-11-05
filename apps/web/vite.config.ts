@@ -6,7 +6,8 @@ import { nodePolyfills } from "vite-plugin-node-polyfills";
 // The Miden and Para Vite plugins (@miden-sdk/vite-plugin, paraVitePlugin from
 // @miden-sdk/para-react/vite) are replicated here instead of registered: the
 // Miden one forces resolve.preserveSymlinks (breaks pnpm), and Para's stubs
-// only 12 of the packages below. CLAUDE.md says when to switch to them.
+// only 12 of the packages below. docs/claude/vite-build.md says when to switch
+// to them.
 
 const stubPackages = [
   "@getpara/solana-wallet-connectors",
