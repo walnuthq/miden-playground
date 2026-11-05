@@ -113,6 +113,34 @@ static assets don't serve prebuilt `.br` files, so this needs Worker code
 precompressed file with `Content-Encoding: br`, an immutable cache header and
 the WASM content type. It must also not break the SDK's streaming compile.
 
+**Implementation** (`feat/precompressed-wasm`). `precompressWasm` in
+`vite.config.ts` writes `assets/*.wasm.br` (3.97 MB, ~35 s of build time), and
+the Worker serves it for `/assets/*.wasm` with `encodeBody: "manual"`. Clients
+without brotli, and a missing `.br`, get the raw asset. Rules in
+`docs/claude/vite-build.md`.
+
+**Measured** on a `wrangler versions upload` preview URL, so on Cloudflare's
+edge but not behind Vercel's proxy, against production. Chromium, fresh context,
+9 Mbps, 170 ms RTT, no CPU throttling, medians of 3. The preview was a
+`--mode development` build.
+
+|               | Production | Preview | Gain   |
+| ------------- | ---------- | ------- | ------ |
+| WASM bytes    | 5.60 MB    | 3.97 MB | −29%   |
+| WASM download | 5.46 s     | 3.91 s  | −1.5 s |
+| App usable    | 8.86 s     | 7.70 s  | −1.2 s |
+
+Browsers advertise zstd, and Cloudflare's on-the-fly compression answers them
+with it (WebKit, production), so 5.60 MB is the real baseline, not brotli's
+5.8 MB. `instantiateStreaming` resolves on the brotli response in Chromium and
+WebKit.
+
+**Found on the way, not fixed: WebKit downloads the WASM twice.** On a fresh
+visit, the page and the web worker each fetch it. Playwright WebKit made two full
+downloads with no request interception (`wrangler dev`, 6.39 MB each), where
+Chromium's second request is ~700 bytes. Not checked on a real iPhone. If Safari
+does the same, a first visit costs twice the WASM's size there.
+
 ### 3. Para in parallel with the Miden client
 
 Para's provider is mounted inside `MidenProvider`. As an ancestor it would
