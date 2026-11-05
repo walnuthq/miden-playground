@@ -1,11 +1,12 @@
-import type { Component, StorageSlot } from "@/lib/types/component";
+import type { Component } from "@/lib/types/component";
 import { snakeCase } from "@/lib/utils/case";
 
-export const defaultStorageSlot = (): StorageSlot => ({
-  name: "",
-  type: "value",
-  value: "0",
-});
+// Unused at the moment. Needs StorageSlot imported from @/lib/types/component.
+// export const defaultStorageSlot = (): StorageSlot => ({
+//   name: "",
+//   type: "value",
+//   value: "0",
+// });
 
 export const storageSlotName = ({
   packageName,

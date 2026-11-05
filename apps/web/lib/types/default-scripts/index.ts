@@ -8,7 +8,6 @@ import counterContract from "@/lib/types/default-scripts/counter-contract";
 import feeSponsorship from "@/lib/types/default-scripts/fee-sponsorship";
 import fungibleFaucet from "@/lib/types/default-scripts/fungible-faucet";
 import p2id from "@/lib/types/default-scripts/p2id";
-// import p2ide from "@/lib/types/default-scripts/p2ide";
 import protocol from "@/lib/types/default-scripts/protocol";
 import txFee from "@/lib/types/default-scripts/tx-fee";
 
@@ -23,7 +22,6 @@ const defaultScripts = [
   feeSponsorship,
   fungibleFaucet,
   p2id,
-  // p2ide,
   protocol,
   txFee,
 ];

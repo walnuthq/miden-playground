@@ -18,7 +18,6 @@ import {
   Note as WasmNote,
   NoteAssets as WasmNoteAssets,
   NoteExecutionHint as WasmNoteExecutionHint,
-  NoteExportFormat as WasmNoteExportFormat,
   NoteFile as WasmNoteFile,
   NoteFilter as WasmNoteFilter,
   NoteFilterTypes as WasmNoteFilterTypes,
@@ -470,38 +469,40 @@ export const clientImportNoteFile = async ({
   return wasmInputNoteRecordToInputNote({ record, scripts, noteFileBytes });
 };
 
-export const clientExportNoteFile = async ({
-  client,
-  noteId,
-}: {
-  client: WebClientType;
-  noteId: string;
-}) => {
-  const noteFile = await client.exportNoteFile(
-    noteId,
-    WasmNoteExportFormat.Details,
-  );
-  return noteFile.serialize();
-};
+// Unused at the moment. Needs NoteExportFormat as WasmNoteExportFormat imported from the SDK.
+// export const clientExportNoteFile = async ({
+//   client,
+//   noteId,
+// }: {
+//   client: WebClientType;
+//   noteId: string;
+// }) => {
+//   const noteFile = await client.exportNoteFile(
+//     noteId,
+//     WasmNoteExportFormat.Details,
+//   );
+//   return noteFile.serialize();
+// };
 
-export const clientExportInputNoteFile = async ({
-  client,
-  noteId,
-}: {
-  client: WebClientType;
-  noteId: string;
-}) => {
-  const record = await client.getInputNote(noteId);
-  if (!record) {
-    throw new Error("Input note not found");
-  }
-  try {
-    const inputNote = record.toInputNote();
-    return WasmNoteFile.fromInputNote(inputNote).serialize();
-  } catch {
-    return WasmNoteFile.fromNoteDetails(record.details()).serialize();
-  }
-};
+// Unused at the moment.
+// export const clientExportInputNoteFile = async ({
+//   client,
+//   noteId,
+// }: {
+//   client: WebClientType;
+//   noteId: string;
+// }) => {
+//   const record = await client.getInputNote(noteId);
+//   if (!record) {
+//     throw new Error("Input note not found");
+//   }
+//   try {
+//     const inputNote = record.toInputNote();
+//     return WasmNoteFile.fromInputNote(inputNote).serialize();
+//   } catch {
+//     return WasmNoteFile.fromNoteDetails(record.details()).serialize();
+//   }
+// };
 
 // Since SDK 0.17.2 a failed private-note send is final: sync() no longer
 // retries it. If the playground sends private notes itself, prefer

@@ -12,10 +12,11 @@ export const scriptTypes = {
 
 export type ScriptType = keyof typeof scriptTypes;
 
-export type ScriptExampleItem = {
-  name: string;
-  type: ScriptType;
-};
+// Unused at the moment.
+// export type ScriptExampleItem = {
+//   name: string;
+//   type: ScriptType;
+// };
 
 export const scriptExamples = {
   "p2id-note": { name: "P2ID Note", type: "note" },
