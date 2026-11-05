@@ -7,8 +7,9 @@ gains for a phone's first visit.
 The playground was built for desktop. A pass at iPhone 14 size (390 px) on
 2026-11-04 listed fixes, scored by priority and effort. This document records
 what #760 implemented and what it left out, with the context needed to pick
-the open items up again. CLAUDE.md ("Phone layout", "Tutorial copy", "Script
-editor") holds the conventions the work set.
+the open items up again. The conventions the work set are in
+`docs/claude/phone-layout.md`, `docs/claude/tutorial-copy.md` and
+`docs/claude/script-editor.md`.
 
 ## Implemented in #760
 
