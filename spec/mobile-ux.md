@@ -148,9 +148,19 @@ the build, 2026-11-05:
 Playwright's WebKit doesn't use an HTTP cache, so don't count downloads with it.
 No real iPhone or iOS simulator was checked; Safari on macOS is the closest.
 
-Chromium's 304 comes from the `Vary` on client hints in `public/_headers`: the
-worker's fetch doesn't send them. Without that `Vary`, the second request goes
-away. It costs one round trip, not the download, and is not fixed.
+Chromium's 304 came from a `Vary` on client hints in `public/_headers`, inherited
+from `@simpleanalytics/next`: the worker's fetch doesn't send them. No response
+depends on them, so `Vary` is now `Accept-Encoding` alone. `Accept-CH` stays, and
+Chromium still sends the hints that the Worker's analytics proxy forwards. Same
+build on two preview URLs, alternating, Chromium, 9 Mbps, 170 ms RTT, medians of
+5:
+
+|                                | Vary on hints | `Vary: Accept-Encoding` |
+| ------------------------------ | ------------- | ----------------------- |
+| Worker's WASM, first visit     | 304           | From cache              |
+| WASM revalidations on a reload | 2             | 0                       |
+| App usable, reload             | 1.62 s        | 1.26 s                  |
+| App usable, first visit        | 8.37 s        | 7.74 s (within noise)   |
 
 ### 3. Para in parallel with the Miden client
 

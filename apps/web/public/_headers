@@ -1,7 +1,10 @@
 /assets/*
   Cache-Control: public,max-age=31536000,immutable
 
-# Client hints for Simple Analytics (what @simpleanalytics/next added).
+# Accept-CH: client hints for Simple Analytics, which the Worker's proxy forwards
+# (what @simpleanalytics/next added). No Vary on them: no response depends on
+# them, and a web worker's fetches don't send them, so Chromium would revalidate
+# every asset a worker reuses from the page.
 /*
   Accept-CH: Sec-CH-Viewport-Width, Sec-CH-Viewport-Height, Viewport-Width, Sec-CH-Lang, Lang
-  Vary: Sec-CH-Viewport-Width, Sec-CH-Viewport-Height, Viewport-Width, Sec-CH-Lang, Lang
+  Vary: Accept-Encoding
