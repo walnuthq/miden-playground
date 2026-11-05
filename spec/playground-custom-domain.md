@@ -26,6 +26,7 @@ cross-user banned), because both zones are on Cloudflare under different
 accounts.
 
 Costs of the hack:
+
 - two edge hops (Vercel, then Cloudflare) for every request, including the
   big WASM and asset downloads, which also count as Vercel bandwidth;
 - two cache layers (responses carry both `x-vercel-cache` and `cf-cache-status`);

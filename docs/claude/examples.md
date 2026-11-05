@@ -1,6 +1,7 @@
 # Examples
 
 The examples launched from the home page (`apps/web/lib/examples`) get their packages from `apps/api/examples/<dir>`. That is a copy of each upstream project's `miden-project.toml` and `src/lib.rs`, the only files the API reads, plus `compiled.json`, their initial compile output. `POST /scripts/examples/:exampleId` inserts those packages already compiled, without calling api-compile. Later edits recompile through `PATCH /scripts/:id` as usual.
+
 - Edit the sources in place. They may drift from upstream on purpose (e.g. the counter's map key).
 - Regenerate the snapshots with `pnpm examples:compile` in `apps/api`, with the local API (`pnpm dev`) and api-compile running. The local api-compile image must match production's, since its output ships as is. Do it after editing an example, and after bumping the SDK, the api-compile image or `templates/project-template`.
 - The snapshots are bundled into the API Worker: each note's masp is ~560 KB of base64 (it embeds its dependencies). The two examples bring the upload to ~840 KiB gzipped, so watch the Worker size limit when adding examples.

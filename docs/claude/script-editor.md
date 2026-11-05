@@ -1,6 +1,7 @@
 # Script editor (`/scripts/:id`)
 
 `spec/editor-console-improvements.md` is the roadmap for the editor and console (15 scored items). Its status line says what's done and what's next; mark items done there, with their PR, as they ship.
+
 - Compile errors come as rustc's rendered text in `script.error`, parsed by `apps/web/lib/utils/diagnostics.ts` into Monaco markers and console links. cargo's JSON isn't available: midenc consumes it and keeps only the `.wasm` artifacts. When the compiler or api-compile changes its output, re-capture the fixtures in `lib/utils/fixtures/compile-errors/` and run `pnpm test` in apps/web (`node:test`, plain node).
 - The console hides the build noise around the diagnostics (`cleanCompilerOutput` in `lib/utils/compiler-output.ts`, display only; "Show full output" shows the raw text). Its rules match cargo's and api-compile's exact lines: update them with the fixtures.
 - The API doesn't store `error` or `warnings` (a successful build's stderr): a script fetched from it has neither, so guard with `script.error ?? ""`.

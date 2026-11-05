@@ -1,6 +1,7 @@
 # Mainnet sandbox
 
 The Mainnet sandbox (`networkId` `mm`, the bech32 prefix) connects to Miden Partner Mainnet. That network is invite-only and uses real funds. Tutorials and examples stay on testnet.
+
 - The SDK has no `"mainnet"` shorthand, so the RPC, prover and note transport go as full URLs (`MAINNET_*` in `lib/constants.ts`, mapped in `lib/miden-client.ts`). `@miden-sdk/react` infers the `mm` address prefix from an RPC URL containing "mainnet".
 - The node creates only allowlisted accounts, each registered with an invite code (`accounts.register`), plus network accounts. The playground doesn't register accounts, so on mainnet you can't create wallets or faucets (`MainnetAllowlistAlert`), and deploying works for network accounts only.
 - There is no faucet API. `useFundAccount` has Bread Wallet send the account `MAINNET_FUNDING_AMOUNT` USDCX (0.001, sized from the fee rule in its comment) through `requestSend`, after checking `isAccountAllowed`. That covers the deploy transaction.

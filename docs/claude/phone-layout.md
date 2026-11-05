@@ -1,6 +1,7 @@
 # Phone layout
 
 Below 768 px (`useIsMobile`, the sidebar's breakpoint) the web app has a phone layout; desktop renders as before. `e2e/mobile` checks it in the `mobile-safari` (iPhone 14, WebKit, 390 px) and `mobile-chrome` (Pixel 7, 412 px) projects, and `mobile-small` (Galaxy S9+, 320 px) runs the sandbox spec: run them after any layout change, and keep each page from overflowing the screen's width down to 320 px (a phone zooms the whole page out).
+
 - Header: the GitHub button and the network badge's block height hide, and the breadcrumb truncates (`min-w-0`) before the action row (`shrink-0`) overflows. It fits down to 320 px.
 - The sidebar is a sheet: `AppSidebarView` closes it on navigation.
 - Tables hide secondary columns with CSS (`mobileHiddenColumns` in each `columns.tsx`, `mobileColumnClassName` in `lib/table.ts`), so row actions stay on screen. A nested table goes under its label (`NestedTableRow`). Below `sm` (the 320 px phones), the accounts table wraps names and clips IDs (`narrowColumnClassNames`), and the procedures table hides the digest's copy button. `expectWithinWidth` checks an element against its clipping containers too, so a row action hidden inside a scrolling table fails it.

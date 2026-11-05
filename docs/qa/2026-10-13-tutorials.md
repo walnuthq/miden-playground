@@ -62,6 +62,7 @@ Same run as above against production, with the same Bread QA wallet. Para used i
 | 12  | Contract verification                     | ✅ Pass, including the optional import into a new sandbox                                                                       |
 
 **Differences from the local dev QA:**
+
 - **Fixes verified:** #1 (late Para approval shows a persistent "Transaction expired." toast, cleared on retry), #5 (new tutorial 5 copy) and #9 (toasts at the bottom center) all work on production.
 - **#2 (stale consumable notes) didn't reproduce** on production in tutorials 1, 2 and 5.
 - **Faster:** wallet creation (~30s) and script creation/compilation (~2s) were faster than on local dev.

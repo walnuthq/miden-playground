@@ -37,6 +37,7 @@ pnpm test:e2e --project=mobile-safari          # phone specs on WebKit (iPhone 1
 ## Mobile
 
 The specs in `mobile/` run in two phone projects: `mobile-safari` (iPhone 14, WebKit, 390 px wide) and `mobile-chrome` (Pixel 7, Chromium, 412 px). `mobile-small` (Galaxy S9+, Chromium, 320 px) runs `mobile-sandbox.spec.ts`, for the narrowest phones. The `chromium` project, at 1440×900, skips them. They check:
+
 - that pages don't overflow the screen's width (a phone would zoom the whole page out);
 - that controls a wider layout pushes off-screen stay on it: the header's buttons, the tables' row menus, the procedures' Invoke buttons;
 - the sidebar, which closes after navigating;

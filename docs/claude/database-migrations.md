@@ -1,6 +1,7 @@
 # Database migrations
 
 The api deploy workflow runs `pnpm db:migrate` (Drizzle, `apps/api/drizzle`) against production before `wrangler deploy`, with the `DATABASE_URL` repository secret. README "Database migrations" has the rules.
+
 - Every change to `apps/api/db/schema.ts` ships with its migration: `pnpm db:generate --name <what_it_does>` in `apps/api`, committed unedited unless it needs a data step. Never `db:push` production, and no one-off migration scripts: a data backfill goes in the migration's SQL.
 - A migration must work with the API that's already deployed, which keeps serving until the new one is live: add nullable or defaulted columns; drop or rename in a second release, once no deployed code uses the old name.
 - The first migration (`*_baseline`) was recorded as applied on production by hand (production was built with `db:push`). Never edit or rename it: the migrator matches applied migrations by folder name.

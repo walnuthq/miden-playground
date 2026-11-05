@@ -13,6 +13,7 @@ Miden Playground is brought to you by [Walnut](https://www.walnut.dev).
 ## ⚙️ Installation
 
 The app requires the following dependencies:
+
 - [NodeJS](https://nodejs.org/) >= 26
 - [pnpm](https://pnpm.io/) >= 11
 
@@ -80,6 +81,7 @@ When running the app locally, you can use the playground against a local node by
 ## 🚀 Deploying
 
 Both apps run on [Cloudflare Workers](https://workers.cloudflare.com/) and are deployed by GitHub Actions when a PR is merged to `main`, each only when its sources change:
+
 - [`deploy-web-cloudflare.yml`](.github/workflows/deploy-web-cloudflare.yml) builds `apps/web` with Vite and deploys the `miden-playground` Worker, which serves the build as static assets (with SPA fallback) and proxies Simple Analytics. Its build variables are committed in `apps/web/.env.production`.
 - [`deploy-api-cloudflare.yml`](.github/workflows/deploy-api-cloudflare.yml) applies the pending database migrations, then deploys the `miden-playground-api` Worker (`wrangler deploy --env production`). Its variables, Hyperdrive binding and custom domain are in `env.production` in `apps/api/wrangler.jsonc`.
 
