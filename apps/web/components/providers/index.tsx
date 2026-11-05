@@ -13,6 +13,7 @@ import MidenProvider from "@/components/providers/miden-provider";
 import MidenFiReconnect from "@/components/providers/midenfi-reconnect";
 import { NetworkProvider } from "@/components/providers/network-provider";
 import ParaProvider from "@/components/providers/para-provider";
+import PauseSyncWhenHidden from "@/components/providers/pause-sync-when-hidden";
 import useNetwork from "@/hooks/use-network";
 import { walletAdapterNetworks } from "@/lib/miden-client";
 
@@ -62,6 +63,7 @@ const Providers = ({ children }: { children: ReactNode }) => (
               <BreadWalletProvider>
                 <SignerSlot />
                 <MidenFiReconnect />
+                <PauseSyncWhenHidden />
                 <WalletModalProvider>
                   <ParaProvider queryClient={queryClient}>
                     {children}

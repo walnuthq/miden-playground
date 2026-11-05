@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { useInterval } from "usehooks-ts";
 import useGlobalContext from "@/components/global-context/hook";
 import useAppState from "@/hooks/use-app-state";
+import useDocumentVisible from "@/hooks/use-document-visible";
 import useExamples from "@/hooks/use-examples";
 import useNetwork from "@/hooks/use-network";
 import { type NetworkId, networks } from "@/lib/types/network";
@@ -62,8 +63,12 @@ const NetworkBadge = () => {
   const exampleAccount = accounts.find(({ components }) =>
     components.includes(exampleId),
   );
+  // Not while the tab is hidden: it would keep querying the node and the note
+  // transport for nobody. It ticks again within 2.5 s of the tab showing.
+  const visible = useDocumentVisible();
   const useIntervalTriggered =
     networkId !== "mmck" &&
+    visible &&
     !isSyncing &&
     !syncingState &&
     !submittingTransaction;
