@@ -21,6 +21,7 @@ import {
 } from "@workspace/ui/components/card";
 import { cn } from "@workspace/ui/lib/utils";
 import { BadgeCheck, CircleDashed, RotateCcw } from "lucide-react";
+import { useState } from "react";
 import type { TutorialMeta } from "@/lib/types/tutorial";
 import type { TutorialStatus } from "@/lib/utils/tutorial-status";
 
@@ -90,38 +91,57 @@ export const StartTutorialCardView = ({
         {status ? "Resume tutorial" : "Start tutorial"}
       </Button>
       {status && (
-        <AlertDialog>
-          <AlertDialogTrigger
-            render={
-              <Button
-                variant="outline"
-                size="icon"
-                className="bg-muted/50"
-                aria-label="Restart tutorial"
-                title="Restart tutorial"
-                disabled={!onRestart}
-              />
-            }
-          >
-            <RotateCcw />
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Restart {tutorial.title}?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Your progress in this tutorial, with the accounts, notes and
-                transactions you created in it, will be lost.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={onRestart}>
-                Restart tutorial
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <RestartTutorialButton title={tutorial.title} onRestart={onRestart} />
       )}
     </CardFooter>
   </Card>
 );
+
+const RestartTutorialButton = ({
+  title,
+  onRestart,
+}: {
+  title: string;
+  onRestart?: () => void;
+}) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <AlertDialog open={open} onOpenChange={setOpen}>
+      <AlertDialogTrigger
+        render={
+          <Button
+            variant="outline"
+            size="icon"
+            className="bg-muted/50"
+            aria-label="Restart tutorial"
+            title="Restart tutorial"
+            disabled={!onRestart}
+          />
+        }
+      >
+        <RotateCcw />
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Restart {title}?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Your progress in this tutorial, with the accounts, notes and
+            transactions you created in it, will be lost.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={() => {
+              // AlertDialogAction is a plain button, not a close trigger.
+              setOpen(false);
+              onRestart?.();
+            }}
+          >
+            Restart tutorial
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+};
