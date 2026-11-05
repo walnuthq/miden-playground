@@ -94,4 +94,15 @@ export type State = {
   tutorialProgress: Partial<Record<TutorialId, TutorialProgress>>;
   // EXAMPLES
   exampleId: string;
+  // PROJECTS
+  // The saved project the workspace is (see `lib/utils/project.ts`): Save
+  // writes to it, and the sidebar shows its name. Empty for a sandbox or an
+  // example that was never saved, and in every state that starts one.
+  projectId: string;
+  projectName: string;
+  // Opened from the project switcher's menu, rendered outside it (on a phone
+  // the switcher is in the sidebar sheet, which unmounts it when it closes).
+  saveProjectDialogOpen: boolean;
+  saveProjectDialogSaveAs: boolean;
+  deleteProjectDialogOpen: boolean;
 };

@@ -101,4 +101,34 @@ test("mobile: a sandbox fits the screen", async ({ page }) => {
     await expectNoHorizontalOverflow(page);
     await expectHeaderFits(page);
   });
+
+  await test.step("the sandbox saves as a project from the sheet", async () => {
+    await navigateWithSidebar(page, "Accounts", /\/accounts$/);
+    await page
+      .locator("header")
+      .getByRole("button", { name: "Toggle Sidebar" })
+      .click();
+    const sidebar = page.locator(
+      '[data-sidebar="sidebar"][data-mobile="true"]',
+    );
+    await sidebar.getByRole("button", { name: /Miden Playground/ }).click();
+    await page.getByRole("menuitem", { name: "Projects" }).click();
+    await page.getByRole("menuitem", { name: "Save", exact: true }).click();
+    // The sheet closes for the dialog, which fits the screen.
+    await expect(sidebar).toBeHidden();
+    const dialog = page.getByRole("dialog", { name: "Save Project" });
+    await expect(dialog.getByLabel("Name")).toHaveValue("Counter Contract");
+    await expectNoHorizontalOverflow(page);
+    await expectWithinWidth(dialog.getByRole("button", { name: "Save" }));
+    await dialog.getByLabel("Name").fill("Phone counter");
+    await dialog.getByRole("button", { name: "Save", exact: true }).click();
+    await expect(page.getByText("Project saved.")).toBeVisible();
+    await expect(dialog).toBeHidden();
+    await page
+      .locator("header")
+      .getByRole("button", { name: "Toggle Sidebar" })
+      .click();
+    await expect(sidebar).toContainText("Phone counter");
+    await expectNoHorizontalOverflow(page);
+  });
 });

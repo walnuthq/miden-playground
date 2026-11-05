@@ -4,7 +4,7 @@ Before working in one of these areas, read its file in `docs/claude/`. Their rul
 
 - Skills (`.claude/skills`, `.agents/skills`, `skills-lock.json`): `skills.md`.
 - Bumping `@miden-sdk/*`: `upgrading-miden.md`, then `examples.md`, `script-templates.md`, `masm-highlighting.md`.
-- Saved projects, resumable tutorials, `PlaygroundProjects`, network resets: `saved-projects.md`.
+- Saved projects, the Projects submenu, resumable tutorials, `PlaygroundProjects`, network resets: `saved-projects.md`.
 - Mainnet sandbox (`mm`), Bread Wallet, fees, network notes, built-in note scripts, note verification: `mainnet-sandbox.md`.
 - Home-page examples, `compiled.json`, `pnpm examples:compile`: `examples.md`.
 - Read-only procedures, the Invoke button: `read-only-procedures.md`.

@@ -35,7 +35,12 @@ const reducer = (state: State, action: Action): State => {
     case "SYNCING_STATE":
     case "SYNC_STATE":
     case "PUSH_STATE":
-    case "POP_STATE": {
+    case "POP_STATE":
+    case "SET_PROJECT":
+    case "OPEN_SAVE_PROJECT_DIALOG":
+    case "CLOSE_SAVE_PROJECT_DIALOG":
+    case "OPEN_DELETE_PROJECT_DIALOG":
+    case "CLOSE_DELETE_PROJECT_DIALOG": {
       return stateReducer(state, action);
     }
     case "NEW_ACCOUNT":

@@ -28,7 +28,10 @@ import {
   accountIdFromPrefixSuffix,
   midenFaucetAccount,
 } from "@/lib/utils/account";
-import { mainnetSandboxStarter } from "@/lib/utils/mainnet-sandbox";
+import {
+  mainnetSandboxStarter,
+  type SandboxStarter,
+} from "@/lib/utils/mainnet-sandbox";
 import { noteConsumed } from "@/lib/utils/note";
 import { defaultState } from "@/lib/utils/state";
 import { defaultStore, storeName } from "@/lib/utils/store";
@@ -347,7 +350,7 @@ const useAppState = () => {
       return tutorialProgress;
     }
     try {
-      await saveProject("tutorial", tutorialId);
+      await saveProject({ kind: "tutorial", id: tutorialId, name: tutorialId });
       return {
         ...tutorialProgress,
         [tutorialId]: {
@@ -413,9 +416,15 @@ const useAppState = () => {
         { skipSync: true },
       );
       dispatch({ type: "POP_STATE", payload: { state: fallbackState } });
-      toast.warning("Your saved progress couldn't be restored.", {
-        description: "The tutorial starts over.",
-      });
+      if (fallbackState.tutorialId) {
+        toast.warning("Your saved progress couldn't be restored.", {
+          description: "The tutorial starts over.",
+        });
+      } else {
+        toast.warning("The project couldn't be restored.", {
+          description: "A new sandbox was started instead.",
+        });
+      }
     }
     // The Para client shares this store, whose contents (the Para account
     // included) were just replaced, and lost its connection to it.
@@ -437,25 +446,47 @@ const useAppState = () => {
       return { scripts: [], components: [] };
     }
   };
-  const resetState = async (newNetworkId: NetworkId) => {
-    const starter = await sandboxStarter(newNetworkId);
-    const nextTutorialProgress = await leaveTutorial();
-    switchNetwork(newNetworkId);
+  // A fresh sandbox on the network: the default state with the network's
+  // faucet and `starter`'s scripts and components (a Mainnet sandbox's, see
+  // sandboxStarter), carrying what outlives a workspace: the completed
+  // tutorials and the progress of those left unfinished.
+  const freshSandboxState = (
+    newNetworkId: NetworkId,
+    {
+      starter = { scripts: [], components: [] },
+      tutorialProgress: nextTutorialProgress = tutorialProgress,
+    }: {
+      starter?: SandboxStarter;
+      tutorialProgress?: State["tutorialProgress"];
+    } = {},
+  ): State => {
     const initialState = defaultState();
-    pushState({
+    return {
       ...initialState,
       accounts: [midenFaucetAccount(newNetworkId)],
       scripts: [...initialState.scripts, ...starter.scripts],
       components: [...initialState.components, ...starter.components],
       completedTutorials,
       tutorialProgress: nextTutorialProgress,
-    });
+    };
+  };
+  const resetState = async (newNetworkId: NetworkId) => {
+    const starter = await sandboxStarter(newNetworkId);
+    const nextTutorialProgress = await leaveTutorial();
+    switchNetwork(newNetworkId);
+    pushState(
+      freshSandboxState(newNetworkId, {
+        starter,
+        tutorialProgress: nextTutorialProgress,
+      }),
+    );
   };
   return {
     syncState,
     leaveTutorial,
     pushState,
     popState,
+    freshSandboxState,
     resetState,
   };
 };

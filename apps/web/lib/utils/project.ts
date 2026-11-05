@@ -1,5 +1,5 @@
 import type { NetworkId } from "@/lib/types/network";
-import type { Project, ProjectKind } from "@/lib/types/project";
+import type { Project, ProjectKind, ProjectMeta } from "@/lib/types/project";
 import type { Store } from "@/lib/types/store";
 import { genesisBlockHeader } from "@/lib/utils/store";
 
@@ -9,8 +9,13 @@ import { genesisBlockHeader } from "@/lib/utils/store";
 // `clearMidenStorage`, which runs before every store import, deletes every
 // database whose name does.
 const PROJECTS_DB_NAME = "PlaygroundProjects";
-const PROJECTS_DB_VERSION = 1;
+// Version 2 added the `meta` store (the projects list reads it alone, never
+// the snapshots): the upgrade creates whichever store is missing, on a fresh
+// database or a version 1 one. Tutorial snapshots saved by version 1 have no
+// meta entry; they aren't listed, and load and delete as before.
+const PROJECTS_DB_VERSION = 2;
 const PROJECTS_STORE = "projects";
+const META_STORE = "meta";
 
 export const projectKey = (kind: ProjectKind, id: string) => `${kind}:${id}`;
 
@@ -18,23 +23,33 @@ const openProjectsDb = () =>
   new Promise<IDBDatabase>((resolve, reject) => {
     const request = indexedDB.open(PROJECTS_DB_NAME, PROJECTS_DB_VERSION);
     request.onupgradeneeded = () => {
-      if (!request.result.objectStoreNames.contains(PROJECTS_STORE)) {
-        request.result.createObjectStore(PROJECTS_STORE);
+      for (const store of [PROJECTS_STORE, META_STORE]) {
+        if (!request.result.objectStoreNames.contains(store)) {
+          request.result.createObjectStore(store);
+        }
       }
     };
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);
   });
 
+// Runs `run` in one transaction over both stores, resolving with its request's
+// result once the transaction completes (so a write is on disk).
 const withProjects = async <T>(
   mode: IDBTransactionMode,
-  run: (projects: IDBObjectStore) => IDBRequest<T>,
+  run: (projects: IDBObjectStore, meta: IDBObjectStore) => IDBRequest<T>,
 ) => {
   const database = await openProjectsDb();
   try {
     return await new Promise<T>((resolve, reject) => {
-      const transaction = database.transaction(PROJECTS_STORE, mode);
-      const request = run(transaction.objectStore(PROJECTS_STORE));
+      const transaction = database.transaction(
+        [PROJECTS_STORE, META_STORE],
+        mode,
+      );
+      const request = run(
+        transaction.objectStore(PROJECTS_STORE),
+        transaction.objectStore(META_STORE),
+      );
       transaction.oncomplete = () => resolve(request.result);
       transaction.onerror = () => reject(transaction.error);
       transaction.onabort = () => reject(transaction.error);
@@ -44,10 +59,20 @@ const withProjects = async <T>(
   }
 };
 
+const projectMeta = ({
+  kind,
+  id,
+  name,
+  networkId,
+  savedAt,
+}: Project): ProjectMeta => ({ kind, id, name, networkId, savedAt });
+
 export const putProject = async (project: Project) => {
-  await withProjects("readwrite", (projects) =>
-    projects.put(project, projectKey(project.kind, project.id)),
-  );
+  const key = projectKey(project.kind, project.id);
+  await withProjects("readwrite", (projects, meta) => {
+    meta.put(projectMeta(project), key);
+    return projects.put(project, key);
+  });
 };
 
 export const getProject = async (kind: ProjectKind, id: string) =>
@@ -56,10 +81,22 @@ export const getProject = async (kind: ProjectKind, id: string) =>
   )) ?? null;
 
 export const deleteProject = async (kind: ProjectKind, id: string) => {
-  await withProjects("readwrite", (projects) =>
-    projects.delete(projectKey(kind, id)),
-  );
+  const key = projectKey(kind, id);
+  await withProjects("readwrite", (projects, meta) => {
+    meta.delete(key);
+    return projects.delete(key);
+  });
 };
+
+// The saved projects of a kind, most recently saved first.
+export const listProjects = async (kind: ProjectKind) =>
+  (
+    await withProjects<ProjectMeta[]>("readonly", (_projects, meta) =>
+      meta.getAll(),
+    )
+  )
+    .filter((project) => project.kind === kind)
+    .sort((a, b) => b.savedAt - a.savedAt);
 
 // Deletes every saved project, e.g. along with the client stores they were
 // taken from.

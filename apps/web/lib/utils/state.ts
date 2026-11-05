@@ -81,6 +81,12 @@ export const defaultState = (): State => ({
   tutorialProgress: {},
   // EXAMPLES
   exampleId: "",
+  // PROJECTS
+  projectId: "",
+  projectName: "",
+  saveProjectDialogOpen: false,
+  saveProjectDialogSaveAs: false,
+  deleteProjectDialogOpen: false,
 });
 
 export const stateSerializer = ({
@@ -100,6 +106,8 @@ export const stateSerializer = ({
   completedTutorials,
   tutorialProgress,
   exampleId,
+  projectId,
+  projectName,
 }: State) =>
   JSON.stringify({
     serializedMockChain:
@@ -119,6 +127,8 @@ export const stateSerializer = ({
     completedTutorials: [...completedTutorials],
     tutorialProgress,
     exampleId,
+    projectId,
+    projectName,
   });
 
 // Scripts persisted before the package `digest` was renamed `commitment` still
@@ -193,6 +203,8 @@ export const stateDeserializer = (value: string): State => {
       completedTutorials,
       tutorialProgress,
       exampleId,
+      projectId,
+      projectName,
     } = JSON.parse(value) as {
       blockNum?: number;
       serializedMockChain?: string;
@@ -211,6 +223,8 @@ export const stateDeserializer = (value: string): State => {
       completedTutorials?: string[];
       tutorialProgress?: State["tutorialProgress"];
       exampleId?: string;
+      projectId?: string;
+      projectName?: string;
     };
     const initialState = defaultState();
     return {
@@ -240,6 +254,8 @@ export const stateDeserializer = (value: string): State => {
         : initialState.completedTutorials,
       tutorialProgress: tutorialProgress ?? initialState.tutorialProgress,
       exampleId: exampleId ?? initialState.exampleId,
+      projectId: projectId ?? initialState.projectId,
+      projectName: projectName ?? initialState.projectName,
     };
   } catch (error) {
     console.error("ERROR: stateDeserializer", error);

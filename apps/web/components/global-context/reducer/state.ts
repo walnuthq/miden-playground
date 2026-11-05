@@ -18,7 +18,16 @@ export type StateAction =
       payload: { nextState: State };
     }
   // Switches to the queued next state, or to `state` instead (its fallback).
-  | { type: "POP_STATE"; payload?: { state: State } };
+  | { type: "POP_STATE"; payload?: { state: State } }
+  // The saved project the workspace now is (both empty: none).
+  | {
+      type: "SET_PROJECT";
+      payload: { projectId: string; projectName: string };
+    }
+  | { type: "OPEN_SAVE_PROJECT_DIALOG"; payload: { saveAs: boolean } }
+  | { type: "CLOSE_SAVE_PROJECT_DIALOG" }
+  | { type: "OPEN_DELETE_PROJECT_DIALOG" }
+  | { type: "CLOSE_DELETE_PROJECT_DIALOG" };
 
 const reducer = (state: State, action: StateAction): State => {
   switch (action.type) {
@@ -67,6 +76,38 @@ const reducer = (state: State, action: StateAction): State => {
         nextState: null,
         nextStore: null,
         fallbackState: null,
+      };
+    }
+    case "SET_PROJECT": {
+      return {
+        ...state,
+        projectId: action.payload.projectId,
+        projectName: action.payload.projectName,
+      };
+    }
+    case "OPEN_SAVE_PROJECT_DIALOG": {
+      return {
+        ...state,
+        saveProjectDialogOpen: true,
+        saveProjectDialogSaveAs: action.payload.saveAs,
+      };
+    }
+    case "CLOSE_SAVE_PROJECT_DIALOG": {
+      return {
+        ...state,
+        saveProjectDialogOpen: false,
+      };
+    }
+    case "OPEN_DELETE_PROJECT_DIALOG": {
+      return {
+        ...state,
+        deleteProjectDialogOpen: true,
+      };
+    }
+    case "CLOSE_DELETE_PROJECT_DIALOG": {
+      return {
+        ...state,
+        deleteProjectDialogOpen: false,
       };
     }
   }

@@ -31,7 +31,7 @@ import useNetwork from "@/hooks/use-network";
 const AppShell = () => {
   const { pathname } = useLocation();
   const { networkId } = useNetwork();
-  const { tutorialId, exampleId } = useGlobalContext();
+  const { projectName, tutorialId, exampleId } = useGlobalContext();
   return (
     <div className="root">
       <TooltipProvider>
@@ -40,7 +40,12 @@ const AppShell = () => {
             <AppSidebarView
               header={
                 <ProjectSwitcherView
-                  title={projectTitle({ tutorialId, exampleId, networkId })}
+                  title={projectTitle({
+                    projectName,
+                    tutorialId,
+                    exampleId,
+                    networkId,
+                  })}
                 />
               }
             />
