@@ -9,6 +9,7 @@ import {
   useMemo,
   useState,
 } from "react";
+import AppShell from "@/components/lib/app-shell";
 import { ParaWalletContext } from "@/components/providers/para-wallet-context";
 import useNetwork from "@/hooks/use-network";
 import { createParaClient, type ParaClient } from "@/lib/para-client";
@@ -100,9 +101,17 @@ const ParaProvider = ({
       environment={import.meta.env.VITE_PARA_ENVIRONMENT ?? "BETA"}
       appName="Miden Playground"
       queryClient={queryClient}
-      // Only Para's embedded wallets count as connected, so external wallets
-      // are turned off; with no partner list Para would load every connector.
-      paraProviderConfig={{ externalWalletConfig: { wallets: [] } }}
+      paraProviderConfig={{
+        // Only Para's embedded wallets count as connected, so external
+        // wallets are turned off; with no partner list Para would load every
+        // connector.
+        externalWalletConfig: { wallets: [] },
+        // Para holds its children back until its client is ready
+        // (`waitForReady`), which ends after the Miden client's: show the app
+        // shell meanwhile, as MidenProvider does, not an empty page between
+        // the two.
+        fallback: <AppShell />,
+      }}
     >
       <SignerSlot />
       <ParaWalletBridge>{children}</ParaWalletBridge>
