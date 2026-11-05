@@ -84,16 +84,19 @@ const ParaWalletBridge = ({ children }: { children: ReactNode }) => {
   );
 };
 
+const paraApiKey = import.meta.env.VITE_PARA_API_KEY;
+
 // Mounted inside MidenProvider rather than around it: as an ancestor it would
 // become MidenProvider's external keystore, holding the client back until Para
 // connects and moving it to a per-wallet store. Para only drives the wallet
 // connection here, registered with MultiSignerProvider through <SignerSlot />.
+// Above MidenClientGate: it stays mounted while the client re-initializes.
 const ParaProvider = ({ children }: { children: ReactNode }) => {
   // The app's query client (OuterProviders), shared with Para.
   const queryClient = useQueryClient();
-  return import.meta.env.VITE_PARA_API_KEY ? (
+  return paraApiKey ? (
     <ParaSignerProvider
-      apiKey={import.meta.env.VITE_PARA_API_KEY}
+      apiKey={paraApiKey}
       environment={import.meta.env.VITE_PARA_ENVIRONMENT ?? "BETA"}
       appName="Miden Playground"
       queryClient={queryClient}
@@ -103,14 +106,14 @@ const ParaProvider = ({ children }: { children: ReactNode }) => {
         // connector.
         externalWalletConfig: { wallets: [] },
         // Para holds its children back until its client is ready
-        // (`waitForReady`), which ends after the Miden client's: show the app
-        // shell meanwhile, as MidenProvider does, not an empty page between
-        // the two.
+        // (`waitForReady`): show the app shell meanwhile, as MidenClientGate
+        // does while the Miden client initializes (both in parallel), not an
+        // empty page between the two.
         fallback: <AppShell />,
       }}
     >
       <SignerSlot />
-      <ParaWalletBridge>{children}</ParaWalletBridge>
+      {children}
     </ParaSignerProvider>
   ) : (
     children
@@ -118,3 +121,9 @@ const ParaProvider = ({ children }: { children: ReactNode }) => {
 };
 
 export default ParaProvider;
+
+// The connected Para wallet's MidenClient, for the page (ParaWalletContext).
+// Below MidenClientGate: the client is created once the Miden client is ready,
+// and again with the page after a network switch (ParaClientLoader's key).
+export const ParaWalletProvider = ({ children }: { children: ReactNode }) =>
+  paraApiKey ? <ParaWalletBridge>{children}</ParaWalletBridge> : children;

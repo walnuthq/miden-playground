@@ -1,4 +1,4 @@
-import { MidenProvider as RawMidenProvider } from "@miden-sdk/react";
+import { MidenProvider as RawMidenProvider, useMiden } from "@miden-sdk/react";
 import { Button } from "@workspace/ui/components/button";
 import {
   Empty,
@@ -14,6 +14,7 @@ import AppShell from "@/components/lib/app-shell";
 import Logo from "@/components/lib/logo";
 import useNetwork from "@/hooks/use-network";
 import { networks, noteTransportUrls, provers } from "@/lib/miden-client";
+import type { NetworkId } from "@/lib/types/network";
 import { deleteProjects } from "@/lib/utils/project";
 import { defaultState, STATE_STORAGE_KEY } from "@/lib/utils/state";
 import {
@@ -69,9 +70,9 @@ const MidenProvider = ({ children }: { children: ReactNode }) => {
   const { networkId } = useNetwork();
   const { dispatch } = useGlobalContext();
   const [storeChecked, setStoreChecked] = useState(false);
-  // Memoized: the SDK's provider re-initializes the client (unmounting the
-  // app) whenever the config object changes, and this component re-renders
-  // on every app state change (it reads the global context).
+  // Memoized: the SDK's provider re-initializes the client whenever the
+  // config object changes, and this component re-renders on every app state
+  // change (it reads the global context).
   const config = useMemo(
     () => ({
       rpcUrl: networks[networkId],
@@ -106,10 +107,13 @@ const MidenProvider = ({ children }: { children: ReactNode }) => {
   if (!storeChecked) {
     return <AppShell />;
   }
+  // No `loadingComponent`: it would stand in for the children, the signer
+  // providers included, while the client initializes, so a network switch
+  // would remount them all. MidenClientGate, below them, holds the page back
+  // instead.
   return (
     <RawMidenProvider
       config={config}
-      loadingComponent={<AppShell />}
       errorComponent={(error) => <InitializationError error={error} />}
     >
       {children}
@@ -118,3 +122,38 @@ const MidenProvider = ({ children }: { children: ReactNode }) => {
 };
 
 export default MidenProvider;
+
+type Client = ReturnType<typeof useMiden>["client"];
+
+// Shows the app shell in place of the page while the Miden client initializes:
+// on load, and again on every network switch, which re-initializes it. The
+// providers between MidenProvider and this gate stay mounted meanwhile. (As
+// the SDK provider's `loadingComponent`, the shell replaced them too: Para's
+// provider then redid its setup on every remount, and showed its fallback, the
+// shell, a few hundred ms after the page was back, closing any menu opened in
+// between.)
+//
+// Keyed on the network as well as on the client: the SDK provider only flags
+// the initialization a tick after its config changed, and the page would
+// otherwise render once more with the old client and the new network.
+export const MidenClientGate = ({ children }: { children: ReactNode }) => {
+  const { client, isReady, isInitializing } = useMiden();
+  const { networkId } = useNetwork();
+  // The client the page runs on, and the network it was created for.
+  const [current, setCurrent] = useState<{
+    client: Client;
+    networkId: NetworkId;
+  }>({ client, networkId });
+  if (client !== current.client) {
+    setCurrent({ client, networkId });
+  }
+  if (
+    !isReady ||
+    isInitializing ||
+    client !== current.client ||
+    networkId !== current.networkId
+  ) {
+    return <AppShell />;
+  }
+  return children;
+};
