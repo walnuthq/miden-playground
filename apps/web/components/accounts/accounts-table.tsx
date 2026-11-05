@@ -15,7 +15,10 @@ import {
 } from "@workspace/ui/components/table";
 import { cn } from "@workspace/ui/lib/utils";
 import { useNavigate } from "react-router";
-import { mobileHiddenColumns } from "@/components/accounts/columns";
+import {
+  mobileHiddenColumns,
+  narrowColumnClassNames,
+} from "@/components/accounts/columns";
 import CreateAccountDropdownMenu from "@/components/accounts/create-account-dropdown-menu";
 import {
   type DataTableFeatures,
@@ -58,9 +61,12 @@ const AccountsTable = <TData extends RowData>({
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
-                    className={mobileColumnClassName(
-                      header.column.id,
-                      mobileHiddenColumns,
+                    className={cn(
+                      mobileColumnClassName(
+                        header.column.id,
+                        mobileHiddenColumns,
+                      ),
+                      narrowColumnClassNames[header.column.id],
                     )}
                   >
                     {header.isPlaceholder
@@ -94,6 +100,7 @@ const AccountsTable = <TData extends RowData>({
                           cell.column.id,
                           mobileHiddenColumns,
                         ),
+                        narrowColumnClassNames[cell.column.id],
                       )}
                       onClick={() =>
                         !["address", "actions"].includes(cell.column.id) &&

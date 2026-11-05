@@ -70,11 +70,9 @@ test("mobile: tutorial 7's increment, added by its button", async ({
   await test.step("the editor is read-only", async () => {
     await waitForEditorText(page, "current_value + felt!(1)");
     const before = await editorSource(page);
-    // Near its top: the open tutorial panel covers the bottom of the screen.
-    await page
-      .locator(".monaco-editor .view-lines")
-      .first()
-      .click({ position: { x: 40, y: 10 } });
+    // Focused rather than clicked: the open tutorial panel covers part of
+    // the editor, and the point to click varies with the engine's layout.
+    await page.locator(".monaco-editor textarea").first().focus();
     await page.keyboard.type("typed");
     expect(await editorSource(page)).toBe(before);
   });

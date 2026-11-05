@@ -14,18 +14,34 @@ export const expectNoHorizontalOverflow = (page: Page) =>
     )
     .toBeLessThanOrEqual(0);
 
-// The element lies within the screen's width: not pushed off its right edge by
-// a wider table or row, where it would only show once scrolled sideways.
+// The element lies within the screen's width, and within every container that
+// clips it (a table's scroll container): not pushed off a right edge by a
+// wider table or row, where it would only show once scrolled sideways.
 export const expectWithinWidth = async (locator: Locator) => {
   await expect(locator).toBeVisible();
   await expect
     .poll(
-      async () => {
-        const box = await locator.boundingBox();
-        const width = await locator.page().evaluate(() => window.innerWidth);
-        return box !== null && box.x >= 0 && box.x + box.width <= width + 1;
-      },
-      { message: "the element is off the screen's right edge" },
+      () =>
+        locator.evaluate((element) => {
+          const { left, right } = element.getBoundingClientRect();
+          if (left < 0 || right > window.innerWidth + 1) {
+            return false;
+          }
+          for (
+            let ancestor = element.parentElement;
+            ancestor;
+            ancestor = ancestor.parentElement
+          ) {
+            if (getComputedStyle(ancestor).overflowX !== "visible") {
+              const box = ancestor.getBoundingClientRect();
+              if (left < box.left - 1 || right > box.right + 1) {
+                return false;
+              }
+            }
+          }
+          return true;
+        }),
+      { message: "the element is off the screen's or its container's edge" },
     )
     .toBe(true);
 };

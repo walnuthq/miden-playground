@@ -122,6 +122,14 @@ const AccountAddressCell = ({ address }: { address: string }) => {
   );
 };
 
+// On the narrowest phones (320 px), the name wraps and the ID gives way
+// (clipped), so the row menu stays on screen: the account page has the full
+// ID.
+export const narrowColumnClassNames: Record<string, string> = {
+  name: "max-sm:whitespace-normal",
+  address: "max-sm:w-full max-sm:max-w-0 max-sm:overflow-hidden",
+};
+
 export const mobileHiddenColumns = ["storageMode", "nonce"];
 
 export const columns: ColumnDef<DataTableFeatures, Account>[] = [

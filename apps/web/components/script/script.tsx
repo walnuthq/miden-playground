@@ -259,7 +259,9 @@ const ScriptComponent = ({ id, script }: { id: string; script?: Script }) => {
           )
         }
       >
-        <div className="flex items-center justify-between gap-2">
+        {/* Wraps on the narrowest phones (under ~380 px): the editor settings
+            and the Compile button go under the tabs, on the right. */}
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <TabsList>
             {masmOnly ? (
               <Tooltip>
@@ -297,7 +299,7 @@ const ScriptComponent = ({ id, script }: { id: string; script?: Script }) => {
             )}
             <TabsTrigger value="manifest">Manifest</TabsTrigger>
           </TabsList>
-          <div className="flex items-center gap-1">
+          <div className="ml-auto flex items-center gap-1">
             <EditorSettingsMenu />
             {!script.readOnly && (
               <Tooltip>
