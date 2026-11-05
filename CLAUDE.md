@@ -95,6 +95,19 @@ Tutorial steps (`apps/web/components/tutorials`) have one wording for the deskto
 - Refer to places outside the panel only if they hold on both layouts ("above the editor", "next to the procedure", "at the top of the page"), or link to them: on a phone the sidebar is hidden, and the panel sits at the bottom.
 - "Click" is fine on both.
 
+# Phone layout
+
+Below 768 px (`useIsMobile`, the sidebar's breakpoint) the web app has a phone layout; desktop renders as before. `e2e/mobile` checks it in the `mobile-safari` (iPhone 14, WebKit) and `mobile-chrome` (Pixel 7) projects: run them after any layout change, and keep each page from overflowing the screen's width (a phone zooms the whole page out).
+- Header: the GitHub button and the network badge's block height hide, and the breadcrumb truncates (`min-w-0`) before the action row (`shrink-0`) overflows. It fits down to 320 px.
+- The sidebar is a sheet: `AppSidebarView` closes it on navigation.
+- Tables hide secondary columns with CSS (`mobileHiddenColumns` in each `columns.tsx`, `mobileColumnClassName` in `lib/table.ts`), so row actions stay on screen. A nested table goes under its label (`NestedTableRow`).
+- The stock dialog is a grid whose column won't shrink below its content: a dialog with wide content (tables) needs `grid-cols-[minmax(0,1fr)]`, plus `max-h-[calc(100dvh-2rem)] overflow-y-auto`, at the call site (the transaction dialog has both).
+- Buttons that show only their icon below `lg` keep their label as `sr-only lg:not-sr-only`, for an accessible name. Tutorial copy names them with `ButtonName` (see "Tutorial copy").
+- Script editor: a files menu replaces the file tree, the console starts collapsed (split saved as `script-editor-layout-mobile`), the minimap is off by default, and the source is read-only (see "Script editor").
+- The tutorial is a panel stuck to the bottom of the screen (`MobileTutorialPanel`, `id="tutorial"` like the desktop panel), which reopens when a step's action is done. Toasts show at the top.
+- While the Miden client initializes, `MidenProvider`'s `loadingComponent` is `AppShell`, on every screen. It renders outside the SDK's context, so it uses the presentational views (`AppSidebarView`, `HeaderView`, `NetworkBadgeView`, `ProjectSwitcherView`, the home cards' `*View`) fed from `useGlobalContext`. Keep those views free of SDK hooks, and of app hooks built on them.
+- Syncing pauses while the tab is hidden (`PauseSyncWhenHidden`, `NetworkBadge`'s interval): it pauses only an auto-sync that isn't paused yet, and resumes only its own pause.
+
 # MASM highlighting
 
 The MASM tab's Monaco language (`apps/web/lib/masm/language.ts`, a Monarch tokenizer) takes its keywords, types and instructions from `lib/masm/vocabulary.json`, which `pnpm masm:sync` in `apps/web` extracts from the assembler's own sources in 0xMiden/miden-vm (`lib/masm/vocabulary.ts`), at the tag of the `miden-assembly-syntax` in `apps/api/templates/project-template/Cargo.lock`. `pnpm masm:check` fails when the file is out of date.
