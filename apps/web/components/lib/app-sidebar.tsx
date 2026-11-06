@@ -5,6 +5,7 @@ import { AppSidebarView } from "@/components/lib/app-sidebar-view";
 import DeleteProjectAlertDialog from "@/components/lib/delete-project-alert-dialog";
 import ProjectSwitcher from "@/components/lib/project-switcher";
 import SaveProjectDialog from "@/components/lib/save-project-dialog";
+import SwitchWorkspaceAlertDialog from "@/components/lib/switch-workspace-alert-dialog";
 import useAccounts from "@/hooks/use-accounts";
 import useNetwork from "@/hooks/use-network";
 import useTutorials from "@/hooks/use-tutorials";
@@ -39,6 +40,7 @@ const AppSidebar = (props: ComponentProps<typeof Sidebar>) => {
       <AppSidebarView header={<ProjectSwitcher />} {...props} />
       <SaveProjectDialog />
       <DeleteProjectAlertDialog />
+      <SwitchWorkspaceAlertDialog />
     </>
   );
 };

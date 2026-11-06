@@ -352,22 +352,31 @@ export const test = base.extend<{ breadProfile: BreadProfile; bread: Bread }>({
       const popupPromise = context
         .waitForEvent("page", { predicate: isConfirmPopup, timeout: 15_000 })
         .catch(() => null);
-      const selectWallet = page.getByRole("button", { name: "Select Wallet" });
-      // A menu when several wallets are offered (e.g. Bread and Para).
-      const hasMenu =
-        (await selectWallet.getAttribute("aria-haspopup")) === "menu";
-      await selectWallet.click();
-      if (hasMenu) {
-        await page.getByRole("menuitem", { name: "Bread Wallet" }).click();
+      // The Playground reconnects a remembered wallet on load: its prompt can
+      // be open already.
+      const openPopup = context.pages().find(isConfirmPopup);
+      if (!openPopup) {
+        const selectWallet = page.getByRole("button", {
+          name: "Select Wallet",
+        });
+        // A menu when several wallets are offered (e.g. Bread and Para).
+        const hasMenu =
+          (await selectWallet.getAttribute("aria-haspopup")) === "menu";
+        await selectWallet.click();
+        if (hasMenu) {
+          await page.getByRole("menuitem", { name: "Bread Wallet" }).click();
+        }
       }
       // An already authorized site is connected without a popup.
-      const popup = await Promise.race([
-        popupPromise,
-        connected
-          .waitFor({ timeout: 15_000 })
-          .then(() => null)
-          .catch(() => null),
-      ]);
+      const popup =
+        openPopup ??
+        (await Promise.race([
+          popupPromise,
+          connected
+            .waitFor({ timeout: 15_000 })
+            .then(() => null)
+            .catch(() => null),
+        ]));
       if (popup) {
         // "I understand the risk" is often unchecked, and Connect then fails.
         // It's a visually hidden input under a custom box: click it directly.

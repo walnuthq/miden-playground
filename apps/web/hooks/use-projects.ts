@@ -12,6 +12,7 @@ import {
   putProject,
 } from "@/lib/utils/project";
 import { stateDeserializer, stateSerializer } from "@/lib/utils/state";
+import { workspaceLeft } from "@/lib/utils/workspace-guard";
 
 type ProjectRef = { kind: ProjectKind; id: string; name: string };
 
@@ -42,7 +43,16 @@ const useProjects = () => {
     ref: ProjectRef,
     stateOverrides?: Partial<State>,
   ) => {
+    // During a switch, the store is being cleared and imported: a snapshot of
+    // it would overwrite the project with that.
+    const refuseIfLeft = () => {
+      if (workspaceLeft(state.workspaceRun)) {
+        throw new Error("This workspace is being replaced.");
+      }
+    };
+    refuseIfLeft();
     const project = await snapshotProject(ref, stateOverrides);
+    refuseIfLeft();
     await putProject(project);
     return project;
   };

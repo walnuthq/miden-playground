@@ -13,11 +13,13 @@ const LaunchExampleCard = ({ example }: { example: ExampleMeta }) => {
       loading={loading}
       onLaunch={async () => {
         setLoading(true);
-        const { error } = await launchExample(example.id);
+        const { error, cancelled } = await launchExample(example.id);
         if (error !== undefined) {
           toast.error("Example couldn't be launched.", {
             description: error,
           });
+        }
+        if (error !== undefined || cancelled) {
           setLoading(false);
         }
       }}

@@ -61,4 +61,6 @@ pnpm test:e2e e2e/mainnet-network-counter.spec.ts --workers=1
 
 The profile is a Bread wallet onboarded on Mainnet with an invite code, from Playwright's Chromium (gitignored, like the rest of `.bread-wallet/`). The spec stops before spending anything when the wallet has less than 0.002 USDCX. To top it up, run `BREAD_INVITE_CODE=<code> pnpm qa-wallet fund`. It onboards a throwaway Bread wallet with the invite code, waits for its 0.01 USDCX funding, sends it all to the QA wallet (about 0.0096 arrives), then deletes the throwaway profile. If it fails midway, the profile is kept in `.bread-wallet/profiles/burner-*`: resume with `pnpm qa-wallet fund --burner <dir>`. `pnpm qa-wallet balance` prints the QA wallet's balance.
 
+`mainnet-switch-warning.spec.ts` runs the same way, on the same wallet, and spends nothing: it never approves Bread's request.
+
 On failure, screenshots, a video and a trace are saved in `test-results/`. Open the trace with `pnpm exec playwright show-trace test-results/<test>/trace.zip`.

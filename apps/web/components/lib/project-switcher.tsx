@@ -41,8 +41,9 @@ import useNetwork from "@/hooks/use-network";
 import useSavedProjects from "@/hooks/use-saved-projects";
 import useTutorials from "@/hooks/use-tutorials";
 import examples from "@/lib/examples";
-import { networks } from "@/lib/types/network";
+import { type NetworkId, networks } from "@/lib/types/network";
 import type { ProjectMeta } from "@/lib/types/project";
+import { confirmWorkspaceSwitch } from "@/lib/utils/workspace-guard";
 
 const errorMessage = (error: unknown) =>
   error instanceof Error ? error.message : String(error);
@@ -67,6 +68,7 @@ const ProjectSwitcher = () => {
     projectId,
     projectName,
     projects,
+    switching,
     saveActiveProject,
     openProject,
     openSaveProjectDialog,
@@ -115,6 +117,12 @@ const ProjectSwitcher = () => {
       });
     } else {
       toast.dismiss(toastId);
+    }
+  };
+  const newSandbox = async (newNetworkId: NetworkId) => {
+    if (await confirmWorkspaceSwitch()) {
+      resetState(newNetworkId);
+      navigate("/accounts");
     }
   };
   return (
@@ -210,14 +218,17 @@ const ProjectSwitcher = () => {
                       workspace can open a project. */}
                   {tutorialId === "" && (
                     <>
-                      <DropdownMenuItem onClick={save}>
+                      <DropdownMenuItem disabled={switching} onClick={save}>
                         <Save className="size-4" /> Save
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => openSaveDialog(true)}>
+                      <DropdownMenuItem
+                        disabled={switching}
+                        onClick={() => openSaveDialog(true)}
+                      >
                         <Copy className="size-4" /> Save as…
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        disabled={!projectId}
+                        disabled={!projectId || switching}
                         onClick={openDeleteDialog}
                       >
                         <Trash2 className="size-4" /> Delete project
@@ -250,20 +261,10 @@ const ProjectSwitcher = () => {
               </DropdownMenuPortal>
             </DropdownMenuSub>
             <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() => {
-                resetState("mtst");
-                navigate("/accounts");
-              }}
-            >
+            <DropdownMenuItem onClick={() => newSandbox("mtst")}>
               New Testnet sandbox
             </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => {
-                resetState("mm");
-                navigate("/accounts");
-              }}
-            >
+            <DropdownMenuItem onClick={() => newSandbox("mm")}>
               New Mainnet sandbox
             </DropdownMenuItem>
             {/* <DropdownMenuItem

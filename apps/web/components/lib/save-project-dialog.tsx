@@ -30,6 +30,7 @@ const SaveProjectDialog = () => {
   const {
     projectId,
     projectName,
+    switching,
     saveProjectDialogOpen,
     saveProjectDialogSaveAs,
     closeSaveProjectDialog,
@@ -101,7 +102,11 @@ const SaveProjectDialog = () => {
           <DialogClose render={<Button variant="outline" />}>
             Cancel
           </DialogClose>
-          <Button form="save-project-form" type="submit" disabled={loading}>
+          <Button
+            form="save-project-form"
+            type="submit"
+            disabled={loading || switching}
+          >
             {loading && <Spinner />}
             {loading ? "Saving…" : "Save"}
           </Button>
