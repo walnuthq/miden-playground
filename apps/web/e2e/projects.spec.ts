@@ -1,5 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
-import { launchExample } from "./example";
+import { launchExample, startExample } from "./example";
 import { logBrowserErrors, TRANSACTION_TIMEOUT } from "./tutorial";
 
 // The sidebar's project switcher: its button names the workspace (the saved
@@ -8,6 +8,8 @@ const switcher = (page: Page) =>
   page
     .locator('[data-sidebar="sidebar"]')
     .getByRole("button", { name: /Miden Playground/ });
+
+const tutorial2 = "Transfer assets between wallets";
 
 const networkBadge = (page: Page) => page.locator('header [data-slot="badge"]');
 
@@ -41,10 +43,9 @@ const openProjectsMenu = async (page: Page) => {
   });
   await switcher(page).click();
   await page.getByRole("menuitem", { name: "Projects" }).click();
+  // Both open: tutorials have no Save item to wait for.
+  await expect(page.getByRole("menu")).toHaveCount(2);
   const menu = page.getByRole("menu").last();
-  await expect(
-    menu.getByRole("menuitem", { name: "Save", exact: true }),
-  ).toBeVisible();
   return menu;
 };
 
@@ -267,4 +268,85 @@ test("save, open and delete projects", async ({ page }) => {
       page.getByRole("row", { name: /Counter Contract/ }),
     ).toBeVisible({ timeout: 60_000 });
   });
+
+  await test.step("a tutorial lists the projects, without saving", async () => {
+    await switcher(page).click();
+    await page.getByRole("menuitem", { name: "Tutorials" }).click();
+    await page.getByRole("menuitem", { name: /^2\. / }).click();
+    await expect(switcher(page)).toContainText(tutorial2, { timeout: 60_000 });
+    await expect(page.getByRole("row", { name: /Wallet A/ })).toBeVisible({
+      timeout: 60_000,
+    });
+    await expect(
+      page.getByRole("row", { name: /Counter Contract/ }),
+    ).toBeHidden();
+    const menu = await openProjectsMenu(page);
+    for (const name of ["Save", "Save as…", "Delete project"]) {
+      await expect(
+        menu.getByRole("menuitem", { name, exact: true }),
+      ).toHaveCount(0);
+    }
+    await expect(
+      menu.getByRole("menuitem", { name: "My counter copy Testnet" }),
+    ).toBeVisible();
+    await closeMenu(page);
+  });
+
+  await test.step("open a project from the tutorial, which can be resumed", async () => {
+    await openProject(page, "My counter copy Testnet");
+    await expect(switcher(page)).toContainText("My counter copy", {
+      timeout: 60_000,
+    });
+    await expect(
+      page.getByRole("row", { name: /Counter Contract/ }),
+    ).toBeVisible({ timeout: 60_000 });
+    await switcher(page).click();
+    await page.getByRole("menuitem", { name: "Tutorials" }).click();
+    await expect(
+      page.getByRole("menuitem", { name: /^2\. / }).getByTitle("In progress"),
+    ).toBeVisible();
+    await closeMenu(page);
+  });
+});
+
+// Leaving an example while its account is being deployed abandons the deploy,
+// which must not report to, or add its account to, the next workspace. The
+// proof is held back so the deploy is mid-transaction during the switch.
+test("a deploy still running doesn't reach the next workspace", async ({
+  page,
+}) => {
+  logBrowserErrors(page);
+  let release = () => {};
+  const held = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  let proving = () => {};
+  const provingStarted = new Promise<void>((resolve) => {
+    proving = resolve;
+  });
+  await page.route(/prover/, async (route) => {
+    proving();
+    await held;
+    await route.continue();
+  });
+  await startExample(page);
+  await provingStarted;
+
+  await switcher(page).click();
+  await page.getByRole("menuitem", { name: "Tutorials" }).click();
+  await page.getByRole("menuitem", { name: /^2\. / }).click();
+  await expect(switcher(page)).toContainText(tutorial2, { timeout: 60_000 });
+  await expect(page.getByRole("row", { name: /Wallet A/ })).toBeVisible({
+    timeout: 60_000,
+  });
+  release();
+
+  // Longer than the rest of the deploy takes.
+  await page.waitForTimeout(45_000);
+  await expect(page.getByRole("row", { name: /Counter Contract/ })).toHaveCount(
+    0,
+  );
+  await expect(
+    page.getByText(/Counter Contract (deployed|couldn't)/),
+  ).toHaveCount(0);
 });

@@ -27,6 +27,10 @@ export type State = {
   // What to switch to instead when `nextStore` can't be imported (a saved
   // project the running client refuses), with its own `nextStore`.
   fallbackState: State | null;
+  // Counts the switches to another workspace (POP_STATE) since the page loaded.
+  // Work started before a switch can't write to the workspace that follows
+  // (see GlobalContextProvider). Not persisted.
+  workspaceRun: number;
   // ACCOUNTS
   createWalletDialogOpen: boolean;
   createFaucetDialogOpen: boolean;

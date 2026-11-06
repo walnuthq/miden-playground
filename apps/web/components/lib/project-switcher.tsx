@@ -200,15 +200,16 @@ const ProjectSwitcher = () => {
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
             </DropdownMenuSub>
-            {/* Saving and opening projects is for sandboxes and examples: a
-                tutorial saves itself when left, and resumes from its card. */}
-            {tutorialId === "" && (
-              <>
-                <DropdownMenuSeparator />
-                <DropdownMenuSub>
-                  <DropdownMenuSubTrigger>Projects</DropdownMenuSubTrigger>
-                  <DropdownMenuPortal>
-                    <DropdownMenuSubContent>
+            <DropdownMenuSeparator />
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>Projects</DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent>
+                  {/* Saving is for sandboxes and examples: a tutorial saves
+                      itself when left, and resumes from its card. Any
+                      workspace can open a project. */}
+                  {tutorialId === "" && (
+                    <>
                       <DropdownMenuItem onClick={save}>
                         <Save className="size-4" /> Save
                       </DropdownMenuItem>
@@ -222,33 +223,32 @@ const ProjectSwitcher = () => {
                         <Trash2 className="size-4" /> Delete project
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      {projects.length === 0 && (
-                        <DropdownMenuItem disabled>
-                          No saved projects
-                        </DropdownMenuItem>
-                      )}
-                      {projects.map((project) => (
-                        <DropdownMenuItem
-                          key={project.id}
-                          onClick={() => open(project)}
-                        >
-                          <Check
-                            className={cn("size-4 text-transparent", {
-                              "text-green-500": project.id === projectId,
-                            })}
-                          />{" "}
-                          {project.name}{" "}
-                          {/* Opening it switches to its network. */}
-                          <span className="ml-auto pl-2 text-xs text-muted-foreground">
-                            {networks[project.networkId]}
-                          </span>
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuSubContent>
-                  </DropdownMenuPortal>
-                </DropdownMenuSub>
-              </>
-            )}
+                    </>
+                  )}
+                  {projects.length === 0 && (
+                    <DropdownMenuItem disabled>
+                      No saved projects
+                    </DropdownMenuItem>
+                  )}
+                  {projects.map((project) => (
+                    <DropdownMenuItem
+                      key={project.id}
+                      onClick={() => open(project)}
+                    >
+                      <Check
+                        className={cn("size-4 text-transparent", {
+                          "text-green-500": project.id === projectId,
+                        })}
+                      />{" "}
+                      {project.name} {/* Opening it switches to its network. */}
+                      <span className="ml-auto pl-2 text-xs text-muted-foreground">
+                        {networks[project.networkId]}
+                      </span>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() => {

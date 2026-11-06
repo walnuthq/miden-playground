@@ -68,7 +68,9 @@ const useExamples = () => {
     });
     return {};
   };
-  const loadExample = async (exampleId: string) => {
+  // Deploys the example's account. `abandoned` tells the workspace was left
+  // meanwhile: the account is gone with its store, nothing to report.
+  const loadExample = async (exampleId: string, abandoned: () => boolean) => {
     const component = components.find(({ id }) => id === exampleId);
     if (!component) {
       return;
@@ -79,8 +81,14 @@ const useExamples = () => {
         storageMode: "public",
         components: [authNoAuth, component],
       });
-      toast.success(`${component.name} deployed.`);
+      if (!abandoned()) {
+        toast.success(`${component.name} deployed.`);
+      }
     } catch (error) {
+      if (abandoned()) {
+        console.warn(`${component.name}: deploy abandoned`, error);
+        return;
+      }
       toast.error(`${component.name} couldn't be deployed.`, {
         description: error instanceof Error ? error.message : String(error),
       });

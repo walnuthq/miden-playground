@@ -9,14 +9,28 @@ import useExamples from "@/hooks/use-examples";
 import useNetwork from "@/hooks/use-network";
 
 let callingPopState = false;
-let callingLoadExample = false;
+// The workspace run whose example account is being deployed. A switch doesn't
+// wait for it: nothing can cancel a deploy, it can take minutes, and it can't
+// write to the next workspace anyway (see GlobalContextProvider).
+let deployingWorkspaceRun: number | null = null;
+// The workspace as last rendered, for a deploy to tell it was abandoned.
+const latest = { workspaceRun: 0, switching: false };
 
 // The live network badge: `NetworkBadgeView` (SDK-free, the app shell's too)
 // with the client's sync state, and the app's own sync loop.
 const NetworkBadge = () => {
   const { syncHeight, isSyncing } = useSyncState();
   const { networkId } = useNetwork();
-  const { accounts, syncingState, submittingTransaction } = useGlobalContext();
+  const {
+    accounts,
+    syncingState,
+    submittingTransaction,
+    nextState,
+    workspaceRun,
+  } = useGlobalContext();
+  const switching = nextState !== null;
+  latest.workspaceRun = workspaceRun;
+  latest.switching = switching;
   const { syncState, popState } = useAppState();
   const { exampleId, loadExample } = useExamples();
   const exampleAccount = accounts.find(({ components }) =>
@@ -30,7 +44,9 @@ const NetworkBadge = () => {
     visible &&
     !isSyncing &&
     !syncingState &&
-    !submittingTransaction;
+    !submittingTransaction &&
+    // The store is about to be replaced, and its accounts with it.
+    !switching;
   useInterval(
     () => {
       // console.log("SYNCING...");
@@ -51,14 +67,26 @@ const NetworkBadge = () => {
   }, [syncingState, popState]);
   useEffect(() => {
     const callLoadExample = async () => {
-      callingLoadExample = true;
-      await loadExample(exampleId);
-      callingLoadExample = false;
+      deployingWorkspaceRun = workspaceRun;
+      await loadExample(
+        exampleId,
+        () => latest.switching || latest.workspaceRun !== workspaceRun,
+      );
+      if (deployingWorkspaceRun === workspaceRun) {
+        deployingWorkspaceRun = null;
+      }
     };
-    if (exampleId && !exampleAccount && !callingLoadExample) {
+    // Not while switching: `exampleId` is the workspace being left, and a
+    // deploy started now would finish in the next one.
+    if (
+      exampleId &&
+      !exampleAccount &&
+      !switching &&
+      deployingWorkspaceRun !== workspaceRun
+    ) {
       callLoadExample();
     }
-  }, [exampleId, exampleAccount, loadExample]);
+  }, [exampleId, exampleAccount, switching, workspaceRun, loadExample]);
   return (
     <NetworkBadgeView
       networkId={networkId}

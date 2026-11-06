@@ -76,6 +76,7 @@ const reducer = (state: State, action: StateAction): State => {
         nextState: null,
         nextStore: null,
         fallbackState: null,
+        workspaceRun: state.workspaceRun + 1,
       };
     }
     case "SET_PROJECT": {
