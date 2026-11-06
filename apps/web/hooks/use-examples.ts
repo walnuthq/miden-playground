@@ -12,6 +12,10 @@ import authNoAuth from "@/lib/types/default-components/auth-no-auth";
 import { compiledPackageToScript } from "@/lib/utils/script";
 import { confirmWorkspaceSwitch } from "@/lib/utils/workspace-guard";
 
+// A failed deploy's toast stays, as it's the way to try again, until the
+// workspace it belongs to is left (NetworkBadge).
+export const EXAMPLE_DEPLOY_FAILED_TOAST = "example-deploy-failed";
+
 const useExamples = () => {
   const navigate = useNavigate();
   const { switchNetwork } = useNetwork();
@@ -72,12 +76,17 @@ const useExamples = () => {
     });
     return {};
   };
-  // Deploys the example's account. `abandoned` tells the workspace was left
-  // meanwhile: the account is gone with its store, nothing to report.
-  const loadExample = async (exampleId: string, abandoned: () => boolean) => {
+  // Deploys the example's account, and tells whether it did. `abandoned` tells
+  // the workspace was left meanwhile: the account is gone with its store,
+  // nothing to report. `retry` is offered when the deploy fails.
+  const loadExample = async (
+    exampleId: string,
+    abandoned: () => boolean,
+    retry: () => void,
+  ) => {
     const component = components.find(({ id }) => id === exampleId);
     if (!component) {
-      return;
+      return false;
     }
     try {
       await deployAccount({
@@ -88,14 +97,20 @@ const useExamples = () => {
       if (!abandoned()) {
         toast.success(`${component.name} deployed.`);
       }
+      return true;
     } catch (error) {
       if (abandoned()) {
         console.warn(`${component.name}: deploy abandoned`, error);
-        return;
+        return false;
       }
       toast.error(`${component.name} couldn't be deployed.`, {
         description: error instanceof Error ? error.message : String(error),
+        id: EXAMPLE_DEPLOY_FAILED_TOAST,
+        duration: Number.POSITIVE_INFINITY,
+        closeButton: true,
+        action: { label: "Retry", onClick: retry },
       });
+      return false;
     }
   };
   return {

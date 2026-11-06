@@ -1,18 +1,21 @@
 import { useSyncState } from "@miden-sdk/react";
 import { useEffect } from "react";
+import { toast } from "sonner";
 import { useInterval } from "usehooks-ts";
 import useGlobalContext from "@/components/global-context/hook";
 import { NetworkBadgeView } from "@/components/lib/network-badge-view";
 import useAppState from "@/hooks/use-app-state";
 import useDocumentVisible from "@/hooks/use-document-visible";
-import useExamples from "@/hooks/use-examples";
+import useExamples, { EXAMPLE_DEPLOY_FAILED_TOAST } from "@/hooks/use-examples";
 import useNetwork from "@/hooks/use-network";
 import { workspaceLeft } from "@/lib/utils/workspace-guard";
 
 let callingPopState = false;
-// The workspace run whose example account is being deployed. A switch doesn't
-// wait for it: nothing can cancel a deploy, it can take minutes, and it can't
-// write to the next workspace anyway (see GlobalContextProvider).
+// The workspace run whose example account is being deployed, or failed to be:
+// a failed deploy isn't tried again until the user asks (its toast's Retry), as
+// each attempt asks the faucet for funds. A switch doesn't wait for it: nothing
+// can cancel a deploy, it can take minutes, and it can't write to the next
+// workspace anyway (see GlobalContextProvider).
 let deployingWorkspaceRun: number | null = null;
 
 // The live network badge: `NetworkBadgeView` (SDK-free, the app shell's too)
@@ -69,11 +72,24 @@ const NetworkBadge = () => {
       callPopState();
     }
   }, [syncingState, popState]);
+  // `workspaceRun` is what this runs on: its cleanup leaves the workspace.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: see above
+  useEffect(
+    () => () => {
+      toast.dismiss(EXAMPLE_DEPLOY_FAILED_TOAST);
+    },
+    [workspaceRun],
+  );
   useEffect(() => {
     const callLoadExample = async () => {
       deployingWorkspaceRun = workspaceRun;
-      await loadExample(exampleId, () => workspaceLeft(workspaceRun));
-      if (deployingWorkspaceRun === workspaceRun) {
+      const abandoned = () => workspaceLeft(workspaceRun);
+      const deployed = await loadExample(exampleId, abandoned, () => {
+        if (!abandoned()) {
+          callLoadExample();
+        }
+      });
+      if (deployed && deployingWorkspaceRun === workspaceRun) {
         deployingWorkspaceRun = null;
       }
     };

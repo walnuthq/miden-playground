@@ -108,6 +108,13 @@ const ProjectSwitcher = () => {
     }
   };
   const open = async (project: ProjectMeta) => {
+    // Already open: carry on where it is. Reloading its last save would throw
+    // away what changed since. (During a switch, it's a way back.)
+    if (project.id === projectId && !switching) {
+      setOpenMobile(false);
+      navigate("/accounts");
+      return;
+    }
     const toastId = toast.loading(`Opening ${project.name}…`);
     const { error } = await openProject(project.id);
     if (error !== undefined) {

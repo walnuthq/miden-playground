@@ -35,8 +35,20 @@ const SaveProjectDialog = () => {
     saveProjectDialogSaveAs,
     closeSaveProjectDialog,
     saveProjectAs,
+    projects,
   } = useSavedProjects();
   const [loading, setLoading] = useState(false);
+  const [nameError, setNameError] = useState("");
+  // Two projects with one name can't be told apart in the Projects menu.
+  const validateName = (name: string) => {
+    if (!name) {
+      return "Enter a name.";
+    }
+    const taken = projects.some(
+      (project) => project.name.trim().toLowerCase() === name.toLowerCase(),
+    );
+    return taken ? "A project with this name already exists." : "";
+  };
   // A copy of the active project, else the workspace's title (the example's,
   // or "<Network> sandbox").
   const defaultName =
@@ -48,7 +60,12 @@ const SaveProjectDialog = () => {
       open={saveProjectDialogOpen}
       modal={false}
       disablePointerDismissal
-      onOpenChange={(open) => !open && closeSaveProjectDialog()}
+      onOpenChange={(open) => {
+        if (!open) {
+          setNameError("");
+          closeSaveProjectDialog();
+        }
+      }}
     >
       <DialogContent data-modal="false" className="sm:max-w-120">
         <DialogHeader>
@@ -68,7 +85,9 @@ const SaveProjectDialog = () => {
               new FormData(event.currentTarget),
               "name",
             ).trim();
-            if (!name) {
+            const error = validateName(name);
+            setNameError(error);
+            if (error) {
               return;
             }
             setLoading(true);
@@ -95,7 +114,19 @@ const SaveProjectDialog = () => {
               defaultValue={defaultName}
               autoComplete="off"
               required
+              aria-invalid={nameError !== ""}
+              aria-describedby={nameError ? "project-name-error" : undefined}
+              onChange={() => setNameError("")}
             />
+            {nameError && (
+              <p
+                id="project-name-error"
+                role="alert"
+                className="text-sm text-destructive"
+              >
+                {nameError}
+              </p>
+            )}
           </div>
         </form>
         <DialogFooter>
