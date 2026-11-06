@@ -1,5 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
-import { launchExample } from "./example";
+import { createCounterScript } from "./editor";
+import { launchExample, startExample } from "./example";
 import { logBrowserErrors, TRANSACTION_TIMEOUT } from "./tutorial";
 
 // What can happen while a workspace is being replaced: the store is cleared,
@@ -146,6 +147,8 @@ test("a second switch during an import gets its own store", async ({
   await saveAs(page, "With account");
   await newTestnetSandbox(page);
   await saveAs(page, "Empty");
+  // Opening the active project wouldn't switch.
+  await saveAs(page, "Current");
 
   await holdNextStoreClear(page);
   await openProject(page, "Empty");
@@ -243,4 +246,135 @@ test("a failed import starts a new sandbox", async ({ page }) => {
   await expect(
     menu.getByRole("menuitem", { name: "Save", exact: true }),
   ).not.toHaveAttribute("aria-disabled", "true");
+});
+
+// Opening the project that's already open must not throw away what changed
+// since its last save.
+test("clicking the active project keeps unsaved work", async ({ page }) => {
+  logBrowserErrors(page);
+  await page.goto("/");
+  await newTestnetSandbox(page);
+  await saveAs(page, "Mine");
+  await createCounterScript(page);
+  // The script page's header has a badge of its own.
+  await page.getByRole("link", { name: "Accounts" }).first().click();
+  await expect(page).toHaveURL(/\/accounts$/);
+  const imports: string[] = [];
+  page.on("console", (message) => {
+    if (message.text().includes("Store imported successfully.")) {
+      imports.push(message.text());
+    }
+  });
+
+  await openProject(page, "Mine");
+  await expect(page).toHaveURL(/\/accounts$/);
+  // Longer than a reload of the project takes.
+  await page.waitForTimeout(5_000);
+  expect(imports).toEqual([]);
+  await expect(switcher(page)).toContainText("Mine");
+  await expect(page.getByRole("menu")).toHaveCount(0);
+  await page.getByRole("link", { name: "Scripts" }).first().click();
+  await expect(page.getByText("counter-account").first()).toBeVisible();
+});
+
+// A deploy that fails is tried once: each attempt asks the faucet for funds,
+// and tells the user again. Its toast offers to try again.
+test("a failed example deploy doesn't retry by itself", async ({ page }) => {
+  logBrowserErrors(page);
+  const prover = /tx-prover\.testnet\.miden\.io/;
+  let attempts = 0;
+  await page.route(prover, (route) => {
+    attempts++;
+    return route.abort();
+  });
+  await startExample(page);
+  const failed = page.getByText("Counter Contract couldn't be deployed.");
+  await expect(failed.first()).toBeVisible({ timeout: TRANSACTION_TIMEOUT });
+  // Longer than an attempt takes.
+  await page.waitForTimeout(45_000);
+  console.info("Deploy attempts:", attempts);
+  expect(attempts).toBe(1);
+
+  await page.unroute(prover);
+  await page.getByRole("button", { name: "Retry" }).click();
+  await expect(failed).toHaveCount(0);
+  await expect(page.getByText("Counter Contract deployed.")).toBeVisible({
+    timeout: 2 * TRANSACTION_TIMEOUT,
+  });
+  await expect(
+    page.getByRole("cell", { name: "Counter Contract", exact: true }),
+  ).toBeVisible();
+});
+
+// A database read that fails says so: the project is still there, not deleted.
+test("a failed project read doesn't claim the project is gone", async ({
+  page,
+}) => {
+  logBrowserErrors(page);
+  await page.goto("/");
+  await newTestnetSandbox(page);
+  await saveAs(page, "Mine");
+  await saveAs(page, "Other");
+  await page.evaluate(() => {
+    const { get } = IDBObjectStore.prototype;
+    IDBObjectStore.prototype.get = function (key) {
+      if (this.name === "projects") {
+        IDBObjectStore.prototype.get = get;
+        throw new Error("Read failed (test).");
+      }
+      return get.call(this, key);
+    };
+  });
+  await openProject(page, "Mine");
+  await expect(page.getByText("Mine couldn't be opened.")).toBeVisible();
+  await expect(page.getByText(/couldn't be read/)).toBeVisible();
+  await expect(page.getByText(/It was deleted/)).toHaveCount(0);
+  await expect(switcher(page)).toContainText("Other");
+  // It's still there: the next try opens it.
+  await openProject(page, "Mine");
+  await expect(switcher(page)).toContainText("Mine", {
+    timeout: TRANSACTION_TIMEOUT,
+  });
+});
+
+// A blank or taken name says what's wrong, and the dialog stays open.
+test("the save dialog refuses blank and duplicate names", async ({ page }) => {
+  logBrowserErrors(page);
+  await page.goto("/");
+  await newTestnetSandbox(page);
+  await saveAs(page, "Mine");
+
+  const menu = await openProjectsMenu(page);
+  await menu.getByRole("menuitem", { name: "Save as…" }).click();
+  const dialog = page.getByRole("dialog", { name: "Save Project As" });
+  const name = dialog.getByLabel("Name");
+  const save = dialog.getByRole("button", { name: "Save", exact: true });
+  const projectRows = async () => {
+    const menu = await openProjectsMenu(page);
+    const count = await menu
+      .getByRole("menuitem", { name: /Testnet$/ })
+      .count();
+    await closeMenu(page);
+    return count;
+  };
+
+  await name.fill("   ");
+  await save.click();
+  await expect(dialog.getByText("Enter a name.")).toBeVisible();
+  await expect(dialog).toBeVisible();
+
+  // Whatever the case and the spaces around it.
+  await name.fill(" mine ");
+  await expect(dialog.getByText("Enter a name.")).toHaveCount(0);
+  await save.click();
+  await expect(
+    dialog.getByText("A project with this name already exists."),
+  ).toBeVisible();
+  await expect(dialog).toBeVisible();
+
+  await name.fill("Mine 2");
+  await save.click();
+  await expect(dialog).toBeHidden();
+  await expect(switcher(page)).toContainText("Mine 2");
+  expect(await projectRows()).toBe(2);
 });

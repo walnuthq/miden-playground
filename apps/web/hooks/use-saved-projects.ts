@@ -72,10 +72,14 @@ const useSavedProjects = () => {
     if (!(await confirmWorkspaceSwitch())) {
       return {};
     }
-    const project = await loadProject("project", id).catch((error: unknown) => {
+    let project: Awaited<ReturnType<typeof loadProject>>;
+    try {
+      project = await loadProject("project", id);
+    } catch (error) {
+      // The project may well be intact: nothing says it's gone.
       console.error("ERROR: loadProject", error);
-      return null;
-    });
+      return { error: "Its saved data couldn't be read. Try again." };
+    }
     if (!project) {
       await refreshProjects();
       return { error: "It was deleted, or saved before a network reset." };
