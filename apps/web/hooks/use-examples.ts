@@ -10,6 +10,7 @@ import examples from "@/lib/examples";
 import { defaultComponentIds } from "@/lib/types/default-components";
 import authNoAuth from "@/lib/types/default-components/auth-no-auth";
 import { compiledPackageToScript } from "@/lib/utils/script";
+import { confirmWorkspaceSwitch } from "@/lib/utils/workspace-guard";
 
 const useExamples = () => {
   const navigate = useNavigate();
@@ -20,10 +21,13 @@ const useExamples = () => {
   const { components } = useComponents();
   const launchExample = async (
     exampleId: string,
-  ): Promise<{ error?: string }> => {
+  ): Promise<{ error?: string; cancelled?: boolean }> => {
     const example = examples.find(({ id }) => id === exampleId);
     if (!example) {
       return { error: "Example not found." };
+    }
+    if (!(await confirmWorkspaceSwitch())) {
+      return { cancelled: true };
     }
     const { scripts, error } = await importExample(example.id).catch(
       (error: unknown) => ({

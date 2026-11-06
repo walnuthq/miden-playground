@@ -6,6 +6,7 @@ import {
   useTransaction,
   useWaitForCommit,
 } from "@miden-sdk/react";
+import useGlobalContext from "@/components/global-context/hook";
 import useNetwork from "@/hooks/use-network";
 import { MAINNET_FUNDING_AMOUNT, midenFaucetAddress } from "@/lib/constants";
 import {
@@ -13,12 +14,19 @@ import {
   waitForConsumableFeeNote,
   waitForFundingNote,
 } from "@/lib/miden-faucet";
+import {
+  endMainnetFunding,
+  type MainnetFunding,
+  startMainnetFunding,
+  workspaceLeft,
+} from "@/lib/utils/workspace-guard";
 
 // Testnet commits a block every few seconds; leave room for a slow one.
 const TRANSACTION_COMMIT_TIMEOUT = 60_000;
 
 const useFundAccount = () => {
   const { networkId } = useNetwork();
+  const { workspaceRun } = useGlobalContext();
   const { client } = useMiden();
   const { execute } = useTransaction();
   const { waitForCommit } = useWaitForCommit();
@@ -28,11 +36,21 @@ const useFundAccount = () => {
   // with an invite code) and network accounts, so check before Bread pays.
   const fundFromBreadWallet = async (
     account: WasmAccount,
-    { isNetworkAccount }: { isNetworkAccount: boolean },
+    {
+      isNetworkAccount,
+      funding,
+    }: { isNetworkAccount: boolean; funding: MainnetFunding },
   ) => {
     if (!client) {
       throw new Error("MidenClient not ready");
     }
+    // A deploy goes on after a switch that started before its funding: never
+    // ask Bread to pay an account that's gone with its store.
+    const refuseIfLeft = () => {
+      if (funding.abandoned || workspaceLeft(workspaceRun)) {
+        throw new Error("You left the workspace of this account.");
+      }
+    };
     if (!isNetworkAccount && !(await client.isAccountAllowed(account.id()))) {
       throw new Error(
         "Partner Mainnet only creates invited accounts: use your Bread Wallet account, or deploy a network account.",
@@ -42,6 +60,7 @@ const useFundAccount = () => {
       throw new Error("Connect Bread Wallet to fund the account on Mainnet");
     }
     const feeFaucetId = await client.feeFaucetId();
+    refuseIfLeft();
     await requestSend(
       new SendTransaction(
         breadWalletAddress,
@@ -51,6 +70,7 @@ const useFundAccount = () => {
         MAINNET_FUNDING_AMOUNT,
       ),
     );
+    refuseIfLeft();
     return waitForConsumableFeeNote({
       client,
       accountId: account.id(),
@@ -84,10 +104,26 @@ const useFundAccount = () => {
     if (!client) {
       throw new Error("MidenClient not ready");
     }
-    const fundingNote =
-      networkId === "mm"
-        ? await fundFromBreadWallet(account, { isNetworkAccount })
+    // Until the account is on chain, leaving loses it and what Bread paid it.
+    const funding = networkId === "mm" ? startMainnetFunding() : null;
+    try {
+      const fundingNote = funding
+        ? await fundFromBreadWallet(account, { isNetworkAccount, funding })
         : await fundFromFaucet(account);
+      return await consumeFundingNote(account, fundingNote);
+    } finally {
+      if (funding) {
+        endMainnetFunding(funding);
+      }
+    }
+  };
+  const consumeFundingNote = async (
+    account: WasmAccount,
+    fundingNote: Awaited<ReturnType<typeof fundFromFaucet>>,
+  ) => {
+    if (!client) {
+      throw new Error("MidenClient not ready");
+    }
     const transactionRequest = await client.newConsumeTransactionRequest(
       [fundingNote.toNote()],
       account.id(),

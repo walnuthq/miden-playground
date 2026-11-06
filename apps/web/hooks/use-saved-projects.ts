@@ -5,6 +5,7 @@ import useAppState from "@/hooks/use-app-state";
 import useNetwork from "@/hooks/use-network";
 import useProjects from "@/hooks/use-projects";
 import { trackEvent } from "@/lib/analytics";
+import { confirmWorkspaceSwitch } from "@/lib/utils/workspace-guard";
 
 const PROJECTS_QUERY_KEY = ["projects"];
 
@@ -23,6 +24,7 @@ const useSavedProjects = () => {
     saveProjectDialogSaveAs,
     deleteProjectDialogOpen,
     completedTutorials,
+    nextState,
     dispatch,
   } = useGlobalContext();
   const { leaveTutorial, pushState, freshSandboxState } = useAppState();
@@ -67,6 +69,9 @@ const useSavedProjects = () => {
   // refuses (written by a newer one) falls back to a fresh sandbox on the
   // project's network: the previous workspace's store is cleared by then.
   const openProject = async (id: string): Promise<{ error?: string }> => {
+    if (!(await confirmWorkspaceSwitch())) {
+      return {};
+    }
     const project = await loadProject("project", id).catch((error: unknown) => {
       console.error("ERROR: loadProject", error);
       return null;
@@ -119,6 +124,8 @@ const useSavedProjects = () => {
     projectId,
     projectName,
     projects,
+    // A switch is underway: there's nothing to save until its store is in.
+    switching: nextState !== null,
     saveProjectAs,
     saveActiveProject,
     openProject,

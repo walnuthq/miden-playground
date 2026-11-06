@@ -11,6 +11,7 @@ import type { Tutorial, TutorialId } from "@/lib/types/tutorial";
 import { randomLowercaseId, sleep } from "@/lib/utils";
 import { defaultTutorial, isTutorial } from "@/lib/utils/tutorial";
 import { tutorialStatus as getTutorialStatus } from "@/lib/utils/tutorial-status";
+import { confirmWorkspaceSwitch } from "@/lib/utils/workspace-guard";
 import { clientGetLatestBlockNum } from "@/lib/web-client";
 
 // The chain tip a tutorial starts at (see State.tutorialStartBlockNum), 0 on the
@@ -113,6 +114,9 @@ const useTutorials = () => {
       openTutorial();
       return;
     }
+    if (!(await confirmWorkspaceSwitch())) {
+      return;
+    }
     const { resumed } = await enterTutorial(tutorial);
     trackEvent(resumed ? "resume_tutorial" : "start_tutorial", {
       tutorial_id: tutorial.id,
@@ -123,6 +127,9 @@ const useTutorials = () => {
   const restartTutorial = async (id: string) => {
     const tutorial = tutorials.find((tutorial) => tutorial.id === id);
     if (!tutorial) {
+      return;
+    }
+    if (!(await confirmWorkspaceSwitch())) {
       return;
     }
     await enterTutorial(tutorial, { restart: true });

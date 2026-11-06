@@ -9,6 +9,7 @@ import {
   stateDeserializer,
   stateSerializer,
 } from "@/lib/utils/state";
+import { setLiveWorkspace } from "@/lib/utils/workspace-guard";
 
 // An action bound to the workspace run it was dispatched from.
 type RunAction = Action & { workspaceRun?: number };
@@ -42,6 +43,7 @@ const GlobalContextProvider = ({ children }: { children: ReactNode }) => {
   // holds this dispatch in its closure, and can't write its results into the
   // next workspace: the reducer drops them.
   const { workspaceRun } = state;
+  setLiveWorkspace(workspaceRun, state.nextState !== null);
   const dispatch = useCallback(
     (action: Action) => globalDispatch({ ...action, workspaceRun }),
     [globalDispatch, workspaceRun],

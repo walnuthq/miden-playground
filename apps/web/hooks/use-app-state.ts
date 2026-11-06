@@ -346,6 +346,11 @@ const useAppState = () => {
   // tutorial progress to carry into the next state. Call it before leaving the
   // tutorial, and before switching networks: it exports the current store.
   const leaveTutorial = async () => {
+    // Already left by the switch underway, whose store is being replaced: its
+    // progress is in the queued state.
+    if (nextState) {
+      return { ...tutorialProgress, ...nextState.tutorialProgress };
+    }
     if (tutorialId === "") {
       return tutorialProgress;
     }
@@ -402,21 +407,35 @@ const useAppState = () => {
       await importStore(storeDump(nextStore), storeName(networkId), {
         skipSync: true,
       });
-      dispatch({ type: "POP_STATE" });
+      dispatch({ type: "POP_STATE", payload: { imported: nextState } });
     } catch (error) {
-      if (!fallbackState) {
-        throw error;
-      }
       // A saved project the running client refuses (e.g. written by a newer
-      // one): start over from the fallback instead.
+      // one): start over from the fallback instead. The previous store is
+      // cleared by now, so without a fallback it's a new sandbox.
       console.error("ERROR: importStore", error);
-      await importStore(
-        storeDump(fallbackState.nextStore),
-        storeName(networkId),
-        { skipSync: true },
-      );
-      dispatch({ type: "POP_STATE", payload: { state: fallbackState } });
-      if (fallbackState.tutorialId) {
+      const state = fallbackState ?? freshSandboxState(networkId);
+      let fallbackImported = true;
+      try {
+        await importStore(storeDump(state.nextStore), storeName(networkId), {
+          skipSync: true,
+        });
+      } catch (fallbackError) {
+        console.error("ERROR: importStore", fallbackError);
+        fallbackImported = false;
+      }
+      dispatch({
+        type: "POP_STATE",
+        payload: { imported: nextState, state },
+      });
+      if (!fallbackImported) {
+        toast.error("The workspace couldn't be opened.", {
+          description: "Reload the page to start a new sandbox.",
+        });
+      } else if (!fallbackState) {
+        toast.error("The workspace couldn't be opened.", {
+          description: "A new sandbox was started instead.",
+        });
+      } else if (fallbackState.tutorialId) {
         toast.warning("Your saved progress couldn't be restored.", {
           description: "The tutorial starts over.",
         });

@@ -17,8 +17,10 @@ export type StateAction =
       type: "PUSH_STATE";
       payload: { nextState: State };
     }
-  // Switches to the queued next state, or to `state` instead (its fallback).
-  | { type: "POP_STATE"; payload?: { state: State } }
+  // `imported` (the queued next state whose store was imported) is done:
+  // switches to it, or to `state` instead (its fallback). A state queued since
+  // stays queued, its store still to import.
+  | { type: "POP_STATE"; payload: { imported: State; state?: State } }
   // The saved project the workspace now is (both empty: none).
   | {
       type: "SET_PROJECT";
@@ -67,13 +69,10 @@ const reducer = (state: State, action: StateAction): State => {
       };
     }
     case "POP_STATE": {
-      const nextState = action.payload?.state ?? state.nextState;
-      if (!nextState) {
-        return state;
-      }
+      const { imported, state: fallbackState } = action.payload;
       return {
-        ...nextState,
-        nextState: null,
+        ...(fallbackState ?? imported),
+        nextState: state.nextState === imported ? null : state.nextState,
         nextStore: null,
         fallbackState: null,
         workspaceRun: state.workspaceRun + 1,

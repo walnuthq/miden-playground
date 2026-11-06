@@ -99,7 +99,10 @@ const MidenProvider = ({ children }: { children: ReactNode }) => {
         if (outdatedStores.length > 0) {
           // GlobalContextProvider, above this one, has already loaded the
           // persisted state: reset it in memory (and in storage) too.
-          dispatch({ type: "POP_STATE", payload: { state: defaultState() } });
+          dispatch({
+            type: "POP_STATE",
+            payload: { imported: defaultState() },
+          });
           // Saved projects come from the same outdated client.
           return deleteProjects();
         }

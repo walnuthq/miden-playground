@@ -7,14 +7,13 @@ import useAppState from "@/hooks/use-app-state";
 import useDocumentVisible from "@/hooks/use-document-visible";
 import useExamples from "@/hooks/use-examples";
 import useNetwork from "@/hooks/use-network";
+import { workspaceLeft } from "@/lib/utils/workspace-guard";
 
 let callingPopState = false;
 // The workspace run whose example account is being deployed. A switch doesn't
 // wait for it: nothing can cancel a deploy, it can take minutes, and it can't
 // write to the next workspace anyway (see GlobalContextProvider).
 let deployingWorkspaceRun: number | null = null;
-// The workspace as last rendered, for a deploy to tell it was abandoned.
-const latest = { workspaceRun: 0, switching: false };
 
 // The live network badge: `NetworkBadgeView` (SDK-free, the app shell's too)
 // with the client's sync state, and the app's own sync loop.
@@ -29,8 +28,6 @@ const NetworkBadge = () => {
     workspaceRun,
   } = useGlobalContext();
   const switching = nextState !== null;
-  latest.workspaceRun = workspaceRun;
-  latest.switching = switching;
   const { syncState, popState } = useAppState();
   const { exampleId, loadExample } = useExamples();
   const exampleAccount = accounts.find(({ components }) =>
@@ -58,8 +55,15 @@ const NetworkBadge = () => {
   useEffect(() => {
     const callPopState = async () => {
       callingPopState = true;
-      await popState();
-      callingPopState = false;
+      try {
+        // Every outcome of an import clears the state it was queued with, so
+        // this doesn't run again for the same one.
+        await popState();
+      } catch (error) {
+        console.error("ERROR: popState", error);
+      } finally {
+        callingPopState = false;
+      }
     };
     if (!syncingState && !callingPopState) {
       callPopState();
@@ -68,10 +72,7 @@ const NetworkBadge = () => {
   useEffect(() => {
     const callLoadExample = async () => {
       deployingWorkspaceRun = workspaceRun;
-      await loadExample(
-        exampleId,
-        () => latest.switching || latest.workspaceRun !== workspaceRun,
-      );
+      await loadExample(exampleId, () => workspaceLeft(workspaceRun));
       if (deployingWorkspaceRun === workspaceRun) {
         deployingWorkspaceRun = null;
       }
