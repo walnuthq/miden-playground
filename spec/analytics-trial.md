@@ -1,12 +1,13 @@
 # Analytics trial: Cloudflare next to Simple Analytics
 
-Status: code ready, the trial starts when it deploys with the beacon's site
-token set.
+Status: running since 2026-11-06 (PR #770). All three sources were verified on
+production that day, and in Brave and in Chrome with uBlock Origin Lite `/ingest`
+got through while the beacon was blocked.
 
 Can Cloudflare replace Simple Analytics (SA)? Web Analytics, the free product,
 has page views and visits but no custom events ("Not yet", in its FAQ), so events
 would go to Workers Analytics Engine (AE) through our Worker. The trial runs all
-of them side by side in production for 2–4 weeks, then we decide.
+of them side by side in production, then we decide: see the schedule below.
 
 ## What runs
 
@@ -49,12 +50,29 @@ needs `ANALYTICS_ACCOUNT_ID` and `ANALYTICS_API_TOKEN` (Account Analytics Read) 
 `apps/web/.env.local`. Read SA's and Web Analytics' figures from their dashboards,
 over the same dates. Cloudflare's dashboard figures can be sampled.
 
+## Schedule
+
+2026-11-06 was a Friday, so the first three days are mostly a weekend, which may
+not look like working days.
+
+1. **Tuesday 2026-11-10, preliminary read.** Catches a broken pipeline and gives
+   the beacon's gap so far, and how much event volume there is. Rarer events will
+   be too few to judge, and nothing gets decided or removed.
+2. **Friday 2026-11-13, possible early finish.** A final decision is reasonable if
+   a full week has enough volume and the gaps have stayed stable.
+3. **Friday 2026-11-20, otherwise.** If volume is low or the numbers are still
+   moving.
+
+Each read needs SA's page views, visitors and event counts and Web Analytics' page
+views and visits, for the same dates. Keep all three sources running until the
+final read: removing SA is the step that can't be undone, since it's the baseline.
+
 ## Decision
 
 Page views are reported to management, so they have to be accurate. AE's page views
 are the reporting source if they pass the checks below: the beacon can be blocked,
-AE's route isn't on the lists checked. Compare totals over the whole trial, for at
-least two weeks, leaving out `automated`. Under about 100 of an event is too few to
+AE's route isn't on the lists checked. Compare totals over the whole trial, leaving
+out `automated`. Under about 100 of an event is too few to
 judge, not a failure.
 
 1. **Events: AE within about 5% of SA.** Both go through our domain from the same
