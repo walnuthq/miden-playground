@@ -2,6 +2,7 @@ import type { ConsumableNoteRecord as WasmConsumableNoteRecordType } from "@mide
 import { useMiden } from "@miden-sdk/react";
 import { Label } from "@workspace/ui/components/label";
 import type { Dispatch, SetStateAction } from "react";
+import { toast } from "sonner";
 import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";
 import SelectTransactionTypeDropdownMenu from "@/components/transactions/select-transaction-type-dropdown-menu";
 import useAccounts from "@/hooks/use-accounts";
@@ -44,12 +45,22 @@ const CreateTransactionDialogSelectForm = ({
         }
         if (transactionType === "consume" && executingAccount) {
           setLoading(true);
-          const consumableNotes = await clientGetConsumableNotes({
-            client,
-            accountId: executingAccountId,
-          });
-          setLoading(false);
-          setConsumableNotes(consumableNotes);
+          try {
+            const consumableNotes = await clientGetConsumableNotes({
+              client,
+              accountId: executingAccountId,
+            });
+            setConsumableNotes(consumableNotes);
+          } catch (error) {
+            console.error(error);
+            toast.error("Failed to load consumable notes.", {
+              description:
+                error instanceof Error ? error.message : String(error),
+            });
+            return;
+          } finally {
+            setLoading(false);
+          }
         }
         setStep("configure");
       }}

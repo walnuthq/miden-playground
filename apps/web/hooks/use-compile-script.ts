@@ -19,7 +19,12 @@ const useCompileScript = (script?: Script) => {
     setCompiling(true);
     append({ level: "info", text: `Compiling ${script.name}…` });
     const start = performance.now();
-    const { script: compiledScript, error } = await compileScript(script);
+    const { script: compiledScript, error } = await compileScript(script).catch(
+      (error: unknown) => ({
+        script: undefined,
+        error: error instanceof Error ? error.message : String(error),
+      }),
+    );
     const duration = formatDuration(performance.now() - start);
     setCompiling(false);
     if (!compiledScript) {

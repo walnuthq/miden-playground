@@ -41,19 +41,28 @@ const DeleteScriptAlertDialog = () => {
             disabled={loading}
             onClick={async () => {
               setLoading(true);
-              const { script, error } = await deleteScript(
-                deleteScriptAlertDialogScriptId,
-              );
-              setLoading(false);
-              if (script) {
-                // AlertDialogAction is a plain button, not a close trigger.
-                closeDeleteScriptAlertDialog();
-                const deletedScript = scripts.find(
-                  ({ id }) => id === script.id,
+              try {
+                const { script, error } = await deleteScript(
+                  deleteScriptAlertDialogScriptId,
                 );
-                toast(`${deletedScript?.name} has been deleted.`);
-              } else {
-                toast.error("Error deleting script.", { description: error });
+                if (script) {
+                  // AlertDialogAction is a plain button, not a close trigger.
+                  closeDeleteScriptAlertDialog();
+                  const deletedScript = scripts.find(
+                    ({ id }) => id === script.id,
+                  );
+                  toast(`${deletedScript?.name} has been deleted.`);
+                } else {
+                  toast.error("Error deleting script.", { description: error });
+                }
+              } catch (error) {
+                console.error(error);
+                toast.error("Error deleting script.", {
+                  description:
+                    error instanceof Error ? error.message : String(error),
+                });
+              } finally {
+                setLoading(false);
               }
             }}
           >

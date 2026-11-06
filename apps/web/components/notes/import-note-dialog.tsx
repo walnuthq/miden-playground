@@ -12,6 +12,7 @@ import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { Spinner } from "@workspace/ui/components/spinner";
 import { useState } from "react";
+import { toast } from "sonner";
 import useNotes from "@/hooks/use-notes";
 import { readFileAsArrayBuffer } from "@/lib/utils/script";
 
@@ -39,9 +40,18 @@ const ImportNoteDialog = () => {
           onSubmit={async (event) => {
             event.preventDefault();
             setLoading(true);
-            await importNoteFromFile({ noteId: "", noteFileBytes });
-            setLoading(false);
-            closeImportNoteDialog();
+            try {
+              await importNoteFromFile({ noteId: "", noteFileBytes });
+              closeImportNoteDialog();
+            } catch (error) {
+              console.error(error);
+              toast.error("Failed to import note.", {
+                description:
+                  error instanceof Error ? error.message : String(error),
+              });
+            } finally {
+              setLoading(false);
+            }
           }}
         >
           <div className="grid grid-cols-2 gap-4">

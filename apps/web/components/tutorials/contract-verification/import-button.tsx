@@ -2,6 +2,7 @@ import { Button } from "@workspace/ui/components/button";
 import { Spinner } from "@workspace/ui/components/spinner";
 import { Download } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import useAccounts from "@/hooks/use-accounts";
 import useComponents from "@/hooks/use-components";
 import { defaultComponentIds } from "@/lib/types/default-components";
@@ -24,13 +25,21 @@ const ImportButton = () => {
           return;
         }
         setLoading(true);
-        await deployAccount({
-          name: "Unverified Contract",
-          storageMode: "public",
-          components: [noAuth, counterContractComponent],
-          verify: false,
-        });
-        setLoading(false);
+        try {
+          await deployAccount({
+            name: "Unverified Contract",
+            storageMode: "public",
+            components: [noAuth, counterContractComponent],
+            verify: false,
+          });
+        } catch (error) {
+          console.error(error);
+          toast.error("Failed to import the contract.", {
+            description: error instanceof Error ? error.message : String(error),
+          });
+        } finally {
+          setLoading(false);
+        }
       }}
     >
       {loading ? <Spinner /> : <Download />}

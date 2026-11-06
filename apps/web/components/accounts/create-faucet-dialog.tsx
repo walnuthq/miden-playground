@@ -59,25 +59,34 @@ const CreateFaucetDialog = () => {
             event.preventDefault();
             const formData = new FormData(event.currentTarget);
             setLoading(true);
-            const faucet = await newFaucet({
-              name: formValue(formData, "name"),
-              storageMode: formData.getAll("is-public").includes("on")
-                ? "public"
-                : "private",
-              tokenSymbol: formValue(formData, "token-symbol"),
-              decimals: Number(decimals),
-              maxSupply: parseAmount(
-                formData.get("max-supply")?.toString() ?? "0",
-                decimals,
-              ),
-            });
-            setLoading(false);
-            toast(`${faucet.name} has been created.`, {
-              description: (
-                <AccountAddress account={faucet} withTooltip={false} />
-              ),
-            });
-            onClose();
+            try {
+              const faucet = await newFaucet({
+                name: formValue(formData, "name"),
+                storageMode: formData.getAll("is-public").includes("on")
+                  ? "public"
+                  : "private",
+                tokenSymbol: formValue(formData, "token-symbol"),
+                decimals: Number(decimals),
+                maxSupply: parseAmount(
+                  formData.get("max-supply")?.toString() ?? "0",
+                  decimals,
+                ),
+              });
+              toast(`${faucet.name} has been created.`, {
+                description: (
+                  <AccountAddress account={faucet} withTooltip={false} />
+                ),
+              });
+              onClose();
+            } catch (error) {
+              console.error(error);
+              toast.error("Failed to create faucet.", {
+                description:
+                  error instanceof Error ? error.message : String(error),
+              });
+            } finally {
+              setLoading(false);
+            }
           }}
         >
           <div className="grid grid-cols-2 gap-4">

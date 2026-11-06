@@ -66,32 +66,42 @@ const VerifyNoteScriptDialog = () => {
               throw new Error("MidenClient not ready");
             }
             setLoading(true);
-            const record = await client.getInputNote(noteId);
-            if (!record || !packageSource) {
-              return;
-            }
-            const { verified, error } = await verifyNoteFromSource({
-              networkId,
-              noteId,
-              packageSource,
-              dependencies,
-            });
-            setLoading(false);
-            if (verified !== undefined) {
+            try {
+              const record = await client.getInputNote(noteId);
+              if (!record || !packageSource) {
+                toast.error("Error while verifying Note script.", {
+                  description: "Note not found.",
+                });
+                return;
+              }
+              const { verified, error } = await verifyNoteFromSource({
+                networkId,
+                noteId,
+                packageSource,
+                dependencies,
+              });
               if (verified) {
                 toast.success("Note script verified.");
                 queryClient.invalidateQueries({
                   queryKey: ["verifiedNote", networkId, scriptRoot],
                 });
-              } else {
+                onClose();
+              } else if (verified === false) {
                 toast.error("Note script couldn't be verified.");
+              } else {
+                toast.error("Error while verifying Note script.", {
+                  description: error,
+                });
               }
-            } else {
+            } catch (error) {
+              console.error(error);
               toast.error("Error while verifying Note script.", {
-                description: error,
+                description:
+                  error instanceof Error ? error.message : String(error),
               });
+            } finally {
+              setLoading(false);
             }
-            onClose();
           }}
         >
           <div className="grid grid-cols-2 gap-4">
