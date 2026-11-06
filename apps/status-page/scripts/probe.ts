@@ -87,10 +87,17 @@ const VERCEL_CHALLENGE_TITLE = "Vercel Security Checkpoint";
 const VERCEL_MITIGATION_HEADER = "x-vercel-mitigated";
 
 // Aborts are routine (React cleanup, the Miden client tearing down streams) and
-// the analytics proxy is a third party behind a same-origin path, so neither
-// says anything about the playground's health.
+// analytics (a proxied third party, Cloudflare's beacon, our own /ingest) can
+// fail without the playground being unhealthy, so neither says anything about
+// its health.
 const IGNORED_REQUEST_FAILURE = "net::ERR_ABORTED";
-const IGNORED_REQUEST_PATHS = ["/proxy.js", "/proxy.dev.js", "/simple/"];
+const IGNORED_REQUEST_PATHS = [
+  "/proxy.js",
+  "/proxy.dev.js",
+  "/simple/",
+  "/ingest",
+  "cloudflareinsights.com",
+];
 
 type CheckDefinition = {
   id: string;

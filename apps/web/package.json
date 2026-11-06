@@ -18,7 +18,8 @@
     "test:e2e": "playwright test",
     "masm:sync": "node scripts/sync-masm-vocabulary.ts",
     "masm:check": "node scripts/sync-masm-vocabulary.ts --check",
-    "qa-wallet": "node e2e/scripts/mainnet-qa-wallet.ts"
+    "qa-wallet": "node e2e/scripts/mainnet-qa-wallet.ts",
+    "analytics:report": "node scripts/analytics-report.ts"
   },
   "dependencies": {
     "@fontsource-variable/geist": "5.3.0",

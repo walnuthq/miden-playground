@@ -11,6 +11,7 @@ import "@fontsource-variable/geist";
 import "@fontsource-variable/geist-mono";
 import "./index.css";
 import OuterProviders from "@/components/providers/outer";
+import { trackPageViews } from "@/lib/analytics";
 import router from "@/routes";
 
 // This entry, routes.tsx and the app shell they render first import nothing
@@ -22,6 +23,8 @@ import router from "@/routes";
 // A tab opened before a deploy requests page chunks that no longer exist:
 // reload to get the new ones.
 window.addEventListener("vite:preloadError", () => window.location.reload());
+
+trackPageViews(router);
 
 const rootElement = document.getElementById("root");
 if (!rootElement) {
