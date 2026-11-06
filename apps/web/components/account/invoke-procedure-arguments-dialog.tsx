@@ -264,6 +264,10 @@ const InvokeProcedureArgumentsDialog = () => {
                 onClose();
               } catch (error) {
                 console.error(error);
+                toast.error("Transaction failed.", {
+                  description:
+                    error instanceof Error ? error.message : String(error),
+                });
               }
             }
             setLoading(false);

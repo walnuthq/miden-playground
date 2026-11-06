@@ -56,19 +56,28 @@ const CreateWalletDialog = () => {
             event.preventDefault();
             const formData = new FormData(event.currentTarget);
             setLoading(true);
-            const wallet = await newWallet({
-              name: formData.get("name")?.toString() ?? walletDefaultName,
-              storageMode: formData.getAll("is-public").includes("on")
-                ? "public"
-                : "private",
-            });
-            setLoading(false);
-            toast(`${wallet.name} has been created.`, {
-              description: (
-                <AccountAddress account={wallet} withTooltip={false} />
-              ),
-            });
-            onClose();
+            try {
+              const wallet = await newWallet({
+                name: formData.get("name")?.toString() ?? walletDefaultName,
+                storageMode: formData.getAll("is-public").includes("on")
+                  ? "public"
+                  : "private",
+              });
+              toast(`${wallet.name} has been created.`, {
+                description: (
+                  <AccountAddress account={wallet} withTooltip={false} />
+                ),
+              });
+              onClose();
+            } catch (error) {
+              console.error(error);
+              toast.error("Failed to create wallet.", {
+                description:
+                  error instanceof Error ? error.message : String(error),
+              });
+            } finally {
+              setLoading(false);
+            }
           }}
         >
           <div className="grid grid-cols-2 gap-4">

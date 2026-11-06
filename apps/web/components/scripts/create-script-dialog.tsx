@@ -73,18 +73,27 @@ const CreateScriptDialog = () => {
             event.preventDefault();
             const formData = new FormData(event.currentTarget);
             setLoading(true);
-            const { script, error } = await newScript({
-              name: kebabCase(formData.get("name")?.toString() ?? ""),
-              type: scriptType,
-              example: scriptExample,
-            });
-            setLoading(false);
-            if (script) {
-              toast(`${script.name} has been created.`);
-              navigate(`/scripts/${script.id}`);
-              onClose();
-            } else {
-              toast.error("Failed to create script.", { description: error });
+            try {
+              const { script, error } = await newScript({
+                name: kebabCase(formData.get("name")?.toString() ?? ""),
+                type: scriptType,
+                example: scriptExample,
+              });
+              if (script) {
+                toast(`${script.name} has been created.`);
+                navigate(`/scripts/${script.id}`);
+                onClose();
+              } else {
+                toast.error("Failed to create script.", { description: error });
+              }
+            } catch (error) {
+              console.error(error);
+              toast.error("Failed to create script.", {
+                description:
+                  error instanceof Error ? error.message : String(error),
+              });
+            } finally {
+              setLoading(false);
             }
           }}
         >

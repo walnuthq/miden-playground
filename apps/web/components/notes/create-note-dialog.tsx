@@ -21,6 +21,7 @@ import { Spinner } from "@workspace/ui/components/spinner";
 import { Switch } from "@workspace/ui/components/switch";
 import { Trash } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import SelectAccountCombobox from "@/components/transactions/select-account-combobox";
 import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";
 import useAccounts from "@/hooks/use-accounts";
@@ -96,6 +97,10 @@ const CreateNoteDialog = () => {
               }
             } catch (error) {
               console.error(error);
+              toast.error("Failed to create note.", {
+                description:
+                  error instanceof Error ? error.message : String(error),
+              });
             } finally {
               setLoading(false);
             }

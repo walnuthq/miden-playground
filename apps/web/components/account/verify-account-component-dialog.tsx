@@ -62,20 +62,23 @@ const VerifyAccountComponentDialog = () => {
               throw new Error("MidenClient not ready");
             }
             setLoading(true);
-            const account = accounts.find(({ id }) => id === accountId);
-            const wasmAccount = await client.getAccount(
-              WasmAccountId.fromHex(accountId),
-            );
-            if (!wasmAccount || !account || !packageSource) {
-              return;
-            }
-            const { verified, error } = await verifyAccountComponentFromSource({
-              networkId,
-              accountId,
-              packageSource,
-            });
-            setLoading(false);
-            if (verified !== undefined) {
+            try {
+              const account = accounts.find(({ id }) => id === accountId);
+              const wasmAccount = await client.getAccount(
+                WasmAccountId.fromHex(accountId),
+              );
+              if (!wasmAccount || !account || !packageSource) {
+                toast.error("Error while verifying Account Component.", {
+                  description: "Account not found.",
+                });
+                return;
+              }
+              const { verified, error } =
+                await verifyAccountComponentFromSource({
+                  networkId,
+                  accountId,
+                  packageSource,
+                });
               if (verified) {
                 toast.success("Account Component verified.");
                 queryClient.invalidateQueries({
@@ -85,15 +88,23 @@ const VerifyAccountComponentDialog = () => {
                     account.code,
                   ],
                 });
-              } else {
+                onClose();
+              } else if (verified === false) {
                 toast.error("Account Component couldn't be verified.");
+              } else {
+                toast.error("Error while verifying Account Component.", {
+                  description: error,
+                });
               }
-            } else {
+            } catch (error) {
+              console.error(error);
               toast.error("Error while verifying Account Component.", {
-                description: error,
+                description:
+                  error instanceof Error ? error.message : String(error),
               });
+            } finally {
+              setLoading(false);
             }
-            onClose();
           }}
         >
           <div className="grid grid-cols-2 gap-4">

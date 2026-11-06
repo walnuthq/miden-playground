@@ -55,19 +55,28 @@ const ImportProjectDialog = () => {
           onSubmit={async (event) => {
             event.preventDefault();
             setLoading(true);
-            const { scripts, error } =
-              await importScriptsFromPackageSources(packageSources);
-            if (scripts) {
-              toast.success(
-                `Successfully imported Rust project, found ${scripts.length} ${scripts.length === 1 ? "script" : "scripts"}.`,
-              );
-            } else {
+            try {
+              const { scripts, error } =
+                await importScriptsFromPackageSources(packageSources);
+              if (scripts) {
+                toast.success(
+                  `Successfully imported Rust project, found ${scripts.length} ${scripts.length === 1 ? "script" : "scripts"}.`,
+                );
+                onClose();
+              } else {
+                toast.error("Failed to import Rust project.", {
+                  description: error,
+                });
+              }
+            } catch (error) {
+              console.error(error);
               toast.error("Failed to import Rust project.", {
-                description: error,
+                description:
+                  error instanceof Error ? error.message : String(error),
               });
+            } finally {
+              setLoading(false);
             }
-            setLoading(false);
-            onClose();
           }}
         >
           <div className="grid grid-cols-2 gap-4">
