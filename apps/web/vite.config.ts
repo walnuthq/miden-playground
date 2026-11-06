@@ -85,6 +85,28 @@ const simpleAnalytics = {
   ],
 } satisfies Plugin;
 
+// Cloudflare Web Analytics' beacon, when its site token is set (.env.production
+// only, so no other build reports). Inserted as text: transformIndexHtml's tag
+// attributes would escape the JSON's quotes with backslashes, which HTML doesn't
+// understand. It stays on Cloudflare's domain: spec/analytics-trial.md says why.
+const cloudflareBeacon = (): Plugin => {
+  let token: string | undefined;
+  return {
+    name: "cloudflare-beacon",
+    apply: "build",
+    configResolved: (config) => {
+      token = config.env.VITE_CF_BEACON_TOKEN;
+    },
+    transformIndexHtml: (html) =>
+      token
+        ? html.replace(
+            "</body>",
+            `<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"${token}"}'></script></body>`,
+          )
+        : html,
+  };
+};
+
 // The app shell paints before the SDK's chunks: the entry (main.tsx), the
 // routes and the shell import nothing from the SDK or Para, whose eager entry
 // awaits the WASM at module load, so a static import graph that reached it
@@ -251,6 +273,7 @@ export default defineConfig({
     // Para needs these Node builtins (what paraVitePlugin adds).
     nodePolyfills({ include: ["buffer", "crypto", "stream", "util"] }),
     simpleAnalytics,
+    cloudflareBeacon(),
     shellIsSdkFree,
     preloadLazyLayouts,
     precompressWasm,

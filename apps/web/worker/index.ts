@@ -1,7 +1,10 @@
+import { toDataPoint } from "../lib/analytics-events";
+
 // Serves the SPA from static assets (wrangler.jsonc `assets`), the client WASM
-// precompressed, and proxies Simple Analytics through our domain, as
-// @simpleanalytics/next's rewrites did. Only the paths in
-// `assets.run_worker_first` reach this Worker.
+// precompressed, proxies Simple Analytics through our domain, as
+// @simpleanalytics/next's rewrites did, and records analytics events in
+// Analytics Engine. Only the paths in `assets.run_worker_first` reach this
+// Worker.
 
 // Visitor IPs never reach Simple Analytics (as in SA's own proxy configs), and
 // neither do our cookies.
@@ -80,9 +83,61 @@ const serveWasm = async (request: Request, env: Env, url: URL) => {
   return env.ASSETS.fetch(request);
 };
 
+const MAX_INGEST_BYTES = 1024;
+
+const isFromSite = (request: Request, hostname: string) => {
+  // Not the request's URL: behind the Vercel proxy, that's workers.dev.
+  const origin = request.headers.get("origin");
+  return (
+    origin !== null &&
+    URL.canParse(origin) &&
+    new URL(origin).hostname === hostname
+  );
+};
+
+// Records an event from the app (lib/analytics.ts). Analytics Engine gets only
+// what toDataPoint lets through: no IP, user agent or cookie.
+const ingest = async (request: Request, env: Env) => {
+  // Disabled when the hostname is unset (local `wrangler dev`).
+  if (!env.ANALYTICS_HOSTNAME) {
+    return new Response("Not found", { status: 404 });
+  }
+  if (request.method !== "POST") {
+    return new Response("Method not allowed", {
+      status: 405,
+      headers: { allow: "POST" },
+    });
+  }
+  if (!isFromSite(request, env.ANALYTICS_HOSTNAME)) {
+    return new Response("Forbidden", { status: 403 });
+  }
+  if (Number(request.headers.get("content-length")) > MAX_INGEST_BYTES) {
+    return new Response("Too large", { status: 413 });
+  }
+  const body = await request.text();
+  if (body.length > MAX_INGEST_BYTES) {
+    return new Response("Too large", { status: 413 });
+  }
+  let event: unknown;
+  try {
+    event = JSON.parse(body);
+  } catch {
+    return new Response("Bad request", { status: 400 });
+  }
+  const dataPoint = toDataPoint(event);
+  if (!dataPoint) {
+    return new Response("Bad request", { status: 400 });
+  }
+  env.ANALYTICS.writeDataPoint(dataPoint);
+  return new Response(null, { status: 204 });
+};
+
 export default {
   fetch: async (request, env) => {
     const url = new URL(request.url);
+    if (url.pathname === "/ingest") {
+      return ingest(request, env);
+    }
     if (
       (request.method === "GET" || request.method === "HEAD") &&
       /^\/assets\/[^/]+\.wasm$/.test(url.pathname)

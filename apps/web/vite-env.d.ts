@@ -10,6 +10,7 @@ interface ImportMetaEnv {
   readonly VITE_PARA_API_KEY?: string;
   readonly VITE_PARA_ENVIRONMENT?: "BETA" | "PROD" | "SANDBOX" | "DEV";
   readonly VITE_MIDEN_FEE_AMOUNT?: string;
+  readonly VITE_CF_BEACON_TOKEN?: string;
 }
 
 interface ImportMeta {
