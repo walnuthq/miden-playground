@@ -1,6 +1,10 @@
 import { expect, type Page, test } from "@playwright/test";
-import { COMPILED, replaceInEditor, waitForEditorText } from "./editor";
-import { launchExample } from "./example";
+import {
+  COMPILED,
+  createCounterScript,
+  replaceInEditor,
+  waitForEditorText,
+} from "./editor";
 import { logBrowserErrors, TRANSACTION_TIMEOUT } from "./tutorial";
 
 // The Rust editor's height on screen, a few px while the console is maximized
@@ -35,12 +39,7 @@ test("script: editor and console layout", async ({ page }) => {
   logBrowserErrors(page);
 
   await test.step("open the counter account script", async () => {
-    await launchExample(page, {
-      title: "Counter Contract",
-      accountName: "Counter Contract",
-    });
-    await page.getByRole("link", { name: "counter-account" }).click();
-    await waitForEditorText(page, "fn get_count(&self) -> Felt {");
+    await createCounterScript(page);
   });
 
   await test.step("the page fills the viewport", async () => {

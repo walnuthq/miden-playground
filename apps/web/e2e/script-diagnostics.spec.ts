@@ -1,6 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
-import { COMPILED, replaceInEditor, waitForEditorText } from "./editor";
-import { launchExample } from "./example";
+import { COMPILED, createCounterScript, replaceInEditor } from "./editor";
 import { logBrowserErrors, TRANSACTION_TIMEOUT } from "./tutorial";
 
 type Marker = { severity: number; startLineNumber: number; message: string };
@@ -46,12 +45,7 @@ test("script: compile errors in the editor", async ({ page }) => {
   logBrowserErrors(page);
 
   await test.step("open the counter account script", async () => {
-    await launchExample(page, {
-      title: "Counter Contract",
-      accountName: "Counter Contract",
-    });
-    await page.getByRole("link", { name: "counter-account" }).click();
-    await waitForEditorText(page, "fn get_count(&self) -> Felt {");
+    await createCounterScript(page);
   });
 
   let errorLine = 0;

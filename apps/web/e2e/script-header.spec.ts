@@ -1,11 +1,10 @@
 import { expect, test } from "@playwright/test";
 import {
   COMPILED,
+  createCounterScript,
   replaceInEditor,
   scriptHeader,
-  waitForEditorText,
 } from "./editor";
-import { launchExample } from "./example";
 import { logBrowserErrors, TRANSACTION_TIMEOUT } from "./tutorial";
 
 test("script: name, dirty state and status in the header", async ({ page }) => {
@@ -20,16 +19,15 @@ test("script: name, dirty state and status in the header", async ({ page }) => {
     await expect(header.dirty).toHaveCount(0);
   });
 
-  await test.step("an example's script: its name, not its UUID", async () => {
-    await launchExample(page, {
-      title: "Counter Contract",
-      accountName: "Counter Contract",
-    });
-    await page.getByRole("link", { name: "counter-account" }).click();
+  await test.step("a user's script: its name, not its UUID", async () => {
+    await createCounterScript(page);
     await expect(page).toHaveURL(/\/scripts\/[0-9a-f-]{36}$/);
-    await waitForEditorText(page, "fn get_count(&self) -> Felt {");
     await expect(header.name).toHaveText("counter-account");
-    await expect(header.status).toHaveText("Compiled");
+    await expect(header.status).toHaveText("Draft");
+    await compile();
+    await expect(header.status).toHaveText("Compiled", {
+      timeout: TRANSACTION_TIMEOUT,
+    });
     await expect(header.dirty).toHaveCount(0);
   });
 

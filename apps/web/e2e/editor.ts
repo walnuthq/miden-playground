@@ -1,4 +1,5 @@
-import type { Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
+import { selectOption, TRANSACTION_TIMEOUT } from "./tutorial";
 
 // Monaco loads lazily, renders only visible lines and splits them into
 // tokens: check its models rather than the page text.
@@ -71,4 +72,21 @@ export const scriptHeader = (page: Page) => {
     dirty: header.getByRole("img", { name: "Edited since the last compile" }),
     status: header.locator('[data-slot="badge"]'),
   };
+};
+
+// An editable script with the counter contract's source, for specs that only
+// need the editor: it deploys nothing. It starts as a draft, until compiled.
+export const createCounterScript = async (page: Page) => {
+  await page.goto("/scripts");
+  const create = page.getByRole("button", { name: "Create new script" });
+  // The app shell shows it disabled until the client is ready.
+  await expect(create).toBeEnabled({ timeout: TRANSACTION_TIMEOUT });
+  await create.click();
+  const dialog = page.getByRole("dialog").filter({ hasText: "Create Script" });
+  await dialog.getByLabel("Name").fill("counter-account");
+  await selectOption(page, "Type", "Account Component");
+  await selectOption(page, "Example", "Counter Contract");
+  await dialog.getByRole("button", { name: "Create" }).click();
+  await expect(page).toHaveURL(/\/scripts\/[0-9a-z_-]+$/);
+  await waitForEditorText(page, "fn get_count(&self) -> Felt {");
 };
