@@ -47,7 +47,8 @@ export const startTutorial = async (page: Page, title: string) => {
   await page.goto("/");
   // The Playground syncs with testnet before rendering, which can be slow.
   const showAll = page.getByRole("button", { name: /Show all \d+ tutorials/ });
-  await expect(showAll).toBeVisible({ timeout: TRANSACTION_TIMEOUT });
+  // The app shell shows it disabled until the client is ready.
+  await expect(showAll).toBeEnabled({ timeout: TRANSACTION_TIMEOUT });
   await showAll.click();
   const card: Locator = page
     .locator("div")

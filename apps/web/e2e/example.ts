@@ -16,7 +16,8 @@ export const launchExample = async (
     .filter({ has: page.getByRole("button", { name: "Launch example" }) })
     .last();
   const launch = card.getByRole("button", { name: "Launch example" });
-  await expect(launch).toBeVisible({ timeout: TRANSACTION_TIMEOUT });
+  // The app shell shows it disabled until the client is ready.
+  await expect(launch).toBeEnabled({ timeout: TRANSACTION_TIMEOUT });
   await launch.click();
   await expect(page).toHaveURL(/\/accounts$/, { timeout: TRANSACTION_TIMEOUT });
   await expect(page.getByText(`${title} example loaded.`)).toBeVisible();

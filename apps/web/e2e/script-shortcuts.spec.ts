@@ -1,6 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
-import { COMPILED, waitForEditorText } from "./editor";
-import { launchExample } from "./example";
+import { COMPILED, createCounterScript, waitForEditorText } from "./editor";
 import { logBrowserErrors, TRANSACTION_TIMEOUT } from "./tutorial";
 
 const consoleHeight = async (page: Page) =>
@@ -31,12 +30,7 @@ test("script: keyboard shortcuts", async ({ page }) => {
   const compiled = page.getByText(COMPILED);
 
   await test.step("open the counter account script", async () => {
-    await launchExample(page, {
-      title: "Counter Contract",
-      accountName: "Counter Contract",
-    });
-    await page.getByRole("link", { name: "counter-account" }).click();
-    await waitForEditorText(page, "fn get_count(&self) -> Felt {");
+    await createCounterScript(page);
   });
 
   await test.step("Cmd/Ctrl+S in the editor compiles", async () => {
