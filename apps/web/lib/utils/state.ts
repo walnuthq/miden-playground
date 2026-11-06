@@ -21,6 +21,7 @@ export const defaultState = (): State => ({
   nextState: null,
   nextStore: null,
   fallbackState: null,
+  workspaceRun: 0,
   // ACCOUNTS
   createWalletDialogOpen: false,
   createFaucetDialogOpen: false,

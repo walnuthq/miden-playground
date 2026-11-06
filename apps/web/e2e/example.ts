@@ -8,6 +8,18 @@ export const launchExample = async (
   page: Page,
   { title, accountName }: { title: string; accountName: string },
 ) => {
+  await startExample(page, title);
+  await expect(page.getByText(`${accountName} deployed.`)).toBeVisible({
+    timeout: 2 * TRANSACTION_TIMEOUT,
+  });
+  // The sidebar can list a component with the same name: open the account
+  // from its (clickable) row.
+  await page.getByRole("cell", { name: accountName, exact: true }).click();
+  await expect(page).toHaveURL(/\/accounts\/mtst1[0-9a-z]+$/);
+};
+
+// Launches an example without waiting for its account.
+export const startExample = async (page: Page, title = "Counter Contract") => {
   await page.goto("/");
   // The Playground syncs with testnet before rendering, which can be slow.
   const card: Locator = page
@@ -21,13 +33,6 @@ export const launchExample = async (
   await launch.click();
   await expect(page).toHaveURL(/\/accounts$/, { timeout: TRANSACTION_TIMEOUT });
   await expect(page.getByText(`${title} example loaded.`)).toBeVisible();
-  await expect(page.getByText(`${accountName} deployed.`)).toBeVisible({
-    timeout: 2 * TRANSACTION_TIMEOUT,
-  });
-  // The sidebar can list a component with the same name: open the account
-  // from its (clickable) row.
-  await page.getByRole("cell", { name: accountName, exact: true }).click();
-  await expect(page).toHaveURL(/\/accounts\/mtst1[0-9a-z]+$/);
 };
 
 // The innermost row holding `text` in the Components tab: a component's row

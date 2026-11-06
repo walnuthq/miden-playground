@@ -8,8 +8,14 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@workspace/ui/components/empty";
-import { type ReactNode, useEffect, useMemo, useState } from "react";
-import useGlobalContext from "@/components/global-context/hook";
+import {
+  type ReactNode,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import GlobalContext from "@/components/global-context";
 import AppShell from "@/components/lib/app-shell";
 import Logo from "@/components/lib/logo";
 import useNetwork from "@/hooks/use-network";
@@ -68,7 +74,7 @@ const InitializationError = ({ error }: { error: Error }) => {
 
 const MidenProvider = ({ children }: { children: ReactNode }) => {
   const { networkId } = useNetwork();
-  const { dispatch } = useGlobalContext();
+  const { globalDispatch: dispatch } = useContext(GlobalContext);
   const [storeChecked, setStoreChecked] = useState(false);
   // Memoized: the SDK's provider re-initializes the client whenever the
   // config object changes, and this component re-renders on every app state
