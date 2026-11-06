@@ -36,5 +36,7 @@ overrides:
   "follow-redirects": "^1.16.2"
   "qs": "^6.16.1"
   "bn.js@4": "^4.12.3"
-minimumReleaseAgeExclude:
-  - playwright-core@1.65.0
+  # GHSA-g3hv-75wg-m249. Keep these two together: glob 11 silently matches nothing
+  # on minimatch 11. Remove both once the SDK and shadcn's ts-morph move on.
+  "minimatch": "^11.0.4"
+  "glob": "^14.0.3"
