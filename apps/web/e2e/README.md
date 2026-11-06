@@ -1,6 +1,6 @@
 # End-to-end tests
 
-Playwright tests for the tutorials, the examples, the script editor (`script-*.spec.ts`: header, Explorer, diagnostics, console layout, shortcuts, MASM highlighting, editor settings) and the phone layout (`mobile/`). They run against a live Playground on testnet, so transactions are proven and submitted for real: expect minutes per test. Tests run one at a time because they share testnet accounts.
+Playwright tests for the tutorials, the examples, the script editor (`script-*.spec.ts`: header, Explorer, diagnostics, console layout, shortcuts, MASM highlighting, editor settings) and the phone layout (`mobile/`). They run against a live Playground on testnet, so transactions are proven and submitted for real: expect minutes per test. Spec files run in parallel on 4 workers, about 8 minutes for the suite, or 28 with `--workers=1`. Testnet's prover and RPC time out now and then, so a failing test gets one retry, and one that passes on it is reported as flaky. See `playwright.config.ts` for why 4, and what specs can share.
 
 ## Prerequisites
 
@@ -11,13 +11,13 @@ Playwright tests for the tutorials, the examples, the script editor (`script-*.s
 
 ## Environment variables
 
-| Variable                              | Required | Description                                                                                                                                                                                  |
-| ------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `BREAD_EXTENSION_DIR`                 | No       | Absolute path to an unpacked Bread Wallet extension, instead of `.bread-wallet/extension`.                                                                                                   |
-| `BREAD_PROFILE_DIR`, `BREAD_PASSWORD` | No       | Run on a copy of a Chromium profile where Bread is already onboarded (e.g. a funded wallet) instead of onboarding a new wallet per test. The profile must come from Playwright's Chromium.   |
-| `BREAD_PROFILE_IN_PLACE`              | No       | `1`: run on the `BREAD_PROFILE_DIR` profile itself, not a copy. Needed for a wallet on a real chain (Mainnet), whose state must persist across runs. Tests sharing it can't run in parallel. |
-| `PARA_EMAIL`                          | No       | Para test account for tutorial 4 (default `playground-e2e@test.getpara.com`).                                                                                                                |
-| `PLAYWRIGHT_BASE_URL`                 | No       | Deployment to test (default `http://localhost:3000`).                                                                                                                                        |
+| Variable                              | Required | Description                                                                                                                                                                                                     |
+| ------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `BREAD_EXTENSION_DIR`                 | No       | Absolute path to an unpacked Bread Wallet extension, instead of `.bread-wallet/extension`.                                                                                                                      |
+| `BREAD_PROFILE_DIR`, `BREAD_PASSWORD` | No       | Run on a copy of a Chromium profile where Bread is already onboarded (e.g. a funded wallet) instead of onboarding a new wallet per test. The profile must come from Playwright's Chromium.                      |
+| `BREAD_PROFILE_IN_PLACE`              | No       | `1`: run on the `BREAD_PROFILE_DIR` profile itself, not a copy. Needed for a wallet on a real chain (Mainnet), whose state must persist across runs. Tests sharing it can't run in parallel: add `--workers=1`. |
+| `PARA_EMAIL`                          | No       | Para test account for tutorial 4 (default `playground-e2e@test.getpara.com`).                                                                                                                                   |
+| `PLAYWRIGHT_BASE_URL`                 | No       | Deployment to test (default `http://localhost:3000`).                                                                                                                                                           |
 
 **Specs using Bread Wallet are skipped, not failed, when Bread Wallet isn't installed.** A run that reports `skipped` didn't test anything. These specs are tutorials 3, 4, 5, 8, 9 and 11, and the Miden Bank example.
 
@@ -56,7 +56,7 @@ The specs in `mobile/` run in two phone projects: `mobile-safari` (iPhone 14, We
 MAINNET_E2E=1 BREAD_PROFILE_IN_PLACE=1 \
 BREAD_PROFILE_DIR="$PWD/../../.bread-wallet/profiles/mainnet" \
 BREAD_PASSWORD="$(cat ../../.bread-wallet/profiles/mainnet.password)" \
-pnpm test:e2e e2e/mainnet-network-counter.spec.ts
+pnpm test:e2e e2e/mainnet-network-counter.spec.ts --workers=1
 ```
 
 The profile is a Bread wallet onboarded on Mainnet with an invite code, from Playwright's Chromium (gitignored, like the rest of `.bread-wallet/`). The spec stops before spending anything when the wallet has less than 0.002 USDCX. To top it up, run `BREAD_INVITE_CODE=<code> pnpm qa-wallet fund`. It onboards a throwaway Bread wallet with the invite code, waits for its 0.01 USDCX funding, sends it all to the QA wallet (about 0.0096 arrives), then deletes the throwaway profile. If it fails midway, the profile is kept in `.bread-wallet/profiles/burner-*`: resume with `pnpm qa-wallet fund --burner <dir>`. `pnpm qa-wallet balance` prints the QA wallet's balance.

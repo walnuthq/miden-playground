@@ -27,20 +27,32 @@ test("mobile: app shell before the WASM loads", async ({ page }) => {
   await expect(showAll).toBeEnabled({ timeout: TRANSACTION_TIMEOUT });
 });
 
-// While the Miden client initializes (seconds in Chrome, about 30 s in
-// WebKit), the app shell shows the home page with its actions disabled, then
-// the app takes over.
+// While the Miden client initializes, the app shell shows the home page with
+// its actions disabled, then the app takes over. That takes under a second
+// against a local server, often over before page.goto returns, and about 30 s
+// on WebKit against production: a script in the page records it, since a check
+// from here could miss it. The test above checks the shell's layout.
 test("mobile: app shell while the client initializes", async ({ page }) => {
   logBrowserErrors(page);
+  await page.addInitScript(() => {
+    const watch = () => {
+      const showAll = [...document.querySelectorAll("button")].find((button) =>
+        /^Show all \d+ tutorials$/.test(button.textContent?.trim() ?? ""),
+      );
+      if (showAll?.disabled) {
+        document.documentElement.dataset.shellSeen = "true";
+      } else {
+        requestAnimationFrame(watch);
+      }
+    };
+    requestAnimationFrame(watch);
+  });
   await page.goto("/");
   const showAll = page.getByRole("button", {
     name: /Show all \d+ tutorials/,
   });
-  await expect(showAll).toBeVisible();
-  await expect(showAll).toBeDisabled();
-  await expectNoHorizontalOverflow(page);
-  await expectHeaderFits(page);
   await expect(showAll).toBeEnabled({ timeout: TRANSACTION_TIMEOUT });
+  await expect(page.locator("html")).toHaveAttribute("data-shell-seen", "true");
   await expectNoHorizontalOverflow(page);
   await expectHeaderFits(page);
 });

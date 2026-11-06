@@ -217,7 +217,8 @@ test("script: a compiled script's MASM", async ({ page }) => {
     await expect(
       page.locator(".monaco-editor-overlaymessage").first(),
     ).toBeVisible();
-    expect(await pageWidth()).toBe(width);
+    // Not exact: a page scrollbar can make it narrower.
+    expect(await pageWidth()).toBeLessThanOrEqual(width);
   });
 
   await test.step("an edit disables it, a compile brings it back", async () => {

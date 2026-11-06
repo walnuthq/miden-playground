@@ -10,12 +10,16 @@ export default defineConfig({
   testDir: "./e2e",
   // Checks the Bread Wallet version (see e2e/global-setup.ts).
   globalSetup: "./e2e/global-setup.ts",
-  // Tutorials share testnet accounts (faucets, wallets of the tutorial
-  // stores): run them one at a time.
+  // Each test has its own browser store and creates its own accounts, so spec
+  // files run in parallel. What they do share can't collide within a run: only
+  // tutorial 2 uses the shared Wallet A, and tutorial 6's count check tolerates
+  // other increments. More workers hit Para's rate limit (429s at 6).
   fullyParallel: false,
-  workers: 1,
+  workers: 4,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 1 : 0,
+  // For testnet's remote prover and RPC, which time out now and then. A test
+  // that passes on its retry is reported as flaky, so it stays visible.
+  retries: 1,
   timeout: 10 * 60_000,
   expect: { timeout: 30_000 },
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "list",
