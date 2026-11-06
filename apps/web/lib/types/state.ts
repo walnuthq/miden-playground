@@ -110,3 +110,7 @@ export type State = {
   saveProjectDialogSaveAs: boolean;
   deleteProjectDialogOpen: boolean;
 };
+
+// Scripts and components a workspace starts with, fetched from the API: a
+// Mainnet sandbox's (mainnetSandboxStarter) or a tutorial's (Tutorial.starter).
+export type WorkspaceStarter = Pick<State, "scripts" | "components">;

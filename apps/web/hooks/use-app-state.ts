@@ -21,17 +21,14 @@ import type { Account } from "@/lib/types/account";
 import type { NetworkId } from "@/lib/types/network";
 import type { InputNote } from "@/lib/types/note";
 import type { Script } from "@/lib/types/script";
-import type { State } from "@/lib/types/state";
+import type { State, WorkspaceStarter } from "@/lib/types/state";
 import type { Store } from "@/lib/types/store";
 import type { Transaction } from "@/lib/types/transaction";
 import {
   accountIdFromPrefixSuffix,
   midenFaucetAccount,
 } from "@/lib/utils/account";
-import {
-  mainnetSandboxStarter,
-  type SandboxStarter,
-} from "@/lib/utils/mainnet-sandbox";
+import { mainnetSandboxStarter } from "@/lib/utils/mainnet-sandbox";
 import { noteConsumed } from "@/lib/utils/note";
 import { defaultState } from "@/lib/utils/state";
 import { defaultStore, storeName } from "@/lib/utils/store";
@@ -475,7 +472,7 @@ const useAppState = () => {
       starter = { scripts: [], components: [] },
       tutorialProgress: nextTutorialProgress = tutorialProgress,
     }: {
-      starter?: SandboxStarter;
+      starter?: WorkspaceStarter;
       tutorialProgress?: State["tutorialProgress"];
     } = {},
   ): State => {

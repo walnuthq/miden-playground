@@ -64,11 +64,17 @@ export type Signature = {
   results: MidenTypeStruct[];
 };
 
+// A procedure's attributes, as midenc's manifest serializes its externally
+// tagged `Attribute` enum: a marker for `#[note_script]`,
+// `#[transaction_script]` or `#[account_procedure]`. The built-in scripts have
+// none.
+export type ProcedureAttribute = { Marker: string } | Record<string, unknown>;
+
 export type ProcedureExport = {
   path: string;
   digest: string;
   signature: Signature;
-  attributes: { attrs: string[] };
+  attributes: { attrs: ProcedureAttribute[] };
   // Whether it only reads state, so its Invoke button runs it locally
   // (`canInvokeProcedure`). api-compile reads it from the MAST and the API
   // stores it with each export: `null` when it can't be told, missing from

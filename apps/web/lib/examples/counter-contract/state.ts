@@ -1,6 +1,6 @@
+import { counterAccountComponent } from "@/lib/tutorials/counter-account";
 import defaultComponents from "@/lib/types/default-components";
 import type { State } from "@/lib/types/state";
-import { defaultComponent, storageSlotName } from "@/lib/utils/component";
 import { defaultState } from "@/lib/utils/state";
 
 const state: State = {
@@ -8,24 +8,9 @@ const state: State = {
   exampleId: "counter-account",
   components: [
     ...defaultComponents,
-    {
-      ...defaultComponent(),
-      id: "counter-account",
-      name: "Counter Contract",
-      type: "account-component",
-      scriptId: "",
-      storageSlots: [
-        {
-          name: storageSlotName({
-            packageName: "counter-account",
-            traitName: "CounterContract",
-            fieldName: "count_map",
-          }),
-          type: "map",
-          value: "1:0",
-        },
-      ],
-    },
+    // Its script is created from the API when the example is launched
+    // (useExamples), which fills `scriptId` in.
+    { ...counterAccountComponent, scriptId: "" },
   ],
 };
 

@@ -1,5 +1,7 @@
-import type { Component } from "@/lib/types/component";
-import { snakeCase } from "@/lib/utils/case";
+// Plain node runs the unit test of lib/tutorials/counter-account.ts, which
+// imports this module: relative imports only.
+import type { Component } from "../types/component.ts";
+import { snakeCase } from "./case.ts";
 
 // Unused at the moment. Needs StorageSlot imported from @/lib/types/component.
 // export const defaultStorageSlot = (): StorageSlot => ({

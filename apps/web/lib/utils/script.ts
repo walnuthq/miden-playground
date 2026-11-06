@@ -107,6 +107,29 @@ export const isReadOnlyProcedure = ({
 }: Pick<ProcedureExport, "path" | "readOnly">) =>
   readOnly ?? formatProcedureExportPath(path).startsWith("get");
 
+const hasMarker = ({ attributes }: ProcedureExport, marker: string) =>
+  attributes.attrs.some(
+    (attribute) => "Marker" in attribute && attribute.Marker === marker,
+  );
+
+// The export a note or transaction script runs from, whose digest is the
+// compiled script's root (checked with `NoteScript.fromPackage`): the one
+// marked `note_script` or `transaction_script`, else `run` (packages compiled
+// before the markers were reported), else the first export (the built-ins,
+// whose only export is the script). Undefined for a script with no exports.
+export const entryPointExport = ({
+  procedureExports,
+}: Pick<Script, "procedureExports">) =>
+  procedureExports.find(
+    (procedureExport) =>
+      hasMarker(procedureExport, "note_script") ||
+      hasMarker(procedureExport, "transaction_script"),
+  ) ??
+  procedureExports.find(
+    ({ path }) => formatProcedureExportPath(path) === "run",
+  ) ??
+  procedureExports[0];
+
 export const formatProcedureInputs = (inputs: MidenInput[]) =>
   inputs
     .toReversed()
