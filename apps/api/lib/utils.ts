@@ -82,26 +82,32 @@ export const createPackage = async ({
   return { id, files: scriptFiles(name, files) };
 };
 
-type CompileResponse = {
-  stdout: string;
-  stderr: string;
-  masp: string;
-  commitment: string;
-  manifest: Manifest;
-  // Whether each exported procedure is read-only, by export path: `null` when
-  // it can't be told. Missing from an api-compile that predates it.
-  readOnly?: Record<string, boolean | null>;
-  // Set when the build succeeded: the sources plus the lockfile it used.
-  files?: Record<string, string>;
-  // The release build's Miden Assembly, sent for `masm: true`: its `error` when
-  // unavailable (or over api-compile's 4 MiB limit). Missing from an
-  // api-compile that predates it.
-  masm?: { source: string } | { error: string };
-};
+// The release build's Miden Assembly, sent for `masm: true`: its `error` when
+// unavailable (or over api-compile's 4 MiB limit).
+type MasmOutput = { source: string } | { error: string };
+
+// api-compile's answer to `POST /compile`: a failed build is a 200 too, with
+// cargo-miden's output alone.
+type CompileResponse =
+  | { built: false; stdout: string; stderr: string }
+  | {
+      built: true;
+      stdout: string;
+      stderr: string;
+      masp: string;
+      commitment: string;
+      manifest: Manifest;
+      // Whether each exported procedure is read-only, by export path: `null`
+      // when it can't be told.
+      readOnly: Record<string, boolean | null>;
+      // The sources plus the lockfile the build used.
+      files: Record<string, string>;
+      masm?: MasmOutput;
+    };
 
 // The MASM tab's content: for reading only, it calls library procedures
 // without including them, so it doesn't reassemble into the package.
-const masmSource = (masm: CompileResponse["masm"]) =>
+const masmSource = (masm?: MasmOutput) =>
   masm && "source" in masm ? masm.source : "";
 
 export const compilePackage = async ({
@@ -141,16 +147,7 @@ export const compilePackage = async ({
     },
     updatedFiles,
   );
-  const {
-    stdout,
-    stderr,
-    masp,
-    commitment,
-    manifest,
-    readOnly = {},
-    files: compiledFiles,
-    masm: masmOutput,
-  } = await fetchApiCompile<CompileResponse>("/compile", {
+  const build = await fetchApiCompile<CompileResponse>("/compile", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     // A stored lockfile can pin other crate versions than api-compile's warm
@@ -166,8 +163,8 @@ export const compilePackage = async ({
     }),
     signal,
   });
-  if (stdout === "" && stderr !== "") {
-    console.error(stderr);
+  if (build.built === false) {
+    console.error(build.stderr);
     await updatePackage({
       id,
       status: "error",
@@ -183,7 +180,7 @@ export const compilePackage = async ({
       type,
       status: "error",
       files: scriptFiles(name, updatedFiles),
-      error: stderr,
+      error: build.stderr,
       warnings: "",
       masm: "",
       commitment: "",
@@ -199,6 +196,15 @@ export const compilePackage = async ({
       ),
     };
   }
+  const {
+    stderr,
+    masp,
+    commitment,
+    manifest,
+    readOnly,
+    files: storedFiles,
+    masm: masmOutput,
+  } = build;
   const exports = manifest.exports
     .filter(({ Procedure: { signature } }) => signature?.abi === 3)
     // Stored with each export, in the `exports` column.
@@ -212,9 +218,8 @@ export const compilePackage = async ({
     console.warn(`${name}: no MASM (${masmOutput.error})`);
   }
   const masm = masmSource(masmOutput);
-  // The compiled sources plus the Cargo.lock the build used, sent back with the
-  // next compile to get the same dependency versions.
-  const storedFiles = compiledFiles ?? updatedFiles;
+  // `storedFiles`, the compiled sources plus the Cargo.lock the build used, are
+  // sent back with the next compile to get the same dependency versions.
   await updatePackage({
     id,
     status: "compiled",
