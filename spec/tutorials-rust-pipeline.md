@@ -1,7 +1,7 @@
 # Tutorials on the real Rust compilation pipeline
 
-Status: plan, written 2026-11-06. PR A in progress (branch
-`feat/tutorials-rust-pipeline-plumbing`), B to F not started. One PR per item
+Status: plan, written 2026-11-06. PR A open as #779 (2026-11-07), B to F not
+started. One PR per item
 below, in the order given; the tutorial PRs (B to E) are independent of each
 other once A has landed, so different agents can pick them up.
 
