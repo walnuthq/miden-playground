@@ -1,6 +1,6 @@
 import type { FunctionComponent } from "react";
 import type { NetworkId } from "@/lib/types/network";
-import type { State } from "@/lib/types/state";
+import type { State, WorkspaceStarter } from "@/lib/types/state";
 import type { Store } from "@/lib/types/store";
 import type { TutorialId } from "@/lib/types/tutorial-id";
 
@@ -32,5 +32,10 @@ export type Tutorial = TutorialMeta & {
   networkId: NetworkId;
   state: State;
   store: Store | null;
+  // Scripts and components fetched from the API when the tutorial starts
+  // fresh (a precompiled example's packages, too big to embed), appended to
+  // `state`'s. When the API is down, the tutorial opens without them, with a
+  // warning. Most tutorials embed their scripts in `state` instead.
+  starter?: () => Promise<WorkspaceStarter>;
   steps: TutorialStep[];
 };

@@ -48,6 +48,7 @@ const useAccounts = () => {
     verifyAccountComponentDialogAccountId,
     deployMultisigDialogOpen,
     accounts,
+    components: workspaceComponents,
     tutorialId,
     dispatch,
   } = useGlobalContext();
@@ -175,6 +176,8 @@ const useAccounts = () => {
     const account = wasmAccountToAccount({
       wasmAccount,
       name,
+      // Lists the workspace's compiled components the account's code holds.
+      workspace: { scripts, components: workspaceComponents },
       updatedAt: lastSyncTime,
     });
     if (

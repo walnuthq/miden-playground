@@ -1,7 +1,10 @@
 // Checks that every script the web app's "Create script" dialog can create
 // compiles: each type with no example, and each example. Examples that call
 // another script compile once the user adds it as a dependency (tutorial 11
-// teaches it for the counter note): the check does the same.
+// teaches it for the counter note): the check does the same. The code the
+// tutorials have users add to a template (their "Add to my script" buttons,
+// lib/utils/tutorial-code.ts in the web app) is compiled too, so an SDK bump
+// that breaks a snippet fails here.
 //
 // It goes through a running API (`pnpm dev`, which reaches whatever
 // API_COMPILE_URL it's configured with), exactly like the dialog then the
@@ -20,6 +23,12 @@ import {
   scriptExamples,
   scriptTypes,
 } from "../../web/lib/types/script.ts";
+import {
+  applyCodeEdits,
+  type CodeEdit,
+  increaseIncrementEdits,
+  resetCountEdits,
+} from "../../web/lib/utils/tutorial-code.ts";
 
 const API_URL = process.env.API_URL ?? "http://localhost:3001";
 
@@ -43,6 +52,25 @@ const userDependencies: Partial<Record<ScriptExample, ScriptExample>> = {
   "counter-note": "counter-account",
   "counter-script": "counter-account",
 };
+
+// The tutorials' edits, applied to the template their script is created from.
+// Tutorial 8's (timelockEdits) join once they anchor on the P2ID template.
+const tutorialEdits: {
+  label: string;
+  example: ScriptExample;
+  edits: CodeEdit[];
+}[] = [
+  {
+    label: "tutorial 7 (increase the increment)",
+    example: "counter-account",
+    edits: increaseIncrementEdits,
+  },
+  {
+    label: "tutorial 12 (reset_count)",
+    example: "counter-account",
+    edits: resetCountEdits,
+  },
+];
 
 type CreatedPackage = {
   id: string;
@@ -151,10 +179,35 @@ for (const { type, example } of scripts) {
   }
 }
 
+for (const { label, example, edits } of tutorialEdits) {
+  const script = await createScript(scriptExamples[example].type, example);
+  try {
+    const edited = applyCodeEdits(script.files["src/lib.rs"], edits);
+    if (edited === null) {
+      failures.push(label);
+      console.error(
+        `FAIL  ${label}: the edits don't apply to the ${example} template\n`,
+      );
+      continue;
+    }
+    const { status, error } = await compileScript(
+      { ...script, files: { "src/lib.rs": edited } },
+      script.dependencies.map(({ id }) => id),
+    );
+    if (status === "compiled") {
+      console.info(`ok    ${label}`);
+    } else {
+      failures.push(label);
+      console.error(`FAIL  ${label}\n${diagnostics(error)}\n`);
+    }
+  } finally {
+    await request(`/scripts/${script.id}`, { method: "DELETE" });
+  }
+}
+
+const total = scripts.length + tutorialEdits.length;
 if (failures.length > 0) {
-  console.error(
-    `${failures.length}/${scripts.length} templates don't compile.`,
-  );
+  console.error(`${failures.length}/${total} templates don't compile.`);
   process.exit(1);
 }
-console.info(`All ${scripts.length} templates compile.`);
+console.info(`All ${total} templates compile.`);

@@ -51,10 +51,12 @@ import type {
   StorageItem,
 } from "@/lib/types/account";
 import type { Component, StorageSlot } from "@/lib/types/component";
+import defaultComponents from "@/lib/types/default-components";
 import defaultScripts from "@/lib/types/default-scripts";
 import type { NetworkId } from "@/lib/types/network";
 import type { InputNote, NoteType } from "@/lib/types/note";
 import type { Script } from "@/lib/types/script";
+import type { State } from "@/lib/types/state";
 import type { Transaction, TransactionNote } from "@/lib/types/transaction";
 import { fromBase64, toBase64, waitUntil } from "@/lib/utils";
 import {
@@ -62,7 +64,7 @@ import {
   getIdentifierPart,
   getRoutingParametersPart,
 } from "@/lib/utils/account";
-import { assembledFromMasm, defaultProcedureExport } from "@/lib/utils/script";
+import { assembledFromMasm, entryPointExport } from "@/lib/utils/script";
 
 export const randomWord = () => {
   const bytes = new Uint8Array(32);
@@ -521,21 +523,41 @@ export const clientImportNoteFile = async ({
 export const storageMode = (accountId: WasmAccountIdType) =>
   accountId.isPublic() ? "public" : "private";
 
-const verifyStandardAccountComponents = (wasmAccount: WasmAccount) =>
-  defaultScripts
+// The components an account's code holds, by their scripts' exports: the
+// built-ins and, given the workspace, its compiled packages too, so an
+// imported account whose code holds a package's procedures lists that
+// package's component. A draft has no exports and matches nothing.
+export const verifyAccountComponents = (
+  wasmAccount: WasmAccount,
+  {
+    scripts = defaultScripts,
+    components = defaultComponents,
+  }: Partial<Pick<State, "scripts" | "components">> = {},
+) => {
+  const code = wasmAccount.code();
+  return scripts
     .filter(
-      ({ type, procedureExports }) =>
+      ({ type, status, procedureExports }) =>
         ["account-component", "authentication-component"].includes(type) &&
+        status === "compiled" &&
+        procedureExports.length > 0 &&
         procedureExports.every(({ digest }) =>
-          wasmAccount.code().hasProcedure(WasmWord.fromHex(digest)),
+          code.hasProcedure(WasmWord.fromHex(digest)),
         ),
     )
-    .map(({ id }) => id);
+    .flatMap((script) => {
+      const component = components.find(
+        ({ scriptId }) => scriptId === script.id,
+      );
+      return component ? [component.id] : [];
+    });
+};
 
 export const wasmAccountToAccount = ({
   wasmAccount,
   name,
   components,
+  workspace,
   multisig,
   updatedAt,
   consumableNoteIds = [],
@@ -543,14 +565,16 @@ export const wasmAccountToAccount = ({
   wasmAccount: WasmAccount;
   name: string;
   components?: string[];
+  // The workspace's scripts and components, matched against the account's
+  // code when `components` isn't given (verifyAccountComponents).
+  workspace?: Pick<State, "scripts" | "components">;
   multisig?: AccountMultisig;
   updatedAt?: number | null;
   consumableNoteIds?: string[];
 }): Account => {
   const code = wasmAccount.code().commitment().toHex();
-  const verifiedComponents = components
-    ? components
-    : verifyStandardAccountComponents(wasmAccount);
+  const verifiedComponents =
+    components ?? verifyAccountComponents(wasmAccount, workspace);
   const address = normalizeAccountId(wasmAccount.id().toString());
   const slotNames = wasmAccount.storage().getSlotNames();
   const account: Account = {
@@ -643,10 +667,7 @@ const verifyStandardNotes = ({
 }) =>
   scripts
     .filter(({ type }) => type === "note")
-    .find(({ procedureExports }) => {
-      const [runScript = defaultProcedureExport()] = procedureExports;
-      return runScript.digest === scriptRoot;
-    });
+    .find((script) => entryPointExport(script)?.digest === scriptRoot);
 
 export const wasmInputNoteRecordToInputNote = ({
   record,
