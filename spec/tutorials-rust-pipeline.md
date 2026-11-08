@@ -1,7 +1,7 @@
 # Tutorials on the real Rust compilation pipeline
 
 Status: plan, written 2026-11-06. PR A merged as #779 (2026-11-08), PR B open
-as #PRB_NUMBER (2026-11-08), C to F not started. One PR per item below, in the
+as #781 (2026-11-08), C to F not started. One PR per item below, in the
 order given; the tutorial PRs (B to E) are independent of each other once A has
 landed, so different agents can pick them up.
 
