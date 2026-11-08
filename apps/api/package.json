@@ -22,7 +22,7 @@
   "dependencies": {
     "drizzle-orm": "1.0.0-rc.5",
     "fflate": "0.8.3",
-    "hono": "4.13.16",
+    "hono": "4.13.17",
     "pg": "8.23.1",
     "smol-toml": "1.9.1"
   },
