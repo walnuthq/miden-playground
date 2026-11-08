@@ -16,13 +16,8 @@ import { defaultTutorialStep } from "@/lib/utils/tutorial";
 const TutorialStep = ({ tutorial }: { tutorial: Tutorial }) => {
   const isMobile = useIsMobile();
   const { networkId } = useNetwork();
-  const {
-    tutorialStep,
-    tutorialOpen,
-    previousTutorialStep,
-    closeTutorial,
-    isTutorial,
-  } = useTutorials();
+  const { tutorialStep, tutorialOpen, previousTutorialStep, closeTutorial } =
+    useTutorials();
   const step = tutorial.steps[tutorialStep] ?? defaultTutorialStep();
   const NextStepButton = step.NextStepButton ?? DefaultNextStepButton;
   return (
@@ -55,7 +50,9 @@ const TutorialStep = ({ tutorial }: { tutorial: Tutorial }) => {
           <>
             {isMobile && <MobileAlert />}
             {networkId === "mmck" && <MockChainAlert />}
-            {!isTutorial && !window.midenWallet && <MidenWalletAlert />}
+            {tutorial.requiresWallet && !window.midenWallet && (
+              <MidenWalletAlert />
+            )}
           </>
         )}
         <step.Content />

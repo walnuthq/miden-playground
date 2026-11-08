@@ -17,6 +17,7 @@ export const tutorialMetas: TutorialMeta[] = [
     category: "beginner",
     initialRoute: "/accounts",
     stepCount: 6,
+    requiresWallet: false,
   },
   {
     id: "transfer-assets-between-wallets",
@@ -28,6 +29,7 @@ export const tutorialMetas: TutorialMeta[] = [
     category: "beginner",
     initialRoute: "/accounts",
     stepCount: 5,
+    requiresWallet: false,
   },
   {
     id: "connect-wallet-and-sign-transactions",
@@ -39,6 +41,7 @@ export const tutorialMetas: TutorialMeta[] = [
     category: "beginner",
     initialRoute: "/accounts",
     stepCount: 5,
+    requiresWallet: true,
   },
   {
     id: "private-transfers",
@@ -50,6 +53,7 @@ export const tutorialMetas: TutorialMeta[] = [
     category: "beginner",
     initialRoute: "/accounts",
     stepCount: 6,
+    requiresWallet: true,
   },
   {
     id: "wallet-backup-using-miden-guardian",
@@ -61,6 +65,7 @@ export const tutorialMetas: TutorialMeta[] = [
     category: "advanced",
     initialRoute: "/accounts",
     stepCount: 7,
+    requiresWallet: true,
   },
   {
     id: "interact-with-the-counter-contract",
@@ -72,6 +77,7 @@ export const tutorialMetas: TutorialMeta[] = [
     category: "beginner",
     initialRoute: "/scripts",
     stepCount: 6,
+    requiresWallet: false,
   },
   {
     id: "deploy-a-counter-contract",
@@ -83,6 +89,7 @@ export const tutorialMetas: TutorialMeta[] = [
     category: "advanced",
     initialRoute: "/scripts",
     stepCount: 7,
+    requiresWallet: false,
   },
   {
     id: "timelock-p2id-note",
@@ -94,6 +101,7 @@ export const tutorialMetas: TutorialMeta[] = [
     category: "advanced",
     initialRoute: "/scripts",
     stepCount: 5,
+    requiresWallet: true,
   },
   {
     id: "network-transactions",
@@ -105,6 +113,7 @@ export const tutorialMetas: TutorialMeta[] = [
     category: "beginner",
     initialRoute: "/accounts",
     stepCount: 5,
+    requiresWallet: true,
   },
   {
     id: "foreign-procedure-invocation",
@@ -117,6 +126,7 @@ export const tutorialMetas: TutorialMeta[] = [
     category: "advanced",
     initialRoute: "/scripts",
     stepCount: 6,
+    requiresWallet: false,
   },
   {
     id: "your-first-smart-contract-and-custom-note",
@@ -128,6 +138,7 @@ export const tutorialMetas: TutorialMeta[] = [
     category: "advanced",
     initialRoute: "/scripts",
     stepCount: 8,
+    requiresWallet: true,
   },
   {
     id: "contract-verification",
@@ -139,6 +150,7 @@ export const tutorialMetas: TutorialMeta[] = [
     category: "advanced",
     initialRoute: "/scripts",
     stepCount: 7,
+    requiresWallet: false,
   },
 ];
 

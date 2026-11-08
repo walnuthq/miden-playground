@@ -26,6 +26,9 @@ export type TutorialMeta = {
   // `steps.length`, for the cards before the steps load; checked against the
   // steps in components/tutorials/index.ts (dev only).
   stepCount: number;
+  // Whether a step has the user connect Bread Wallet and sign with it: the
+  // first step then asks to install the extension when it's missing.
+  requiresWallet: boolean;
 };
 
 export type Tutorial = TutorialMeta & {
