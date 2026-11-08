@@ -17,6 +17,7 @@ export const defaultTutorial = (): Tutorial => ({
   category: "beginner",
   initialRoute: "/",
   stepCount: 0,
+  requiresWallet: false,
   networkId: "mtst",
   state: defaultState(),
   store: null,
