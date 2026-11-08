@@ -30,7 +30,7 @@ import {
   accountStorageModes,
 } from "@/lib/types/account";
 import { defaultComponentIds } from "@/lib/types/default-components";
-import { formatProcedureExportPath } from "@/lib/utils/script";
+import { entryPointExport } from "@/lib/utils/script";
 
 const DeployAccountDialog = () => {
   const { deployAccountDialogOpen, deployAccount, closeDeployAccountDialog } =
@@ -63,12 +63,11 @@ const DeployAccountDialog = () => {
     setAllowedTransactionScriptIds([]);
     closeDeployAccountDialog();
   };
+  // An allowed script's entry point, as the allowlist records it.
   const scriptIdToProcedure = (scriptId: string) => {
     const script = scripts.find(({ id }) => id === scriptId);
-    const runProcedure = script?.procedureExports.find(
-      ({ path }) => formatProcedureExportPath(path) === "run",
-    );
-    return runProcedure ? `${runProcedure.digest}:1` : "";
+    const entryPoint = script ? entryPointExport(script) : undefined;
+    return entryPoint ? `${entryPoint.digest}:1` : "";
   };
   return (
     <Dialog

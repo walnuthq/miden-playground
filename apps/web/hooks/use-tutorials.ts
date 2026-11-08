@@ -1,5 +1,6 @@
 import { useWallet } from "@miden-sdk/miden-wallet-adapter";
 import { useNavigate } from "react-router";
+import { toast } from "sonner";
 import useGlobalContext from "@/components/global-context/hook";
 import tutorials from "@/components/tutorials";
 import useAppState from "@/hooks/use-app-state";
@@ -7,6 +8,7 @@ import useNetwork from "@/hooks/use-network";
 import useProjects from "@/hooks/use-projects";
 import { trackEvent } from "@/lib/analytics";
 import type { NetworkId } from "@/lib/types/network";
+import type { WorkspaceStarter } from "@/lib/types/state";
 import type { Tutorial, TutorialId } from "@/lib/types/tutorial";
 import { randomLowercaseId, sleep } from "@/lib/utils";
 import { defaultTutorial, isTutorial } from "@/lib/utils/tutorial";
@@ -25,6 +27,25 @@ const startBlockNum = async (networkId: NetworkId) => {
   } catch (error) {
     console.error("ERROR: clientGetLatestBlockNum", error);
     return 0;
+  }
+};
+
+// A tutorial's starter scripts (`Tutorial.starter`), none for most. When the
+// API can't be reached, the tutorial still opens, with a warning.
+const tutorialStarter = async (
+  tutorial: Tutorial,
+): Promise<WorkspaceStarter> => {
+  if (!tutorial.starter) {
+    return { scripts: [], components: [] };
+  }
+  try {
+    return await tutorial.starter();
+  } catch (error) {
+    console.error("ERROR: tutorial.starter", error);
+    toast.warning("The tutorial's scripts couldn't be added.", {
+      description: error instanceof Error ? error.message : String(error),
+    });
+    return { scripts: [], components: [] };
   }
 };
 
@@ -79,11 +100,16 @@ const useTutorials = () => {
         console.error("ERROR: deleteProject", error),
       );
     }
+    // Fetched for the fresh state even when resuming: it's the fallback when
+    // the saved store can't be imported.
+    const starter = await tutorialStarter(tutorial);
     navigate(tutorial.initialRoute);
     await sleep(400);
     switchNetwork(tutorial.networkId);
     const freshState = {
       ...tutorial.state,
+      scripts: [...tutorial.state.scripts, ...starter.scripts],
+      components: [...tutorial.state.components, ...starter.components],
       nextStore: tutorial.store,
       tutorialStartBlockNum: await startBlockNum(tutorial.networkId),
       tutorialRunId: randomLowercaseId(),

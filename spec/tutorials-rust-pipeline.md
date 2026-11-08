@@ -1,6 +1,7 @@
 # Tutorials on the real Rust compilation pipeline
 
-Status: plan, written 2026-11-06. Nothing is implemented. One PR per item
+Status: plan, written 2026-11-06. PR A open as #779 (2026-11-07), B to F not
+started. One PR per item
 below, in the order given; the tutorial PRs (B to E) are independent of each
 other once A has landed, so different agents can pick them up.
 
@@ -56,7 +57,8 @@ installed SDK (`@miden-sdk/miden-sdk` 0.17.8, `miden` crate 0.15).
   them: `COUNTER_CONTRACT_*_PROC_HASH`, `COUNTER_NOTE_RUN_PROC_HASH` and
   `COUNTER_SCRIPT_RUN_PROC_HASH` in `lib/constants.ts` only describe the MASM
   built-ins.
-- **The MASM tab shows the compiler's output**: 1,878 lines for the counter,
+- **The MASM tab shows the compiler's output** for scripts compiled through
+  the API (an embedded package carries none, see PR A): 1,878 lines for the counter,
   with `get-count` and `increment-count` wrapping an `init` and WASM-lowered
   procedures. A step-by-step MASM walkthrough (tutorial 6, step 3) and the
   claim that the MASM tab shows the new increment as `add.5` (tutorial 7,
@@ -177,8 +179,10 @@ installed SDK (`@miden-sdk/miden-sdk` 0.17.8, `miden` crate 0.15).
 - **Tutorial 7 doesn't force a script name.** The copy shows the slot name
   computed from the user's script name (`storageSlotName`) and explains why,
   which teaches the derivation. Tutorials 11 and 12 keep forcing theirs.
-- **Note entry points are found by the `note_script` marker**, with `run` as
-  the fallback for packages stored before api-compile reported attributes.
+- **Entry points are found by the `note_script` / `transaction_script`
+  marker** (`entryPointExport`), with `run` as the fallback for packages
+  stored before api-compile reported attributes, then the first export (the
+  built-ins).
 - **No new precompiled example or API route.** The counter example's packages
   cover tutorial 9; nothing new goes into the Worker bundle (see the size note
   in `examples.md`).
@@ -190,16 +194,19 @@ yet. Small, reviewable on its own; every tutorial still passes.
 
 1. `verifyStandardNotes` (`lib/web-client.ts`) and `scriptIdToProcedure`
    (`deploy-account-dialog.tsx`): pick the export whose
-   `attributes.attrs` has `{ Marker: "note_script" }`, else the one named
-   `run`, else the first. Put the lookup in `lib/utils/script.ts`
-   (`noteScriptExport(script)`) and use it in both. Check that a note created
+   `attributes.attrs` has `{ Marker: "note_script" }` (or
+   `"transaction_script"`: the dialog resolves both allowlists), else the one
+   named `run`, else the first. Put the lookup in `lib/utils/script.ts`
+   (`entryPointExport(script)`) and use it in both. Check that a note created
    from the real P2ID template in a sandbox shows its script in the notes
    table.
 2. `verifyStandardAccountComponents` (`lib/web-client.ts`): match against the
    workspace's compiled scripts, not `defaultScripts` only, and let
-   `wasmAccountToAccount` callers pass `scripts`. Importing an account whose
-   code holds a package's procedures then lists that component, which lets
-   PR B delete the `interact-with-the-counter-contract` special case in
+   `wasmAccountToAccount` callers pass the workspace's scripts and components
+   (`account.components` holds component ids, found through `scriptId`).
+   Importing an account whose code holds a package's procedures then lists
+   that component, which lets PR B delete the
+   `interact-with-the-counter-contract` special case in
    `importAccountByAddress`.
 3. `Tutorial.starter?: () => Promise<Pick<State, "scripts" | "components">>`
    (`lib/types/tutorial.ts`). `enterTutorial` (`hooks/use-tutorials.ts`)
@@ -211,8 +218,10 @@ yet. Small, reviewable on its own; every tutorial still passes.
    (`lib/utils/mainnet-sandbox.ts`) so both use one
    `counterExampleStarter({ componentName })`.
 4. `apps/web/lib/tutorials/counter-account.ts`: the compiled `counter-account`
-   script (`masp`, `commitment`, `masm`, `procedureExports` with `readOnly`)
-   and its "Counter Contract" component (map slot `1:0`), lifted from
+   script (`masp`, `commitment`, `procedureExports` with `readOnly`; not the
+   compiler's `masm`, which stays out of the bundle, so the MASM tab of an
+   embedded script is empty, as tutorial 10's is today) and its "Counter
+   Contract" component (map slot `1:0`), lifted from
    tutorial 10's `state.ts`, which then imports it. Fields come from
    `apps/api/examples/counter-contract/compiled.json`. A `node --test` next to
    it (see `tutorial-code.test.ts` for the pattern) reads that JSON and asserts
@@ -222,8 +231,9 @@ yet. Small, reviewable on its own; every tutorial still passes.
 5. `apps/api/scripts/check-templates.ts`: also compile the tutorials' edited
    sources, so an SDK bump that breaks a snippet (as `tx::get_block_number`
    did) fails `pnpm templates:check`: import `increaseIncrementEdits` and
-   `timelockEdits` from `../../web/lib/utils/tutorial-code.ts`, apply them to
-   the created script's source, compile. Document it in
+   `resetCountEdits` from `../../web/lib/utils/tutorial-code.ts`, apply them
+   to the created script's source, compile. `timelockEdits` joins in PR D,
+   once it anchors on the P2ID template. Document it in
    `docs/claude/script-templates.md`.
 
 Verify: typecheck, lint, unit tests, `pnpm templates:check`, tutorials 10, 11
@@ -257,10 +267,12 @@ Then the tutorial (`components/tutorials/interact-with-the-counter-contract`):
   `templates/counter-account.rs` before shipping.
 - Step 3: drop the MASM walkthrough. Either remove the step (then `stepCount`
   in `components/tutorials/meta.ts`, the e2e and the next step's "In the
-  previous step" wording) or turn it into "Explore the compiled package": the
-  MASM tab is the compiler's output, the Manifest tab lists the exports with
-  their digests and whether they only read state. Recommended: the second,
-  since the step count and the e2e then barely change.
+  previous step" wording) or turn it into "Explore the compiled package"
+  around the Manifest tab, which lists the exports with their digests and
+  whether they only read state. The embedded script carries no MASM (PR A:
+  the compiler's output stays out of the bundle), so its MASM tab is empty
+  and the step can't lean on it. Recommended: the second, since the step
+  count and the e2e then barely change.
 - Step 4: unchanged flow, new address. Delete the special case in
   `importAccountByAddress` (PR A's digest matching lists `auth-no-auth`,
   `basic-wallet` and `counter-account` from the account code).
@@ -380,7 +392,7 @@ Verify: tutorial 8 e2e with Bread (`pnpm bread-wallet`), the mobile spec,
 - Step 2: "the `counter_account::counter_contract::count_map` storage slot
   with its default value `1:0`", "select `increment-note` as the allowed note
   script". Completion: the allowlist entry's key equals the `increment-note`
-  script's note-script digest from state (`noteScriptExport`), value
+  script's note-script digest from state (`entryPointExport`), value
   `0x01…`; `COUNTER_NOTE_RUN_PROC_HASH` goes.
 - Step 3: `increment-note` script, `run` at lines 22-29 of
   `apps/api/examples/counter-contract/increment-note/src/lib.rs` (re-count),
