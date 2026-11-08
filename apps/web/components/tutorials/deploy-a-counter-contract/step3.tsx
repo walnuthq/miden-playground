@@ -1,20 +1,16 @@
 import { Plus } from "lucide-react";
 import { useLocation } from "react-router";
+import useCounter from "@/components/tutorials/deploy-a-counter-contract/use-counter";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import { ButtonName, ExternalLink } from "@/components/tutorials/prose";
 import TutorialLink from "@/components/tutorials/tutorial-link";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
-import useComponents from "@/hooks/use-components";
 import type { TutorialStep } from "@/lib/types/tutorial";
 
 const useCompleted = () => {
   const { pathname } = useLocation();
-  const { components } = useComponents();
-  const component = components.find(
-    ({ type, scriptId }) =>
-      type === "account-component" && scriptId.startsWith("counter-account_"),
-  );
-  return pathname === `/components/${component?.id}`;
+  const { component } = useCounter();
+  return !!component && pathname === `/components/${component.id}`;
 };
 
 const Step3: TutorialStep = {

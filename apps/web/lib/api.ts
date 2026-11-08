@@ -26,6 +26,7 @@ export const createScript = async ({
   if (
     ![
       "",
+      "deploy-a-counter-contract",
       "foreign-procedure-invocation",
       "your-first-smart-contract-and-custom-note",
       "contract-verification",

@@ -22,13 +22,10 @@ const builtInRust = (path: string) => {
   return (match[1] ?? "").replaceAll("\\`", "`");
 };
 
-// The scripts the tutorials start from: the mock API's (tutorials 7 and 8)
-// and the API's template (tutorial 12).
-const counterMapContract = builtInRust(
-  "../types/default-scripts/counter-map-contract.ts",
-);
-const p2id = builtInRust("../types/default-scripts/p2id.ts");
+// The scripts the tutorials start from: the API's template (tutorials 7 and
+// 12) and the mock API's (tutorial 8).
 const counterAccount = read("../../../api/templates/counter-account.rs");
+const p2id = builtInRust("../types/default-scripts/p2id.ts");
 
 // Every edit applies, then reads as applied, and applying it again changes
 // nothing.
@@ -47,7 +44,7 @@ const expectEditsApply = (source: string, edits: CodeEdit[]) => {
 
 describe("tutorial code edits", () => {
   test("tutorial 7: the increment value, not the key", () => {
-    const edited = expectEditsApply(counterMapContract, increaseIncrementEdits);
+    const edited = expectEditsApply(counterAccount, increaseIncrementEdits);
     assert.equal(incrementValue(edited), INCREMENT);
     assert.match(
       edited,
@@ -55,7 +52,7 @@ describe("tutorial code edits", () => {
     );
     assert.equal(
       edited.match(/Word::new\(\[felt!\(1\), felt!\(0\)/g)?.length,
-      counterMapContract.match(/Word::new\(\[felt!\(1\), felt!\(0\)/g)?.length,
+      counterAccount.match(/Word::new\(\[felt!\(1\), felt!\(0\)/g)?.length,
     );
   });
 

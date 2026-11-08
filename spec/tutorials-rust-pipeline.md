@@ -47,11 +47,16 @@ installed SDK (`@miden-sdk/miden-sdk` 0.17.8, `miden` crate 0.15).
   Use `!defaultScriptIds.includes(id) && type === "…"` as tutorials 11 and 12
   do.
 - **Storage slot names derive from the script name.** A component's slot is
-  `<snake(script name)>::<snake(trait)>::<field>` (`storageSlotName` in
+  `<script name>::<snake(trait)>::<field>` (`storageSlotName` in
   `lib/utils/component.ts`, confirmed in the package metadata: a script named
-  `my-counter` has `my_counter::counter_contract::count_map`). Tutorial 7
-  currently has the user type `counter_contract::counter_contract::count_map`
-  whatever the script is called: that slot would never be read.
+  `my-counter` has `my_counter::counter_contract::count_map`). The script
+  name isn't split into words: only its characters outside `[A-Za-z0-9_]`
+  become `_`, so `counter2` gives `counter2::…` and `counter-v2`
+  `counter_v2::…` (`derive_storage_slot_name` in miden-base-macros 0.15;
+  found in PR C, where `storageSlotName` still applied `snakeCase` to it and
+  returned `counter_2::…`). Before PR C, tutorial 7 had the user type
+  `counter_contract::counter_contract::count_map` whatever the script was
+  called: that slot would never be read.
 - **Procedure digests depend on the package name** too (`my-counter`'s
   `get-count` differs from `counter-account`'s), so nothing can hard-code
   them: `COUNTER_CONTRACT_*_PROC_HASH`, `COUNTER_NOTE_RUN_PROC_HASH` and
@@ -422,7 +427,10 @@ Once B to E are merged:
   drops the UUID check. A script saved mid-tutorial before the migration has
   a `counter-account_<uuid>` id: `compileScript` returns a clear error for a
   non-UUID id ("created before … restart the tutorial") rather than the
-  API's 500. Restart is on the tutorial card.
+  API's 500. Restart is on the tutorial card. Tutorial 7's `use-counter.ts`
+  keeps the mock's fixed slot name (`MOCK_SLOT_NAME`) for such a script, so a
+  run saved before PR C still deploys a counter that reads its slot: remove
+  it here.
 - Delete the MASM counter built-ins: `default-scripts/counter-contract.ts`,
   `counter-map-contract.ts`, `counter-note.ts`, `counter-script.ts`,
   `timelock-p2id.ts`, `default-components/counter-contract.ts`, and their

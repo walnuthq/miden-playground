@@ -1,19 +1,15 @@
 import { Plus } from "lucide-react";
 import { useLocation } from "react-router";
+import useCounter from "@/components/tutorials/deploy-a-counter-contract/use-counter";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import { ButtonName, ExternalLink } from "@/components/tutorials/prose";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
-import useScripts from "@/hooks/use-scripts";
 import type { TutorialStep } from "@/lib/types/tutorial";
 
 const useCompleted = () => {
   const { pathname } = useLocation();
-  const { scripts } = useScripts();
-  const script = scripts.find(
-    ({ id, type }) =>
-      id.startsWith("counter-account_") && type === "account-component",
-  );
-  return pathname === `/scripts/${script?.id}`;
+  const { script } = useCounter();
+  return !!script && pathname === `/scripts/${script.id}`;
 };
 
 const Step1: TutorialStep = {
@@ -25,7 +21,8 @@ const Step1: TutorialStep = {
         <p>
           In the previous tutorial, you interacted with a counter contract that
           was already deployed on testnet. In this tutorial, you'll build your
-          own counter contract, deploy it on testnet and increment its counter.
+          own from the same code, deploy it on testnet and increment its
+          counter.
         </p>
         <p>
           To do so, you'll write the contract code in a script, turn it into an{" "}
@@ -41,6 +38,11 @@ const Step1: TutorialStep = {
           the <ButtonName icon={Plus}>Create new script</ButtonName> button,
           enter a name, then select the <strong>Account Component</strong> type
           and the <strong>Counter Contract</strong> example.
+        </p>
+        <p>
+          The name is yours to choose, for example <strong>my-counter</strong>.
+          It becomes the name of the package your code compiles to, and you'll
+          meet it again in the name of the contract's storage slot.
         </p>
         <TutorialStepAlert
           completed={completed}
