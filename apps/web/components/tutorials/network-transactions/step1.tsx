@@ -13,8 +13,8 @@ const Step1: TutorialStep = {
         proven by the network transaction builder, run by the Miden operator.
       </p>
       <p>
-        You'll deploy a network counter contract that uses the same code as the
-        counter contract from a previous tutorial, but a different{" "}
+        You'll deploy a network counter contract, a counter like the ones from
+        the previous tutorials, but with a different{" "}
         <ExternalLink href="https://docs.miden.xyz/reference/protocol/account/code#authentication">
           authentication component
         </ExternalLink>{" "}

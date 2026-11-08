@@ -7,9 +7,9 @@ import {
   tutorialPanel,
 } from "./tutorial";
 
-// The counter contract is deployed on testnet and anyone can increment it, so
-// its count is compared before and after rather than checked against fixed
-// values.
+// The counter contract (counterContractAddress in lib/constants.ts) is deployed
+// on testnet and anyone can increment it, so its count is compared before and
+// after rather than checked against fixed values.
 const invoke = async (page: Page, procedure: string) => {
   const row = page
     .getByRole("row")
@@ -41,11 +41,13 @@ test("tutorial 6: interact with the counter contract", async ({
   await expect(page).toHaveURL(/\/scripts$/);
 
   await test.step("1. open the counter contract script", async () => {
-    // Rows are clickable, without links.
+    // Rows are clickable, without links. The script's id is its name, so the
+    // ID column (hidden on phones) reads the same: click the Name cell.
     await page
-      .getByRole("cell", { name: "counter-contract", exact: true })
+      .getByRole("cell", { name: "counter-account", exact: true })
+      .last()
       .click();
-    await expect(page).toHaveURL(/\/scripts\/counter-value-contract$/);
+    await expect(page).toHaveURL(/\/scripts\/counter-account$/);
     await nextStep(page);
   });
 
@@ -53,9 +55,21 @@ test("tutorial 6: interact with the counter contract", async ({
     await nextStep(page);
   });
 
-  await test.step("3. read the MASM code", async () => {
-    await page.getByRole("tab", { name: "MASM" }).click();
-    await expect(page.getByText("increment_count").first()).toBeVisible();
+  await test.step("3. explore the compiled package", async () => {
+    // The embedded package carries no MASM: its tab is disabled.
+    await expect(page.getByRole("tab", { name: "MASM" })).toBeDisabled();
+    await page.getByRole("tab", { name: "Manifest" }).click();
+    // Listed under "Package exports", get_count flagged read-only.
+    await expect(
+      page.getByRole("row", {
+        name: "get_count Read-only fn get_count() -> Felt",
+      }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("row", {
+        name: "increment_count fn increment_count() -> Felt",
+      }),
+    ).toBeVisible();
     await nextStep(page);
   });
 
@@ -78,12 +92,17 @@ test("tutorial 6: interact with the counter contract", async ({
     await expect(dialog).toBeHidden({ timeout: TRANSACTION_TIMEOUT });
     // The sidebar also lists a "Counter Contract" component.
     await panel.openLink("click its name", /\/accounts\/mtst1[0-9a-z]+$/);
+    // The import matched the account's code against the workspace's
+    // counter-account package, so its component is listed.
+    await page.getByRole("tab", { name: "Components" }).click();
+    await expect(
+      page.getByRole("cell", { name: "counter-account", exact: true }),
+    ).toBeVisible();
     await nextStep(page);
   });
 
   let before = 0;
   await test.step("5. invoke get_count, then increment_count", async () => {
-    await page.getByRole("tab", { name: "Components" }).click();
     before = await getCount(page);
     await invoke(page, "increment_count");
     // Completes once the account's nonce has increased.

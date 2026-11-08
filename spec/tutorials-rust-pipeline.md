@@ -1,9 +1,9 @@
 # Tutorials on the real Rust compilation pipeline
 
-Status: plan, written 2026-11-06. PR A open as #779 (2026-11-07), B to F not
-started. One PR per item
-below, in the order given; the tutorial PRs (B to E) are independent of each
-other once A has landed, so different agents can pick them up.
+Status: plan, written 2026-11-06. PR A merged as #779 (2026-11-08), PR B open
+as #781 (2026-11-08), C to F not started. One PR per item below, in the
+order given; the tutorial PRs (B to E) are independent of each other once A has
+landed, so different agents can pick them up.
 
 Four tutorials show Rust code to the user but never compile it. Tutorials 7
 ("Deploy a counter contract") and 8 ("Timelock P2ID note") create and
@@ -143,13 +143,16 @@ installed SDK (`@miden-sdk/miden-sdk` 0.17.8, `miden` crate 0.15).
   with the compile service (CLAUDE.md: run it on port 3001 next to the web
   app), and the unit test must read `apps/api/templates/p2id-note.rs`
   like it already reads `counter-account.rs` for tutorial 12.
-- **Two counters live on testnet.** Tutorial 6 imports the MASM value-slot
-  counter at `TESTNET_COUNTER_CONTRACT_ADDRESS`
+- **Two counters live on testnet** (before PR B). Tutorial 6 imports the MASM
+  value-slot counter at `TESTNET_COUNTER_CONTRACT_ADDRESS`
   (`mtst1aqv9d02w5qvzfyfg87rg6penkg2fgqyc_qr7qqq9wr6w`); tutorial 10 reads the
   MASP map counter `0x7240e428d9f88611442761fe8f572b`
   (`mtst1apeypepgm8ugvy2yyaslar6h9vdvwmz4_qr7qqq9wr6w`, hard-coded in its
   `state.ts`), an instance of the `counter-account` package. Both are gone
-  after a testnet reset, like today.
+  after a testnet reset, like today. PR B replaced both with one
+  `counter-account` instance deployed on 2026-11-08
+  (`0xe564fdf28c41655101fa9601b7530c`,
+  `mtst1arjkfl0j33qk25gpl2tqrd6npsptfavv_qr7qqq9wr6w`, in `lib/constants.ts`).
 
 ## Decisions
 

@@ -82,12 +82,17 @@ export const TESTNET_FAUCET_ADDRESS =
   "mtst1apxtmjhlua0s5vt5sg3ymtnyxclasaf0_qr7qqq9wr6w";
 export const DEVNET_FAUCET_ADDRESS = "";
 
-// Unused at the moment.
-// export const TESTNET_COUNTER_CONTRACT_ACCOUNT_ID =
-//   "0x1856bd4ea0182491283f868d0733b2";
-// export const DEVNET_COUNTER_CONTRACT_ACCOUNT_ID = "";
+// The tutorials' counter contract (tutorial 6 imports it, tutorial 10 reads
+// it through FPI): an instance of the `counter-account` package
+// (lib/tutorials/counter-account.ts), deployed on 2026-11-08 by launching the
+// "Counter Contract" example on playground.miden.xyz, so it's verified in the
+// registry and funded. A testnet reset wipes it: deploy a new one the same way
+// and update both constants (spec/tutorials-rust-pipeline.md, PR B).
+export const TESTNET_COUNTER_CONTRACT_ACCOUNT_ID =
+  "0xe564fdf28c41655101fa9601b7530c";
+export const DEVNET_COUNTER_CONTRACT_ACCOUNT_ID = "";
 export const TESTNET_COUNTER_CONTRACT_ADDRESS =
-  "mtst1aqv9d02w5qvzfyfg87rg6penkg2fgqyc_qr7qqq9wr6w";
+  "mtst1arjkfl0j33qk25gpl2tqrd6npsptfavv_qr7qqq9wr6w";
 export const DEVNET_COUNTER_CONTRACT_ADDRESS = "";
 export const COUNTER_CONTRACT_GET_COUNT_PROC_HASH =
   "0x59d75d32906324e66bc719fe956662cd534c87d03ebda5a81444268f6fae574b";
@@ -144,13 +149,12 @@ export const midenFaucetApiUrl = (networkId: NetworkId) =>
     mmck: DEVNET_FAUCET_API_URL,
   })[networkId];
 
-// Unused at the moment.
-// export const counterContractAccountId = (networkId: NetworkId) =>
-//   networkId === "mtst"
-//     ? TESTNET_COUNTER_CONTRACT_ACCOUNT_ID
-//     : DEVNET_COUNTER_CONTRACT_ACCOUNT_ID;
-
 // The tutorials' counter contract is deployed on testnet only.
+export const counterContractAccountId = (networkId: NetworkId) =>
+  networkId === "mtst"
+    ? TESTNET_COUNTER_CONTRACT_ACCOUNT_ID
+    : DEVNET_COUNTER_CONTRACT_ACCOUNT_ID;
+
 export const counterContractAddress = (networkId: NetworkId) =>
   networkId === "mtst"
     ? TESTNET_COUNTER_CONTRACT_ADDRESS

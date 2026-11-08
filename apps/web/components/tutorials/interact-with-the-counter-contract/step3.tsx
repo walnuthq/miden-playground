@@ -1,120 +1,67 @@
-import {
-  ExternalLink,
-  InlineCode,
-  NumberedList,
-} from "@/components/tutorials/prose";
+import { ExternalLink, InlineCode } from "@/components/tutorials/prose";
 import type { TutorialStep } from "@/lib/types/tutorial";
 
 const Step3: TutorialStep = {
-  title: "Understand the counter contract MASM code.",
+  title: "Explore the compiled package.",
   Content: () => (
     <>
       <p>
-        In the previous step, you looked at the higher-level{" "}
-        <strong>Rust</strong> source code of the counter contract. Now let's
-        focus on its <strong>MASM</strong> implementation.
+        In the previous step, you read the <strong>Rust</strong> source code of
+        the counter contract. The <em>"Manifest"</em> tab describes what it
+        compiles to: a <strong>package</strong>, the unit of code that gets
+        deployed on-chain as an{" "}
+        <ExternalLink href="https://docs.miden.xyz/reference/protocol/account/components">
+          account component
+        </ExternalLink>
+        .
       </p>
       <p>
-        Here's a breakdown of what the{" "}
+        Under <em>"Package metadata"</em>, the <strong>Commitment</strong> is a
+        hash of the whole package, which identifies this exact build of the
+        code.
+      </p>
+      <p>
+        Under <em>"Package exports"</em>, each{" "}
+        <strong>
+          <InlineCode>#[account_procedure]</InlineCode>
+        </strong>{" "}
+        of the Rust code appears with its signature:{" "}
         <strong>
           <InlineCode>get_count</InlineCode>
         </strong>{" "}
-        procedure does:
-      </p>
-      <NumberedList>
-        <li>
-          Pushes the{" "}
-          <ExternalLink href="https://docs.miden.xyz/reference/protocol/account/storage#slot-id">
-            slot ID
-          </ExternalLink>{" "}
-          of the{" "}
-          <strong>
-            <InlineCode>counter_contract::counter_contract::count</InlineCode>
-          </strong>{" "}
-          slot (its prefix and suffix) onto the stack.
-        </li>
-        <li>
-          Executes{" "}
-          <strong>
-            <InlineCode>active_account::get_item</InlineCode>
-          </strong>{" "}
-          to read the Word stored in that slot, which holds the count.
-        </li>
-        <li>
-          Executes{" "}
-          <strong>
-            <InlineCode>sys::truncate_stack</InlineCode>
-          </strong>{" "}
-          to truncate the stack back to 16 elements.
-        </li>
-        <li>
-          The count read by{" "}
-          <strong>
-            <InlineCode>active_account::get_item</InlineCode>
-          </strong>{" "}
-          is now on top of the stack, and is returned when this procedure is
-          called.
-        </li>
-      </NumberedList>
-      <p>
-        Here's a breakdown of what the{" "}
+        and{" "}
         <strong>
           <InlineCode>increment_count</InlineCode>
         </strong>{" "}
-        procedure does:
+        both take no argument and return a <strong>Felt</strong>. The copy
+        button next to a name copies the procedure's <strong>digest</strong>,
+        the hash of its{" "}
+        <ExternalLink href="https://docs.miden.xyz/builder/glossary/#miden-assembly">
+          Miden Assembly
+        </ExternalLink>{" "}
+        (MASM) code. An Account's code is a set of such procedures, called by
+        their digests: when you import the counter contract in the next step,
+        the Playground finds these two digests in its code and recognizes the
+        component.
       </p>
-      <NumberedList>
-        <li>
-          Pushes the slot ID of the{" "}
-          <strong>
-            <InlineCode>counter_contract::counter_contract::count</InlineCode>
-          </strong>{" "}
-          slot onto the stack.
-        </li>
-        <li>
-          Executes{" "}
-          <strong>
-            <InlineCode>active_account::get_item</InlineCode>
-          </strong>{" "}
-          to read the current count.
-        </li>
-        <li>
-          Executes{" "}
-          <strong>
-            <InlineCode>add.1</InlineCode>
-          </strong>{" "}
-          to add{" "}
-          <strong>
-            <InlineCode>1</InlineCode>
-          </strong>{" "}
-          to the count.
-        </li>
-        <li>
-          Pushes the slot ID again so that the updated count can be written.
-        </li>
-        <li>
-          Executes{" "}
-          <strong>
-            <InlineCode>native_account::set_item</InlineCode>
-          </strong>
-          , which saves the incremented count to storage and returns the old
-          value.
-        </li>
-        <li>
-          Executes{" "}
-          <strong>
-            <InlineCode>dropw</InlineCode>
-          </strong>{" "}
-          to drop the old value from the stack.
-        </li>
-        <li>
-          Executes{" "}
-          <strong>
-            <InlineCode>sys::truncate_stack</InlineCode>
-          </strong>{" "}
-          to truncate the stack back to 16 elements.
-        </li>
-      </NumberedList>
+      <p>
+        The compiler also analyzes what each procedure does to the account:{" "}
+        <strong>
+          <InlineCode>get_count</InlineCode>
+        </strong>{" "}
+        is marked <em>"Read-only"</em> because it only reads storage, while{" "}
+        <strong>
+          <InlineCode>increment_count</InlineCode>
+        </strong>{" "}
+        writes to it. You'll see the difference when you invoke them: the
+        Playground runs a read-only procedure locally, and submits a Transaction
+        for the others.
+      </p>
+      <p>
+        The Playground ships this package already compiled, so its{" "}
+        <em>"MASM"</em> tab is disabled: for the scripts you compile yourself in
+        the next tutorials, it shows the compiler's MASM output.
+      </p>
     </>
   ),
 };

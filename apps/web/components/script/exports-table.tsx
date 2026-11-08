@@ -1,3 +1,4 @@
+import { Badge } from "@workspace/ui/components/badge";
 import {
   Table,
   TableBody,
@@ -52,6 +53,12 @@ const ExportsTable = ({ script }: { script: Script }) => (
                   content="Copy Procedure Digest"
                   copy={procedureExport.digest}
                 />
+                {/* api-compile's analysis (read-only-procedures.md): the
+                    Playground runs these locally instead of submitting a
+                    transaction. */}
+                {procedureExport.readOnly && (
+                  <Badge variant="outline">Read-only</Badge>
+                )}
               </div>
             </TableCell>
             <TableCell>
