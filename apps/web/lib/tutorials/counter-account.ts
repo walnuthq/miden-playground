@@ -1,11 +1,12 @@
 // The compiled `counter-account` package: the account of the "Counter
 // Contract" example (apps/api/examples/counter-contract), whose source is the
 // counter-account template, and its component. Embedded so a tutorial starts
-// with it without the API (tutorial 10). The masp, commitment and exports come
-// from the example's compiled.json: counter-account.test.ts checks they still
-// match, so after `pnpm examples:compile` regenerates the snapshot, update
-// them here (docs/claude/examples.md). The compiler's MASM isn't embedded: the
-// MASM tab stays empty. Plain node runs the test: relative imports only.
+// with it without the API (tutorials 6 and 10). The masp, commitment and
+// exports come from the example's compiled.json: counter-account.test.ts
+// checks they still match, so after `pnpm examples:compile` regenerates the
+// snapshot, update them here (docs/claude/examples.md). The compiler's MASM
+// isn't embedded: the MASM tab stays empty. Plain node runs the test:
+// relative imports only.
 import type { Component } from "../types/component.ts";
 import type { Script } from "../types/script.ts";
 import { storageSlotName } from "../utils/component.ts";

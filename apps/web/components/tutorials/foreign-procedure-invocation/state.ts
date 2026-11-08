@@ -1,4 +1,8 @@
 import {
+  counterContractAccountId,
+  counterContractAddress,
+} from "@/lib/constants";
+import {
   counterAccountComponent,
   counterAccountScript,
 } from "@/lib/tutorials/counter-account";
@@ -15,21 +19,21 @@ import {
 import { defaultComponent, storageSlotName } from "@/lib/utils/component";
 import { defaultState } from "@/lib/utils/state";
 
-const COUNTER_CONTRACT_ID = "0x7240e428d9f88611442761fe8f572b";
-const COUNTER_CONTRACT_ADDRESS =
-  "mtst1apeypepgm8ugvy2yyaslar6h9vdvwmz4_qr7qqq9wr6w";
-
+// The counter tutorial 6 imports: the same `counter-account` instance, here
+// pre-imported so the tutorial starts at the Count Reader.
 const state: State = {
   ...defaultState(),
   accounts: [
     midenFaucetAccount("mtst"),
     {
       ...defaultAccount(),
-      id: COUNTER_CONTRACT_ID,
+      id: counterContractAccountId("mtst"),
       name: "Counter Contract",
-      address: COUNTER_CONTRACT_ADDRESS,
-      identifier: getIdentifierPart(COUNTER_CONTRACT_ADDRESS),
-      routingParameters: getRoutingParametersPart(COUNTER_CONTRACT_ADDRESS),
+      address: counterContractAddress("mtst"),
+      identifier: getIdentifierPart(counterContractAddress("mtst")),
+      routingParameters: getRoutingParametersPart(
+        counterContractAddress("mtst"),
+      ),
       isFaucet: false,
       isPublic: true,
       isPrivate: false,

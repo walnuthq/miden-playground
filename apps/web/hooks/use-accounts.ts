@@ -17,7 +17,6 @@ import useFundAccount from "@/hooks/use-fund-account";
 import useNetwork from "@/hooks/use-network";
 import useScripts from "@/hooks/use-scripts";
 import { verifyAccountComponentsFromPackageIds } from "@/lib/api";
-import { counterContractAddress } from "@/lib/constants";
 import type { Account, AccountStorageMode } from "@/lib/types/account";
 import type { Component } from "@/lib/types/component";
 import { defaultComponentIds } from "@/lib/types/default-components";
@@ -180,16 +179,6 @@ const useAccounts = () => {
       workspace: { scripts, components: workspaceComponents },
       updatedAt: lastSyncTime,
     });
-    if (
-      address === counterContractAddress(networkId) &&
-      tutorialId === "interact-with-the-counter-contract"
-    ) {
-      account.components = [
-        "auth-no-auth",
-        "basic-wallet",
-        "counter-value-contract",
-      ];
-    }
     dispatch({
       type: "IMPORT_ACCOUNT",
       payload: { account },

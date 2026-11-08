@@ -6,7 +6,7 @@ import type { TutorialStep } from "@/lib/types/tutorial";
 
 const useCompleted = () => {
   const { pathname } = useLocation();
-  return pathname === "/scripts/counter-value-contract";
+  return pathname === "/scripts/counter-account";
 };
 
 const Step1: TutorialStep = {
@@ -38,7 +38,13 @@ const Step1: TutorialStep = {
           <ExternalLink href="https://docs.miden.xyz/builder/glossary/#miden-assembly">
             Miden Assembly
           </ExternalLink>{" "}
-          (MASM) before being deployed on-chain.
+          (MASM) before being deployed on-chain. The scripts table lists the
+          counter contract's script,{" "}
+          <strong>
+            <InlineCode>counter-account</InlineCode>
+          </strong>
+          : its Rust source code and the package it compiles to, the same one
+          the deployed contract runs.
         </p>
         <p>
           Let's start by reading the counter contract code to understand how its{" "}
@@ -57,7 +63,7 @@ const Step1: TutorialStep = {
           titleWhenCompleted="You opened the counter contract script."
           description={
             <p>
-              Click the <em>"counter-contract"</em> row in the scripts table to
+              Click the <em>"counter-account"</em> row in the scripts table to
               open the script.
             </p>
           }
