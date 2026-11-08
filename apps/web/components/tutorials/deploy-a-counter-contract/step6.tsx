@@ -1,23 +1,15 @@
+import useCounter from "@/components/tutorials/deploy-a-counter-contract/use-counter";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import { InlineCode } from "@/components/tutorials/prose";
 import TutorialLink from "@/components/tutorials/tutorial-link";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
-import useAccounts from "@/hooks/use-accounts";
-import useComponents from "@/hooks/use-components";
 import type { Account } from "@/lib/types/account";
-import { defaultComponentIds } from "@/lib/types/default-components";
 import type { TutorialStep } from "@/lib/types/tutorial";
 
+// The deployment's funding is the account's first transaction, the increment
+// its second.
 const useCompleted = () => {
-  const { accounts } = useAccounts();
-  const { components } = useComponents();
-  const component = components.find(
-    ({ type, scriptId }) =>
-      type === "account-component" && scriptId.startsWith("counter-account_"),
-  );
-  const counter = accounts.find(({ components }) =>
-    components.includes(component?.id ?? ""),
-  );
+  const { counter } = useCounter();
   const nonce = counter?.nonce ?? 0;
   return nonce >= 2;
 };
@@ -57,15 +49,7 @@ const Step6Content = ({ counter }: { counter?: Account }) => (
 const Step6: TutorialStep = {
   title: "Increment your counter contract.",
   Content: () => {
-    const { accounts } = useAccounts();
-    const { components } = useComponents();
-    const component = components.find(
-      ({ id, type }) =>
-        !defaultComponentIds.includes(id) && type === "account-component",
-    );
-    const counter = accounts.find(({ components }) =>
-      components.includes(component?.id ?? ""),
-    );
+    const { counter } = useCounter();
     const completed = useCompleted();
     return (
       <>

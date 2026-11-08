@@ -12,8 +12,8 @@ import { closePanel } from "./layout";
 
 // The editor is read-only on a phone: the tutorial steps that ask for code
 // have buttons that add it to the script, which these tests use to complete
-// them. Tutorials 7 and 8 compile through the web app's local mocks, tutorial
-// 12 through apps/api and the compile service, which checks that the code
+// them. Tutorial 8 compiles through the web app's local mocks, tutorials 7
+// and 12 through apps/api and the compile service, which checks that the code
 // the buttons add compiles.
 
 // Creates the step's script from the "Create Script" dialog, with the panel

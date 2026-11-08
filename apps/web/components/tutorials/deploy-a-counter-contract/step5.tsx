@@ -1,22 +1,13 @@
 import { Plus } from "lucide-react";
+import useCounter from "@/components/tutorials/deploy-a-counter-contract/use-counter";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import { ButtonName, ExternalLink } from "@/components/tutorials/prose";
 import TutorialLink from "@/components/tutorials/tutorial-link";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
-import useAccounts from "@/hooks/use-accounts";
-import useComponents from "@/hooks/use-components";
 import type { TutorialStep } from "@/lib/types/tutorial";
 
 const useCompleted = () => {
-  const { accounts } = useAccounts();
-  const { components } = useComponents();
-  const component = components.find(
-    ({ type, scriptId }) =>
-      type === "account-component" && scriptId.startsWith("counter-account_"),
-  );
-  const counter = accounts.find(({ components }) =>
-    components.includes(component?.id ?? ""),
-  );
+  const { counter } = useCounter();
   return !!counter;
 };
 

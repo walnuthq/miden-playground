@@ -10,6 +10,11 @@ import { snakeCase } from "./case.ts";
 //   value: "0",
 // });
 
+// A component's storage slot name, as the compiler derives it
+// (`derive_storage_slot_name` in miden-base-macros): the package name as it
+// is, with every character outside [A-Za-z0-9_] replaced by `_`, then the
+// trait in snake case, then the field. The package name isn't split into
+// words: `counter2` stays `counter2`, where snakeCase gives `counter_2`.
 export const storageSlotName = ({
   packageName,
   traitName,
@@ -18,7 +23,8 @@ export const storageSlotName = ({
   packageName: string;
   traitName: string;
   fieldName: string;
-}) => `${snakeCase(packageName)}::${snakeCase(traitName)}::${fieldName}`;
+}) =>
+  `${packageName.replace(/[^A-Za-z0-9_]/g, "_")}::${snakeCase(traitName)}::${fieldName}`;
 
 export const defaultComponent = (): Component => ({
   id: "",

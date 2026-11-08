@@ -1,45 +1,46 @@
 import ApplyCodeButton from "@/components/tutorials/apply-code-button";
+import useCounter from "@/components/tutorials/deploy-a-counter-contract/use-counter";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import { ExternalLink, InlineCode } from "@/components/tutorials/prose";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
-import useScripts from "@/hooks/use-scripts";
 import type { TutorialStep } from "@/lib/types/tutorial";
 import { scriptSource } from "@/lib/utils/script-files";
-import { INCREMENT, increaseIncrementEdits } from "@/lib/utils/tutorial-code";
+import {
+  INCREMENT,
+  increaseIncrementEdits,
+  incrementValue,
+} from "@/lib/utils/tutorial-code";
 
-const useScript = () => {
-  const { scripts } = useScripts();
-  return scripts.find(
-    ({ id, type }) =>
-      id.startsWith("counter-account_") && type === "account-component",
+// An edit after the compile turns the script back into a draft, so the
+// compiled package is the one of the source checked here.
+const useCompleted = () => {
+  const { script } = useCounter();
+  return (
+    script?.status === "compiled" && incrementValue(scriptSource(script)) > 1
   );
 };
 
-const useCompleted = () => {
-  const script = useScript();
-  const source = script ? scriptSource(script) : "";
-  return script?.masm !== "" && !!increaseIncrementEdits[0]?.applied(source);
-};
-
+// Line numbers refer to apps/api/templates/counter-account.rs, the source the
+// script is created from.
 const Step2: TutorialStep = {
   title: "Customize and compile the counter contract script.",
   Content: () => {
     const completed = useCompleted();
-    const script = useScript();
+    const { script } = useCounter();
     return (
       <>
         <p>
           The script you created contains the Rust source code of a counter
-          contract. Unlike the contract from the previous tutorial, which kept
-          its counter in a value slot, this one stores it in a{" "}
-          <ExternalLink href="https://docs.miden.xyz/reference/protocol/account/storage#map-slots">
-            map slot
-          </ExternalLink>
-          .
+          contract, the same code as the contract you interacted with in the
+          previous tutorial. Here's how it works.
         </p>
         <p>
-          Let's focus on lines <em>13-18</em>, where its storage layout is
-          defined. The counter is kept in a single map slot named{" "}
+          Lines <em>13-18</em> define its storage layout. The counter is kept in
+          a single{" "}
+          <ExternalLink href="https://docs.miden.xyz/reference/protocol/account/storage#map-slots">
+            map slot
+          </ExternalLink>{" "}
+          named{" "}
           <strong>
             <InlineCode>count_map</InlineCode>
           </strong>
@@ -59,10 +60,9 @@ const Step2: TutorialStep = {
           <strong>
             <InlineCode>get_count</InlineCode>
           </strong>{" "}
-          procedure, at lines <em>33-36</em>, builds this fixed key, a Word
-          whose first element is{" "}
+          procedure, at lines <em>33-38</em>, builds this fixed key, the Word{" "}
           <strong>
-            <InlineCode>1</InlineCode>
+            <InlineCode>[1, 0, 0, 0]</InlineCode>
           </strong>
           , then reads the value stored under it in the contract's{" "}
           <ExternalLink href="https://docs.miden.xyz/builder/glossary/#accountstorage">
@@ -75,32 +75,19 @@ const Step2: TutorialStep = {
           <strong>
             <InlineCode>increment_count</InlineCode>
           </strong>{" "}
-          procedure, at lines <em>38-44</em>, reads the current value the same
+          procedure, at lines <em>40-50</em>, reads the current value the same
           way, adds one to it, writes the new value back under the same key and
           returns it.
         </p>
         <p>
           To make this contract your own, change the increment value at line{" "}
-          <em>41</em> from{" "}
+          <em>46</em> from{" "}
           <strong>
-            <InlineCode>1</InlineCode>
+            <InlineCode>felt!(1)</InlineCode>
           </strong>{" "}
           to a greater number, for example{" "}
           <strong>
-            <InlineCode>felt!(5)</InlineCode>
-          </strong>
-          . Then compile the script to{" "}
-          <ExternalLink href="https://docs.miden.xyz/builder/glossary/#miden-assembly">
-            Miden Assembly
-          </ExternalLink>{" "}
-          (MASM): once it's compiled, the <em>"MASM"</em> tab shows your new
-          increment value in the{" "}
-          <strong>
-            <InlineCode>add</InlineCode>
-          </strong>{" "}
-          instruction of{" "}
-          <strong>
-            <InlineCode>increment_count</InlineCode>
+            <InlineCode>felt!({INCREMENT})</InlineCode>
           </strong>
           .
         </p>
@@ -112,6 +99,21 @@ const Step2: TutorialStep = {
             appliedLabel="Increment value changed"
           />
         </div>
+        <p>
+          Then click the <em>"Compile"</em> button above the editor. The
+          Playground sends your code to the Miden compiler, which turns the Rust
+          into{" "}
+          <ExternalLink href="https://docs.miden.xyz/builder/glossary/#miden-assembly">
+            Miden Assembly
+          </ExternalLink>{" "}
+          (MASM) and bundles it into a package, the form in which your contract
+          is deployed. The console under the editor reports the result.
+        </p>
+        <p>
+          If the compiler reports an error instead, the console shows it and the
+          editor underlines the faulty code: click the error's location in the
+          console to jump to it, fix the code and compile again.
+        </p>
         <TutorialStepAlert
           completed={completed}
           title="Action required: Change the increment value and compile the script."

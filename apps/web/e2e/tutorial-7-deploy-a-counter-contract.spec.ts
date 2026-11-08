@@ -1,10 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
-import {
-  COMPILED,
-  replaceInEditor,
-  scriptHeader,
-  waitForEditorText,
-} from "./editor";
+import { COMPILED, replaceInEditor, scriptHeader } from "./editor";
 import {
   logBrowserErrors,
   nextStep,
@@ -14,11 +9,17 @@ import {
   tutorialPanel,
 } from "./tutorial";
 
-// The script is created and compiled by the web app's local mocks
-// (lib/mock-api.ts), not apps/api.
+// Tutorial 7 needs no wallet: the contract uses No Auth. The script is created
+// and compiled through apps/api and the compile service: run them along with
+// the dev server.
 // The deployed contract is new, so its count goes from 0 to INCREMENT.
 const INCREMENT = 5;
-const SLOT_NAME = "counter_contract::counter_contract::count_map";
+// The tutorial leaves the script's name to the user, and the storage slot's
+// name follows it as the compiler derives it: dashes become underscores, and
+// a digit stays with its letters (not `counter_v_2`). The contract only finds
+// its counter in a slot with that exact name.
+const SCRIPT_NAME = "counter-v2";
+const SLOT_NAME = "counter_v2::counter_contract::count_map";
 
 const invoke = async (page: Page, procedure: string) => {
   const row = page
@@ -41,26 +42,31 @@ test("tutorial 7: deploy a counter contract", async ({ page }) => {
     const dialog = page
       .getByRole("dialog")
       .filter({ hasText: "Create Script" });
-    await dialog.getByLabel("Name").fill("my-counter");
+    await dialog.getByLabel("Name").fill(SCRIPT_NAME);
     await selectOption(page, "Type", "Account Component");
     await selectOption(page, "Example", "Counter Contract");
     await dialog.getByRole("button", { name: "Create" }).click();
-    // The Playground opens the new script, whose ID comes from the example's
-    // package name.
-    await expect(page).toHaveURL(/\/scripts\/counter-account_[0-9a-f-]+$/);
+    // The Playground opens the new script, whose ID is the API's UUID.
+    await expect(page).toHaveURL(/\/scripts\/[0-9a-f-]{36}$/);
     // The header shows the script's name, not its ID.
-    await expect(scriptHeader(page).name).toHaveText("my-counter");
+    await expect(scriptHeader(page).name).toHaveText(SCRIPT_NAME);
     await nextStep(page);
   });
 
   await test.step(`2. increment by ${INCREMENT} and compile`, async () => {
-    await replaceInEditor(page, "felt!(1)", `felt!(${INCREMENT})`);
+    // The step isn't done by the edit alone: the script must compile.
+    await replaceInEditor(
+      page,
+      "current_value + felt!(1)",
+      `current_value + felt!(${INCREMENT})`,
+    );
+    await expect(scriptHeader(page).status).toHaveText("Draft");
+    await expect(panel.nextStepButton).toBeDisabled();
     await page.getByRole("button", { name: "Compile" }).click();
     await expect(page.getByText(COMPILED).last()).toBeVisible({
       timeout: TRANSACTION_TIMEOUT,
     });
-    await page.getByRole("tab", { name: "MASM" }).click();
-    await waitForEditorText(page, `add.${INCREMENT}`);
+    await expect(scriptHeader(page).status).toHaveText("Compiled");
     await nextStep(page);
   });
 
@@ -72,13 +78,15 @@ test("tutorial 7: deploy a counter contract", async ({ page }) => {
       .filter({ hasText: "Create Component" });
     await dialog.getByLabel("Name").fill("My Counter");
     await selectOption(page, "Type", "Account Component");
-    await selectOption(page, "Script", "my-counter");
+    await selectOption(page, "Script", SCRIPT_NAME);
     await dialog.getByRole("button", { name: "Create" }).click();
     await expect(page).toHaveURL(/\/components\/[^/]+$/);
     await nextStep(page);
   });
 
   await test.step("4. add the count_map storage slot", async () => {
+    // The step shows the slot name derived from the script's name.
+    await expect(panel.root.getByText(SLOT_NAME).first()).toBeVisible();
     await page.getByRole("button", { name: "Add storage slot" }).click();
     const dialog = page
       .getByRole("dialog")
