@@ -85,7 +85,7 @@ export const tutorialMetas: TutorialMeta[] = [
     title: "Deploy a counter contract",
     tagline: "Deploy your own counter contract on testnet.",
     description:
-      "In this tutorial, you'll write your own counter contract, deploy it on testnet and increment its counter.",
+      "In this tutorial, you'll customize a counter contract, deploy it on testnet and increment its counter.",
     category: "advanced",
     initialRoute: "/scripts",
     stepCount: 7,
@@ -110,7 +110,7 @@ export const tutorialMetas: TutorialMeta[] = [
     tagline: "Deploy a network counter and increment it with a network note.",
     description:
       "In this tutorial, you'll deploy a network counter contract on testnet and increment it with a network note, consumed by the network transaction builder.",
-    category: "beginner",
+    category: "advanced",
     initialRoute: "/accounts",
     stepCount: 5,
     requiresWallet: true,

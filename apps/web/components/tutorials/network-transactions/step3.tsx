@@ -8,7 +8,7 @@ import type { TutorialStep } from "@/lib/types/tutorial";
 // apps/api/examples/counter-contract/increment-note/src/lib.rs, the source of
 // the increment-note script the tutorial starts with.
 const Step3: TutorialStep = {
-  title: "Understand the counter note script.",
+  title: "Understand the increment note script.",
   Content: () => {
     const { noteScript, component } = useNetworkCounter();
     return (
@@ -30,7 +30,7 @@ const Step3: TutorialStep = {
           <strong>
             <InlineCode>run</InlineCode>
           </strong>{" "}
-          method, at lines <em>22-29</em>, is the note script itself: marked{" "}
+          method, at lines <em>24-31</em>, is the note script itself: marked{" "}
           <strong>
             <InlineCode>#[note_script]</InlineCode>
           </strong>
@@ -67,7 +67,7 @@ const Step3: TutorialStep = {
         </p>
         <p>
           Those two procedures aren't part of the note script: they belong to
-          the consuming Account. Lines <em>13-15</em> name where they come from,
+          the consuming Account. Lines <em>13-17</em> name where they come from,
           the{" "}
           <TutorialLink
             href={component ? `/scripts/${component.scriptId}` : "/scripts"}

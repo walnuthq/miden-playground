@@ -135,13 +135,11 @@ assert!(block_number.as_felt() >= self.timelock_height);`}
           again.
         </p>
         <p>
-          When you proceed to the next step, the Playground creates an account
+          When you proceed to the next step, the Playground creates an Account
           named <strong>Test Wallet</strong> for you, with the{" "}
-          <strong>
-            <InlineCode>basic-wallet</InlineCode>
-          </strong>{" "}
-          component your script relies on: it will be the target account of your
-          timelocked note.
+          <strong>Rust Basic Wallet</strong> account component, built from the{" "}
+          <strong>basic-wallet</strong> script your note script relies on: it
+          will be the target account of your timelocked note.
         </p>
         <TutorialStepAlert
           completed={completed}

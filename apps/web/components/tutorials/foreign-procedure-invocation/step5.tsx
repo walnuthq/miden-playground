@@ -47,9 +47,10 @@ const Step5: TutorialStep = {
       <>
         <p>
           Your <strong>Count Reader</strong> is deployed, so you can now copy
-          the count of the <strong>Counter Contract</strong>, a counter contract
-          deployed on testnet that the Playground imported for you in this
-          tutorial.
+          the count of the <strong>Counter Contract</strong>: the counter
+          contract deployed on testnet that you incremented in the{" "}
+          <em>"Interact with the counter contract"</em> tutorial, which the
+          Playground imported for you in this one.
         </p>
         <p>
           Click the <em>"Components"</em> tab on the account details page. Under{" "}

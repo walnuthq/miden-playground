@@ -36,9 +36,9 @@ const Step3: TutorialStep = {
         <p>
           For example, a wallet account, capable of holding assets and requiring
           authentication to move them, can be built by combining a{" "}
-          <strong>BasicWallet</strong> component with a{" "}
-          <strong>Falcon512Poseidon2</strong> authentication component. The{" "}
-          <strong>BasicWallet</strong> component contains the code to move
+          <strong>Basic Wallet</strong> component with a{" "}
+          <strong>Single Sig</strong> authentication component. The{" "}
+          <strong>Basic Wallet</strong> component contains the code to move
           assets in and out of the account vault. The authentication component
           stores the user's public key and contains the code to verify
           signatures against it.

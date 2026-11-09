@@ -38,7 +38,7 @@ const Step1: TutorialStep = {
               note script
             </ExternalLink>{" "}
             as a <strong>Rust program</strong> and compile it to{" "}
-            <strong>MASM (Miden Assembly)</strong>.
+            <strong>Miden Assembly (MASM)</strong>, bundled into a package.
           </li>
           <li>
             Then, your wallet executes a Transaction that creates the Note on

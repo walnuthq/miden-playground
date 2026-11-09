@@ -53,9 +53,10 @@ const Step1: TutorialStep = {
           can use the account you used in the previous tutorials.
         </p>
         <p>
-          Then click the <ButtonName icon={Wallet}>Select Wallet</ButtonName>{" "}
-          button, select <em>"Bread Wallet"</em>, and accept the request to
-          access your account by clicking <em>"Connect"</em>.
+          Make sure the Bread Wallet extension is pinned in your browser, then
+          click the <ButtonName icon={Wallet}>Select Wallet</ButtonName> button,
+          select <em>"Bread Wallet"</em> and accept the connection request in
+          Bread Wallet.
         </p>
         <TutorialStepAlert
           completed={completed}

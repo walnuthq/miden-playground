@@ -8,15 +8,7 @@ import { getIdentifierPart } from "@/lib/utils/account";
 const Step5Content = ({ address }: { address: string }) => (
   <>
     <p>
-      Congratulations! You have successfully used the Miden Playground to create
-      your first custom note using a timelock pattern.
-    </p>
-    <p>
-      You performed advanced testnet operations: you developed your own note
-      script and used it to create a custom note on the network.
-    </p>
-    <p>
-      On the{" "}
+      Your timelocked note is committed on testnet. On the{" "}
       <TutorialLink href={`/accounts/${address}`}>Test Wallet</TutorialLink>'s
       page, take a look at the <em>"Consumable Notes"</em> section: the Note you
       created is listed there, since the Test Wallet is its target account.
@@ -29,6 +21,14 @@ const Step5Content = ({ address }: { address: string }) => (
       that's the assertion you added, since testnet hasn't reached the timelock
       block height yet. Once it has, the same option moves the note's assets
       into the Test Wallet's vault.
+    </p>
+    <p>
+      Congratulations! You have successfully used the Miden Playground to create
+      your first custom note using a timelock pattern.
+    </p>
+    <p>
+      You performed advanced testnet operations: you developed your own note
+      script and used it to create a custom note on the network.
     </p>
   </>
 );

@@ -39,7 +39,7 @@ const Step2: TutorialStep = {
         <strong>
           <InlineCode>#[note_script]</InlineCode>
         </strong>
-        , it runs when an account consumes the Note. It gets the ID of the
+        , it runs when an Account consumes the Note. It gets the ID of the
         consuming account with{" "}
         <strong>
           <InlineCode>account.get_id()</InlineCode>

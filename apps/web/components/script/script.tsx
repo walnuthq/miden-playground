@@ -59,7 +59,12 @@ const reveal = (editor: CodeEditor, location: EditorLocation) => {
   editor.focus();
 };
 
-const NO_MASM = "Compile the script to see its Miden Assembly.";
+// A read-only script without MASM is a package embedded already compiled
+// (lib/tutorials): it has no Compile button to point at.
+const noMasm = ({ readOnly }: Pick<Script, "readOnly">) =>
+  readOnly
+    ? "This script ships already compiled, without its Miden Assembly."
+    : "Compile the script to see its Miden Assembly.";
 const NO_RUST =
   "This script is written in Miden Assembly: it has no Rust source.";
 
@@ -232,7 +237,7 @@ const ScriptComponent = ({ id, script }: { id: string; script?: Script }) => {
           // Shown when the MASM goes while its tab is open: a failed compile
           // started from it (Cmd+S), or a `?tab=masm` link to a draft.
           <p className="flex h-full items-center justify-center border p-6 text-xs text-muted-foreground">
-            {NO_MASM}
+            {noMasm(script)}
           </p>
         )}
       </TabsContent>
@@ -297,7 +302,7 @@ const ScriptComponent = ({ id, script }: { id: string; script?: Script }) => {
                     MASM
                   </TabsTrigger>
                 </TooltipTrigger>
-                <TooltipContent>{NO_MASM}</TooltipContent>
+                <TooltipContent>{noMasm(script)}</TooltipContent>
               </Tooltip>
             )}
             <TabsTrigger value="manifest">Manifest</TabsTrigger>

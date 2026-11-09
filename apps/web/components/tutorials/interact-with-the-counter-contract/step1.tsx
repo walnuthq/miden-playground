@@ -18,7 +18,7 @@ const Step1: TutorialStep = {
         <p>
           In this tutorial, you'll use the Miden Playground to interact with a
           counter contract that is already deployed on testnet, and increment
-          its count.
+          its counter.
         </p>
         <p>
           To do so, you'll execute a Transaction against the contract with a
