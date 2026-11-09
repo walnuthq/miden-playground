@@ -1,5 +1,6 @@
+import { Wallet } from "lucide-react";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import { ExternalLink } from "@/components/tutorials/prose";
+import { ButtonName, ExternalLink } from "@/components/tutorials/prose";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import useAccounts from "@/hooks/use-accounts";
 import type { TutorialStep } from "@/lib/types/tutorial";
@@ -52,9 +53,9 @@ const Step1: TutorialStep = {
           can use the account you used in the previous tutorials.
         </p>
         <p>
-          Then click the <em>"Select Wallet"</em> button, select{" "}
-          <em>"Bread Wallet"</em>, and accept the request to access your account
-          by clicking <em>"Connect"</em>.
+          Then click the <ButtonName icon={Wallet}>Select Wallet</ButtonName>{" "}
+          button, select <em>"Bread Wallet"</em>, and accept the request to
+          access your account by clicking <em>"Connect"</em>.
         </p>
         <TutorialStepAlert
           completed={completed}
@@ -62,9 +63,9 @@ const Step1: TutorialStep = {
           titleWhenCompleted="Your private Bread Wallet is connected."
           description={
             <p>
-              Click the <em>"Select Wallet"</em> button in the top-right corner,
-              select <em>"Bread Wallet"</em> and connect a{" "}
-              <strong>Private</strong> account to the Playground.
+              Click the <ButtonName icon={Wallet}>Select Wallet</ButtonName>{" "}
+              button in the top-right corner, select <em>"Bread Wallet"</em> and
+              connect a <strong>Private</strong> account to the Playground.
             </p>
           }
         />

@@ -18,7 +18,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
-import { useState } from "react";
+import { Wallet } from "lucide-react";
+import { type ReactNode, useState } from "react";
 import { useParaWallet } from "@/components/providers/para-wallet-context";
 
 const signerLabels: Record<string, string> = {
@@ -28,6 +29,19 @@ const signerLabels: Record<string, string> = {
 
 const formatEvmAddress = (address: string) =>
   `${address.slice(0, 6)}…${address.slice(-4)}`;
+
+// Below `sm` (the 320 px phones) the header has no room for a wallet button's
+// label: it shows its icon only, and keeps the label for its accessible name.
+const ButtonLabel = ({ children }: { children: ReactNode }) => (
+  <span className="sr-only sm:not-sr-only">{children}</span>
+);
+
+const SelectWalletLabel = () => (
+  <>
+    <Wallet />
+    <ButtonLabel>Select Wallet</ButtonLabel>
+  </>
+);
 
 const InstallBreadWalletDialog = ({
   url,
@@ -83,7 +97,7 @@ const SelectWalletButton = ({ signerNames }: { signerNames: string[] }) => {
     <>
       {onlySignerName ? (
         <Button variant="outline" onClick={() => selectSigner(onlySignerName)}>
-          Select Wallet
+          <SelectWalletLabel />
         </Button>
       ) : (
         // Non-modal: Para's dialog uses its own bundled copy of Radix, and
@@ -91,7 +105,7 @@ const SelectWalletButton = ({ signerNames }: { signerNames: string[] }) => {
         // none` on body.
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger render={<Button variant="outline" />}>
-            Select Wallet
+            <SelectWalletLabel />
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-auto" align="end">
             {signerNames.map((name) => (
@@ -150,9 +164,11 @@ const WalletButton = ({
           height={160}
           loading="lazy"
         />
-        {paraWallet?.address
-          ? formatEvmAddress(paraWallet.address)
-          : "Para Wallet"}
+        <ButtonLabel>
+          {paraWallet?.address
+            ? formatEvmAddress(paraWallet.address)
+            : "Para Wallet"}
+        </ButtonLabel>
       </Button>
     );
   }

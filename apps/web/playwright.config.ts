@@ -57,11 +57,11 @@ export default defineConfig({
       testMatch: /mobile\/.*\.spec\.ts/,
       use: { ...devices["Pixel 7"] },
     },
-    // The narrowest phones (320 px): every page of a sandbox must fit there
-    // too.
+    // The narrowest phones (320 px): every page of a sandbox, and the header
+    // of a wallet tutorial (its widest), must fit there too.
     {
       name: "mobile-small",
-      testMatch: /mobile\/mobile-sandbox\.spec\.ts/,
+      testMatch: /mobile\/mobile-(sandbox|header)\.spec\.ts/,
       use: { ...devices["Galaxy S9+"] },
     },
   ],

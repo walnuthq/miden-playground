@@ -1,15 +1,26 @@
 import { expect, type Locator, type Page } from "@playwright/test";
 import { tutorialPanel } from "../tutorial";
 
+// The screen's width: the device's viewport. Not `window.innerWidth`, which a
+// phone browser widens to the page's width when it zooms a too-wide page out:
+// measured against it, a page never overflows.
+const screenWidth = (page: Page) => {
+  const viewport = page.viewportSize();
+  if (!viewport) {
+    throw new Error("the mobile projects set a viewport");
+  }
+  return viewport.width;
+};
+
 // Nothing wider than the screen: a phone browser would zoom the whole page out
-// to fit it (the header once made a 390 px screen 420 px wide).
+// to fit it (the header once made a 390 px screen 420 px wide, and a wallet
+// tutorial's a 320 px one 362 px wide).
 export const expectNoHorizontalOverflow = (page: Page) =>
   expect
     .poll(
-      () =>
-        page.evaluate(
-          () => document.documentElement.scrollWidth - window.innerWidth,
-        ),
+      async () =>
+        (await page.evaluate(() => document.documentElement.scrollWidth)) -
+        screenWidth(page),
       { message: "the page is wider than the screen" },
     )
     .toBeLessThanOrEqual(0);
@@ -19,12 +30,13 @@ export const expectNoHorizontalOverflow = (page: Page) =>
 // wider table or row, where it would only show once scrolled sideways.
 export const expectWithinWidth = async (locator: Locator) => {
   await expect(locator).toBeVisible();
+  const width = screenWidth(locator.page());
   await expect
     .poll(
       () =>
-        locator.evaluate((element) => {
+        locator.evaluate((element, width) => {
           const { left, right } = element.getBoundingClientRect();
-          if (left < 0 || right > window.innerWidth + 1) {
+          if (left < 0 || right > width + 1) {
             return false;
           }
           for (
@@ -40,7 +52,7 @@ export const expectWithinWidth = async (locator: Locator) => {
             }
           }
           return true;
-        }),
+        }, width),
       { message: "the element is off the screen's or its container's edge" },
     )
     .toBe(true);

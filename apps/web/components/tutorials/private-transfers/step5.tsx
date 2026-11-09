@@ -1,6 +1,7 @@
-import { EllipsisVertical } from "lucide-react";
+import { EllipsisVertical, Wallet } from "lucide-react";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import useTransferNote from "@/components/tutorials/private-transfers/use-transfer-note";
+import { ButtonName } from "@/components/tutorials/prose";
 import TutorialLink from "@/components/tutorials/tutorial-link";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import useAccounts from "@/hooks/use-accounts";
@@ -30,9 +31,9 @@ const Step5Content = ({
       top-right corner and selecting <em>"Disconnect"</em>.
     </p>
     <p>
-      Then click the <em>"Select Wallet"</em> button, select{" "}
-      <em>"Para Wallet"</em> and log in again with your email address and the
-      verification code Para sends you.
+      Then click the <ButtonName icon={Wallet}>Select Wallet</ButtonName>{" "}
+      button, select <em>"Para Wallet"</em> and log in again with your email
+      address and the verification code Para sends you.
     </p>
     <p>
       Open your{" "}

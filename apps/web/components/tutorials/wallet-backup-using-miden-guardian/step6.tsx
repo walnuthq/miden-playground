@@ -1,5 +1,5 @@
 import { normalizeAccountId, useMiden } from "@miden-sdk/react";
-import { Plus } from "lucide-react";
+import { Plus, Wallet } from "lucide-react";
 import { useEffect, useState } from "react";
 import AccountAddress from "@/components/lib/account-address";
 import CopyButton from "@/components/lib/copy-button";
@@ -36,8 +36,9 @@ const Step6Content = ({
       restore it on a new device.
     </p>
     <p>
-      Click the <em>"Select Wallet"</em> button, select <em>"Bread Wallet"</em>{" "}
-      and accept the connection request to reconnect it.
+      Click the <ButtonName icon={Wallet}>Select Wallet</ButtonName> button,
+      select <em>"Bread Wallet"</em> and accept the connection request to
+      reconnect it.
     </p>
     <p>
       Then, on the <TutorialLink href="/accounts">accounts page</TutorialLink>,

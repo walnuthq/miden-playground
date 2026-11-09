@@ -1,6 +1,7 @@
+import { Wallet } from "lucide-react";
 import { useLocation } from "react-router";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import { ExternalLink } from "@/components/tutorials/prose";
+import { ButtonName, ExternalLink } from "@/components/tutorials/prose";
 import TutorialLink from "@/components/tutorials/tutorial-link";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import useAccounts from "@/hooks/use-accounts";
@@ -28,8 +29,8 @@ const Step1Content = ({ wallet }: { wallet?: Account }) => (
     </p>
     <p>
       Make sure the Bread Wallet extension is pinned in your browser, then click
-      the <em>"Select Wallet"</em> button, select <em>"Bread Wallet"</em> and
-      accept the connection request in Bread Wallet.
+      the <ButtonName icon={Wallet}>Select Wallet</ButtonName> button, select{" "}
+      <em>"Bread Wallet"</em> and accept the connection request in Bread Wallet.
     </p>
     <p>
       The Playground automatically imports your wallet. Once it appears on the
@@ -60,10 +61,10 @@ const Step1: TutorialStep = {
           titleWhenCompleted="Your wallet is connected and imported."
           description={
             <p>
-              Click the <em>"Select Wallet"</em> button in the top-right corner
-              and select <em>"Bread Wallet"</em> to connect it to the
-              Playground. Once your wallet is imported, open its account details
-              page.
+              Click the <ButtonName icon={Wallet}>Select Wallet</ButtonName>{" "}
+              button in the top-right corner and select <em>"Bread Wallet"</em>{" "}
+              to connect it to the Playground. Once your wallet is imported,
+              open its account details page.
             </p>
           }
         />

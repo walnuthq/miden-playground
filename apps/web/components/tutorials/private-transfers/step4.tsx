@@ -1,7 +1,7 @@
-import { EllipsisVertical } from "lucide-react";
+import { EllipsisVertical, Wallet } from "lucide-react";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import useTransferNote from "@/components/tutorials/private-transfers/use-transfer-note";
-import { ExternalLink } from "@/components/tutorials/prose";
+import { ButtonName, ExternalLink } from "@/components/tutorials/prose";
 import TutorialLink from "@/components/tutorials/tutorial-link";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import type { TutorialStep } from "@/lib/types/tutorial";
@@ -31,9 +31,9 @@ const Step4: TutorialStep = {
           accounts page.
         </p>
         <p>
-          Then click the <em>"Select Wallet"</em> button, select{" "}
-          <em>"Bread Wallet"</em> and accept the connection request to reconnect
-          it.
+          Then click the <ButtonName icon={Wallet}>Select Wallet</ButtonName>{" "}
+          button, select <em>"Bread Wallet"</em> and accept the connection
+          request to reconnect it.
         </p>
         <p>
           On the <TutorialLink href="/accounts">accounts page</TutorialLink>,
