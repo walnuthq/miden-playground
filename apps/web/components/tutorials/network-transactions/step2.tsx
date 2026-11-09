@@ -1,34 +1,29 @@
 import { Plus } from "lucide-react";
+import MissingScriptsAlert from "@/components/tutorials/network-transactions/missing-scripts-alert";
+import useNetworkCounter, {
+  COUNTER_SLOT_NAME,
+} from "@/components/tutorials/network-transactions/use-network-counter";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import { ButtonName, InlineCode } from "@/components/tutorials/prose";
 import TutorialLink from "@/components/tutorials/tutorial-link";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
-import useAccounts from "@/hooks/use-accounts";
-import useComponents from "@/hooks/use-components";
-import { COUNTER_NOTE_RUN_PROC_HASH } from "@/lib/constants";
-import { defaultComponentIds } from "@/lib/types/default-components";
 import type { TutorialStep } from "@/lib/types/tutorial";
+import { entryPointExport } from "@/lib/utils/script";
 
+// The network counter's allowlist records the increment-note script by its
+// root, the digest of the script's entry point.
 const useCompleted = () => {
-  const { accounts } = useAccounts();
-  const { components } = useComponents();
-  const component = components.find(
-    ({ id, type }) =>
-      !defaultComponentIds.includes(id) && type === "account-component",
-  );
-  const counter = accounts.find(
-    ({ components, isPublic }) =>
-      components.includes(component?.id ?? "") &&
-      isPublic &&
-      components.includes("auth-network-account"),
-  );
+  const { noteScript, counter } = useNetworkCounter();
+  const noteScriptRoot = noteScript
+    ? entryPointExport(noteScript)?.digest
+    : undefined;
   const allowedNoteScripts = counter?.storage.find(
     ({ name }) =>
       name === "miden::standards::auth::network_account::allowed_note_scripts",
   );
-  const allowedNoteScript = allowedNoteScripts?.mapEntries.find(
-    ({ key }) => key === COUNTER_NOTE_RUN_PROC_HASH,
-  );
+  const allowedNoteScript = noteScriptRoot
+    ? allowedNoteScripts?.mapEntries.find(({ key }) => key === noteScriptRoot)
+    : undefined;
   return (
     allowedNoteScript?.value ===
     "0x0100000000000000000000000000000000000000000000000000000000000000"
@@ -41,6 +36,7 @@ const Step2: TutorialStep = {
     const completed = useCompleted();
     return (
       <>
+        <MissingScriptsAlert />
         <p>
           Let's start by deploying the network counter. Head to the{" "}
           <TutorialLink href="/accounts">accounts page</TutorialLink>, click the{" "}
@@ -62,18 +58,19 @@ const Step2: TutorialStep = {
           Account.
         </p>
         <p>
-          Select <strong>counter-note</strong> as the allowed note script and
+          Select <strong>increment-note</strong> as the allowed note script and
           leave the allowed transaction scripts empty. The Playground also
           allows the <strong>P2ID</strong> note script, so that the Account can
           be funded.
         </p>
         <p>
           Once the account component is selected, its{" "}
-          <strong>
-            <InlineCode>counter_contract::counter_contract::count</InlineCode>
+          <strong className="wrap-anywhere">
+            <InlineCode>{COUNTER_SLOT_NAME}</InlineCode>
           </strong>{" "}
-          storage slot is listed with its default value: keep the initial count
-          set to <strong>0</strong>.
+          storage slot is listed with its default value, <strong>1:0</strong>:
+          the count, <strong>0</strong>, under key <strong>1</strong>. Keep it,
+          so that the counter starts at <strong>0</strong>.
         </p>
         <p>
           Finally, click the <em>"Deploy"</em> button. This takes a few moments:
@@ -101,7 +98,7 @@ const Step2: TutorialStep = {
               <strong>Public</strong> account using the{" "}
               <strong>Network Account</strong> authentication component, the{" "}
               <strong>Counter Contract</strong> account component and the{" "}
-              <strong>counter-note</strong> allowed note script.
+              <strong>increment-note</strong> allowed note script.
             </p>
           }
         />

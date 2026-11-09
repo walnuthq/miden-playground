@@ -10,11 +10,15 @@ export const COUNTER_EXAMPLE_ID = "counter-account";
 // and the counter's component, as a workspace's starting scripts. The API
 // inserts the packages precompiled (compiled.json), as when launching the
 // example, without its auto-deployed account. A Mainnet sandbox starts from
-// them; a tutorial can too (Tutorial.starter).
+// them, and so does tutorial 9 (Tutorial.starter), which only reads them:
+// `readOnly` then leaves out what would change or remove them (editing,
+// compiling, their dependencies, deleting).
 export const counterExampleStarter = async ({
   componentName,
+  readOnly = false,
 }: {
   componentName: string;
+  readOnly?: boolean;
 }): Promise<WorkspaceStarter> => {
   const { scripts, error } = await importExample(COUNTER_EXAMPLE_ID);
   if (!scripts) {
@@ -28,7 +32,10 @@ export const counterExampleStarter = async ({
     ({ name }) => name === COUNTER_EXAMPLE_ID,
   );
   return {
-    scripts: scripts.map(compiledPackageToScript),
+    scripts: scripts.map((script) => ({
+      ...compiledPackageToScript(script),
+      readOnly,
+    })),
     components: counterAccountScript
       ? [
           {
