@@ -1,9 +1,10 @@
 # Tutorials on the real Rust compilation pipeline
 
-Status: plan, written 2026-11-06. PR A merged as #779 and PR B as #781
-(2026-11-08), PR C open as #782 (2026-11-08), D to F not started. One PR per
-item below, in the order given; the tutorial PRs (B to E) are independent of each other once A has
-landed, so different agents can pick them up.
+Status: plan, written 2026-11-06. PR A merged as #779, PR B as #781 and PR C
+as #782 (2026-11-08), PR D open as #784 (2026-11-09), E and F not started.
+One PR per item below, in the order given; the tutorial PRs (B to E) are
+independent of each other once A has landed, so different agents can pick
+them up.
 
 Four tutorials show Rust code to the user but never compile it. Tutorials 7
 ("Deploy a counter contract") and 8 ("Timelock P2ID note") create and
@@ -114,8 +115,21 @@ installed SDK (`@miden-sdk/miden-sdk` 0.17.8, `miden` crate 0.15).
   `ToFeltRepr` with fields `prefix` then `suffix` (`miden-base-sys`
   `bindings/types.rs`), the reverse of the MASM P2ID layout (suffix, prefix)
   the current copy teaches. With the struct above, the Create Note dialog's
-  storage items are prefix, suffix, timelock height. Confirm the order once by
-  consuming a note created with height 0 (see PR D).
+  storage items are prefix, suffix, timelock height. Confirmed on testnet in
+  PR D: a note with those items and height 0 passes both assertions, and one
+  with a future height fails the first.
+- **A compiled note calls the Rust basic wallet, not the standard one** (found
+  in PR D). `#[account(basic_wallet::BasicWallet)]` binds the note script to
+  the `basic-wallet` package the API compiles it against
+  (`templates/basic-wallet.rs`, `lib/default-dependencies.ts`), and the script
+  calls `receive_asset` by that package's MAST root (`0x086e7fa3…`). The
+  standard basic wallet, which the SDK's wallets, Bread and Para carry, has
+  another one (`0xd7416b79…`), and the 0.15 SDK has no binding to it. So a
+  standard wallet can't consume a note built from the P2ID template: the
+  transaction fails with "procedure with root digest … could not be found".
+  An account deployed with the compiled `basic-wallet` component can (checked
+  on testnet: +1 USDCX). The web app's built-in `basic-wallet` script is the
+  standard one with that Rust source attached, like the MASM counters were.
 - **Deploy, invoke, create note already handle packages.** `lib/web-client.ts`
   branches on `assembledFromMasm`: `AccountComponent.fromPackage` for deploys,
   `TransactionScript.fromPackage` / `NoteScript.fromPackage` for scripts, and
@@ -194,6 +208,16 @@ installed SDK (`@miden-sdk/miden-sdk` 0.17.8, `miden` crate 0.15).
 - **No new precompiled example or API route.** The counter example's packages
   cover tutorial 9; nothing new goes into the Worker bundle (see the size note
   in `examples.md`).
+- **Tutorial 8's Test Wallet carries the Rust basic wallet** (decided in PR D,
+  once the fact above was found). Otherwise the note the user creates could
+  never be consumed, timelock or not. The compiled `basic-wallet` package is
+  embedded in the web app (15 KB of masp, `lib/tutorials/basic-wallet.json`),
+  in the tutorial's starting state with its component, and step 3 deploys the
+  Test Wallet with it (No Auth, not funded). `pnpm templates:check` compiles
+  the template again and fails when the snapshot is out of date;
+  `pnpm templates:sync` regenerates it. The alternatives were a tutorial
+  whose note nobody can consume, or leaving tutorial 8 on the mock until the
+  compiler can target the standard wallet.
 
 ## PR A: shared plumbing
 
@@ -344,7 +368,30 @@ Verify: tutorial 7 e2e (chromium) and the mobile spec on `mobile-safari` and
 ## PR D: tutorial 8, "Timelock P2ID note"
 
 The most copy. `components/tutorials/timelock-p2id-note`, against
-`templates/p2id-note.rs` (48 lines):
+`templates/p2id-note.rs` (48 lines). As built, it differs from the list below
+in five places:
+
+- The tutorial never ran the user's script: `newNote` in `hooks/use-notes.ts`
+  created a standard P2IDE note (`Note.createP2IDENote`) whenever the tutorial
+  was active, whatever script the dialog had selected, and
+  `components/note/note-information.tsx` showed three of its four storage
+  items. Both special cases are gone: the note is built from the compiled
+  package, like any custom note.
+- The Test Wallet is an account deployed with the Rust basic wallet (see the
+  decision above), not a standard wallet: `deployAccount` gained `fund:
+  false`, which leaves it off chain as `newWallet`'s did. Step 2 explains
+  lines 7-10 and links to the `basic-wallet` script.
+- Step 3 has four snippets, not three: the imports have their own, after the
+  field that needs them. The steps cite a line number only where no earlier
+  snippet moves it (5 and 14), and name the place otherwise.
+- Step 5 has the user try "Consume note with Test Wallet", which fails on the
+  assertion until the height is reached, and the e2e checks it: that failure
+  shows the note runs the user's code.
+- A run started before this PR has a mock script (`p2id-note_<uuid>`), no Rust
+  basic wallet in its state and maybe a standard Test Wallet. It can't be
+  brought up to date: steps 1, 3 and 4 offer to restart the tutorial
+  (`outdated-run-alert.tsx`, which tells such a run by the missing
+  `rust-basic-wallet` script). PR F removes it.
 
 - `lib/api.ts` `createScript`: add `"timelock-p2id-note"`.
 - Step 1: unchanged flow. "Creating a custom note is a two-step process" still
@@ -430,7 +477,8 @@ Once B to E are merged:
   API's 500. Restart is on the tutorial card. Tutorial 7's `use-counter.ts`
   keeps the mock's fixed slot name (`MOCK_SLOT_NAME`) for such a script, so a
   run saved before PR C still deploys a counter that reads its slot: remove
-  it here.
+  it here. Tutorial 8 offers such a run a restart instead
+  (`timelock-p2id-note/outdated-run-alert.tsx`): remove it too.
 - Delete the MASM counter built-ins: `default-scripts/counter-contract.ts`,
   `counter-map-contract.ts`, `counter-note.ts`, `counter-script.ts`,
   `timelock-p2id.ts`, `default-components/counter-contract.ts`, and their
@@ -455,6 +503,12 @@ Verify: typecheck, lint, build, the full e2e suite against local (API and
 compile service up, Bread installed), the three mobile projects.
 
 ## Open questions
+
+- Can a Rust note script target the standard basic wallet? Until it can, a
+  note built from the P2ID template is only consumable by an account deployed
+  with the compiled `basic-wallet` package (tutorial 8 deploys one), never by
+  Bread or an SDK wallet: worth raising with the compiler team, and worth a
+  line where the "P2ID Note" example is offered outside the tutorial.
 
 - Keep a MASM step somewhere? Tutorial 6's step 3 was the only place the
   tutorials explained Miden Assembly. If that matters, it needs a new home

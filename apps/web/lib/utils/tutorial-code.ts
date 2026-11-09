@@ -72,51 +72,120 @@ export const increaseIncrementEdits: CodeEdit[] = [
   },
 ];
 
-// Tutorial 8: the timelock in the P2ID note script. The regexes of `applied`
-// are the step's own completion check.
+// Tutorial 8: the timelock in the P2ID note script, each edit after the ones
+// it needs to compile: the imports (0) and the note's new input (1), the
+// constructor's parameter (2) and struct literal (3), the block number (4)
+// and its check (5) in the script. The regexes of `applied` are the step's
+// own completion check.
+
+// The names imported by the script's `use miden::{…};`.
+const MIDEN_IMPORTS = /use\s+miden::\{([^}]*)\}\s*;/;
+
+const midenImports = (source: string) =>
+  (MIDEN_IMPORTS.exec(source)?.[1] ?? "")
+    .split(",")
+    .map((name) => name.trim())
+    .filter((name) => name !== "");
+
+// Adds `name` after `after`, where the template's order puts it.
+const withImport = (names: string[], name: string, after: string) => {
+  if (names.includes(name)) {
+    return names;
+  }
+  const index = names.indexOf(after);
+  return index === -1 ? [...names, name] : names.toSpliced(index + 1, 0, name);
+};
+
 export const timelockEdits: CodeEdit[] = [
   {
-    applied: (source) =>
-      /assert_eq\(storage\.len\(\)\.into\(\),\s*felt!\(3\)\);/.test(source),
+    applied: (source) => {
+      const names = midenImports(source);
+      return (
+        (names.includes("tx") && names.includes("Felt")) ||
+        /use\s+miden::\*\s*;/.test(source)
+      );
+    },
     apply: (source) => {
-      const anchor =
-        /(assert_eq\(storage\.len\(\)\.into\(\),\s*felt!\()2(\)\);)/;
-      return anchor.test(source)
-        ? source
-            .replace(anchor, "$13$2")
-            .replace(
-              "make sure the storage length is 2",
-              "make sure the storage length is 3",
-            )
-        : null;
+      if (!MIDEN_IMPORTS.test(source)) {
+        return null;
+      }
+      const names = withImport(
+        withImport(midenImports(source), "tx", "note"),
+        "Felt",
+        "AccountId",
+      );
+      return source.replace(MIDEN_IMPORTS, `use miden::{${names.join(", ")}};`);
     },
   },
   {
+    // After the target account: the note's inputs follow the fields' order,
+    // which the next step's storage items rely on.
     applied: (source) =>
-      /let\s+timelock_height\s*=\s*storage\[2\];/.test(source),
-    apply: (source) =>
-      insertAfterLine(
+      /struct\s+P2idNote\s*\{[^}]*\btarget_account_id\s*:\s*AccountId\b[^}]*\btimelock_height\s*:\s*Felt\b/.test(
         source,
-        /let\s+target_account_id_prefix\s*=\s*storage\[1\];/,
-        ["let timelock_height = storage[2];"],
       ),
-  },
-  {
-    applied: (source) =>
-      /let\s+block_number\s*=\s*tx::get_block_number\(\);/.test(source),
     apply: (source) =>
-      insertAfterLine(source, /let\s+timelock_height\s*=\s*storage\[2\];/, [
-        "let block_number = tx::get_block_number();",
+      insertAfterLine(source, /target_account_id\s*:\s*AccountId\s*,/, [
+        "timelock_height: Felt,",
       ]),
   },
   {
     applied: (source) =>
-      /assert!\s*\(\s*block_number\s*>=\s*timelock_height\s*\);/.test(source),
+      /fn\s+build_recipient\s*\([^)]*\btimelock_height\s*:\s*Felt\b/.test(
+        source,
+      ),
+    // One parameter per line, as rustfmt lays out a signature that no longer
+    // fits on one.
+    apply: (source) => {
+      const match = /^([ \t]*)(.*\bfn\s+build_recipient\s*)\(([^)]*)\)/m.exec(
+        source,
+      );
+      if (!match) {
+        return null;
+      }
+      const [signature, indent = "", head = "", parameters = ""] = match;
+      const lines = [...parameters.split(","), "timelock_height: Felt"]
+        .map((parameter) => parameter.trim())
+        .filter((parameter) => parameter !== "")
+        .map((parameter) => `${indent}    ${parameter},`);
+      return source.replace(
+        signature,
+        `${indent}${head}(\n${lines.join("\n")}\n${indent})`,
+      );
+    },
+  },
+  {
+    // The struct literal, not the struct's or the impl's own block.
+    applied: (source) =>
+      /(?<!\b(?:struct|impl)\s+)\bP2idNote\s*\{[^}]*\btimelock_height\b/.test(
+        source,
+      ),
+    apply: (source) =>
+      insertAfterLine(source, /target_account_id\s*:\s*target\s*,/, [
+        "timelock_height,",
+      ]),
+  },
+  {
+    applied: (source) =>
+      /let\s+block_number\s*=\s*tx::get_reference_block_number\(\)\s*;/.test(
+        source,
+      ),
+    apply: (source) =>
+      insertAfterLine(source, /fn\s+script\s*\([^)]*\)\s*\{/, [
+        "    let block_number = tx::get_reference_block_number();",
+      ]),
+  },
+  {
+    applied: (source) =>
+      /assert!\s*\(\s*block_number\.as_felt\(\)\s*>=\s*self\.timelock_height\s*\)\s*;/.test(
+        source,
+      ),
+    // A blank line after it sets the timelock apart from the target check.
     apply: (source) =>
       insertAfterLine(
         source,
-        /let\s+block_number\s*=\s*tx::get_block_number\(\);/,
-        ["assert!(block_number >= timelock_height);"],
+        /let\s+block_number\s*=\s*tx::get_reference_block_number\(\)\s*;/,
+        ["assert!(block_number.as_felt() >= self.timelock_height);", ""],
       ),
   },
 ];

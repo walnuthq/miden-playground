@@ -34,25 +34,29 @@ export const InlineCode = ({ children }: { children: ReactNode }) => (
 
 // Takes the code as a string so that braces need no JSX escaping. `action`
 // (a button adding the code to the user's script) goes under it, on the right.
+// A line wider than the panel scrolls inside the block: the panel would clip
+// it on desktop, and scroll as a whole on a phone.
 export const CodeBlock = ({
   code,
   action,
 }: {
   code: string;
   action?: ReactNode;
-}) =>
-  action ? (
-    <div className="flex flex-col gap-2">
-      <pre>
-        <InlineCode>{code}</InlineCode>
-      </pre>
-      <div className="flex justify-end">{action}</div>
-    </div>
-  ) : (
-    <pre>
+}) => {
+  const block = (
+    <pre className="overflow-x-auto">
       <InlineCode>{code}</InlineCode>
     </pre>
   );
+  return action ? (
+    <div className="flex flex-col gap-2">
+      {block}
+      <div className="flex justify-end">{action}</div>
+    </div>
+  ) : (
+    block
+  );
+};
 
 // A button named as it looks, its icon then its label: below `lg`, buttons
 // like "Create new account" show their icon only, so naming both reads right

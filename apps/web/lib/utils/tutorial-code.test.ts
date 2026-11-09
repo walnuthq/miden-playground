@@ -14,18 +14,10 @@ import {
 const read = (path: string) =>
   readFileSync(new URL(path, import.meta.url), "utf8");
 
-// A built-in script's Rust: its `rust` template literal (plain node can't
-// import the module, which uses path aliases).
-const builtInRust = (path: string) => {
-  const match = /export const rust = `((?:\\`|[^`])*)`/.exec(read(path));
-  assert.ok(match, `no rust literal in ${path}`);
-  return (match[1] ?? "").replaceAll("\\`", "`");
-};
-
-// The scripts the tutorials start from: the API's template (tutorials 7 and
-// 12) and the mock API's (tutorial 8).
+// The API's templates, which the tutorials' scripts are created from:
+// tutorials 7 and 12, then tutorial 8.
 const counterAccount = read("../../../api/templates/counter-account.rs");
-const p2id = builtInRust("../types/default-scripts/p2id.ts");
+const p2idNote = read("../../../api/templates/p2id-note.rs");
 
 // Every edit applies, then reads as applied, and applying it again changes
 // nothing.
@@ -56,25 +48,74 @@ describe("tutorial code edits", () => {
     );
   });
 
-  test("tutorial 8: the timelock, in order after the target account", () => {
-    const edited = expectEditsApply(p2id, timelockEdits);
+  test("tutorial 8: the timelock, from the note's input to the check", () => {
+    const edited = expectEditsApply(p2idNote, timelockEdits);
     assert.match(
       edited,
-      /storage length is 3\n\s*assert_eq\(storage\.len\(\)\.into\(\), felt!\(3\)\);/,
+      /\nuse miden::\{account, felt_repr::ToFeltRepr, note, tx, AccountId, Felt, Recipient, Word\};\n/,
+    );
+    // After the target account: the storage items follow the fields' order.
+    assert.match(
+      edited,
+      /\nstruct P2idNote \{\n {4}target_account_id: AccountId,\n {4}timelock_height: Felt,\n\}\n/,
     );
     assert.match(
       edited,
-      /\n( +)let target_account_id_prefix = storage\[1\];\n\1let timelock_height = storage\[2\];\n\1let block_number = tx::get_block_number\(\);\n\1assert!\(block_number >= timelock_height\);\n/,
+      /\n {4}pub fn build_recipient\(\n {8}target: AccountId,\n {8}serial_num: Word,\n {8}timelock_height: Felt,\n {4}\) -> Recipient \{\n {8}let inputs = P2idNote \{\n {12}target_account_id: target,\n {12}timelock_height,\n {8}\};\n/,
+    );
+    // Before the target check, a blank line apart.
+    assert.match(
+      edited,
+      /\n( +)pub fn script\(self, _arg: Word, account: &mut Wallet\) \{\n\1 {4}let block_number = tx::get_reference_block_number\(\);\n\1 {4}assert!\(block_number\.as_felt\(\) >= self\.timelock_height\);\n\n\1 {4}let current_account = account\.get_id\(\);\n/,
     );
   });
 
   test("tutorial 8: a later snippet adds the earlier ones it needs", () => {
-    const edited = applyCodeEdits(p2id, timelockEdits, 2);
-    assert.ok(edited !== null);
-    assert.equal(timelockEdits[0]?.applied(edited), true);
-    assert.equal(timelockEdits[1]?.applied(edited), true);
-    assert.equal(timelockEdits[2]?.applied(edited), true);
-    assert.equal(timelockEdits[3]?.applied(edited), false);
+    // The field's button imports `Felt` too.
+    const withField = applyCodeEdits(p2idNote, timelockEdits, 1);
+    assert.ok(withField !== null);
+    assert.deepEqual(
+      timelockEdits.map((edit) => edit.applied(withField)),
+      [true, true, false, false, false, false],
+    );
+    // The check's button adds everything before it.
+    const withCheck = applyCodeEdits(p2idNote, timelockEdits, 5);
+    assert.equal(withCheck, applyCodeEdits(p2idNote, timelockEdits));
+  });
+
+  test("tutorial 8: each part is told apart from the others", () => {
+    const [imports, field, parameter, literal] = timelockEdits;
+    assert.ok(imports && field && parameter && literal);
+    // The constructor's parameter and struct literal aren't the struct's
+    // field, nor the other way around.
+    const constructorOnly = applyCodeEdits(
+      p2idNote,
+      [imports, parameter, literal],
+      2,
+    );
+    assert.ok(constructorOnly !== null);
+    assert.equal(field.applied(constructorOnly), false);
+    const fieldOnly = applyCodeEdits(p2idNote, timelockEdits, 1);
+    assert.ok(fieldOnly !== null);
+    assert.equal(parameter.applied(fieldOnly), false);
+    assert.equal(literal.applied(fieldOnly), false);
+    // A field declared before the target account changes the storage order.
+    assert.equal(
+      field.applied(
+        p2idNote.replace(
+          "    target_account_id: AccountId,\n}",
+          "    timelock_height: Felt,\n    target_account_id: AccountId,\n}",
+        ),
+      ),
+      false,
+    );
+    // Imports written by hand: a glob, or one name per line.
+    assert.equal(imports.applied("use miden::*;"), true);
+    assert.equal(
+      imports.applied("use miden::{\n    note,\n    tx,\n    Felt,\n};"),
+      true,
+    );
+    assert.equal(imports.applied("use miden::{note, Felt};"), false);
   });
 
   test("tutorial 12: reset_count in the trait and the impl", () => {
