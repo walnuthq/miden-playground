@@ -52,9 +52,9 @@ const Step1: TutorialStep = {
           the <strong>Counter Contract</strong> example.
         </p>
         <p>
-          Your script must be named <strong>counter-account</strong>: the
-          Playground creates resources in the next steps, such as the contract's
-          storage slot name, that expect this exact name.
+          Your script must be named <strong>counter-account</strong>: the note
+          script you'll create in step 3 refers to the counter contract's
+          package by this exact name.
         </p>
         <TutorialStepAlert
           completed={completed}

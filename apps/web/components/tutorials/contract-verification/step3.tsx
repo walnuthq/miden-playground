@@ -47,7 +47,8 @@ const Step3Content = ({ counter }: { counter?: Account }) => (
     <p>
       Finally, click the <em>"Deploy"</em> button. This takes a few moments: the
       Playground creates the Account, then funds it so that it can pay
-      transaction fees.
+      transaction fees. Funding the Account is its first Transaction, which also
+      registers it on testnet.
     </p>
     <p>
       The Playground knows the source code of this contract because you deployed

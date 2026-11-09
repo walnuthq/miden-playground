@@ -38,12 +38,13 @@ const Step3Content = ({
       <ExternalLink href="https://docs.miden.xyz/reference/protocol/note#storage">
         note storage
       </ExternalLink>{" "}
-      when the send transaction was created. Feel free to read the{" "}
-      <strong>Rust source code</strong> of this verified note script, as well as
-      its compiled <strong>MASM (Miden Assembly)</strong>, by clicking the{" "}
-      <TutorialLink href="/scripts/p2id">script shortcut</TutorialLink>. The
-      script is heavily commented and provides insights into the underlying
-      Miden architecture.
+      when the send transaction was created. Feel free to read this standard
+      note script by clicking the{" "}
+      <TutorialLink href="/scripts/p2id">script shortcut</TutorialLink>. Its{" "}
+      <em>"MASM"</em> tab holds the <strong>Miden Assembly (MASM)</strong> code
+      the network runs: it is heavily commented and provides insights into the
+      underlying Miden architecture. The <em>"Explorer"</em> tab shows the same
+      logic written in <strong>Rust</strong>.
     </p>
     <p>
       When you're done, click the target account ID in the{" "}

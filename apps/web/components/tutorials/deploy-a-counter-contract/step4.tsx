@@ -66,8 +66,9 @@ const Step4: TutorialStep = {
         </p>
         <BulletList>
           <li>
-            the name of your script, <strong>{script?.name}</strong>, with its
-            dashes turned into underscores;
+            the name of your script, <strong>{script?.name}</strong>, where any
+            character other than a letter, a digit or an underscore becomes an
+            underscore;
           </li>
           <li>
             the name of the component's trait,{" "}

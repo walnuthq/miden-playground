@@ -154,7 +154,7 @@ trait CounterContract {
               counter_account::counter_contract::count_map
             </InlineCode>
           </strong>
-          . That's why your script must be named{" "}
+          . The first part comes from your script's name,{" "}
           <strong>counter-account</strong>.
         </p>
         <p>

@@ -45,10 +45,10 @@ const Step3: TutorialStep = {
           counter-account script
         </TutorialLink>
         . This script contains the code of the counter contract you'll copy the
-        count from, which keeps its count in a map slot, like the one you
-        deployed in the <em>"Deploy a counter contract"</em> tutorial. This
-        declaration lets the <strong>Count Reader</strong> call the counter
-        contract's procedures.
+        count from: the one you imported in the{" "}
+        <em>"Interact with the counter contract"</em> tutorial, which keeps its
+        count in a map slot. This declaration lets the{" "}
+        <strong>Count Reader</strong> call the counter contract's procedures.
       </p>
       <p>
         Finally, the{" "}

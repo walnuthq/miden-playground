@@ -30,11 +30,12 @@ impl P2idNote {
     pub fn run(self, _arg: Word, account: &mut Wallet) {
         let storage = active_note::get_storage();
 
-        // make sure the storage length is 2
-        assert_eq(storage.len().into(), felt!(2));
+        // make sure the note has 4 storage items
+        assert_eq(storage.len().into(), felt!(4));
 
         // P2ID storage follows the protocol layout:
-        // [target_account_id_suffix, target_account_id_prefix]
+        // [target_account_id_suffix, target_account_id_prefix, salt_0, salt_1]
+        // The salt makes the storage commitment hard to guess: the script doesn't read it.
         let target_account_id_suffix = storage[0];
         let target_account_id_prefix = storage[1];
 
