@@ -4,7 +4,6 @@ import DecodedNoteStorageTable from "@/components/note/decoded-note-storage-tabl
 import NoteInformationTable from "@/components/note/note-information-table";
 import NoteStorageTable from "@/components/note/note-storage-table";
 import useScripts from "@/hooks/use-scripts";
-import useTutorials from "@/hooks/use-tutorials";
 import type { InputNote } from "@/lib/types/note";
 import type { Script } from "@/lib/types/script";
 import { accountIdFromPrefixSuffix } from "@/lib/utils/account";
@@ -17,17 +16,8 @@ const NoteInformation = ({
   serverNoteScript: Script | null;
 }) => {
   const { scripts } = useScripts();
-  const { tutorialId } = useTutorials();
   const script =
     scripts.find(({ id }) => id === inputNote.scriptId) ?? serverNoteScript;
-  const storage =
-    tutorialId === "timelock-p2id-note"
-      ? [
-          inputNote.storage[2] ?? "",
-          inputNote.storage[3] ?? "",
-          inputNote.storage[4] ?? "",
-        ]
-      : inputNote.storage;
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-2">
@@ -66,7 +56,9 @@ const NoteInformation = ({
             )}
           </div>
         </div>
-        {inputNote.storage.length > 0 && <NoteStorageTable storage={storage} />}
+        {inputNote.storage.length > 0 && (
+          <NoteStorageTable storage={inputNote.storage} />
+        )}
       </div>
       {/* TODO: better decoded note storage using inputNote.scriptId */}
       {script?.id === "p2id" && (

@@ -1,11 +1,5 @@
 import {
-  AccountId as WasmAccountId,
-  FungibleAsset as WasmFungibleAsset,
-  Note as WasmNote,
   NoteArray as WasmNoteArray,
-  NoteAssets as WasmNoteAssets,
-  NoteAttachment as WasmNoteAttachment,
-  NoteType as WasmNoteType,
   TransactionRequestBuilder as WasmTransactionRequestBuilder,
 } from "@miden-sdk/miden-sdk";
 import {
@@ -126,34 +120,18 @@ const useNotes = () => {
     if (!script) {
       throw new Error("Script not found");
     }
-    const note =
-      tutorialId === "timelock-p2id-note"
-        ? WasmNote.createP2IDENote(
-            WasmAccountId.fromHex(senderAccountId),
-            WasmAccountId.fromHex(recipientAccountId),
-            new WasmNoteAssets([
-              new WasmFungibleAsset(
-                WasmAccountId.fromHex(faucetAccountId),
-                amount,
-              ),
-            ]),
-            Number(noteStorage[2]),
-            Number(noteStorage[2]),
-            type === "public" ? WasmNoteType.Public : WasmNoteType.Private,
-            new WasmNoteAttachment(),
-          )
-        : await clientCreateNoteFromScript({
-            client,
-            senderAccountId,
-            recipientAccountId,
-            isNetworkNote,
-            script,
-            type,
-            faucetAccountId,
-            amount,
-            noteStorage,
-            scripts,
-          });
+    const note = await clientCreateNoteFromScript({
+      client,
+      senderAccountId,
+      recipientAccountId,
+      isNetworkNote,
+      script,
+      type,
+      faucetAccountId,
+      amount,
+      noteStorage,
+      scripts,
+    });
     // console.log(note.script().root());
     // Verified once submitted: the verification service imports the note
     // from the node. Read its ID now: the note array below takes the note.

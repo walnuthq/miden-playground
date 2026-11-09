@@ -257,16 +257,21 @@ const useAccounts = () => {
       }
     }
   };
+  // `fund: false` leaves the account off chain, with no fee asset: it's
+  // created by its first transaction, which then has to bring its own fee
+  // (consuming a note that carries the fee asset does).
   const deployAccount = async ({
     name,
     storageMode,
     components,
     verify = true,
+    fund = true,
   }: {
     name: string;
     storageMode: AccountStorageMode;
     components: Component[];
     verify?: boolean;
+    fund?: boolean;
   }) => {
     if (!client) {
       throw new Error("MidenClient not ready");
@@ -290,7 +295,9 @@ const useAccounts = () => {
           ? await clientNetworkNoteFee(networkId)
           : 0n,
       });
-      fundedAccount = await fundAccount(wasmAccount, { isNetworkAccount });
+      fundedAccount = fund
+        ? await fundAccount(wasmAccount, { isNetworkAccount })
+        : wasmAccount;
     } catch (error) {
       dispatch({ type: "TRANSACTION_SUBMITTED" });
       throw error;

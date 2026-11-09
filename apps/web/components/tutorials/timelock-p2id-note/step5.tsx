@@ -1,3 +1,4 @@
+import { EllipsisVertical } from "lucide-react";
 import NextTutorialButton from "@/components/tutorials/next-tutorial-button";
 import TutorialLink from "@/components/tutorials/tutorial-link";
 import useAccounts from "@/hooks/use-accounts";
@@ -19,8 +20,15 @@ const Step5Content = ({ address }: { address: string }) => (
       <TutorialLink href={`/accounts/${address}`}>Test Wallet</TutorialLink>'s
       page, take a look at the <em>"Consumable Notes"</em> section: the Note you
       created is listed there, since the Test Wallet is its target account.
-      However, the Test Wallet won't be able to claim the note's assets until
-      the timelock block height has been reached.
+    </p>
+    <p>
+      See your timelock at work: click the{" "}
+      <EllipsisVertical className="size-4 inline" /> icon button at the end of
+      the Note's row and select the <em>"Consume note with Test Wallet"</em>{" "}
+      option. The Transaction fails with an <em>"assertion failed"</em> error:
+      that's the assertion you added, since testnet hasn't reached the timelock
+      block height yet. Once it has, the same option moves the note's assets
+      into the Test Wallet's vault.
     </p>
   </>
 );

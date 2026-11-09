@@ -6,7 +6,7 @@ Playwright tests for the tutorials, the examples, the script editor (`script-*.s
 
 1. Install Playwright's browsers once: `pnpm exec playwright install chromium webkit` (WebKit for the iPhone project).
 2. Start the Playground (`pnpm dev` in `apps/web`, port 3000), unless you set `PLAYWRIGHT_BASE_URL`.
-3. For the specs that create scripts on the API, start `apps/api` too (`pnpm dev` in `apps/api`, port 3001), with its Docker services up. The two examples only need postgres: their packages come precompiled (`apps/api/examples`). Tutorials 7, 11 and 12 and the script editor specs compile, so they also need the compile service. Tutorial 8 compiles through local mocks in `apps/web/lib/mock-api.ts` and doesn't need it.
+3. For the specs that create scripts on the API, start `apps/api` too (`pnpm dev` in `apps/api`, port 3001), with its Docker services up. The two examples only need postgres: their packages come precompiled (`apps/api/examples`). Tutorials 7, 8, 11 and 12 and the script editor specs compile, so they also need the compile service.
 4. For the specs that use Bread Wallet, install it from the repo root with `pnpm bread-wallet`. It downloads the version pinned in `.bread-wallet/version` to `.bread-wallet/extension` (gitignored). Each run warns when it's missing or outdated. `pnpm bread-wallet latest` upgrades to the newest [wallet release](https://github.com/0xMiden/wallet/releases) and pins it: commit `.bread-wallet/version`.
 
 ## Environment variables
@@ -46,7 +46,7 @@ The specs in `mobile/` run in two phone projects: `mobile-safari` (iPhone 14, We
 - the app shell shown while the Miden client starts;
 - the read-only code editor, and the tutorial buttons that add the code a step asks for (tutorials 7, 8 and 12, in `mobile-tutorial-code.spec.ts`).
 
-`mobile-sandbox.spec.ts` launches the counter example, so it needs `apps/api`, and compiles a script, so it needs the compile service too, as do tutorials 7 and 12 in `mobile-tutorial-code.spec.ts`. Headless WebKit starts the client in a couple of seconds against a local server, but takes about 30 s against production, where it downloads the WASM.
+`mobile-sandbox.spec.ts` launches the counter example, so it needs `apps/api`, and compiles a script, so it needs the compile service too, as do the three tutorials of `mobile-tutorial-code.spec.ts`. Headless WebKit starts the client in a couple of seconds against a local server, but takes about 30 s against production, where it downloads the WASM.
 
 ## Mainnet
 

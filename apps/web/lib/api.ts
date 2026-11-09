@@ -27,6 +27,7 @@ export const createScript = async ({
     ![
       "",
       "deploy-a-counter-contract",
+      "timelock-p2id-note",
       "foreign-procedure-invocation",
       "your-first-smart-contract-and-custom-note",
       "contract-verification",

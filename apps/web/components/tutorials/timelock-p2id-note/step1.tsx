@@ -5,19 +5,17 @@ import {
   BulletList,
   ButtonName,
   ExternalLink,
+  InlineCode,
 } from "@/components/tutorials/prose";
+import OutdatedRunAlert from "@/components/tutorials/timelock-p2id-note/outdated-run-alert";
+import useNoteScript from "@/components/tutorials/timelock-p2id-note/use-note-script";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
-import useScripts from "@/hooks/use-scripts";
-import { defaultScriptIds } from "@/lib/types/default-scripts";
 import type { TutorialStep } from "@/lib/types/tutorial";
 
 const useCompleted = () => {
   const { pathname } = useLocation();
-  const { scripts } = useScripts();
-  const script = scripts.find(
-    ({ id, type }) => !defaultScriptIds.includes(id) && type === "note",
-  );
-  return pathname === `/scripts/${script?.id}`;
+  const script = useNoteScript();
+  return !!script && pathname === `/scripts/${script.id}`;
 };
 
 const Step1: TutorialStep = {
@@ -26,6 +24,7 @@ const Step1: TutorialStep = {
     const completed = useCompleted();
     return (
       <>
+        <OutdatedRunAlert />
         <p>
           In this tutorial, you'll create a custom timelocked note on Miden, an
           extended version of the <strong>P2ID (Pay-to-ID)</strong> note. Using
@@ -54,11 +53,16 @@ const Step1: TutorialStep = {
           <ExternalLink href="https://docs.miden.xyz/reference/protocol/note#storage">
             note storage
           </ExternalLink>
-          , which the note script can read.
+          , which the note script can read. In a Rust note script, they are the
+          fields of the struct marked{" "}
+          <strong>
+            <InlineCode>#[note]</InlineCode>
+          </strong>
+          .
         </p>
         <p>
           In this timelock example, the note storage holds three items: the
-          target Account ID, split into two items, and the minimum block height
+          target Account ID, which takes two, and the minimum block height
           before the Note can be consumed.
         </p>
         <p>
@@ -66,6 +70,10 @@ const Step1: TutorialStep = {
           <ButtonName icon={Plus}>Create new script</ButtonName> button, enter a
           name, then select the <strong>Note Script</strong> type and the{" "}
           <strong>P2ID Note</strong> example.
+        </p>
+        <p>
+          The <strong>basic-wallet</strong> script that's already listed comes
+          with this tutorial: the next step tells you what it's for.
         </p>
         <TutorialStepAlert
           completed={completed}

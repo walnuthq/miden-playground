@@ -1,0 +1,770 @@
+{
+  "source": "// Do not link against libstd (i.e. anything defined in `std::`)\n#![no_std]\n#![feature(alloc_error_handler)]\n\n// However, we could still use some standard library types while\n// remaining no-std compatible, if we uncommented the following lines:\n//\n// extern crate alloc;\n\nuse miden::{component, component_storage, output_note, Asset, NoteIdx, NoteType, Recipient, Tag};\n\n#[component_storage]\nstruct BasicWalletStorage;\n\n/// API of the basic wallet account component.\n#[component]\ntrait BasicWallet {\n    /// Adds an asset to the account.\n    ///\n    /// This function adds the specified asset to the account's asset list.\n    ///\n    /// # Arguments\n    /// * `asset` - The asset to be added to the account\n    #[account_procedure]\n    fn receive_asset(&mut self, asset: Asset);\n\n    /// Moves an asset from the account to a note.\n    ///\n    /// This function removes the specified asset from the account and adds it to\n    /// the note identified by the given index.\n    ///\n    /// # Arguments\n    /// * `asset` - The asset to move from the account to the note\n    /// * `note_idx` - The index of the note to receive the asset\n    #[account_procedure]\n    fn move_asset_to_note(&mut self, asset: Asset, note_idx: NoteIdx);\n\n    /// Creates an output note and returns its index.\n    ///\n    /// `output_note::create` may only be called from an account component\n    /// context, so transaction scripts must create notes through this method.\n    ///\n    /// # Arguments\n    /// * `tag` - The note tag\n    /// * `note_type` - The note type (public/private/encrypted)\n    /// * `recipient` - The note recipient digest\n    #[account_procedure]\n    fn create_note(&mut self, tag: Tag, note_type: NoteType, recipient: Recipient) -> NoteIdx;\n}\n\n#[component]\nimpl BasicWallet for BasicWalletStorage {\n    fn receive_asset(&mut self, asset: Asset) {\n        self.add_asset(asset);\n    }\n\n    fn move_asset_to_note(&mut self, asset: Asset, note_idx: NoteIdx) {\n        self.remove_asset(asset);\n        output_note::add_asset(asset, note_idx);\n    }\n\n    fn create_note(&mut self, tag: Tag, note_type: NoteType, recipient: Recipient) -> NoteIdx {\n        output_note::create(tag, note_type, recipient)\n    }\n}\n",
+  "commitment": "0x9e869176aa15b9f8cd41d99ff5b9d683e5df6a13969d23445de60bba9035e8de",
+  "masp": "TUFTUAAHAAAZYmFzaWMtd2FsbGV0CzAuMS4wAANNQVNUAAAABMENGwYAAAAtAAAAUQAAAFkAAABaAAAAYwAAADAAAAAxAAAAWwAAAGQAAAAyAAAAWAAAAGUAAABCQwMAAQAAAAEAAAAAB1uwJraXzbstDx8pAQAAAAMAAAAAB1vh7gqi3JlzVh8pAQAAAAMAAAAAqVvh7gqi3JlzVh8pEDEKCFsEAAAAAAAAAEYIW7AmtpfNuy0PHykIASAAAAAAAAAAAC0pW+HuCqLcmXNWHylbBAAAAAAAAAAyIjBKAAAAAAAAAAApCghbBAAAAAAAAABGCFuwJraXzbstDx8pCAEgAAAAAAAAAAAtKVvh7gqi3JlzVh8pWwgAAAAAAAAAMiIwSgAAAAAAAAAAKQoIWwQAAAAAAAAARghbsCa2l827LQ8fKQgBIAAAAAAAAAAALSlb4e4KotyZc1YfKVsMAAAAAAAAACIwSgAAAAAAAAAAKVsEAAAAAAAAAEYIW7AmtpfNuy0PHykIASAAAAAAAAAAAC0pW+HuCqLcmXNWHykEAAAACZCQAAmQAAkICJAABQAAAAAAAAARMgEzWwQAAAAAAAAAQggpIAAAAAAAAAAAAQAAAAgAAAAABwgpBwEAAAADAAAAAIsIWwgAAAAAAAAARAgpCDEHCDAEQAgBIAAAAAAAAAAABwgzWwIAAAAAAAAAMAQIMA8PDw8PDykpCAEgAAAAAAAAAABGKQpbIAAAAAAAAAAIQgEgAAAAAAAAAAAKCFsCAAAAAAAAADAECDAPDw8PDw8pKQgBIAAAAAAAAAAARAgpMjImAiIiAgAAAAmZkAgJeQAAAAAPWyQAEQAAAAAAWwQAAAAAAAAARghbsCa2l827LQ8fKQEAAAAHAAAAADdb4e4KotyZc1YfKVsEAAAAAAAAAFsMABAAAAAAAApACCkIRjBKAAAAAAAAAAApASCw0agCIsLGHTApBzAwCiEhBQAAAQAAAAkAeRHAP1vh7gqi3JlzVh8pWwQAAAAAAAAAWwwAEAAAAAAACkAIKQhGMEoAAAAAAAAAACkBILDRqAIiwsYdMCkwBAgtKVuwJraXzbstDx8pAABb4e4KotyZc1YfKQIAAAAJAJkQAwAAAIAABTAg6Y1MAU+e6owBAAAAAgAAAACFWwwAAAAAAAAAW/7///8AAAAAByJb/v///wAAAAAtKVv1/////v///wBb/v///wAAAAAHIi0pW/b////+////AFv+////AAAAAAciLSlb9/////7///9b/v///wAAAAAHIi0pW/j////+////W/7///8AAAAAByItKQBb+f////7///9b/v///wAAAAAHIi0pW/r////+////W/7///8AAAAAByItKVv7/////v///1v+////AAAAAAciLSlb/P////7///9b/v///wAAAAAHIi0pWyAAEQAAAAAAWwQAAAAAAAAARghbsCa2l827LQ8fKQAEAAAACQBwAAkACBAJAJAACQBAECGAAIAJCCktKQEAAAAEAAAAAOcIWwgAAAAAAAAARAgpCDEwBEAIASAAAAAAAAAAAAcyB1sgAAAAAAAAADUCIlv/////AAAAADJbAgAAAAAAAAAwBAgwDw8PDw8PKSkIASAAAAAAAAAAAEYpMVv/////AAAAAEoAAAAAAAAAAAhCKRAmDAomNhJbAgAAAAAAAAAwBAgwDw8PDw8PKSkIASAAAAAAAAAAAEQIKTIyJgIiIggQDFsCAAAAAAAAADAECDAPDw8PDw8pKQgBIAAAAAAAAAAARikyMiYCIiIzBC0pCC0pAAAAAwAAAAkJCZAJmJAZCZkUEQAA4F1b4e4KotyZc1YfKTFb/f////7///9b/v///wAAAAAHIi0pAFv+/////v///1v+////AAAAAAciLSkAAFv9/////v///1v+////AAAAAAciB1vg////AAAAAFsgAAAAAAAAAAoIQikmMVv9/////v///1v+////AAAAAAciLSkAWyAAEQAAAAAAWwQAAAAAAAAARghbsCa2l827LQ8fKQMAAAAJAAkQCQCQAAkAAACAAAAZW+HuCqLcmXNWHylbJAARAAAAAABbBAAAAAAAAABGCFuwJraXzbstDx8pAAABAAAACQAQEcBbW+HuCqLcmXNWHylbFAAQAAAAAABACClbBAAAAAAAAABGCAgyBwhbCAAAAAAAAABECClbAgAAAAAAAAAwBAgwDw8PDw8PKSkIASAAAAAAAAAAAEYpCClb/wAAAAAAAAAmMAghBQACAAAACQAJCYkQAAAACNNb4e4KotyZc1YfKVv//////v///1v+////AAAAAAciLSkAW7AmtpfNuy0PHykAW+HuCqLcmXNWHykAW//////+////W/7///8AAAAAByIHMARbFAAQAAAAAAAKQAgpWwQAAAAAAAAARggxBzNbCAAAAAAAAABECClb/wAAAAAAAAAIWwIAAAAAAAAAMAQIMA8PDw8PDykpCAEgAAAAAAAAAABECClb/////wAAAABKAAAAAAAAAAAIQikIJgwMWwgAAAAAAAAARAgpWwIAAAAAAAAAMAQIMA8PDw8PDykpCAEgAAAAAAAAAABECCkyMiYCIiIILSkAAAAEAAAACQAIEAkACQQJkAkHCZkREYAAAOB/W/X////+////W/7///8AAAAAByIHW/b////+////W/7///8AAAAAByIHW/f////+////W/7///8AAAAAByIHW/j////+////W/7///8AAAAAByIHW/n////+////W/7///8AAAAAByIHW/r////+////W/7///8AAAAAByIHW/v////+////W/7///8AAAAAByIHW/z////+////W/7///8AAAAAByIHW/3////+////W/7///8AAAAAByIHFxoIFRYIChMUCwwREg1bsCa2l827LQ8fKQAEAAAACQBgAAkAYAAJAJAAWRAAAAAAAAgfW+HuCqLcmXNWHylb/v////7///9b/v///wAAAAAHIgdbIAARAAAAAABbBAAAAAAAAABGCFuwJraXzbstDx8pAQAAAAgABwAAGVvh7gqi3JlzVh8pW/X////+////W/7///8AAAAAByJb/v///wAAAAAtKQAAAQAAAAkAEBHAM1vh7gqi3JlzVh8pKVsAABAAAAAAADBKAAAAAAAAAAApWwhABAAAAAAALSkwMEoAAAAAAAAAAClbCUAEAAAAAAAtKVsAABAAAAAAADBKAAAAAAAAAAApWwpABAAAAAAALSkCAAAACJAABQMAAAAAAElbAAASAAAAAABbsCa2l827LQ8fKTEwCFvvvq3eAAAAAA0IClsAAABAAAAAAC4NCAopKSkpW+HuCqLcmXNWHylbHRqK1SKMrPtbTRuG0dGs3hZbXoROGUyJ9p1bRvKBe1Iz4b1blkHgLsLKoPcfKVsAAAQAAAAAADAEW7AmtpfNuy0PHykDAAAACQAJBQkAABADAAAAAAAAj1sMAAAAAAAAAFv+////AAAAAAciW/7///8AAAAALSlb9f////7///8AW/7///8AAAAAByItKVv2/////v///wBb/v///wAAAAAHIi0pW/f////+////W/7///8AAAAAByItKVv4/////v///1v+////AAAAAAciLSkAW/n////+////W/7///8AAAAAByItKVv6/////v///1v+////AAAAAAciLSlb+/////7///9b/v///wAAAAAHIi0pW/z////+////W/7///8AAAAAByItKVv9/////v///1v+////AAAAAAciLSlbIAARAAAAAABbBAAAAAAAAABGCFuwJraXzbstDx8pBQAAAAkAcAAJAAgQCQCQAAkAcAADAAAAIYAAAABdW+HuCqLcmXNWHykxW/7////+////W/7///8AAAAAByItKQBb//////7///9b/v///wAAAAAHIi0pAABb/v////7///9b/v///wAAAAAHIgdb4P///wAAAABbIAAAAAAAAAAKCEIpJjFb/v////7///9b/v///wAAAAAHIi0pAFsgABEAAAAAAFsEAAAAAAAAAEYIW7AmtpfNuy0PHykDAAAACQAJEAkAkAAJAAAAgAAA01vh7gqi3JlzVh8pWwAAAAD/////W/7///8AAAAAByItKQBbsCa2l827LQ8fKQBb4e4KotyZc1YfKQBbAAAAAP////9b/v///wAAAAAHIgcwBFsUABAAAAAAAApACClbBAAAAAAAAABGCDEHM1sIAAAAAAAAAEQIKVv/AAAAAAAAAAhbAgAAAAAAAAAwBAgwDw8PDw8PKSkIASAAAAAAAAAAAEQIKVv/////AAAAAEoAAAAAAAAAAAhCKQgmDAxbCAAAAAAAAABECClbAgAAAAAAAAAwBAgwDw8PDw8PKSkIASAAAAAAAAAAAEQIKTIyJgIiIggtKQAAAAQAAAAJAAgQCQAJBAmQCQcJmRERgAAA4H9b9f////7///9b/v///wAAAAAHIgdb9v////7///9b/v///wAAAAAHIgdb9/////7///9b/v///wAAAAAHIgdb+P////7///9b/v///wAAAAAHIgdb+f////7///9b/v///wAAAAAHIgdb+v////7///9b/v///wAAAAAHIgdb+/////7///9b/v///wAAAAAHIgdb/P////7///9b/v///wAAAAAHIgdb/v////7///9b/v///wAAAAAHIgcXGggVFggKExQLDBESDVuwJraXzbstDx8pAAQAAAAJAGAACQBgAAkAkABZEAAAAAAACI9b4e4KotyZc1YfKVv1/////v///1v+////AAAAAAciB1v2/////v///1v+////AAAAAAciB1v3/////v///wBb/v///wAAAAAHIgdb+P////7///9b/v///wAAAAAHIgdb+f////7///9b/v///wAAAAAHIgdb+v////7///8AW/7///8AAAAAByIHW/v////+////W/7///8AAAAAByIHW/z////+////W/7///8AAAAAByIHW/3////+////AFv+////AAAAAAciBxcaCBUWCAoTFAsMERINW7AmtpfNuy0PHykAAAAEAAAACAAHAAkABwAJAAcACTkQERAQEOAfW+HuCqLcmXNWHylb//////7///9b/v///wAAAAAHIgdbIAARAAAAAABbBAAAAAAAAABGCFuwJraXzbstDx8pAQAAAAgABwAAa1sIAAAAAAAAAFv+////AAAAAAciW/7///8AAAAALSlb+f////7///8AW/7///8AAAAAByItKVv6/////v///wBb/v///wAAAAAHIi0pW/v////+////W/7///8AAAAAByItKVv8/////v///1v+////AAAAAAciLSkAW/3////+////W/7///8AAAAAByItKVv+/////v///1v+////AAAAAAciLSlbJAARAAAAAABbBAAAAAAAAABGCFuwJraXzbstDx8pBAAAAAkAcAAJAAgQCQBwAAMAAAAhgAAAWVv5/////v///1v+////AAAAAAciB1v6/////v///1v+////AAAAAAciB1v7/////v///1v+////AAAAAAciB1v8/////v///1v+////AAAAAAciB1v9/////v///1v+////AAAAAAciB1v+/////v///1v+////AAAAAAciBxESCA0QCAoLDAtbsCa2l827LQ8fKQADAAAACQBgAAkAkAAJEQAAAAAIGVvh7gqi3JlzVh8pW/n////+////W/7///8AAAAAByJb/v///wAAAAAtKQAAAQAAAAkAEBHAAAAAAAAAAIAAAAAAAAAAgAAAAAAAAACAAAAAAAAAAIAAAAAAAAAAgAAAAAAAAACAAAAAAAAAADALAAAAAAAAMCAAAAAAAAAwNQAAAAAAADBaAQAAAAAAMHwBAAAAAAAwiQEAAAAA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MC9mZWx0AAEBC2lubmVyDwEDYxEBQW1pZGVuOmJhc2UvY29yZS10eXBlc0AxLjAuMC9mZWx0AAEBC2lubmVyDwEDZBEBQW1pZGVuOmJhc2UvY29yZS10eXBlc0AxLjAuMC9mZWx0AAEBC2lubmVyDwMRAUltaWRlbjpiYXNlL2NvcmUtdHlwZXNAMS4wLjAvbm90ZS1pZHgAAQELaW5uZXIRAUFtaWRlbjpiYXNlL2NvcmUtdHlwZXNAMS4wLjAvZmVsdAABAQtpbm5lcg8DACNhY2NvdW50X3Byb2NlZHVyZQE/ADo6Im1pZGVuOmJhc2ljLXdhbGxldC9iYXNpYy13YWxsZXRAMC4xLjAiOjoibW92ZS1hc3NldC10by1ub3RlIgFkAAAAAcAAAAA9QUUeqZq8TR6CaWwn+Yokvp16fqKZ41KRK84/2o4yjgEDBREBQ21pZGVuOmJhc2UvY29yZS10eXBlc0AxLjAuMC9hc3NldAACAQVpZBEBSW1pZGVuOmJhc2UvY29yZS10eXBlc0AxLjAuMC9hc3NldC1pZAABAQtpbm5lchEBQW1pZGVuOmJhc2UvY29yZS10eXBlc0AxLjAuMC93b3JkAAQBA2ERAUFtaWRlbjpiYXNlL2NvcmUtdHlwZXNAMS4wLjAvZmVsdAABAQtpbm5lcg8BA2IRAUFtaWRlbjpiYXNlL2NvcmUtdHlwZXNAMS4wLjAvZmVsdAABAQtpbm5lcg8BA2MRAUFtaWRlbjpiYXNlL2NvcmUtdHlwZXNAMS4wLjAvZmVsdAABAQtpbm5lcg8BA2QRAUFtaWRlbjpiYXNlL2NvcmUtdHlwZXNAMS4wLjAvZmVsdAABAQtpbm5lcg8BC3ZhbHVlEQFBbWlkZW46YmFzZS9jb3JlLXR5cGVzQDEuMC4wL3dvcmQABAEDYREBQW1pZGVuOmJhc2UvY29yZS10eXBlc0AxLjAuMC9mZWx0AAEBC2lubmVyDwEDYhEBQW1pZGVuOmJhc2UvY29yZS10eXBlc0AxLjAuMC9mZWx0AAEBC2lubmVyDwEDYxEBQW1pZGVuOmJhc2UvY29yZS10eXBlc0AxLjAuMC9mZWx0AAEBC2lubmVyDwEDZBEBQW1pZGVuOmJhc2UvY29yZS10eXBlc0AxLjAuMC9mZWx0AAEBC2lubmVyDxEBSW1pZGVuOmJhc2UvY29yZS10eXBlc0AxLjAuMC9ub3RlLWlkeAABAQtpbm5lchEBQW1pZGVuOmJhc2UvY29yZS10eXBlc0AxLjAuMC9mZWx0AAEBC2lubmVyDwEDACNhY2NvdW50X3Byb2NlZHVyZQE6ADo6Im1pZGVuOmJhc2ljLXdhbGxldC9iYXNpYy13YWxsZXRAMC4xLjAiOjoicmVjZWl2ZS1hc3NldCIBYwAAAAFtAAAACG5/o6toisHU8hXFO6UXtoxMjUNBj2uKCsHxuaih2yABAwMRAUNtaWRlbjpiYXNlL2NvcmUtdHlwZXNAMS4wLjAvYXNzZXQAAgEFaWQRAUltaWRlbjpiYXNlL2NvcmUtdHlwZXNAMS4wLjAvYXNzZXQtaWQAAQELaW5uZXIRAUFtaWRlbjpiYXNlL2NvcmUtdHlwZXNAMS4wLjAvd29yZAAEAQNhEQFBbWlkZW46YmFzZS9jb3JlLXR5cGVzQDEuMC4wL2ZlbHQAAQELaW5uZXIPAQNiEQFBbWlkZW46YmFzZS9jb3JlLXR5cGVzQDEuMC4wL2ZlbHQAAQELaW5uZXIPAQNjEQFBbWlkZW46YmFzZS9jb3JlLXR5cGVzQDEuMC4wL2ZlbHQAAQELaW5uZXIPAQNkEQFBbWlkZW46YmFzZS9jb3JlLXR5cGVzQDEuMC4wL2ZlbHQAAQELaW5uZXIPAQt2YWx1ZREBQW1pZGVuOmJhc2UvY29yZS10eXBlc0AxLjAuMC93b3JkAAQBA2ERAUFtaWRlbjpiYXNlL2NvcmUtdHlwZXNAMS4wLjAvZmVsdAABAQtpbm5lcg8BA2IRAUFtaWRlbjpiYXNlL2NvcmUtdHlwZXNAMS4wLjAvZmVsdAABAQtpbm5lcg8BA2MRAUFtaWRlbjpiYXNlL2NvcmUtdHlwZXNAMS4wLjAvZmVsdAABAQtpbm5lcg8BA2QRAUFtaWRlbjpiYXNlL2NvcmUtdHlwZXNAMS4wLjAvZmVsdAABAQtpbm5lcg8BAwAjYWNjb3VudF9wcm9jZWR1cmUBLwA6OiJtaWRlbjpiYXNpYy13YWxsZXQvYmFzaWMtd2FsbGV0QDAuMS4wIjo6aW5pdAFaAAAAAWYAAADfP+1ok3pz9359QFMcvPrcdrbYRZxqNSTYCY+dN1pKywEAAQEBAykAOjoibWlkZW46YmFzaWMtd2FsbGV0L2Jhc2ljLXdhbGxldEAwLjEuMCIBBxVtaWRlbi1jb3JlAA0wLjM1LjDdJXEt32k5w9WXCwYMLA9ty0XVuxVDZzlBeCD18KguxR1taWRlbi1wcm90b2NvbAANMC4xNy4wWfdD+8252kKV9vJkRngOh74jGegG3m4SctVcCZfBzp8fbWlkZW4tdHgta2VybmVsAg0wLjE3LjBP6ODEXTwP0QnDTumyg5X7CRRDFcNvWcfx88M4nOWvFgAHM3Byb2plY3Rfc291cmNlX3Byb3ZlbmFuY2WHBPdcrn9LgoSaNdz964yBq/XKRFsmoN0YRuIhQS3Ld4qdqwJehOwLMDCVKffXx8iomRb9EJ4rQeba9bFto1m8jaMAATVhY2NvdW50X2NvbXBvbmVudF9tZXRhZGF0YUEZYmFzaWMtd2FsbGV0AQswLjEuMAAAAAAAAAAAAAAAAAd3aXTqBwovLyBUaGlzIGZpbGUgaXMgYXV0by1nZW5lcmF0ZWQgYnkgdGhlIGAjW2NvbXBvbmVudF1gIG1hY3JvLgovLyBEbyBub3QgZWRpdCB0aGlzIGZpbGUgbWFudWFsbHkuCgpwYWNrYWdlIG1pZGVuOmJhc2ljLXdhbGxldEAwLjEuMDsKCnVzZSBtaWRlbjpiYXNlL2NvcmUtdHlwZXNAMS4wLjA7CgppbnRlcmZhY2UgYmFzaWMtd2FsbGV0IHsKICAgIHVzZSBjb3JlLXR5cGVzLnthc3NldCwgbm90ZS1pZHgsIG5vdGUtdHlwZSwgcmVjaXBpZW50LCB0YWd9OwoKICAgIHJlY2VpdmUtYXNzZXQ6IGZ1bmMoYXNzZXQ6IGFzc2V0KTsKICAgIG1vdmUtYXNzZXQtdG8tbm90ZTogZnVuYyhhc3NldDogYXNzZXQsIG5vdGUtaWR4OiBub3RlLWlkeCk7CiAgICBjcmVhdGUtbm90ZTogZnVuYyh0YWc6IHRhZywgbm90ZS10eXBlOiBub3RlLXR5cGUsIHJlY2lwaWVudDogcmVjaXBpZW50KSAtPiBub3RlLWlkeDsKfQoKd29ybGQgYmFzaWMtd2FsbGV0LXdvcmxkIHsKICAgIGV4cG9ydCBiYXNpYy13YWxsZXQ7Cn0K",
+  "exports": [
+    {
+      "Procedure": {
+        "path": "::\"miden:basic-wallet/basic-wallet@0.1.0\"::\"create-note\"",
+        "node": 101,
+        "source_node": 233,
+        "digest": "0xb225bce302cff9d8dd415d1c7fc8bc1ad2229d90e02ef34cbe89ff89a76a0454",
+        "signature": {
+          "abi": 3,
+          "params": [
+            {
+              "Struct": {
+                "name": "miden:base/core-types@1.0.0/note-idx",
+                "repr": "Default",
+                "size": 4,
+                "fields": [
+                  {
+                    "name": "inner",
+                    "index": 0,
+                    "align": 4,
+                    "offset": 0,
+                    "ty": {
+                      "Struct": {
+                        "name": "miden:base/core-types@1.0.0/felt",
+                        "repr": "Default",
+                        "size": 4,
+                        "fields": [
+                          {
+                            "name": "inner",
+                            "index": 0,
+                            "align": 4,
+                            "offset": 0,
+                            "ty": "Felt"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Struct": {
+                "name": "miden:base/core-types@1.0.0/note-idx",
+                "repr": "Default",
+                "size": 4,
+                "fields": [
+                  {
+                    "name": "inner",
+                    "index": 0,
+                    "align": 4,
+                    "offset": 0,
+                    "ty": {
+                      "Struct": {
+                        "name": "miden:base/core-types@1.0.0/felt",
+                        "repr": "Default",
+                        "size": 4,
+                        "fields": [
+                          {
+                            "name": "inner",
+                            "index": 0,
+                            "align": 4,
+                            "offset": 0,
+                            "ty": "Felt"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Struct": {
+                "name": "miden:base/core-types@1.0.0/asset-id",
+                "repr": "Default",
+                "size": 16,
+                "fields": [
+                  {
+                    "name": "inner",
+                    "index": 0,
+                    "align": 4,
+                    "offset": 0,
+                    "ty": {
+                      "Struct": {
+                        "name": "miden:base/core-types@1.0.0/word",
+                        "repr": "Default",
+                        "size": 16,
+                        "fields": [
+                          {
+                            "name": "a",
+                            "index": 0,
+                            "align": 4,
+                            "offset": 0,
+                            "ty": {
+                              "Struct": {
+                                "name": "miden:base/core-types@1.0.0/felt",
+                                "repr": "Default",
+                                "size": 4,
+                                "fields": [
+                                  {
+                                    "name": "inner",
+                                    "index": 0,
+                                    "align": 4,
+                                    "offset": 0,
+                                    "ty": "Felt"
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "name": "b",
+                            "index": 1,
+                            "align": 4,
+                            "offset": 4,
+                            "ty": {
+                              "Struct": {
+                                "name": "miden:base/core-types@1.0.0/felt",
+                                "repr": "Default",
+                                "size": 4,
+                                "fields": [
+                                  {
+                                    "name": "inner",
+                                    "index": 0,
+                                    "align": 4,
+                                    "offset": 0,
+                                    "ty": "Felt"
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "name": "c",
+                            "index": 2,
+                            "align": 4,
+                            "offset": 8,
+                            "ty": {
+                              "Struct": {
+                                "name": "miden:base/core-types@1.0.0/felt",
+                                "repr": "Default",
+                                "size": 4,
+                                "fields": [
+                                  {
+                                    "name": "inner",
+                                    "index": 0,
+                                    "align": 4,
+                                    "offset": 0,
+                                    "ty": "Felt"
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "name": "d",
+                            "index": 3,
+                            "align": 4,
+                            "offset": 12,
+                            "ty": {
+                              "Struct": {
+                                "name": "miden:base/core-types@1.0.0/felt",
+                                "repr": "Default",
+                                "size": 4,
+                                "fields": [
+                                  {
+                                    "name": "inner",
+                                    "index": 0,
+                                    "align": 4,
+                                    "offset": 0,
+                                    "ty": "Felt"
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "results": [
+            {
+              "Struct": {
+                "name": "miden:base/core-types@1.0.0/note-idx",
+                "repr": "Default",
+                "size": 4,
+                "fields": [
+                  {
+                    "name": "inner",
+                    "index": 0,
+                    "align": 4,
+                    "offset": 0,
+                    "ty": {
+                      "Struct": {
+                        "name": "miden:base/core-types@1.0.0/felt",
+                        "repr": "Default",
+                        "size": 4,
+                        "fields": [
+                          {
+                            "name": "inner",
+                            "index": 0,
+                            "align": 4,
+                            "offset": 0,
+                            "ty": "Felt"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "attributes": {
+          "attrs": [
+            {
+              "Marker": "account_procedure"
+            }
+          ]
+        },
+        "readOnly": false
+      }
+    },
+    {
+      "Procedure": {
+        "path": "::\"miden:basic-wallet/basic-wallet@0.1.0\"::\"move-asset-to-note\"",
+        "node": 100,
+        "source_node": 192,
+        "digest": "0x3d41451ea99abc4d1e82696c27f98a24be9d7a7ea299e352912bce3fda8e328e",
+        "signature": {
+          "abi": 3,
+          "params": [
+            {
+              "Struct": {
+                "name": "miden:base/core-types@1.0.0/asset",
+                "repr": "Default",
+                "size": 32,
+                "fields": [
+                  {
+                    "name": "id",
+                    "index": 0,
+                    "align": 4,
+                    "offset": 0,
+                    "ty": {
+                      "Struct": {
+                        "name": "miden:base/core-types@1.0.0/asset-id",
+                        "repr": "Default",
+                        "size": 16,
+                        "fields": [
+                          {
+                            "name": "inner",
+                            "index": 0,
+                            "align": 4,
+                            "offset": 0,
+                            "ty": {
+                              "Struct": {
+                                "name": "miden:base/core-types@1.0.0/word",
+                                "repr": "Default",
+                                "size": 16,
+                                "fields": [
+                                  {
+                                    "name": "a",
+                                    "index": 0,
+                                    "align": 4,
+                                    "offset": 0,
+                                    "ty": {
+                                      "Struct": {
+                                        "name": "miden:base/core-types@1.0.0/felt",
+                                        "repr": "Default",
+                                        "size": 4,
+                                        "fields": [
+                                          {
+                                            "name": "inner",
+                                            "index": 0,
+                                            "align": 4,
+                                            "offset": 0,
+                                            "ty": "Felt"
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "name": "b",
+                                    "index": 1,
+                                    "align": 4,
+                                    "offset": 4,
+                                    "ty": {
+                                      "Struct": {
+                                        "name": "miden:base/core-types@1.0.0/felt",
+                                        "repr": "Default",
+                                        "size": 4,
+                                        "fields": [
+                                          {
+                                            "name": "inner",
+                                            "index": 0,
+                                            "align": 4,
+                                            "offset": 0,
+                                            "ty": "Felt"
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "name": "c",
+                                    "index": 2,
+                                    "align": 4,
+                                    "offset": 8,
+                                    "ty": {
+                                      "Struct": {
+                                        "name": "miden:base/core-types@1.0.0/felt",
+                                        "repr": "Default",
+                                        "size": 4,
+                                        "fields": [
+                                          {
+                                            "name": "inner",
+                                            "index": 0,
+                                            "align": 4,
+                                            "offset": 0,
+                                            "ty": "Felt"
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "name": "d",
+                                    "index": 3,
+                                    "align": 4,
+                                    "offset": 12,
+                                    "ty": {
+                                      "Struct": {
+                                        "name": "miden:base/core-types@1.0.0/felt",
+                                        "repr": "Default",
+                                        "size": 4,
+                                        "fields": [
+                                          {
+                                            "name": "inner",
+                                            "index": 0,
+                                            "align": 4,
+                                            "offset": 0,
+                                            "ty": "Felt"
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "name": "value",
+                    "index": 1,
+                    "align": 4,
+                    "offset": 16,
+                    "ty": {
+                      "Struct": {
+                        "name": "miden:base/core-types@1.0.0/word",
+                        "repr": "Default",
+                        "size": 16,
+                        "fields": [
+                          {
+                            "name": "a",
+                            "index": 0,
+                            "align": 4,
+                            "offset": 0,
+                            "ty": {
+                              "Struct": {
+                                "name": "miden:base/core-types@1.0.0/felt",
+                                "repr": "Default",
+                                "size": 4,
+                                "fields": [
+                                  {
+                                    "name": "inner",
+                                    "index": 0,
+                                    "align": 4,
+                                    "offset": 0,
+                                    "ty": "Felt"
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "name": "b",
+                            "index": 1,
+                            "align": 4,
+                            "offset": 4,
+                            "ty": {
+                              "Struct": {
+                                "name": "miden:base/core-types@1.0.0/felt",
+                                "repr": "Default",
+                                "size": 4,
+                                "fields": [
+                                  {
+                                    "name": "inner",
+                                    "index": 0,
+                                    "align": 4,
+                                    "offset": 0,
+                                    "ty": "Felt"
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "name": "c",
+                            "index": 2,
+                            "align": 4,
+                            "offset": 8,
+                            "ty": {
+                              "Struct": {
+                                "name": "miden:base/core-types@1.0.0/felt",
+                                "repr": "Default",
+                                "size": 4,
+                                "fields": [
+                                  {
+                                    "name": "inner",
+                                    "index": 0,
+                                    "align": 4,
+                                    "offset": 0,
+                                    "ty": "Felt"
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "name": "d",
+                            "index": 3,
+                            "align": 4,
+                            "offset": 12,
+                            "ty": {
+                              "Struct": {
+                                "name": "miden:base/core-types@1.0.0/felt",
+                                "repr": "Default",
+                                "size": 4,
+                                "fields": [
+                                  {
+                                    "name": "inner",
+                                    "index": 0,
+                                    "align": 4,
+                                    "offset": 0,
+                                    "ty": "Felt"
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Struct": {
+                "name": "miden:base/core-types@1.0.0/note-idx",
+                "repr": "Default",
+                "size": 4,
+                "fields": [
+                  {
+                    "name": "inner",
+                    "index": 0,
+                    "align": 4,
+                    "offset": 0,
+                    "ty": {
+                      "Struct": {
+                        "name": "miden:base/core-types@1.0.0/felt",
+                        "repr": "Default",
+                        "size": 4,
+                        "fields": [
+                          {
+                            "name": "inner",
+                            "index": 0,
+                            "align": 4,
+                            "offset": 0,
+                            "ty": "Felt"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "results": []
+        },
+        "attributes": {
+          "attrs": [
+            {
+              "Marker": "account_procedure"
+            }
+          ]
+        },
+        "readOnly": false
+      }
+    },
+    {
+      "Procedure": {
+        "path": "::\"miden:basic-wallet/basic-wallet@0.1.0\"::\"receive-asset\"",
+        "node": 99,
+        "source_node": 109,
+        "digest": "0x086e7fa3ab688ac1d4f215c53ba517b68c4c8d43418f6b8a0ac1f1b9a8a1db20",
+        "signature": {
+          "abi": 3,
+          "params": [
+            {
+              "Struct": {
+                "name": "miden:base/core-types@1.0.0/asset",
+                "repr": "Default",
+                "size": 32,
+                "fields": [
+                  {
+                    "name": "id",
+                    "index": 0,
+                    "align": 4,
+                    "offset": 0,
+                    "ty": {
+                      "Struct": {
+                        "name": "miden:base/core-types@1.0.0/asset-id",
+                        "repr": "Default",
+                        "size": 16,
+                        "fields": [
+                          {
+                            "name": "inner",
+                            "index": 0,
+                            "align": 4,
+                            "offset": 0,
+                            "ty": {
+                              "Struct": {
+                                "name": "miden:base/core-types@1.0.0/word",
+                                "repr": "Default",
+                                "size": 16,
+                                "fields": [
+                                  {
+                                    "name": "a",
+                                    "index": 0,
+                                    "align": 4,
+                                    "offset": 0,
+                                    "ty": {
+                                      "Struct": {
+                                        "name": "miden:base/core-types@1.0.0/felt",
+                                        "repr": "Default",
+                                        "size": 4,
+                                        "fields": [
+                                          {
+                                            "name": "inner",
+                                            "index": 0,
+                                            "align": 4,
+                                            "offset": 0,
+                                            "ty": "Felt"
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "name": "b",
+                                    "index": 1,
+                                    "align": 4,
+                                    "offset": 4,
+                                    "ty": {
+                                      "Struct": {
+                                        "name": "miden:base/core-types@1.0.0/felt",
+                                        "repr": "Default",
+                                        "size": 4,
+                                        "fields": [
+                                          {
+                                            "name": "inner",
+                                            "index": 0,
+                                            "align": 4,
+                                            "offset": 0,
+                                            "ty": "Felt"
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "name": "c",
+                                    "index": 2,
+                                    "align": 4,
+                                    "offset": 8,
+                                    "ty": {
+                                      "Struct": {
+                                        "name": "miden:base/core-types@1.0.0/felt",
+                                        "repr": "Default",
+                                        "size": 4,
+                                        "fields": [
+                                          {
+                                            "name": "inner",
+                                            "index": 0,
+                                            "align": 4,
+                                            "offset": 0,
+                                            "ty": "Felt"
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "name": "d",
+                                    "index": 3,
+                                    "align": 4,
+                                    "offset": 12,
+                                    "ty": {
+                                      "Struct": {
+                                        "name": "miden:base/core-types@1.0.0/felt",
+                                        "repr": "Default",
+                                        "size": 4,
+                                        "fields": [
+                                          {
+                                            "name": "inner",
+                                            "index": 0,
+                                            "align": 4,
+                                            "offset": 0,
+                                            "ty": "Felt"
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "name": "value",
+                    "index": 1,
+                    "align": 4,
+                    "offset": 16,
+                    "ty": {
+                      "Struct": {
+                        "name": "miden:base/core-types@1.0.0/word",
+                        "repr": "Default",
+                        "size": 16,
+                        "fields": [
+                          {
+                            "name": "a",
+                            "index": 0,
+                            "align": 4,
+                            "offset": 0,
+                            "ty": {
+                              "Struct": {
+                                "name": "miden:base/core-types@1.0.0/felt",
+                                "repr": "Default",
+                                "size": 4,
+                                "fields": [
+                                  {
+                                    "name": "inner",
+                                    "index": 0,
+                                    "align": 4,
+                                    "offset": 0,
+                                    "ty": "Felt"
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "name": "b",
+                            "index": 1,
+                            "align": 4,
+                            "offset": 4,
+                            "ty": {
+                              "Struct": {
+                                "name": "miden:base/core-types@1.0.0/felt",
+                                "repr": "Default",
+                                "size": 4,
+                                "fields": [
+                                  {
+                                    "name": "inner",
+                                    "index": 0,
+                                    "align": 4,
+                                    "offset": 0,
+                                    "ty": "Felt"
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "name": "c",
+                            "index": 2,
+                            "align": 4,
+                            "offset": 8,
+                            "ty": {
+                              "Struct": {
+                                "name": "miden:base/core-types@1.0.0/felt",
+                                "repr": "Default",
+                                "size": 4,
+                                "fields": [
+                                  {
+                                    "name": "inner",
+                                    "index": 0,
+                                    "align": 4,
+                                    "offset": 0,
+                                    "ty": "Felt"
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "name": "d",
+                            "index": 3,
+                            "align": 4,
+                            "offset": 12,
+                            "ty": {
+                              "Struct": {
+                                "name": "miden:base/core-types@1.0.0/felt",
+                                "repr": "Default",
+                                "size": 4,
+                                "fields": [
+                                  {
+                                    "name": "inner",
+                                    "index": 0,
+                                    "align": 4,
+                                    "offset": 0,
+                                    "ty": "Felt"
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "results": []
+        },
+        "attributes": {
+          "attrs": [
+            {
+              "Marker": "account_procedure"
+            }
+          ]
+        },
+        "readOnly": false
+      }
+    }
+  ]
+}

@@ -4,7 +4,8 @@
 // teaches it for the counter note): the check does the same. The code the
 // tutorials have users add to a template (their "Add to my script" buttons,
 // lib/utils/tutorial-code.ts in the web app) is compiled too, so an SDK bump
-// that breaks a snippet fails here.
+// that breaks a snippet fails here. So does a package the web app embeds
+// (lib/tutorials/basic-wallet.json) once the compiler builds it differently.
 //
 // It goes through a running API (`pnpm dev`, which reaches whatever
 // API_COMPILE_URL it's configured with), exactly like the dialog then the
@@ -13,10 +14,14 @@
 // after bumping the Miden SDK, the api-compile image or
 // templates/project-template.
 //
-//   node scripts/check-templates.ts
+//   node scripts/check-templates.ts [--write]
 //
 // API_URL defaults to the local API (http://localhost:3001). Exits with 1 when
-// a template doesn't compile, printing the compiler's diagnostics.
+// a template doesn't compile, printing the compiler's diagnostics, or when an
+// embedded package is out of date: `--write` (`pnpm templates:sync`)
+// regenerates it instead.
+import { readFileSync, writeFileSync } from "node:fs";
+import path from "node:path";
 import {
   type ScriptExample,
   type ScriptType,
@@ -28,9 +33,11 @@ import {
   type CodeEdit,
   increaseIncrementEdits,
   resetCountEdits,
+  timelockEdits,
 } from "../../web/lib/utils/tutorial-code.ts";
 
 const API_URL = process.env.API_URL ?? "http://localhost:3001";
+const write = process.argv.includes("--write");
 
 // The types the dialog offers (see components/scripts/create-script-dialog.tsx
 // in the web app).
@@ -54,7 +61,6 @@ const userDependencies: Partial<Record<ScriptExample, ScriptExample>> = {
 };
 
 // The tutorials' edits, applied to the template their script is created from.
-// Tutorial 8's (timelockEdits) join once they anchor on the P2ID template.
 const tutorialEdits: {
   label: string;
   example: ScriptExample;
@@ -66,11 +72,52 @@ const tutorialEdits: {
     edits: increaseIncrementEdits,
   },
   {
+    label: "tutorial 8 (timelock)",
+    example: "p2id-note",
+    edits: timelockEdits,
+  },
+  {
     label: "tutorial 12 (reset_count)",
     example: "counter-account",
     edits: resetCountEdits,
   },
 ];
+
+// The packages the web app embeds, each compiled from a template under the
+// name the snapshot's digests are for (procedure digests depend on the package
+// name). A snapshot is the template's source and what the web app builds a
+// script from: the package, its commitment and its exports, not its MASM.
+const embeddedPackages: {
+  name: string;
+  type: ScriptType;
+  template: string;
+  snapshot: string;
+}[] = [
+  {
+    // The Rust basic wallet the API compiles note scripts against
+    // (lib/default-dependencies.ts): tutorial 8's Test Wallet carries it, so
+    // it can consume the note built from the user's P2ID script.
+    name: "basic-wallet",
+    type: "account-component",
+    template: path.join(import.meta.dirname, "../templates/basic-wallet.rs"),
+    snapshot: path.join(
+      import.meta.dirname,
+      "../../web/lib/tutorials/basic-wallet.json",
+    ),
+  },
+];
+
+type Snapshot = {
+  source: string;
+  commitment: string;
+  masp: string;
+  exports: unknown[];
+};
+
+// What tells a snapshot is up to date. Not the package's bytes: the
+// commitment covers its code.
+const comparable = ({ source, commitment, exports }: Snapshot) =>
+  JSON.stringify({ source, commitment, exports });
 
 type CreatedPackage = {
   id: string;
@@ -81,6 +128,9 @@ type CreatedPackage = {
 type CompiledPackage = {
   status: "draft" | "compiled" | "error";
   error: string;
+  commitment: string;
+  masp: string;
+  exports: unknown[];
 };
 
 const request = async <T>(path: string, init: RequestInit): Promise<T> => {
@@ -205,9 +255,44 @@ for (const { label, example, edits } of tutorialEdits) {
   }
 }
 
-const total = scripts.length + tutorialEdits.length;
+const staleSnapshots: string[] = [];
+for (const { name, type, template, snapshot } of embeddedPackages) {
+  const label = `embedded package ${name}`;
+  const source = readFileSync(template, "utf8");
+  const script = await createScript(type, "none", name);
+  try {
+    const { status, error, commitment, masp, exports } = await compileScript(
+      { ...script, files: { "src/lib.rs": source } },
+      script.dependencies.map(({ id }) => id),
+    );
+    if (status !== "compiled") {
+      failures.push(label);
+      console.error(`FAIL  ${label}\n${diagnostics(error)}\n`);
+      continue;
+    }
+    const compiled: Snapshot = { source, commitment, masp, exports };
+    const current = JSON.parse(readFileSync(snapshot, "utf8")) as Snapshot;
+    if (comparable(current) === comparable(compiled)) {
+      console.info(`ok    ${label}`);
+    } else if (write) {
+      writeFileSync(snapshot, `${JSON.stringify(compiled, null, 2)}\n`);
+      console.info(`wrote ${label} (${commitment})`);
+    } else {
+      staleSnapshots.push(label);
+      console.error(
+        `FAIL  ${label}: its snapshot is out of date, run \`pnpm templates:sync\`\n`,
+      );
+    }
+  } finally {
+    await request(`/scripts/${script.id}`, { method: "DELETE" });
+  }
+}
+
+const total = scripts.length + tutorialEdits.length + embeddedPackages.length;
 if (failures.length > 0) {
   console.error(`${failures.length}/${total} templates don't compile.`);
+}
+if (failures.length > 0 || staleSnapshots.length > 0) {
   process.exit(1);
 }
 console.info(`All ${total} templates compile.`);

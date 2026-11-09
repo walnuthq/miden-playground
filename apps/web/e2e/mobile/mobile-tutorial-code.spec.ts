@@ -8,13 +8,12 @@ import {
   TRANSACTION_TIMEOUT,
   tutorialPanel,
 } from "../tutorial";
-import { closePanel } from "./layout";
+import { closePanel, expectNoHorizontalOverflow } from "./layout";
 
 // The editor is read-only on a phone: the tutorial steps that ask for code
 // have buttons that add it to the script, which these tests use to complete
-// them. Tutorial 8 compiles through the web app's local mocks, tutorials 7
-// and 12 through apps/api and the compile service, which checks that the code
-// the buttons add compiles.
+// them. The scripts compile through apps/api and the compile service, which
+// checks that the code the buttons add compiles.
 
 // Creates the step's script from the "Create Script" dialog, with the panel
 // closed, and waits for the panel to open again on the completed step.
@@ -104,22 +103,39 @@ test("mobile: tutorial 8's timelock, added by its buttons", async ({
   await nextStep(page);
 
   await test.step("3. add the timelock and compile", async () => {
-    await panel.root
-      .getByRole("button", { name: "Apply to my script" })
-      .click();
-    await waitForEditorText(page, "felt!(3)");
-    // The last snippet's button adds the two before it too.
-    await panel.root
-      .getByRole("button", { name: "Add to my script" })
-      .last()
-      .click();
-    await waitForEditorText(page, "assert!(block_number >= timelock_height);");
-    await expect(panel.root.getByRole("button", { name: "Added" })).toHaveCount(
-      3,
+    const addButtons = panel.root.getByRole("button", {
+      name: "Add to my script",
+    });
+    const addedButtons = panel.root.getByRole("button", { name: "Added" });
+    await expect(addButtons).toHaveCount(4);
+    // A snippet's lines are wider than a phone: they scroll inside their
+    // block, not the panel or the page with it.
+    await expect
+      .poll(() =>
+        panel.root
+          .locator(".overflow-y-auto")
+          .evaluate((element) => element.scrollWidth - element.clientWidth),
+      )
+      .toBeLessThanOrEqual(0);
+    await expectNoHorizontalOverflow(page);
+    // The note's new input: its button imports the field's type too, the
+    // next snippet.
+    await addButtons.first().click();
+    await waitForEditorText(page, "timelock_height: Felt,\n}");
+    await waitForEditorText(page, "note, tx, AccountId, Felt, Recipient");
+    await expect(addedButtons).toHaveCount(2);
+    // The last snippet's button adds the constructor's before it too.
+    await addButtons.last().click();
+    await waitForEditorText(
+      page,
+      "serial_num: Word,\n        timelock_height: Felt,",
     );
-    await expect(
-      panel.root.getByRole("button", { name: "Add to my script" }),
-    ).toHaveCount(0);
+    await waitForEditorText(
+      page,
+      "assert!(block_number.as_felt() >= self.timelock_height);",
+    );
+    await expect(addedButtons).toHaveCount(4);
+    await expect(addButtons).toHaveCount(0);
     await compile(page);
     // Moving on creates the Test Wallet, the note's target account.
     await nextStep(page);
