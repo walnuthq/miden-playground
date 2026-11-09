@@ -3,7 +3,6 @@ import { toast } from "sonner";
 import ApplyCodeButton from "@/components/tutorials/apply-code-button";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import { CodeBlock, InlineCode } from "@/components/tutorials/prose";
-import OutdatedRunAlert from "@/components/tutorials/timelock-p2id-note/outdated-run-alert";
 import useNoteScript from "@/components/tutorials/timelock-p2id-note/use-note-script";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import useAccounts from "@/hooks/use-accounts";
@@ -38,7 +37,6 @@ const Step3: TutorialStep = {
     );
     return (
       <>
-        <OutdatedRunAlert />
         <p>
           The timelock block height is a new parameter of the Note, so it needs
           a new field in the{" "}

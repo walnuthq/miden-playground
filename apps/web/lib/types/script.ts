@@ -107,8 +107,8 @@ export type PackageSource = { midenProjectToml: string; rust: string };
 
 // The files of a script the editor shows, by path in its project. Only
 // `src/lib.rs` is edited: the API generates the manifests. The built-in
-// scripts and the mock API's have no manifests, the MASM-only built-ins no
-// file at all.
+// scripts and the packages embedded for the tutorials have no manifests, the
+// MASM-only built-ins no file at all.
 export const scriptFilePaths = [
   "src/lib.rs",
   "Cargo.toml",

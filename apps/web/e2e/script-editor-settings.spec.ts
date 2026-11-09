@@ -30,8 +30,8 @@ test("script: editor settings (minimap, font size)", async ({ page }) => {
   logBrowserErrors(page);
 
   await test.step("the minimap shows by default", async () => {
-    await page.goto("/scripts/counter-contract");
-    await waitForEditorText(page, "fn increment_count");
+    await page.goto("/scripts/auth-no-auth");
+    await waitForEditorText(page, "fn auth_procedure");
     await expect(page.locator(".minimap").first()).toBeVisible();
     expect((await editorOptions(page)).minimap).toBe(true);
   });
@@ -59,7 +59,7 @@ test("script: editor settings (minimap, font size)", async ({ page }) => {
 
   await test.step("kept across a reload", async () => {
     await page.reload();
-    await waitForEditorText(page, "fn increment_count");
+    await waitForEditorText(page, "fn auth_procedure");
     await expect
       .poll(() => editorOptions(page))
       .toEqual({ minimap: false, fontSize: 18 });

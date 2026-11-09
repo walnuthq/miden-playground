@@ -67,8 +67,8 @@ test("script: the Explorer's files and tabs", async ({ page }) => {
   const { file, files, tabs, tab, close } = explorer(page);
 
   await test.step("a built-in script has its source only", async () => {
-    await page.goto("/scripts/counter-contract");
-    await waitForEditorText(page, "fn get_count(&self) -> Felt {");
+    await page.goto("/scripts/auth-no-auth");
+    await waitForEditorText(page, "fn auth_procedure(&mut self, _arg: Word) {");
     await expect(files).toHaveText(["src", "lib.rs"]);
     await expect(tabs).toHaveText(["lib.rs"]);
   });

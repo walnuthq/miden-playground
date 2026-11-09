@@ -71,7 +71,7 @@ test("mainnet: switching during a funding warns first", async ({
     }
     await dialog.getByLabel("Name").fill("Never funded");
     await selectOption(page, "Auth Component", "Network Account");
-    await selectOption(page, "Account Component", "Counter Account");
+    await selectOption(page, "Account Component", "Counter Contract");
     await dialog.getByPlaceholder("Select allowed note-scripts…").click();
     await page.getByRole("option", { name: "increment-note" }).click();
     await dialog.locator("#name").click();

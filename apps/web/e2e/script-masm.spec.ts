@@ -40,8 +40,8 @@ test("script: MASM syntax highlighting", async ({ page }) => {
   logBrowserErrors(page);
 
   await test.step("open a built-in script's MASM tab", async () => {
-    await page.goto("/scripts/counter-contract?tab=masm");
-    await waitForEditorText(page, "pub proc increment_count()");
+    await page.goto("/scripts/auth-no-auth?tab=masm");
+    await waitForEditorText(page, "pub proc auth_no_auth(");
     const language = await page.evaluate(() =>
       (
         window as unknown as {
@@ -143,9 +143,10 @@ test("script: MASM syntax highlighting", async ({ page }) => {
   });
 
   await test.step("the MASM tab is colored", async () => {
-    // Keywords and comments get different colors than plain text. Monaco can
+    // Keywords, names and comments each get their own color. Monaco can
     // render a line before tokenizing it (one color for the whole line), so
-    // poll until the colors show.
+    // poll until the colors show. The words are ones no earlier line has, a
+    // comment's included ("proc" is in "procedure"): `color` reads the first.
     const panel = page.getByRole("tabpanel");
     const color = (text: string) =>
       panel
@@ -154,10 +155,10 @@ test("script: MASM syntax highlighting", async ({ page }) => {
         .evaluate((element) => getComputedStyle(element).color);
     await expect
       .poll(async () => {
-        const proc = await color("proc");
-        const name = await color("increment_count");
-        const comment = await color("Returns the current count");
-        return new Set([proc, name, comment]).size;
+        const keyword = await color("dropw");
+        const name = await color("auth_no_auth");
+        const comment = await color("Pay the transaction fee");
+        return new Set([keyword, name, comment]).size;
       })
       .toBe(3);
   });

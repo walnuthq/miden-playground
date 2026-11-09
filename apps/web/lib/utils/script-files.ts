@@ -5,8 +5,8 @@ import type { Script, ScriptFiles } from "../types/script.ts";
 // The file a script's code is compiled from, and the only one edited.
 export const SCRIPT_FILE = "src/lib.rs";
 
-// The files of a script that only has a source (the built-in and mock API's
-// scripts). The MASM-only built-ins have none.
+// The files of a script that only has a source (the built-in scripts and the
+// packages embedded for the tutorials). The MASM-only built-ins have none.
 export const sourceFiles = (source: string): ScriptFiles =>
   source === "" ? {} : { [SCRIPT_FILE]: source };
 

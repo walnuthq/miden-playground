@@ -117,8 +117,8 @@ const ScriptComponent = ({ id, script }: { id: string; script?: Script }) => {
   });
   const { compile, compiling } = useCompileScript(script);
   // The MASM-only built-ins have no Rust source, so no files for the Explorer.
-  // Not just an empty source: an editable script's can be cleared, and the
-  // mock API's scripts are assembled from MASM but have Rust.
+  // Not just an empty source: an editable script's can be cleared, and other
+  // built-ins are assembled from MASM but come with a Rust source.
   const masmOnly =
     !!script && assembledFromMasm(script) && scriptSource(script) === "";
   const defaultTab = masmOnly ? "masm" : "explorer";

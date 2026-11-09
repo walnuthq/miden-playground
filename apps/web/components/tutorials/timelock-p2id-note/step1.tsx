@@ -7,7 +7,6 @@ import {
   ExternalLink,
   InlineCode,
 } from "@/components/tutorials/prose";
-import OutdatedRunAlert from "@/components/tutorials/timelock-p2id-note/outdated-run-alert";
 import useNoteScript from "@/components/tutorials/timelock-p2id-note/use-note-script";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import type { TutorialStep } from "@/lib/types/tutorial";
@@ -24,7 +23,6 @@ const Step1: TutorialStep = {
     const completed = useCompleted();
     return (
       <>
-        <OutdatedRunAlert />
         <p>
           In this tutorial, you'll create a custom timelocked note on Miden, an
           extended version of the <strong>P2ID (Pay-to-ID)</strong> note. Using

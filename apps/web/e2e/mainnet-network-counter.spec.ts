@@ -155,7 +155,7 @@ test("mainnet: network counter incremented by a network note from Bread", async 
     await dialog.getByLabel("Name").fill(ACCOUNT_NAME);
     await expect(dialog.getByRole("combobox").first()).toContainText("Public");
     await selectOption(page, "Auth Component", "Network Account");
-    await selectOption(page, "Account Component", "Counter Account");
+    await selectOption(page, "Account Component", "Counter Contract");
     await dialog.getByPlaceholder("Select allowed note-scripts…").click();
     await page.getByRole("option", { name: "increment-note" }).click();
     // Escape would close the whole dialog: click another field instead.

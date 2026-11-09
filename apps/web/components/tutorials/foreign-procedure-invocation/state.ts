@@ -2,13 +2,13 @@ import {
   counterContractAccountId,
   counterContractAddress,
 } from "@/lib/constants";
+import countReaderScript from "@/lib/tutorials/count-reader";
 import {
   counterAccountComponent,
   counterAccountScript,
 } from "@/lib/tutorials/counter-account";
 import defaultComponents from "@/lib/types/default-components";
 import defaultScripts from "@/lib/types/default-scripts";
-import countReaderScript from "@/lib/types/default-scripts/count-reader";
 import type { State } from "@/lib/types/state";
 import {
   defaultAccount,

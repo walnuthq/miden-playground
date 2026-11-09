@@ -7,5 +7,4 @@ import { counterExampleStarter } from "@/lib/utils/counter-example";
 // Wallet, increments. Partner Mainnet only creates invited accounts and
 // network accounts, so no account comes with them.
 export const mainnetSandboxStarter = (): Promise<WorkspaceStarter> =>
-  // The built-in MASM counter is already "Counter Contract".
-  counterExampleStarter({ componentName: "Counter Account" });
+  counterExampleStarter();

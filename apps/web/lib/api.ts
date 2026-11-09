@@ -1,5 +1,4 @@
 import { API_REGISTRY_URL, API_URL } from "@/lib/constants";
-import { mockCompileScript, mockCreateScript } from "@/lib/mock-api";
 import type {
   CompiledPackage,
   Package,
@@ -16,25 +15,11 @@ export const createScript = async ({
   name,
   type,
   example,
-  tutorialId,
 }: {
   name: string;
   type: ScriptType;
   example: ScriptExample | "none";
-  tutorialId: string;
 }) => {
-  if (
-    ![
-      "",
-      "deploy-a-counter-contract",
-      "timelock-p2id-note",
-      "foreign-procedure-invocation",
-      "your-first-smart-contract-and-custom-note",
-      "contract-verification",
-    ].includes(tutorialId)
-  ) {
-    return { script: await mockCreateScript({ name, type, example }) };
-  }
   const response = await fetch(`${API_URL}/scripts`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -51,12 +36,14 @@ export const createScript = async ({
 };
 
 export const compileScript = async (script: Script) => {
+  // The API's scripts have UUIDs. A tutorial run saved before the tutorials
+  // all compiled through the API can still hold a script made by the stand-in
+  // some of them used (`<example>_<uuid>`), which the API never stored.
   if (!isValidUUIDv4(script.id)) {
-    try {
-      return { script: await mockCompileScript(script) };
-    } catch (error) {
-      return { error: (error as Error).message };
-    }
+    return {
+      error:
+        "This script comes from an earlier version of the Playground and can't be compiled anymore. Restart the tutorial to create a new one.",
+    };
   }
   const response = await fetch(`${API_URL}/scripts/${script.id}`, {
     method: "PATCH",

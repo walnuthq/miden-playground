@@ -175,7 +175,9 @@ const migrateScript = ({
 // a project) holds a copy of each, which can predate a change to it (e.g. its
 // procedures' `readOnly` flags): built-ins can't be edited, so the code's
 // version replaces it. One added since is missing: add it, as built-ins
-// recognize standard notes (e.g. fee-sponsorship) by their script root.
+// recognize standard notes (e.g. fee-sponsorship) by their script root. One
+// removed since stays as it was persisted, and needs its id in
+// retiredScriptIds (lib/types/default-scripts) to stay out of the user's.
 const withDefaultScripts = (scripts: Script[]) => [
   ...scripts.map(
     (script) => defaultScripts.find(({ id }) => id === script.id) ?? script,
