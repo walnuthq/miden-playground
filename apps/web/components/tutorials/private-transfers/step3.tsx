@@ -1,4 +1,6 @@
+import { Wallet } from "lucide-react";
 import NextStepButton from "@/components/tutorials/next-step-button";
+import { ButtonName } from "@/components/tutorials/prose";
 import TutorialLink from "@/components/tutorials/tutorial-link";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import useAccounts from "@/hooks/use-accounts";
@@ -26,9 +28,10 @@ const Step3: TutorialStep = {
           stays listed on the accounts page.
         </p>
         <p>
-          Then click the <em>"Select Wallet"</em> button and select{" "}
-          <em>"Para Wallet"</em>. In the Para modal, enter your email address
-          and type the verification code Para sends you by email.
+          Then click the <ButtonName icon={Wallet}>Select Wallet</ButtonName>{" "}
+          button and select <em>"Para Wallet"</em>. In the Para modal, enter
+          your email address and type the verification code Para sends you by
+          email.
         </p>
         <p>
           Para creates a wallet for your email address and the Playground
@@ -44,9 +47,9 @@ const Step3: TutorialStep = {
           titleWhenCompleted="Your Para Wallet is connected and imported."
           description={
             <p>
-              Disconnect Bread Wallet, then click the <em>"Select Wallet"</em>{" "}
-              button, select <em>"Para Wallet"</em> and log in with your email
-              address.
+              Disconnect Bread Wallet, then click the{" "}
+              <ButtonName icon={Wallet}>Select Wallet</ButtonName> button,
+              select <em>"Para Wallet"</em> and log in with your email address.
             </p>
           }
         />
