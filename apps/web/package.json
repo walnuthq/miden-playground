@@ -24,9 +24,9 @@
   "dependencies": {
     "@fontsource-variable/geist": "5.3.0",
     "@fontsource-variable/geist-mono": "5.3.0",
-    "@getpara/evm-wallet-connectors": "3.25.0",
-    "@getpara/react-sdk-lite": "3.25.0",
-    "@getpara/web-sdk": "3.25.0",
+    "@getpara/evm-wallet-connectors": "3.27.0",
+    "@getpara/react-sdk-lite": "3.27.0",
+    "@getpara/web-sdk": "3.27.0",
     "@miden-sdk/miden-sdk": "0.17.8",
     "@miden-sdk/miden-wallet-adapter": "0.17.8",
     "@miden-sdk/para": "0.17.8",

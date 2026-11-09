@@ -40,3 +40,17 @@ overrides:
   # on minimatch 11. Remove both once the SDK and shadcn's ts-morph move on.
   "minimatch": "^11.0.4"
   "glob": "^14.0.3"
+# Para 3.27.0 (released 2026-11-09) drops the fetch instrumentation that broke
+# Miden gRPC-web calls in 3.26. Remove these once 3.27.0 is past the minimum
+# release age.
+minimumReleaseAgeExclude:
+  - "@getpara/core-sdk@3.27.0"
+  - "@getpara/evm-wallet-connectors@3.27.0"
+  - "@getpara/react-common@3.27.0"
+  - "@getpara/react-component-library@3.27.0"
+  - "@getpara/react-core@3.27.0"
+  - "@getpara/react-sdk-lite@3.27.0"
+  - "@getpara/user-management-client@3.27.0"
+  - "@getpara/viem-v2-integration@3.27.0"
+  - "@getpara/wagmi-v2-connector@3.27.0"
+  - "@getpara/web-sdk@3.27.0"
