@@ -1,7 +1,8 @@
 # Tutorials on the real Rust compilation pipeline
 
 Status: plan, written 2026-11-06. PR A merged as #779, PR B as #781 and PR C
-as #782 (2026-11-08), PR D open as #784 (2026-11-09), E and F not started.
+as #782 (2026-11-08), PR D as #784 and PR E as #785 (2026-11-09), F not
+started.
 One PR per item below, in the order given; the tutorial PRs (B to E) are
 independent of each other once A has landed, so different agents can pick
 them up.
@@ -438,7 +439,28 @@ Verify: tutorial 8 e2e with Bread (`pnpm bread-wallet`), the mobile spec,
 
 ## PR E: tutorial 9, "Network transactions"
 
-`components/tutorials/network-transactions`:
+`components/tutorials/network-transactions`. As built, it differs from the
+list below in five places:
+
+- The starter's scripts are read-only (`counterExampleStarter({ readOnly:
+  true })`), as the MASM built-ins were. The steps only read them, and a
+  counter compiled again from other code would no longer have the procedures
+  the note calls: the network transaction would fail, with nothing to show
+  for it in the Playground.
+- The steps find the scripts by name (`use-network-counter.ts`), their ids
+  being the API's UUIDs, and the component by its script.
+- A run without the scripts gets a "Restart tutorial" alert on steps 1 to 4
+  (`missing-scripts-alert.tsx`). That's a run started while the API was down:
+  the toast goes away, a resumed run keeps the scripts it was saved with, and
+  the Deploy dialog then has no component to select. It's also a run started
+  before this PR, which holds the MASM built-ins (`counter-value-contract`)
+  and can't follow the new copy. PR F removes that second case.
+  `e2e/tutorial-9-missing-scripts.spec.ts` covers the first.
+- Step 1 says again that the counter uses the same code as a previous
+  tutorial's (PR B had loosened it). Step 3 also cites lines 13-15, which bind
+  the note to the `counter-account` package, and links to that script.
+- Step 5 has both: `get_count`'s Invoke, then the map entry. The e2e ends on
+  `get_count` returning 1.
 
 - `index.ts`: `starter: () => counterExampleStarter({ componentName: "Counter
   Contract" })` (PR A). `state.ts` drops the three built-ins and the
@@ -478,7 +500,11 @@ Once B to E are merged:
   keeps the mock's fixed slot name (`MOCK_SLOT_NAME`) for such a script, so a
   run saved before PR C still deploys a counter that reads its slot: remove
   it here. Tutorial 8 offers such a run a restart instead
-  (`timelock-p2id-note/outdated-run-alert.tsx`): remove it too.
+  (`timelock-p2id-note/outdated-run-alert.tsx`): remove it too. So does
+  tutorial 9, in the `outdated` case of
+  `network-transactions/missing-scripts-alert.tsx` (a state holding
+  `counter-value-contract`): remove that case, keep the alert for a run
+  started without the API.
 - Delete the MASM counter built-ins: `default-scripts/counter-contract.ts`,
   `counter-map-contract.ts`, `counter-note.ts`, `counter-script.ts`,
   `timelock-p2id.ts`, `default-components/counter-contract.ts`, and their

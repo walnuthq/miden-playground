@@ -1,28 +1,17 @@
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
+import MissingScriptsAlert from "@/components/tutorials/network-transactions/missing-scripts-alert";
+import useNetworkCounter from "@/components/tutorials/network-transactions/use-network-counter";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import { ButtonName } from "@/components/tutorials/prose";
 import TutorialLink from "@/components/tutorials/tutorial-link";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
-import useAccounts from "@/hooks/use-accounts";
-import useComponents from "@/hooks/use-components";
-import { defaultComponentIds } from "@/lib/types/default-components";
 import type { TutorialStep } from "@/lib/types/tutorial";
 
+// The network transaction that consumes the note bumps the counter's nonce.
 const useCompleted = () => {
   const [initialNonce, setInitialNonce] = useState(0);
-  const { accounts } = useAccounts();
-  const { components } = useComponents();
-  const component = components.find(
-    ({ id, type }) =>
-      !defaultComponentIds.includes(id) && type === "account-component",
-  );
-  const counter = accounts.find(
-    ({ components, isPublic }) =>
-      components.includes(component?.id ?? "") &&
-      isPublic &&
-      components.includes("auth-network-account"),
-  );
+  const { counter } = useNetworkCounter();
   const currentNonce = counter?.nonce ?? 0;
   useEffect(() => {
     if (initialNonce === 0) {
@@ -38,6 +27,7 @@ const Step4: TutorialStep = {
     const completed = useCompleted();
     return (
       <>
+        <MissingScriptsAlert />
         <p>
           Let's create the network note by executing a Transaction. Your wallet
           signs this Transaction, so make sure it's connected to the Playground
@@ -52,7 +42,7 @@ const Step4: TutorialStep = {
           A <em>"Create Note"</em> dialog shows up to help you configure the
           note creation transaction. Set the recipient account to the network
           counter you deployed in step 2, select the{" "}
-          <strong>counter-note</strong> script, leave the note type set to{" "}
+          <strong>increment-note</strong> script, leave the note type set to{" "}
           <strong>Public</strong> and turn on the <em>"Network note"</em>{" "}
           toggle.
         </p>
