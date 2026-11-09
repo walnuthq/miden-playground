@@ -19,15 +19,6 @@ const PARA_TEST_CODE = "123456";
 
 const PARA_TIMEOUT = 60_000;
 
-// Para's login modal can stay blank ("Login" with no code screen) when the
-// email is submitted within ~3 s of a page load: Para's SDK reloads its
-// preload iframe several times around startup, even under a login in progress
-// (walnuthq/miden-playground#743). In regular Chrome, logins submitted by
-// 3.1 s went blank about half the time and none after 3.4 s did. Logins wait
-// until the page has been up this long (no wait past it), about 3× that
-// boundary.
-const PARA_WARM_UP = 10_000;
-
 // Para preloads its portal in an iframe, whose host tells the environment.
 export const skipUnlessParaBeta = async (page: Page) => {
   const paraFrame = () =>
@@ -45,10 +36,6 @@ export const para = (page: Page) => {
 
   // Connects Para Wallet from the header's "Select Wallet" menu.
   const login = async () => {
-    const uptime = await page.evaluate(() => performance.now());
-    if (uptime < PARA_WARM_UP) {
-      await page.waitForTimeout(PARA_WARM_UP - uptime);
-    }
     await page.getByRole("button", { name: "Select Wallet" }).click();
     await page.getByRole("menuitem", { name: "Para Wallet" }).click();
     const modal = page.getByRole("dialog", { name: /Authentication Modal/ });
