@@ -3,7 +3,6 @@ import { useSyncState } from "@miden-sdk/react";
 import { Plus } from "lucide-react";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import { ButtonName, InlineCode } from "@/components/tutorials/prose";
-import OutdatedRunAlert from "@/components/tutorials/timelock-p2id-note/outdated-run-alert";
 import useNoteScript from "@/components/tutorials/timelock-p2id-note/use-note-script";
 import TutorialLink from "@/components/tutorials/tutorial-link";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
@@ -120,7 +119,6 @@ const Step4: TutorialStep = {
       : undefined;
     return (
       <>
-        <OutdatedRunAlert />
         <Step4Content
           address={getIdentifierPart(testWallet?.address ?? "")}
           accountIdPrefix={accountId?.prefix().toString() ?? ""}

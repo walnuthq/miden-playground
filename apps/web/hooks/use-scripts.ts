@@ -9,7 +9,6 @@ import {
 import { useMiden } from "@miden-sdk/react";
 import useGlobalContext from "@/components/global-context/hook";
 import useTransactions from "@/hooks/use-transactions";
-import useTutorials from "@/hooks/use-tutorials";
 import {
   compileScript as apiCompileScript,
   deleteScript as apiDeleteScript,
@@ -51,7 +50,6 @@ const useScripts = () => {
   } = useGlobalContext();
   const { client } = useMiden();
   const { submitNewTransaction } = useTransactions();
-  const { tutorialId } = useTutorials();
   const openCreateScriptDialog = () =>
     dispatch({ type: "OPEN_CREATE_SCRIPT_DIALOG" });
   const closeCreateScriptDialog = () =>
@@ -72,12 +70,7 @@ const useScripts = () => {
     type: ScriptType;
     example: ScriptExample | "none";
   }) => {
-    const { script, error } = await createScript({
-      name,
-      type,
-      example,
-      tutorialId,
-    });
+    const { script, error } = await createScript({ name, type, example });
     if (script) {
       dispatch({
         type: "NEW_SCRIPT",

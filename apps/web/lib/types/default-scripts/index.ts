@@ -4,7 +4,6 @@ import authNoAuth from "@/lib/types/default-scripts/auth-no-auth";
 import authSingleSig from "@/lib/types/default-scripts/auth-single-sig";
 import basicWallet from "@/lib/types/default-scripts/basic-wallet";
 import core from "@/lib/types/default-scripts/core";
-import counterContract from "@/lib/types/default-scripts/counter-contract";
 import feeSponsorship from "@/lib/types/default-scripts/fee-sponsorship";
 import fungibleFaucet from "@/lib/types/default-scripts/fungible-faucet";
 import p2id from "@/lib/types/default-scripts/p2id";
@@ -18,7 +17,6 @@ const defaultScripts = [
   authSingleSig,
   core,
   basicWallet,
-  counterContract,
   feeSponsorship,
   fungibleFaucet,
   p2id,
@@ -26,6 +24,15 @@ const defaultScripts = [
   txFee,
 ];
 
-export const defaultScriptIds = defaultScripts.map(({ id }) => id);
+// The MASM counter was a built-in until every tutorial compiled real packages.
+// A state persisted before then still holds its copy, whose id keeps counting
+// as a built-in's: the copy stays out of the user's scripts, and isn't taken
+// for the script a tutorial has them create.
+const retiredScriptIds = ["counter-contract"];
+
+export const defaultScriptIds = [
+  ...defaultScripts.map(({ id }) => id),
+  ...retiredScriptIds,
+];
 
 export default defaultScripts;

@@ -30,10 +30,9 @@ const getPage = (pathname: string) => {
   return resource;
 };
 
-// A script's page shows its name, not its id (a UUID, or `<example>_<uuid>`
-// for the mock API's), then its compile status: a dot while it's a draft,
-// edited since its last compile, and a badge. Both sit outside
-// `BreadcrumbPage`, whose text is the name alone.
+// A script's page shows its name, not its id (the API's UUID), then its
+// compile status: a dot while it's a draft, edited since its last compile, and
+// a badge. Both sit outside `BreadcrumbPage`, whose text is the name alone.
 const ScriptBreadcrumb = ({ id }: { id: string }) => {
   const script = useScript(id);
   if (!script) {

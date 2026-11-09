@@ -23,11 +23,7 @@ const tutorial: Tutorial = {
     accounts: [midenFaucetAccount("mtst")],
     tutorialId: "network-transactions",
   },
-  starter: () =>
-    counterExampleStarter({
-      componentName: "Counter Contract",
-      readOnly: true,
-    }),
+  starter: () => counterExampleStarter({ readOnly: true }),
   steps: [Step1, Step2, Step3, Step4, Step5],
 };
 

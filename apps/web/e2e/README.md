@@ -50,7 +50,7 @@ The specs in `mobile/` run in two phone projects: `mobile-safari` (iPhone 14, We
 
 ## Mainnet
 
-`mainnet-network-counter.spec.ts` runs on Miden Partner Mainnet with real funds. It's skipped unless `MAINNET_E2E=1` is set with an in-place Bread profile, so `pnpm test:e2e` never runs it. It creates a Mainnet sandbox and connects Bread. Then it deploys a network counter (the sandbox's built-in "Counter Account" component, with `increment-note` allowed), funded with 0.001 USDCX from Bread, and increments it with a network note sent from Bread. It checks that the counter's balance didn't drop, which shows the note's fee sponsorship paid for the network transaction. Each run costs the wallet about 0.0015 USDCX.
+`mainnet-network-counter.spec.ts` runs on Miden Partner Mainnet with real funds. It's skipped unless `MAINNET_E2E=1` is set with an in-place Bread profile, so `pnpm test:e2e` never runs it. It creates a Mainnet sandbox and connects Bread. Then it deploys a network counter (the sandbox's "Counter Contract" component, with `increment-note` allowed), funded with 0.001 USDCX from Bread, and increments it with a network note sent from Bread. It checks that the counter's balance didn't drop, which shows the note's fee sponsorship paid for the network transaction. Each run costs the wallet about 0.0015 USDCX.
 
 ```sh
 MAINNET_E2E=1 BREAD_PROFILE_IN_PLACE=1 \

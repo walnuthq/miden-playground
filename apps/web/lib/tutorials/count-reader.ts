@@ -2,6 +2,10 @@ import type { Script } from "@/lib/types/script";
 import { defaultProcedureExport, defaultScript } from "@/lib/utils/script";
 import { sourceFiles } from "@/lib/utils/script-files";
 
+// The compiled `count-reader` package tutorial 10 deploys: embedded so the
+// tutorial starts with it without the API, like the counter it reads
+// (counter-account.ts). Its source is apps/api/templates/count-reader.rs,
+// verbatim. The compiler's MASM isn't embedded: the MASM tab stays empty.
 export const rust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
 #![no_std]
 #![feature(alloc_error_handler)]

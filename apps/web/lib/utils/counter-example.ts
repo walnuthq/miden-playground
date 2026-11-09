@@ -14,12 +14,10 @@ export const COUNTER_EXAMPLE_ID = "counter-account";
 // `readOnly` then leaves out what would change or remove them (editing,
 // compiling, their dependencies, deleting).
 export const counterExampleStarter = async ({
-  componentName,
   readOnly = false,
 }: {
-  componentName: string;
   readOnly?: boolean;
-}): Promise<WorkspaceStarter> => {
+} = {}): Promise<WorkspaceStarter> => {
   const { scripts, error } = await importExample(COUNTER_EXAMPLE_ID);
   if (!scripts) {
     throw new Error(error ?? "Scripts couldn't be imported.");
@@ -37,13 +35,7 @@ export const counterExampleStarter = async ({
       readOnly,
     })),
     components: counterAccountScript
-      ? [
-          {
-            ...counterAccountComponent,
-            name: componentName,
-            scriptId: counterAccountScript.id,
-          },
-        ]
+      ? [{ ...counterAccountComponent, scriptId: counterAccountScript.id }]
       : [],
   };
 };

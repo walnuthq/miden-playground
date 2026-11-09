@@ -14,8 +14,6 @@ export const FUNGIBLE_FAUCET_CODE =
 
 export const P2ID_NOTE_CODE =
   "0xfb8052cf499c8923513fe112e2a4812b005738194759903e1aa6cab3f7334ada";
-export const P2IDE_NOTE_CODE =
-  "0x775c7e6b99171d8eb3808ea84588bd439ef81016e4cf950c3edafbffc13d0643";
 // Unused at the moment.
 // export const SWAP_NOTE_CODE =
 //   "0x2363589b463de87885a11bebc90dc838785ed80f2bea559d670f103442a3f223";
@@ -94,14 +92,6 @@ export const DEVNET_COUNTER_CONTRACT_ACCOUNT_ID = "";
 export const TESTNET_COUNTER_CONTRACT_ADDRESS =
   "mtst1arjkfl0j33qk25gpl2tqrd6npsptfavv_qr7qqq9wr6w";
 export const DEVNET_COUNTER_CONTRACT_ADDRESS = "";
-export const COUNTER_CONTRACT_GET_COUNT_PROC_HASH =
-  "0x59d75d32906324e66bc719fe956662cd534c87d03ebda5a81444268f6fae574b";
-export const COUNTER_CONTRACT_INCREMENT_COUNT_PROC_HASH =
-  "0xf23908cdb67bcb5a335047c1321f62d89582185be3fda38d47d517da4f18ccc9";
-export const COUNTER_NOTE_RUN_PROC_HASH =
-  "0xb08de5ec2961a2b3c3641d278230c091d46ac37bab78d50a5c140368020ea3cf";
-export const COUNTER_SCRIPT_RUN_PROC_HASH =
-  "0xb08de5ec2961a2b3c3641d278230c091d46ac37bab78d50a5c140368020ea3cf";
 
 export const midenExplorerUrl = (networkId: NetworkId) =>
   ({

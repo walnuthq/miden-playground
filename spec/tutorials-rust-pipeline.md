@@ -1,8 +1,8 @@
 # Tutorials on the real Rust compilation pipeline
 
-Status: plan, written 2026-11-06. PR A merged as #779, PR B as #781 and PR C
-as #782 (2026-11-08), PR D as #784 and PR E as #785 (2026-11-09), F not
-started.
+Status: done. Written 2026-11-06; PR A merged as #779, PR B as #781 and PR C
+as #782 (2026-11-08), PR D as #784, PR E as #785 and PR F as #787
+(2026-11-09). The open questions at the end remain.
 One PR per item below, in the order given; the tutorial PRs (B to E) are
 independent of each other once A has landed, so different agents can pick
 them up.
@@ -489,6 +489,27 @@ check the warning toast.
 
 ## PR F: cleanup
 
+As built, it differs from the list below in four places:
+
+- The MASM counter (`counter-contract`) was in `defaultScripts` and
+  `defaultComponents`, so every persisted state, saved project and tutorial
+  snapshot holds a copy of it. Deleted, it stops counting as a built-in: the
+  copy would show on the Scripts and Components pages, and tutorials 7, 11 and
+  12, which take the first account component script that isn't a built-in for
+  the one the user created, would find it first in a resumed run. Its id
+  stays in `retiredScriptIds` / `retiredComponentIds`, next to the built-ins'
+  lists, so the copies stay hidden as before
+  (`e2e/retired-built-ins.spec.ts`, `docs/claude/saved-projects.md`).
+- `counterExampleStarter` lost its `componentName` option: with the Mainnet
+  sandbox back to "Counter Contract", both callers asked for the embedded
+  component's own name.
+- Four editor specs opened `/scripts/counter-contract` as their built-in
+  script (`script-header`, `script-explorer`, `script-masm`,
+  `script-editor-settings`): they open `auth-no-auth`, which also has a Rust
+  source and MASM procedures.
+- `count-reader.ts` keeps its `@/` imports in `lib/tutorials`: no unit test
+  loads it, unlike `counter-account.ts`.
+
 Once B to E are merged:
 
 - Delete `lib/mock-api.ts`. `createScript` always calls the API (drop the
@@ -512,8 +533,9 @@ Once B to E are merged:
   `count-reader.ts` moves next to `lib/tutorials/counter-account.ts` (it's a
   compiled package tutorial 10 embeds, not a built-in). Persisted states keep
   their copies (`withDefaultScripts` only replaces known ids), so old
-  sandboxes still open; the "Counter Account" rename in
-  `mainnetSandboxStarter` can go back to "Counter Contract".
+  sandboxes still open (but see above: the copies need their id kept as a
+  built-in's); the "Counter Account" rename in `mainnetSandboxStarter` can go
+  back to "Counter Contract".
 - `lib/constants.ts`: `COUNTER_CONTRACT_GET_COUNT_PROC_HASH`,
   `COUNTER_CONTRACT_INCREMENT_COUNT_PROC_HASH`, `COUNTER_NOTE_RUN_PROC_HASH`,
   `COUNTER_SCRIPT_RUN_PROC_HASH`, `P2IDE_NOTE_CODE` if unused.

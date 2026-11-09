@@ -13,8 +13,8 @@ test("script: name, dirty state and status in the header", async ({ page }) => {
   const compile = () => page.getByRole("button", { name: "Compile" }).click();
 
   await test.step("a built-in script", async () => {
-    await page.goto("/scripts/counter-contract");
-    await expect(header.name).toHaveText("counter-contract");
+    await page.goto("/scripts/auth-no-auth");
+    await expect(header.name).toHaveText("auth-no-auth");
     await expect(header.status).toHaveText("Compiled");
     await expect(header.dirty).toHaveCount(0);
   });
