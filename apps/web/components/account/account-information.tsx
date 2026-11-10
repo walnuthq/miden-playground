@@ -1,5 +1,6 @@
 import { Button } from "@workspace/ui/components/button";
 import { Separator } from "@workspace/ui/components/separator";
+import { toast } from "sonner";
 import AccountInformationTable from "@/components/account/account-information-table";
 import AccountNotesTable from "@/components/account/account-notes-table";
 import FungibleAssetsTable from "@/components/lib/fungible-assets-table";
@@ -56,18 +57,28 @@ const AccountInformation = ({ account }: { account: Account }) => {
                 <Button
                   variant="outline"
                   onClick={async () => {
-                    const { transactionRequest, transactionResult } =
-                      await newConsumeTransactionRequest({
+                    try {
+                      const { transactionRequest, transactionResult } =
+                        await newConsumeTransactionRequest({
+                          accountId: account.id,
+                          noteIds: account.consumableNoteIds,
+                        });
+                      openCreateTransactionDialog({
                         accountId: account.id,
-                        noteIds: account.consumableNoteIds,
+                        transactionType: "consume",
+                        step: "preview",
+                        transactionRequest,
+                        transactionResult,
                       });
-                    openCreateTransactionDialog({
-                      accountId: account.id,
-                      transactionType: "consume",
-                      step: "preview",
-                      transactionRequest,
-                      transactionResult,
-                    });
+                    } catch (error) {
+                      console.error(error);
+                      toast.error("Transaction failed.", {
+                        description:
+                          error instanceof Error
+                            ? error.message
+                            : String(error),
+                      });
+                    }
                   }}
                 >
                   Consume all notes

@@ -150,7 +150,8 @@ const CreateTransactionConfigureForm = ({
             if (
               isTutorial ||
               networkId === "mmck" ||
-              !isConnectedWallet(executingAccount)
+              (!isConnectedWallet(executingAccount) &&
+                !executingAccount.multisig)
             ) {
               const { transactionRequest, transactionResult } =
                 await newConsumeTransactionRequest({
@@ -166,6 +167,10 @@ const CreateTransactionConfigureForm = ({
               if (transactionRecord) {
                 closeCreateTransactionDialog();
               }
+            } else {
+              throw new Error(
+                "Consume this note from the account's notes table: this dialog can't ask this account's signer.",
+              );
             }
           }
           if (
@@ -174,7 +179,14 @@ const CreateTransactionConfigureForm = ({
             targetAccountId &&
             faucetAccount
           ) {
-            if (isTutorial || networkId === "mmck") {
+            // Accounts the Playground holds itself (e.g. No Auth contracts) send
+            // locally, like they consume; connected wallets and multisigs sign.
+            if (
+              isTutorial ||
+              networkId === "mmck" ||
+              (!isConnectedWallet(executingAccount) &&
+                !executingAccount.multisig)
+            ) {
               const { transactionRequest, transactionResult } =
                 await newSendTransactionRequest({
                   senderAccountId: executingAccount.id,
@@ -209,12 +221,14 @@ const CreateTransactionConfigureForm = ({
               }
             } else {
               if (!wallet) {
-                return;
+                throw new Error("Bread Wallet isn't connected.");
               }
               if (executingAccount.multisig) {
                 const multisig = await loadMultisig(executingAccount.id);
                 if (!multisig) {
-                  return;
+                  throw new Error(
+                    "Connect the wallet that signs for this multisig.",
+                  );
                 }
                 await createP2idProposal({
                   multisig,
@@ -242,13 +256,9 @@ const CreateTransactionConfigureForm = ({
                   ),
                 );
                 const adapter = wallet.adapter as MidenWalletAdapter;
-                try {
-                  const txId = await adapter.requestSend(transaction);
-                  console.info({ txId });
-                  closeCreateTransactionDialog();
-                } catch (error) {
-                  console.error(error);
-                }
+                const txId = await adapter.requestSend(transaction);
+                console.info({ txId });
+                closeCreateTransactionDialog();
               }
             }
           }

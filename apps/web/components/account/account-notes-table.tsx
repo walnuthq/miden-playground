@@ -1,9 +1,4 @@
-import {
-  ConsumeTransaction,
-  type MidenWalletAdapter,
-  useWallet,
-} from "@miden-sdk/miden-wallet-adapter";
-import { normalizeAccountId, useMiden } from "@miden-sdk/react";
+import { normalizeAccountId } from "@miden-sdk/react";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import {
@@ -28,14 +23,11 @@ import { toast } from "sonner";
 import AccountAddress from "@/components/lib/account-address";
 import NoteId from "@/components/lib/note-id";
 import useAccounts from "@/hooks/use-accounts";
-import useMultisig from "@/hooks/use-multisig";
+import useConsumeNotes from "@/hooks/use-consume-notes";
 import useNotes from "@/hooks/use-notes";
-import useParaTransaction from "@/hooks/use-para-transaction";
 import useScripts from "@/hooks/use-scripts";
-import useTransactions from "@/hooks/use-transactions";
 import type { Account } from "@/lib/types/account";
 import type { InputNote } from "@/lib/types/note";
-import { fromBase64 } from "@/lib/utils";
 import { formatAmount } from "@/lib/utils/asset";
 
 const NoteActionsCell = ({
@@ -45,13 +37,7 @@ const NoteActionsCell = ({
   account: Account;
   inputNote: InputNote;
 }) => {
-  const { client } = useMiden();
-  const { wallet } = useWallet();
-  const { loadMultisig, createConsumeNotesProposal } = useMultisig();
-  const { faucets, connectedWallet, isParaWallet } = useAccounts();
-  const { consumeWithPara } = useParaTransaction();
-  const { openCreateTransactionDialog, newConsumeTransactionRequest } =
-    useTransactions();
+  const { consumeNote } = useConsumeNotes();
   const [loading, setLoading] = useState(false);
   return (
     <DropdownMenu>
@@ -66,65 +52,9 @@ const NoteActionsCell = ({
       <DropdownMenuContent className="w-auto" align="end">
         <DropdownMenuItem
           onClick={async () => {
+            setLoading(true);
             try {
-              if (isParaWallet(account)) {
-                setLoading(true);
-                await consumeWithPara({ noteIds: [inputNote.id] });
-              } else if (connectedWallet?.id === account.id) {
-                if (!client) {
-                  throw new Error("MidenClient not ready");
-                }
-                const [fungibleAsset] = inputNote.fungibleAssets;
-                const faucet = faucets.find(
-                  ({ id }) => id === fungibleAsset?.faucetId,
-                );
-                if (!wallet || !fungibleAsset || !faucet) {
-                  return;
-                }
-                const adapter = wallet.adapter as MidenWalletAdapter;
-                try {
-                  if (inputNote.noteFileBytes) {
-                    await adapter.importPrivateNote(
-                      fromBase64(inputNote.noteFileBytes),
-                    );
-                  } else {
-                    const transaction = new ConsumeTransaction(
-                      faucet.identifier,
-                      inputNote.id,
-                      inputNote.type === "public" ? "public" : "private",
-                      Number(fungibleAsset.amount),
-                    );
-                    const txId = await adapter.requestConsume(transaction);
-                    console.info({ txId });
-                  }
-                } catch (error) {
-                  // Rejected in Bread Wallet.
-                  console.error(error);
-                }
-              } else if (account.multisig) {
-                const multisig = await loadMultisig(account.id);
-                if (!multisig) {
-                  return;
-                }
-                await createConsumeNotesProposal({
-                  multisig,
-                  noteIds: [inputNote.id],
-                });
-              } else {
-                setLoading(true);
-                const { transactionRequest, transactionResult } =
-                  await newConsumeTransactionRequest({
-                    accountId: account.id,
-                    noteIds: [inputNote.id],
-                  });
-                openCreateTransactionDialog({
-                  accountId: account.id,
-                  transactionType: "consume",
-                  step: "preview",
-                  transactionRequest,
-                  transactionResult,
-                });
-              }
+              await consumeNote({ account, inputNote });
             } catch (error) {
               console.error(error);
               toast.error("Transaction failed.", {
