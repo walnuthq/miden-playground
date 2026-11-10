@@ -1,14 +1,14 @@
-import { API_COMPILE_URL, API_REGISTRY_URL } from "@/lib/constants";
+import { API_COMPILE_URL, API_REGISTRY_URL } from "./constants.ts";
 
 // A failed call to api-compile or api-registry, with the status it answered.
 // When it could not be reached, or did not answer with JSON, the status is 502.
 export class UpstreamError extends Error {
-  constructor(
-    message: string,
-    readonly status: number,
-    readonly retryAfter?: string,
-  ) {
+  readonly status: number;
+  readonly retryAfter?: string;
+  constructor(message: string, status: number, retryAfter?: string) {
     super(message);
+    this.status = status;
+    this.retryAfter = retryAfter;
   }
 }
 

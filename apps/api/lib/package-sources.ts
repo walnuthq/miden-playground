@@ -1,6 +1,8 @@
 import type { MidenProjectToml, PackageSource } from "@/lib/types";
+import { badRequest } from "./errors.ts";
 import { packageTypeNames, toPackageType } from "./package-type.ts";
 import { parseMidenProjectToml } from "./toml.ts";
+import { isValidPackageName } from "./validation.ts";
 
 const lastSegment = (path: string) => path.split("/").at(-1);
 
@@ -13,7 +15,7 @@ export const resolvePackageSources = (
   const packages = Object.entries(packageSources).map(
     ([packagePath, { midenProjectToml, rust }]) => {
       const fail = (reason: string) => {
-        throw new Error(`Error: ${packagePath}: ${reason}`);
+        throw badRequest(`Error: ${packagePath}: ${reason}`);
       };
       let manifest: Partial<MidenProjectToml>;
       try {
@@ -26,6 +28,11 @@ export const resolvePackageSources = (
       const type = toPackageType(manifest.lib?.kind);
       if (!name) {
         return fail("miden-project.toml has no [package] name.");
+      }
+      if (!isValidPackageName(name)) {
+        return fail(
+          `[package] name "${name}" isn't a valid package name (letters, digits, - and _, starting with a letter, 2 to 64 characters).`,
+        );
       }
       if (!type) {
         return fail(
@@ -47,7 +54,7 @@ export const resolvePackageSources = (
   for (const [index, { name, packagePath }] of packages.entries()) {
     const duplicate = packages.findIndex((other) => other.name === name);
     if (duplicate !== index) {
-      throw new Error(
+      throw badRequest(
         `Error: ${packagePath} and ${packages[duplicate]?.packagePath} are both named ${name}.`,
       );
     }
@@ -71,7 +78,7 @@ export const resolvePackageSources = (
             ({ packagePath }) => lastSegment(packagePath) === dependencyDir,
           );
           if (!dependencyPackage) {
-            throw new Error(
+            throw badRequest(
               `Error: ${packagePath} depends on ${dependencyName} (path = "${dependency.path}"), which isn't in the imported folder: import the folder that holds both.`,
             );
           }

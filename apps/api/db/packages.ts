@@ -65,7 +65,11 @@ export const deletePackage = (id: string) =>
 
 export const getDependencies = async (dependencies: string[]) => {
   const defaultDependencies = dependencies
-    .filter((dependency) => !isValidUUIDv4(dependency))
+    .filter(
+      (dependency) =>
+        !isValidUUIDv4(dependency) &&
+        Object.hasOwn(defaultDependenciesRecords, dependency),
+    )
     .map((dependency) => ({
       ...defaultDependenciesRecords[dependency as DefaultDependency],
       // Default dependencies have none.
