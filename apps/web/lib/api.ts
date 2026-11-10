@@ -25,7 +25,7 @@ export const createScript = async ({
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name, type, example }),
   });
-  if (response.status === 500) {
+  if (!response.ok) {
     return { error: await response.text() };
   }
   const result = await response.json();
@@ -67,7 +67,7 @@ export const deleteScript = async (scriptId: string) => {
   const response = await fetch(`${API_URL}/scripts/${scriptId}`, {
     method: "DELETE",
   });
-  if (response.status === 500) {
+  if (!response.ok) {
     return { error: await response.text() };
   }
   const result = await response.json();
@@ -263,7 +263,7 @@ export const getScript = async (id: string) => {
   const response = await fetch(`${API_URL}/scripts/${id}`, {
     method: "GET",
   });
-  if (response.status === 500) {
+  if (!response.ok) {
     return { error: await response.text() };
   }
   const result = await response.json();
