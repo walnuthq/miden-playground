@@ -1,5 +1,5 @@
-import { packageTypeEnum } from "@/db/schema";
 import type { PackageType } from "@/lib/types";
+import { packageTypeEnum } from "../db/schema.ts";
 
 // The `[lib] kind` names Miden accepts for the package types the playground
 // supports, mapped to their canonical names. They mirror `TargetType`'s

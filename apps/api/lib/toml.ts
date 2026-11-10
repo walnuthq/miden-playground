@@ -1,6 +1,6 @@
 import { parse } from "smol-toml";
-import { kebabCase } from "@/lib/case";
 import type { Dependency, MidenProjectToml, PackageType } from "@/lib/types";
+import { kebabCase } from "./case.ts";
 
 const extractTraitName = (rust: string) => {
   const pattern =
