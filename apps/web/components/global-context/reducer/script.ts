@@ -1,6 +1,5 @@
 import type { ProcedureExport, Script } from "@/lib/types/script";
 import type { State } from "@/lib/types/state";
-import { defaultScript } from "@/lib/utils/script";
 
 export type ScriptAction =
   | {
@@ -91,12 +90,15 @@ const reducer = (state: State, action: ScriptAction): State => {
       const index = state.scripts.findIndex(
         ({ id }) => id === action.payload.script.id,
       );
+      if (index === -1) {
+        return state;
+      }
       return {
         ...state,
         scripts: [
           ...state.scripts.slice(0, index),
           {
-            ...(state.scripts[index] ?? defaultScript()),
+            ...(state.scripts[index] as Script),
             ...action.payload.script,
             updatedAt: Date.now(),
           },
@@ -108,6 +110,9 @@ const reducer = (state: State, action: ScriptAction): State => {
       const index = state.scripts.findIndex(
         ({ id }) => id === action.payload.scriptId,
       );
+      if (index === -1) {
+        return state;
+      }
       return {
         ...state,
         scripts: [

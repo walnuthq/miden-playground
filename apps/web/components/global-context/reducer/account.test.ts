@@ -56,4 +56,22 @@ describe("account reducer", () => {
     assert.ok((next.accounts[1]?.updatedAt ?? 0) > 0);
     assert.equal(next.accounts[2], c);
   });
+
+  test("DELETE_ACCOUNT ignores an unknown id", () => {
+    const s = state([account("a"), account("b")]);
+    const next = reducer(s, {
+      type: "DELETE_ACCOUNT",
+      payload: { accountId: "missing" },
+    } as Action);
+    assert.equal(next, s);
+  });
+
+  test("UPDATE_ACCOUNT ignores an unknown id", () => {
+    const s = state([account("a"), account("b")]);
+    const next = reducer(s, {
+      type: "UPDATE_ACCOUNT",
+      payload: { account: account("missing") },
+    } as Action);
+    assert.equal(next, s);
+  });
 });
