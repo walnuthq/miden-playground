@@ -61,7 +61,7 @@ export type ScriptAction =
   | { type: "IMPORT_SCRIPTS"; payload: { scripts: Script[] } }
   | {
       type: "SET_READ_ONLY_PROCEDURE_RESULT";
-      payload: { digest: string; result: string };
+      payload: { accountId: string; digest: string; result: string };
     };
 
 const reducer = (state: State, action: ScriptAction): State => {
@@ -232,6 +232,7 @@ const reducer = (state: State, action: ScriptAction): State => {
     case "SET_READ_ONLY_PROCEDURE_RESULT": {
       return {
         ...state,
+        readOnlyProcedureAccountId: action.payload.accountId,
         readOnlyProcedureDigest: action.payload.digest,
         readOnlyProcedureResult: action.payload.result,
       };

@@ -48,6 +48,7 @@ const ProceduresTableRow = ({
   const {
     invokeProcedure,
     openInvokeProcedureArgumentsDialog,
+    readOnlyProcedureAccountId,
     readOnlyProcedureDigest,
     readOnlyProcedureResult,
   } = useScripts();
@@ -56,12 +57,15 @@ const ProceduresTableRow = ({
   const [result, setResult] = useState("");
   useEffect(() => {
     if (
+      account.id === readOnlyProcedureAccountId &&
       procedureExport.digest === readOnlyProcedureDigest &&
       result !== readOnlyProcedureResult
     ) {
       setResult(readOnlyProcedureResult);
     }
   }, [
+    account.id,
+    readOnlyProcedureAccountId,
     procedureExport.digest,
     readOnlyProcedureDigest,
     result,

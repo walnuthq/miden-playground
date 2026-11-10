@@ -224,11 +224,13 @@ const InvokeProcedureArgumentsDialog = () => {
                 if (procedureExport.signature.results.length === 1) {
                   const [felt = 0n] = word.toU64s();
                   setReadOnlyProcedureResult({
+                    accountId: senderAccountId,
                     digest: procedureExport.digest,
                     result: felt.toString(),
                   });
                 } else if (procedureExport.signature.results.length === 4) {
                   setReadOnlyProcedureResult({
+                    accountId: senderAccountId,
                     digest: procedureExport.digest,
                     result: word.toHex(),
                   });
@@ -236,6 +238,7 @@ const InvokeProcedureArgumentsDialog = () => {
               } catch (error) {
                 console.error(error);
                 setReadOnlyProcedureResult({
+                  accountId: senderAccountId,
                   digest: procedureExport.digest,
                   result: "ERROR",
                 });

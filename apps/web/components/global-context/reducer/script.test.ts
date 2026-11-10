@@ -122,4 +122,14 @@ describe("script reducer", () => {
     } as Action);
     assert.equal(next, s);
   });
+
+  test("SET_READ_ONLY_PROCEDURE_RESULT sets the account, digest and result", () => {
+    const next = reducer(state([]), {
+      type: "SET_READ_ONLY_PROCEDURE_RESULT",
+      payload: { accountId: "acc", digest: "dig", result: "42" },
+    } as Action);
+    assert.equal(next.readOnlyProcedureAccountId, "acc");
+    assert.equal(next.readOnlyProcedureDigest, "dig");
+    assert.equal(next.readOnlyProcedureResult, "42");
+  });
 });
