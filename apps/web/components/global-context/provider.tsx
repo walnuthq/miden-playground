@@ -1,10 +1,16 @@
-import { type ReactNode, useCallback, useReducer } from "react";
-import { useLocalStorage } from "usehooks-ts";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useReducer,
+  useRef,
+} from "react";
 import GlobalContext from "@/components/global-context";
 import reducer, { type Action } from "@/components/global-context/reducer";
 import type { State } from "@/lib/types/state";
 import {
   defaultState,
+  PERSISTED_KEYS,
   STATE_STORAGE_KEY,
   stateDeserializer,
   stateSerializer,
@@ -14,26 +20,47 @@ import { setLiveWorkspace } from "@/lib/utils/workspace-guard";
 // An action bound to the workspace run it was dispatched from.
 type RunAction = Action & { workspaceRun?: number };
 
+// The state as it was last persisted, or the default one.
+const readPersistedState = (): State => {
+  try {
+    const value = localStorage.getItem(STATE_STORAGE_KEY);
+    return value === null ? defaultState() : stateDeserializer(value);
+  } catch {
+    // Storage can throw when it's blocked.
+    return defaultState();
+  }
+};
+
+const persistedReducer = (prevState: State, action: RunAction) =>
+  action.workspaceRun !== undefined &&
+  action.workspaceRun !== prevState.workspaceRun
+    ? prevState
+    : reducer(prevState, action);
+
 const usePersistedReducer = () => {
-  const [state, setState] = useLocalStorage(STATE_STORAGE_KEY, defaultState(), {
-    serializer: stateSerializer,
-    deserializer: stateDeserializer,
-  });
-  const persistedReducer = useCallback(
-    (prevState: State, action: RunAction) => {
-      if (
-        action.workspaceRun !== undefined &&
-        action.workspaceRun !== prevState.workspaceRun
-      ) {
-        return prevState;
-      }
-      const nextState = reducer(prevState, action);
-      setState(nextState);
-      return nextState;
-    },
-    [setState],
+  const [state, dispatch] = useReducer(
+    persistedReducer,
+    undefined,
+    readPersistedState,
   );
-  return useReducer(persistedReducer, state);
+  // Written after the render that changed it, and only when a persisted
+  // field did: the reducer stays pure, and a dialog opening costs no write.
+  const persisted = useRef(state);
+  useEffect(() => {
+    const previous = persisted.current;
+    if (
+      previous !== state &&
+      PERSISTED_KEYS.some((key) => previous[key] !== state[key])
+    ) {
+      try {
+        localStorage.setItem(STATE_STORAGE_KEY, stateSerializer(state));
+      } catch (error) {
+        console.warn("Error persisting the state:", error);
+      }
+    }
+    persisted.current = state;
+  }, [state]);
+  return [state, dispatch] as const;
 };
 
 const GlobalContextProvider = ({ children }: { children: ReactNode }) => {

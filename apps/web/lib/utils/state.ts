@@ -91,6 +91,29 @@ export const defaultState = (): State => ({
   deleteProjectDialogOpen: false,
 });
 
+// The fields stateSerializer writes: keep the two in step. A change to any
+// other field (a dialog flag, syncingState) isn't worth a write.
+export const PERSISTED_KEYS = [
+  "serializedMockChain",
+  "accounts",
+  "transactions",
+  "inputNotes",
+  "scripts",
+  "components",
+  "tutorialId",
+  "tutorialStep",
+  "tutorialMaxStep",
+  "tutorialStartBlockNum",
+  "tutorialRunId",
+  "tutorialOpen",
+  "nextTutorialStepDisabled",
+  "completedTutorials",
+  "tutorialProgress",
+  "exampleId",
+  "projectId",
+  "projectName",
+] as const satisfies readonly (keyof State)[];
+
 export const stateSerializer = ({
   serializedMockChain,
   accounts,
