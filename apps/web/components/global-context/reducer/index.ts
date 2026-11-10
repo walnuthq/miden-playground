@@ -85,6 +85,7 @@ const reducer = (state: State, action: Action): State => {
     case "CLOSE_DELETE_SCRIPT_ALERT_DIALOG":
     case "NEW_SCRIPT":
     case "UPDATE_SCRIPT":
+    case "SCRIPT_COMPILED":
     case "DELETE_SCRIPT":
     case "OPEN_INVOKE_PROCEDURE_ARGUMENTS_DIALOG":
     case "CLOSE_INVOKE_PROCEDURE_ARGUMENTS_DIALOG":
