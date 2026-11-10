@@ -26,6 +26,16 @@
       // through CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE.
     },
   ],
+  // Limits the routes that compile, verify or create rows (lib/rate-limit.ts):
+  // 30 requests per 60 seconds per client IP, shared by all of them. The
+  // numbers are the operator's to tune.
+  "ratelimits": [
+    {
+      "name": "COMPILE_RATE_LIMITER",
+      "namespace_id": "1001",
+      "simple": { "limit": 30, "period": 60 },
+    },
+  ],
   // Bundle the Rust templates and project files as strings (lib/templates.ts).
   "rules": [
     {
@@ -64,6 +74,16 @@
           // `miden-playground-api` (caching disabled: the API reads back what
           // it just wrote, sslmode=require).
           "id": "27b933dd0e7c47bf9a29803a28b62b85",
+        },
+      ],
+      // Limits the routes that compile, verify or create rows (lib/rate-limit.ts):
+      // 30 requests per 60 seconds per client IP, shared by all of them. The
+      // numbers are the operator's to tune.
+      "ratelimits": [
+        {
+          "name": "COMPILE_RATE_LIMITER",
+          "namespace_id": "1001",
+          "simple": { "limit": 30, "period": 60 },
         },
       ],
     },

@@ -3,6 +3,7 @@ import { getDependenciesDeep, getPackage } from "@/db/packages";
 import { createApp } from "@/lib/app";
 import { badRequest, errorResponse, notFound } from "@/lib/errors";
 import { buildFiles, ownFiles } from "@/lib/package-files";
+import { rateLimit } from "@/lib/rate-limit";
 import { projectTemplateFiles } from "@/lib/templates";
 import { generateCargoToml, parseMidenProjectToml } from "@/lib/toml";
 import type { PackageSource } from "@/lib/types";
@@ -77,7 +78,7 @@ const packageSourceName = (packageSource: PackageSource) => {
 const verified = createApp()
   .use("/verified-account-components/*", dbMiddleware)
   .use("/verified-notes/*", dbMiddleware)
-  .post("/verified-account-components/:network", async (c) => {
+  .post("/verified-account-components/:network", rateLimit, async (c) => {
     try {
       const network = c.req.param("network");
       if (!isValidNetwork(network)) {
@@ -155,7 +156,7 @@ const verified = createApp()
       return errorResponse(c, error);
     }
   })
-  .post("/verified-notes/:network", async (c) => {
+  .post("/verified-notes/:network", rateLimit, async (c) => {
     try {
       const network = c.req.param("network");
       if (!isValidNetwork(network)) {
