@@ -64,6 +64,9 @@ const reducer = (state: State, action: ComponentAction): State => {
       const index = state.components.findIndex(
         ({ id }) => id === action.payload.component.id,
       );
+      if (index === -1) {
+        return state;
+      }
       return {
         ...state,
         components: [

@@ -77,6 +77,14 @@ const reducer = (state: State, action: TransactionAction): State => {
       const index = state.accounts.findIndex(
         ({ id }) => id === action.payload.account.id,
       );
+      if (index === -1) {
+        // The account was deleted while its transaction was running.
+        return {
+          ...state,
+          submittingTransaction: false,
+          transactions: [...state.transactions, action.payload.transaction],
+        };
+      }
       return {
         ...state,
         submittingTransaction: false,

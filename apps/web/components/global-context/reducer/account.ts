@@ -67,6 +67,9 @@ const reducer = (state: State, action: AccountAction): State => {
       const index = state.accounts.findIndex(
         ({ id }) => id === action.payload.accountId,
       );
+      if (index === -1) {
+        return state;
+      }
       return {
         ...state,
         accounts: [
@@ -79,6 +82,9 @@ const reducer = (state: State, action: AccountAction): State => {
       const index = state.accounts.findIndex(
         ({ id }) => id === action.payload.account.id,
       );
+      if (index === -1) {
+        return state;
+      }
       return {
         ...state,
         accounts: [

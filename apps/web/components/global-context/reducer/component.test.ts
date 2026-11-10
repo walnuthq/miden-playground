@@ -38,4 +38,13 @@ describe("component reducer", () => {
     assert.ok((next.components[1]?.updatedAt ?? 0) > 0);
     assert.equal(next.components[2], c);
   });
+
+  test("UPDATE_COMPONENT ignores an unknown id", () => {
+    const s = state([component("a"), component("b")]);
+    const next = reducer(s, {
+      type: "UPDATE_COMPONENT",
+      payload: { component: component("missing") },
+    } as Action);
+    assert.equal(next, s);
+  });
 });

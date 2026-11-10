@@ -42,4 +42,19 @@ describe("transaction reducer", () => {
     assert.equal(next.accounts[2], c);
     assert.equal(next.submittingTransaction, false);
   });
+
+  test("SUBMIT_TRANSACTION for a deleted account still records the transaction", () => {
+    const a = account("a");
+    const b = account("b");
+    const tx = transaction("t");
+    const next = reducer(state([a, b]), {
+      type: "SUBMIT_TRANSACTION",
+      payload: { transaction: tx, account: account("missing") },
+    } as Action);
+    assert.deepEqual(next.transactions, [tx]);
+    assert.equal(next.submittingTransaction, false);
+    assert.equal(next.accounts.length, 2);
+    assert.equal(next.accounts[0], a);
+    assert.equal(next.accounts[1], b);
+  });
 });
