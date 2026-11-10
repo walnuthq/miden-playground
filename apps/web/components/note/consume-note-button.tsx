@@ -1,20 +1,13 @@
-import {
-  ConsumeTransaction,
-  type MidenWalletAdapter,
-  useWallet,
-} from "@miden-sdk/miden-wallet-adapter";
-import { useMiden } from "@miden-sdk/react";
 import { Button } from "@workspace/ui/components/button";
 import { Spinner } from "@workspace/ui/components/spinner";
 import { FileInput } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import useAccounts from "@/hooks/use-accounts";
-import useParaTransaction from "@/hooks/use-para-transaction";
+import useConsumeNotes from "@/hooks/use-consume-notes";
 import useTransactions from "@/hooks/use-transactions";
 import type { Account } from "@/lib/types/account";
 import type { InputNote } from "@/lib/types/note";
-import { fromBase64 } from "@/lib/utils";
 
 const ConsumeNoteButton = ({
   inputNote,
@@ -23,15 +16,9 @@ const ConsumeNoteButton = ({
   inputNote: InputNote;
   targetAccount: Account;
 }) => {
-  const { client } = useMiden();
-  const { wallet } = useWallet();
-  const { faucets, connectedWallet, isParaWallet } = useAccounts();
-  const { consumeWithPara } = useParaTransaction();
-  const {
-    createTransactionDialogOpen,
-    openCreateTransactionDialog,
-    newConsumeTransactionRequest,
-  } = useTransactions();
+  const { connectedWallet, isParaWallet } = useAccounts();
+  const { consumeNote } = useConsumeNotes();
+  const { createTransactionDialogOpen } = useTransactions();
   const [loading, setLoading] = useState(false);
   useEffect(() => {
     if (!createTransactionDialogOpen) {
@@ -42,56 +29,16 @@ const ConsumeNoteButton = ({
     <Button
       variant="outline"
       onClick={async () => {
+        setLoading(true);
         try {
-          if (isParaWallet(targetAccount)) {
-            setLoading(true);
-            await consumeWithPara({ noteIds: [inputNote.id] });
+          await consumeNote({ account: targetAccount, inputNote });
+          // The dialog stays open (and `loading` on) only on the local path.
+          if (
+            isParaWallet(targetAccount) ||
+            connectedWallet?.id === targetAccount.id ||
+            targetAccount.multisig
+          ) {
             setLoading(false);
-          } else if (connectedWallet?.id === targetAccount.id) {
-            if (!client) {
-              throw new Error("MidenClient not ready");
-            }
-            const [fungibleAsset] = inputNote.fungibleAssets;
-            const faucet = faucets.find(
-              ({ id }) => id === fungibleAsset?.faucetId,
-            );
-            if (!wallet || !fungibleAsset || !faucet) {
-              return;
-            }
-            const adapter = wallet.adapter as MidenWalletAdapter;
-            try {
-              if (inputNote.noteFileBytes) {
-                await adapter.importPrivateNote(
-                  fromBase64(inputNote.noteFileBytes),
-                );
-              } else {
-                const transaction = new ConsumeTransaction(
-                  faucet.identifier,
-                  inputNote.id,
-                  inputNote.type === "public" ? "public" : "private",
-                  Number(fungibleAsset.amount),
-                );
-                const txId = await adapter.requestConsume(transaction);
-                console.info({ txId });
-              }
-            } catch (error) {
-              // Rejected in Bread Wallet.
-              console.error(error);
-            }
-          } else {
-            setLoading(true);
-            const { transactionRequest, transactionResult } =
-              await newConsumeTransactionRequest({
-                accountId: targetAccount.id,
-                noteIds: [inputNote.id],
-              });
-            openCreateTransactionDialog({
-              accountId: targetAccount.id,
-              transactionType: "consume",
-              step: "preview",
-              transactionRequest,
-              transactionResult,
-            });
           }
         } catch (error) {
           console.error(error);
