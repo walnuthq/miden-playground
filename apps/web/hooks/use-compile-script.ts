@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import useScripts from "@/hooks/use-scripts";
 import { countsSuffix, formatDuration, useConsoleLog } from "@/lib/console-log";
 import type { Script } from "@/lib/types/script";
 import { countDiagnostics } from "@/lib/utils/diagnostics";
+import { scriptSource } from "@/lib/utils/script-files";
 
 // Compiles a script and logs it in its editor console. Used by the Compile
 // button of the script page, above the editor and the console. The page calls
@@ -12,6 +13,8 @@ const useCompileScript = (script?: Script) => {
   const { compileScript } = useScripts();
   const { append } = useConsoleLog(script?.id ?? "");
   const [compiling, setCompiling] = useState(false);
+  const latest = useRef(script);
+  latest.current = script;
   const compile = async () => {
     if (!script) {
       return;
@@ -33,6 +36,14 @@ const useCompileScript = (script?: Script) => {
         text: `Compile request failed after ${duration}: ${error || "unknown error"}`,
       });
       toast.error("Script compilation failed.", { description: error });
+      return;
+    }
+    const current = latest.current;
+    if (current && scriptSource(current) !== scriptSource(script)) {
+      append({
+        level: "info",
+        text: `${script.name} changed while it compiled: compile again to update its package.`,
+      });
       return;
     }
     if (compiledScript.error) {

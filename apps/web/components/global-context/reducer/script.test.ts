@@ -39,6 +39,69 @@ describe("script reducer", () => {
     assert.equal(next, s);
   });
 
+  const compiled = (extra: object = {}) =>
+    script("b", {
+      name: "from-api",
+      createdAt: 99,
+      status: "compiled",
+      masm: "m",
+      masp: "p",
+      files: { "src/lib.rs": "new", "Cargo.toml": "toml" },
+      ...extra,
+    });
+  const compiling = () =>
+    script("b", {
+      name: "mine",
+      createdAt: 1,
+      status: "draft",
+      files: { "src/lib.rs": "old" },
+      dependencies: [{ id: "d1" }, { id: "d2" }],
+    });
+  const dependencyIds = ["d1", "d2"];
+
+  test("SCRIPT_COMPILED applies a result for the compiled source", () => {
+    const a = script("a");
+    const next = reducer(state([a, compiling()]), {
+      type: "SCRIPT_COMPILED",
+      payload: { script: compiled(), source: "old", dependencyIds },
+    } as Action);
+    const b = next.scripts[1];
+    assert.equal(next.scripts[0], a);
+    assert.equal(b?.name, "mine");
+    assert.equal(b?.createdAt, 1);
+    assert.equal(b?.status, "compiled");
+    assert.equal(b?.masp, "p");
+    assert.equal(b?.files["src/lib.rs"], "new");
+    assert.ok((b?.updatedAt ?? 0) > 0);
+  });
+
+  test("SCRIPT_COMPILED ignores a result when the source changed", () => {
+    const s = state([compiling()]);
+    const next = reducer(s, {
+      type: "SCRIPT_COMPILED",
+      payload: { script: compiled(), source: "older", dependencyIds },
+    } as Action);
+    assert.equal(next, s);
+  });
+
+  test("SCRIPT_COMPILED ignores a result when the dependencies changed", () => {
+    const s = state([compiling()]);
+    const next = reducer(s, {
+      type: "SCRIPT_COMPILED",
+      payload: { script: compiled(), source: "old", dependencyIds: ["d1"] },
+    } as Action);
+    assert.equal(next, s);
+  });
+
+  test("SCRIPT_COMPILED ignores a result for a missing script", () => {
+    const s = state([script("a")]);
+    const next = reducer(s, {
+      type: "SCRIPT_COMPILED",
+      payload: { script: compiled(), source: "old", dependencyIds },
+    } as Action);
+    assert.equal(next, s);
+  });
+
   test("DELETE_SCRIPT removes an existing script", () => {
     const a = script("a");
     const c = script("c");

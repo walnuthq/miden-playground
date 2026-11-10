@@ -1,5 +1,6 @@
 import type { ProcedureExport, Script } from "@/lib/types/script";
 import type { State } from "@/lib/types/state";
+import { scriptSource } from "@/lib/utils/script-files";
 
 export type ScriptAction =
   | {
@@ -22,6 +23,16 @@ export type ScriptAction =
   | {
       type: "UPDATE_SCRIPT";
       payload: { script: Partial<Script> };
+    }
+  | {
+      type: "SCRIPT_COMPILED";
+      payload: {
+        // The compiled package, as a script.
+        script: Script;
+        // What was sent to the compiler.
+        source: string;
+        dependencyIds: string[];
+      };
     }
   | {
       type: "DELETE_SCRIPT";
@@ -104,6 +115,52 @@ const reducer = (state: State, action: ScriptAction): State => {
           },
           ...state.scripts.slice(index + 1),
         ],
+      };
+    }
+    case "SCRIPT_COMPILED": {
+      const { script, source, dependencyIds } = action.payload;
+      const current = state.scripts.find(({ id }) => id === script.id);
+      // Deleted or edited since the compile started: the result describes
+      // another source, so the script stays as it is (a draft).
+      if (
+        !current ||
+        scriptSource(current) !== source ||
+        current.dependencies.map(({ id }) => id).join() !== dependencyIds.join()
+      ) {
+        return state;
+      }
+      const {
+        status,
+        masm,
+        files,
+        commitment,
+        masp,
+        exports,
+        procedureExports,
+        error,
+        warnings,
+        dependencies,
+      } = script;
+      return {
+        ...state,
+        scripts: state.scripts.map((item) =>
+          item === current
+            ? {
+                ...item,
+                status,
+                masm,
+                files,
+                commitment,
+                masp,
+                exports,
+                procedureExports,
+                error,
+                warnings,
+                dependencies,
+                updatedAt: Date.now(),
+              }
+            : item,
+        ),
       };
     }
     case "DELETE_SCRIPT": {

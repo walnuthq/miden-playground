@@ -30,6 +30,7 @@ import {
   defaultScript,
   invokeProcedureCustomTransactionScript,
 } from "@/lib/utils/script";
+import { scriptSource } from "@/lib/utils/script-files";
 
 const useScripts = () => {
   const {
@@ -82,12 +83,16 @@ const useScripts = () => {
     return { script, error };
   };
   const compileScript = async (script: Script) => {
+    const source = scriptSource(script);
+    const dependencyIds = script.dependencies.map(({ id }) => id);
     const { script: compiledScript, error } = await apiCompileScript(script);
     if (compiledScript) {
       dispatch({
-        type: "UPDATE_SCRIPT",
+        type: "SCRIPT_COMPILED",
         payload: {
           script: compiledPackageToScript(compiledScript),
+          source,
+          dependencyIds,
         },
       });
     }
