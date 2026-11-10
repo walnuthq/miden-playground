@@ -47,7 +47,9 @@ export const importExample = async (
   exampleId: string,
   signal?: AbortSignal,
 ): Promise<CompiledPackage[]> => {
-  const example = examples[exampleId];
+  const example = Object.hasOwn(examples, exampleId)
+    ? examples[exampleId]
+    : undefined;
   if (!example) {
     throw notFound("Error: Example not found.");
   }

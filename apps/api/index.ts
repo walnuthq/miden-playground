@@ -1,7 +1,9 @@
+import { bodyLimit } from "hono/body-limit";
 import { contextStorage } from "hono/context-storage";
 import { cors } from "hono/cors";
 import { createApp } from "@/lib/app";
 import { WEB_URL } from "@/lib/constants";
+import { MAX_BODY_SIZE } from "@/lib/validation";
 import root from "@/routes/root";
 import scripts from "@/routes/scripts";
 import verified from "@/routes/verified";
@@ -27,6 +29,12 @@ const app = createApp()
       origin: (origin) => (allowedOrigins.includes(origin) ? origin : null),
       allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
       allowHeaders: ["Content-Type", "Authorization"],
+    }),
+  )
+  .use(
+    bodyLimit({
+      maxSize: MAX_BODY_SIZE,
+      onError: (c) => c.text("Error: Request body too large.", 413),
     }),
   )
   .route("/", root)
