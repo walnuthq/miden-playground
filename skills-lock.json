@@ -28,6 +28,12 @@
       "version": "0.17.6",
       "computedHash": "426c2f69c6bfbe893842d0aa42e9bdde747ed7ba9d5952f12049a7559ae4c3f4"
     },
+    "improve": {
+      "source": "shadcn/improve",
+      "sourceType": "github",
+      "skillPath": "skills/improve/SKILL.md",
+      "computedHash": "39a9358732dcff385e9e4d3e60b4547856f834e54a58b35e455aa9bd49928c13"
+    },
     "migrate-radix-to-base": {
       "source": "shadcn/ui",
       "sourceType": "github",
