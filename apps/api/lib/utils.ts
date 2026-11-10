@@ -5,6 +5,7 @@ import {
   insertPackage,
   updatePackage,
 } from "@/db/packages";
+import { notFound } from "@/lib/errors";
 import { buildFiles, ownFiles } from "@/lib/package-files";
 import { projectTemplateFiles } from "@/lib/templates";
 import { generateCargoToml, generateMidenProjectToml } from "@/lib/toml";
@@ -131,7 +132,7 @@ export const compilePackage = async ({
       getDependenciesDeep(dependencies),
     ]);
   if (!dbPackage) {
-    throw new Error("Error: Package not found");
+    throw notFound("Error: Package not found.");
   }
   const { name, type } = dbPackage;
   const updatedFiles = ownFiles(name, dbPackage.files);

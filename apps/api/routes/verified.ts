@@ -1,11 +1,19 @@
 import { dbMiddleware } from "@/db/middleware";
 import { getDependenciesDeep, getPackage } from "@/db/packages";
 import { createApp } from "@/lib/app";
+import { badRequest, errorResponse, notFound } from "@/lib/errors";
 import { buildFiles, ownFiles } from "@/lib/package-files";
 import { projectTemplateFiles } from "@/lib/templates";
 import { generateCargoToml, parseMidenProjectToml } from "@/lib/toml";
 import type { PackageSource } from "@/lib/types";
-import { fetchApiRegistry, upstreamErrorResponse } from "@/lib/upstream";
+import { fetchApiRegistry } from "@/lib/upstream";
+import { isValidUUIDv4 } from "@/lib/uuid";
+import {
+  isPackageSource,
+  isStringArray,
+  isValidNetwork,
+  isValidPackageName,
+} from "@/lib/validation";
 
 type VerifyAccountComponentRequestBody = {
   accountId: string;
@@ -48,18 +56,50 @@ const packageFilesWithDependencies = async (
   return buildFiles(ownFiles(dbPackage.name, dbPackage.files), dependencies);
 };
 
+const invalidBody = () => badRequest("Error: Invalid request body.");
+
+// The package name of a miden-project.toml, which becomes a directory name.
+const packageSourceName = (packageSource: PackageSource) => {
+  let name: unknown;
+  try {
+    name = parseMidenProjectToml(packageSource.midenProjectToml).package.name;
+  } catch {
+    throw badRequest("Error: Invalid miden-project.toml.");
+  }
+  if (!isValidPackageName(name)) {
+    throw badRequest("Error: Invalid miden-project.toml.");
+  }
+  return name;
+};
+
 const verified = createApp()
   .use("/verified-account-components/*", dbMiddleware)
   .use("/verified-notes/*", dbMiddleware)
   .post("/verified-account-components/:network", async (c) => {
     try {
       const network = c.req.param("network");
-      const { accountId, packageSource, packageIds } =
-        await c.req.json<VerifyAccountComponentRequestBody>();
+      if (!isValidNetwork(network)) {
+        throw badRequest("Error: Invalid network.");
+      }
+      const { accountId, packageSource, packageIds } = await c.req
+        .json<VerifyAccountComponentRequestBody>()
+        .catch(() => {
+          throw invalidBody();
+        });
+      if (typeof accountId !== "string" || accountId === "") {
+        throw invalidBody();
+      }
+      if (packageSource !== undefined && !isPackageSource(packageSource)) {
+        throw invalidBody();
+      }
+      if (
+        packageIds !== undefined &&
+        (!isStringArray(packageIds) || !packageIds.every(isValidUUIDv4))
+      ) {
+        throw invalidBody();
+      }
       if (packageSource) {
-        const {
-          package: { name },
-        } = parseMidenProjectToml(packageSource.midenProjectToml);
+        const name = packageSourceName(packageSource);
         const { verified } =
           await fetchApiRegistry<VerifyAccountComponentResponse>(
             `/v1/${network}/verified-accounts`,
@@ -106,28 +146,43 @@ const verified = createApp()
         const verified = verifiedList.every((v) => v);
         return c.json<VerifyAccountComponentResponse>({ verified });
       }
-      throw new Error("Error: Invalid request body.");
+      throw invalidBody();
     } catch (error) {
-      console.error(error);
-      const { message } = error as { message: string };
-      return upstreamErrorResponse(error) ?? c.text(message, 500);
+      return errorResponse(c, error);
     }
   })
   .post("/verified-notes/:network", async (c) => {
     try {
       const network = c.req.param("network");
-      const { noteId, packageSource, dependencies, packageId } =
-        await c.req.json<VerifyNoteRequestBody>();
+      if (!isValidNetwork(network)) {
+        throw badRequest("Error: Invalid network.");
+      }
+      const { noteId, packageSource, dependencies, packageId } = await c.req
+        .json<VerifyNoteRequestBody>()
+        .catch(() => {
+          throw invalidBody();
+        });
+      if (typeof noteId !== "string" || noteId === "") {
+        throw invalidBody();
+      }
+      if (packageSource !== undefined && !isPackageSource(packageSource)) {
+        throw invalidBody();
+      }
+      if (
+        dependencies !== undefined &&
+        (!Array.isArray(dependencies) || !dependencies.every(isPackageSource))
+      ) {
+        throw invalidBody();
+      }
+      if (packageId !== undefined && !isValidUUIDv4(packageId)) {
+        throw invalidBody();
+      }
       if (packageSource && dependencies) {
-        const {
-          package: { name },
-        } = parseMidenProjectToml(packageSource.midenProjectToml);
+        const name = packageSourceName(packageSource);
         const files: Record<string, string> = Object.assign(
           packageSourceFiles(name, packageSource),
           ...dependencies.map((dependency) => {
-            const {
-              package: { name: dependencyName },
-            } = parseMidenProjectToml(dependency.midenProjectToml);
+            const dependencyName = packageSourceName(dependency);
             return packageSourceFiles(dependencyName, dependency);
           }),
         );
@@ -149,7 +204,7 @@ const verified = createApp()
       } else if (packageId) {
         const dbPackage = await getPackage(packageId);
         if (!dbPackage) {
-          throw new Error(`Package with ID ${packageId} not found.`);
+          throw notFound(`Package with ID ${packageId} not found.`);
         }
         const { verified } = await fetchApiRegistry<VerifyNoteResponse>(
           `/v1/${network}/verified-notes`,
@@ -166,11 +221,9 @@ const verified = createApp()
         );
         return c.json<VerifyNoteResponse>({ verified });
       }
-      throw new Error("Error: Invalid request body.");
+      throw invalidBody();
     } catch (error) {
-      console.error(error);
-      const { message } = error as { message: string };
-      return upstreamErrorResponse(error) ?? c.text(message, 500);
+      return errorResponse(c, error);
     }
   });
 
