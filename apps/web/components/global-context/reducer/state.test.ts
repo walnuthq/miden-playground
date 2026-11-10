@@ -20,7 +20,7 @@ describe("state reducer", () => {
   });
 
   test("SYNC_STATE merges the payload with what was added meanwhile", () => {
-    const [a, b, c] = [account("a"), account("b"), account("c")];
+    const [b, c] = [account("b"), account("c")];
     const [t1, t2, t3] = [
       transaction("t1"),
       transaction("t2"),
@@ -36,23 +36,85 @@ describe("state reducer", () => {
     const next = reducer(current, {
       type: "SYNC_STATE",
       payload: {
-        accounts: [a, b],
+        accounts: [b],
+        previousAccounts: [b],
         inputNotes: [payloadNote],
         transactions: [t1, t2],
       },
     } as Action);
     assert.deepEqual(
       next.accounts.map(({ id }) => id),
-      ["a", "b", "c"],
+      ["b", "c"],
     );
-    assert.equal(next.accounts[0], a);
-    assert.equal(next.accounts[1], b);
-    assert.equal(next.accounts[2], c);
+    assert.equal(next.accounts[0], b);
+    assert.equal(next.accounts[1], c);
     assert.deepEqual(next.inputNotes, [payloadNote]);
     assert.deepEqual(
       next.transactions.map(({ id }) => id),
       ["t1", "t2", "t3"],
     );
     assert.equal(next.syncingState, false);
+  });
+
+  describe("SYNC_STATE accounts", () => {
+    const sync = (
+      current: Account[],
+      previousAccounts: Account[],
+      accounts: Account[],
+    ) =>
+      reducer(
+        {
+          accounts: current,
+          inputNotes: [],
+          transactions: [],
+          syncingState: true,
+        } as unknown as State,
+        {
+          type: "SYNC_STATE",
+          payload: {
+            accounts,
+            previousAccounts,
+            inputNotes: [],
+            transactions: [],
+          },
+        } as Action,
+      );
+
+    test("an account deleted during the sync is not restored", () => {
+      const [a, b] = [account("a"), account("b")];
+      const next = sync([b], [a, b], [account("a"), account("b")]);
+      assert.deepEqual(
+        next.accounts.map(({ id }) => id),
+        ["b"],
+      );
+    });
+
+    test("an account changed during the sync keeps the state object", () => {
+      const old = account("a");
+      const newer = account("a");
+      const next = sync([newer], [old], [account("a")]);
+      assert.equal(next.accounts.length, 1);
+      assert.equal(next.accounts[0], newer);
+    });
+
+    test("an untouched account is replaced by the synced one", () => {
+      const a = account("a");
+      const synced = account("a");
+      const next = sync([a], [a], [synced]);
+      assert.equal(next.accounts.length, 1);
+      assert.equal(next.accounts[0], synced);
+    });
+
+    test("an account added during the sync is kept after the synced ones", () => {
+      const [a, added] = [account("a"), account("z")];
+      const synced = account("a");
+      const next = sync([added, a], [a], [synced]);
+      assert.deepEqual(
+        next.accounts.map(({ id }) => id),
+        ["a", "z"],
+      );
+      assert.equal(next.accounts[0], synced);
+      assert.equal(next.accounts[1], added);
+    });
   });
 });
