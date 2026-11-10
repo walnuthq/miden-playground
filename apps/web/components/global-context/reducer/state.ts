@@ -9,6 +9,7 @@ export type StateAction =
       type: "SYNC_STATE";
       payload: {
         accounts: Account[];
+        previousAccounts: Account[];
         inputNotes: InputNote[];
         transactions: Transaction[];
       };
@@ -41,14 +42,24 @@ const reducer = (state: State, action: StateAction): State => {
     }
     case "SYNC_STATE": {
       // The payload is built from the accounts and transactions as they were
-      // when the sync started: keep the ones added while it was running.
-      const { accounts, inputNotes, transactions } = action.payload;
+      // when the sync started (previousAccounts). An account deleted or changed
+      // since then stays as it is now, and the ones added meanwhile are kept.
+      const { accounts, previousAccounts, inputNotes, transactions } =
+        action.payload;
+      const untouched = (id: string) => {
+        const current = state.accounts.find((account) => account.id === id);
+        return (
+          current !== undefined &&
+          current === previousAccounts.find((account) => account.id === id)
+        );
+      };
+      const syncedAccounts = accounts.filter(({ id }) => untouched(id));
       return {
         ...state,
         accounts: [
-          ...accounts,
+          ...syncedAccounts,
           ...state.accounts.filter(
-            ({ id }) => !accounts.some((account) => account.id === id),
+            ({ id }) => !syncedAccounts.some((account) => account.id === id),
           ),
         ],
         inputNotes,

@@ -106,6 +106,7 @@ const syncAccounts = ({
         wasmAccount,
         name: previousAccount.name,
         components: previousAccount.components,
+        multisig: previousAccount.multisig,
         updatedAt,
         consumableNoteIds,
       }),
@@ -327,6 +328,7 @@ const useAppState = () => {
         type: "SYNC_STATE",
         payload: {
           accounts: syncedAccounts,
+          previousAccounts,
           inputNotes: syncedInputNotes,
           transactions: syncTransactions({
             previousTransactions,
