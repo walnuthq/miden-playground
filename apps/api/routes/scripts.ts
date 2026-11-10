@@ -11,6 +11,7 @@ import { badRequest, errorResponse, notFound } from "@/lib/errors";
 import { importExample, importScriptsFromPackageSources } from "@/lib/import";
 import { exportFiles } from "@/lib/package-files";
 import { toPackageType } from "@/lib/package-type";
+import { rateLimit } from "@/lib/rate-limit";
 import { templates } from "@/lib/templates";
 import type {
   CompiledPackage,
@@ -91,7 +92,7 @@ const invalidBody = () => badRequest("Error: Invalid request body.");
 
 const scripts = createApp()
   .use(dbMiddleware)
-  .post("/", async (c) => {
+  .post("/", rateLimit, async (c) => {
     try {
       const { name, type, example } = await c.req
         .json<CreateScriptRequestBody>()
@@ -132,7 +133,7 @@ const scripts = createApp()
       return errorResponse(c, error);
     }
   })
-  .post("/import", async (c) => {
+  .post("/import", rateLimit, async (c) => {
     try {
       const { packageSources } = await c.req
         .json<ImportScriptsRequestBody>()
@@ -151,7 +152,7 @@ const scripts = createApp()
       return errorResponse(c, error);
     }
   })
-  .post("/examples/:exampleId", async (c) => {
+  .post("/examples/:exampleId", rateLimit, async (c) => {
     try {
       const packages = await importExample(
         c.req.param("exampleId"),
@@ -186,7 +187,7 @@ const scripts = createApp()
       return errorResponse(c, error);
     }
   })
-  .patch("/:id", async (c) => {
+  .patch("/:id", rateLimit, async (c) => {
     try {
       const id = packageId(c.req.param("id"));
       const { files, dependencies } = await c.req
