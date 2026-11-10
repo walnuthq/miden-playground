@@ -18,7 +18,10 @@ export const formatAmount = ({
     minimumFractionDigits: 0,
     maximumFractionDigits: decimals,
     signDisplay,
-  }).format(Number(formatAssetAmount(BigInt(amount), decimals)));
+  }).format(
+    // The decimal string as it is: a number would round large amounts.
+    formatAssetAmount(BigInt(amount), decimals) as Intl.StringNumericLiteral,
+  );
 
 export const parseAmount = (
   amount: string,

@@ -39,6 +39,7 @@ import type {
   TransactionType,
 } from "@/lib/types/transaction";
 import { formatAmount, parseAmount } from "@/lib/utils/asset";
+import { toSafeNumber } from "@/lib/utils/safe-amount";
 import { clientCreateTransactionFromScript } from "@/lib/web-client";
 
 const CreateTransactionConfigureForm = ({
@@ -248,7 +249,7 @@ const CreateTransactionConfigureForm = ({
                   formData.getAll("is-public").includes("on")
                     ? "public"
                     : "private",
-                  Number(
+                  toSafeNumber(
                     parseAmount(
                       formData.get("amount")?.toString() ?? "0",
                       decimals,

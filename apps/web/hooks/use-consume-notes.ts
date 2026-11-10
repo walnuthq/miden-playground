@@ -11,6 +11,7 @@ import useTransactions from "@/hooks/use-transactions";
 import type { Account } from "@/lib/types/account";
 import type { InputNote } from "@/lib/types/note";
 import { fromBase64 } from "@/lib/utils";
+import { toSafeNumber } from "@/lib/utils/safe-amount";
 
 const useConsumeNotes = () => {
   const { client } = useMiden();
@@ -60,7 +61,7 @@ const useConsumeNotes = () => {
           faucet.identifier,
           inputNote.id,
           inputNote.type === "public" ? "public" : "private",
-          Number(fungibleAsset.amount),
+          toSafeNumber(BigInt(fungibleAsset.amount)),
         );
         const txId = await adapter.requestConsume(transaction);
         console.info({ txId });
