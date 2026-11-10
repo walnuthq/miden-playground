@@ -9,14 +9,16 @@
     "allowImportingTsExtensions": true,
     "noEmit": true,
     "declaration": false,
-    "declarationMap": false
+    "declarationMap": false,
+    "paths": { "@/*": ["./*"] }
   },
   "include": [
     "vite.config.ts",
     "playwright.config.ts",
     "e2e",
     "scripts",
-    "**/*.test.ts"
+    "**/*.test.ts",
+    "test"
   ],
   "exclude": ["node_modules", "dist"]
 }

@@ -173,7 +173,7 @@ const deleteStore = (name: string) =>
 const MIGRATION_SCHEMA_VERSION = 8;
 const MIGRATION_BASELINE = [0, 17, 0];
 
-const isBelowMigrationBaseline = (storedVersion: string | null) => {
+export const isBelowMigrationBaseline = (storedVersion: string | null) => {
   if (storedVersion === null) {
     return true;
   }
