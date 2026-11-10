@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { badRequest, errorStatusAndMessage, notFound } from "./errors.ts";
-import { UpstreamError } from "./upstream.ts";
+import { isAlreadyVerified, UpstreamError } from "./upstream.ts";
 
 test("client errors keep their status and message", () => {
   assert.deepEqual(errorStatusAndMessage(badRequest("Error: bad.")), {
@@ -23,9 +23,26 @@ test("unexpected errors are a generic 500", () => {
   assert.deepEqual(errorStatusAndMessage("boom"), expected);
 });
 
-test("an upstream error keeps its message", () => {
-  assert.deepEqual(
-    errorStatusAndMessage(new UpstreamError("bad manifest", 400)),
-    { status: 500, message: "bad manifest" },
-  );
+test("an upstream client error keeps its status and message", () => {
+  for (const status of [400, 404, 409]) {
+    assert.deepEqual(
+      errorStatusAndMessage(new UpstreamError("bad manifest", status)),
+      { status, message: "bad manifest" },
+    );
+  }
+});
+
+test("any other upstream error is a 500 with its message", () => {
+  for (const status of [401, 403, 429, 500]) {
+    assert.deepEqual(
+      errorStatusAndMessage(new UpstreamError("refused", status)),
+      { status: 500, message: "refused" },
+    );
+  }
+});
+
+test("only a 409 from upstream means already verified", () => {
+  assert.equal(isAlreadyVerified(new UpstreamError("…", 409)), true);
+  assert.equal(isAlreadyVerified(new UpstreamError("…", 400)), false);
+  assert.equal(isAlreadyVerified(new Error("409")), false);
 });

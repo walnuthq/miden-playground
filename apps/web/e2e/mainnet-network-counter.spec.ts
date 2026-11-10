@@ -32,8 +32,8 @@ const LOW_BALANCE = 0.002;
 // The Playground verifies a deployed account's custom components and a created
 // note's script through its API, in the background: wait for that call's
 // answer. The registry keys records on code and script roots, the same every
-// run: after the first run, it answers that the code is already verified (an
-// error, which the API passes on as a 500 and the Playground ignores).
+// run: after the first run, it answers that the code is already verified,
+// which the API reports as verified.
 const verification = (page: Page, path: string) =>
   page.waitForResponse(
     (response) =>

@@ -12,6 +12,12 @@ export class UpstreamError extends Error {
   }
 }
 
+// api-registry answers 409 once a project compiled to the resource's root
+// and that verification is already recorded: verified, though not by this
+// request.
+export const isAlreadyVerified = (error: unknown) =>
+  error instanceof UpstreamError && error.status === 409;
+
 const fetchUpstream = async <T>(
   service: string,
   url: string,
