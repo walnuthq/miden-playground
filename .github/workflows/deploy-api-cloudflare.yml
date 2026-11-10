@@ -42,6 +42,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Before the migration: nothing reaches production from a commit that
+      # fails them. Lint and typecheck cover the whole repository.
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Test
+        run: pnpm --filter miden-playground-api test
+
       # Before the deploy, so the new code never runs on an old schema; a failed
       # migration stops the job with nothing deployed. Already-applied
       # migrations are skipped. The old code keeps serving on the new schema

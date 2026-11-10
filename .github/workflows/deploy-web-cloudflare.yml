@@ -45,6 +45,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Before the deploy: nothing reaches production from a commit that fails
+      # them. Lint and typecheck cover the whole repository.
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Test
+        run: pnpm --filter miden-playground-web test
+
       # Builds with Vite (`vite build` reads the build variables from
       # apps/web/.env.production) and deploys the Worker and its assets.
       # `pnpm run`, not `pnpm deploy`, which is a pnpm command of its own.
