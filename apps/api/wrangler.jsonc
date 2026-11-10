@@ -32,7 +32,7 @@
   "ratelimits": [
     {
       "name": "COMPILE_RATE_LIMITER",
-      "namespace_id": "1001",
+      "namespace_id": "48271",
       "simple": { "limit": 30, "period": 60 },
     },
   ],
@@ -82,7 +82,7 @@
       "ratelimits": [
         {
           "name": "COMPILE_RATE_LIMITER",
-          "namespace_id": "1001",
+          "namespace_id": "48271",
           "simple": { "limit": 30, "period": 60 },
         },
       ],
