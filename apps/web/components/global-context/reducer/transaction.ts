@@ -77,7 +77,8 @@ const reducer = (state: State, action: TransactionAction): State => {
       const index = state.accounts.findIndex(
         ({ id }) => id === action.payload.account.id,
       );
-      if (index === -1) {
+      const current = state.accounts[index];
+      if (!current) {
         // The account was deleted while its transaction was running.
         return {
           ...state,
@@ -85,13 +86,26 @@ const reducer = (state: State, action: TransactionAction): State => {
           transactions: [...state.transactions, action.payload.transaction],
         };
       }
+      // The payload's account is rebuilt from the store, which doesn't hold
+      // its multisig data or the notes it can consume: keep the current ones,
+      // minus the notes this transaction consumed.
+      const consumedNoteIds = action.payload.transaction.inputNotes.map(
+        ({ id }) => id,
+      );
+      const account = {
+        ...action.payload.account,
+        multisig: current.multisig,
+        consumableNoteIds: current.consumableNoteIds.filter(
+          (id) => !consumedNoteIds.includes(id),
+        ),
+      };
       return {
         ...state,
         submittingTransaction: false,
         transactions: [...state.transactions, action.payload.transaction],
         accounts: [
           ...state.accounts.slice(0, index),
-          action.payload.account,
+          account,
           ...state.accounts.slice(index + 1),
         ],
         // serializedMockChain: action.payload.serializedMockChain,

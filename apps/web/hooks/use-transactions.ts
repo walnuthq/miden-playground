@@ -298,6 +298,8 @@ const useTransactions = () => {
       result: transactionResult,
       scripts,
     });
+    // Its multisig data and consumable notes aren't in the store: the reducer
+    // keeps the current ones (SUBMIT_TRANSACTION).
     const account = wasmAccountToAccount({
       wasmAccount: nextAccount,
       name: previousAccount.name,
