@@ -1,6 +1,6 @@
 import { strToU8, zipSync } from "fflate";
 import { dbMiddleware } from "@/db/middleware";
-import { deletePackage, getDependencies, getPackage } from "@/db/packages";
+import { deletePackage, getDependenciesDeep, getPackage } from "@/db/packages";
 import { createApp } from "@/lib/app";
 import {
   basicWalletDependency,
@@ -11,6 +11,7 @@ import {
   importExample,
   importScriptsFromPackageSources,
 } from "@/lib/import";
+import { exportFiles } from "@/lib/package-files";
 import { toPackageType } from "@/lib/package-type";
 import { templates } from "@/lib/templates";
 import type {
@@ -211,29 +212,13 @@ const scripts = createApp()
       }
       const dependenciesPackages =
         dbPackage.dependencies.length > 0
-          ? await getDependencies(dbPackage.dependencies)
+          ? await getDependenciesDeep(dbPackage.dependencies)
           : [];
-      const files =
-        dbPackage.dependencies.length > 0
-          ? dependenciesPackages.reduce<Record<string, string>>(
-              (previousValue, currentValue) => {
-                for (const [path, content] of Object.entries(
-                  currentValue.files,
-                )) {
-                  previousValue[path] = content;
-                }
-                return previousValue;
-              },
-              dbPackage.files,
-            )
-          : Object.entries(dbPackage.files).reduce<Record<string, string>>(
-              (previousValue, [path, content]) => {
-                const strippedPath = path.split("/").slice(1).join("/");
-                previousValue[strippedPath] = content;
-                return previousValue;
-              },
-              {},
-            );
+      const files = exportFiles(
+        dbPackage.name,
+        dbPackage.files,
+        dependenciesPackages,
+      );
       const zip = zipSync(
         Object.fromEntries(
           Object.entries(files).map(([path, content]) => [

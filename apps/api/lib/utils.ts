@@ -1,9 +1,11 @@
 import {
   getDependencies,
+  getDependenciesDeep,
   getPackage,
   insertPackage,
   updatePackage,
 } from "@/db/packages";
+import { buildFiles, ownFiles } from "@/lib/package-files";
 import { projectTemplateFiles } from "@/lib/templates";
 import { generateCargoToml, generateMidenProjectToml } from "@/lib/toml";
 import {
@@ -122,15 +124,17 @@ export const compilePackage = async ({
   dependencies: string[];
   signal?: AbortSignal;
 }): Promise<CompiledPackage> => {
-  const [dbPackage, dependenciesPackages] = await Promise.all([
-    getPackage(id),
-    getDependencies(dependencies),
-  ]);
+  const [dbPackage, dependenciesPackages, buildDependencies] =
+    await Promise.all([
+      getPackage(id),
+      getDependencies(dependencies),
+      getDependenciesDeep(dependencies),
+    ]);
   if (!dbPackage) {
     throw new Error("Error: Package not found");
   }
   const { name, type } = dbPackage;
-  const updatedFiles = dbPackage.files;
+  const updatedFiles = ownFiles(name, dbPackage.files);
   updatedFiles[`${name}/src/lib.rs`] = source;
   updatedFiles[`${name}/miden-project.toml`] = generateMidenProjectToml({
     name,
@@ -138,15 +142,7 @@ export const compilePackage = async ({
     rust: source,
     dependencies: dependenciesPackages,
   });
-  const files = dependenciesPackages.reduce<Record<string, string>>(
-    (previousValue, currentValue) => {
-      for (const [path, content] of Object.entries(currentValue.files)) {
-        previousValue[path] = content;
-      }
-      return previousValue;
-    },
-    updatedFiles,
-  );
+  const files = buildFiles(updatedFiles, buildDependencies);
   const build = await fetchApiCompile<CompileResponse>("/compile", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -218,12 +214,13 @@ export const compilePackage = async ({
     console.warn(`${name}: no MASM (${masmOutput.error})`);
   }
   const masm = masmSource(masmOutput);
-  // `storedFiles`, the compiled sources plus the Cargo.lock the build used, are
+  const packageFiles = ownFiles(name, storedFiles);
+  // The package's own compiled sources plus the Cargo.lock the build used are
   // sent back with the next compile to get the same dependency versions.
   await updatePackage({
     id,
     status: "compiled",
-    files: storedFiles,
+    files: packageFiles,
     masm,
     masp,
     commitment,
@@ -235,7 +232,7 @@ export const compilePackage = async ({
     name,
     type,
     status: "compiled",
-    files: scriptFiles(name, storedFiles),
+    files: scriptFiles(name, packageFiles),
     error: "",
     // A successful build still reports its warnings on stderr.
     warnings: stderr,
