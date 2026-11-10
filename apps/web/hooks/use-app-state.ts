@@ -400,17 +400,17 @@ const useAppState = () => {
       return;
     }
     const { nextStore, fallbackState } = nextState;
-    await clearMidenStorage();
     try {
+      await clearMidenStorage();
       // Synced below, so a sync failure isn't taken for a failed import.
       await importStore(storeDump(nextStore), storeName(networkId), {
         skipSync: true,
       });
       dispatch({ type: "POP_STATE", payload: { imported: nextState } });
     } catch (error) {
-      // A saved project the running client refuses (e.g. written by a newer
-      // one): start over from the fallback instead. The previous store is
-      // cleared by now, so without a fallback it's a new sandbox.
+      // The store couldn't be cleared, or the running client refuses the saved
+      // project (e.g. written by a newer one): start over from the fallback
+      // instead. Without a fallback it's a new sandbox.
       console.error("ERROR: importStore", error);
       const state = fallbackState ?? freshSandboxState(networkId);
       let fallbackImported = true;
