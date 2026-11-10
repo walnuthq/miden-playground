@@ -1,6 +1,7 @@
 import { dbMiddleware } from "@/db/middleware";
-import { getDependencies, getPackage } from "@/db/packages";
+import { getDependenciesDeep, getPackage } from "@/db/packages";
 import { createApp } from "@/lib/app";
+import { buildFiles, ownFiles } from "@/lib/package-files";
 import { projectTemplateFiles } from "@/lib/templates";
 import { generateCargoToml, parseMidenProjectToml } from "@/lib/toml";
 import type { PackageSource } from "@/lib/types";
@@ -42,13 +43,9 @@ const packageFilesWithDependencies = async (
 ) => {
   const dependencies =
     dbPackage.dependencies.length > 0
-      ? await getDependencies(dbPackage.dependencies)
+      ? await getDependenciesDeep(dbPackage.dependencies)
       : [];
-  return Object.assign(
-    {},
-    dbPackage.files,
-    ...dependencies.map(({ files }) => files),
-  ) as Record<string, string>;
+  return buildFiles(ownFiles(dbPackage.name, dbPackage.files), dependencies);
 };
 
 const verified = createApp()

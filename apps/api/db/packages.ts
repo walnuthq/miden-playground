@@ -66,10 +66,11 @@ export const deletePackage = (id: string) =>
 export const getDependencies = async (dependencies: string[]) => {
   const defaultDependencies = dependencies
     .filter((dependency) => !isValidUUIDv4(dependency))
-    .map(
-      (dependency) =>
-        defaultDependenciesRecords[dependency as DefaultDependency],
-    );
+    .map((dependency) => ({
+      ...defaultDependenciesRecords[dependency as DefaultDependency],
+      // Default dependencies have none.
+      dependencies: [] as string[],
+    }));
   const dbDependencies = await getDb().query.packagesTable.findMany({
     columns: {
       id: true,
@@ -77,6 +78,7 @@ export const getDependencies = async (dependencies: string[]) => {
       type: true,
       commitment: true,
       files: true,
+      dependencies: true,
     },
     where: {
       id: {
@@ -91,4 +93,26 @@ export const getDependencies = async (dependencies: string[]) => {
       files: dbDependency.files as Record<string, string>,
     })),
   ];
+};
+
+// The dependencies of a build: the given ones and, in turn, the ones they
+// depend on. A package's miden-project.toml lists only its direct ones.
+export const getDependenciesDeep = async (dependencies: string[]) => {
+  const found = new Map<
+    string,
+    Awaited<ReturnType<typeof getDependencies>>[number]
+  >();
+  let pending = dependencies;
+  while (pending.length > 0) {
+    const batch = await getDependencies(pending);
+    pending = [];
+    for (const dependency of batch) {
+      if (found.has(dependency.id)) {
+        continue;
+      }
+      found.set(dependency.id, dependency);
+      pending.push(...dependency.dependencies.filter((id) => !found.has(id)));
+    }
+  }
+  return [...found.values()];
 };
