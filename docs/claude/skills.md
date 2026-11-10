@@ -10,5 +10,6 @@ Skills are installed per project with the `skills` CLI (`pnpm dlx skills ...`) a
   ```
 
 - Third-party skills are copied in and recorded in `skills-lock.json`. Example: `shadcn` and `migrate-radix-to-base` from `pnpm dlx skills add shadcn/ui --skill '*' --agent claude-code -y`.
+- `improve` (from `pnpm dlx skills add shadcn/improve --agent claude-code -y`) audits the codebase and writes handoff plans to `plans/`, which is committed. `plans/README.md` is the index: each run reads it, skips what's planned or rejected, and numbers new plans after the last one. Update a plan's status row when its PR merges.
 - `tutorials-qa` is a hand-written local skill in `.claude/skills/tutorials-qa/`, with no upstream source; don't delete it.
 - Install skills at project level with `--agent claude-code`, not globally (`-g`), unless asked.
