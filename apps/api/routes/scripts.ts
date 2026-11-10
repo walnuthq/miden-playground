@@ -25,7 +25,9 @@ import type {
 import { compilePackage, createPackage, scriptFiles } from "@/lib/utils";
 import { isValidUUIDv4 } from "@/lib/uuid";
 import {
-  isPackageSource,
+  isBoundedArray,
+  isPackageSources,
+  isSource,
   isStringArray,
   isValidPackageName,
 } from "@/lib/validation";
@@ -137,11 +139,7 @@ const scripts = createApp()
         .catch(() => {
           throw invalidBody();
         });
-      if (
-        typeof packageSources !== "object" ||
-        packageSources === null ||
-        !Object.values(packageSources).every(isPackageSource)
-      ) {
+      if (!isPackageSources(packageSources)) {
         throw invalidBody();
       }
       const packages = await importScriptsFromPackageSources(
@@ -197,10 +195,11 @@ const scripts = createApp()
           throw invalidBody();
         });
       const source = files?.["src/lib.rs"];
-      if (typeof source !== "string") {
+      if (!isSource(source)) {
         throw invalidBody();
       }
       if (
+        !isBoundedArray(dependencies) ||
         !isStringArray(dependencies) ||
         !dependencies.every(
           (dependency) =>

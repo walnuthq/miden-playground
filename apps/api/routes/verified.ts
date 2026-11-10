@@ -9,6 +9,8 @@ import type { PackageSource } from "@/lib/types";
 import { fetchApiRegistry } from "@/lib/upstream";
 import { isValidUUIDv4 } from "@/lib/uuid";
 import {
+  isBoundedArray,
+  isId,
   isPackageSource,
   isStringArray,
   isValidNetwork,
@@ -86,7 +88,7 @@ const verified = createApp()
         .catch(() => {
           throw invalidBody();
         });
-      if (typeof accountId !== "string" || accountId === "") {
+      if (!isId(accountId)) {
         throw invalidBody();
       }
       if (packageSource !== undefined && !isPackageSource(packageSource)) {
@@ -94,7 +96,9 @@ const verified = createApp()
       }
       if (
         packageIds !== undefined &&
-        (!isStringArray(packageIds) || !packageIds.every(isValidUUIDv4))
+        (!isBoundedArray(packageIds) ||
+          !isStringArray(packageIds) ||
+          !packageIds.every(isValidUUIDv4))
       ) {
         throw invalidBody();
       }
@@ -162,7 +166,7 @@ const verified = createApp()
         .catch(() => {
           throw invalidBody();
         });
-      if (typeof noteId !== "string" || noteId === "") {
+      if (!isId(noteId)) {
         throw invalidBody();
       }
       if (packageSource !== undefined && !isPackageSource(packageSource)) {
@@ -170,7 +174,7 @@ const verified = createApp()
       }
       if (
         dependencies !== undefined &&
-        (!Array.isArray(dependencies) || !dependencies.every(isPackageSource))
+        (!isBoundedArray(dependencies) || !dependencies.every(isPackageSource))
       ) {
         throw invalidBody();
       }
