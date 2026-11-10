@@ -12,22 +12,10 @@ export const rateLimitKey = (headers: Headers) =>
 export const rateLimit = createMiddleware<AppEnv>(async (c, next) => {
   const key = rateLimitKey(c.req.raw.headers);
   const limiter = c.env.COMPILE_RATE_LIMITER;
-  // Temporary: production never answered 429 after PR #809. Logs the
-  // limiter's answer (never the key: Workers Logs are persisted). Remove once
-  // the cause is known.
-  const log = (success?: boolean) =>
-    console.info("rate-limit", {
-      hasKey: key !== undefined,
-      hasLimiter: Boolean(limiter),
-      success,
-      colo: c.req.raw.cf?.colo,
-    });
   if (key === undefined || !limiter) {
-    log();
     return next();
   }
   const { success } = await limiter.limit({ key });
-  log(success);
   if (!success) {
     return c.text("Error: Too many requests. Try again in a minute.", 429, {
       "Retry-After": "60",
