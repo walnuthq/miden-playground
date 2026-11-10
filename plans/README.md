@@ -12,7 +12,7 @@ your row when done.
 | 001  | `apps/api` has unit tests for its pure logic                       | P1       | M      | —                     | DONE (branch `test/api-unit-tests`, PR #792, merged dff21ae)                 |
 | 002  | A stored package holds only its own files                          | P1       | M      | 001                   | DONE (PR #793, merged 478b5d0, local e2e 11✓)                                |
 | 004  | The web app's script calls treat every non-OK response as an error | P2       | S      | —                     | DONE (PR #795, merged 09546b2, deployed 2026-11-10)                          |
-| 003  | The API validates its input and answers client errors with 4xx     | P2       | M      | 001, deploy 004 first | IN PROGRESS (review approved; PR #796 open, f8bfe2a)                         |
+| 003  | The API validates its input and answers client errors with 4xx     | P2       | M      | 001, deploy 004 first | DONE (PR #796, merged 57e044c, deployed 2026-11-10)                          |
 | 005  | Deploys run lint, typecheck and unit tests first                   | P2       | S      | 001                   | DONE (PR #794, merged d4be8c2; branch protection on main enabled 2026-11-10) |
 | 006  | Only a script's owner can change or delete it                      | P2       | L      | owner-token feature   | DEFERRED                                                                     |
 
