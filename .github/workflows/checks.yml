@@ -1,0 +1,52 @@
+name: Checks
+
+# On every pull request to main, whatever it touches: branch protection
+# requires this job, and a required check skipped by a `paths` filter would
+# leave the pull request waiting forever.
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A new push to the pull request supersedes the run in progress.
+concurrency:
+  group: checks-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    # Branch protection on main requires a check of this exact name: rename
+    # it there too.
+    name: Lint, typecheck and test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 26
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Lint and typecheck cover the whole repository.
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Test api
+        run: pnpm --filter miden-playground-api test
+
+      - name: Test web
+        run: pnpm --filter miden-playground-web test

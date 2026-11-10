@@ -139,6 +139,8 @@ Check for any TypeScript issues:
 pnpm typecheck
 ```
 
+Every pull request to `main` runs [`checks.yml`](.github/workflows/checks.yml) (lint, typecheck and the unit tests), and branch protection requires it to pass before merging. The deploy workflows run the same checks again before they migrate or deploy.
+
 ### Tests
 
 Unit tests (`node:test`, plain node) cover the web app's pure helpers, such as the compile diagnostics parser, the console's output cleanup, the MASM vocabulary and the manifest patch. `masm:check` reports when the MASM vocabulary is out of date with the assembler:
