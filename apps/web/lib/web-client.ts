@@ -117,24 +117,37 @@ export const clientGetLatestBlockNum = async (networkId: NetworkId) => {
 export const clientGetAllInputNotes = async ({
   client,
   networkId,
+  knownNoteIds,
 }: {
   client: WebClientType;
   networkId: NetworkId;
+  // Notes whose metadata the caller already has: not asked for again.
+  knownNoteIds?: Set<string>;
 }) => {
   const wasmInputNotes = await client.getInputNotes(
     new WasmNoteFilter(WasmNoteFilterTypes.All),
   );
-  const wasmFetchedNotes = await clientGetNotesById({
-    networkId,
-    noteIds: wasmInputNotes
-      .map((wasmInputNote) => wasmInputNote.id()?.toString())
-      .filter((id) => id !== undefined),
-  });
+  const noteIds = wasmInputNotes
+    .map((wasmInputNote) => wasmInputNote.id()?.toString())
+    .filter((id) => id !== undefined)
+    .filter((id) => !knownNoteIds?.has(id));
+  if (noteIds.length === 0) {
+    return wasmInputNotes;
+  }
+  const requestedIds = new Set(noteIds);
+  const wasmFetchedNotes = await clientGetNotesById({ networkId, noteIds });
+  const fetchedById = new Map(
+    wasmFetchedNotes.map((wasmFetchedNote) => [
+      wasmFetchedNote.noteId.toString(),
+      wasmFetchedNote,
+    ]),
+  );
   return wasmInputNotes.map((wasmInputNote) => {
-    const wasmFetchedNote = wasmFetchedNotes.find(
-      ({ noteId }) => noteId.toString() === wasmInputNote.id()?.toString(),
-    );
-    wasmInputNote.metadata = () => wasmFetchedNote?.metadata;
+    const id = wasmInputNote.id()?.toString();
+    // A note that wasn't asked for keeps its own metadata.
+    if (id !== undefined && requestedIds.has(id)) {
+      wasmInputNote.metadata = () => fetchedById.get(id)?.metadata;
+    }
     return wasmInputNote;
   });
 };

@@ -303,6 +303,12 @@ const useAppState = () => {
         clientGetAllInputNotes({
           client,
           networkId,
+          // Their type, tag and sender are set: nothing a fetch would change.
+          knownNoteIds: new Set(
+            previousInputNotes
+              .filter(({ tag, senderId }) => tag !== "" && senderId !== "")
+              .map(({ id }) => id),
+          ),
         }),
         clientGetAllTransactions(client),
         // MidenFiSignerProvider selects its only wallet up front, so `wallet`
