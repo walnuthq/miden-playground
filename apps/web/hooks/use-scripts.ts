@@ -45,6 +45,7 @@ const useScripts = () => {
     addDependencyDialogOpen,
     addDependencyDialogScriptId,
     importProjectDialogOpen,
+    readOnlyProcedureAccountId,
     readOnlyProcedureDigest,
     readOnlyProcedureResult,
     dispatch,
@@ -230,15 +231,17 @@ const useScripts = () => {
     return { scripts, error };
   };
   const setReadOnlyProcedureResult = ({
+    accountId,
     digest,
     result,
   }: {
+    accountId: string;
     digest: string;
     result: string;
   }) =>
     dispatch({
       type: "SET_READ_ONLY_PROCEDURE_RESULT",
-      payload: { digest, result },
+      payload: { accountId, digest, result },
     });
   return {
     scripts,
@@ -252,6 +255,7 @@ const useScripts = () => {
     addDependencyDialogOpen,
     addDependencyDialogScriptId,
     importProjectDialogOpen,
+    readOnlyProcedureAccountId,
     readOnlyProcedureDigest,
     readOnlyProcedureResult,
     openCreateScriptDialog,

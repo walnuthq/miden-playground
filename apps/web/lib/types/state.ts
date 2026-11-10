@@ -70,6 +70,7 @@ export type State = {
   addDependencyDialogOpen: boolean;
   addDependencyDialogScriptId: string;
   importProjectDialogOpen: boolean;
+  readOnlyProcedureAccountId: string;
   readOnlyProcedureDigest: string;
   readOnlyProcedureResult: string;
   scripts: Script[];

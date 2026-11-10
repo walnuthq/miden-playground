@@ -61,6 +61,7 @@ export const defaultState = (): State => ({
   addDependencyDialogOpen: false,
   addDependencyDialogScriptId: "",
   importProjectDialogOpen: false,
+  readOnlyProcedureAccountId: "",
   readOnlyProcedureDigest: "",
   readOnlyProcedureResult: "",
   scripts: defaultScripts,
