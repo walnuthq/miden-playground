@@ -7,7 +7,7 @@ import { rateLimit } from "@/lib/rate-limit";
 import { projectTemplateFiles } from "@/lib/templates";
 import { generateCargoToml, parseMidenProjectToml } from "@/lib/toml";
 import type { PackageSource } from "@/lib/types";
-import { fetchApiRegistry } from "@/lib/upstream";
+import { fetchApiRegistry, isAlreadyVerified } from "@/lib/upstream";
 import { isValidUUIDv4 } from "@/lib/uuid";
 import {
   isBoundedArray,
@@ -24,8 +24,6 @@ type VerifyAccountComponentRequestBody = {
   packageIds?: string[];
 };
 
-type VerifyAccountComponentResponse = { verified: boolean };
-
 type VerifyNoteRequestBody = {
   noteId: string;
   packageSource?: PackageSource;
@@ -33,7 +31,7 @@ type VerifyNoteRequestBody = {
   packageId?: string;
 };
 
-type VerifyNoteResponse = { verified: boolean };
+type VerifyResponse = { verified: boolean };
 
 const packageSourceFiles = (name: string, packageSource: PackageSource) => ({
   [`${name}/.cargo/config.toml`]: projectTemplateFiles[".cargo/config.toml"],
@@ -75,6 +73,29 @@ const packageSourceName = (packageSource: PackageSource) => {
   return name;
 };
 
+// Asks api-registry to verify a project against an account or a note.
+// "Already verified" is its 409: the project matched before, so it counts.
+const verifyWithRegistry = async (
+  path: string,
+  body: Record<string, unknown>,
+  signal: AbortSignal,
+) => {
+  try {
+    const { verified } = await fetchApiRegistry<VerifyResponse>(path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      signal,
+    });
+    return verified;
+  } catch (error) {
+    if (isAlreadyVerified(error)) {
+      return true;
+    }
+    throw error;
+  }
+};
+
 const verified = createApp()
   .use("/verified-account-components/*", dbMiddleware)
   .use("/verified-notes/*", dbMiddleware)
@@ -105,22 +126,17 @@ const verified = createApp()
       }
       if (packageSource) {
         const name = packageSourceName(packageSource);
-        const { verified } =
-          await fetchApiRegistry<VerifyAccountComponentResponse>(
-            `/v1/${network}/verified-accounts`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                accountId,
-                files: packageSourceFiles(name, packageSource),
-                entrypoint: name,
-                source: "miden-playground",
-              }),
-              signal: c.req.raw.signal,
-            },
-          );
-        return c.json<VerifyAccountComponentResponse>({ verified });
+        const verified = await verifyWithRegistry(
+          `/v1/${network}/verified-accounts`,
+          {
+            accountId,
+            files: packageSourceFiles(name, packageSource),
+            entrypoint: name,
+            source: "miden-playground",
+          },
+          c.req.raw.signal,
+        );
+        return c.json<VerifyResponse>({ verified });
       } else if (packageIds) {
         const rawPackages = await Promise.all(
           packageIds.map((packageId) => getPackage(packageId)),
@@ -132,24 +148,20 @@ const verified = createApp()
         // at a time and answers 503 once its queue is full: verify them in turn.
         const verifiedList: boolean[] = [];
         for (const dbPackage of packages) {
-          const { verified } =
-            await fetchApiRegistry<VerifyAccountComponentResponse>(
+          verifiedList.push(
+            await verifyWithRegistry(
               `/v1/${network}/verified-accounts`,
               {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  accountId,
-                  files: await packageFilesWithDependencies(dbPackage),
-                  entrypoint: dbPackage.name,
-                }),
-                signal: c.req.raw.signal,
+                accountId,
+                files: await packageFilesWithDependencies(dbPackage),
+                entrypoint: dbPackage.name,
               },
-            );
-          verifiedList.push(verified);
+              c.req.raw.signal,
+            ),
+          );
         }
         const verified = verifiedList.every((v) => v);
-        return c.json<VerifyAccountComponentResponse>({ verified });
+        return c.json<VerifyResponse>({ verified });
       }
       throw invalidBody();
     } catch (error) {
@@ -191,40 +203,27 @@ const verified = createApp()
             return packageSourceFiles(dependencyName, dependency);
           }),
         );
-        const { verified } = await fetchApiRegistry<VerifyNoteResponse>(
+        const verified = await verifyWithRegistry(
           `/v1/${network}/verified-notes`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              noteId,
-              files,
-              entrypoint: name,
-              source: "miden-playground",
-            }),
-            signal: c.req.raw.signal,
-          },
+          { noteId, files, entrypoint: name, source: "miden-playground" },
+          c.req.raw.signal,
         );
-        return c.json<VerifyNoteResponse>({ verified });
+        return c.json<VerifyResponse>({ verified });
       } else if (packageId) {
         const dbPackage = await getPackage(packageId);
         if (!dbPackage) {
           throw notFound(`Package with ID ${packageId} not found.`);
         }
-        const { verified } = await fetchApiRegistry<VerifyNoteResponse>(
+        const verified = await verifyWithRegistry(
           `/v1/${network}/verified-notes`,
           {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              noteId,
-              files: await packageFilesWithDependencies(dbPackage),
-              entrypoint: dbPackage.name,
-            }),
-            signal: c.req.raw.signal,
+            noteId,
+            files: await packageFilesWithDependencies(dbPackage),
+            entrypoint: dbPackage.name,
           },
+          c.req.raw.signal,
         );
-        return c.json<VerifyNoteResponse>({ verified });
+        return c.json<VerifyResponse>({ verified });
       }
       throw invalidBody();
     } catch (error) {
