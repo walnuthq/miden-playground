@@ -1,5 +1,6 @@
 import { examples } from "@/examples";
 import { sourcesHash } from "@/examples/hash";
+import { notFound } from "@/lib/errors";
 import { resolvePackageSources } from "@/lib/package-sources";
 import type { CompiledPackage, Dependency, PackageSource } from "@/lib/types";
 import { compilePackage, createPackage } from "@/lib/utils";
@@ -39,8 +40,6 @@ export const importScriptsFromPackageSources = async (
   return compiledPackages;
 };
 
-export class ExampleNotFoundError extends Error {}
-
 // Creates the packages of an example from its precompiled snapshot
 // (examples/*/compiled.json), without calling api-compile. Falls back to
 // compiling the sources when they were edited since the snapshot was taken.
@@ -50,7 +49,7 @@ export const importExample = async (
 ): Promise<CompiledPackage[]> => {
   const example = examples[exampleId];
   if (!example) {
-    throw new ExampleNotFoundError("Error: Example not found.");
+    throw notFound("Error: Example not found.");
   }
   const { sources, compiled } = example;
   if ((await sourcesHash(sources)) !== compiled.sourcesHash) {

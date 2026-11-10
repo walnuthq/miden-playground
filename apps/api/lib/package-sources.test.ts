@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
+import { HttpError } from "./errors.ts";
 import { resolvePackageSources } from "./package-sources.ts";
 
 const manifest = ({
@@ -48,7 +49,7 @@ describe("resolvePackageSources", () => {
   });
   test("tx-script resolves to transaction-script", () => {
     const [pkg] = resolvePackageSources({
-      s: source(manifest({ name: "s", kind: "tx-script" })),
+      s: source(manifest({ name: "tx-s", kind: "tx-script" })),
     });
     assert.equal(pkg?.type, "transaction-script");
   });
@@ -68,14 +69,15 @@ describe("resolvePackageSources", () => {
     assert.throws(
       () =>
         resolvePackageSources({
-          a: source(manifest({ name: "a", kind: "nope" })),
+          a: source(manifest({ name: "pkg-a", kind: "nope" })),
         }),
       /has no valid \[lib\] kind/,
     );
   });
   test("empty rust throws", () => {
     assert.throws(
-      () => resolvePackageSources({ a: source(manifest({ name: "a" }), "") }),
+      () =>
+        resolvePackageSources({ a: source(manifest({ name: "pkg-a" }), "") }),
       /src\/lib.rs is missing or empty/,
     );
   });
@@ -93,16 +95,27 @@ describe("resolvePackageSources", () => {
     assert.throws(
       () =>
         resolvePackageSources({
-          a: source(manifest({ name: "a", dependencies: ["ghost"] })),
+          a: source(manifest({ name: "pkg-a", dependencies: ["ghost"] })),
         }),
       /isn't in the imported folder/,
     );
   });
   test("a cycle returns both packages", () => {
     const result = resolvePackageSources({
-      a: source(manifest({ name: "a", dependencies: ["b"] })),
-      b: source(manifest({ name: "b", dependencies: ["a"] })),
+      a: source(manifest({ name: "pkg-a", dependencies: ["b"] })),
+      b: source(manifest({ name: "pkg-b", dependencies: ["a"] })),
     });
-    assert.deepEqual(result.map(({ name }) => name).sort(), ["a", "b"]);
+    assert.deepEqual(result.map(({ name }) => name).sort(), ["pkg-a", "pkg-b"]);
+  });
+  test("rejects an invalid package name with a 400", () => {
+    const run = () =>
+      resolvePackageSources({
+        evil: source(manifest({ name: "../evil" })),
+      });
+    assert.throws(run, /isn't a valid package name/);
+    assert.throws(
+      run,
+      (error) => error instanceof HttpError && error.status === 400,
+    );
   });
 });

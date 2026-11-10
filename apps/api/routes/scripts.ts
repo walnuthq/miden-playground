@@ -5,12 +5,10 @@ import { createApp } from "@/lib/app";
 import {
   basicWalletDependency,
   counterAccountDependency,
+  defaultDependenciesRecords,
 } from "@/lib/default-dependencies";
-import {
-  ExampleNotFoundError,
-  importExample,
-  importScriptsFromPackageSources,
-} from "@/lib/import";
+import { badRequest, errorResponse, notFound } from "@/lib/errors";
+import { importExample, importScriptsFromPackageSources } from "@/lib/import";
 import { exportFiles } from "@/lib/package-files";
 import { toPackageType } from "@/lib/package-type";
 import { templates } from "@/lib/templates";
@@ -24,8 +22,13 @@ import type {
   ScriptExample,
   ScriptFiles,
 } from "@/lib/types";
-import { upstreamErrorResponse } from "@/lib/upstream";
 import { compilePackage, createPackage, scriptFiles } from "@/lib/utils";
+import { isValidUUIDv4 } from "@/lib/uuid";
+import {
+  isPackageSource,
+  isStringArray,
+  isValidPackageName,
+} from "@/lib/validation";
 
 type CreateScriptRequestBody = {
   name: string;
@@ -75,16 +78,34 @@ type ImportScriptsResponse = {
   packages: CompiledPackage[];
 };
 
+const packageId = (id: string) => {
+  if (!isValidUUIDv4(id)) {
+    throw notFound("Error: Package not found.");
+  }
+  return id;
+};
+
+const invalidBody = () => badRequest("Error: Invalid request body.");
+
 const scripts = createApp()
   .use(dbMiddleware)
   .post("/", async (c) => {
     try {
-      const { name, type, example } =
-        await c.req.json<CreateScriptRequestBody>();
+      const { name, type, example } = await c.req
+        .json<CreateScriptRequestBody>()
+        .catch(() => {
+          throw invalidBody();
+        });
       // A web app loaded before the rename can still send "tx-script".
       const packageType = toPackageType(type);
       if (!packageType) {
         return c.text(`Error: Invalid script type ${type}.`, 400);
+      }
+      if (!isValidPackageName(name)) {
+        throw badRequest("Error: Invalid script name.");
+      }
+      if (!Object.hasOwn(scriptsDependencies, example)) {
+        throw badRequest("Error: Invalid script example.");
       }
       const actualType =
         packageType === "authentication-component"
@@ -106,16 +127,22 @@ const scripts = createApp()
         },
       });
     } catch (error) {
-      console.error(error);
-      const { message } = error as { message: string };
-      return c.text(message, 500);
+      return errorResponse(c, error);
     }
   })
   .post("/import", async (c) => {
     try {
-      const { packageSources } = await c.req.json<ImportScriptsRequestBody>();
-      if (!packageSources) {
-        throw new Error("Error: Invalid request body.");
+      const { packageSources } = await c.req
+        .json<ImportScriptsRequestBody>()
+        .catch(() => {
+          throw invalidBody();
+        });
+      if (
+        typeof packageSources !== "object" ||
+        packageSources === null ||
+        !Object.values(packageSources).every(isPackageSource)
+      ) {
+        throw invalidBody();
       }
       const packages = await importScriptsFromPackageSources(
         packageSources,
@@ -123,9 +150,7 @@ const scripts = createApp()
       );
       return c.json<ImportScriptsResponse>({ packages });
     } catch (error) {
-      console.error(error);
-      const { message } = error as { message: string };
-      return upstreamErrorResponse(error) ?? c.text(message, 500);
+      return errorResponse(c, error);
     }
   })
   .post("/examples/:exampleId", async (c) => {
@@ -136,20 +161,15 @@ const scripts = createApp()
       );
       return c.json<ImportScriptsResponse>({ packages });
     } catch (error) {
-      console.error(error);
-      const { message } = error as { message: string };
-      if (error instanceof ExampleNotFoundError) {
-        return c.text(message, 404);
-      }
-      return upstreamErrorResponse(error) ?? c.text(message, 500);
+      return errorResponse(c, error);
     }
   })
   .get("/:id", async (c) => {
     try {
-      const id = c.req.param("id");
+      const id = packageId(c.req.param("id"));
       const dbPackage = await getPackage(id);
       if (!dbPackage) {
-        throw new Error("Error: Package not found.");
+        throw notFound("Error: Package not found.");
       }
       const exports = dbPackage.exports as Export[];
       return c.json<GetScriptResponse>({
@@ -165,19 +185,30 @@ const scripts = createApp()
         },
       });
     } catch (error) {
-      console.error(error);
-      const { message } = error as { message: string };
-      return c.text(message, 500);
+      return errorResponse(c, error);
     }
   })
   .patch("/:id", async (c) => {
     try {
-      const id = c.req.param("id");
-      const { files, dependencies } =
-        await c.req.json<CompileScriptRequestBody>();
+      const id = packageId(c.req.param("id"));
+      const { files, dependencies } = await c.req
+        .json<CompileScriptRequestBody>()
+        .catch(() => {
+          throw invalidBody();
+        });
       const source = files?.["src/lib.rs"];
-      if (source === undefined) {
-        throw new Error("Error: Invalid request body.");
+      if (typeof source !== "string") {
+        throw invalidBody();
+      }
+      if (
+        !isStringArray(dependencies) ||
+        !dependencies.every(
+          (dependency) =>
+            isValidUUIDv4(dependency) ||
+            Object.hasOwn(defaultDependenciesRecords, dependency),
+        )
+      ) {
+        throw badRequest("Error: Invalid dependencies.");
       }
       const compiledPackage = await compilePackage({
         id,
@@ -187,28 +218,24 @@ const scripts = createApp()
       });
       return c.json<CompileScriptResponse>({ package: compiledPackage });
     } catch (error) {
-      console.error(error);
-      const { message } = error as { message: string };
-      return upstreamErrorResponse(error) ?? c.text(message, 500);
+      return errorResponse(c, error);
     }
   })
   .delete("/:id", async (c) => {
     try {
-      const id = c.req.param("id");
+      const id = packageId(c.req.param("id"));
       await deletePackage(id);
       return c.json<{ package: { id: string } }>({ package: { id } });
     } catch (error) {
-      console.error(error);
-      const { message } = error as { message: string };
-      return c.text(message, 500);
+      return errorResponse(c, error);
     }
   })
   .get("/:id/export", async (c) => {
     try {
-      const id = c.req.param("id");
+      const id = packageId(c.req.param("id"));
       const dbPackage = await getPackage(id);
       if (!dbPackage) {
-        throw new Error("Error: Package not found");
+        throw notFound("Error: Package not found.");
       }
       const dependenciesPackages =
         dbPackage.dependencies.length > 0
@@ -233,8 +260,7 @@ const scripts = createApp()
         "Content-Disposition": `attachment; filename="${dbPackage.name}.zip"`,
       });
     } catch (error) {
-      console.error(error);
-      return c.text("Error exporting script", 500);
+      return errorResponse(c, error);
     }
   });
 
