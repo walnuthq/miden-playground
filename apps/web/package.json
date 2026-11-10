@@ -63,7 +63,7 @@
     "@workspace/typescript-config": "workspace:*",
     "tailwindcss": "4.3.5",
     "typescript": "7.0.2",
-    "vite": "8.3.6",
+    "vite": "8.3.7",
     "vite-plugin-node-polyfills": "0.28.0",
     "wrangler": "4.158.0"
   }
