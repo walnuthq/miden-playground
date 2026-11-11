@@ -13,27 +13,42 @@ import {
   type Multisig,
   type Proposal,
 } from "@openzeppelin/miden-multisig-client";
-import { useState } from "react";
 import useGlobalContext from "@/components/global-context/hook";
 import useAccounts from "@/hooks/use-accounts";
 import { useMidenWallet } from "@/hooks/use-miden-wallet";
 import useNetwork from "@/hooks/use-network";
 import { GUARDIAN_ENDPOINT_URL } from "@/lib/constants";
 import createMidenClient from "@/lib/miden-client";
+import {
+  cachedMultisig,
+  cacheMultisig,
+  multisigScope,
+} from "@/lib/multisig-cache";
 import { initMultisigClient } from "@/lib/multisig-client";
 import type { Account } from "@/lib/types/account";
 import { wasmAccountToAccount } from "@/lib/web-client";
 
 const useMultisig = () => {
-  const [multisig, setMultisig] = useState<Multisig | null>(null);
   const { networkId } = useNetwork();
   const { wallet } = useWallet();
   const { session: midenWalletSession, signBytes } = useMidenWallet(
     (wallet?.adapter as MessageSignerWalletAdapter) ?? null,
   );
-  const { dispatch } = useGlobalContext();
+  const { workspaceRun, dispatch } = useGlobalContext();
   const { client } = useMiden();
   const { lastSyncTime } = useSyncState();
+  const { commitment, scheme } = midenWalletSession;
+  const scopeKey = `${workspaceRun}:${networkId}:${commitment}:${scheme}`;
+  const createScopedClient = async () => {
+    const midenClient = await createMidenClient(networkId);
+    const result = await initMultisigClient({
+      midenClient,
+      networkId,
+      guardianEndpoint: GUARDIAN_ENDPOINT_URL,
+      scheme: scheme ?? undefined,
+    });
+    return { midenClient, result };
+  };
   const { accounts, updateAccount } = useAccounts();
   // Pauses syncing while `run` talks to Miden Guardian and the wallet, which
   // can fail or be rejected at any step.
@@ -55,22 +70,15 @@ const useMultisig = () => {
     if (!client) {
       throw new Error("MidenClient not ready");
     }
-    if (!midenWalletSession.commitment || !midenWalletSession.scheme) {
+    if (!commitment || !scheme) {
       return;
     }
-    const { commitment, scheme } = midenWalletSession;
     return whileSubmitting(async () => {
-      const midenClient = await createMidenClient(networkId);
       const {
         client: multisigClient,
         guardianCommitment,
         guardianPublicKey,
-      } = await initMultisigClient({
-        midenClient,
-        networkId,
-        guardianEndpoint: GUARDIAN_ENDPOINT_URL,
-        scheme,
-      });
+      } = await multisigScope(scopeKey, createScopedClient);
       const signer = new MidenWalletSigner({ signBytes }, commitment, scheme);
       const newMultisig = await multisigClient.create(
         {
@@ -83,7 +91,7 @@ const useMultisig = () => {
         signer,
       );
       await newMultisig.registerOnGuardian();
-      setMultisig(newMultisig);
+      cacheMultisig(scopeKey, newMultisig.accountId, newMultisig);
       await newMultisig.syncState();
       if (!newMultisig.account) {
         return;
@@ -116,25 +124,23 @@ const useMultisig = () => {
     if (!client) {
       throw new Error("MidenClient not ready");
     }
-    if (!midenWalletSession.commitment || !midenWalletSession.scheme) {
+    if (!commitment || !scheme) {
       return;
     }
-    if (multisig) {
-      return multisig;
+    const cached = cachedMultisig(scopeKey, accountId);
+    if (cached) {
+      return cached;
     }
-    const { commitment, scheme } = midenWalletSession;
     const { multisigClient, signer } = await whileSubmitting(async () => {
-      const midenClient = await createMidenClient(networkId);
-      const { client: multisigClient } = await initMultisigClient({
-        midenClient,
-        networkId,
-        guardianEndpoint: GUARDIAN_ENDPOINT_URL,
-      });
+      const { client: multisigClient } = await multisigScope(
+        scopeKey,
+        createScopedClient,
+      );
       const signer = new MidenWalletSigner({ signBytes }, commitment, scheme);
       return { multisigClient, signer };
     });
     const loadedMultisig = await multisigClient.load(accountId, signer);
-    setMultisig(loadedMultisig);
+    cacheMultisig(scopeKey, accountId, loadedMultisig);
     return loadedMultisig;
   };
   const isMultisigSigner = ({ multisig }: Account) => {
