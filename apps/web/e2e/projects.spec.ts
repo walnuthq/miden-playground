@@ -309,6 +309,11 @@ test("save, open and delete projects", async ({ page }) => {
   });
 });
 
+// The node's submit method, as named in the SDK's WASM (NodeService/SubmitProvenTx).
+// The `$` keeps it from matching SubmitProvenTxBatch.
+const SUBMIT_ROUTE =
+  /rpc\.testnet\.miden\.io\/miden\.node\.v1\.NodeService\/SubmitProvenTx$/;
+
 // Leaving an example while its account is being deployed abandons the deploy,
 // which must not report to, or add its account to, the next workspace. The
 // proof is held back so the deploy is mid-transaction during the switch.
@@ -345,19 +350,16 @@ test("a deploy still running doesn't reach the next workspace", async ({
   const submitAnswered = new Promise<void>((resolve) => {
     submitDone = resolve;
   });
-  await page.route(
-    /rpc\.testnet\.miden\.io\/miden\.node\.v1\.NodeService\/SubmitProvenTransaction/,
-    async (route) => {
-      submitted = true;
-      try {
-        await route.fulfill({ response: await route.fetch() });
-      } catch {
-        // The page abandoned the request meanwhile.
-      } finally {
-        submitDone();
-      }
-    },
-  );
+  await page.route(SUBMIT_ROUTE, async (route) => {
+    submitted = true;
+    try {
+      await route.fulfill({ response: await route.fetch() });
+    } catch {
+      // The page abandoned the request meanwhile.
+    } finally {
+      submitDone();
+    }
+  });
   await startExample(page);
   await provingStarted;
 
@@ -370,7 +372,7 @@ test("a deploy still running doesn't reach the next workspace", async ({
   });
   // The proof is held for the whole switch, which outlasts the SDK's request
   // deadline: the deploy fails ("Request timed out") and no
-  // SubmitProvenTransaction request follows (observed). If the timing changes
+  // SubmitProvenTx request follows (observed). If the timing changes
   // and a submit does happen, the test waits for the node's answer before
   // asserting, so the assertions never run before a late write could land.
   // The settles let the page render whatever the abandoned deploy wrote.
@@ -387,4 +389,161 @@ test("a deploy still running doesn't reach the next workspace", async ({
   await expect(
     page.getByText(/Counter Contract (deployed|couldn't)/),
   ).toHaveCount(0);
+});
+
+// The tutorial snapshot saved when leaving it: its app state and its store,
+// read from the saved projects' database (tutorials have no `meta` entry).
+const savedTutorial = (page: Page, id: string) =>
+  page.evaluate(
+    (id) =>
+      new Promise<{ state: string; store: string }>((resolve, reject) => {
+        const open = indexedDB.open("PlaygroundProjects");
+        open.onerror = () => reject(open.error);
+        open.onsuccess = () => {
+          const database = open.result;
+          const get = database
+            .transaction("projects")
+            .objectStore("projects")
+            .get(`tutorial:${id}`);
+          get.onsuccess = () => {
+            database.close();
+            if (!get.result) {
+              reject(new Error(`No saved tutorial "${id}".`));
+              return;
+            }
+            resolve({ state: get.result.state, store: get.result.store });
+          };
+        };
+      }),
+    id,
+  );
+
+// How long the client waits for the prover and for the node's submit before
+// giving up (local, testnet, 2026-11-11: about 10.0 s and 10.2 s).
+const PROVER_DEADLINE_MS = 10_000;
+const SUBMIT_DEADLINE_MS = 10_200;
+// Mirrors TRANSACTION_COMMIT_TIMEOUT in apps/web/hooks/use-fund-account.ts.
+const TRANSACTION_COMMIT_TIMEOUT_MS = 60_000;
+
+// A deploy that succeeds after the user left the example must not write into
+// the next workspace either: the Miden client is the same instance across a
+// switch, so a transaction submitted after the next store was imported could
+// land in that store. The switch takes about 10.4 s, as long as either
+// request's deadline, so neither can be held through it alone. Hold C: the
+// switch starts when the prover is called, the prover is held for its
+// deadline minus 3 s, then the submit is held until the tutorial's `Wallet A`
+// row is visible (its store is imported), or for the submit deadline minus
+// 3 s, then let through. The test asserts the submit was answered after the
+// import, then that nothing of the deploy shows up in the tutorial or in its
+// saved store.
+test("a deploy that succeeds after leaving its example doesn't reach the next workspace", async ({
+  page,
+}) => {
+  logBrowserErrors(page);
+  // Registered from the start: the warning comes 1-2 s after the node's answer.
+  let deployAbandoned = false;
+  page.on("console", (message) => {
+    if (message.text().includes("deploy abandoned")) {
+      deployAbandoned = true;
+    }
+  });
+  let proverFired = () => {};
+  const proverStarted = new Promise<void>((resolve) => {
+    proverFired = resolve;
+  });
+  let imported = false;
+  let importedBeforeSubmit = false;
+  let submitted = false;
+  // The prover and the node are called through the page (continue, not fetch:
+  // a request replayed from Node is refused by their load balancer).
+  await page.route(/prover/, async (route) => {
+    proverFired();
+    await new Promise((resolve) =>
+      setTimeout(resolve, PROVER_DEADLINE_MS - 3_000),
+    );
+    await route.continue();
+  });
+  await page.route(SUBMIT_ROUTE, async (route) => {
+    submitted = true;
+    const until = Date.now() + SUBMIT_DEADLINE_MS - 3_000;
+    while (!imported && Date.now() < until) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+    importedBeforeSubmit = imported;
+    await route.continue();
+  });
+  const submitAnswer = page
+    .waitForResponse((response) => SUBMIT_ROUTE.test(response.url()), {
+      timeout: 120_000,
+    })
+    .then(
+      (response) => response.status(),
+      () => null,
+    );
+  await startExample(page);
+  await proverStarted;
+
+  await switcher(page).click();
+  await page.getByRole("menuitem", { name: "Tutorials" }).click();
+  await page.getByRole("menuitem", { name: /^2\. / }).click();
+  await expect(switcher(page)).toContainText(tutorial2, { timeout: 60_000 });
+  await expect(page.getByRole("row", { name: /Wallet A/ })).toBeVisible({
+    timeout: 60_000,
+  });
+  imported = true;
+  expect(await submitAnswer, "the node never answered the submit").toBe(200);
+  expect(
+    submitted,
+    "the deploy never submitted: the timings changed, see the comment above",
+  ).toBe(true);
+  expect(
+    importedBeforeSubmit,
+    "the switch outlasted both holds: re-measure, see the comment above",
+  ).toBe(true);
+  // Observed: applying the answered transaction fails in the new store (its
+  // account isn't there), and the deploy ends by logging "deploy abandoned".
+  // The wait counts from the answer and covers the app's 60 s commit wait
+  // plus a margin. If the warning stops appearing, the test fails here:
+  // someone has to look at the new behaviour.
+  await expect
+    .poll(() => deployAbandoned, {
+      message: "the late deploy never ended with the abandoned warning",
+      timeout: TRANSACTION_COMMIT_TIMEOUT_MS + 15_000,
+    })
+    .toBe(true);
+  // The settle lets the page render whatever the deploy wrote.
+  await page.waitForTimeout(5_000);
+  await expect(page.getByRole("row", { name: /Counter Contract/ })).toHaveCount(
+    0,
+  );
+  await expect(
+    page.getByText(/Counter Contract (deployed|couldn't)/),
+  ).toHaveCount(0);
+
+  // Leaving the tutorial saves its snapshot, whose store lists accounts by
+  // id (hex, as the app state's accounts do): none may be missing from the
+  // state, which the deploy's account would be.
+  await switcher(page).click();
+  await page.getByRole("menuitem", { name: "New Testnet sandbox" }).click();
+  await expect(switcher(page)).toContainText("Testnet sandbox", {
+    timeout: TRANSACTION_TIMEOUT,
+  });
+  await expect(networkBadge(page)).toContainText(/#\d+/, {
+    timeout: TRANSACTION_TIMEOUT,
+  });
+  const { state, store } = await savedTutorial(
+    page,
+    "transfer-assets-between-wallets",
+  );
+  const normalize = (id: string) => id.toLowerCase().replace(/^0x/, "");
+  const stateIds = new Set(
+    (JSON.parse(state) as { accounts: { id: string }[] }).accounts.map(
+      (account) => normalize(account.id),
+    ),
+  );
+  const storeIds = (
+    JSON.parse(store) as { latestAccountHeaders: { id: string }[] }
+  ).latestAccountHeaders.map((account) => normalize(account.id));
+  expect(storeIds.length).toBeGreaterThan(0);
+  expect(storeIds.filter((id) => !stateIds.has(id))).toEqual([]);
 });
