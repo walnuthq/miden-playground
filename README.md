@@ -15,7 +15,7 @@ Miden Playground is brought to you by [Walnut](https://www.walnut.dev).
 The app requires the following dependencies:
 
 - [NodeJS](https://nodejs.org/) >= 26
-- [pnpm](https://pnpm.io/) >= 11
+- [pnpm](https://pnpm.io/) >= 12
 
 ## 👩‍💻 Local Development
 
@@ -66,13 +66,11 @@ docker compose -f apps/api/docker-compose.yml up -d
 pnpm --filter miden-playground-api db:migrate
 ```
 
-Build Rust helpers:
-
-```sh
-pnpm --filter miden-playground-api build:rust
-```
-
-Install Miden Rust compiler using this guide: https://0xmiden.github.io/compiler/usage/cargo-miden.html
+Scripts are compiled by a separate service, api-compile (from
+[miden-source-code-verification](https://github.com/walnuthq/miden-source-code-verification)),
+which the API reaches at `API_COMPILE_URL` (`http://localhost:8080` by
+default). Without it, the examples still launch (their packages are
+precompiled), but compiling a script fails.
 
 ### Local node setup
 
