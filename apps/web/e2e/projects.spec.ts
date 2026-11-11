@@ -314,6 +314,13 @@ test("save, open and delete projects", async ({ page }) => {
 const SUBMIT_ROUTE =
   /rpc\.testnet\.miden\.io\/miden\.node\.v1\.NodeService\/SubmitProvenTx$/;
 
+// How long the client waits for the prover and for the node's submit before
+// giving up (local, testnet, 2026-11-11: about 10.0 s and 10.2 s).
+const PROVER_DEADLINE_MS = 10_000;
+const SUBMIT_DEADLINE_MS = 10_200;
+// Mirrors TRANSACTION_COMMIT_TIMEOUT in apps/web/hooks/use-fund-account.ts.
+const TRANSACTION_COMMIT_TIMEOUT_MS = 60_000;
+
 // Leaving an example while its account is being deployed abandons the deploy,
 // which must not report to, or add its account to, the next workspace. The
 // proof is held back so the deploy is mid-transaction during the switch.
@@ -321,6 +328,14 @@ test("a deploy still running doesn't reach the next workspace", async ({
   page,
 }) => {
   logBrowserErrors(page);
+  // Registered from the start: the warning comes during the switch, before
+  // the proof is released.
+  let deployAbandoned = false;
+  page.on("console", (message) => {
+    if (message.text().includes("deploy abandoned")) {
+      deployAbandoned = true;
+    }
+  });
   let release = () => {};
   const held = new Promise<void>((resolve) => {
     release = resolve;
@@ -329,35 +344,22 @@ test("a deploy still running doesn't reach the next workspace", async ({
   const provingStarted = new Promise<void>((resolve) => {
     proving = resolve;
   });
-  let answered = () => {};
-  const proverAnswered = new Promise<void>((resolve) => {
-    answered = resolve;
-  });
   await page.route(/prover/, async (route) => {
     proving();
     await held;
     try {
-      // Fetched here, not continued, so the test knows when it was answered.
-      await route.fulfill({ response: await route.fetch() });
+      await route.continue();
     } catch {
       // The page abandoned the request meanwhile.
-    } finally {
-      answered();
     }
   });
   let submitted = false;
-  let submitDone = () => {};
-  const submitAnswered = new Promise<void>((resolve) => {
-    submitDone = resolve;
-  });
   await page.route(SUBMIT_ROUTE, async (route) => {
     submitted = true;
     try {
-      await route.fulfill({ response: await route.fetch() });
+      await route.continue();
     } catch {
       // The page abandoned the request meanwhile.
-    } finally {
-      submitDone();
     }
   });
   await startExample(page);
@@ -370,19 +372,24 @@ test("a deploy still running doesn't reach the next workspace", async ({
   await expect(page.getByRole("row", { name: /Wallet A/ })).toBeVisible({
     timeout: 60_000,
   });
-  // The proof is held for the whole switch, which outlasts the SDK's request
-  // deadline: the deploy fails ("Request timed out") and no
-  // SubmitProvenTx request follows (observed). If the timing changes
-  // and a submit does happen, the test waits for the node's answer before
-  // asserting, so the assertions never run before a late write could land.
-  // The settles let the page render whatever the abandoned deploy wrote.
+  // The prover is held for the whole switch (about 10.4 s, measured
+  // 2026-11-11), which outlasts its deadline of about 10 s: the deploy ends
+  // with "deploy abandoned" and never submits. The test waits on that warning
+  // and fails if a submit gets through, because then it no longer covers the
+  // failing path (the next test covers the succeeding one).
   release();
-  await proverAnswered;
+  await expect
+    .poll(() => deployAbandoned, {
+      message: "the deploy never ended with the abandoned warning",
+      timeout: PROVER_DEADLINE_MS + 15_000,
+    })
+    .toBe(true);
+  expect(
+    submitted,
+    "a submit got through: the deploy no longer fails during the switch, see the comment above",
+  ).toBe(false);
+  // The settle lets the page render whatever the abandoned deploy wrote.
   await page.waitForTimeout(5_000);
-  if (submitted) {
-    await submitAnswered;
-    await page.waitForTimeout(5_000);
-  }
   await expect(page.getByRole("row", { name: /Counter Contract/ })).toHaveCount(
     0,
   );
@@ -417,13 +424,6 @@ const savedTutorial = (page: Page, id: string) =>
       }),
     id,
   );
-
-// How long the client waits for the prover and for the node's submit before
-// giving up (local, testnet, 2026-11-11: about 10.0 s and 10.2 s).
-const PROVER_DEADLINE_MS = 10_000;
-const SUBMIT_DEADLINE_MS = 10_200;
-// Mirrors TRANSACTION_COMMIT_TIMEOUT in apps/web/hooks/use-fund-account.ts.
-const TRANSACTION_COMMIT_TIMEOUT_MS = 60_000;
 
 // A deploy that succeeds after the user left the example must not write into
 // the next workspace either: the Miden client is the same instance across a
