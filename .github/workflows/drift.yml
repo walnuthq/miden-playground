@@ -1,0 +1,51 @@
+name: Drift checks
+
+# Two generated files follow something outside this repository: the project
+# template's Cargo.lock (the crates api-compile warmed its cache with) and the
+# MASM vocabulary (the assembler's sources). Neither check can be required on
+# pull requests: they depend on api-compile and GitHub's raw files being up.
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  pull_request:
+    branches: [main]
+    paths:
+      - "apps/api/templates/project-template/Cargo.lock"
+      - "apps/web/lib/masm/**"
+      - ".github/workflows/drift.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  drift:
+    name: Template lockfile and MASM vocabulary
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 26
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: MASM vocabulary
+        run: pnpm --filter miden-playground-web masm:check
+
+      # Production's api-compile: the lockfile its image warmed is the one
+      # that matters. The container sleeps when idle, so its first answer can
+      # be slow.
+      - name: Template lockfile
+        if: always()
+        run: pnpm --filter miden-playground-api lockfile:check
+        env:
+          API_COMPILE_URL: https://miden-source-code-verification-api-compile.walnut.dev
