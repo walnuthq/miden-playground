@@ -309,6 +309,11 @@ test("save, open and delete projects", async ({ page }) => {
   });
 });
 
+// The node's submit method, as named in the SDK's WASM (NodeService/SubmitProvenTx).
+// The `$` keeps it from matching SubmitProvenTxBatch.
+const SUBMIT_ROUTE =
+  /rpc\.testnet\.miden\.io\/miden\.node\.v1\.NodeService\/SubmitProvenTx$/;
+
 // Leaving an example while its account is being deployed abandons the deploy,
 // which must not report to, or add its account to, the next workspace. The
 // proof is held back so the deploy is mid-transaction during the switch.
@@ -345,19 +350,16 @@ test("a deploy still running doesn't reach the next workspace", async ({
   const submitAnswered = new Promise<void>((resolve) => {
     submitDone = resolve;
   });
-  await page.route(
-    /rpc\.testnet\.miden\.io\/miden\.node\.v1\.NodeService\/SubmitProvenTransaction/,
-    async (route) => {
-      submitted = true;
-      try {
-        await route.fulfill({ response: await route.fetch() });
-      } catch {
-        // The page abandoned the request meanwhile.
-      } finally {
-        submitDone();
-      }
-    },
-  );
+  await page.route(SUBMIT_ROUTE, async (route) => {
+    submitted = true;
+    try {
+      await route.fulfill({ response: await route.fetch() });
+    } catch {
+      // The page abandoned the request meanwhile.
+    } finally {
+      submitDone();
+    }
+  });
   await startExample(page);
   await provingStarted;
 
@@ -370,7 +372,7 @@ test("a deploy still running doesn't reach the next workspace", async ({
   });
   // The proof is held for the whole switch, which outlasts the SDK's request
   // deadline: the deploy fails ("Request timed out") and no
-  // SubmitProvenTransaction request follows (observed). If the timing changes
+  // SubmitProvenTx request follows (observed). If the timing changes
   // and a submit does happen, the test waits for the node's answer before
   // asserting, so the assertions never run before a late write could land.
   // The settles let the page render whatever the abandoned deploy wrote.
