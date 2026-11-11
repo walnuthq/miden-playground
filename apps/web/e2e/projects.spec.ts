@@ -1,17 +1,15 @@
 import { expect, type Page, test } from "@playwright/test";
 import { launchExample, startExample } from "./example";
+import {
+  clickProjectsItem,
+  closeMenu,
+  networkBadge,
+  openProjectsMenu,
+  switcher,
+} from "./projects-menu";
 import { logBrowserErrors, TRANSACTION_TIMEOUT } from "./tutorial";
 
-// The sidebar's project switcher: its button names the workspace (the saved
-// project's name, the example's title, or "<Network> sandbox").
-const switcher = (page: Page) =>
-  page
-    .locator('[data-sidebar="sidebar"]')
-    .getByRole("button", { name: /Miden Playground/ });
-
 const tutorial2 = "Transfer assets between wallets";
-
-const networkBadge = (page: Page) => page.locator('header [data-slot="badge"]');
 
 // Waits for the app to be live on `network` after a switch to it: the switch
 // replaces the page with the app shell, whose badge names the new network
@@ -33,36 +31,13 @@ const expectNetworkSwitch = async (
   });
 };
 
-// Opens the Projects submenu and returns it (the submenu is the last menu
-// opened, portaled after the root one).
-const openProjectsMenu = async (page: Page) => {
-  // The app shell's switcher, shown while the client initializes, has no
-  // menu: wait for the live badge (a block height) first.
-  await expect(networkBadge(page)).toContainText(/#\d+/, {
-    timeout: TRANSACTION_TIMEOUT,
-  });
-  await switcher(page).click();
-  await page.getByRole("menuitem", { name: "Projects" }).click();
-  // Both open: tutorials have no Save item to wait for.
-  await expect(page.getByRole("menu")).toHaveCount(2);
-  const menu = page.getByRole("menu").last();
-  return menu;
-};
-
-const closeMenu = async (page: Page) => {
-  await page.keyboard.press("Escape");
-  await page.keyboard.press("Escape");
-  await expect(page.getByRole("menu")).toHaveCount(0);
-};
-
 // Saves the workspace under `name` through `item` ("Save" with no active
 // project, or "Save as…"), checking the name the dialog proposes first.
 const saveProjectAs = async (
   page: Page,
   { item, proposed, name }: { item: string; proposed: string; name: string },
 ) => {
-  const menu = await openProjectsMenu(page);
-  await menu.getByRole("menuitem", { name: item, exact: true }).click();
+  await clickProjectsItem(page, item);
   const dialog = page.getByRole("dialog", { name: /^Save Project/ });
   const input = dialog.getByLabel("Name");
   await expect(input).toHaveValue(proposed);
@@ -74,10 +49,7 @@ const saveProjectAs = async (
 };
 
 // Opens a saved project from the submenu, whose items read "<name> <network>".
-const openProject = async (page: Page, item: string) => {
-  const menu = await openProjectsMenu(page);
-  await menu.getByRole("menuitem", { name: item, exact: true }).click();
-};
+const openProject = (page: Page, item: string) => clickProjectsItem(page, item);
 
 // Stamps a saved project's store with a newer client version, which the
 // running client then refuses to import (as after a rollback).
@@ -155,8 +127,7 @@ test("save, open and delete projects", async ({ page }) => {
       name: "My counter copy",
     });
     // Save, with an active project, saves without asking.
-    const menu = await openProjectsMenu(page);
-    await menu.getByRole("menuitem", { name: "Save", exact: true }).click();
+    await clickProjectsItem(page, "Save");
     await expect(page.getByText("Project saved.").last()).toBeVisible();
     await expect(page.getByRole("dialog")).toHaveCount(0);
     await expect(page.getByText("The project couldn't be saved.")).toHaveCount(
@@ -225,8 +196,7 @@ test("save, open and delete projects", async ({ page }) => {
   });
 
   await test.step("delete the active project", async () => {
-    const menu = await openProjectsMenu(page);
-    await menu.getByRole("menuitem", { name: "Delete project" }).click();
+    await clickProjectsItem(page, "Delete project");
     await page
       .getByRole("alertdialog")
       .getByRole("button", { name: "Delete project" })
