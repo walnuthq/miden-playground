@@ -340,6 +340,24 @@ test("a deploy still running doesn't reach the next workspace", async ({
       answered();
     }
   });
+  let submitted = false;
+  let submitDone = () => {};
+  const submitAnswered = new Promise<void>((resolve) => {
+    submitDone = resolve;
+  });
+  await page.route(
+    /rpc\.testnet\.miden\.io\/miden\.node\.v1\.NodeService\/SubmitProvenTransaction/,
+    async (route) => {
+      submitted = true;
+      try {
+        await route.fulfill({ response: await route.fetch() });
+      } catch {
+        // The page abandoned the request meanwhile.
+      } finally {
+        submitDone();
+      }
+    },
+  );
   await startExample(page);
   await provingStarted;
 
@@ -350,17 +368,19 @@ test("a deploy still running doesn't reach the next workspace", async ({
   await expect(page.getByRole("row", { name: /Wallet A/ })).toBeVisible({
     timeout: 60_000,
   });
-  // The held proof request is the last step of the deploy the test can name.
-  // The proof is held for the whole switch, longer than the client's request
-  // deadline, so by the time it is answered the deploy has already failed with
-  // "Request timed out" and no SubmitProvenTransaction request follows (logged
-  // on the node's RPC host, rpc.testnet.miden.io, in a run: only syncs and
-  // account reads came after the answer). That is why a short settle is enough:
-  // it lets the page render whatever the abandoned deploy would have written
-  // before the assertions below.
+  // The proof is held for the whole switch, which outlasts the SDK's request
+  // deadline: the deploy fails ("Request timed out") and no
+  // SubmitProvenTransaction request follows (observed). If the timing changes
+  // and a submit does happen, the test waits for the node's answer before
+  // asserting, so the assertions never run before a late write could land.
+  // The settles let the page render whatever the abandoned deploy wrote.
   release();
   await proverAnswered;
   await page.waitForTimeout(5_000);
+  if (submitted) {
+    await submitAnswered;
+    await page.waitForTimeout(5_000);
+  }
   await expect(page.getByRole("row", { name: /Counter Contract/ })).toHaveCount(
     0,
   );

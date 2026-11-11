@@ -299,11 +299,11 @@ test("a failed example deploy doesn't retry by itself", async ({ page }) => {
   await startExample(page);
   const failed = page.getByText("Counter Contract couldn't be deployed.");
   await expect(failed.first()).toBeVisible({ timeout: TRANSACTION_TIMEOUT });
-  // Waits for a retry that must not happen. Nothing bounds it: the deploy
-  // effect (network-badge.tsx) re-runs on any render, not on a timer or a sync
-  // tick, so no delay is derived from the app. This is longer than an attempt
-  // takes (faucet request, then proving), and an attempt shows as a request to
-  // the prover, counted above.
+  // Waits for a retry that must not happen. A retry would come from the
+  // deploy effect in components/lib/network-badge.tsx re-running past its
+  // `deployingWorkspaceRun` guard; the likeliest trigger is the sync loop,
+  // which ticks every 2.5 s, so 45 s covers about 18 ticks. Not a hard bound:
+  // nothing in the app bounds a retry.
   await page.waitForTimeout(45_000);
   console.info("Deploy attempts:", attempts);
   expect(attempts).toBe(1);
