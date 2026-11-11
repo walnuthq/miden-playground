@@ -154,7 +154,11 @@ test("a second switch during an import gets its own store", async ({
   await openProject(page, "Empty");
   await page.waitForFunction(() => !!window.releaseStoreClear);
   await openProject(page, "With account");
-  // The second one is queued once the menu's action is done.
+  // The second one is queued once the menu's action is done: it reads the
+  // project from IndexedDB, then sets the app's `nextState`. Neither shows in
+  // the page (the menu closes before, the switcher's label and the Save item
+  // already reflect the first switch), so there is no condition to wait on
+  // without a test hook in the app; this is the time that read takes.
   await page.waitForTimeout(1_000);
   await releaseStoreClear(page);
 
@@ -199,6 +203,9 @@ test("saving during a switch leaves the project as it was", async ({
   const save = menu.getByRole("menuitem", { name: "Save", exact: true });
   await expect(save).toHaveAttribute("aria-disabled", "true");
   await save.click({ force: true });
+  // Waits for a save that must not happen: nothing in the page reports a
+  // refused save (it is dropped silently), so there is no condition to wait
+  // on. Longer than a save of a sandbox store takes.
   await page.waitForTimeout(2_000);
   const during = await savedStore(page, "Mine");
   await closeMenu(page).catch(() => {});
@@ -268,7 +275,9 @@ test("clicking the active project keeps unsaved work", async ({ page }) => {
 
   await openProject(page, "Mine");
   await expect(page).toHaveURL(/\/accounts$/);
-  // Longer than a reload of the project takes.
+  // Waits for a re-import that must not happen. The URL assertion above
+  // already waited for navigation, and the header has no idle indicator to
+  // wait on instead, so this is longer than a reload of the project takes.
   await page.waitForTimeout(5_000);
   expect(imports).toEqual([]);
   await expect(switcher(page)).toContainText("Mine");
@@ -290,7 +299,11 @@ test("a failed example deploy doesn't retry by itself", async ({ page }) => {
   await startExample(page);
   const failed = page.getByText("Counter Contract couldn't be deployed.");
   await expect(failed.first()).toBeVisible({ timeout: TRANSACTION_TIMEOUT });
-  // Longer than an attempt takes.
+  // Waits for a retry that must not happen. A retry would come from the
+  // deploy effect in components/lib/network-badge.tsx re-running past its
+  // `deployingWorkspaceRun` guard; the likeliest trigger is the sync loop,
+  // which ticks every 2.5 s, so 45 s covers about 18 ticks. Not a hard bound:
+  // nothing in the app bounds a retry.
   await page.waitForTimeout(45_000);
   console.info("Deploy attempts:", attempts);
   expect(attempts).toBe(1);
