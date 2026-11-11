@@ -1,8 +1,10 @@
 import { useWallet } from "@miden-sdk/miden-wallet-adapter";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import useGlobalContext from "@/components/global-context/hook";
-import tutorials from "@/components/tutorials";
+import { loadTutorial } from "@/components/tutorials/loaders";
+import { tutorialMeta, tutorialMetas } from "@/components/tutorials/meta";
 import useAppState from "@/hooks/use-app-state";
 import useNetwork from "@/hooks/use-network";
 import useProjects from "@/hooks/use-projects";
@@ -47,6 +49,49 @@ const tutorialStarter = async (
     });
     return { scripts: [], components: [] };
   }
+};
+
+const toastLoadError = (error: unknown) => {
+  console.error("ERROR: loadTutorial", error);
+  toast.error("The tutorial couldn't be loaded.", {
+    description: error instanceof Error ? error.message : String(error),
+  });
+};
+
+// Loads a tutorial's steps (components/tutorials/loaders.ts), with a toast
+// when the chunk can't be fetched. Undefined then.
+const loadTutorialOrToast = async (id: TutorialId) => {
+  try {
+    return await loadTutorial(id);
+  } catch (error) {
+    toastLoadError(error);
+    return undefined;
+  }
+};
+
+// The active tutorial with its steps, once loaded: undefined until then, and
+// when there is none. Only the tutorial panel and the buttons in it need it,
+// the rest read `tutorialMeta` from `useTutorials`.
+export const useLoadedTutorial = () => {
+  const { tutorialId } = useGlobalContext();
+  const [loadedTutorial, setLoadedTutorial] = useState<Tutorial>();
+  useEffect(() => {
+    if (!tutorialId) {
+      return;
+    }
+    let current = true;
+    loadTutorial(tutorialId).then((tutorial) => {
+      if (current) {
+        setLoadedTutorial(tutorial);
+      }
+    }, toastLoadError);
+    return () => {
+      current = false;
+    };
+  }, [tutorialId]);
+  return tutorialId && loadedTutorial?.id === tutorialId
+    ? loadedTutorial
+    : undefined;
 };
 
 const useTutorials = () => {
@@ -130,17 +175,21 @@ const useTutorials = () => {
     return { resumed: savedProject !== null };
   };
   const startTutorial = async (id: string) => {
-    const tutorial = tutorials.find((tutorial) => tutorial.id === id);
-    if (!tutorial) {
+    const meta = tutorialMetas.find((meta) => meta.id === id);
+    if (!meta) {
       return;
     }
     // Already active: carry on where it is.
-    if (tutorial.id === tutorialId) {
-      navigate(tutorial.initialRoute);
+    if (meta.id === tutorialId) {
+      navigate(meta.initialRoute);
       openTutorial();
       return;
     }
     if (!(await confirmWorkspaceSwitch())) {
+      return;
+    }
+    const tutorial = await loadTutorialOrToast(meta.id);
+    if (!tutorial) {
       return;
     }
     const { resumed } = await enterTutorial(tutorial);
@@ -151,11 +200,15 @@ const useTutorials = () => {
   };
   // Drops a tutorial's saved progress and starts it over.
   const restartTutorial = async (id: string) => {
-    const tutorial = tutorials.find((tutorial) => tutorial.id === id);
-    if (!tutorial) {
+    const meta = tutorialMetas.find((meta) => meta.id === id);
+    if (!meta) {
       return;
     }
     if (!(await confirmWorkspaceSwitch())) {
+      return;
+    }
+    const tutorial = await loadTutorialOrToast(meta.id);
+    if (!tutorial) {
       return;
     }
     await enterTutorial(tutorial, { restart: true });
@@ -165,11 +218,20 @@ const useTutorials = () => {
     });
   };
   const nextTutorial = async () => {
-    const tutorial = tutorials.find(({ id }) => id === tutorialId);
+    if (!tutorialId) {
+      return;
+    }
+    const tutorial = await loadTutorialOrToast(tutorialId);
     if (!tutorial) {
       return;
     }
-    const nextTutorial = tutorials[tutorial.number] ?? defaultTutorial();
+    const nextMeta = tutorialMetas[tutorial.number];
+    const nextTutorial = nextMeta
+      ? await loadTutorialOrToast(nextMeta.id)
+      : defaultTutorial();
+    if (!nextTutorial) {
+      return;
+    }
     const { resumed } = await enterTutorial(nextTutorial, {
       completedTutorial: tutorial,
     });
@@ -218,7 +280,7 @@ const useTutorials = () => {
     tutorialOpen,
     nextTutorialStepDisabled,
     completedTutorials,
-    tutorial: tutorials.find(({ id }) => id === tutorialId),
+    tutorialMeta: tutorialId ? tutorialMeta(tutorialId) : undefined,
     isTutorial: isTutorial(tutorialId),
     // tutorialId === "create-and-fund-wallet" ||
     // tutorialId === "transfer-assets-between-wallets",

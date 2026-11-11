@@ -34,7 +34,7 @@ import {
   ProjectSwitcherButtonContent,
   projectTitle,
 } from "@/components/lib/project-switcher-view";
-import tutorials from "@/components/tutorials";
+import { tutorialMetas } from "@/components/tutorials/meta";
 import useAppState from "@/hooks/use-app-state";
 import useExamples from "@/hooks/use-examples";
 import useNetwork from "@/hooks/use-network";
@@ -56,13 +56,8 @@ const ProjectSwitcher = () => {
   const navigate = useNavigate();
   const { networkId } = useNetwork();
   const { resetState } = useAppState();
-  const {
-    tutorial,
-    tutorialId,
-    completedTutorials,
-    tutorialStatus,
-    startTutorial,
-  } = useTutorials();
+  const { tutorialId, completedTutorials, tutorialStatus, startTutorial } =
+    useTutorials();
   const { example, launchExample } = useExamples();
   const {
     projectId,
@@ -88,7 +83,7 @@ const ProjectSwitcher = () => {
   };
   const title = projectTitle({
     projectName,
-    tutorialId: tutorial?.id ?? "",
+    tutorialId,
     exampleId: example?.id ?? "",
     networkId,
   });
@@ -156,7 +151,7 @@ const ProjectSwitcher = () => {
               <DropdownMenuSubTrigger>Tutorials</DropdownMenuSubTrigger>
               <DropdownMenuPortal>
                 <DropdownMenuSubContent>
-                  {tutorials.map((tutorial) => {
+                  {tutorialMetas.map((tutorial) => {
                     const status = tutorialStatus(tutorial.id);
                     return (
                       <DropdownMenuItem
@@ -177,7 +172,7 @@ const ProjectSwitcher = () => {
                             title="In progress"
                           >
                             <CircleDashed className="size-3" />
-                            {status.step + 1}/{tutorial.steps.length}
+                            {status.step + 1}/{tutorial.stepCount}
                           </span>
                         )}
                       </DropdownMenuItem>

@@ -3,8 +3,8 @@ import type { TutorialId, TutorialMeta } from "@/lib/types/tutorial";
 // What the home page's cards and the project switcher show of each tutorial,
 // apart from its steps and state. On its own so the app shell can render them
 // before the SDK loads: the step components import the SDK, so the full
-// tutorials (index.ts) can't be in the shell's graph. Each tutorial's index.ts
-// spreads its entry here; index.ts checks `stepCount` against the steps in
+// tutorials (loaders.ts) can't be in the shell's graph. Each tutorial's index.ts
+// spreads its entry here; loaders.ts checks `stepCount` against the steps in
 // dev. A new tutorial gets its entry here first.
 export const tutorialMetas: TutorialMeta[] = [
   {
