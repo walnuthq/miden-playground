@@ -422,6 +422,8 @@ const savedTutorial = (page: Page, id: string) =>
 // giving up (local, testnet, 2026-11-11: about 10.0 s and 10.2 s).
 const PROVER_DEADLINE_MS = 10_000;
 const SUBMIT_DEADLINE_MS = 10_200;
+// Mirrors TRANSACTION_COMMIT_TIMEOUT in apps/web/hooks/use-fund-account.ts.
+const TRANSACTION_COMMIT_TIMEOUT_MS = 60_000;
 
 // A deploy that succeeds after the user left the example must not write into
 // the next workspace either: the Miden client is the same instance across a
@@ -438,18 +440,13 @@ test("a deploy that succeeds after leaving its example doesn't reach the next wo
   page,
 }) => {
   logBrowserErrors(page);
-  // The deploy ends by logging "deploy abandoned" (its error, after the
-  // switch): waiting on that message, bounded by the 60 s commit wait plus a
-  // margin, makes the assertions follow the end of the deploy, not a guess.
-  const deployEnded = page
-    .waitForEvent("console", {
-      predicate: (message) => message.text().includes("deploy abandoned"),
-      timeout: 75_000,
-    })
-    .then(
-      () => true,
-      () => false,
-    );
+  // Registered from the start: the warning comes 1-2 s after the node's answer.
+  let deployAbandoned = false;
+  page.on("console", (message) => {
+    if (message.text().includes("deploy abandoned")) {
+      deployAbandoned = true;
+    }
+  });
   let proverFired = () => {};
   const proverStarted = new Promise<void>((resolve) => {
     proverFired = resolve;
@@ -504,9 +501,16 @@ test("a deploy that succeeds after leaving its example doesn't reach the next wo
     "the switch outlasted both holds: re-measure, see the comment above",
   ).toBe(true);
   // Observed: applying the answered transaction fails in the new store (its
-  // account isn't there), which logs the warning. Whether it appears or the
-  // bound passes, the assertions below hold the deploy to what it left.
-  await deployEnded;
+  // account isn't there), and the deploy ends by logging "deploy abandoned".
+  // The wait counts from the answer and covers the app's 60 s commit wait
+  // plus a margin. If the warning stops appearing, the test fails here:
+  // someone has to look at the new behaviour.
+  await expect
+    .poll(() => deployAbandoned, {
+      message: "the late deploy never ended with the abandoned warning",
+      timeout: TRANSACTION_COMMIT_TIMEOUT_MS + 15_000,
+    })
+    .toBe(true);
   // The settle lets the page render whatever the deploy wrote.
   await page.waitForTimeout(5_000);
   await expect(page.getByRole("row", { name: /Counter Contract/ })).toHaveCount(
