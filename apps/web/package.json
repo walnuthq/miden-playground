@@ -39,7 +39,7 @@
     "@tanstack/react-table": "9.3.1",
     "@wagmi/core": "3.6.9",
     "@workspace/ui": "workspace:*",
-    "lucide-react": "1.70.0",
+    "lucide-react": "1.71.0",
     "next-themes": "0.4.6",
     "react": "19.3.1",
     "react-dom": "19.3.1",
@@ -52,7 +52,7 @@
     "wagmi": "3.7.11"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "5.20261109.1",
+    "@cloudflare/workers-types": "5.20261110.1",
     "@miden-sdk/vite-plugin": "0.17.5",
     "@playwright/test": "1.65.0",
     "@tailwindcss/vite": "4.3.5",
@@ -65,6 +65,6 @@
     "typescript": "7.0.2",
     "vite": "8.3.7",
     "vite-plugin-node-polyfills": "0.28.0",
-    "wrangler": "4.158.0"
+    "wrangler": "4.160.0"
   }
 }
