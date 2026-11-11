@@ -1,6 +1,13 @@
 import { expect, type Page, test } from "@playwright/test";
 import { createCounterScript } from "./editor";
 import { launchExample, startExample } from "./example";
+import {
+  clickProjectsItem,
+  closeMenu,
+  networkBadge,
+  openProjectsMenu,
+  switcher,
+} from "./projects-menu";
 import { logBrowserErrors, TRANSACTION_TIMEOUT } from "./tutorial";
 
 // What can happen while a workspace is being replaced: the store is cleared,
@@ -13,33 +20,9 @@ declare global {
   }
 }
 
-const switcher = (page: Page) =>
-  page
-    .locator('[data-sidebar="sidebar"]')
-    .getByRole("button", { name: /Miden Playground/ });
-
-const networkBadge = (page: Page) => page.locator('header [data-slot="badge"]');
-
-const openProjectsMenu = async (page: Page) => {
-  await expect(networkBadge(page)).toContainText(/#\d+/, {
-    timeout: TRANSACTION_TIMEOUT,
-  });
-  await switcher(page).click();
-  await page.getByRole("menuitem", { name: "Projects" }).click();
-  await expect(page.getByRole("menu")).toHaveCount(2);
-  return page.getByRole("menu").last();
-};
-
-const closeMenu = async (page: Page) => {
-  await page.keyboard.press("Escape");
-  await page.keyboard.press("Escape");
-  await expect(page.getByRole("menu")).toHaveCount(0);
-};
-
 // Saves the workspace as a new project, named `name`.
 const saveAs = async (page: Page, name: string) => {
-  const menu = await openProjectsMenu(page);
-  await menu.getByRole("menuitem", { name: "Save as…" }).click();
+  await clickProjectsItem(page, "Save as…");
   const dialog = page.getByRole("dialog", { name: "Save Project As" });
   await dialog.getByLabel("Name").fill(name);
   await dialog.getByRole("button", { name: "Save", exact: true }).click();
@@ -58,12 +41,8 @@ const newTestnetSandbox = async (page: Page) => {
   });
 };
 
-const openProject = async (page: Page, name: string) => {
-  const menu = await openProjectsMenu(page);
-  await menu
-    .getByRole("menuitem", { name: `${name} Testnet`, exact: true })
-    .click();
-};
+const openProject = (page: Page, name: string) =>
+  clickProjectsItem(page, `${name} Testnet`);
 
 // Holds the next switch right after it cleared the store, until
 // `window.releaseStoreClear()`. clearMidenStorage starts by listing the
@@ -357,8 +336,7 @@ test("the save dialog refuses blank and duplicate names", async ({ page }) => {
   await newTestnetSandbox(page);
   await saveAs(page, "Mine");
 
-  const menu = await openProjectsMenu(page);
-  await menu.getByRole("menuitem", { name: "Save as…" }).click();
+  await clickProjectsItem(page, "Save as…");
   const dialog = page.getByRole("dialog", { name: "Save Project As" });
   const name = dialog.getByLabel("Name");
   const save = dialog.getByRole("button", { name: "Save", exact: true });
