@@ -324,10 +324,21 @@ test("a deploy still running doesn't reach the next workspace", async ({
   const provingStarted = new Promise<void>((resolve) => {
     proving = resolve;
   });
+  let answered = () => {};
+  const proverAnswered = new Promise<void>((resolve) => {
+    answered = resolve;
+  });
   await page.route(/prover/, async (route) => {
     proving();
     await held;
-    await route.continue();
+    try {
+      // Fetched here, not continued, so the test knows when it was answered.
+      await route.fulfill({ response: await route.fetch() });
+    } catch {
+      // The page abandoned the request meanwhile.
+    } finally {
+      answered();
+    }
   });
   await startExample(page);
   await provingStarted;
@@ -339,10 +350,15 @@ test("a deploy still running doesn't reach the next workspace", async ({
   await expect(page.getByRole("row", { name: /Wallet A/ })).toBeVisible({
     timeout: 60_000,
   });
+  // The held proof request is the last step of the deploy the test can name:
+  // once the prover has answered it (or the page abandoned it), the deploy has
+  // no network request left that could reach the workspace. The node's submit
+  // request can't be waited for: an abandoned deploy may never send it. A
+  // short settle lets the page render whatever the deploy would have written
+  // before the assertions below.
   release();
-
-  // Longer than the rest of the deploy takes.
-  await page.waitForTimeout(45_000);
+  await proverAnswered;
+  await page.waitForTimeout(5_000);
   await expect(page.getByRole("row", { name: /Counter Contract/ })).toHaveCount(
     0,
   );
