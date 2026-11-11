@@ -350,11 +350,13 @@ test("a deploy still running doesn't reach the next workspace", async ({
   await expect(page.getByRole("row", { name: /Wallet A/ })).toBeVisible({
     timeout: 60_000,
   });
-  // The held proof request is the last step of the deploy the test can name:
-  // once the prover has answered it (or the page abandoned it), the deploy has
-  // no network request left that could reach the workspace. The node's submit
-  // request can't be waited for: an abandoned deploy may never send it. A
-  // short settle lets the page render whatever the deploy would have written
+  // The held proof request is the last step of the deploy the test can name.
+  // The proof is held for the whole switch, longer than the client's request
+  // deadline, so by the time it is answered the deploy has already failed with
+  // "Request timed out" and no SubmitProvenTransaction request follows (logged
+  // on the node's RPC host, rpc.testnet.miden.io, in a run: only syncs and
+  // account reads came after the answer). That is why a short settle is enough:
+  // it lets the page render whatever the abandoned deploy would have written
   // before the assertions below.
   release();
   await proverAnswered;

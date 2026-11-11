@@ -159,6 +159,7 @@ test("a second switch during an import gets its own store", async ({
   // the page (the menu closes before, the switcher's label and the Save item
   // already reflect the first switch), so there is no condition to wait on
   // without a test hook in the app; this is the time that read takes.
+  await page.waitForTimeout(1_000);
   await releaseStoreClear(page);
 
   await expect(switcher(page)).toContainText("With account", {
