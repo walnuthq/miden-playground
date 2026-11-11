@@ -9,7 +9,7 @@ import { BookOpen, BookOpenCheck, ChevronUp } from "lucide-react";
 import { type ReactNode, useEffect, useRef } from "react";
 import type { PanelImperativeHandle } from "react-resizable-panels";
 import TutorialStep from "@/components/tutorials/tutorial-step";
-import useTutorials from "@/hooks/use-tutorials";
+import useTutorials, { useLoadedTutorial } from "@/hooks/use-tutorials";
 import type { Tutorial } from "@/lib/types/tutorial";
 import { defaultTutorialStep } from "@/lib/utils/tutorial";
 
@@ -88,7 +88,8 @@ const MobileTutorialPanel = ({ tutorial }: { tutorial: Tutorial }) => {
 
 const InnerTutorialLayout = ({ children }: { children: ReactNode }) => {
   const tutorialRef = useRef<PanelImperativeHandle | null>(null);
-  const { tutorial, tutorialOpen } = useTutorials();
+  const { tutorialOpen } = useTutorials();
+  const tutorial = useLoadedTutorial();
   const isMobile = useIsMobile();
   useEffect(() => {
     tutorialRef?.current?.resize(tutorialOpen ? "33%" : "0%");
