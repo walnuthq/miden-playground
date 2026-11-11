@@ -8,3 +8,8 @@
 /*
   Accept-CH: Sec-CH-Viewport-Width, Sec-CH-Viewport-Height, Viewport-Width, Sec-CH-Lang, Lang
   Vary: Accept-Encoding
+# Report-only: browsers log violations to the console and block nothing.
+# The sha256 allows the inline theme script in index.html. Recompute it after
+# any edit to that script: build, then hash the body of the inline <script> in
+# dist/index.html (see docs/claude/vite-build.md).
+  Content-Security-Policy-Report-Only: default-src 'self'; script-src 'self' 'wasm-unsafe-eval' 'sha256-ZB7MDqNy2uYPcF4qad34UNyxKecdV4pxXwTSFTGSG50=' https://static.cloudflareinsights.com https://cdn.jsdelivr.net; worker-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net; connect-src 'self' https://miden-playground-api.walnut.dev https://miden-source-code-verification-api-registry.walnut.dev https://guardian.openzeppelin.com https://rpc.testnet.miden.io https://rpc.devnet.miden.io https://rpc.mainnet.miden.io https://tx-prover.testnet.miden.io https://tx-prover.devnet.miden.io https://tx-prover.mainnet.miden.io https://transport.miden.io https://transport.devnet.miden.io https://transport.mainnet.miden.io https://faucet-api.testnet.miden.io https://faucet-api.devnet.miden.io https://*.getpara.com https://cloudflareinsights.com; frame-src https://*.getpara.com; object-src 'none'; base-uri 'self'; form-action 'self'
