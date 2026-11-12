@@ -29,6 +29,9 @@ const app = createApp()
       origin: (origin) => (allowedOrigins.includes(origin) ? origin : null),
       allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
       allowHeaders: ["Content-Type", "Authorization"],
+      // Browsers keep a preflight for 5 s by default, so nearly every PATCH or
+      // JSON POST cost an extra OPTIONS round trip. 7200 s is Chrome's cap.
+      maxAge: 7200,
     }),
   )
   .use(
