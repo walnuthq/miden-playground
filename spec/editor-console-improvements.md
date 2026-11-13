@@ -598,8 +598,8 @@ a known limit:
     auth aborts with an unauthorized event rather than a keystore request:
     only single-sig was tested.
 - Hide the target accounts whose code lacks a procedure the script calls,
-  from a MAST walk in api-compile: planned in `spec/simulate-target-accounts.md`
-  (2026-11-13).
+  from a MAST walk in api-compile: done (2026-11-13), see
+  `spec/simulate-target-accounts.md`.
 
 Spike (2026-11-13, SDK 0.17.10, Chromium, testnet sandbox with the Counter
 Contract example):

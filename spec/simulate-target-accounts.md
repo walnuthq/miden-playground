@@ -1,6 +1,6 @@
 # Simulate: hide target accounts that can't run the script
 
-Status: **planned** (2026-11-13). Not started. A follow-up to item 11 of `spec/editor-console-improvements.md` (the Simulate tab, shipped in #831–#836).
+Status: **done** (2026-11-13). A follow-up to item 11 of `spec/editor-console-improvements.md` (the Simulate tab, shipped in #831–#836).
 
 This is the Playground half. It depends on the api-compile half, `spec/account-procedures.md` in walnuthq/miden-source-code-verification. **Don't start until that one is deployed** and production `POST /compile` returns `accountProcedures` for the counter example's note.
 
@@ -96,6 +96,13 @@ The spec needs apps/api on 3001 and an api-compile that returns the field. To po
     - An absent field or `null` means no filter.
 19. `spec/editor-console-improvements.md`: under item 11's follow-ups, point to this spec and mark it done when it ships.
 20. Run `pnpm lint`. Biome formats Markdown (tables padded).
+
+## Outcome
+
+- The api-compile half shipped as walnuthq/miden-source-code-verification#140. The snapshots in `apps/api/examples/*/compiled.json` only gained `metadata.accountProcedures`: a fresh compile changed nothing else but Rust's mangled symbol names in `masm` and `masp`, with the same commitments, so those were kept.
+- "Other Counter" (the tutorials' counter) was deployed from the same `counter-account` package as the example, so it has the same roots: it's listed for the counter's note and script.
+- The P2ID template calls the Rust basic wallet's `receive-asset` (`lib/tutorials/basic-wallet.ts`), not the standard wallet's `receive_asset`. Deployed accounts carry the standard wallet, so no account in the Counter Contract sandbox can be its target, even though a P2ID note without assets never makes that call. The P2ID e2e steps now check its typed storage field and the empty state, which covers step 17; the run against its target was dropped by decision. Tutorial 8 still consumes a P2ID note for real. `procedureName` also looks in the embedded Rust basic wallet so the hint says `receive-asset`.
+- The plain wallet in the e2e is the faucet's funding account, imported last: it's busy, and a page load after importing it waits minutes for the sync. A sandbox can't create a wallet, and deploying needs a component.
 
 ## Out of scope
 

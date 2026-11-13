@@ -1184,7 +1184,11 @@
           }
         }
       ],
-      "metadata": null,
+      "metadata": {
+        "accountProcedures": [
+          "0x3d6e1ba6ce13207198922673838037298a51729e0652ff1f3b9dec19bb51aa9b"
+        ]
+      },
       "dependencies": [
         {
           "name": "bank-account",
@@ -1318,7 +1322,11 @@
           }
         }
       ],
-      "metadata": null,
+      "metadata": {
+        "accountProcedures": [
+          "0x55fb027f52280a5ef8822db11c278eebd069029d06babbfd27f81fb0a160114f"
+        ]
+      },
       "dependencies": [
         {
           "name": "bank-account",
@@ -1452,7 +1460,11 @@
           }
         }
       ],
-      "metadata": null,
+      "metadata": {
+        "accountProcedures": [
+          "0xabe7b9f4910d4508805dcc325e8f822e4309f137fa637384b7e02b9078343b5a"
+        ]
+      },
       "dependencies": [
         {
           "name": "bank-account",

@@ -14,6 +14,11 @@ const SLOT = "counter_account::counter_contract::count_map";
 const OTHER_ACCOUNT_ADDRESS =
   "mtst1arjkfl0j33qk25gpl2tqrd6npsptfavv_qr7qqq9wr6w";
 
+// A public basic wallet on Testnet: the faucet's funding account
+// (`TESTNET_FAUCET_FUNDER_ACCOUNT_ID` in lib/constants.ts). It's busy: a page
+// load after importing it waits minutes for the sync, so import it last.
+const WALLET_ACCOUNT_ID = "0x4e6fb40fd2f6a55140df2c42dfb5b7";
+
 const editorConsole = (page: Page) =>
   page.getByRole("region", { name: "Editor Console" });
 
@@ -219,6 +224,31 @@ const selectTarget = async (page: Page, name: string) => {
   await page.getByRole("menuitemradio", { name, exact: true }).click();
 };
 
+// The accounts the Simulate tab's target dropdown lists, then closes it.
+const targetOptions = async (page: Page) => {
+  await editorConsole(page)
+    .getByRole("button", { name: "Select account" })
+    .first()
+    .click();
+  const options = page.getByRole("menuitemradio");
+  await expect(options.first()).toBeVisible();
+  const names = await options.allInnerTexts();
+  await page.keyboard.press("Escape");
+  await expect(options).toHaveCount(0);
+  return names.map((name) => name.trim()).sort();
+};
+
+const importAccount = async (page: Page, name: string, address: string) => {
+  await page.goto("/accounts");
+  await page.getByRole("button", { name: "Create new account" }).click();
+  await page.getByRole("menuitem", { name: "Import account" }).click();
+  const dialog = page.getByRole("dialog", { name: "Import Account" });
+  await dialog.getByLabel("Name").fill(name);
+  await dialog.getByLabel("Address").fill(address);
+  await dialog.getByRole("button", { name: "Import" }).click();
+  await expect(dialog).toBeHidden({ timeout: TRANSACTION_TIMEOUT });
+};
+
 const simulate = async (page: Page, script: string) => {
   await editorConsole(page)
     .getByRole("button", { name: "Simulate", exact: true })
@@ -312,14 +342,22 @@ test("script: simulate a note and a transaction script", async ({ page }) => {
 
   await test.step("import a second account", async () => {
     // The tutorials' counter contract: another account a note can target.
-    await page.goto("/accounts");
-    await page.getByRole("button", { name: "Create new account" }).click();
-    await page.getByRole("menuitem", { name: "Import account" }).click();
-    const dialog = page.getByRole("dialog", { name: "Import Account" });
-    await dialog.getByLabel("Name").fill("Other Counter");
-    await dialog.getByLabel("Address").fill(OTHER_ACCOUNT_ADDRESS);
-    await dialog.getByRole("button", { name: "Import" }).click();
-    await expect(dialog).toBeHidden({ timeout: TRANSACTION_TIMEOUT });
+    await importAccount(page, "Other Counter", OTHER_ACCOUNT_ADDRESS);
+  });
+
+  await test.step("only the accounts with the procedures are targets", async () => {
+    // The tutorials' counter was deployed from the same `counter-account`
+    // package as the example (lib/constants.ts): same procedure roots, so it
+    // can run the counter's note and script.
+    for (const script of ["increment-note", "counter-script"]) {
+      await page.getByRole("link", { name: script }).first().click();
+      await expect(page).toHaveURL(/\/scripts\//);
+      await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
+      expect(await targetOptions(page)).toEqual([
+        "Counter Contract",
+        "Other Counter",
+      ]);
+    }
   });
 
   await test.step("a note's storage is typed by its storage schema", async () => {
@@ -347,52 +385,40 @@ test("script: simulate a note and a transaction script", async ({ page }) => {
     await expect(
       editorConsole(page).getByRole("button", { name: "Add storage item" }),
     ).toHaveCount(0);
-    const run = editorConsole(page).getByRole("button", {
-      name: "Simulate",
-      exact: true,
-    });
-    // The target account first, then the note's storage field.
-    await editorConsole(page)
-      .getByRole("button", { name: "Select account" })
-      .first()
-      .click();
-    await page
-      .getByRole("menuitemradio", { name: "Counter Contract", exact: true })
-      .click();
-    await expect(run).toBeDisabled();
+    // Its storage field lists every account: only the target is filtered.
     await field.getByRole("button", { name: "Select account" }).click();
+    for (const name of ["Counter Contract", "Other Counter"]) {
+      await expect(
+        page.getByRole("menuitemradio", { name, exact: true }),
+      ).toBeVisible();
+    }
     await page
       .getByRole("menuitemradio", { name: "Counter Contract", exact: true })
       .click();
-    await expect(run).toBeEnabled();
   });
 
-  await test.step("the P2ID note is consumed by its target only", async () => {
-    await editorConsole(page)
-      .getByRole("button", { name: "Simulate", exact: true })
-      .click();
-    const dialog = page
-      .getByRole("dialog")
-      .filter({ hasText: "Simulation of p2id-note" });
+  await test.step("no account can be the P2ID note's target", async () => {
+    // The template calls the Rust basic wallet's `receive-asset`
+    // (lib/tutorials/basic-wallet.ts), which none of the sandbox's accounts
+    // has: they carry the standard basic wallet, whose `receive_asset` has
+    // another root.
     await expect(
-      dialog.getByText("1 note will be consumed", { exact: false }),
-    ).toBeVisible({ timeout: TRANSACTION_TIMEOUT });
-    await dialog.getByRole("button", { name: "Close" }).first().click();
-    // Another account as the note's target: its script's assertion fails.
-    const field = editorConsole(page)
-      .locator("div")
-      .filter({ hasText: "target-account-id" })
-      .last();
-    await field.getByRole("button", { name: "Counter Contract" }).click();
-    await page
-      .getByRole("menuitemradio", { name: "Other Counter", exact: true })
-      .click();
-    await editorConsole(page)
-      .getByRole("button", { name: "Simulate", exact: true })
-      .click();
+      editorConsole(page).getByText(
+        "No account has the procedures this script calls: receive-asset. Deploy or import an account with them.",
+        { exact: true },
+      ),
+    ).toBeVisible();
     await expect(
-      editorConsole(page).getByText("Simulation of p2id-note failed.").last(),
-    ).toBeVisible({ timeout: TRANSACTION_TIMEOUT });
+      editorConsole(page)
+        .getByRole("button", { name: "No accounts found." })
+        .first(),
+    ).toBeDisabled();
+    await expect(
+      editorConsole(page).getByRole("button", {
+        name: "Simulate",
+        exact: true,
+      }),
+    ).toBeDisabled();
   });
 
   await test.step("nothing was submitted", async () => {
@@ -408,5 +434,20 @@ test("script: simulate a note and a transaction script", async ({ page }) => {
       .last();
     await row.getByRole("button", { name: "Invoke" }).click();
     await expect(row.getByRole("cell").last()).toHaveText(/^0\s*Invoke$/);
+  });
+
+  await test.step("a plain wallet can't run the counter's scripts", async () => {
+    await importAccount(page, "Plain Wallet", WALLET_ACCOUNT_ID);
+    // Through the sidebar: a page load would wait for the wallet's sync. It
+    // has neither `get-count` nor `increment-count`.
+    for (const script of ["increment-note", "counter-script"]) {
+      await page.getByRole("link", { name: script }).first().click();
+      await expect(page).toHaveURL(/\/scripts\//);
+      await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
+      expect(await targetOptions(page)).toEqual([
+        "Counter Contract",
+        "Other Counter",
+      ]);
+    }
   });
 });

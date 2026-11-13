@@ -72,6 +72,11 @@ export type NoteStorageField = {
 export type PackageMetadata = {
   storage?: { slots: StorageSlotSchema[] };
   noteStorage?: { name: string; fields: NoteStorageField[] };
+  // A note or transaction script's account procedures: the MAST roots
+  // (`0x…` hex, sorted) it `call`s, `[]` when it calls none. api-compile
+  // sends `null` when it can't tell (a dynamic call is reachable); the API
+  // stores no key then.
+  accountProcedures?: string[] | null;
 };
 
 export const defaultPackage = (): Package => ({

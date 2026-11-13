@@ -3,13 +3,14 @@ import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { Spinner } from "@workspace/ui/components/spinner";
 import { Plus, Trash2 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ProcedureArgumentsForm from "@/components/procedures/procedure-arguments-form";
 import { notReady } from "@/components/script/simulate/not-ready";
 import SimulationResultDialog, {
   type SimulatedTransaction,
 } from "@/components/script/simulate/simulation-result-dialog";
 import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";
+import useScriptTargetAccounts from "@/hooks/use-script-target-accounts";
 import useTargetSimulation from "@/hooks/use-target-simulation";
 import type { Script } from "@/lib/types/script";
 import {
@@ -34,6 +35,22 @@ const TargetSimulation = ({
   const { accounts, simulate } = useTargetSimulation(script);
   const isNote = script.type === "note";
   const [targetAccountId, setTargetAccountId] = useState("");
+  // Only the accounts whose code has the procedures the script calls.
+  const targets = useScriptTargetAccounts(script);
+  const noTarget =
+    targets.status === "filtered" &&
+    targets.accountIds.size === 0 &&
+    accounts.length > 0;
+  // A recompile or a code change can rule out the selected account.
+  useEffect(() => {
+    if (
+      targets.status !== "checking" &&
+      targetAccountId !== "" &&
+      !targets.accountIds.has(targetAccountId)
+    ) {
+      setTargetAccountId("");
+    }
+  }, [targets, targetAccountId]);
   const [argument, setArgument] = useState("");
   const [noteStorage, setNoteStorage] = useState<string[]>([]);
   const [noteArguments, setNoteArguments] = useState<ProcedureArguments>({});
@@ -62,9 +79,13 @@ const TargetSimulation = ({
         {blocked ??
           (accounts.length === 0
             ? "Create or import an account to simulate the script against."
-            : isNote
-              ? "Runs the script locally as if the account consumed a note made from it: nothing is submitted."
-              : "Runs the script locally against the account: nothing is submitted.")}
+            : noTarget
+              ? targets.missing.length > 0
+                ? `No account has the procedures this script calls: ${targets.missing.join(", ")}. Deploy or import an account with them.`
+                : "No account has every procedure this script calls. Deploy or import an account with them."
+              : isNote
+                ? "Runs the script locally as if the account consumed a note made from it: nothing is submitted."
+                : "Runs the script locally against the account: nothing is submitted.")}
       </p>
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="grid gap-1.5">
@@ -72,6 +93,8 @@ const TargetSimulation = ({
           <SelectAccountDropdownMenu
             value={targetAccountId}
             onValueChange={setTargetAccountId}
+            accountIds={targets.accountIds}
+            checking={targets.status === "checking"}
           />
         </div>
         <div className="grid gap-1.5">
