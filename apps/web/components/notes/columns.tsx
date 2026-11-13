@@ -8,11 +8,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
-import { MoreVertical } from "lucide-react";
+import { CircleCheckBig, MoreVertical } from "lucide-react";
+import { Link } from "react-router";
 import { toast } from "sonner";
 import AccountAddress from "@/components/lib/account-address";
 import useAccounts from "@/hooks/use-accounts";
 import useConsumeNotes from "@/hooks/use-consume-notes";
+import useNoteScript from "@/hooks/use-note-script";
 import type { DataTableFeatures } from "@/lib/table";
 import { type InputNote, noteStates } from "@/lib/types/note";
 import { formatId } from "@/lib/utils";
@@ -28,6 +30,23 @@ const InputNoteSenderCell = ({ inputNote }: { inputNote: InputNote }) => {
       withName={!!sender}
       withLink={!!sender}
     />
+  );
+};
+
+const InputNoteScriptCell = ({ inputNote }: { inputNote: InputNote }) => {
+  const script = useNoteScript(inputNote);
+  return script ? (
+    <Link
+      className="text-primary font-medium underline underline-offset-4 flex items-center gap-2"
+      to={`/scripts/${script.id}`}
+      // The row links to the note: follow this link instead.
+      onClick={(event) => event.stopPropagation()}
+    >
+      {script.name}
+      <CircleCheckBig color="var(--color-green-500)" className="size-4" />
+    </Link>
+  ) : (
+    <span className="text-muted-foreground">Unknown</span>
   );
 };
 
@@ -74,7 +93,7 @@ const InputNoteActionsCell = ({ inputNote }: { inputNote: InputNote }) => {
 };
 
 // Columns the table hides on phones (`mobileColumnClassName`).
-export const mobileHiddenColumns = ["type", "tag", "senderId"];
+export const mobileHiddenColumns = ["type", "script", "tag", "senderId"];
 
 export const columns: ColumnDef<DataTableFeatures, InputNote>[] = [
   {
@@ -98,6 +117,11 @@ export const columns: ColumnDef<DataTableFeatures, InputNote>[] = [
     accessorKey: "state",
     header: "State",
     cell: ({ row }) => noteStates[row.original.state],
+  },
+  {
+    id: "script",
+    header: "Script",
+    cell: ({ row }) => <InputNoteScriptCell inputNote={row.original} />,
   },
   {
     accessorKey: "tag",

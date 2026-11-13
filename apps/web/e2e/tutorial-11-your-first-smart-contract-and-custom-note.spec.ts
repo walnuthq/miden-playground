@@ -126,6 +126,10 @@ test("tutorial 11: your first smart contract and custom note", async ({
     expect(request).toContain("Confirm Transaction");
     // Completes once the note is committed.
     await nextStep(page);
+    // The notes table names the script the note is built from.
+    await expect(
+      page.getByRole("row").getByRole("link", { name: "increment-note" }),
+    ).toBeVisible();
   });
 
   await test.step("7. consume the note with the counter contract", async () => {
