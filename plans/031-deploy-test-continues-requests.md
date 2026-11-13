@@ -330,9 +330,9 @@ asserts:
 
 - [ ] `grep -c "route.fetch" apps/web/e2e/projects.spec.ts` → `0`
 - [ ] The failing-deploy test polls `deployAbandoned` and asserts
-  `submitted === false` with a message
+      `submitted === false` with a message
 - [ ] The succeeding test's body is unchanged (`git diff` shows only the moved
-  constants around it)
+      constants around it)
 - [ ] `pnpm test:e2e e2e/projects.spec.ts -g "deploy" --repeat-each=3 --retries=0` → 6 passed
 - [ ] `pnpm test:e2e e2e/projects.spec.ts --retries=0` → 3 passed
 - [ ] `cd apps/web && pnpm typecheck` exits 0

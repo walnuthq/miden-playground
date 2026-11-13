@@ -48,11 +48,11 @@
     "smol-toml": "1.9.1",
     "sonner": "2.0.8",
     "usehooks-ts": "3.1.1",
-    "viem": "2.57.18",
+    "viem": "2.57.19",
     "wagmi": "3.7.11"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "5.20261110.1",
+    "@cloudflare/workers-types": "5.20261112.1",
     "@miden-sdk/vite-plugin": "0.17.5",
     "@playwright/test": "1.65.0",
     "@tailwindcss/vite": "4.3.5",
