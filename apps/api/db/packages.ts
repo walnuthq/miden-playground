@@ -5,7 +5,12 @@ import {
   type DefaultDependency,
   defaultDependenciesRecords,
 } from "@/lib/default-dependencies";
-import type { Export, NewPackage, PackageStatus } from "@/lib/types";
+import type {
+  Export,
+  NewPackage,
+  PackageMetadata,
+  PackageStatus,
+} from "@/lib/types";
 import { isValidUUIDv4 } from "@/lib/uuid";
 
 export const getPackage = async (id: string) => {
@@ -13,7 +18,11 @@ export const getPackage = async (id: string) => {
     where: { id },
   });
   return dbPackage
-    ? { ...dbPackage, files: dbPackage.files as Record<string, string> }
+    ? {
+        ...dbPackage,
+        files: dbPackage.files as Record<string, string>,
+        metadata: dbPackage.metadata as PackageMetadata | null,
+      }
     : undefined;
 };
 
@@ -37,6 +46,7 @@ export const updatePackage = ({
   commitment,
   exports,
   dependencies,
+  metadata,
 }: {
   id: string;
   status?: PackageStatus;
@@ -46,6 +56,7 @@ export const updatePackage = ({
   commitment?: string;
   exports?: Export[];
   dependencies?: string[];
+  metadata?: PackageMetadata | null;
 }) =>
   getDb()
     .update(packagesTable)
@@ -57,6 +68,7 @@ export const updatePackage = ({
       commitment,
       exports,
       dependencies,
+      metadata,
     })
     .where(eq(packagesTable.id, id));
 

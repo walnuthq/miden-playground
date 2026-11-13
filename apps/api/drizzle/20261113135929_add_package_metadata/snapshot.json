@@ -1,0 +1,47 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "46baa1ac-24b7-4f0a-930d-0b801a57da17",
+  "prevIds": [
+    "0b8def42-bfb0-46ff-8ed9-7fcb35b786a0"
+  ],
+  "footprints": [
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "packages",
+        "metadata"
+      ],
+      "writes": [
+        "s|col|public.packages.metadata",
+        "n|col|public.packages.metadata",
+        "e|col|public.packages.metadata"
+      ],
+      "reads": [
+        "n|tbl|public.packages",
+        "n|sch|public"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "packages",
+        "name": "metadata",
+        "type": "jsonb",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    }
+  ]
+}

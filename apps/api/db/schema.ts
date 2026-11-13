@@ -41,6 +41,11 @@ export const packagesTable = pgTable("packages", {
   masp: text().notNull().default(""),
   exports: jsonb().array().notNull().default([]),
   dependencies: varchar({ length: 36 }).array().notNull().default([]),
+  // What api-compile reads from the compiled package besides its manifest:
+  // an account component's storage slots, a note's storage fields
+  // (`PackageMetadata`). Null for a draft, a failed build, and a package
+  // compiled before api-compile reported them.
+  metadata: jsonb(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
