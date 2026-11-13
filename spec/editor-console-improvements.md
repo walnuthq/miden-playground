@@ -522,6 +522,58 @@ component", "Call `get_count`" (read-only), "Call `increment_count`"
 in the console. Reuse the existing account/transaction flows; this is
 mostly a shortcut to them.
 
+Plan (2026-11-13), in progress. A **Simulate** tab in the console, next to
+**Output** (the log): it runs the compiled package locally and shows the
+account's changes. Nothing is proven, submitted or saved.
+
+- Account components: the package's storage slots, editable, then its
+  procedures with an Invoke button each. They run on a throwaway account
+  (basic wallet, No Auth, the component) rebuilt on every compile and slot
+  edit. Every run starts from the storage shown, at nonce 0; the result
+  dialog's "Apply to storage" copies the resulting values into the slots, to
+  chain calls.
+- Note scripts: a target account, the note's inputs, an optional asset and
+  note argument; run as if the account consumed the note.
+- Transaction scripts: a target account and the script's one input, its
+  `Word` argument (`fn run(_arg: Word, …)`, `withScriptArg`).
+- Two engines. Throwaway accounts live in a mock client
+  (`MockWasmWebClient`), whose IndexedDB store is always `mock_client_db`,
+  apart from the networks' stores: the SDK can't delete an account, and an
+  account's id changes with its storage, so the regular client would keep one
+  account per edit, in the user's store and saved projects. Note and
+  transaction scripts run on the regular client against the real account:
+  `executeTransaction` and `executeProgram` write nothing.
+- Storage slots (and typed note inputs) come from the package: its account
+  component metadata and note storage schema sections, which api-compile has
+  to return (miden-source-code-verification), then the API (a `metadata`
+  column). Until a package has them, slots are added by hand.
+- Built from components the account page's Invoke flow can adopt
+  (`components/procedures`), with the argument encoding in
+  `lib/utils/procedure-inputs.ts`. That flow isn't changed here.
+- Out of scope: targeting an account built on the fly for notes and
+  transaction scripts, advice map inputs, foreign accounts, read-only scripts
+  (they have no console).
+
+Spike (2026-11-13, SDK 0.17.10, Chromium, testnet sandbox with the Counter
+Contract example):
+
+- A mock client starts next to the app's client in ~170 ms and opens
+  `mock_client_db` only.
+- On it, `newAccount` of an account built from the counter package takes
+  10–20 ms, `executeProgram` (`get_count`) 15–35 ms and `executeTransaction`
+  (`increment_count`) ~35 ms, at nonce 0, with no `proveBlock`. No fee note.
+  A second run still reads the initial value: nothing is persisted.
+  `executeProgram` on the raw client returns a `FeltArray` (`get(i).asInt()`),
+  not an array.
+- On the regular client, a note that was never submitted runs as an
+  unauthenticated input (`withInputNotes` with a `NoteAndArgs`), and a
+  transaction script takes `withScriptArg`: ~110–160 ms each, and the store
+  has the same accounts and notes afterwards.
+- An account whose key isn't in the keystore (single-sig Falcon) can't be
+  simulated: `executeTransaction` and `executeForSummary` both fail on the
+  `miden::protocol::auth::request` event. The tab says so instead of offering
+  a summary.
+
 ### 12. Header and tabs (P2, impact 3, effort S–M)
 
 - Breadcrumb: the script name (`counter-account`) instead of its UUID.
