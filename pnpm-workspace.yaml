@@ -69,3 +69,11 @@ minimumReleaseAgeExclude:
   - "@miden-sdk/para-react@0.17.10"
   - "@miden-sdk/para@0.17.10"
   - "@miden-sdk/react@0.17.10"
+  - "@cloudflare/workerd-darwin-64@1.20261113.1"
+  - "@cloudflare/workerd-darwin-arm64@1.20261113.1"
+  - "@cloudflare/workerd-linux-64@1.20261113.1"
+  - "@cloudflare/workerd-linux-arm64@1.20261113.1"
+  - "@cloudflare/workerd-windows-64@1.20261113.1"
+  - miniflare@5.20261113.0-beta
+  - workerd@1.20261113.1
+  - wrangler@4.162.0
