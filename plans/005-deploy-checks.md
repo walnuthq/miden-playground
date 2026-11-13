@@ -154,7 +154,7 @@ operator watches it.
 ## Done criteria
 
 - [ ] Both workflow files contain the `Lint`, `Typecheck` and `Test` steps
-  between install and the first production step
+      between install and the first production step
 - [ ] `git diff 301e950 -- .github/workflows` shows insertions only
 - [ ] `pnpm lint`, `pnpm typecheck` and both `test` commands exit 0 locally
 - [ ] `git status` shows only the two workflow files (and `plans/README.md`)

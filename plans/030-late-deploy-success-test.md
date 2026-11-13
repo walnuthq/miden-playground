@@ -373,7 +373,7 @@ the success path.
 - [ ] The existing deploy test routes `NodeService/SubmitProvenTx$` and its comment names `SubmitProvenTx`
 - [ ] `grep -c "SubmitProvenTransaction" apps/web/e2e/projects.spec.ts` → 0
 - [ ] The new test exists and asserts `submitted === true`, the UI (no row,
-  no toast) and the saved store (no stray account)
+      no toast) and the saved store (no stray account)
 - [ ] `pnpm test:e2e e2e/projects.spec.ts -g "deploy" --repeat-each=3 --retries=0` → 6 passed
 - [ ] `pnpm test:e2e e2e/projects.spec.ts` → all pass
 - [ ] `cd apps/web && pnpm typecheck` exits 0
