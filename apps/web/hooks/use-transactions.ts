@@ -3,7 +3,6 @@ import {
   AccountId as WasmAccountId,
   type ConsumableNoteRecord as WasmConsumableNoteRecordType,
   NoteType as WasmNoteType,
-  Package as WasmPackage,
   TransactionFilter as WasmTransactionFilter,
   TransactionId as WasmTransactionId,
   type TransactionId as WasmTransactionIdType,
@@ -26,12 +25,8 @@ import type {
   CreateTransactionDialogStep,
   TransactionType,
 } from "@/lib/types/transaction";
-import { fromBase64 } from "@/lib/utils";
 import {
-  assembledFromMasm,
-  invokeProcedureCustomTransactionScript,
-} from "@/lib/utils/script";
-import {
+  procedureCallScript,
   wasmAccountToAccount,
   wasmTransactionToTransaction,
 } from "@/lib/web-client";
@@ -213,19 +208,12 @@ const useTransactions = () => {
     if (!client) {
       throw new Error("MidenClient not ready");
     }
-    const builder = await client.createCodeBuilder();
-    const contractName = script.name.replaceAll("-", "_");
-    const accountComponentLibrary = assembledFromMasm(script)
-      ? builder.buildLibrary(`external_contract::${contractName}`, script.masm)
-      : WasmPackage.deserialize(fromBase64(script.masp)).asLibrary();
-    builder.linkDynamicLibrary(accountComponentLibrary);
-    const transactionScript = builder.compileTxScript(
-      invokeProcedureCustomTransactionScript({
-        contractName: assembledFromMasm(script) ? contractName : undefined,
-        procedureExport,
-        procedureInputs,
-      }),
-    );
+    const transactionScript = await procedureCallScript({
+      client,
+      script,
+      procedureExport,
+      procedureInputs,
+    });
     const { stack } = await executeProgram({
       accountId,
       script: transactionScript,

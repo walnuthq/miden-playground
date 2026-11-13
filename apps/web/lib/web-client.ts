@@ -6,6 +6,7 @@ import {
   type AccountId as WasmAccountIdType,
   AccountStorageMode as WasmAccountStorageMode,
   BasicFungibleFaucetComponent as WasmBasicFungibleFaucetComponent,
+  type CodeBuilder as WasmCodeBuilderType,
   Endpoint as WasmEndpoint,
   Felt as WasmFelt,
   FeltArray as WasmFeltArray,
@@ -55,7 +56,7 @@ import defaultComponents from "@/lib/types/default-components";
 import defaultScripts from "@/lib/types/default-scripts";
 import type { NetworkId } from "@/lib/types/network";
 import type { InputNote, NoteType } from "@/lib/types/note";
-import type { Script } from "@/lib/types/script";
+import type { MidenInput, ProcedureExport, Script } from "@/lib/types/script";
 import type { State } from "@/lib/types/state";
 import type { Transaction, TransactionNote } from "@/lib/types/transaction";
 import { fromBase64, toBase64, waitUntil } from "@/lib/utils";
@@ -64,7 +65,11 @@ import {
   getIdentifierPart,
   getRoutingParametersPart,
 } from "@/lib/utils/account";
-import { assembledFromMasm, entryPointExport } from "@/lib/utils/script";
+import {
+  assembledFromMasm,
+  entryPointExport,
+  invokeProcedureCustomTransactionScript,
+} from "@/lib/utils/script";
 
 export const randomWord = () => {
   const bytes = new Uint8Array(32);
@@ -203,6 +208,32 @@ export const clientNetworkNoteFee = async (networkId: NetworkId) => {
   );
 };
 
+// An account component built from a script (its package, or its MASM for the
+// built-in ones) and its storage slots' initial values.
+export const wasmAccountComponent = ({
+  builder,
+  script,
+  storageSlots,
+}: {
+  builder: WasmCodeBuilderType;
+  script: Script;
+  storageSlots: StorageSlot[];
+}) => {
+  const wasmStorageSlots = storageSlots.map((storageSlot) =>
+    wasmStorageSlotFromStorageSlot(storageSlot),
+  );
+  const accountComponent = assembledFromMasm(script)
+    ? WasmAccountComponent.compile(
+        builder.compileAccountComponentCode(script.masm),
+        wasmStorageSlots,
+      )
+    : WasmAccountComponent.fromPackage(
+        WasmPackage.deserialize(fromBase64(script.masp)),
+        new WasmMidenArrays.StorageSlotArray(wasmStorageSlots),
+      );
+  return accountComponent.withSupportsAllTypes();
+};
+
 export const clientDeployAccount = async ({
   client,
   storageMode,
@@ -284,32 +315,11 @@ export const clientDeployAccount = async ({
     if (!script) {
       continue;
     }
-    const storageSlots = component.storageSlots.map((storageSlot) =>
-      wasmStorageSlotFromStorageSlot(storageSlot),
-    );
-    let accountComponent = assembledFromMasm(script)
-      ? WasmAccountComponent.compile(
-          builder.compileAccountComponentCode(script.masm),
-          storageSlots,
-        )
-      : WasmAccountComponent.fromPackage(
-          WasmPackage.deserialize(fromBase64(script.masp)),
-          new WasmMidenArrays.StorageSlotArray(storageSlots),
-        );
-    // const procedures = accountComponent.getProcedures();
-    // for (const procedure of procedures) {
-    //   console.log(script.id);
-    //   console.log(procedure.digest.toHex());
-    // }
-    // if (script.id === "auth-no-auth") {
-    //   console.log(script.id);
-    //   console.log("get_count", accountComponent.getProcedureHash("get_count"));
-    //   console.log(
-    //     "increment_count",
-    //     accountComponent.getProcedureHash("increment_count"),
-    //   );
-    // }
-    accountComponent = accountComponent.withSupportsAllTypes();
+    const accountComponent = wasmAccountComponent({
+      builder,
+      script,
+      storageSlots: component.storageSlots,
+    });
     if (component.type === "authentication-component") {
       accountBuilder = accountBuilder.withAuthComponent(accountComponent);
     } else {
@@ -320,6 +330,43 @@ export const clientDeployAccount = async ({
   // console.log(toBase64(account.serialize()));
   await client.newAccount(account, true);
   return account;
+};
+
+// A transaction script that calls one of an account component's procedures
+// with the given inputs, linked against the component.
+export const procedureCallScript = async ({
+  client,
+  script,
+  procedureExport,
+  procedureInputs = [],
+}: {
+  client: WebClientType;
+  script: Script;
+  procedureExport: ProcedureExport;
+  procedureInputs?: MidenInput[];
+}) => {
+  const builder = await client.createCodeBuilder();
+  const contractName = script.name.replaceAll("-", "_");
+  const accountComponentLibrary = assembledFromMasm(script)
+    ? builder.buildLibrary(`external_contract::${contractName}`, script.masm)
+    : WasmPackage.deserialize(fromBase64(script.masp)).asLibrary();
+  builder.linkDynamicLibrary(accountComponentLibrary);
+  return builder.compileTxScript(
+    invokeProcedureCustomTransactionScript({
+      contractName: assembledFromMasm(script) ? contractName : undefined,
+      procedureExport,
+      procedureInputs,
+    }),
+  );
+};
+
+// An account id's two felts, as procedure arguments take it.
+export const accountIdParts = (accountId: string) => {
+  const wasmAccountId = WasmAccountId.fromHex(accountId);
+  return {
+    prefix: wasmAccountId.prefix().asInt(),
+    suffix: wasmAccountId.suffix().asInt(),
+  };
 };
 
 const createTransactionFromMasm = async ({

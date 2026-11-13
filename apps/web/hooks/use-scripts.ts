@@ -3,7 +3,6 @@ import {
   AccountStorageRequirements as WasmAccountStorageRequirements,
   ForeignAccount as WasmForeignAccount,
   MidenArrays as WasmMidenArrays,
-  Package as WasmPackage,
   TransactionRequestBuilder as WasmTransactionRequestBuilder,
 } from "@miden-sdk/miden-sdk";
 import { useMiden } from "@miden-sdk/react";
@@ -23,14 +22,9 @@ import type {
   ScriptExample,
   ScriptType,
 } from "@/lib/types/script";
-import { fromBase64 } from "@/lib/utils";
-import {
-  assembledFromMasm,
-  compiledPackageToScript,
-  defaultScript,
-  invokeProcedureCustomTransactionScript,
-} from "@/lib/utils/script";
+import { compiledPackageToScript, defaultScript } from "@/lib/utils/script";
 import { scriptSource } from "@/lib/utils/script-files";
+import { procedureCallScript } from "@/lib/web-client";
 
 const useScripts = () => {
   const {
@@ -132,22 +126,12 @@ const useScripts = () => {
     }
     dispatch({ type: "SUBMITTING_TRANSACTION" });
     try {
-      const builder = await client.createCodeBuilder();
-      const contractName = script.name.replaceAll("-", "_");
-      const accountComponentLibrary = assembledFromMasm(script)
-        ? builder.buildLibrary(
-            `external_contract::${contractName}`,
-            script.masm,
-          )
-        : WasmPackage.deserialize(fromBase64(script.masp)).asLibrary();
-      builder.linkDynamicLibrary(accountComponentLibrary);
-      const transactionScript = builder.compileTxScript(
-        invokeProcedureCustomTransactionScript({
-          contractName: assembledFromMasm(script) ? contractName : undefined,
-          procedureExport,
-          procedureInputs,
-        }),
-      );
+      const transactionScript = await procedureCallScript({
+        client,
+        script,
+        procedureExport,
+        procedureInputs,
+      });
       let transactionRequestBuilder =
         new WasmTransactionRequestBuilder().withCustomScript(transactionScript);
       if (foreignAccounts.length > 0) {
