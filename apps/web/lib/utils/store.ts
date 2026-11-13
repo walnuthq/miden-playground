@@ -5,7 +5,7 @@ import type { Store, StoreBlockHeader } from "@/lib/types/store";
 // it writes to the `clientVersion` setting). Bump it alongside the SDK: it
 // stamps the stores seeded from `defaultStore`, and the SDK refuses to import a
 // store stamped by a client newer than the running one.
-const CLIENT_VERSION = "0.17.9";
+const CLIENT_VERSION = "0.17.10";
 // The `settings` row the SDK keeps that version in.
 const SETTING_SCOPE_CLIENT = 0;
 const CLIENT_VERSION_SETTING_KEY = "clientVersion";

@@ -26,8 +26,8 @@ peerDependencyRules:
     "@miden-sdk/vite-plugin>vite": "8"
 
 overrides:
-  "@miden-sdk/miden-sdk": "0.17.9"
-  "@miden-sdk/react": "0.17.9"
+  "@miden-sdk/miden-sdk": "0.17.10"
+  "@miden-sdk/react": "0.17.10"
   # Security fixes for transitive dependencies (Dependabot alerts). Remove each
   # once the packages that pull it in (Para, monaco-editor, the node polyfills)
   # ship the patched version.
@@ -54,18 +54,18 @@ minimumReleaseAgeExclude:
   - "@getpara/viem-v2-integration@3.27.0"
   - "@getpara/wagmi-v2-connector@3.27.0"
   - "@getpara/web-sdk@3.27.0"
-  # Miden SDK 0.17.9 (released 2026-11-11). Remove these once it is past the
+  # Miden SDK 0.17.10 (released 2026-11-12). Remove these once it is past the
   # minimum release age.
-  - "@miden-sdk/miden-sdk@0.17.9"
-  - "@miden-sdk/miden-wallet-adapter-base@0.17.9"
-  - "@miden-sdk/miden-wallet-adapter-miden@0.17.9"
-  - "@miden-sdk/miden-wallet-adapter-react@0.17.9"
-  - "@miden-sdk/miden-wallet-adapter-reactui@0.17.9"
-  - "@miden-sdk/miden-wallet-adapter@0.17.9"
-  - "@miden-sdk/node-darwin-arm64@0.17.9"
-  - "@miden-sdk/node-darwin-x64@0.17.9"
-  - "@miden-sdk/node-linux-x64-gnu@0.17.9"
-  - "@miden-sdk/node-linux-x64-musl@0.17.9"
-  - "@miden-sdk/para-react@0.17.9"
-  - "@miden-sdk/para@0.17.9"
-  - "@miden-sdk/react@0.17.9"
+  - "@miden-sdk/miden-sdk@0.17.10"
+  - "@miden-sdk/miden-wallet-adapter-base@0.17.10"
+  - "@miden-sdk/miden-wallet-adapter-miden@0.17.10"
+  - "@miden-sdk/miden-wallet-adapter-react@0.17.10"
+  - "@miden-sdk/miden-wallet-adapter-reactui@0.17.10"
+  - "@miden-sdk/miden-wallet-adapter@0.17.10"
+  - "@miden-sdk/node-darwin-arm64@0.17.10"
+  - "@miden-sdk/node-darwin-x64@0.17.10"
+  - "@miden-sdk/node-linux-x64-gnu@0.17.10"
+  - "@miden-sdk/node-linux-x64-musl@0.17.10"
+  - "@miden-sdk/para-react@0.17.10"
+  - "@miden-sdk/para@0.17.10"
+  - "@miden-sdk/react@0.17.10"
