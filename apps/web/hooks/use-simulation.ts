@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import useComponents from "@/hooks/use-components";
 import { appendConsoleEntry } from "@/lib/console-log";
 import {
@@ -21,6 +22,10 @@ import {
   procedureParams,
 } from "@/lib/utils/procedure-inputs";
 import { formatProcedureExportPath } from "@/lib/utils/script";
+import {
+  mergeStorageSlots,
+  schemaStorageSlots,
+} from "@/lib/utils/storage-schema";
 import { effectiveStorageChanges } from "@/lib/utils/storage-slots";
 import { accountIdParts } from "@/lib/web-client";
 
@@ -73,12 +78,26 @@ const summary = (
 // Every run starts from those slots, at nonce 0: nothing is persisted.
 const useSimulation = (script: Script) => {
   const { components } = useComponents();
-  // Until the package's storage schema is known, the slots of a component of
-  // the workspace made from the script, then the user's edits.
-  const [storageSlots, setStorageSlots] = useSimulationStorageSlots(
+  const schema = script.metadata?.storage;
+  // The slots of the package's storage schema, at their defaults. Without one
+  // (a package compiled before the API returned it), the slots of a component
+  // of the workspace made from the script. Then the user's edits.
+  const [slots, setStorageSlots] = useSimulationStorageSlots(
     script.id,
-    components.find(({ scriptId }) => scriptId === script.id)?.storageSlots ??
-      NO_SLOTS,
+    useMemo(
+      () =>
+        schema
+          ? schemaStorageSlots(schema)
+          : (components.find(({ scriptId }) => scriptId === script.id)
+              ?.storageSlots ?? NO_SLOTS),
+      [schema, components, script.id],
+    ),
+  );
+  // A recompile can change the schema: the edits of the slots it still has
+  // stay, the others go.
+  const storageSlots = useMemo(
+    () => (schema ? mergeStorageSlots(schema, slots) : slots),
+    [schema, slots],
   );
   // Resolves to the run's result and the account's state it ran from.
   const invoke = (procedureExport: ProcedureExport, args: ProcedureArguments) =>

@@ -3,7 +3,8 @@ import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { Spinner } from "@workspace/ui/components/spinner";
 import { Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import ProcedureArgumentsForm from "@/components/procedures/procedure-arguments-form";
 import { notReady } from "@/components/script/simulate/not-ready";
 import SimulationResultDialog, {
   type SimulatedTransaction,
@@ -11,8 +12,14 @@ import SimulationResultDialog, {
 import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";
 import useTargetSimulation from "@/hooks/use-target-simulation";
 import type { Script } from "@/lib/types/script";
-import { isFelt } from "@/lib/utils/procedure-inputs";
+import {
+  noteStorageFelts,
+  noteStorageParams,
+  noteStorageReady,
+} from "@/lib/utils/note-storage";
+import { isFelt, type ProcedureArguments } from "@/lib/utils/procedure-inputs";
 import { isWordText } from "@/lib/utils/storage-slots";
+import { accountIdParts } from "@/lib/web-client";
 
 // A note or transaction script, simulated against one of the sandbox's
 // accounts: as if the account consumed a note made from the script, or ran
@@ -29,13 +36,23 @@ const TargetSimulation = ({
   const [targetAccountId, setTargetAccountId] = useState("");
   const [argument, setArgument] = useState("");
   const [noteStorage, setNoteStorage] = useState<string[]>([]);
+  const [noteArguments, setNoteArguments] = useState<ProcedureArguments>({});
+  // One typed field per field of the note's storage schema, when the package
+  // has one and the form can type every field. Raw felts otherwise.
+  const noteStorageSchema = script.metadata?.noteStorage;
+  const noteParams = useMemo(
+    () => noteStorageSchema && noteStorageParams(noteStorageSchema.fields),
+    [noteStorageSchema],
+  );
   const [faucetAccountId, setFaucetAccountId] = useState("");
   const [amount, setAmount] = useState("");
   const [running, setRunning] = useState(false);
   const [simulation, setSimulation] = useState<SimulatedTransaction>();
   const blocked = notReady(script);
   const argumentValid = argument.trim() === "" || isWordText(argument);
-  const inputsValid = noteStorage.every(isFelt);
+  const inputsValid = noteParams
+    ? noteStorageReady(noteParams, noteArguments)
+    : noteStorage.every(isFelt);
   // In the asset's base units, like a note's assets.
   const amountValid = faucetAccountId === "" || /^[0-9]+$/.test(amount.trim());
   const idPrefix = `simulate-${script.id}`;
@@ -75,47 +92,77 @@ const TargetSimulation = ({
         </div>
         {isNote && (
           <>
-            <div className="grid content-start gap-1.5">
-              <Label>Note inputs</Label>
-              {noteStorage.map((input, index) => (
-                // biome-ignore lint/suspicious/noArrayIndexKey: rows have no stable id, only their position.
-                <div key={index} className="flex items-center gap-1.5">
-                  <Input
-                    aria-label={`Note input ${index + 1}`}
-                    className="font-mono"
-                    placeholder="Felt"
-                    value={input}
-                    aria-invalid={!isFelt(input)}
-                    onChange={(event) =>
-                      setNoteStorage(
-                        noteStorage.with(index, event.target.value),
-                      )
-                    }
+            {noteParams ? (
+              <div className="grid content-start gap-1.5 sm:col-span-2">
+                <Label>Note inputs</Label>
+                {noteParams.length === 0 ? (
+                  <p className="text-xs text-muted-foreground">
+                    This note has no inputs.
+                  </p>
+                ) : (
+                  <ProcedureArgumentsForm
+                    idPrefix={`${idPrefix}-note`}
+                    params={noteParams}
+                    value={noteArguments}
+                    onChange={setNoteArguments}
                   />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon-sm"
-                    aria-label={`Remove note input ${index + 1}`}
-                    onClick={() =>
-                      setNoteStorage(noteStorage.toSpliced(index, 1))
-                    }
-                  >
-                    <Trash2 />
-                  </Button>
-                </div>
-              ))}
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                className="justify-self-start"
-                onClick={() => setNoteStorage([...noteStorage, ""])}
-              >
-                <Plus />
-                Add input
-              </Button>
-            </div>
+                )}
+              </div>
+            ) : (
+              <div className="grid content-start gap-1.5">
+                <Label>Note inputs</Label>
+                {noteStorageSchema && (
+                  <p className="text-xs text-muted-foreground">
+                    Felts, in the order of the note's fields:{" "}
+                    {noteStorageSchema.fields
+                      .map(
+                        ({ name, type, width }) =>
+                          `${name} (${type}${width === undefined ? "" : `, ${width} felt${width === 1 ? "" : "s"}`})`,
+                      )
+                      .join(", ")}
+                    .
+                  </p>
+                )}
+                {noteStorage.map((input, index) => (
+                  // biome-ignore lint/suspicious/noArrayIndexKey: rows have no stable id, only their position.
+                  <div key={index} className="flex items-center gap-1.5">
+                    <Input
+                      aria-label={`Note input ${index + 1}`}
+                      className="font-mono"
+                      placeholder="Felt"
+                      value={input}
+                      aria-invalid={!isFelt(input)}
+                      onChange={(event) =>
+                        setNoteStorage(
+                          noteStorage.with(index, event.target.value),
+                        )
+                      }
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label={`Remove note input ${index + 1}`}
+                      onClick={() =>
+                        setNoteStorage(noteStorage.toSpliced(index, 1))
+                      }
+                    >
+                      <Trash2 />
+                    </Button>
+                  </div>
+                ))}
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  className="justify-self-start"
+                  onClick={() => setNoteStorage([...noteStorage, ""])}
+                >
+                  <Plus />
+                  Add input
+                </Button>
+              </div>
+            )}
             <div className="grid content-start gap-1.5">
               <Label htmlFor={`${idPrefix}-amount`}>
                 Asset
@@ -161,7 +208,13 @@ const TargetSimulation = ({
             const { result, account } = await simulate({
               targetAccountId,
               argument,
-              noteStorage,
+              noteStorage: noteParams
+                ? noteStorageFelts({
+                    params: noteParams,
+                    args: noteArguments,
+                    accountIdParts,
+                  })
+                : noteStorage,
               faucetAccountId,
               amount: faucetAccountId === "" ? 0n : BigInt(amount.trim()),
             });

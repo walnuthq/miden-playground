@@ -119,6 +119,49 @@ export type ScriptFilePath = (typeof scriptFilePaths)[number];
 
 export type ScriptFiles = Partial<Record<ScriptFilePath, string>>;
 
+// An account component's storage slot, as the package's storage schema
+// describes it (api-compile reads it from the account component metadata the
+// toolchain embeds). Types are the schema's names: `word`, `felt`, or a named
+// type such as `miden::standards::auth::pub_key`.
+export type StorageSlotSchema = {
+  // The slot's full name, e.g. `counter_contract::counter_contract::count_map`.
+  name: string;
+  description?: string;
+} & (
+  | {
+      type: "value";
+      valueType: string;
+      // A word in hex (`Word.toHex()`), when the schema gives a default.
+      defaultValue?: string;
+    }
+  | { type: "map"; keyType: string; valueType: string }
+);
+
+export type StorageSchema = { slots: StorageSlotSchema[] };
+
+// A field of a note's storage (its inputs). The fields' felts follow each
+// other in the note's storage, in declaration order.
+export type NoteStorageField = {
+  // The field's WIT name, in kebab case, e.g. `target-account-id`.
+  name: string;
+  // Its WIT type name: `felt`, `word`, `account-id`, `u64`... or a record the
+  // note defines.
+  type: string;
+  // The felts it takes. Absent when that varies (an `option` or a `variant`).
+  width?: number;
+  description?: string;
+};
+
+export type NoteStorageSchema = { name: string; fields: NoteStorageField[] };
+
+// What the API returns of a package besides its manifest. A key is absent when
+// the package has none, or when it was compiled before api-compile reported
+// it.
+export type PackageMetadata = {
+  storage?: StorageSchema;
+  noteStorage?: NoteStorageSchema;
+};
+
 export type Script = {
   id: string;
   name: string;
@@ -137,6 +180,10 @@ export type Script = {
   exports: Export[];
   procedureExports: ProcedureExport[];
   dependencies: Dependency[];
+  // The package's schemas. Null or missing for a draft, a failed build, a
+  // built-in script, and a script compiled, persisted or saved before the API
+  // returned them: the Simulate tab then works without.
+  metadata?: PackageMetadata | null;
   createdAt: number;
   updatedAt: number;
 };
@@ -155,6 +202,7 @@ export type CompiledPackage = Pick<
   | "error"
   | "warnings"
   | "dependencies"
+  | "metadata"
 >;
 
 export type MidenProjectToml = {

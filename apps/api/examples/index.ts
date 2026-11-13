@@ -20,7 +20,7 @@ import initTxScriptToml from "@/examples/miden-bank/init-tx-script/miden-project
 import initTxScriptRust from "@/examples/miden-bank/init-tx-script/src/lib.rs";
 import withdrawRequestNoteToml from "@/examples/miden-bank/withdraw-request-note/miden-project.toml";
 import withdrawRequestNoteRust from "@/examples/miden-bank/withdraw-request-note/src/lib.rs";
-import type { Export, PackageType } from "@/lib/types";
+import type { Export, PackageMetadata, PackageType } from "@/lib/types";
 
 export type CompiledExample = {
   sourcesHash: string;
@@ -33,6 +33,8 @@ export type CompiledExample = {
       masp: string;
       commitment: string;
       exports: Export[];
+      // The package's schemas, null when it has none.
+      metadata?: PackageMetadata | null;
       dependencies: { name: string; commitment: string }[];
     }
   >;

@@ -140,6 +140,7 @@ const reducer = (state: State, action: ScriptAction): State => {
         error,
         warnings,
         dependencies,
+        metadata,
       } = script;
       return {
         ...state,
@@ -157,6 +158,7 @@ const reducer = (state: State, action: ScriptAction): State => {
                 error,
                 warnings,
                 dependencies,
+                metadata,
                 updatedAt: Date.now(),
               }
             : item,

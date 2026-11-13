@@ -33,7 +33,7 @@ const ProcedureArgumentsForm = ({
   disabled?: boolean;
 }) => (
   <div className="grid gap-3 sm:grid-cols-2">
-    {params.map(({ name, type, rawType }) => {
+    {params.map(({ name, type, rawType, label }) => {
       const id = `${idPrefix}-${name}`;
       if (!type) {
         return (
@@ -61,7 +61,9 @@ const ProcedureArgumentsForm = ({
         <div key={name} className="grid gap-1.5">
           <Label htmlFor={id}>
             {name}
-            <span className="font-normal text-muted-foreground">{type}</span>
+            <span className="font-normal text-muted-foreground">
+              {label ?? type}
+            </span>
           </Label>
           {(argument.type === "Felt" || argument.type === "Word") && (
             <Input

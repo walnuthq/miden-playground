@@ -117,20 +117,23 @@ const MapEntries = ({
 
 // An account component's storage slots, their values edited in place: a felt
 // or a word for a value slot, key/value entries for a map. `allowSlotEdits`
-// adds and removes slots, for a component whose slots aren't known. It holds
-// only the "new slot" row's state: the slots are the caller's.
+// adds and removes slots, for a component whose slots aren't known.
+// `descriptions`, by slot name, show under the names. It holds only the "new
+// slot" row's state: the slots are the caller's.
 const StorageSlotsEditor = ({
   storageSlots,
   onChange,
   disabled = false,
   allowSlotEdits = false,
   namePlaceholder = "package::component::field",
+  descriptions = {},
 }: {
   storageSlots: StorageSlot[];
   onChange: (storageSlots: StorageSlot[]) => void;
   disabled?: boolean;
   allowSlotEdits?: boolean;
   namePlaceholder?: string;
+  descriptions?: Record<string, string>;
 }) => {
   const [name, setName] = useState("");
   const [type, setType] = useState<StorageSlotType>("value");
@@ -177,6 +180,11 @@ const StorageSlotsEditor = ({
               </Button>
             )}
           </div>
+          {descriptions[storageSlot.name] && (
+            <p className="text-xs text-muted-foreground">
+              {descriptions[storageSlot.name]}
+            </p>
+          )}
           {storageSlot.type === "value" ? (
             <WordInput
               label={`${storageSlot.name} value`}

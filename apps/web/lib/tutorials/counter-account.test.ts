@@ -15,6 +15,7 @@ type Snapshot = {
     string,
     {
       masp: string;
+      metadata: unknown;
       commitment: string;
       exports: {
         Procedure: {
@@ -43,6 +44,7 @@ describe("the embedded counter-account package", () => {
   test("is the counter example's compiled.json snapshot", () => {
     assert.equal(counterAccountScript.commitment, snapshot.commitment);
     assert.equal(counterAccountScript.masp, snapshot.masp);
+    assert.deepEqual(counterAccountScript.metadata, snapshot.metadata);
     assert.deepEqual(
       counterAccountScript.procedureExports.map(
         ({ path, digest, readOnly, attributes }) => ({

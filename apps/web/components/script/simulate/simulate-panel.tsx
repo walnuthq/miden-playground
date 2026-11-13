@@ -10,6 +10,7 @@ import useSimulation from "@/hooks/use-simulation";
 import { storageChanges } from "@/lib/simulation/run";
 import type { Script } from "@/lib/types/script";
 import { formatProcedureExportPath } from "@/lib/utils/script";
+import { storageSlotDescriptions } from "@/lib/utils/storage-schema";
 import {
   applyStorageChanges,
   storageSlotsValid,
@@ -26,6 +27,8 @@ const AccountComponentSimulation = ({
   const [simulation, setSimulation] = useState<SimulatedTransaction>();
   const blocked = notReady(script);
   const slotsValid = storageSlotsValid(storageSlots);
+  // With the package's storage schema, its slots are the ones there are.
+  const schema = script.metadata?.storage;
   return (
     <div className="flex flex-col gap-3">
       <p className="text-xs text-muted-foreground">
@@ -39,7 +42,8 @@ const AccountComponentSimulation = ({
           <StorageSlotsEditor
             storageSlots={storageSlots}
             onChange={setStorageSlots}
-            allowSlotEdits
+            allowSlotEdits={!schema}
+            descriptions={schema && storageSlotDescriptions(schema)}
             namePlaceholder={`${script.name.replace(/[^A-Za-z0-9_]/g, "_")}::component::field`}
           />
           {!slotsValid && (

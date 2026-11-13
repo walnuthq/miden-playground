@@ -7,6 +7,7 @@ import {
 } from "@/db/packages";
 import { notFound } from "@/lib/errors";
 import { buildFiles, ownFiles } from "@/lib/package-files";
+import { packageMetadata } from "@/lib/package-metadata";
 import { projectTemplateFiles } from "@/lib/templates";
 import { generateCargoToml, generateMidenProjectToml } from "@/lib/toml";
 import {
@@ -14,6 +15,7 @@ import {
   type Dependency,
   type Export,
   type Manifest,
+  type PackageMetadata,
   type PackageType,
   type ScriptFiles,
   scriptFilePaths,
@@ -58,6 +60,7 @@ export const createPackage = async ({
     masp: string;
     commitment: string;
     exports: Export[];
+    metadata: PackageMetadata | null;
   };
 }) => {
   const files = {
@@ -93,7 +96,7 @@ type MasmOutput = { source: string } | { error: string };
 // cargo-miden's output alone.
 type CompileResponse =
   | { built: false; stdout: string; stderr: string }
-  | {
+  | ({
       built: true;
       stdout: string;
       stderr: string;
@@ -106,7 +109,9 @@ type CompileResponse =
       // The sources plus the lockfile the build used.
       files: Record<string, string>;
       masm?: MasmOutput;
-    };
+      // An account component's storage slots and a note's storage fields:
+      // absent for other packages, and from an api-compile older than them.
+    } & PackageMetadata);
 
 // The MASM tab's content: for reading only, it calls library procedures
 // without including them, so it doesn't reassemble into the package.
@@ -170,6 +175,8 @@ export const compilePackage = async ({
       masm: "",
       dependencies,
       exports: [],
+      // Nor schemas: the last build's would describe other code.
+      metadata: null,
     });
     return {
       id,
@@ -183,6 +190,7 @@ export const compilePackage = async ({
       commitment: "",
       masp: "",
       exports: [],
+      metadata: null,
       dependencies: dependenciesPackages.map(
         ({ id, name, type, commitment }) => ({
           id,
@@ -199,9 +207,12 @@ export const compilePackage = async ({
     commitment,
     manifest,
     readOnly,
+    storage,
+    noteStorage,
     files: storedFiles,
     masm: masmOutput,
   } = build;
+  const metadata = packageMetadata({ storage, noteStorage });
   const exports = manifest.exports
     .filter(({ Procedure: { signature } }) => signature?.abi === 3)
     // Stored with each export, in the `exports` column.
@@ -227,6 +238,7 @@ export const compilePackage = async ({
     commitment,
     exports,
     dependencies,
+    metadata,
   });
   return {
     id,
@@ -241,6 +253,7 @@ export const compilePackage = async ({
     commitment,
     masp,
     exports,
+    metadata,
     dependencies: dependenciesPackages.map((dependencyPackage) => {
       const dependency = manifest.dependencies.find(
         ({ name }) => name.replaceAll("_", "-") === dependencyPackage.name,

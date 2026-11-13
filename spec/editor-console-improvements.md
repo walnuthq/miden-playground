@@ -6,7 +6,7 @@ Done: item 1 (PR #731), item 2 (PR #732), item 3 (PR #735), item 4 (PR
 console" pass (see "Scoring"), item 7 (PRs #745 and #746), item 12 (PRs #747
 and #748: header, Explorer with file tabs), item 14 (PR #749: minimap and font
 size; word wrap and Vim dropped). In progress: item 11 (the console's Simulate
-tab, see its section). Next: the P2 items 8 to 10, each a separate product
+tab, PRs #831 to #833 and #834, open; see its section). Next: the P2 items 8 to 10, each a separate product
 decision; then 13 and 15.
 
 The code editor UX of the scripts feature (`/scripts/:id`) is behind other
@@ -529,9 +529,12 @@ account's changes. Nothing is proven, submitted or saved.
 
 Shipped so far: the groundwork (PR #831), the tab for account components,
 with slots added by hand (PR #832), then note and transaction scripts
-against one of the sandbox's accounts. Left: the storage schema and the
-typed note inputs from api-compile (note inputs are a list of felts until
-then). `docs/claude/simulation.md` has the rules.
+against one of the sandbox's accounts (PR #833), then the storage schema and
+typed note inputs from api-compile (miden-source-code-verification
+#135, then #834: the `metadata` column, the slots listed
+from the schema, one typed field per note storage field). Nothing left but
+the merges and the api-compile deploy. `docs/claude/simulation.md` has the
+rules.
 
 - Account components: the package's storage slots, editable, then its
   procedures with an Invoke button each. They run on a throwaway account
@@ -551,9 +554,10 @@ then). `docs/claude/simulation.md` has the rules.
   transaction scripts run on the regular client against the real account:
   `executeTransaction` and `executeProgram` write nothing.
 - Storage slots (and typed note inputs) come from the package: its account
-  component metadata and note storage schema sections, which api-compile has
-  to return (miden-source-code-verification), then the API (a `metadata`
-  column). Until a package has them, slots are added by hand.
+  component metadata and note storage schema sections, which api-compile
+  returns (`storage`, `noteStorage`), then the API (a `metadata` column).
+  Until a package has them, slots are added by hand and note inputs are raw
+  felts.
 - Built from components the account page's Invoke flow can adopt
   (`components/procedures`), with the argument encoding in
   `lib/utils/procedure-inputs.ts`. That flow isn't changed here.
