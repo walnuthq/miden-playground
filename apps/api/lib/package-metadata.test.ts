@@ -12,6 +12,9 @@ const storage = {
     },
   ],
 };
+const accountProcedures = [
+  "0x1111111111111111111111111111111111111111111111111111111111111111",
+];
 const noteStorage = {
   name: "p2id-note",
   fields: [{ name: "target-account-id", type: "account-id", width: 2 }],
@@ -29,6 +32,31 @@ describe("packageMetadata", () => {
     assert.equal(
       packageMetadata({ storage: undefined, noteStorage: undefined }),
       null,
+    );
+  });
+
+  it("keeps a script's account procedures, an empty list included", () => {
+    assert.deepEqual(packageMetadata({ accountProcedures }), {
+      accountProcedures,
+    });
+    // The script calls no account procedure: every account can run it.
+    assert.deepEqual(packageMetadata({ accountProcedures: [] }), {
+      accountProcedures: [],
+    });
+  });
+
+  it("drops account procedures api-compile couldn't tell", () => {
+    assert.equal(packageMetadata({ accountProcedures: null }), null);
+    assert.deepEqual(
+      packageMetadata({ noteStorage, accountProcedures: null }),
+      { noteStorage },
+    );
+  });
+
+  it("keeps every key together", () => {
+    assert.deepEqual(
+      packageMetadata({ storage, noteStorage, accountProcedures }),
+      { storage, noteStorage, accountProcedures },
     );
   });
 });

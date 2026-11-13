@@ -109,8 +109,9 @@ type CompileResponse =
       // The sources plus the lockfile the build used.
       files: Record<string, string>;
       masm?: MasmOutput;
-      // An account component's storage slots and a note's storage fields:
-      // absent for other packages, and from an api-compile older than them.
+      // An account component's storage slots, a note's storage fields and a
+      // script's account procedures: absent for other packages, and from an
+      // api-compile older than them.
     } & PackageMetadata);
 
 // The MASM tab's content: for reading only, it calls library procedures
@@ -209,10 +210,15 @@ export const compilePackage = async ({
     readOnly,
     storage,
     noteStorage,
+    accountProcedures,
     files: storedFiles,
     masm: masmOutput,
   } = build;
-  const metadata = packageMetadata({ storage, noteStorage });
+  const metadata = packageMetadata({
+    storage,
+    noteStorage,
+    accountProcedures,
+  });
   const exports = manifest.exports
     .filter(({ Procedure: { signature } }) => signature?.abi === 3)
     // Stored with each export, in the `exports` column.

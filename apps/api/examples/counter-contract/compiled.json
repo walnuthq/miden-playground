@@ -225,7 +225,12 @@
           }
         }
       ],
-      "metadata": null,
+      "metadata": {
+        "accountProcedures": [
+          "0xd5fc8175e38bc8de732d1b74a6622043e302b6d4252ab80b494927312246b159",
+          "0xfd4baa4cdaad14d4649856647535ba44b49b8bd6004b57f183801ccc5b44b879"
+        ]
+      },
       "dependencies": [
         {
           "name": "counter-account",

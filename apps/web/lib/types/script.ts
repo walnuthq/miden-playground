@@ -160,6 +160,14 @@ export type NoteStorageSchema = { name: string; fields: NoteStorageField[] };
 export type PackageMetadata = {
   storage?: StorageSchema;
   noteStorage?: NoteStorageSchema;
+  // The account procedures a note or transaction script `call`s, by MAST root
+  // (`0x…` hex, sorted): the Simulate tab's target dropdown lists only the
+  // accounts whose code has all of them (`useScriptTargetAccounts`). `[]`
+  // when it calls none: every account can run it. `null` when api-compile
+  // couldn't tell (a dynamic call is reachable), and absent for other
+  // packages and packages compiled before api-compile reported it: both mean
+  // no filter.
+  accountProcedures?: string[] | null;
 };
 
 export type Script = {

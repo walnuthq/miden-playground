@@ -65,6 +65,7 @@ import {
   getIdentifierPart,
   getRoutingParametersPart,
 } from "@/lib/utils/account";
+import { missingProcedures } from "@/lib/utils/account-procedures";
 import { stringToKeyValues } from "@/lib/utils/component";
 import {
   assembledFromMasm,
@@ -183,6 +184,34 @@ export const clientGetAccounts = async ({
     }),
   );
   return accounts.filter((account) => account !== undefined);
+};
+
+// The procedure roots an account's code lacks (`missingProcedures`), for the
+// Simulate tab's target dropdown. It only reads the store, never writes it:
+// undefined when the account isn't there or can't be read.
+export const clientAccountMissingProcedures = async ({
+  client,
+  accountId,
+  roots,
+}: {
+  client: WebClientType;
+  accountId: string;
+  roots: string[];
+}) => {
+  try {
+    const wasmAccount = await client.getAccount(
+      WasmAccountId.fromHex(accountId),
+    );
+    if (!wasmAccount) {
+      return undefined;
+    }
+    const code = wasmAccount.code();
+    return missingProcedures(roots, (root) =>
+      code.hasProcedure(WasmWord.fromHex(root)),
+    );
+  } catch {
+    return undefined;
+  }
 };
 
 export const clientGetAllTransactions = (client: WebClientType) =>
