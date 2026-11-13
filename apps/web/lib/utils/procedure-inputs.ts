@@ -186,3 +186,15 @@ export const decodeProcedureResult = (
     .map(String)
     .join(", ")}]`;
 };
+
+// An execution error as the SDK reports it, without miette's hint and its
+// debug formatting: the diagnostic's message alone.
+export const cleanExecutionError = (error: string) =>
+  error
+    .split("\n")
+    .filter((line) => !line.startsWith("NOTE: If you're looking for the fancy"))
+    .map((line) =>
+      line.replace(/^Diagnostic \{ message: "(.*)", labels: .*$/, "$1"),
+    )
+    .join("\n")
+    .trim();

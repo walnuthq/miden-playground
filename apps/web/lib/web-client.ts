@@ -65,11 +65,13 @@ import {
   getIdentifierPart,
   getRoutingParametersPart,
 } from "@/lib/utils/account";
+import { stringToKeyValues } from "@/lib/utils/component";
 import {
   assembledFromMasm,
   entryPointExport,
   invokeProcedureCustomTransactionScript,
 } from "@/lib/utils/script";
+import { wordFelts } from "@/lib/utils/storage-slots";
 
 export const randomWord = () => {
   const bytes = new Uint8Array(32);
@@ -878,24 +880,23 @@ export const wasmNoteToNote = ({
   };
 };
 
+// Values, map keys and map values are written as a felt (a word's first
+// element) or as a whole word in hex (`wordFelts`).
+const wasmWordFromText = (text: string) =>
+  new WasmWord(new BigUint64Array(wordFelts(text)));
+
 export const wasmStorageSlotFromStorageSlot = (storageSlot: StorageSlot) => {
   if (storageSlot.type === "value") {
     return WasmStorageSlot.fromValue(
       storageSlot.name,
-      new WasmWord(new BigUint64Array([BigInt(storageSlot.value), 0n, 0n, 0n])),
+      wasmWordFromText(storageSlot.value),
     );
-  } else {
-    const storageMap = new WasmStorageMap();
-    const keyValuePairs = storageSlot.value.split(",");
-    for (const keyValuePair of keyValuePairs) {
-      const [key = "", value = ""] = keyValuePair.split(":");
-      storageMap.insert(
-        new WasmWord(new BigUint64Array([BigInt(key), 0n, 0n, 0n])),
-        new WasmWord(new BigUint64Array([BigInt(value), 0n, 0n, 0n])),
-      );
-    }
-    return WasmStorageSlot.map(storageSlot.name, storageMap);
   }
+  const storageMap = new WasmStorageMap();
+  for (const { key, value } of stringToKeyValues(storageSlot.value)) {
+    storageMap.insert(wasmWordFromText(key), wasmWordFromText(value));
+  }
+  return WasmStorageSlot.map(storageSlot.name, storageMap);
 };
 
 export const wasmWordFromHex = (value: string) => {

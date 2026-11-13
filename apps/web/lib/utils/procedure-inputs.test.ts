@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, test } from "node:test";
 import type { MidenRawType, Signature } from "../types/script.ts";
 import {
+  cleanExecutionError,
   decodeProcedureResult,
   encodeProcedureArguments,
   isFelt,
@@ -151,5 +152,24 @@ describe("decodeProcedureResult", () => {
 
   test("nothing when the procedure returns nothing", () => {
     assert.equal(decodeProcedureResult(signature([]), [1n]), "");
+  });
+});
+
+describe("cleanExecutionError", () => {
+  test("keeps the diagnostic's message", () => {
+    assert.equal(
+      cleanExecutionError(
+        [
+          "failed to execute program: transaction execution failed: failed to execute transaction kernel program:",
+          'Diagnostic { message: "assertion failed with error code: 12", labels: "[LabeledSpan { label: None }]" }',
+          "NOTE: If you're looking for the fancy error reports, install miette with the `fancy` feature, or write your own and hook it up with miette::set_hook().",
+          "",
+        ].join("\n"),
+      ),
+      [
+        "failed to execute program: transaction execution failed: failed to execute transaction kernel program:",
+        "assertion failed with error code: 12",
+      ].join("\n"),
+    );
   });
 });

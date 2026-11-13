@@ -5,8 +5,9 @@ Done: item 1 (PR #731), item 2 (PR #732), item 3 (PR #735), item 4 (PR
 #736), item 5 (PR #737), item 6 (PR #742), which completes the "editor and
 console" pass (see "Scoring"), item 7 (PRs #745 and #746), item 12 (PRs #747
 and #748: header, Explorer with file tabs), item 14 (PR #749: minimap and font
-size; word wrap and Vim dropped). Next: the P2 items 8 to 11, each a separate
-product decision; then 13 and 15.
+size; word wrap and Vim dropped). In progress: item 11 (the console's Simulate
+tab, see its section). Next: the P2 items 8 to 10, each a separate product
+decision; then 13 and 15.
 
 The code editor UX of the scripts feature (`/scripts/:id`) is behind other
 blockchain playgrounds. This document compares it with Solana Playground
@@ -525,6 +526,10 @@ mostly a shortcut to them.
 Plan (2026-11-13), in progress. A **Simulate** tab in the console, next to
 **Output** (the log): it runs the compiled package locally and shows the
 account's changes. Nothing is proven, submitted or saved.
+
+Shipped so far: the groundwork (PR #831) and the tab for account components,
+with slots added by hand. Left: the storage schema from api-compile, then
+note and transaction scripts. `docs/claude/simulation.md` has the rules.
 
 - Account components: the package's storage slots, editable, then its
   procedures with an Invoke button each. They run on a throwaway account

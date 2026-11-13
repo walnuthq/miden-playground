@@ -18,9 +18,13 @@ export type TransactionBaseline = Pick<
 const TransactionEffects = ({
   executedTransaction,
   baseline,
+  accountLabel,
 }: {
   executedTransaction: WasmExecutedTransactionType;
   baseline?: TransactionBaseline;
+  // Names the account instead of its address, for one that has none worth
+  // showing: "simulated account".
+  accountLabel?: string;
 }) => {
   const accountId = executedTransaction.accountId().toString();
   const consumedNotes = executedTransaction.inputNotes().numNotes();
@@ -160,13 +164,19 @@ const TransactionEffects = ({
         </p>
       )}
       <h5 className="font-semibold">
-        The account with ID{" "}
-        <AccountAddress
-          id={accountId}
-          withLink={false}
-          withTooltip={false}
-          withCopyButton={false}
-        />{" "}
+        {accountLabel ? (
+          `The ${accountLabel}`
+        ) : (
+          <>
+            The account with ID{" "}
+            <AccountAddress
+              id={accountId}
+              withLink={false}
+              withTooltip={false}
+              withCopyButton={false}
+            />
+          </>
+        )}{" "}
         will be modified as follows:
       </h5>
       <h5 className="font-semibold">Storage changes:</h5>
