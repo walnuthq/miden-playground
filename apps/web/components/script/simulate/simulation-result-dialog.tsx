@@ -21,6 +21,9 @@ export type SimulatedTransaction = {
   executedTransaction: WasmExecutedTransactionType;
   // The account's state the transaction ran from.
   baseline: TransactionBaseline;
+  // Whether it ran on a throwaway account, which the effects then name
+  // instead of showing an address.
+  throwaway: boolean;
 };
 
 // A simulated transaction's effects: the transaction dialog's preview without
@@ -44,8 +47,8 @@ const SimulationResultDialog = ({
       <DialogHeader>
         <DialogTitle>Simulation of {simulation?.name}</DialogTitle>
         <DialogDescription>
-          Nothing was submitted: the transaction ran locally, on a throwaway
-          account.
+          Nothing was submitted: the transaction ran locally
+          {simulation?.throwaway ? ", on a throwaway account" : ""}.
         </DialogDescription>
       </DialogHeader>
       {simulation && (
@@ -59,7 +62,9 @@ const SimulationResultDialog = ({
           <TransactionEffects
             executedTransaction={simulation.executedTransaction}
             baseline={simulation.baseline}
-            accountLabel="simulated account"
+            accountLabel={
+              simulation.throwaway ? "simulated account" : undefined
+            }
           />
         </>
       )}

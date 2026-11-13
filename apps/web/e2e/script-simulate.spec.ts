@@ -1,6 +1,11 @@
 import { expect, type Page, test } from "@playwright/test";
 import { COMPILED, createCounterScript, replaceInEditor } from "./editor";
-import { logBrowserErrors, TRANSACTION_TIMEOUT } from "./tutorial";
+import { launchExample } from "./example";
+import {
+  logBrowserErrors,
+  selectOption,
+  TRANSACTION_TIMEOUT,
+} from "./tutorial";
 
 const SLOT = "counter_account::counter_contract::count_map";
 
@@ -188,5 +193,120 @@ test("script: simulate an account component", async ({ page }) => {
     await expect(
       page.getByRole("dialog").getByText("Returned: 8"),
     ).toBeVisible();
+  });
+});
+
+// Picks the Simulate tab's target account.
+const selectTarget = async (page: Page, name: string) => {
+  await editorConsole(page)
+    .getByRole("button", { name: "Select account" })
+    .click();
+  await page.getByRole("menuitemradio", { name, exact: true }).click();
+};
+
+const simulate = async (page: Page, script: string) => {
+  await editorConsole(page)
+    .getByRole("button", { name: "Simulate", exact: true })
+    .click();
+  const dialog = page
+    .getByRole("dialog")
+    .filter({ hasText: `Simulation of ${script}` });
+  await expect(dialog.getByText("Storage changes:")).toBeVisible();
+  // The counter goes from 0 to 1, on the deployed account.
+  await expect(dialog.getByText("count_map")).toBeVisible();
+  await expect(dialog.getByRole("button", { name: /submit/i })).toHaveCount(0);
+  await expect(
+    dialog.getByRole("button", { name: "Apply to storage" }),
+  ).toHaveCount(0);
+  return dialog;
+};
+
+test("script: simulate a note and a transaction script", async ({ page }) => {
+  logBrowserErrors(page);
+
+  await test.step("launch the counter contract example", async () => {
+    await launchExample(page, {
+      title: "Counter Contract",
+      accountName: "Counter Contract",
+    });
+  });
+
+  await test.step("the note runs as if the counter consumed it", async () => {
+    await page.getByRole("link", { name: "increment-note" }).first().click();
+    await expect(page).toHaveURL(/\/scripts\//);
+    await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
+    const run = editorConsole(page).getByRole("button", {
+      name: "Simulate",
+      exact: true,
+    });
+    await expect(run).toBeDisabled();
+    await selectTarget(page, "Counter Contract");
+    const dialog = await simulate(page, "increment-note");
+    await expect(
+      dialog.getByText("1 note will be consumed", { exact: false }),
+    ).toBeVisible();
+    await dialog.getByRole("button", { name: "Close" }).first().click();
+    await editorConsole(page).getByRole("tab", { name: "Output" }).click();
+    await expect(
+      editorConsole(page).getByText(
+        "Simulated increment-note on Counter Contract: 1 storage change.",
+        { exact: true },
+      ),
+    ).toBeVisible();
+  });
+
+  await test.step("an invalid argument blocks the run", async () => {
+    await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
+    await editorConsole(page).getByLabel("Note argument").fill("nope");
+    await expect(
+      editorConsole(page).getByRole("button", {
+        name: "Simulate",
+        exact: true,
+      }),
+    ).toBeDisabled();
+  });
+
+  await test.step("a transaction script runs against the counter", async () => {
+    await page.goto("/scripts");
+    await page.getByRole("button", { name: "Create new script" }).click();
+    const create = page
+      .getByRole("dialog")
+      .filter({ hasText: "Create Script" });
+    await create.getByLabel("Name").fill("counter-script");
+    await selectOption(page, "Type", "Transaction Script");
+    await selectOption(page, "Example", "Counter Script");
+    await create.getByRole("button", { name: "Create" }).click();
+    await expect(page).toHaveURL(/\/scripts\/[0-9a-z_-]+$/);
+    await page.getByRole("tab", { name: "Manifest" }).click();
+    await page.getByRole("button", { name: "Add dependency" }).click();
+    const dependency = page
+      .getByRole("dialog")
+      .filter({ hasText: "Add Dependency" });
+    await selectOption(page, "Dependency", "counter-account");
+    await dependency.getByRole("button", { name: "Add", exact: true }).click();
+    await expect(dependency).toBeHidden();
+    await page.getByRole("button", { name: "Compile" }).click();
+    await expect(page.getByText(COMPILED).last()).toBeVisible({
+      timeout: TRANSACTION_TIMEOUT,
+    });
+    await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
+    await selectTarget(page, "Counter Contract");
+    await editorConsole(page).getByLabel("Script argument").fill("7");
+    await simulate(page, "counter-script");
+  });
+
+  await test.step("nothing was submitted", async () => {
+    // The example's deployment is the sandbox's only account, at count 0.
+    await page.goto("/accounts");
+    await page
+      .getByRole("cell", { name: "Counter Contract", exact: true })
+      .click();
+    await page.getByRole("tab", { name: "Components" }).click();
+    const row = page
+      .getByRole("row")
+      .filter({ has: page.getByText("get_count", { exact: true }) })
+      .last();
+    await row.getByRole("button", { name: "Invoke" }).click();
+    await expect(row.getByRole("cell").last()).toHaveText(/^0\s*Invoke$/);
   });
 });

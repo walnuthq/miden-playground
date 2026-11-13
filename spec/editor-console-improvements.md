@@ -527,9 +527,11 @@ Plan (2026-11-13), in progress. A **Simulate** tab in the console, next to
 **Output** (the log): it runs the compiled package locally and shows the
 account's changes. Nothing is proven, submitted or saved.
 
-Shipped so far: the groundwork (PR #831) and the tab for account components,
-with slots added by hand. Left: the storage schema from api-compile, then
-note and transaction scripts. `docs/claude/simulation.md` has the rules.
+Shipped so far: the groundwork (PR #831), the tab for account components,
+with slots added by hand (PR #832), then note and transaction scripts
+against one of the sandbox's accounts. Left: the storage schema and the
+typed note inputs from api-compile (note inputs are a list of felts until
+then). `docs/claude/simulation.md` has the rules.
 
 - Account components: the package's storage slots, editable, then its
   procedures with an Invoke button each. They run on a throwaway account

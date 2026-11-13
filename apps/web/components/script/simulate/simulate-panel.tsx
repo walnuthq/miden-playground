@@ -1,9 +1,11 @@
 import { useState } from "react";
 import ProceduresList from "@/components/procedures/procedures-list";
 import StorageSlotsEditor from "@/components/procedures/storage-slots-editor";
+import { notReady } from "@/components/script/simulate/not-ready";
 import SimulationResultDialog, {
   type SimulatedTransaction,
 } from "@/components/script/simulate/simulation-result-dialog";
+import TargetSimulation from "@/components/script/simulate/target-simulation";
 import useSimulation from "@/hooks/use-simulation";
 import { storageChanges } from "@/lib/simulation/run";
 import type { Script } from "@/lib/types/script";
@@ -12,16 +14,6 @@ import {
   applyStorageChanges,
   storageSlotsValid,
 } from "@/lib/utils/storage-slots";
-
-// Why the script can't be simulated now, or nothing when it can.
-const notReady = ({ status, masp }: Script) =>
-  status === "draft"
-    ? "Compile the script to simulate it: its source changed since the last compile."
-    : status === "error"
-      ? "Fix the compile errors to simulate the script."
-      : masp === ""
-        ? "Compile the script to simulate it."
-        : undefined;
 
 const AccountComponentSimulation = ({
   script,
@@ -76,6 +68,7 @@ const AccountComponentSimulation = ({
                   value: result.value,
                   executedTransaction: result.executedTransaction,
                   baseline: account,
+                  throwaway: true,
                 });
               }
               return { value: result.value };
@@ -110,9 +103,12 @@ const SimulatePanel = ({
 }) =>
   script.type === "account-component" ? (
     <AccountComponentSimulation script={script} onFailure={onFailure} />
+  ) : script.type === "note" || script.type === "transaction-script" ? (
+    <TargetSimulation script={script} onFailure={onFailure} />
   ) : (
     <p className="text-xs text-muted-foreground">
-      Only account components can be simulated for now.
+      Only account components, note scripts and transaction scripts can be
+      simulated.
     </p>
   );
 

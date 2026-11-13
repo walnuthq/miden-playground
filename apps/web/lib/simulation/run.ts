@@ -5,17 +5,23 @@ import {
   AdviceInputs as WasmAdviceInputs,
   type ExecutedTransaction as WasmExecutedTransactionType,
   MidenArrays as WasmMidenArrays,
+  NoteAndArgs as WasmNoteAndArgs,
+  Package as WasmPackage,
   TransactionRequestBuilder as WasmTransactionRequestBuilder,
+  TransactionScript as WasmTransactionScript,
+  Word as WasmWord,
   type WebClient as WebClientType,
 } from "@miden-sdk/miden-sdk";
 import type { StorageSlot } from "@/lib/types/component";
 import type { MidenInput, ProcedureExport, Script } from "@/lib/types/script";
+import { fromBase64 } from "@/lib/utils";
 import {
   cleanExecutionError,
   decodeProcedureResult,
 } from "@/lib/utils/procedure-inputs";
-import type { StorageChanges } from "@/lib/utils/storage-slots";
+import { type StorageChanges, wordFelts } from "@/lib/utils/storage-slots";
 import {
+  clientCreateNoteFromScript,
   procedureCallScript,
   wasmAccountComponent,
   wasmAccountToAccount,
@@ -155,6 +161,114 @@ export const simulateProcedure = async ({
     };
   } catch (error) {
     return { ok: false, error: errorMessage(error) };
+  }
+};
+
+// A script's `Word` argument, written as a felt or a word in hex. None when
+// empty.
+const wordArgument = (text: string) =>
+  text.trim() === ""
+    ? undefined
+    : new WasmWord(new BigUint64Array(wordFelts(text)));
+
+// The executor asks the keystore for a signature it doesn't have.
+const AUTH_REQUEST_EVENT = "miden::protocol::auth::request";
+
+const targetErrorMessage = (error: unknown) => {
+  const message = errorMessage(error);
+  return message.includes(AUTH_REQUEST_EVENT)
+    ? `${message}\nThis account's key isn't in the Playground, so its transactions can't be simulated: pick a No Auth account or a wallet created here.`
+    : message;
+};
+
+// Runs a note script as if the account consumed a note made from it: the
+// note, never submitted, is an unauthenticated input of a transaction that is
+// executed only. The client's store isn't written to.
+export const simulateNote = async ({
+  client,
+  targetAccountId,
+  script,
+  scripts,
+  noteStorage,
+  faucetAccountId,
+  amount,
+  noteArgument,
+}: {
+  client: WebClientType;
+  targetAccountId: string;
+  script: Script;
+  // The workspace's scripts, for a built-in note script's dependencies.
+  scripts: Script[];
+  // The note's inputs, as felts.
+  noteStorage: string[];
+  // The asset the note carries: none when empty.
+  faucetAccountId: string;
+  amount: bigint;
+  noteArgument: string;
+}): Promise<SimulationResult> => {
+  try {
+    const note = await clientCreateNoteFromScript({
+      client,
+      senderAccountId: targetAccountId,
+      recipientAccountId: targetAccountId,
+      isNetworkNote: false,
+      script,
+      type: "public",
+      faucetAccountId,
+      amount,
+      noteStorage,
+      scripts,
+    });
+    const transactionResult = await client.executeTransaction(
+      WasmAccountId.fromHex(targetAccountId),
+      new WasmTransactionRequestBuilder()
+        .withInputNotes(
+          new WasmMidenArrays.NoteAndArgsArray([
+            new WasmNoteAndArgs(note, wordArgument(noteArgument)),
+          ]),
+        )
+        .build(),
+    );
+    return {
+      ok: true,
+      value: "",
+      executedTransaction: transactionResult.executedTransaction(),
+    };
+  } catch (error) {
+    return { ok: false, error: targetErrorMessage(error) };
+  }
+};
+
+// Runs a compiled transaction script against the account, executed only.
+export const simulateTransactionScript = async ({
+  client,
+  targetAccountId,
+  script,
+  scriptArgument,
+}: {
+  client: WebClientType;
+  targetAccountId: string;
+  script: Script;
+  scriptArgument: string;
+}): Promise<SimulationResult> => {
+  try {
+    const builder = new WasmTransactionRequestBuilder().withCustomScript(
+      WasmTransactionScript.fromPackage(
+        WasmPackage.deserialize(fromBase64(script.masp)),
+      ),
+    );
+    const argument = wordArgument(scriptArgument);
+    const transactionResult = await client.executeTransaction(
+      WasmAccountId.fromHex(targetAccountId),
+      (argument ? builder.withScriptArg(argument) : builder).build(),
+    );
+    return {
+      ok: true,
+      value: "",
+      executedTransaction: transactionResult.executedTransaction(),
+    };
+  } catch (error) {
+    return { ok: false, error: targetErrorMessage(error) };
   }
 };
 
