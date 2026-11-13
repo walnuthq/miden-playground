@@ -322,7 +322,7 @@ test("script: simulate a note and a transaction script", async ({ page }) => {
     await expect(dialog).toBeHidden({ timeout: TRANSACTION_TIMEOUT });
   });
 
-  await test.step("a note's inputs are typed by its storage schema", async () => {
+  await test.step("a note's storage is typed by its storage schema", async () => {
     await page.goto("/scripts");
     await page.getByRole("button", { name: "Create new script" }).click();
     const create = page
@@ -345,13 +345,13 @@ test("script: simulate a note and a transaction script", async ({ page }) => {
       .last();
     await expect(field.getByText("AccountId")).toBeVisible();
     await expect(
-      editorConsole(page).getByRole("button", { name: "Add input" }),
+      editorConsole(page).getByRole("button", { name: "Add storage item" }),
     ).toHaveCount(0);
     const run = editorConsole(page).getByRole("button", {
       name: "Simulate",
       exact: true,
     });
-    // The target account first, then the note's input.
+    // The target account first, then the note's storage field.
     await editorConsole(page)
       .getByRole("button", { name: "Select account" })
       .first()

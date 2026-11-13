@@ -50,7 +50,7 @@ const TargetSimulation = ({
   const [simulation, setSimulation] = useState<SimulatedTransaction>();
   const blocked = notReady(script);
   const argumentValid = argument.trim() === "" || isWordText(argument);
-  const inputsValid = noteParams
+  const noteStorageValid = noteParams
     ? noteStorageReady(noteParams, noteArguments)
     : noteStorage.every(isFelt);
   // In the asset's base units, like a note's assets.
@@ -94,10 +94,10 @@ const TargetSimulation = ({
           <>
             {noteParams ? (
               <div className="grid content-start gap-1.5 sm:col-span-2">
-                <Label>Note inputs</Label>
+                <Label>Note storage</Label>
                 {noteParams.length === 0 ? (
                   <p className="text-xs text-muted-foreground">
-                    This note has no inputs.
+                    This note has no storage.
                   </p>
                 ) : (
                   <ProcedureArgumentsForm
@@ -110,7 +110,7 @@ const TargetSimulation = ({
               </div>
             ) : (
               <div className="grid content-start gap-1.5">
-                <Label>Note inputs</Label>
+                <Label>Note storage</Label>
                 {noteStorageSchema && (
                   <p className="text-xs text-muted-foreground">
                     Felts, in the order of the note's fields:{" "}
@@ -123,15 +123,15 @@ const TargetSimulation = ({
                     .
                   </p>
                 )}
-                {noteStorage.map((input, index) => (
+                {noteStorage.map((item, index) => (
                   // biome-ignore lint/suspicious/noArrayIndexKey: rows have no stable id, only their position.
                   <div key={index} className="flex items-center gap-1.5">
                     <Input
-                      aria-label={`Note input ${index + 1}`}
+                      aria-label={`Note storage item ${index + 1}`}
                       className="font-mono"
                       placeholder="Felt"
-                      value={input}
-                      aria-invalid={!isFelt(input)}
+                      value={item}
+                      aria-invalid={!isFelt(item)}
                       onChange={(event) =>
                         setNoteStorage(
                           noteStorage.with(index, event.target.value),
@@ -142,7 +142,7 @@ const TargetSimulation = ({
                       type="button"
                       variant="ghost"
                       size="icon-sm"
-                      aria-label={`Remove note input ${index + 1}`}
+                      aria-label={`Remove note storage item ${index + 1}`}
                       onClick={() =>
                         setNoteStorage(noteStorage.toSpliced(index, 1))
                       }
@@ -159,7 +159,7 @@ const TargetSimulation = ({
                   onClick={() => setNoteStorage([...noteStorage, ""])}
                 >
                   <Plus />
-                  Add input
+                  Add storage item
                 </Button>
               </div>
             )}
@@ -199,7 +199,7 @@ const TargetSimulation = ({
           running ||
           targetAccountId === "" ||
           !argumentValid ||
-          !inputsValid ||
+          !noteStorageValid ||
           !amountValid
         }
         onClick={async () => {

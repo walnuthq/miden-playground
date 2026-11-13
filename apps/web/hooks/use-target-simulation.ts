@@ -17,7 +17,7 @@ export type TargetSimulationInputs = {
   targetAccountId: string;
   // The script's `Word` argument: a felt, a word in hex, or empty.
   argument: string;
-  // A note's inputs (felts) and the asset it carries, none when no faucet.
+  // A note's storage (felts) and the asset it carries, none when no faucet.
   noteStorage: string[];
   faucetAccountId: string;
   amount: bigint;
