@@ -9,6 +9,11 @@ import {
 
 const SLOT = "counter_account::counter_contract::count_map";
 
+// The tutorials' counter contract (`TESTNET_COUNTER_CONTRACT_ADDRESS` in
+// lib/constants.ts, which reads Vite's env and so can't be imported here).
+const OTHER_ACCOUNT_ADDRESS =
+  "mtst1arjkfl0j33qk25gpl2tqrd6npsptfavv_qr7qqq9wr6w";
+
 const editorConsole = (page: Page) =>
   page.getByRole("region", { name: "Editor Console" });
 
@@ -87,21 +92,28 @@ test("script: simulate an account component", async ({ page }) => {
     await expect(procedureRow(page, "get_count")).toContainText("Read-only");
   });
 
-  await test.step("a failed run shows its error in the log", async () => {
-    // The component reads a slot the account doesn't have yet.
+  await test.step("the package's storage schema lists its slots", async () => {
+    // The counter's map, with its description, and no slot to add by hand.
+    await expect(editorConsole(page).getByText(SLOT)).toBeVisible();
+    await expect(
+      editorConsole(page).getByText(
+        "counter contract storage map (word → felt)",
+      ),
+    ).toBeVisible();
+    await expect(editorConsole(page).getByLabel("New slot name")).toHaveCount(
+      0,
+    );
+    await expect(
+      editorConsole(page).getByRole("button", { name: `Remove slot ${SLOT}` }),
+    ).toHaveCount(0);
+    // The map starts empty: the count reads zero.
     await invoke(page, "get_count").click();
     await expect(
-      editorConsole(page).getByText("Simulation of get_count failed.").last(),
-    ).toBeVisible();
-    await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
-    await expect(procedureRow(page, "get_count")).toContainText("Failed");
+      procedureRow(page, "get_count").getByRole("cell").nth(2),
+    ).toHaveText("0");
   });
 
   await test.step("a read-only procedure returns the storage's value", async () => {
-    await editorConsole(page).getByLabel("New slot name").fill(SLOT);
-    await editorConsole(page).getByLabel("New slot type").click();
-    await page.getByRole("option", { name: "Map", exact: true }).click();
-    await editorConsole(page).getByRole("button", { name: "Add slot" }).click();
     await editorConsole(page)
       .getByRole("button", { name: "Add entry" })
       .click();
@@ -188,7 +200,10 @@ test("script: simulate an account component", async ({ page }) => {
       timeout: TRANSACTION_TIMEOUT,
     });
     await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
-    // The slots were kept; the recompiled procedure adds 2.
+    // The slot's edits were kept; the recompiled procedure adds 2.
+    await expect(editorConsole(page).getByLabel(`${SLOT} value 1`)).toHaveValue(
+      "6",
+    );
     await invoke(page, "increment_count").click();
     await expect(
       page.getByRole("dialog").getByText("Returned: 8"),
@@ -293,6 +308,91 @@ test("script: simulate a note and a transaction script", async ({ page }) => {
     await selectTarget(page, "Counter Contract");
     await editorConsole(page).getByLabel("Script argument").fill("7");
     await simulate(page, "counter-script");
+  });
+
+  await test.step("import a second account", async () => {
+    // The tutorials' counter contract: another account a note can target.
+    await page.goto("/accounts");
+    await page.getByRole("button", { name: "Create new account" }).click();
+    await page.getByRole("menuitem", { name: "Import account" }).click();
+    const dialog = page.getByRole("dialog", { name: "Import Account" });
+    await dialog.getByLabel("Name").fill("Other Counter");
+    await dialog.getByLabel("Address").fill(OTHER_ACCOUNT_ADDRESS);
+    await dialog.getByRole("button", { name: "Import" }).click();
+    await expect(dialog).toBeHidden({ timeout: TRANSACTION_TIMEOUT });
+  });
+
+  await test.step("a note's inputs are typed by its storage schema", async () => {
+    await page.goto("/scripts");
+    await page.getByRole("button", { name: "Create new script" }).click();
+    const create = page
+      .getByRole("dialog")
+      .filter({ hasText: "Create Script" });
+    await create.getByLabel("Name").fill("p2id-note");
+    await selectOption(page, "Type", "Note Script");
+    await selectOption(page, "Example", "P2ID Note");
+    await create.getByRole("button", { name: "Create" }).click();
+    await expect(page).toHaveURL(/\/scripts\/[0-9a-z_-]+$/);
+    await page.getByRole("button", { name: "Compile" }).click();
+    await expect(page.getByText(COMPILED).last()).toBeVisible({
+      timeout: TRANSACTION_TIMEOUT,
+    });
+    await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
+    // One account field, named as the note's storage names it: no raw felts.
+    const field = editorConsole(page)
+      .locator("div")
+      .filter({ hasText: "target-account-id" })
+      .last();
+    await expect(field.getByText("AccountId")).toBeVisible();
+    await expect(
+      editorConsole(page).getByRole("button", { name: "Add input" }),
+    ).toHaveCount(0);
+    const run = editorConsole(page).getByRole("button", {
+      name: "Simulate",
+      exact: true,
+    });
+    // The target account first, then the note's input.
+    await editorConsole(page)
+      .getByRole("button", { name: "Select account" })
+      .first()
+      .click();
+    await page
+      .getByRole("menuitemradio", { name: "Counter Contract", exact: true })
+      .click();
+    await expect(run).toBeDisabled();
+    await field.getByRole("button", { name: "Select account" }).click();
+    await page
+      .getByRole("menuitemradio", { name: "Counter Contract", exact: true })
+      .click();
+    await expect(run).toBeEnabled();
+  });
+
+  await test.step("the P2ID note is consumed by its target only", async () => {
+    await editorConsole(page)
+      .getByRole("button", { name: "Simulate", exact: true })
+      .click();
+    const dialog = page
+      .getByRole("dialog")
+      .filter({ hasText: "Simulation of p2id-note" });
+    await expect(
+      dialog.getByText("1 note will be consumed", { exact: false }),
+    ).toBeVisible({ timeout: TRANSACTION_TIMEOUT });
+    await dialog.getByRole("button", { name: "Close" }).first().click();
+    // Another account as the note's target: its script's assertion fails.
+    const field = editorConsole(page)
+      .locator("div")
+      .filter({ hasText: "target-account-id" })
+      .last();
+    await field.getByRole("button", { name: "Counter Contract" }).click();
+    await page
+      .getByRole("menuitemradio", { name: "Other Counter", exact: true })
+      .click();
+    await editorConsole(page)
+      .getByRole("button", { name: "Simulate", exact: true })
+      .click();
+    await expect(
+      editorConsole(page).getByText("Simulation of p2id-note failed.").last(),
+    ).toBeVisible({ timeout: TRANSACTION_TIMEOUT });
   });
 
   await test.step("nothing was submitted", async () => {

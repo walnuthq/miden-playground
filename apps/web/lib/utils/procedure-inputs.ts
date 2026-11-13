@@ -20,6 +20,9 @@ export type ProcedureParam = {
   type?: MidenType;
   // The type's name in the manifest, without its package: `felt`, `note-idx`.
   rawType: string;
+  // What the form shows next to the name, `type` when unset: a note's `u32`
+  // field is entered as a felt.
+  label?: string;
 };
 
 // What a form holds for one parameter.
