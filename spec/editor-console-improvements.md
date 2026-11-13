@@ -5,9 +5,9 @@ Done: item 1 (PR #731), item 2 (PR #732), item 3 (PR #735), item 4 (PR
 #736), item 5 (PR #737), item 6 (PR #742), which completes the "editor and
 console" pass (see "Scoring"), item 7 (PRs #745 and #746), item 12 (PRs #747
 and #748: header, Explorer with file tabs), item 14 (PR #749: minimap and font
-size; word wrap and Vim dropped). In progress: item 11 (the console's Simulate
-tab, PRs #831 to #833 and #834, open; see its section). Next: the P2 items 8 to 10, each a separate product
-decision; then 13 and 15.
+size; word wrap and Vim dropped), item 11 (PRs #831 to #834: the console's
+Simulate tab). Next: the P2 items 8 to 10, each a separate product decision;
+then 13 and 15, and item 11's follow-ups.
 
 The code editor UX of the scripts feature (`/scripts/:id`) is behind other
 blockchain playgrounds. This document compares it with Solana Playground
@@ -183,7 +183,7 @@ What the user sees today, from the production run:
 | 8   | Miden SDK autocomplete, snippets and hover docs           | 4      | M / L  | P2       |
 | 9   | Tutorials next to the live editor                         | 4      | M      | P2       |
 | 10  | Fill in boilerplate automatically on compile              | 3      | M      | P2       |
-| 11  | Call a script's procedures from its page                  | 4      | M–L    | P2       |
+| 11  | Call a script's procedures from its page                  | 4      | M–L    | Done     |
 | 12  | Header and tabs (name, dirty state, open scripts)         | 3      | S–M    | Done     |
 | 13  | Format code (rustfmt)                                     | 2      | M      | P3       |
 | 14  | Editor settings (minimap, font size)                      | 2      | S      | Done     |
@@ -523,18 +523,21 @@ component", "Call `get_count`" (read-only), "Call `increment_count`"
 in the console. Reuse the existing account/transaction flows; this is
 mostly a shortcut to them.
 
-Plan (2026-11-13), in progress. A **Simulate** tab in the console, next to
-**Output** (the log): it runs the compiled package locally and shows the
-account's changes. Nothing is proven, submitted or saved.
+Done in PRs #831 to #834 (2026-11-13), with miden-source-code-verification
+#135 for the schemas, deployed with api-compile. What shipped: a
+**Simulate** tab in the console, next to **Output** (the log). It runs the
+compiled package locally and shows the account's changes. Nothing is proven,
+submitted or saved.
+`docs/claude/simulation.md` has the rules.
 
-Shipped so far: the groundwork (PR #831), the tab for account components,
-with slots added by hand (PR #832), then note and transaction scripts
-against one of the sandbox's accounts (PR #833), then the storage schema and
-typed note inputs from api-compile (miden-source-code-verification
-#135, then #834: the `metadata` column, the slots listed
-from the schema, one typed field per note storage field). Nothing left but
-the merges and the api-compile deploy. `docs/claude/simulation.md` has the
-rules.
+- #831: the groundwork, with no visible change (`procedureCallScript`,
+  `wasmAccountComponent`, `TransactionEffects`,
+  `lib/utils/procedure-inputs.ts`).
+- #832: the tab for account components, with slots added by hand.
+- #833: note and transaction scripts against one of the sandbox's accounts.
+- #834: the storage slots listed from the package's schema and one typed
+  field per note storage field, from api-compile (`storage`, `noteStorage`)
+  through the API's `metadata` column.
 
 - Account components: the package's storage slots, editable, then its
   procedures with an Invoke button each. They run on a throwaway account
@@ -561,9 +564,39 @@ rules.
 - Built from components the account page's Invoke flow can adopt
   (`components/procedures`), with the argument encoding in
   `lib/utils/procedure-inputs.ts`. That flow isn't changed here.
-- Out of scope: targeting an account built on the fly for notes and
-  transaction scripts, advice map inputs, foreign accounts, read-only scripts
-  (they have no console).
+
+Potential follow-ups. The first four were left out by decision, the last is
+a known limit:
+
+- The account page's Invoke flow on `components/procedures`: its dialog
+  still has its own form and hardcoded parameter names
+  (`getParamsWithNames`).
+- For notes and transaction scripts, a target built on the fly from an
+  account package instead of an existing account.
+- Foreign accounts and advice map inputs in simulations.
+- A Simulate tab on read-only scripts, which have no console.
+- Accounts whose key isn't in the Playground (Bread, Para, an imported
+  wallet) can't be a simulation target: a single-sig account's auth
+  procedure asks the keystore for a signature, and the run stops there (see
+  the spike). Options, none tested:
+  - Disable those accounts in the target dropdown, with the reason, instead
+    of failing the run. Needs a reliable "is the key local?" check: No Auth
+    accounts are certain, wallets need a keystore lookup or a record of the
+    ones the Playground created.
+  - Simulate on a clone in the mock client: the account's state, with its
+    public key slot replaced by a throwaway key held in the mock keystore.
+    The id and code stay the same, so scripts that check the id behave as on
+    the real account. To check first: whether the SDK can build an `Account`
+    with one slot changed, whether the mock chain accepts an account at
+    nonce > 0 it never saw, and guarded multisig (several keys and a
+    guardian). It loses foreign accounts: the mock chain has no network.
+  - Let the wallet sign. Para would work through its client, with a signing
+    modal on every run; Bread can't (`signBytes` signs under a domain tag).
+  - Failing those, an upstream request for an executor mode that skips auth
+    (`spec/upstream-sdk-issues.md`).
+  - Multisig accounts may already work through `executeForSummary`, whose
+    auth aborts with an unauthorized event rather than a keystore request:
+    only single-sig was tested.
 
 Spike (2026-11-13, SDK 0.17.10, Chromium, testnet sandbox with the Counter
 Contract example):
