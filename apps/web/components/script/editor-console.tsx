@@ -1,5 +1,11 @@
 import { Button } from "@workspace/ui/components/button";
 import { Kbd } from "@workspace/ui/components/kbd";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@workspace/ui/components/tabs";
 import { Toggle } from "@workspace/ui/components/toggle";
 import {
   Tooltip,
@@ -16,8 +22,9 @@ import {
   Trash2,
 } from "lucide-react";
 import type { ReactNode } from "react";
-import { useEffect, useLayoutEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import CopyButton from "@/components/lib/copy-button";
+import SimulatePanel from "@/components/script/simulate/simulate-panel";
 import { shortcutLabel } from "@/hooks/use-script-shortcuts";
 import {
   type ConsoleEntry,
@@ -36,6 +43,8 @@ import {
   outputLineSeverity,
   splitLocations,
 } from "@/lib/utils/diagnostics";
+
+type ConsoleView = "output" | "simulate";
 
 export type EditorLocation = { line: number; column: number };
 
@@ -179,7 +188,7 @@ const IconButton = ({
 const Status = ({ entry }: { entry?: ConsoleEntry }) => (
   <p
     className={cn(
-      "mr-auto min-w-0 truncate font-mono text-xs",
+      "mr-auto ml-2 min-w-0 truncate font-mono text-xs",
       entry ? levelClassNames[entry.level] : "text-muted-foreground",
     )}
     title={
@@ -210,6 +219,8 @@ const EditorConsole = ({
 }) => {
   const { entries, append, clear } = useConsoleLog(script.id);
   const [fullOutput, setFullOutput] = useFullOutput();
+  // The log, or the Simulate tab. Not in the URL: `?tab=` is the page's.
+  const [view, setView] = useState<ConsoleView>("output");
   const scrollRef = useRef<HTMLDivElement>(null);
   const stickToBottom = useRef(true);
   // Starts with the last compile's error, if any, the first time the script
@@ -229,11 +240,13 @@ const EditorConsole = ({
       });
     }
   }, []);
-  // A new compile scrolls down to its output, even if scrolled up. Declared
+  // A new compile shows the log and scrolls down to its output, even if
+  // scrolled up. Declared
   // before the effect below, which runs after it in the same commit.
   useLayoutEffect(() => {
     if (compiling) {
       stickToBottom.current = true;
+      setView("output");
     }
   }, [compiling]);
   // biome-ignore lint/correctness/useExhaustiveDependencies: on new entries.
@@ -246,11 +259,23 @@ const EditorConsole = ({
   // The latest compile result: only its locations link to the editor.
   const latestCompileId = entries.findLast(({ compile }) => compile)?.id;
   return (
-    <section
-      aria-label="Editor Console"
-      className="flex h-full flex-col overflow-hidden border bg-card text-card-foreground"
+    <Tabs
+      value={view}
+      onValueChange={(value: ConsoleView) => {
+        setView(value);
+        // A collapsed console shows its header bar only.
+        if (state === "collapsed") {
+          onStateChange("normal");
+        }
+      }}
+      className="h-full gap-0 overflow-hidden border bg-card text-card-foreground"
+      render={<section aria-label="Editor Console" />}
     >
-      <div className="flex h-10 shrink-0 items-center gap-1 pr-1 pl-3">
+      <div className="flex h-10 shrink-0 items-center gap-1 px-1">
+        <TabsList variant="line" className="shrink-0">
+          <TabsTrigger value="output">Output</TabsTrigger>
+          <TabsTrigger value="simulate">Simulate</TabsTrigger>
+        </TabsList>
         <Status entry={entries.at(-1)} />
         {state === "collapsed" ? (
           <IconButton
@@ -284,42 +309,55 @@ const EditorConsole = ({
             <Maximize2 />
           </IconButton>
         )}
-        <Tooltip>
-          <TooltipTrigger
-            delay={100}
-            render={
-              <Toggle
-                size="sm"
-                aria-label="Show full output"
-                pressed={fullOutput}
-                onPressedChange={setFullOutput}
+        {/* The log's own tools. */}
+        {view === "output" && (
+          <>
+            {/* Not on the narrowest phones (under 360 px), where the tabs
+                leave no room for them. */}
+            <span className="contents max-[359px]:hidden">
+              <Tooltip>
+                <TooltipTrigger
+                  delay={100}
+                  render={
+                    <Toggle
+                      size="sm"
+                      aria-label="Show full output"
+                      pressed={fullOutput}
+                      onPressedChange={setFullOutput}
+                    />
+                  }
+                >
+                  <ScrollText />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{fullOutput ? "Show clean output" : "Show full output"}</p>
+                </TooltipContent>
+              </Tooltip>
+              <CopyButton
+                content="Copy output"
+                copy={consoleLogText(entries, fullOutput)}
+                disabled={entries.length === 0}
+                variant="ghost"
               />
-            }
-          >
-            <ScrollText />
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>{fullOutput ? "Show clean output" : "Show full output"}</p>
-          </TooltipContent>
-        </Tooltip>
-        <CopyButton
-          content="Copy output"
-          copy={consoleLogText(entries, fullOutput)}
-          disabled={entries.length === 0}
-          variant="ghost"
-        />
-        <IconButton
-          label="Clear console"
-          shortcut="L"
-          disabled={entries.length === 0}
-          onClick={clear}
-        >
-          <Trash2 />
-        </IconButton>
+            </span>
+            <IconButton
+              label="Clear console"
+              shortcut="L"
+              disabled={entries.length === 0}
+              onClick={clear}
+            >
+              <Trash2 />
+            </IconButton>
+          </>
+        )}
       </div>
-      <div
+      {/* Both stay mounted: the log keeps its scroll position, the Simulate
+          tab its arguments and results. */}
+      <TabsContent
+        value="output"
+        keepMounted
         ref={scrollRef}
-        className="min-h-0 flex-1 overflow-y-auto border-t px-3 py-2"
+        className="min-h-0 overflow-y-auto border-t px-3 py-2"
         onScroll={({ currentTarget }) => {
           stickToBottom.current =
             currentTarget.scrollHeight -
@@ -343,8 +381,15 @@ const EditorConsole = ({
             />
           ))}
         </pre>
-      </div>
-    </section>
+      </TabsContent>
+      <TabsContent
+        value="simulate"
+        keepMounted
+        className="min-h-0 overflow-y-auto border-t px-3 py-2"
+      >
+        <SimulatePanel script={script} onFailure={() => setView("output")} />
+      </TabsContent>
+    </Tabs>
   );
 };
 

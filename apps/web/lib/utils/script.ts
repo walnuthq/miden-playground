@@ -335,3 +335,23 @@ export const formatProcedureExportResultType = (type: MidenTypeStruct) => {
     }
   }
 };
+
+// A procedure as its Rust signature: `fn get_count() -> Felt`.
+export const procedureSignature = ({
+  path,
+  signature: { params, results },
+}: ProcedureExport) => {
+  let result = `fn ${formatProcedureExportPath(path)}(`;
+  result += params
+    .map((param) => formatProcedureExportParamType(param))
+    .join(", ");
+  result += ")";
+  if (results.length > 0) {
+    result += ` -> `;
+    const resultTypes = results
+      .map((result) => formatProcedureExportResultType(result))
+      .join(", ");
+    result += results.length === 1 ? resultTypes : `(${resultTypes})`;
+  }
+  return result;
+};

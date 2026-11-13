@@ -8,31 +8,11 @@ import {
   TableRow,
 } from "@workspace/ui/components/table";
 import CopyButton from "@/components/lib/copy-button";
-import type { ProcedureExport, Script } from "@/lib/types/script";
+import type { Script } from "@/lib/types/script";
 import {
-  formatProcedureExportParamType,
   formatProcedureExportPath,
-  formatProcedureExportResultType,
+  procedureSignature,
 } from "@/lib/utils/script";
-
-const procedureSignature = ({
-  path,
-  signature: { params, results },
-}: ProcedureExport) => {
-  let result = `fn ${formatProcedureExportPath(path)}(`;
-  result += params
-    .map((param) => formatProcedureExportParamType(param))
-    .join(", ");
-  result += ")";
-  if (results.length > 0) {
-    result += ` -> `;
-    const resultTypes = results
-      .map((result) => formatProcedureExportResultType(result))
-      .join(", ");
-    result += results.length === 1 ? resultTypes : `(${resultTypes})`;
-  }
-  return result;
-};
 
 const ExportsTable = ({ script }: { script: Script }) => (
   <div className="rounded-md border">
