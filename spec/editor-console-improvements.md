@@ -6,7 +6,7 @@ Done: item 1 (PR #731), item 2 (PR #732), item 3 (PR #735), item 4 (PR
 console" pass (see "Scoring"), item 7 (PRs #745 and #746), item 12 (PRs #747
 and #748: header, Explorer with file tabs), item 14 (PR #749: minimap and font
 size; word wrap and Vim dropped). In progress: item 11 (the console's Simulate
-tab, PRs #831 to #833 and PLAYGROUND_PR, open; see its section). Next: the P2 items 8 to 10, each a separate product
+tab, PRs #831 to #833 and #834, open; see its section). Next: the P2 items 8 to 10, each a separate product
 decision; then 13 and 15.
 
 The code editor UX of the scripts feature (`/scripts/:id`) is behind other
@@ -531,7 +531,7 @@ Shipped so far: the groundwork (PR #831), the tab for account components,
 with slots added by hand (PR #832), then note and transaction scripts
 against one of the sandbox's accounts (PR #833), then the storage schema and
 typed note inputs from api-compile (miden-source-code-verification
-VERIFICATION_PR, then PLAYGROUND_PR: the `metadata` column, the slots listed
+#135, then #834: the `metadata` column, the slots listed
 from the schema, one typed field per note storage field). Nothing left but
 the merges and the api-compile deploy. `docs/claude/simulation.md` has the
 rules.
