@@ -1,4 +1,4 @@
-// A note's storage (its inputs) from its package's note storage schema: one
+// A note's storage from its package's note storage schema: one
 // typed field per schema field, flattened to the felts the note's storage
 // holds. No SDK import: the unit tests run on plain node.
 import type { MidenType, NoteStorageField } from "../types/script.ts";
@@ -93,7 +93,7 @@ export const noteStorageFelts = ({
     .flatMap(({ name, rawType }) => {
       const argument = args[name];
       if (!argument) {
-        throw new Error(`Missing note input "${name}".`);
+        throw new Error(`Missing note storage field "${name}".`);
       }
       if (argument.type === "AccountId") {
         const { prefix, suffix } = accountIdParts(argument.accountId);
@@ -109,6 +109,6 @@ export const noteStorageFelts = ({
           : [value];
       }
       // `noteStorageParams` types no field as an asset.
-      throw new Error(`Unsupported note input "${name}".`);
+      throw new Error(`Unsupported note storage field "${name}".`);
     })
     .map(String);

@@ -199,7 +199,7 @@ export const simulateNote = async ({
   script: Script;
   // The workspace's scripts, for a built-in note script's dependencies.
   scripts: Script[];
-  // The note's inputs, as felts.
+  // The note's storage, as felts.
   noteStorage: string[];
   // The asset the note carries: none when empty.
   faucetAccountId: string;

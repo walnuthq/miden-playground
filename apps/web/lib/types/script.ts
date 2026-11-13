@@ -139,7 +139,7 @@ export type StorageSlotSchema = {
 
 export type StorageSchema = { slots: StorageSlotSchema[] };
 
-// A field of a note's storage (its inputs). The fields' felts follow each
+// A field of a note's storage. The fields' felts follow each
 // other in the note's storage, in declaration order.
 export type NoteStorageField = {
   // The field's WIT name, in kebab case, e.g. `target-account-id`.
