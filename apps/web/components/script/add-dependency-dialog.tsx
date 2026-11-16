@@ -35,15 +35,21 @@ const AddDependencyDialog = () => {
   const [loading, setLoading] = useState(false);
   const [dependencyId, setDependencyId] = useState("");
   const script = scripts.find(({ id }) => id === scriptId);
-  const dependenciesIds = script?.dependencies.map(({ id }) => id) ?? [];
+  // By name, not id: a dependency is keyed by its name in
+  // `miden-project.toml`, so a second one with the same name breaks the
+  // build. A template's dependency (the Count Reader's `counter-account`) has
+  // the API's built-in id, not that of the workspace's script of that name.
+  const dependenciesNames = new Set(
+    script?.dependencies.map(({ name }) => name),
+  );
   const shownDependencies = scripts
     .filter(
-      ({ id, type, status }) =>
+      ({ id, name, type, status }) =>
         id !== scriptId &&
         !defaultScriptIds
           .filter((defaultScriptId) => defaultScriptId !== "basic-wallet")
           .includes(id) &&
-        !dependenciesIds.includes(id) &&
+        !dependenciesNames.has(name) &&
         ["account-component", "authentication-component"].includes(type) &&
         status === "compiled",
     )

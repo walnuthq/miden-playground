@@ -65,6 +65,9 @@ const countReader: Script = {
         ],
         results: [],
       },
+      // What api-compile reports for this package: it reads the Counter
+      // Contract's count through FPI.
+      callsForeign: true,
     },
   ],
 };

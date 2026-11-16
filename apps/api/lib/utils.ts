@@ -106,6 +106,10 @@ type CompileResponse =
       // Whether each exported procedure is read-only, by export path: `null`
       // when it can't be told.
       readOnly: Record<string, boolean | null>;
+      // Whether each exported procedure calls another account's procedure
+      // (FPI), by export path: `null` when it can't be told. Absent from an
+      // api-compile older than it.
+      callsForeign?: Record<string, boolean | null>;
       // The sources plus the lockfile the build used.
       files: Record<string, string>;
       masm?: MasmOutput;
@@ -208,6 +212,7 @@ export const compilePackage = async ({
     commitment,
     manifest,
     readOnly,
+    callsForeign,
     storage,
     noteStorage,
     accountProcedures,
@@ -226,6 +231,7 @@ export const compilePackage = async ({
       Procedure: {
         ...procedureExport,
         readOnly: readOnly[procedureExport.path],
+        callsForeign: callsForeign?.[procedureExport.path],
       },
     }));
   if (masmOutput && "error" in masmOutput) {

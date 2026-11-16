@@ -105,6 +105,7 @@ export const counterAccountScript: Script = {
       },
       attributes: { attrs: [{ Marker: "account_procedure" }] },
       readOnly: true,
+      callsForeign: false,
     },
     {
       path: '::"miden:counter-account/counter-contract@0.1.0"::"increment-count"',
@@ -117,6 +118,7 @@ export const counterAccountScript: Script = {
       },
       attributes: { attrs: [{ Marker: "account_procedure" }] },
       readOnly: false,
+      callsForeign: false,
     },
   ],
   dependencies: [],

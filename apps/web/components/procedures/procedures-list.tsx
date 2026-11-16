@@ -29,14 +29,17 @@ const ProcedureRows = ({
   idPrefix,
   procedureExport,
   disabled,
+  blockedReason,
   onInvoke,
 }: {
   idPrefix: string;
   procedureExport: ProcedureExport;
   disabled: boolean;
+  blockedReason: ProceduresListProps["blockedReason"];
   onInvoke: ProceduresListProps["onInvoke"];
 }) => {
   const name = formatProcedureExportPath(procedureExport.path);
+  const reason = blockedReason?.(procedureExport);
   const params = procedureParams(procedureExport);
   const [args, setArgs] = useState<ProcedureArguments>({});
   const [running, setRunning] = useState(false);
@@ -52,6 +55,10 @@ const ProcedureRows = ({
               <Badge variant="outline">Read-only</Badge>
             )}
           </div>
+          {/* Under the name: the Signature column is hidden on a phone. */}
+          {reason && (
+            <p className="mt-1 text-xs text-muted-foreground">{reason}</p>
+          )}
         </TableCell>
         <TableCell className="max-sm:hidden">
           <pre>{procedureSignature(procedureExport)}</pre>
@@ -72,7 +79,10 @@ const ProcedureRows = ({
             size="sm"
             aria-label={`Invoke ${name}`}
             disabled={
-              disabled || running || !procedureArgumentsReady(params, args)
+              disabled ||
+              reason !== undefined ||
+              running ||
+              !procedureArgumentsReady(params, args)
             }
             onClick={async () => {
               setRunning(true);
@@ -96,7 +106,7 @@ const ProcedureRows = ({
               params={params}
               value={args}
               onChange={setArgs}
-              disabled={disabled || running}
+              disabled={disabled || reason !== undefined || running}
             />
           </TableCell>
         </TableRow>
@@ -111,6 +121,9 @@ type ProceduresListProps = {
   procedureExports: ProcedureExport[];
   // Blocks every Invoke button: nothing to run against yet.
   disabled?: boolean;
+  // Why a procedure can't run, if it can't: its Invoke button is disabled
+  // and the reason shows under its name.
+  blockedReason?: (procedureExport: ProcedureExport) => string | undefined;
   // Runs the procedure with the form's arguments. The list shows what it
   // resolves to in the procedure's row.
   onInvoke: (
@@ -126,6 +139,7 @@ const ProceduresList = ({
   idPrefix,
   procedureExports,
   disabled = false,
+  blockedReason,
   onInvoke,
 }: ProceduresListProps) => (
   <div className="rounded-md border">
@@ -145,6 +159,7 @@ const ProceduresList = ({
             idPrefix={idPrefix}
             procedureExport={procedureExport}
             disabled={disabled}
+            blockedReason={blockedReason}
             onInvoke={onInvoke}
           />
         ))}

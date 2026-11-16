@@ -81,6 +81,14 @@ export type ProcedureExport = {
   // packages compiled before api-compile reported it. A script's
   // `procedureExports` always hold a boolean (`isReadOnlyProcedure`).
   readOnly?: boolean | null;
+  // Whether it calls another account's procedure (FPI), from api-compile's
+  // MAST walk, stored with each export like `readOnly`: `true` when it does,
+  // `false` when it doesn't, `null` when it can't be told. Missing from
+  // built-ins, registry packages and packages compiled before api-compile
+  // reported it. Only `true` acts: the Simulate tab refuses the procedure
+  // (`simulationBlockedReason`), whose foreign account the mock client can't
+  // serve.
+  callsForeign?: boolean | null;
 };
 
 export type Export = { Procedure: ProcedureExport };

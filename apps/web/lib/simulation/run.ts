@@ -12,6 +12,7 @@ import {
   Word as WasmWord,
   type WebClient as WebClientType,
 } from "@miden-sdk/miden-sdk";
+import { simulationBlockedReason } from "@/lib/simulation/blocked";
 import type { StorageSlot } from "@/lib/types/component";
 import type { MidenInput, ProcedureExport, Script } from "@/lib/types/script";
 import { fromBase64 } from "@/lib/utils";
@@ -130,6 +131,12 @@ export const simulateProcedure = async ({
   procedureExport: ProcedureExport;
   procedureInputs?: MidenInput[];
 }): Promise<SimulationResult> => {
+  // The Invoke button is disabled for it: this keeps any other caller from
+  // panicking the mock client's WASM.
+  const blocked = simulationBlockedReason(procedureExport);
+  if (blocked) {
+    return { ok: false, error: blocked };
+  }
   try {
     const call = {
       client,

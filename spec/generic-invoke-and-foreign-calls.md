@@ -1,6 +1,6 @@
 # Generic Invoke dialog, and foreign calls in simulations
 
-Status: **PR A implemented** on `feat/generic-invoke-dialog` (2026-11-16), not merged; PR B waits for api-compile. Step 9 verified: a read-only `get_remote_count` returned the testnet counter's count (34) with no foreign account declared. The `set_owner` check passed with a private wallet and with a public wallet not yet on chain. A follow-up to item 11 of `spec/editor-console-improvements.md` (the Simulate tab, #831–#836), which built `components/procedures` for the account page's Invoke flow too.
+Status: **PR A deployed** (#841, efb61a4, 2026-11-16) and **api-compile deployed** (miden-source-code-verification #142, container v113, 2026-11-16). **PR B implemented** on `feat/calls-foreign` (2026-11-16), not yet opened: see "Cross-check before PR B". Step 15 found that a foreign call on the mock client hangs rather than fails: the panic never settles the run, and every later simulation queues behind it until a reload. PR B therefore also resets the mock client on a worker crash or a 60 s timeout (`docs/claude/simulation.md`), and fixes the Add Dependency dialog, which offered a component whose name was already a dependency (the Count Reader's built-in `counter-account`), breaking the build. Step 9 verified: a read-only `get_remote_count` returned the testnet counter's count (34) with no foreign account declared. The `set_owner` check passed with a private wallet and with a public wallet not yet on chain. A follow-up to item 11 of `spec/editor-console-improvements.md` (the Simulate tab, #831–#836), which built `components/procedures` for the account page's Invoke flow too.
 
 Two PRs here, and one in walnuthq/miden-source-code-verification:
 
@@ -22,7 +22,7 @@ The dialog also carries the only foreign procedure invocation (FPI) plumbing: th
 
 - **A public foreign account needs no declaration on SDK 0.17.10.** The executor asks the client's data store for a foreign account when the code reaches it. On a cache miss the store fetches it from the node at the reference block (`get_foreign_account_inputs` → `fetch_and_cache_foreign_account`, miden-client 0.17.5 `src/store/data_store/mod.rs`). Storage map keys are fetched per key the same way, which is why the empty `AccountStorageRequirements` always worked.
 - **Verified by a run.** With `foreignAccounts` forced to `[]`, `e2e/tutorial-10-foreign-procedure-invocation.spec.ts` passed: `copy_count` executed, proved and was accepted on testnet.
-- **Not verified: a read-only procedure that makes a foreign call.** `executeProgram` builds the same data store, so it should behave the same. No procedure in the repo is both, so PR A checks it by hand (step 9).
+- **A read-only procedure that makes a foreign call works too.** `executeProgram` builds the same data store. Verified in PR A (step 9): `get_remote_count` returned the testnet counter's count with no foreign account declared.
 - **The mock client can't.** Its RPC serves only accounts committed on the mock chain and unwraps the lookup (`committed_account(account_id).unwrap()`, miden-client `test_utils/mock.rs`): a foreign id it doesn't know panics inside the WASM instead of failing the run. So the Simulate tab's throwaway account can't make a foreign call.
 - **A private foreign account, or one not yet committed, fails everywhere.** A private one needs `ForeignAccount.private(account)` with state held locally. Out of scope.
 - **api-compile can tell that an export makes a foreign call, not which one.** `tx::execute_foreign_procedure` is a protocol procedure the MAST walk already recognises. The foreign procedure's root isn't in the MAST as a constant: the compiler passes it through locals (`codegen/masm/src/lower/fpi.rs`).
@@ -84,7 +84,16 @@ The dialog also carries the only foreign procedure invocation (FPI) plumbing: th
 
 ## PR B: `callsForeign`, and the Simulate tab
 
-**Don't start until the api-compile half is deployed** and production `POST /compile` returns `callsForeign`.
+The api-compile half is deployed and production `POST /compile` returns `callsForeign`: this PR can start.
+
+### Cross-check before PR B (2026-11-16)
+
+- **Production returns the flag as specified.** A direct `POST /compile` of the `count-reader` template with its `counter-account` dependency answered `callsForeign: { copy-count: true, init: false }` next to `readOnly: { copy-count: false, init: true }`, in 4.3 s.
+- **The contract is the planned one**: a map by export path next to `readOnly`, `true` / `false` / `null`, for every package kind, absent on a failed build. `POST /verify` returns it too; the registry doesn't store it.
+- **No lockfile drift**: `lockfile:check` against production passes (439 crates), so `templates/project-template/Cargo.lock` needs no sync for this PR.
+- **The web app needs no mapping change**: `compiledPackageToScript` and the import path spread each export (`lib/utils/script.ts`), so a stored `callsForeign` reaches `procedureExports` once the API stores it and the type has it.
+- **PR A left nothing for PR B to redo.** `invokeProcedure` has no `foreignAccounts`, and the dialog still has the `DialogDescription` step 12 extends. The component PR A used for its manual checks (`get_remote_count`, `set_owner`) lived in a throwaway spec and isn't in the repo.
+- **S14** is in `spec/upstream-sdk-issues.md`, which is still untracked by choice.
 
 ### The field
 
@@ -100,7 +109,7 @@ api-compile returns `callsForeign` next to `readOnly`: a map from export path to
 ### Examples and embedded packages
 
 5. `pnpm examples:compile` in `apps/api`, against a local api-compile that has the change and matches production's image (`docs/claude/examples.md`). Every procedure export in `compiled.json` gains `callsForeign`.
-6. `apps/web/lib/tutorials/counter-account.ts`: `pnpm test` compares its embedded fields with `compiled.json` (`counter-account.test.ts`). Add the flag to the embedded exports if the test asks for it.
+6. `apps/web/lib/tutorials/counter-account.ts`: `counter-account.test.ts` compares the embedded exports with `compiled.json` field by field (`path`, `digest`, `readOnly`, `attributes`), so it won't notice the new flag. Add `callsForeign` to that comparison and `callsForeign: false` to the two embedded exports.
 7. `apps/web/lib/tutorials/count-reader.ts`: set `callsForeign: true` on `copy-count` by hand. Its script is read-only, so it has no Simulate tab today, but the flag should be true wherever the package is.
 
 ### Web (`apps/web`)
@@ -115,12 +124,13 @@ api-compile returns `callsForeign` next to `readOnly`: a map from export path to
 ### Tests
 
 14. A unit test for the reason helper if it's extracted (plain node, no SDK import), and for `simulateProcedure`'s guard if it can run without the WASM; otherwise the helper alone.
-15. E2E: a Simulate-tab case needs an editable component with a dependency on `counter-account`. If `e2e/script-simulate.spec.ts` can create one cheaply (the step 9 component of PR A, through the import flow), add a case: the row shows the reason and its Invoke button is disabled. If it can't, check it by hand and say so in the PR.
+15. Before writing the guard, bypass it once by hand and run a procedure that makes a foreign call on the mock client: record in `docs/claude/simulation.md` what happens (an error, or a panic that leaves the mock client unusable until a reload). A `callsForeign: null` procedure isn't blocked, so this is what a user sees when api-compile couldn't tell. If the client is left unusable, recreate it after a failed run, or say so in the PR.
+16. E2E: a Simulate-tab case needs an editable component with a dependency on `counter-account`. If `e2e/script-simulate.spec.ts` can create one cheaply (a component like PR A's step 9 one, which isn't in the repo), add a case: the row shows the reason and its Invoke button is disabled. If it can't, check it by hand and say so in the PR.
 
 ### Docs
 
-16. `docs/claude/simulation.md`: a bullet on `callsForeign`, why the mock client can't make a foreign call (the panic), and where the guard is.
-17. `docs/claude/read-only-procedures.md`: `callsForeign` travels with `readOnly` (same source, same storage, same staleness), and `pnpm examples:compile` after api-compile changes either.
+17. `docs/claude/simulation.md`: a bullet on `callsForeign`, why the mock client can't make a foreign call (the panic), and where the guard is.
+18. `docs/claude/read-only-procedures.md`: `callsForeign` travels with `readOnly` (same source, same storage, same staleness), and `pnpm examples:compile` after api-compile changes either.
 
 ### Checks before the PR
 

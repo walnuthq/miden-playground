@@ -7,6 +7,7 @@ import SimulationResultDialog, {
 } from "@/components/script/simulate/simulation-result-dialog";
 import TargetSimulation from "@/components/script/simulate/target-simulation";
 import useSimulation from "@/hooks/use-simulation";
+import { simulationBlockedReason } from "@/lib/simulation/blocked";
 import { storageChanges } from "@/lib/simulation/run";
 import type { Script } from "@/lib/types/script";
 import { formatProcedureExportPath } from "@/lib/utils/script";
@@ -59,6 +60,7 @@ const AccountComponentSimulation = ({
             idPrefix={`simulate-${script.id}`}
             procedureExports={script.procedureExports}
             disabled={blocked !== undefined || !slotsValid}
+            blockedReason={simulationBlockedReason}
             onInvoke={async (procedureExport, args) => {
               const { result, account } = await invoke(procedureExport, args);
               if (!result.ok || !account) {
