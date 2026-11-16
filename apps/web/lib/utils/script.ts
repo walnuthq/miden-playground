@@ -5,8 +5,6 @@ import type {
   Dependency,
   MidenInput,
   MidenProjectToml,
-  MidenRawType,
-  MidenType,
   MidenTypeStruct,
   Package,
   PackageSource,
@@ -14,7 +12,7 @@ import type {
   Script,
   Signature,
 } from "@/lib/types/script";
-import { midenTypes, scriptFilePaths } from "@/lib/types/script";
+import { scriptFilePaths } from "@/lib/types/script";
 import { findPackages } from "@/lib/utils/project-files";
 
 export const defaultSignature = (): Signature => ({
@@ -250,10 +248,6 @@ export const fileListToPackageSources = async (
     ),
   );
 };
-
-export const midenRawTypeToMidenType = (
-  midenRawType: MidenRawType,
-): MidenType => midenTypes[midenRawType];
 
 export const packageToScript = ({
   id,

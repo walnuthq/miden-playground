@@ -1,4 +1,3 @@
-import { AccountId as WasmAccountId } from "@miden-sdk/miden-sdk";
 import { Button } from "@workspace/ui/components/button";
 import {
   Dialog,
@@ -9,120 +8,27 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@workspace/ui/components/dialog";
-import { Input } from "@workspace/ui/components/input";
-import { Label } from "@workspace/ui/components/label";
 import { Spinner } from "@workspace/ui/components/spinner";
-import { type Dispatch, Fragment, type SetStateAction, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
-import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";
+import ProcedureArgumentsForm from "@/components/procedures/procedure-arguments-form";
 import useNetwork from "@/hooks/use-network";
 import useScripts from "@/hooks/use-scripts";
 import useTransactions from "@/hooks/use-transactions";
 import { midenExplorerUrl } from "@/lib/constants";
-import type { MidenType, ProcedureExport } from "@/lib/types/script";
-import { formValue } from "@/lib/utils";
 import {
-  formatProcedureExportPath,
-  midenRawTypeToMidenType,
-} from "@/lib/utils/script";
+  decodeProcedureResult,
+  encodeProcedureArguments,
+  type ProcedureArguments,
+  procedureArgumentsReady,
+  procedureParams,
+} from "@/lib/utils/procedure-inputs";
+import { accountIdParts } from "@/lib/web-client";
 
-const FeltField = ({ id }: { id: string }) => (
-  <div className="grid gap-3 col-span-2">
-    <Label htmlFor={id}>{id}</Label>
-    <Input id={id} name={id} required />
-  </div>
-);
-
-const WordField = ({ id }: { id: string }) => (
-  <div className="grid gap-3 col-span-2">
-    <Label htmlFor={id}>{id}</Label>
-    <Input id={id} name={id} required />
-  </div>
-);
-
-const AccountIdField = ({
-  id,
-  accountId,
-  setAccountId,
-}: {
-  id: string;
-  accountId: string;
-  setAccountId: Dispatch<SetStateAction<string>>;
-}) => (
-  <div className="grid gap-3 col-span-2">
-    <Label>{id}</Label>
-    <SelectAccountDropdownMenu value={accountId} onValueChange={setAccountId} />
-  </div>
-);
-
-// const FaucetIdField = ({
-//   id,
-//   faucetId,
-//   setFaucetId,
-// }: {
-//   id: string;
-//   faucetId: string;
-//   setFaucetId: Dispatch<SetStateAction<string>>;
-// }) => (
-//   <div className="grid gap-3 col-span-2">
-//     <Label>{id}</Label>
-//     <SelectAccountDropdownMenu
-//       value={faucetId}
-//       onValueChange={setFaucetId}
-//       selectFaucets
-//       showFaucetsAsAssets
-//     />
-//   </div>
-// );
-
-const AssetField = ({
-  id,
-  faucetId,
-  setFaucetId,
-}: {
-  id: string;
-  faucetId: string;
-  setFaucetId: Dispatch<SetStateAction<string>>;
-}) => (
-  <>
-    <div className="grid gap-3">
-      <Label>{id} faucet</Label>
-      <SelectAccountDropdownMenu
-        value={faucetId}
-        onValueChange={setFaucetId}
-        selectFaucets
-        showFaucetsAsAssets
-      />
-    </div>
-    <div className="grid gap-3">
-      <Label htmlFor="amount">{id} amount</Label>
-      <Input id={`${id}-amount`} name={`${id}-amount`} type="number" />
-    </div>
-  </>
-);
-
-const getParamsWithNames = (
-  procedureExport: ProcedureExport,
-): { name: string; type: MidenType }[] => {
-  const path = formatProcedureExportPath(procedureExport.path);
-  return path === "copy_count"
-    ? [{ name: "counter_account_id", type: "AccountId" }]
-    : path === "get_depositor_balance"
-      ? [
-          { name: "depositor", type: "AccountId" },
-          { name: "asset", type: "Asset" },
-        ]
-      : path === "deposit"
-        ? [
-            { name: "depositor", type: "AccountId" },
-            { name: "asset", type: "Asset" },
-          ]
-        : procedureExport.signature.params.map((param, index) => ({
-            name: `param_${index}`,
-            type: midenRawTypeToMidenType(param.Struct.name),
-          }));
-};
-
+// The arguments of a procedure invoked from an account's Components tab. An
+// `AccountId` argument is a plain argument: no foreign account is declared.
+// When the procedure reaches a public account through FPI, the client fetches
+// that account from the node as it executes.
 const InvokeProcedureArgumentsDialog = () => {
   const { readWord } = useTransactions();
   const { networkId } = useNetwork();
@@ -136,17 +42,16 @@ const InvokeProcedureArgumentsDialog = () => {
     setReadOnlyProcedureResult,
   } = useScripts();
   const [loading, setLoading] = useState(false);
-  const [accountId, setAccountId] = useState("");
-  const [faucetId, setFaucetId] = useState("");
+  const [args, setArgs] = useState<ProcedureArguments>({});
   if (!script || !procedureExport) {
     return null;
   }
   const onClose = () => {
-    setAccountId("");
-    setFaucetId("");
+    setArgs({});
     closeInvokeProcedureArgumentsDialog();
   };
-  const paramsWithNames = getParamsWithNames(procedureExport);
+  const params = procedureParams(procedureExport);
+  const ready = procedureArgumentsReady(params, args);
   return (
     <Dialog
       open={invokeProcedureArgumentsDialogOpen}
@@ -165,53 +70,14 @@ const InvokeProcedureArgumentsDialog = () => {
           id="invoke-procedure-form"
           onSubmit={async (event) => {
             event.preventDefault();
-            const formData = new FormData(event.currentTarget);
+            if (!ready) {
+              return;
+            }
             setLoading(true);
-            const procedureInputs = paramsWithNames.map(({ name, type }) => {
-              switch (type) {
-                case "AccountId": {
-                  const wasmAccountId = WasmAccountId.fromHex(accountId);
-                  return {
-                    name,
-                    type,
-                    value: JSON.stringify({
-                      prefix: wasmAccountId.prefix().toString(),
-                      suffix: wasmAccountId.suffix().toString(),
-                    }),
-                  };
-                }
-                // case "FaucetId": {
-                //   const wasmAccountId = WasmAccountId.fromHex(faucetId);
-                //   return {
-                //     name,
-                //     type,
-                //     value: JSON.stringify({
-                //       prefix: wasmAccountId.prefix().toString(),
-                //       suffix: wasmAccountId.suffix().toString(),
-                //     }),
-                //   };
-                // }
-                case "Asset": {
-                  const wasmAccountId = WasmAccountId.fromHex(faucetId);
-                  const amount = formData.get(`${name}-amount`);
-                  return {
-                    name,
-                    type,
-                    value: JSON.stringify({
-                      prefix: wasmAccountId.prefix().toString(),
-                      suffix: (wasmAccountId.suffix().asInt() + 1n).toString(),
-                      amount: amount ? amount.toString() : "0",
-                    }),
-                  };
-                }
-                default: {
-                  return {
-                    name,
-                    type,
-                    value: formValue(formData, name),
-                  };
-                }
-              }
+            const procedureInputs = encodeProcedureArguments({
+              params,
+              args,
+              accountIdParts,
             });
             if (procedureExport.readOnly) {
               try {
@@ -221,20 +87,14 @@ const InvokeProcedureArgumentsDialog = () => {
                   procedureExport,
                   procedureInputs,
                 });
-                if (procedureExport.signature.results.length === 1) {
-                  const [felt = 0n] = word.toU64s();
-                  setReadOnlyProcedureResult({
-                    accountId: senderAccountId,
-                    digest: procedureExport.digest,
-                    result: felt.toString(),
-                  });
-                } else if (procedureExport.signature.results.length === 4) {
-                  setReadOnlyProcedureResult({
-                    accountId: senderAccountId,
-                    digest: procedureExport.digest,
-                    result: word.toHex(),
-                  });
-                }
+                setReadOnlyProcedureResult({
+                  accountId: senderAccountId,
+                  digest: procedureExport.digest,
+                  result: decodeProcedureResult(
+                    procedureExport.signature,
+                    Array.from(word.toU64s()),
+                  ),
+                });
               } catch (error) {
                 console.error(error);
                 setReadOnlyProcedureResult({
@@ -251,7 +111,6 @@ const InvokeProcedureArgumentsDialog = () => {
                   script,
                   procedureExport,
                   procedureInputs,
-                  foreignAccounts: accountId ? [accountId] : [],
                 });
                 toast("Transaction submitted.", {
                   action: {
@@ -276,35 +135,13 @@ const InvokeProcedureArgumentsDialog = () => {
             setLoading(false);
           }}
         >
-          <div className="grid grid-cols-2 gap-4">
-            {paramsWithNames.map(({ name, type }) => (
-              <Fragment key={name}>
-                {type === "Felt" && <FeltField id={name} />}
-                {type === "Word" && <WordField id={name} />}
-                {type === "AccountId" && (
-                  <AccountIdField
-                    id={name}
-                    accountId={accountId}
-                    setAccountId={setAccountId}
-                  />
-                )}
-                {/* type === "FaucetId" && (
-                  <FaucetIdField
-                    id={name}
-                    faucetId={faucetId}
-                    setFaucetId={setFaucetId}
-                  />
-                ) */}
-                {type === "Asset" && (
-                  <AssetField
-                    id={name}
-                    faucetId={faucetId}
-                    setFaucetId={setFaucetId}
-                  />
-                )}
-              </Fragment>
-            ))}
-          </div>
+          <ProcedureArgumentsForm
+            idPrefix="invoke-procedure"
+            params={params}
+            value={args}
+            onChange={setArgs}
+            disabled={loading}
+          />
         </form>
         <DialogFooter>
           <DialogClose render={<Button variant="outline" />}>
@@ -313,15 +150,7 @@ const InvokeProcedureArgumentsDialog = () => {
           <Button
             form="invoke-procedure-form"
             type="submit"
-            disabled={
-              loading ||
-              (paramsWithNames.map(({ type }) => type).includes("AccountId") &&
-                !accountId) ||
-              // (procedureExport.signature.params.includes("FaucetId") &&
-              //   !faucetId) ||
-              (paramsWithNames.map(({ type }) => type).includes("Asset") &&
-                !faucetId)
-            }
+            disabled={loading || !ready}
           >
             {loading && <Spinner />}
             {loading ? "Invoking…" : "Invoke"}

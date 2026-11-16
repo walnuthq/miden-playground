@@ -65,6 +65,8 @@ test("tutorial 10: foreign procedure invocation", async ({ page }) => {
     const dialog = page
       .getByRole("dialog")
       .filter({ hasText: "Invoke Procedure" });
+    // Step 5 names the argument: the copy and the dialog must agree.
+    await expect(dialog.getByText("param_0")).toBeVisible();
     await dialog.getByRole("button", { name: "Select account" }).click();
     await page.getByRole("menuitemradio", { name: "Counter Contract" }).click();
     await dialog.getByRole("button", { name: "Invoke", exact: true }).click();

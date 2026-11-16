@@ -1,8 +1,5 @@
 import {
   AccountId as WasmAccountId,
-  AccountStorageRequirements as WasmAccountStorageRequirements,
-  ForeignAccount as WasmForeignAccount,
-  MidenArrays as WasmMidenArrays,
   TransactionRequestBuilder as WasmTransactionRequestBuilder,
 } from "@miden-sdk/miden-sdk";
 import { useMiden } from "@miden-sdk/react";
@@ -113,13 +110,11 @@ const useScripts = () => {
     script,
     procedureExport,
     procedureInputs = [],
-    foreignAccounts = [],
   }: {
     senderAccountId: string;
     script: Script;
     procedureExport: ProcedureExport;
     procedureInputs?: MidenInput[];
-    foreignAccounts?: string[];
   }) => {
     if (!client) {
       throw new Error("MidenClient not ready");
@@ -132,22 +127,11 @@ const useScripts = () => {
         procedureExport,
         procedureInputs,
       });
-      let transactionRequestBuilder =
-        new WasmTransactionRequestBuilder().withCustomScript(transactionScript);
-      if (foreignAccounts.length > 0) {
-        transactionRequestBuilder =
-          transactionRequestBuilder.withForeignAccounts(
-            new WasmMidenArrays.ForeignAccountArray(
-              foreignAccounts.map((foreignAccountId) =>
-                WasmForeignAccount.public(
-                  WasmAccountId.fromHex(foreignAccountId),
-                  new WasmAccountStorageRequirements(),
-                ),
-              ),
-            ),
-          );
-      }
-      const transactionRequest = transactionRequestBuilder.build();
+      // No foreign account is declared: the client fetches a public one from
+      // the node when the procedure reaches it through FPI.
+      const transactionRequest = new WasmTransactionRequestBuilder()
+        .withCustomScript(transactionScript)
+        .build();
       const transactionResult = await client.executeTransaction(
         WasmAccountId.fromHex(senderAccountId),
         transactionRequest,
