@@ -3,6 +3,8 @@ import { describe, test } from "node:test";
 import {
   FOREIGN_CALL_REASON,
   missingForeignCallReason,
+  SANDBOX_FOREIGN_ACCOUNT_REASON,
+  sandboxAccountsDisabledReason,
   simulationBlockedReason,
   staleForeignCallReason,
 } from "./blocked.ts";
@@ -69,5 +71,28 @@ describe("simulationBlockedReason", () => {
     assert.equal(simulationBlockedReason({ callsForeign: null }), undefined);
     // A built-in, a registry package, a package compiled before the flag.
     assert.equal(simulationBlockedReason({}), undefined);
+  });
+});
+
+describe("sandboxAccountsDisabledReason", () => {
+  test("keeps a foreign call off the sandbox accounts", () => {
+    assert.equal(
+      sandboxAccountsDisabledReason({ callsForeign: true }),
+      SANDBOX_FOREIGN_ACCOUNT_REASON,
+    );
+  });
+
+  test("leaves every other procedure's accounts alone", () => {
+    // An account id is plain data.
+    assert.equal(
+      sandboxAccountsDisabledReason({ callsForeign: false }),
+      undefined,
+    );
+    // api-compile couldn't tell: the crash recovery is the safety net.
+    assert.equal(
+      sandboxAccountsDisabledReason({ callsForeign: null }),
+      undefined,
+    );
+    assert.equal(sandboxAccountsDisabledReason({}), undefined);
   });
 });

@@ -9,6 +9,7 @@ import {
   isWord,
   procedureArgumentsReady,
   procedureParams,
+  withAccountIdsAmong,
   wordToHex,
 } from "./procedure-inputs.ts";
 
@@ -171,5 +172,30 @@ describe("cleanExecutionError", () => {
         "assertion failed with error code: 12",
       ].join("\n"),
     );
+  });
+});
+
+describe("withAccountIdsAmong", () => {
+  const allowed = new Set(["simulated:counter-account"]);
+
+  test("empties an account id that isn't allowed", () => {
+    const args = {
+      param_0: { type: "AccountId", accountId: "0xsandbox" },
+      param_1: { type: "AccountId", accountId: "simulated:counter-account" },
+      param_2: { type: "Felt", value: "1" },
+    } as const;
+    assert.deepEqual(withAccountIdsAmong(args, allowed), {
+      ...args,
+      param_0: { type: "AccountId", accountId: "" },
+    });
+  });
+
+  test("returns the same arguments when nothing changes", () => {
+    const args = {
+      param_0: { type: "AccountId", accountId: "simulated:counter-account" },
+      param_1: { type: "AccountId", accountId: "" },
+      param_2: { type: "Asset", faucetId: "0xsandbox", amount: "1" },
+    } as const;
+    assert.equal(withAccountIdsAmong(args, allowed), args);
   });
 });

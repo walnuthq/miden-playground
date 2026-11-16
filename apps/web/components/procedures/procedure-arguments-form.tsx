@@ -25,6 +25,7 @@ const ProcedureArgumentsForm = ({
   onChange,
   disabled = false,
   simulatedAccounts,
+  sandboxDisabledReason,
 }: {
   // Makes the fields' ids unique on the page.
   idPrefix: string;
@@ -35,6 +36,10 @@ const ProcedureArgumentsForm = ({
   // Accounts a simulation stages, offered to the `AccountId` fields above
   // the sandbox's accounts.
   simulatedAccounts?: { value: string; name: string }[];
+  // When given, the `AccountId` fields list the sandbox's accounts disabled,
+  // with this reason: only `simulatedAccounts` can be picked. The caller
+  // clears a sandbox account picked before.
+  sandboxDisabledReason?: string;
 }) => (
   <div className="grid gap-3 sm:grid-cols-2">
     {params.map(({ name, type, rawType, label }) => {
@@ -86,6 +91,7 @@ const ProcedureArgumentsForm = ({
             <SelectAccountDropdownMenu
               value={argument.accountId}
               simulatedAccounts={simulatedAccounts}
+              sandboxDisabledReason={sandboxDisabledReason}
               onValueChange={setter((accountId) => ({
                 type: "AccountId",
                 accountId,
