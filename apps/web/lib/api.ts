@@ -1,3 +1,4 @@
+import { createCompilerWake } from "@/lib/compiler-wake";
 import { API_REGISTRY_URL, API_URL } from "@/lib/constants";
 import type {
   CompiledPackage,
@@ -36,6 +37,15 @@ export const createScript = async ({
   return { script };
 };
 
+// Asks the API to wake api-compile, without waiting for it (`POST /wake`
+// answers at once). Its outcome doesn't matter: a failure is ignored.
+const wakeCompiler = () => {
+  fetch(`${API_URL}/wake`, { method: "POST" }).catch(() => {});
+};
+
+// One per tab: the script page calls `wakeIfIdle`, every compile `compiled`.
+export const compilerWake = createCompilerWake({ wake: wakeCompiler });
+
 export const compileScript = async (script: Script) => {
   // The API's scripts have UUIDs. A tutorial run saved before the tutorials
   // all compiled through the API can still hold a script made by the stand-in
@@ -46,6 +56,7 @@ export const compileScript = async (script: Script) => {
         "This script comes from an earlier version of the Playground and can't be compiled anymore. Restart the tutorial to create a new one.",
     };
   }
+  compilerWake.compiled();
   // Saving the same files twice is harmless, so a request that never got an
   // answer is sent again.
   const response = await fetchRetryingNetworkError(
