@@ -21,15 +21,21 @@ type Handlers = {
 // page has two), and the capture phase runs before Monaco's own bindings
 // (Cmd+Enter inserts a line, Cmd+L selects one) and stops the browser's (save
 // page, address bar, downloads).
+//
+// `compileEnabled` (an editable script) turns on the first two, and
+// `consoleEnabled` (a page with a console: an editable script, or a read-only
+// one that can be simulated) the last two. A disabled key is left to the
+// browser.
 const useScriptShortcuts = ({
-  enabled,
+  compileEnabled,
+  consoleEnabled,
   ...handlers
-}: Handlers & { enabled: boolean }) => {
+}: Handlers & { compileEnabled: boolean; consoleEnabled: boolean }) => {
   // The latest handlers, so the listener is attached once.
   const handlersRef = useRef(handlers);
   handlersRef.current = handlers;
   useEffect(() => {
-    if (!enabled) {
+    if (!compileEnabled && !consoleEnabled) {
       return;
     }
     const onKeyDown = (event: KeyboardEvent) => {
@@ -48,7 +54,10 @@ const useScriptShortcuts = ({
           l: "onClearConsole",
         } as const
       )[event.key.toLowerCase()];
-      if (!action) {
+      if (
+        !action ||
+        !(action === "onCompile" ? compileEnabled : consoleEnabled)
+      ) {
         return;
       }
       // An open dialog (e.g. Add dependency) keeps its keys, but the browser
@@ -69,7 +78,7 @@ const useScriptShortcuts = ({
     window.addEventListener("keydown", onKeyDown, { capture: true });
     return () =>
       window.removeEventListener("keydown", onKeyDown, { capture: true });
-  }, [enabled]);
+  }, [compileEnabled, consoleEnabled]);
 };
 
 export default useScriptShortcuts;

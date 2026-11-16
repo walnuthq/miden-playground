@@ -580,7 +580,9 @@ a known limit:
   chain from its dependencies (`spec/simulate-foreign-calls.md`). Left:
   advice map inputs, and foreign accounts for note and transaction scripts
   (they run on the app's client, which fetches a public one from the node).
-- A Simulate tab on read-only scripts, which have no console.
+- A Simulate tab on read-only scripts, which have no console. Done for the
+  ones that hold a package (the tutorials' embedded and starter packages):
+  `spec/simulate-read-only-scripts.md`. The MASM built-ins still have none.
 - Accounts whose key isn't in the Playground (Bread, Para, an imported
   wallet) can't be a simulation target: a single-sig account's auth
   procedure asks the keystore for a signature, and the run stops there (see

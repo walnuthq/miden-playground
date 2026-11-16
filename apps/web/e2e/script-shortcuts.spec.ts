@@ -1,6 +1,10 @@
 import { expect, type Page, test } from "@playwright/test";
 import { COMPILED, createCounterScript, waitForEditorText } from "./editor";
-import { logBrowserErrors, TRANSACTION_TIMEOUT } from "./tutorial";
+import {
+  logBrowserErrors,
+  startTutorial,
+  TRANSACTION_TIMEOUT,
+} from "./tutorial";
 
 const consoleHeight = async (page: Page) =>
   (await page.getByRole("region", { name: "Editor Console" }).boundingBox())
@@ -104,5 +108,23 @@ test("script: keyboard shortcuts", async ({ page }) => {
       page.getByRole("region", { name: "Editor Console" }),
     ).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Compile" })).toHaveCount(0);
+  });
+
+  await test.step("a read-only package keeps the console's shortcuts only", async () => {
+    // Tutorial 10's count-reader: compiled, read-only, simulated in its
+    // console.
+    await startTutorial(page, "Foreign procedure invocation");
+    await page.goto("/scripts/count-reader");
+    await waitForEditorText(page, "fn ");
+    await page.getByRole("tabpanel").locator(".view-lines").first().click();
+    await page.keyboard.press("ControlOrMeta+s");
+    await expect(page.getByRole("button", { name: "Compile" })).toHaveCount(0);
+    await expect(
+      page.getByText("Simulation runs are logged here."),
+    ).toBeVisible();
+    await page.keyboard.press("ControlOrMeta+j");
+    await expect.poll(() => consoleHeight(page)).toBeLessThan(COLLAPSED_HEIGHT);
+    await page.keyboard.press("ControlOrMeta+j");
+    await expect.poll(() => consoleHeight(page)).toBeGreaterThan(100);
   });
 });

@@ -185,7 +185,13 @@ const IconButton = ({
 // Keep it one text node and not a button: the e2e specs' anchored regexes
 // (`/^Compiled …/`) and `getByRole("button", { name: "Compile" })` (a
 // case-insensitive substring) would match it too, and fail on two elements.
-const Status = ({ entry }: { entry?: ConsoleEntry }) => (
+const Status = ({
+  entry,
+  placeholder,
+}: {
+  entry?: ConsoleEntry;
+  placeholder: string;
+}) => (
   <p
     className={cn(
       "mr-auto ml-2 min-w-0 truncate font-mono text-xs",
@@ -199,13 +205,14 @@ const Status = ({ entry }: { entry?: ConsoleEntry }) => (
   >
     {entry
       ? `[${formatConsoleTime(entry.timestamp)}] ${entry.text}`
-      : "Compile the script to see its output here."}
+      : placeholder}
   </p>
 );
 
 const EditorConsole = ({
   script,
   compiling,
+  readOnly,
   state,
   onStateChange,
   onRevealLocation,
@@ -213,6 +220,9 @@ const EditorConsole = ({
   script: Script;
   // A compile started from the page: the log follows its output.
   compiling: boolean;
+  // A read-only script, already compiled: the console is there for its
+  // Simulate tab, which it opens on, and its log holds the runs only.
+  readOnly: boolean;
   state: ConsoleState;
   onStateChange: (state: ConsoleState) => void;
   onRevealLocation: (location: EditorLocation) => void;
@@ -220,7 +230,9 @@ const EditorConsole = ({
   const { entries, append, clear } = useConsoleLog(script.id);
   const [fullOutput, setFullOutput] = useFullOutput();
   // The log, or the Simulate tab. Not in the URL: `?tab=` is the page's.
-  const [view, setView] = useState<ConsoleView>("output");
+  const [view, setView] = useState<ConsoleView>(
+    readOnly ? "simulate" : "output",
+  );
   const scrollRef = useRef<HTMLDivElement>(null);
   const stickToBottom = useRef(true);
   // Starts with the last compile's error, if any, the first time the script
@@ -276,7 +288,14 @@ const EditorConsole = ({
           <TabsTrigger value="output">Output</TabsTrigger>
           <TabsTrigger value="simulate">Simulate</TabsTrigger>
         </TabsList>
-        <Status entry={entries.at(-1)} />
+        <Status
+          entry={entries.at(-1)}
+          placeholder={
+            readOnly
+              ? "Simulation runs are logged here."
+              : "Compile the script to see its output here."
+          }
+        />
         {state === "collapsed" ? (
           <IconButton
             label="Restore console"
@@ -366,7 +385,7 @@ const EditorConsole = ({
             STICK_TO_BOTTOM_PX;
         }}
       >
-        {/* Empty until the first compile: the header bar says so. */}
+        {/* Empty until the first compile (or run): the header bar says so. */}
         <pre
           className="flex flex-col gap-2 font-mono text-xs"
           aria-live="polite"
