@@ -11,11 +11,12 @@ import type { ProcedureExport } from "@/lib/types/script";
 export const FOREIGN_CALL_REASON =
   "Calls a procedure of another account, and none of this script's dependencies is an account component a simulation can stage. Deploy the component and invoke it from the account's Components tab.";
 
-export const staleForeignCallReason = (names: string[]) =>
-  `Calls a procedure of another account, but ${names.join(", ")} changed since this script was compiled: compile this script again to simulate it.`;
+// A read-only script can't be compiled: its reasons stop at the cause.
+export const staleForeignCallReason = (names: string[], readOnly = false) =>
+  `Calls a procedure of another account, but ${names.join(", ")} changed since this script was compiled${readOnly ? "." : ": compile this script again to simulate it."}`;
 
-export const missingForeignCallReason = (names: string[]) =>
-  `Calls a procedure of another account, but the compiled package of ${names.join(", ")} isn't in the workspace: compile it, then this script.`;
+export const missingForeignCallReason = (names: string[], readOnly = false) =>
+  `Calls a procedure of another account, but the compiled package of ${names.join(", ")} isn't in the workspace${readOnly ? "." : ": compile it, then this script."}`;
 
 // The script's foreign accounts: how many were staged, and the names of the
 // dependencies that couldn't be.
@@ -28,15 +29,16 @@ export type ForeignAccountsStatus = {
 export const simulationBlockedReason = (
   { callsForeign }: Pick<ProcedureExport, "callsForeign">,
   { staged, stale = [], missing = [] }: ForeignAccountsStatus = { staged: 0 },
+  readOnly = false,
 ) => {
   if (callsForeign !== true || staged > 0) {
     return undefined;
   }
   if (stale.length > 0) {
-    return staleForeignCallReason(stale);
+    return staleForeignCallReason(stale, readOnly);
   }
   if (missing.length > 0) {
-    return missingForeignCallReason(missing);
+    return missingForeignCallReason(missing, readOnly);
   }
   return FOREIGN_CALL_REASON;
 };

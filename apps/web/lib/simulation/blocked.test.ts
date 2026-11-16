@@ -36,6 +36,23 @@ describe("simulationBlockedReason", () => {
     );
   });
 
+  test("asks a read-only script for no compile", () => {
+    const stale = simulationBlockedReason(
+      { callsForeign: true },
+      { staged: 0, stale: ["counter-account"] },
+      true,
+    );
+    assert.equal(stale, staleForeignCallReason(["counter-account"], true));
+    assert.doesNotMatch(stale ?? "", /compile this/);
+    const missing = simulationBlockedReason(
+      { callsForeign: true },
+      { staged: 0, missing: ["counter-account"] },
+      true,
+    );
+    assert.equal(missing, missingForeignCallReason(["counter-account"], true));
+    assert.doesNotMatch(missing ?? "", /compile it/);
+  });
+
   test("runs a foreign call against a staged account", () => {
     assert.equal(
       simulationBlockedReason(

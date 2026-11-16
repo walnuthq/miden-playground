@@ -46,6 +46,7 @@ import useScriptShortcuts, {
 } from "@/hooks/use-script-shortcuts";
 import useTutorials from "@/hooks/use-tutorials";
 import { clearConsoleLog } from "@/lib/console-log";
+import { canSimulate } from "@/lib/simulation/can-simulate";
 import type { Script, ScriptFilePath } from "@/lib/types/script";
 import { assembledFromMasm } from "@/lib/utils/script";
 import { SCRIPT_FILE, scriptSource } from "@/lib/utils/script-files";
@@ -163,8 +164,14 @@ const ScriptComponent = ({ id, script }: { id: string; script?: Script }) => {
     consolePanelRef.current?.expand();
     compile();
   };
+  // An editable script always has its console. A read-only one has it for
+  // its Simulate tab, when it can be simulated: no Compile button, nothing to
+  // compile.
+  const hasConsole =
+    script !== undefined && (!script.readOnly || canSimulate(script));
   useScriptShortcuts({
-    enabled: script !== undefined && !script.readOnly,
+    compileEnabled: script !== undefined && !script.readOnly,
+    consoleEnabled: hasConsole,
     onCompile: compileAndShow,
     // A maximized console hides, like VS Code's panel. Asks the panel, not
     // `consoleState`: that one waits for the re-render after `onResize`, so a
@@ -331,7 +338,7 @@ const ScriptComponent = ({ id, script }: { id: string; script?: Script }) => {
             )}
           </div>
         </div>
-        {script.readOnly ? (
+        {!hasConsole ? (
           <div className="min-h-0 flex-1">{tabs}</div>
         ) : (
           <ResizablePanelGroup
@@ -372,6 +379,7 @@ const ScriptComponent = ({ id, script }: { id: string; script?: Script }) => {
               <EditorConsole
                 script={script}
                 compiling={compiling}
+                readOnly={script.readOnly}
                 state={consoleState}
                 onStateChange={setConsoleState}
                 onRevealLocation={revealLocation}

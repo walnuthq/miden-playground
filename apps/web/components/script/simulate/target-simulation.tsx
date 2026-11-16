@@ -311,8 +311,17 @@ const TargetSimulation = ({
           <DependencyAccounts
             title="Simulated account"
             labelPrefix="Simulated account"
-            stale="changed since this script was compiled. Compile this script again to run it against it."
-            missing="its compiled package isn't in the workspace. Compile it, then this script, to run this script against it."
+            {...(script.readOnly
+              ? {
+                  stale: "changed since this script was compiled.",
+                  missing: "its compiled package isn't in the workspace.",
+                }
+              : {
+                  stale:
+                    "changed since this script was compiled. Compile this script again to run it against it.",
+                  missing:
+                    "its compiled package isn't in the workspace. Compile it, then this script, to run this script against it.",
+                })}
             accounts={dependencyAccounts.accounts}
             unresolved={dependencyAccounts.unresolved}
           />

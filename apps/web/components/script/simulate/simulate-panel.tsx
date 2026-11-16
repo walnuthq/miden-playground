@@ -71,8 +71,17 @@ const AccountComponentSimulation = ({
             <DependencyAccounts
               title="Foreign accounts"
               labelPrefix="Foreign account"
-              stale="changed since this script was compiled. Compile this script again to simulate calls to it."
-              missing="its compiled package isn't in the workspace. Compile it, then this script, to simulate calls to it."
+              {...(script.readOnly
+                ? {
+                    stale: "changed since this script was compiled.",
+                    missing: "its compiled package isn't in the workspace.",
+                  }
+                : {
+                    stale:
+                      "changed since this script was compiled. Compile this script again to simulate calls to it.",
+                    missing:
+                      "its compiled package isn't in the workspace. Compile it, then this script, to simulate calls to it.",
+                  })}
               accounts={foreignAccounts}
               unresolved={unresolvedForeignAccounts}
             />
@@ -87,7 +96,11 @@ const AccountComponentSimulation = ({
               blocked !== undefined || !slotsValid || !foreignAccountsReady
             }
             blockedReason={(procedureExport) =>
-              simulationBlockedReason(procedureExport, foreignAccountsStatus)
+              simulationBlockedReason(
+                procedureExport,
+                foreignAccountsStatus,
+                script.readOnly,
+              )
             }
             simulatedAccounts={simulatedAccounts}
             onInvoke={async (procedureExport, args) => {

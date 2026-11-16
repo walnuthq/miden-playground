@@ -87,6 +87,26 @@ const Step3: TutorialStep = {
         </ExternalLink>{" "}
         section of the Miden docs.
       </p>
+      <p>
+        You can try{" "}
+        <strong>
+          <InlineCode>copy_count</InlineCode>
+        </strong>{" "}
+        before deploying anything, in the <em>"Simulate"</em> tab of the console
+        under the code: it runs the procedure locally, against a simulated
+        counter contract, and submits nothing. Under{" "}
+        <em>"Foreign accounts"</em>, click <em>"Add entry"</em> and give the
+        counter's map the key <InlineCode>1</InlineCode> and a count as its
+        value. Pick the simulated <strong>counter-account</strong> as{" "}
+        <strong>
+          <InlineCode>copy_count</InlineCode>
+        </strong>
+        's argument, then click <em>"Invoke"</em>: the result shows the{" "}
+        <strong>
+          <InlineCode>count</InlineCode>
+        </strong>{" "}
+        slot set to that count.
+      </p>
     </>
   ),
 };
