@@ -22,6 +22,7 @@ type Snapshot = {
           path: string;
           digest: string;
           readOnly: boolean | null;
+          callsForeign?: boolean | null;
           attributes: unknown;
         };
       }[];
@@ -47,18 +48,22 @@ describe("the embedded counter-account package", () => {
     assert.deepEqual(counterAccountScript.metadata, snapshot.metadata);
     assert.deepEqual(
       counterAccountScript.procedureExports.map(
-        ({ path, digest, readOnly, attributes }) => ({
+        ({ path, digest, readOnly, callsForeign, attributes }) => ({
           path,
           digest,
           readOnly,
+          callsForeign,
           attributes,
         }),
       ),
       snapshot.exports.map(
-        ({ Procedure: { path, digest, readOnly, attributes } }) => ({
+        ({
+          Procedure: { path, digest, readOnly, callsForeign, attributes },
+        }) => ({
           path,
           digest,
           readOnly,
+          callsForeign,
           attributes,
         }),
       ),

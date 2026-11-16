@@ -64,6 +64,8 @@ const InvokeProcedureArgumentsDialog = () => {
           <DialogTitle>Invoke Procedure</DialogTitle>
           <DialogDescription>
             Invoke a procedure with custom arguments.
+            {procedureExport.callsForeign === true &&
+              " It calls another account's procedures, which works when that account is public and on chain."}
           </DialogDescription>
         </DialogHeader>
         <form

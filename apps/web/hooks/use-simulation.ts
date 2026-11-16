@@ -9,7 +9,7 @@ import {
 } from "@/lib/simulation/run";
 import {
   enqueueSimulation,
-  simulationClient,
+  withSimulationClient,
 } from "@/lib/simulation/simulation-client";
 import { useSimulationStorageSlots } from "@/lib/simulation/simulation-state";
 import type { Account } from "@/lib/types/account";
@@ -31,14 +31,24 @@ import { accountIdParts } from "@/lib/web-client";
 
 const NO_SLOTS: StorageSlot[] = [];
 
-// The simulated accounts of this page load, by package and storage: an
-// account's id depends on its storage, so each edit is a new one.
-const simulatedAccounts = new Map<string, Promise<Account>>();
+// The simulated accounts of each mock client, by package and storage: an
+// account's id depends on its storage, so each edit is a new one. A client
+// that crashed is replaced by a new one, with an empty store.
+const simulatedAccountsByClient = new WeakMap<
+  object,
+  Map<string, Promise<Account>>
+>();
 
 const simulatedAccount = (
+  client: object,
   key: string,
   create: () => Promise<Account>,
 ): Promise<Account> => {
+  let simulatedAccounts = simulatedAccountsByClient.get(client);
+  if (!simulatedAccounts) {
+    simulatedAccounts = new Map();
+    simulatedAccountsByClient.set(client, simulatedAccounts);
+  }
   const existing = simulatedAccounts.get(key);
   if (existing) {
     return existing;
@@ -106,21 +116,23 @@ const useSimulation = (script: Script) => {
       let account: Account | undefined;
       let result: SimulationResult;
       try {
-        const client = await simulationClient();
-        account = await simulatedAccount(
-          `${script.id}:${script.commitment}:${JSON.stringify(storageSlots)}`,
-          () => createSimulatedAccount({ client, script, storageSlots }),
-        );
-        result = await simulateProcedure({
-          client,
-          accountId: account.id,
-          script,
-          procedureExport,
-          procedureInputs: encodeProcedureArguments({
-            params: procedureParams(procedureExport),
-            args,
-            accountIdParts,
-          }),
+        result = await withSimulationClient(async (client) => {
+          account = await simulatedAccount(
+            client,
+            `${script.id}:${script.commitment}:${JSON.stringify(storageSlots)}`,
+            () => createSimulatedAccount({ client, script, storageSlots }),
+          );
+          return simulateProcedure({
+            client,
+            accountId: account.id,
+            script,
+            procedureExport,
+            procedureInputs: encodeProcedureArguments({
+              params: procedureParams(procedureExport),
+              args,
+              accountIdParts,
+            }),
+          });
         });
       } catch (error) {
         result = {

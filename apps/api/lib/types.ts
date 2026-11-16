@@ -114,6 +114,11 @@ export type ProcedureExport = {
   // can't be told. Missing from packages compiled before api-compile reported
   // it: they get it on their next compile.
   readOnly?: boolean | null;
+  // Whether the procedure calls another account's procedure (FPI), as
+  // api-compile reads it from the MAST (`callsForeign` next to `readOnly`):
+  // `null` when it can't be told. Missing from packages compiled before
+  // api-compile reported it, like `readOnly`.
+  callsForeign?: boolean | null;
 };
 
 export const defaultProcedureExport = (): ProcedureExport => ({

@@ -213,6 +213,103 @@ test("script: simulate an account component", async ({ page }) => {
     await expect(
       page.getByRole("dialog").getByText("Returned: 8"),
     ).toBeVisible();
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: "Close" })
+      .first()
+      .click();
+  });
+
+  await test.step("a procedure that makes a foreign call is refused", async () => {
+    // The Count Reader's `copy_count` reads the counter through FPI, which
+    // the mock client can't serve: api-compile flags it (`callsForeign`).
+    await page.goto("/scripts");
+    await page.getByRole("button", { name: "Create new script" }).click();
+    const create = page
+      .getByRole("dialog")
+      .filter({ hasText: "Create Script" });
+    await create.getByLabel("Name").fill("count-reader");
+    await selectOption(page, "Type", "Account Component");
+    await selectOption(page, "Example", "Count Reader");
+    await create.getByRole("button", { name: "Create" }).click();
+    await expect(page).toHaveURL(/\/scripts\/[0-9a-z_-]+$/);
+    // The example depends on `counter-account` on its own, under the API's
+    // built-in id: the workspace's script of that name isn't offered again.
+    await page.getByRole("tab", { name: "Manifest" }).click();
+    await page.getByRole("button", { name: "Add dependency" }).click();
+    const dependency = page
+      .getByRole("dialog")
+      .filter({ hasText: "Add Dependency" });
+    await dependency.getByRole("combobox").click();
+    await expect(
+      page.getByRole("option", { name: "basic-wallet" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("option", { name: "counter-account" }),
+    ).toHaveCount(0);
+    // Closes the list: a key press can loop on a non-modal dialog's Select.
+    await page.getByRole("option", { name: "basic-wallet" }).click();
+    await dependency.getByRole("button", { name: "Cancel" }).click();
+    await expect(dependency).toBeHidden();
+    await page.getByRole("button", { name: "Compile" }).click();
+    await expect(page.getByText(COMPILED).last()).toBeVisible({
+      timeout: TRANSACTION_TIMEOUT,
+    });
+    await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
+    await expect(procedureRow(page, "copy_count")).toContainText(
+      "Calls a procedure of another account, which a simulation can't reach.",
+    );
+    await expect(invoke(page, "copy_count")).toBeDisabled();
+  });
+
+  await test.step("a crash of the mock client is reported and recovered", async () => {
+    // As if api-compile couldn't tell (`callsForeign: null`): the procedure
+    // isn't refused, and the mock client panics on the foreign account.
+    await importAccount(page, "Other Counter", OTHER_ACCOUNT_ADDRESS);
+    await page.getByRole("link", { name: "count-reader" }).first().click();
+    await expect(page).toHaveURL(/\/scripts\//);
+    const compile = /\/scripts\/[0-9a-z_-]+$/;
+    await page.route(compile, async (route) => {
+      if (route.request().method() !== "PATCH") {
+        return route.continue();
+      }
+      const response = await route.fetch();
+      const body = await response.json();
+      for (const { Procedure } of body.package.exports) {
+        delete Procedure.callsForeign;
+      }
+      await route.fulfill({ response, json: body });
+    });
+    await page.getByRole("button", { name: "Compile" }).click();
+    await expect(page.getByText(COMPILED).last()).toBeVisible({
+      timeout: TRANSACTION_TIMEOUT,
+    });
+    await page.unroute(compile);
+    await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
+    await editorConsole(page)
+      .getByRole("button", { name: "Select account" })
+      .click();
+    await page
+      .getByRole("menuitemradio", { name: "Other Counter", exact: true })
+      .click();
+    await invoke(page, "copy_count").click();
+    // The worker's crash is caught at once, well before the run's timeout. A
+    // failed run shows the log.
+    await expect(
+      editorConsole(page).getByText(/The simulation's client crashed/),
+    ).toBeVisible({ timeout: 30_000 });
+    await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
+    await expect(
+      procedureRow(page, "copy_count").getByRole("cell").nth(2),
+    ).toHaveText("Failed");
+    // The next run gets a new client. The counter's map is empty again: the
+    // import's page load dropped the slot edits, which live in memory.
+    await page.getByRole("link", { name: "counter-account" }).first().click();
+    await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
+    await invoke(page, "get_count").click();
+    await expect(
+      procedureRow(page, "get_count").getByRole("cell").nth(2),
+    ).toHaveText("0");
   });
 });
 

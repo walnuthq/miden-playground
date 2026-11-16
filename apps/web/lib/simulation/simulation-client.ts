@@ -30,6 +30,63 @@ export const simulationClient = () => {
   return clientPromise;
 };
 
+// How long a run on the mock client may take before it's taken for hung.
+// Runs are executed, never proven: they take seconds.
+export const SIMULATION_TIMEOUT_MS = 60_000;
+
+// Thrown when the mock client crashed or hung, and was discarded.
+export class SimulationClientReset extends Error {}
+
+const CRASHED =
+  "The simulation's client crashed, most likely on a call to another account's procedure, which a simulation can't reach. It was reset: the next run starts a new one.";
+
+const timedOut = (ms: number) =>
+  `The simulation didn't finish in ${ms / 1000} s. Its client was reset: the next run starts a new one.`;
+
+// Drops the client, so the next run creates another, and stops it: a call in
+// flight on its worker rejects ("WebClient terminated").
+const discardClient = (client: MockWasmWebClient) => {
+  clientPromise = undefined;
+  try {
+    client.terminate();
+  } catch {
+    // Already terminated.
+  }
+};
+
+// Runs `run` on the mock client. A panic inside the SDK's worker (the mock
+// RPC unwraps its lookup of an account it doesn't hold: any foreign call)
+// never settles the call, and would hold every later simulation in the queue
+// until a reload. So a crash of the worker, or a run past `timeoutMs`,
+// discards the client and rejects with `SimulationClientReset`.
+export const withSimulationClient = async <T>(
+  run: (client: MockWasmWebClient) => Promise<T>,
+  timeoutMs = SIMULATION_TIMEOUT_MS,
+): Promise<T> => {
+  const client = await simulationClient();
+  // Not in the SDK's typings: without it, only the timeout catches a crash.
+  const worker = (client as unknown as { worker?: Worker }).worker;
+  let onError: (() => void) | undefined;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const failure = new Promise<never>((_, reject) => {
+    const fail = (message: string) => {
+      discardClient(client);
+      reject(new SimulationClientReset(message));
+    };
+    onError = () => fail(CRASHED);
+    worker?.addEventListener("error", onError);
+    timer = setTimeout(() => fail(timedOut(timeoutMs)), timeoutMs);
+  });
+  try {
+    return await Promise.race([run(client), failure]);
+  } finally {
+    clearTimeout(timer);
+    if (onError) {
+      worker?.removeEventListener("error", onError);
+    }
+  }
+};
+
 let queue: Promise<unknown> = Promise.resolve();
 
 // One run at a time: the client's calls aren't atomic as a group.

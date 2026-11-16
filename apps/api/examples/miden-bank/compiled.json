@@ -326,7 +326,8 @@
                 }
               ]
             },
-            "readOnly": true
+            "readOnly": true,
+            "callsForeign": false
           }
         },
         {
@@ -631,7 +632,8 @@
                 }
               ]
             },
-            "readOnly": false
+            "readOnly": false,
+            "callsForeign": false
           }
         },
         {
@@ -652,7 +654,8 @@
                 }
               ]
             },
-            "readOnly": false
+            "readOnly": false,
+            "callsForeign": false
           }
         },
         {
@@ -1033,7 +1036,8 @@
                 }
               ]
             },
-            "readOnly": false
+            "readOnly": false,
+            "callsForeign": false
           }
         }
       ],
@@ -1180,7 +1184,8 @@
                 }
               ]
             },
-            "readOnly": null
+            "readOnly": null,
+            "callsForeign": null
           }
         }
       ],
@@ -1318,7 +1323,8 @@
                 }
               ]
             },
-            "readOnly": null
+            "readOnly": null,
+            "callsForeign": null
           }
         }
       ],
@@ -1456,7 +1462,8 @@
                 }
               ]
             },
-            "readOnly": null
+            "readOnly": null,
+            "callsForeign": null
           }
         }
       ],
