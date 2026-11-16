@@ -1,0 +1,59 @@
+import type { Account } from "@/lib/types/account";
+import type { Component, StorageSlot } from "@/lib/types/component";
+import type { Script, StorageSchema } from "@/lib/types/script";
+import {
+  mergeStorageSlots,
+  schemaStorageSlots,
+} from "@/lib/utils/storage-schema";
+
+const NO_SLOTS: StorageSlot[] = [];
+
+// The simulated accounts of each mock client, by package and storage: an
+// account's id depends on its storage, so each edit is a new one. A client
+// that crashed is replaced by a new one, with an empty store.
+const simulatedAccountsByClient = new WeakMap<
+  object,
+  Map<string, Promise<Account>>
+>();
+
+export const simulatedAccount = (
+  client: object,
+  key: string,
+  create: () => Promise<Account>,
+): Promise<Account> => {
+  let simulatedAccounts = simulatedAccountsByClient.get(client);
+  if (!simulatedAccounts) {
+    simulatedAccounts = new Map();
+    simulatedAccountsByClient.set(client, simulatedAccounts);
+  }
+  const existing = simulatedAccounts.get(key);
+  if (existing) {
+    return existing;
+  }
+  const created = create();
+  simulatedAccounts.set(key, created);
+  created.catch(() => simulatedAccounts.delete(key));
+  return created;
+};
+
+// The slots a script's simulations start from: those of the package's
+// storage schema, at their defaults. Without one (a package compiled before
+// the API returned it), the slots of a component of the workspace made from
+// the script.
+export const initialStorageSlots = (
+  script: Script,
+  components: Component[],
+) => {
+  const schema = script.metadata?.storage;
+  return schema
+    ? schemaStorageSlots(schema)
+    : (components.find(({ scriptId }) => scriptId === script.id)
+        ?.storageSlots ?? NO_SLOTS);
+};
+
+// The slots shown: the user's edits over the initial ones. A recompile can
+// change the schema: the edits of the slots it still has stay, the others go.
+export const shownStorageSlots = (
+  schema: StorageSchema | undefined,
+  slots: StorageSlot[],
+) => (schema ? mergeStorageSlots(schema, slots) : slots);

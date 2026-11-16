@@ -59,10 +59,11 @@ const SelectAccountDropdownMenu = ({
     ({ id }) =>
       id !== without && (withoutFaucets ? !faucetIds.includes(id) : true),
   );
+  const hasSimulated = simulatedAccounts.length > 0;
   const disabled =
     checking ||
-    (selectWallets && !showWallets) ||
-    (selectFaucets && !showFaucets) ||
+    (selectWallets && !showWallets && !hasSimulated) ||
+    (selectFaucets && !showFaucets && !hasSimulated) ||
     (accountIds !== undefined &&
       shownAccounts.length === 0 &&
       simulatedAccounts.length === 0);
@@ -92,7 +93,7 @@ const SelectAccountDropdownMenu = ({
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="start">
         <DropdownMenuRadioGroup value={value} onValueChange={onValueChange}>
-          {simulatedAccounts.length > 0 && (
+          {hasSimulated && (
             <>
               <DropdownMenuGroup>
                 <DropdownMenuLabel className="flex items-center gap-2">

@@ -2,7 +2,9 @@ import type { ExecutedTransaction as WasmExecutedTransactionType } from "@miden-
 import { FungibleAsset as WasmFungibleAsset } from "@miden-sdk/miden-sdk";
 import AccountAddress from "@/components/lib/account-address";
 import AccountStorageDeltaTable from "@/components/lib/account-storage-delta-table";
-import FungibleAssetsTable from "@/components/lib/fungible-assets-table";
+import FungibleAssetsTable, {
+  type FaucetLabel,
+} from "@/components/lib/fungible-assets-table";
 import { EMPTY_WORD } from "@/lib/constants";
 import type { Account } from "@/lib/types/account";
 import { getItem, getMapItem } from "@/lib/utils/account";
@@ -19,9 +21,12 @@ const TransactionEffects = ({
   executedTransaction,
   baseline,
   accountLabel,
+  faucetLabels,
 }: {
   executedTransaction: WasmExecutedTransactionType;
   baseline?: TransactionBaseline;
+  // Names faucets the app doesn't know, by id (FungibleAssetsTable).
+  faucetLabels?: Record<string, FaucetLabel>;
   // Names the account instead of its address, for one that has none worth
   // showing: "simulated account".
   accountLabel?: string;
@@ -196,6 +201,7 @@ const TransactionEffects = ({
         <FungibleAssetsTable
           fungibleAssets={fungibleAssetDeltas}
           withAccountAddress={false}
+          faucetLabels={faucetLabels}
         />
       )}
       <h5 className="font-semibold">Transaction fees:</h5>
@@ -207,6 +213,7 @@ const TransactionEffects = ({
         <FungibleAssetsTable
           fungibleAssets={feeAssets}
           withAccountAddress={false}
+          faucetLabels={faucetLabels}
         />
       )}
       <strong>

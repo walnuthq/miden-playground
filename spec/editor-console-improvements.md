@@ -572,7 +572,9 @@ a known limit:
   still has its own form and hardcoded parameter names
   (`getParamsWithNames`).
 - For notes and transaction scripts, a target built on the fly from an
-  account package instead of an existing account.
+  account package instead of an existing account. Done: the target dropdown
+  offers a simulated account, a throwaway account of the mock client holding
+  the script's dependencies' components (`spec/simulate-throwaway-target.md`).
 - Foreign accounts and advice map inputs in simulations. Half done: an
   account component's foreign calls run against accounts staged on the mock
   chain from its dependencies (`spec/simulate-foreign-calls.md`). Left:

@@ -1,4 +1,5 @@
 import {
+  getWasmOrThrow,
   type MockWasmWebClient,
   AccountBuilder as WasmAccountBuilder,
   AccountId as WasmAccountId,
@@ -45,35 +46,88 @@ export type SimulationResult =
 // How many felts of the stack a result can take.
 const RESULT_FELTS = 16;
 
-// A throwaway account holding the script's component, with the basic wallet
-// (to hold assets) and no authentication, at nonce 0. Its id depends on its
-// storage: every change of slots is a new account.
-export const createSimulatedAccount = async ({
-  client,
-  script,
-  storageSlots,
-}: {
-  client: WebClientType;
+// A component of a simulated account: a package and the storage slots it
+// starts from.
+export type SimulatedComponent = {
   script: Script;
   storageSlots: StorageSlot[];
+};
+
+// A throwaway account holding the components, with the standard basic wallet
+// (to hold assets) and no authentication, at nonce 0. Its id depends on its
+// storage: every change of slots is a new account. Nothing is committed: an
+// account the chain never saw runs a transaction script or consumes an
+// unauthenticated note all the same.
+export const createSimulatedAccount = async ({
+  client,
+  name,
+  components,
+}: {
+  client: WebClientType;
+  name: string;
+  components: SimulatedComponent[];
 }) => {
   const builder = await client.createCodeBuilder();
   const seed = crypto.getRandomValues(new Uint8Array(32));
-  const { account } = new WasmAccountBuilder(seed)
-    .storageMode(WasmAccountStorageMode.public())
-    .withBasicWalletComponent()
-    .withNoAuthComponent()
-    .withComponent(wasmAccountComponent({ builder, script, storageSlots }))
-    .build();
+  const accountBuilder = components.reduce(
+    (accountBuilder, { script, storageSlots }) =>
+      accountBuilder.withComponent(
+        wasmAccountComponent({ builder, script, storageSlots }),
+      ),
+    new WasmAccountBuilder(seed)
+      .storageMode(WasmAccountStorageMode.public())
+      .withBasicWalletComponent()
+      .withNoAuthComponent(),
+  );
+  const { account } = accountBuilder.build();
   await client.newAccount(account, true);
   // Its state before any run: what a run's changes are shown against. Slots
   // of its other components included, which a new account's first
   // transaction reports as created.
-  return wasmAccountToAccount({
-    wasmAccount: account,
-    name: script.name,
-    components: [],
-  });
+  return wasmAccountToAccount({ wasmAccount: account, name, components: [] });
+};
+
+// The fungible faucet whose asset a note carries on a simulated account: a
+// note's asset makes the client load its faucet as a foreign account, from
+// its own store first, then from the RPC, which on the mock client panics on
+// an account its chain doesn't hold (any sandbox faucet). A faucet created in
+// the mock client is enough, uncommitted. One per client (about 300 ms): a
+// client that was reset gets a new one.
+const mockFaucets = new WeakMap<MockWasmWebClient, Promise<string>>();
+
+// Base units: the most a fungible asset can hold is 2^63 - 2^31.
+const MOCK_FAUCET_MAX_SUPPLY = 10n ** 18n;
+
+// How the result dialog shows the faucet's asset: the app doesn't know it.
+export const MOCK_FAUCET_LABEL = {
+  name: "Simulated asset",
+  symbol: "SIM",
+  decimals: 6,
+};
+
+export const mockFaucet = (client: MockWasmWebClient) => {
+  let faucetId = mockFaucets.get(client);
+  if (!faucetId) {
+    faucetId = (async () => {
+      // The package's `AuthScheme` export is the friendly string const; the
+      // raw client takes the wasm module's numeric enum, which only the wasm
+      // module exports (as in lib/para-client.ts).
+      const { AuthScheme } = await getWasmOrThrow();
+      const faucet = await client.newFaucet(
+        WasmAccountStorageMode.public(),
+        false,
+        "Simulated",
+        MOCK_FAUCET_LABEL.symbol,
+        MOCK_FAUCET_LABEL.decimals,
+        MOCK_FAUCET_MAX_SUPPLY,
+        AuthScheme.AuthRpoFalcon512,
+      );
+      return faucet.id().toString();
+    })();
+    mockFaucets.set(client, faucetId);
+    faucetId.catch(() => mockFaucets.delete(client));
+  }
+  return faucetId;
 };
 
 // Stages an account component's foreign account on the mock chain: a
@@ -97,8 +151,8 @@ export const stageForeignAccount = async ({
   recordStaging(client);
   const account = await createSimulatedAccount({
     client,
-    script,
-    storageSlots,
+    name: script.name,
+    components: [{ script, storageSlots }],
   });
   const transactionResult = await client.executeTransaction(
     WasmAccountId.fromHex(account.id),
