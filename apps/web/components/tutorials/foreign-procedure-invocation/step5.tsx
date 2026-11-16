@@ -67,11 +67,16 @@ const Step5: TutorialStep = {
             <InlineCode>copy_count</InlineCode>
           </strong>{" "}
           procedure. In the <em>"Invoke Procedure"</em> dialog, select the{" "}
-          <strong>Counter Contract</strong> account as the{" "}
+          <strong>Counter Contract</strong> account as the procedure's only
+          argument,{" "}
+          <strong>
+            <InlineCode>param_0</InlineCode>
+          </strong>
+          : the{" "}
           <strong>
             <InlineCode>counter_account_id</InlineCode>
           </strong>{" "}
-          argument, then click the <em>"Invoke"</em> button.
+          of the Rust code. Then click the <em>"Invoke"</em> button.
         </p>
         <p>
           The Playground executes a Transaction against your{" "}
@@ -79,16 +84,17 @@ const Step5: TutorialStep = {
           <strong>
             <InlineCode>copy_count</InlineCode>
           </strong>
-          , and submits it to testnet. The <strong>Counter Contract</strong> is
-          passed to the Transaction as a foreign account, so that{" "}
+          , and submits it to testnet.{" "}
           <strong>
             <InlineCode>copy_count</InlineCode>
           </strong>{" "}
-          can call its{" "}
+          reaches the <strong>Counter Contract</strong> through FPI and calls
+          its{" "}
           <strong>
             <InlineCode>get_count</InlineCode>
           </strong>{" "}
-          procedure through FPI.
+          procedure: while it executes the Transaction, the Playground's client
+          fetches the Counter Contract's public state from testnet.
         </p>
         <TutorialStepAlert
           completed={completed}

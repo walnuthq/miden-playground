@@ -11,6 +11,7 @@ import { midenExplorerUrl } from "@/lib/constants";
 import type { Account } from "@/lib/types/account";
 import type { Component } from "@/lib/types/component";
 import type { ProcedureExport, Script } from "@/lib/types/script";
+import { decodeProcedureResult } from "@/lib/utils/procedure-inputs";
 import { formatProcedureExportPath } from "@/lib/utils/script";
 
 // Whether the Playground can invoke the procedure on the account from its
@@ -105,12 +106,12 @@ const ProceduresTableRow = ({
                       script,
                       procedureExport,
                     });
-                    if (procedureExport.signature.results.length === 1) {
-                      const [felt = 0n] = word.toU64s();
-                      setResult(felt.toString());
-                    } else if (procedureExport.signature.results.length === 4) {
-                      setResult(word.toHex());
-                    }
+                    setResult(
+                      decodeProcedureResult(
+                        procedureExport.signature,
+                        Array.from(word.toU64s()),
+                      ),
+                    );
                   } catch (error) {
                     console.error(error);
                     setResult("ERROR");
