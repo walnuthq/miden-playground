@@ -9,6 +9,9 @@ import {
 
 const SLOT = "counter_account::counter_contract::count_map";
 
+// The Count Reader's slot, which `copy_count` sets to the counter's count.
+const COUNT_SLOT = "count_reader::count_reader::count";
+
 // The tutorials' counter contract (`TESTNET_COUNTER_CONTRACT_ADDRESS` in
 // lib/constants.ts, which reads Vite's env and so can't be imported here).
 const OTHER_ACCOUNT_ADDRESS =
@@ -220,9 +223,10 @@ test("script: simulate an account component", async ({ page }) => {
       .click();
   });
 
-  await test.step("a procedure that makes a foreign call is refused", async () => {
-    // The Count Reader's `copy_count` reads the counter through FPI, which
-    // the mock client can't serve: api-compile flags it (`callsForeign`).
+  await test.step("a foreign call runs against a staged account", async () => {
+    // The Count Reader's `copy_count` reads the counter through FPI: the
+    // counter is staged on the mock chain from the script's `counter-account`
+    // dependency, with the storage set in the tab.
     await page.goto("/scripts");
     await page.getByRole("button", { name: "Create new script" }).click();
     const create = page
@@ -256,42 +260,28 @@ test("script: simulate an account component", async ({ page }) => {
       timeout: TRANSACTION_TIMEOUT,
     });
     await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
-    await expect(procedureRow(page, "copy_count")).toContainText(
-      "Calls a procedure of another account, which a simulation can't reach.",
-    );
-    await expect(invoke(page, "copy_count")).toBeDisabled();
+    // The workspace's `counter-account` was edited since: the dependency
+    // resolves to the package the web app embeds, with its storage schema.
+    const foreign = foreignAccount(page, "counter-account");
+    await expect(foreign.getByText(SLOT)).toBeVisible();
+    await foreign.getByRole("button", { name: "Add entry" }).click();
+    await foreign.getByLabel(`${SLOT} key 1`).fill("1");
+    await foreign.getByLabel(`${SLOT} value 1`).fill("7");
+    await selectCopyCountAccount(page, "counter-account");
+    await copyCount(page, "7");
+    // An edit is a new account, staged at the next run.
+    await foreign.getByLabel(`${SLOT} value 1`).fill("42");
+    await copyCount(page, "42");
   });
 
   await test.step("a crash of the mock client is reported and recovered", async () => {
-    // As if api-compile couldn't tell (`callsForeign: null`): the procedure
-    // isn't refused, and the mock client panics on the foreign account.
+    // A sandbox account is out of the mock chain's reach: the mock client
+    // panics on it.
     await importAccount(page, "Other Counter", OTHER_ACCOUNT_ADDRESS);
     await page.getByRole("link", { name: "count-reader" }).first().click();
     await expect(page).toHaveURL(/\/scripts\//);
-    const compile = /\/scripts\/[0-9a-z_-]+$/;
-    await page.route(compile, async (route) => {
-      if (route.request().method() !== "PATCH") {
-        return route.continue();
-      }
-      const response = await route.fetch();
-      const body = await response.json();
-      for (const { Procedure } of body.package.exports) {
-        delete Procedure.callsForeign;
-      }
-      await route.fulfill({ response, json: body });
-    });
-    await page.getByRole("button", { name: "Compile" }).click();
-    await expect(page.getByText(COMPILED).last()).toBeVisible({
-      timeout: TRANSACTION_TIMEOUT,
-    });
-    await page.unroute(compile);
     await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
-    await editorConsole(page)
-      .getByRole("button", { name: "Select account" })
-      .click();
-    await page
-      .getByRole("menuitemradio", { name: "Other Counter", exact: true })
-      .click();
+    await selectCopyCountAccount(page, "Other Counter");
     await invoke(page, "copy_count").click();
     // The worker's crash is caught at once, well before the run's timeout. A
     // failed run shows the log.
@@ -302,8 +292,14 @@ test("script: simulate an account component", async ({ page }) => {
     await expect(
       procedureRow(page, "copy_count").getByRole("cell").nth(2),
     ).toHaveText("Failed");
-    // The next run gets a new client. The counter's map is empty again: the
-    // import's page load dropped the slot edits, which live in memory.
+    // The next run gets a new client, on which the counter is staged again.
+    // The import's page load dropped the slot edits, which live in memory.
+    const foreign = foreignAccount(page, "counter-account");
+    await foreign.getByRole("button", { name: "Add entry" }).click();
+    await foreign.getByLabel(`${SLOT} key 1`).fill("1");
+    await foreign.getByLabel(`${SLOT} value 1`).fill("3");
+    await selectCopyCountAccount(page, "counter-account");
+    await copyCount(page, "3");
     await page.getByRole("link", { name: "counter-account" }).first().click();
     await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
     await invoke(page, "get_count").click();
@@ -312,6 +308,33 @@ test("script: simulate an account component", async ({ page }) => {
     ).toHaveText("0");
   });
 });
+
+// A foreign account's block in the Simulate tab.
+const foreignAccount = (page: Page, name: string) =>
+  editorConsole(page).getByRole("region", { name: `Foreign account ${name}` });
+
+// Picks the account `copy_count` reads.
+const selectCopyCountAccount = async (page: Page, name: string) => {
+  await procedureRow(page, "copy_count")
+    .locator("xpath=following-sibling::tr[1]")
+    .getByRole("button")
+    .click();
+  await page.getByRole("menuitemradio", { name, exact: true }).click();
+};
+
+// Runs the Count Reader's `copy_count` and applies its result: `count` holds
+// the counter's count.
+const copyCount = async (page: Page, count: string) => {
+  await invoke(page, "copy_count").click();
+  const dialog = page
+    .getByRole("dialog")
+    .filter({ hasText: "Simulation of copy_count" });
+  await dialog.getByRole("button", { name: "Apply to storage" }).click();
+  await expect(dialog).toBeHidden();
+  await expect(
+    editorConsole(page).getByLabel(`${COUNT_SLOT} value`, { exact: true }),
+  ).toHaveValue(count);
+};
 
 // Picks the Simulate tab's target account.
 const selectTarget = async (page: Page, name: string) => {

@@ -6,9 +6,13 @@ import SimulationResultDialog, {
   type SimulatedTransaction,
 } from "@/components/script/simulate/simulation-result-dialog";
 import TargetSimulation from "@/components/script/simulate/target-simulation";
-import useSimulation from "@/hooks/use-simulation";
+import useSimulation, {
+  type ForeignAccount,
+  type UnresolvedForeignAccount,
+} from "@/hooks/use-simulation";
 import { simulationBlockedReason } from "@/lib/simulation/blocked";
 import { storageChanges } from "@/lib/simulation/run";
+import type { StorageSlot } from "@/lib/types/component";
 import type { Script } from "@/lib/types/script";
 import { formatProcedureExportPath } from "@/lib/utils/script";
 import { storageSlotDescriptions } from "@/lib/utils/storage-schema";
@@ -17,6 +21,58 @@ import {
   storageSlotsValid,
 } from "@/lib/utils/storage-slots";
 
+const slotNamePlaceholder = (name: string) =>
+  `${name.replace(/[^A-Za-z0-9_]/g, "_")}::component::field`;
+
+const InvalidSlots = () => (
+  <p className="text-xs text-destructive">
+    Storage values are felts or words (0x and 64 hex digits), with distinct slot
+    names and map keys.
+  </p>
+);
+
+// The accounts a procedure's foreign calls run against: one per account
+// component the script depends on, staged on the mock chain at Invoke from
+// the slots shown.
+const ForeignAccounts = ({
+  foreignAccounts,
+  unresolved,
+}: {
+  foreignAccounts: ForeignAccount[];
+  unresolved: UnresolvedForeignAccount[];
+}) => (
+  <div className="flex flex-col gap-2">
+    <h3 className="text-xs font-medium">Foreign accounts</h3>
+    {foreignAccounts.map(({ name, storageSlots, setStorageSlots, schema }) => (
+      <section
+        key={name}
+        aria-label={`Foreign account ${name}`}
+        className="flex flex-col gap-2"
+      >
+        <h4 className="font-mono text-xs break-all text-muted-foreground">
+          {name}
+        </h4>
+        <StorageSlotsEditor
+          storageSlots={storageSlots}
+          onChange={(slots: StorageSlot[]) => setStorageSlots(slots)}
+          allowSlotEdits={!schema}
+          descriptions={schema && storageSlotDescriptions(schema)}
+          namePlaceholder={slotNamePlaceholder(name)}
+        />
+        {!storageSlotsValid(storageSlots) && <InvalidSlots />}
+      </section>
+    ))}
+    {unresolved.map(({ name, reason }) => (
+      <p key={name} className="text-xs text-muted-foreground">
+        <span className="font-mono break-all">{name}</span>:{" "}
+        {reason === "stale"
+          ? "changed since this script was compiled. Compile this script again to simulate calls to it."
+          : "its compiled package isn't in the workspace. Compile it, then this script, to simulate calls to it."}
+      </p>
+    ))}
+  </div>
+);
+
 const AccountComponentSimulation = ({
   script,
   onFailure,
@@ -24,17 +80,32 @@ const AccountComponentSimulation = ({
   script: Script;
   onFailure: () => void;
 }) => {
-  const { storageSlots, setStorageSlots, invoke } = useSimulation(script);
+  const {
+    storageSlots,
+    setStorageSlots,
+    foreignAccounts,
+    unresolvedForeignAccounts,
+    foreignAccountsStatus,
+    foreignAccountsReady,
+    simulatedAccounts,
+    invoke,
+  } = useSimulation(script);
   const [simulation, setSimulation] = useState<SimulatedTransaction>();
   const blocked = notReady(script);
-  const slotsValid = storageSlotsValid(storageSlots);
+  const slotsValid =
+    storageSlotsValid(storageSlots) &&
+    foreignAccounts.every((foreignAccount) =>
+      storageSlotsValid(foreignAccount.storageSlots),
+    );
+  const hasForeignAccounts =
+    foreignAccounts.length > 0 || unresolvedForeignAccounts.length > 0;
   // With the package's storage schema, its slots are the ones there are.
   const schema = script.metadata?.storage;
   return (
     <div className="flex flex-col gap-3">
       <p className="text-xs text-muted-foreground">
         {blocked ??
-          "Procedures run locally on a throwaway account holding this component: nothing is submitted. Every run starts from the storage below, at nonce 0."}
+          `Procedures run locally on a throwaway account holding this component: nothing is submitted. Every run starts from the storage below, at nonce 0.${hasForeignAccounts ? " Procedures that call another account run against the simulated foreign accounts below: pick one as the account argument." : ""}`}
       </p>
       {/* Side by side on a wide screen: the console is short. */}
       <div className="grid items-start gap-3 xl:grid-cols-2">
@@ -45,13 +116,14 @@ const AccountComponentSimulation = ({
             onChange={setStorageSlots}
             allowSlotEdits={!schema}
             descriptions={schema && storageSlotDescriptions(schema)}
-            namePlaceholder={`${script.name.replace(/[^A-Za-z0-9_]/g, "_")}::component::field`}
+            namePlaceholder={slotNamePlaceholder(script.name)}
           />
-          {!slotsValid && (
-            <p className="text-xs text-destructive">
-              Storage values are felts or words (0x and 64 hex digits), with
-              distinct slot names and map keys.
-            </p>
+          {!storageSlotsValid(storageSlots) && <InvalidSlots />}
+          {hasForeignAccounts && (
+            <ForeignAccounts
+              foreignAccounts={foreignAccounts}
+              unresolved={unresolvedForeignAccounts}
+            />
           )}
         </div>
         <div className="flex min-w-0 flex-col gap-2">
@@ -59,8 +131,13 @@ const AccountComponentSimulation = ({
           <ProceduresList
             idPrefix={`simulate-${script.id}`}
             procedureExports={script.procedureExports}
-            disabled={blocked !== undefined || !slotsValid}
-            blockedReason={simulationBlockedReason}
+            disabled={
+              blocked !== undefined || !slotsValid || !foreignAccountsReady
+            }
+            blockedReason={(procedureExport) =>
+              simulationBlockedReason(procedureExport, foreignAccountsStatus)
+            }
+            simulatedAccounts={simulatedAccounts}
             onInvoke={async (procedureExport, args) => {
               const { result, account } = await invoke(procedureExport, args);
               if (!result.ok || !account) {

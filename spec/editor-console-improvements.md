@@ -573,7 +573,11 @@ a known limit:
   (`getParamsWithNames`).
 - For notes and transaction scripts, a target built on the fly from an
   account package instead of an existing account.
-- Foreign accounts and advice map inputs in simulations.
+- Foreign accounts and advice map inputs in simulations. Half done: an
+  account component's foreign calls run against accounts staged on the mock
+  chain from its dependencies (`spec/simulate-foreign-calls.md`). Left:
+  advice map inputs, and foreign accounts for note and transaction scripts
+  (they run on the app's client, which fetches a public one from the node).
 - A Simulate tab on read-only scripts, which have no console.
 - Accounts whose key isn't in the Playground (Bread, Para, an imported
   wallet) can't be a simulation target: a single-sig account's auth

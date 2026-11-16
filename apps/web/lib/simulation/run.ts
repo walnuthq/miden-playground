@@ -1,4 +1,5 @@
 import {
+  type MockWasmWebClient,
   AccountBuilder as WasmAccountBuilder,
   AccountId as WasmAccountId,
   AccountStorageMode as WasmAccountStorageMode,
@@ -13,6 +14,7 @@ import {
   type WebClient as WebClientType,
 } from "@miden-sdk/miden-sdk";
 import { simulationBlockedReason } from "@/lib/simulation/blocked";
+import { recordStaging } from "@/lib/simulation/simulation-client";
 import type { StorageSlot } from "@/lib/types/component";
 import type { MidenInput, ProcedureExport, Script } from "@/lib/types/script";
 import { fromBase64 } from "@/lib/utils";
@@ -74,6 +76,45 @@ export const createSimulatedAccount = async ({
   });
 };
 
+// Stages an account component's foreign account on the mock chain: a
+// simulated account made from the dependency's package and the storage
+// slots shown, then committed in a block, so the mock RPC serves it to a
+// foreign call (it serves only committed accounts, and its lazy fetch finds
+// them without a declaration). An empty transaction commits it: No Auth bumps
+// a new account's nonce. Proving on the mock client is a dummy proof. Each
+// staging adds an account and a block to the mock chain: run it at Invoke,
+// never on a slot edit. It writes to the client's store, which is the point
+// of the mock client: never call it on the app's client.
+export const stageForeignAccount = async ({
+  client,
+  script,
+  storageSlots,
+}: {
+  client: MockWasmWebClient;
+  script: Script;
+  storageSlots: StorageSlot[];
+}) => {
+  recordStaging(client);
+  const account = await createSimulatedAccount({
+    client,
+    script,
+    storageSlots,
+  });
+  const transactionResult = await client.executeTransaction(
+    WasmAccountId.fromHex(account.id),
+    new WasmTransactionRequestBuilder().build(),
+  );
+  const provenTransaction = await client.proveTransaction(transactionResult);
+  const submissionHeight = await client.submitProvenTransaction(
+    provenTransaction,
+    transactionResult,
+  );
+  await client.applyTransaction(transactionResult, submissionHeight);
+  await client.proveBlock();
+  await client.syncState();
+  return account;
+};
+
 const errorMessage = (error: unknown) =>
   cleanExecutionError(error instanceof Error ? error.message : String(error));
 
@@ -124,16 +165,21 @@ export const simulateProcedure = async ({
   script,
   procedureExport,
   procedureInputs = [],
+  foreignAccountsStaged = 0,
 }: {
   client: WebClientType;
   accountId: string;
   script: Script;
   procedureExport: ProcedureExport;
   procedureInputs?: MidenInput[];
+  // How many foreign accounts were staged on the client for this run.
+  foreignAccountsStaged?: number;
 }): Promise<SimulationResult> => {
-  // The Invoke button is disabled for it: this keeps any other caller from
-  // panicking the mock client's WASM.
-  const blocked = simulationBlockedReason(procedureExport);
+  // The Invoke button is disabled for a foreign call with nothing staged:
+  // this keeps any other caller from panicking the mock client's WASM.
+  const blocked = simulationBlockedReason(procedureExport, {
+    staged: foreignAccountsStaged,
+  });
   if (blocked) {
     return { ok: false, error: blocked };
   }

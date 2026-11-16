@@ -38,7 +38,7 @@ export const SIMULATION_TIMEOUT_MS = 60_000;
 export class SimulationClientReset extends Error {}
 
 const CRASHED =
-  "The simulation's client crashed, most likely on a call to another account's procedure, which a simulation can't reach. It was reset: the next run starts a new one.";
+  "The simulation's client crashed, most likely on a call to another account's procedure: a simulation reaches only the simulated foreign accounts, not the sandbox's. It was reset: the next run starts a new one.";
 
 const timedOut = (ms: number) =>
   `The simulation didn't finish in ${ms / 1000} s. Its client was reset: the next run starts a new one.`;
@@ -84,7 +84,23 @@ export const withSimulationClient = async <T>(
     if (onError) {
       worker?.removeEventListener("error", onError);
     }
+    if ((stagings.get(client) ?? 0) >= STAGINGS_PER_CLIENT) {
+      discardClient(client);
+    }
   }
+};
+
+// Each foreign account staged adds an account and a block to the mock chain,
+// and the mock RPC keeps a snapshot of the chain per block: runs slow down as
+// they pile up (about 370 ms a run after the first staging, 520 ms after 50,
+// measured on 2026-11-16). Past this many, the client is discarded after the
+// run, and the next run starts a new one, with an empty store.
+export const STAGINGS_PER_CLIENT = 100;
+
+const stagings = new WeakMap<MockWasmWebClient, number>();
+
+export const recordStaging = (client: MockWasmWebClient) => {
+  stagings.set(client, (stagings.get(client) ?? 0) + 1);
 };
 
 let queue: Promise<unknown> = Promise.resolve();

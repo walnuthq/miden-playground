@@ -1,12 +1,48 @@
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
-import { FOREIGN_CALL_REASON, simulationBlockedReason } from "./blocked.ts";
+import {
+  FOREIGN_CALL_REASON,
+  missingForeignCallReason,
+  simulationBlockedReason,
+  staleForeignCallReason,
+} from "./blocked.ts";
 
 describe("simulationBlockedReason", () => {
-  test("blocks a procedure that calls another account's procedure", () => {
+  test("blocks a foreign call when no account could be staged", () => {
     assert.equal(
       simulationBlockedReason({ callsForeign: true }),
       FOREIGN_CALL_REASON,
+    );
+    assert.equal(
+      simulationBlockedReason({ callsForeign: true }, { staged: 0 }),
+      FOREIGN_CALL_REASON,
+    );
+  });
+
+  test("says which dependency must be compiled again", () => {
+    assert.equal(
+      simulationBlockedReason(
+        { callsForeign: true },
+        { staged: 0, stale: ["counter-account"], missing: ["other"] },
+      ),
+      staleForeignCallReason(["counter-account"]),
+    );
+    assert.equal(
+      simulationBlockedReason(
+        { callsForeign: true },
+        { staged: 0, missing: ["other"] },
+      ),
+      missingForeignCallReason(["other"]),
+    );
+  });
+
+  test("runs a foreign call against a staged account", () => {
+    assert.equal(
+      simulationBlockedReason(
+        { callsForeign: true },
+        { staged: 1, stale: ["other"] },
+      ),
+      undefined,
     );
   });
 
