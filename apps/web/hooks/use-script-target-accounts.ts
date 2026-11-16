@@ -1,12 +1,8 @@
 import { useMiden } from "@miden-sdk/react";
 import { useEffect, useMemo, useState } from "react";
 import useAccounts from "@/hooks/use-accounts";
-import useScripts from "@/hooks/use-scripts";
 import { enqueueSimulation } from "@/lib/simulation/simulation-client";
-import { basicWalletScript } from "@/lib/tutorials/basic-wallet";
-import defaultScripts from "@/lib/types/default-scripts";
 import type { Script } from "@/lib/types/script";
-import { procedureName } from "@/lib/utils/account-procedures";
 import { clientAccountMissingProcedures } from "@/lib/web-client";
 
 export type ScriptTargetAccounts = {
@@ -17,8 +13,6 @@ export type ScriptTargetAccounts = {
   // `checking`. An account whose code couldn't be read is kept: it's unknown,
   // not incompatible.
   accountIds: Set<string>;
-  // The names of the procedures no account has, for the empty state.
-  missing: string[];
 };
 
 // The roots each code commitment lacks, by `${code}:${roots}`. The same code
@@ -32,7 +26,6 @@ const missingByCode = new Map<string, string[]>();
 const useScriptTargetAccounts = (script: Script): ScriptTargetAccounts => {
   const { client } = useMiden();
   const { accounts } = useAccounts();
-  const { scripts } = useScripts();
   const accountProcedures = script.metadata?.accountProcedures;
   const roots =
     Array.isArray(accountProcedures) && accountProcedures.length > 0
@@ -98,28 +91,17 @@ const useScriptTargetAccounts = (script: Script): ScriptTargetAccounts => {
       return {
         status: "all",
         accountIds: new Set(accounts.map(({ id }) => id)),
-        missing: [],
       };
     }
     const kept = accounts.filter(({ id, code }) => {
       const missing = missingByCode.get(cacheKey(code, id));
       return missing === undefined || missing.length === 0;
     });
-    // The Rust basic wallet names `receive-asset`, which the P2ID template
-    // calls: it isn't a workspace script.
-    const named = [...scripts, ...defaultScripts, basicWalletScript];
     return {
       status: pending.length > 0 ? "checking" : "filtered",
       accountIds: new Set(kept.map(({ id }) => id)),
-      missing: roots
-        .filter((root) =>
-          accounts.every(({ id, code }) =>
-            missingByCode.get(cacheKey(code, id))?.includes(root),
-          ),
-        )
-        .map((root) => procedureName(root, named)),
     };
-  }, [accounts, scripts, rootsKey, pendingKey, checks, unknown]);
+  }, [accounts, rootsKey, pendingKey, checks, unknown]);
 };
 
 export default useScriptTargetAccounts;

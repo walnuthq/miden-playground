@@ -1,4 +1,4 @@
-import { expect, type Page, test } from "@playwright/test";
+import { expect, type Locator, type Page, test } from "@playwright/test";
 import { COMPILED, createCounterScript, replaceInEditor } from "./editor";
 import { launchExample } from "./example";
 import {
@@ -336,20 +336,24 @@ const copyCount = async (page: Page, count: string) => {
   ).toHaveValue(count);
 };
 
+// The Simulate tab's target dropdown, under its label.
+const targetDropdown = (page: Page) =>
+  editorConsole(page)
+    .locator("div")
+    .filter({ has: page.getByText("Target account", { exact: true }) })
+    .last()
+    .getByRole("button");
+
 // Picks the Simulate tab's target account.
 const selectTarget = async (page: Page, name: string) => {
-  await editorConsole(page)
-    .getByRole("button", { name: "Select account" })
-    .click();
+  await targetDropdown(page).click();
   await page.getByRole("menuitemradio", { name, exact: true }).click();
+  await expect(targetDropdown(page)).toHaveText(name);
 };
 
 // The accounts the Simulate tab's target dropdown lists, then closes it.
 const targetOptions = async (page: Page) => {
-  await editorConsole(page)
-    .getByRole("button", { name: "Select account" })
-    .first()
-    .click();
+  await targetDropdown(page).click();
   const options = page.getByRole("menuitemradio");
   await expect(options.first()).toBeVisible();
   const names = await options.allInnerTexts();
@@ -367,6 +371,38 @@ const importAccount = async (page: Page, name: string, address: string) => {
   await dialog.getByLabel("Address").fill(address);
   await dialog.getByRole("button", { name: "Import" }).click();
   await expect(dialog).toBeHidden({ timeout: TRANSACTION_TIMEOUT });
+};
+
+// A block of the simulated account's storage: one per dependency.
+const simulatedComponent = (page: Page, name: string) =>
+  editorConsole(page).getByRole("region", {
+    name: `Simulated account ${name}`,
+  });
+
+const simulateButton = (page: Page) =>
+  editorConsole(page).getByRole("button", { name: "Simulate", exact: true });
+
+// A storage change's value in the result dialog: a felt as a word, shown as
+// its first and last 16 hex digits.
+const shownFelt = (value: number) =>
+  `0x${value.toString(16).padStart(2, "0").padEnd(16, "0")}…${"0".repeat(16)}`;
+
+// The value a storage change ends at, in the result dialog.
+const afterValue = (dialog: Locator) =>
+  dialog
+    .locator("p")
+    .filter({ hasText: /^After:/ })
+    .getByRole("button");
+
+// Runs the script on the simulated account: the dialog says so.
+const simulateOnThrowaway = async (page: Page, script: string) => {
+  await simulateButton(page).click();
+  const dialog = page
+    .getByRole("dialog")
+    .filter({ hasText: `Simulation of ${script}` });
+  await expect(dialog.getByText("on a throwaway account")).toBeVisible();
+  await expect(dialog.getByRole("button", { name: /submit/i })).toHaveCount(0);
+  return dialog;
 };
 
 const simulate = async (page: Page, script: string) => {
@@ -431,6 +467,43 @@ test("script: simulate a note and a transaction script", async ({ page }) => {
     ).toBeDisabled();
   });
 
+  await test.step("the note runs on the simulated account", async () => {
+    const storeBefore = await networkStoreAccounts(page);
+    await editorConsole(page).getByLabel("Note argument").fill("");
+    await selectTarget(page, "Simulated account");
+    // A throwaway account holding the note's `counter-account` dependency,
+    // with the storage set in the tab.
+    const counter = simulatedComponent(page, "counter-account");
+    await expect(counter.getByText(SLOT)).toBeVisible();
+    await counter.getByRole("button", { name: "Add entry" }).click();
+    await counter.getByLabel(`${SLOT} key 1`).fill("1");
+    await counter.getByLabel(`${SLOT} value 1`).fill("5");
+    let dialog = await simulateOnThrowaway(page, "increment-note");
+    await expect(afterValue(dialog)).toHaveText(shownFelt(6));
+    await dialog.getByRole("button", { name: "Apply to storage" }).click();
+    await expect(dialog).toBeHidden();
+    await expect(counter.getByLabel(`${SLOT} value 1`)).toHaveValue("6");
+    // The next run starts from the applied storage.
+    dialog = await simulateOnThrowaway(page, "increment-note");
+    await expect(afterValue(dialog)).toHaveText(shownFelt(7));
+    await dialog.getByRole("button", { name: "Close" }).first().click();
+    await editorConsole(page).getByRole("tab", { name: "Output" }).click();
+    await expect(
+      editorConsole(page)
+        .getByText(
+          "Simulated increment-note on the simulated account: 1 storage change.",
+          { exact: true },
+        )
+        .first(),
+    ).toBeVisible();
+    // The simulated account isn't in the network's store.
+    expect(await clientStores(page)).toEqual([
+      "MidenClientDB_mtst",
+      "mock_client_db",
+    ]);
+    expect(await networkStoreAccounts(page)).toBe(storeBefore);
+  });
+
   await test.step("a transaction script runs against the counter", async () => {
     await page.goto("/scripts");
     await page.getByRole("button", { name: "Create new script" }).click();
@@ -457,7 +530,19 @@ test("script: simulate a note and a transaction script", async ({ page }) => {
     await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
     await selectTarget(page, "Counter Contract");
     await editorConsole(page).getByLabel("Script argument").fill("7");
-    await simulate(page, "counter-script");
+    const dialog = await simulate(page, "counter-script");
+    await dialog.getByRole("button", { name: "Close" }).first().click();
+  });
+
+  await test.step("a transaction script runs on the simulated account", async () => {
+    await selectTarget(page, "Simulated account");
+    // The script's own slots, empty: the count goes from 0 to 1.
+    await expect(
+      simulatedComponent(page, "counter-account").getByText(SLOT),
+    ).toBeVisible();
+    const dialog = await simulateOnThrowaway(page, "counter-script");
+    await expect(afterValue(dialog)).toHaveText(shownFelt(1));
+    await dialog.getByRole("button", { name: "Close" }).first().click();
   });
 
   await test.step("import a second account", async () => {
@@ -476,6 +561,7 @@ test("script: simulate a note and a transaction script", async ({ page }) => {
       expect(await targetOptions(page)).toEqual([
         "Counter Contract",
         "Other Counter",
+        "Simulated account",
       ]);
     }
   });
@@ -517,28 +603,59 @@ test("script: simulate a note and a transaction script", async ({ page }) => {
       .click();
   });
 
-  await test.step("no account can be the P2ID note's target", async () => {
+  await test.step("the simulated account is the P2ID note's target", async () => {
+    const storeBefore = await networkStoreAccounts(page);
     // The template calls the Rust basic wallet's `receive-asset`
     // (lib/tutorials/basic-wallet.ts), which none of the sandbox's accounts
     // has: they carry the standard basic wallet, whose `receive_asset` has
-    // another root.
+    // another root. The simulated account holds the note's `basic-wallet`
+    // dependency: it's preselected.
+    await expect(targetDropdown(page)).toHaveText("Simulated account");
     await expect(
-      editorConsole(page).getByText(
-        "No account has the procedures this script calls: receive-asset. Deploy or import an account with them.",
-        { exact: true },
-      ),
+      editorConsole(page).getByText(/It lacks procedures/),
+    ).toHaveCount(0);
+    const field = editorConsole(page)
+      .locator("div")
+      .filter({ hasText: "target-account-id" })
+      .last();
+    await field.getByRole("button", { name: "Counter Contract" }).click();
+    await page
+      .getByRole("menuitemradio", { name: "Simulated account", exact: true })
+      .click();
+    // Only the simulated asset: a sandbox faucet would crash the mock client.
+    await editorConsole(page)
+      .getByRole("button", { name: "Select asset" })
+      .click();
+    await expect(page.getByRole("menuitemradio")).toHaveCount(1);
+    await page
+      .getByRole("menuitemradio", { name: "Simulated asset", exact: true })
+      .click();
+    await editorConsole(page).getByPlaceholder("Amount").fill("100");
+    const dialog = await simulateOnThrowaway(page, "p2id-note");
+    await expect(dialog.getByText("Vault changes:")).toBeVisible();
+    // 100 base units of a 6-decimal token.
+    await expect(
+      dialog.getByRole("row", {
+        name: "Fungible Asset Simulated asset SIM +0.0001",
+      }),
+    ).toBeVisible();
+    await dialog.getByRole("button", { name: "Close" }).first().click();
+    // Another account named in the note: its assertion fails.
+    await field.getByRole("button", { name: "Simulated account" }).click();
+    await page
+      .getByRole("menuitemradio", { name: "Other Counter", exact: true })
+      .click();
+    await simulateButton(page).click();
+    // A failed run shows the log.
+    await expect(
+      editorConsole(page).getByText("Simulation of p2id-note failed.").last(),
     ).toBeVisible();
     await expect(
       editorConsole(page)
-        .getByRole("button", { name: "No accounts found." })
-        .first(),
-    ).toBeDisabled();
-    await expect(
-      editorConsole(page).getByRole("button", {
-        name: "Simulate",
-        exact: true,
-      }),
-    ).toBeDisabled();
+        .getByText(/assert/i)
+        .last(),
+    ).toBeVisible();
+    expect(await networkStoreAccounts(page)).toBe(storeBefore);
   });
 
   await test.step("nothing was submitted", async () => {
@@ -567,6 +684,7 @@ test("script: simulate a note and a transaction script", async ({ page }) => {
       expect(await targetOptions(page)).toEqual([
         "Counter Contract",
         "Other Counter",
+        "Simulated account",
       ]);
     }
   });

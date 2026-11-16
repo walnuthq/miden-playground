@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@workspace/ui/components/dialog";
+import type { FaucetLabel } from "@/components/lib/fungible-assets-table";
 import TransactionEffects, {
   type TransactionBaseline,
 } from "@/components/lib/transaction-effects";
@@ -24,6 +25,9 @@ export type SimulatedTransaction = {
   // Whether it ran on a throwaway account, which the effects then name
   // instead of showing an address.
   throwaway: boolean;
+  // Names the assets of faucets the app doesn't know, by faucet id: the
+  // simulated asset, issued by a faucet of the mock client.
+  faucetLabels?: Record<string, FaucetLabel>;
 };
 
 // A simulated transaction's effects: the transaction dialog's preview without
@@ -65,6 +69,7 @@ const SimulationResultDialog = ({
             accountLabel={
               simulation.throwaway ? "simulated account" : undefined
             }
+            faucetLabels={simulation.faucetLabels}
           />
         </>
       )}

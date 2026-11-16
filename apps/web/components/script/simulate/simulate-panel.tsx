@@ -1,18 +1,18 @@
 import { useState } from "react";
 import ProceduresList from "@/components/procedures/procedures-list";
 import StorageSlotsEditor from "@/components/procedures/storage-slots-editor";
+import DependencyAccounts, {
+  InvalidSlots,
+  slotNamePlaceholder,
+} from "@/components/script/simulate/dependency-accounts";
 import { notReady } from "@/components/script/simulate/not-ready";
 import SimulationResultDialog, {
   type SimulatedTransaction,
 } from "@/components/script/simulate/simulation-result-dialog";
 import TargetSimulation from "@/components/script/simulate/target-simulation";
-import useSimulation, {
-  type ForeignAccount,
-  type UnresolvedForeignAccount,
-} from "@/hooks/use-simulation";
+import useSimulation from "@/hooks/use-simulation";
 import { simulationBlockedReason } from "@/lib/simulation/blocked";
 import { storageChanges } from "@/lib/simulation/run";
-import type { StorageSlot } from "@/lib/types/component";
 import type { Script } from "@/lib/types/script";
 import { formatProcedureExportPath } from "@/lib/utils/script";
 import { storageSlotDescriptions } from "@/lib/utils/storage-schema";
@@ -20,58 +20,6 @@ import {
   applyStorageChanges,
   storageSlotsValid,
 } from "@/lib/utils/storage-slots";
-
-const slotNamePlaceholder = (name: string) =>
-  `${name.replace(/[^A-Za-z0-9_]/g, "_")}::component::field`;
-
-const InvalidSlots = () => (
-  <p className="text-xs text-destructive">
-    Storage values are felts or words (0x and 64 hex digits), with distinct slot
-    names and map keys.
-  </p>
-);
-
-// The accounts a procedure's foreign calls run against: one per account
-// component the script depends on, staged on the mock chain at Invoke from
-// the slots shown.
-const ForeignAccounts = ({
-  foreignAccounts,
-  unresolved,
-}: {
-  foreignAccounts: ForeignAccount[];
-  unresolved: UnresolvedForeignAccount[];
-}) => (
-  <div className="flex flex-col gap-2">
-    <h3 className="text-xs font-medium">Foreign accounts</h3>
-    {foreignAccounts.map(({ name, storageSlots, setStorageSlots, schema }) => (
-      <section
-        key={name}
-        aria-label={`Foreign account ${name}`}
-        className="flex flex-col gap-2"
-      >
-        <h4 className="font-mono text-xs break-all text-muted-foreground">
-          {name}
-        </h4>
-        <StorageSlotsEditor
-          storageSlots={storageSlots}
-          onChange={(slots: StorageSlot[]) => setStorageSlots(slots)}
-          allowSlotEdits={!schema}
-          descriptions={schema && storageSlotDescriptions(schema)}
-          namePlaceholder={slotNamePlaceholder(name)}
-        />
-        {!storageSlotsValid(storageSlots) && <InvalidSlots />}
-      </section>
-    ))}
-    {unresolved.map(({ name, reason }) => (
-      <p key={name} className="text-xs text-muted-foreground">
-        <span className="font-mono break-all">{name}</span>:{" "}
-        {reason === "stale"
-          ? "changed since this script was compiled. Compile this script again to simulate calls to it."
-          : "its compiled package isn't in the workspace. Compile it, then this script, to simulate calls to it."}
-      </p>
-    ))}
-  </div>
-);
 
 const AccountComponentSimulation = ({
   script,
@@ -120,8 +68,12 @@ const AccountComponentSimulation = ({
           />
           {!storageSlotsValid(storageSlots) && <InvalidSlots />}
           {hasForeignAccounts && (
-            <ForeignAccounts
-              foreignAccounts={foreignAccounts}
+            <DependencyAccounts
+              title="Foreign accounts"
+              labelPrefix="Foreign account"
+              stale="changed since this script was compiled. Compile this script again to simulate calls to it."
+              missing="its compiled package isn't in the workspace. Compile it, then this script, to simulate calls to it."
+              accounts={foreignAccounts}
               unresolved={unresolvedForeignAccounts}
             />
           )}

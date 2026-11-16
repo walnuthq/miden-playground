@@ -1,6 +1,6 @@
 # Simulate: foreign calls on the mock chain
 
-Status: **implemented** (2026-11-16), on `feat/simulate-foreign-calls`. A follow-up to `spec/generic-invoke-and-foreign-calls.md` (PR B, #842), which made the Simulate tab refuse an account component's procedure that makes a foreign procedure invocation (FPI). This lifts the refusal: the foreign account is staged on the mock chain from the script's dependency, with storage the user edits.
+Status: **deployed** (2026-11-16, #844, 959ce8b). A follow-up to `spec/generic-invoke-and-foreign-calls.md` (PR B, #842), which made the Simulate tab refuse an account component's procedure that makes a foreign procedure invocation (FPI). This lifts the refusal: the foreign account is staged on the mock chain from the script's dependency, with storage the user edits.
 
 One PR, in the Playground only. api-compile and the API don't change.
 
