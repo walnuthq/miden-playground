@@ -102,6 +102,44 @@ test("mobile: a sandbox fits the screen", async ({ page }) => {
     await expectHeaderFits(page);
   });
 
+  await test.step("a note's Simulate tab fits, on the simulated account", async () => {
+    await navigateWithSidebar(page, "Scripts", /\/scripts$/);
+    await page
+      .getByRole("cell", { name: "increment-note", exact: true })
+      .click();
+    await expect(page).toHaveURL(/\/scripts\/[0-9a-f-]+$/);
+    const editorConsole = page.getByRole("region", { name: "Editor Console" });
+    await editorConsole.getByRole("tab", { name: "Simulate" }).click();
+    // Both dropdowns' lists stay on screen.
+    const pick = async (trigger: string, option: string) => {
+      await editorConsole.getByRole("button", { name: trigger }).click();
+      const item = page.getByRole("menuitemradio", {
+        name: option,
+        exact: true,
+      });
+      await expectWithinWidth(item);
+      await item.click();
+      await expectWithinWidth(
+        editorConsole.getByRole("button", { name: option }),
+      );
+    };
+    await pick("Select account", "Simulated account");
+    await pick("Select asset", "Simulated asset");
+    // The simulated account's storage, under the form.
+    const counter = editorConsole.getByRole("region", {
+      name: "Simulated account counter-account",
+    });
+    await counter.getByRole("button", { name: "Add entry" }).click();
+    const slot = "counter_account::counter_contract::count_map";
+    await expectWithinWidth(counter.getByLabel(`${slot} key 1`));
+    await expectWithinWidth(counter.getByLabel(`${slot} value 1`));
+    await expectWithinWidth(
+      editorConsole.getByRole("button", { name: "Simulate", exact: true }),
+    );
+    await expectNoHorizontalOverflow(page);
+    await expectHeaderFits(page);
+  });
+
   await test.step("the sandbox saves as a project from the sheet", async () => {
     await navigateWithSidebar(page, "Accounts", /\/accounts$/);
     await page

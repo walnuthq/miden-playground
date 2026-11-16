@@ -102,7 +102,9 @@ const MOCK_FAUCET_MAX_SUPPLY = 10n ** 18n;
 export const MOCK_FAUCET_LABEL = {
   name: "Simulated asset",
   symbol: "SIM",
-  decimals: 6,
+  // The form takes the amount in base units: without decimals, the dialog
+  // shows the same number.
+  decimals: 0,
 };
 
 export const mockFaucet = (client: MockWasmWebClient) => {
@@ -281,11 +283,29 @@ const wordArgument = (text: string) =>
 // The executor asks the keystore for a signature it doesn't have.
 const AUTH_REQUEST_EVENT = "miden::protocol::auth::request";
 
+// The kernel's check, at the end of a transaction, that no asset appeared or
+// vanished (`ERR_EPILOGUE_TOTAL_NUMBER_OF_ASSETS_MUST_STAY_THE_SAME`,
+// miden-protocol 0.17.1 `asm/kernels/transaction-core/src/epilogue.masm`). The
+// executor reports the code only: the first felt of the Blake3 hash of the
+// message "total number of assets in the account and all involved notes must
+// stay the same" (`error_code_from_msg`, miden-core), so it changes if the
+// message does.
+const ASSETS_NOT_CONSERVED_CODE = "4544980346559459778";
+
+const targetErrorHint = (message: string) => {
+  if (message.includes(AUTH_REQUEST_EVENT)) {
+    return "This account's key isn't in the Playground, so its transactions can't be simulated: pick a No Auth account or a wallet created here.";
+  }
+  if (message.includes(`error code: ${ASSETS_NOT_CONSERVED_CODE}`)) {
+    return "The assets of the account and the notes must add up to the same total before and after the transaction. A note's asset isn't received on its own: the script has to move each one to the account (the wallet's receive_asset) or to an output note. Run the note without an asset if its script doesn't take one.";
+  }
+  return undefined;
+};
+
 const targetErrorMessage = (error: unknown) => {
   const message = errorMessage(error);
-  return message.includes(AUTH_REQUEST_EVENT)
-    ? `${message}\nThis account's key isn't in the Playground, so its transactions can't be simulated: pick a No Auth account or a wallet created here.`
-    : message;
+  const hint = targetErrorHint(message);
+  return hint ? `${message}\n${hint}` : message;
 };
 
 // Runs a note script as if the account consumed a note made from it: the

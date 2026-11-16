@@ -1,6 +1,6 @@
 # Simulate: a throwaway target for note and transaction scripts
 
-Status: **implemented** (2026-11-16), on `feat/simulate-throwaway-target`. A follow-up to `spec/simulate-foreign-calls.md` (#844), and the item "a target built on the fly from an account package" of `spec/editor-console-improvements.md`.
+Status: **deployed** (2026-11-16, #845, 74fc08f). A follow-up PR made the simulated asset a token without decimals (100 base units showed as 0.0001 SIM), explains the kernel's error when a note doesn't take its asset, and turned the checks listed "by hand" below into e2e steps. A follow-up to `spec/simulate-foreign-calls.md` (#844), and the item "a target built on the fly from an account package" of `spec/editor-console-improvements.md`.
 
 One PR, in the Playground only. api-compile and the API don't change.
 

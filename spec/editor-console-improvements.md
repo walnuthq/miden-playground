@@ -568,9 +568,9 @@ submitted or saved.
 Potential follow-ups. The first four were left out by decision, the last is
 a known limit:
 
-- The account page's Invoke flow on `components/procedures`: its dialog
-  still has its own form and hardcoded parameter names
-  (`getParamsWithNames`).
+- The account page's Invoke flow on `components/procedures`. Done (#841,
+  `spec/generic-invoke-and-foreign-calls.md`): the dialog uses the same form
+  and encoding. Left: parameter names, which the hardcoded cases had.
 - For notes and transaction scripts, a target built on the fly from an
   account package instead of an existing account. Done: the target dropdown
   offers a simulated account, a throwaway account of the mock client holding
