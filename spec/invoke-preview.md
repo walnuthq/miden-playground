@@ -1,6 +1,6 @@
 # Account page: preview a procedure's transaction before submitting it
 
-Status: **implemented** (2026-11-16), on `feat/invoke-preview`; not merged. Written for an agent that hasn't seen the discussion: everything needed is here or in the files named.
+Status: **deployed** (2026-11-17) in PR #849. Written for an agent that hasn't seen the discussion: everything needed is here or in the files named.
 
 One PR, in the Playground only (`apps/web`, `docs`, `spec`). The API and api-compile don't change.
 
