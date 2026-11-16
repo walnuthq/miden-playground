@@ -30,12 +30,14 @@ const ProcedureRows = ({
   procedureExport,
   disabled,
   blockedReason,
+  simulatedAccounts,
   onInvoke,
 }: {
   idPrefix: string;
   procedureExport: ProcedureExport;
   disabled: boolean;
   blockedReason: ProceduresListProps["blockedReason"];
+  simulatedAccounts: ProceduresListProps["simulatedAccounts"];
   onInvoke: ProceduresListProps["onInvoke"];
 }) => {
   const name = formatProcedureExportPath(procedureExport.path);
@@ -106,6 +108,7 @@ const ProcedureRows = ({
               params={params}
               value={args}
               onChange={setArgs}
+              simulatedAccounts={simulatedAccounts}
               disabled={disabled || reason !== undefined || running}
             />
           </TableCell>
@@ -124,6 +127,9 @@ type ProceduresListProps = {
   // Why a procedure can't run, if it can't: its Invoke button is disabled
   // and the reason shows under its name.
   blockedReason?: (procedureExport: ProcedureExport) => string | undefined;
+  // Accounts the caller stages, offered to the `AccountId` arguments above
+  // the sandbox's accounts (ProcedureArgumentsForm).
+  simulatedAccounts?: { value: string; name: string }[];
   // Runs the procedure with the form's arguments. The list shows what it
   // resolves to in the procedure's row.
   onInvoke: (
@@ -140,6 +146,7 @@ const ProceduresList = ({
   procedureExports,
   disabled = false,
   blockedReason,
+  simulatedAccounts,
   onInvoke,
 }: ProceduresListProps) => (
   <div className="rounded-md border">
@@ -160,6 +167,7 @@ const ProceduresList = ({
             procedureExport={procedureExport}
             disabled={disabled}
             blockedReason={blockedReason}
+            simulatedAccounts={simulatedAccounts}
             onInvoke={onInvoke}
           />
         ))}

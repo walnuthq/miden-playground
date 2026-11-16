@@ -1,6 +1,6 @@
 # Generic Invoke dialog, and foreign calls in simulations
 
-Status: **PR A deployed** (#841, efb61a4, 2026-11-16) and **api-compile deployed** (miden-source-code-verification #142, container v113, 2026-11-16). **PR B implemented** on `feat/calls-foreign` (2026-11-16), not yet opened: see "Cross-check before PR B". Step 15 found that a foreign call on the mock client hangs rather than fails: the panic never settles the run, and every later simulation queues behind it until a reload. PR B therefore also resets the mock client on a worker crash or a 60 s timeout (`docs/claude/simulation.md`), and fixes the Add Dependency dialog, which offered a component whose name was already a dependency (the Count Reader's built-in `counter-account`), breaking the build. Step 9 verified: a read-only `get_remote_count` returned the testnet counter's count (34) with no foreign account declared. The `set_owner` check passed with a private wallet and with a public wallet not yet on chain. A follow-up to item 11 of `spec/editor-console-improvements.md` (the Simulate tab, #831–#836), which built `components/procedures` for the account page's Invoke flow too.
+Status: **PR A deployed** (#841, efb61a4, 2026-11-16) and **api-compile deployed** (miden-source-code-verification #142, container v113, 2026-11-16). **PR B deployed** (#842, 477e4ad, 2026-11-16). Step 15 found that a foreign call on the mock client hangs rather than fails: the panic never settles the run, and every later simulation queues behind it until a reload. PR B therefore also resets the mock client on a worker crash or a 60 s timeout (`docs/claude/simulation.md`), and fixes the Add Dependency dialog, which offered a component whose name was already a dependency (the Count Reader's built-in `counter-account`), breaking the build. Step 9 verified: a read-only `get_remote_count` returned the testnet counter's count (34) with no foreign account declared. The `set_owner` check passed with a private wallet and with a public wallet not yet on chain. A follow-up to item 11 of `spec/editor-console-improvements.md` (the Simulate tab, #831–#836), which built `components/procedures` for the account page's Invoke flow too.
 
 Two PRs here, and one in walnuthq/miden-source-code-verification:
 
@@ -140,7 +140,7 @@ api-compile returns `callsForeign` next to `readOnly`: a map from export path to
 ## Out of scope
 
 - Parameter names in the forms.
-- Simulating a foreign call: staging the foreign account on the mock chain from the dependency's component, with its own storage editor. Needs a spike (does the mock RPC then serve it to the lazy fetch?).
+- ~~Simulating a foreign call~~: planned and spiked in `spec/simulate-foreign-calls.md`.
 - A "Foreign accounts" picker for private foreign accounts (`ForeignAccount.private`).
 - Filtering the `AccountId` dropdown to the accounts that have the dependency's procedures.
 - A Simulate tab on read-only scripts.
