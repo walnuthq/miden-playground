@@ -570,7 +570,10 @@ a known limit:
 
 - The account page's Invoke flow on `components/procedures`. Done (#841,
   `spec/generic-invoke-and-foreign-calls.md`): the dialog uses the same form
-  and encoding. Left: parameter names, which the hardcoded cases had.
+  and encoding. Left: parameter names, which the hardcoded cases had. A
+  state-changing Invoke now previews its transaction (storage and vault
+  changes, fees, nonce) before Submit submits it, as the Create Transaction
+  dialog does: `spec/invoke-preview.md`.
 - For notes and transaction scripts, a target built on the fly from an
   account package instead of an existing account. Done: the target dropdown
   offers a simulated account, a throwaway account of the mock client holding

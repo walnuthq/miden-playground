@@ -39,18 +39,24 @@ export const SubmitTransactionToastDescription = ({
   </>
 );
 
-const CreateTransactionPreviewForm = ({
+// A transaction's preview: its effects against the account in app state, in a
+// form whose submit submits it (executing it again). Shared by the Create
+// Transaction and Invoke Procedure dialogs, whose Submit button targets
+// `formId` and whose `onSubmitted` shows their own toast.
+const TransactionPreviewForm = ({
+  formId,
   executingAccountId,
   transactionRequest,
   transactionResult,
   setLoading,
-  onClose,
+  onSubmitted,
 }: {
+  formId: string;
   executingAccountId: string;
   transactionRequest: WasmTransactionRequestType;
   transactionResult: WasmTransactionResultType;
   setLoading: Dispatch<SetStateAction<boolean>>;
-  onClose: () => void;
+  onSubmitted: (transactionRecord: WasmTransactionRecordType) => void;
 }) => {
   const { submitNewTransaction } = useTransactions();
   const { accounts } = useAccounts();
@@ -58,7 +64,7 @@ const CreateTransactionPreviewForm = ({
   const accountId = executedTransaction.accountId().toString();
   return (
     <form
-      id="create-transaction-preview-form"
+      id={formId}
       onSubmit={async (event) => {
         event.preventDefault();
         setLoading(true);
@@ -68,14 +74,7 @@ const CreateTransactionPreviewForm = ({
             transactionRequest,
             transactionResult,
           });
-          toast("Successfully created transaction.", {
-            description: (
-              <SubmitTransactionToastDescription
-                transactionRecord={transactionRecord}
-              />
-            ),
-          });
-          onClose();
+          onSubmitted(transactionRecord);
         } catch (error) {
           console.error(error);
           toast.error("Transaction failed.", {
@@ -94,4 +93,4 @@ const CreateTransactionPreviewForm = ({
   );
 };
 
-export default CreateTransactionPreviewForm;
+export default TransactionPreviewForm;

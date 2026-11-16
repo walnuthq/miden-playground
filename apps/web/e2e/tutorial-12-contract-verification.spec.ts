@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { expect, type Page, test } from "@playwright/test";
 import { COMPILED, replaceInEditor } from "./editor";
+import { submitPreview } from "./example";
 import {
   logBrowserErrors,
   nextStep,
@@ -164,12 +165,14 @@ test("tutorial 12: contract verification", async ({ page }) => {
       await procedureRow(page, "increment_count")
         .getByRole("button", { name: "Invoke" })
         .click();
+      await submitPreview(page, "increment_count");
       await expect(
         page.getByText("Transaction submitted.").first(),
       ).toBeVisible({ timeout: TRANSACTION_TIMEOUT });
       await procedureRow(page, "reset_count")
         .getByRole("button", { name: "Invoke" })
         .click();
+      await submitPreview(page, "reset_count");
       // Completes once both transactions are committed and the count is 0.
       // This is the last tutorial: there's no "Next tutorial".
       await expect(

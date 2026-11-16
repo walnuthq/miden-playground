@@ -1,4 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
+import { submitPreview } from "./example";
 import {
   logBrowserErrors,
   nextStep,
@@ -105,6 +106,7 @@ test("tutorial 6: interact with the counter contract", async ({
   await test.step("5. invoke get_count, then increment_count", async () => {
     before = await getCount(page);
     await invoke(page, "increment_count");
+    await submitPreview(page, "increment_count");
     // Completes once the account's nonce has increased.
     await nextStep(page);
   });

@@ -15,9 +15,12 @@ import {
 } from "@workspace/ui/components/dialog";
 import { Spinner } from "@workspace/ui/components/spinner";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import CreateTransactionConfigureForm from "@/components/transactions/create-transaction-dialog/create-transaction-configure-form";
-import CreateTransactionPreviewForm from "@/components/transactions/create-transaction-dialog/create-transaction-preview-form";
 import CreateTransactionSelectForm from "@/components/transactions/create-transaction-dialog/create-transaction-select-form";
+import TransactionPreviewForm, {
+  SubmitTransactionToastDescription,
+} from "@/components/transactions/transaction-preview-form";
 import useAccounts from "@/hooks/use-accounts";
 import useTransactions from "@/hooks/use-transactions";
 
@@ -158,12 +161,22 @@ const CreateTransactionDialog = () => {
           />
         )}
         {step === "preview" && transactionRequest && transactionResult && (
-          <CreateTransactionPreviewForm
+          <TransactionPreviewForm
+            formId="create-transaction-preview-form"
             executingAccountId={executingAccountId}
             transactionRequest={transactionRequest}
             transactionResult={transactionResult}
             setLoading={setLoading}
-            onClose={onClose}
+            onSubmitted={(transactionRecord) => {
+              toast("Successfully created transaction.", {
+                description: (
+                  <SubmitTransactionToastDescription
+                    transactionRecord={transactionRecord}
+                  />
+                ),
+              });
+              onClose();
+            }}
           />
         )}
         <DialogFooter>

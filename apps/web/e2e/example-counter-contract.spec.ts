@@ -1,5 +1,11 @@
 import { expect, type Page, test } from "@playwright/test";
-import { componentRow, invoke, launchExample } from "./example";
+import {
+  componentRow,
+  invoke,
+  invokeAndSubmit,
+  launchExample,
+  previewDialog,
+} from "./example";
 import { logBrowserErrors, TRANSACTION_TIMEOUT } from "./tutorial";
 
 // Each launch deploys a new counter contract (No Auth, so the Playground
@@ -12,6 +18,20 @@ const expectCount = async (page: Page, count: number) => {
       timeout: 10_000,
     });
   }).toPass({ timeout: TRANSACTION_TIMEOUT });
+};
+
+// The account's nonce, from its Information tab; back on Components after.
+const nonce = async (page: Page) => {
+  await page.getByRole("tab", { name: "Information" }).click();
+  const value = page
+    .getByRole("row")
+    .filter({ has: page.getByRole("cell", { name: "Nonce", exact: true }) })
+    .getByRole("cell")
+    .last();
+  await expect(value).toHaveText(/^\d+$/);
+  const text = await value.textContent();
+  await page.getByRole("tab", { name: "Components" }).click();
+  return Number(text);
 };
 
 test("example: counter contract", async ({ page }) => {
@@ -29,8 +49,27 @@ test("example: counter contract", async ({ page }) => {
     await expectCount(page, 0);
   });
 
-  await test.step("increment the counter", async () => {
+  await test.step("a cancelled preview submits nothing", async () => {
+    const nonceBefore = await nonce(page);
     await invoke(page, "increment_count");
+    const dialog = previewDialog(page, "increment_count");
+    // The preview shows the counter's storage change before anything is
+    // submitted.
+    await expect(
+      dialog.getByRole("cell", { name: "count_map", exact: true }),
+    ).toBeVisible({ timeout: TRANSACTION_TIMEOUT });
+    await expect(dialog.getByRole("button", { name: "Submit" })).toBeEnabled();
+    await dialog.getByRole("button", { name: "Cancel" }).click();
+    await expect(dialog).toBeHidden();
+    await expect(page.getByText("Transaction submitted.")).toHaveCount(0);
+    await expectCount(page, 0);
+    // No transaction was added: the account's nonce didn't move.
+    expect(await nonce(page)).toBe(nonceBefore);
+  });
+
+  await test.step("increment the counter", async () => {
+    await invokeAndSubmit(page, "increment_count");
+    await expect(page.getByText("Transaction submitted.")).toBeVisible();
     // Procedures can't be invoked while the transaction is submitted.
     await expectCount(page, 1);
   });
