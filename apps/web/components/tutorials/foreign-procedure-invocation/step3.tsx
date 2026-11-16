@@ -94,10 +94,10 @@ const Step3: TutorialStep = {
         </strong>{" "}
         before deploying anything, in the <em>"Simulate"</em> tab of the console
         under the code: it runs the procedure locally, against a simulated
-        counter contract, and submits nothing. Under{" "}
-        <em>"Foreign accounts"</em>, click <em>"Add entry"</em> and give the
-        counter's map the key <InlineCode>1</InlineCode> and a count as its
-        value. Pick the simulated <strong>counter-account</strong> as{" "}
+        counter contract, and submits nothing. Under <em>"Foreign accounts"</em>
+        , click <em>"Add entry"</em> and give the counter's map the key{" "}
+        <InlineCode>1</InlineCode> and a count as its value. Pick the simulated{" "}
+        <strong>counter-account</strong> as{" "}
         <strong>
           <InlineCode>copy_count</InlineCode>
         </strong>
