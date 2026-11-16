@@ -12,6 +12,11 @@ const SLOT = "counter_account::counter_contract::count_map";
 // The Count Reader's slot, which `copy_count` sets to the counter's count.
 const COUNT_SLOT = "count_reader::count_reader::count";
 
+// What a foreign call's account argument says of the sandbox's accounts
+// (`SANDBOX_FOREIGN_ACCOUNT_REASON` in lib/simulation/blocked.ts).
+const SANDBOX_REASON =
+  "A simulated foreign call can only reach the simulated accounts: sandbox accounts aren't on the simulation's chain.";
+
 // The tutorials' counter contract (`TESTNET_COUNTER_CONTRACT_ADDRESS` in
 // lib/constants.ts, which reads Vite's env and so can't be imported here).
 const OTHER_ACCOUNT_ADDRESS =
@@ -274,14 +279,41 @@ test("script: simulate an account component", async ({ page }) => {
     await copyCount(page, "42");
   });
 
-  await test.step("a crash of the mock client is reported and recovered", async () => {
-    // A sandbox account is out of the mock chain's reach: the mock client
-    // panics on it.
+  await test.step("a foreign call can't pick a sandbox account", async () => {
+    // A sandbox account is out of the mock chain's reach: `copy_count` makes
+    // a foreign call (`callsForeign`), so its account argument lists the
+    // sandbox's accounts disabled, saying why.
     await importAccount(page, "Other Counter", OTHER_ACCOUNT_ADDRESS);
     await page.getByRole("link", { name: "count-reader" }).first().click();
     await expect(page).toHaveURL(/\/scripts\//);
     await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
-    await selectCopyCountAccount(page, "Other Counter");
+    await copyCountAccountDropdown(page).click();
+    await expect(
+      page.getByRole("menuitemradio", { name: "Other Counter", exact: true }),
+    ).toBeDisabled();
+    await expect(
+      page.getByRole("menu").getByText(SANDBOX_REASON),
+    ).toBeVisible();
+    const simulated = page.getByRole("menuitemradio", {
+      name: "counter-account",
+      exact: true,
+    });
+    await expect(simulated).toBeEnabled();
+    await simulated.click();
+    await expect(copyCountAccountDropdown(page)).toHaveText("counter-account");
+  });
+
+  await test.step("a crash of the mock client is reported and recovered", async () => {
+    // As if api-compile couldn't tell (`callsForeign` missing): the sandbox
+    // account can be picked, and the mock client panics on it.
+    await compileWithoutCallsForeign(page);
+    await copyCountAccountDropdown(page).click();
+    await expect(page.getByRole("menu").getByText(SANDBOX_REASON)).toHaveCount(
+      0,
+    );
+    await page
+      .getByRole("menuitemradio", { name: "Other Counter", exact: true })
+      .click();
     await invoke(page, "copy_count").click();
     // The worker's crash is caught at once, well before the run's timeout. A
     // failed run shows the log.
@@ -330,8 +362,9 @@ test("script: simulate an account component", async ({ page }) => {
     });
     // The first run makes the mock client's faucet.
     await receiveSimulatedAsset(page);
-    // The crash, as in the step above: the client is discarded, its accounts
-    // and its faucet with it.
+    // The crash, as in the step above (the Count Reader's package still has
+    // no `callsForeign`): the client is discarded, its accounts and its
+    // faucet with it.
     await page.getByRole("link", { name: "count-reader" }).first().click();
     await expect(page).toHaveURL(/\/scripts\//);
     await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
@@ -342,6 +375,9 @@ test("script: simulate an account component", async ({ page }) => {
         .getByText(/The simulation's client crashed/)
         .last(),
     ).toBeVisible({ timeout: 30_000 });
+    // A compile that brings `callsForeign` back clears the sandbox account.
+    await compileScript(page);
+    await expect(copyCountAccountDropdown(page)).toHaveText("Select account");
     await page.getByRole("link", { name: "p2id-note" }).first().click();
     await expect(page).toHaveURL(/\/scripts\//);
     await receiveSimulatedAsset(page);
@@ -434,13 +470,39 @@ const receiveSimulatedAsset = async (page: Page) => {
 const foreignAccount = (page: Page, name: string) =>
   editorConsole(page).getByRole("region", { name: `Foreign account ${name}` });
 
+// The dropdown of the account `copy_count` reads, in the row under its own.
+const copyCountAccountDropdown = (page: Page) =>
+  procedureRow(page, "copy_count")
+    .locator("xpath=following-sibling::tr[1]")
+    .getByRole("button");
+
 // Picks the account `copy_count` reads.
 const selectCopyCountAccount = async (page: Page, name: string) => {
-  await procedureRow(page, "copy_count")
-    .locator("xpath=following-sibling::tr[1]")
-    .getByRole("button")
-    .click();
+  await copyCountAccountDropdown(page).click();
   await page.getByRole("menuitemradio", { name, exact: true }).click();
+};
+
+// Compiles the open script with `callsForeign` stripped from the response's
+// exports, as if api-compile couldn't tell: the Simulate tab doesn't restrict
+// the account arguments then, and a sandbox account reaches the mock client.
+const compileWithoutCallsForeign = async (page: Page) => {
+  const compile = /\/scripts\/[0-9a-z_-]+$/;
+  await page.route(compile, async (route) => {
+    if (route.request().method() !== "PATCH") {
+      return route.continue();
+    }
+    const response = await route.fetch();
+    const body = await response.json();
+    for (const { Procedure } of body.package.exports) {
+      delete Procedure.callsForeign;
+    }
+    await route.fulfill({ response, json: body });
+  });
+  try {
+    await compileScript(page);
+  } finally {
+    await page.unroute(compile);
+  }
 };
 
 // Runs the Count Reader's `copy_count` and applies its result: `count` holds

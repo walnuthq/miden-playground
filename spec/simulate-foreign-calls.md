@@ -30,6 +30,7 @@ Run in the browser on the dev server, with the embedded `counter-account` and `c
 - **Its storage** is edited in the Simulate tab, under the script's own, with the same editor and the same rules (the package's schema when there is one).
 - **The argument**: the staged account is offered in the `AccountId` argument's dropdown, in a "Simulated" group. The user picks it; nothing is prefilled. Its real id changes with every storage edit, so the form holds a stand-in resolved at run time.
 - **A sandbox account is still out of reach** of the mock chain. Picking one for a foreign call crashes the mock client, which PR B's reset already catches and explains.
+- **A sandbox account can't be picked for a known foreign call** (follow-up, 2026-11-16): for an export whose `callsForeign` is `true`, the Simulate tab's `AccountId` arguments list the sandbox's accounts disabled, with the reason in the menu, and clear one picked before. Every `AccountId` argument of such a procedure is restricted, since the manifest doesn't say which one is the foreign account. `null` or a missing flag changes nothing, the reset stays as the safety net, and the account page's Invoke dialog is unchanged.
 - **Only one level.** A staged account whose own procedure makes a foreign call isn't given its dependencies.
 
 ## Resolving a dependency

@@ -46,6 +46,30 @@ export const procedureParams = ({
     rawType: rawTypeName(param),
   }));
 
+// The arguments with every `AccountId` that isn't among `allowed` emptied,
+// or the same object when there is none: a field whose accounts were
+// restricted after one was picked.
+export const withAccountIdsAmong = (
+  args: ProcedureArguments,
+  allowed: ReadonlySet<string>,
+): ProcedureArguments => {
+  const cleared = Object.entries(args).filter(
+    ([, argument]) =>
+      argument.type === "AccountId" &&
+      argument.accountId !== "" &&
+      !allowed.has(argument.accountId),
+  );
+  if (cleared.length === 0) {
+    return args;
+  }
+  return {
+    ...args,
+    ...Object.fromEntries(
+      cleared.map(([name]) => [name, { type: "AccountId", accountId: "" }]),
+    ),
+  };
+};
+
 export const emptyProcedureArgument = (type: MidenType): ProcedureArgument =>
   type === "AccountId"
     ? { type, accountId: "" }

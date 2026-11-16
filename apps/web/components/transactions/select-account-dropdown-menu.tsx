@@ -24,6 +24,7 @@ const SelectAccountDropdownMenu = ({
   accountIds,
   checking = false,
   simulatedAccounts = [],
+  sandboxDisabledReason,
 }: {
   value: string;
   onValueChange: Dispatch<SetStateAction<string>>;
@@ -39,6 +40,9 @@ const SelectAccountDropdownMenu = ({
   // Accounts a simulation stages on its mock chain, shown in a group above
   // the sandbox's. `value` is what the dropdown sets when one is picked.
   simulatedAccounts?: { value: string; name: string }[];
+  // When given, the sandbox's accounts are listed but can't be picked, and
+  // the menu says why: only `simulatedAccounts` can.
+  sandboxDisabledReason?: string;
 }) => {
   const everyAccount = useAccounts();
   const shown = ({ id }: { id: string }) => !accountIds || accountIds.has(id);
@@ -60,6 +64,9 @@ const SelectAccountDropdownMenu = ({
       id !== without && (withoutFaucets ? !faucetIds.includes(id) : true),
   );
   const hasSimulated = simulatedAccounts.length > 0;
+  const sandboxDisabled = sandboxDisabledReason !== undefined;
+  const hasSandbox =
+    showWallets || showFaucets ? true : shownAccounts.length > 0;
   const disabled =
     checking ||
     (selectWallets && !showWallets && !hasSimulated) ||
@@ -112,12 +119,18 @@ const SelectAccountDropdownMenu = ({
               <DropdownMenuSeparator />
             </>
           )}
+          {sandboxDisabled && hasSandbox && (
+            <p className="px-2 py-1.5 text-xs text-muted-foreground">
+              {sandboxDisabledReason}
+            </p>
+          )}
           {!showWallets && !showFaucets ? (
             shownAccounts.map((account) => (
               <DropdownMenuRadioItem
                 closeOnClick
                 key={account.id}
                 value={account.id}
+                disabled={sandboxDisabled}
               >
                 {account.name}
               </DropdownMenuRadioItem>
@@ -136,6 +149,7 @@ const SelectAccountDropdownMenu = ({
                       closeOnClick
                       key={wallet.id}
                       value={wallet.id}
+                      disabled={sandboxDisabled}
                     >
                       {wallet.name}
                     </DropdownMenuRadioItem>
@@ -155,6 +169,7 @@ const SelectAccountDropdownMenu = ({
                       closeOnClick
                       key={faucet.name}
                       value={faucet.id}
+                      disabled={sandboxDisabled}
                     >
                       {showFaucetsAsAssets ? faucet.symbol : faucet.name}
                     </DropdownMenuRadioItem>

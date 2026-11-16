@@ -42,3 +42,19 @@ export const simulationBlockedReason = (
   }
   return FOREIGN_CALL_REASON;
 };
+
+// Why an `AccountId` argument of the Simulate tab can't take a sandbox
+// account, if it can't. A procedure known to make a foreign call runs on the
+// mock chain, which serves only the accounts staged on it: a sandbox account
+// makes its RPC panic. Only a `callsForeign` of `true`: with `false` the
+// argument is plain data, and with `null` or a missing flag (api-compile
+// couldn't tell) the client's crash recovery is the safety net. Every
+// `AccountId` argument of such a procedure is restricted: the manifest
+// doesn't say which one is the foreign account.
+export const SANDBOX_FOREIGN_ACCOUNT_REASON =
+  "A simulated foreign call can only reach the simulated accounts: sandbox accounts aren't on the simulation's chain.";
+
+export const sandboxAccountsDisabledReason = ({
+  callsForeign,
+}: Pick<ProcedureExport, "callsForeign">) =>
+  callsForeign === true ? SANDBOX_FOREIGN_ACCOUNT_REASON : undefined;

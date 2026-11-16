@@ -16,6 +16,7 @@ import {
   type ProcedureArguments,
   procedureArgumentsReady,
   procedureParams,
+  withAccountIdsAmong,
 } from "@/lib/utils/procedure-inputs";
 import {
   formatProcedureExportPath,
@@ -31,6 +32,7 @@ const ProcedureRows = ({
   disabled,
   blockedReason,
   simulatedAccounts,
+  sandboxDisabledReason,
   onInvoke,
 }: {
   idPrefix: string;
@@ -38,12 +40,25 @@ const ProcedureRows = ({
   disabled: boolean;
   blockedReason: ProceduresListProps["blockedReason"];
   simulatedAccounts: ProceduresListProps["simulatedAccounts"];
+  sandboxDisabledReason: ProceduresListProps["sandboxDisabledReason"];
   onInvoke: ProceduresListProps["onInvoke"];
 }) => {
   const name = formatProcedureExportPath(procedureExport.path);
   const reason = blockedReason?.(procedureExport);
   const params = procedureParams(procedureExport);
   const [args, setArgs] = useState<ProcedureArguments>({});
+  const sandboxReason = sandboxDisabledReason?.(procedureExport);
+  // A sandbox account picked before the rule applied (a recompile changed
+  // the procedure): cleared during render, before it can run.
+  if (sandboxReason !== undefined) {
+    const allowed = withAccountIdsAmong(
+      args,
+      new Set((simulatedAccounts ?? []).map(({ value }) => value)),
+    );
+    if (allowed !== args) {
+      setArgs(allowed);
+    }
+  }
   const [running, setRunning] = useState(false);
   const [outcome, setOutcome] = useState<ProcedureOutcome>();
   return (
@@ -109,6 +124,7 @@ const ProcedureRows = ({
               value={args}
               onChange={setArgs}
               simulatedAccounts={simulatedAccounts}
+              sandboxDisabledReason={sandboxReason}
               disabled={disabled || reason !== undefined || running}
             />
           </TableCell>
@@ -130,6 +146,12 @@ type ProceduresListProps = {
   // Accounts the caller stages, offered to the `AccountId` arguments above
   // the sandbox's accounts (ProcedureArgumentsForm).
   simulatedAccounts?: { value: string; name: string }[];
+  // Why a procedure's `AccountId` arguments can't take a sandbox account, if
+  // they can't: the sandbox's accounts are listed disabled, with the reason,
+  // and one picked before is cleared.
+  sandboxDisabledReason?: (
+    procedureExport: ProcedureExport,
+  ) => string | undefined;
   // Runs the procedure with the form's arguments. The list shows what it
   // resolves to in the procedure's row.
   onInvoke: (
@@ -147,6 +169,7 @@ const ProceduresList = ({
   disabled = false,
   blockedReason,
   simulatedAccounts,
+  sandboxDisabledReason,
   onInvoke,
 }: ProceduresListProps) => (
   <div className="rounded-md border">
@@ -168,6 +191,7 @@ const ProceduresList = ({
             disabled={disabled}
             blockedReason={blockedReason}
             simulatedAccounts={simulatedAccounts}
+            sandboxDisabledReason={sandboxDisabledReason}
             onInvoke={onInvoke}
           />
         ))}
