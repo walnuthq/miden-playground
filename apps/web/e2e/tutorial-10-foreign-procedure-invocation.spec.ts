@@ -1,4 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
+import { previewDialog } from "./example";
 import {
   logBrowserErrors,
   nextStep,
@@ -114,10 +115,25 @@ test("tutorial 10: foreign procedure invocation", async ({ page }) => {
       .filter({ hasText: "Invoke Procedure" });
     // Step 5 names the argument: the copy and the dialog must agree.
     await expect(dialog.getByText("param_0")).toBeVisible();
+    // The Count Reader isn't a counter: copy_count fails as it executes, and
+    // the dialog stays on the arguments with the error.
     await dialog.getByRole("button", { name: "Select account" }).click();
+    await page.getByRole("menuitemradio", { name: "My Count Reader" }).click();
+    await dialog.getByRole("button", { name: "Preview", exact: true }).click();
+    await expect(page.getByText("Transaction failed.")).toBeVisible({
+      timeout: TRANSACTION_TIMEOUT,
+    });
+    await expect(dialog.getByText("param_0")).toBeVisible();
+    await dialog.getByRole("button", { name: "My Count Reader" }).click();
     await page.getByRole("menuitemradio", { name: "Counter Contract" }).click();
-    await dialog.getByRole("button", { name: "Invoke", exact: true }).click();
-    await expect(dialog).toBeHidden({ timeout: TRANSACTION_TIMEOUT });
+    await dialog.getByRole("button", { name: "Preview", exact: true }).click();
+    // Step 5 names the slot the preview changes.
+    const preview = previewDialog(page, "copy_count");
+    await expect(
+      preview.getByRole("cell", { name: "count", exact: true }),
+    ).toBeVisible({ timeout: TRANSACTION_TIMEOUT });
+    await preview.getByRole("button", { name: "Submit" }).click();
+    await expect(preview).toBeHidden({ timeout: TRANSACTION_TIMEOUT });
     // Completes once the Count Reader holds the Counter Contract's count.
     await nextStep(page);
   });

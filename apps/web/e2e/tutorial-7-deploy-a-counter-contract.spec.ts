@@ -1,5 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
 import { COMPILED, replaceInEditor, scriptHeader } from "./editor";
+import { submitPreview } from "./example";
 import {
   logBrowserErrors,
   nextStep,
@@ -127,6 +128,7 @@ test("tutorial 7: deploy a counter contract", async ({ page }) => {
       timeout: TRANSACTION_TIMEOUT,
     });
     await invoke(page, "increment_count");
+    await submitPreview(page, "increment_count");
     // Completes once the increment transaction is committed.
     await nextStep(page);
   });

@@ -1,5 +1,10 @@
 # Read-only procedures
 
+The account page's Invoke button (`components/account/procedures-table-row.tsx`) has two behaviours:
+
+- A read-only procedure runs locally (`readWord`, `executeProgram`) and shows its result in the row, through the Invoke Procedure dialog when it takes arguments.
+- A state-changing one always opens the dialog (`invoke-procedure-arguments-dialog.tsx`): its arguments if it takes any (button "Preview"), then a preview of the transaction (`TransactionPreviewForm`, shared with the Create Transaction dialog), which Submit submits. Without arguments it opens straight on the preview, executing once as it opens. The preview's execution (`previewProcedure` in `hooks/use-scripts.ts`) dispatches nothing: no `SUBMITTING_TRANSACTION`, so the page's Invoke buttons stay enabled. Submit (`submitNewTransaction`) executes again, so a sync in between can make the submitted transaction differ from the preview, as in the Create Transaction dialog. A failed execution shows its cleaned message (`cleanExecutionError`): a toast on the arguments, or in the dialog with Retry when there are none. Tutorials 6, 7, 10 and 12 name the "Preview" and "Submit" buttons.
+
 A procedure's `readOnly` flag decides whether its Invoke button runs it locally (`canInvokeProcedure`). api-compile reads it from the MAST (`readOnly` next to the manifest in `POST /compile`, `miden-package-metadata/src/read_only.rs` in miden-source-code-verification): `true`, `false`, or `null` when it can't tell (a dynamic call, a direct syscall, a call into another user library).
 
 - The API stores it in each export's `Procedure` (the `exports` jsonb column, no schema change). Packages compiled before api-compile reported it have none until their next compile, and neither do registry packages (api-registry doesn't store it).

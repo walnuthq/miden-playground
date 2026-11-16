@@ -1,6 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
 import { COMPILED } from "../editor";
-import { componentRow, invoke, launchExample } from "../example";
+import { componentRow, invoke, launchExample, previewDialog } from "../example";
 import { logBrowserErrors, TRANSACTION_TIMEOUT } from "../tutorial";
 import {
   expectHeaderFits,
@@ -49,6 +49,25 @@ test("mobile: a sandbox fits the screen", async ({ page }) => {
       await expect(result).toHaveText(/^0\s*Invoke$/, { timeout: 10_000 });
     }).toPass({ timeout: TRANSACTION_TIMEOUT });
     await expectNoHorizontalOverflow(page);
+  });
+
+  await test.step("a state-changing Invoke's preview fits, Submit on screen", async () => {
+    await invoke(page, "increment_count");
+    const dialog = previewDialog(page, "increment_count");
+    await expect(dialog.getByText("Storage changes:")).toBeVisible({
+      timeout: TRANSACTION_TIMEOUT,
+    });
+    const submit = dialog.getByRole("button", { name: "Submit" });
+    await submit.scrollIntoViewIfNeeded();
+    await expectWithinWidth(submit);
+    await expectNoHorizontalOverflow(page);
+    await submit.click();
+    await expect(dialog).toBeHidden({ timeout: TRANSACTION_TIMEOUT });
+    const result = componentRow(page, "get_count").getByRole("cell").last();
+    await expect(async () => {
+      await invoke(page, "get_count");
+      await expect(result).toHaveText(/^1\s*Invoke$/, { timeout: 10_000 });
+    }).toPass({ timeout: TRANSACTION_TIMEOUT });
   });
 
   await test.step("every page fits, opened from the sidebar", async () => {

@@ -55,8 +55,14 @@ const Step7Content = ({ counter }: { counter?: Account }) => (
       <strong>
         <InlineCode>increment_count</InlineCode>
       </strong>{" "}
-      procedure. Once the Transaction is submitted, click the <em>"Invoke"</em>{" "}
-      button next to the{" "}
+      procedure: the Playground executes the Transaction and opens a preview of
+      it, with the{" "}
+      <strong>
+        <InlineCode>count_map</InlineCode>
+      </strong>{" "}
+      storage change and the contract's new nonce. Click the <em>"Submit"</em>{" "}
+      button to submit it. Once the Transaction is submitted, do the same with
+      the{" "}
       <strong>
         <InlineCode>reset_count</InlineCode>
       </strong>{" "}
@@ -116,9 +122,9 @@ const Step7: TutorialStep = {
           description={
             <p>
               Click the <em>"Invoke"</em> button next to the{" "}
-              <strong>increment_count</strong> procedure, then next to the{" "}
-              <strong>reset_count</strong> procedure to set the counter back to
-              zero.
+              <strong>increment_count</strong> procedure and submit its preview,
+              then do the same with the <strong>reset_count</strong> procedure
+              to set the counter back to zero.
             </p>
           }
         />

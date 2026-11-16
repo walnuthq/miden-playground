@@ -76,7 +76,7 @@ const Step5: TutorialStep = {
           <strong>
             <InlineCode>counter_account_id</InlineCode>
           </strong>{" "}
-          of the Rust code. Then click the <em>"Invoke"</em> button.
+          of the Rust code. Then click the <em>"Preview"</em> button.
         </p>
         <p>
           The Playground executes a Transaction against your{" "}
@@ -84,7 +84,7 @@ const Step5: TutorialStep = {
           <strong>
             <InlineCode>copy_count</InlineCode>
           </strong>
-          , and submits it to testnet.{" "}
+          .{" "}
           <strong>
             <InlineCode>copy_count</InlineCode>
           </strong>{" "}
@@ -96,6 +96,14 @@ const Step5: TutorialStep = {
           procedure: while it executes the Transaction, the Playground's client
           fetches the Counter Contract's public state from testnet.
         </p>
+        <p>
+          The dialog then shows a preview of the Transaction: the Count Reader's{" "}
+          <strong>
+            <InlineCode>count</InlineCode>
+          </strong>{" "}
+          storage slot takes the Counter Contract's count. Click the{" "}
+          <em>"Submit"</em> button to submit it to testnet.
+        </p>
         <TutorialStepAlert
           completed={completed}
           title="Action required: Copy the Counter Contract count."
@@ -104,8 +112,9 @@ const Step5: TutorialStep = {
             <p>
               In the <em>"Components"</em> tab of your Count Reader's details
               page, click the <em>"Invoke"</em> button next to the{" "}
-              <strong>copy_count</strong> procedure and select the{" "}
-              <strong>Counter Contract</strong> account.
+              <strong>copy_count</strong> procedure, select the{" "}
+              <strong>Counter Contract</strong> account, click{" "}
+              <em>"Preview"</em>, then <em>"Submit"</em>.
             </p>
           }
         />

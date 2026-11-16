@@ -2,12 +2,9 @@ import { Button } from "@workspace/ui/components/button";
 import { Spinner } from "@workspace/ui/components/spinner";
 import { TableCell, TableRow } from "@workspace/ui/components/table";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
 import CopyButton from "@/components/lib/copy-button";
-import useNetwork from "@/hooks/use-network";
 import useScripts from "@/hooks/use-scripts";
 import useTransactions from "@/hooks/use-transactions";
-import { midenExplorerUrl } from "@/lib/constants";
 import type { Account } from "@/lib/types/account";
 import type { Component } from "@/lib/types/component";
 import type { ProcedureExport, Script } from "@/lib/types/script";
@@ -45,9 +42,7 @@ const ProceduresTableRow = ({
   // Whether the table has a Result column, which this row then fills.
   showResultColumn: boolean;
 }) => {
-  const { networkId } = useNetwork();
   const {
-    invokeProcedure,
     openInvokeProcedureArgumentsDialog,
     readOnlyProcedureAccountId,
     readOnlyProcedureDigest,
@@ -97,55 +92,35 @@ const ProceduresTableRow = ({
           <Button
             disabled={loading || submittingTransaction}
             onClick={async () => {
-              setLoading(true);
-              if (procedureExport.signature.params.length === 0) {
-                if (procedureExport.readOnly) {
-                  try {
-                    const word = await readWord({
-                      accountId: account.id,
-                      script,
-                      procedureExport,
-                    });
-                    setResult(
-                      decodeProcedureResult(
-                        procedureExport.signature,
-                        Array.from(word.toU64s()),
-                      ),
-                    );
-                  } catch (error) {
-                    console.error(error);
-                    setResult("ERROR");
-                  }
-                } else {
-                  try {
-                    const transactionRecord = await invokeProcedure({
-                      senderAccountId: account.id,
-                      script,
-                      procedureExport,
-                    });
-                    toast("Transaction submitted.", {
-                      action: {
-                        label: "View on MidenScan",
-                        onClick: () =>
-                          window.open(
-                            `${midenExplorerUrl(networkId)}/tx/${transactionRecord.id().toHex()}`,
-                            "_blank",
-                            "noreferrer",
-                          ),
-                      },
-                    });
-                    setResult("");
-                  } catch (error) {
-                    console.error(error);
-                    setResult("ERROR");
-                  }
-                }
-              } else {
+              // A state-changing procedure opens the dialog, with or without
+              // arguments: it previews the transaction before submitting it.
+              if (
+                procedureExport.signature.params.length > 0 ||
+                !procedureExport.readOnly
+              ) {
                 openInvokeProcedureArgumentsDialog({
                   senderAccountId: account.id,
                   script,
                   procedureExport,
                 });
+                return;
+              }
+              setLoading(true);
+              try {
+                const word = await readWord({
+                  accountId: account.id,
+                  script,
+                  procedureExport,
+                });
+                setResult(
+                  decodeProcedureResult(
+                    procedureExport.signature,
+                    Array.from(word.toU64s()),
+                  ),
+                );
+              } catch (error) {
+                console.error(error);
+                setResult("ERROR");
               }
               setLoading(false);
             }}

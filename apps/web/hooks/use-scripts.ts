@@ -4,7 +4,6 @@ import {
 } from "@miden-sdk/miden-sdk";
 import { useMiden } from "@miden-sdk/react";
 import useGlobalContext from "@/components/global-context/hook";
-import useTransactions from "@/hooks/use-transactions";
 import {
   compileScript as apiCompileScript,
   deleteScript as apiDeleteScript,
@@ -42,7 +41,6 @@ const useScripts = () => {
     dispatch,
   } = useGlobalContext();
   const { client } = useMiden();
-  const { submitNewTransaction } = useTransactions();
   const openCreateScriptDialog = () =>
     dispatch({ type: "OPEN_CREATE_SCRIPT_DIALOG" });
   const closeCreateScriptDialog = () =>
@@ -105,7 +103,11 @@ const useScripts = () => {
     }
     return { script, error };
   };
-  const invokeProcedure = async ({
+  // Executes a call to the procedure as a transaction of the sender, for a
+  // preview: nothing is submitted (and `SUBMITTING_TRANSACTION`, which
+  // disables every Invoke button, isn't dispatched). The preview's Submit hands
+  // the request to `submitNewTransaction`, which executes it again.
+  const previewProcedure = async ({
     senderAccountId,
     script,
     procedureExport,
@@ -119,33 +121,22 @@ const useScripts = () => {
     if (!client) {
       throw new Error("MidenClient not ready");
     }
-    dispatch({ type: "SUBMITTING_TRANSACTION" });
-    try {
-      const transactionScript = await procedureCallScript({
-        client,
-        script,
-        procedureExport,
-        procedureInputs,
-      });
-      // No foreign account is declared: the client fetches a public one from
-      // the node when the procedure reaches it through FPI.
-      const transactionRequest = new WasmTransactionRequestBuilder()
-        .withCustomScript(transactionScript)
-        .build();
-      const transactionResult = await client.executeTransaction(
-        WasmAccountId.fromHex(senderAccountId),
-        transactionRequest,
-      );
-      return submitNewTransaction({
-        accountId: senderAccountId,
-        transactionRequest,
-        transactionResult,
-      });
-    } catch (error) {
-      console.error(error);
-      dispatch({ type: "TRANSACTION_SUBMITTED" });
-      throw error;
-    }
+    const transactionScript = await procedureCallScript({
+      client,
+      script,
+      procedureExport,
+      procedureInputs,
+    });
+    // No foreign account is declared: the client fetches a public one from
+    // the node when the procedure reaches it through FPI.
+    const transactionRequest = new WasmTransactionRequestBuilder()
+      .withCustomScript(transactionScript)
+      .build();
+    const transactionResult = await client.executeTransaction(
+      WasmAccountId.fromHex(senderAccountId),
+      transactionRequest,
+    );
+    return { transactionRequest, transactionResult };
   };
   const openInvokeProcedureArgumentsDialog = ({
     senderAccountId,
@@ -234,7 +225,7 @@ const useScripts = () => {
     compileScript,
     updateScript,
     deleteScript,
-    invokeProcedure,
+    previewProcedure,
     openInvokeProcedureArgumentsDialog,
     closeInvokeProcedureArgumentsDialog,
     openAddDependencyDialog,

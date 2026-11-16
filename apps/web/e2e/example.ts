@@ -44,9 +44,32 @@ export const componentRow = (page: Page, text: string) =>
     .last();
 
 // Invokes a procedure from the Components tab. Read-only procedures show
-// their result in the row, others submit a transaction.
+// their result in the row, others open their transaction's preview (see
+// `invokeAndSubmit`).
 export const invoke = async (page: Page, procedure: string) => {
   const row = componentRow(page, procedure);
   await row.getByRole("button", { name: "Invoke" }).click();
   return row;
+};
+
+// The Invoke Procedure dialog on a state-changing procedure's preview.
+export const previewDialog = (page: Page, procedure: string) =>
+  page.getByRole("dialog").filter({ hasText: `Preview ${procedure}` });
+
+// Waits for the preview of a state-changing procedure's transaction, submits
+// it and waits for the dialog to close.
+export const submitPreview = async (page: Page, procedure: string) => {
+  const dialog = previewDialog(page, procedure);
+  await expect(dialog.getByText("Storage changes:")).toBeVisible({
+    timeout: TRANSACTION_TIMEOUT,
+  });
+  await dialog.getByRole("button", { name: "Submit" }).click();
+  await expect(dialog).toBeHidden({ timeout: TRANSACTION_TIMEOUT });
+};
+
+// Invokes a state-changing procedure without arguments: Invoke opens its
+// preview, Submit submits it.
+export const invokeAndSubmit = async (page: Page, procedure: string) => {
+  await invoke(page, procedure);
+  await submitPreview(page, procedure);
 };

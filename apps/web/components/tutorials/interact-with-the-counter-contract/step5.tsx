@@ -59,7 +59,12 @@ const Step5: TutorialStep = {
           </strong>{" "}
           procedure. The Playground executes a Transaction against the counter
           contract with a transaction script that calls this procedure, which
-          increments the counter by one, and submits it to testnet.
+          increments the counter by one, and opens a preview of it: the{" "}
+          <strong>
+            <InlineCode>count_map</InlineCode>
+          </strong>{" "}
+          storage change and the contract's new nonce. Click the{" "}
+          <em>"Submit"</em> button to submit it to testnet.
         </p>
         <p>
           Under <em>"Authentication Components"</em>, notice that the counter
@@ -78,7 +83,8 @@ const Step5: TutorialStep = {
             <p>
               In the <em>"Components"</em> tab of the account details page,
               click the <em>"Invoke"</em> button next to the{" "}
-              <strong>increment_count</strong> procedure.
+              <strong>increment_count</strong> procedure, then the{" "}
+              <em>"Submit"</em> button in the preview.
             </p>
           }
         />
