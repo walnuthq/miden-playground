@@ -110,3 +110,33 @@ export const useSimulatedAssetSymbols = (scriptId: string) => {
   );
   return [symbols, addSymbol] as const;
 };
+
+// The dependencies of a note or transaction script that its simulation
+// stages as foreign accounts instead of putting their component on the
+// simulated account, by script id. In memory, like the slots.
+let foreignDependencies = new Map<string, string[]>();
+
+const getForeignDependencies = () => foreignDependencies;
+
+const NO_NAMES: string[] = [];
+
+// None until the user marks one: a dependency is the target's by default.
+export const useForeignDependencyNames = (scriptId: string) => {
+  const names =
+    useSyncExternalStore(subscribe, getForeignDependencies).get(scriptId) ??
+    NO_NAMES;
+  const setForeign = useCallback(
+    (name: string, foreign: boolean) => {
+      const current = foreignDependencies.get(scriptId) ?? NO_NAMES;
+      foreignDependencies = new Map(foreignDependencies).set(
+        scriptId,
+        foreign
+          ? [...new Set([...current, name])]
+          : current.filter((other) => other !== name),
+      );
+      notify();
+    },
+    [scriptId],
+  );
+  return [names, setForeign] as const;
+};

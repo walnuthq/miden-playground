@@ -133,7 +133,7 @@ Not covered by the spike, checked in the first steps: a transaction script, and 
 
 - ~~Assets already in the simulated account's vault before a run.~~ Done: `spec/simulate-assets.md` (the seed is applied to the store only, no commit needed).
 - Non-fungible assets.
-- A note or transaction script that makes a foreign call, on the simulated account: its dependencies all go to the target, and nothing says which one is foreign.
+- ~~A note or transaction script that makes a foreign call on the simulated account.~~ Done since: a dependency's "Foreign account" switch stages it instead (`docs/claude/simulation.md`, `spec/simulation-follow-ups.md`).
 - Naming the simulated account in raw-felt note storage.
 - Authentication other than No Auth on the simulated account.
 - The same simulated account for the account page or for account components' procedures that take assets.

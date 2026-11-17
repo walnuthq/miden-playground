@@ -1,3 +1,5 @@
+import { Label } from "@workspace/ui/components/label";
+import { Switch } from "@workspace/ui/components/switch";
 import StorageSlotsEditor from "@/components/procedures/storage-slots-editor";
 import type {
   DependencyAccount,
@@ -21,7 +23,9 @@ export const InvalidSlots = () => (
 // `account-component` dependencies, one editor per dependency, and the
 // dependencies whose package wasn't found, with why. `labelPrefix` names each
 // section (`${labelPrefix} ${name}`); `stale` and `missing` end the sentence
-// on an unresolved dependency.
+// on an unresolved dependency. With `foreign`, each account has a switch
+// that makes it a foreign account (`foreign.labelPrefix` then names its
+// section) instead of a component of the simulated account.
 const DependencyAccounts = ({
   title,
   labelPrefix,
@@ -29,6 +33,7 @@ const DependencyAccounts = ({
   missing,
   accounts,
   unresolved,
+  foreign,
 }: {
   title: string;
   labelPrefix: string;
@@ -36,18 +41,44 @@ const DependencyAccounts = ({
   missing: string;
   accounts: DependencyAccount[];
   unresolved: UnresolvedDependency[];
+  foreign?: {
+    idPrefix: string;
+    labelPrefix: string;
+    names: string[];
+    onChange: (name: string, foreign: boolean) => void;
+  };
 }) => (
   <div className="flex flex-col gap-2">
     <h3 className="text-xs font-medium">{title}</h3>
     {accounts.map(({ name, storageSlots, setStorageSlots, schema }) => (
       <section
         key={name}
-        aria-label={`${labelPrefix} ${name}`}
+        aria-label={`${
+          foreign?.names.includes(name) ? foreign.labelPrefix : labelPrefix
+        } ${name}`}
         className="flex flex-col gap-2"
       >
-        <h4 className="font-mono text-xs break-all text-muted-foreground">
-          {name}
-        </h4>
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+          <h4 className="font-mono text-xs break-all text-muted-foreground">
+            {name}
+          </h4>
+          {foreign && (
+            <div className="flex items-center gap-2">
+              <Switch
+                id={`${foreign.idPrefix}-foreign-${name}`}
+                size="sm"
+                checked={foreign.names.includes(name)}
+                onCheckedChange={(checked) => foreign.onChange(name, checked)}
+              />
+              <Label
+                htmlFor={`${foreign.idPrefix}-foreign-${name}`}
+                className="text-xs font-normal"
+              >
+                Foreign account
+              </Label>
+            </div>
+          )}
+        </div>
         <StorageSlotsEditor
           storageSlots={storageSlots}
           onChange={(slots: StorageSlot[]) => setStorageSlots(slots)}

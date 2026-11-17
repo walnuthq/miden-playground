@@ -5,6 +5,7 @@ import useDependencyAccounts from "@/hooks/use-dependency-accounts";
 import useScripts from "@/hooks/use-scripts";
 import type { SimulationRun } from "@/hooks/use-simulation";
 import { appendConsoleEntry } from "@/lib/console-log";
+import { simulatedAccountName } from "@/lib/simulation/foreign-accounts";
 import {
   changedAssets,
   createSimulatedAccount,
@@ -14,6 +15,7 @@ import {
   type SimulatedAsset,
   simulateNote,
   simulateTransactionScript,
+  stageForeignAccount,
   storageChanges,
   vaultBalances,
 } from "@/lib/simulation/run";
@@ -31,7 +33,10 @@ import {
   enqueueSimulation,
   withSimulationClient,
 } from "@/lib/simulation/simulation-client";
-import { useSimulationVault } from "@/lib/simulation/simulation-state";
+import {
+  useForeignDependencyNames,
+  useSimulationVault,
+} from "@/lib/simulation/simulation-state";
 import type { Account } from "@/lib/types/account";
 import type { Script } from "@/lib/types/script";
 import { cleanExecutionError } from "@/lib/utils/procedure-inputs";
@@ -57,26 +62,41 @@ export type TargetSimulationInputs = {
   noteAssets: AssetRow[];
 };
 
-export type TargetSimulationRun = SimulationRun;
+// A run, and the ids of the foreign accounts it staged, by dependency name.
+export type TargetSimulationRun = SimulationRun & {
+  stagedIds?: Map<string, string>;
+};
 
-// The account id splitter, with the simulated account's and the simulated
-// assets' stand-ins replaced by their ids: the account built for a run on it,
-// the faucets the run made. None on a sandbox account.
+// The account id splitter, with the stand-ins replaced by their ids: the
+// simulated account built for a run on it, the foreign accounts the run
+// staged (by dependency name), the faucets it made. None on a sandbox
+// account.
 const resolvingAccountIdParts =
   (
     simulatedId?: string,
     faucetIds = new Map<string, string>(),
+    stagedIds = new Map<string, string>(),
   ): AccountIdParts =>
   (accountId) => {
-    if (accountId !== SIMULATED_TARGET) {
-      return accountIdParts(resolveSimulatedAsset(accountId, faucetIds));
+    if (accountId === SIMULATED_TARGET) {
+      if (!simulatedId) {
+        throw new Error(
+          "The note's storage names the simulated account: pick it as the target, or name another account.",
+        );
+      }
+      return accountIdParts(simulatedId);
     }
-    if (!simulatedId) {
-      throw new Error(
-        "The note's storage names the simulated account: pick it as the target, or name another account.",
-      );
+    const foreignName = simulatedAccountName(accountId);
+    if (foreignName !== undefined) {
+      const stagedId = stagedIds.get(foreignName);
+      if (!stagedId) {
+        throw new Error(
+          `The note's storage names the foreign account ${foreignName}, which this run doesn't stage: mark the dependency as a foreign account on the simulated account, or name another account.`,
+        );
+      }
+      return accountIdParts(stagedId);
     }
-    return accountIdParts(simulatedId);
+    return accountIdParts(resolveSimulatedAsset(accountId, faucetIds));
   };
 
 const SIMULATED_ONLY =
@@ -91,12 +111,25 @@ const errorMessage = (error: unknown) =>
 // runs on the mock client: a throwaway account holding the script's
 // dependencies' components, built from the storage slots shown, never
 // committed. Every run starts from those slots and the vault shown, at nonce
-// 0 (1 with assets, which a seed transaction put in the vault).
+// 0 (1 with assets, which a seed transaction put in the vault). A dependency
+// marked as a foreign account isn't one of its components: it's staged on
+// the mock chain instead, for the script's foreign calls.
 const useTargetSimulation = (script: Script) => {
   const { client } = useMiden();
   const { accounts } = useAccounts();
   const { scripts } = useScripts();
   const dependencyAccounts = useDependencyAccounts(script);
+  // The dependencies the script calls on another account, by name: the user
+  // says which, the package doesn't.
+  const [foreignNames, setForeignDependency] = useForeignDependencyNames(
+    script.id,
+  );
+  const foreignAccounts = dependencyAccounts.accounts.filter(({ name }) =>
+    foreignNames.includes(name),
+  );
+  const targetComponents = dependencyAccounts.accounts.filter(
+    ({ name }) => !foreignNames.includes(name),
+  );
   // The simulated account's vault: one account, whatever its dependencies.
   const [vault, setVault] = useSimulationVault(script.id);
   const isNote = script.type === "note";
@@ -110,6 +143,7 @@ const useTargetSimulation = (script: Script) => {
     assets,
     simulatedId,
     faucetIds,
+    stagedIds,
   }: {
     runClient: WebClientType;
     targetAccountId: string;
@@ -117,6 +151,7 @@ const useTargetSimulation = (script: Script) => {
     assets: SimulatedAsset[];
     simulatedId?: string;
     faucetIds?: Map<string, string>;
+    stagedIds?: Map<string, string>;
   }) =>
     isNote
       ? simulateNote({
@@ -125,7 +160,7 @@ const useTargetSimulation = (script: Script) => {
           script,
           scripts,
           noteStorage: noteStorage(
-            resolvingAccountIdParts(simulatedId, faucetIds),
+            resolvingAccountIdParts(simulatedId, faucetIds, stagedIds),
           ),
           assets,
           noteArgument: argument,
@@ -156,6 +191,8 @@ const useTargetSimulation = (script: Script) => {
     }
     let account: Account | undefined;
     let faucetIds = new Map<string, string>();
+    // The foreign accounts' ids, by dependency name.
+    const stagedIds = new Map<string, string>();
     try {
       const result = await withSimulationClient(async (mockClient) => {
         faucetIds = await mockFaucetIds(
@@ -171,9 +208,25 @@ const useTargetSimulation = (script: Script) => {
             faucetId: resolveSimulatedAsset(faucetId, faucetIds),
             amount,
           }));
-        const components = dependencyAccounts.accounts.map(
-          ({ script, storageSlots }) => ({ script, storageSlots }),
-        );
+        // The foreign accounts first, each committed in a block of the mock
+        // chain, as for an account component's foreign calls.
+        for (const foreignAccount of foreignAccounts) {
+          const staged = await simulatedAccount(
+            mockClient,
+            `foreign:${foreignAccount.script.commitment}:${JSON.stringify(foreignAccount.storageSlots)}`,
+            () =>
+              stageForeignAccount({
+                client: mockClient,
+                script: foreignAccount.script,
+                storageSlots: foreignAccount.storageSlots,
+              }),
+          );
+          stagedIds.set(foreignAccount.name, staged.id);
+        }
+        const components = targetComponents.map(({ script, storageSlots }) => ({
+          script,
+          storageSlots,
+        }));
         account = await simulatedAccount(
           mockClient,
           `target:${JSON.stringify([
@@ -201,11 +254,13 @@ const useTargetSimulation = (script: Script) => {
           assets: resolve(inputs.noteAssets),
           simulatedId: account.id,
           faucetIds,
+          stagedIds,
         });
       });
       return {
         result,
         account,
+        stagedIds,
         faucetLabels: mockFaucetLabels(faucetIds),
         vaultChanges:
           result.ok && result.executedTransaction
@@ -214,7 +269,11 @@ const useTargetSimulation = (script: Script) => {
       };
     } catch (error) {
       // A crash or a timeout of the mock client, which was reset.
-      return { result: { ok: false, error: errorMessage(error) }, account };
+      return {
+        result: { ok: false, error: errorMessage(error) },
+        account,
+        stagedIds,
+      };
     }
   };
   // The run on a sandbox account, in the app's client.
@@ -253,6 +312,14 @@ const useTargetSimulation = (script: Script) => {
         ? await runSimulated(inputs)
         : await runSandbox(inputs);
       const { result, account } = outcome;
+      // A transaction script or a raw-felt note can only name a foreign
+      // account by its id, known once it's staged.
+      const staged =
+        outcome.stagedIds && outcome.stagedIds.size > 0
+          ? [...outcome.stagedIds]
+              .map(([name, id]) => `Foreign account ${name}: ${id}`)
+              .join("\n")
+          : "";
       if (result.ok && result.executedTransaction && account) {
         const { values, entries } = effectiveStorageChanges(
           account.storage,
@@ -273,17 +340,29 @@ const useTargetSimulation = (script: Script) => {
               ? `, ${assets} vault change${assets === 1 ? "" : "s"}`
               : ""
           }.`,
+          output: staged,
         });
       } else {
         appendConsoleEntry(script.id, {
           level: "error",
           text: `Simulation of ${script.name} failed.`,
-          output: result.ok ? "" : result.error,
+          output: [result.ok ? "" : result.error, staged]
+            .filter(Boolean)
+            .join("\n\n"),
         });
       }
       return outcome;
     });
-  return { accounts, dependencyAccounts, vault, setVault, simulate };
+  return {
+    accounts,
+    dependencyAccounts,
+    targetComponents,
+    foreignAccounts,
+    setForeignDependency,
+    vault,
+    setVault,
+    simulate,
+  };
 };
 
 export default useTargetSimulation;
