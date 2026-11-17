@@ -615,6 +615,10 @@ a known limit:
 - Hide the target accounts whose code lacks a procedure the script calls,
   from a MAST walk in api-compile: done (2026-11-13), see
   `spec/simulate-target-accounts.md`.
+- Name the arguments: the forms and the signature lines show a procedure's
+  parameters by the names in the package's WIT (`depositor`, not
+  `param_0`), reported by api-compile: done (2026-11-17), see
+  `spec/procedure-parameter-names.md`.
 
 Spike (2026-11-13, SDK 0.17.10, Chromium, testnet sandbox with the Counter
 Contract example):

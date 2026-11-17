@@ -119,7 +119,15 @@ export type ProcedureExport = {
   // `null` when it can't be told. Missing from packages compiled before
   // api-compile reported it, like `readOnly`.
   callsForeign?: boolean | null;
+  // The parameters' names and WIT types, kebab case, in the signature's
+  // order (`parameters` next to `readOnly`, from the WIT the package embeds).
+  // Missing when api-compile found no names or not as many as the signature
+  // has parameters, from transaction scripts (no WIT) and from packages
+  // compiled before api-compile reported them.
+  parameters?: ProcedureParameter[];
 };
+
+export type ProcedureParameter = { name: string; type: string };
 
 export const defaultProcedureExport = (): ProcedureExport => ({
   path: "",

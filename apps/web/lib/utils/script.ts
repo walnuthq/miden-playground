@@ -5,7 +5,6 @@ import type {
   Dependency,
   MidenInput,
   MidenProjectToml,
-  MidenTypeStruct,
   Package,
   PackageSource,
   ProcedureExport,
@@ -13,7 +12,15 @@ import type {
   Signature,
 } from "@/lib/types/script";
 import { scriptFilePaths } from "@/lib/types/script";
+import { formatProcedureExportPath } from "@/lib/utils/procedure-inputs";
 import { findPackages } from "@/lib/utils/project-files";
+
+// Moved to `procedure-inputs.ts`, which the unit tests can load: still
+// exported here for the app's imports.
+export {
+  formatProcedureExportPath,
+  procedureSignature,
+} from "@/lib/utils/procedure-inputs";
 
 export const defaultSignature = (): Signature => ({
   abi: 3,
@@ -91,10 +98,6 @@ export const assembledFromMasm = ({
   masm,
   masp,
 }: Pick<Script, "masm" | "masp">) => masp === "" && masm !== "";
-
-// Rust packages export kebab-case names, displayed as their snake_case source names.
-export const formatProcedureExportPath = (path: string) =>
-  path.split("::").at(-1)?.replaceAll('"', "").replaceAll("-", "_") ?? "";
 
 // api-compile's answer when it has one. Otherwise, when it can't tell or the
 // package predates it, the name: a `get…` procedure. A wrong guess only costs
@@ -257,6 +260,7 @@ export const packageToScript = ({
   commitment,
   masp,
   manifest,
+  parameters,
   createdAt,
   updatedAt,
 }: Package): Script => ({
@@ -285,6 +289,10 @@ export const packageToScript = ({
     .map(({ Procedure: procedureExport }) => ({
       ...procedureExport,
       readOnly: isReadOnlyProcedure(procedureExport),
+      // The registry keeps the names apart from the manifest.
+      ...(parameters?.[procedureExport.path] && {
+        parameters: parameters[procedureExport.path],
+      }),
     })),
   dependencies: manifest.dependencies.map((dependency) => ({
     id: dependency.name,
@@ -295,57 +303,3 @@ export const packageToScript = ({
   createdAt: new Date(createdAt).getTime(),
   updatedAt: new Date(updatedAt).getTime(),
 });
-
-export const formatProcedureExportParamType = (type: MidenTypeStruct) => {
-  switch (type.Struct.name) {
-    case "miden:base/core-types@1.0.0/felt": {
-      return "felt: Felt";
-    }
-    case "miden:base/core-types@1.0.0/word": {
-      return "word: Word";
-    }
-    case "miden:base/core-types@1.0.0/account-id": {
-      return "account_id: AccountId";
-    }
-    case "miden:base/core-types@1.0.0/asset": {
-      return "asset: Asset";
-    }
-  }
-};
-
-export const formatProcedureExportResultType = (type: MidenTypeStruct) => {
-  switch (type.Struct.name) {
-    case "miden:base/core-types@1.0.0/felt": {
-      return "Felt";
-    }
-    case "miden:base/core-types@1.0.0/word": {
-      return "Word";
-    }
-    case "miden:base/core-types@1.0.0/account-id": {
-      return "AccountId";
-    }
-    case "miden:base/core-types@1.0.0/asset": {
-      return "Asset";
-    }
-  }
-};
-
-// A procedure as its Rust signature: `fn get_count() -> Felt`.
-export const procedureSignature = ({
-  path,
-  signature: { params, results },
-}: ProcedureExport) => {
-  let result = `fn ${formatProcedureExportPath(path)}(`;
-  result += params
-    .map((param) => formatProcedureExportParamType(param))
-    .join(", ");
-  result += ")";
-  if (results.length > 0) {
-    result += ` -> `;
-    const resultTypes = results
-      .map((result) => formatProcedureExportResultType(result))
-      .join(", ");
-    result += results.length === 1 ? resultTypes : `(${resultTypes})`;
-  }
-  return result;
-};

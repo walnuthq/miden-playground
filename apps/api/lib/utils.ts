@@ -6,6 +6,7 @@ import {
   updatePackage,
 } from "@/db/packages";
 import { notFound } from "@/lib/errors";
+import { analyzedExports, type ExportAnalysis } from "@/lib/package-exports";
 import { buildFiles, ownFiles } from "@/lib/package-files";
 import { packageMetadata } from "@/lib/package-metadata";
 import { projectTemplateFiles } from "@/lib/templates";
@@ -103,20 +104,17 @@ type CompileResponse =
       masp: string;
       commitment: string;
       manifest: Manifest;
-      // Whether each exported procedure is read-only, by export path: `null`
-      // when it can't be told.
-      readOnly: Record<string, boolean | null>;
-      // Whether each exported procedure calls another account's procedure
-      // (FPI), by export path: `null` when it can't be told. Absent from an
-      // api-compile older than it.
-      callsForeign?: Record<string, boolean | null>;
+      // Whether each exported procedure is read-only and calls another
+      // account's procedure (FPI), and its parameters' names
+      // (`analyzedExports`).
       // The sources plus the lockfile the build used.
       files: Record<string, string>;
       masm?: MasmOutput;
       // An account component's storage slots, a note's storage fields and a
       // script's account procedures: absent for other packages, and from an
       // api-compile older than them.
-    } & PackageMetadata);
+    } & ExportAnalysis &
+      PackageMetadata);
 
 // The MASM tab's content: for reading only, it calls library procedures
 // without including them, so it doesn't reassemble into the package.
@@ -213,6 +211,7 @@ export const compilePackage = async ({
     manifest,
     readOnly,
     callsForeign,
+    parameters,
     storage,
     noteStorage,
     accountProcedures,
@@ -224,16 +223,11 @@ export const compilePackage = async ({
     noteStorage,
     accountProcedures,
   });
-  const exports = manifest.exports
-    .filter(({ Procedure: { signature } }) => signature?.abi === 3)
-    // Stored with each export, in the `exports` column.
-    .map(({ Procedure: procedureExport }) => ({
-      Procedure: {
-        ...procedureExport,
-        readOnly: readOnly[procedureExport.path],
-        callsForeign: callsForeign?.[procedureExport.path],
-      },
-    }));
+  const exports = analyzedExports(manifest, {
+    readOnly,
+    callsForeign,
+    parameters,
+  });
   if (masmOutput && "error" in masmOutput) {
     console.warn(`${name}: no MASM (${masmOutput.error})`);
   }

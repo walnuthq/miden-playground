@@ -228,7 +228,22 @@
             }
           ]
         },
-        "readOnly": false
+        "readOnly": false,
+        "callsForeign": false,
+        "parameters": [
+          {
+            "name": "tag",
+            "type": "tag"
+          },
+          {
+            "name": "note-type",
+            "type": "note-type"
+          },
+          {
+            "name": "recipient",
+            "type": "recipient"
+          }
+        ]
       }
     },
     {
@@ -511,7 +526,18 @@
             }
           ]
         },
-        "readOnly": false
+        "readOnly": false,
+        "callsForeign": false,
+        "parameters": [
+          {
+            "name": "asset",
+            "type": "asset"
+          },
+          {
+            "name": "note-idx",
+            "type": "note-idx"
+          }
+        ]
       }
     },
     {
@@ -763,7 +789,14 @@
             }
           ]
         },
-        "readOnly": false
+        "readOnly": false,
+        "callsForeign": false,
+        "parameters": [
+          {
+            "name": "asset",
+            "type": "asset"
+          }
+        ]
       }
     }
   ]

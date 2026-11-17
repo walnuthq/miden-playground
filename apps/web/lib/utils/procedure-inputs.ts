@@ -33,18 +33,92 @@ export type ProcedureArgument =
 
 export type ProcedureArguments = Record<string, ProcedureArgument>;
 
-const rawTypeName = ({ Struct }: MidenTypeStruct) =>
+// A type's name without its package: `note-idx`.
+const rawProcedureTypeName = ({ Struct }: MidenTypeStruct) =>
   Struct.name.split("/").at(-1) ?? Struct.name;
 
-// The manifest has the parameters' types, not their names.
-export const procedureParams = ({
+// The parameters' names in snake case, as the Rust source spells them, from
+// the WIT names api-compile reports with the export: `deposit-asset` is
+// `deposit_asset`. Undefined when the list is missing (a package compiled
+// before api-compile reported them, a built-in, a transaction script), has
+// another length than the signature's, or holds an empty or repeated name:
+// the arguments are keyed by name, so names must be unique.
+export const procedureParameterNames = ({
   signature,
-}: Pick<ProcedureExport, "signature">): ProcedureParam[] =>
-  signature.params.map((param, index) => ({
-    name: `param_${index}`,
+  parameters,
+}: Pick<ProcedureExport, "signature" | "parameters">): string[] | undefined => {
+  if (!parameters || parameters.length !== signature.params.length) {
+    return undefined;
+  }
+  const names = parameters.map(({ name }) => name.replaceAll("-", "_"));
+  return names.every((name) => name !== "") &&
+    new Set(names).size === names.length
+    ? names
+    : undefined;
+};
+
+// The manifest's signature has the parameters' types, the WIT their names.
+// Without names, every parameter is named by its position: never a mix.
+export const procedureParams = (
+  procedureExport: Pick<ProcedureExport, "signature" | "parameters">,
+): ProcedureParam[] => {
+  const names = procedureParameterNames(procedureExport);
+  return procedureExport.signature.params.map((param, index) => ({
+    name: names?.[index] ?? `param_${index}`,
     type: midenTypes[param.Struct.name] as MidenType | undefined,
-    rawType: rawTypeName(param),
+    rawType: rawProcedureTypeName(param),
   }));
+};
+
+// Rust packages export kebab-case names, displayed as their snake_case source
+// names.
+export const formatProcedureExportPath = (path: string) =>
+  path.split("::").at(-1)?.replaceAll('"', "").replaceAll("-", "_") ?? "";
+
+export const formatProcedureExportResultType = (type: MidenTypeStruct) => {
+  switch (type.Struct.name) {
+    case "miden:base/core-types@1.0.0/felt": {
+      return "Felt";
+    }
+    case "miden:base/core-types@1.0.0/word": {
+      return "Word";
+    }
+    case "miden:base/core-types@1.0.0/account-id": {
+      return "AccountId";
+    }
+    case "miden:base/core-types@1.0.0/asset": {
+      return "Asset";
+    }
+  }
+};
+
+// A procedure as its Rust signature: `fn deposit(depositor: AccountId,
+// deposit_asset: Asset)`, or its parameters' types alone when it has no
+// names (`procedureParameterNames`): `fn deposit(AccountId, Asset)`.
+export const procedureSignature = (procedureExport: ProcedureExport) => {
+  const {
+    path,
+    signature: { params, results },
+  } = procedureExport;
+  const names = procedureParameterNames(procedureExport);
+  let result = `fn ${formatProcedureExportPath(path)}(`;
+  result += params
+    .map((param, index) => {
+      const type =
+        formatProcedureExportResultType(param) ?? rawProcedureTypeName(param);
+      return names ? `${names[index]}: ${type}` : type;
+    })
+    .join(", ");
+  result += ")";
+  if (results.length > 0) {
+    result += ` -> `;
+    const resultTypes = results
+      .map((result) => formatProcedureExportResultType(result))
+      .join(", ");
+    result += results.length === 1 ? resultTypes : `(${resultTypes})`;
+  }
+  return result;
+};
 
 // The arguments with every `AccountId` that isn't among `allowed` emptied,
 // or the same object when there is none: a field whose accounts were

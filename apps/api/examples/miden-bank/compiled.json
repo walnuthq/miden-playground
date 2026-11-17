@@ -327,7 +327,17 @@
               ]
             },
             "readOnly": true,
-            "callsForeign": false
+            "callsForeign": false,
+            "parameters": [
+              {
+                "name": "depositor",
+                "type": "account-id"
+              },
+              {
+                "name": "asset",
+                "type": "asset"
+              }
+            ]
           }
         },
         {
@@ -633,7 +643,17 @@
               ]
             },
             "readOnly": false,
-            "callsForeign": false
+            "callsForeign": false,
+            "parameters": [
+              {
+                "name": "depositor",
+                "type": "account-id"
+              },
+              {
+                "name": "deposit-asset",
+                "type": "asset"
+              }
+            ]
           }
         },
         {
@@ -655,7 +675,8 @@
               ]
             },
             "readOnly": false,
-            "callsForeign": false
+            "callsForeign": false,
+            "parameters": []
           }
         },
         {
@@ -1037,7 +1058,25 @@
               ]
             },
             "readOnly": false,
-            "callsForeign": false
+            "callsForeign": false,
+            "parameters": [
+              {
+                "name": "withdraw-asset",
+                "type": "asset"
+              },
+              {
+                "name": "serial-num",
+                "type": "word"
+              },
+              {
+                "name": "tag",
+                "type": "felt"
+              },
+              {
+                "name": "note-type",
+                "type": "felt"
+              }
+            ]
           }
         }
       ],
@@ -1185,7 +1224,13 @@
               ]
             },
             "readOnly": null,
-            "callsForeign": null
+            "callsForeign": null,
+            "parameters": [
+              {
+                "name": "arg",
+                "type": "word"
+              }
+            ]
           }
         }
       ],
@@ -1463,7 +1508,13 @@
               ]
             },
             "readOnly": null,
-            "callsForeign": null
+            "callsForeign": null,
+            "parameters": [
+              {
+                "name": "arg",
+                "type": "word"
+              }
+            ]
           }
         }
       ],

@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
-import type { MidenRawType, Signature } from "../types/script.ts";
+import type {
+  MidenRawType,
+  ProcedureExport,
+  Signature,
+} from "../types/script.ts";
 import {
   cleanExecutionError,
   decodeProcedureResult,
@@ -8,7 +12,9 @@ import {
   isFelt,
   isWord,
   procedureArgumentsReady,
+  procedureParameterNames,
   procedureParams,
+  procedureSignature,
   withAccountIdsAmong,
   wordToHex,
 } from "./procedure-inputs.ts";
@@ -36,11 +42,114 @@ describe("procedureParams", () => {
     );
   });
 
+  const parameters = [
+    { name: "depositor", type: "account-id" },
+    { name: "deposit-asset", type: "asset" },
+  ];
+
+  test("names the parameters from the WIT, in snake case", () => {
+    assert.deepEqual(
+      procedureParams({
+        signature: signature(["account-id", "asset"]),
+        parameters,
+      }).map(({ name }) => name),
+      ["depositor", "deposit_asset"],
+    );
+  });
+
+  test("falls back to positions for every parameter", () => {
+    const fallback = (
+      parameters?: { name: string; type: string }[],
+    ): string[] =>
+      procedureParams({
+        signature: signature(["account-id", "asset"]),
+        parameters,
+      }).map(({ name }) => name);
+    // Missing: an older compile, a built-in, a transaction script.
+    assert.deepEqual(fallback(undefined), ["param_0", "param_1"]);
+    // Not as many names as the signature has parameters.
+    assert.deepEqual(fallback(parameters.slice(0, 1)), ["param_0", "param_1"]);
+    // An empty name, or two that are the same once in snake case.
+    assert.deepEqual(
+      fallback([
+        parameters[0] as (typeof parameters)[number],
+        { name: "", type: "asset" },
+      ]),
+      ["param_0", "param_1"],
+    );
+    assert.deepEqual(
+      fallback([
+        { name: "an-id", type: "account-id" },
+        { name: "an_id", type: "asset" },
+      ]),
+      ["param_0", "param_1"],
+    );
+    assert.equal(
+      procedureParameterNames({ signature: signature([]), parameters: [] })
+        ?.length,
+      0,
+    );
+  });
+
   test("leaves a type the forms don't know without a type", () => {
     const params = procedureParams({ signature: signature(["note-idx"]) });
     assert.equal(params[0]?.type, undefined);
     assert.equal(params[0]?.rawType, "note-idx");
     assert.equal(procedureArgumentsReady(params, {}), false);
+  });
+});
+
+const deposit = (
+  parameters?: ProcedureExport["parameters"],
+): ProcedureExport => ({
+  path: '::"miden:bank-account/bank@0.1.0"::deposit',
+  digest: "0x00",
+  signature: {
+    abi: 3,
+    params: [struct("account-id"), struct("asset")],
+    results: [struct("felt")],
+  },
+  attributes: { attrs: [] },
+  ...(parameters && { parameters }),
+});
+
+describe("procedureSignature", () => {
+  test("names the parameters when the procedure has names", () => {
+    assert.equal(
+      procedureSignature(
+        deposit([
+          { name: "depositor", type: "account-id" },
+          { name: "deposit-asset", type: "asset" },
+        ]),
+      ),
+      "fn deposit(depositor: AccountId, deposit_asset: Asset) -> Felt",
+    );
+  });
+
+  test("shows the types alone without names", () => {
+    assert.equal(
+      procedureSignature(deposit()),
+      "fn deposit(AccountId, Asset) -> Felt",
+    );
+    // Not as many names as parameters: none of them.
+    assert.equal(
+      procedureSignature(deposit([{ name: "depositor", type: "account-id" }])),
+      "fn deposit(AccountId, Asset) -> Felt",
+    );
+  });
+
+  test("shows a type the forms don't know by its WIT name", () => {
+    assert.equal(
+      procedureSignature({
+        ...deposit([{ name: "note-index", type: "note-idx" }]),
+        signature: {
+          abi: 3,
+          params: [struct("note-idx")],
+          results: [],
+        },
+      }),
+      "fn deposit(note_index: note-idx)",
+    );
   });
 });
 
