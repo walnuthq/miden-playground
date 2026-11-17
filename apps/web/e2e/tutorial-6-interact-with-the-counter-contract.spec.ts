@@ -60,14 +60,16 @@ test("tutorial 6: interact with the counter contract", async ({
     // The embedded package carries no MASM: its tab is disabled.
     await expect(page.getByRole("tab", { name: "MASM" })).toBeDisabled();
     await page.getByRole("tab", { name: "Manifest" }).click();
-    // Listed under "Package exports", get_count flagged read-only.
+    // Listed under "Package exports", get_count flagged read-only. The
+    // console's Simulate tab lists the same procedures: look in the editor.
+    const editor = page.getByTestId("editor");
     await expect(
-      page.getByRole("row", {
+      editor.getByRole("row", {
         name: "get_count Read-only fn get_count() -> Felt",
       }),
     ).toBeVisible();
     await expect(
-      page.getByRole("row", {
+      editor.getByRole("row", {
         name: "increment_count fn increment_count() -> Felt",
       }),
     ).toBeVisible();
