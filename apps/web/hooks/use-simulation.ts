@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import type { FaucetLabel } from "@/components/lib/fungible-assets-table";
 import useComponents from "@/hooks/use-components";
 import useDependencyAccounts from "@/hooks/use-dependency-accounts";
 import { appendConsoleEntry } from "@/lib/console-log";
@@ -8,11 +9,15 @@ import {
   simulatedAccountValue,
 } from "@/lib/simulation/foreign-accounts";
 import {
+  changedAssets,
   createSimulatedAccount,
+  mockFaucetIds,
+  mockFaucetLabels,
   type SimulationResult,
   simulateProcedure,
   stageForeignAccount,
   storageChanges,
+  vaultBalances,
 } from "@/lib/simulation/run";
 import {
   initialStorageSlots,
@@ -20,10 +25,22 @@ import {
   simulatedAccount,
 } from "@/lib/simulation/simulated-accounts";
 import {
+  type AssetRow,
+  resolveSimulatedAsset,
+  rowAssets,
+  simulatedAssetOptions,
+  usedSymbols,
+  vaultChanges,
+} from "@/lib/simulation/simulated-assets";
+import {
   enqueueSimulation,
   withSimulationClient,
 } from "@/lib/simulation/simulation-client";
-import { useSimulationStorageSlots } from "@/lib/simulation/simulation-state";
+import {
+  useSimulatedAssetSymbols,
+  useSimulationStorageSlots,
+  useSimulationVault,
+} from "@/lib/simulation/simulation-state";
 import type { Account } from "@/lib/types/account";
 import type { ProcedureExport, Script } from "@/lib/types/script";
 import {
@@ -35,6 +52,32 @@ import {
 import { formatProcedureExportPath } from "@/lib/utils/script";
 import { effectiveStorageChanges } from "@/lib/utils/storage-slots";
 import { accountIdParts } from "@/lib/web-client";
+
+// A run's result, the account's state it ran from, the labels of the
+// simulated assets' faucets (the app doesn't know them), and the final
+// balances of the vault's assets the run changed, by stand-in.
+export type SimulationRun = {
+  result: SimulationResult;
+  account?: Account;
+  faucetLabels?: Record<string, FaucetLabel>;
+  vaultChanges?: { faucetId: string; amount: bigint }[];
+};
+
+// The stand-ins of the vault's rows, of the arguments' assets and faucets.
+const argumentValues = (args: ProcedureArguments) =>
+  Object.values(args).flatMap((argument) =>
+    argument.type === "Asset"
+      ? [argument.faucetId]
+      : argument.type === "AccountId"
+        ? [argument.accountId]
+        : [],
+  );
+
+const resolveRows = (rows: AssetRow[], faucetIds: Map<string, string>) =>
+  rowAssets(rows).map(({ faucetId, amount }) => ({
+    faucetId: resolveSimulatedAsset(faucetId, faucetIds),
+    amount,
+  }));
 
 const plural = (count: number, noun: string) =>
   `${count} ${noun}${count === 1 ? "" : "s"}`;
@@ -52,17 +95,22 @@ const summary = (
       storageChanges(result.executedTransaction),
     );
   const count = changes ? changes.values.length + changes.entries.length : 0;
+  const assets = result.executedTransaction
+    ? changedAssets(result.executedTransaction, account)
+    : 0;
   const parts = [
     result.value && `returned ${result.value}`,
     changes &&
       (count === 0 ? "no storage change" : plural(count, "storage change")),
+    assets > 0 && plural(assets, "vault change"),
   ].filter(Boolean);
   return `Simulated ${name}${parts.length > 0 ? `: ${parts.join(", ")}` : ""}.`;
 };
 
 // Simulates an account component's procedures on a throwaway account of the
-// mock client, built from the script's package and the storage slots shown.
-// Every run starts from those slots, at nonce 0: nothing is persisted.
+// mock client, built from the script's package and the storage slots and
+// vault shown. Every run starts from them, at nonce 0 (1 with assets, which a
+// seed transaction put in the vault): nothing is persisted.
 const useSimulation = (script: Script) => {
   const { components } = useComponents();
   const schema = script.metadata?.storage;
@@ -76,6 +124,12 @@ const useSimulation = (script: Script) => {
   const storageSlots = useMemo(
     () => shownStorageSlots(schema, slots),
     [schema, slots],
+  );
+  const [vault, setVault] = useSimulationVault(script.id);
+  const [assetSymbols, addAssetSymbol] = useSimulatedAssetSymbols(script.id);
+  const simulatedAssets = useMemo(
+    () => simulatedAssetOptions(assetSymbols),
+    [assetSymbols],
   );
   // The foreign accounts: one per `account-component` dependency whose
   // package the workspace or the web app holds.
@@ -100,13 +154,25 @@ const useSimulation = (script: Script) => {
     name,
   }));
   // Resolves to the run's result and the account's state it ran from.
-  const invoke = (procedureExport: ProcedureExport, args: ProcedureArguments) =>
+  const invoke = (
+    procedureExport: ProcedureExport,
+    args: ProcedureArguments,
+  ): Promise<SimulationRun> =>
     enqueueSimulation(async () => {
       const name = formatProcedureExportPath(procedureExport.path);
       let account: Account | undefined;
       let result: SimulationResult;
+      let faucetIds = new Map<string, string>();
       try {
         result = await withSimulationClient(async (client) => {
+          // The simulated assets the vault and the arguments name.
+          faucetIds = await mockFaucetIds(
+            client,
+            usedSymbols([
+              ...vault.map(({ faucetId }) => faucetId),
+              ...argumentValues(args),
+            ]),
+          );
           // The foreign accounts first, each committed in a block of the
           // mock chain. Not for a procedure known not to call one, unless an
           // argument names one.
@@ -133,9 +199,31 @@ const useSimulation = (script: Script) => {
               );
             }
           }
-          // The stand-ins of the staged accounts, replaced by their ids.
+          // The stand-ins of the staged accounts and of the simulated assets,
+          // replaced by their ids.
           const resolvedArgs = Object.fromEntries(
             Object.entries(args).map(([name, argument]) => {
+              if (argument.type === "Asset") {
+                return [
+                  name,
+                  {
+                    ...argument,
+                    faucetId: resolveSimulatedAsset(
+                      argument.faucetId,
+                      faucetIds,
+                    ),
+                  },
+                ];
+              }
+              if (argument.type === "AccountId") {
+                const faucetId = resolveSimulatedAsset(
+                  argument.accountId,
+                  faucetIds,
+                );
+                if (faucetId !== argument.accountId) {
+                  return [name, { ...argument, accountId: faucetId }];
+                }
+              }
               const foreignName =
                 argument.type === "AccountId"
                   ? simulatedAccountName(argument.accountId)
@@ -152,14 +240,16 @@ const useSimulation = (script: Script) => {
               return [name, { ...argument, accountId: foreign.id }];
             }),
           );
+          const assets = resolveRows(vault, faucetIds);
           account = await simulatedAccount(
             client,
-            `${script.id}:${script.commitment}:${JSON.stringify(storageSlots)}`,
+            `${script.id}:${script.commitment}:${JSON.stringify(storageSlots)}:${JSON.stringify(rowAssets(vault).map(({ faucetId, amount }) => [faucetId, amount.toString()]))}`,
             () =>
               createSimulatedAccount({
                 client,
                 name: script.name,
                 components: [{ script, storageSlots }],
+                assets,
               }),
           );
           return simulateProcedure({
@@ -193,11 +283,24 @@ const useSimulation = (script: Script) => {
               output: result.ok ? "" : result.error,
             },
       );
-      return { result, account };
+      return {
+        result,
+        account,
+        faucetLabels: mockFaucetLabels(faucetIds),
+        vaultChanges:
+          result.ok && result.executedTransaction
+            ? vaultChanges(vaultBalances(result.executedTransaction), faucetIds)
+            : undefined,
+      };
     });
   return {
     storageSlots,
     setStorageSlots,
+    vault,
+    setVault,
+    assetSymbols,
+    addAssetSymbol,
+    simulatedAssets,
     foreignAccounts,
     unresolvedForeignAccounts,
     foreignAccountsStatus,

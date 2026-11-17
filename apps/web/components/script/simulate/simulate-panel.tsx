@@ -1,6 +1,7 @@
 import { useState } from "react";
 import ProceduresList from "@/components/procedures/procedures-list";
 import StorageSlotsEditor from "@/components/procedures/storage-slots-editor";
+import VaultEditor from "@/components/procedures/vault-editor";
 import DependencyAccounts, {
   InvalidSlots,
   slotNamePlaceholder,
@@ -16,6 +17,10 @@ import {
   simulationBlockedReason,
 } from "@/lib/simulation/blocked";
 import { storageChanges } from "@/lib/simulation/run";
+import {
+  applyVaultChanges,
+  assetRowsError,
+} from "@/lib/simulation/simulated-assets";
 import type { Script } from "@/lib/types/script";
 import { formatProcedureExportPath } from "@/lib/utils/script";
 import { storageSlotDescriptions } from "@/lib/utils/storage-schema";
@@ -34,6 +39,11 @@ const AccountComponentSimulation = ({
   const {
     storageSlots,
     setStorageSlots,
+    vault,
+    setVault,
+    assetSymbols,
+    addAssetSymbol,
+    simulatedAssets,
     foreignAccounts,
     unresolvedForeignAccounts,
     foreignAccountsStatus,
@@ -48,6 +58,7 @@ const AccountComponentSimulation = ({
     foreignAccounts.every((foreignAccount) =>
       storageSlotsValid(foreignAccount.storageSlots),
     );
+  const vaultValid = assetRowsError(vault, assetSymbols) === undefined;
   const hasForeignAccounts =
     foreignAccounts.length > 0 || unresolvedForeignAccounts.length > 0;
   // With the package's storage schema, its slots are the ones there are.
@@ -56,7 +67,7 @@ const AccountComponentSimulation = ({
     <div className="flex flex-col gap-3">
       <p className="text-xs text-muted-foreground">
         {blocked ??
-          `Procedures run locally on a throwaway account holding this component: nothing is submitted. Every run starts from the storage below, at nonce 0.${hasForeignAccounts ? " Procedures that call another account run against the simulated foreign accounts below: pick one as the account argument." : ""}`}
+          `Procedures run locally on a throwaway account holding this component: nothing is submitted. Every run starts from the storage and the vault below: at nonce 0, or 1 when the vault holds assets (a first transaction puts them there).${hasForeignAccounts ? " Procedures that call another account run against the simulated foreign accounts below: pick one as the account argument." : ""}`}
       </p>
       {/* Side by side on a wide screen: the console is short. */}
       <div className="grid items-start gap-3 xl:grid-cols-2">
@@ -70,6 +81,16 @@ const AccountComponentSimulation = ({
             namePlaceholder={slotNamePlaceholder(script.name)}
           />
           {!storageSlotsValid(storageSlots) && <InvalidSlots />}
+          <h3 className="text-xs font-medium">Vault</h3>
+          <VaultEditor
+            label="Vault"
+            rows={vault}
+            onChange={setVault}
+            simulatedAssets={simulatedAssets}
+            symbols={assetSymbols}
+            onNewAsset={addAssetSymbol}
+            empty="The vault is empty."
+          />
           {hasForeignAccounts && (
             <DependencyAccounts
               title="Foreign accounts"
@@ -96,7 +117,10 @@ const AccountComponentSimulation = ({
             idPrefix={`simulate-${script.id}`}
             procedureExports={script.procedureExports}
             disabled={
-              blocked !== undefined || !slotsValid || !foreignAccountsReady
+              blocked !== undefined ||
+              !slotsValid ||
+              !vaultValid ||
+              !foreignAccountsReady
             }
             blockedReason={(procedureExport) =>
               simulationBlockedReason(
@@ -106,9 +130,11 @@ const AccountComponentSimulation = ({
               )
             }
             simulatedAccounts={simulatedAccounts}
+            simulatedAssets={simulatedAssets}
             sandboxDisabledReason={sandboxAccountsDisabledReason}
             onInvoke={async (procedureExport, args) => {
-              const { result, account } = await invoke(procedureExport, args);
+              const { result, account, faucetLabels, vaultChanges } =
+                await invoke(procedureExport, args);
               if (!result.ok || !account) {
                 // The error is in the log.
                 onFailure();
@@ -121,6 +147,8 @@ const AccountComponentSimulation = ({
                   executedTransaction: result.executedTransaction,
                   baseline: account,
                   throwaway: true,
+                  faucetLabels,
+                  vaultChanges,
                 });
               }
               return { value: result.value };
@@ -131,14 +159,15 @@ const AccountComponentSimulation = ({
       <SimulationResultDialog
         simulation={simulation}
         onClose={() => setSimulation(undefined)}
-        onApply={({ executedTransaction }) =>
+        onApply={({ executedTransaction, vaultChanges }) => {
           setStorageSlots(
             applyStorageChanges(
               storageSlots,
               storageChanges(executedTransaction),
             ),
-          )
-        }
+          );
+          setVault(applyVaultChanges(vault, vaultChanges ?? []));
+        }}
       />
     </div>
   );

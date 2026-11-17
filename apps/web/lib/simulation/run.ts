@@ -6,8 +6,13 @@ import {
   AccountStorageMode as WasmAccountStorageMode,
   AdviceInputs as WasmAdviceInputs,
   type ExecutedTransaction as WasmExecutedTransactionType,
+  FungibleAsset as WasmFungibleAsset,
   MidenArrays as WasmMidenArrays,
+  Note as WasmNote,
   NoteAndArgs as WasmNoteAndArgs,
+  NoteAssets as WasmNoteAssets,
+  NoteAttachment as WasmNoteAttachment,
+  NoteType as WasmNoteType,
   Package as WasmPackage,
   TransactionRequestBuilder as WasmTransactionRequestBuilder,
   TransactionScript as WasmTransactionScript,
@@ -16,6 +21,7 @@ import {
 } from "@miden-sdk/miden-sdk";
 import { simulationBlockedReason } from "@/lib/simulation/blocked";
 import { recordStaging } from "@/lib/simulation/simulation-client";
+import type { Account } from "@/lib/types/account";
 import type { StorageSlot } from "@/lib/types/component";
 import type { MidenInput, ProcedureExport, Script } from "@/lib/types/script";
 import { fromBase64 } from "@/lib/utils";
@@ -53,19 +59,75 @@ export type SimulatedComponent = {
   storageSlots: StorageSlot[];
 };
 
+// An asset a simulated account's vault starts with, or a note carries: a
+// faucet of the mock client (or a sandbox faucet, for a note on a sandbox
+// account) and an amount in base units.
+export type SimulatedAsset = { faucetId: string; amount: bigint };
+
+// Puts the assets in the account's vault: the account consumes a P2ID note
+// carrying them (the standard basic wallet takes it), and the transaction is
+// applied to the client's store, never submitted. `AccountBuilder` can't build
+// an account with assets, and the mock chain can't hold the transaction: its
+// note was never created on the chain, so the block that holds it fails to
+// build (`unauthenticated note … was not created in the same block`), and so
+// does every later block, a foreign account's staging included. Applied to the
+// store alone, the account is at nonce 1 with the assets for every run that
+// executes against it, transaction or program. The faucets needn't be minted
+// from, nor committed. About 80 ms the first time, 20 ms after (2026-11-17).
+// It writes to the client's store: never call it on the app's client.
+export const seedVault = async ({
+  client,
+  accountId,
+  assets,
+}: {
+  client: MockWasmWebClient;
+  accountId: string;
+  assets: SimulatedAsset[];
+}) => {
+  const account = WasmAccountId.fromHex(accountId);
+  const note = WasmNote.createP2IDNote(
+    account,
+    account,
+    new WasmNoteAssets(
+      assets.map(
+        ({ faucetId, amount }) =>
+          new WasmFungibleAsset(WasmAccountId.fromHex(faucetId), amount),
+      ),
+    ),
+    WasmNoteType.Public,
+    new WasmNoteAttachment(),
+  );
+  const transactionResult = await client.executeTransaction(
+    account,
+    new WasmTransactionRequestBuilder()
+      .withInputNotes(
+        new WasmMidenArrays.NoteAndArgsArray([new WasmNoteAndArgs(note)]),
+      )
+      .build(),
+  );
+  await client.applyTransaction(
+    transactionResult,
+    await client.getSyncHeight(),
+  );
+};
+
 // A throwaway account holding the components, with the standard basic wallet
-// (to hold assets) and no authentication, at nonce 0. Its id depends on its
-// storage: every change of slots is a new account. Nothing is committed: an
+// (to hold assets) and no authentication. Its id depends on its storage, not
+// its vault: every change of slots is a new account. Nothing is committed: an
 // account the chain never saw runs a transaction script or consumes an
-// unauthenticated note all the same.
+// unauthenticated note all the same. Without assets it's at nonce 0; with
+// some, `seedVault` puts them in its vault and it's at nonce 1. It writes to
+// the client's store: the mock client's only.
 export const createSimulatedAccount = async ({
   client,
   name,
   components,
+  assets = [],
 }: {
-  client: WebClientType;
+  client: MockWasmWebClient;
   name: string;
   components: SimulatedComponent[];
+  assets?: SimulatedAsset[];
 }) => {
   const builder = await client.createCodeBuilder();
   const seed = crypto.getRandomValues(new Uint8Array(32));
@@ -81,34 +143,55 @@ export const createSimulatedAccount = async ({
   );
   const { account } = accountBuilder.build();
   await client.newAccount(account, true);
-  // Its state before any run: what a run's changes are shown against. Slots
-  // of its other components included, which a new account's first
-  // transaction reports as created.
-  return wasmAccountToAccount({ wasmAccount: account, name, components: [] });
+  if (assets.length === 0) {
+    // Its state before any run: what a run's changes are shown against.
+    // Slots of its other components included, which a new account's first
+    // transaction reports as created.
+    return wasmAccountToAccount({ wasmAccount: account, name, components: [] });
+  }
+  await seedVault({
+    client,
+    accountId: account.id().toString(),
+    assets,
+  });
+  // Its state after the seed: the seed is never shown as a change.
+  const seeded = await client.getAccount(account.id());
+  if (!seeded) {
+    throw new Error("The simulated account isn't in the client's store.");
+  }
+  return wasmAccountToAccount({ wasmAccount: seeded, name, components: [] });
 };
 
-// The fungible faucet whose asset a note carries on a simulated account: a
-// note's asset makes the client load its faucet as a foreign account, from
-// its own store first, then from the RPC, which on the mock client panics on
-// an account its chain doesn't hold (any sandbox faucet). A faucet created in
-// the mock client is enough, uncommitted. One per client (about 300 ms): a
-// client that was reset gets a new one.
-const mockFaucets = new WeakMap<MockWasmWebClient, Promise<string>>();
+// The fungible faucet of a simulated asset: an asset in a note or a vault
+// makes the client load its faucet as a foreign account, from its own store
+// first, then from the RPC, which on the mock client panics on an account its
+// chain doesn't hold (any sandbox faucet). A faucet created in the mock client
+// is enough, uncommitted. One per client and symbol (about 300 ms): a client
+// that was reset gets new ones.
+const mockFaucets = new WeakMap<
+  MockWasmWebClient,
+  Map<string, Promise<string>>
+>();
 
 // Base units: the most a fungible asset can hold is 2^63 - 2^31.
 const MOCK_FAUCET_MAX_SUPPLY = 10n ** 18n;
 
-// How the result dialog shows the faucet's asset: the app doesn't know it.
-export const MOCK_FAUCET_LABEL = {
+// How the result dialog shows a simulated asset: the app doesn't know its
+// faucet. The form takes amounts in base units: without decimals, the dialog
+// shows the same number.
+export const mockFaucetLabel = (symbol: string) => ({
   name: "Simulated asset",
-  symbol: "SIM",
-  // The form takes the amount in base units: without decimals, the dialog
-  // shows the same number.
+  symbol,
   decimals: 0,
-};
+});
 
-export const mockFaucet = (client: MockWasmWebClient) => {
-  let faucetId = mockFaucets.get(client);
+export const mockFaucet = (client: MockWasmWebClient, symbol: string) => {
+  let faucets = mockFaucets.get(client);
+  if (!faucets) {
+    faucets = new Map();
+    mockFaucets.set(client, faucets);
+  }
+  let faucetId = faucets.get(symbol);
   if (!faucetId) {
     faucetId = (async () => {
       // The package's `AuthScheme` export is the friendly string const; the
@@ -119,18 +202,45 @@ export const mockFaucet = (client: MockWasmWebClient) => {
         WasmAccountStorageMode.public(),
         false,
         "Simulated",
-        MOCK_FAUCET_LABEL.symbol,
-        MOCK_FAUCET_LABEL.decimals,
+        symbol,
+        mockFaucetLabel(symbol).decimals,
         MOCK_FAUCET_MAX_SUPPLY,
         AuthScheme.AuthRpoFalcon512,
       );
       return faucet.id().toString();
     })();
-    mockFaucets.set(client, faucetId);
-    faucetId.catch(() => mockFaucets.delete(client));
+    const created = faucetId;
+    faucets.set(symbol, created);
+    created.catch(() => {
+      if (faucets.get(symbol) === created) {
+        faucets.delete(symbol);
+      }
+    });
   }
   return faucetId;
 };
+
+// The faucets of the simulated assets a run uses, by symbol, made one after
+// the other: a client's calls aren't atomic as a group.
+export const mockFaucetIds = async (
+  client: MockWasmWebClient,
+  symbols: string[],
+) => {
+  const faucetIds = new Map<string, string>();
+  for (const symbol of symbols) {
+    faucetIds.set(symbol, await mockFaucet(client, symbol));
+  }
+  return faucetIds;
+};
+
+// The labels the result dialog names the simulated assets by, by faucet id.
+export const mockFaucetLabels = (faucetIds: Map<string, string>) =>
+  Object.fromEntries(
+    [...faucetIds].map(([symbol, faucetId]) => [
+      faucetId,
+      mockFaucetLabel(symbol),
+    ]),
+  );
 
 // Stages an account component's foreign account on the mock chain: a
 // simulated account made from the dependency's package and the storage
@@ -269,7 +379,7 @@ export const simulateProcedure = async ({
       executedTransaction: transactionResult.executedTransaction(),
     };
   } catch (error) {
-    return { ok: false, error: errorMessage(error) };
+    return { ok: false, error: targetErrorMessage(error) };
   }
 };
 
@@ -281,6 +391,8 @@ const wordArgument = (text: string) =>
     : new WasmWord(new BigUint64Array(wordFelts(text)));
 
 // The executor asks the keystore for a signature it doesn't have.
+// (The hints below explain the kernel's bare error codes, for every run: a
+// procedure's, a note's, a transaction script's.)
 const AUTH_REQUEST_EVENT = "miden::protocol::auth::request";
 
 // The kernel's check, at the end of a transaction, that no asset appeared or
@@ -292,12 +404,21 @@ const AUTH_REQUEST_EVENT = "miden::protocol::auth::request";
 // message does.
 const ASSETS_NOT_CONSERVED_CODE = "4544980346559459778";
 
+// The kernel's check that a vault holds what is removed from it
+// (`ERR_VAULT_FUNGIBLE_ASSET_AMOUNT_LESS_THAN_AMOUNT_TO_WITHDRAW`, same file's
+// kernel): "failed to remove the fungible asset from the vault since the
+// amount of the asset in the vault is less than the amount to remove".
+const VAULT_SHORT_CODE = "644413868907058392";
+
 const targetErrorHint = (message: string) => {
   if (message.includes(AUTH_REQUEST_EVENT)) {
     return "This account's key isn't in the Playground, so its transactions can't be simulated: pick a No Auth account or a wallet created here.";
   }
   if (message.includes(`error code: ${ASSETS_NOT_CONSERVED_CODE}`)) {
     return "The assets of the account and the notes must add up to the same total before and after the transaction. A note's asset isn't received on its own: the script has to move each one to the account (the wallet's receive_asset) or to an output note. Run the note without an asset if its script doesn't take one.";
+  }
+  if (message.includes(`error code: ${VAULT_SHORT_CODE}`)) {
+    return "The account's vault holds less of the asset than the transaction removes from it. On the simulated account, add the asset to its vault, or raise its amount.";
   }
   return undefined;
 };
@@ -317,8 +438,7 @@ export const simulateNote = async ({
   script,
   scripts,
   noteStorage,
-  faucetAccountId,
-  amount,
+  assets,
   noteArgument,
 }: {
   client: WebClientType;
@@ -328,9 +448,8 @@ export const simulateNote = async ({
   scripts: Script[];
   // The note's storage, as felts.
   noteStorage: string[];
-  // The asset the note carries: none when empty.
-  faucetAccountId: string;
-  amount: bigint;
+  // The assets the note carries.
+  assets: SimulatedAsset[];
   noteArgument: string;
 }): Promise<SimulationResult> => {
   try {
@@ -341,8 +460,7 @@ export const simulateNote = async ({
       isNetworkNote: false,
       script,
       type: "public",
-      faucetAccountId,
-      amount,
+      assets,
       noteStorage,
       scripts,
     });
@@ -418,4 +536,47 @@ export const storageChanges = (
       })),
     ),
   };
+};
+
+// The final balances of the vault's assets a transaction changed, by faucet
+// id: an asset it removed outright is at zero.
+export const vaultBalances = (
+  executedTransaction: WasmExecutedTransactionType,
+): SimulatedAsset[] => {
+  const vaultPatch = executedTransaction.accountPatch().vault();
+  return [
+    ...vaultPatch.updatedFungibleAssets().map((asset) => ({
+      faucetId: asset.faucetId().toString(),
+      amount: asset.amount(),
+    })),
+    ...vaultPatch.removedAssetIds().map((assetId) => ({
+      faucetId: WasmFungibleAsset.fromVaultKey(assetId, 0n)
+        .faucetId()
+        .toString(),
+      amount: 0n,
+    })),
+  ];
+};
+
+// How many of the vault's assets a transaction changed the balance of,
+// against the account's state it ran from. The fee a sandbox account pays
+// leaves its vault too, but isn't counted: the result dialog reports it
+// apart, as the transaction dialog does (TransactionEffects).
+export const changedAssets = (
+  executedTransaction: WasmExecutedTransactionType,
+  account: Pick<Account, "fungibleAssets">,
+) => {
+  const fees = new Map(
+    (executedTransaction.feeNote()?.assets()?.fungibleAssets() ?? []).map(
+      (asset) => [asset.faucetId().toString(), asset.amount()],
+    ),
+  );
+  return vaultBalances(executedTransaction).filter(
+    ({ faucetId, amount }) =>
+      amount + (fees.get(faucetId) ?? 0n) !==
+      BigInt(
+        account.fungibleAssets.find((asset) => asset.faucetId === faucetId)
+          ?.amount ?? "0",
+      ),
+  ).length;
 };

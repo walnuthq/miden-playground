@@ -127,8 +127,7 @@ const useNotes = () => {
       isNetworkNote,
       script,
       type,
-      faucetAccountId,
-      amount,
+      assets: faucetAccountId ? [{ faucetId: faucetAccountId, amount }] : [],
       noteStorage,
       scripts,
     });

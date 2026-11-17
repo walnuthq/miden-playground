@@ -54,8 +54,12 @@ export const SIMULATED_PREFIX = "simulated:";
 export const simulatedAccountValue = (name: string) =>
   `${SIMULATED_PREFIX}${name}`;
 
-// The dependency's name, when the value is a stand-in.
-export const simulatedAccountName = (value: string) =>
-  value.startsWith(SIMULATED_PREFIX)
+// The dependency's name, when the value is a staged account's stand-in. A
+// package's name has no colon: a simulated asset's stand-in
+// (`simulated:asset:<symbol>`, lib/simulation/simulated-assets.ts) isn't one.
+export const simulatedAccountName = (value: string) => {
+  const name = value.startsWith(SIMULATED_PREFIX)
     ? value.slice(SIMULATED_PREFIX.length)
     : undefined;
+  return name?.includes(":") ? undefined : name;
+};

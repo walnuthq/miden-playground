@@ -32,6 +32,7 @@ const ProcedureRows = ({
   disabled,
   blockedReason,
   simulatedAccounts,
+  simulatedAssets,
   sandboxDisabledReason,
   onInvoke,
 }: {
@@ -40,6 +41,7 @@ const ProcedureRows = ({
   disabled: boolean;
   blockedReason: ProceduresListProps["blockedReason"];
   simulatedAccounts: ProceduresListProps["simulatedAccounts"];
+  simulatedAssets: ProceduresListProps["simulatedAssets"];
   sandboxDisabledReason: ProceduresListProps["sandboxDisabledReason"];
   onInvoke: ProceduresListProps["onInvoke"];
 }) => {
@@ -53,7 +55,11 @@ const ProcedureRows = ({
   if (sandboxReason !== undefined) {
     const allowed = withAccountIdsAmong(
       args,
-      new Set((simulatedAccounts ?? []).map(({ value }) => value)),
+      new Set(
+        [...(simulatedAccounts ?? []), ...(simulatedAssets ?? [])].map(
+          ({ value }) => value,
+        ),
+      ),
     );
     if (allowed !== args) {
       setArgs(allowed);
@@ -124,6 +130,7 @@ const ProcedureRows = ({
               value={args}
               onChange={setArgs}
               simulatedAccounts={simulatedAccounts}
+              simulatedAssets={simulatedAssets}
               sandboxDisabledReason={sandboxReason}
               disabled={disabled || reason !== undefined || running}
             />
@@ -146,6 +153,9 @@ type ProceduresListProps = {
   // Accounts the caller stages, offered to the `AccountId` arguments above
   // the sandbox's accounts (ProcedureArgumentsForm).
   simulatedAccounts?: { value: string; name: string }[];
+  // Assets the caller issues, offered to the `Asset` arguments, and their
+  // faucets to the `AccountId` ones, above the sandbox's.
+  simulatedAssets?: { value: string; name: string }[];
   // Why a procedure's `AccountId` arguments can't take a sandbox account, if
   // they can't: the sandbox's accounts are listed disabled, with the reason,
   // and one picked before is cleared.
@@ -169,6 +179,7 @@ const ProceduresList = ({
   disabled = false,
   blockedReason,
   simulatedAccounts,
+  simulatedAssets,
   sandboxDisabledReason,
   onInvoke,
 }: ProceduresListProps) => (
@@ -191,6 +202,7 @@ const ProceduresList = ({
             disabled={disabled}
             blockedReason={blockedReason}
             simulatedAccounts={simulatedAccounts}
+            simulatedAssets={simulatedAssets}
             sandboxDisabledReason={sandboxDisabledReason}
             onInvoke={onInvoke}
           />

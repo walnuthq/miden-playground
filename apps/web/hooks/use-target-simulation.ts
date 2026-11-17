@@ -1,28 +1,36 @@
 import type { WebClient as WebClientType } from "@miden-sdk/miden-sdk";
 import { useMiden } from "@miden-sdk/react";
-import type { FaucetLabel } from "@/components/lib/fungible-assets-table";
 import useAccounts from "@/hooks/use-accounts";
 import useDependencyAccounts from "@/hooks/use-dependency-accounts";
 import useScripts from "@/hooks/use-scripts";
+import type { SimulationRun } from "@/hooks/use-simulation";
 import { appendConsoleEntry } from "@/lib/console-log";
 import {
+  changedAssets,
   createSimulatedAccount,
-  MOCK_FAUCET_LABEL,
-  mockFaucet,
-  type SimulationResult,
+  mockFaucetIds,
+  mockFaucetLabels,
+  type SimulatedAsset,
   simulateNote,
   simulateTransactionScript,
   storageChanges,
+  vaultBalances,
 } from "@/lib/simulation/run";
 import { simulatedAccount } from "@/lib/simulation/simulated-accounts";
 import {
-  SIMULATED_ASSET,
-  SIMULATED_TARGET,
-} from "@/lib/simulation/simulated-target";
+  type AssetRow,
+  resolveSimulatedAsset,
+  rowAssets,
+  simulatedAssetSymbol,
+  usedSymbols,
+  vaultChanges,
+} from "@/lib/simulation/simulated-assets";
+import { SIMULATED_TARGET } from "@/lib/simulation/simulated-target";
 import {
   enqueueSimulation,
   withSimulationClient,
 } from "@/lib/simulation/simulation-client";
+import { useSimulationVault } from "@/lib/simulation/simulation-state";
 import type { Account } from "@/lib/types/account";
 import type { Script } from "@/lib/types/script";
 import { cleanExecutionError } from "@/lib/utils/procedure-inputs";
@@ -38,30 +46,29 @@ export type TargetSimulationInputs = {
   // The script's `Word` argument: a felt, a word in hex, or empty.
   argument: string;
   // A note's storage, as felts. A function of the account id splitter, so
-  // that an account field naming the simulated account gets its id, known
-  // only during the run.
+  // that an account field naming the simulated account or a simulated
+  // asset's faucet gets its id, known only during the run.
   noteStorage: (accountIdParts: AccountIdParts) => string[];
-  // The asset the note carries, none when no faucet: a sandbox faucet's id,
-  // or `SIMULATED_ASSET` on the simulated account.
-  faucetAccountId: string;
-  amount: bigint;
+  // The account ids the note's storage names, stand-ins included.
+  noteStorageAccountIds: string[];
+  // The assets the note carries: sandbox faucets, or simulated assets'
+  // stand-ins on the simulated account.
+  noteAssets: AssetRow[];
 };
 
-// A run's result, the account's state it ran from, and the labels of the
-// faucets the app doesn't know (the simulated asset's).
-export type TargetSimulationRun = {
-  result: SimulationResult;
-  account?: Account;
-  faucetLabels?: Record<string, FaucetLabel>;
-};
+export type TargetSimulationRun = SimulationRun;
 
-// The account id splitter, with the simulated account's stand-in replaced by
-// its id: the account built for a run on it. None on a sandbox account.
+// The account id splitter, with the simulated account's and the simulated
+// assets' stand-ins replaced by their ids: the account built for a run on it,
+// the faucets the run made. None on a sandbox account.
 const resolvingAccountIdParts =
-  (simulatedId?: string): AccountIdParts =>
+  (
+    simulatedId?: string,
+    faucetIds = new Map<string, string>(),
+  ): AccountIdParts =>
   (accountId) => {
     if (accountId !== SIMULATED_TARGET) {
-      return accountIdParts(accountId);
+      return accountIdParts(resolveSimulatedAsset(accountId, faucetIds));
     }
     if (!simulatedId) {
       throw new Error(
@@ -71,6 +78,9 @@ const resolvingAccountIdParts =
     return accountIdParts(simulatedId);
   };
 
+const SIMULATED_ONLY =
+  "Simulated assets exist only on the simulated account: pick it as the target, or a sandbox faucet.";
+
 const errorMessage = (error: unknown) =>
   cleanExecutionError(error instanceof Error ? error.message : String(error));
 
@@ -79,27 +89,33 @@ const errorMessage = (error: unknown) =>
 // writes nothing to the store. The simulated account (`SIMULATED_TARGET`)
 // runs on the mock client: a throwaway account holding the script's
 // dependencies' components, built from the storage slots shown, never
-// committed. Every run starts from those slots, at nonce 0.
+// committed. Every run starts from those slots and the vault shown, at nonce
+// 0 (1 with assets, which a seed transaction put in the vault).
 const useTargetSimulation = (script: Script) => {
   const { client } = useMiden();
   const { accounts } = useAccounts();
   const { scripts } = useScripts();
   const dependencyAccounts = useDependencyAccounts(script);
+  // The simulated account's vault: one account, whatever its dependencies.
+  const [vault, setVault] = useSimulationVault(script.id);
   const isNote = script.type === "note";
-  // `faucetId` is the asset's real faucet; `simulatedId` the simulated
-  // account's id, on a run on it.
+  // `assets` are the note's, with real faucets; `simulatedId` the simulated
+  // account's id and `faucetIds` the simulated assets' faucets, on a run on
+  // it.
   const run = ({
     runClient,
     targetAccountId,
-    inputs: { argument, noteStorage, amount },
-    faucetId,
+    inputs: { argument, noteStorage },
+    assets,
     simulatedId,
+    faucetIds,
   }: {
     runClient: WebClientType;
     targetAccountId: string;
     inputs: TargetSimulationInputs;
-    faucetId: string;
+    assets: SimulatedAsset[];
     simulatedId?: string;
+    faucetIds?: Map<string, string>;
   }) =>
     isNote
       ? simulateNote({
@@ -107,9 +123,10 @@ const useTargetSimulation = (script: Script) => {
           targetAccountId,
           script,
           scripts,
-          noteStorage: noteStorage(resolvingAccountIdParts(simulatedId)),
-          faucetAccountId: faucetId,
-          amount,
+          noteStorage: noteStorage(
+            resolvingAccountIdParts(simulatedId, faucetIds),
+          ),
+          assets,
           noteArgument: argument,
         })
       : simulateTransactionScript({
@@ -123,55 +140,76 @@ const useTargetSimulation = (script: Script) => {
     inputs: TargetSimulationInputs,
   ): Promise<TargetSimulationRun> => {
     if (
-      inputs.faucetAccountId !== "" &&
-      inputs.faucetAccountId !== SIMULATED_ASSET
+      inputs.noteAssets.some(
+        ({ faucetId }) => simulatedAssetSymbol(faucetId) === undefined,
+      )
     ) {
       // Any other faucet would crash the mock client.
       return {
         result: {
           ok: false,
           error:
-            "The simulated account can only receive the simulated asset: pick it, or no asset.",
+            "The simulated account can only receive simulated assets: pick one, or no asset.",
         },
       };
     }
     let account: Account | undefined;
-    let faucetId = "";
+    let faucetIds = new Map<string, string>();
     try {
       const result = await withSimulationClient(async (mockClient) => {
+        faucetIds = await mockFaucetIds(
+          mockClient,
+          usedSymbols([
+            ...vault.map(({ faucetId }) => faucetId),
+            ...inputs.noteAssets.map(({ faucetId }) => faucetId),
+            ...inputs.noteStorageAccountIds,
+          ]),
+        );
+        const resolve = (rows: AssetRow[]) =>
+          rowAssets(rows).map(({ faucetId, amount }) => ({
+            faucetId: resolveSimulatedAsset(faucetId, faucetIds),
+            amount,
+          }));
         const components = dependencyAccounts.accounts.map(
           ({ script, storageSlots }) => ({ script, storageSlots }),
         );
         account = await simulatedAccount(
           mockClient,
-          `target:${JSON.stringify(
+          `target:${JSON.stringify([
             components.map(({ script, storageSlots }) => [
               script.commitment,
               storageSlots,
             ]),
-          )}`,
+            rowAssets(vault).map(({ faucetId, amount }) => [
+              faucetId,
+              amount.toString(),
+            ]),
+          ])}`,
           () =>
             createSimulatedAccount({
               client: mockClient,
               name: "Simulated account",
               components,
+              assets: resolve(vault),
             }),
         );
-        if (inputs.faucetAccountId === SIMULATED_ASSET) {
-          faucetId = await mockFaucet(mockClient);
-        }
         return run({
           runClient: mockClient,
           targetAccountId: account.id,
           inputs,
-          faucetId,
+          assets: resolve(inputs.noteAssets),
           simulatedId: account.id,
+          faucetIds,
         });
       });
       return {
         result,
         account,
-        faucetLabels: faucetId ? { [faucetId]: MOCK_FAUCET_LABEL } : undefined,
+        faucetLabels: mockFaucetLabels(faucetIds),
+        vaultChanges:
+          result.ok && result.executedTransaction
+            ? vaultChanges(vaultBalances(result.executedTransaction), faucetIds)
+            : undefined,
       };
     } catch (error) {
       // A crash or a timeout of the mock client, which was reset.
@@ -189,15 +227,13 @@ const useTargetSimulation = (script: Script) => {
         account,
       };
     }
-    if (inputs.faucetAccountId === SIMULATED_ASSET) {
-      return {
-        result: {
-          ok: false,
-          error:
-            "The simulated asset exists only on the simulated account: pick another asset.",
-        },
-        account,
-      };
+    if (
+      usedSymbols([
+        ...inputs.noteAssets.map(({ faucetId }) => faucetId),
+        ...inputs.noteStorageAccountIds,
+      ]).length > 0
+    ) {
+      return { result: { ok: false, error: SIMULATED_ONLY }, account };
     }
     try {
       return {
@@ -205,7 +241,7 @@ const useTargetSimulation = (script: Script) => {
           runClient: client,
           targetAccountId: inputs.targetAccountId,
           inputs,
-          faucetId: inputs.faucetAccountId,
+          assets: rowAssets(inputs.noteAssets),
         }),
         account,
       };
@@ -227,6 +263,7 @@ const useTargetSimulation = (script: Script) => {
           storageChanges(result.executedTransaction),
         );
         const count = values.length + entries.length;
+        const assets = changedAssets(result.executedTransaction, account);
         appendConsoleEntry(script.id, {
           level: "success",
           text: `Simulated ${script.name} on ${
@@ -235,6 +272,10 @@ const useTargetSimulation = (script: Script) => {
             count === 0
               ? "no storage change"
               : `${count} storage change${count === 1 ? "" : "s"}`
+          }${
+            assets > 0
+              ? `, ${assets} vault change${assets === 1 ? "" : "s"}`
+              : ""
           }.`,
         });
       } else {
@@ -246,7 +287,7 @@ const useTargetSimulation = (script: Script) => {
       }
       return outcome;
     });
-  return { accounts, dependencyAccounts, simulate };
+  return { accounts, dependencyAccounts, vault, setVault, simulate };
 };
 
 export default useTargetSimulation;

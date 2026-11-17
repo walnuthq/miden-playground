@@ -107,7 +107,7 @@ describe("encodeProcedureArguments", () => {
         {
           name: "param_2",
           type: "Asset",
-          value: JSON.stringify({ prefix: "10", suffix: "21", amount: "100" }),
+          value: JSON.stringify({ prefix: "10", suffix: "37", amount: "100" }),
         },
       ],
     );

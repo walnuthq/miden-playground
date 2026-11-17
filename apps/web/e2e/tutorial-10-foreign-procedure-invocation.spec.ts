@@ -74,7 +74,7 @@ test("tutorial 10: foreign procedure invocation", async ({ page }) => {
     await expect(dialog.getByText("on a throwaway account")).toBeVisible({
       timeout: TRANSACTION_TIMEOUT,
     });
-    await dialog.getByRole("button", { name: "Apply to storage" }).click();
+    await dialog.getByRole("button", { name: "Apply to state" }).click();
     await expect(dialog).toBeHidden();
     await expect(
       editorConsole.getByLabel("count_reader::count_reader::count value", {

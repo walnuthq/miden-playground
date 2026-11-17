@@ -26,12 +26,16 @@ export type SimulatedTransaction = {
   // instead of showing an address.
   throwaway: boolean;
   // Names the assets of faucets the app doesn't know, by faucet id: the
-  // simulated asset, issued by a faucet of the mock client.
+  // simulated assets, issued by faucets of the mock client.
   faucetLabels?: Record<string, FaucetLabel>;
+  // The final balances of the vault's simulated assets the transaction
+  // changed, by stand-in: what "Apply to state" sets the vault rows to.
+  vaultChanges?: { faucetId: string; amount: bigint }[];
 };
 
 // A simulated transaction's effects: the transaction dialog's preview without
-// its Submit. `onApply` carries the resulting storage over to the next runs.
+// its Submit. `onApply` carries the resulting storage and vault over to the
+// next runs.
 const SimulationResultDialog = ({
   simulation,
   onClose,
@@ -82,7 +86,7 @@ const SimulationResultDialog = ({
               onClose();
             }}
           >
-            Apply to storage
+            Apply to state
           </Button>
         )}
       </DialogFooter>
