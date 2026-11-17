@@ -23,6 +23,7 @@ import { simulationBlockedReason } from "@/lib/simulation/blocked";
 import { recordStaging } from "@/lib/simulation/simulation-client";
 import type { Account } from "@/lib/types/account";
 import type { StorageSlot } from "@/lib/types/component";
+import type { NoteType } from "@/lib/types/note";
 import type { MidenInput, ProcedureExport, Script } from "@/lib/types/script";
 import { fromBase64 } from "@/lib/utils";
 import {
@@ -435,6 +436,9 @@ const targetErrorMessage = (error: unknown) => {
 export const simulateNote = async ({
   client,
   targetAccountId,
+  senderAccountId = targetAccountId,
+  noteType = "public",
+  isNetworkNote = false,
   script,
   scripts,
   noteStorage,
@@ -443,6 +447,12 @@ export const simulateNote = async ({
 }: {
   client: WebClientType;
   targetAccountId: string;
+  // The note's sender, its type and whether it's a network note, as the
+  // Create Note dialog would create it. The Simulate tab's note is the
+  // target's own, public, regular.
+  senderAccountId?: string;
+  noteType?: NoteType;
+  isNetworkNote?: boolean;
   script: Script;
   // The workspace's scripts, for a built-in note script's dependencies.
   scripts: Script[];
@@ -455,11 +465,11 @@ export const simulateNote = async ({
   try {
     const note = await clientCreateNoteFromScript({
       client,
-      senderAccountId: targetAccountId,
+      senderAccountId,
       recipientAccountId: targetAccountId,
-      isNetworkNote: false,
+      isNetworkNote,
       script,
-      type: "public",
+      type: noteType,
       assets,
       noteStorage,
       scripts,
@@ -481,6 +491,34 @@ export const simulateNote = async ({
     };
   } catch (error) {
     return { ok: false, error: targetErrorMessage(error) };
+  }
+};
+
+// A run on one of the sandbox's accounts, in the app's client, with the
+// account's state in app state it ran from: what the result dialog shows the
+// changes against. Execution only: nothing is written to the store.
+export const runOnSandboxAccount = async ({
+  client,
+  accounts,
+  accountId,
+  run,
+}: {
+  client: WebClientType | null | undefined;
+  accounts: Account[];
+  accountId: string;
+  run: (client: WebClientType) => Promise<SimulationResult>;
+}): Promise<{ result: SimulationResult; account?: Account }> => {
+  const account = accounts.find(({ id }) => id === accountId);
+  if (!client || !account) {
+    return {
+      result: { ok: false, error: "The client or the account isn't ready." },
+      account,
+    };
+  }
+  try {
+    return { result: await run(client), account };
+  } catch (error) {
+    return { result: { ok: false, error: errorMessage(error) }, account };
   }
 };
 

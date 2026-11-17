@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@workspace/ui/components/dialog";
+import type { ReactNode } from "react";
 import type { FaucetLabel } from "@/components/lib/fungible-assets-table";
 import TransactionEffects, {
   type TransactionBaseline,
@@ -35,15 +36,20 @@ export type SimulatedTransaction = {
 
 // A simulated transaction's effects: the transaction dialog's preview without
 // its Submit. `onApply` carries the resulting storage and vault over to the
-// next runs.
+// next runs. `title` and `description` replace the simulation's, for another
+// kind of run (the Create Note dialog's consumption preview).
 const SimulationResultDialog = ({
   simulation,
   onClose,
   onApply,
+  title,
+  description,
 }: {
   simulation?: SimulatedTransaction;
   onClose: () => void;
   onApply?: (simulation: SimulatedTransaction) => void;
+  title?: ReactNode;
+  description?: ReactNode;
 }) => (
   <Dialog
     open={simulation !== undefined}
@@ -53,10 +59,16 @@ const SimulationResultDialog = ({
         tables (docs/claude/phone-layout.md). */}
     <DialogContent className="max-h-[calc(100dvh-2rem)] grid-cols-[minmax(0,1fr)] overflow-y-auto sm:max-w-160">
       <DialogHeader>
-        <DialogTitle>Simulation of {simulation?.name}</DialogTitle>
+        <DialogTitle>
+          {title ?? <>Simulation of {simulation?.name}</>}
+        </DialogTitle>
         <DialogDescription>
-          Nothing was submitted: the transaction ran locally
-          {simulation?.throwaway ? ", on a throwaway account" : ""}.
+          {description ?? (
+            <>
+              Nothing was submitted: the transaction ran locally
+              {simulation?.throwaway ? ", on a throwaway account" : ""}.
+            </>
+          )}
         </DialogDescription>
       </DialogHeader>
       {simulation && (

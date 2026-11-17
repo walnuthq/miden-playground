@@ -88,3 +88,56 @@ export const closePanel = async (page: Page, step: number) => {
   await expect(bar).toBeVisible();
   await expect(bar).toContainText(new RegExp(`Step ${step} of \\d+`));
 };
+
+// Runs `check` with the page at a 320 px phone's size, then restores it: for
+// what only the desktop specs reach (a dialog that needs Bread Wallet, which
+// the mobile projects don't load). The app lays out for a phone by width
+// alone (`useIsMobile`), so the page switches layouts as it would on one.
+// A fixed dialog's boxes are the screen's whatever the page's scroll: in a
+// desktop spec resized to a phone, what only a desktop browser has (toasts
+// shown before the resize keep their desktop place, the header's Bread Wallet
+// button, which a phone never shows) can widen and scroll the page, which
+// `expectWithinWidth`'s ancestor checks would count against the dialog.
+export const expectWithinDialog = async (locator: Locator, dialog: Locator) => {
+  await expect(locator).toBeVisible();
+  const width = screenWidth(locator.page());
+  const box = async (target: Locator) => {
+    const rect = await target.boundingBox();
+    if (!rect) {
+      throw new Error("no box");
+    }
+    return rect;
+  };
+  await expect
+    .poll(
+      async () => {
+        const outer = await box(dialog);
+        const inner = await box(locator);
+        return (
+          outer.x >= 0 &&
+          outer.x + outer.width <= width + 1 &&
+          inner.x >= outer.x - 1 &&
+          inner.x + inner.width <= outer.x + outer.width + 1
+        );
+      },
+      { message: "the element is off its dialog's or the screen's edge" },
+    )
+    .toBe(true);
+};
+
+// Runs `check` with the page at a 320 px phone's size, then restores it: for
+// what only the desktop specs reach (a dialog that needs Bread Wallet, which
+// the mobile projects don't load). The app lays out for a phone by width
+// alone (`useIsMobile`), so the page switches layouts as it would on one.
+// Check a dialog there with `expectWithinDialog`.
+export const atPhoneWidth = async (page: Page, check: () => Promise<void>) => {
+  const viewport = page.viewportSize();
+  await page.setViewportSize({ width: 320, height: 740 });
+  try {
+    await check();
+  } finally {
+    if (viewport) {
+      await page.setViewportSize(viewport);
+    }
+  }
+};

@@ -84,6 +84,14 @@ test("tutorial 9: network transactions", async ({ page, bread }) => {
     const dialog = page.getByRole("dialog").filter({ hasText: "Create Note" });
     await pickAccount(dialog, "Network Counter");
     await selectOption(page, "Script", "increment-note");
+    // The example's precompiled note has no storage schema: raw felts, none
+    // added, and no typed fields to switch from.
+    await expect(
+      dialog.getByRole("button", { name: "Add note storage" }),
+    ).toBeVisible();
+    await expect(
+      dialog.getByRole("switch", { name: "Enter as raw felts" }),
+    ).toHaveCount(0);
     const networkNote = dialog.getByRole("switch", { name: /Network note/ });
     await networkNote.click();
     await expect(networkNote).toBeChecked();

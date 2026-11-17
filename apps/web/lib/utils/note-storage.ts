@@ -1,8 +1,9 @@
 // A note's storage from its package's note storage schema: one
 // typed field per schema field, flattened to the felts the note's storage
 // holds. No SDK import: the unit tests run on plain node.
-import type { MidenType, NoteStorageField } from "../types/script.ts";
+import type { MidenType, NoteStorageField, Script } from "../types/script.ts";
 import {
+  isFelt,
   type ProcedureArguments,
   type ProcedureParam,
   procedureArgumentError,
@@ -112,3 +113,83 @@ export const noteStorageFelts = ({
       throw new Error(`Unsupported note storage field "${name}".`);
     })
     .map(String);
+
+// The typed fields the Create Note dialog shows for a script, or nothing for
+// raw felts: a script compiled before api-compile returned schemas, one whose
+// schema has a field the form can't type, and a draft or a script whose last
+// compile failed (its schema may no longer be its source's). Tutorial 8's
+// step 4 words its instructions on the same condition.
+export const createNoteStorageParams = ({
+  status,
+  metadata,
+}: Pick<Script, "status" | "metadata">) => {
+  const schema = metadata?.noteStorage;
+  return status === "compiled" && schema
+    ? noteStorageParams(schema.fields)
+    : undefined;
+};
+
+// Raw felts are ready when each one is a felt.
+export const rawNoteStorageReady = (felts: string[]) => felts.every(isFelt);
+
+// The raw felts the typed values stand for, to prefill the raw fields when
+// the user switches to them: none when a typed value is missing or invalid.
+export const typedToRawNoteStorage = ({
+  params,
+  args,
+  accountIdParts,
+}: {
+  params: ProcedureParam[];
+  args: ProcedureArguments;
+  accountIdParts: (accountId: string) => { prefix: bigint; suffix: bigint };
+}): string[] => {
+  if (!noteStorageReady(params, args)) {
+    return [];
+  }
+  try {
+    return noteStorageFelts({ params, args, accountIdParts });
+  } catch {
+    return [];
+  }
+};
+
+// A note's storage as a form holds it: typed values, raw felts, and whether
+// the user chose raw felts over the typed fields.
+export type NoteStorageInput = {
+  args: ProcedureArguments;
+  felts: string[];
+  raw: boolean;
+};
+
+// Where every script starts, and what a change of script resets to: another
+// script's values mean nothing to this one's fields.
+export const emptyNoteStorage = (): NoteStorageInput => ({
+  args: {},
+  felts: [],
+  raw: false,
+});
+
+// The felts a note is created with: the typed fields flattened when they're
+// shown, else the raw felts as entered.
+export const noteStorageInputFelts = ({
+  params,
+  input,
+  accountIdParts,
+}: {
+  params: ProcedureParam[] | undefined;
+  input: NoteStorageInput;
+  accountIdParts: (accountId: string) => { prefix: bigint; suffix: bigint };
+}) =>
+  params && !input.raw
+    ? noteStorageFelts({ params, args: input.args, accountIdParts })
+    : input.felts;
+
+// Whether the note's storage can be sent: every typed field valid, or every
+// raw felt.
+export const noteStorageInputReady = (
+  params: ProcedureParam[] | undefined,
+  input: NoteStorageInput,
+) =>
+  params && !input.raw
+    ? noteStorageReady(params, input.args)
+    : rawNoteStorageReady(input.felts);

@@ -2,9 +2,8 @@ import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { Spinner } from "@workspace/ui/components/spinner";
-import { Plus, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import ProcedureArgumentsForm from "@/components/procedures/procedure-arguments-form";
+import NoteStorageFields from "@/components/procedures/note-storage-fields";
 import VaultEditor from "@/components/procedures/vault-editor";
 import DependencyAccounts from "@/components/script/simulate/dependency-accounts";
 import { notReady } from "@/components/script/simulate/not-ready";
@@ -210,90 +209,25 @@ const TargetSimulation = ({
         </div>
         {isNote && (
           <>
-            {noteParams ? (
-              <div className="grid content-start gap-1.5 sm:col-span-2">
-                <Label>Note storage</Label>
-                {noteParams.length === 0 ? (
-                  <p className="text-xs text-muted-foreground">
-                    This note has no storage.
-                  </p>
-                ) : (
-                  <ProcedureArgumentsForm
-                    idPrefix={`${idPrefix}-note`}
-                    params={noteParams}
-                    value={noteArguments}
-                    onChange={setNoteArguments}
-                    simulatedAccounts={
-                      simulatedPicked ? SIMULATED_TARGET_OPTIONS : undefined
-                    }
-                    simulatedAssets={
-                      simulatedPicked ? simulatedAssets : undefined
-                    }
-                  />
-                )}
-              </div>
-            ) : (
-              <div className="grid content-start gap-1.5">
-                <Label>Note storage</Label>
-                {noteStorageSchema && (
-                  <p className="text-xs text-muted-foreground">
-                    Felts, in the order of the note's fields:{" "}
-                    {noteStorageSchema.fields
-                      .map(
-                        ({ name, type, width }) =>
-                          `${name} (${type}${width === undefined ? "" : `, ${width} felt${width === 1 ? "" : "s"}`})`,
-                      )
-                      .join(", ")}
-                    .
-                  </p>
-                )}
-                {simulatedPicked && (
-                  <p className="text-xs text-muted-foreground">
-                    The simulated account's id is known only during the run: a
-                    note that names its target needs a package with a storage
-                    schema.
-                  </p>
-                )}
-                {noteStorage.map((item, index) => (
-                  // biome-ignore lint/suspicious/noArrayIndexKey: rows have no stable id, only their position.
-                  <div key={index} className="flex items-center gap-1.5">
-                    <Input
-                      aria-label={`Note storage item ${index + 1}`}
-                      className="font-mono"
-                      placeholder="Felt"
-                      value={item}
-                      aria-invalid={!isFelt(item)}
-                      onChange={(event) =>
-                        setNoteStorage(
-                          noteStorage.with(index, event.target.value),
-                        )
-                      }
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon-sm"
-                      aria-label={`Remove note storage item ${index + 1}`}
-                      onClick={() =>
-                        setNoteStorage(noteStorage.toSpliced(index, 1))
-                      }
-                    >
-                      <Trash2 />
-                    </Button>
-                  </div>
-                ))}
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  className="justify-self-start"
-                  onClick={() => setNoteStorage([...noteStorage, ""])}
-                >
-                  <Plus />
-                  Add storage item
-                </Button>
-              </div>
-            )}
+            <NoteStorageFields
+              idPrefix={idPrefix}
+              schema={noteStorageSchema ?? undefined}
+              params={noteParams}
+              args={noteArguments}
+              onArgsChange={setNoteArguments}
+              felts={noteStorage}
+              onFeltsChange={setNoteStorage}
+              simulatedAccounts={
+                simulatedPicked ? SIMULATED_TARGET_OPTIONS : undefined
+              }
+              simulatedAssets={simulatedPicked ? simulatedAssets : undefined}
+              rawNote={
+                simulatedPicked
+                  ? "The simulated account's id is known only during the run: a note that names its target needs a package with a storage schema."
+                  : undefined
+              }
+              typedClassName="sm:col-span-2"
+            />
             <div className="grid content-start gap-1.5 sm:col-span-2">
               <Label>
                 Note assets

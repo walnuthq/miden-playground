@@ -1,6 +1,8 @@
 import type { Page } from "@playwright/test";
 import { expect, test } from "./bread";
 import { COMPILED } from "./editor";
+import { atPhoneWidth, expectWithinDialog } from "./mobile/layout";
+import { storeRecordCounts } from "./store";
 import {
   logBrowserErrors,
   nextStep,
@@ -111,14 +113,62 @@ test("tutorial 11: your first smart contract and custom note", async ({
   await test.step("6. create the increment note", async () => {
     await bread.connect(page);
     await panel.openLink("notes page", /\/notes$/);
+    const dialog = page.getByRole("dialog").filter({ hasText: "Create Note" });
+    // The dialog and its preview fit a 320 px phone. Opened at that size: a
+    // resize across the phone breakpoint remounts the dialog, empty.
+    await atPhoneWidth(page, async () => {
+      await page.getByRole("button", { name: "Add note" }).click();
+      await page.getByRole("menuitem", { name: "Create note" }).click();
+      await pickAccount(dialog, "My Counter");
+      await selectOption(page, "Script", "increment-note");
+      const previewButton = dialog.getByRole("button", {
+        name: "Preview consumption",
+      });
+      await previewButton.scrollIntoViewIfNeeded();
+      await expectWithinDialog(previewButton, dialog);
+      await previewButton.click();
+      const preview = page
+        .getByRole("dialog")
+        .filter({ hasText: "Consumption preview of increment-note" });
+      await expect(preview.getByText("count_map").first()).toBeVisible({
+        timeout: TRANSACTION_TIMEOUT,
+      });
+      const close = preview.getByRole("button", { name: "Close" }).first();
+      await close.scrollIntoViewIfNeeded();
+      await expectWithinDialog(close, preview);
+      await close.click();
+      await expect(preview).toBeHidden();
+      await dialog.getByRole("button", { name: "Cancel" }).click();
+      await expect(dialog).toBeHidden();
+    });
     await page.getByRole("button", { name: "Add note" }).click();
     await page.getByRole("menuitem", { name: "Create note" }).click();
-    const dialog = page.getByRole("dialog").filter({ hasText: "Create Note" });
     await pickAccount(dialog, "My Counter");
     await selectOption(page, "Script", "increment-note");
     await expect(
       dialog.getByRole("switch", { name: /Network note/ }),
     ).not.toBeChecked();
+    // The note declares no storage struct, so it has no storage schema: raw
+    // felts, none added.
+    await expect(
+      dialog.getByRole("button", { name: "Add note storage" }),
+    ).toBeVisible();
+    // The preview runs the note on the counter, locally: the count goes from
+    // 0 to 1, nothing is submitted or stored.
+    const before = await storeRecordCounts(page);
+    await dialog.getByRole("button", { name: "Preview consumption" }).click();
+    const preview = page
+      .getByRole("dialog")
+      .filter({ hasText: "Consumption preview of increment-note" });
+    await expect(
+      preview.getByRole("cell", { name: "count_map", exact: true }),
+    ).toBeVisible({ timeout: TRANSACTION_TIMEOUT });
+    await expect(preview.getByRole("button", { name: "Submit" })).toHaveCount(
+      0,
+    );
+    await preview.getByRole("button", { name: "Close" }).first().click();
+    await expect(preview).toBeHidden();
+    expect(await storeRecordCounts(page)).toEqual(before);
     const request = await bread.approve(
       () => dialog.getByRole("button", { name: "Create", exact: true }).click(),
       { timeout: TRANSACTION_TIMEOUT },
