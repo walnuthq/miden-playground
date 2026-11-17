@@ -33,4 +33,25 @@ describe("the embedded count-reader package", () => {
       counterAccountScript.commitment,
     ]);
   });
+
+  test("names its parameters as the WIT it embeds does", () => {
+    // The WIT is in the package as text (its `wit` section):
+    // `copy-count: func(counter-account-id: account-id)`. The function is
+    // the export path's last segment.
+    const wit = Buffer.from(masp, "base64").toString("latin1");
+    const exports = [
+      ...source.matchAll(
+        /path: '[^']*::"?([a-z0-9-]+)"?',[\s\S]*?parameters: (\[[^\]]*\])/g,
+      ),
+    ];
+    assert.equal(exports.length, 1);
+    for (const [, name, parameters] of exports) {
+      const list = [
+        ...(parameters ?? "").matchAll(/name: "([^"]+)", type: "([^"]+)"/g),
+      ]
+        .map(([, name, type]) => `${name}: ${type}`)
+        .join(", ");
+      assert.ok(wit.includes(`${name}: func(${list})`), `${name}(${list})`);
+    }
+  });
 });

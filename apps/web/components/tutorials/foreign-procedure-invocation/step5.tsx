@@ -70,13 +70,9 @@ const Step5: TutorialStep = {
           <strong>Counter Contract</strong> account as the procedure's only
           argument,{" "}
           <strong>
-            <InlineCode>param_0</InlineCode>
-          </strong>
-          : the{" "}
-          <strong>
             <InlineCode>counter_account_id</InlineCode>
-          </strong>{" "}
-          of the Rust code. Then click the <em>"Preview"</em> button.
+          </strong>
+          , named as in the Rust code. Then click the <em>"Preview"</em> button.
         </p>
         <p>
           The Playground executes a Transaction against your{" "}

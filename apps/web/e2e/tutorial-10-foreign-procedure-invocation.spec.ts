@@ -114,7 +114,7 @@ test("tutorial 10: foreign procedure invocation", async ({ page }) => {
       .getByRole("dialog")
       .filter({ hasText: "Invoke Procedure" });
     // Step 5 names the argument: the copy and the dialog must agree.
-    await expect(dialog.getByText("param_0")).toBeVisible();
+    await expect(dialog.getByText("counter_account_id")).toBeVisible();
     // The Count Reader isn't a counter: copy_count fails as it executes, and
     // the dialog stays on the arguments with the error.
     await dialog.getByRole("button", { name: "Select account" }).click();
@@ -123,7 +123,7 @@ test("tutorial 10: foreign procedure invocation", async ({ page }) => {
     await expect(page.getByText("Transaction failed.")).toBeVisible({
       timeout: TRANSACTION_TIMEOUT,
     });
-    await expect(dialog.getByText("param_0")).toBeVisible();
+    await expect(dialog.getByText("counter_account_id")).toBeVisible();
     await dialog.getByRole("button", { name: "My Count Reader" }).click();
     await page.getByRole("menuitemradio", { name: "Counter Contract" }).click();
     await dialog.getByRole("button", { name: "Preview", exact: true }).click();

@@ -41,8 +41,12 @@ const ExportsTable = ({ script }: { script: Script }) => (
                 )}
               </div>
             </TableCell>
-            <TableCell>
-              <pre>{procedureSignature(procedureExport)}</pre>
+            {/* Wraps: with its parameters' names, a signature is wider than
+                a phone. */}
+            <TableCell className="whitespace-normal">
+              <pre className="whitespace-pre-wrap wrap-anywhere">
+                {procedureSignature(procedureExport)}
+              </pre>
             </TableCell>
           </TableRow>
         ))}

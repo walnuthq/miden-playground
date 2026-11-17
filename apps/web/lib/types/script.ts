@@ -89,6 +89,13 @@ export type ProcedureExport = {
   // (`simulationBlockedReason`), whose foreign account the mock client can't
   // serve.
   callsForeign?: boolean | null;
+  // The parameters' names and WIT types, kebab case, in the signature's
+  // order, from the WIT the package embeds (api-compile's `parameters`),
+  // stored with each export like `readOnly`. Missing when api-compile found
+  // none (a transaction script), from built-ins and from packages compiled
+  // before it reported them: the forms then name them `param_N`
+  // (`procedureParams`). Only the names are used.
+  parameters?: { name: string; type: string }[];
 };
 
 export type Export = { Procedure: ProcedureExport };
@@ -252,6 +259,10 @@ export type Package = {
       version: string;
     }[];
   };
+  // The registry's parameter names by export path (`ProcedureExport`'s
+  // `parameters`): null or missing for a package stored before it reported
+  // them.
+  parameters?: Record<string, { name: string; type: string }[]> | null;
   createdAt: string;
   updatedAt: string;
 };

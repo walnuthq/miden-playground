@@ -6,7 +6,11 @@ import {
   startTutorial,
   tutorialPanel,
 } from "../tutorial";
-import { closePanel, expectNoHorizontalOverflow } from "./layout";
+import {
+  closePanel,
+  expectNoHorizontalOverflow,
+  expectWithinWidth,
+} from "./layout";
 
 // The collapsed console: its header bar only (as in script-layout.spec.ts).
 const COLLAPSED_HEIGHT = 52;
@@ -51,5 +55,23 @@ test("mobile: a tutorial's read-only script fits the screen", async ({
   await expect(
     editorConsole(page).getByRole("button", { name: "Invoke copy_count" }),
   ).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+  // The argument's field carries the parameter's name from the WIT, the
+  // longest of the tutorials' (`counter_account_id`).
+  await expectWithinWidth(
+    editorConsole(page)
+      .locator("label")
+      .filter({ hasText: /^counter_account_id/ }),
+  );
+  await expectWithinWidth(
+    editorConsole(page).getByRole("button", { name: "Select account" }),
+  );
+  // The Manifest tab's signature line names it too, wrapped to fit.
+  await page.getByRole("tab", { name: "Manifest" }).click();
+  await expectWithinWidth(
+    page
+      .getByTestId("editor")
+      .getByText("fn copy_count(counter_account_id: AccountId)"),
+  );
   await expectNoHorizontalOverflow(page);
 });

@@ -372,6 +372,17 @@ test("script: simulate an account component", async ({ page }) => {
       timeout: TRANSACTION_TIMEOUT,
     });
     await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
+    // The argument and the signature are named from the package's WIT.
+    await expect(
+      procedureArguments(page, "copy_count")
+        .locator("label")
+        .filter({ hasText: /^counter_account_id/ }),
+    ).toBeVisible();
+    await expect(
+      procedureRow(page, "copy_count").getByText(
+        "fn copy_count(counter_account_id: AccountId)",
+      ),
+    ).toBeVisible();
     // The workspace's `counter-account` was edited since: the dependency
     // resolves to the package the web app embeds, with its storage schema.
     const foreign = foreignAccount(page, "counter-account");
@@ -413,7 +424,7 @@ test("script: simulate an account component", async ({ page }) => {
   await test.step("a crash of the mock client is reported and recovered", async () => {
     // As if api-compile couldn't tell (`callsForeign` missing): the sandbox
     // account can be picked, and the mock client panics on it.
-    await compileWithoutCallsForeign(page);
+    await compileWithout(page, "callsForeign");
     await copyCountAccountDropdown(page).click();
     await expect(page.getByRole("menu").getByText(SANDBOX_REASON)).toHaveCount(
       0,
@@ -488,6 +499,28 @@ test("script: simulate an account component", async ({ page }) => {
     await page.getByRole("link", { name: "p2id-note" }).first().click();
     await expect(page).toHaveURL(/\/scripts\//);
     await receiveSimulatedAsset(page);
+  });
+
+  await test.step("a compile without names falls back to positions", async () => {
+    // As if api-compile found no names (an older api-compile, a package
+    // without its WIT): the argument is `param_0`, the signature types only.
+    await page
+      .getByRole("link", { name: "Scripts", exact: true })
+      .first()
+      .click();
+    await expect(page).toHaveURL(/\/scripts$/);
+    await page.getByRole("link", { name: "count-reader" }).first().click();
+    await expect(page).toHaveURL(/\/scripts\/[0-9a-z_-]+$/);
+    await compileWithout(page, "parameters");
+    await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
+    await expect(
+      procedureArguments(page, "copy_count")
+        .locator("label")
+        .filter({ hasText: /^param_0/ }),
+    ).toBeVisible();
+    await expect(
+      procedureRow(page, "copy_count").getByText("fn copy_count(AccountId)"),
+    ).toBeVisible();
   });
 
   await test.step("a script runs against the workspace's dependency", async () => {
@@ -615,11 +648,21 @@ const selectCopyCountAccount = async (page: Page, name: string) => {
   await page.getByRole("menuitemradio", { name, exact: true }).click();
 };
 
-// Compiles the open script with `callsForeign` stripped from the response's
-// exports, as if api-compile couldn't tell: the Simulate tab doesn't restrict
-// the account arguments then, and a sandbox account reaches the mock client.
-const compileWithoutCallsForeign = async (page: Page) => {
+// Compiles the open script with a key stripped from the response's exports,
+// as if api-compile hadn't reported it: without `callsForeign` the Simulate
+// tab doesn't restrict the account arguments, and a sandbox account reaches
+// the mock client; without `parameters` the arguments are named `param_N`.
+const compileWithout = async (
+  page: Page,
+  key: "callsForeign" | "parameters",
+) => {
   const compile = /\/scripts\/[0-9a-z_-]+$/;
+  // The log may already show an earlier compile's line, which
+  // `compileScript` accepts: unroute only once this one was answered.
+  let resolve = () => {};
+  const answered = new Promise<void>((done) => {
+    resolve = done;
+  });
   await page.route(compile, async (route) => {
     if (route.request().method() !== "PATCH") {
       return route.continue();
@@ -627,12 +670,14 @@ const compileWithoutCallsForeign = async (page: Page) => {
     const response = await route.fetch();
     const body = await response.json();
     for (const { Procedure } of body.package.exports) {
-      delete Procedure.callsForeign;
+      delete Procedure[key];
     }
     await route.fulfill({ response, json: body });
+    resolve();
   });
   try {
     await compileScript(page);
+    await answered;
   } finally {
     await page.unroute(compile);
   }

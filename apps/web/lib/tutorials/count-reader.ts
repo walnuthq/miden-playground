@@ -81,6 +81,9 @@ const countReader: Script = {
       // What api-compile reports for this package: it reads the Counter
       // Contract's count through FPI.
       callsForeign: true,
+      // The WIT's, as api-compile reports them: count-reader.test.ts checks
+      // them against the WIT the package embeds.
+      parameters: [{ name: "counter-account-id", type: "account-id" }],
     },
   ],
 };
