@@ -128,6 +128,13 @@ export const procedureArgumentsReady = (
       type !== undefined && procedureArgumentError(args[name]) === undefined,
   );
 
+// What a fungible asset's id adds to its faucet's suffix: composition
+// fungible, version 1 (`ASSET_METADATA_FUNGIBLE`, miden-standards 0.17.1
+// `asm/standards/assets/fungible_asset.masm`). The SDK's
+// `FungibleAsset.vaultKey()` gives the same. Any other value is an id the
+// vault doesn't hold: a procedure reading the balance gets zero.
+const FUNGIBLE_ASSET_METADATA = 0x11n;
+
 // The inputs `formatProcedureInputs` (lib/utils/script.ts) pushes, in the
 // encoding the account page's Invoke dialog uses. `accountIdParts` splits an
 // account id into its two felts (`accountIdParts` in lib/web-client.ts).
@@ -164,7 +171,7 @@ export const encodeProcedureArguments = ({
           type,
           value: JSON.stringify({
             prefix: prefix.toString(),
-            suffix: (suffix + 1n).toString(),
+            suffix: (suffix + FUNGIBLE_ASSET_METADATA).toString(),
             amount: argument.amount.trim() || "0",
           }),
         };

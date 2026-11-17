@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import { describe, test } from "node:test";
 import type { ProcedureExport, Script } from "../types/script.ts";
 import { SIMULATED_PREFIX } from "./foreign-accounts.ts";
+import { simulatedAssetValue } from "./simulated-assets.ts";
 import {
-  SIMULATED_ASSET,
   SIMULATED_TARGET,
   simulatedTargetMissing,
 } from "./simulated-target.ts";
@@ -164,7 +164,8 @@ describe("simulatedTargetMissing", () => {
 describe("stand-ins", () => {
   test("the target's and the asset's are distinct simulated values", () => {
     assert.ok(SIMULATED_TARGET.startsWith(SIMULATED_PREFIX));
-    assert.ok(SIMULATED_ASSET.startsWith(SIMULATED_PREFIX));
-    assert.notEqual(SIMULATED_TARGET, SIMULATED_ASSET);
+    const asset = simulatedAssetValue("TARGET");
+    assert.ok(asset.startsWith(SIMULATED_PREFIX));
+    assert.notEqual(SIMULATED_TARGET, asset);
   });
 });

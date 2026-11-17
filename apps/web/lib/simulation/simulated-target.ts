@@ -9,11 +9,10 @@ import { SIMULATED_PREFIX } from "./foreign-accounts.ts";
 // tests run on plain node.
 
 // What the form holds when the simulated account is picked as the target (or
-// named in an account field of the note's storage), and when the simulated
-// asset is picked: the account's id changes with every storage edit, and the
-// faucet's with every mock client. The run replaces them with the real ids.
+// named in an account field of the note's storage): the account's id changes
+// with every storage edit. The run replaces it with the real id. Simulated
+// assets have their own stand-ins (lib/simulation/simulated-assets.ts).
 export const SIMULATED_TARGET = `${SIMULATED_PREFIX}target`;
-export const SIMULATED_ASSET = `${SIMULATED_PREFIX}asset`;
 
 const normalizeRoot = (root: string) =>
   `0x${root.replace(/^0x/i, "").toLowerCase()}`;

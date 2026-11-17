@@ -583,6 +583,10 @@ a known limit:
   chain from its dependencies (`spec/simulate-foreign-calls.md`). Left:
   advice map inputs, and foreign accounts for note and transaction scripts
   (they run on the app's client, which fetches a public one from the node).
+- Assets in simulations: a vault editor on the throwaway and the simulated
+  accounts, simulated assets per symbol, a note carrying several assets,
+  "Apply to state" (`spec/simulate-assets.md`). Left: a staged foreign
+  account's vault.
 - A Simulate tab on read-only scripts, which have no console. Done for the
   ones that hold a package (the tutorials' embedded and starter packages):
   `spec/simulate-read-only-scripts.md`. The MASM built-ins still have none.

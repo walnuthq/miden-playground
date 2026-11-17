@@ -143,7 +143,20 @@ test("mobile: a sandbox fits the screen", async ({ page }) => {
       );
     };
     await pick("Select account", "Simulated account");
-    await pick("Select asset", "Simulated asset");
+    // A row of the note's assets and one of the vault's: the simulated asset
+    // is picked.
+    for (const label of ["Note", "Vault"]) {
+      const rows = editorConsole.getByRole("group", {
+        name: `${label} assets`,
+      });
+      await rows.getByRole("button", { name: "Add asset" }).click();
+      await expectWithinWidth(rows.getByLabel(`${label} amount 1`));
+      await expectWithinWidth(
+        rows.getByRole("button", { name: `Remove ${label} asset 1` }),
+      );
+      await expectWithinWidth(rows.getByRole("button", { name: "SIM" }));
+      await expectWithinWidth(rows.getByRole("button", { name: "New asset" }));
+    }
     // The simulated account's storage, under the form.
     const counter = editorConsole.getByRole("region", {
       name: "Simulated account counter-account",

@@ -86,7 +86,7 @@ test("tutorial 9 started without the API offers to restart", async ({
     await expect(dialog.getByText("on a throwaway account")).toBeVisible({
       timeout: TRANSACTION_TIMEOUT,
     });
-    await dialog.getByRole("button", { name: "Apply to storage" }).click();
+    await dialog.getByRole("button", { name: "Apply to state" }).click();
     await expect(dialog).toBeHidden();
     await expect(counter.getByLabel(`${SLOT} value 1`)).toHaveValue("6");
   });

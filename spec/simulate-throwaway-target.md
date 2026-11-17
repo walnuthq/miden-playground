@@ -131,7 +131,7 @@ Not covered by the spike, checked in the first steps: a transaction script, and 
 
 ## Out of scope
 
-- Assets already in the simulated account's vault before a run. Reachable later by consuming a P2ID of the mock faucet first, which needs the account committed.
+- ~~Assets already in the simulated account's vault before a run.~~ Done: `spec/simulate-assets.md` (the seed is applied to the store only, no commit needed).
 - Non-fungible assets.
 - A note or transaction script that makes a foreign call, on the simulated account: its dependencies all go to the target, and nothing says which one is foreign.
 - Naming the simulated account in raw-felt note storage.

@@ -116,4 +116,8 @@ describe("simulated account stand-in", () => {
     );
     assert.equal(simulatedAccountName(""), undefined);
   });
+
+  test("isn't a simulated asset's stand-in", () => {
+    assert.equal(simulatedAccountName("simulated:asset:SIM"), undefined);
+  });
 });

@@ -487,8 +487,7 @@ export const clientCreateNoteFromScript = async ({
   isNetworkNote,
   script,
   type,
-  faucetAccountId,
-  amount,
+  assets: noteAssets,
   noteStorage,
   scripts,
 }: {
@@ -498,8 +497,8 @@ export const clientCreateNoteFromScript = async ({
   isNetworkNote: boolean;
   script: Script;
   type: NoteType;
-  faucetAccountId: string;
-  amount: bigint;
+  // The fungible assets the note carries: none, one or several.
+  assets: { faucetId: string; amount: bigint }[];
   noteStorage: string[];
   scripts: Script[];
 }) => {
@@ -507,9 +506,10 @@ export const clientCreateNoteFromScript = async ({
     ? await clientCreateNoteScriptFromMasm({ client, script, scripts })
     : createNoteScriptFromPackage(script);
   const assets = new WasmNoteAssets(
-    faucetAccountId
-      ? [new WasmFungibleAsset(WasmAccountId.fromHex(faucetAccountId), amount)]
-      : [],
+    noteAssets.map(
+      ({ faucetId, amount }) =>
+        new WasmFungibleAsset(WasmAccountId.fromHex(faucetId), amount),
+    ),
   );
   const metadata = new WasmNoteMetadata(
     WasmAccountId.fromHex(senderAccountId),

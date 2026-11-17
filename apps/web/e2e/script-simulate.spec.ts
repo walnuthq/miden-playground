@@ -9,6 +9,11 @@ import {
 
 const SLOT = "counter_account::counter_contract::count_map";
 
+// What the log says of a procedure that spends more than the vault holds:
+// the kernel's bare error code, explained (`targetErrorHint`,
+// lib/simulation/run.ts).
+const VAULT_SHORT = /The account's vault holds less of the asset/;
+
 // The Count Reader's slot, which `copy_count` sets to the counter's count.
 const COUNT_SLOT = "count_reader::count_reader::count";
 
@@ -161,7 +166,7 @@ test("script: simulate an account component", async ({ page }) => {
     await invoke(page, "increment_count").click();
     await page
       .getByRole("dialog")
-      .getByRole("button", { name: "Apply to storage" })
+      .getByRole("button", { name: "Apply to state" })
       .click();
     await expect(editorConsole(page).getByLabel(`${SLOT} value 1`)).toHaveValue(
       "6",
@@ -226,6 +231,108 @@ test("script: simulate an account component", async ({ page }) => {
       .getByRole("button", { name: "Close" })
       .first()
       .click();
+  });
+
+  await test.step("a procedure spends the vault it starts from", async () => {
+    // Two procedures on the counter: one reads the vault, one moves an asset
+    // from it to a new note. None of the examples' components spends from a
+    // procedure call (the Bank's `withdraw` needs a note's sender).
+    await replaceInEditor(
+      page,
+      "use miden::{component, component_storage, felt, Felt, StorageMap, Word};",
+      `use miden::{
+    active_account, component, component_storage, felt, native_account, output_note, Asset,
+    Felt, NoteType, Recipient, StorageMap, Tag, Word,
+};`,
+    );
+    await replaceInEditor(
+      page,
+      "fn increment_count(&mut self) -> Felt;",
+      `fn increment_count(&mut self) -> Felt;
+    /// Returns the vault's balance of the asset's faucet.
+    #[account_procedure]
+    fn balance(&self, asset: Asset) -> Felt;
+    /// Moves the asset from the vault to a new private note.
+    #[account_procedure]
+    fn send(&mut self, asset: Asset);`,
+    );
+    await replaceInEditor(
+      page,
+      "impl CounterContract for CounterContractStorage {",
+      `impl CounterContract for CounterContractStorage {
+    fn balance(&self, asset: Asset) -> Felt {
+        active_account::get_asset(asset.id)[0]
+    }
+
+    fn send(&mut self, asset: Asset) {
+        let recipient = Recipient::from(Word::new([felt!(11), felt!(12), felt!(13), felt!(14)]));
+        let note_idx = output_note::create(Tag::from(felt!(0)), NoteType::from(felt!(0)), recipient);
+        native_account::remove_asset(asset);
+        output_note::add_asset(asset, note_idx);
+    }
+`,
+    );
+    await compileScript(page);
+    // An empty vault by default: the account starts as before, with no seed.
+    await expect(
+      assetRows(page, "Vault").getByText("The vault is empty."),
+    ).toBeVisible();
+    await addAsset(page, "Vault", "SIM", "1000");
+    // A read-only procedure sees the seeded balance.
+    await setAssetArgument(page, "balance", "SIM", "1");
+    await invoke(page, "balance").click();
+    await expect(
+      procedureRow(page, "balance").getByRole("cell").nth(2),
+    ).toHaveText("1000");
+    // A transaction that spends: the changes are shown against the seeded
+    // vault, at nonce 1.
+    await setAssetArgument(page, "send", "SIM", "400");
+    await invoke(page, "send").click();
+    const dialog = page
+      .getByRole("dialog")
+      .filter({ hasText: "Simulation of send" });
+    await expect(
+      dialog.getByRole("row", {
+        name: "Fungible Asset Simulated asset SIM -400",
+      }),
+    ).toBeVisible();
+    await expect(dialog.getByText(/1 note\s*will be created/)).toBeVisible();
+    await expect(dialog.getByText("New nonce: 2.")).toBeVisible();
+    // "Apply to state" leaves 600 in the vault, and the next run starts there.
+    await dialog.getByRole("button", { name: "Apply to state" }).click();
+    await expect(dialog).toBeHidden();
+    await expect(
+      assetRows(page, "Vault").getByLabel("Vault amount 1"),
+    ).toHaveValue("600");
+    await invoke(page, "balance").click();
+    await expect(
+      procedureRow(page, "balance").getByRole("cell").nth(2),
+    ).toHaveText("600");
+    // A simulated asset of the script's own: another faucet.
+    await newAsset(page, "Vault", "USDC");
+    await addAsset(page, "Vault", "USDC", "25");
+    await setAssetArgument(page, "balance", "USDC", "1");
+    await invoke(page, "balance").click();
+    await expect(
+      procedureRow(page, "balance").getByRole("cell").nth(2),
+    ).toHaveText("25");
+    // An invalid row blocks the runs.
+    await assetRows(page, "Vault").getByLabel("Vault amount 2").fill("2.5");
+    await expect(invoke(page, "balance")).toBeDisabled();
+    await assetRows(page, "Vault").getByLabel("Vault amount 2").fill("25");
+    await expect(invoke(page, "balance")).toBeEnabled();
+  });
+
+  await test.step("spending more than the vault holds fails, saying why", async () => {
+    await setAssetArgument(page, "send", "SIM", "5000");
+    await invoke(page, "send").click();
+    await expect(
+      editorConsole(page).getByText("Simulation of send failed.").last(),
+    ).toBeVisible();
+    await expect(
+      editorConsole(page).getByText(VAULT_SHORT).last(),
+    ).toBeVisible();
+    await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
   });
 
   await test.step("a foreign call runs against a staged account", async () => {
@@ -456,14 +563,40 @@ const receiveSimulatedAsset = async (page: Page) => {
   await page
     .getByRole("menuitemradio", { name: "Simulated account", exact: true })
     .click();
-  await selectAsset(page, "Simulated asset", "100");
+  // A seeded vault too, kept across the crash (in memory, no page load): the
+  // new client makes the faucet and the seed again.
+  if (
+    (await assetRows(page, "Vault").getByLabel("Vault amount 1").count()) === 0
+  ) {
+    await addAsset(page, "Vault", "SIM", "500");
+  }
+  await addAsset(page, "Note", "SIM", "100");
   const dialog = await simulateOnThrowaway(page, "p2id-note");
   await expect(
     dialog.getByRole("row", {
       name: "Fungible Asset Simulated asset SIM +100",
     }),
   ).toBeVisible();
+  // Against the seeded state, at nonce 1.
+  await expect(dialog.getByText("New nonce: 2.")).toBeVisible();
   await dialog.getByRole("button", { name: "Close" }).first().click();
+};
+
+// The arguments of a procedure, in the row under its own.
+const procedureArguments = (page: Page, procedure: string) =>
+  procedureRow(page, procedure).locator("xpath=following-sibling::tr[1]");
+
+// Sets a procedure's `Asset` argument: a simulated asset and an amount.
+const setAssetArgument = async (
+  page: Page,
+  procedure: string,
+  symbol: string,
+  amount: string,
+) => {
+  const args = procedureArguments(page, procedure);
+  await args.getByRole("button").first().click();
+  await page.getByRole("menuitemradio", { name: symbol, exact: true }).click();
+  await args.getByPlaceholder("Amount").fill(amount);
 };
 
 // A foreign account's block in the Simulate tab.
@@ -512,7 +645,7 @@ const copyCount = async (page: Page, count: string) => {
   const dialog = page
     .getByRole("dialog")
     .filter({ hasText: "Simulation of copy_count" });
-  await dialog.getByRole("button", { name: "Apply to storage" }).click();
+  await dialog.getByRole("button", { name: "Apply to state" }).click();
   await expect(dialog).toBeHidden();
   await expect(
     editorConsole(page).getByLabel(`${COUNT_SLOT} value`, { exact: true }),
@@ -577,13 +710,46 @@ const afterValue = (dialog: Locator) =>
     .filter({ hasText: /^After:/ })
     .getByRole("button");
 
-// Picks the asset a note carries, and its amount in base units.
-const selectAsset = async (page: Page, name: string, amount: string) => {
-  await editorConsole(page)
-    .getByRole("button", { name: "Select asset" })
-    .click();
-  await page.getByRole("menuitemradio", { name, exact: true }).click();
-  await editorConsole(page).getByPlaceholder("Amount").fill(amount);
+// A list of assets in the Simulate tab: the note's ("Note") or the vault's
+// ("Vault").
+const assetRows = (page: Page, label: string) =>
+  editorConsole(page).getByRole("group", { name: `${label} assets` });
+
+// Adds a row to a list of assets: `symbol` (a simulated asset, or a sandbox
+// faucet's symbol) and its amount in base units.
+const addAsset = async (
+  page: Page,
+  label: string,
+  symbol: string,
+  amount: string,
+) => {
+  const rows = assetRows(page, label);
+  const index =
+    (await rows.getByRole("button", { name: /^Remove / }).count()) + 1;
+  await rows.getByRole("button", { name: "Add asset" }).click();
+  const amountField = rows.getByLabel(`${label} amount ${index}`);
+  const row = rows
+    .locator("div")
+    .filter({ has: page.getByLabel(`${label} amount ${index}`) })
+    .last();
+  // The row's asset dropdown: the first simulated asset no row holds, or
+  // none on a sandbox account.
+  const dropdown = row.getByRole("button").first();
+  if ((await dropdown.textContent())?.trim() !== symbol) {
+    await dropdown.click();
+    await page
+      .getByRole("menuitemradio", { name: symbol, exact: true })
+      .click();
+  }
+  await expect(dropdown).toHaveText(symbol);
+  await amountField.fill(amount);
+};
+
+// Adds a simulated asset to the script's list.
+const newAsset = async (page: Page, label: string, symbol: string) => {
+  const rows = assetRows(page, label);
+  await rows.getByLabel(`New ${label} asset symbol`).fill(symbol);
+  await rows.getByRole("button", { name: "New asset" }).click();
 };
 
 // A run that fails shows the log, which explains the kernel's bare error
@@ -624,7 +790,7 @@ const simulate = async (page: Page, script: string) => {
   await expect(dialog.getByText("count_map")).toBeVisible();
   await expect(dialog.getByRole("button", { name: /submit/i })).toHaveCount(0);
   await expect(
-    dialog.getByRole("button", { name: "Apply to storage" }),
+    dialog.getByRole("button", { name: "Apply to state" }),
   ).toHaveCount(0);
   return dialog;
 };
@@ -691,7 +857,7 @@ test("script: simulate a note and a transaction script", async ({ page }) => {
     await counter.getByLabel(`${SLOT} value 1`).fill("5");
     let dialog = await simulateOnThrowaway(page, "increment-note");
     await expect(afterValue(dialog)).toHaveText(shownFelt(6));
-    await dialog.getByRole("button", { name: "Apply to storage" }).click();
+    await dialog.getByRole("button", { name: "Apply to state" }).click();
     await expect(dialog).toBeHidden();
     await expect(counter.getByLabel(`${SLOT} value 1`)).toHaveValue("6");
     // The next run starts from the applied storage.
@@ -715,8 +881,15 @@ test("script: simulate a note and a transaction script", async ({ page }) => {
     expect(await networkStoreAccounts(page)).toBe(storeBefore);
     // The same note with the simulated asset, which it doesn't take either.
     await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
-    await selectAsset(page, "Simulated asset", "100");
+    await addAsset(page, "Note", "SIM", "100");
     await expectAssetNotTaken(page, "increment-note");
+    // A sandbox account takes no simulated asset: switching clears the
+    // note's assets, and the vault's editor goes.
+    await selectTarget(page, "Counter Contract");
+    await expect(
+      assetRows(page, "Note").getByText("The note carries no asset."),
+    ).toBeVisible();
+    await expect(assetRows(page, "Vault")).toHaveCount(0);
   });
 
   await test.step("a transaction script runs against the counter", async () => {
@@ -837,15 +1010,12 @@ test("script: simulate a note and a transaction script", async ({ page }) => {
     await page
       .getByRole("menuitemradio", { name: "Simulated account", exact: true })
       .click();
-    // Only the simulated asset: a sandbox faucet would crash the mock client.
-    await editorConsole(page)
-      .getByRole("button", { name: "Select asset" })
-      .click();
+    // Only the simulated assets: a sandbox faucet would crash the mock
+    // client.
+    await addAsset(page, "Note", "SIM", "100");
+    await assetRows(page, "Note").getByRole("button", { name: "SIM" }).click();
     await expect(page.getByRole("menuitemradio")).toHaveCount(1);
-    await page
-      .getByRole("menuitemradio", { name: "Simulated asset", exact: true })
-      .click();
-    await editorConsole(page).getByPlaceholder("Amount").fill("100");
+    await page.getByRole("menuitemradio", { name: "SIM", exact: true }).click();
     const dialog = await simulateOnThrowaway(page, "p2id-note");
     await expect(dialog.getByText("Vault changes:")).toBeVisible();
     // The simulated asset has no decimals: the amount, as typed.
@@ -868,6 +1038,51 @@ test("script: simulate a note and a transaction script", async ({ page }) => {
     await expect(
       editorConsole(page)
         .getByText(/assert/i)
+        .last(),
+    ).toBeVisible();
+    expect(await networkStoreAccounts(page)).toBe(storeBefore);
+  });
+
+  await test.step("a note's assets land in the seeded vault", async () => {
+    const storeBefore = await networkStoreAccounts(page);
+    // The failed run above showed the log.
+    await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
+    const field = editorConsole(page)
+      .locator("div")
+      .filter({ hasText: "target-account-id" })
+      .last();
+    await field.getByRole("button", { name: "Other Counter" }).click();
+    await page
+      .getByRole("menuitemradio", { name: "Simulated account", exact: true })
+      .click();
+    // The note carries 100 SIM (the row above) and 50 of another simulated
+    // asset; the vault starts with 1000 SIM.
+    await newAsset(page, "Note", "USDC");
+    await addAsset(page, "Note", "USDC", "50");
+    await addAsset(page, "Vault", "SIM", "1000");
+    const dialog = await simulateOnThrowaway(page, "p2id-note");
+    await expect(dialog.getByText(/1 note\s*will be consumed/)).toBeVisible();
+    for (const name of [
+      "Fungible Asset Simulated asset SIM +100",
+      "Fungible Asset Simulated asset USDC +50",
+    ]) {
+      await expect(dialog.getByRole("row", { name })).toBeVisible();
+    }
+    // The seed isn't a change: the vault was seeded at nonce 1.
+    await expect(dialog.getByText("New nonce: 2.")).toBeVisible();
+    await dialog.getByRole("button", { name: "Apply to state" }).click();
+    await expect(dialog).toBeHidden();
+    const vault = assetRows(page, "Vault");
+    await expect(vault.getByLabel("Vault amount 1")).toHaveValue("1100");
+    await expect(vault.getByLabel("Vault amount 2")).toHaveValue("50");
+    await expect(vault.getByRole("button", { name: "USDC" })).toBeVisible();
+    await editorConsole(page).getByRole("tab", { name: "Output" }).click();
+    await expect(
+      editorConsole(page)
+        .getByText(
+          "Simulated p2id-note on the simulated account: no storage change, 2 vault changes.",
+          { exact: true },
+        )
         .last(),
     ).toBeVisible();
     expect(await networkStoreAccounts(page)).toBe(storeBefore);
