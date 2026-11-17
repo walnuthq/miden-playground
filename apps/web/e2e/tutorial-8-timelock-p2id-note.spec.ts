@@ -1,5 +1,6 @@
 import { expect, test } from "./bread";
 import { COMPILED, replaceInEditor, scriptHeader } from "./editor";
+import { atPhoneWidth, expectWithinDialog } from "./mobile/layout";
 import {
   logBrowserErrors,
   nextStep,
@@ -98,15 +99,47 @@ test("tutorial 8: timelock P2ID note", async ({ page, bread }) => {
 
   await test.step("4. create the timelocked note", async () => {
     await bread.connect(page);
-    // The note storage, in the order of the script's struct fields: the Test
-    // Wallet's Account ID prefix and suffix, then a block height.
+    // The script's storage schema types its fields: the panel gives the
+    // block height only, the Test Wallet is picked from the accounts.
     const values = panel.root.locator("strong").filter({ hasText: /^\d+$/ });
-    await expect(values).toHaveCount(3, { timeout: TRANSACTION_TIMEOUT });
-    const [prefix, suffix, height] = await values.allTextContents();
+    await expect(values).toHaveCount(1, { timeout: TRANSACTION_TIMEOUT });
+    const height = (await values.textContent()) ?? "";
+    await expect(panel.root.getByText("target-account-id")).toBeVisible();
     await panel.openLink("notes page", /\/notes$/);
+    const dialog = page.getByRole("dialog").filter({ hasText: "Create Note" });
+    // The typed fields fit a 320 px phone. The dialog is opened at that
+    // size: a resize across the phone breakpoint remounts it, empty.
+    await atPhoneWidth(page, async () => {
+      await page.getByRole("button", { name: "Add note" }).click();
+      await page.getByRole("menuitem", { name: "Create note" }).click();
+      await selectOption(page, "Script", SCRIPT_NAME);
+      const height = dialog.locator(
+        "#create-note-storage-note-timelock-height",
+      );
+      await height.scrollIntoViewIfNeeded();
+      await expectWithinDialog(height, dialog);
+      const target = dialog
+        .locator("div")
+        .filter({ hasText: "target-account-id" })
+        .last();
+      await expectWithinDialog(
+        target.getByRole("button", { name: "Select account" }),
+        dialog,
+      );
+      await expectWithinDialog(
+        dialog.getByRole("switch", { name: "Enter as raw felts" }),
+        dialog,
+      );
+      for (const name of ["Preview consumption", "Create", "Cancel"]) {
+        const button = dialog.getByRole("button", { name, exact: true });
+        await button.scrollIntoViewIfNeeded();
+        await expectWithinDialog(button, dialog);
+      }
+      await dialog.getByRole("button", { name: "Cancel" }).click();
+      await expect(dialog).toBeHidden();
+    });
     await page.getByRole("button", { name: "Add note" }).click();
     await page.getByRole("menuitem", { name: "Create note" }).click();
-    const dialog = page.getByRole("dialog").filter({ hasText: "Create Note" });
     await dialog.getByPlaceholder("Select an account").click();
     await page.getByRole("option", { name: /Test Wallet/ }).click();
     await selectOption(page, "Script", SCRIPT_NAME);
@@ -114,18 +147,59 @@ test("tutorial 8: timelock P2ID note", async ({ page, bread }) => {
     await dialog.getByRole("button", { name: "Select asset" }).click();
     await page.getByRole("menuitemradio", { name: /USDCX/i }).click();
     await dialog.getByLabel("Amount").fill("1");
-    for (const [index, value] of [prefix, suffix, height].entries()) {
-      await dialog.getByRole("button", { name: "Add note storage" }).click();
-      await dialog.getByPlaceholder(`Note storage #${index}`).fill(value!);
-    }
-    const request = await bread.approve(
-      () => dialog.getByRole("button", { name: "Create", exact: true }).click(),
-      { timeout: TRANSACTION_TIMEOUT },
+    // One typed field per field of the note's struct, in order.
+    await expect(
+      dialog.getByRole("button", { name: "Add note storage" }),
+    ).toHaveCount(0);
+    const create = dialog.getByRole("button", { name: "Create", exact: true });
+    const target = dialog
+      .locator("div")
+      .filter({ hasText: "target-account-id" })
+      .last();
+    await target.getByRole("button", { name: "Select account" }).click();
+    await page
+      .getByRole("menuitemradio", { name: /Test Wallet/ })
+      .first()
+      .click();
+    // Nothing is created from an empty field.
+    await expect(create).toBeDisabled();
+    const heightField = dialog.locator(
+      "#create-note-storage-note-timelock-height",
     );
+    await heightField.fill(height);
+    await expect(create).toBeEnabled();
+    // The preview runs at the current block: the timelock fails it, which
+    // doesn't stop the note from being created.
+    await dialog.getByRole("button", { name: "Preview consumption" }).click();
+    const failure = dialog.getByRole("alert");
+    await expect(failure).toContainText("assertion failed", {
+      timeout: TRANSACTION_TIMEOUT,
+    });
+    await expect(failure).toContainText(
+      "This doesn't stop you from creating the note.",
+    );
+    await expect(create).toBeEnabled();
+    // The raw felts the typed fields stand for: the Test Wallet's prefix and
+    // suffix, then the height. Back to typed, the values are kept.
+    const raw = dialog.getByRole("switch", { name: "Enter as raw felts" });
+    await raw.click();
+    await expect(failure).toBeHidden();
+    await expect(
+      dialog.getByLabel("Note storage item 3", { exact: true }),
+    ).toHaveValue(height);
+    await expect(
+      dialog.getByLabel("Note storage item 4", { exact: true }),
+    ).toHaveCount(0);
+    await raw.click();
+    await expect(heightField).toHaveValue(height);
+    const request = await bread.approve(() => create.click(), {
+      timeout: TRANSACTION_TIMEOUT,
+    });
     expect(request).toContain("Confirm Transaction");
     // Completes once the note is committed, recognized as the script's (its
     // script root is the compiled script's entry point) and targeted at the
-    // Test Wallet.
+    // Test Wallet: its storage starts with the Test Wallet's prefix and
+    // suffix, so the typed field is flattened in that order.
     await nextStep(page);
   });
 

@@ -53,8 +53,14 @@ const Step6: TutorialStep = {
           this Note yourself.
         </p>
         <p>
-          Don't add any note assets or note storage: the Note doesn't need to
-          carry assets or take any parameters.
+          Don't add any note assets: the Note doesn't need to carry any. It
+          takes no parameters either, so leave its note storage empty.
+        </p>
+        <p>
+          Before creating it, you can click the <em>"Preview consumption"</em>{" "}
+          button to see what the Note will do: the Playground runs it locally,
+          as if your counter contract consumed it now, and shows the count it
+          would store. Nothing is submitted.
         </p>
         <p>
           Once you're done, click the <em>"Create"</em> button and confirm the

@@ -1022,7 +1022,7 @@ test("script: simulate a note and a transaction script", async ({ page }) => {
       .last();
     await expect(field.getByText("AccountId")).toBeVisible();
     await expect(
-      editorConsole(page).getByRole("button", { name: "Add storage item" }),
+      editorConsole(page).getByRole("button", { name: "Add note storage" }),
     ).toHaveCount(0);
     // Its storage field lists every account: only the target is filtered.
     await field.getByRole("button", { name: "Select account" }).click();

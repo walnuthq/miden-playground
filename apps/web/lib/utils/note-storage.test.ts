@@ -1,10 +1,15 @@
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
 import {
+  createNoteStorageParams,
+  emptyNoteStorage,
   noteStorageArgumentError,
   noteStorageFelts,
+  noteStorageInputFelts,
+  noteStorageInputReady,
   noteStorageParams,
   noteStorageReady,
+  typedToRawNoteStorage,
 } from "./note-storage.ts";
 
 const accountIdParts = (accountId: string) =>
@@ -109,6 +114,184 @@ describe("noteStorageArgumentError", () => {
         small: { type: "Felt", value: "3" },
         flag: { type: "Felt", value: "0" },
       }),
+      true,
+    );
+  });
+});
+
+const timelockFields = [
+  { name: "target-account-id", type: "account-id", width: 2 },
+  { name: "timelock-height", type: "felt", width: 1 },
+];
+
+const timelockParams = () => {
+  const params = noteStorageParams(timelockFields);
+  assert.ok(params);
+  return params;
+};
+
+describe("createNoteStorageParams", () => {
+  const metadata = {
+    noteStorage: { name: "p2id-note", fields: timelockFields },
+  };
+
+  test("types a compiled script's schema", () => {
+    assert.deepEqual(
+      createNoteStorageParams({ status: "compiled", metadata })?.map(
+        ({ name }) => name,
+      ),
+      ["target-account-id", "timelock-height"],
+    );
+  });
+
+  test("is raw without a schema", () => {
+    assert.equal(createNoteStorageParams({ status: "compiled" }), undefined);
+    assert.equal(
+      createNoteStorageParams({ status: "compiled", metadata: null }),
+      undefined,
+    );
+    assert.equal(
+      createNoteStorageParams({ status: "compiled", metadata: {} }),
+      undefined,
+    );
+  });
+
+  test("is raw for a field the form can't type", () => {
+    assert.equal(
+      createNoteStorageParams({
+        status: "compiled",
+        metadata: {
+          noteStorage: {
+            name: "n",
+            fields: [{ name: "price", type: "limit-price", width: 4 }],
+          },
+        },
+      }),
+      undefined,
+    );
+  });
+
+  test("is raw for a draft or a failed compile", () => {
+    assert.equal(
+      createNoteStorageParams({ status: "draft", metadata }),
+      undefined,
+    );
+    assert.equal(
+      createNoteStorageParams({ status: "error", metadata }),
+      undefined,
+    );
+  });
+
+  test("an empty schema has no field, typed", () => {
+    assert.deepEqual(
+      createNoteStorageParams({
+        status: "compiled",
+        metadata: { noteStorage: { name: "n", fields: [] } },
+      }),
+      [],
+    );
+  });
+});
+
+describe("typedToRawNoteStorage", () => {
+  const params = timelockParams();
+
+  test("the typed values' felts, prefix then suffix", () => {
+    assert.deepEqual(
+      typedToRawNoteStorage({
+        params,
+        args: {
+          "target-account-id": { type: "AccountId", accountId: "0xabc" },
+          "timelock-height": { type: "Felt", value: "1234" },
+        },
+        accountIdParts,
+      }),
+      ["11", "22", "1234"],
+    );
+  });
+
+  test("none when a value is missing or invalid", () => {
+    assert.deepEqual(
+      typedToRawNoteStorage({
+        params,
+        args: {
+          "target-account-id": { type: "AccountId", accountId: "0xabc" },
+        },
+        accountIdParts,
+      }),
+      [],
+    );
+    assert.deepEqual(
+      typedToRawNoteStorage({
+        params,
+        args: {
+          "target-account-id": { type: "AccountId", accountId: "0xabc" },
+          "timelock-height": { type: "Felt", value: "x" },
+        },
+        accountIdParts,
+      }),
+      [],
+    );
+  });
+});
+
+describe("note storage input", () => {
+  const params = timelockParams();
+  const args = {
+    "target-account-id": { type: "AccountId", accountId: "0xabc" },
+    "timelock-height": { type: "Felt", value: "7" },
+  } as const;
+
+  test("starts empty, typed", () => {
+    assert.deepEqual(emptyNoteStorage(), { args: {}, felts: [], raw: false });
+  });
+
+  test("typed fields are flattened, raw felts sent as entered", () => {
+    assert.deepEqual(
+      noteStorageInputFelts({
+        params,
+        input: { args, felts: ["9"], raw: false },
+        accountIdParts,
+      }),
+      ["11", "22", "7"],
+    );
+    assert.deepEqual(
+      noteStorageInputFelts({
+        params,
+        input: { args, felts: ["9"], raw: true },
+        accountIdParts,
+      }),
+      ["9"],
+    );
+    assert.deepEqual(
+      noteStorageInputFelts({
+        params: undefined,
+        input: { args, felts: ["1", "2"], raw: false },
+        accountIdParts,
+      }),
+      ["1", "2"],
+    );
+  });
+
+  test("ready when the fields shown are valid", () => {
+    assert.equal(
+      noteStorageInputReady(params, { args: {}, felts: [], raw: false }),
+      false,
+    );
+    assert.equal(
+      noteStorageInputReady(params, { args, felts: [], raw: false }),
+      true,
+    );
+    assert.equal(
+      noteStorageInputReady(params, { args: {}, felts: ["1"], raw: true }),
+      true,
+    );
+    assert.equal(
+      noteStorageInputReady(undefined, { args: {}, felts: [""], raw: false }),
+      false,
+    );
+    assert.equal(
+      noteStorageInputReady(undefined, { args: {}, felts: [], raw: false }),
       true,
     );
   });

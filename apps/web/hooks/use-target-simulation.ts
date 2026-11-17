@@ -10,6 +10,7 @@ import {
   createSimulatedAccount,
   mockFaucetIds,
   mockFaucetLabels,
+  runOnSandboxAccount,
   type SimulatedAsset,
   simulateNote,
   simulateTransactionScript,
@@ -220,34 +221,29 @@ const useTargetSimulation = (script: Script) => {
   const runSandbox = async (
     inputs: TargetSimulationInputs,
   ): Promise<TargetSimulationRun> => {
-    const account = accounts.find(({ id }) => id === inputs.targetAccountId);
-    if (!client || !account) {
-      return {
-        result: { ok: false, error: "The client or the account isn't ready." },
-        account,
-      };
-    }
     if (
       usedSymbols([
         ...inputs.noteAssets.map(({ faucetId }) => faucetId),
         ...inputs.noteStorageAccountIds,
       ]).length > 0
     ) {
-      return { result: { ok: false, error: SIMULATED_ONLY }, account };
-    }
-    try {
       return {
-        result: await run({
-          runClient: client,
+        result: { ok: false, error: SIMULATED_ONLY },
+        account: accounts.find(({ id }) => id === inputs.targetAccountId),
+      };
+    }
+    return runOnSandboxAccount({
+      client,
+      accounts,
+      accountId: inputs.targetAccountId,
+      run: (runClient) =>
+        run({
+          runClient,
           targetAccountId: inputs.targetAccountId,
           inputs,
           assets: rowAssets(inputs.noteAssets),
         }),
-        account,
-      };
-    } catch (error) {
-      return { result: { ok: false, error: errorMessage(error) }, account };
-    }
+    });
   };
   // Resolves to the run's result and the account's state it ran from.
   const simulate = (inputs: TargetSimulationInputs) =>

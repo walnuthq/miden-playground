@@ -47,8 +47,8 @@ const Step4: TutorialStep = {
           toggle.
         </p>
         <p>
-          Don't add any note assets or note storage: the Note doesn't need to
-          carry assets or take any parameters.
+          Don't add any note assets: the Note doesn't need to carry any. It
+          takes no parameters either, so leave its note storage empty.
         </p>
         <p>
           Once you're done, click the <em>"Create"</em> button and confirm the

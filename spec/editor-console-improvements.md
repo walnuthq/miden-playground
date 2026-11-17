@@ -619,6 +619,9 @@ a known limit:
   parameters by the names in the package's WIT (`depositor`, not
   `param_0`), reported by api-compile: done (2026-11-17), see
   `spec/procedure-parameter-names.md`.
+- Preview a note's consumption from the Create Note dialog, and type its
+  storage there as in the Simulate tab, with a raw felts fallback: done
+  (2026-11-17), see `spec/create-note-preview.md`.
 
 Spike (2026-11-13, SDK 0.17.10, Chromium, testnet sandbox with the Counter
 Contract example):
