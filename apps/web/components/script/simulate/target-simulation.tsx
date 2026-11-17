@@ -14,13 +14,16 @@ import SelectAccountDropdownMenu from "@/components/transactions/select-account-
 import useScriptTargetAccounts from "@/hooks/use-script-target-accounts";
 import useScripts from "@/hooks/use-scripts";
 import useTargetSimulation from "@/hooks/use-target-simulation";
+import {
+  SIMULATED_PREFIX,
+  simulatedAccountValue,
+} from "@/lib/simulation/foreign-accounts";
 import { storageChanges } from "@/lib/simulation/run";
 import {
   type AssetRow,
   applyVaultChanges,
   assetRowsError,
   simulatedAssetOptions,
-  simulatedAssetSymbol,
 } from "@/lib/simulation/simulated-assets";
 import {
   SIMULATED_TARGET,
@@ -50,14 +53,13 @@ const SIMULATED_TARGET_OPTIONS = [
 const NO_ASSETS: AssetRow[] = [];
 
 // The note's typed storage without any account field naming the simulated
-// account or a simulated asset's faucet.
+// account, a foreign account staged for it or a simulated asset's faucet.
 const withoutSimulatedIds = (args: ProcedureArguments) =>
   Object.fromEntries(
     Object.entries(args).filter(
       ([, argument]) =>
         argument.type !== "AccountId" ||
-        (argument.accountId !== SIMULATED_TARGET &&
-          simulatedAssetSymbol(argument.accountId) === undefined),
+        !argument.accountId.startsWith(SIMULATED_PREFIX),
     ),
   );
 
@@ -78,8 +80,27 @@ const TargetSimulation = ({
   script: Script;
   onFailure: () => void;
 }) => {
-  const { dependencyAccounts, vault, setVault, simulate } =
-    useTargetSimulation(script);
+  const {
+    dependencyAccounts,
+    targetComponents,
+    foreignAccounts,
+    setForeignDependency,
+    vault,
+    setVault,
+    simulate,
+  } = useTargetSimulation(script);
+  // What an account field of the note's storage can name on the simulated
+  // account: the account itself and the foreign accounts staged for it.
+  const simulatedAccountOptions = useMemo(
+    () => [
+      ...SIMULATED_TARGET_OPTIONS,
+      ...foreignAccounts.map(({ name }) => ({
+        value: simulatedAccountValue(name),
+        name: `${name} (foreign account)`,
+      })),
+    ],
+    [foreignAccounts],
+  );
   const [assetSymbols, addAssetSymbol] = useSimulatedAssetSymbols(script.id);
   const simulatedAssets = useMemo(
     () => simulatedAssetOptions(assetSymbols),
@@ -114,13 +135,13 @@ const TargetSimulation = ({
     () =>
       simulatedTargetMissing({
         script,
-        components: dependencyAccounts.accounts.map(({ script }) => script),
+        components: targetComponents.map(({ script }) => script),
         builtIns: [standardBasicWallet],
         // The Rust basic wallet names `receive-asset`, which the P2ID
         // template calls: it isn't a workspace script.
         named: [...scripts, ...defaultScripts, basicWalletScript],
       }),
-    [script, dependencyAccounts.accounts, scripts],
+    [script, targetComponents, scripts],
   );
   const dependencySlotsValid = dependencyAccounts.accounts.every(
     ({ storageSlots }) => storageSlotsValid(storageSlots),
@@ -168,10 +189,16 @@ const TargetSimulation = ({
                   ? "Runs the script locally as if a throwaway account consumed a note made from it"
                   : "Runs the script locally on a throwaway account"
               }: nothing is submitted. ${
-                dependencyAccounts.accounts.length > 0
+                targetComponents.length > 0
                   ? "It holds the components of the script's dependencies, and every run starts from the vault and the storage below"
                   : "It holds the basic wallet only, and every run starts from the vault below"
               }: at nonce 0, or 1 when the vault holds assets (a first transaction puts them there).${
+                foreignAccounts.length > 0
+                  ? " A dependency marked as a foreign account is another account, which the script's foreign calls read: its id is in the log after a run."
+                  : dependencyAccounts.accounts.length > 0
+                    ? " If the script calls a dependency on another account, mark it as a foreign account below."
+                    : ""
+              }${
                 dependencyAccounts.ready && missing.length > 0
                   ? ` It lacks procedures this script calls: ${missing.join(", ")}.`
                   : ""
@@ -218,7 +245,7 @@ const TargetSimulation = ({
               felts={noteStorage}
               onFeltsChange={setNoteStorage}
               simulatedAccounts={
-                simulatedPicked ? SIMULATED_TARGET_OPTIONS : undefined
+                simulatedPicked ? simulatedAccountOptions : undefined
               }
               simulatedAssets={simulatedPicked ? simulatedAssets : undefined}
               rawNote={
@@ -289,6 +316,12 @@ const TargetSimulation = ({
                 })}
             accounts={dependencyAccounts.accounts}
             unresolved={dependencyAccounts.unresolved}
+            foreign={{
+              idPrefix,
+              labelPrefix: "Foreign account",
+              names: foreignAccounts.map(({ name }) => name),
+              onChange: setForeignDependency,
+            }}
           />
         )}
       <Button
@@ -353,12 +386,13 @@ const TargetSimulation = ({
         onApply={
           simulation?.throwaway
             ? ({ executedTransaction, vaultChanges }) => {
-                // Each component's slots take the changes to theirs.
+                // Each component's slots take the changes to theirs. A
+                // foreign account's don't change: a foreign call only reads.
                 const changes = storageChanges(executedTransaction);
                 for (const {
                   storageSlots,
                   setStorageSlots,
-                } of dependencyAccounts.accounts) {
+                } of targetComponents) {
                   setStorageSlots(applyStorageChanges(storageSlots, changes));
                 }
                 setVault(applyVaultChanges(vault, vaultChanges ?? []));

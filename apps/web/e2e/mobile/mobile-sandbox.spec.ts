@@ -161,6 +161,11 @@ test("mobile: a sandbox fits the screen", async ({ page }) => {
     const counter = editorConsole.getByRole("region", {
       name: "Simulated account counter-account",
     });
+    // Its switch, which makes the dependency a foreign account.
+    await expectWithinWidth(
+      counter.getByRole("switch", { name: "Foreign account" }),
+    );
+    await expectWithinWidth(counter.getByText("Foreign account"));
     await counter.getByRole("button", { name: "Add entry" }).click();
     const slot = "counter_account::counter_contract::count_map";
     await expectWithinWidth(counter.getByLabel(`${slot} key 1`));
