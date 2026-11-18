@@ -6,7 +6,6 @@ import CopyButton from "@/components/lib/copy-button";
 import useScripts from "@/hooks/use-scripts";
 import useTransactions from "@/hooks/use-transactions";
 import type { Account } from "@/lib/types/account";
-import type { Component } from "@/lib/types/component";
 import type { ProcedureExport, Script } from "@/lib/types/script";
 import { decodeProcedureResult } from "@/lib/utils/procedure-inputs";
 import { formatProcedureExportPath } from "@/lib/utils/script";
@@ -18,25 +17,23 @@ import { formatProcedureExportPath } from "@/lib/utils/script";
 // submit a transaction, which only No Auth accounts can sign here.
 export const canInvokeProcedure = ({
   account,
-  component,
+  script,
   procedureExport,
 }: {
   account: Account;
-  component: Component;
+  script: Pick<Script, "type">;
   procedureExport: ProcedureExport;
 }) =>
-  component.type === "account-component" &&
+  script.type === "account-component" &&
   (procedureExport.readOnly || account.components.includes("auth-no-auth"));
 
 const ProceduresTableRow = ({
   account,
-  component,
   script,
   procedureExport,
   showResultColumn,
 }: {
   account: Account;
-  component: Component;
   script: Script;
   procedureExport: ProcedureExport;
   // Whether the table has a Result column, which this row then fills.
@@ -83,10 +80,10 @@ const ProceduresTableRow = ({
         </div>
       </TableCell>
       {showResultColumn &&
-        !canInvokeProcedure({ account, component, procedureExport }) && (
+        !canInvokeProcedure({ account, script, procedureExport }) && (
           <TableCell />
         )}
-      {canInvokeProcedure({ account, component, procedureExport }) && (
+      {canInvokeProcedure({ account, script, procedureExport }) && (
         <TableCell className="flex items-center justify-between gap-2">
           <span>{result}</span>
           <Button

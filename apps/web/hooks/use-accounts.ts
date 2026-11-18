@@ -18,8 +18,6 @@ import useNetwork from "@/hooks/use-network";
 import useScripts from "@/hooks/use-scripts";
 import { verifyAccountComponentsFromPackageIds } from "@/lib/api";
 import type { Account, AccountStorageMode } from "@/lib/types/account";
-import type { Component } from "@/lib/types/component";
-import { defaultComponentIds } from "@/lib/types/default-components";
 import { defaultScriptIds } from "@/lib/types/default-scripts";
 import {
   basicWalletAccount,
@@ -29,6 +27,7 @@ import {
 import {
   clientDeployAccount,
   clientNetworkNoteFee,
+  type DeployedComponent,
   storageMode,
   wasmAccountToAccount,
 } from "@/lib/web-client";
@@ -47,7 +46,6 @@ const useAccounts = () => {
     verifyAccountComponentDialogAccountId,
     deployMultisigDialogOpen,
     accounts,
-    components: workspaceComponents,
     tutorialId,
     dispatch,
   } = useGlobalContext();
@@ -176,7 +174,7 @@ const useAccounts = () => {
       wasmAccount,
       name,
       // Lists the workspace's compiled components the account's code holds.
-      workspace: { scripts, components: workspaceComponents },
+      workspace: { scripts },
       updatedAt: lastSyncTime,
     });
     dispatch({
@@ -259,7 +257,10 @@ const useAccounts = () => {
   };
   // `fund: false` leaves the account off chain, with no fee asset: it's
   // created by its first transaction, which then has to bring its own fee
-  // (consuming a note that carries the fee asset does).
+  // (consuming a note that carries the fee asset does). `verify: false`
+  // neither sends the account's packages for verification nor lists them as
+  // its components (tutorial 12 has the user verify the account, which then
+  // lists the verified package).
   const deployAccount = async ({
     name,
     storageMode,
@@ -269,18 +270,24 @@ const useAccounts = () => {
   }: {
     name: string;
     storageMode: AccountStorageMode;
-    components: Component[];
+    components: DeployedComponent[];
     verify?: boolean;
     fund?: boolean;
   }) => {
     if (!client) {
       throw new Error("MidenClient not ready");
     }
-    dispatch({ type: "SUBMITTING_TRANSACTION" });
     const componentScriptIds = components.map(({ scriptId }) => scriptId);
     const componentScripts = scripts.filter(({ id }) =>
       componentScriptIds.includes(id),
     );
+    const missingScriptId = componentScriptIds.find(
+      (id) => !componentScripts.some((script) => script.id === id),
+    );
+    if (missingScriptId) {
+      throw new Error(`Script ${missingScriptId} not found.`);
+    }
+    dispatch({ type: "SUBMITTING_TRANSACTION" });
     let fundedAccount: Awaited<ReturnType<typeof fundAccount>>;
     try {
       const isNetworkAccount = componentScriptIds.includes(
@@ -310,11 +317,9 @@ const useAccounts = () => {
       name,
       components: [
         "basic-wallet",
-        ...components
-          .filter(({ id }) =>
-            verify ? true : defaultComponentIds.includes(id),
-          )
-          .map(({ id }) => id),
+        ...componentScriptIds.filter((id) =>
+          verify ? true : defaultScriptIds.includes(id),
+        ),
       ],
       updatedAt: lastSyncTime,
     });

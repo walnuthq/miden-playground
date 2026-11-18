@@ -1,6 +1,4 @@
 import type { Account } from "@/lib/types/account";
-import type { Component } from "@/lib/types/component";
-import defaultComponents from "@/lib/types/default-components";
 import defaultScripts from "@/lib/types/default-scripts";
 import type { InputNote } from "@/lib/types/note";
 import type { Script, ScriptType } from "@/lib/types/script";
@@ -8,6 +6,10 @@ import type { State } from "@/lib/types/state";
 import type { Transaction } from "@/lib/types/transaction";
 import type { TutorialId } from "@/lib/types/tutorial";
 import { randomLowercaseId } from "@/lib/utils";
+import {
+  type LegacyComponent,
+  migrateLegacyComponents,
+} from "@/lib/utils/legacy-components";
 import { sourceFiles } from "@/lib/utils/script-files";
 
 // The local storage key holding the serialized app state. Exported so the
@@ -65,12 +67,6 @@ export const defaultState = (): State => ({
   readOnlyProcedureDigest: "",
   readOnlyProcedureResult: "",
   scripts: defaultScripts,
-  // COMPONENTS
-  createComponentDialogOpen: false,
-  upsertStorageSlotDialogOpen: false,
-  upsertStorageSlotDialogComponentId: "",
-  upsertStorageSlotDialogStorageSlotName: "",
-  components: defaultComponents,
   // TUTORIALS
   tutorialId: "",
   tutorialStep: 0,
@@ -99,7 +95,6 @@ export const PERSISTED_KEYS = [
   "transactions",
   "inputNotes",
   "scripts",
-  "components",
   "tutorialId",
   "tutorialStep",
   "tutorialMaxStep",
@@ -120,7 +115,6 @@ export const stateSerializer = ({
   transactions,
   inputNotes,
   scripts,
-  components,
   tutorialId,
   tutorialStep,
   tutorialMaxStep,
@@ -141,7 +135,6 @@ export const stateSerializer = ({
     transactions,
     inputNotes,
     scripts,
-    components,
     tutorialId,
     tutorialStep,
     tutorialMaxStep,
@@ -219,7 +212,6 @@ export const stateDeserializer = (value: string): State => {
       transactions,
       inputNotes,
       scripts,
-      components,
       tutorialId,
       tutorialStep,
       tutorialMaxStep,
@@ -232,27 +224,30 @@ export const stateDeserializer = (value: string): State => {
       exampleId,
       projectId,
       projectName,
-    } = JSON.parse(value) as {
-      blockNum?: number;
-      serializedMockChain?: string;
-      accounts?: Account[];
-      transactions?: Transaction[];
-      inputNotes?: InputNote[];
-      scripts?: LegacyScript[];
-      components?: Component[];
-      tutorialId?: TutorialId;
-      tutorialStep?: number;
-      tutorialMaxStep?: number;
-      tutorialStartBlockNum?: number;
-      tutorialRunId?: string;
-      tutorialOpen?: boolean;
-      nextTutorialStepDisabled?: boolean;
-      completedTutorials?: string[];
-      tutorialProgress?: State["tutorialProgress"];
-      exampleId?: string;
-      projectId?: string;
-      projectName?: string;
-    };
+    } = migrateLegacyComponents(
+      JSON.parse(value) as {
+        blockNum?: number;
+        serializedMockChain?: string;
+        accounts?: Account[];
+        transactions?: Transaction[];
+        inputNotes?: InputNote[];
+        scripts?: LegacyScript[];
+        // Written until components were removed (spec/remove-components.md).
+        components?: LegacyComponent[];
+        tutorialId?: TutorialId;
+        tutorialStep?: number;
+        tutorialMaxStep?: number;
+        tutorialStartBlockNum?: number;
+        tutorialRunId?: string;
+        tutorialOpen?: boolean;
+        nextTutorialStepDisabled?: boolean;
+        completedTutorials?: string[];
+        tutorialProgress?: State["tutorialProgress"];
+        exampleId?: string;
+        projectId?: string;
+        projectName?: string;
+      },
+    );
     const initialState = defaultState();
     return {
       ...initialState,
@@ -265,7 +260,6 @@ export const stateDeserializer = (value: string): State => {
       scripts: scripts
         ? withDefaultScripts(scripts.map(migrateScript))
         : initialState.scripts,
-      components: components ?? initialState.components,
       tutorialId: tutorialId ?? initialState.tutorialId,
       tutorialStep: tutorialStep ?? initialState.tutorialStep,
       tutorialMaxStep: tutorialMaxStep ?? initialState.tutorialMaxStep,

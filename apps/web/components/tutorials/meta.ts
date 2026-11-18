@@ -88,7 +88,7 @@ export const tutorialMetas: TutorialMeta[] = [
       "In this tutorial, you'll customize a counter contract, deploy it on testnet and increment its counter.",
     category: "advanced",
     initialRoute: "/scripts",
-    stepCount: 7,
+    stepCount: 6,
     requiresWallet: false,
   },
   {

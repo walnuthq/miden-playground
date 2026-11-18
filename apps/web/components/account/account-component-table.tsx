@@ -10,8 +10,11 @@ import { Link } from "react-router";
 import ProceduresTable from "@/components/account/procedures-table";
 import StorageSlotsTable from "@/components/account/storage-slots-table";
 import type { Account } from "@/lib/types/account";
-import type { Component } from "@/lib/types/component";
 import type { Script } from "@/lib/types/script";
+import {
+  componentStorageSlots,
+  componentTitle,
+} from "@/lib/utils/account-components";
 
 // A row holding a nested table. On a phone the label goes above the table
 // rather than beside it, which leaves the nested table the whole width. Its
@@ -47,53 +50,52 @@ const NestedTableRow = ({
   );
 };
 
+// One of an account's components: its script, the account's slots that
+// belong to it, and its procedures.
 const AccountComponentTable = ({
   account,
-  component,
   script,
 }: {
   account: Account;
-  component: Component;
   script: Script;
-}) => (
-  <div className="rounded-md border">
-    <Table>
-      <TableBody>
-        <TableRow>
-          <TableCell>Name</TableCell>
-          <TableCell>{component.name}</TableCell>
-        </TableRow>
-        <TableRow>
-          <TableCell>Script</TableCell>
-          <TableCell>
-            <Link
-              className="text-primary font-medium underline underline-offset-4"
-              to={`/scripts/${component.scriptId}`}
-            >
-              {script.name}
-            </Link>
-          </TableCell>
-        </TableRow>
-        {component.storageSlots.length > 0 && (
-          <NestedTableRow label="Storage Slots">
-            <StorageSlotsTable
-              storage={account.storage}
-              storageSlots={component.storageSlots}
-            />
-          </NestedTableRow>
-        )}
-        {script.procedureExports.length > 0 && (
-          <NestedTableRow label="Procedures">
-            <ProceduresTable
-              account={account}
-              script={script}
-              component={component}
-            />
-          </NestedTableRow>
-        )}
-      </TableBody>
-    </Table>
-  </div>
-);
+}) => {
+  const storageSlots = componentStorageSlots(script, account.storage);
+  return (
+    <div className="rounded-md border">
+      <Table>
+        <TableBody>
+          <TableRow>
+            <TableCell>Name</TableCell>
+            <TableCell>{componentTitle(script)}</TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell>Script</TableCell>
+            <TableCell>
+              <Link
+                className="text-primary font-medium underline underline-offset-4"
+                to={`/scripts/${script.id}`}
+              >
+                {script.name}
+              </Link>
+            </TableCell>
+          </TableRow>
+          {storageSlots.length > 0 && (
+            <NestedTableRow label="Storage Slots">
+              <StorageSlotsTable
+                storage={account.storage}
+                storageSlots={storageSlots}
+              />
+            </NestedTableRow>
+          )}
+          {script.procedureExports.length > 0 && (
+            <NestedTableRow label="Procedures">
+              <ProceduresTable account={account} script={script} />
+            </NestedTableRow>
+          )}
+        </TableBody>
+      </Table>
+    </div>
+  );
+};
 
 export default AccountComponentTable;

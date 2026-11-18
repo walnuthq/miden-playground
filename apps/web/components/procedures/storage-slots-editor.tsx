@@ -10,13 +10,17 @@ import {
 } from "@workspace/ui/components/select";
 import { Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
+import StorageSlotName from "@/components/lib/storage-slot-name";
 import {
   type StorageSlot,
   type StorageSlotType,
   storageSlotTypes,
-} from "@/lib/types/component";
-import { keyValuesToString, stringToKeyValues } from "@/lib/utils/component";
-import { isWordText } from "@/lib/utils/storage-slots";
+} from "@/lib/types/storage-slot";
+import {
+  isWordText,
+  keyValuesToString,
+  stringToKeyValues,
+} from "@/lib/utils/storage-slots";
 
 const slotTypeItems = Object.entries(storageSlotTypes).map(
   ([value, label]) => ({ value, label }),
@@ -156,9 +160,7 @@ const StorageSlotsEditor = ({
       {storageSlots.map((storageSlot, index) => (
         <div key={storageSlot.name} className="flex flex-col gap-2 p-2">
           <div className="flex items-center gap-2">
-            <span className="min-w-0 break-all font-mono text-xs">
-              {storageSlot.name}
-            </span>
+            <StorageSlotName name={storageSlot.name} className="min-w-0" />
             <Badge variant="outline">
               {storageSlotTypes[storageSlot.type]}
             </Badge>

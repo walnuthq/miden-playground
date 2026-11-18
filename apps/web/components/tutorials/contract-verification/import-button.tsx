@@ -4,24 +4,22 @@ import { Download } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import useAccounts from "@/hooks/use-accounts";
-import useComponents from "@/hooks/use-components";
-import { defaultComponentIds } from "@/lib/types/default-components";
-import noAuth from "@/lib/types/default-components/auth-no-auth";
+import useScripts from "@/hooks/use-scripts";
+import { deployableAccountComponents } from "@/lib/utils/account-components";
+import { schemaStorageSlots } from "@/lib/utils/storage-schema";
 
 const ImportButton = () => {
   const { accounts, deployAccount } = useAccounts();
-  const { components } = useComponents();
+  const { scripts } = useScripts();
   const [loading, setLoading] = useState(false);
-  const counterContractComponent = components.find(
-    ({ id, type }) =>
-      !defaultComponentIds.includes(id) && type === "account-component",
-  );
+  // The counter the user compiled in step 2.
+  const [counterScript] = deployableAccountComponents(scripts);
   const counter = accounts.find(({ name }) => name === "Unverified Contract");
   return (
     <Button
       disabled={loading || !!counter}
       onClick={async () => {
-        if (!counterContractComponent) {
+        if (!counterScript) {
           return;
         }
         setLoading(true);
@@ -29,7 +27,15 @@ const ImportButton = () => {
           await deployAccount({
             name: "Unverified Contract",
             storageMode: "public",
-            components: [noAuth, counterContractComponent],
+            components: [
+              { scriptId: "auth-no-auth", storageSlots: [] },
+              {
+                scriptId: counterScript.id,
+                storageSlots: counterScript.metadata?.storage
+                  ? schemaStorageSlots(counterScript.metadata.storage)
+                  : [],
+              },
+            ],
             verify: false,
           });
         } catch (error) {

@@ -15,4 +15,7 @@ export type ExampleMeta = {
 
 export type Example = ExampleMeta & {
   state: State;
+  // The name of the account launching the example deploys, from the script
+  // named after the example's id (useExamples).
+  accountName: string;
 };

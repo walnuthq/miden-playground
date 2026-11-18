@@ -12,10 +12,14 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@workspace/ui/components/tooltip";
+import StorageSlotName from "@/components/lib/storage-slot-name";
 import type { StorageItem } from "@/lib/types/account";
-import { type StorageSlot, storageSlotTypes } from "@/lib/types/component";
+import {
+  type StorageSlotType,
+  storageSlotTypes,
+} from "@/lib/types/storage-slot";
 import { getItem } from "@/lib/utils/account";
-import { newWasmWord, wasmWordFromHex } from "@/lib/web-client";
+import { wasmWordFromHex } from "@/lib/web-client";
 
 const StorageSlotValueTooltip = ({ value }: { value: string }) => {
   const feltArray = wasmWordFromHex(value);
@@ -33,32 +37,9 @@ const StorageSlotValueTooltip = ({ value }: { value: string }) => {
   );
 };
 
-const StorageSlotMapTable = ({
-  storageItem,
-  defaultValue,
-}: {
-  storageItem: StorageItem;
-  defaultValue: string;
-}) => {
-  const keyValuePairs = defaultValue === "" ? [] : defaultValue.split(",");
-  const keyValues = keyValuePairs.map((pair) => {
-    const [key = "", value = ""] = pair.split(":");
-    return {
-      key: newWasmWord(new BigUint64Array([BigInt(key), 0n, 0n, 0n])),
-      value: newWasmWord(new BigUint64Array([BigInt(value), 0n, 0n, 0n])),
-    };
-  });
-  // First entry per key, compared by identity like lodash's uniqBy.
-  const seenKeys = new Set<unknown>();
-  const entries = [...storageItem.mapEntries, ...keyValues].filter(
-    ({ key }) => {
-      if (seenKeys.has(key)) {
-        return false;
-      }
-      seenKeys.add(key);
-      return true;
-    },
-  );
+// A map slot's entries: those the account holds, none until set.
+const StorageSlotMapTable = ({ storageItem }: { storageItem: StorageItem }) => {
+  const entries = storageItem.mapEntries;
   return (
     <div className="rounded-md border">
       <Table>
@@ -90,7 +71,7 @@ const StorageSlotsTable = ({
   storageSlots,
 }: {
   storage: StorageItem[];
-  storageSlots: StorageSlot[];
+  storageSlots: { name: string; type: StorageSlotType }[];
 }) => (
   <div className="rounded-md border">
     <Table>
@@ -108,17 +89,17 @@ const StorageSlotsTable = ({
           );
           return (
             <TableRow key={storageSlot.name}>
-              <TableCell>{storageSlot.name}</TableCell>
+              {/* Wraps: the full name is wider than a phone. */}
+              <TableCell className="min-w-40 whitespace-normal">
+                <StorageSlotName name={storageSlot.name} />
+              </TableCell>
               <TableCell>{storageSlotTypes[storageSlot.type]}</TableCell>
               <TableCell>
                 {storageSlot.type === "value" && storageItem && (
                   <StorageSlotValueTooltip value={getItem(storageItem)} />
                 )}
                 {storageSlot.type === "map" && storageItem && (
-                  <StorageSlotMapTable
-                    storageItem={storageItem}
-                    defaultValue={storageSlot.value}
-                  />
+                  <StorageSlotMapTable storageItem={storageItem} />
                 )}
               </TableCell>
             </TableRow>

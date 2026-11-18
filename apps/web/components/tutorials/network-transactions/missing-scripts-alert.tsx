@@ -10,9 +10,9 @@ import useTutorials from "@/hooks/use-tutorials";
 // never gets them later, a resumed run keeping its saved scripts: every step
 // that needs them offers to start over.
 const MissingScriptsAlert = () => {
-  const { noteScript, component } = useNetworkCounter();
+  const { noteScript, counterScript } = useNetworkCounter();
   const { restartTutorial } = useTutorials();
-  if (noteScript && component) {
+  if (noteScript && counterScript) {
     return null;
   }
   return (

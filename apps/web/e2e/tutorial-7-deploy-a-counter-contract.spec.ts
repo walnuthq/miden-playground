@@ -71,38 +71,22 @@ test("tutorial 7: deploy a counter contract", async ({ page }) => {
     await nextStep(page);
   });
 
-  await test.step("3. create an account component", async () => {
-    await panel.openLink("components page", /\/components$/);
-    await page.getByRole("button", { name: "Create new component" }).click();
-    const dialog = page
-      .getByRole("dialog")
-      .filter({ hasText: "Create Component" });
-    await dialog.getByLabel("Name").fill("My Counter");
-    await selectOption(page, "Type", "Account Component");
-    await selectOption(page, "Script", SCRIPT_NAME);
-    await dialog.getByRole("button", { name: "Create" }).click();
-    await expect(page).toHaveURL(/\/components\/[^/]+$/);
-    await nextStep(page);
-  });
-
-  await test.step("4. add the count_map storage slot", async () => {
-    // The step shows the slot name derived from the script's name.
+  await test.step("3. the contract's storage layout", async () => {
+    // No action: the step shows the slot name derived from the script's
+    // name, which the compile listed in the Simulate tab.
     await expect(panel.root.getByText(SLOT_NAME).first()).toBeVisible();
-    await page.getByRole("button", { name: "Add storage slot" }).click();
-    const dialog = page
-      .getByRole("dialog")
-      .filter({ hasText: "Create Storage Slot" });
-    await dialog.getByLabel("Name").fill(SLOT_NAME);
-    await selectOption(page, "Type", "Map");
-    await dialog.getByRole("button", { name: "Add key-value pair" }).click();
-    await dialog.getByPlaceholder("Key").fill("1");
-    await dialog.getByPlaceholder("Value").fill("0");
-    await dialog.getByRole("button", { name: "Create" }).click();
-    await expect(dialog).toBeHidden();
+    await expect(panel.nextStepButton).toBeEnabled();
+    // openLink expects a page named after its id: this one shows its name.
+    await panel.root.getByRole("link", { name: "script's code" }).click();
+    await expect(page).toHaveURL(/\/scripts\/[0-9a-f-]{36}$/);
+    await expect(scriptHeader(page).name).toHaveText(SCRIPT_NAME);
+    const editorConsole = page.getByRole("region", { name: "Editor Console" });
+    await editorConsole.getByRole("tab", { name: "Simulate" }).click();
+    await expect(editorConsole.getByText(SLOT_NAME)).toBeVisible();
     await nextStep(page);
   });
 
-  await test.step("5. deploy the counter contract", async () => {
+  await test.step("4. deploy the counter contract", async () => {
     await panel.openLink("accounts page", /\/accounts$/);
     await page.getByRole("button", { name: "Create new account" }).click();
     await page.getByRole("menuitem", { name: "Deploy account" }).click();
@@ -113,14 +97,21 @@ test("tutorial 7: deploy a counter contract", async ({ page }) => {
     // Public storage and No Auth are the defaults.
     await expect(dialog.getByRole("combobox").first()).toContainText("Public");
     await expect(dialog.getByRole("combobox").nth(1)).toContainText("No Auth");
-    await selectOption(page, "Account Component", "My Counter");
+    await selectOption(page, "Account Component", SCRIPT_NAME);
+    // Its slot comes from the compiled script's storage layout: the map
+    // starts empty.
     await expect(dialog.getByText(SLOT_NAME)).toBeVisible();
+    await expect(
+      dialog.getByRole("button", { name: "Add entry" }),
+    ).toBeVisible();
+    await expect(dialog.getByPlaceholder("Key")).toHaveCount(0);
     await dialog.getByRole("button", { name: "Deploy" }).click();
     await expect(dialog).toBeHidden({ timeout: TRANSACTION_TIMEOUT });
     await nextStep(page);
   });
 
-  await test.step(`6. increment the counter by ${INCREMENT}`, async () => {
+  // A key the map never had reads as zero: the deployed counter starts at 0.
+  await test.step(`5. increment the counter by ${INCREMENT}`, async () => {
     await panel.openLink("Click its name", /\/accounts\/mtst1[0-9a-z]+$/);
     await page.getByRole("tab", { name: "Components" }).click();
     const count = await invoke(page, "get_count");
@@ -133,7 +124,7 @@ test("tutorial 7: deploy a counter contract", async ({ page }) => {
     await nextStep(page);
   });
 
-  await test.step(`7. the count is ${INCREMENT}`, async () => {
+  await test.step(`6. the count is ${INCREMENT}`, async () => {
     await expect(async () => {
       const count = await invoke(page, "get_count");
       await expect(count).toHaveText(new RegExp(`^${INCREMENT}\\s*Invoke$`), {

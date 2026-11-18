@@ -5,6 +5,7 @@ import type { Example } from "@/lib/types/example";
 const midenBank: Example = {
   ...exampleMeta("bank-account"),
   state,
+  accountName: "Bank Account",
 };
 
 export default midenBank;

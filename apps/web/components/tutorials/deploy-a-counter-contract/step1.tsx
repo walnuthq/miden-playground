@@ -25,7 +25,8 @@ const Step1: TutorialStep = {
           counter.
         </p>
         <p>
-          To do so, you'll write the contract code in a script, turn it into an{" "}
+          To do so, you'll write the contract code in a script, compile it into
+          an{" "}
           <ExternalLink href="https://docs.miden.xyz/reference/protocol/account/components">
             account component
           </ExternalLink>{" "}

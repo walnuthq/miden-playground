@@ -1,10 +1,12 @@
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
-import type { StorageSlot } from "../types/component.ts";
+import type { StorageSlot } from "../types/storage-slot.ts";
 import {
   applyStorageChanges,
   effectiveStorageChanges,
   storageSlotError,
+  storageSlotName,
+  storageSlotPrefix,
   storageSlotsValid,
   wordFelts,
   wordHexToText,
@@ -115,6 +117,67 @@ describe("effectiveStorageChanges", () => {
         values: [{ name: "other::set", value: ONE }],
         entries: [{ name: "c::count_map", key: FULL, value: SIX }],
       },
+    );
+  });
+});
+
+const counterSlot = (packageName: string) =>
+  storageSlotName({
+    packageName,
+    traitName: "CounterContract",
+    fieldName: "count_map",
+  });
+
+// The expected names are the ones in the packages api-compile built from the
+// counter template under each script name (2026-11-08, miden 0.15).
+describe("storageSlotName", () => {
+  test("turns the package name's dashes into underscores", () => {
+    assert.equal(
+      counterSlot("counter-account"),
+      "counter_account::counter_contract::count_map",
+    );
+    assert.equal(
+      counterSlot("my-counter"),
+      "my_counter::counter_contract::count_map",
+    );
+    assert.equal(
+      counterSlot("my-2nd-counter"),
+      "my_2nd_counter::counter_contract::count_map",
+    );
+  });
+
+  test("doesn't split the package name's letters from its digits", () => {
+    assert.equal(
+      counterSlot("counter2"),
+      "counter2::counter_contract::count_map",
+    );
+    assert.equal(
+      counterSlot("counter-v2"),
+      "counter_v2::counter_contract::count_map",
+    );
+    assert.equal(counterSlot("a1b2"), "a1b2::counter_contract::count_map");
+    assert.equal(
+      counterSlot("my-counter-2"),
+      "my_counter_2::counter_contract::count_map",
+    );
+  });
+
+  test("starts with the package's prefix", () => {
+    assert.equal(storageSlotPrefix("my-2nd.counter"), "my_2nd_counter::");
+    assert.ok(
+      counterSlot("counter2").startsWith(storageSlotPrefix("counter2")),
+    );
+  });
+
+  test("puts the trait in snake case", () => {
+    // The Miden Bank example's map slot.
+    assert.equal(
+      storageSlotName({
+        packageName: "bank-account",
+        traitName: "Bank",
+        fieldName: "balances",
+      }),
+      "bank_account::bank::balances",
     );
   });
 });

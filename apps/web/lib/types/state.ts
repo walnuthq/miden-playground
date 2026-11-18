@@ -4,7 +4,6 @@ import type {
   TransactionResult as WasmTransactionResultType,
 } from "@miden-sdk/miden-sdk";
 import type { Account } from "@/lib/types/account";
-import type { Component } from "@/lib/types/component";
 import type { InputNote } from "@/lib/types/note";
 import type { TutorialProgress } from "@/lib/types/project";
 import type { ProcedureExport, Script } from "@/lib/types/script";
@@ -74,12 +73,6 @@ export type State = {
   readOnlyProcedureDigest: string;
   readOnlyProcedureResult: string;
   scripts: Script[];
-  // COMPONENTS
-  createComponentDialogOpen: boolean;
-  upsertStorageSlotDialogOpen: boolean;
-  upsertStorageSlotDialogComponentId: string;
-  upsertStorageSlotDialogStorageSlotName: string;
-  components: Component[];
   // TUTORIALS
   tutorialId: TutorialId;
   tutorialStep: number;
@@ -112,6 +105,6 @@ export type State = {
   deleteProjectDialogOpen: boolean;
 };
 
-// Scripts and components a workspace starts with, fetched from the API: a
-// Mainnet sandbox's (mainnetSandboxStarter) or a tutorial's (Tutorial.starter).
-export type WorkspaceStarter = Pick<State, "scripts" | "components">;
+// Scripts a workspace starts with, fetched from the API: a Mainnet sandbox's
+// (mainnetSandboxStarter) or a tutorial's (Tutorial.starter).
+export type WorkspaceStarter = Pick<State, "scripts">;

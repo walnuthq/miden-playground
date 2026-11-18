@@ -16,10 +16,10 @@ import {
   Wallet,
 } from "lucide-react";
 import useAccounts from "@/hooks/use-accounts";
-import useComponents from "@/hooks/use-components";
 import useNetwork from "@/hooks/use-network";
+import useScripts from "@/hooks/use-scripts";
 import useTutorials from "@/hooks/use-tutorials";
-import { defaultComponentIds } from "@/lib/types/default-components";
+import { deployableAccountComponents } from "@/lib/utils/account-components";
 
 const CreateAccountDropdownMenu = () => {
   const { networkId } = useNetwork();
@@ -31,7 +31,7 @@ const CreateAccountDropdownMenu = () => {
     openDeployAccountDialog,
     openDeployMultisigDialog,
   } = useAccounts();
-  const { components } = useComponents();
+  const { scripts } = useScripts();
   const { isTutorial } = useTutorials();
   const showCreateWalletsFaucets = isTutorial || networkId === "mmck";
   const showImportDeployAccounts = true;
@@ -62,13 +62,7 @@ const CreateAccountDropdownMenu = () => {
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={openDeployAccountDialog}
-              disabled={
-                components.filter(
-                  ({ id, type }) =>
-                    !defaultComponentIds.includes(id) &&
-                    type === "account-component",
-                ).length === 0
-              }
+              disabled={deployableAccountComponents(scripts).length === 0}
             >
               <Upload />
               Deploy account

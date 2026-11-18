@@ -1,9 +1,44 @@
 // A component's storage slots as text (`StorageSlot`), to and from words. No
 // SDK import: the unit tests run on plain node.
 import type { StorageItem } from "../types/account.ts";
-import type { StorageSlot } from "../types/component.ts";
-import { keyValuesToString, stringToKeyValues } from "./component.ts";
+import type { StorageSlot } from "../types/storage-slot.ts";
+import { snakeCase } from "./case.ts";
 import { isFelt, isWord, wordToHex } from "./procedure-inputs.ts";
+
+// A component's storage slot name, as the compiler derives it
+// (`derive_storage_slot_name` in miden-base-macros): the package name as it
+// is, with every character outside [A-Za-z0-9_] replaced by `_`, then the
+// trait in snake case, then the field. The package name isn't split into
+// words: `counter2` stays `counter2`, where snakeCase gives `counter_2`.
+export const storageSlotName = ({
+  packageName,
+  traitName,
+  fieldName,
+}: {
+  packageName: string;
+  traitName: string;
+  fieldName: string;
+}) => `${storageSlotPrefix(packageName)}${snakeCase(traitName)}::${fieldName}`;
+
+// What every slot a package's components declare starts with: its name with
+// every character outside [A-Za-z0-9_] replaced by `_`, then `::`.
+export const storageSlotPrefix = (packageName: string) =>
+  `${packageName.replace(/[^A-Za-z0-9_]/g, "_")}::`;
+
+// A map slot's value as text: `key:value` pairs joined by commas.
+export const stringToKeyValues = (value: string) => {
+  if (value === "") {
+    return [];
+  }
+  const keyValuePairs = value.split(",");
+  return keyValuePairs.map((pair) => {
+    const [key = "", value = ""] = pair.split(":");
+    return { key, value };
+  });
+};
+
+export const keyValuesToString = (value: { key: string; value: string }[]) =>
+  value.map(({ key, value }) => `${key}:${value}`).join(",");
 
 // A slot value, a map key or a map value is written as a felt, which fills a
 // word's first element, or as a whole word in hex.

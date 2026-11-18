@@ -3,11 +3,7 @@ import {
   counterContractAddress,
 } from "@/lib/constants";
 import countReaderScript from "@/lib/tutorials/count-reader";
-import {
-  counterAccountComponent,
-  counterAccountScript,
-} from "@/lib/tutorials/counter-account";
-import defaultComponents from "@/lib/types/default-components";
+import { counterAccountScript } from "@/lib/tutorials/counter-account";
 import defaultScripts from "@/lib/types/default-scripts";
 import type { State } from "@/lib/types/state";
 import {
@@ -16,11 +12,11 @@ import {
   getRoutingParametersPart,
   midenFaucetAccount,
 } from "@/lib/utils/account";
-import { defaultComponent, storageSlotName } from "@/lib/utils/component";
 import { defaultState } from "@/lib/utils/state";
 
 // The counter tutorial 6 imports: the same `counter-account` instance, here
-// pre-imported so the tutorial starts at the Count Reader.
+// pre-imported so the tutorial starts at the Count Reader. Its components are
+// script ids (the embedded scripts keep the built-in packages' ids).
 const state: State = {
   ...defaultState(),
   accounts: [
@@ -43,28 +39,6 @@ const state: State = {
     },
   ],
   scripts: [...defaultScripts, counterAccountScript, countReaderScript],
-  components: [
-    ...defaultComponents,
-    counterAccountComponent,
-    {
-      ...defaultComponent(),
-      id: "count-reader",
-      name: "Count Reader",
-      type: "account-component",
-      scriptId: "count-reader",
-      storageSlots: [
-        {
-          name: storageSlotName({
-            packageName: "count-reader",
-            traitName: "CountReader",
-            fieldName: "count",
-          }),
-          type: "value",
-          value: "0",
-        },
-      ],
-    },
-  ],
   tutorialId: "foreign-procedure-invocation",
 };
 

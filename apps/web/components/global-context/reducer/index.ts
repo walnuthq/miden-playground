@@ -1,9 +1,6 @@
 import accountReducer, {
   type AccountAction,
 } from "@/components/global-context/reducer/account";
-import componentReducer, {
-  type ComponentAction,
-} from "@/components/global-context/reducer/component";
 import noteReducer, {
   type NoteAction,
 } from "@/components/global-context/reducer/note";
@@ -27,7 +24,6 @@ export type Action =
   | TransactionAction
   | NoteAction
   | ScriptAction
-  | ComponentAction
   | TutorialAction;
 
 const reducer = (state: State, action: Action): State => {
@@ -96,14 +92,6 @@ const reducer = (state: State, action: Action): State => {
     case "IMPORT_SCRIPTS":
     case "SET_READ_ONLY_PROCEDURE_RESULT": {
       return scriptReducer(state, action);
-    }
-    case "OPEN_CREATE_COMPONENT_DIALOG":
-    case "CLOSE_CREATE_COMPONENT_DIALOG":
-    case "OPEN_UPSERT_STORAGE_SLOT_DIALOG":
-    case "CLOSE_UPSERT_STORAGE_SLOT_DIALOG":
-    case "NEW_COMPONENT":
-    case "UPDATE_COMPONENT": {
-      return componentReducer(state, action);
     }
     case "PREVIOUS_TUTORIAL_STEP":
     case "NEXT_TUTORIAL_STEP":

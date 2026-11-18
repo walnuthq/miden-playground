@@ -7,8 +7,7 @@ import useNoteScript from "@/components/tutorials/timelock-p2id-note/use-note-sc
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import useAccounts from "@/hooks/use-accounts";
 import useTutorials from "@/hooks/use-tutorials";
-import { basicWalletComponent } from "@/lib/tutorials/basic-wallet";
-import noAuth from "@/lib/types/default-components/auth-no-auth";
+import { basicWalletScript } from "@/lib/tutorials/basic-wallet";
 import type { TutorialStep } from "@/lib/types/tutorial";
 import { scriptSource } from "@/lib/utils/script-files";
 import { timelockEdits } from "@/lib/utils/tutorial-code";
@@ -137,9 +136,9 @@ assert!(block_number.as_felt() >= self.timelock_height);`}
         <p>
           When you proceed to the next step, the Playground creates an Account
           named <strong>Test Wallet</strong> for you, with the{" "}
-          <strong>Rust Basic Wallet</strong> account component, built from the{" "}
-          <strong>basic-wallet</strong> script your note script relies on: it
-          will be the target account of your timelocked note.
+          <strong>basic-wallet</strong> script your note script relies on as an
+          account component: it will be the target account of your timelocked
+          note.
         </p>
         <TutorialStepAlert
           completed={completed}
@@ -178,7 +177,10 @@ assert!(block_number.as_felt() >= self.timelock_height);`}
               await deployAccount({
                 name: "Test Wallet",
                 storageMode: "public",
-                components: [noAuth, basicWalletComponent],
+                components: [
+                  { scriptId: "auth-no-auth", storageSlots: [] },
+                  { scriptId: basicWalletScript.id, storageSlots: [] },
+                ],
                 fund: false,
               });
             } catch (error) {

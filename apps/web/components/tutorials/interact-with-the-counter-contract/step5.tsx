@@ -43,7 +43,7 @@ const Step5: TutorialStep = {
         </p>
         <p>
           Under <em>"Account Components"</em>, find the{" "}
-          <em>"Counter Contract"</em> component and click the <em>"Invoke"</em>{" "}
+          <em>"counter-account"</em> component and click the <em>"Invoke"</em>{" "}
           button next to the{" "}
           <strong>
             <InlineCode>get_count</InlineCode>

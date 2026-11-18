@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, test } from "node:test";
-import { storageSlotName } from "../utils/component.ts";
+import { storageSlotName } from "../utils/storage-slots.ts";
 import { counterAccountScript } from "./counter-account.ts";
 
 // Read as a file: count-reader.ts imports modules that need Vite's

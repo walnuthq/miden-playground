@@ -22,43 +22,118 @@ import { useState } from "react";
 import { toast } from "sonner";
 import SelectScriptsCombobox from "@/components/accounts/select-scripts-combobox";
 import AccountAddress from "@/components/lib/account-address";
+import StorageSlotsEditor from "@/components/procedures/storage-slots-editor";
+import {
+  InvalidSlots,
+  slotNamePlaceholder,
+} from "@/components/script/simulate/dependency-accounts";
 import useAccounts from "@/hooks/use-accounts";
-import useComponents from "@/hooks/use-components";
 import useScripts from "@/hooks/use-scripts";
 import {
   type AccountStorageMode,
   accountStorageModes,
 } from "@/lib/types/account";
-import { defaultComponentIds } from "@/lib/types/default-components";
+import type { Script } from "@/lib/types/script";
+import type { StorageSlot } from "@/lib/types/storage-slot";
+import {
+  authComponents,
+  componentTitle,
+  deployableAccountComponents,
+} from "@/lib/utils/account-components";
 import { entryPointExport } from "@/lib/utils/script";
+import {
+  schemaStorageSlots,
+  storageSlotDescriptions,
+} from "@/lib/utils/storage-schema";
+import { storageSlotsValid } from "@/lib/utils/storage-slots";
+
+const NETWORK_ACCOUNT_ID = "auth-network-account";
+const ALLOWED_NOTE_SCRIPTS =
+  "miden::standards::auth::network_account::allowed_note_scripts";
+const ALLOWED_TX_SCRIPTS =
+  "miden::standards::auth::network_account::allowed_tx_scripts";
+
+// A component's slots at their initial values: its schema's, else none (the
+// user adds them).
+const initialSlots = (script: Script | undefined) => {
+  const schema = script?.metadata?.storage;
+  return schema ? schemaStorageSlots(schema) : [];
+};
+
+// The storage of a component the account is deployed with, edited in place:
+// its schema's slots, or slots added by hand when the script has none (a
+// script compiled before the API returned schemas).
+const ComponentStorage = ({
+  label,
+  script,
+  storageSlots,
+  onChange,
+  disabled,
+}: {
+  label: string;
+  script: Script;
+  storageSlots: StorageSlot[];
+  onChange: (storageSlots: StorageSlot[]) => void;
+  disabled: boolean;
+}) => {
+  const schema = script.metadata?.storage;
+  return (
+    <div className="flex min-w-0 flex-col gap-2">
+      <h3 className="text-sm font-medium">{label}</h3>
+      {!schema && (
+        <p className="text-xs text-muted-foreground">
+          This script was compiled without its storage layout: add its slots
+          below, or recompile it to list its storage slots.
+        </p>
+      )}
+      <StorageSlotsEditor
+        storageSlots={storageSlots}
+        onChange={onChange}
+        disabled={disabled}
+        allowSlotEdits={!schema}
+        descriptions={schema && storageSlotDescriptions(schema)}
+        namePlaceholder={slotNamePlaceholder(script.name)}
+      />
+    </div>
+  );
+};
 
 const DeployAccountDialog = () => {
   const { deployAccountDialogOpen, deployAccount, closeDeployAccountDialog } =
     useAccounts();
-  const { components } = useComponents();
   const { scripts } = useScripts();
   const [loading, setLoading] = useState(false);
   const [storageMode, setStorageMode] = useState<AccountStorageMode>("public");
-  const [authComponentId, setAuthComponentId] = useState("auth-no-auth");
-  const [componentId, setComponentId] = useState("");
+  const [authScriptId, setAuthScriptId] = useState("auth-no-auth");
+  const [authStorageSlots, setAuthStorageSlots] = useState<StorageSlot[]>([]);
+  const [scriptId, setScriptId] = useState("");
+  const [storageSlots, setStorageSlots] = useState<StorageSlot[]>([]);
   const [allowedNoteScriptIds, setAllowedNoteScriptIds] = useState<string[]>(
     [],
   );
   const [allowedTransactionScriptIds, setAllowedTransactionScriptIds] =
     useState<string[]>([]);
-  const authComponent = components.find(({ id }) => id === authComponentId);
-  const component = components.find(({ id }) => id === componentId);
-  const authComponents = components.filter(
-    ({ type }) => type === "authentication-component",
-  );
-  const accountComponents = components.filter(
-    ({ id, type }) =>
-      !defaultComponentIds.includes(id) && type === "account-component",
-  );
+  const authScripts = authComponents(scripts);
+  const accountScripts = deployableAccountComponents(scripts);
+  const authScript = authScripts.find(({ id }) => id === authScriptId);
+  const script = accountScripts.find(({ id }) => id === scriptId);
+  const isNetworkAccount = authScriptId === NETWORK_ACCOUNT_ID;
+  // Network Account's slots come from its two script pickers. No Auth has
+  // none.
+  const showAuthStorage =
+    !!authScript &&
+    !isNetworkAccount &&
+    (!authScript.metadata?.storage ||
+      authScript.metadata.storage.slots.length > 0);
+  const valid =
+    storageSlotsValid(storageSlots) &&
+    (!showAuthStorage || storageSlotsValid(authStorageSlots));
   const onClose = () => {
     setStorageMode("public");
-    setAuthComponentId("auth-no-auth");
-    setComponentId("");
+    setAuthScriptId("auth-no-auth");
+    setAuthStorageSlots([]);
+    setScriptId("");
+    setStorageSlots([]);
     setAllowedNoteScriptIds([]);
     setAllowedTransactionScriptIds([]);
     closeDeployAccountDialog();
@@ -76,53 +151,46 @@ const DeployAccountDialog = () => {
       disablePointerDismissal
       onOpenChange={(open) => !open && onClose()}
     >
-      <DialogContent data-modal="false" className="sm:max-w-160">
+      <DialogContent
+        data-modal="false"
+        className="max-h-[calc(100dvh-2rem)] grid-cols-[minmax(0,1fr)] overflow-y-auto sm:max-w-160"
+      >
         <DialogHeader>
           <DialogTitle>Deploy Account</DialogTitle>
           <DialogDescription>Deploy a new custom account.</DialogDescription>
         </DialogHeader>
+        {/* The storage editors sit outside the form: the one that adds slots
+            has a form of its own, whose submit would bubble to this one. */}
         <form
           id="deploy-account-form"
           onSubmit={async (event) => {
             event.preventDefault();
-            if (!component || !authComponent) {
+            if (!script || !authScript || !valid) {
               return;
             }
             const formData = new FormData(event.currentTarget);
-            const authComponentWithInitialValues =
-              authComponent.id === "auth-network-account"
-                ? {
-                    ...authComponent,
-                    storageSlots: authComponent.storageSlots.map(
-                      (storageSlot) => ({
-                        ...storageSlot,
-                        value:
-                          storageSlot.name ===
-                          "miden::standards::auth::network_account::allowed_note_scripts"
-                            ? allowedNoteScriptIds
-                                .map(scriptIdToProcedure)
-                                .join(",")
-                            : allowedTransactionScriptIds
-                                .map(scriptIdToProcedure)
-                                .join(","),
-                      }),
-                    ),
-                  }
-                : {
-                    ...authComponent,
-                    storageSlots: authComponent.storageSlots.map(
-                      (storageSlot) => ({
-                        ...storageSlot,
-                        value: formData.get(storageSlot.name)?.toString() ?? "",
-                      }),
-                    ),
-                  };
-            const componentWithInitialValues = {
-              ...component,
-              storageSlots: component.storageSlots.map((storageSlot) => ({
-                ...storageSlot,
-                value: formData.get(storageSlot.name)?.toString() ?? "",
-              })),
+            const authComponent = {
+              scriptId: authScript.id,
+              storageSlots: isNetworkAccount
+                ? [
+                    {
+                      name: ALLOWED_NOTE_SCRIPTS,
+                      type: "map" as const,
+                      value: allowedNoteScriptIds
+                        .map(scriptIdToProcedure)
+                        .join(","),
+                    },
+                    {
+                      name: ALLOWED_TX_SCRIPTS,
+                      type: "map" as const,
+                      value: allowedTransactionScriptIds
+                        .map(scriptIdToProcedure)
+                        .join(","),
+                    },
+                  ]
+                : showAuthStorage
+                  ? authStorageSlots
+                  : [],
             };
             setLoading(true);
             try {
@@ -130,8 +198,8 @@ const DeployAccountDialog = () => {
                 name: formData.get("name")?.toString() ?? "",
                 storageMode,
                 components: [
-                  authComponentWithInitialValues,
-                  componentWithInitialValues,
+                  authComponent,
+                  { scriptId: script.id, storageSlots },
                 ],
               });
               toast(`${account.name} has been deployed.`, {
@@ -150,7 +218,7 @@ const DeployAccountDialog = () => {
             setLoading(false);
           }}
         >
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid gap-4 sm:grid-cols-2">
             <div className="grid gap-3">
               <Label htmlFor="name">Name</Label>
               <Input id="name" name="name" required />
@@ -164,7 +232,7 @@ const DeployAccountDialog = () => {
                 }
                 value={storageMode}
               >
-                <SelectTrigger className="w-45">
+                <SelectTrigger id="storage-mode" className="w-full sm:w-45">
                   <SelectValue placeholder="Select storage mode…" />
                 </SelectTrigger>
                 <SelectContent>
@@ -188,20 +256,25 @@ const DeployAccountDialog = () => {
             <div className="grid gap-3">
               <Label htmlFor="auth-component">Auth Component</Label>
               <Select
-                items={authComponents.map(({ id, name }) => ({
-                  value: id,
-                  label: name,
+                items={authScripts.map((script) => ({
+                  value: script.id,
+                  label: componentTitle(script),
                 }))}
-                onValueChange={(value) => setAuthComponentId(value ?? "")}
-                value={authComponentId || null}
+                onValueChange={(value) => {
+                  setAuthScriptId(value ?? "");
+                  setAuthStorageSlots(
+                    initialSlots(authScripts.find(({ id }) => id === value)),
+                  );
+                }}
+                value={authScriptId || null}
               >
-                <SelectTrigger className="w-45">
+                <SelectTrigger id="auth-component" className="w-full sm:w-45">
                   <SelectValue placeholder="Select auth component…" />
                 </SelectTrigger>
                 <SelectContent>
-                  {authComponents.map(({ id, name }) => (
-                    <SelectItem key={id} value={id}>
-                      {name}
+                  {authScripts.map((script) => (
+                    <SelectItem key={script.id} value={script.id}>
+                      {componentTitle(script)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -210,28 +283,33 @@ const DeployAccountDialog = () => {
             <div className="grid gap-3">
               <Label htmlFor="component">Account Component</Label>
               <Select
-                items={accountComponents.map(({ id, name }) => ({
-                  value: id,
-                  label: name,
+                items={accountScripts.map((script) => ({
+                  value: script.id,
+                  label: componentTitle(script),
                 }))}
-                onValueChange={(value) => setComponentId(value ?? "")}
-                value={componentId || null}
+                onValueChange={(value) => {
+                  setScriptId(value ?? "");
+                  setStorageSlots(
+                    initialSlots(accountScripts.find(({ id }) => id === value)),
+                  );
+                }}
+                value={scriptId || null}
               >
-                <SelectTrigger className="w-45">
+                <SelectTrigger id="component" className="w-full sm:w-45">
                   <SelectValue placeholder="Select component…" />
                 </SelectTrigger>
                 <SelectContent>
-                  {accountComponents.map(({ id, name }) => (
-                    <SelectItem key={id} value={id}>
-                      {name}
+                  {accountScripts.map((script) => (
+                    <SelectItem key={script.id} value={script.id}>
+                      {componentTitle(script)}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            {authComponentId === "auth-network-account" && (
+            {isNetworkAccount && (
               <>
-                <div className="grid gap-3 col-span-2">
+                <div className="grid gap-3 sm:col-span-2">
                   <Label htmlFor="allowed-note-scripts">
                     Allowed Note-scripts
                   </Label>
@@ -242,7 +320,7 @@ const DeployAccountDialog = () => {
                     placeholder="Select allowed note-scripts…"
                   />
                 </div>
-                <div className="grid gap-3 col-span-2">
+                <div className="grid gap-3 sm:col-span-2">
                   <Label htmlFor="allowed-transaction-scripts">
                     Allowed Transaction-scripts
                   </Label>
@@ -257,26 +335,27 @@ const DeployAccountDialog = () => {
                 </div>
               </>
             )}
-            {[
-              ...(authComponent?.id !== "auth-network-account"
-                ? (authComponent?.storageSlots ?? [])
-                : []),
-              ...(component?.storageSlots ?? []),
-            ].map((storageSlot) => (
-              <div key={storageSlot.name} className="grid gap-3 col-span-2">
-                <Label htmlFor={storageSlot.name}>
-                  <pre>{storageSlot.name}</pre>
-                </Label>
-                <Input
-                  id={storageSlot.name}
-                  name={storageSlot.name}
-                  defaultValue={storageSlot.value}
-                  required={storageSlot.type === "value"}
-                />
-              </div>
-            ))}
           </div>
         </form>
+        {showAuthStorage && (
+          <ComponentStorage
+            label={`${componentTitle(authScript)} storage`}
+            script={authScript}
+            storageSlots={authStorageSlots}
+            onChange={setAuthStorageSlots}
+            disabled={loading}
+          />
+        )}
+        {script && (
+          <ComponentStorage
+            label={`${componentTitle(script)} storage`}
+            script={script}
+            storageSlots={storageSlots}
+            onChange={setStorageSlots}
+            disabled={loading}
+          />
+        )}
+        {!valid && <InvalidSlots />}
         <DialogFooter>
           <DialogClose render={<Button variant="outline" />}>
             Cancel
@@ -284,7 +363,7 @@ const DeployAccountDialog = () => {
           <Button
             form="deploy-account-form"
             type="submit"
-            disabled={loading || !componentId}
+            disabled={loading || !script || !valid}
           >
             {loading && <Spinner />}
             {loading ? "Deploying…" : "Deploy"}

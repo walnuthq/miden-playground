@@ -12,6 +12,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@workspace/ui/components/tooltip";
+import StorageSlotName from "@/components/lib/storage-slot-name";
 import { formatValue } from "@/lib/utils";
 import { formatStorageSlotName } from "@/lib/utils/account";
 
@@ -42,7 +43,11 @@ const AccountStorageDeltaTable = ({
       <TableBody>
         {storageDelta.map(({ name, key, before, after }) => (
           <TableRow key={`${name}:${key ?? ""}`}>
-            <TableCell>{formatStorageSlotName(name)}</TableCell>
+            <TableCell>
+              <StorageSlotName name={name}>
+                {formatStorageSlotName(name)}
+              </StorageSlotName>
+            </TableCell>
             <TableCell className="space-y-2.5">
               {key !== undefined && (
                 <p>

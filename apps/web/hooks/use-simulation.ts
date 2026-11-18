@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import type { FaucetLabel } from "@/components/lib/fungible-assets-table";
-import useComponents from "@/hooks/use-components";
 import useDependencyAccounts from "@/hooks/use-dependency-accounts";
 import { appendConsoleEntry } from "@/lib/console-log";
 import type { ForeignAccountsStatus } from "@/lib/simulation/blocked";
@@ -112,14 +111,10 @@ const summary = (
 // vault shown. Every run starts from them, at nonce 0 (1 with assets, which a
 // seed transaction put in the vault): nothing is persisted.
 const useSimulation = (script: Script) => {
-  const { components } = useComponents();
   const schema = script.metadata?.storage;
   const [slots, setStorageSlots] = useSimulationStorageSlots(
     script.id,
-    useMemo(
-      () => initialStorageSlots(script, components),
-      [script, components],
-    ),
+    useMemo(() => initialStorageSlots(script), [script]),
   );
   const storageSlots = useMemo(
     () => shownStorageSlots(schema, slots),

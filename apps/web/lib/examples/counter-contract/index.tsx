@@ -5,6 +5,7 @@ import type { Example } from "@/lib/types/example";
 const counterContract: Example = {
   ...exampleMeta("counter-account"),
   state,
+  accountName: "Counter Contract",
 };
 
 export default counterContract;

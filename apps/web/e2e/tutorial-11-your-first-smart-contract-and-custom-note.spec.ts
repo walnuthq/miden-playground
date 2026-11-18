@@ -63,7 +63,6 @@ test("tutorial 11: your first smart contract and custom note", async ({
 
   await test.step("2. compile the counter contract", async () => {
     await compile(page);
-    // Moving on creates the Counter Contract account component.
     await nextStep(page);
   });
 
@@ -101,10 +100,13 @@ test("tutorial 11: your first smart contract and custom note", async ({
     // Public storage and No Auth are the defaults.
     await expect(dialog.getByRole("combobox").first()).toContainText("Public");
     await expect(dialog.getByRole("combobox").nth(1)).toContainText("No Auth");
-    await selectOption(page, "Account Component", "Counter Contract");
+    await selectOption(page, "Account Component", "counter-account");
+    // The slot of the script's storage layout, its map empty: the counter
+    // starts at 0.
     await expect(
-      dialog.getByLabel("counter_account::counter_contract::count_map"),
-    ).toHaveValue("1:0");
+      dialog.getByText("counter_account::counter_contract::count_map"),
+    ).toBeVisible();
+    await expect(dialog.getByPlaceholder("Key")).toHaveCount(0);
     await dialog.getByRole("button", { name: "Deploy" }).click();
     await expect(dialog).toBeHidden({ timeout: TRANSACTION_TIMEOUT });
     await nextStep(page);

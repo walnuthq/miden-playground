@@ -6,12 +6,9 @@ import {
   InlineCode,
 } from "@/components/tutorials/prose";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
-import useComponents from "@/hooks/use-components";
 import useScripts from "@/hooks/use-scripts";
-import useTutorials from "@/hooks/use-tutorials";
 import { defaultScriptIds } from "@/lib/types/default-scripts";
 import type { TutorialStep } from "@/lib/types/tutorial";
-import { storageSlotName } from "@/lib/utils/component";
 
 const useCompleted = () => {
   const { scripts } = useScripts();
@@ -237,42 +234,7 @@ trait CounterContract {
   },
   NextStepButton: () => {
     const completed = useCompleted();
-    const { scripts } = useScripts();
-    const { components, newComponent } = useComponents();
-    const { nextTutorialStep } = useTutorials();
-    const script = scripts.find(
-      ({ id, type }) =>
-        !defaultScriptIds.includes(id) && type === "account-component",
-    );
-    const component = components.find(
-      ({ scriptId }) => scriptId === script?.id,
-    );
-    return (
-      <NextStepButton
-        disabled={!completed}
-        onClick={() => {
-          if (!component) {
-            newComponent({
-              name: "Counter Contract",
-              type: "account-component",
-              scriptId: script?.id ?? "",
-              storageSlots: [
-                {
-                  name: storageSlotName({
-                    packageName: script?.name ?? "",
-                    traitName: "CounterContract",
-                    fieldName: "count_map",
-                  }),
-                  type: "map",
-                  value: "1:0",
-                },
-              ],
-            });
-          }
-          nextTutorialStep();
-        }}
-      />
-    );
+    return <NextStepButton disabled={!completed} />;
   },
 };
 

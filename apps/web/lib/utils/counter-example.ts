@@ -1,13 +1,12 @@
 import { importExample } from "@/lib/api";
-import { counterAccountComponent } from "@/lib/tutorials/counter-account";
 import type { WorkspaceStarter } from "@/lib/types/state";
 import { compiledPackageToScript } from "@/lib/utils/script";
 
 // The counter-contract example (whose id is its account package's name).
 export const COUNTER_EXAMPLE_ID = "counter-account";
 
-// The counter-contract example's packages (counter-account and increment-note)
-// and the counter's component, as a workspace's starting scripts. The API
+// The counter-contract example's packages (counter-account and increment-note),
+// as a workspace's starting scripts. The API
 // inserts the packages precompiled (compiled.json), as when launching the
 // example, without its auto-deployed account. A Mainnet sandbox starts from
 // them, and so does tutorial 9 (Tutorial.starter), which only reads them:
@@ -26,16 +25,10 @@ export const counterExampleStarter = async ({
   if (failedScript) {
     throw new Error(`${failedScript.name}: ${failedScript.error}`);
   }
-  const counterAccountScript = scripts.find(
-    ({ name }) => name === COUNTER_EXAMPLE_ID,
-  );
   return {
     scripts: scripts.map((script) => ({
       ...compiledPackageToScript(script),
       readOnly,
     })),
-    components: counterAccountScript
-      ? [{ ...counterAccountComponent, scriptId: counterAccountScript.id }]
-      : [],
   };
 };

@@ -1,7 +1,8 @@
 // An account component's storage slots from its package's storage schema. No
 // SDK import: the unit tests run on plain node.
-import type { StorageSlot } from "../types/component.ts";
+
 import type { StorageSchema } from "../types/script.ts";
+import type { StorageSlot } from "../types/storage-slot.ts";
 
 // The slots a schema declares, in its order, at their defaults: the schema's
 // default word for a value slot, else zero, and no entries for a map.

@@ -20,7 +20,6 @@ const getLink = (pathname: string) => {
     transactions: { href: "/transactions", title: "Transactions" },
     notes: { href: "/notes", title: "Notes" },
     scripts: { href: "/scripts", title: "Scripts" },
-    components: { href: "/components", title: "Components" },
   };
   return links[route as keyof typeof links];
 };
@@ -98,7 +97,6 @@ export const HeaderView = ({ actions }: { actions: ReactNode }) => {
     "/transactions",
     "/notes",
     "/scripts",
-    "/components",
   ].includes(pathname);
   return (
     <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">

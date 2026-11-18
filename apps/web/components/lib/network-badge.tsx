@@ -32,10 +32,11 @@ const NetworkBadge = () => {
   } = useGlobalContext();
   const switching = nextState !== null;
   const { syncState, popState } = useAppState();
-  const { exampleId, loadExample } = useExamples();
-  const exampleAccount = accounts.find(({ components }) =>
-    components.includes(exampleId),
-  );
+  const { exampleId, exampleScript, loadExample } = useExamples();
+  // The account deployed with the example's script.
+  const exampleAccount = exampleScript
+    ? accounts.find(({ components }) => components.includes(exampleScript.id))
+    : undefined;
   // Not while the tab is hidden: it would keep querying the node and the note
   // transport for nobody. It ticks again within 2.5 s of the tab showing.
   const visible = useDocumentVisible();

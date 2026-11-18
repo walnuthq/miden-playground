@@ -1,28 +1,36 @@
 import { Plus } from "lucide-react";
+import useScriptName from "@/components/tutorials/contract-verification/use-script-name";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import { ButtonName, InlineCode } from "@/components/tutorials/prose";
 import TutorialLink from "@/components/tutorials/tutorial-link";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import useAccounts from "@/hooks/use-accounts";
-import useComponents from "@/hooks/use-components";
+import useScripts from "@/hooks/use-scripts";
 import type { Account } from "@/lib/types/account";
-import { defaultComponentIds } from "@/lib/types/default-components";
 import type { TutorialStep } from "@/lib/types/tutorial";
 
-const useCompleted = () => {
+// The contract deployed with the script compiled in step 2.
+const useCounter = () => {
   const { accounts } = useAccounts();
-  const { components } = useComponents();
-  const component = components.find(
-    ({ id, type }) =>
-      !defaultComponentIds.includes(id) && type === "account-component",
+  const { scripts } = useScripts();
+  const scriptName = useScriptName();
+  const script = scripts.find(
+    ({ name, type }) => name === scriptName && type === "account-component",
   );
-  const counter = accounts.find(({ components }) =>
-    components.includes(component?.id ?? ""),
-  );
-  return !!counter;
+  return script
+    ? accounts.find(({ components }) => components.includes(script.id))
+    : undefined;
 };
 
-const Step3Content = ({ counter }: { counter?: Account }) => (
+const useCompleted = () => !!useCounter();
+
+const Step3Content = ({
+  counter,
+  scriptName,
+}: {
+  counter?: Account;
+  scriptName: string;
+}) => (
   <>
     <p>
       Now that the counter contract script is compiled, let's deploy the
@@ -36,13 +44,14 @@ const Step3Content = ({ counter }: { counter?: Account }) => (
     <p>
       Enter a name for your contract and leave the storage mode set to{" "}
       <strong>Public</strong>. Keep <strong>No Auth</strong> as the
-      authentication component, then select the{" "}
-      <strong>Counter Contract</strong> account component and keep the default
-      value of its{" "}
+      authentication component, then select your script,{" "}
+      <strong className="wrap-anywhere">{scriptName}</strong>, as the account
+      component. Its{" "}
       <strong>
         <InlineCode>count_map</InlineCode>
       </strong>{" "}
-      storage slot.
+      storage slot is listed with no entries: the counter starts at{" "}
+      <strong>0</strong>. Leave it as it is.
     </p>
     <p>
       Finally, click the <em>"Deploy"</em> button. This takes a few moments: the
@@ -89,18 +98,11 @@ const Step3: TutorialStep = {
   title: "Deploy the counter contract.",
   Content: () => {
     const completed = useCompleted();
-    const { accounts } = useAccounts();
-    const { components } = useComponents();
-    const component = components.find(
-      ({ id, type }) =>
-        !defaultComponentIds.includes(id) && type === "account-component",
-    );
-    const counter = accounts.find(({ components }) =>
-      components.includes(component?.id ?? ""),
-    );
+    const counter = useCounter();
+    const scriptName = useScriptName();
     return (
       <>
-        <Step3Content counter={counter} />
+        <Step3Content counter={counter} scriptName={scriptName} />
         <TutorialStepAlert
           completed={completed}
           title="Action required: Deploy the counter contract."
@@ -110,8 +112,8 @@ const Step3: TutorialStep = {
               On the accounts page, click the{" "}
               <ButtonName icon={Plus}>Create new account</ButtonName> button,
               select the <em>"Deploy account"</em> option and deploy a contract
-              with the <strong>No Auth</strong> authentication component and the{" "}
-              <strong>Counter Contract</strong> account component.
+              with the <strong>No Auth</strong> authentication component and
+              your script as the account component.
             </p>
           }
         />
