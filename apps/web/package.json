@@ -39,7 +39,7 @@
     "@tanstack/react-table": "9.3.1",
     "@wagmi/core": "3.6.9",
     "@workspace/ui": "workspace:*",
-    "lucide-react": "1.73.0",
+    "lucide-react": "1.74.0",
     "next-themes": "0.4.6",
     "react": "19.3.1",
     "react-dom": "19.3.1",
@@ -48,11 +48,11 @@
     "smol-toml": "1.9.1",
     "sonner": "2.0.8",
     "usehooks-ts": "3.1.1",
-    "viem": "2.57.20",
+    "viem": "2.58.0",
     "wagmi": "3.7.11"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "5.20261116.1",
+    "@cloudflare/workers-types": "5.20261117.1",
     "@miden-sdk/vite-plugin": "0.17.5",
     "@playwright/test": "1.65.1",
     "@tailwindcss/vite": "4.3.5",
