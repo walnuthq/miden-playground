@@ -38,7 +38,7 @@ const tutorialStarter = async (
   tutorial: Tutorial,
 ): Promise<WorkspaceStarter> => {
   if (!tutorial.starter) {
-    return { scripts: [], components: [] };
+    return { scripts: [] };
   }
   try {
     return await tutorial.starter();
@@ -47,7 +47,7 @@ const tutorialStarter = async (
     toast.warning("The tutorial's scripts couldn't be added.", {
       description: error instanceof Error ? error.message : String(error),
     });
-    return { scripts: [], components: [] };
+    return { scripts: [] };
   }
 };
 
@@ -154,7 +154,6 @@ const useTutorials = () => {
     const freshState = {
       ...tutorial.state,
       scripts: [...tutorial.state.scripts, ...starter.scripts],
-      components: [...tutorial.state.components, ...starter.components],
       nextStore: tutorial.store,
       tutorialStartBlockNum: await startBlockNum(tutorial.networkId),
       tutorialRunId: randomLowercaseId(),

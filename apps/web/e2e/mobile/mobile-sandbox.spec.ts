@@ -75,7 +75,6 @@ test("mobile: a sandbox fits the screen", async ({ page }) => {
       ["Accounts", /\/accounts$/],
       ["Transactions", /\/transactions$/],
       ["Notes", /\/notes$/],
-      ["Components", /\/components$/],
       ["Scripts", /\/scripts$/],
       ["Home", /\/$/],
     ] as const) {

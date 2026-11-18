@@ -7,11 +7,8 @@ import {
   InlineCode,
 } from "@/components/tutorials/prose";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
-import useComponents from "@/hooks/use-components";
 import useScripts from "@/hooks/use-scripts";
-import useTutorials from "@/hooks/use-tutorials";
 import type { TutorialStep } from "@/lib/types/tutorial";
-import { storageSlotName } from "@/lib/utils/component";
 import { resetCountEdits } from "@/lib/utils/tutorial-code";
 
 const useScript = () => {
@@ -157,38 +154,7 @@ trait CounterContract {
   },
   NextStepButton: () => {
     const completed = useCompleted();
-    const script = useScript();
-    const { components, newComponent } = useComponents();
-    const { nextTutorialStep } = useTutorials();
-    const component = components.find(
-      ({ scriptId }) => scriptId === script?.id,
-    );
-    return (
-      <NextStepButton
-        disabled={!completed}
-        onClick={() => {
-          if (!component) {
-            newComponent({
-              name: "Counter Contract",
-              type: "account-component",
-              scriptId: script?.id ?? "",
-              storageSlots: [
-                {
-                  name: storageSlotName({
-                    packageName: script?.name ?? "",
-                    traitName: "CounterContract",
-                    fieldName: "count_map",
-                  }),
-                  type: "map",
-                  value: "1:0",
-                },
-              ],
-            });
-          }
-          nextTutorialStep();
-        }}
-      />
-    );
+    return <NextStepButton disabled={!completed} />;
   },
 };
 

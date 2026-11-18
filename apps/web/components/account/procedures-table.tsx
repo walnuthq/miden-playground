@@ -9,20 +9,17 @@ import ProceduresTableRow, {
   canInvokeProcedure,
 } from "@/components/account/procedures-table-row";
 import type { Account } from "@/lib/types/account";
-import type { Component } from "@/lib/types/component";
 import type { Script } from "@/lib/types/script";
 
 const ProceduresTable = ({
   account,
   script,
-  component,
 }: {
   account: Account;
   script: Script;
-  component: Component;
 }) => {
   const showResultColumn = script.procedureExports.some((procedureExport) =>
-    canInvokeProcedure({ account, component, procedureExport }),
+    canInvokeProcedure({ account, script, procedureExport }),
   );
   return (
     <div className="rounded-md border">
@@ -38,7 +35,6 @@ const ProceduresTable = ({
             <ProceduresTableRow
               key={procedureExport.path}
               account={account}
-              component={component}
               script={script}
               procedureExport={procedureExport}
               showResultColumn={showResultColumn}

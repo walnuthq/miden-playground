@@ -1,69 +1,75 @@
-import { Plus } from "lucide-react";
 import useCounter from "@/components/tutorials/deploy-a-counter-contract/use-counter";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import { ButtonName, ExternalLink } from "@/components/tutorials/prose";
+import { InlineCode } from "@/components/tutorials/prose";
 import TutorialLink from "@/components/tutorials/tutorial-link";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
+import type { Account } from "@/lib/types/account";
 import type { TutorialStep } from "@/lib/types/tutorial";
 
+// The deployment's funding is the account's first transaction, the increment
+// its second.
 const useCompleted = () => {
   const { counter } = useCounter();
-  return !!counter;
+  const nonce = counter?.nonce ?? 0;
+  return nonce >= 2;
 };
 
+const Step5Content = ({ counter }: { counter?: Account }) => (
+  <>
+    <p>
+      Your counter contract is deployed, so you can now interact with it.{" "}
+      <TutorialLink href={`/accounts/${counter?.identifier}`}>
+        Click its name
+      </TutorialLink>{" "}
+      on the accounts page to open its details page, then click the{" "}
+      <em>"Components"</em> tab.
+    </p>
+    <p>
+      Under <em>"Account Components"</em>, find the component named after your
+      script and click the <em>"Invoke"</em> button next to the{" "}
+      <strong>
+        <InlineCode>get_count</InlineCode>
+      </strong>{" "}
+      procedure to read the initial value of the counter. This procedure only
+      reads storage, so the Playground executes it locally, without submitting a
+      Transaction.
+    </p>
+    <p>
+      Next, click the <em>"Invoke"</em> button next to the{" "}
+      <strong>
+        <InlineCode>increment_count</InlineCode>
+      </strong>{" "}
+      procedure. The Playground executes a Transaction against your counter
+      contract with a transaction script that calls this procedure, which
+      increments the counter by the value you chose, and opens a preview of it:
+      the{" "}
+      <strong>
+        <InlineCode>count_map</InlineCode>
+      </strong>{" "}
+      storage change and the contract's new nonce. Click the <em>"Submit"</em>{" "}
+      button to submit it to testnet.
+    </p>
+  </>
+);
+
 const Step5: TutorialStep = {
-  title: "Deploy your counter contract.",
+  title: "Increment your counter contract.",
   Content: () => {
+    const { counter } = useCounter();
     const completed = useCompleted();
     return (
       <>
-        <p>
-          Now that your account component defines both the contract's{" "}
-          <ExternalLink href="https://docs.miden.xyz/reference/protocol/account/code">
-            code
-          </ExternalLink>{" "}
-          and its{" "}
-          <ExternalLink href="https://docs.miden.xyz/reference/protocol/account/storage">
-            storage
-          </ExternalLink>{" "}
-          layout, it's time to deploy your counter contract on testnet.
-        </p>
-        <p>
-          Head to the{" "}
-          <TutorialLink href="/accounts">accounts page</TutorialLink>, click the{" "}
-          <ButtonName icon={Plus}>Create new account</ButtonName> button at the
-          top of the page and select the <em>"Deploy account"</em> option.
-        </p>
-        <p>
-          Enter a name for your contract and leave the storage mode set to{" "}
-          <strong>Public</strong>. Keep <strong>No Auth</strong> as the
-          authentication component: it doesn't require any signature, so anyone
-          can increment the counter, just like the contract from the previous
-          tutorial. Then select your account component, the one you created in
-          the previous steps.
-        </p>
-        <p>
-          Once the component is selected, the storage slots it defines are
-          listed with their default values, which you can override for this
-          deployment. Keep the value you set in the previous step.
-        </p>
-        <p>
-          Finally, click the <em>"Deploy"</em> button. This takes a few moments:
-          the Playground creates the Account, then funds it so that it can pay
-          transaction fees. Funding the Account is its first Transaction, which
-          also registers it on testnet.
-        </p>
+        <Step5Content counter={counter} />
         <TutorialStepAlert
           completed={completed}
-          title="Action required: Deploy your counter contract."
-          titleWhenCompleted="You deployed your counter contract."
+          title="Action required: Increment the counter."
+          titleWhenCompleted="Your increment transaction has been submitted."
           description={
             <p>
-              Click the <ButtonName icon={Plus}>Create new account</ButtonName>{" "}
-              button at the top of the accounts page, select the{" "}
-              <em>"Deploy account"</em> option and deploy an Account using the{" "}
-              <strong>No Auth</strong> authentication component and your account
-              component.
+              In the <em>"Components"</em> tab of the account details page,
+              click the <em>"Invoke"</em> button next to the{" "}
+              <strong>increment_count</strong> procedure, then the{" "}
+              <em>"Submit"</em> button in the preview.
             </p>
           }
         />

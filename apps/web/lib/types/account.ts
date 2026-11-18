@@ -45,6 +45,11 @@ export type Account = {
   code: string;
   storage: StorageItem[];
   consumableNoteIds: string[];
+  // The ids of the scripts the account's code holds as components: built-ins
+  // (`basic-wallet`, `auth-no-auth`…) and the workspace's or verified
+  // packages. Named for the account's components; states persisted when
+  // components were an entity of their own held those entities' ids, which
+  // `stateDeserializer` maps to their scripts' (lib/utils/state.ts).
   components: string[];
   multisig?: AccountMultisig;
   updatedAt: number;

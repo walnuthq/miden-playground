@@ -1,6 +1,8 @@
 # Remove the Components feature
 
-Status: decisions confirmed by the user (2026-11-18). PR A done on `feat/schema-sources` (2026-11-18: 229 unit tests, lint and typecheck pass), opened for review; PR B not started. Written for the agent that implements it.
+Status: decisions confirmed by the user (2026-11-18). PR A merged (#855, 2026-11-18). PR B implemented on `feat/remove-components` (2026-11-18): unit tests, lint, typecheck and build pass; full local e2e 63 passed, then its 8 failures (one bug: the example auto-deploy looked for the old component id) all pass after the fix; the hand checks below were run 2026-11-18 with Playwright on states built by `main` in persistent profiles, and all pass (see "Hand checks before merging"). Written for the agent that implements it.
+
+PR B's deviations from the plan below: the helpers live in `lib/utils/account-components.ts`, not `script.ts` (the built-in scripts import `script.ts`, so it can't import them back); `componentStorageSlots` there applies the prefix match to any script without a schema; the built-in `auth-no-auth` and `basic-wallet` scripts carry an empty schema (`slots: []`), so "absent" keeps meaning "unknown"; the unit tests' loader (`test/alias.ts`) gives modules an empty `import.meta.env`, so `stateDeserializer` is tested directly.
 
 ## Goal
 
@@ -116,6 +118,8 @@ No test catches stale copy: reread each touched step.
 - A fresh counter with an empty `count_map`: `get_count` gives 0, increment gives 1, the map table then shows the entry.
 - An account verified through the registry (tutorial 12 steps 6–7) lists its slot, with and without `schemas` in the response.
 - Deploy dialog and account Components tab at 320 px.
+
+Results (2026-11-18): all pass. The old sandbox opens live and as a saved project reopened from another sandbox, lists `legacy-counter` with its slot, reads 0 from the old `1:0` entry, increments to 1, and deploys a second account that reads 0. Tutorial 11 left at step 5 resumes at step 5, deploys, reads 0 and increments to 1. Tutorial 7 left at old steps 3, 4, 5 and 6 resumes at new steps 3, 3, 4 and 5; at step 5 the old counter is found by its script. Tutorial 12 step 7 lists the verified slot with `schemas` and, with `schemas` stripped from the registry response, through the prefix. At 320 px neither page overflows; the slots table, as before, scrolls its Type and Value columns within its own container.
 
 ## Out of scope
 

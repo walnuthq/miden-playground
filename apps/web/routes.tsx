@@ -1,5 +1,5 @@
 import type { ComponentType } from "react";
-import { createBrowserRouter } from "react-router";
+import { createBrowserRouter, redirect } from "react-router";
 import AppShell from "@/components/lib/app-shell";
 import NotFound from "@/components/lib/not-found";
 
@@ -27,14 +27,10 @@ const router = createBrowserRouter([
             path: "accounts/:identifier",
             lazy: page(() => import("@/pages/account")),
           },
-          {
-            path: "components",
-            lazy: page(() => import("@/pages/components")),
-          },
-          {
-            path: "components/:id",
-            lazy: page(() => import("@/pages/component")),
-          },
+          // The Components pages are gone: an account component is a
+          // script (spec/remove-components.md). Old links land on Scripts.
+          { path: "components", loader: () => redirect("/scripts") },
+          { path: "components/:id", loader: () => redirect("/scripts") },
           { path: "notes", lazy: page(() => import("@/pages/notes")) },
           { path: "notes/:id", lazy: page(() => import("@/pages/note")) },
           { path: "scripts", lazy: page(() => import("@/pages/scripts")) },

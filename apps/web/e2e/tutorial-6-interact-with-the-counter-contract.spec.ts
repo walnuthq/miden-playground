@@ -93,14 +93,14 @@ test("tutorial 6: interact with the counter contract", async ({
     await dialog.getByLabel("Address").fill(address);
     await dialog.getByRole("button", { name: "Import" }).click();
     await expect(dialog).toBeHidden({ timeout: TRANSACTION_TIMEOUT });
-    // The sidebar also lists a "Counter Contract" component.
     await panel.openLink("click its name", /\/accounts\/mtst1[0-9a-z]+$/);
     // The import matched the account's code against the workspace's
-    // counter-account package, so its component is listed.
+    // counter-account package, so it's listed as a component: its name, and
+    // its script's link.
     await page.getByRole("tab", { name: "Components" }).click();
     await expect(
       page.getByRole("cell", { name: "counter-account", exact: true }),
-    ).toBeVisible();
+    ).toHaveCount(2);
     await nextStep(page);
   });
 

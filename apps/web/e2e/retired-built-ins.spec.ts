@@ -2,18 +2,17 @@ import { expect, type Page, test } from "@playwright/test";
 import { scriptHeader } from "./editor";
 import { logBrowserErrors, startTutorial, tutorialPanel } from "./tutorial";
 
-// The MASM counter was a built-in script and component until every tutorial
-// compiled real packages. A state persisted before then holds a copy of both,
-// which no code refreshes or removes: it must stay out of the user's scripts
-// and components, as when it was a built-in (retiredScriptIds and
-// retiredComponentIds, next to the built-ins' lists). No testnet transaction,
-// no API.
+// The MASM counter was a built-in script until every tutorial compiled real
+// packages. A state persisted before then holds a copy of it, which no code
+// refreshes or removes: it must stay out of the user's scripts, as when it was
+// a built-in (retiredScriptIds, next to the built-ins' list). No testnet
+// transaction, no API.
 const RETIRED = "counter-contract";
 // The same copy under an id the app doesn't know: one of the user's.
 const CONTROL = "some-old-script";
 
-// Adds an account component script and its component to the persisted state,
-// as an earlier version would have left them, and loads `pathname` with it.
+// Adds an account component script to the persisted state, as an earlier
+// version would have left it, and loads `pathname` with it.
 // From an init script: the next page patches the state before the app reads
 // it, where a write from the open page could be overwritten by the app's own.
 const persist = async (page: Page, ids: string[], pathname: string) => {
@@ -30,16 +29,9 @@ const persist = async (page: Page, ids: string[], pathname: string) => {
     }
     const state = JSON.parse(value) as {
       scripts: { id: string; name: string; type: string }[];
-      components: {
-        id: string;
-        name: string;
-        type: string;
-        scriptId: string;
-      }[];
     };
     const script = state.scripts.find(({ id }) => id === "basic-wallet");
-    const component = state.components.find(({ id }) => id === "basic-wallet");
-    if (!script || !component) {
+    if (!script) {
       return;
     }
     for (const id of ids) {
@@ -48,19 +40,13 @@ const persist = async (page: Page, ids: string[], pathname: string) => {
       }
       // Before the user's scripts, as the built-ins are.
       state.scripts.unshift({ ...script, id, name: id });
-      state.components.unshift({
-        ...component,
-        id,
-        name: `Component of ${id}`,
-        scriptId: id,
-      });
     }
     localStorage.setItem("state", JSON.stringify(state));
   }, ids);
   await page.goto(pathname);
 };
 
-test("a retired built-in stays out of a sandbox's scripts and components", async ({
+test("a retired built-in stays out of a sandbox's scripts", async ({
   page,
 }) => {
   logBrowserErrors(page);
@@ -78,16 +64,6 @@ test("a retired built-in stays out of a sandbox's scripts and components", async
     await expect(link(CONTROL)).toBeVisible();
     await expect(row(RETIRED)).toHaveCount(0);
     await expect(link(RETIRED)).toHaveCount(0);
-  });
-
-  await test.step("so does the components page", async () => {
-    await page.goto("/components");
-    await expect(row(`Component of ${CONTROL}`)).toBeVisible({
-      timeout: 60_000,
-    });
-    await expect(link(`Component of ${CONTROL}`)).toBeVisible();
-    await expect(row(`Component of ${RETIRED}`)).toHaveCount(0);
-    await expect(link(`Component of ${RETIRED}`)).toHaveCount(0);
   });
 
   await test.step("the copy is still there: its page opens", async () => {

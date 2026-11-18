@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import useGlobalContext from "@/components/global-context/hook";
-import useComponents from "@/hooks/use-components";
 import { foreignDependencies } from "@/lib/simulation/foreign-accounts";
 import { useEmbeddedPackages } from "@/lib/simulation/load-embedded-packages";
 import {
@@ -12,8 +11,8 @@ import {
   setSimulationStorageSlots,
   useEditedStorageSlots,
 } from "@/lib/simulation/simulation-state";
-import type { StorageSlot } from "@/lib/types/component";
 import type { Dependency, Script, StorageSchema } from "@/lib/types/script";
+import type { StorageSlot } from "@/lib/types/storage-slot";
 
 // An account a simulation builds from one of the script's
 // `account-component` dependencies: a foreign account staged for an account
@@ -42,7 +41,6 @@ export type UnresolvedDependency = {
 // (foreign accounts) or a note or transaction script (its target's
 // components), never both.
 const useDependencyAccounts = (script: Script) => {
-  const { components } = useComponents();
   const { scripts } = useGlobalContext();
   const needsEmbedded = script.dependencies.some(
     ({ type }) => type === "account-component",
@@ -70,7 +68,7 @@ const useDependencyAccounts = (script: Script) => {
         script: resolution.script,
         storageSlots: shownStorageSlots(
           schema,
-          edited.get(key) ?? initialStorageSlots(resolution.script, components),
+          edited.get(key) ?? initialStorageSlots(resolution.script),
         ),
         setStorageSlots: (storageSlots) =>
           setSimulationStorageSlots(key, storageSlots),
@@ -78,7 +76,7 @@ const useDependencyAccounts = (script: Script) => {
       });
     }
     return { accounts, unresolved };
-  }, [script, scripts, embedded, edited, components]);
+  }, [script, scripts, embedded, edited]);
   // The embedded packages aren't loaded yet: a dependency may still resolve.
   const ready = !needsEmbedded || embedded !== undefined;
   return { accounts, unresolved, ready };

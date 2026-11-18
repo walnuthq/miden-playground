@@ -10,15 +10,10 @@ import {
 import { Puzzle } from "lucide-react";
 import AccountComponentTable from "@/components/account/account-component-table";
 import useAccounts from "@/hooks/use-accounts";
-import useComponents from "@/hooks/use-components";
 import useScripts from "@/hooks/use-scripts";
-import useTutorials from "@/hooks/use-tutorials";
 import type { Account } from "@/lib/types/account";
-import type { ComponentType, StorageSlotType } from "@/lib/types/component";
-import { defaultComponentIds } from "@/lib/types/default-components";
 import type { Script } from "@/lib/types/script";
-import { defaultComponent, storageSlotName } from "@/lib/utils/component";
-import { defaultScript } from "@/lib/utils/script";
+import { isBuiltInScript } from "@/lib/utils/account-components";
 
 const AddCustomComponents = ({
   empty,
@@ -60,6 +55,9 @@ const AddCustomComponents = ({
   );
 };
 
+// The account's components: the scripts `account.components` names, then
+// the packages the registry verified for its code that aren't among them
+// (by commitment).
 const AccountComponents = ({
   account,
   verifiedAccountComponents,
@@ -67,70 +65,29 @@ const AccountComponents = ({
   account: Account;
   verifiedAccountComponents: Script[];
 }) => {
-  const { tutorialId } = useTutorials();
   const { scripts } = useScripts();
-  const { components } = useComponents();
-  const accountComponentsWithScripts = account.components
-    .map((componentId) => components.find(({ id }) => id === componentId))
-    .filter((component) => component !== undefined)
-    .map((component) => ({
-      component,
-      script:
-        scripts.find(({ id }) => id === component.scriptId) ?? defaultScript(),
-    }));
-  const accountComponentsScriptsCommitments = accountComponentsWithScripts.map(
-    ({ script }) => script.commitment,
+  const accountScripts = account.components.flatMap((scriptId) =>
+    scripts.filter(({ id }) => id === scriptId),
   );
-  const verifiedAccountComponentsWithScripts = verifiedAccountComponents
-    .filter(
-      ({ commitment }) =>
-        !accountComponentsScriptsCommitments.includes(commitment),
-    )
-    .map((script) => ({
-      component: {
-        ...defaultComponent(),
-        id: script.id,
-        name: script.name,
-        type: (script.type === "account-component"
-          ? "account-component"
-          : "authentication-component") as ComponentType,
-        scriptId: script.id,
-        // storageSlots: [], // TODO
-        storageSlots:
-          tutorialId === "contract-verification"
-            ? [
-                {
-                  name: storageSlotName({
-                    packageName: script.name,
-                    traitName: "CounterContract",
-                    fieldName: "count_map",
-                  }),
-                  type: "map" as StorageSlotType,
-                  value: "1:0",
-                },
-              ]
-            : [], // TODO
-        updatedAt: script.updatedAt,
-      },
-      script,
-    }));
-  const componentsWithScripts = [
-    ...accountComponentsWithScripts,
-    ...verifiedAccountComponentsWithScripts,
+  const commitments = accountScripts.map(({ commitment }) => commitment);
+  const componentScripts = [
+    ...accountScripts,
+    ...verifiedAccountComponents.filter(
+      ({ commitment }) => !commitments.includes(commitment),
+    ),
   ];
-  const authenticationComponents = componentsWithScripts.filter(
-    ({ component }) => component.type === "authentication-component",
+  const authenticationComponents = componentScripts.filter(
+    ({ type }) => type === "authentication-component",
   );
   // Every account has the basic wallet component, so list it after the others.
-  const accountComponents = componentsWithScripts
-    .filter(({ component }) => component.type === "account-component")
+  const accountComponents = componentScripts
+    .filter(({ type }) => type === "account-component")
     .toSorted(
       (a, b) =>
-        Number(a.component.id === "basic-wallet") -
-        Number(b.component.id === "basic-wallet"),
+        Number(a.id === "basic-wallet") - Number(b.id === "basic-wallet"),
     );
   const customAccountComponents = accountComponents.filter(
-    ({ component }) => !defaultComponentIds.includes(component.id),
+    (script) => !isBuiltInScript(script),
   );
   return (
     <div className="space-y-8">
@@ -139,11 +96,10 @@ const AccountComponents = ({
           <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
             Account Components
           </h4>
-          {accountComponents.map(({ component, script }) => (
+          {accountComponents.map((script) => (
             <AccountComponentTable
-              key={component.id}
+              key={script.id}
               account={account}
-              component={component}
               script={script}
             />
           ))}
@@ -157,11 +113,10 @@ const AccountComponents = ({
           <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
             Authentication Components
           </h4>
-          {authenticationComponents.map(({ component, script }) => (
+          {authenticationComponents.map((script) => (
             <AccountComponentTable
-              key={component.id}
+              key={script.id}
               account={account}
-              component={component}
               script={script}
             />
           ))}

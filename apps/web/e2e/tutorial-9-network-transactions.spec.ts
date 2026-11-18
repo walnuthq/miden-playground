@@ -40,7 +40,7 @@ test("tutorial 9: network transactions", async ({ page, bread }) => {
     await dialog.getByLabel("Name").fill("Network Counter");
     await expect(dialog.getByRole("combobox").first()).toContainText("Public");
     await selectOption(page, "Auth Component", "Network Account");
-    await selectOption(page, "Account Component", "Counter Contract");
+    await selectOption(page, "Account Component", "counter-account");
     await dialog.getByPlaceholder("Select allowed note-scripts…").click();
     await page.getByRole("option", { name: "increment-note" }).click();
     // Escape would close the whole dialog: click another field to close the
@@ -50,10 +50,11 @@ test("tutorial 9: network transactions", async ({ page, bread }) => {
     await expect(
       dialog.getByRole("toolbar").getByText("increment-note"),
     ).toBeVisible();
-    // The counter's map slot, with the count under key 1.
+    // The counter's map slot, empty: the count under key 1 reads as 0.
     await expect(
-      dialog.getByLabel("counter_account::counter_contract::count_map"),
-    ).toHaveValue("1:0");
+      dialog.getByText("counter_account::counter_contract::count_map"),
+    ).toBeVisible();
+    await expect(dialog.getByPlaceholder("Key")).toHaveCount(0);
     await dialog.getByRole("button", { name: "Deploy" }).click();
     await expect(dialog).toBeHidden({ timeout: TRANSACTION_TIMEOUT });
     await nextStep(page);

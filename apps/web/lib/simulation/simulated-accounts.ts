@@ -1,6 +1,6 @@
 import type { Account } from "@/lib/types/account";
-import type { Component, StorageSlot } from "@/lib/types/component";
 import type { Script, StorageSchema } from "@/lib/types/script";
+import type { StorageSlot } from "@/lib/types/storage-slot";
 import {
   mergeStorageSlots,
   schemaStorageSlots,
@@ -38,17 +38,10 @@ export const simulatedAccount = (
 
 // The slots a script's simulations start from: those of the package's
 // storage schema, at their defaults. Without one (a package compiled before
-// the API returned it), the slots of a component of the workspace made from
-// the script.
-export const initialStorageSlots = (
-  script: Script,
-  components: Component[],
-) => {
+// the API returned it), none: the user adds them.
+export const initialStorageSlots = (script: Script) => {
   const schema = script.metadata?.storage;
-  return schema
-    ? schemaStorageSlots(schema)
-    : (components.find(({ scriptId }) => scriptId === script.id)
-        ?.storageSlots ?? NO_SLOTS);
+  return schema ? schemaStorageSlots(schema) : NO_SLOTS;
 };
 
 // The slots shown: the user's edits over the initial ones. A recompile can

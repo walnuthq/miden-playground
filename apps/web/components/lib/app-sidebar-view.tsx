@@ -17,7 +17,6 @@ import {
   HandCoins,
   Home,
   Key,
-  Puzzle,
   ReceiptText,
   Route,
   ShieldUser,
@@ -29,16 +28,14 @@ import { useLocation } from "react-router";
 import useGlobalContext from "@/components/global-context/hook";
 import Footer from "@/components/lib/footer";
 import NavMain from "@/components/lib/nav-main";
-import { defaultComponentIds } from "@/lib/types/default-components";
 import { defaultScriptIds } from "@/lib/types/default-scripts";
 import { formatId } from "@/lib/utils";
 
-// The sidebar's links, with the latest accounts, transactions, notes, scripts
-// and components of the project. From the app state alone, not the Miden
+// The sidebar's links, with the latest accounts, transactions, notes and
+// scripts of the project. From the app state alone, not the Miden
 // client, so the app shell shows them too.
 const useSidebarItems = () => {
-  const { accounts, transactions, inputNotes, scripts, components } =
-    useGlobalContext();
+  const { accounts, transactions, inputNotes, scripts } = useGlobalContext();
   const items = [
     {
       title: "Home",
@@ -122,19 +119,6 @@ const useSidebarItems = () => {
             ) : (
               <CircleX className="text-red-500!" />
             ),
-        })),
-    },
-    {
-      title: "Components",
-      url: "/components",
-      icon: <Puzzle />,
-      items: components
-        .filter(({ id }) => !defaultComponentIds.includes(id))
-        .sort((a, b) => b.updatedAt - a.updatedAt)
-        .slice(0, 5)
-        .map(({ id, name }) => ({
-          title: name,
-          url: `/components/${id}`,
         })),
     },
   ];

@@ -123,6 +123,8 @@ const authNoAuth: Script = {
   masm,
   commitment:
     "0xdf9079c0a5668001295dfa427f4c03a61c6fa4cb92c0c2b7293b30a622cb2982",
+  // No storage (an absent schema would mean unknown).
+  metadata: { storage: { slots: [] } },
   procedureExports: [
     {
       ...defaultProcedureExport(),

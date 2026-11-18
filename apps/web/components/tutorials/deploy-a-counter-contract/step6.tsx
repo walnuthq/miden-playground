@@ -1,85 +1,26 @@
-import useCounter from "@/components/tutorials/deploy-a-counter-contract/use-counter";
-import NextStepButton from "@/components/tutorials/next-step-button";
+import NextTutorialButton from "@/components/tutorials/next-tutorial-button";
 import { InlineCode } from "@/components/tutorials/prose";
-import TutorialLink from "@/components/tutorials/tutorial-link";
-import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
-import type { Account } from "@/lib/types/account";
 import type { TutorialStep } from "@/lib/types/tutorial";
 
-// The deployment's funding is the account's first transaction, the increment
-// its second.
-const useCompleted = () => {
-  const { counter } = useCounter();
-  const nonce = counter?.nonce ?? 0;
-  return nonce >= 2;
-};
-
-const Step6Content = ({ counter }: { counter?: Account }) => (
-  <>
-    <p>
-      Your counter contract is deployed, so you can now interact with it.{" "}
-      <TutorialLink href={`/accounts/${counter?.identifier}`}>
-        Click its name
-      </TutorialLink>{" "}
-      on the accounts page to open its details page, then click the{" "}
-      <em>"Components"</em> tab.
-    </p>
-    <p>
-      Under <em>"Account Components"</em>, find your component and click the{" "}
-      <em>"Invoke"</em> button next to the{" "}
-      <strong>
-        <InlineCode>get_count</InlineCode>
-      </strong>{" "}
-      procedure to read the initial value of the counter. This procedure only
-      reads storage, so the Playground executes it locally, without submitting a
-      Transaction.
-    </p>
-    <p>
-      Next, click the <em>"Invoke"</em> button next to the{" "}
-      <strong>
-        <InlineCode>increment_count</InlineCode>
-      </strong>{" "}
-      procedure. The Playground executes a Transaction against your counter
-      contract with a transaction script that calls this procedure, which
-      increments the counter by the value you chose, and opens a preview of it:
-      the{" "}
-      <strong>
-        <InlineCode>count_map</InlineCode>
-      </strong>{" "}
-      storage change and the contract's new nonce. Click the <em>"Submit"</em>{" "}
-      button to submit it to testnet.
-    </p>
-  </>
-);
-
 const Step6: TutorialStep = {
-  title: "Increment your counter contract.",
-  Content: () => {
-    const { counter } = useCounter();
-    const completed = useCompleted();
-    return (
-      <>
-        <Step6Content counter={counter} />
-        <TutorialStepAlert
-          completed={completed}
-          title="Action required: Increment the counter."
-          titleWhenCompleted="Your increment transaction has been submitted."
-          description={
-            <p>
-              In the <em>"Components"</em> tab of the account details page,
-              click the <em>"Invoke"</em> button next to the{" "}
-              <strong>increment_count</strong> procedure, then the{" "}
-              <em>"Submit"</em> button in the preview.
-            </p>
-          }
-        />
-      </>
-    );
-  },
-  NextStepButton: () => {
-    const completed = useCompleted();
-    return <NextStepButton disabled={!completed} />;
-  },
+  title: "Read the updated counter value.",
+  Content: () => (
+    <>
+      <p>
+        Click the <em>"Invoke"</em> button next to the{" "}
+        <strong>
+          <InlineCode>get_count</InlineCode>
+        </strong>{" "}
+        procedure again to read the new value of the counter: it should have
+        increased by the increment value you set in the contract code.
+      </p>
+      <p>
+        Congratulations! You have successfully written, deployed and interacted
+        with your own Miden smart contract on testnet.
+      </p>
+    </>
+  ),
+  NextStepButton: NextTutorialButton,
 };
 
 export default Step6;

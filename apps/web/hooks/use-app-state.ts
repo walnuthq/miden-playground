@@ -459,7 +459,7 @@ const useAppState = () => {
   // the API, it does, with a warning.
   const sandboxStarter = async (newNetworkId: NetworkId) => {
     if (newNetworkId !== "mm") {
-      return { scripts: [], components: [] };
+      return { scripts: [] };
     }
     try {
       return await mainnetSandboxStarter();
@@ -467,17 +467,17 @@ const useAppState = () => {
       toast.warning("The counter scripts couldn't be added.", {
         description: error instanceof Error ? error.message : String(error),
       });
-      return { scripts: [], components: [] };
+      return { scripts: [] };
     }
   };
   // A fresh sandbox on the network: the default state with the network's
-  // faucet and `starter`'s scripts and components (a Mainnet sandbox's, see
+  // faucet and `starter`'s scripts (a Mainnet sandbox's, see
   // sandboxStarter), carrying what outlives a workspace: the completed
   // tutorials and the progress of those left unfinished.
   const freshSandboxState = (
     newNetworkId: NetworkId,
     {
-      starter = { scripts: [], components: [] },
+      starter = { scripts: [] },
       tutorialProgress: nextTutorialProgress = tutorialProgress,
     }: {
       starter?: WorkspaceStarter;
@@ -489,7 +489,6 @@ const useAppState = () => {
       ...initialState,
       accounts: [midenFaucetAccount(newNetworkId)],
       scripts: [...initialState.scripts, ...starter.scripts],
-      components: [...initialState.components, ...starter.components],
       completedTutorials,
       tutorialProgress: nextTutorialProgress,
     };

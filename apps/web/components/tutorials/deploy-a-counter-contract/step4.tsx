@@ -1,114 +1,71 @@
 import { Plus } from "lucide-react";
-import CopyButton from "@/components/lib/copy-button";
 import useCounter from "@/components/tutorials/deploy-a-counter-contract/use-counter";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import {
-  BulletList,
-  ButtonName,
-  InlineCode,
-} from "@/components/tutorials/prose";
+import { ButtonName, ExternalLink } from "@/components/tutorials/prose";
+import TutorialLink from "@/components/tutorials/tutorial-link";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import type { TutorialStep } from "@/lib/types/tutorial";
-import { stringToKeyValues } from "@/lib/utils/component";
 
-// The compiled code looks the slot up by its name, and the counter under key
-// 1 (a number input, so "01" is the same key).
 const useCompleted = () => {
-  const { component, slotName } = useCounter();
-  const storageSlots = component?.storageSlots ?? [];
-  const storageSlot = storageSlots.find(
-    ({ name, type, value }) =>
-      name === slotName &&
-      type === "map" &&
-      stringToKeyValues(value).some(({ key }) => Number(key) === 1),
-  );
-  return storageSlots.length === 1 && !!storageSlot;
+  const { counter } = useCounter();
+  return !!counter;
 };
 
-// The slot name is as long as the user's script name and has no place to
-// break: `wrap-anywhere` keeps it inside the panel.
 const Step4: TutorialStep = {
-  title: "Add the counter storage slot.",
+  title: "Deploy your counter contract.",
   Content: () => {
     const completed = useCompleted();
-    const { script, slotName } = useCounter();
+    const { script } = useCounter();
     return (
       <>
-        <p>An account component is made of two parts:</p>
-        <BulletList>
-          <li>
-            Its <strong>code</strong>: a library of procedures that can read and
-            write the component's storage. Here, it's the script you compiled in
-            the previous step.
-          </li>
-          <li>
-            Its <strong>storage layout</strong>: the list of storage slots the
-            component uses, each with a type and an optional default value.
-          </li>
-        </BulletList>
         <p>
-          Your component already has its code, so let's define its storage
-          layout. Click the{" "}
-          <ButtonName icon={Plus}>Add storage slot</ButtonName> button and enter{" "}
-          <strong className="wrap-anywhere">
-            <InlineCode>{slotName}</InlineCode>
-          </strong>{" "}
-          <CopyButton content="Copy Storage Slot Name" copy={slotName} /> as the
-          slot name.
+          Now that your script defines both the contract's{" "}
+          <ExternalLink href="https://docs.miden.xyz/reference/protocol/account/code">
+            code
+          </ExternalLink>{" "}
+          and its{" "}
+          <ExternalLink href="https://docs.miden.xyz/reference/protocol/account/storage">
+            storage
+          </ExternalLink>{" "}
+          layout, it's time to deploy your counter contract on testnet.
         </p>
         <p>
-          Storage slots are identified by their name, which the compiler derives
-          from your code in three parts, separated by{" "}
-          <strong>
-            <InlineCode>::</InlineCode>
-          </strong>
-          :
-        </p>
-        <BulletList>
-          <li>
-            the name of your script, <strong>{script?.name}</strong>, where any
-            character other than a letter, a digit or an underscore becomes an
-            underscore;
-          </li>
-          <li>
-            the name of the component's trait,{" "}
-            <strong>
-              <InlineCode>CounterContract</InlineCode>
-            </strong>
-            , in snake case;
-          </li>
-          <li>
-            the name of the field in the storage struct,{" "}
-            <strong>
-              <InlineCode>count_map</InlineCode>
-            </strong>
-            .
-          </li>
-        </BulletList>
-        <p>
-          The slot you add must have exactly this name: it's the one the
-          compiled code looks up, so the contract wouldn't find its counter in a
-          slot named differently.
+          Head to the{" "}
+          <TutorialLink href="/accounts">accounts page</TutorialLink>, click the{" "}
+          <ButtonName icon={Plus}>Create new account</ButtonName> button at the
+          top of the page and select the <em>"Deploy account"</em> option.
         </p>
         <p>
-          Select the <strong>Map</strong> type, then click{" "}
-          <em>"Add key-value pair"</em> to set the initial value of the counter:
-          enter <strong>1</strong> as the key, the fixed key used by the
-          contract, and the initial count as the value, for example{" "}
-          <strong>0</strong>.
+          Enter a name for your contract and leave the storage mode set to{" "}
+          <strong>Public</strong>. Keep <strong>No Auth</strong> as the
+          authentication component: it doesn't require any signature, so anyone
+          can increment the counter, just like the contract from the previous
+          tutorial. Then select your script, <strong>{script?.name}</strong>, as
+          the account component.
+        </p>
+        <p>
+          Once it's selected, the storage slots its layout defines are listed
+          with their initial values, which you can set for this deployment. Your
+          counter's map starts empty: a key that was never written reads as
+          zero, so the counter starts at <strong>0</strong>. Leave it as it is.
+        </p>
+        <p>
+          Finally, click the <em>"Deploy"</em> button. This takes a few moments:
+          the Playground creates the Account, then funds it so that it can pay
+          transaction fees. Funding the Account is its first Transaction, which
+          also registers it on testnet.
         </p>
         <TutorialStepAlert
           completed={completed}
-          title="Action required: Add the counter storage slot."
-          titleWhenCompleted="You added the counter storage slot."
+          title="Action required: Deploy your counter contract."
+          titleWhenCompleted="You deployed your counter contract."
           description={
             <p>
-              Click the <ButtonName icon={Plus}>Add storage slot</ButtonName>{" "}
-              button and create a <strong>Map</strong> slot named{" "}
-              <strong className="wrap-anywhere">
-                <InlineCode>{slotName}</InlineCode>
-              </strong>
-              , with the initial counter value stored at key <strong>1</strong>.
+              Click the <ButtonName icon={Plus}>Create new account</ButtonName>{" "}
+              button at the top of the accounts page, select the{" "}
+              <em>"Deploy account"</em> option and deploy an Account using the{" "}
+              <strong>No Auth</strong> authentication component and your script
+              as the account component.
             </p>
           }
         />

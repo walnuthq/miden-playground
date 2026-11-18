@@ -10,7 +10,7 @@ import type { TutorialStep } from "@/lib/types/tutorial";
 const Step3: TutorialStep = {
   title: "Understand the increment note script.",
   Content: () => {
-    const { noteScript, component } = useNetworkCounter();
+    const { noteScript, counterScript } = useNetworkCounter();
     return (
       <>
         <MissingScriptsAlert />
@@ -70,12 +70,11 @@ const Step3: TutorialStep = {
           the consuming Account. Lines <em>13-17</em> name where they come from,
           the{" "}
           <TutorialLink
-            href={component ? `/scripts/${component.scriptId}` : "/scripts"}
+            href={counterScript ? `/scripts/${counterScript.id}` : "/scripts"}
           >
             counter-account
           </TutorialLink>{" "}
-          script, which holds the code of your network counter's{" "}
-          <strong>Counter Contract</strong> account component.
+          script, your network counter's account component.
         </p>
         <p>
           A network note is a public Note that carries an attachment identifying

@@ -4,7 +4,6 @@ import { ButtonName, InlineCode } from "@/components/tutorials/prose";
 import TutorialLink from "@/components/tutorials/tutorial-link";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import useAccounts from "@/hooks/use-accounts";
-import useComponents from "@/hooks/use-components";
 import useScripts from "@/hooks/use-scripts";
 import { defaultScriptIds } from "@/lib/types/default-scripts";
 import type { TutorialStep } from "@/lib/types/tutorial";
@@ -12,14 +11,12 @@ import type { TutorialStep } from "@/lib/types/tutorial";
 const useCompleted = () => {
   const { accounts } = useAccounts();
   const { scripts } = useScripts();
-  const { components } = useComponents();
   const script = scripts.find(
     ({ id, type }) =>
       !defaultScriptIds.includes(id) && type === "account-component",
   );
-  const component = components.find(({ scriptId }) => scriptId === script?.id);
   const counter = accounts.find(({ components }) =>
-    components.includes(component?.id ?? ""),
+    components.includes(script?.id ?? ""),
   );
   return !!counter;
 };
@@ -35,17 +32,15 @@ const Step5: TutorialStep = {
           contract on testnet and interact with it using a Note.
         </p>
         <p>
-          When you moved on from step 2, the Playground created a{" "}
-          <strong>Counter Contract</strong> account component from your{" "}
-          <strong>counter-account</strong> script. Its storage layout defines a
-          single map slot,{" "}
+          Your compiled <strong>counter-account</strong> script is an account
+          component: its code, and its storage layout, which the compiler
+          derived from the storage struct. It defines a single map slot,{" "}
           <strong>
             <InlineCode>
               counter_account::counter_contract::count_map
             </InlineCode>
           </strong>
-          , which holds the initial count, <strong>0</strong>, under key{" "}
-          <strong>1</strong>.
+          , which holds the count under key <strong>1</strong>.
         </p>
         <p>
           Head to the{" "}
@@ -57,18 +52,19 @@ const Step5: TutorialStep = {
           Enter a name for your contract and leave the storage mode set to{" "}
           <strong>Public</strong>. Keep <strong>No Auth</strong> as the
           authentication component: it doesn't require any signature, so anyone
-          can make your counter contract consume an increment note. Then select
-          the <strong>Counter Contract</strong> account component.
+          can make your counter contract consume an increment note. Then select{" "}
+          <strong>counter-account</strong> as the account component.
         </p>
         <p>
-          Once the component is selected, its{" "}
+          Once it's selected, its{" "}
           <strong>
             <InlineCode>
               counter_account::counter_contract::count_map
             </InlineCode>
           </strong>{" "}
-          storage slot is listed with its default value, <strong>1:0</strong>:
-          keep it, so that the counter starts at <strong>0</strong>.
+          storage slot is listed, with no entries: a key that was never written
+          reads as zero, so the counter starts at <strong>0</strong>. Leave it
+          as it is.
         </p>
         <p>
           Finally, click the <em>"Deploy"</em> button. This takes a few moments:
@@ -85,8 +81,8 @@ const Step5: TutorialStep = {
               Click the <ButtonName icon={Plus}>Create new account</ButtonName>{" "}
               button at the top of the accounts page, select the{" "}
               <em>"Deploy account"</em> option and deploy an Account using the{" "}
-              <strong>No Auth</strong> authentication component and the{" "}
-              <strong>Counter Contract</strong> account component.
+              <strong>No Auth</strong> authentication component and{" "}
+              <strong>counter-account</strong> as the account component.
             </p>
           }
         />

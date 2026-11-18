@@ -3,13 +3,12 @@ import { toast } from "sonner";
 import useGlobalContext from "@/components/global-context/hook";
 import useAccounts from "@/hooks/use-accounts";
 import useAppState from "@/hooks/use-app-state";
-import useComponents from "@/hooks/use-components";
 import useNetwork from "@/hooks/use-network";
+import useScripts from "@/hooks/use-scripts";
 import { importExample } from "@/lib/api";
 import examples from "@/lib/examples";
-import { defaultComponentIds } from "@/lib/types/default-components";
-import authNoAuth from "@/lib/types/default-components/auth-no-auth";
 import { compiledPackageToScript } from "@/lib/utils/script";
+import { schemaStorageSlots } from "@/lib/utils/storage-schema";
 import { confirmWorkspaceSwitch } from "@/lib/utils/workspace-guard";
 
 // A failed deploy's toast stays, as it's the way to try again, until the
@@ -22,7 +21,13 @@ const useExamples = () => {
   const { completedTutorials, exampleId } = useGlobalContext();
   const { leaveTutorial, pushState } = useAppState();
   const { deployAccount } = useAccounts();
-  const { components } = useComponents();
+  const { scripts: workspaceScripts } = useScripts();
+  // The example's account component: its script is named after the example
+  // (its id is the API's).
+  const exampleScript = (id: string) =>
+    workspaceScripts.find(
+      ({ name, type }) => name === id && type === "account-component",
+    );
   const launchExample = async (
     exampleId: string,
   ): Promise<{ error?: string; cancelled?: boolean }> => {
@@ -56,16 +61,6 @@ const useExamples = () => {
           compiledPackageToScript(compiledScript),
         ),
       ],
-      components: example.state.components.map((component) => {
-        if (defaultComponentIds.includes(component.id)) {
-          return component;
-        }
-        const script = scripts.find(({ name }) => name === component.id);
-        return {
-          ...component,
-          scriptId: script?.id ?? "",
-        };
-      }),
       completedTutorials,
       tutorialProgress,
     });
@@ -84,26 +79,36 @@ const useExamples = () => {
     abandoned: () => boolean,
     retry: () => void,
   ) => {
-    const component = components.find(({ id }) => id === exampleId);
-    if (!component) {
+    const example = examples.find(({ id }) => id === exampleId);
+    const script = exampleScript(exampleId);
+    if (!example || !script) {
       return false;
     }
+    const name = example.accountName;
     try {
       await deployAccount({
-        name: component.name,
+        name,
         storageMode: "public",
-        components: [authNoAuth, component],
+        components: [
+          { scriptId: "auth-no-auth", storageSlots: [] },
+          {
+            scriptId: script.id,
+            storageSlots: script.metadata?.storage
+              ? schemaStorageSlots(script.metadata.storage)
+              : [],
+          },
+        ],
       });
       if (!abandoned()) {
-        toast.success(`${component.name} deployed.`);
+        toast.success(`${name} deployed.`);
       }
       return true;
     } catch (error) {
       if (abandoned()) {
-        console.warn(`${component.name}: deploy abandoned`, error);
+        console.warn(`${name}: deploy abandoned`, error);
         return false;
       }
-      toast.error(`${component.name} couldn't be deployed.`, {
+      toast.error(`${name} couldn't be deployed.`, {
         description: error instanceof Error ? error.message : String(error),
         id: EXAMPLE_DEPLOY_FAILED_TOAST,
         duration: Number.POSITIVE_INFINITY,
@@ -116,6 +121,7 @@ const useExamples = () => {
   return {
     exampleId,
     example: examples.find(({ id }) => id === exampleId),
+    exampleScript: exampleScript(exampleId),
     launchExample,
     loadExample,
   };

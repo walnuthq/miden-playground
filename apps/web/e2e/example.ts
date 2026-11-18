@@ -12,8 +12,8 @@ export const launchExample = async (
   await expect(page.getByText(`${accountName} deployed.`)).toBeVisible({
     timeout: 2 * TRANSACTION_TIMEOUT,
   });
-  // The sidebar can list a component with the same name: open the account
-  // from its (clickable) row.
+  // The sidebar lists the account under the same name: open it from its
+  // (clickable) row.
   await page.getByRole("cell", { name: accountName, exact: true }).click();
   await expect(page).toHaveURL(/\/accounts\/mtst1[0-9a-z]+$/);
 };

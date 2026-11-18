@@ -32,11 +32,11 @@ const Step4Content = ({ countReader }: { countReader?: Account }) => (
       Enter a name for your contract and leave the storage mode set to{" "}
       <strong>Public</strong>. Keep <strong>No Auth</strong> as the
       authentication component: it doesn't require any signature, so you can
-      invoke the contract's procedures without a wallet. Then select the{" "}
-      <strong>Count Reader</strong> account component.
+      invoke the contract's procedures without a wallet. Then select{" "}
+      <strong>count-reader</strong> as the account component.
     </p>
     <p>
-      Once the component is selected, its{" "}
+      Once it's selected, its{" "}
       <strong>
         <InlineCode>count_reader::count_reader::count</InlineCode>
       </strong>{" "}
@@ -83,9 +83,9 @@ const Step4: TutorialStep = {
               Click the <ButtonName icon={Plus}>Create new account</ButtonName>{" "}
               button at the top of the accounts page, select the{" "}
               <em>"Deploy account"</em> option and deploy an Account using the{" "}
-              <strong>No Auth</strong> authentication component and the{" "}
-              <strong>Count Reader</strong> account component, then click its
-              name.
+              <strong>No Auth</strong> authentication component and{" "}
+              <strong>count-reader</strong> as the account component, then click
+              its name.
             </p>
           }
         />

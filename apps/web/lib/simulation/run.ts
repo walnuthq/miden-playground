@@ -22,9 +22,9 @@ import {
 import { simulationBlockedReason } from "@/lib/simulation/blocked";
 import { recordStaging } from "@/lib/simulation/simulation-client";
 import type { Account } from "@/lib/types/account";
-import type { StorageSlot } from "@/lib/types/component";
 import type { NoteType } from "@/lib/types/note";
 import type { MidenInput, ProcedureExport, Script } from "@/lib/types/script";
+import type { StorageSlot } from "@/lib/types/storage-slot";
 import { fromBase64 } from "@/lib/utils";
 import {
   cleanExecutionError,

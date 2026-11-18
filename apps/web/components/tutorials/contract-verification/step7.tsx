@@ -15,7 +15,7 @@ import type { Account } from "@/lib/types/account";
 import { defaultScriptIds } from "@/lib/types/default-scripts";
 import type { TutorialStep } from "@/lib/types/tutorial";
 import { getMapItem } from "@/lib/utils/account";
-import { storageSlotName } from "@/lib/utils/component";
+import { storageSlotName } from "@/lib/utils/storage-slots";
 
 const useCompleted = () => {
   const { accounts } = useAccounts();

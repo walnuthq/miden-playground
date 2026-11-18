@@ -46,8 +46,8 @@ const Step2: TutorialStep = {
         <p>
           Enter a name for your contract and leave the storage mode set to{" "}
           <strong>Public</strong>. Select <strong>Network Account</strong> as
-          the authentication component and the <strong>Counter Contract</strong>{" "}
-          account component.
+          the authentication component and <strong>counter-account</strong> as
+          the account component.
         </p>
         <p>
           An Account is a network account, one that the network transaction
@@ -68,9 +68,9 @@ const Step2: TutorialStep = {
           <strong className="wrap-anywhere">
             <InlineCode>{COUNTER_SLOT_NAME}</InlineCode>
           </strong>{" "}
-          storage slot is listed with its default value, <strong>1:0</strong>:
-          the count, <strong>0</strong>, under key <strong>1</strong>. Keep it,
-          so that the counter starts at <strong>0</strong>.
+          storage slot is listed with no entries: the count lives under key{" "}
+          <strong>1</strong>, and a key that was never written reads as zero, so
+          the counter starts at <strong>0</strong>. Leave it as it is.
         </p>
         <p>
           Finally, click the <em>"Deploy"</em> button. This takes a few moments:
@@ -96,8 +96,8 @@ const Step2: TutorialStep = {
               button at the top of the accounts page, select the{" "}
               <em>"Deploy account"</em> option and deploy a{" "}
               <strong>Public</strong> account using the{" "}
-              <strong>Network Account</strong> authentication component, the{" "}
-              <strong>Counter Contract</strong> account component and the{" "}
+              <strong>Network Account</strong> authentication component,{" "}
+              <strong>counter-account</strong> as the account component and the{" "}
               <strong>increment-note</strong> allowed note script.
             </p>
           }

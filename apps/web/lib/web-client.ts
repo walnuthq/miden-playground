@@ -51,13 +51,12 @@ import type {
   AccountStorageMode,
   StorageItem,
 } from "@/lib/types/account";
-import type { Component, StorageSlot } from "@/lib/types/component";
-import defaultComponents from "@/lib/types/default-components";
 import defaultScripts from "@/lib/types/default-scripts";
 import type { NetworkId } from "@/lib/types/network";
 import type { InputNote, NoteType } from "@/lib/types/note";
 import type { MidenInput, ProcedureExport, Script } from "@/lib/types/script";
 import type { State } from "@/lib/types/state";
+import type { StorageSlot } from "@/lib/types/storage-slot";
 import type { Transaction, TransactionNote } from "@/lib/types/transaction";
 import { fromBase64, toBase64, waitUntil } from "@/lib/utils";
 import {
@@ -66,13 +65,12 @@ import {
   getRoutingParametersPart,
 } from "@/lib/utils/account";
 import { missingProcedures } from "@/lib/utils/account-procedures";
-import { stringToKeyValues } from "@/lib/utils/component";
 import {
   assembledFromMasm,
   entryPointExport,
   invokeProcedureCustomTransactionScript,
 } from "@/lib/utils/script";
-import { wordFelts } from "@/lib/utils/storage-slots";
+import { stringToKeyValues, wordFelts } from "@/lib/utils/storage-slots";
 
 export const randomWord = () => {
   const bytes = new Uint8Array(32);
@@ -265,6 +263,13 @@ export const wasmAccountComponent = ({
   return accountComponent.withSupportsAllTypes();
 };
 
+// A component an account is deployed with: a script and its storage slots'
+// initial values.
+export type DeployedComponent = {
+  scriptId: string;
+  storageSlots: StorageSlot[];
+};
+
 export const clientDeployAccount = async ({
   client,
   storageMode,
@@ -274,7 +279,9 @@ export const clientDeployAccount = async ({
 }: {
   client: WebClientType;
   storageMode: AccountStorageMode;
-  components: Component[];
+  components: DeployedComponent[];
+  // The components' scripts: an authentication component's goes in as the
+  // account's auth component.
   scripts: Script[];
   // What the account's custom notes cost their senders (network accounts only).
   networkNoteFee?: bigint;
@@ -351,7 +358,7 @@ export const clientDeployAccount = async ({
       script,
       storageSlots: component.storageSlots,
     });
-    if (component.type === "authentication-component") {
+    if (script.type === "authentication-component") {
       accountBuilder = accountBuilder.withAuthComponent(accountComponent);
     } else {
       accountBuilder = accountBuilder.withComponent(accountComponent);
@@ -614,18 +621,18 @@ export const clientImportNoteFile = async ({
 export const storageMode = (accountId: WasmAccountIdType) =>
   accountId.isPublic() ? "public" : "private";
 
-// The components an account's code holds, by their scripts' exports: the
-// built-ins and, given the workspace, its compiled packages too, so an
-// imported account whose code holds a package's procedures lists that
-// package's component. A draft has no exports and matches nothing.
+// The components an account's code holds, as the ids of the scripts whose
+// exports it has: the built-ins and, given the workspace, its compiled
+// packages too, so an imported account whose code holds a package's
+// procedures lists that package. One script per package (`commitment`): the
+// workspace's counter and an embedded copy of it are the same component. A
+// draft has no exports and matches nothing.
 export const verifyAccountComponents = (
   wasmAccount: WasmAccount,
-  {
-    scripts = defaultScripts,
-    components = defaultComponents,
-  }: Partial<Pick<State, "scripts" | "components">> = {},
+  { scripts = defaultScripts }: Partial<Pick<State, "scripts">> = {},
 ) => {
   const code = wasmAccount.code();
+  const commitments = new Set<string>();
   return scripts
     .filter(
       ({ type, status, procedureExports }) =>
@@ -636,12 +643,17 @@ export const verifyAccountComponents = (
           code.hasProcedure(WasmWord.fromHex(digest)),
         ),
     )
-    .flatMap((script) => {
-      const component = components.find(
-        ({ scriptId }) => scriptId === script.id,
-      );
-      return component ? [component.id] : [];
-    });
+    .filter(({ commitment }) => {
+      if (commitment === "") {
+        return true;
+      }
+      if (commitments.has(commitment)) {
+        return false;
+      }
+      commitments.add(commitment);
+      return true;
+    })
+    .map(({ id }) => id);
 };
 
 export const wasmAccountToAccount = ({
@@ -656,9 +668,9 @@ export const wasmAccountToAccount = ({
   wasmAccount: WasmAccount;
   name: string;
   components?: string[];
-  // The workspace's scripts and components, matched against the account's
-  // code when `components` isn't given (verifyAccountComponents).
-  workspace?: Pick<State, "scripts" | "components">;
+  // The workspace's scripts, matched against the account's code when
+  // `components` isn't given (verifyAccountComponents).
+  workspace?: Pick<State, "scripts">;
   multisig?: AccountMultisig;
   updatedAt?: number | null;
   consumableNoteIds?: string[];

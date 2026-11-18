@@ -97,7 +97,14 @@ test("tutorial 12: contract verification", async ({ page }) => {
         .getByRole("dialog")
         .filter({ hasText: "Deploy Account" });
       await dialog.getByLabel("Name").fill("My Counter");
-      await selectOption(page, "Account Component", "Counter Contract");
+      // The script compiled in step 2, named with the run's id.
+      await dialog
+        .getByText("Account Component", { exact: true })
+        .locator("xpath=following::button[@role='combobox'][1]")
+        .click();
+      await page
+        .getByRole("option", { name: /^counter-account-[a-z]+$/ })
+        .click();
       await dialog.getByRole("button", { name: "Deploy" }).click();
       await expect(dialog).toBeHidden({ timeout: TRANSACTION_TIMEOUT });
       await nextStep(page);

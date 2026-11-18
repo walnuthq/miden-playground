@@ -5,12 +5,15 @@ import type {
   DependencyAccount,
   UnresolvedDependency,
 } from "@/hooks/use-dependency-accounts";
-import type { StorageSlot } from "@/lib/types/component";
+import type { StorageSlot } from "@/lib/types/storage-slot";
 import { storageSlotDescriptions } from "@/lib/utils/storage-schema";
-import { storageSlotsValid } from "@/lib/utils/storage-slots";
+import {
+  storageSlotPrefix,
+  storageSlotsValid,
+} from "@/lib/utils/storage-slots";
 
 export const slotNamePlaceholder = (name: string) =>
-  `${name.replace(/[^A-Za-z0-9_]/g, "_")}::component::field`;
+  `${storageSlotPrefix(name)}component::field`;
 
 export const InvalidSlots = () => (
   <p className="text-xs text-destructive">

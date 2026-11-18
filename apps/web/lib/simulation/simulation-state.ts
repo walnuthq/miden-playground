@@ -3,7 +3,7 @@ import {
   type AssetRow,
   DEFAULT_SIMULATED_ASSET,
 } from "@/lib/simulation/simulated-assets";
-import type { StorageSlot } from "@/lib/types/component";
+import type { StorageSlot } from "@/lib/types/storage-slot";
 
 // The storage slots a script's simulations start from, per script, and those
 // of the foreign accounts staged for it (`foreignSlotsKey`). In memory only,

@@ -25,7 +25,6 @@ import SelectAccountCombobox from "@/components/transactions/select-account-comb
 import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";
 import SelectConsumableNotesCombobox from "@/components/transactions/select-consumable-notes-combobox";
 import useAccounts from "@/hooks/use-accounts";
-import useComponents from "@/hooks/use-components";
 import useMultisig from "@/hooks/use-multisig";
 import useNetwork from "@/hooks/use-network";
 import useParaTransaction from "@/hooks/use-para-transaction";
@@ -33,7 +32,7 @@ import useScripts from "@/hooks/use-scripts";
 import useTransactions from "@/hooks/use-transactions";
 import useTutorials from "@/hooks/use-tutorials";
 import { midenFaucetAccountId } from "@/lib/constants";
-import { defaultComponentIds } from "@/lib/types/default-components";
+import { defaultScriptIds } from "@/lib/types/default-scripts";
 import type {
   CreateTransactionDialogStep,
   TransactionType,
@@ -89,7 +88,6 @@ const CreateTransactionConfigureForm = ({
   const { accounts, isConnectedWallet, isParaWallet } = useAccounts();
   const { consumeWithPara, sendWithPara } = useParaTransaction();
   const { scripts } = useScripts();
-  const { components } = useComponents();
   const {
     newMintTransactionRequest,
     newConsumeTransactionRequest,
@@ -264,14 +262,12 @@ const CreateTransactionConfigureForm = ({
             }
           }
           if (transactionType === "custom" && executingAccount && script) {
-            const customComponentId = executingAccount.components.find(
-              (componentId) => !defaultComponentIds.includes(componentId),
-            );
-            const customComponent = components.find(
-              ({ id }) => id === customComponentId,
+            // The account's first component that isn't a built-in.
+            const accountScriptId = executingAccount.components.find(
+              (scriptId) => !defaultScriptIds.includes(scriptId),
             );
             const accountScript = scripts.find(
-              ({ id }) => id === customComponent?.scriptId,
+              ({ id }) => id === accountScriptId,
             );
             const customTransactionRequest =
               await clientCreateTransactionFromScript({

@@ -1,11 +1,8 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, test } from "node:test";
-import {
-  counterAccountComponent,
-  counterAccountScript,
-  rust,
-} from "./counter-account.ts";
+import { storageSlotName } from "../utils/storage-slots.ts";
+import { counterAccountScript, rust } from "./counter-account.ts";
 
 const read = (path: string) =>
   readFileSync(new URL(path, import.meta.url), "utf8");
@@ -85,11 +82,16 @@ describe("the embedded counter-account package", () => {
     assert.equal(counterAccountScript.files["src/lib.rs"], rust);
   });
 
-  test("its component's slot follows the package name", () => {
-    assert.equal(counterAccountComponent.scriptId, counterAccountScript.id);
+  test("its storage slot follows the package name", () => {
     assert.deepEqual(
-      counterAccountComponent.storageSlots.map(({ name }) => name),
-      ["counter_account::counter_contract::count_map"],
+      counterAccountScript.metadata?.storage?.slots.map(({ name }) => name),
+      [
+        storageSlotName({
+          packageName: counterAccountScript.name,
+          traitName: "CounterContract",
+          fieldName: "count_map",
+        }),
+      ],
     );
   });
 });
