@@ -28,8 +28,10 @@ export type ParaClient = {
 // from the EVM wallet's key set up in it. Same account as @miden-sdk/para's
 // createParaMidenClient (all-zero seed, so the id is the same for a given
 // wallet), but built here to control the client:
-// - useWorker: false, since the worker relays the sign callback with a 30s
-//   timeout, and the Para confirmation modal can take longer;
+// - useWorker: false, from when the worker relayed the sign callback with a
+//   30s timeout, shorter than the Para confirmation modal can take. Since SDK
+//   0.18 the worker waits for `sign` without a limit, so the worker mode may
+//   work here too (untested);
 // - proverUrl, to prove on the network's remote prover rather than locally.
 // No storeName: it shares MidenProvider's store (MidenClientDB_<network>), so
 // the app's own client reads the account and transactions it writes, and
