@@ -1,3 +1,4 @@
+import { authSingleSigStorage } from "@/lib/types/default-scripts/storage-schemas";
 import type { Script } from "@/lib/types/script";
 import { defaultProcedureExport, defaultScript } from "@/lib/utils/script";
 import { sourceFiles } from "@/lib/utils/script-files";
@@ -169,6 +170,7 @@ const authSingleSig: Script = {
   masm,
   commitment:
     "0xca556e3d56ba394901cc8809b68c082b3388f77d17fc92c628501fc3f3d972b1",
+  metadata: { storage: authSingleSigStorage },
   procedureExports: [
     {
       ...defaultProcedureExport(),

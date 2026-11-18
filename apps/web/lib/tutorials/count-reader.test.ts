@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, test } from "node:test";
+import { storageSlotName } from "../utils/component.ts";
 import { counterAccountScript } from "./counter-account.ts";
 
 // Read as a file: count-reader.ts imports modules that need Vite's
@@ -53,5 +54,39 @@ describe("the embedded count-reader package", () => {
         .join(", ");
       assert.ok(wit.includes(`${name}: func(${list})`), `${name}(${list})`);
     }
+  });
+
+  test("embeds the storage schema api-compile returned", () => {
+    // Compiled from apps/api/templates/count-reader.rs through the local
+    // API (2026-11-18): one value slot, named as the compiler derives it.
+    const metadata = source.match(/\bmetadata: (\{[\s\S]*?\n {2}\}),\n/)?.[1];
+    assert.ok(metadata, "metadata");
+    const slots = [
+      ...metadata.matchAll(
+        /name: "([^"]+)",\s*description: "([^"]+)",\s*type: "([^"]+)",\s*valueType: "([^"]+)",/g,
+      ),
+    ].map(([, name, description, type, valueType]) => ({
+      name,
+      description,
+      type,
+      valueType,
+    }));
+    assert.deepEqual(slots, [
+      {
+        name: storageSlotName({
+          packageName: "count-reader",
+          traitName: "CountReader",
+          fieldName: "count",
+        }),
+        description: "count reader storage value",
+        type: "value",
+        valueType: "felt",
+      },
+    ]);
+    // The source declares that slot, with that description.
+    assert.match(
+      source,
+      /#\[storage\(description = "count reader storage value"\)\]\s*count: StorageValue<Felt>,/,
+    );
   });
 });

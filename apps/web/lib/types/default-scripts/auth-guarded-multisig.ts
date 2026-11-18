@@ -1,3 +1,4 @@
+import { authGuardedMultisigStorage } from "@/lib/types/default-scripts/storage-schemas";
 import type { Script } from "@/lib/types/script";
 import { defaultProcedureExport, defaultScript } from "@/lib/utils/script";
 import { sourceFiles } from "@/lib/utils/script-files";
@@ -132,6 +133,7 @@ const authGuardedMultisig: Script = {
   masm,
   commitment:
     "0x4ec0dd8bf5ced6e758f661aeebe4f1cc6ea6eecf66b7758968ca953a7e9c1348",
+  metadata: { storage: authGuardedMultisigStorage },
   procedureExports: [
     {
       ...defaultProcedureExport(),
