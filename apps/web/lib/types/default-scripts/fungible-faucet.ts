@@ -1,3 +1,4 @@
+import { fungibleFaucetStorage } from "@/lib/types/default-scripts/storage-schemas";
 import type { Script } from "@/lib/types/script";
 import { defaultProcedureExport, defaultScript } from "@/lib/utils/script";
 import { sourceFiles } from "@/lib/utils/script-files";
@@ -48,6 +49,7 @@ const fungibleFaucet: Script = {
   masm,
   commitment:
     "0xa93f46f604b8c6b9896f18d5d6fc191f5bc3d03d20f4b6c315bd74d5c21b9011",
+  metadata: { storage: fungibleFaucetStorage },
   procedureExports: [
     {
       ...defaultProcedureExport(),

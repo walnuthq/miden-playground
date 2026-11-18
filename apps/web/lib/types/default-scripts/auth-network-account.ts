@@ -1,3 +1,4 @@
+import { authNetworkAccountStorage } from "@/lib/types/default-scripts/storage-schemas";
 import type { Script } from "@/lib/types/script";
 import { defaultProcedureExport, defaultScript } from "@/lib/utils/script";
 import { sourceFiles } from "@/lib/utils/script-files";
@@ -227,6 +228,7 @@ const authNetworkAccount: Script = {
   masm,
   commitment:
     "0xd16c8eedd5e0c8cc784bb329a89bc952e7616529feca6f67a99c5fb76b6b1a00",
+  metadata: { storage: authNetworkAccountStorage },
   procedureExports: [
     {
       ...defaultProcedureExport(),

@@ -263,6 +263,11 @@ export type Package = {
   // `parameters`): null or missing for a package stored before it reported
   // them.
   parameters?: Record<string, { name: string; type: string }[]> | null;
+  // The registry's storage schemas (`PackageSchemas` in
+  // miden-source-code-verification): `{}` when the package has none, or when
+  // it was stored before the registry read them. Missing from a registry that
+  // predates them.
+  schemas?: Pick<PackageMetadata, "storage" | "noteStorage"> | null;
   createdAt: string;
   updatedAt: string;
 };
