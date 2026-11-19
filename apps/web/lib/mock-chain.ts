@@ -66,7 +66,7 @@ export const deleteMockChain = async () => {
 
 // The mock client's members the SDK's typings leave out.
 type MockClient = MockWasmWebClient & {
-  usesMockChain?: () => boolean;
+  usesMockChain?: () => boolean | Promise<boolean>;
   worker?: Worker | null;
   // The wasm client under the JS wrapper.
   getWasmWebClient: () => Promise<{
@@ -79,8 +79,13 @@ type MockClient = MockWasmWebClient & {
 };
 
 // The client as a mock client, or null when it runs on a real network.
-export const asMockClient = (client: unknown): MockWasmWebClient | null =>
-  (client as MockClient | null)?.usesMockChain?.()
+// Awaited: the mock client's wrapper answers a boolean, but every other client
+// forwards the call to its WASM client, which answers a Promise (truthy even
+// for `false`).
+export const asMockClient = async (
+  client: unknown,
+): Promise<MockWasmWebClient | null> =>
+  (await (client as MockClient | null)?.usesMockChain?.()) === true
     ? (client as MockWasmWebClient)
     : null;
 

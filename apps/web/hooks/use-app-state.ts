@@ -408,7 +408,7 @@ const useAppState = () => {
     await importStore(storeDump(store), storeName(networkId), {
       skipSync: true,
     });
-    const mockClient = asMockClient(client);
+    const mockClient = await asMockClient(client);
     if (mockClient) {
       // The import replaced the store under the mock client, whose chain is in
       // its memory: it gets a new one, which writes its genesis to the store.

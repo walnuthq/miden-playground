@@ -111,7 +111,7 @@ describe("mockAwareCreateClient", () => {
     const { storage, saved } = memoryStorage();
     const { createClient } = factory(storage);
     const client = await createClient(MOCK_RPC_URL);
-    assert.notEqual(asMockClient(client), null);
+    assert.notEqual(await asMockClient(client), null);
     assert.deepEqual(saved, [{ chain: bytes(0), transport: bytes() }]);
   });
 
@@ -121,7 +121,7 @@ describe("mockAwareCreateClient", () => {
       transport: bytes(9),
     });
     const { createClient } = factory(storage);
-    const client = asMockClient(await createClient(MOCK_RPC_URL));
+    const client = await asMockClient(await createClient(MOCK_RPC_URL));
     assert.deepEqual(await client?.serializeMockChain(), bytes(4));
     assert.deepEqual(await client?.serializeMockNoteTransportNode(), bytes(9));
     assert.equal(saved.length, 0);
@@ -145,12 +145,23 @@ describe("mockAwareCreateClient", () => {
 });
 
 describe("asMockClient", () => {
-  test("only a client on a mock chain", () => {
-    assert.equal(asMockClient(null), null);
-    assert.equal(asMockClient({}), null);
-    assert.equal(asMockClient({ usesMockChain: () => false }), null);
+  test("only a client on a mock chain", async () => {
+    assert.equal(await asMockClient(null), null);
+    assert.equal(await asMockClient({}), null);
+    assert.equal(await asMockClient({ usesMockChain: () => false }), null);
     const { client } = fakeMockClient();
-    assert.equal(asMockClient(client), client);
+    assert.equal(await asMockClient(client), client);
+  });
+
+  // A real network's client forwards the call to its WASM client, which
+  // answers a Promise: taken for a mock client, it had its chain replaced.
+  test("a client that answers with a Promise", async () => {
+    assert.equal(
+      await asMockClient({ usesMockChain: async () => false }),
+      null,
+    );
+    const client = { usesMockChain: async () => true };
+    assert.equal(await asMockClient(client), client);
   });
 });
 
