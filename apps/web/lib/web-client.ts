@@ -137,7 +137,9 @@ export const clientGetAllInputNotes = async ({
     .map((wasmInputNote) => wasmInputNote.id()?.toString())
     .filter((id) => id !== undefined)
     .filter((id) => !knownNoteIds?.has(id));
-  if (noteIds.length === 0) {
+  // A stateless RpcClient can't reach the mock chain, which lives in the
+  // client: on "mmck" the notes keep their records' metadata.
+  if (noteIds.length === 0 || networkId === "mmck") {
     return wasmInputNotes;
   }
   const requestedIds = new Set(noteIds);

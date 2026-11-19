@@ -277,14 +277,12 @@ const ProjectSwitcher = () => {
             >
               New Devnet sandbox
             </DropdownMenuItem> */}
-            {/* <DropdownMenuItem
-              onClick={() => {
-                resetState("mmck");
-                navigate("/accounts");
-              }}
-            >
-              New MockChain sandbox
-            </DropdownMenuItem> */}
+            {/* Dev builds only, for its e2e spec, until it's turned on. */}
+            {import.meta.env.DEV && (
+              <DropdownMenuItem onClick={() => newSandbox("mmck")}>
+                New MockChain sandbox
+              </DropdownMenuItem>
+            )}
             {/* import.meta.env.DEV && (
               <DropdownMenuItem
                 onClick={() => {

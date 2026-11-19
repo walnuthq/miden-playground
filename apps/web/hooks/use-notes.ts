@@ -136,7 +136,8 @@ const useNotes = () => {
     // from the node. Read its ID now: the note array below takes the note.
     const noteId = note.id().toString();
     const verifyNote = () => {
-      if (!tutorialId) {
+      // The registry has no MockChain, and its notes can't be fetched by RPC.
+      if (!tutorialId && networkId !== "mmck") {
         verifyNoteOnceCommitted({
           networkId,
           noteId,

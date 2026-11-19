@@ -19,6 +19,7 @@ import {
 } from "@miden-sdk/react";
 import useGlobalContext from "@/components/global-context/hook";
 import { useParaWallet } from "@/components/providers/para-wallet-context";
+import { asMockClient, proveMockBlock } from "@/lib/mock-chain";
 import type { NoteType } from "@/lib/types/note";
 import type { MidenInput, ProcedureExport, Script } from "@/lib/types/script";
 import type {
@@ -50,7 +51,7 @@ const useTransactions = () => {
     scripts,
     dispatch,
   } = useGlobalContext();
-  const { client } = useMiden();
+  const { client, sync } = useMiden();
   const { lastSyncTime } = useSyncState();
   const { execute: executeProgram } = useExecuteProgram();
   const { execute } = useTransaction();
@@ -238,10 +239,14 @@ const useTransactions = () => {
         accountId,
         request: transactionRequest,
       });
-      // if (client.usesMockChain()) {
-      //   await client.proveBlock();
-      // }
-      // const syncSummary = await client.syncState();
+      // Nothing produces blocks on the mock chain: the transaction stays
+      // pending until one is proven, and the store learns of it by a sync.
+      // `useTransaction` already synced, before the block existed.
+      const mockClient = await asMockClient(client);
+      if (mockClient) {
+        await proveMockBlock(mockClient);
+        await sync();
+      }
       return await recordTransaction({
         accountId,
         transactionId,

@@ -41,7 +41,6 @@ const NetworkBadge = () => {
   // transport for nobody. It ticks again within 2.5 s of the tab showing.
   const visible = useDocumentVisible();
   const useIntervalTriggered =
-    networkId !== "mmck" &&
     visible &&
     !isSyncing &&
     !syncingState &&

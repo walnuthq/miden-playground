@@ -56,10 +56,13 @@ const CreateAccountDropdownMenu = () => {
         )}
         {showImportDeployAccounts && (
           <>
-            <DropdownMenuItem onClick={() => openImportAccountDialog()}>
-              <Download />
-              Import account
-            </DropdownMenuItem>
+            {/* The mock RPC panics on an account its chain doesn't hold. */}
+            {networkId !== "mmck" && (
+              <DropdownMenuItem onClick={() => openImportAccountDialog()}>
+                <Download />
+                Import account
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem
               onClick={openDeployAccountDialog}
               disabled={deployableAccountComponents(scripts).length === 0}
