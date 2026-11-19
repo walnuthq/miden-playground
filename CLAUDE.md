@@ -6,6 +6,7 @@ Before working in one of these areas, read its file in `docs/claude/`. Their rul
 - Bumping `@miden-sdk/*`: `upgrading-miden.md`, then `examples.md`, `script-templates.md`, `masm-highlighting.md`.
 - Saved projects, the Projects submenu, resumable tutorials, `PlaygroundProjects`, network resets: `saved-projects.md`.
 - Mainnet sandbox (`mm`), Bread Wallet, fees, network notes, built-in note scripts, note verification: `mainnet-sandbox.md`.
+- MockChain sandbox (`mmck`), `lib/mock-chain.ts`, the mock client as the app's client, its saved chain: `mockchain-sandbox.md`.
 - Home-page examples, `compiled.json`, `pnpm examples:compile`: `examples.md`.
 - Read-only procedures, the Invoke button: `read-only-procedures.md`.
 - `apps/api/templates/*.rs`, `pnpm templates:check`/`sync`, the package embedded in `apps/web/lib/tutorials/basic-wallet.json`, note scripts and the wallets that can consume them: `script-templates.md`.

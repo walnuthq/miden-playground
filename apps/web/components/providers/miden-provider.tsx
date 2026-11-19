@@ -15,11 +15,13 @@ import {
   useMemo,
   useState,
 } from "react";
+import { toast } from "sonner";
 import GlobalContext from "@/components/global-context";
 import AppShell from "@/components/lib/app-shell";
 import Logo from "@/components/lib/logo";
 import useNetwork from "@/hooks/use-network";
 import { networks, noteTransportUrls, provers } from "@/lib/miden-client";
+import { deleteMockChain, onMockClientCrash } from "@/lib/mock-chain";
 import type { NetworkId } from "@/lib/types/network";
 import { deleteProjects } from "@/lib/utils/project";
 import { defaultState, STATE_STORAGE_KEY } from "@/lib/utils/state";
@@ -30,6 +32,10 @@ import {
 
 const resetLocalData = async () => {
   await deleteMidenStores();
+  // The MockChain's store went with the others: its chain goes too.
+  await deleteMockChain().catch((error) =>
+    console.error("ERROR: deleteMockChain", error),
+  );
   await deleteProjects();
   localStorage.removeItem(STATE_STORAGE_KEY);
   window.location.reload();
@@ -39,6 +45,10 @@ const resetLocalData = async () => {
 // (e.g. after a rollback) rather than resetting it, and deletes nothing.
 const isNewerStoreError = (error: Error) =>
   error.message.includes("written by a newer Miden client");
+
+// The saved chain couldn't be loaded, or its client crashes on every start
+// (`lib/mock-chain.ts`).
+const isMockChainError = (error: Error) => error.message.includes("MockChain");
 
 const InitializationError = ({ error }: { error: Error }) => {
   const [loading, setLoading] = useState(false);
@@ -52,7 +62,9 @@ const InitializationError = ({ error }: { error: Error }) => {
         <EmptyDescription className="max-w-md text-pretty">
           {isNewerStoreError(error)
             ? "The data this browser stores for the playground was written by a newer version, which this one cannot read."
-            : "The data this browser stores for the playground may have been written by an older version."}{" "}
+            : isMockChainError(error)
+              ? "The MockChain this browser stores and the accounts of its sandbox no longer match."
+              : "The data this browser stores for the playground may have been written by an older version."}{" "}
           Resetting it deletes the local accounts, notes and transactions, and
           the saved tutorial progress, then reloads the page.
         </EmptyDescription>
@@ -79,6 +91,11 @@ const MidenProvider = ({ children }: { children: ReactNode }) => {
   // Memoized: the SDK's provider re-initializes the client whenever the
   // config object changes, and this component re-renders on every app state
   // change (it reads the global context).
+  // The MockChain client's worker crashed: `restarts` counts the clients
+  // started in its place, `mockClientError` is set once restarting is given up.
+  const [restarts, setRestarts] = useState(0);
+  const [mockClientError, setMockClientError] = useState<Error | null>(null);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: a restart needs a new config object, which is what makes the SDK's provider create a client.
   const config = useMemo(
     () => ({
       rpcUrl: networks[networkId],
@@ -86,7 +103,22 @@ const MidenProvider = ({ children }: { children: ReactNode }) => {
       autoSyncInterval: 5000,
       prover: provers[networkId],
     }),
-    [networkId],
+    [networkId, restarts],
+  );
+  useEffect(
+    () =>
+      onMockClientCrash(({ action }) => {
+        if (action === "give-up") {
+          setMockClientError(new Error("the MockChain client keeps crashing"));
+          return;
+        }
+        toast.error("The MockChain client crashed.", {
+          description:
+            "It was restarted on the last block. Asking the MockChain for an account it doesn't hold does this.",
+        });
+        setRestarts((count) => count + 1);
+      }),
+    [],
   );
   // Has to settle before `RawMidenProvider` mounts, since that is what opens
   // the store and, with it, upgrades away the only marker saying the store
@@ -115,6 +147,9 @@ const MidenProvider = ({ children }: { children: ReactNode }) => {
   }, [dispatch]);
   if (!storeChecked) {
     return <AppShell />;
+  }
+  if (mockClientError) {
+    return <InitializationError error={mockClientError} />;
   }
   // No `loadingComponent`: it would stand in for the children, the signer
   // providers included, while the client initializes, so a network switch

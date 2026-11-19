@@ -1,4 +1,8 @@
-import { MidenClient, WasmWebClient } from "@miden-sdk/miden-sdk";
+import {
+  MidenClient,
+  MockWasmWebClient,
+  WasmWebClient,
+} from "@miden-sdk/miden-sdk";
 import { WalletAdapterNetwork } from "@miden-sdk/miden-wallet-adapter";
 import {
   DEVNET_NOTE_TRANSPORT_URL,
@@ -10,6 +14,7 @@ import {
   TESTNET_NOTE_TRANSPORT_URL,
   TESTNET_RPC_URL,
 } from "@/lib/constants";
+import { MOCK_RPC_URL, mockAwareCreateClient } from "@/lib/mock-chain";
 import type { NetworkId } from "@/lib/types/network";
 
 // "auto" picks the classic worker on Safari/WebKit, which can't find the WASM
@@ -19,13 +24,29 @@ import type { NetworkId } from "@/lib/types/network";
 // `workerMode` is missing from the SDK's types.
 (WasmWebClient as unknown as { workerMode: string }).workerMode = "module";
 
+// The React SDK's MidenProvider takes no client: it builds its own with this
+// static. Replaced so that the MockChain's sentinel URL gets a mock client
+// (`lib/mock-chain.ts`); every other URL goes to the SDK's.
+const sdkCreateClient = WasmWebClient.createClient.bind(WasmWebClient);
+(
+  WasmWebClient as unknown as {
+    createClient: (
+      ...args: Parameters<typeof sdkCreateClient>
+    ) => Promise<WasmWebClient>;
+  }
+).createClient = mockAwareCreateClient({
+  createClient: sdkCreateClient,
+  createMockClient: (chain, transport) =>
+    MockWasmWebClient.createClient(chain, transport),
+});
+
 // The SDK has shorthands for testnet and devnet only: mainnet takes full URLs.
 export const networks = {
   mm: MAINNET_RPC_URL,
   mtst: "testnet",
   mdev: "devnet",
   mlcl: "local",
-  mmck: "local",
+  mmck: MOCK_RPC_URL,
 } as const;
 
 export const provers = {
@@ -33,7 +54,10 @@ export const provers = {
   mtst: "testnet",
   mdev: "devnet",
   mlcl: "local",
-  mmck: "local",
+  // None: the mock client then uses its own, which doesn't prove (a
+  // transaction takes well under a second). With "local" the React SDK hands
+  // it a local prover, and it generates a real proof.
+  mmck: undefined,
 } as const;
 
 export const rpcUrls = {
