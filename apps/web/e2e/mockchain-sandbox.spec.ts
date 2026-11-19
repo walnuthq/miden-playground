@@ -1,6 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
 import { invoke, submitPreview } from "./example";
-import { networkBadge, switcher } from "./projects-menu";
+import { clickProjectsItem, networkBadge, switcher } from "./projects-menu";
 import {
   logBrowserErrors,
   selectOption,
@@ -219,4 +219,145 @@ test("MockChain sandbox: deploy a counter and increment it", async ({
   }).toPass({ timeout: MOCK_TIMEOUT });
   // The registry has no MockChain.
   expect(verifications).toEqual([]);
+});
+
+// A project's snapshot carries its chain with its store: a mock chain lives in
+// the client's memory, and a store only syncs with the chain it came from.
+test("MockChain sandbox: a saved project opens on its own chain", async ({
+  page,
+}) => {
+  logBrowserErrors(page);
+  await newMockChainSandbox(page);
+  await createWallet(page, "Wallet A");
+
+  await test.step("save it, then go on in a new MockChain sandbox", async () => {
+    await clickProjectsItem(page, "Save");
+    const dialog = page.getByRole("dialog", { name: /^Save Project/ });
+    await dialog.getByLabel("Name").fill("Mock one");
+    await dialog.getByRole("button", { name: "Save", exact: true }).click();
+    await expect(page.getByText("Project saved.").last()).toBeVisible();
+    await expect(switcher(page)).toContainText("Mock one");
+    await createWallet(page, "Wallet B");
+    await newMockChainSandbox(page);
+    await expect(page.getByRole("row", { name: /Wallet/ })).toHaveCount(0);
+    await createWallet(page, "Wallet C");
+  });
+
+  await test.step("open the project: its accounts, on a chain that takes a transaction", async () => {
+    await clickProjectsItem(page, "Mock one MockChain");
+    await expect(switcher(page)).toContainText("Mock one", {
+      timeout: MOCK_TIMEOUT,
+    });
+    await expect(page.getByRole("row", { name: /Wallet A/ })).toBeVisible({
+      timeout: MOCK_TIMEOUT,
+    });
+    await expect(page.getByRole("row", { name: /Wallet [BC]/ })).toHaveCount(0);
+    await createWallet(page, "Wallet D");
+    await openAccount(page, "Wallet D");
+    await expect(nonceRow(page)).toHaveText(/^Nonce\s*1$/, {
+      timeout: MOCK_TIMEOUT,
+    });
+    await openAccount(page, "Wallet A");
+    await expect(nonceRow(page)).toHaveText(/^Nonce\s*1$/);
+  });
+
+  await test.step("and after a reload", async () => {
+    await page.reload();
+    await expect(networkBadge(page)).toContainText(/#\d+/, {
+      timeout: TRANSACTION_TIMEOUT,
+    });
+    await expect(nonceRow(page)).toHaveText(/^Nonce\s*1$/);
+  });
+});
+
+// Truncates the chain saved with a project, which the client then refuses.
+const corruptProjectChain = (page: Page, name: string) =>
+  page.evaluate(
+    (name) =>
+      new Promise<void>((resolve, reject) => {
+        const open = indexedDB.open("PlaygroundProjects");
+        open.onerror = () => reject(open.error);
+        open.onsuccess = () => {
+          const database = open.result;
+          const transaction = database.transaction("projects", "readwrite");
+          const projects = transaction.objectStore("projects");
+          const cursor = projects.openCursor();
+          cursor.onsuccess = () => {
+            const entry = cursor.result;
+            if (!entry) {
+              return;
+            }
+            if (entry.value.name === name) {
+              const { chain, transport } = entry.value.mockChain;
+              entry.update({
+                ...entry.value,
+                mockChain: { chain: chain.slice(0, 16), transport },
+              });
+            }
+            entry.continue();
+          };
+          transaction.oncomplete = () => {
+            database.close();
+            resolve();
+          };
+          transaction.onerror = () => reject(transaction.error);
+        };
+      }),
+    name,
+  );
+
+test("MockChain sandbox: a project whose chain can't be loaded falls back to a new sandbox", async ({
+  page,
+}) => {
+  logBrowserErrors(page);
+  await newMockChainSandbox(page);
+  await createWallet(page, "Wallet A");
+  await clickProjectsItem(page, "Save");
+  const dialog = page.getByRole("dialog", { name: /^Save Project/ });
+  await dialog.getByLabel("Name").fill("Mock broken");
+  await dialog.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(page.getByText("Project saved.").last()).toBeVisible();
+  await corruptProjectChain(page, "Mock broken");
+  await newMockChainSandbox(page);
+
+  await clickProjectsItem(page, "Mock broken MockChain");
+  await expect(page.getByText("The project couldn't be restored.")).toBeVisible(
+    { timeout: MOCK_TIMEOUT },
+  );
+  await expect(switcher(page)).toContainText("MockChain sandbox");
+  await expect(page.getByRole("row", { name: /Wallet/ })).toHaveCount(0);
+  // The new sandbox's store and chain agree.
+  await createWallet(page, "Wallet B");
+  await openAccount(page, "Wallet B");
+  await expect(nonceRow(page)).toHaveText(/^Nonce\s*1$/, {
+    timeout: MOCK_TIMEOUT,
+  });
+});
+
+// Two tabs would each run a chain of their own over the one store.
+test("MockChain sandbox: one tab at a time", async ({ page, context }) => {
+  logBrowserErrors(page);
+  await newMockChainSandbox(page);
+  await createWallet(page, "Wallet A");
+
+  const second = await context.newPage();
+  await second.goto("/accounts");
+  await expect(
+    second.getByText("the MockChain sandbox is open in another tab"),
+  ).toBeVisible({ timeout: MOCK_TIMEOUT });
+  await expect(
+    second.getByRole("button", { name: "Reset local data" }),
+  ).toHaveCount(0);
+
+  // The first tab is untouched, and frees the sandbox when it closes.
+  await createWallet(page, "Wallet B");
+  await page.close();
+  await second.getByRole("button", { name: "Retry" }).click();
+  await expect(networkBadge(second)).toContainText(/#\d+/, {
+    timeout: TRANSACTION_TIMEOUT,
+  });
+  await expect(second.getByRole("row", { name: /Wallet B/ })).toBeVisible({
+    timeout: MOCK_TIMEOUT,
+  });
+  await createWallet(second, "Wallet C");
 });

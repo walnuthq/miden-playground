@@ -22,6 +22,7 @@ export const defaultState = (): State => ({
   syncingState: false,
   nextState: null,
   nextStore: null,
+  nextMockChain: null,
   fallbackState: null,
   workspaceRun: 0,
   // ACCOUNTS

@@ -97,6 +97,7 @@ const useSavedProjects = () => {
       completedTutorials,
       tutorialProgress,
       nextStore: project.store,
+      nextMockChain: project.mockChain,
       fallbackState,
     });
     navigate("/accounts");

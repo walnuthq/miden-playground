@@ -85,6 +85,7 @@ const reducer = (state: State, action: StateAction): State => {
         ...(fallbackState ?? imported),
         nextState: state.nextState === imported ? null : state.nextState,
         nextStore: null,
+        nextMockChain: null,
         fallbackState: null,
         workspaceRun: state.workspaceRun + 1,
       };

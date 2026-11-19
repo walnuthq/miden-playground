@@ -4,8 +4,10 @@ import type { MockWasmWebClient } from "@miden-sdk/miden-sdk";
 import {
   asMockClient,
   crashAction,
+  MOCK_CHAIN_BUSY_MESSAGE,
   MOCK_RPC_URL,
   type MockChainDump,
+  type MockChainLock,
   type MockChainStorage,
   mockAwareCreateClient,
   onMockClientCrash,
@@ -70,7 +72,10 @@ const fakeMockClient = (chain?: Uint8Array, transport?: Uint8Array) => {
 
 const factory = (
   storage: MockChainStorage,
-  { now = () => 0 }: { now?: () => number } = {},
+  {
+    now = () => 0,
+    lock = async () => () => {},
+  }: { now?: () => number; lock?: MockChainLock } = {},
 ) => {
   const page = new EventTarget();
   const clients: ReturnType<typeof fakeMockClient>[] = [];
@@ -85,6 +90,7 @@ const factory = (
       return fake.client;
     },
     storage,
+    lock,
     page,
     now,
   });
@@ -141,6 +147,62 @@ describe("mockAwareCreateClient", () => {
       /saved MockChain couldn't be loaded \(unexpected end of input\)/,
     );
     assert.deepEqual((await storage.load())?.chain, bytes(4));
+  });
+});
+
+// The tab's hold outlives a test: each starts by leaving the sandbox.
+describe("one tab at a time", () => {
+  const tabLock = () => {
+    const state = { asked: 0, released: 0 };
+    const lock: MockChainLock = async () => {
+      state.asked += 1;
+      return () => {
+        state.released += 1;
+      };
+    };
+    return { lock, state };
+  };
+
+  test("another tab has the sandbox: no client, and the chain is left alone", async () => {
+    const { storage, saved } = memoryStorage();
+    const { createClient, clients } = factory(storage, {
+      lock: async () => null,
+    });
+    await createClient("testnet");
+    await assert.rejects(
+      createClient(MOCK_RPC_URL),
+      new RegExp(MOCK_CHAIN_BUSY_MESSAGE),
+    );
+    assert.equal(clients.length, 0);
+    assert.equal(saved.length, 0);
+  });
+
+  test("asked again once the other tab left", async () => {
+    const { storage } = memoryStorage();
+    let busy = true;
+    const { createClient, clients } = factory(storage, {
+      lock: async () => (busy ? null : () => {}),
+    });
+    await createClient("testnet");
+    await assert.rejects(createClient(MOCK_RPC_URL));
+    busy = false;
+    await createClient(MOCK_RPC_URL);
+    assert.equal(clients.length, 1);
+  });
+
+  test("held once for clients created in a row, released on leaving", async () => {
+    const { storage } = memoryStorage();
+    const { lock, state } = tabLock();
+    const { createClient, clients } = factory(storage, { lock });
+    await createClient("testnet");
+    await Promise.all([createClient(MOCK_RPC_URL), createClient(MOCK_RPC_URL)]);
+    await createClient(MOCK_RPC_URL);
+    assert.equal(clients.length, 3);
+    assert.deepEqual(state, { asked: 1, released: 0 });
+    await createClient("testnet");
+    // The release waits for the lock's promise.
+    await Promise.resolve();
+    assert.deepEqual(state, { asked: 1, released: 1 });
   });
 });
 
