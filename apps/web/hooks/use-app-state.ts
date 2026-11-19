@@ -17,7 +17,11 @@ import { useParaWallet } from "@/components/providers/para-wallet-context";
 import useNetwork from "@/hooks/use-network";
 import useProjects from "@/hooks/use-projects";
 import { midenFaucetAccountId, P2ID_NOTE_CODE } from "@/lib/constants";
-import { asMockClient, replaceMockChain } from "@/lib/mock-chain";
+import {
+  asMockClient,
+  type MockChainDump,
+  replaceMockChain,
+} from "@/lib/mock-chain";
 import type { Account } from "@/lib/types/account";
 import type { NetworkId } from "@/lib/types/network";
 import type { InputNote } from "@/lib/types/note";
@@ -405,37 +409,39 @@ const useAppState = () => {
       : JSON.stringify(store ?? defaultStore(networkId));
   // Not synced: `popState` syncs once the state is applied, so a sync failure
   // isn't taken for a failed import.
-  const importWorkspaceStore = async (store: Store | string | null) => {
+  const importWorkspaceStore = async (
+    store: Store | string | null,
+    mockChain: MockChainDump | null,
+  ) => {
     await importStore(storeDump(store), storeName(networkId), {
       skipSync: true,
     });
     const mockClient = await asMockClient(client);
     if (mockClient) {
       // The import replaced the store under the mock client, whose chain is in
-      // its memory: it gets a new one, which writes its genesis to the store.
-      // Enough for a store that starts empty; a saved store needs the chain
-      // it was synced with, which snapshots don't carry yet.
-      await replaceMockChain(mockClient, null);
+      // its memory: it gets the chain a saved store was synced with, or a new
+      // one for a store that starts empty, which writes its genesis there.
+      await replaceMockChain(mockClient, mockChain);
     }
   };
   const popState = async () => {
     if (!nextState) {
       return;
     }
-    const { nextStore, fallbackState } = nextState;
+    const { nextStore, nextMockChain, fallbackState } = nextState;
     try {
       await clearMidenStorage();
-      await importWorkspaceStore(nextStore);
+      await importWorkspaceStore(nextStore, nextMockChain);
       dispatch({ type: "POP_STATE", payload: { imported: nextState } });
     } catch (error) {
       // The store couldn't be cleared, or the running client refuses the saved
-      // project (e.g. written by a newer one): start over from the fallback
-      // instead. Without a fallback it's a new sandbox.
+      // project (e.g. written by a newer one), or its MockChain: start over
+      // from the fallback instead. Without a fallback it's a new sandbox.
       console.error("ERROR: importStore", error);
       const state = fallbackState ?? freshSandboxState(networkId);
       let fallbackImported = true;
       try {
-        await importWorkspaceStore(state.nextStore);
+        await importWorkspaceStore(state.nextStore, state.nextMockChain);
       } catch (fallbackError) {
         console.error("ERROR: importStore", fallbackError);
         fallbackImported = false;

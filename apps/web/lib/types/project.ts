@@ -1,3 +1,4 @@
+import type { MockChainDump } from "@/lib/mock-chain";
 import type { NetworkId } from "@/lib/types/network";
 
 // What a project snapshot was taken of: a tutorial left unfinished, saved to
@@ -19,6 +20,9 @@ export type Project = {
   state: string;
   // The client store as `exportStore()` dumps it (JSON, the `Store` type).
   store: string;
+  // A MockChain sandbox's chain, which `exportStore()` leaves out: it lives in
+  // the client's memory. A store only opens on the chain it was synced with.
+  mockChain?: MockChainDump;
 };
 
 // What the projects list shows of a project, kept apart from the snapshot

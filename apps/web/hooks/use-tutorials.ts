@@ -165,6 +165,7 @@ const useTutorials = () => {
         ? {
             ...savedProject.state,
             nextStore: savedProject.store,
+            nextMockChain: savedProject.mockChain,
             fallbackState: freshState,
             completedTutorials: newCompletedTutorials,
             tutorialProgress: nextTutorialProgress,

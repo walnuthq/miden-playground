@@ -115,9 +115,14 @@ export const deleteProjects = () =>
 // Whether a snapshot can be restored on the given network: the store must come
 // from that network, and from the same chain (a network reset changes the
 // genesis block). The SDK checks the client version itself when importing.
+// A MockChain's store only opens on its own chain, saved with it: a snapshot
+// without one (saved before they carried it) can't be restored.
 export const isRestorable = (project: Project, networkId: NetworkId) => {
   if (project.version !== 1 || project.networkId !== networkId) {
     return false;
+  }
+  if (networkId === "mmck") {
+    return project.mockChain !== undefined;
   }
   const expectedGenesis = genesisBlockHeader(networkId);
   if (!expectedGenesis) {

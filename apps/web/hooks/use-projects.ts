@@ -1,6 +1,7 @@
-import { useExportStore } from "@miden-sdk/react";
+import { useExportStore, useMiden } from "@miden-sdk/react";
 import useGlobalContext from "@/components/global-context/hook";
 import useNetwork from "@/hooks/use-network";
+import { asMockClient, dumpMockChain } from "@/lib/mock-chain";
 import type { NetworkId } from "@/lib/types/network";
 import type { Project, ProjectKind } from "@/lib/types/project";
 import type { State } from "@/lib/types/state";
@@ -22,6 +23,7 @@ type ProjectRef = { kind: ProjectKind; id: string; name: string };
 const useProjects = () => {
   const { networkId } = useNetwork();
   const { exportStore } = useExportStore();
+  const { client } = useMiden();
   const { dispatch: _dispatch, ...state } = useGlobalContext();
   // A snapshot of the current state and client store. `stateOverrides` go
   // into the serialized state: a Save as stamps the new project's id and name
@@ -29,16 +31,24 @@ const useProjects = () => {
   const snapshotProject = async (
     { kind, id, name }: ProjectRef,
     stateOverrides: Partial<State> = {},
-  ): Promise<Project> => ({
-    version: 1,
-    kind,
-    id,
-    name,
-    networkId,
-    savedAt: Date.now(),
-    state: stateSerializer({ ...state, ...stateOverrides }),
-    store: await exportStore(),
-  });
+  ): Promise<Project> => {
+    const store = await exportStore();
+    // A MockChain sandbox's chain isn't in its store. Dumped after the store:
+    // a block proven in between leaves the store behind the chain, which a
+    // sync makes up for. A store ahead of its chain never syncs again.
+    const mockClient = await asMockClient(client);
+    return {
+      version: 1,
+      kind,
+      id,
+      name,
+      networkId,
+      savedAt: Date.now(),
+      state: stateSerializer({ ...state, ...stateOverrides }),
+      store,
+      ...(mockClient ? { mockChain: await dumpMockChain(mockClient) } : {}),
+    };
+  };
   const saveProject = async (
     ref: ProjectRef,
     stateOverrides?: Partial<State>,
@@ -78,6 +88,7 @@ const useProjects = () => {
       networkId: project.networkId,
       state: stateDeserializer(project.state),
       store: project.store,
+      mockChain: project.mockChain ?? null,
       savedAt: project.savedAt,
     };
   };

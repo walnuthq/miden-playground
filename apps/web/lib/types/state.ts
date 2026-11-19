@@ -3,6 +3,7 @@ import type {
   TransactionRequest as WasmTransactionRequestType,
   TransactionResult as WasmTransactionResultType,
 } from "@miden-sdk/miden-sdk";
+import type { MockChainDump } from "@/lib/mock-chain";
 import type { Account } from "@/lib/types/account";
 import type { InputNote } from "@/lib/types/note";
 import type { TutorialProgress } from "@/lib/types/project";
@@ -23,6 +24,9 @@ export type State = {
   // The store to import with `nextState`: a `Store`, or a store dump as
   // `exportStore()` returns it (a saved project).
   nextStore: Store | string | null;
+  // The chain `nextStore` was synced with, for a saved MockChain project. Null
+  // starts a new chain.
+  nextMockChain: MockChainDump | null;
   // What to switch to instead when `nextStore` can't be imported (a saved
   // project the running client refuses), with its own `nextStore`.
   fallbackState: State | null;

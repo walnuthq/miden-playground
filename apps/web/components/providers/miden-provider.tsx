@@ -21,13 +21,18 @@ import AppShell from "@/components/lib/app-shell";
 import Logo from "@/components/lib/logo";
 import useNetwork from "@/hooks/use-network";
 import { networks, noteTransportUrls, provers } from "@/lib/miden-client";
-import { deleteMockChain, onMockClientCrash } from "@/lib/mock-chain";
+import {
+  deleteMockChain,
+  MOCK_CHAIN_BUSY_MESSAGE,
+  onMockClientCrash,
+} from "@/lib/mock-chain";
 import type { NetworkId } from "@/lib/types/network";
 import { deleteProjects } from "@/lib/utils/project";
 import { defaultState, STATE_STORAGE_KEY } from "@/lib/utils/state";
 import {
   deleteMidenStores,
   deleteOutdatedMidenStores,
+  storeName,
 } from "@/lib/utils/store";
 
 const resetLocalData = async () => {
@@ -50,8 +55,35 @@ const isNewerStoreError = (error: Error) =>
 // (`lib/mock-chain.ts`).
 const isMockChainError = (error: Error) => error.message.includes("MockChain");
 
+// Another tab runs the MockChain sandbox (`mockChainTabLock`). Nothing is
+// wrong with the stored data, which is that tab's: no reset is offered.
+const isMockChainBusyError = (error: Error) =>
+  error.message.includes(MOCK_CHAIN_BUSY_MESSAGE);
+
+const MockChainBusy = ({ error }: { error: Error }) => (
+  <Empty className="h-screen">
+    <EmptyHeader>
+      <EmptyMedia variant="icon">
+        <Logo className="size-8" />
+      </EmptyMedia>
+      <EmptyTitle>Failed to initialize: {error.message}</EmptyTitle>
+      <EmptyDescription className="max-w-md text-pretty">
+        A MockChain lives in the memory of the tab that runs it, so one tab at a
+        time can open the sandbox. Close the other tab, or start another sandbox
+        there, then retry.
+      </EmptyDescription>
+    </EmptyHeader>
+    <EmptyContent>
+      <Button onClick={() => window.location.reload()}>Retry</Button>
+    </EmptyContent>
+  </Empty>
+);
+
 const InitializationError = ({ error }: { error: Error }) => {
   const [loading, setLoading] = useState(false);
+  if (isMockChainBusyError(error)) {
+    return <MockChainBusy error={error} />;
+  }
   return (
     <Empty className="h-screen">
       <EmptyHeader>
@@ -135,8 +167,12 @@ const MidenProvider = ({ children }: { children: ReactNode }) => {
             type: "POP_STATE",
             payload: { imported: defaultState() },
           });
-          // Saved projects come from the same outdated client.
-          return deleteProjects();
+          // Saved projects come from the same outdated client, and so does
+          // the chain of a MockChain store.
+          return Promise.all([
+            deleteProjects(),
+            outdatedStores.includes(storeName("mmck")) && deleteMockChain(),
+          ]);
         }
       })
       .catch((error) =>

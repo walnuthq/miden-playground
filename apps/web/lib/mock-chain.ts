@@ -135,6 +135,49 @@ export const replaceMockChain = async (
   await saveMockChain(client, storage);
 };
 
+// One tab at a time runs the MockChain sandbox: the chain is in the memory of
+// the tab's client, over a store every tab shares (`mock_client_db`). A second
+// tab would load the same saved chain, and the first block either proves puts
+// the shared store ahead of the other's chain, whose syncs then fail.
+// Resolves with what releases the sandbox, or null when another tab has it.
+export type MockChainLock = () => Promise<(() => void) | null>;
+
+const LOCK_NAME = "playground-mock-chain";
+// A reload asks while the page it replaces may still hold the lock.
+const LOCK_TIMEOUT_MS = 1000;
+
+export const MOCK_CHAIN_BUSY_MESSAGE =
+  "the MockChain sandbox is open in another tab";
+
+// A Web Lock, which the browser releases with the tab. Without the API
+// (plain node, an old browser) nothing is checked.
+export const mockChainTabLock: MockChainLock = () => {
+  const locks = globalThis.navigator?.locks;
+  if (!locks) {
+    return Promise.resolve(() => {});
+  }
+  return new Promise((resolve) => {
+    locks
+      .request(
+        LOCK_NAME,
+        { signal: AbortSignal.timeout(LOCK_TIMEOUT_MS) },
+        // Held until the returned promise settles.
+        () => new Promise<void>((release) => resolve(release)),
+      )
+      .catch(() => resolve(null));
+  });
+};
+
+// The tab's hold on the sandbox while its client is a mock client. One for
+// the tab, not one per client: React's StrictMode and a restart create
+// clients in a row.
+let held: ReturnType<MockChainLock> | undefined;
+
+const releaseMockChain = () => {
+  held?.then((release) => release?.());
+  held = undefined;
+};
+
 // A mock client younger than this when its worker crashes crashed on startup.
 export const STARTUP_CRASH_MS = 5000;
 
@@ -227,6 +270,7 @@ export const mockAwareCreateClient =
     createClient,
     createMockClient,
     storage = mockChainStorage,
+    lock = mockChainTabLock,
     page = globalThis,
     now = Date.now,
   }: {
@@ -239,6 +283,7 @@ export const mockAwareCreateClient =
       transport?: Uint8Array,
     ) => Promise<MockWasmWebClient>;
     storage?: MockChainStorage;
+    lock?: MockChainLock;
     // Where an uncaught error of the page is reported.
     page?: EventTarget;
     now?: () => number;
@@ -253,10 +298,16 @@ export const mockAwareCreateClient =
     unwatch?.();
     unwatch = undefined;
     if (rpcUrl !== MOCK_RPC_URL) {
+      releaseMockChain();
       return createClient(rpcUrl, ...rest);
     }
     const restarted = restarting;
     restarting = false;
+    held ??= lock();
+    if (!(await held)) {
+      held = undefined;
+      throw new Error(MOCK_CHAIN_BUSY_MESSAGE);
+    }
     const dump = await storage.load();
     let client: MockWasmWebClient;
     try {

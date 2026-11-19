@@ -54,4 +54,13 @@ describe("isRestorable", () => {
       true,
     );
   });
+
+  test("a MockChain project needs its chain", () => {
+    const mockChain = { chain: new Uint8Array(), transport: new Uint8Array() };
+    assert.equal(isRestorable(project({ networkId: "mmck" }), "mmck"), false);
+    assert.equal(
+      isRestorable(project({ networkId: "mmck", mockChain }), "mmck"),
+      true,
+    );
+  });
 });
