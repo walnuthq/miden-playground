@@ -10,10 +10,13 @@ import {
   type MockChainLock,
   type MockChainStorage,
   mockAwareCreateClient,
+  mockChainTabLock,
   onMockClientCrash,
   proveMockBlock,
   replaceMockChain,
   STARTUP_CRASH_MS,
+  simulationStoreLock,
+  tabRunsMockChain,
 } from "./mock-chain.ts";
 
 const bytes = (...values: number[]) => new Uint8Array(values);
@@ -224,6 +227,55 @@ describe("asMockClient", () => {
     );
     const client = { usesMockChain: async () => true };
     assert.equal(await asMockClient(client), client);
+  });
+});
+
+// On the real Web Locks, which node has: each test frees what it holds.
+describe("the store's lock", () => {
+  const settled = () => new Promise((resolve) => setTimeout(resolve, 20));
+
+  test("simulations share the store, and a sandbox takes it from them", async () => {
+    const lost: string[] = [];
+    const first = await simulationStoreLock(() => lost.push("first"));
+    const second = await simulationStoreLock(() => lost.push("second"));
+    assert.ok(first && second);
+    const sandbox = await mockChainTabLock();
+    assert.ok(sandbox);
+    await settled();
+    assert.deepEqual(lost.sort(), ["first", "second"]);
+    // While the sandbox runs, no simulation gets the store.
+    assert.equal(await simulationStoreLock(() => {}), null);
+    sandbox();
+    await settled();
+    const after = await simulationStoreLock(() => lost.push("after"));
+    assert.ok(after);
+    after();
+    await settled();
+    // A release isn't a loss.
+    assert.equal(lost.length, 2);
+  });
+
+  test("a sandbox isn't taken from another sandbox", async () => {
+    const sandbox = await mockChainTabLock();
+    assert.ok(sandbox);
+    assert.equal(await mockChainTabLock(), null);
+    sandbox();
+    await settled();
+    const next = await mockChainTabLock();
+    assert.ok(next);
+    next();
+    await settled();
+  });
+
+  test("the tab runs the MockChain while its client is the sandbox's", async () => {
+    const { storage } = memoryStorage();
+    const { createClient } = factory(storage);
+    await createClient("testnet");
+    assert.equal(tabRunsMockChain(), false);
+    await createClient(MOCK_RPC_URL);
+    assert.equal(tabRunsMockChain(), true);
+    await createClient("testnet");
+    assert.equal(tabRunsMockChain(), false);
   });
 });
 

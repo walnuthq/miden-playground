@@ -1,4 +1,5 @@
 import { MockWasmWebClient } from "@miden-sdk/miden-sdk";
+import { simulationStoreLock, tabRunsMockChain } from "@/lib/mock-chain";
 
 // The client simulations of account components run on: a mock chain in the
 // browser, with its own IndexedDB store (`mock_client_db`, the name the SDK
@@ -7,6 +8,10 @@ import { MockWasmWebClient } from "@miden-sdk/miden-sdk";
 // delete an account: on the app's client they would pile up in the user's
 // store and saved projects. This store is emptied on each page load instead.
 // It needs no network: the mock chain doesn't depend on the sandbox's.
+//
+// On the MockChain sandbox that store is the sandbox's own, and the SDK takes
+// no other name: this client is never created there, nor while another tab
+// runs the sandbox (`simulationStoreLock`, lib/mock-chain.ts).
 
 const MOCK_STORE_NAME = "mock_client_db";
 
@@ -17,16 +22,75 @@ const deleteMockStore = () =>
     request.onsuccess = request.onerror = request.onblocked = () => resolve();
   });
 
+export const ON_MOCK_CHAIN =
+  "A simulated account can't be used on the MockChain sandbox: it would run on a second mock chain, whose store is the sandbox's own.";
+
+export const MOCK_CHAIN_IN_ANOTHER_TAB =
+  "A simulated account can't be used while the MockChain sandbox is open in another tab: both use the same store. Close that tab, or start another sandbox there.";
+
+const TAKEN_BY_MOCK_CHAIN =
+  "The simulation was stopped: a MockChain sandbox started, and it uses the same store.";
+
 let clientPromise: Promise<MockWasmWebClient> | undefined;
+
+// What frees each client's hold on the store.
+const storeHolds = new WeakMap<MockWasmWebClient, () => void>();
+
+// Fails the run in flight, if there is one (`withSimulationClient`).
+let failRun: ((message: string) => void) | undefined;
+
+const stop = (client: MockWasmWebClient) => {
+  storeHolds.get(client)?.();
+  storeHolds.delete(client);
+  try {
+    client.terminate();
+  } catch {
+    // Already terminated.
+  }
+};
+
+const createSimulationClient = () => {
+  const created: Promise<MockWasmWebClient> = (async () => {
+    if (tabRunsMockChain()) {
+      throw new Error(ON_MOCK_CHAIN);
+    }
+    const release = await simulationStoreLock(() => {
+      // A MockChain sandbox took the store, in this tab or another.
+      if (clientPromise === created) {
+        clientPromise = undefined;
+      }
+      if (failRun) {
+        failRun(TAKEN_BY_MOCK_CHAIN);
+      }
+      created.then(stop, () => undefined);
+    });
+    if (!release) {
+      throw new Error(MOCK_CHAIN_IN_ANOTHER_TAB);
+    }
+    try {
+      await deleteMockStore();
+      const client = await MockWasmWebClient.createClient();
+      storeHolds.set(client, release);
+      return client;
+    } catch (error) {
+      release();
+      throw error;
+    }
+  })();
+  return created;
+};
 
 // Created on first use: most visits never simulate.
 export const simulationClient = () => {
-  clientPromise ??= deleteMockStore()
-    .then(() => MockWasmWebClient.createClient())
-    .catch((error) => {
-      clientPromise = undefined;
-      throw error;
+  if (!clientPromise) {
+    const created = createSimulationClient();
+    clientPromise = created;
+    created.catch(() => {
+      if (clientPromise === created) {
+        clientPromise = undefined;
+      }
     });
+  }
   return clientPromise;
 };
 
@@ -47,11 +111,7 @@ const timedOut = (ms: number) =>
 // flight on its worker rejects ("WebClient terminated").
 const discardClient = (client: MockWasmWebClient) => {
   clientPromise = undefined;
-  try {
-    client.terminate();
-  } catch {
-    // Already terminated.
-  }
+  stop(client);
 };
 
 // Runs `run` on the mock client. A panic inside the SDK's worker (the mock
@@ -73,6 +133,7 @@ export const withSimulationClient = async <T>(
       discardClient(client);
       reject(new SimulationClientReset(message));
     };
+    failRun = fail;
     onError = () => fail(CRASHED);
     worker?.addEventListener("error", onError);
     timer = setTimeout(() => fail(timedOut(timeoutMs)), timeoutMs);
@@ -80,6 +141,7 @@ export const withSimulationClient = async <T>(
   try {
     return await Promise.race([run(client), failure]);
   } finally {
+    failRun = undefined;
     clearTimeout(timer);
     if (onError) {
       worker?.removeEventListener("error", onError);

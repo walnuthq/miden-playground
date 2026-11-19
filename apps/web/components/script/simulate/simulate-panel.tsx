@@ -11,11 +11,13 @@ import SimulationResultDialog, {
   type SimulatedTransaction,
 } from "@/components/script/simulate/simulation-result-dialog";
 import TargetSimulation from "@/components/script/simulate/target-simulation";
+import useNetwork from "@/hooks/use-network";
 import useSimulation from "@/hooks/use-simulation";
 import {
   sandboxAccountsDisabledReason,
   simulationBlockedReason,
 } from "@/lib/simulation/blocked";
+import { hasSimulatedAccounts } from "@/lib/simulation/can-simulate";
 import { storageChanges } from "@/lib/simulation/run";
 import {
   applyVaultChanges,
@@ -181,9 +183,21 @@ const SimulatePanel = ({
 }: {
   script: Script;
   onFailure: () => void;
-}) =>
-  script.type === "account-component" ? (
-    <AccountComponentSimulation script={script} onFailure={onFailure} />
+}) => {
+  const { networkId } = useNetwork();
+  return script.type === "account-component" ? (
+    hasSimulatedAccounts(networkId) ? (
+      <AccountComponentSimulation script={script} onFailure={onFailure} />
+    ) : (
+      // The MockChain sandbox: no throwaway account, and none is needed.
+      <p className="max-w-2xl text-xs text-muted-foreground">
+        Account components aren't simulated on the MockChain sandbox: deploying
+        one takes under a second and costs nothing. Deploy an account with this
+        component from the Accounts page, then invoke its procedures from the
+        account's Components tab, where a call is previewed before it's
+        submitted.
+      </p>
+    )
   ) : script.type === "note" || script.type === "transaction-script" ? (
     <TargetSimulation script={script} onFailure={onFailure} />
   ) : (
@@ -192,5 +206,6 @@ const SimulatePanel = ({
       simulated.
     </p>
   );
+};
 
 export default SimulatePanel;
