@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
-import { canSimulate } from "./can-simulate.ts";
+import { canSimulate, hasSimulatedAccounts } from "./can-simulate.ts";
 
 const masp = "TUFTUA==";
 
@@ -28,5 +28,14 @@ describe("canSimulate", () => {
   test("needs a package: not a built-in assembled from MASM", () => {
     assert.equal(canSimulate({ type: "note", masp: "" }), false);
     assert.equal(canSimulate({ type: "account-component", masp: "" }), false);
+  });
+});
+
+describe("hasSimulatedAccounts", () => {
+  test("everywhere but on the MockChain sandbox, whose store a second mock client would take", () => {
+    for (const networkId of ["mm", "mtst", "mdev", "mlcl"] as const) {
+      assert.equal(hasSimulatedAccounts(networkId), true, networkId);
+    }
+    assert.equal(hasSimulatedAccounts("mmck"), false);
   });
 });

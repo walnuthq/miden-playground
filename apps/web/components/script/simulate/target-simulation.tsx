@@ -11,9 +11,11 @@ import SimulationResultDialog, {
   type SimulatedTransaction,
 } from "@/components/script/simulate/simulation-result-dialog";
 import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";
+import useNetwork from "@/hooks/use-network";
 import useScriptTargetAccounts from "@/hooks/use-script-target-accounts";
 import useScripts from "@/hooks/use-scripts";
 import useTargetSimulation from "@/hooks/use-target-simulation";
+import { hasSimulatedAccounts } from "@/lib/simulation/can-simulate";
 import {
   SIMULATED_PREFIX,
   simulatedAccountValue,
@@ -109,27 +111,32 @@ const TargetSimulation = ({
   const { scripts } = useScripts();
   const isNote = script.type === "note";
   const [targetAccountId, setTargetAccountId] = useState("");
+  // Not on the MockChain sandbox, where the script runs on the sandbox's
+  // accounts only.
+  const { networkId } = useNetwork();
+  const simulatedOffered = hasSimulatedAccounts(networkId);
   const simulatedPicked = targetAccountId === SIMULATED_TARGET;
   // Only the accounts whose code has the procedures the script calls.
   const targets = useScriptTargetAccounts(script);
   // A recompile or a code change can rule out the selected account. The
-  // simulated account is always offered, and picked when no sandbox account
-  // qualifies.
+  // simulated account, where there is one, is always offered, and picked
+  // when no sandbox account qualifies.
   useEffect(() => {
     if (targets.status === "checking") {
       return;
     }
     if (targetAccountId === "") {
-      if (targets.accountIds.size === 0) {
+      if (simulatedOffered && targets.accountIds.size === 0) {
         setTargetAccountId(SIMULATED_TARGET);
       }
     } else if (
-      targetAccountId !== SIMULATED_TARGET &&
-      !targets.accountIds.has(targetAccountId)
+      targetAccountId === SIMULATED_TARGET
+        ? !simulatedOffered
+        : !targets.accountIds.has(targetAccountId)
     ) {
       setTargetAccountId("");
     }
-  }, [targets, targetAccountId]);
+  }, [targets, targetAccountId, simulatedOffered]);
   // The procedures the script calls that the simulated account lacks.
   const missing = useMemo(
     () =>
@@ -203,9 +210,18 @@ const TargetSimulation = ({
                   ? ` It lacks procedures this script calls: ${missing.join(", ")}.`
                   : ""
               }`
-            : isNote
-              ? "Runs the script locally as if the account consumed a note made from it: nothing is submitted."
-              : "Runs the script locally against the account: nothing is submitted.")}
+            : `${
+                isNote
+                  ? "Runs the script locally as if the account consumed a note made from it"
+                  : "Runs the script locally against the account"
+              }: nothing is submitted.${
+                simulatedOffered
+                  ? ""
+                  : targets.status !== "checking" &&
+                      targets.accountIds.size === 0
+                    ? " None of the sandbox's accounts has the procedures this script calls: deploy one that does."
+                    : " On the MockChain sandbox it runs on the sandbox's accounts."
+              }`)}
       </p>
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="grid gap-1.5">
@@ -215,7 +231,9 @@ const TargetSimulation = ({
             onValueChange={setTargetAccountId}
             accountIds={targets.accountIds}
             checking={targets.status === "checking"}
-            simulatedAccounts={SIMULATED_TARGET_OPTIONS}
+            simulatedAccounts={
+              simulatedOffered ? SIMULATED_TARGET_OPTIONS : undefined
+            }
           />
         </div>
         <div className="grid gap-1.5">

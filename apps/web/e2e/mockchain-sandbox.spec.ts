@@ -1,4 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
+import { COMPILED, createCounterScript } from "./editor";
 import { invoke, submitPreview } from "./example";
 import { clickProjectsItem, networkBadge, switcher } from "./projects-menu";
 import {
@@ -360,4 +361,152 @@ test("MockChain sandbox: one tab at a time", async ({ page, context }) => {
     timeout: MOCK_TIMEOUT,
   });
   await createWallet(second, "Wallet C");
+});
+
+const editorConsole = (page: Page) =>
+  page.getByRole("region", { name: "Editor Console" });
+
+const simulateInvoke = (page: Page, procedure: string) =>
+  editorConsole(page).getByRole("button", { name: `Invoke ${procedure}` });
+
+// What `get_count` returned in the Simulate tab.
+const simulatedCount = (page: Page) =>
+  editorConsole(page)
+    .getByRole("row")
+    .filter({ has: page.getByRole("button", { name: "Invoke get_count" }) })
+    .getByRole("cell")
+    .nth(2);
+
+const targetDropdown = (page: Page) =>
+  editorConsole(page)
+    .locator("div")
+    .filter({ has: page.getByText("Target account", { exact: true }) })
+    .last()
+    .getByRole("button");
+
+const openScript = async (page: Page, name: string) => {
+  await page.goto("/scripts");
+  await page.getByRole("link", { name }).first().click();
+  await expect(page).toHaveURL(/\/scripts\//);
+  await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
+};
+
+// A simulated account runs on a mock client of its own, whose store has the
+// name of the sandbox's: on the MockChain the Simulate tab never creates it.
+test("MockChain sandbox: the Simulate tab runs on the sandbox's accounts only", async ({
+  page,
+}) => {
+  logBrowserErrors(page);
+  await newMockChainSandbox(page);
+  await page.getByRole("button", { name: "Create new account" }).click();
+  await page.getByRole("menuitem", { name: "Deploy account" }).click();
+  const deploy = page.getByRole("dialog").filter({ hasText: "Deploy Account" });
+  await deploy.getByLabel("Name").fill("Mock Counter");
+  await selectOption(page, "Account Component", "counter-account");
+  await deploy.getByRole("button", { name: "Deploy" }).click();
+  await expect(deploy).toBeHidden({ timeout: MOCK_TIMEOUT });
+
+  await test.step("an account component isn't simulated: it's deployed", async () => {
+    await openScript(page, "counter-account");
+    await expect(
+      editorConsole(page).getByText(
+        /^Account components aren't simulated on the MockChain sandbox/,
+      ),
+    ).toBeVisible();
+    await expect(simulateInvoke(page, "get_count")).toHaveCount(0);
+  });
+
+  await test.step("a note runs on a sandbox account, with no simulated account offered", async () => {
+    await openScript(page, "increment-note");
+    await targetDropdown(page).click();
+    const options = page.getByRole("menuitemradio");
+    await expect(options).toHaveText(["Mock Counter"]);
+    await options.first().click();
+    await editorConsole(page)
+      .getByRole("button", { name: "Simulate", exact: true })
+      .click();
+    const dialog = page
+      .getByRole("dialog")
+      .filter({ hasText: "Simulation of increment-note" });
+    await expect(dialog.getByText("count_map")).toBeVisible({
+      timeout: MOCK_TIMEOUT,
+    });
+    await dialog.getByRole("button", { name: "Close" }).first().click();
+  });
+
+  await test.step("the sandbox still transacts, and nothing was executed for real", async () => {
+    await page.goto("/accounts");
+    await createWallet(page, "Wallet A");
+    await openAccount(page, "Mock Counter");
+    await expect(nonceRow(page)).toHaveText(/^Nonce\s*1$/);
+  });
+});
+
+// The Simulate tab's mock client, on another network, uses the same store.
+test("MockChain sandbox: another tab's simulations leave its store alone", async ({
+  page,
+  context,
+}) => {
+  logBrowserErrors(page);
+  // A Testnet tab that simulated: its mock client has the store.
+  await createCounterScript(page);
+  await page.getByRole("button", { name: "Compile" }).click();
+  await expect(page.getByText(COMPILED).last()).toBeVisible({
+    timeout: TRANSACTION_TIMEOUT,
+  });
+  await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
+  await simulateInvoke(page, "get_count").click();
+  await expect(simulatedCount(page)).toHaveText("0");
+
+  // The sandbox takes it, in a second tab.
+  const sandbox = await context.newPage();
+  logBrowserErrors(sandbox);
+  await newMockChainSandbox(sandbox);
+  await createWallet(sandbox, "Wallet A");
+
+  await test.step("the first tab can't simulate meanwhile", async () => {
+    await simulateInvoke(page, "get_count").click();
+    // A failed run shows the log.
+    await expect(
+      editorConsole(page).getByText(
+        /while the MockChain sandbox is open in another tab/,
+      ),
+    ).toBeVisible({ timeout: MOCK_TIMEOUT });
+  });
+
+  await test.step("the sandbox is untouched", async () => {
+    // Its next account is committed in a block and synced: the store is
+    // still its chain's. No reload: the two tabs write the same persisted
+    // app state, and the last writer wins.
+    await createWallet(sandbox, "Wallet B");
+    await sandbox.getByRole("cell", { name: "Wallet B", exact: true }).click();
+    await expect(nonceRow(sandbox)).toHaveText(/^Nonce\s*1$/, {
+      timeout: MOCK_TIMEOUT,
+    });
+  });
+
+  await test.step("once the sandbox's tab is closed, simulations run again", async () => {
+    await sandbox.close();
+    await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
+    await simulateInvoke(page, "get_count").click();
+    await expect(simulatedCount(page)).toHaveText("0", {
+      timeout: MOCK_TIMEOUT,
+    });
+  });
+
+  await test.step("a sandbox started in the tab that simulated takes the store from its own mock client", async () => {
+    // Without a reload: the simulation's client is still alive.
+    await switcher(page).click();
+    await page.getByRole("menuitem", { name: "New MockChain sandbox" }).click();
+    await expect(page).toHaveURL(/\/accounts$/, { timeout: MOCK_TIMEOUT });
+    // The page navigates before the network switches.
+    await expect(switcher(page)).toContainText("MockChain sandbox", {
+      timeout: MOCK_TIMEOUT,
+    });
+    await createWallet(page, "Wallet C");
+    await page.reload();
+    await expect(page.getByRole("row", { name: /Wallet C/ })).toBeVisible({
+      timeout: MOCK_TIMEOUT,
+    });
+  });
 });

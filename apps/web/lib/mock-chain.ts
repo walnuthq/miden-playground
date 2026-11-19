@@ -149,23 +149,61 @@ const LOCK_TIMEOUT_MS = 1000;
 export const MOCK_CHAIN_BUSY_MESSAGE =
   "the MockChain sandbox is open in another tab";
 
-// A Web Lock, which the browser releases with the tab. Without the API
-// (plain node, an old browser) nothing is checked.
-export const mockChainTabLock: MockChainLock = () => {
+// Asks for the Web Lock, which the browser releases with the tab. Resolves
+// with its release once it's granted, or null when it isn't. `onLost` is
+// called when a granted hold is taken away (`steal`).
+const holdLock = (
+  locks: LockManager,
+  options: LockOptions,
+  onLost?: () => void,
+) =>
+  new Promise<(() => void) | null>((resolve) => {
+    locks
+      .request(LOCK_NAME, options, (lock) => {
+        if (!lock) {
+          resolve(null);
+          return;
+        }
+        // Held until the returned promise settles.
+        return new Promise<void>((release) => resolve(release));
+      })
+      .catch(() => {
+        resolve(null);
+        onLost?.();
+      });
+  });
+
+// The sandbox's hold is exclusive. The Simulate tab's mock clients, which use
+// the same store on the other networks, hold the lock shared
+// (`simulationStoreLock`): the sandbox takes it from them, in this tab or
+// another, and they stop. Only another sandbox refuses it. Without the API
+// (an old browser) nothing is checked.
+export const mockChainTabLock: MockChainLock = async () => {
   const locks = globalThis.navigator?.locks;
   if (!locks) {
-    return Promise.resolve(() => {});
+    return () => {};
   }
-  return new Promise((resolve) => {
-    locks
-      .request(
-        LOCK_NAME,
-        { signal: AbortSignal.timeout(LOCK_TIMEOUT_MS) },
-        // Held until the returned promise settles.
-        () => new Promise<void>((release) => resolve(release)),
-      )
-      .catch(() => resolve(null));
-  });
+  const free = await holdLock(locks, { ifAvailable: true });
+  if (free) {
+    return free;
+  }
+  const { held = [] } = await locks.query();
+  const holders = held.filter(({ name }) => name === LOCK_NAME);
+  return holders.length > 0 && holders.every(({ mode }) => mode === "shared")
+    ? holdLock(locks, { steal: true })
+    : holdLock(locks, { signal: AbortSignal.timeout(LOCK_TIMEOUT_MS) });
+};
+
+// The hold of a Simulate tab's mock client on the store, on a network other
+// than the MockChain: shared, so several tabs simulate at once, as before.
+// Resolves with its release, or null while a tab runs the sandbox, whose
+// store it is then. `onLost` is called when a sandbox starts, here or in
+// another tab: the client must stop using the store.
+export const simulationStoreLock = (onLost: () => void) => {
+  const locks = globalThis.navigator?.locks;
+  return locks
+    ? holdLock(locks, { mode: "shared", ifAvailable: true }, onLost)
+    : Promise.resolve(() => {});
 };
 
 // The tab's hold on the sandbox while its client is a mock client. One for
@@ -177,6 +215,10 @@ const releaseMockChain = () => {
   held?.then((release) => release?.());
   held = undefined;
 };
+
+// Whether this tab's client is the sandbox's mock client: `mock_client_db` is
+// then its store, and no other mock client may be created.
+export const tabRunsMockChain = () => held !== undefined;
 
 // A mock client younger than this when its worker crashes crashed on startup.
 export const STARTUP_CRASH_MS = 5000;
