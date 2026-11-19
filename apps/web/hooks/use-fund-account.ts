@@ -1,4 +1,7 @@
-import type { Account as WasmAccount } from "@miden-sdk/miden-sdk";
+import {
+  type Account as WasmAccount,
+  TransactionRequestBuilder as WasmTransactionRequestBuilder,
+} from "@miden-sdk/miden-sdk";
 import { SendTransaction, useWallet } from "@miden-sdk/miden-wallet-adapter";
 import {
   normalizeAccountId,
@@ -14,6 +17,7 @@ import {
   waitForConsumableFeeNote,
   waitForFundingNote,
 } from "@/lib/miden-faucet";
+import { asMockClient, proveMockBlock } from "@/lib/mock-chain";
 import {
   endMainnetFunding,
   type MainnetFunding,
@@ -27,7 +31,7 @@ const TRANSACTION_COMMIT_TIMEOUT = 60_000;
 const useFundAccount = () => {
   const { networkId } = useNetwork();
   const { workspaceRun } = useGlobalContext();
-  const { client } = useMiden();
+  const { client, sync } = useMiden();
   const { execute } = useTransaction();
   const { waitForCommit } = useWaitForCommit();
   const { address: breadWalletAddress, requestSend } = useWallet();
@@ -104,6 +108,9 @@ const useFundAccount = () => {
     if (!client) {
       throw new Error("MidenClient not ready");
     }
+    if (await asMockClient(client)) {
+      return await commitMockAccount(account);
+    }
     // Until the account is on chain, leaving loses it and what Bread paid it.
     const funding = networkId === "mm" ? startMainnetFunding() : null;
     try {
@@ -116,6 +123,25 @@ const useFundAccount = () => {
         endMainnetFunding(funding);
       }
     }
+  };
+  // The mock chain charges no fee and has no faucet: an empty transaction
+  // puts the new account on chain (nonce 1), in a block proven here.
+  const commitMockAccount = async (account: WasmAccount) => {
+    const mockClient = await asMockClient(client);
+    if (!client || !mockClient) {
+      throw new Error("MidenClient not ready");
+    }
+    await execute({
+      accountId: account.id(),
+      request: new WasmTransactionRequestBuilder().build(),
+    });
+    await proveMockBlock(mockClient);
+    await sync();
+    const committedAccount = await client.getAccount(account.id());
+    if (!committedAccount) {
+      throw new Error("Account not found");
+    }
+    return committedAccount;
   };
   const consumeFundingNote = async (
     account: WasmAccount,

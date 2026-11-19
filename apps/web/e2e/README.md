@@ -48,6 +48,10 @@ The specs in `mobile/` run in two phone projects: `mobile-safari` (iPhone 14, We
 
 `mobile-sandbox.spec.ts` launches the counter example, so it needs `apps/api`, and compiles a script, so it needs the compile service too, as do the three tutorials of `mobile-tutorial-code.spec.ts`. Headless WebKit starts the client in a couple of seconds against a local server, but takes about 30 s against production, where it downloads the WASM.
 
+## MockChain
+
+`mockchain-sandbox.spec.ts` runs on a MockChain sandbox, whose chain runs in the browser: no node, prover or faucet, about 35 s for both tests. The sandbox's switcher entry only shows in dev builds until it's turned on, so the spec is skipped against production. It creates two wallets and a faucet, mints, consumes and sends, reloads, then deploys a counter from the sandbox's `counter-account` package (which needs `apps/api`) and increments it.
+
 ## Mainnet
 
 `mainnet-network-counter.spec.ts` runs on Miden Partner Mainnet with real funds. It's skipped unless `MAINNET_E2E=1` is set with an in-place Bread profile, so `pnpm test:e2e` never runs it. It creates a Mainnet sandbox and connects Bread. Then it deploys a network counter (the sandbox's `counter-account` script as its component, with `increment-note` allowed), funded with 0.001 USDCX from Bread, and increments it with a network note sent from Bread. It checks that the counter's balance didn't drop, which shows the note's fee sponsorship paid for the network transaction. Each run costs the wallet about 0.0015 USDCX.

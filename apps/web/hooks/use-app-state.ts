@@ -29,6 +29,7 @@ import {
   accountIdFromPrefixSuffix,
   midenFaucetAccount,
 } from "@/lib/utils/account";
+import { counterExampleStarter } from "@/lib/utils/counter-example";
 import { mainnetSandboxStarter } from "@/lib/utils/mainnet-sandbox";
 import { noteConsumed } from "@/lib/utils/note";
 import { defaultState } from "@/lib/utils/state";
@@ -466,14 +467,18 @@ const useAppState = () => {
     paraWallet?.resetClient();
     sync().catch((error) => console.error("ERROR: sync", error));
   };
-  // A Mainnet sandbox doesn't start empty (see mainnetSandboxStarter); without
-  // the API, it does, with a warning.
+  // A Mainnet sandbox doesn't start empty (see mainnetSandboxStarter), nor
+  // does a MockChain one: the counter example's packages give it something to
+  // deploy (`counterExampleStarter`). Without the API, they start empty,
+  // with a warning.
   const sandboxStarter = async (newNetworkId: NetworkId) => {
-    if (newNetworkId !== "mm") {
+    if (newNetworkId !== "mm" && newNetworkId !== "mmck") {
       return { scripts: [] };
     }
     try {
-      return await mainnetSandboxStarter();
+      return newNetworkId === "mm"
+        ? await mainnetSandboxStarter()
+        : await counterExampleStarter();
     } catch (error) {
       toast.warning("The counter scripts couldn't be added.", {
         description: error instanceof Error ? error.message : String(error),

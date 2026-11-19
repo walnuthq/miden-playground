@@ -323,7 +323,8 @@ const useAccounts = () => {
       ],
       updatedAt: lastSyncTime,
     });
-    if (verify && !tutorialId) {
+    // The registry has no MockChain.
+    if (verify && !tutorialId && networkId !== "mmck") {
       verifyAccountComponentsFromPackageIds({
         networkId,
         accountId: account.id,
