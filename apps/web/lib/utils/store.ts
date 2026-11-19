@@ -42,12 +42,18 @@ const blockHeaders = {
   mtst: testnetBlock0Header,
   mdev: devnetBlock0Header,
   mlcl: testnetBlock0Header,
-  mmck: testnetBlock0Header,
 } as const;
+
+// A mock chain has its own genesis, with its own validator key: the client
+// writes it to the store when it is given the chain (`replaceMockChain`,
+// `lib/mock-chain.ts`). Seeded with another chain's, the first sync fails.
+const startingBlockHeaders = (networkId: NetworkId) =>
+  networkId === "mmck" ? [] : [blockHeaders[networkId]];
 
 // The genesis block header a store of the network starts from, to tell a saved
 // store from an older chain (before a network reset). Empty when unknown: the
-// local and mock chains seed testnet's header but have their own genesis.
+// local chain seeds testnet's header but has its own genesis, and so has
+// every mock chain.
 export const genesisBlockHeader = (networkId: NetworkId) =>
   networkId === "mtst" || networkId === "mm"
     ? blockHeaders[networkId].header.data
@@ -77,7 +83,8 @@ const protocolConfigSettings = {
   mtst: [testnetProtocolConfig],
   mdev: [],
   mlcl: [testnetProtocolConfig],
-  mmck: [testnetProtocolConfig],
+  // Cached under the genesis header's commitment: the mock chain has its own.
+  mmck: [],
 };
 
 export const defaultStore = (networkId: NetworkId): Store => ({
@@ -105,7 +112,7 @@ export const defaultStore = (networkId: NetworkId): Store => ({
       partialBlockchainPeaks: { __type: "Uint8Array", data: "" },
     },
   ],
-  blockHeaders: [blockHeaders[networkId]],
+  blockHeaders: startingBlockHeaders(networkId),
   partialBlockchainNodes: [],
   tags: [],
   foreignAccountCode: [],
