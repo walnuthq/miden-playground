@@ -120,7 +120,7 @@ const SandboxEnvironments = ({
       <SandboxCard networkId="mtst" />
       <SandboxCard networkId="mm" />
       {/* <SandboxCard networkId="mdev" /> */}
-      {/* <SandboxCard networkId="mmck" /> */}
+      <SandboxCard networkId="mmck" />
       {/* import.meta.env.DEV && (
         <SandboxCard networkId="mlcl" />
       )*/}

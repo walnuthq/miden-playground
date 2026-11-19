@@ -1,4 +1,3 @@
-import { normalizeAccountId } from "@miden-sdk/react";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import {
@@ -29,6 +28,7 @@ import useScripts from "@/hooks/use-scripts";
 import type { Account } from "@/lib/types/account";
 import type { InputNote } from "@/lib/types/note";
 import { formatAmount } from "@/lib/utils/asset";
+import { accountAddress } from "@/lib/web-client";
 
 const NoteActionsCell = ({
   account,
@@ -98,7 +98,7 @@ const AccountNotesTable = ({ account }: { account: Account }) => {
           {consumableNotes.map((inputNote) => {
             const script = scripts.find(({ id }) => id === inputNote.scriptId);
             const sender = accounts.find(({ id }) => id === inputNote.senderId);
-            const senderAddress = normalizeAccountId(inputNote.senderId);
+            const senderAddress = accountAddress(inputNote.senderId);
             return (
               <TableRow key={inputNote.id}>
                 <TableCell>

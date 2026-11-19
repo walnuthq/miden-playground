@@ -1,4 +1,3 @@
-import { normalizeAccountId } from "@miden-sdk/react";
 import { Badge } from "@workspace/ui/components/badge";
 import {
   Table,
@@ -16,6 +15,7 @@ import useAccounts from "@/hooks/use-accounts";
 import useScripts from "@/hooks/use-scripts";
 import type { TransactionNote } from "@/lib/types/transaction";
 import { formatAmount } from "@/lib/utils/asset";
+import { accountAddress } from "@/lib/web-client";
 
 const TransactionNoteTable = ({ notes }: { notes: TransactionNote[] }) => {
   const { accounts, faucets } = useAccounts();
@@ -36,7 +36,7 @@ const TransactionNoteTable = ({ notes }: { notes: TransactionNote[] }) => {
           {notes.map((note) => {
             const script = scripts.find(({ id }) => id === note.scriptId);
             const sender = accounts.find(({ id }) => id === note.senderId);
-            const senderAddress = normalizeAccountId(note.senderId);
+            const senderAddress = accountAddress(note.senderId);
             return (
               <TableRow key={note.id}>
                 <TableCell>

@@ -28,6 +28,7 @@ import {
   slotNamePlaceholder,
 } from "@/components/script/simulate/dependency-accounts";
 import useAccounts from "@/hooks/use-accounts";
+import useNetwork from "@/hooks/use-network";
 import useScripts from "@/hooks/use-scripts";
 import {
   type AccountStorageMode,
@@ -113,7 +114,12 @@ const DeployAccountDialog = () => {
   );
   const [allowedTransactionScriptIds, setAllowedTransactionScriptIds] =
     useState<string[]>([]);
-  const authScripts = authComponents(scripts);
+  const { networkId } = useNetwork();
+  // No network transaction builder runs on the MockChain: a network account's
+  // notes would never be consumed.
+  const authScripts = authComponents(scripts).filter(
+    ({ id }) => networkId !== "mmck" || id !== NETWORK_ACCOUNT_ID,
+  );
   const accountScripts = deployableAccountComponents(scripts);
   const authScript = authScripts.find(({ id }) => id === authScriptId);
   const script = accountScripts.find(({ id }) => id === scriptId);

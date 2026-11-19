@@ -70,20 +70,25 @@ const CreateAccountDropdownMenu = () => {
               <Upload />
               Deploy account
             </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={openDeployMultisigDialog}
-              disabled={!connectedWallet?.isPrivate}
-            >
-              <ShieldPlus />
-              Deploy guardian wallet
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => openImportAccountDialog(true)}
-              disabled={!connectedWallet?.isPrivate}
-            >
-              <ShieldCheck />
-              Restore guardian wallet
-            </DropdownMenuItem>
+            {/* Miden Guardian signs for real networks, with a wallet. */}
+            {networkId !== "mmck" && (
+              <>
+                <DropdownMenuItem
+                  onClick={openDeployMultisigDialog}
+                  disabled={!connectedWallet?.isPrivate}
+                >
+                  <ShieldPlus />
+                  Deploy guardian wallet
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => openImportAccountDialog(true)}
+                  disabled={!connectedWallet?.isPrivate}
+                >
+                  <ShieldCheck />
+                  Restore guardian wallet
+                </DropdownMenuItem>
+              </>
+            )}
           </>
         )}
       </DropdownMenuContent>

@@ -1,4 +1,3 @@
-import { normalizeAccountId } from "@miden-sdk/react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
@@ -19,11 +18,12 @@ import type { DataTableFeatures } from "@/lib/table";
 import { type InputNote, noteStates } from "@/lib/types/note";
 import { formatId } from "@/lib/utils";
 import { noteConsumed } from "@/lib/utils/note";
+import { accountAddress } from "@/lib/web-client";
 
 const InputNoteSenderCell = ({ inputNote }: { inputNote: InputNote }) => {
   const { accounts } = useAccounts();
   const sender = accounts.find(({ id }) => id === inputNote.senderId);
-  const senderAddress = normalizeAccountId(inputNote.senderId);
+  const senderAddress = accountAddress(inputNote.senderId);
   return (
     <AccountAddress
       account={{ name: sender?.name ?? "", address: senderAddress }}

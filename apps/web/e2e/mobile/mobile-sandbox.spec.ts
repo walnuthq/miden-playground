@@ -206,3 +206,50 @@ test("mobile: a sandbox fits the screen", async ({ page }) => {
     await expectNoHorizontalOverflow(page);
   });
 });
+
+// The MockChain sandbox, started from the home page's third card: nothing to
+// wait for but the app (no node, no prover), so its pages are quick to check.
+test("mobile: a MockChain sandbox fits the screen", async ({ page }) => {
+  logBrowserErrors(page);
+  await page.goto("/");
+  const create = page.getByRole("button", {
+    name: "Create new MockChain sandbox",
+  });
+  await expect(create).toBeEnabled({ timeout: TRANSACTION_TIMEOUT });
+  await expectNoHorizontalOverflow(page);
+  await expectWithinWidth(create);
+  await create.click();
+  await expect(page).toHaveURL(/\/accounts$/, { timeout: TRANSACTION_TIMEOUT });
+  await expect(page.locator('header [data-slot="badge"]')).toContainText(
+    "MockChain",
+    { timeout: TRANSACTION_TIMEOUT },
+  );
+  await expectNoHorizontalOverflow(page);
+  await expectHeaderFits(page);
+
+  await test.step("a wallet's dialog and row fit", async () => {
+    await page.getByRole("button", { name: "Create new account" }).click();
+    const item = page.getByRole("menuitem", { name: "Create new wallet" });
+    await expectWithinWidth(item);
+    await item.click();
+    const dialog = page.getByRole("dialog", { name: "Create Wallet" });
+    const submit = dialog.getByRole("button", { name: "Create" });
+    await expectWithinWidth(submit);
+    await submit.click();
+    await expect(dialog).toBeHidden({ timeout: TRANSACTION_TIMEOUT });
+    await expectWithinWidth(
+      page.getByRole("button", { name: "Open menu" }).first(),
+    );
+    await expectNoHorizontalOverflow(page);
+  });
+
+  await test.step("the wallet's page fits, under its own prefix", async () => {
+    await page
+      .getByRole("cell", { name: /^mmck1/ })
+      .first()
+      .click();
+    await expect(page).toHaveURL(/\/accounts\/mmck1[0-9a-z]+$/);
+    await expectNoHorizontalOverflow(page);
+    await expectHeaderFits(page);
+  });
+});
