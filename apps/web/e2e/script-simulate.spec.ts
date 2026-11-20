@@ -583,6 +583,191 @@ test("script: simulate an account component", async ({ page }) => {
   });
 });
 
+// The result cell of a procedure's row.
+const procedureResult = (page: Page, procedure: string) =>
+  procedureRow(page, procedure).getByRole("cell").nth(2);
+
+// Picks the SIM asset's faucet for a procedure's only `AccountId` argument.
+const pickSimFaucet = async (page: Page, procedure: string) => {
+  await procedureArguments(page, procedure).getByRole("button").first().click();
+  await page
+    .getByRole("menuitemradio", { name: "SIM faucet", exact: true })
+    .click();
+};
+
+test("script: raw felts for the arguments the form can't type", async ({
+  page,
+}) => {
+  logBrowserErrors(page);
+
+  await test.step("a counter with a record, a note index, the wallet's note types", async () => {
+    await createCounterScript(page);
+    await replaceInEditor(
+      page,
+      "use miden::{component, component_storage, felt, Felt, StorageMap, Word};",
+      `use miden::{
+    component, component_storage, export_type, felt, output_note, AccountId, Felt, NoteIdx,
+    NoteType, Recipient, StorageMap, Tag, Word,
+};
+
+/// Two felts, laid out as an account id is.
+#[export_type]
+#[derive(Clone, Copy)]
+pub struct Pair {
+    /// The first felt.
+    pub first: Felt,
+    /// The second felt.
+    pub second: Felt,
+}`,
+    );
+    await replaceInEditor(
+      page,
+      "fn increment_count(&mut self) -> Felt;",
+      `fn increment_count(&mut self) -> Felt;
+    #[account_procedure]
+    fn prefix_of(&self, id: AccountId) -> Felt;
+    #[account_procedure]
+    fn suffix_of(&self, id: AccountId) -> Felt;
+    /// One when the pair's felts are the id's, in its fields' order.
+    #[account_procedure]
+    fn same_id(&self, id: AccountId, pair: Pair) -> Felt;
+    /// Each argument's felt as a digit.
+    #[account_procedure]
+    fn pick(&self, pair: Pair, idx: NoteIdx, last: Felt) -> Felt;
+    /// The basic wallet's \`create_note\`.
+    #[account_procedure]
+    fn create_note(&mut self, tag: Tag, note_type: NoteType, recipient: Recipient) -> NoteIdx;
+    #[account_procedure]
+    fn scalar(&self, big: u64) -> Felt;`,
+    );
+    await replaceInEditor(
+      page,
+      "impl CounterContract for CounterContractStorage {",
+      `impl CounterContract for CounterContractStorage {
+    fn prefix_of(&self, id: AccountId) -> Felt {
+        id.prefix
+    }
+
+    fn suffix_of(&self, id: AccountId) -> Felt {
+        id.suffix
+    }
+
+    fn same_id(&self, id: AccountId, pair: Pair) -> Felt {
+        if pair.first == id.prefix && pair.second == id.suffix {
+            felt!(1)
+        } else {
+            felt!(0)
+        }
+    }
+
+    fn pick(&self, pair: Pair, idx: NoteIdx, last: Felt) -> Felt {
+        pair.first * felt!(1000) + pair.second * felt!(100) + idx.inner * felt!(10) + last
+    }
+
+    fn create_note(&mut self, tag: Tag, note_type: NoteType, recipient: Recipient) -> NoteIdx {
+        output_note::create(tag, note_type, recipient)
+    }
+
+    fn scalar(&self, big: u64) -> Felt {
+        let _ = big;
+        felt!(3)
+    }
+`,
+    );
+    await compileScript(page);
+  });
+
+  await test.step("an untyped argument is entered as its layout's felts", async () => {
+    const args = procedureArguments(page, "pick");
+    // A record of two felts: a group, one input per field. A note index: one
+    // felt, one input.
+    const pair = args.getByRole("group", { name: /^pair/ });
+    await expect(pair).toContainText("pair, 2 felts");
+    await expect(args.getByText("note-idx, 1 felt")).toBeVisible();
+    await expect(
+      args.getByText("Entered as raw felts: the form doesn't know this type."),
+    ).toHaveCount(2);
+    await expect(args.getByText(/aren't supported yet/)).toHaveCount(0);
+    await expect(invoke(page, "pick")).toBeDisabled();
+    await pair.getByLabel("pair first").fill("1");
+    await pair.getByLabel("pair second").fill("2");
+    await args.getByLabel(/^idx/).fill("3");
+    await expect(invoke(page, "pick")).toBeDisabled();
+    await args.getByLabel(/^last/).fill("4");
+    await expect(invoke(page, "pick")).toBeEnabled();
+    // Not a felt: flagged, and the run is blocked.
+    await pair.getByLabel("pair second").fill("two");
+    await expect(pair.getByLabel("pair second")).toHaveAttribute(
+      "aria-invalid",
+      "true",
+    );
+    await expect(invoke(page, "pick")).toBeDisabled();
+    await pair.getByLabel("pair second").fill("0x2");
+    // The felts reach the procedure in the fields' order, between the typed
+    // arguments.
+    await invoke(page, "pick").click();
+    await expect(procedureResult(page, "pick")).toHaveText("1234");
+  });
+
+  await test.step("raw felts in field order are the typed argument", async () => {
+    // The SIM faucet's id through the typed field, then its two felts by
+    // hand: the same value to the procedure.
+    await pickSimFaucet(page, "prefix_of");
+    await invoke(page, "prefix_of").click();
+    await expect(procedureResult(page, "prefix_of")).toHaveText(/^\d+$/);
+    await pickSimFaucet(page, "suffix_of");
+    await invoke(page, "suffix_of").click();
+    await expect(procedureResult(page, "suffix_of")).toHaveText(/^\d+$/);
+    const prefix =
+      (await procedureResult(page, "prefix_of").textContent()) ?? "";
+    const suffix =
+      (await procedureResult(page, "suffix_of").textContent()) ?? "";
+    expect(prefix).not.toBe(suffix);
+    const args = procedureArguments(page, "same_id");
+    await pickSimFaucet(page, "same_id");
+    await args.getByLabel("pair first").fill(prefix);
+    await args.getByLabel("pair second").fill(suffix);
+    await invoke(page, "same_id").click();
+    await expect(procedureResult(page, "same_id")).toHaveText("1");
+    // The other way round isn't.
+    await args.getByLabel("pair first").fill(suffix);
+    await args.getByLabel("pair second").fill(prefix);
+    await invoke(page, "same_id").click();
+    await expect(procedureResult(page, "same_id")).toHaveText("0");
+  });
+
+  await test.step("the wallet's create_note runs from raw felts", async () => {
+    const args = procedureArguments(page, "create_note");
+    // Named from the WIT: the manifest lays a tag out as a note index, a
+    // recipient as a word.
+    await expect(args.getByText("tag, 1 felt")).toBeVisible();
+    await expect(args.getByText("note-type, 1 felt")).toBeVisible();
+    await expect(args.getByText("recipient, 4 felts")).toBeVisible();
+    await args.getByLabel(/^tag/).fill("0");
+    await args.getByLabel(/^note_type/).fill("0");
+    for (const [index, name] of ["a", "b", "c", "d"].entries()) {
+      await args.getByLabel(`recipient ${name}`).fill(String(11 + index));
+    }
+    await invoke(page, "create_note").click();
+    const dialog = page
+      .getByRole("dialog")
+      .filter({ hasText: "Simulation of create_note" });
+    // A note index isn't a type the result is decoded as: its felt.
+    await expect(dialog.getByText("Returned: [0]")).toBeVisible();
+    await expect(dialog.getByText(/1 note\s*will be created/)).toBeVisible();
+    await dialog.getByRole("button", { name: "Close" }).first().click();
+  });
+
+  await test.step("a type whose layout isn't felts stays unsupported", async () => {
+    await expect(
+      procedureArguments(page, "scalar").getByText(
+        "big: arguments of type u64 aren't supported yet.",
+      ),
+    ).toBeVisible();
+    await expect(invoke(page, "scalar")).toBeDisabled();
+  });
+});
+
 // The P2ID note, naming the simulated account and carrying 100 of the
 // simulated asset, consumed by the simulated account.
 const receiveSimulatedAsset = async (page: Page) => {

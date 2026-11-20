@@ -48,20 +48,43 @@ export type MidenRawType = keyof typeof midenTypes;
 
 export type MidenType = (typeof midenTypes)[keyof typeof midenTypes];
 
+// A struct's layout in a package's manifest: its name (`MidenRawType` for the
+// four types the forms know, `miden:base/core-types@1.0.0/note-idx`, or a
+// bare `pair` for a record the package defines), its size in bytes (four per
+// felt) and its fields in declaration order. The built-ins' hand-written
+// signatures have the name alone.
 export type MidenTypeStruct = {
-  Struct: { name: MidenRawType /*repr: "Default"; size: number*/ };
+  Struct: {
+    name: string;
+    repr?: unknown;
+    size?: number;
+    fields?: MidenTypeField[];
+  };
 };
 
+export type MidenTypeField = { name?: string; ty: MidenTypeLayout };
+
+// A type as the manifest lays it out (midenc's `Type`): a primitive by name
+// (`"Felt"`, and `"U64"`, `"U32"`, `"I1"` for a `u64`, a `u32`, a `bool`), a
+// struct, or another kind under its own key (an option is `{ Enum: … }`).
+export type MidenTypeLayout =
+  | string
+  | MidenTypeStruct
+  | (Record<string, unknown> & { Struct?: undefined });
+
+// `Felts`: a type the forms don't know, entered as its felts, in the order
+// of its layout's fields. Its `value` is the JSON array of the felts as
+// decimal strings.
 export type MidenInput = {
   name: string;
-  type: MidenType;
+  type: MidenType | "Felts";
   value: string;
 };
 
 export type Signature = {
   abi: number;
-  params: MidenTypeStruct[];
-  results: MidenTypeStruct[];
+  params: MidenTypeLayout[];
+  results: MidenTypeLayout[];
 };
 
 // A procedure's attributes, as midenc's manifest serializes its externally
@@ -94,7 +117,8 @@ export type ProcedureExport = {
   // stored with each export like `readOnly`. Missing when api-compile found
   // none (a transaction script), from built-ins and from packages compiled
   // before it reported them: the forms then name them `param_N`
-  // (`procedureParams`). Only the names are used.
+  // (`procedureParams`). The names are used, and the type to label a
+  // parameter the forms don't know.
   parameters?: { name: string; type: string }[];
 };
 

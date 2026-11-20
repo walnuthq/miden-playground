@@ -70,7 +70,9 @@ const ProcedureRows = ({
   return (
     <>
       <TableRow className={params.length > 0 ? "border-b-0" : undefined}>
-        <TableCell className="whitespace-normal">
+        {/* A long name breaks rather than widen the table past a phone's
+            screen, its Invoke button and the arguments' fields with it. */}
+        <TableCell className="whitespace-normal wrap-anywhere">
           {/* The badge goes under the name on a phone. */}
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             {name}
