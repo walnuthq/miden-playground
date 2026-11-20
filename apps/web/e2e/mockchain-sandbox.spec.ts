@@ -10,10 +10,9 @@ import {
 
 // A MockChain sandbox: the chain runs in the browser, so nothing reaches a
 // node, a prover or a faucet, and a block is proven after each transaction.
-// Its switcher entry only shows in dev builds until the sandbox is turned on,
-// so this spec is skipped against a production build.
 const MOCK_TIMEOUT = 30_000;
-const ACCOUNT_URL = /\/accounts\/[a-z]+1[0-9a-z]+$/;
+// Its addresses carry its own prefix, on the pages and in their URLs.
+const ACCOUNT_URL = /\/accounts\/mmck1[0-9a-z]+$/;
 
 const newMockChainSandbox = async (page: Page) => {
   await page.goto("/");
@@ -25,12 +24,7 @@ const newMockChainSandbox = async (page: Page) => {
   await expect(
     page.getByRole("menuitem", { name: "New Testnet sandbox" }),
   ).toBeVisible();
-  const entry = page.getByRole("menuitem", { name: "New MockChain sandbox" });
-  test.skip(
-    (await entry.count()) === 0,
-    "The MockChain sandbox is only offered in dev builds",
-  );
-  await entry.click();
+  await page.getByRole("menuitem", { name: "New MockChain sandbox" }).click();
   await expect(page).toHaveURL(/\/accounts$/, { timeout: MOCK_TIMEOUT });
   // A fresh mock chain: no public faucet, and a block height of its own.
   await expect(networkBadge(page)).toContainText(/#\d+/, {
@@ -109,6 +103,10 @@ test("MockChain sandbox: wallets, faucet, mint, consume, send", async ({
     await expect(
       page.getByRole("menuitem", { name: "Import account" }),
     ).toHaveCount(0);
+    // Miden Guardian signs for real networks.
+    await expect(page.getByRole("menuitem", { name: /guardian/i })).toHaveCount(
+      0,
+    );
     await page.keyboard.press("Escape");
   });
 
@@ -198,6 +196,14 @@ test("MockChain sandbox: deploy a counter and increment it", async ({
   const dialog = page.getByRole("dialog").filter({ hasText: "Deploy Account" });
   await dialog.getByLabel("Name").fill("Mock Counter");
   await selectOption(page, "Account Component", "counter-account");
+  // Nothing consumes a network account's notes on a mock chain.
+  await dialog
+    .getByText("Auth Component", { exact: true })
+    .locator("xpath=following::button[@role='combobox'][1]")
+    .click();
+  await expect(page.getByRole("option", { name: "No Auth" })).toBeVisible();
+  await expect(page.getByRole("option", { name: /Network/ })).toHaveCount(0);
+  await page.keyboard.press("Escape");
   await dialog.getByRole("button", { name: "Deploy" }).click();
   await expect(dialog).toBeHidden({ timeout: MOCK_TIMEOUT });
 
@@ -220,6 +226,24 @@ test("MockChain sandbox: deploy a counter and increment it", async ({
   }).toPass({ timeout: MOCK_TIMEOUT });
   // The registry has no MockChain.
   expect(verifications).toEqual([]);
+  await expect(page.getByRole("button", { name: /^Verify/ })).toHaveCount(0);
+});
+
+// The home page's card starts one too.
+test("MockChain sandbox: the home card starts a sandbox", async ({ page }) => {
+  logBrowserErrors(page);
+  await page.goto("/");
+  const create = page.getByRole("button", {
+    name: "Create new MockChain sandbox",
+  });
+  await expect(create).toBeEnabled({ timeout: TRANSACTION_TIMEOUT });
+  await create.click();
+  await expect(page).toHaveURL(/\/accounts$/, { timeout: MOCK_TIMEOUT });
+  await expect(networkBadge(page)).toContainText("MockChain", {
+    timeout: MOCK_TIMEOUT,
+  });
+  await createWallet(page, "Wallet A");
+  await openAccount(page, "Wallet A");
 });
 
 // A project's snapshot carries its chain with its store: a mock chain lives in

@@ -1,4 +1,3 @@
-import { normalizeAccountId } from "@miden-sdk/react";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import {
@@ -16,6 +15,7 @@ import useNotes from "@/hooks/use-notes";
 import { midenExplorerUrl } from "@/lib/constants";
 import { type InputNote, noteStates } from "@/lib/types/note";
 import type { Script } from "@/lib/types/script";
+import { accountAddress } from "@/lib/web-client";
 
 const NoteInformationTable = ({
   inputNote,
@@ -28,7 +28,7 @@ const NoteInformationTable = ({
   const { accounts } = useAccounts();
   const { openVerifyNoteScriptDialog } = useNotes();
   const sender = accounts.find(({ id }) => id === inputNote.senderId);
-  const senderAddress = normalizeAccountId(inputNote.senderId);
+  const senderAddress = accountAddress(inputNote.senderId);
   return (
     <div className="rounded-md border">
       <Table>
@@ -77,12 +77,15 @@ const NoteInformationTable = ({
                   <span className="text-muted-foreground">
                     Unknown note script
                   </span>
-                  <Button
-                    size="sm"
-                    onClick={() => openVerifyNoteScriptDialog(inputNote.id)}
-                  >
-                    Verify note script
-                  </Button>
+                  {/* The registry has no MockChain. */}
+                  {networkId !== "mmck" && (
+                    <Button
+                      size="sm"
+                      onClick={() => openVerifyNoteScriptDialog(inputNote.id)}
+                    >
+                      Verify note script
+                    </Button>
+                  )}
                 </div>
               )}
             </TableCell>

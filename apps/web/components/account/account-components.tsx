@@ -10,6 +10,7 @@ import {
 import { Puzzle } from "lucide-react";
 import AccountComponentTable from "@/components/account/account-component-table";
 import useAccounts from "@/hooks/use-accounts";
+import useNetwork from "@/hooks/use-network";
 import useScripts from "@/hooks/use-scripts";
 import type { Account } from "@/lib/types/account";
 import type { Script } from "@/lib/types/script";
@@ -24,9 +25,14 @@ const AddCustomComponents = ({
   type: "account-component" | "authentication-component";
   accountId: string;
 }) => {
+  const { networkId } = useNetwork();
   const { openVerifyAccountComponentDialog } = useAccounts();
   const componentType =
     type === "account-component" ? "account" : "authentication";
+  // The registry has no MockChain: nothing to verify against.
+  if (networkId === "mmck") {
+    return null;
+  }
   return (
     <Empty className="border border-dashed">
       <EmptyHeader>

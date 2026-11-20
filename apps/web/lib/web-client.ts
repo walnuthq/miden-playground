@@ -5,6 +5,7 @@ import {
   AccountId as WasmAccountId,
   type AccountId as WasmAccountIdType,
   AccountStorageMode as WasmAccountStorageMode,
+  Address as WasmAddress,
   BasicFungibleFaucetComponent as WasmBasicFungibleFaucetComponent,
   type CodeBuilder as WasmCodeBuilderType,
   Endpoint as WasmEndpoint,
@@ -16,6 +17,7 @@ import {
   type InputNoteState as WasmInputNoteStateType,
   MidenArrays as WasmMidenArrays,
   NetworkAccountTarget as WasmNetworkAccountTarget,
+  NetworkId as WasmNetworkId,
   Note as WasmNote,
   NoteAssets as WasmNoteAssets,
   NoteExecutionHint as WasmNoteExecutionHint,
@@ -45,6 +47,7 @@ import {
 } from "@miden-sdk/miden-sdk";
 import { normalizeAccountId } from "@miden-sdk/react";
 import { EMPTY_WORD, MAINNET_RPC_URL } from "@/lib/constants";
+import { tabRunsMockChain } from "@/lib/mock-chain";
 import type {
   Account,
   AccountMultisig,
@@ -71,6 +74,23 @@ import {
   invokeProcedureCustomTransactionScript,
 } from "@/lib/utils/script";
 import { stringToKeyValues, wordFelts } from "@/lib/utils/storage-slots";
+
+// An account's address, from its id (hex) or an address of any network. The
+// React SDK's `normalizeAccountId` picks the prefix from the RPC URL's text,
+// which makes a MockChain account read as a testnet one ("mtst1…"): there the
+// prefix is the sandbox's own, "mmck".
+export const accountAddress = (accountId: string) => {
+  if (!tabRunsMockChain()) {
+    return normalizeAccountId(accountId);
+  }
+  const wasmAddress = /^m/i.test(accountId)
+    ? WasmAddress.fromBech32(accountId)
+    : WasmAddress.fromAccountId(
+        WasmAccountId.fromHex(accountId),
+        "BasicWallet",
+      );
+  return wasmAddress.toBech32(WasmNetworkId.custom("mmck"));
+};
 
 export const randomWord = () => {
   const bytes = new Uint8Array(32);
@@ -680,7 +700,7 @@ export const wasmAccountToAccount = ({
   const code = wasmAccount.code().commitment().toHex();
   const verifiedComponents =
     components ?? verifyAccountComponents(wasmAccount, workspace);
-  const address = normalizeAccountId(wasmAccount.id().toString());
+  const address = accountAddress(wasmAccount.id().toString());
   const slotNames = wasmAccount.storage().getSlotNames();
   const account: Account = {
     ...defaultAccount(),

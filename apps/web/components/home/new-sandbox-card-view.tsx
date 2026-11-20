@@ -52,9 +52,10 @@ export const NewSandboxCardView = ({
         </div>
       ) : networkId === "mmck" ? (
         <p>
-          Choose this option to experiment on a MockChain environment not
-          connected to any network. You won't need to sign transactions using a
-          wallet.
+          Choose this option to create a new sandbox on a MockChain: a chain
+          that runs in your browser, connected to no network. Create wallets and
+          faucets, mint and send assets, deploy accounts: transactions are free,
+          take about a second and need no wallet.
         </p>
       ) : (
         <p>
