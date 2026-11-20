@@ -26,9 +26,13 @@ const newMockChainSandbox = async (page: Page) => {
   ).toBeVisible();
   await page.getByRole("menuitem", { name: "New MockChain sandbox" }).click();
   await expect(page).toHaveURL(/\/accounts$/, { timeout: MOCK_TIMEOUT });
-  // A fresh mock chain: no public faucet, and a block height of its own.
-  await expect(networkBadge(page)).toContainText(/#\d+/, {
-    timeout: MOCK_TIMEOUT,
+  // A fresh mock chain: no public faucet, and a block height of its own. The
+  // badge names it: until the switch is over it still shows the previous
+  // network's height, and the accounts page that network's menu (against
+  // production the counter packages take long enough for a click to land
+  // there).
+  await expect(networkBadge(page)).toContainText(/MockChain\s*\|\s*#\d+/, {
+    timeout: TRANSACTION_TIMEOUT,
   });
 };
 
@@ -239,8 +243,8 @@ test("MockChain sandbox: the home card starts a sandbox", async ({ page }) => {
   await expect(create).toBeEnabled({ timeout: TRANSACTION_TIMEOUT });
   await create.click();
   await expect(page).toHaveURL(/\/accounts$/, { timeout: MOCK_TIMEOUT });
-  await expect(networkBadge(page)).toContainText("MockChain", {
-    timeout: MOCK_TIMEOUT,
+  await expect(networkBadge(page)).toContainText(/MockChain\s*\|\s*#\d+/, {
+    timeout: TRANSACTION_TIMEOUT,
   });
   await createWallet(page, "Wallet A");
   await openAccount(page, "Wallet A");
