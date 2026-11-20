@@ -44,6 +44,13 @@ the unit tests can load it; the e2e's script is edited in the spec with
 contract sources); the procedures list lets a long name wrap, which the
 basic wallet's table needed to fit a 320 px screen.
 
+Found by the hand checks and fixed with it: Invoke on a built-in (MASM)
+component never compiled, its call written as `<name>::` followed by the
+export's full standards path. It is called by name now, and the built-in basic
+wallet's exports have signatures, so its `create_note` and
+`move_asset_to_note` take their arguments (raw felts for the untyped ones)
+from the account page too.
+
 ## Why
 
 The arguments form types four parameter types: `Felt`, `Word`, `AccountId`,

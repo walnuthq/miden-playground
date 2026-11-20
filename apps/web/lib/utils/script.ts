@@ -135,6 +135,11 @@ export const entryPointExport = ({
   ) ??
   procedureExports[0];
 
+// A script that calls one procedure with its inputs. A package's procedure
+// is called by its MAST root. A component assembled from MASM (`contractName`)
+// is linked as `external_contract::<name>` and its procedure called by name:
+// the last segment of the export's path, which for a built-in is the path in
+// the standards library its MASM re-exports from.
 export const invokeProcedureCustomTransactionScript = ({
   contractName,
   procedureExport,
@@ -149,7 +154,7 @@ use miden::core::sys
 @transaction_script
 pub proc main(args: word)
     ${formatProcedureInputs(procedureInputs)}
-    call.${contractName ? `${contractName}::${procedureExport.path}` : procedureExport.digest}
+    call.${contractName ? `${contractName}::${procedureExport.path.split("::").at(-1)}` : procedureExport.digest}
     exec.sys::truncate_stack
 end
 `;
