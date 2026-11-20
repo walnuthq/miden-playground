@@ -17,10 +17,10 @@ An account whose key isn't in the Playground's keystore (Bread, Para, an importe
 
 ### Argument types the form can't type
 
-The arguments form (`components/procedures/procedure-arguments-form.tsx`) types `Felt`, `Word`, `AccountId` and `Asset`. Any other parameter (`NoteIdx`, a record, an option, a list) shows "arguments of type … aren't supported yet" and keeps the run disabled, in the Simulate tab and in the account page's Invoke dialog. The basic wallet's `move_asset_to_note(asset, note_idx)` is one.
+The arguments form (`components/procedures/procedure-arguments-form.tsx`) types `Felt`, `Word`, `AccountId` and `Asset`. Since `spec/raw-felt-arguments.md`, any other parameter whose layout in the manifest is felts only (`NoteIdx`, `Tag`, `NoteType`, `Recipient`, a record of felts) is entered as raw felts, one input per felt, in the Simulate tab and in the account page's Invoke dialog: the basic wallet's `create_note` and `move_asset_to_note` can be run. What still shows "arguments of type … aren't supported yet" and keeps the run disabled: a `u64`, `u32` or `bool` (a bare `"U64"`, `"U32"`, `"I1"` in the manifest), a record with such a field, an option (`{ "Enum": … }`), and a built-in's hand-written signature, which has no layout. A list doesn't compile as a parameter.
 
-- Needs: per type, the felts the compiler's ABI expects (`lib/utils/procedure-inputs.ts`), and a field for it. A `NoteIdx` is a felt, but it names an output note created earlier in the same transaction, so a lone call has nothing to point at: it needs a run of several calls, or stays out of reach.
-- When: records and options with the first example whose exports take one. A raw felts fallback, as note storage has, would unblock every type at once.
+- Needs: how the compiler passes a `u64` (two felts, which order), a `u32`, a `bool` and an option's discriminant on the stack, each proved by a run as the felts' order was; then typed fields per type. A `NoteIdx` is a felt, but it names an output note created earlier in the same transaction, so a lone `move_asset_to_note` fails in the VM: it needs a run of several calls.
+- When: typed fields for records and options with the first example whose exports take one; the scalars with the first that takes a `u64`.
 
 ### Foreign calls two levels deep
 

@@ -3,7 +3,9 @@ import { Label } from "@workspace/ui/components/label";
 import type { Dispatch, SetStateAction } from "react";
 import SelectAccountDropdownMenu from "@/components/transactions/select-account-dropdown-menu";
 import {
+  emptyFeltsArgument,
   emptyProcedureArgument,
+  isFelt,
   type ProcedureArgument,
   type ProcedureArguments,
   type ProcedureParam,
@@ -55,8 +57,78 @@ const ProcedureArgumentsForm = ({
   ];
   return (
     <div className="grid gap-3 sm:grid-cols-2">
-      {params.map(({ name, type, rawType, label }) => {
+      {params.map(({ name, type, rawType, label, feltCount, feltNames }) => {
         const id = `${idPrefix}-${name}`;
+        // A type the forms don't know, entered as the felts of its layout,
+        // in field order.
+        if (!type && feltCount !== undefined) {
+          const current = value[name];
+          const argument =
+            current?.type === "Felts" && current.values.length === feltCount
+              ? current
+              : emptyFeltsArgument(feltCount);
+          const values = argument.type === "Felts" ? argument.values : [];
+          const single = feltCount === 1;
+          return (
+            <div
+              key={name}
+              // A group of felts takes the row: four of them fit a phone two
+              // by two.
+              className={single ? "grid gap-1.5" : "grid gap-1.5 sm:col-span-2"}
+              {...(!single && {
+                role: "group",
+                "aria-labelledby": `${id}-label`,
+              })}
+            >
+              <Label id={`${id}-label`} htmlFor={single ? id : `${id}-0`}>
+                {name}
+                <span className="font-normal text-muted-foreground">
+                  {rawType}, {feltCount} felt{single ? "" : "s"}
+                </span>
+              </Label>
+              <div
+                className={
+                  single ? "grid" : "grid grid-cols-2 gap-2 sm:grid-cols-4"
+                }
+              >
+                {values.map((felt, index) => (
+                  <Input
+                    // biome-ignore lint/suspicious/noArrayIndexKey: a felt is its position in the layout.
+                    key={index}
+                    id={single ? id : `${id}-${index}`}
+                    aria-label={
+                      single
+                        ? undefined
+                        : `${name} ${feltNames?.[index] ?? `felt ${index + 1}`}`
+                    }
+                    className="font-mono"
+                    placeholder={
+                      single
+                        ? placeholders.Felt
+                        : (feltNames?.[index] ?? placeholders.Felt)
+                    }
+                    value={felt}
+                    // Flagged once typed in: an untouched felt isn't an error.
+                    aria-invalid={felt !== "" && !isFelt(felt)}
+                    disabled={disabled}
+                    onChange={(event) =>
+                      onChange({
+                        ...value,
+                        [name]: {
+                          type: "Felts",
+                          values: values.with(index, event.target.value),
+                        },
+                      })
+                    }
+                  />
+                ))}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Entered as raw felts: the form doesn't know this type.
+              </p>
+            </div>
+          );
+        }
         if (!type) {
           return (
             <p

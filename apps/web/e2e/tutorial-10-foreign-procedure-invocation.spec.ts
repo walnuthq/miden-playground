@@ -107,12 +107,31 @@ test("tutorial 10: foreign procedure invocation", async ({ page }) => {
 
   await test.step("5. invoke copy_count with the Counter Contract", async () => {
     await page.getByRole("tab", { name: "Components" }).click();
-    await procedureRow(page, "copy_count")
-      .getByRole("button", { name: "Invoke" })
-      .click();
     const dialog = page
       .getByRole("dialog")
       .filter({ hasText: "Invoke Procedure" });
+    // Every deployed account carries the built-in basic wallet, assembled
+    // from MASM: its procedure is called by name, with arguments the form
+    // doesn't type, entered as raw felts. Previewed only.
+    await procedureRow(page, "create_note")
+      .getByRole("button", { name: "Invoke" })
+      .click();
+    await expect(dialog.getByText("recipient, 4 felts")).toBeVisible();
+    await dialog.getByLabel(/^tag/).fill("0");
+    await dialog.getByLabel(/^note_type/).fill("0");
+    for (const [index, name] of ["a", "b", "c", "d"].entries()) {
+      await dialog.getByLabel(`recipient ${name}`).fill(String(11 + index));
+    }
+    await dialog.getByRole("button", { name: "Preview", exact: true }).click();
+    const notePreview = previewDialog(page, "create_note");
+    await expect(notePreview.getByText(/1 note\s*will be created/)).toBeVisible(
+      { timeout: TRANSACTION_TIMEOUT },
+    );
+    await notePreview.getByRole("button", { name: "Cancel" }).click();
+    await expect(notePreview).toBeHidden();
+    await procedureRow(page, "copy_count")
+      .getByRole("button", { name: "Invoke" })
+      .click();
     // Step 5 names the argument: the copy and the dialog must agree.
     await expect(dialog.getByText("counter_account_id")).toBeVisible();
     // The Count Reader isn't a counter: copy_count fails as it executes, and

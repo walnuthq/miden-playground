@@ -12,13 +12,17 @@ import type {
   Signature,
 } from "@/lib/types/script";
 import { scriptFilePaths } from "@/lib/types/script";
-import { formatProcedureExportPath } from "@/lib/utils/procedure-inputs";
+import {
+  formatProcedureExportPath,
+  formatProcedureInputs,
+} from "@/lib/utils/procedure-inputs";
 import { findPackages } from "@/lib/utils/project-files";
 
 // Moved to `procedure-inputs.ts`, which the unit tests can load: still
 // exported here for the app's imports.
 export {
   formatProcedureExportPath,
+  formatProcedureInputs,
   procedureSignature,
 } from "@/lib/utils/procedure-inputs";
 
@@ -131,39 +135,11 @@ export const entryPointExport = ({
   ) ??
   procedureExports[0];
 
-export const formatProcedureInputs = (inputs: MidenInput[]) =>
-  inputs
-    .toReversed()
-    .map((arg) => {
-      switch (arg.type) {
-        case "Felt":
-        case "Word": {
-          return `push.${arg.value}`;
-        }
-        // case "FaucetId":
-        case "AccountId": {
-          const { prefix, suffix } = JSON.parse(arg.value ?? "") as {
-            prefix: string;
-            suffix: string;
-          };
-          // TODO calling convention differs between MASM and Rust
-          return `push.${suffix}.${prefix}`;
-        }
-        case "Asset": {
-          const { prefix, suffix, amount } = JSON.parse(arg.value ?? "") as {
-            prefix: string;
-            suffix: string;
-            amount: string;
-          };
-          return `push.0.0.0.${amount}\npush.${prefix}.${suffix}.0.0\n`;
-        }
-        default: {
-          return "";
-        }
-      }
-    })
-    .join("\n");
-
+// A script that calls one procedure with its inputs. A package's procedure
+// is called by its MAST root. A component assembled from MASM (`contractName`)
+// is linked as `external_contract::<name>` and its procedure called by name:
+// the last segment of the export's path, which for a built-in is the path in
+// the standards library its MASM re-exports from.
 export const invokeProcedureCustomTransactionScript = ({
   contractName,
   procedureExport,
@@ -178,7 +154,7 @@ use miden::core::sys
 @transaction_script
 pub proc main(args: word)
     ${formatProcedureInputs(procedureInputs)}
-    call.${contractName ? `${contractName}::${procedureExport.path}` : procedureExport.digest}
+    call.${contractName ? `${contractName}::${procedureExport.path.split("::").at(-1)}` : procedureExport.digest}
     exec.sys::truncate_stack
 end
 `;

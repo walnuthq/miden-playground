@@ -3,6 +3,7 @@ import { waitForEditorText } from "../editor";
 import {
   logBrowserErrors,
   nextStep,
+  selectOption,
   startTutorial,
   tutorialPanel,
 } from "../tutorial";
@@ -72,6 +73,59 @@ test("mobile: a tutorial's read-only script fits the screen", async ({
     page
       .getByTestId("editor")
       .getByText("fn copy_count(counter_account_id: AccountId)"),
+  );
+  await expectNoHorizontalOverflow(page);
+});
+
+// The Rust basic wallet's procedures take types the form doesn't know,
+// entered as raw felts: one input for a note index, a group of four for a
+// recipient (a word), two by two on a phone.
+test("mobile: raw felt arguments fit the screen", async ({ page }) => {
+  logBrowserErrors(page);
+  await startTutorial(page, "Timelock P2ID note");
+  // Step 1 asks for a script: step 2 links to the wallet's.
+  await closePanel(page, 1);
+  await page.getByRole("button", { name: "Create new script" }).click();
+  const dialog = page.getByRole("dialog").filter({ hasText: "Create Script" });
+  await dialog.getByLabel("Name").fill("timelock-p2id");
+  await selectOption(page, "Type", "Note Script");
+  await selectOption(page, "Example", "P2ID Note");
+  await dialog.getByRole("button", { name: "Create" }).click();
+  await expect(page).toHaveURL(/\/scripts\/[0-9a-z_-]+$/);
+  await nextStep(page);
+  // Not `openLink`, which expects a script named as its id.
+  await tutorialPanel(page)
+    .root.locator("a")
+    .filter({ hasText: /^basic-wallet$/ })
+    .first()
+    .click();
+  await expect(page).toHaveURL(/\/scripts\/rust-basic-wallet$/);
+  await closePanel(page, 2);
+  await waitForEditorText(page, "fn create_note");
+  await editorConsole(page)
+    .getByRole("button", { name: "Restore console" })
+    .click();
+  await expect(
+    editorConsole(page).getByRole("button", { name: "Invoke create_note" }),
+  ).toBeVisible();
+  const recipient = editorConsole(page).getByRole("group", {
+    name: /^recipient/,
+  });
+  await expect(recipient).toContainText("recipient, 4 felts");
+  for (const name of ["a", "b", "c", "d"]) {
+    await expectWithinWidth(recipient.getByLabel(`recipient ${name}`));
+  }
+  await expectWithinWidth(
+    recipient.getByText(
+      "Entered as raw felts: the form doesn't know this type.",
+    ),
+  );
+  await expectWithinWidth(editorConsole(page).getByLabel(/^note_idx/));
+  // The longest name breaks: its row's button stays on the screen.
+  await expectWithinWidth(
+    editorConsole(page).getByRole("button", {
+      name: "Invoke move_asset_to_note",
+    }),
   );
   await expectNoHorizontalOverflow(page);
 });
