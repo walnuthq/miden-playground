@@ -45,17 +45,31 @@ const AccountAddress = ({
   // A link styled as a button: Base UI's Button would give it role="button".
   const accountLinkProps = {
     to: `/accounts/${getIdentifierPart(displayedAccount.address)}`,
-    className: buttonVariants({ variant: "link", className: "-ml-4" }),
+    className: buttonVariants({
+      variant: "link",
+      className: "-ml-4 min-w-0 shrink",
+    }),
   };
+  // In a narrow container (the tutorial panel on a phone) the name is cut
+  // short rather than pushing the copy button off screen.
+  const label = (
+    <span className="truncate">
+      {displayedAddress}
+      {withName && ` (${displayedAccount.name})`}
+    </span>
+  );
   const accountAddressContent = withTooltip ? (
     <Tooltip>
       <TooltipTrigger
         render={
-          withLink ? <Link {...accountLinkProps} /> : <Button variant="ghost" />
+          withLink ? (
+            <Link {...accountLinkProps} />
+          ) : (
+            <Button variant="ghost" className="min-w-0 shrink" />
+          )
         }
       >
-        {displayedAddress}
-        {withName && ` (${displayedAccount.name})`}
+        {label}
       </TooltipTrigger>
       <TooltipContent>
         <p>
@@ -65,18 +79,12 @@ const AccountAddress = ({
       </TooltipContent>
     </Tooltip>
   ) : withLink ? (
-    <Link {...accountLinkProps}>
-      {displayedAddress}
-      {withName && ` (${displayedAccount.name})`}
-    </Link>
+    <Link {...accountLinkProps}>{label}</Link>
   ) : (
-    <span>
-      {displayedAddress}
-      {withName && ` (${displayedAccount.name})`}
-    </span>
+    label
   );
   return withCopyButton ? (
-    <div className="flex items-center gap-2">
+    <div className="flex min-w-0 items-center gap-2">
       {accountAddressContent}
       {withCopyButton && (
         <CopyButton content="Copy Address" copy={displayedAccount.address} />

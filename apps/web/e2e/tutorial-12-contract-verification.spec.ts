@@ -5,6 +5,7 @@ import path from "node:path";
 import { expect, type Page, test } from "@playwright/test";
 import { COMPILED, replaceInEditor } from "./editor";
 import { submitPreview } from "./example";
+import { atPhoneWidth } from "./mobile/layout";
 import {
   logBrowserErrors,
   nextStep,
@@ -168,6 +169,21 @@ test("tutorial 12: contract verification", async ({ page }) => {
     await test.step("7. increment, then reset the verified contract", async () => {
       await expect(procedureRow(page, "reset_count")).toBeVisible({
         timeout: TRANSACTION_TIMEOUT,
+      });
+      // The contract's address fits a 320 px phone's panel: its name is cut
+      // short rather than making the panel scroll sideways, the copy button
+      // off screen.
+      await atPhoneWidth(page, async () => {
+        await expect(
+          panel.root.getByText("(Unverified Contract)"),
+        ).toBeVisible();
+        await expect
+          .poll(() =>
+            panel.root
+              .locator(".overflow-y-auto")
+              .evaluate((element) => element.scrollWidth - element.clientWidth),
+          )
+          .toBeLessThanOrEqual(0);
       });
       await procedureRow(page, "increment_count")
         .getByRole("button", { name: "Invoke" })

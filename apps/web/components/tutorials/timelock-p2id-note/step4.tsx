@@ -142,6 +142,14 @@ const Step4Content = ({
       </>
     )}
     <p>
+      Before creating it, you can click the <em>"Preview consumption"</em>{" "}
+      button to see what the Note will do: the Playground runs it locally, as if
+      the Test Wallet consumed it now. The timelock height is still in the
+      future, so the preview fails on your assertion, which is what the timelock
+      is for. It doesn't stop you from creating the Note, and nothing is
+      submitted.
+    </p>
+    <p>
       Once you're done, click the <em>"Create"</em> button and confirm the
       Transaction in your wallet.
     </p>
