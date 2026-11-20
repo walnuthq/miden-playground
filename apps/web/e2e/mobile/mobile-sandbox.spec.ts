@@ -221,7 +221,7 @@ test("mobile: a MockChain sandbox fits the screen", async ({ page }) => {
   await create.click();
   await expect(page).toHaveURL(/\/accounts$/, { timeout: TRANSACTION_TIMEOUT });
   await expect(page.locator('header [data-slot="badge"]')).toContainText(
-    "MockChain",
+    /MockChain\s*\|\s*#\d+/,
     { timeout: TRANSACTION_TIMEOUT },
   );
   await expectNoHorizontalOverflow(page);
