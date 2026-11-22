@@ -156,6 +156,7 @@ const ProjectSwitcher = () => {
                     return (
                       <DropdownMenuItem
                         key={tutorial.id}
+                        disabled={tutorial.unavailable !== undefined}
                         onClick={() => startTutorial(tutorial.id)}
                       >
                         <BadgeCheck
@@ -166,14 +167,20 @@ const ProjectSwitcher = () => {
                           })}
                         />{" "}
                         {tutorial.number}. {tutorial.title}
-                        {status && (
-                          <span
-                            className="ml-auto flex items-center gap-1 pl-2 text-xs text-muted-foreground"
-                            title="In progress"
-                          >
-                            <CircleDashed className="size-3" />
-                            {status.step + 1}/{tutorial.stepCount}
+                        {tutorial.unavailable ? (
+                          <span className="ml-auto pl-2 text-xs text-muted-foreground">
+                            Unavailable
                           </span>
+                        ) : (
+                          status && (
+                            <span
+                              className="ml-auto flex items-center gap-1 pl-2 text-xs text-muted-foreground"
+                              title="In progress"
+                            >
+                              <CircleDashed className="size-3" />
+                              {status.step + 1}/{tutorial.stepCount}
+                            </span>
+                          )
                         )}
                       </DropdownMenuItem>
                     );

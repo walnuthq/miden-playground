@@ -9,6 +9,7 @@ describe("isBelowMigrationBaseline", () => {
     ["0.17.0-rc.1", true],
     ["0.17.0", false],
     ["0.17.10", false],
+    ["0.18.0", false],
     ["1.0.0", false],
     ["0.9.20", true],
     ["not-a-version", false],

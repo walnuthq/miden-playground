@@ -27,7 +27,8 @@ import type { TutorialStatus } from "@/lib/utils/tutorial-status";
 
 // A tutorial's card, from its metadata (tutorials/meta.ts). Its buttons are
 // disabled without their handlers: the app shell renders it that way, before
-// the SDK loads, so this module stays SDK-free.
+// the SDK loads, so this module stays SDK-free. An unavailable tutorial's card
+// says why, and has no action.
 export const StartTutorialCardView = ({
   tutorial,
   status,
@@ -78,20 +79,34 @@ export const StartTutorialCardView = ({
       <CardTitle className="text-xl">{tutorial.title}</CardTitle>
       <CardDescription>{tutorial.tagline}</CardDescription>
     </CardHeader>
-    <CardContent className="h-full">
+    <CardContent className="h-full space-y-2">
       <p>{tutorial.description}</p>
+      {tutorial.unavailable && (
+        <p className="text-sm text-muted-foreground">{tutorial.unavailable}</p>
+      )}
     </CardContent>
     <CardFooter className="gap-2">
-      <Button
-        variant="outline"
-        className="grow bg-muted/50"
-        disabled={!onStart}
-        onClick={onStart}
-      >
-        {status ? "Resume tutorial" : "Start tutorial"}
-      </Button>
-      {status && (
-        <RestartTutorialButton title={tutorial.title} onRestart={onRestart} />
+      {tutorial.unavailable ? (
+        <Button variant="outline" className="grow bg-muted/50" disabled>
+          Unavailable
+        </Button>
+      ) : (
+        <>
+          <Button
+            variant="outline"
+            className="grow bg-muted/50"
+            disabled={!onStart}
+            onClick={onStart}
+          >
+            {status ? "Resume tutorial" : "Start tutorial"}
+          </Button>
+          {status && (
+            <RestartTutorialButton
+              title={tutorial.title}
+              onRestart={onRestart}
+            />
+          )}
+        </>
       )}
     </CardFooter>
   </Card>

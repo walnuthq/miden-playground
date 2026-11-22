@@ -4,7 +4,11 @@ import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import useGlobalContext from "@/components/global-context/hook";
 import { loadTutorial } from "@/components/tutorials/loaders";
-import { tutorialMeta, tutorialMetas } from "@/components/tutorials/meta";
+import {
+  nextTutorialMeta,
+  tutorialMeta,
+  tutorialMetas,
+} from "@/components/tutorials/meta";
 import useAppState from "@/hooks/use-app-state";
 import useNetwork from "@/hooks/use-network";
 import useProjects from "@/hooks/use-projects";
@@ -176,7 +180,7 @@ const useTutorials = () => {
   };
   const startTutorial = async (id: string) => {
     const meta = tutorialMetas.find((meta) => meta.id === id);
-    if (!meta) {
+    if (!meta || meta.unavailable) {
       return;
     }
     // Already active: carry on where it is.
@@ -201,7 +205,7 @@ const useTutorials = () => {
   // Drops a tutorial's saved progress and starts it over.
   const restartTutorial = async (id: string) => {
     const meta = tutorialMetas.find((meta) => meta.id === id);
-    if (!meta) {
+    if (!meta || meta.unavailable) {
       return;
     }
     if (!(await confirmWorkspaceSwitch())) {
@@ -225,7 +229,7 @@ const useTutorials = () => {
     if (!tutorial) {
       return;
     }
-    const nextMeta = tutorialMetas[tutorial.number];
+    const nextMeta = nextTutorialMeta(tutorial.number);
     const nextTutorial = nextMeta
       ? await loadTutorialOrToast(nextMeta.id)
       : defaultTutorial();
