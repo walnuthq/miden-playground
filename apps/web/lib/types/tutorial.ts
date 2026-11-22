@@ -29,6 +29,10 @@ export type TutorialMeta = {
   // Whether a step has the user connect Bread Wallet and sign with it: the
   // first step then asks to install the extension when it's missing.
   requiresWallet: boolean;
+  // Set while the tutorial can't be completed: the reason, shown on its card
+  // and its menu item, which are disabled. It can't be started or restarted,
+  // and "Next tutorial" skips it. Saved progress is kept.
+  unavailable?: string;
 };
 
 export type Tutorial = TutorialMeta & {

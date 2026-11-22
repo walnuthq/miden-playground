@@ -23,6 +23,8 @@ Playwright tests for the tutorials, the examples, the script editor (`script-*.s
 
 Para test accounts only exist in Para's BETA environment (local dev), so tutorial 4 is also skipped against production.
 
+Tutorial 5 is skipped for now (`test.fixme`): Bread Wallet 1.17.12 and later signs a dApp's `signBytes` word under a domain tag, which the Guardian multisig client (0.19.1) doesn't expect, so a guardian wallet can't be deployed with Bread (OpenZeppelin/guardian#611). The tutorial is marked `unavailable` in `components/tutorials/meta.ts`, which `tutorial-unavailable.spec.ts` checks; `docs/claude/upgrading-miden.md` says when to bring both back.
+
 ## Running
 
 ```sh

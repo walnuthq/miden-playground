@@ -66,6 +66,15 @@ export const tutorialMetas: TutorialMeta[] = [
     initialRoute: "/accounts",
     stepCount: 7,
     requiresWallet: true,
+    // Since 1.17.12, Bread Wallet signs a dApp's `signBytes` word under a
+    // domain tag (0xMiden/wallet#2161), and @openzeppelin/miden-multisig-client
+    // 0.19.1 still expects the raw word signed: deploying the guardian wallet
+    // fails with "the ECDSA public key does not match the signer commitment"
+    // (OpenZeppelin/guardian#611).
+    // Drop this line, and the `test.fixme` in the tutorial's e2e spec, once
+    // the multisig client signs with Bread again.
+    unavailable:
+      "Temporarily unavailable: Bread Wallet and Miden Guardian don't sign the same way yet.",
   },
   {
     id: "interact-with-the-counter-contract",
@@ -161,3 +170,11 @@ export const tutorialMeta = (id: Exclude<TutorialId, "">): TutorialMeta => {
   }
   return meta;
 };
+
+// The tutorial "Next tutorial" leads to from tutorial `number`: the next one
+// that can be started, if any.
+export const nextTutorialMeta = (
+  number: number,
+  metas: TutorialMeta[] = tutorialMetas,
+): TutorialMeta | undefined =>
+  metas.slice(number).find((meta) => !meta.unavailable);

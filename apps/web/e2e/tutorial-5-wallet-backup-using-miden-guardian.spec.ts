@@ -12,6 +12,17 @@ import {
 // restores it from Miden Guardian once the tutorial has deleted it. Every
 // guardian wallet action opens several "Opaque signature request" popups in
 // Bread: bread.approveAll approves them, however many there are.
+// Since 1.17.12, Bread Wallet signs a dApp's `signBytes` word under a domain
+// tag (0xMiden/wallet#2161), which @openzeppelin/miden-multisig-client 0.19.1
+// doesn't expect: the deploy fails with "the ECDSA public key does not match
+// the signer commitment" (OpenZeppelin/guardian#611). The tutorial is marked `unavailable` meanwhile
+// (components/tutorials/meta.ts, tutorial-unavailable.spec.ts). After a
+// multisig client bump, remove this and run the spec.
+test.fixme(
+  true,
+  "Guardian's multisig client can't sign with Bread Wallet 1.17.12+ (OpenZeppelin/guardian#611)",
+);
+
 test("tutorial 5: wallet backup using Miden Guardian", async ({
   page,
   bread,
