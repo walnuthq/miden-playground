@@ -35,6 +35,21 @@ import { TRANSACTION_TIMEOUT } from "./tutorial";
 
 const POPUP_TIMEOUT = 60_000;
 
+// The USDCX balance in the "Assets" list of Bread's home page (a row reading
+// "USDCX 1.50 USDCX 1.50 USD" since 1.18.0), or null while it isn't shown.
+export const breadUsdcxBalance = async (walletPage: Page) => {
+  const text = await walletPage
+    .getByRole("main")
+    // biome-ignore lint/performance/useDomNodeTextContent: rendered text keeps the fields of a row apart
+    .innerText({ timeout: 1_000 })
+    .catch(() => null);
+  const amount = text
+    ?.split(/\bAssets\b/)
+    .at(-1)
+    ?.match(/USDCX\s+(\d[\d,]*(?:\.\d+)?)\s+USDCX/)?.[1];
+  return amount ? Number(amount.replaceAll(",", "")) : null;
+};
+
 const isConfirmPopup = (page: Page) => page.url().includes("/confirm.html");
 
 export type Bread = {
@@ -189,7 +204,7 @@ const unlock = async (context: BrowserContext, password: string) => {
   const walletPage = await openWalletPage(context);
   await walletPage.locator("input[type=password]").fill(password);
   await walletPage.getByRole("button", { name: "Unlock" }).click();
-  await expect(walletPage.getByText("Total balance")).toBeVisible({
+  await expect(walletPage.getByText("Wallet balance")).toBeVisible({
     timeout: POPUP_TIMEOUT,
   });
   return walletPage;
@@ -401,27 +416,12 @@ export const test = base.extend<{ breadProfile: BreadProfile; bread: Bread }>({
         .getByRole("button", { name: /^Fund your wallet/ })
         .click();
       // Wait for a positive balance, not just for "0.00" to go away: while
-      // Bread loads (or fails to load) the balance, the row only shows the
-      // token and its price change, e.g. "USDCX USDCX +0.00%".
-      const usdcx = walletPage
-        .getByRole("group", { name: "Assets" })
-        .getByRole("button", { name: /^USDCX / });
+      // Bread loads (or fails to load) the balance, the row shows no amount.
       await expect
-        .poll(
-          async () => {
-            const text = await usdcx
-              .textContent({ timeout: 1_000 })
-              .catch(() => null);
-            // Amounts, without percentages (the text has no spaces).
-            return (text?.match(/\d[\d,]*(\.\d+)?%?/g) ?? [])
-              .filter((amount) => !amount.endsWith("%"))
-              .some((amount) => Number(amount.replaceAll(",", "")) > 0);
-          },
-          {
-            message: "Bread's USDCX balance stays empty",
-            timeout: 2 * TRANSACTION_TIMEOUT,
-          },
-        )
+        .poll(async () => ((await breadUsdcxBalance(walletPage)) ?? 0) > 0, {
+          message: "Bread's USDCX balance stays empty",
+          timeout: 2 * TRANSACTION_TIMEOUT,
+        })
         .toBe(true);
     };
 

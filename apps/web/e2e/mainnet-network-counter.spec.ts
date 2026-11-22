@@ -1,5 +1,5 @@
 import type { Page, Response } from "@playwright/test";
-import { expect, test } from "./bread";
+import { breadUsdcxBalance, expect, test } from "./bread";
 import { componentRow, invoke } from "./example";
 import {
   logBrowserErrors,
@@ -97,15 +97,12 @@ test("mainnet: network counter incremented by a network note from Bread", async 
   logBrowserErrors(page);
 
   await test.step("check the QA wallet's funds", async () => {
-    const usdcx = bread.walletPage
-      .getByRole("group", { name: "Assets" })
-      .getByRole("button", { name: /^USDCX / });
-    await expect(usdcx).toContainText(/USDCX\s*[\d.]+\s*USDCX/, {
-      timeout: TRANSACTION_TIMEOUT,
-    });
-    const balance = Number(
-      (await usdcx.textContent())?.match(/USDCX\s*([\d.]+)\s*USDCX/)?.[1],
-    );
+    await expect
+      .poll(() => breadUsdcxBalance(bread.walletPage), {
+        timeout: TRANSACTION_TIMEOUT,
+      })
+      .not.toBeNull();
+    const balance = await breadUsdcxBalance(bread.walletPage);
     console.info("QA wallet balance:", balance, "USDCX");
     expect(
       balance,
