@@ -1,6 +1,6 @@
 {
   "type": "base",
-  "version": "9",
+  "version": "10",
   "dialect": "postgres",
   "id": "9cd5369f-dcdc-455d-b8e2-5493a0f27b90",
   "prevIds": [
