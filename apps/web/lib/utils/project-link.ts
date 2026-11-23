@@ -164,3 +164,52 @@ export const parseProjectLink = (hash: string): ParsedProjectLink => {
     droppedAccounts: accountItems.length - accounts.length,
   };
 };
+
+// An account of the workspace as "Share project" offers it (decision 3 of the
+// spec): public accounts on chain ticked, the connected wallet unticked, the
+// others shown disabled with the reason. The network's faucet isn't offered:
+// every sandbox has it.
+export type ShareableAccount = {
+  id: string;
+  name: string;
+  address: string;
+  checked: boolean;
+  disabledReason?: string;
+};
+
+export const shareableAccounts = (
+  accounts: {
+    id: string;
+    name: string;
+    address: string;
+    isPublic: boolean;
+    isNew: boolean;
+  }[],
+  {
+    networkId,
+    faucetId,
+    isConnectedWallet,
+  }: {
+    networkId: ProjectLinkNetworkId;
+    faucetId: string;
+    isConnectedWallet: (id: string) => boolean;
+  },
+): ShareableAccount[] =>
+  accounts
+    .filter(({ id }) => id !== faucetId)
+    .map(({ id, name, address, isPublic, isNew }) => {
+      const disabledReason = !isPublic
+        ? "Private: its state isn't on chain for others to read."
+        : isNew
+          ? "Not on chain yet: it shows up once it has a transaction."
+          : !isNetworkAddress(address, networkId)
+            ? "Its address isn't one of this network."
+            : undefined;
+      return {
+        id,
+        name,
+        address,
+        checked: disabledReason === undefined && !isConnectedWallet(id),
+        ...(disabledReason !== undefined && { disabledReason }),
+      };
+    });

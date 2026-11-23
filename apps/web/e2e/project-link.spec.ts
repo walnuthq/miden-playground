@@ -8,8 +8,10 @@ import {
 import {
   atPhoneWidth,
   expectNoHorizontalOverflow,
+  expectWithinDialog,
   expectWithinWidth,
 } from "./mobile/layout";
+import { clickProjectsItem } from "./projects-menu";
 import { logBrowserErrors, TRANSACTION_TIMEOUT } from "./tutorial";
 
 const UUID =
@@ -40,11 +42,14 @@ const apiScripts = (page: Page) =>
 
 test("a project link opens the scripts as copies and imports the accounts", async ({
   page,
+  context,
   browser,
 }) => {
   logBrowserErrors(page);
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   let address = "";
   let scripts: { id: string; name: string }[] = [];
+  let link = "";
 
   await test.step("the author launches the counter example", async () => {
     await launchExample(page, {
@@ -59,15 +64,61 @@ test("a project link opens the scripts as copies and imports the accounts", asyn
     ]);
   });
 
-  // Built by hand until Share project (spec/project-links.md, PR 4), with a
-  // deleted script and a Mainnet address the page leaves out.
-  const fragment = [
-    "v=1",
-    "n=mtst",
-    `t=${encodeURIComponent("Counter: a demo & more")}`,
-    `s=${[...scripts.map(({ id }) => id), DELETED_ID].join(",")}`,
-    `a=${encodeURIComponent("My counter")}:${address},other:mm1arnfum9xuwwlrvgvrefejwvlavn3vk24`,
-  ].join("&");
+  await test.step("and shares the project", async () => {
+    await clickProjectsItem(page, "Share project…");
+    const dialog = page.getByRole("dialog", { name: "Share Project" });
+    await expect(dialog).toBeVisible();
+    for (const { name } of scripts) {
+      await expect(dialog.getByText(name, { exact: true })).toBeVisible();
+    }
+    // The deployed counter is public and on chain: ticked.
+    const counter = dialog.getByRole("checkbox", { name: /Counter Contract/ });
+    await expect(counter).toBeChecked();
+    await expect(counter).toBeEnabled();
+    // The faucet every sandbox has isn't offered.
+    await expect(dialog.getByRole("checkbox")).toHaveCount(1);
+    await dialog.getByRole("button", { name: "Cancel" }).click();
+    await expect(dialog).toBeHidden();
+    // On a phone the switcher is in the sidebar's sheet, which closes for
+    // the dialog.
+    await atPhoneWidth(page, async () => {
+      await page
+        .locator("header")
+        .getByRole("button", { name: "Toggle Sidebar" })
+        .click();
+      const sidebar = page.locator(
+        '[data-sidebar="sidebar"][data-mobile="true"]',
+      );
+      await sidebar.getByRole("button", { name: /Miden Playground/ }).click();
+      await page.getByRole("menuitem", { name: "Projects" }).click();
+      await page.getByRole("menuitem", { name: "Share project…" }).click();
+      await expect(sidebar).toBeHidden();
+      const phoneDialog = page.getByRole("dialog", { name: "Share Project" });
+      await expectWithinDialog(
+        phoneDialog.getByRole("button", { name: "Copy link" }),
+        phoneDialog,
+      );
+      await expectWithinDialog(phoneDialog.getByText(address), phoneDialog);
+      await phoneDialog.getByRole("button", { name: "Cancel" }).click();
+    });
+    await clickProjectsItem(page, "Share project…");
+    const desktopDialog = page.getByRole("dialog", { name: "Share Project" });
+    await desktopDialog.getByLabel("Title").fill("Counter: a demo & more");
+    await desktopDialog.getByRole("button", { name: "Copy link" }).click();
+    await expect(page.getByText("Link copied.")).toBeVisible();
+    await expect(desktopDialog).toBeHidden();
+    link = await page.evaluate(() => navigator.clipboard.readText());
+    const url = new URL(link);
+    expect(url.pathname).toBe("/open");
+    expect(url.hash).toContain(`${address}`);
+  });
+
+  // With a deleted script and a Mainnet address added, which the page leaves
+  // out.
+  const fragment = new URL(link).hash
+    .slice(1)
+    .replace(/&s=([^&]*)/, `&s=$1,${DELETED_ID}`)
+    .concat(",other:mm1arnfum9xuwwlrvgvrefejwvlavn3vk24");
   // Another browser: its own state and its own owner token.
   const readerContext = await browser.newContext();
   const reader = await readerContext.newPage();
@@ -103,7 +154,10 @@ test("a project link opens the scripts as copies and imports the accounts", asyn
     await expect(
       reader.getByText("Counter: a demo & more opened."),
     ).toBeVisible();
-    const row = reader.getByRole("cell", { name: "My counter", exact: true });
+    const row = reader.getByRole("cell", {
+      name: "Counter Contract",
+      exact: true,
+    });
     await expect(row).toBeVisible({ timeout: TRANSACTION_TIMEOUT });
     // The copies, not the author's scripts.
     const copies = (await apiScripts(reader)).filter(({ id }) => UUID.test(id));

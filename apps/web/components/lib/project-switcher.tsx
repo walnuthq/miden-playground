@@ -25,6 +25,7 @@ import {
   CircleDashed,
   Copy,
   Save,
+  Share2,
   Trash2,
 } from "lucide-react";
 // import { useEffect } from "react";
@@ -44,6 +45,7 @@ import { trackEvent } from "@/lib/analytics";
 import examples from "@/lib/examples";
 import { type NetworkId, networks } from "@/lib/types/network";
 import type { ProjectMeta } from "@/lib/types/project";
+import { isProjectLinkNetworkId } from "@/lib/utils/project-link";
 import { confirmWorkspaceSwitch } from "@/lib/utils/workspace-guard";
 
 const errorMessage = (error: unknown) =>
@@ -69,6 +71,7 @@ const ProjectSwitcher = () => {
     openProject,
     openSaveProjectDialog,
     openDeleteProjectDialog,
+    openShareProjectDialog,
   } = useSavedProjects();
   // The Save dialog (Save as, and Save without an active project) and the
   // delete confirmation render next to the sidebar (AppSidebar), not here: on
@@ -82,6 +85,13 @@ const ProjectSwitcher = () => {
     setOpenMobile(false);
     openDeleteProjectDialog();
   };
+  const openShareDialog = () => {
+    setOpenMobile(false);
+    openShareProjectDialog();
+  };
+  // A MockChain sandbox's chain lives in this browser: a link to it would
+  // open on nothing (spec/project-links.md).
+  const shareable = isProjectLinkNetworkId(networkId);
   const title = projectTitle({
     projectName,
     tutorialId,
@@ -243,6 +253,17 @@ const ProjectSwitcher = () => {
                         onClick={openDeleteDialog}
                       >
                         <Trash2 className="size-4" /> Delete project
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        disabled={!shareable || switching}
+                        onClick={openShareDialog}
+                      >
+                        <Share2 className="size-4" /> Share project…
+                        {!shareable && (
+                          <span className="ml-auto pl-2 text-xs text-muted-foreground">
+                            Not on {networks[networkId]}
+                          </span>
+                        )}
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                     </>
