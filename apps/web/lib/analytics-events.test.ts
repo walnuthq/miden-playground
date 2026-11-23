@@ -18,6 +18,8 @@ describe("toDataPoint", () => {
         script_type: "account-component",
         outcome: "ok",
         target: "component",
+        script_count: 4,
+        account_count: 2,
       }),
       {
         indexes: ["complete_tutorial_step"],
@@ -33,7 +35,7 @@ describe("toDataPoint", () => {
           "ok",
           "component",
         ],
-        doubles: [3, 1],
+        doubles: [3, 1, 4, 2],
       },
     );
   });
@@ -42,7 +44,7 @@ describe("toDataPoint", () => {
     assert.deepEqual(toDataPoint({ name: "page_view" }), {
       indexes: ["page_view"],
       blobs: ["page_view", "", "", "", "", "", "", "", "", ""],
-      doubles: [0, 0],
+      doubles: [0, 0, 0, 0],
     });
   });
 
@@ -65,6 +67,8 @@ describe("toDataPoint", () => {
       "compile_script",
       "simulate",
       "deploy_account",
+      "open_project_link",
+      "share_project",
     ]) {
       assert.notEqual(toDataPoint({ name }), null);
     }
@@ -75,6 +79,20 @@ describe("toDataPoint", () => {
         script_type: "transaction-script",
         outcome: "failed",
       }),
+      null,
+    );
+    assert.notEqual(
+      toDataPoint({
+        name: "open_project_link",
+        network_id: "mtst",
+        script_count: 3,
+        account_count: 1,
+        outcome: "ok",
+      }),
+      null,
+    );
+    assert.equal(
+      toDataPoint({ name: "share_project", script_count: "3" }),
       null,
     );
     for (const target of ["component", "simulated", "sandbox"]) {

@@ -80,6 +80,7 @@ export const defaultState = (): State => ({
   tutorialProgress: {},
   // EXAMPLES
   exampleId: "",
+  projectLinkAccounts: [],
   // PROJECTS
   projectId: "",
   projectName: "",
@@ -106,6 +107,7 @@ export const PERSISTED_KEYS = [
   "completedTutorials",
   "tutorialProgress",
   "exampleId",
+  "projectLinkAccounts",
   "projectId",
   "projectName",
 ] as const satisfies readonly (keyof State)[];
@@ -126,6 +128,7 @@ export const stateSerializer = ({
   completedTutorials,
   tutorialProgress,
   exampleId,
+  projectLinkAccounts,
   projectId,
   projectName,
 }: State) =>
@@ -146,6 +149,7 @@ export const stateSerializer = ({
     completedTutorials: [...completedTutorials],
     tutorialProgress,
     exampleId,
+    projectLinkAccounts,
     projectId,
     projectName,
   });
@@ -223,6 +227,7 @@ export const stateDeserializer = (value: string): State => {
       completedTutorials,
       tutorialProgress,
       exampleId,
+      projectLinkAccounts,
       projectId,
       projectName,
     } = migrateLegacyComponents(
@@ -245,6 +250,7 @@ export const stateDeserializer = (value: string): State => {
         completedTutorials?: string[];
         tutorialProgress?: State["tutorialProgress"];
         exampleId?: string;
+        projectLinkAccounts?: State["projectLinkAccounts"];
         projectId?: string;
         projectName?: string;
       },
@@ -276,6 +282,8 @@ export const stateDeserializer = (value: string): State => {
         : initialState.completedTutorials,
       tutorialProgress: tutorialProgress ?? initialState.tutorialProgress,
       exampleId: exampleId ?? initialState.exampleId,
+      projectLinkAccounts:
+        projectLinkAccounts ?? initialState.projectLinkAccounts,
       projectId: projectId ?? initialState.projectId,
       projectName: projectName ?? initialState.projectName,
     };

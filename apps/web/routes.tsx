@@ -35,6 +35,9 @@ const router = createBrowserRouter([
           { path: "notes/:id", lazy: page(() => import("@/pages/note")) },
           { path: "scripts", lazy: page(() => import("@/pages/scripts")) },
           { path: "scripts/:id", lazy: page(() => import("@/pages/script")) },
+          // A project link: its description is in the fragment
+          // (lib/utils/project-link.ts).
+          { path: "open", lazy: page(() => import("@/pages/open")) },
           {
             path: "transactions",
             lazy: page(() => import("@/pages/transactions")),

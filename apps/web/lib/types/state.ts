@@ -15,6 +15,7 @@ import type {
   TransactionType,
 } from "@/lib/types/transaction";
 import type { TutorialId } from "@/lib/types/tutorial";
+import type { ProjectLinkAccount } from "@/lib/utils/project-link";
 
 export type State = {
   // GLOBAL
@@ -96,6 +97,10 @@ export type State = {
   tutorialProgress: Partial<Record<TutorialId, TutorialProgress>>;
   // EXAMPLES
   exampleId: string;
+  // PROJECT LINKS
+  // The accounts of an opened project link (spec/project-links.md) still to
+  // import by address, once the client is ready on the link's network.
+  projectLinkAccounts: ProjectLinkAccount[];
   // PROJECTS
   // The saved project the workspace is (see `lib/utils/project.ts`): Save
   // writes to it, and the sidebar shows its name. Empty for a sandbox or an

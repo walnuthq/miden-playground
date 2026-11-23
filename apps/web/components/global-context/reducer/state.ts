@@ -27,6 +27,8 @@ export type StateAction =
       type: "SET_PROJECT";
       payload: { projectId: string; projectName: string };
     }
+  // A project link's account was imported: no longer pending.
+  | { type: "PROJECT_LINK_ACCOUNT_IMPORTED"; payload: { address: string } }
   | { type: "OPEN_SAVE_PROJECT_DIALOG"; payload: { saveAs: boolean } }
   | { type: "CLOSE_SAVE_PROJECT_DIALOG" }
   | { type: "OPEN_DELETE_PROJECT_DIALOG" }
@@ -95,6 +97,14 @@ const reducer = (state: State, action: StateAction): State => {
         ...state,
         projectId: action.payload.projectId,
         projectName: action.payload.projectName,
+      };
+    }
+    case "PROJECT_LINK_ACCOUNT_IMPORTED": {
+      return {
+        ...state,
+        projectLinkAccounts: state.projectLinkAccounts.filter(
+          ({ address }) => address !== action.payload.address,
+        ),
       };
     }
     case "OPEN_SAVE_PROJECT_DIALOG": {
