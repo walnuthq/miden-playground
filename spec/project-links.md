@@ -2,7 +2,7 @@
 
 Status: written 2026-11-23 at `6081a7d` as a design plan; decisions 1 to 5
 taken the same day, each as recommended. Being implemented as four PRs (see
-"Shape"): PR 1 (#870) shipped. It
+"Shape"): PR 1 (#870) and PR 2 (#871) shipped. It
 follows `spec/share-and-fork-scripts.md` (shipped as #867 and #868) and
 replaces the project parts of `spec/account-files.md` (its PRs 3 and 4) for
 the sharing use case.
@@ -178,6 +178,14 @@ project" for the link that includes the accounts.
 
 Decided: compare the digests before PR 3; `--account` ships only if they
 agree.
+
+Compared 2026-11-23 (cargo-miden 0.11.0, the export's `Cargo.lock`): for
+`counter-account`, `bank-account`, `deposit-note` and `init-tx-script`, the
+package commitment, every procedure digest and every dependency digest are
+the same in the API's build and a local `cargo miden build --release`
+(`miden-package-metadata` on both `.masp`); only the bytes differ. So
+`--account` ships, with a note that other dependency versions can give other
+digests.
 
 `--account` lets the terminal script add accounts the agent deployed itself.
 Two things decide whether the reader sees them as built from the scripts:
