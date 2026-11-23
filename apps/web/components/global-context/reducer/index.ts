@@ -33,6 +33,7 @@ const reducer = (state: State, action: Action): State => {
     case "PUSH_STATE":
     case "POP_STATE":
     case "SET_PROJECT":
+    case "PROJECT_LINK_ACCOUNT_IMPORTED":
     case "OPEN_SAVE_PROJECT_DIALOG":
     case "CLOSE_SAVE_PROJECT_DIALOG":
     case "OPEN_DELETE_PROJECT_DIALOG":

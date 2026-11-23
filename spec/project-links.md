@@ -2,7 +2,7 @@
 
 Status: written 2026-11-23 at `6081a7d` as a design plan; decisions 1 to 5
 taken the same day, each as recommended. Being implemented as four PRs (see
-"Shape"): PR 1, the multi-root fork, first. It
+"Shape"): PR 1 (#870) shipped. It
 follows `spec/share-and-fork-scripts.md` (shipped as #867 and #868) and
 replaces the project parts of `spec/account-files.md` (its PRs 3 and 4) for
 the sharing use case.
@@ -209,6 +209,11 @@ says so and the documented path is "deploy in the playground".
 - Deploy the API first.
 
 ### PR 2: open a link (web)
+
+Shipped as built here: the link's accounts wait in `State.projectLinkAccounts`
+(persisted) and are imported by `useImportProjectLinkAccounts`, which
+`NetworkBadge` calls. The new sandbox holds the copies only, not a Mainnet
+sandbox's starter scripts.
 
 - `apps/web/lib/utils/project-link.ts`: build and parse the fragment, pure,
   unit-tested (bounds, bad ids, addresses of another network, unknown

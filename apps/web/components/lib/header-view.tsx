@@ -97,6 +97,7 @@ export const HeaderView = ({ actions }: { actions: ReactNode }) => {
     "/transactions",
     "/notes",
     "/scripts",
+    "/open",
   ].includes(pathname);
   return (
     <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
@@ -114,9 +115,13 @@ export const HeaderView = ({ actions }: { actions: ReactNode }) => {
           <BreadcrumbList className="flex-nowrap">
             {isTopLevelPage ? (
               <BreadcrumbItem>
-                <BreadcrumbPage className="capitalize">
-                  {pathname.slice(1) || "home"}
-                </BreadcrumbPage>
+                {pathname === "/open" ? (
+                  <BreadcrumbPage>Shared project</BreadcrumbPage>
+                ) : (
+                  <BreadcrumbPage className="capitalize">
+                    {pathname.slice(1) || "home"}
+                  </BreadcrumbPage>
+                )}
               </BreadcrumbItem>
             ) : (
               <SubLevelPageBreadcrumbs />

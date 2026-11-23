@@ -8,6 +8,7 @@ import useAppState from "@/hooks/use-app-state";
 import useDocumentVisible from "@/hooks/use-document-visible";
 import useExamples, { EXAMPLE_DEPLOY_FAILED_TOAST } from "@/hooks/use-examples";
 import useNetwork from "@/hooks/use-network";
+import { useImportProjectLinkAccounts } from "@/hooks/use-project-link";
 import { workspaceLeft } from "@/lib/utils/workspace-guard";
 
 let callingPopState = false;
@@ -104,6 +105,7 @@ const NetworkBadge = () => {
       callLoadExample();
     }
   }, [exampleId, exampleAccount, switching, workspaceRun, loadExample]);
+  useImportProjectLinkAccounts();
   return (
     <NetworkBadgeView
       networkId={networkId}

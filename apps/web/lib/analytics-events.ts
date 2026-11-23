@@ -18,6 +18,8 @@ const eventNames = [
   "compile_script",
   "simulate",
   "deploy_account",
+  "open_project_link",
+  "share_project",
 ] as const;
 
 export type AnalyticsEventName = (typeof eventNames)[number];
@@ -60,6 +62,10 @@ export type AnalyticsMetadata = {
   script_type?: (typeof scriptTypes)[number];
   outcome?: AnalyticsOutcome;
   target?: (typeof targets)[number];
+  // A project link's (spec/project-links.md): how many scripts and accounts it
+  // holds, never which.
+  script_count?: number;
+  account_count?: number;
 };
 
 export type AnalyticsEvent = { name: AnalyticsEventName } & AnalyticsMetadata;
@@ -88,6 +94,8 @@ const fieldChecks: Record<
   script_type: isOneOf(scriptTypes),
   outcome: isOneOf(outcomes),
   target: isOneOf(targets),
+  script_count: isNumber,
+  account_count: isNumber,
 };
 
 const isAnalyticsEvent = (body: unknown): body is AnalyticsEvent => {
@@ -108,8 +116,9 @@ const isAnalyticsEvent = (body: unknown): body is AnalyticsEvent => {
 // Analytics Engine's columns are positional: never reorder these, or data
 // already written changes meaning. `index1` and `blob1` are the event's name,
 // `blob2…6` route, tutorial_id, network_id, wallet_connected and automated,
-// `blob7…10` example_id, script_type, outcome and target, `double1…2`
-// tutorial_step and visit. A new field takes the next free column.
+// `blob7…10` example_id, script_type, outcome and target, `double1…4`
+// tutorial_step, visit, script_count and account_count. A new field takes the
+// next free column.
 // scripts/analytics-report.ts reads them.
 export const toDataPoint = (body: unknown) => {
   if (!isAnalyticsEvent(body)) {
@@ -129,6 +138,11 @@ export const toDataPoint = (body: unknown) => {
       body.outcome ?? "",
       body.target ?? "",
     ],
-    doubles: [body.tutorial_step ?? 0, body.visit ? 1 : 0],
+    doubles: [
+      body.tutorial_step ?? 0,
+      body.visit ? 1 : 0,
+      body.script_count ?? 0,
+      body.account_count ?? 0,
+    ],
   };
 };
