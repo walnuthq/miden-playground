@@ -92,6 +92,7 @@ export const defaultPackage = (): Package => ({
   exports: [],
   dependencies: [],
   metadata: null,
+  ownerKeyHash: null,
   createdAt: new Date(0),
   updatedAt: new Date(0),
 });

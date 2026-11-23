@@ -1,12 +1,21 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { badRequest, errorStatusAndMessage, notFound } from "./errors.ts";
+import {
+  badRequest,
+  errorStatusAndMessage,
+  forbidden,
+  notFound,
+} from "./errors.ts";
 import { isAlreadyVerified, UpstreamError } from "./upstream.ts";
 
 test("client errors keep their status and message", () => {
   assert.deepEqual(errorStatusAndMessage(badRequest("Error: bad.")), {
     status: 400,
     message: "Error: bad.",
+  });
+  assert.deepEqual(errorStatusAndMessage(forbidden("Error: not yours.")), {
+    status: 403,
+    message: "Error: not yours.",
   });
   assert.deepEqual(errorStatusAndMessage(notFound("Error: gone.")), {
     status: 404,

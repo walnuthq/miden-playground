@@ -133,10 +133,17 @@ type CompiledPackage = {
   exports: unknown[];
 };
 
+// This run's owner token: the API lets only a script's owner compile and
+// delete it (lib/owner.ts).
+const OWNER_TOKEN = crypto.randomUUID() + crypto.randomUUID();
+
 const request = async <T>(path: string, init: RequestInit): Promise<T> => {
   const response = await fetch(`${API_URL}${path}`, {
     ...init,
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${OWNER_TOKEN}`,
+    },
   });
   if (!response.ok) {
     throw new Error(

@@ -46,6 +46,11 @@ export const packagesTable = pgTable("packages", {
   // (`PackageMetadata`). Null for a draft, a failed build, and a package
   // compiled before api-compile reported them.
   metadata: jsonb(),
+  // The SHA-256 (hex) of the owner token of the browser that created the
+  // package, or first wrote to it (lib/owner.ts). Null for a package created
+  // before owners existed, or by a web app loaded before then. Never sent to
+  // a client.
+  ownerKeyHash: varchar("owner_key_hash", { length: 64 }),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

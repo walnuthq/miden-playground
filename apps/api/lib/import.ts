@@ -7,7 +7,14 @@ import { compilePackage, createPackage } from "@/lib/utils";
 
 export const importScriptsFromPackageSources = async (
   packageSources: Record<string, PackageSource>,
-  signal?: AbortSignal,
+  {
+    signal,
+    ownerKeyHash,
+  }: {
+    signal?: AbortSignal;
+    // The hash of the caller's owner token, which owns the new packages.
+    ownerKeyHash?: string;
+  } = {},
 ): Promise<CompiledPackage[]> => {
   const packages = resolvePackageSources(packageSources);
   const packageIds = new Map(
@@ -16,7 +23,8 @@ export const importScriptsFromPackageSources = async (
         async ({ name, type, rust }) =>
           [
             name,
-            (await createPackage({ name, type, source: rust })).id,
+            (await createPackage({ name, type, source: rust, ownerKeyHash }))
+              .id,
           ] as const,
       ),
     ),
@@ -45,7 +53,10 @@ export const importScriptsFromPackageSources = async (
 // compiling the sources when they were edited since the snapshot was taken.
 export const importExample = async (
   exampleId: string,
-  signal?: AbortSignal,
+  {
+    signal,
+    ownerKeyHash,
+  }: { signal?: AbortSignal; ownerKeyHash?: string } = {},
 ): Promise<CompiledPackage[]> => {
   const example = Object.hasOwn(examples, exampleId)
     ? examples[exampleId]
@@ -58,7 +69,7 @@ export const importExample = async (
     console.warn(
       `Example ${exampleId}: sources changed since compiled.json was generated (run pnpm examples:compile), compiling them.`,
     );
-    return importScriptsFromPackageSources(sources, signal);
+    return importScriptsFromPackageSources(sources, { signal, ownerKeyHash });
   }
   const createdPackages = new Map<string, Dependency>();
   const compiledPackages: CompiledPackage[] = [];
@@ -94,6 +105,7 @@ export const importExample = async (
       source: rust,
       dependencies: packageDependencies,
       compiled: { masm, masp, commitment, exports, metadata },
+      ownerKeyHash,
     });
     createdPackages.set(name, { id, name, type, commitment });
     compiledPackages.push({

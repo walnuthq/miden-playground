@@ -12,6 +12,7 @@ import useScripts from "@/hooks/use-scripts";
 import { exportScript } from "@/lib/api";
 import type { DataTableFeatures } from "@/lib/table";
 import { type Script, scriptTypes } from "@/lib/types/script";
+import { shareScript } from "@/lib/utils/share-script";
 
 const ScriptActionsCell = ({ script }: { script: Script }) => {
   const { openDeleteScriptAlertDialog } = useScripts();
@@ -28,6 +29,9 @@ const ScriptActionsCell = ({ script }: { script: Script }) => {
         <MoreVertical className="size-4" />
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-auto" align="end">
+        <DropdownMenuItem onClick={() => shareScript(script)}>
+          Share script
+        </DropdownMenuItem>
         <DropdownMenuItem>
           <a href={exportScript(script.id)} download={`${script.name}.zip`}>
             Export script

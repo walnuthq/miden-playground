@@ -40,6 +40,8 @@ import EditorConsole, {
 import EditorSettingsMenu from "@/components/script/editor-settings-menu";
 import ScriptExplorer from "@/components/script/script-explorer";
 import ScriptManifest from "@/components/script/script-manifest";
+import ShareScriptButton from "@/components/script/share-script-button";
+import SharedScriptBanner from "@/components/script/shared-script-banner";
 import useCompileScript from "@/hooks/use-compile-script";
 import useScriptShortcuts, {
   shortcutLabel,
@@ -48,6 +50,7 @@ import useTutorials from "@/hooks/use-tutorials";
 import { clearConsoleLog } from "@/lib/console-log";
 import { canSimulate } from "@/lib/simulation/can-simulate";
 import type { Script, ScriptFilePath } from "@/lib/types/script";
+import { isValidUUIDv4 } from "@/lib/utils";
 import { assembledFromMasm } from "@/lib/utils/script";
 import { SCRIPT_FILE, scriptSource } from "@/lib/utils/script-files";
 
@@ -76,7 +79,17 @@ const PAGE_HEIGHT_CLASS_NAME =
 // On a phone, a tutorial's closed panel (`h-12`) sits below the page too.
 const MOBILE_TUTORIAL_PAGE_HEIGHT_CLASS_NAME = "h-[calc(100svh-7rem)]";
 
-const ScriptComponent = ({ id, script }: { id: string; script?: Script }) => {
+const ScriptComponent = ({
+  id,
+  script,
+  // The script can't be changed from here (hooks/use-script.ts): it shows
+  // read-only, under a banner that offers to fork it.
+  shared = false,
+}: {
+  id: string;
+  script?: Script;
+  shared?: boolean;
+}) => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [searchParams] = useSearchParams();
@@ -262,6 +275,7 @@ const ScriptComponent = ({ id, script }: { id: string; script?: Script }) => {
           : PAGE_HEIGHT_CLASS_NAME,
       )}
     >
+      {shared && <SharedScriptBanner script={script} />}
       <Tabs
         className="min-h-0 flex-1"
         value={tab}
@@ -315,6 +329,9 @@ const ScriptComponent = ({ id, script }: { id: string; script?: Script }) => {
             <TabsTrigger value="manifest">Manifest</TabsTrigger>
           </TabsList>
           <div className="ml-auto flex items-center gap-1">
+            {/* The API's scripts have a link to share: not the built-in
+                ones, nor the packages embedded for the tutorials. */}
+            {isValidUUIDv4(script.id) && <ShareScriptButton script={script} />}
             <EditorSettingsMenu />
             {!script.readOnly && (
               <Tooltip>

@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { getDb } from "@/db";
 import { packagesTable } from "@/db/schema";
 import {
@@ -24,6 +24,63 @@ export const getPackage = async (id: string) => {
         metadata: dbPackage.metadata as PackageMetadata | null,
       }
     : undefined;
+};
+
+// Full rows, for a fork: in no particular order, without the missing ones.
+export const getPackages = async (ids: string[]) => {
+  if (ids.length === 0) {
+    return [];
+  }
+  const dbPackages = await getDb().query.packagesTable.findMany({
+    where: { id: { in: ids } },
+  });
+  return dbPackages.map((dbPackage) => ({
+    ...dbPackage,
+    files: dbPackage.files as Record<string, string>,
+    exports: dbPackage.exports as Export[],
+    metadata: dbPackage.metadata as PackageMetadata | null,
+  }));
+};
+
+// A package and the packages it depends on, in turn: full rows, the package
+// first. Undefined when it doesn't exist. Stops reading once there are more
+// than `max`, which the caller refuses.
+export const getPackageTree = async (id: string, max: number) => {
+  const [root] = await getPackages([id]);
+  if (!root) {
+    return undefined;
+  }
+  const found = new Map([[root.id, root]]);
+  let pending = root.dependencies;
+  while (pending.length > 0 && found.size <= max) {
+    const batch = await getPackages([
+      ...new Set(
+        pending.filter(
+          (dependency) => isValidUUIDv4(dependency) && !found.has(dependency),
+        ),
+      ),
+    ]);
+    pending = [];
+    for (const dbPackage of batch) {
+      found.set(dbPackage.id, dbPackage);
+      pending.push(...dbPackage.dependencies);
+    }
+  }
+  return [...found.values()];
+};
+
+export const insertPackages = (newPackages: NewPackage[]) =>
+  getDb().insert(packagesTable).values(newPackages);
+
+// Makes the token's hash the owner of a package that has none. False when it
+// got an owner meanwhile (or is gone).
+export const claimPackage = async (id: string, ownerKeyHash: string) => {
+  const claimed = await getDb()
+    .update(packagesTable)
+    .set({ ownerKeyHash })
+    .where(and(eq(packagesTable.id, id), isNull(packagesTable.ownerKeyHash)))
+    .returning({ id: packagesTable.id });
+  return claimed.length > 0;
 };
 
 export const insertPackage = async (newPackage: NewPackage) => {
