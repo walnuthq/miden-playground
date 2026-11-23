@@ -1,8 +1,11 @@
 # Project links
 
 Status: written 2026-11-23 at `6081a7d` as a design plan; decisions 1 to 5
-taken the same day, each as recommended. Being implemented as four PRs (see
-"Shape"): PR 1 (#870) and PR 2 (#871) shipped. It
+taken the same day, each as recommended. Shipped as four PRs (see
+"Shape"), all merged and deployed on 2026-11-23: the multi-root fork (#870),
+`/open` (#871), the terminal script (#872) and Share project (#873).
+`e2e/project-link.spec.ts` passed against production, and the terminal
+script's links (one package, three packages) opened there. It
 follows `spec/share-and-fork-scripts.md` (shipped as #867 and #868) and
 replaces the project parts of `spec/account-files.md` (its PRs 3 and 4) for
 the sharing use case.
