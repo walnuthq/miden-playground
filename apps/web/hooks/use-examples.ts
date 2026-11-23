@@ -5,6 +5,8 @@ import useAccounts from "@/hooks/use-accounts";
 import useAppState from "@/hooks/use-app-state";
 import useNetwork from "@/hooks/use-network";
 import useScripts from "@/hooks/use-scripts";
+import { trackEvent } from "@/lib/analytics";
+import type { AnalyticsOutcome } from "@/lib/analytics-events";
 import { importExample } from "@/lib/api";
 import examples from "@/lib/examples";
 import { compiledPackageToScript } from "@/lib/utils/script";
@@ -38,6 +40,8 @@ const useExamples = () => {
     if (!(await confirmWorkspaceSwitch())) {
       return { cancelled: true };
     }
+    const track = (outcome: AnalyticsOutcome) =>
+      trackEvent("launch_example", { example_id: example.id, outcome });
     const { scripts, error } = await importExample(example.id).catch(
       (error: unknown) => ({
         scripts: undefined,
@@ -45,10 +49,12 @@ const useExamples = () => {
       }),
     );
     if (!scripts) {
+      track("failed");
       return { error: error ?? "Scripts couldn't be imported." };
     }
     const failedScript = scripts.find(({ status }) => status === "error");
     if (failedScript) {
+      track("error");
       return { error: `${failedScript.name}: ${failedScript.error}` };
     }
     const tutorialProgress = await leaveTutorial();
@@ -69,6 +75,7 @@ const useExamples = () => {
       description:
         "We're deploying an account for you to play with. It will show up here in a moment.",
     });
+    track("ok");
     return {};
   };
   // Deploys the example's account, and tells whether it did. `abandoned` tells

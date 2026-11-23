@@ -4,6 +4,8 @@ import {
 } from "@miden-sdk/miden-sdk";
 import { useMiden } from "@miden-sdk/react";
 import useGlobalContext from "@/components/global-context/hook";
+import { trackEvent } from "@/lib/analytics";
+import type { AnalyticsOutcome } from "@/lib/analytics-events";
 import {
   compileScript as apiCompileScript,
   deleteScript as apiDeleteScript,
@@ -38,6 +40,7 @@ const useScripts = () => {
     readOnlyProcedureAccountId,
     readOnlyProcedureDigest,
     readOnlyProcedureResult,
+    tutorialId,
     dispatch,
   } = useGlobalContext();
   const { client } = useMiden();
@@ -61,7 +64,22 @@ const useScripts = () => {
     type: ScriptType;
     example: ScriptExample | "none";
   }) => {
-    const { script, error } = await createScript({ name, type, example });
+    const track = (outcome: "ok" | "failed") =>
+      trackEvent("create_script", {
+        script_type: type,
+        example_id: example === "none" ? "" : example,
+        outcome,
+        tutorial_id: tutorialId,
+      });
+    const { script, error } = await createScript({
+      name,
+      type,
+      example,
+    }).catch((error: unknown) => {
+      track("failed");
+      throw error;
+    });
+    track(script ? "ok" : "failed");
     if (script) {
       dispatch({
         type: "NEW_SCRIPT",
@@ -175,8 +193,21 @@ const useScripts = () => {
   const importScriptsFromPackageSources = async (
     packageSources: Record<string, PackageSource>,
   ) => {
-    const { scripts, error } =
-      await apiImportScriptsFromPackageSources(packageSources);
+    const track = (outcome: AnalyticsOutcome) =>
+      trackEvent("import_scripts", { outcome, tutorial_id: tutorialId });
+    const { scripts, error } = await apiImportScriptsFromPackageSources(
+      packageSources,
+    ).catch((error: unknown) => {
+      track("failed");
+      throw error;
+    });
+    if (!scripts) {
+      track("failed");
+    } else if (scripts.some(({ status }) => status === "error")) {
+      track("error");
+    } else {
+      track("ok");
+    }
     if (scripts) {
       dispatch({
         type: "IMPORT_SCRIPTS",

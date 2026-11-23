@@ -1,6 +1,9 @@
 import { useRef, useState } from "react";
 import { toast } from "sonner";
+import useGlobalContext from "@/components/global-context/hook";
 import useScripts from "@/hooks/use-scripts";
+import { trackEvent } from "@/lib/analytics";
+import type { AnalyticsOutcome } from "@/lib/analytics-events";
 import { countsSuffix, formatDuration, useConsoleLog } from "@/lib/console-log";
 import type { Script } from "@/lib/types/script";
 import { countDiagnostics } from "@/lib/utils/diagnostics";
@@ -11,6 +14,7 @@ import { scriptSource } from "@/lib/utils/script-files";
 // it before it knows the script exists: `compile` does nothing without one.
 const useCompileScript = (script?: Script) => {
   const { compileScript } = useScripts();
+  const { tutorialId } = useGlobalContext();
   const { append } = useConsoleLog(script?.id ?? "");
   const [compiling, setCompiling] = useState(false);
   const latest = useRef(script);
@@ -19,6 +23,12 @@ const useCompileScript = (script?: Script) => {
     if (!script) {
       return;
     }
+    const track = (outcome: AnalyticsOutcome) =>
+      trackEvent("compile_script", {
+        script_type: script.type,
+        outcome,
+        tutorial_id: tutorialId,
+      });
     setCompiling(true);
     append({ level: "info", text: `Compiling ${script.name}…` });
     const start = performance.now();
@@ -36,6 +46,7 @@ const useCompileScript = (script?: Script) => {
         text: `Compile request failed after ${duration}: ${error || "unknown error"}`,
       });
       toast.error("Script compilation failed.", { description: error });
+      track("failed");
       return;
     }
     const current = latest.current;
@@ -53,6 +64,7 @@ const useCompileScript = (script?: Script) => {
         output: compiledScript.error,
         compile: true,
       });
+      track("error");
       return;
     }
     const warnings = compiledScript.warnings ?? "";
@@ -64,6 +76,7 @@ const useCompileScript = (script?: Script) => {
       output: warnings || undefined,
       compile: true,
     });
+    track("ok");
   };
   return { compile, compiling };
 };
