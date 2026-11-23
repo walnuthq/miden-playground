@@ -37,6 +37,13 @@ const AccountInformationTable = ({ account }: { account: Account }) => (
             />
           </TableCell>
         </TableRow>
+        <TableRow>
+          <TableCell>Code commitment</TableCell>
+          <TableCell className="flex items-center gap-2">
+            {account.code}
+            <CopyButton content="Copy Code Commitment" copy={account.code} />
+          </TableCell>
+        </TableRow>
         {account.isFaucet && (
           <>
             <TableRow>

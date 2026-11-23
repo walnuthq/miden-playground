@@ -249,6 +249,14 @@ test("mobile: a MockChain sandbox fits the screen", async ({ page }) => {
       .first()
       .click();
     await expect(page).toHaveURL(/\/accounts\/mmck1[0-9a-z]+$/);
+    // The account's code commitment, as a note shows its script root.
+    await expect(
+      page
+        .getByRole("row")
+        .filter({ hasText: "Code commitment" })
+        .getByRole("cell")
+        .last(),
+    ).toHaveText(/^0x[0-9a-f]{64}$/);
     await expectNoHorizontalOverflow(page);
     await expectHeaderFits(page);
   });
