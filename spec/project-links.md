@@ -243,6 +243,12 @@ sandbox's starter scripts.
 
 ### PR 4: Share project (web)
 
+As built: "Share project…" sits with Save, Save as and Delete (sandboxes and
+examples), disabled on MockChain. Its dialog (`share-project-dialog.tsx`,
+rendered by `AppSidebar` like the Save dialog) edits the title and ticks the
+accounts as `shareableAccounts` (`lib/utils/project-link.ts`) offers them;
+the network's faucet isn't listed. Checkboxes are shadcn's stock `checkbox`.
+
 - "Share project" in the Projects submenu, for sandboxes and examples, not
   tutorials: a dialog with the accounts' checkboxes (decision 3) and a copy
   button. The toast repeats what a script link's toast says.

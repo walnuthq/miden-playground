@@ -112,6 +112,8 @@ export type State = {
   saveProjectDialogOpen: boolean;
   saveProjectDialogSaveAs: boolean;
   deleteProjectDialogOpen: boolean;
+  // "Share project" (spec/project-links.md), opened the same way.
+  shareProjectDialogOpen: boolean;
 };
 
 // Scripts a workspace starts with, fetched from the API: a Mainnet sandbox's

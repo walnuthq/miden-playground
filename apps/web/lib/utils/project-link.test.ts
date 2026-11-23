@@ -9,6 +9,7 @@ import {
   parseProjectLink,
   projectLinkFragment,
   projectLinkUrl,
+  shareableAccounts,
 } from "./project-link.ts";
 
 const ID_1 = "11111111-1111-4111-8111-111111111111";
@@ -123,5 +124,50 @@ test("bounds: scripts, accounts, title and names", () => {
   assert.equal(
     longName.link.accounts[0]?.name.length,
     MAX_LINK_ACCOUNT_NAME_LENGTH,
+  );
+});
+
+test("Share project ticks public accounts on chain, not the wallet or the faucet", () => {
+  const account = (
+    id: string,
+    fields: Partial<{ isPublic: boolean; isNew: boolean; address: string }>,
+  ) => ({
+    id,
+    name: id,
+    address: ADDRESS_1,
+    isPublic: true,
+    isNew: false,
+    ...fields,
+  });
+  const offered = shareableAccounts(
+    [
+      account("faucet", {}),
+      account("counter", {}),
+      account("wallet", { address: ADDRESS_2 }),
+      account("secret", { isPublic: false }),
+      account("fresh", { isNew: true }),
+      account("elsewhere", {
+        address: "mm1arnfum9xuwwlrvgvrefejwvlavn3vk24",
+      }),
+    ],
+    {
+      networkId: "mtst",
+      faucetId: "faucet",
+      isConnectedWallet: (id) => id === "wallet",
+    },
+  );
+  assert.deepEqual(
+    offered.map(({ id, checked, disabledReason }) => [
+      id,
+      checked,
+      disabledReason !== undefined,
+    ]),
+    [
+      ["counter", true, false],
+      ["wallet", false, false],
+      ["secret", false, true],
+      ["fresh", false, true],
+      ["elsewhere", false, true],
+    ],
   );
 });

@@ -23,6 +23,7 @@ const useSavedProjects = () => {
     saveProjectDialogOpen,
     saveProjectDialogSaveAs,
     deleteProjectDialogOpen,
+    shareProjectDialogOpen,
     completedTutorials,
     nextState,
     dispatch,
@@ -125,6 +126,10 @@ const useSavedProjects = () => {
     dispatch({ type: "OPEN_DELETE_PROJECT_DIALOG" });
   const closeDeleteProjectDialog = () =>
     dispatch({ type: "CLOSE_DELETE_PROJECT_DIALOG" });
+  const openShareProjectDialog = () =>
+    dispatch({ type: "OPEN_SHARE_PROJECT_DIALOG" });
+  const closeShareProjectDialog = () =>
+    dispatch({ type: "CLOSE_SHARE_PROJECT_DIALOG" });
   return {
     projectId,
     projectName,
@@ -142,6 +147,9 @@ const useSavedProjects = () => {
     closeSaveProjectDialog,
     openDeleteProjectDialog,
     closeDeleteProjectDialog,
+    shareProjectDialogOpen,
+    openShareProjectDialog,
+    closeShareProjectDialog,
   };
 };
 

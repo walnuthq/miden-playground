@@ -32,7 +32,9 @@ export type StateAction =
   | { type: "OPEN_SAVE_PROJECT_DIALOG"; payload: { saveAs: boolean } }
   | { type: "CLOSE_SAVE_PROJECT_DIALOG" }
   | { type: "OPEN_DELETE_PROJECT_DIALOG" }
-  | { type: "CLOSE_DELETE_PROJECT_DIALOG" };
+  | { type: "CLOSE_DELETE_PROJECT_DIALOG" }
+  | { type: "OPEN_SHARE_PROJECT_DIALOG" }
+  | { type: "CLOSE_SHARE_PROJECT_DIALOG" };
 
 const reducer = (state: State, action: StateAction): State => {
   switch (action.type) {
@@ -130,6 +132,18 @@ const reducer = (state: State, action: StateAction): State => {
       return {
         ...state,
         deleteProjectDialogOpen: false,
+      };
+    }
+    case "OPEN_SHARE_PROJECT_DIALOG": {
+      return {
+        ...state,
+        shareProjectDialogOpen: true,
+      };
+    }
+    case "CLOSE_SHARE_PROJECT_DIALOG": {
+      return {
+        ...state,
+        shareProjectDialogOpen: false,
       };
     }
   }

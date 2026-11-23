@@ -87,6 +87,7 @@ export const defaultState = (): State => ({
   saveProjectDialogOpen: false,
   saveProjectDialogSaveAs: false,
   deleteProjectDialogOpen: false,
+  shareProjectDialogOpen: false,
 });
 
 // The fields stateSerializer writes: keep the two in step. A change to any
