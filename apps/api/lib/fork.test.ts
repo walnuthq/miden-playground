@@ -87,6 +87,7 @@ test("forkPackages points the copies at each other", () => {
     ],
     builtIns,
     newId: sequentialIds(),
+    ownerKeyHash: "hash",
   });
   assert.equal(id, "new-2");
   const [deep, root, dependency] = copies;
@@ -106,7 +107,7 @@ test("forkPackages points the copies at each other", () => {
     },
     builtIns["basic-wallet"],
   ]);
-  assert.equal(root?.row.ownerKeyHash, undefined);
+  assert.equal(root?.row.ownerKeyHash, "hash");
 });
 
 test("forkPackages drops a dependency that is gone", () => {
@@ -117,6 +118,7 @@ test("forkPackages drops a dependency that is gone", () => {
     ],
     builtIns,
     newId: sequentialIds(),
+    ownerKeyHash: "hash",
   });
   assert.deepEqual(copies[0]?.row.dependencies, []);
   assert.deepEqual(copies[0]?.dependencies, []);

@@ -2,8 +2,9 @@
 
 Status: written 2026-11-19 at `7127b64` as a design plan. Decisions 1 to 4
 were made on 2026-11-23 and are recorded in their sections; the checks were
-run and PR 1 to 3 implemented the same day ("What was built" at the end says
-where it differs from the plan below). PR 4 waits for the next release. It replaces the
+run and PR 1 to 3 implemented and shipped the same day (#867; "What was
+built" at the end says where it differs from the plan below). PR 4 is
+implemented too, in its own PR. It replaces the
 deferred `plans/006-script-write-access.md` once accepted: 006 recorded the
 problem and the maintainer's intent (an owner token, scripts tied to the
 wallet address); this is the design that was missing.
@@ -195,6 +196,15 @@ of your own other scripts is already possible today.
 Once the web bundle that sends the token has been live for a release, writes
 without a token are refused, including on ownerless packages.
 
+Implemented on 2026-11-23, the day PR 1 to 3 shipped (#867): every route that
+creates or changes a package answers a request without a token with a 401
+("This page is out of date. Reload it, then try again."), which is what a
+tab still running a bundle from before #867 gets. `GET` and the export stay
+public. What it buys is that no new package is created without an owner; an
+ownerless package from before #867 can still be claimed by whoever writes to
+it first with a token (Decision 2). Merge it once tabs opened before #867
+are unlikely to be around.
+
 ## Things to verify before estimating
 
 Checked on 2026-11-23; the answers are under each item's number in "What was
@@ -278,9 +288,8 @@ Where the code differs from the plan above:
 - No analytics events for Share and Fork yet: the allowlist
   (`apps/web/lib/analytics-events.ts`) is append-only, so they deserve their
   own decision.
-- `apps/api/scripts/check-templates.ts` sends a token of its own for the run.
-  `compile-examples.ts` doesn't, and leaves ownerless rows: give it one
-  before PR 4.
+- `apps/api/scripts/check-templates.ts` sends a token of its own for the run,
+  and so does `compile-examples.ts` since PR 4.
 
 Code: `apps/api/lib/owner.ts` (the token, its hash, the decision function)
 and `lib/fork.ts`, both unit-tested; `apps/web/lib/owner-token.ts`,

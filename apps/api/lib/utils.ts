@@ -64,9 +64,8 @@ export const createPackage = async ({
     exports: Export[];
     metadata: PackageMetadata | null;
   };
-  // The hash of the creator's owner token (lib/owner.ts): none from a caller
-  // that sent no token.
-  ownerKeyHash?: string;
+  // The hash of the creator's owner token (lib/owner.ts).
+  ownerKeyHash: string;
 }) => {
   const files = {
     [`${name}/.cargo/config.toml`]: projectTemplateFiles[".cargo/config.toml"],

@@ -16,7 +16,13 @@ import {
   counterAccountDependency,
   defaultDependenciesRecords,
 } from "@/lib/default-dependencies";
-import { badRequest, errorResponse, forbidden, notFound } from "@/lib/errors";
+import {
+  badRequest,
+  errorResponse,
+  forbidden,
+  notFound,
+  unauthorized,
+} from "@/lib/errors";
 import { forkPackages } from "@/lib/fork";
 import { importExample, importScriptsFromPackageSources } from "@/lib/import";
 import {
@@ -122,11 +128,24 @@ const callerKeyHash = async (c: Context<AppEnv>) => {
   return token === undefined ? undefined : hashOwnerToken(token);
 };
 
+// The same for a route that creates or changes a package, which needs one.
+// A web app loaded before owners existed (2026-11-23) sends none: reloading
+// the page gets the bundle that does.
+const requireKeyHash = async (c: Context<AppEnv>) => {
+  const tokenHash = await callerKeyHash(c);
+  if (tokenHash === undefined) {
+    throw unauthorized(
+      "Error: This page is out of date. Reload it, then try again.",
+    );
+  }
+  return tokenHash;
+};
+
 // Refuses a write to another owner's package. A package without an owner
 // becomes the caller's.
 const authorizeWrite = async (
   { id, ownerKeyHash }: { id: string; ownerKeyHash: string | null },
-  tokenHash: string | undefined,
+  tokenHash: string,
 ) => {
   const notOwner = () =>
     forbidden(
@@ -136,11 +155,7 @@ const authorizeWrite = async (
   if (access === "deny") {
     throw notOwner();
   }
-  if (
-    access === "claim" &&
-    tokenHash !== undefined &&
-    !(await claimPackage(id, tokenHash))
-  ) {
+  if (access === "claim" && !(await claimPackage(id, tokenHash))) {
     // Someone claimed it since it was read.
     const current = await getPackage(id);
     if (!current) {
@@ -192,7 +207,7 @@ const scripts = createApp()
         type: actualType,
         source: templates[example === "none" ? packageType : example],
         dependencies: scriptsDependencies[example],
-        ownerKeyHash: await callerKeyHash(c),
+        ownerKeyHash: await requireKeyHash(c),
       });
       return c.json<CreateScriptResponse>({
         package: {
@@ -219,7 +234,7 @@ const scripts = createApp()
       }
       const packages = await importScriptsFromPackageSources(packageSources, {
         signal: c.req.raw.signal,
-        ownerKeyHash: await callerKeyHash(c),
+        ownerKeyHash: await requireKeyHash(c),
       });
       return c.json<ImportScriptsResponse>({ packages });
     } catch (error) {
@@ -230,7 +245,7 @@ const scripts = createApp()
     try {
       const packages = await importExample(c.req.param("exampleId"), {
         signal: c.req.raw.signal,
-        ownerKeyHash: await callerKeyHash(c),
+        ownerKeyHash: await requireKeyHash(c),
       });
       return c.json<ImportScriptsResponse>({ packages });
     } catch (error) {
@@ -284,7 +299,7 @@ const scripts = createApp()
   .patch("/:id", rateLimit, async (c) => {
     try {
       const id = packageId(c.req.param("id"));
-      const tokenHash = await callerKeyHash(c);
+      const tokenHash = await requireKeyHash(c);
       const { files, dependencies } = await c.req
         .json<CompileScriptRequestBody>()
         .catch(() => {
@@ -324,7 +339,7 @@ const scripts = createApp()
   .delete("/:id", async (c) => {
     try {
       const id = packageId(c.req.param("id"));
-      const tokenHash = await callerKeyHash(c);
+      const tokenHash = await requireKeyHash(c);
       // Deleting a package that's already gone succeeds, as before.
       const dbPackage = await getPackage(id);
       if (dbPackage) {
@@ -341,7 +356,7 @@ const scripts = createApp()
   .post("/:id/fork", rateLimit, async (c) => {
     try {
       const rootId = packageId(c.req.param("id"));
-      const ownerKeyHash = await callerKeyHash(c);
+      const ownerKeyHash = await requireKeyHash(c);
       const packages = await getPackageTree(rootId, MAX_PACKAGES);
       if (!packages) {
         throw notFound("Error: Package not found.");

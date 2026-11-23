@@ -59,7 +59,12 @@ const compileExample = async (dir: string) => {
   console.info(`${dir}: compiling ${Object.keys(sources).join(", ")}`);
   const response = await fetch(`${API_URL}/scripts/import`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      // The API needs an owner for the packages it creates (lib/owner.ts):
+      // this run's, which nothing uses afterwards.
+      Authorization: `Bearer ${crypto.randomUUID()}${crypto.randomUUID()}`,
+    },
     body: JSON.stringify({ packageSources: sources }),
   });
   if (!response.ok) {
