@@ -1,6 +1,8 @@
 import { useMemo } from "react";
+import useGlobalContext from "@/components/global-context/hook";
 import type { FaucetLabel } from "@/components/lib/fungible-assets-table";
 import useDependencyAccounts from "@/hooks/use-dependency-accounts";
+import { trackEvent } from "@/lib/analytics";
 import { appendConsoleEntry } from "@/lib/console-log";
 import type { ForeignAccountsStatus } from "@/lib/simulation/blocked";
 import {
@@ -111,6 +113,7 @@ const summary = (
 // vault shown. Every run starts from them, at nonce 0 (1 with assets, which a
 // seed transaction put in the vault): nothing is persisted.
 const useSimulation = (script: Script) => {
+  const { tutorialId } = useGlobalContext();
   const schema = script.metadata?.storage;
   const [slots, setStorageSlots] = useSimulationStorageSlots(
     script.id,
@@ -158,6 +161,7 @@ const useSimulation = (script: Script) => {
       let account: Account | undefined;
       let result: SimulationResult;
       let faucetIds = new Map<string, string>();
+      let thrown = false;
       try {
         result = await withSimulationClient(async (client) => {
           // The simulated assets the vault and the arguments name.
@@ -261,6 +265,7 @@ const useSimulation = (script: Script) => {
           });
         });
       } catch (error) {
+        thrown = true;
         result = {
           ok: false,
           error: cleanExecutionError(
@@ -268,6 +273,12 @@ const useSimulation = (script: Script) => {
           ),
         };
       }
+      trackEvent("simulate", {
+        script_type: script.type,
+        outcome: thrown ? "failed" : result.ok ? "ok" : "error",
+        target: "component",
+        tutorial_id: tutorialId,
+      });
       appendConsoleEntry(
         script.id,
         result.ok && account

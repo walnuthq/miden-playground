@@ -16,6 +16,8 @@ import { useParaWallet } from "@/components/providers/para-wallet-context";
 import useFundAccount from "@/hooks/use-fund-account";
 import useNetwork from "@/hooks/use-network";
 import useScripts from "@/hooks/use-scripts";
+import { trackEvent } from "@/lib/analytics";
+import type { AnalyticsOutcome } from "@/lib/analytics-events";
 import { verifyAccountComponentsFromPackageIds } from "@/lib/api";
 import type { Account, AccountStorageMode } from "@/lib/types/account";
 import { defaultScriptIds } from "@/lib/types/default-scripts";
@@ -287,6 +289,12 @@ const useAccounts = () => {
     if (missingScriptId) {
       throw new Error(`Script ${missingScriptId} not found.`);
     }
+    const track = (outcome: AnalyticsOutcome) =>
+      trackEvent("deploy_account", {
+        network_id: networkId,
+        outcome,
+        tutorial_id: tutorialId,
+      });
     dispatch({ type: "SUBMITTING_TRANSACTION" });
     let fundedAccount: Awaited<ReturnType<typeof fundAccount>>;
     try {
@@ -307,6 +315,7 @@ const useAccounts = () => {
         : wasmAccount;
     } catch (error) {
       dispatch({ type: "TRANSACTION_SUBMITTED" });
+      track("failed");
       throw error;
     }
     const packageIds = componentScriptIds.filter(
@@ -335,6 +344,7 @@ const useAccounts = () => {
       type: "NEW_ACCOUNT",
       payload: { account },
     });
+    track("ok");
     return account;
   };
   const updateAccount = (account: Account) =>

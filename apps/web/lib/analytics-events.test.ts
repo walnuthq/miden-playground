@@ -14,6 +14,10 @@ describe("toDataPoint", () => {
         tutorial_step: 3,
         visit: true,
         automated: false,
+        example_id: "counter-contract",
+        script_type: "account-component",
+        outcome: "ok",
+        target: "component",
       }),
       {
         indexes: ["complete_tutorial_step"],
@@ -24,6 +28,10 @@ describe("toDataPoint", () => {
           "mtst",
           "true",
           "false",
+          "counter-contract",
+          "account-component",
+          "ok",
+          "component",
         ],
         doubles: [3, 1],
       },
@@ -33,7 +41,7 @@ describe("toDataPoint", () => {
   test("fills the fields an event doesn't have", () => {
     assert.deepEqual(toDataPoint({ name: "page_view" }), {
       indexes: ["page_view"],
-      blobs: ["page_view", "", "", "", "", ""],
+      blobs: ["page_view", "", "", "", "", "", "", "", "", ""],
       doubles: [0, 0],
     });
   });
@@ -46,6 +54,35 @@ describe("toDataPoint", () => {
       toDataPoint({ name: "complete_tutorial", tutorial_id: "" }),
       null,
     );
+  });
+
+  test("accepts the product events and their fields", () => {
+    for (const name of [
+      "new_sandbox",
+      "launch_example",
+      "create_script",
+      "import_scripts",
+      "compile_script",
+      "simulate",
+      "deploy_account",
+    ]) {
+      assert.notEqual(toDataPoint({ name }), null);
+    }
+    assert.notEqual(
+      toDataPoint({
+        name: "create_script",
+        example_id: "",
+        script_type: "transaction-script",
+        outcome: "failed",
+      }),
+      null,
+    );
+    for (const target of ["component", "simulated", "sandbox"]) {
+      assert.notEqual(
+        toDataPoint({ name: "simulate", outcome: "error", target }),
+        null,
+      );
+    }
   });
 
   test("rejects anything that isn't one of our events", () => {
@@ -74,6 +111,11 @@ describe("toDataPoint", () => {
       { tutorial_step: Number.POSITIVE_INFINITY },
       { visit: 1 },
       { route: null },
+      { outcome: "maybe" },
+      { target: "x" },
+      { script_type: "tx-script" },
+      { example_id: "Counter Contract" },
+      { count: 1 },
     ]) {
       assert.equal(toDataPoint({ name: "page_view", ...fields }), null);
     }

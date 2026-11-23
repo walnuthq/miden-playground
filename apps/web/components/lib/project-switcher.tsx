@@ -40,6 +40,7 @@ import useExamples from "@/hooks/use-examples";
 import useNetwork from "@/hooks/use-network";
 import useSavedProjects from "@/hooks/use-saved-projects";
 import useTutorials from "@/hooks/use-tutorials";
+import { trackEvent } from "@/lib/analytics";
 import examples from "@/lib/examples";
 import { type NetworkId, networks } from "@/lib/types/network";
 import type { ProjectMeta } from "@/lib/types/project";
@@ -124,6 +125,7 @@ const ProjectSwitcher = () => {
   const newSandbox = async (newNetworkId: NetworkId) => {
     if (await confirmWorkspaceSwitch()) {
       resetState(newNetworkId);
+      trackEvent("new_sandbox", { network_id: newNetworkId });
       navigate("/accounts");
     }
   };

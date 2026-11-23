@@ -6,6 +6,10 @@
 // the environment or .env.local. `people` leaves out automated traffic (e2e, the
 // status page's probe, QA). Compare it with Simple Analytics' and Web Analytics'
 // dashboards over the same dates, in UTC.
+//
+// A second table breaks the product events (spec/product-analytics-events.md)
+// down by their fields, over the whole period. Rows written before those
+// fields existed have no blob7…10, which Analytics Engine returns as ''.
 import { existsSync } from "node:fs";
 
 if (existsSync(".env.local")) {
@@ -38,19 +42,23 @@ const query = `
   FORMAT JSON
 `;
 
-const response = await fetch(
-  `https://api.cloudflare.com/client/v4/accounts/${ANALYTICS_ACCOUNT_ID}/analytics_engine/sql`,
-  {
-    method: "POST",
-    headers: { authorization: `Bearer ${ANALYTICS_API_TOKEN}` },
-    body: query,
-  },
-);
-if (!response.ok) {
-  throw new Error(
-    `Analytics Engine: ${response.status} ${await response.text()}`,
+const runQuery = async <Row>(sql: string) => {
+  const response = await fetch(
+    `https://api.cloudflare.com/client/v4/accounts/${ANALYTICS_ACCOUNT_ID}/analytics_engine/sql`,
+    {
+      method: "POST",
+      headers: { authorization: `Bearer ${ANALYTICS_API_TOKEN}` },
+      body: sql,
+    },
   );
-}
+  if (!response.ok) {
+    throw new Error(
+      `Analytics Engine: ${response.status} ${await response.text()}`,
+    );
+  }
+  const { data } = (await response.json()) as { data: Row[] };
+  return data;
+};
 
 type Row = {
   day: string;
@@ -59,7 +67,7 @@ type Row = {
   total: string | number;
   visits: string | number;
 };
-const { data } = (await response.json()) as { data: Row[] };
+const data = await runQuery<Row>(query);
 
 type Line = {
   day: string;
@@ -90,3 +98,48 @@ for (const { day, event, automated, total, visits } of data) {
 }
 
 console.table([...lines.values()]);
+
+// The product events by their fields, automated traffic left out.
+const productEvents = [
+  "new_sandbox",
+  "launch_example",
+  "create_script",
+  "import_scripts",
+  "compile_script",
+  "simulate",
+  "deploy_account",
+];
+const productQuery = `
+  SELECT
+    blob1 AS event,
+    blob7 AS example_id,
+    blob8 AS script_type,
+    blob9 AS outcome,
+    blob10 AS target,
+    blob3 != '' AS in_tutorial,
+    SUM(_sample_interval) AS people
+  FROM miden_playground_events
+  WHERE timestamp > NOW() - INTERVAL '${days}' DAY
+    AND blob1 IN (${productEvents.map((name) => `'${name}'`).join(", ")})
+    AND blob6 != 'true'
+  GROUP BY event, example_id, script_type, outcome, target, in_tutorial
+  ORDER BY event, people DESC
+  FORMAT JSON
+`;
+
+type ProductRow = {
+  event: string;
+  example_id: string;
+  script_type: string;
+  outcome: string;
+  target: string;
+  in_tutorial: string | number | boolean;
+  people: string | number;
+};
+console.table(
+  (await runQuery<ProductRow>(productQuery)).map((row) => ({
+    ...row,
+    in_tutorial: [1, "1", true, "true"].includes(row.in_tutorial),
+    people: Number(row.people),
+  })),
+);

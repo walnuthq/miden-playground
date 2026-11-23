@@ -1,9 +1,11 @@
 import type { WebClient as WebClientType } from "@miden-sdk/miden-sdk";
 import { useMiden } from "@miden-sdk/react";
+import useGlobalContext from "@/components/global-context/hook";
 import useAccounts from "@/hooks/use-accounts";
 import useDependencyAccounts from "@/hooks/use-dependency-accounts";
 import useScripts from "@/hooks/use-scripts";
 import type { SimulationRun } from "@/hooks/use-simulation";
+import { trackEvent } from "@/lib/analytics";
 import { appendConsoleEntry } from "@/lib/console-log";
 import { simulatedAccountName } from "@/lib/simulation/foreign-accounts";
 import {
@@ -116,6 +118,7 @@ const errorMessage = (error: unknown) =>
 // the mock chain instead, for the script's foreign calls.
 const useTargetSimulation = (script: Script) => {
   const { client } = useMiden();
+  const { tutorialId } = useGlobalContext();
   const { accounts } = useAccounts();
   const { scripts } = useScripts();
   const dependencyAccounts = useDependencyAccounts(script);
@@ -171,9 +174,11 @@ const useTargetSimulation = (script: Script) => {
           script,
           scriptArgument: argument,
         });
-  // The run on the simulated account, in the mock client.
+  // The run on the simulated account, in the mock client. `onThrow` tells the
+  // run threw, for analytics.
   const runSimulated = async (
     inputs: TargetSimulationInputs,
+    onThrow: () => void,
   ): Promise<TargetSimulationRun> => {
     if (
       inputs.noteAssets.some(
@@ -269,6 +274,7 @@ const useTargetSimulation = (script: Script) => {
       };
     } catch (error) {
       // A crash or a timeout of the mock client, which was reset.
+      onThrow();
       return {
         result: { ok: false, error: errorMessage(error) },
         account,
@@ -308,10 +314,19 @@ const useTargetSimulation = (script: Script) => {
   const simulate = (inputs: TargetSimulationInputs) =>
     enqueueSimulation(async () => {
       const simulated = inputs.targetAccountId === SIMULATED_TARGET;
+      let thrown = false;
       const outcome = simulated
-        ? await runSimulated(inputs)
+        ? await runSimulated(inputs, () => {
+            thrown = true;
+          })
         : await runSandbox(inputs);
       const { result, account } = outcome;
+      trackEvent("simulate", {
+        script_type: script.type,
+        outcome: thrown ? "failed" : result.ok ? "ok" : "error",
+        target: simulated ? "simulated" : "sandbox",
+        tutorial_id: tutorialId,
+      });
       // A transaction script or a raw-felt note can only name a foreign
       // account by its id, known once it's staged.
       const staged =
