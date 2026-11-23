@@ -61,7 +61,10 @@ test("tutorial 4: private transfers", async ({ page, bread }) => {
       () => dialog.getByRole("button", { name: "Preview" }).click(),
       { timeout: TRANSACTION_TIMEOUT },
     );
-    expect(request).toMatch(/Amount\s*-1\b/);
+    // Bread lists each party: the connected account (" · you") and the
+    // recipient (1.18.1 dropped the single "Amount" row).
+    expect(request).toMatch(/· you\s*-1\b/);
+    expect(request).toMatch(/Recipient\s*\+1\b/);
     // Completes once the private note is committed.
     await nextStep(page);
   });

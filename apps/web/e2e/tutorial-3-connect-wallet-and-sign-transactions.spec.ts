@@ -57,7 +57,10 @@ test("tutorial 3: connect a wallet and sign transactions", async ({
       { timeout: TRANSACTION_TIMEOUT },
     );
     expect(request).toContain("Confirm Transaction");
-    expect(request).toMatch(/Amount\s*-0\.1\b/);
+    // Bread lists each party: the connected account (" · you") and the
+    // recipient (1.18.1 dropped the single "Amount" row).
+    expect(request).toMatch(/· you\s*-0\.1\b/);
+    expect(request).toMatch(/Recipient\s*\+0\.1\b/);
     await nextStep(page);
   });
 
