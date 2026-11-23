@@ -5,6 +5,7 @@ import {
   errorStatusAndMessage,
   forbidden,
   notFound,
+  unauthorized,
 } from "./errors.ts";
 import { isAlreadyVerified, UpstreamError } from "./upstream.ts";
 
@@ -12,6 +13,10 @@ test("client errors keep their status and message", () => {
   assert.deepEqual(errorStatusAndMessage(badRequest("Error: bad.")), {
     status: 400,
     message: "Error: bad.",
+  });
+  assert.deepEqual(errorStatusAndMessage(unauthorized("Error: who?")), {
+    status: 401,
+    message: "Error: who?",
   });
   assert.deepEqual(errorStatusAndMessage(forbidden("Error: not yours.")), {
     status: 403,

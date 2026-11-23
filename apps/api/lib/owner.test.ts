@@ -70,16 +70,16 @@ test("writeAccess: a package without an owner", async () => {
   );
   assert.equal(
     writeAccess({ ownerKeyHash: null, tokenHash: undefined }),
-    "allow",
+    "deny",
   );
 });
 
-test("isWritable is false only for another owner's package", async () => {
+test("isWritable is false for another owner's package and without a token", async () => {
   const ownerKeyHash = await hashOwnerToken(token);
   const otherHash = await hashOwnerToken(otherToken);
   assert.equal(isWritable({ ownerKeyHash, tokenHash: ownerKeyHash }), true);
   assert.equal(isWritable({ ownerKeyHash: null, tokenHash: otherHash }), true);
-  assert.equal(isWritable({ ownerKeyHash: null, tokenHash: undefined }), true);
+  assert.equal(isWritable({ ownerKeyHash: null, tokenHash: undefined }), false);
   assert.equal(isWritable({ ownerKeyHash, tokenHash: otherHash }), false);
   assert.equal(isWritable({ ownerKeyHash, tokenHash: undefined }), false);
 });

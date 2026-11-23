@@ -112,9 +112,9 @@ test("a shared script opens read-only, and a fork is the visitor's own", async (
       .toBe(403);
     const deleted = await visitor.request.delete(request.url(), { headers });
     expect(deleted.status()).toBe(403);
-    // Nor without a token.
+    // Nor without a token, which every write needs.
     const anonymous = await visitor.request.delete(request.url());
-    expect(anonymous.status()).toBe(403);
+    expect(anonymous.status()).toBe(401);
   });
 
   await test.step("the banner fits a 320 px phone", async () => {

@@ -13,8 +13,8 @@ export const importScriptsFromPackageSources = async (
   }: {
     signal?: AbortSignal;
     // The hash of the caller's owner token, which owns the new packages.
-    ownerKeyHash?: string;
-  } = {},
+    ownerKeyHash: string;
+  },
 ): Promise<CompiledPackage[]> => {
   const packages = resolvePackageSources(packageSources);
   const packageIds = new Map(
@@ -53,10 +53,7 @@ export const importScriptsFromPackageSources = async (
 // compiling the sources when they were edited since the snapshot was taken.
 export const importExample = async (
   exampleId: string,
-  {
-    signal,
-    ownerKeyHash,
-  }: { signal?: AbortSignal; ownerKeyHash?: string } = {},
+  { signal, ownerKeyHash }: { signal?: AbortSignal; ownerKeyHash: string },
 ): Promise<CompiledPackage[]> => {
   const example = Object.hasOwn(examples, exampleId)
     ? examples[exampleId]

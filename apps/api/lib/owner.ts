@@ -50,12 +50,12 @@ const sameHash = (a: string, b: string) => {
 
 // What a write to a package gets, given its stored owner and the caller's
 // token hash:
-// - `allow`: the caller owns it, or it has no owner and the caller sent no
-//   token (a web app loaded before tokens existed: allowed for one release).
-// - `claim`: it has no owner and the caller sent a token, which becomes its
-//   owner (packages created before owners existed).
-// - `deny`: it has another owner, or the caller sent no token for an owned
-//   package.
+// - `allow`: the caller owns it.
+// - `claim`: it has no owner (created before owners existed) and the caller
+//   sent a token, which becomes its owner.
+// - `deny`: it has another owner, or the caller sent no token. Every web app
+//   sends one: the routes answer a write without a token with a 401 before
+//   asking.
 export const writeAccess = ({
   ownerKeyHash,
   tokenHash,
@@ -63,12 +63,13 @@ export const writeAccess = ({
   ownerKeyHash: string | null;
   tokenHash: string | undefined;
 }): "allow" | "claim" | "deny" => {
-  if (ownerKeyHash === null) {
-    return tokenHash === undefined ? "allow" : "claim";
+  if (tokenHash === undefined) {
+    return "deny";
   }
-  return tokenHash !== undefined && sameHash(ownerKeyHash, tokenHash)
-    ? "allow"
-    : "deny";
+  if (ownerKeyHash === null) {
+    return "claim";
+  }
+  return sameHash(ownerKeyHash, tokenHash) ? "allow" : "deny";
 };
 
 // Whether the caller could write to the package: what `GET /scripts/:id`

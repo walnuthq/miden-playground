@@ -19,7 +19,7 @@ export const forkPackages = ({
   packages: Package[];
   builtIns: Record<string, Dependency>;
   newId: () => string;
-  ownerKeyHash?: string;
+  ownerKeyHash: string;
 }) => {
   const ids = new Map(packages.map(({ id }) => [id, newId()]));
   const byId = new Map(packages.map((dbPackage) => [dbPackage.id, dbPackage]));
