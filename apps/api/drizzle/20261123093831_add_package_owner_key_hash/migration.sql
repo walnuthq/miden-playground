@@ -1,0 +1,1 @@
+ALTER TABLE "packages" ADD COLUMN "owner_key_hash" varchar(64);

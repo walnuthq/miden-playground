@@ -15,7 +15,7 @@ starting, honor its STOP conditions, and update your row when done.
 | 004  | The web app's script calls treat every non-OK response as an error              | P2       | S      | —                     | DONE (PR #795, merged 09546b2, deployed 2026-11-10)                                    |
 | 003  | The API validates its input and answers client errors with 4xx                  | P2       | M      | 001, deploy 004 first | DONE (PR #796, merged 57e044c, deployed 2026-11-10)                                    |
 | 005  | Deploys run lint, typecheck and unit tests first                                | P2       | S      | 001                   | DONE (PR #794, merged d4be8c2; branch protection on main enabled 2026-11-10)           |
-| 006  | Only a script's owner can change or delete it                                   | P2       | L      | owner-token feature   | DEFERRED                                                                               |
+| 006  | Only a script's owner can change or delete it                                   | P2       | L      | owner-token feature   | SUPERSEDED (`spec/share-and-fork-scripts.md`)                                          |
 | 007  | The web app's reducers and store helpers have unit tests                        | P1       | M      | —                     | DONE (PR #798, merged 72e1211)                                                         |
 | 008  | Reducers leave the lists alone when the item to update is gone                  | P1       | S      | 007                   | DONE (PR #799, merged 512b9d9, deployed 2026-11-10)                                    |
 | 009  | A compile result never overwrites edits made while it ran                       | P1       | S      | 008                   | DONE (PR #800, merged b954f63, local e2e 58✓/9 skip)                                   |
@@ -102,8 +102,9 @@ First audit:
   `lib/utils.ts` and `db/packages.ts`. Run them one after the other (002
   first), not in parallel.
 - 005 requires 001 for the API's `test` script.
-- 006 is deferred: it will be handled when the owner token is introduced
-  (scripts tied to the wallet address). Do not execute it.
+- 006 is superseded by `spec/share-and-fork-scripts.md`, which designs the
+  owner token it waited for (a secret kept by the browser; the wallet link
+  comes later). Do not execute it.
 
 Second audit:
 

@@ -11,7 +11,7 @@ Before working in one of these areas, read its file in `docs/claude/`. Their rul
 - Read-only procedures, the Invoke button: `read-only-procedures.md`.
 - `apps/api/templates/*.rs`, `pnpm templates:check`/`sync`, the package embedded in `apps/web/lib/tutorials/basic-wallet.json`, note scripts and the wallets that can consume them: `script-templates.md`.
 - `templates/project-template/Cargo.lock`, `pnpm lockfile:check`/`sync`, api-compile image bumps: `project-template-lockfile.md`.
-- Script page (`/scripts/:id`): editor, console, diagnostics, tabs, shortcuts, its e2e specs: `script-editor.md`.
+- Script page (`/scripts/:id`): editor, console, diagnostics, tabs, shortcuts, its e2e specs, script owners (the owner token), shared links and forks: `script-editor.md`.
 - The console's Simulate tab, `lib/simulation`, the mock client, `components/procedures`, storage slot values: `simulation.md`.
 - Tutorial steps (`apps/web/components/tutorials`), adding a tutorial: `tutorial-copy.md`.
 - Layout, responsive classes, dialogs, the app shell and its SDK-free entry, anything that renders on a phone: `phone-layout.md`.

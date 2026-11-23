@@ -49,6 +49,7 @@ export const createPackage = async ({
   source,
   dependencies = [],
   compiled,
+  ownerKeyHash,
 }: {
   name: string;
   type: PackageType;
@@ -63,6 +64,9 @@ export const createPackage = async ({
     exports: Export[];
     metadata: PackageMetadata | null;
   };
+  // The hash of the creator's owner token (lib/owner.ts): none from a caller
+  // that sent no token.
+  ownerKeyHash?: string;
 }) => {
   const files = {
     [`${name}/.cargo/config.toml`]: projectTemplateFiles[".cargo/config.toml"],
@@ -84,6 +88,7 @@ export const createPackage = async ({
     type,
     dependencies: dependencies.map(({ id }) => id),
     files,
+    ownerKeyHash,
     ...(compiled && { status: "compiled" as const, ...compiled }),
   });
   return { id, files: scriptFiles(name, files) };

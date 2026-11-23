@@ -1,0 +1,47 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "8a535195-6ab9-43f6-8751-7500e5ddaffd",
+  "prevIds": [
+    "46baa1ac-24b7-4f0a-930d-0b801a57da17"
+  ],
+  "footprints": [
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "packages",
+        "owner_key_hash"
+      ],
+      "writes": [
+        "s|col|public.packages.owner_key_hash",
+        "n|col|public.packages.owner_key_hash",
+        "e|col|public.packages.owner_key_hash"
+      ],
+      "reads": [
+        "n|tbl|public.packages",
+        "n|sch|public"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "packages",
+        "name": "owner_key_hash",
+        "type": "varchar(64)",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    }
+  ]
+}

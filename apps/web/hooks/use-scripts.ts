@@ -9,6 +9,7 @@ import type { AnalyticsOutcome } from "@/lib/analytics-events";
 import {
   compileScript as apiCompileScript,
   deleteScript as apiDeleteScript,
+  forkScript as apiForkScript,
   importScriptsFromPackageSources as apiImportScriptsFromPackageSources,
   createScript,
 } from "@/lib/api";
@@ -112,7 +113,14 @@ const useScripts = () => {
       payload: { script },
     });
   const deleteScript = async (scriptId: string) => {
-    const { script, error } = await apiDeleteScript(scriptId);
+    const { script, error, notOwner } = await apiDeleteScript(scriptId);
+    // Another owner's script (kept from before this browser's owner token
+    // was lost, or claimed by someone else) stays on the API: it only leaves
+    // this workspace.
+    if (notOwner) {
+      dispatch({ type: "DELETE_SCRIPT", payload: { scriptId } });
+      return { script: { id: scriptId } };
+    }
     if (script) {
       dispatch({
         type: "DELETE_SCRIPT",
@@ -120,6 +128,22 @@ const useScripts = () => {
       });
     }
     return { script, error };
+  };
+  // Copies a script that can't be changed from here, and its dependencies,
+  // into scripts of this workspace (the shared script banner's Fork).
+  const forkScript = async (scriptId: string) => {
+    const { id, scripts, error } = await apiForkScript(scriptId);
+    if (scripts) {
+      dispatch({
+        type: "IMPORT_SCRIPTS",
+        payload: {
+          scripts: scripts.map((compiledScript) =>
+            compiledPackageToScript(compiledScript),
+          ),
+        },
+      });
+    }
+    return { id, error };
   };
   // Executes a call to the procedure as a transaction of the sender, for a
   // preview: nothing is submitted (and `SUBMITTING_TRANSACTION`, which
@@ -256,6 +280,7 @@ const useScripts = () => {
     compileScript,
     updateScript,
     deleteScript,
+    forkScript,
     previewProcedure,
     openInvokeProcedureArgumentsDialog,
     closeInvokeProcedureArgumentsDialog,

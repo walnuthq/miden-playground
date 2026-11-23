@@ -1,6 +1,6 @@
 # End-to-end tests
 
-Playwright tests for the tutorials, the examples, the script editor (`script-*.spec.ts`: header, Explorer, diagnostics, console layout, shortcuts, MASM highlighting, editor settings) and the phone layout (`mobile/`). They run against a live Playground on testnet, so transactions are proven and submitted for real: expect minutes per test. Spec files run in parallel on 4 workers, about 8 minutes for the suite, or 28 with `--workers=1`. Testnet's prover and RPC time out now and then, so a failing test gets one retry, and one that passes on it is reported as flaky. See `playwright.config.ts` for why 4, and what specs can share.
+Playwright tests for the tutorials, the examples, the script editor (`script-*.spec.ts`: header, Explorer, diagnostics, console layout, shortcuts, MASM highlighting, editor settings), sharing (`share-and-fork.spec.ts`: a second browser context opens a script's link read-only, is refused by the API, then forks it) and the phone layout (`mobile/`). They run against a live Playground on testnet, so transactions are proven and submitted for real: expect minutes per test. Spec files run in parallel on 4 workers, about 8 minutes for the suite, or 28 with `--workers=1`. Testnet's prover and RPC time out now and then, so a failing test gets one retry, and one that passes on it is reported as flaky. See `playwright.config.ts` for why 4, and what specs can share.
 
 ## Prerequisites
 

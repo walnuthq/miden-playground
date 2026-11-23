@@ -1,4 +1,8 @@
-# Plan 006: Only a script's owner can change or delete it (DEFERRED)
+# Plan 006: Only a script's owner can change or delete it (SUPERSEDED)
+
+> **Superseded on 2026-11-23** by `spec/share-and-fork-scripts.md`, which
+> designs and records the owner token this plan waited for. Kept for its
+> finding.
 
 > **Executor instructions**: Do NOT execute this plan. It records a finding
 > and a decision. The maintainer decided on 2026-11-10 that this will be

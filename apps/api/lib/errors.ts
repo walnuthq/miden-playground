@@ -3,14 +3,15 @@ import { UpstreamError, upstreamErrorResponse } from "./upstream.ts";
 
 // A request the client got wrong: answered with its status and message.
 export class HttpError extends Error {
-  readonly status: 400 | 404;
-  constructor(status: 400 | 404, message: string) {
+  readonly status: 400 | 403 | 404;
+  constructor(status: 400 | 403 | 404, message: string) {
     super(message);
     this.status = status;
   }
 }
 
 export const badRequest = (message: string) => new HttpError(400, message);
+export const forbidden = (message: string) => new HttpError(403, message);
 export const notFound = (message: string) => new HttpError(404, message);
 
 // What api-compile and api-registry refuse for a reason the caller can act
@@ -44,5 +45,5 @@ export const errorResponse = (c: Context, error: unknown) => {
     return upstream;
   }
   const { status, message } = errorStatusAndMessage(error);
-  return c.text(message, status as 400 | 404 | 409 | 500);
+  return c.text(message, status as 400 | 403 | 404 | 409 | 500);
 };
