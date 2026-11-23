@@ -9,13 +9,29 @@ import { isValidUUIDv4 } from "./uuid.ts";
 // A dependency that was deleted is dropped from its dependents.
 export const forkPackages = ({
   rootId,
+  ...rest
+}: {
+  rootId: string;
+  // The package and its dependencies, deep, in any order.
+  packages: Package[];
+  builtIns: Record<string, Dependency>;
+  newId: () => string;
+  ownerKeyHash: string;
+}) => {
+  const { ids, copies } = forkPackageForest(rest);
+  return { id: ids.get(rootId) ?? "", copies };
+};
+
+// The same for several packages at once: a dependency they share is copied
+// once, so their copies point at the same copy of it. `ids` maps each package
+// to its copy.
+export const forkPackageForest = ({
   packages,
   builtIns,
   newId,
   ownerKeyHash,
 }: {
-  rootId: string;
-  // The package and its dependencies, deep, in any order.
+  // The packages and their dependencies, deep, in any order.
   packages: Package[];
   builtIns: Record<string, Dependency>;
   newId: () => string;
@@ -74,5 +90,5 @@ export const forkPackages = ({
       };
     },
   );
-  return { id: ids.get(rootId) ?? "", copies };
+  return { ids, copies };
 };

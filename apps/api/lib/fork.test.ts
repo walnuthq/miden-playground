@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { forkPackages } from "./fork.ts";
+import { forkPackageForest, forkPackages } from "./fork.ts";
 import { defaultPackage, type Package } from "./types.ts";
 
 const ROOT = "11111111-1111-4111-8111-111111111111";
@@ -122,4 +122,60 @@ test("forkPackages drops a dependency that is gone", () => {
   });
   assert.deepEqual(copies[0]?.row.dependencies, []);
   assert.deepEqual(copies[0]?.dependencies, []);
+});
+
+const SECOND_ROOT = "55555555-5555-4555-8555-555555555555";
+
+test("forkPackageForest copies a dependency two roots share once", () => {
+  const { ids, copies } = forkPackageForest({
+    packages: [
+      dbPackage({
+        id: ROOT,
+        name: "deposit",
+        type: "note",
+        dependencies: [DEPENDENCY],
+      }),
+      dbPackage({
+        id: SECOND_ROOT,
+        name: "withdraw",
+        type: "note",
+        dependencies: [DEPENDENCY, "basic-wallet"],
+      }),
+      dbPackage({ id: DEPENDENCY, name: "bank-account", commitment: "0xb" }),
+    ],
+    builtIns,
+    newId: sequentialIds(),
+    ownerKeyHash: "hash",
+  });
+  assert.equal(copies.length, 3);
+  assert.deepEqual(Object.fromEntries(ids), {
+    [ROOT]: "new-1",
+    [SECOND_ROOT]: "new-2",
+    [DEPENDENCY]: "new-3",
+  });
+  const [deposit, withdraw] = copies;
+  // Both notes point at the same copy of the account.
+  assert.deepEqual(deposit?.row.dependencies, ["new-3"]);
+  assert.deepEqual(withdraw?.row.dependencies, ["new-3", "basic-wallet"]);
+  assert.ok(copies.every(({ row }) => row.ownerKeyHash === "hash"));
+});
+
+test("forkPackageForest copies a root that another root depends on once", () => {
+  const { ids, copies } = forkPackageForest({
+    packages: [
+      dbPackage({
+        id: ROOT,
+        name: "note",
+        type: "note",
+        dependencies: [DEPENDENCY],
+      }),
+      dbPackage({ id: DEPENDENCY, name: "counter" }),
+    ],
+    builtIns,
+    newId: sequentialIds(),
+    ownerKeyHash: "hash",
+  });
+  assert.equal(copies.length, 2);
+  assert.equal(ids.get(DEPENDENCY), "new-2");
+  assert.deepEqual(copies[0]?.row.dependencies, ["new-2"]);
 });

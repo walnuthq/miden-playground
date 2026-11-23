@@ -328,6 +328,25 @@ export const forkScript = async (scriptId: string) => {
   return { id, scripts: packages };
 };
 
+// Copies of several scripts and of their dependencies, a dependency they share
+// copied once (opening a project link). `roots` gives each script's copy, null
+// for one that's gone.
+export const forkScripts = async (ids: string[]) => {
+  const response = await fetch(`${API_URL}/scripts/fork`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...ownerHeaders() },
+    body: JSON.stringify({ ids }),
+  });
+  if (!response.ok) {
+    return { error: await response.text() };
+  }
+  const { roots, packages } = (await response.json()) as {
+    roots: { id: string; forkedId: string | null }[];
+    packages: CompiledPackage[];
+  };
+  return { roots, scripts: packages };
+};
+
 export const exportScript = (id: string) => `${API_URL}/scripts/${id}/export`;
 
 export const importScriptsFromPackageSources = async (
