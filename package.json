@@ -12,7 +12,8 @@
     "lint": "biome check .",
     "typecheck": "turbo typecheck",
     "format": "biome check --write .",
-    "bread-wallet": "node .bread-wallet/update.mjs"
+    "bread-wallet": "node .bread-wallet/update.mjs",
+    "share-project": "node scripts/share-project.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.8",
