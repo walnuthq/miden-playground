@@ -46,12 +46,17 @@ export const getPackages = async (ids: string[]) => {
 // first. Undefined when it doesn't exist. Stops reading once there are more
 // than `max`, which the caller refuses.
 export const getPackageTree = async (id: string, max: number) => {
-  const [root] = await getPackages([id]);
-  if (!root) {
-    return undefined;
-  }
-  const found = new Map([[root.id, root]]);
-  let pending = root.dependencies;
+  const { packages, missing } = await getPackageForest([id], max);
+  return missing.length > 0 ? undefined : packages;
+};
+
+// The same from several packages, roots first: a dependency they share is
+// read once. `missing` lists the roots that don't exist.
+export const getPackageForest = async (ids: string[], max: number) => {
+  const roots = await getPackages([...new Set(ids)]);
+  const found = new Map(roots.map((dbPackage) => [dbPackage.id, dbPackage]));
+  const missing = ids.filter((id) => !found.has(id));
+  let pending = roots.flatMap(({ dependencies }) => dependencies);
   while (pending.length > 0 && found.size <= max) {
     const batch = await getPackages([
       ...new Set(
@@ -66,7 +71,7 @@ export const getPackageTree = async (id: string, max: number) => {
       pending.push(...dbPackage.dependencies);
     }
   }
-  return [...found.values()];
+  return { packages: [...found.values()], missing };
 };
 
 export const insertPackages = (newPackages: NewPackage[]) =>

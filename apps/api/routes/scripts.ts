@@ -7,6 +7,7 @@ import {
   getDependencies,
   getDependenciesDeep,
   getPackage,
+  getPackageForest,
   getPackageTree,
   insertPackages,
 } from "@/db/packages";
@@ -23,7 +24,7 @@ import {
   notFound,
   unauthorized,
 } from "@/lib/errors";
-import { forkPackages } from "@/lib/fork";
+import { forkPackageForest, forkPackages } from "@/lib/fork";
 import { importExample, importScriptsFromPackageSources } from "@/lib/import";
 import {
   hashOwnerToken,
@@ -117,6 +118,39 @@ type ForkScriptResponse = {
   package: { id: string };
   packages: CompiledPackage[];
 };
+
+// The copies a fork of several scripts made: each root's copy, or null for a
+// root that doesn't exist, and every copy, the dependencies' included.
+type ForkScriptsRequestBody = { ids: string[] };
+
+type ForkScriptsResponse = {
+  roots: { id: string; forkedId: string | null }[];
+  packages: CompiledPackage[];
+};
+
+// A copy as the web app takes a compiled script.
+const forkedPackage = ({
+  row,
+  dependencies,
+}: ReturnType<
+  typeof forkPackageForest
+>["copies"][number]): CompiledPackage => ({
+  id: row.id,
+  name: row.name,
+  type: row.type,
+  status: row.status,
+  files: scriptFiles(row.name, row.files),
+  // rustc's output isn't stored: a fork of a script that doesn't build shows
+  // it after its next compile.
+  error: "",
+  warnings: "",
+  masm: row.masm,
+  commitment: row.commitment,
+  masp: row.masp,
+  exports: row.exports,
+  metadata: row.metadata,
+  dependencies,
+});
 
 // The hash of the caller's owner token (lib/owner.ts): undefined for a
 // request without one.
@@ -237,6 +271,54 @@ const scripts = createApp()
         ownerKeyHash: await requireKeyHash(c),
       });
       return c.json<ImportScriptsResponse>({ packages });
+    } catch (error) {
+      return errorResponse(c, error);
+    }
+  })
+  // Copies of several scripts and of their dependencies, owned by the caller:
+  // what opening a project link does. A dependency they share is copied once.
+  // A script that doesn't exist is reported, not fatal, unless none does.
+  .post("/fork", rateLimit, async (c) => {
+    try {
+      const { ids } = await c.req.json<ForkScriptsRequestBody>().catch(() => {
+        throw invalidBody();
+      });
+      if (
+        !isStringArray(ids) ||
+        !isBoundedArray(ids) ||
+        ids.length === 0 ||
+        !ids.every(isValidUUIDv4)
+      ) {
+        throw invalidBody();
+      }
+      const rootIds = [...new Set(ids)];
+      const ownerKeyHash = await requireKeyHash(c);
+      const { packages, missing } = await getPackageForest(
+        rootIds,
+        MAX_PACKAGES,
+      );
+      if (missing.length === rootIds.length) {
+        throw notFound("Error: Package not found.");
+      }
+      if (packages.length > MAX_PACKAGES) {
+        throw badRequest(
+          `Error: These scripts and their dependencies are too many to fork (more than ${MAX_PACKAGES}).`,
+        );
+      }
+      const { ids: forkedIds, copies } = forkPackageForest({
+        packages,
+        builtIns: defaultDependenciesRecords,
+        newId: () => crypto.randomUUID(),
+        ownerKeyHash,
+      });
+      await insertPackages(copies.map(({ row }) => row));
+      return c.json<ForkScriptsResponse>({
+        roots: rootIds.map((id) => ({
+          id,
+          forkedId: forkedIds.get(id) ?? null,
+        })),
+        packages: copies.map(forkedPackage),
+      });
     } catch (error) {
       return errorResponse(c, error);
     }
@@ -376,23 +458,7 @@ const scripts = createApp()
       await insertPackages(copies.map(({ row }) => row));
       return c.json<ForkScriptResponse>({
         package: { id },
-        packages: copies.map(({ row, dependencies }) => ({
-          id: row.id,
-          name: row.name,
-          type: row.type,
-          status: row.status,
-          files: scriptFiles(row.name, row.files),
-          // rustc's output isn't stored: a fork of a script that doesn't
-          // build shows it after its next compile.
-          error: "",
-          warnings: "",
-          masm: row.masm,
-          commitment: row.commitment,
-          masp: row.masp,
-          exports: row.exports,
-          metadata: row.metadata,
-          dependencies,
-        })),
+        packages: copies.map(forkedPackage),
       });
     } catch (error) {
       return errorResponse(c, error);
