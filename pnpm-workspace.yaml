@@ -40,13 +40,3 @@ overrides:
   # on minimatch 11. Remove both once the SDK and shadcn's ts-morph move on.
   "minimatch": "^11.0.4"
   "glob": "^14.0.3"
-# Routine bumps released within the minimum release age (2026-11-24). Remove
-# these once they have aged out.
-minimumReleaseAgeExclude:
-  - "@tanstack/query-core@5.108.4"
-  - "@tanstack/react-query@5.108.4"
-  - lucide-react@1.79.0
-  - "@cloudflare/workers-types@5.20261124.1"
-  - hono@4.13.22
-  - miniflare@5.20261123.1-beta
-  - wrangler@4.168.0
