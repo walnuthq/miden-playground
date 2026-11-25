@@ -139,7 +139,7 @@ export const AppSidebarView = ({
   // `key` changes on every navigation, a link to the current path included.
   const { key: locationKey } = useLocation();
   const { setOpenMobile } = useSidebar();
-  // biome-ignore lint/correctness/useExhaustiveDependencies: runs on navigation.
+  // Runs on navigation.
   useEffect(() => {
     setOpenMobile(false);
   }, [locationKey, setOpenMobile]);

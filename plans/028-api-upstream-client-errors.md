@@ -102,21 +102,20 @@ or script is already verified.
   the same shape (`:103-118`, `:130-144`, `:189-203`, `:209-222`):
 
   ```ts
-  const { verified } =
-    await fetchApiRegistry<VerifyAccountComponentResponse>(
-      `/v1/${network}/verified-accounts`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          accountId,
-          files: packageSourceFiles(name, packageSource),
-          entrypoint: name,
-          source: "miden-playground",
-        }),
-        signal: c.req.raw.signal,
-      },
-    );
+  const { verified } = await fetchApiRegistry<VerifyAccountComponentResponse>(
+    `/v1/${network}/verified-accounts`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        accountId,
+        files: packageSourceFiles(name, packageSource),
+        entrypoint: name,
+        source: "miden-playground",
+      }),
+      signal: c.req.raw.signal,
+    },
+  );
   return c.json<VerifyAccountComponentResponse>({ verified });
   ```
 

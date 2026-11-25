@@ -3,6 +3,7 @@ import { Button } from "@workspace/ui/components/button";
 const GithubButton = ({ className }: { className?: string }) => (
   <a
     className={className}
+    aria-label="GitHub"
     href="https://github.com/walnuthq/miden-playground"
     target="_blank"
     rel="noreferrer"

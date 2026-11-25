@@ -81,6 +81,7 @@ dependencies_ (`basic-wallet`, `counter-account`) defined in
   compile service's `files` answer is stored (`utils.ts:205`,
   `files: storedFiles`, and `utils.ts:226`); that answer is every file that
   was sent plus the updated lockfile, so it contains the dependencies too.
+
 - `apps/api/routes/scripts.ts:205-254` — `GET /:id/export`:
 
   ```ts
@@ -93,9 +94,7 @@ dependencies_ (`basic-wallet`, `counter-account`) defined in
     dbPackage.dependencies.length > 0
       ? dependenciesPackages.reduce<Record<string, string>>(
           (previousValue, currentValue) => {
-            for (const [path, content] of Object.entries(
-              currentValue.files,
-            )) {
+            for (const [path, content] of Object.entries(currentValue.files)) {
               previousValue[path] = content;
             }
             return previousValue;
@@ -299,6 +298,7 @@ In `apps/api/lib/utils.ts`:
    `dependenciesPackages` (direct only) keeps feeding
    `generateMidenProjectToml` and the returned `dependencies` arrays, exactly
    as today.
+
 3. Replace `const updatedFiles = dbPackage.files;` with
    `const updatedFiles = ownFiles(name, dbPackage.files);`.
 4. Replace the whole `const files = dependenciesPackages.reduce(…)` statement
@@ -334,6 +334,7 @@ The failed-build branch needs no edit: `updatedFiles` is no longer mutated.
 
   Import `getDependenciesDeep` (replacing `getDependencies` in that import if
   it becomes unused) and `exportFiles` from `@/lib/package-files`.
+
 - `apps/api/routes/verified.ts`, `packageFilesWithDependencies`: return
   `buildFiles(ownFiles(dbPackage.name, dbPackage.files), dependencies)` where
   `dependencies` comes from `getDependenciesDeep(dbPackage.dependencies)`

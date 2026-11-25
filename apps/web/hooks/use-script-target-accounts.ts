@@ -36,7 +36,7 @@ const useScriptTargetAccounts = (script: Script): ScriptTargetAccounts => {
   const [checks, setChecks] = useState(0);
   // The cache keys whose account couldn't be read with this client.
   const [unknown, setUnknown] = useState(() => new Set<string>());
-  // biome-ignore lint/correctness/useExhaustiveDependencies: a new client can read what the last one couldn't.
+  // On `client`: a new client can read what the last one couldn't.
   useEffect(() => setUnknown(new Set()), [client]);
   const cacheKey = (code: string, id: string) => `${code || id}:${rootsKey}`;
   const pending = roots
@@ -46,7 +46,6 @@ const useScriptTargetAccounts = (script: Script): ScriptTargetAccounts => {
       })
     : [];
   const pendingKey = pending.map(({ id, code }) => `${id}:${code}`).join();
-  // biome-ignore lint/correctness/useExhaustiveDependencies: `pendingKey` stands for `pending`.
   useEffect(() => {
     if (!roots || pending.length === 0) {
       return;
@@ -84,8 +83,8 @@ const useScriptTargetAccounts = (script: Script): ScriptTargetAccounts => {
     return () => {
       cancelled = true;
     };
+    // oxlint-disable-next-line react-hooks/exhaustive-deps -- `pendingKey` stands for `pending`.
   }, [client, rootsKey, pendingKey]);
-  // biome-ignore lint/correctness/useExhaustiveDependencies: `checks` and `unknown` say when the cache changed.
   return useMemo(() => {
     if (!roots) {
       return {
@@ -101,6 +100,7 @@ const useScriptTargetAccounts = (script: Script): ScriptTargetAccounts => {
       status: pending.length > 0 ? "checking" : "filtered",
       accountIds: new Set(kept.map(({ id }) => id)),
     };
+    // oxlint-disable-next-line react-hooks/exhaustive-deps -- `checks` and `unknown` say when the cache changed.
   }, [accounts, rootsKey, pendingKey, checks, unknown]);
 };
 

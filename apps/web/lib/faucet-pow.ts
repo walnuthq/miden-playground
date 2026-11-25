@@ -1,4 +1,4 @@
-// biome-ignore-all lint/style/noNonNullAssertion: SHA-256 over fixed-size typed arrays, every index is in bounds by construction.
+/* oxlint-disable typescript/no-non-null-assertion -- SHA-256 over fixed-size typed arrays, every index is in bounds by construction. */
 
 // Solves the faucet API's proof of work: find a nonce such that the first 8 bytes
 // (big-endian) of SHA-256(challenge || nonce as big-endian u64) are below `target`.

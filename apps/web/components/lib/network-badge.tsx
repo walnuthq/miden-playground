@@ -74,7 +74,6 @@ const NetworkBadge = () => {
     }
   }, [syncingState, popState]);
   // `workspaceRun` is what this runs on: its cleanup leaves the workspace.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: see above
   useEffect(
     () => () => {
       toast.dismiss(EXAMPLE_DEPLOY_FAILED_TOAST);

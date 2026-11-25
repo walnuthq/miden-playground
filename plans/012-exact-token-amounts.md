@@ -64,9 +64,7 @@ decimals that is anything above about 9,007 tokens.
     normalizeAccountId(targetAccountId),
     faucetAccount.address,
     formData.getAll("is-public").includes("on") ? "public" : "private",
-    Number(
-      parseAmount(formData.get("amount")?.toString() ?? "0", decimals),
-    ),
+    Number(parseAmount(formData.get("amount")?.toString() ?? "0", decimals)),
   );
   ```
 

@@ -9,7 +9,6 @@ import {
   ShieldQuestion,
   TriangleAlert,
 } from "lucide-react";
-
 import { formatTimestamp } from "@/lib/format";
 import type { ServiceStatus } from "@/lib/types";
 

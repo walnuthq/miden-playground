@@ -58,6 +58,7 @@ detail stays in the logs.
   Some handlers omit `upstreamErrorResponse(error) ??`. The export handler
   answers `c.text("Error exporting script", 500)`. The examples handler
   answers 404 for `ExampleNotFoundError`.
+
 - `apps/api/lib/upstream.ts` — `UpstreamError` (has `status`) and
   `upstreamErrorResponse(error)`, which returns a `Response` for upstream
   statuses 502-504 and `undefined` otherwise. An `UpstreamError` with another

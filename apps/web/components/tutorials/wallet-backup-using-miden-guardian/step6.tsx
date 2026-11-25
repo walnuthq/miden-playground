@@ -78,7 +78,7 @@ const Step6: TutorialStep = {
     const { client } = useMiden();
     const { networkId } = useNetwork();
     const [address, setAddress] = useState("");
-    // biome-ignore lint/correctness/useExhaustiveDependencies: refetch the address when the network changes.
+    // Refetch the address when the network changes.
     useEffect(() => {
       if (!client) {
         return;

@@ -28,7 +28,7 @@ export type Diagnostic = {
   endColumn?: number;
 };
 
-// biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI escapes.
+// oxlint-disable-next-line no-control-regex -- ANSI escapes.
 export const ANSI_ESCAPE = /\u001b\[[0-9;]*m/g;
 const HEADER = /^(error|warning)(?:\[(E\d+)\])?: (.+)$/;
 const LOCATION = /^\s*--> (.+):(\d+):(\d+)$/;

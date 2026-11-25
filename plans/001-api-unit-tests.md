@@ -85,6 +85,7 @@ functions, without changing any behaviour.
   `resolvePackageSources` ends at line 111 (`};`), just before
   `export const importScriptsFromPackageSources`. It is called twice in the
   same file (in `importScriptsFromPackageSources` and `importExample`).
+
 - Test style to copy: `apps/web/lib/utils/script-files.test.ts`:
 
   ```ts

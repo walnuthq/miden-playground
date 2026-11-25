@@ -65,6 +65,7 @@ const InstallBreadWalletDialog = ({
       {url && (
         <Button
           nativeButton={false}
+          // oxlint-disable-next-line jsx-a11y/control-has-associated-label -- the button's children render inside this link.
           render={<a href={url} target="_blank" rel="noopener noreferrer" />}
         >
           Install from the Chrome Web Store

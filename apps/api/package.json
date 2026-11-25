@@ -1,14 +1,14 @@
 {
   "name": "miden-playground-api",
   "version": "0.0.1",
-  "type": "module",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "wrangler dev --port 3001",
     "build": "wrangler deploy --dry-run --outdir dist --env production",
     "deploy": "wrangler deploy --env production",
-    "lint": "biome check .",
-    "format": "biome check --write .",
+    "lint": "oxlint && oxfmt --check",
+    "format": "oxlint --fix && oxfmt",
     "typecheck": "tsc --noEmit",
     "test": "node --test 'lib/**/*.test.ts'",
     "cf-typegen": "wrangler types --env-file .env.example --strict-vars=false cloudflare-env.d.ts",

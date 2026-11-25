@@ -1,16 +1,16 @@
 {
   "name": "status-page",
   "version": "0.0.1",
-  "type": "module",
   "private": true,
+  "type": "module",
   "scripts": {
     "probe": "node scripts/probe.ts",
     "notify": "node scripts/notify.ts",
     "build": "pnpm probe && pnpm typecheck && vite build",
     "dev": "pnpm probe && vite",
     "preview": "vite preview",
-    "lint": "biome check .",
-    "format": "biome check --write .",
+    "lint": "oxlint && oxfmt --check",
+    "format": "oxlint --fix && oxfmt",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.node.json --noEmit"
   },
   "dependencies": {

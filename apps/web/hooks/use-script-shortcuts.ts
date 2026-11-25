@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useEffectEvent } from "react";
 
 // Cmd on macOS (and iOS), Ctrl elsewhere. `navigator.platform` is the real OS
 // (`userAgentData` follows an emulated user agent, e.g. Playwright's devices).
@@ -31,9 +31,10 @@ const useScriptShortcuts = ({
   consoleEnabled,
   ...handlers
 }: Handlers & { compileEnabled: boolean; consoleEnabled: boolean }) => {
-  // The latest handlers, so the listener is attached once.
-  const handlersRef = useRef(handlers);
-  handlersRef.current = handlers;
+  // Calls the latest handlers, so the listener is attached once.
+  const runAction = useEffectEvent((action: keyof Handlers) =>
+    handlers[action](),
+  );
   useEffect(() => {
     if (!compileEnabled && !consoleEnabled) {
       return;
@@ -73,7 +74,7 @@ const useScriptShortcuts = ({
       if (inDialog || event.repeat) {
         return;
       }
-      handlersRef.current[action]();
+      runAction(action);
     };
     window.addEventListener("keydown", onKeyDown, { capture: true });
     return () =>

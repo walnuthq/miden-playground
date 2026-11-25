@@ -151,7 +151,6 @@ export const useImportProjectLinkAccounts = () => {
     dispatch,
   ]);
   // `workspaceRun` is what this runs on: its cleanup leaves the workspace.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: see above
   useEffect(
     () => () => {
       toast.dismiss(PROJECT_LINK_IMPORT_FAILED_TOAST);

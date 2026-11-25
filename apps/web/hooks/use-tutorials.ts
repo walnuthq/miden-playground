@@ -128,7 +128,7 @@ const useTutorials = () => {
       completedTutorial || tutorial.id === tutorialId
         ? tutorialProgress
         : await leaveTutorial();
-    const newCompletedTutorials = new Set([...completedTutorials]);
+    const newCompletedTutorials = new Set(completedTutorials);
     if (completedTutorial) {
       newCompletedTutorials.add(completedTutorial.id);
       await deleteProject("tutorial", completedTutorial.id).catch((error) =>

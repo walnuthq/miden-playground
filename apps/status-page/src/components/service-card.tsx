@@ -8,7 +8,6 @@ import {
   CardTitle,
 } from "@workspace/ui/components/card";
 import type { ReactNode } from "react";
-
 import { formatTimestamp } from "@/lib/format";
 import type {
   CheckHealth,

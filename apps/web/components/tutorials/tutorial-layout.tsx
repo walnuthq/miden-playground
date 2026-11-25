@@ -39,7 +39,7 @@ const MobileTutorialPanel = ({ tutorial }: { tutorial: Tutorial }) => {
     }
   }, [tutorialOpen]);
   // A new step starts at its top.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: runs on step changes.
+  // Runs on step changes.
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = 0;

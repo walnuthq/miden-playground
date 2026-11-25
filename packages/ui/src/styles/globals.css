@@ -167,7 +167,7 @@
   width: initial;
 }
 
-/* biome-ignore-start lint/complexity/noImportantStyles: overrides the wallet adapter's own button styles. */
+/* `!important` overrides the wallet adapter's own button styles. */
 .wallet-adapter-button-trigger {
   border-color: var(--color-border) !important;
   @apply text-foreground!;
@@ -202,4 +202,3 @@
     ) !important;
   }
 }
-/* biome-ignore-end lint/complexity/noImportantStyles: overrides the wallet adapter's own button styles. */

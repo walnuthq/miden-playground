@@ -54,7 +54,7 @@ const Step4Content = ({
       The preview dialog lets you check the asset changes about to occur, and
       the fee. Then click <em>"Submit"</em> to complete the transfer.
     </p>
-    {/* biome-ignore lint/a11y/useMediaCaption: silent animated diagram */}
+    {/* oxlint-disable-next-line jsx-a11y/media-has-caption -- silent animated diagram */}
     <video className="max-h-64 object-contain" autoPlay loop>
       <source
         src="/img/transfer-assets-transactions-video.mp4"
