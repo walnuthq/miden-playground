@@ -48,7 +48,7 @@
     "smol-toml": "1.9.1",
     "sonner": "2.0.8",
     "usehooks-ts": "3.1.1",
-    "viem": "2.58.4",
+    "viem": "2.58.6",
     "wagmi": "3.7.11"
   },
   "devDependencies": {
@@ -65,6 +65,6 @@
     "typescript": "7.0.2",
     "vite": "8.3.8",
     "vite-plugin-node-polyfills": "0.28.0",
-    "wrangler": "4.166.0"
+    "wrangler": "4.168.0"
   }
 }
