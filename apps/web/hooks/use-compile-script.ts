@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import useGlobalContext from "@/components/global-context/hook";
 import useScripts from "@/hooks/use-scripts";
@@ -17,8 +17,11 @@ const useCompileScript = (script?: Script) => {
   const { tutorialId } = useGlobalContext();
   const { append } = useConsoleLog(script?.id ?? "");
   const [compiling, setCompiling] = useState(false);
+  // The script as last rendered, to tell whether it changed during a compile.
   const latest = useRef(script);
-  latest.current = script;
+  useEffect(() => {
+    latest.current = script;
+  });
   const compile = async () => {
     if (!script) {
       return;

@@ -46,8 +46,8 @@ for now. This plan does not add it.
 - The install step, identical in both:
 
   ```yaml
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+  - name: Install dependencies
+    run: pnpm install --frozen-lockfile
   ```
 
 - Root `package.json` scripts: `"lint": "biome check ."` (whole repo),

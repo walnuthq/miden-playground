@@ -158,6 +158,7 @@ What the user sees today, from the production run:
   ```
 
   Nothing is marked in the editor, and `src/lib.rs:26:5` isn't clickable.
+
 - A successful compile prints only `Script compiled successfully.`: no time,
   no warnings.
 - The console is a small card under a fixed-height editor; on a 1000 px high

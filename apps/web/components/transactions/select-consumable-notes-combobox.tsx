@@ -93,6 +93,7 @@ const SelectConsumableNotesCombobox = ({
         render={
           <Button
             variant="outline"
+            // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role, jsx-a11y/role-has-required-aria-props -- the popover trigger of a combobox: the list it controls only exists while open.
             role="combobox"
             aria-expanded={open}
             className="justify-between"

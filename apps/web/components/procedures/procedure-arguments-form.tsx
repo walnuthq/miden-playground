@@ -93,7 +93,7 @@ const ProcedureArgumentsForm = ({
               >
                 {values.map((felt, index) => (
                   <Input
-                    // biome-ignore lint/suspicious/noArrayIndexKey: a felt is its position in the layout.
+                    // oxlint-disable-next-line react/no-array-index-key -- a felt is its position in the layout.
                     key={index}
                     id={single ? id : `${id}-${index}`}
                     aria-label={

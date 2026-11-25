@@ -74,7 +74,7 @@ const MapEntries = ({
   return (
     <div className="flex flex-col gap-1.5">
       {entries.map((entry, index) => (
-        // biome-ignore lint/suspicious/noArrayIndexKey: rows have no stable id, only their position.
+        // oxlint-disable-next-line react/no-array-index-key -- rows have no stable id, only their position.
         <div key={index} className="flex items-center gap-1.5">
           <WordInput
             label={`${storageSlot.name} key ${index + 1}`}

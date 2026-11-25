@@ -77,8 +77,18 @@ are written.
   ```ts
   export type CompiledPackage = Pick<
     Script,
-    | "id" | "name" | "type" | "status" | "masm" | "files" | "commitment"
-    | "masp" | "exports" | "error" | "warnings" | "dependencies"
+    | "id"
+    | "name"
+    | "type"
+    | "status"
+    | "masm"
+    | "files"
+    | "commitment"
+    | "masp"
+    | "exports"
+    | "error"
+    | "warnings"
+    | "dependencies"
   >;
   ```
 

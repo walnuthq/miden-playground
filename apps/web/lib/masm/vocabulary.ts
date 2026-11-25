@@ -67,11 +67,9 @@ export const extractTypes = (fragments: string) => {
   return sorted(captures(body ?? "", /"(\w+)" =>/g));
 };
 
-export const extractVocabulary = (
-  sources: {
-    [key in keyof typeof MIDEN_VM_SOURCES]: string;
-  },
-): MasmVocabulary => {
+export const extractVocabulary = (sources: {
+  [key in keyof typeof MIDEN_VM_SOURCES]: string;
+}): MasmVocabulary => {
   const types = extractTypes(sources.fragments);
   const instructions = extractInstructions(sources.instructions);
   const keywords = extractKeywords(sources.parser, sources.fragments).filter(

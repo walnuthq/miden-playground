@@ -1,9 +1,7 @@
 import "./load-env.ts";
 import fs from "node:fs";
 import path from "node:path";
-
 import { type Browser, chromium, type Page } from "playwright";
-
 import type {
   EndpointStatus,
   ServiceHealth,
@@ -468,10 +466,11 @@ const rollUp = (endpoints: EndpointStatus[]): ServiceHealth => {
 // Every check is individually caught above and this script always exits 0. A
 // service being down must still produce a status page — that is precisely when
 // someone is looking at it.
-const [previous, [apiEndpoints, webEndpoints]] = await Promise.all([
+const [previous, [apiRoot, webEndpoints]] = await Promise.all([
   fetchPreviousSnapshot(),
-  Promise.all([Promise.all([probeApiRoot()]), probeWebWithRetry()]),
+  Promise.all([probeApiRoot(), probeWebWithRetry()]),
 ]);
+const apiEndpoints = [apiRoot];
 
 const checkedAt = new Date().toISOString();
 

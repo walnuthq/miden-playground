@@ -1,0 +1,19 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "printWidth": 80,
+  "sortImports": { "newlinesBetween": false },
+  "ignorePatterns": [
+    "**/cloudflare-env.d.ts",
+    "**/worker-configuration.d.ts",
+    "pnpm-lock.yaml",
+    "skills-lock.json",
+    ".agents",
+    ".claude/skills",
+    "packages/ui/src/components",
+    "**/public",
+    "apps/api/examples/*/compiled.json",
+    "apps/api/drizzle",
+    "apps/web/lib/masm/vocabulary.json",
+    "apps/web/lib/tutorials/basic-wallet.json"
+  ]
+}

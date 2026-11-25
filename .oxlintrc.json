@@ -1,0 +1,33 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "oxc", "react", "jsx-a11y"],
+  "categories": {
+    "correctness": "error"
+  },
+  "rules": {
+    "react/rules-of-hooks": "error",
+    "react/no-array-index-key": "error",
+    "typescript/no-non-null-assertion": "error",
+    "react/set-state-in-effect": "off"
+  },
+  "overrides": [
+    {
+      "files": ["apps/web/e2e/**"],
+      "rules": {
+        "typescript/no-non-null-assertion": "off",
+        "react/rules-of-hooks": "off"
+      }
+    }
+  ],
+  "env": {
+    "builtin": true
+  },
+  "ignorePatterns": [
+    "**/cloudflare-env.d.ts",
+    "**/worker-configuration.d.ts",
+    ".agents",
+    ".claude/skills",
+    "packages/ui/src/components",
+    "**/public"
+  ]
+}

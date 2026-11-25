@@ -140,6 +140,7 @@ can take tens of seconds.
   Its test "SUBMIT_TRANSACTION appends and replaces the account in place"
   asserts `assert.equal(next.accounts[1], updated)` (same object). That
   assertion must change in step 1: the reducer will build a new object.
+
 - The web unit tests run in plain node
   (`node --import ./test/alias.ts --test …`): the reducer file is loadable
   because its imports are type-only. Keep them type-only.

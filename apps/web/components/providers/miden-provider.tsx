@@ -127,7 +127,6 @@ const MidenProvider = ({ children }: { children: ReactNode }) => {
   // started in its place, `mockClientError` is set once restarting is given up.
   const [restarts, setRestarts] = useState(0);
   const [mockClientError, setMockClientError] = useState<Error | null>(null);
-  // biome-ignore lint/correctness/useExhaustiveDependencies: a restart needs a new config object, which is what makes the SDK's provider create a client.
   const config = useMemo(
     () => ({
       rpcUrl: networks[networkId],
@@ -135,6 +134,7 @@ const MidenProvider = ({ children }: { children: ReactNode }) => {
       autoSyncInterval: 5000,
       prover: provers[networkId],
     }),
+    // oxlint-disable-next-line react-hooks/exhaustive-deps -- a restart needs a new config object, which is what makes the SDK's provider create a client.
     [networkId, restarts],
   );
   useEffect(

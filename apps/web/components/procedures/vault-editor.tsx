@@ -100,7 +100,7 @@ const VaultEditor = ({
     >
       {rows.length === 0 && <p className="text-muted-foreground">{empty}</p>}
       {rows.map((row, index) => (
-        // biome-ignore lint/suspicious/noArrayIndexKey: rows have no stable id, only their position.
+        // oxlint-disable-next-line react/no-array-index-key -- rows have no stable id, only their position.
         <div key={index} className="flex items-center gap-1.5">
           <SelectAccountDropdownMenu
             value={row.faucetId}

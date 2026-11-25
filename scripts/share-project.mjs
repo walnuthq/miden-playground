@@ -91,7 +91,6 @@ const listFiles = async (folder) => {
 // characters. Kept across runs so the uploaded scripts keep one owner.
 const ownerToken = async () => {
   const directory = join(
-    // biome-ignore lint/suspicious/noUndeclaredEnvVars: run by hand, not by turbo
     process.env.XDG_CONFIG_HOME || join(homedir(), ".config"),
     "miden-playground",
   );

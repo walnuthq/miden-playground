@@ -80,14 +80,14 @@ const Output = ({
     const severity = outputLineSeverity(line);
     return (
       <div
-        // biome-ignore lint/suspicious/noArrayIndexKey: static lines.
+        // oxlint-disable-next-line react/no-array-index-key -- static lines.
         key={lineIndex}
         className={cn("min-h-[1lh]", severity && levelClassNames[severity])}
       >
         {splitLocations(line).map((part, index) =>
           "href" in part ? (
             <a
-              // biome-ignore lint/suspicious/noArrayIndexKey: static parts.
+              // oxlint-disable-next-line react/no-array-index-key -- static parts.
               key={index}
               href={part.href}
               target="_blank"
@@ -98,7 +98,7 @@ const Output = ({
             </a>
           ) : "line" in part && onRevealLocation ? (
             <button
-              // biome-ignore lint/suspicious/noArrayIndexKey: static parts.
+              // oxlint-disable-next-line react/no-array-index-key -- static parts.
               key={index}
               type="button"
               className={cn("cursor-pointer", LINK_CLASS_NAME)}
@@ -237,7 +237,6 @@ const EditorConsole = ({
   const stickToBottom = useRef(true);
   // Starts with the last compile's error, if any, the first time the script
   // shows. The API doesn't store it: a script fetched from there has none.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: on mount only.
   useEffect(() => {
     if (
       !hasConsoleLog(script.id) &&
@@ -251,6 +250,7 @@ const EditorConsole = ({
         compile: true,
       });
     }
+    // oxlint-disable-next-line react-hooks/exhaustive-deps -- on mount only.
   }, []);
   // A new compile shows the log and scrolls down to its output, even if
   // scrolled up. Declared
@@ -261,7 +261,7 @@ const EditorConsole = ({
       setView("output");
     }
   }, [compiling]);
-  // biome-ignore lint/correctness/useExhaustiveDependencies: on new entries.
+  // On new entries.
   useLayoutEffect(() => {
     const scroll = scrollRef.current;
     if (scroll && stickToBottom.current) {

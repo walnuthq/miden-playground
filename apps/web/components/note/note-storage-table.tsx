@@ -18,7 +18,7 @@ const NoteStorageTable = ({ storage }: { storage: string[] }) => (
       </TableHeader>
       <TableBody>
         {storage.map((value, index) => (
-          // biome-ignore lint/suspicious/noArrayIndexKey: storage items are identified by their position.
+          // oxlint-disable-next-line react/no-array-index-key -- storage items are identified by their position.
           <TableRow key={index}>
             <TableCell>{index}</TableCell>
             <TableCell>{BigInt(value)}</TableCell>

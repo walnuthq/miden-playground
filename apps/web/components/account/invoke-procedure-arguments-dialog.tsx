@@ -145,13 +145,13 @@ const InvokeProcedureDialogContent = ({
   // Without arguments, the preview runs as the dialog opens, once: the ref
   // survives React's strict-mode double effect, which would execute twice.
   const autoPreviewStarted = useRef(false);
-  // biome-ignore lint/correctness/useExhaustiveDependencies: runs once per instance, which is keyed on the procedure
   useEffect(() => {
     if (hasArguments || readOnly || autoPreviewStarted.current) {
       return;
     }
     autoPreviewStarted.current = true;
     preview([]);
+    // oxlint-disable-next-line react-hooks/exhaustive-deps -- runs once per instance, which is keyed on the procedure
   }, []);
   const previewReady =
     step === "preview" && transactionRequest && transactionResult;

@@ -40,7 +40,7 @@ const POPUP_TIMEOUT = 60_000;
 export const breadUsdcxBalance = async (walletPage: Page) => {
   const text = await walletPage
     .getByRole("main")
-    // biome-ignore lint/performance/useDomNodeTextContent: rendered text keeps the fields of a row apart
+    // innerText, not textContent: rendered text keeps the fields of a row apart.
     .innerText({ timeout: 1_000 })
     .catch(() => null);
   const amount = text
@@ -280,7 +280,7 @@ export const test = base.extend<{ breadProfile: BreadProfile; bread: Bread }>({
         exact: typeof button === "string",
       });
       await expect(approveButton).toBeEnabled({ timeout });
-      // biome-ignore lint/performance/useDomNodeTextContent: rendered text keeps line breaks between fields
+      // innerText, not textContent: rendered text keeps line breaks between fields.
       const text = await popup.locator("body").innerText();
       await approveButton.click();
       // Bread closes its popup once the request is handled, but headless

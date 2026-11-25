@@ -133,7 +133,7 @@ const NoteStorageFields = ({
             <p className="text-xs text-muted-foreground">{rawNote}</p>
           )}
           {felts.map((item, index) => (
-            // biome-ignore lint/suspicious/noArrayIndexKey: rows have no stable id, only their position.
+            // oxlint-disable-next-line react/no-array-index-key -- rows have no stable id, only their position.
             <div key={index} className="flex items-center gap-1.5">
               <Input
                 aria-label={`Note storage item ${index + 1}`}

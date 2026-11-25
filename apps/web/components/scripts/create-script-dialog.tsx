@@ -46,7 +46,7 @@ const CreateScriptDialog = () => {
   const [scriptExample, setScriptExample] = useState<ScriptExample | "none">(
     "none",
   );
-  // biome-ignore lint/correctness/useExhaustiveDependencies: reset the selected example when the script type changes.
+  // Reset the selected example when the script type changes.
   useEffect(() => {
     setScriptExample("none");
   }, [scriptType]);

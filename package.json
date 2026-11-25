@@ -2,23 +2,24 @@
   "name": "miden-playground",
   "version": "0.0.1",
   "private": true,
-  "packageManager": "pnpm@12.23.0+sha512.02da94ffaf133f46074322afe552f90d40b5f71ae259aefbccdacc5085b1d617e98d65e0131f5748b9b67445978ee5055d7d59a473f1eef0d504854fefcd5975",
-  "engines": {
-    "node": ">=26"
-  },
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev",
-    "lint": "biome check .",
+    "lint": "oxlint && oxfmt --check",
     "typecheck": "turbo typecheck",
-    "format": "biome check --write .",
+    "format": "oxlint --fix && oxfmt",
     "bread-wallet": "node .bread-wallet/update.mjs",
     "share-project": "node scripts/share-project.mjs"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.6.8",
     "@workspace/typescript-config": "workspace:*",
+    "oxfmt": "0.80.0",
+    "oxlint": "1.95.0",
     "turbo": "2.11.13",
     "typescript": "7.0.2"
-  }
+  },
+  "engines": {
+    "node": ">=26"
+  },
+  "packageManager": "pnpm@12.23.0+sha512.02da94ffaf133f46074322afe552f90d40b5f71ae259aefbccdacc5085b1d617e98d65e0131f5748b9b67445978ee5055d7d59a473f1eef0d504854fefcd5975"
 }

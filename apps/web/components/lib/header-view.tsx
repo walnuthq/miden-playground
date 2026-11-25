@@ -47,6 +47,7 @@ const ScriptBreadcrumb = ({ id }: { id: string }) => {
       <BreadcrumbPage className="truncate">{name}</BreadcrumbPage>
       {status === "draft" && !readOnly && (
         <span
+          // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role -- a dot drawn with CSS, not an image file.
           role="img"
           aria-label="Edited since the last compile"
           title="Edited since the last compile"

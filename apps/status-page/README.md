@@ -172,9 +172,9 @@ fields forward:
       "health": "unhealthy",
       "previousHealth": "degraded",
       "since": "…",
-      "episodeSince": "…"
-    }
-  ]
+      "episodeSince": "…",
+    },
+  ],
 }
 ```
 

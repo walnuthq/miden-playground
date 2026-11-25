@@ -43,10 +43,14 @@ not profiled.
 
   ```tsx
   const usePersistedReducer = () => {
-    const [state, setState] = useLocalStorage(STATE_STORAGE_KEY, defaultState(), {
-      serializer: stateSerializer,
-      deserializer: stateDeserializer,
-    });
+    const [state, setState] = useLocalStorage(
+      STATE_STORAGE_KEY,
+      defaultState(),
+      {
+        serializer: stateSerializer,
+        deserializer: stateDeserializer,
+      },
+    );
     const persistedReducer = useCallback(
       (prevState: State, action: RunAction) => {
         if (
