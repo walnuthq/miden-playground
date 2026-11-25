@@ -4,8 +4,7 @@
 // It compiles through a running API (`pnpm dev`, which reaches whatever
 // API_COMPILE_URL it's configured with), so the packages are built from
 // exactly the files the API generates for them. Run it after editing an
-// example's sources, and after bumping the Miden SDK, the api-compile image or
-// templates/project-template.
+// example's sources, and after bumping the Miden SDK or the api-compile image.
 //
 //   node scripts/compile-examples.ts [example-dir...]
 //
@@ -13,13 +12,13 @@
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { type ExampleSources, sourcesHash } from "../examples/hash.ts";
+import { parseMidenProjectToml } from "../lib/toml.ts";
 
 type CompiledPackage = {
   name: string;
   type: string;
   status: "draft" | "compiled" | "error";
   error: string;
-  masm: string;
   masp: string;
   commitment: string;
   exports: unknown[];
@@ -41,16 +40,22 @@ const readSources = (exampleDir: string): ExampleSources =>
       .filter(({ name }) =>
         existsSync(path.join(exampleDir, name, "miden-project.toml")),
       )
-      .map(({ name }) => [
-        name,
-        {
-          midenProjectToml: readFileSync(
-            path.join(exampleDir, name, "miden-project.toml"),
-            "utf8",
-          ),
-          rust: readFileSync(path.join(exampleDir, name, "src/lib.rs"), "utf8"),
-        },
-      ]),
+      .map(({ name }) => {
+        const midenProjectToml = readFileSync(
+          path.join(exampleDir, name, "miden-project.toml"),
+          "utf8",
+        );
+        // The package's one module, where its manifest points.
+        const modulePath = parseMidenProjectToml(midenProjectToml).lib.path;
+        if (!modulePath) {
+          throw new Error(`${name}: miden-project.toml has no [lib] path.`);
+        }
+        const masm = readFileSync(
+          path.join(exampleDir, name, modulePath),
+          "utf8",
+        );
+        return [name, { midenProjectToml, masm }];
+      }),
   );
 
 const compileExample = async (dir: string) => {
@@ -81,20 +86,10 @@ const compileExample = async (dir: string) => {
     sourcesHash: await sourcesHash(sources),
     packages: Object.fromEntries(
       packages.map(
-        ({
-          name,
-          type,
-          masm,
-          masp,
-          commitment,
-          exports,
-          metadata,
-          dependencies,
-        }) => [
+        ({ name, type, masp, commitment, exports, metadata, dependencies }) => [
           name,
           {
             type,
-            masm,
             masp,
             commitment,
             exports,

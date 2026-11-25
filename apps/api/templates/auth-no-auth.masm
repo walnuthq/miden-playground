@@ -1,0 +1,8 @@
+# Placeholder: an authentication component that never checks a signature.
+
+use {AuthArgs} from miden::standards::types
+
+@auth_script
+pub proc auth_no_auth(auth_args: AuthArgs)
+    dropw
+end

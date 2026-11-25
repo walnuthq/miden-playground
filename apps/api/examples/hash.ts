@@ -3,7 +3,7 @@
 
 export type ExampleSources = Record<
   string,
-  { midenProjectToml: string; rust: string }
+  { midenProjectToml: string; masm: string }
 >;
 
 // Fingerprint of an example's sources, stored in its compiled.json: a mismatch
@@ -12,10 +12,10 @@ export const sourcesHash = async (sources: ExampleSources) => {
   const canonical = JSON.stringify(
     Object.entries(sources)
       .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
-      .map(([dir, { midenProjectToml, rust }]) => [
+      .map(([dir, { midenProjectToml, masm }]) => [
         dir,
         midenProjectToml,
-        rust,
+        masm,
       ]),
   );
   const digest = await crypto.subtle.digest(

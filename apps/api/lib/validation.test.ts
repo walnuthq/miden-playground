@@ -5,6 +5,7 @@ import {
   isId,
   isPackageSource,
   isPackageSources,
+  isRustPackageSource,
   isSource,
   isStringArray,
   isValidNetwork,
@@ -53,18 +54,26 @@ test("string arrays", () => {
 });
 
 test("package sources", () => {
-  assert.equal(isPackageSource({ midenProjectToml: "", rust: "x" }), true);
+  assert.equal(isPackageSource({ midenProjectToml: "", masm: "x" }), true);
   for (const value of [
     null,
     {},
-    { rust: "x" },
-    { rust: 1, midenProjectToml: "" },
+    { masm: "x" },
+    { masm: 1, midenProjectToml: "" },
   ]) {
     assert.equal(isPackageSource(value), false);
   }
 });
 
-const pkg = { midenProjectToml: "", rust: "" };
+test("a Rust package source is told apart", () => {
+  const rust = { midenProjectToml: "", rust: "fn main() {}" };
+  assert.equal(isRustPackageSource(rust), true);
+  assert.equal(isPackageSource(rust), false);
+  assert.equal(isRustPackageSource({ midenProjectToml: "", masm: "x" }), false);
+  assert.equal(isRustPackageSource(null), false);
+});
+
+const pkg = { midenProjectToml: "", masm: "" };
 
 test("source length", () => {
   assert.equal(isSource("a".repeat(MAX_SOURCE_LENGTH)), true);
@@ -88,7 +97,7 @@ test("bounded arrays", () => {
 test("package source limits", () => {
   assert.equal(isPackageSource(pkg), true);
   assert.equal(
-    isPackageSource({ ...pkg, rust: "a".repeat(MAX_SOURCE_LENGTH + 1) }),
+    isPackageSource({ ...pkg, masm: "a".repeat(MAX_SOURCE_LENGTH + 1) }),
     false,
   );
   assert.equal(
@@ -111,5 +120,5 @@ test("import package sources", () => {
     isPackageSources({ ["a".repeat(MAX_ID_LENGTH + 1)]: pkg }),
     false,
   );
-  assert.equal(isPackageSources({ a: pkg, b: { rust: "" } }), false);
+  assert.equal(isPackageSources({ a: pkg, b: { masm: "" } }), false);
 });

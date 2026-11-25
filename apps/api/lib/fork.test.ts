@@ -32,7 +32,7 @@ test("forkPackages copies a package under a new id, with its owner", () => {
   const root = dbPackage({
     id: ROOT,
     name: "counter",
-    files: { "counter/src/lib.rs": "source" },
+    files: { "counter/counter.masm": "source" },
     masm: "masm",
     masp: "masp",
     commitment: "0xc0",
@@ -53,7 +53,7 @@ test("forkPackages copies a package under a new id, with its owner", () => {
         name: "counter",
         type: "account-component",
         status: "compiled",
-        files: { "counter/src/lib.rs": "source" },
+        files: { "counter/counter.masm": "source" },
         masm: "masm",
         commitment: "0xc0",
         masp: "masp",

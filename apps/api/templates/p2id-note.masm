@@ -1,0 +1,6 @@
+# Placeholder: a P2ID note, which pays its assets to one account.
+
+@note_script
+pub proc main()
+    nop
+end

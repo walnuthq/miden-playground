@@ -1,7 +1,7 @@
 import type { MidenProjectToml, PackageSource } from "@/lib/types";
 import { badRequest } from "./errors.ts";
 import { packageTypeNames, toPackageType } from "./package-type.ts";
-import { parseMidenProjectToml } from "./toml.ts";
+import { builtInDependencies, parseMidenProjectToml } from "./toml.ts";
 import { isValidPackageName } from "./validation.ts";
 
 const lastSegment = (path: string) => path.split("/").at(-1);
@@ -13,7 +13,7 @@ export const resolvePackageSources = (
   packageSources: Record<string, PackageSource>,
 ) => {
   const packages = Object.entries(packageSources).map(
-    ([packagePath, { midenProjectToml, rust }]) => {
+    ([packagePath, { midenProjectToml, masm }]) => {
       const fail = (reason: string) => {
         throw badRequest(`Error: ${packagePath}: ${reason}`);
       };
@@ -39,14 +39,14 @@ export const resolvePackageSources = (
           `miden-project.toml has no valid [lib] kind (one of ${packageTypeNames}).`,
         );
       }
-      if (!rust) {
-        return fail("src/lib.rs is missing or empty.");
+      if (!masm) {
+        return fail("its MASM source is missing or empty.");
       }
       return {
         packagePath,
         name,
         type,
-        rust,
+        masm,
         dependencies: manifest.dependencies ?? {},
       };
     },
@@ -60,15 +60,12 @@ export const resolvePackageSources = (
     }
   }
   const resolved = packages.map(
-    ({ packagePath, name, type, rust, dependencies }) => ({
+    ({ packagePath, name, type, masm, dependencies }) => ({
       name,
       type,
-      rust,
+      masm,
       dependencies: Object.entries(dependencies)
-        .filter(
-          ([dependency]) =>
-            dependency !== "miden-core" && dependency !== "miden-protocol",
-        )
+        .filter(([dependency]) => !builtInDependencies.has(dependency))
         .flatMap(([dependencyName, dependency]) => {
           if (typeof dependency === "string") {
             return [];
