@@ -43,7 +43,7 @@
     "next-themes": "0.4.6",
     "react": "19.3.1",
     "react-dom": "19.3.1",
-    "react-resizable-panels": "4.24.1",
+    "react-resizable-panels": "4.24.2",
     "react-router": "8.5.3",
     "smol-toml": "1.9.1",
     "sonner": "2.0.8",
@@ -52,7 +52,7 @@
     "wagmi": "3.7.11"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "5.20261124.1",
+    "@cloudflare/workers-types": "5.20261124.2",
     "@miden-sdk/vite-plugin": "0.18.0",
     "@playwright/test": "1.65.1",
     "@tailwindcss/vite": "4.3.5",
