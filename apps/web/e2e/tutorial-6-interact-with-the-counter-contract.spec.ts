@@ -30,14 +30,6 @@ const getCount = async (page: Page) => {
   return Number((await result.textContent())!.match(/^\d+/)![0]);
 };
 
-// Tutorial 6 was written for Rust contracts: it's marked `unavailable`
-// (components/tutorials/meta.ts, tutorial-unavailable.spec.ts) until plan 07
-// of spec/remove-rust rewrites it in MASM. Remove this with the flag.
-test.fixme(
-  true,
-  "Tutorial 6 is being rewritten for Miden Assembly (spec/remove-rust plan 07)",
-);
-
 test("tutorial 6: interact with the counter contract", async ({
   page,
   context,
@@ -50,35 +42,36 @@ test("tutorial 6: interact with the counter contract", async ({
   await expect(page).toHaveURL(/\/scripts$/);
 
   await test.step("1. open the counter contract script", async () => {
-    // Rows are clickable, without links. The script's id is its name, so the
-    // ID column (hidden on phones) reads the same: click the Name cell.
+    // Rows are clickable, without links. The starter fetched the script from
+    // the API, so its id is a UUID.
     await page
       .getByRole("cell", { name: "counter-account", exact: true })
       .last()
       .click();
-    await expect(page).toHaveURL(/\/scripts\/counter-account$/);
+    await expect(page).toHaveURL(/\/scripts\/[0-9a-f-]{36}$/);
     await nextStep(page);
   });
 
-  await test.step("2. read the Rust code", async () => {
+  await test.step("2. read the MASM code", async () => {
+    await expect(
+      page.getByRole("tab", { name: "counter_account.masm" }),
+    ).toBeVisible();
     await nextStep(page);
   });
 
-  await test.step("3. explore the compiled package", async () => {
-    // The embedded package carries no MASM: its tab is disabled.
-    await expect(page.getByRole("tab", { name: "MASM" })).toBeDisabled();
+  await test.step("3. explore the assembled package", async () => {
     await page.getByRole("tab", { name: "Manifest" }).click();
     // Listed under "Package exports", get_count flagged read-only. The
     // console's Simulate tab lists the same procedures: look in the editor.
     const editor = page.getByTestId("editor");
     await expect(
       editor.getByRole("row", {
-        name: "get_count Read-only fn get_count() -> Felt",
+        name: "get_count Read-only proc get_count() -> Felt",
       }),
     ).toBeVisible();
     await expect(
       editor.getByRole("row", {
-        name: "increment_count fn increment_count() -> Felt",
+        name: "increment_count proc increment_count() -> Felt",
       }),
     ).toBeVisible();
     await nextStep(page);

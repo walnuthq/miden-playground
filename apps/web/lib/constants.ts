@@ -81,16 +81,15 @@ export const TESTNET_FAUCET_ADDRESS =
 export const DEVNET_FAUCET_ADDRESS = "";
 
 // The tutorials' counter contract (tutorial 6 imports it, tutorial 10 reads
-// it through FPI): an instance of the Rust `counter-account` package (embedded
-// until the switch to MASM; plan 07 of spec/remove-rust replaces it), deployed on 2026-11-08 by launching the
-// "Counter Contract" example on playground.miden.xyz, so it's verified in the
-// registry and funded. A testnet reset wipes it: deploy a new one the same way
-// and update both constants (spec/tutorials-rust-pipeline.md, PR B).
+// it through FPI): an instance of the MASM `counter-account` package, deployed
+// on 2026-11-26 by launching the "Counter Contract" example on
+// playground.miden.xyz, so it's verified in the registry and funded. A testnet
+// reset wipes it: deploy a new one the same way and update both constants.
 export const TESTNET_COUNTER_CONTRACT_ACCOUNT_ID =
-  "0xe564fdf28c41655101fa9601b7530c";
+  "0xb2986df5e0aeee116642cf025a2641";
 export const DEVNET_COUNTER_CONTRACT_ACCOUNT_ID = "";
 export const TESTNET_COUNTER_CONTRACT_ADDRESS =
-  "mtst1arjkfl0j33qk25gpl2tqrd6npsptfavv_qr7qqq9wr6w";
+  "mtst1azefsm04uzhwuytxgt8syk3xgyv59pyr_qr7qqq9wr6w";
 export const DEVNET_COUNTER_CONTRACT_ADDRESS = "";
 
 export const midenExplorerUrl = (networkId: NetworkId) =>

@@ -2,6 +2,7 @@ import { Plus } from "lucide-react";
 import { useLocation } from "react-router";
 import AccountAddress from "@/components/lib/account-address";
 import CopyButton from "@/components/lib/copy-button";
+import CounterMissingAlert from "@/components/tutorials/interact-with-the-counter-contract/counter-missing-alert";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import { BulletList, ButtonName } from "@/components/tutorials/prose";
 import TutorialLink from "@/components/tutorials/tutorial-link";
@@ -83,6 +84,7 @@ const Step4: TutorialStep = {
     const completed = useCompleted();
     return (
       <>
+        <CounterMissingAlert />
         <Step4Content
           counter={{
             name: "Counter Contract",
