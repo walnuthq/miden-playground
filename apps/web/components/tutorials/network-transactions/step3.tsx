@@ -1,12 +1,13 @@
 import MissingScriptsAlert from "@/components/tutorials/network-transactions/missing-scripts-alert";
 import useNetworkCounter from "@/components/tutorials/network-transactions/use-network-counter";
-import { InlineCode, NumberedList } from "@/components/tutorials/prose";
+import { CodeBlock, InlineCode } from "@/components/tutorials/prose";
 import TutorialLink from "@/components/tutorials/tutorial-link";
 import type { TutorialStep } from "@/lib/types/tutorial";
 
-// Line numbers refer to
-// apps/api/examples/counter-contract/increment-note/src/lib.rs, the source of
-// the increment-note script the tutorial starts with.
+// The lines quoted here are
+// apps/api/examples/counter-contract/increment-note/increment_note.masm's, the
+// source of the increment-note script the tutorial starts with: after editing
+// it, check them.
 const Step3: TutorialStep = {
   title: "Understand the increment note script.",
   Content: () => {
@@ -26,55 +27,68 @@ const Step3: TutorialStep = {
           >
             increment-note script
           </TutorialLink>
-          . Its{" "}
+          , its source file{" "}
           <strong>
-            <InlineCode>run</InlineCode>
-          </strong>{" "}
-          method, at lines <em>24-31</em>, is the note script itself: marked{" "}
-          <strong>
-            <InlineCode>#[note_script]</InlineCode>
+            <InlineCode>increment_note.masm</InlineCode>
           </strong>
-          , it runs when an Account consumes the Note, here your network
-          counter:
+          . It starts by naming the module its procedures come from:
         </p>
-        <NumberedList>
-          <li>
-            It reads the current count with the{" "}
-            <strong>
-              <InlineCode>get_count</InlineCode>
-            </strong>{" "}
-            procedure.
-          </li>
-          <li>
-            It calls the{" "}
-            <strong>
-              <InlineCode>increment_count</InlineCode>
-            </strong>{" "}
-            procedure.
-          </li>
-          <li>
-            It computes the expected count and asserts that it's equal to the
-            new count returned by{" "}
-            <strong>
-              <InlineCode>get_count</InlineCode>
-            </strong>
-            .
-          </li>
-        </NumberedList>
+        <CodeBlock code="use counter_account" />
         <p>
-          If the contract didn't implement the increment logic correctly, the
-          assertion would fail, and so would the Transaction consuming the Note.
-        </p>
-        <p>
-          Those two procedures aren't part of the note script: they belong to
-          the consuming Account. Lines <em>13-17</em> name where they come from,
-          the{" "}
+          <InlineCode>counter_account</InlineCode> is the{" "}
           <TutorialLink
             href={counterScript ? `/scripts/${counterScript.id}` : "/scripts"}
           >
             counter-account
           </TutorialLink>{" "}
-          script, your network counter's account component.
+          script, your network counter's account component, which the note
+          script depends on. Its procedures aren't part of the Note: they belong
+          to the consuming Account, here your network counter.
+        </p>
+        <p>
+          The{" "}
+          <strong>
+            <InlineCode>main</InlineCode>
+          </strong>{" "}
+          procedure, marked{" "}
+          <strong>
+            <InlineCode>@note_script</InlineCode>
+          </strong>
+          , is the note script itself: it runs when an Account consumes the
+          Note. It first reads the count:
+        </p>
+        <CodeBlock
+          code={`call.counter_account::get_count
+add.1 loc_store.0`}
+        />
+        <p>
+          <InlineCode>call</InlineCode> runs one of the Account's procedures on
+          the top 16 elements of the stack and puts its 16 outputs in their
+          place: <InlineCode>get_count</InlineCode> leaves the count on top.{" "}
+          <InlineCode>add.1</InlineCode> adds one to it, the count expected
+          after the increment, and <InlineCode>loc_store.0</InlineCode> moves
+          that value to the procedure's local memory:{" "}
+          <InlineCode>@locals(1)</InlineCode> above the procedure reserves one
+          slot for it.
+        </p>
+        <CodeBlock
+          code={`call.counter_account::increment_count
+drop call.counter_account::get_count
+loc_load.0 assert_eq.err=ERR_COUNT_NOT_INCREMENTED`}
+        />
+        <p>
+          It then calls <InlineCode>increment_count</InlineCode>, drops the new
+          count that procedure returns and reads the count again with{" "}
+          <InlineCode>get_count</InlineCode>.{" "}
+          <InlineCode>loc_load.0</InlineCode> pushes the expected count back,
+          and <InlineCode>assert_eq</InlineCode> checks that the two top values
+          are equal.
+        </p>
+        <p>
+          If the contract didn't implement the increment logic correctly, the
+          assertion would fail, and so would the Transaction consuming the Note.
+          The error would show as an error code, not as the{" "}
+          <InlineCode>ERR_COUNT_NOT_INCREMENTED</InlineCode> message.
         </p>
         <p>
           A network note is a public Note that carries an attachment identifying

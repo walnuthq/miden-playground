@@ -10,11 +10,10 @@ import { counterExampleStarter } from "@/lib/utils/counter-example";
 import { defaultState } from "@/lib/utils/state";
 import { defaultTutorial } from "@/lib/utils/tutorial";
 
-// The counter's scripts aren't in the state: the starter fetches the
-// counter-contract example's compiled packages (counter-account and
-// increment-note, whose masp is too big to embed) and adds the "Counter
-// Contract" component. They're read-only: the steps only read them, and the
-// note would no longer run against a counter compiled again from other code.
+// The counter's scripts aren't in the state: the starter has the API create
+// the counter-contract example's packages (counter-account and
+// increment-note, MASM sources assembled when the tutorial starts). They're read-only: the steps only read them, and the
+// note would no longer run against a counter assembled again from other code.
 const tutorial: Tutorial = {
   ...defaultTutorial(),
   ...tutorialMeta("network-transactions"),

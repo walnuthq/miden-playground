@@ -11,18 +11,9 @@ import {
   tutorialPanel,
 } from "./tutorial";
 
-// Tutorial 9 was written for Rust contracts: it's marked `unavailable`
-// (components/tutorials/meta.ts, tutorial-unavailable.spec.ts) until plan 07
-// of spec/remove-rust rewrites it in MASM. Remove this with the flag.
-test.fixme(
-  true,
-  "Tutorial 9 is being rewritten for Miden Assembly (spec/remove-rust plan 07)",
-);
-
 // The tutorial starts with the counter-contract example's compiled packages
-// (counter-account and increment-note), which it fetches from the API: run
-// apps/api next to the web app. They come precompiled, so the compile service
-// isn't needed.
+// (counter-account and increment-note), which the API assembles from their
+// MASM sources: run apps/api next to the web app, with api-compile.
 //
 // The network note is created by a new Bread Wallet (see ./bread.ts), funded
 // from its "Fund your wallet" prompt first to pay the fees. The network
@@ -59,9 +50,7 @@ test("tutorial 9: network transactions", async ({ page, bread }) => {
       dialog.getByRole("toolbar").getByText("increment-note"),
     ).toBeVisible();
     // The counter's map slot, empty: the count under key 1 reads as 0.
-    await expect(
-      dialog.getByText("counter_account::counter_contract::count_map"),
-    ).toBeVisible();
+    await expect(dialog.getByText("counter_account::count_map")).toBeVisible();
     await expect(dialog.getByPlaceholder("Key")).toHaveCount(0);
     await dialog.getByRole("button", { name: "Deploy" }).click();
     await expect(dialog).toBeHidden({ timeout: TRANSACTION_TIMEOUT });
@@ -79,7 +68,7 @@ test("tutorial 9: network transactions", async ({ page, bread }) => {
     await expect(
       page.locator('header [data-slot="breadcrumb-page"]'),
     ).toHaveText("increment-note");
-    await waitForEditorText(page, "#[note_script]");
+    await waitForEditorText(page, "@note_script");
     // Read-only: the tutorial doesn't have it compiled again.
     await expect(page.getByRole("button", { name: "Compile" })).toHaveCount(0);
     await nextStep(page);
@@ -93,7 +82,7 @@ test("tutorial 9: network transactions", async ({ page, bread }) => {
     const dialog = page.getByRole("dialog").filter({ hasText: "Create Note" });
     await pickAccount(dialog, "Network Counter");
     await selectOption(page, "Script", "increment-note");
-    // The example's precompiled note has no storage schema: raw felts, none
+    // The example's note has no storage schema: raw felts, none
     // added, and no typed fields to switch from.
     await expect(
       dialog.getByRole("button", { name: "Add note storage" }),
