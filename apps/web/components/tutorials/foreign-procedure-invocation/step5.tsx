@@ -1,20 +1,18 @@
+import CountReaderMissingScriptsAlert from "@/components/tutorials/foreign-procedure-invocation/missing-scripts-alert";
+import useCountReader, {
+  COUNT_READER_SLOT_NAME,
+  COUNTER_SLOT_NAME,
+} from "@/components/tutorials/foreign-procedure-invocation/use-count-reader";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import { InlineCode } from "@/components/tutorials/prose";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
-import useAccounts from "@/hooks/use-accounts";
 import useTransactions from "@/hooks/use-transactions";
 import { EMPTY_WORD } from "@/lib/constants";
 import type { TutorialStep } from "@/lib/types/tutorial";
 
 const useCompleted = () => {
-  const { accounts } = useAccounts();
+  const { countReader, counter } = useCountReader();
   const { transactions } = useTransactions();
-  const countReader = accounts.find(({ components }) =>
-    components.includes("count-reader"),
-  );
-  const counter = accounts.find(({ components }) =>
-    components.includes("counter-account"),
-  );
   if (!countReader || !counter) {
     return false;
   }
@@ -25,17 +23,18 @@ const useCompleted = () => {
     return false;
   }
   const countReaderCount = countReader.storage.find(
-    ({ name }) => name === "count_reader::count_reader::count",
+    ({ name }) => name === COUNT_READER_SLOT_NAME,
   );
   const counterCountMap = counter.storage.find(
-    ({ name }) => name === "counter_account::counter_contract::count_map",
+    ({ name }) => name === COUNTER_SLOT_NAME,
   );
   const counterCountMapEntry = counterCountMap?.mapEntries.find(
     ({ key }) =>
       key ===
       "0x0100000000000000000000000000000000000000000000000000000000000000",
   );
-  // an unset map entry reads as an empty word
+  // Both are the word [count, 0, 0, 0]. An unset map entry reads as an empty
+  // word.
   return countReaderCount?.item === (counterCountMapEntry?.value ?? EMPTY_WORD);
 };
 
@@ -45,6 +44,7 @@ const Step5: TutorialStep = {
     const completed = useCompleted();
     return (
       <>
+        <CountReaderMissingScriptsAlert />
         <p>
           Your <strong>Count Reader</strong> is deployed, so you can now copy
           the count of the <strong>Counter Contract</strong>: the counter
@@ -54,10 +54,10 @@ const Step5: TutorialStep = {
         </p>
         <p>
           Click the <em>"Components"</em> tab on the account details page. Under{" "}
-          <em>"Account Components"</em>, find the <em>"Count Reader"</em>{" "}
+          <em>"Account Components"</em>, find the <em>"count-reader"</em>{" "}
           component: its{" "}
           <strong>
-            <InlineCode>count_reader::count_reader::count</InlineCode>
+            <InlineCode>{COUNT_READER_SLOT_NAME}</InlineCode>
           </strong>{" "}
           storage slot holds the initial count, <strong>0</strong>.
         </p>
@@ -72,7 +72,8 @@ const Step5: TutorialStep = {
           <strong>
             <InlineCode>counter_account_id</InlineCode>
           </strong>
-          , named as in the Rust code. Then click the <em>"Preview"</em> button.
+          , named as in the MASM source. Then click the <em>"Preview"</em>{" "}
+          button.
         </p>
         <p>
           The Playground executes a Transaction against your{" "}

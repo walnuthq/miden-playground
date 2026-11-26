@@ -1,4 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
+import { waitForEditorText } from "./editor";
 import { previewDialog } from "./example";
 import {
   logBrowserErrors,
@@ -9,8 +10,10 @@ import {
   tutorialPanel,
 } from "./tutorial";
 
-// The counter's slot, in the Count Reader's Simulate tab.
-const COUNTER_SLOT = "counter_account::counter_contract::count_map";
+// The slots, as the MASM sources name them: the counter's, in the Count
+// Reader's Simulate tab, and the Count Reader's.
+const COUNTER_SLOT = "counter_account::count_map";
+const COUNT_READER_SLOT = "count_reader::count";
 
 // Tutorial 10 needs no wallet: the Count Reader uses No Auth. It copies the
 // count of the shared testnet Counter Contract, which anyone can increment,
@@ -22,14 +25,6 @@ const procedureRow = (page: Page, procedure: string) =>
     // The innermost row: the component's row contains its procedures table.
     .last();
 
-// Tutorial 10 was written for Rust contracts: it's marked `unavailable`
-// (components/tutorials/meta.ts, tutorial-unavailable.spec.ts) until plan 07
-// of spec/remove-rust rewrites it in MASM. Remove this with the flag.
-test.fixme(
-  true,
-  "Tutorial 10 is being rewritten for Miden Assembly (spec/remove-rust plan 07)",
-);
-
 test("tutorial 10: foreign procedure invocation", async ({ page }) => {
   logBrowserErrors(page);
   const panel = tutorialPanel(page);
@@ -40,7 +35,11 @@ test("tutorial 10: foreign procedure invocation", async ({ page }) => {
   });
 
   await test.step("2. open the count-reader script", async () => {
-    await panel.openLink("count-reader script", /\/scripts\/count-reader$/);
+    // The starter's scripts have the API's ids.
+    await panel.openLink("count-reader script", /\/scripts\/[0-9a-f-]{36}$/, {
+      breadcrumb: "count-reader",
+    });
+    await waitForEditorText(page, "pub proc copy_count");
     await nextStep(page);
   });
 
@@ -85,7 +84,7 @@ test("tutorial 10: foreign procedure invocation", async ({ page }) => {
     await dialog.getByRole("button", { name: "Apply to state" }).click();
     await expect(dialog).toBeHidden();
     await expect(
-      editorConsole.getByLabel("count_reader::count_reader::count value", {
+      editorConsole.getByLabel(`${COUNT_READER_SLOT} value`, {
         exact: true,
       }),
     ).toHaveValue("7");
@@ -104,9 +103,7 @@ test("tutorial 10: foreign procedure invocation", async ({ page }) => {
     await expect(dialog.getByRole("combobox").first()).toContainText("Public");
     await expect(dialog.getByRole("combobox").nth(1)).toContainText("No Auth");
     await selectOption(page, "Account Component", "count-reader");
-    await expect(
-      dialog.getByText("count_reader::count_reader::count"),
-    ).toBeVisible();
+    await expect(dialog.getByText(COUNT_READER_SLOT)).toBeVisible();
     await dialog.getByRole("button", { name: "Deploy" }).click();
     await expect(dialog).toBeHidden({ timeout: TRANSACTION_TIMEOUT });
     await panel.openLink("click its name", /\/accounts\/mtst1[0-9a-z]+$/);
@@ -119,17 +116,18 @@ test("tutorial 10: foreign procedure invocation", async ({ page }) => {
       .getByRole("dialog")
       .filter({ hasText: "Invoke Procedure" });
     // Every deployed account carries the built-in basic wallet, assembled
-    // from MASM: its procedure is called by name, with arguments the form
-    // doesn't type, entered as raw felts. Previewed only.
+    // from MASM: its procedure is called by name, with its hand-written
+    // signature's arguments (the recipient is a word). Previewed only.
     await procedureRow(page, "create_note")
       .getByRole("button", { name: "Invoke" })
       .click();
-    await expect(dialog.getByText("recipient, 4 felts")).toBeVisible();
     await dialog.getByLabel(/^tag/).fill("0");
     await dialog.getByLabel(/^note_type/).fill("0");
-    for (const [index, name] of ["a", "b", "c", "d"].entries()) {
-      await dialog.getByLabel(`recipient ${name}`).fill(String(11 + index));
-    }
+    await dialog
+      .getByLabel(/^recipient/)
+      .fill(
+        "0x0b000000000000000c000000000000000d000000000000000e00000000000000",
+      );
     await dialog.getByRole("button", { name: "Preview", exact: true }).click();
     const notePreview = previewDialog(page, "create_note");
     await expect(notePreview.getByText(/1 note\s*will be created/)).toBeVisible(

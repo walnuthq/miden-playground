@@ -6,7 +6,7 @@ Playwright tests for the tutorials, the examples, the script editor (`script-*.s
 
 1. Install Playwright's browsers once: `pnpm exec playwright install chromium webkit` (WebKit for the iPhone project).
 2. Start the Playground (`pnpm dev` in `apps/web`, port 3000), unless you set `PLAYWRIGHT_BASE_URL`.
-3. For the specs that create scripts on the API, start `apps/api` too (`pnpm dev` in `apps/api`, port 3001), with its Docker services up. The examples, tutorial 9, which starts with the counter example's packages (`apps/api/examples`), tutorials 7, 8, 11 and 12 and the script editor specs assemble MASM sources on the API, so they also need the compile service.
+3. For the specs that create scripts on the API, start `apps/api` too (`pnpm dev` in `apps/api`, port 3001), with its Docker services up. The examples, tutorials 6, 9 and 10, which start with the counter example's packages (`apps/api/examples`; 10 with the count-reader template too), tutorials 7, 8, 11 and 12 and the script editor specs assemble MASM sources on the API, so they also need the compile service.
 4. For the specs that use Bread Wallet, install it from the repo root with `pnpm bread-wallet`. It downloads the version pinned in `.bread-wallet/version` to `.bread-wallet/extension` (gitignored). Each run warns when it's missing or outdated. `pnpm bread-wallet latest` upgrades to the newest [wallet release](https://github.com/0xMiden/wallet/releases) and pins it: commit `.bread-wallet/version`.
 
 ## Environment variables

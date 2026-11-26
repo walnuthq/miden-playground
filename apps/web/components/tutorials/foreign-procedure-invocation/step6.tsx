@@ -1,7 +1,9 @@
+import useCountReader, {
+  COUNT_READER_SLOT_NAME,
+} from "@/components/tutorials/foreign-procedure-invocation/use-count-reader";
 import NextTutorialButton from "@/components/tutorials/next-tutorial-button";
 import { InlineCode } from "@/components/tutorials/prose";
 import TutorialLink from "@/components/tutorials/tutorial-link";
-import useAccounts from "@/hooks/use-accounts";
 import type { Account } from "@/lib/types/account";
 import type { TutorialStep } from "@/lib/types/tutorial";
 
@@ -11,7 +13,7 @@ const Step6Content = ({ counter }: { counter?: Account }) => (
       Your Transaction has been submitted: under <em>"Account Components"</em>,
       the{" "}
       <strong>
-        <InlineCode>count_reader::count_reader::count</InlineCode>
+        <InlineCode>{COUNT_READER_SLOT_NAME}</InlineCode>
       </strong>{" "}
       storage slot of your <strong>Count Reader</strong> now holds a copy of the{" "}
       <strong>Counter Contract</strong> count.
@@ -50,10 +52,7 @@ const Step6Content = ({ counter }: { counter?: Account }) => (
 const Step6: TutorialStep = {
   title: "Read the copied count.",
   Content: () => {
-    const { accounts } = useAccounts();
-    const counter = accounts.find(({ components }) =>
-      components.includes("counter-account"),
-    );
+    const { counter } = useCountReader();
     return <Step6Content counter={counter} />;
   },
   NextStepButton: NextTutorialButton,

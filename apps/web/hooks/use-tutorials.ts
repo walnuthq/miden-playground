@@ -14,8 +14,11 @@ import useNetwork from "@/hooks/use-network";
 import useProjects from "@/hooks/use-projects";
 import { trackEvent } from "@/lib/analytics";
 import type { NetworkId } from "@/lib/types/network";
-import type { WorkspaceStarter } from "@/lib/types/state";
-import type { Tutorial, TutorialId } from "@/lib/types/tutorial";
+import type {
+  Tutorial,
+  TutorialId,
+  TutorialStarter,
+} from "@/lib/types/tutorial";
 import { randomLowercaseId, sleep } from "@/lib/utils";
 import { defaultTutorial, isTutorial } from "@/lib/utils/tutorial";
 import { tutorialStatus as getTutorialStatus } from "@/lib/utils/tutorial-status";
@@ -36,11 +39,11 @@ const startBlockNum = async (networkId: NetworkId) => {
   }
 };
 
-// A tutorial's starter scripts (`Tutorial.starter`), none for most. When the
+// A tutorial's starter scripts and accounts (`Tutorial.starter`), none for most. When the
 // API can't be reached, the tutorial still opens, with a warning.
 const tutorialStarter = async (
   tutorial: Tutorial,
-): Promise<WorkspaceStarter> => {
+): Promise<TutorialStarter> => {
   if (!tutorial.starter) {
     return { scripts: [] };
   }
@@ -157,6 +160,7 @@ const useTutorials = () => {
     switchNetwork(tutorial.networkId);
     const freshState = {
       ...tutorial.state,
+      accounts: [...tutorial.state.accounts, ...(starter.accounts ?? [])],
       scripts: [...tutorial.state.scripts, ...starter.scripts],
       nextStore: tutorial.store,
       tutorialStartBlockNum: await startBlockNum(tutorial.networkId),
