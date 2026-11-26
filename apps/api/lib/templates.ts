@@ -1,4 +1,6 @@
-// Bundled as strings by the Text rule in wrangler.jsonc.
+// Bundled as strings by the Text rule in wrangler.jsonc. The hand-written
+// schemas of the templates that have one are next to them
+// (templates/*.schema.ts, lib/template-schemas.ts).
 
 import accountComponent from "@/templates/account-component.masm";
 import authNoAuth from "@/templates/auth-no-auth.masm";
@@ -25,3 +27,5 @@ export const templates = {
   "counter-script": counterScript,
   "count-reader": countReader,
 } as const;
+
+export { templateMetadata } from "./template-schemas.ts";

@@ -7,6 +7,11 @@
 // that breaks a snippet fails here: none for now, the tutorials' snippets
 // are Rust until they're rewritten in MASM (plan 07 of spec/remove-rust).
 //
+// A template with a hand-written schema (templates/*.schema.ts) must agree
+// with it: its slot names are the ones the source declares (the stale rule of
+// lib/package-metadata.ts, run on the template as shipped), and the package
+// created from it still has its schema once compiled.
+//
 // It goes through a running API (`pnpm dev`, which reaches whatever
 // API_COMPILE_URL it's configured with), exactly like the dialog then the
 // Compile button: POST /scripts, PATCH /scripts/:id with the script's code and
@@ -16,7 +21,8 @@
 //   node scripts/check-templates.ts
 //
 // API_URL defaults to the local API (http://localhost:3001). Exits with 1 when
-// a template doesn't compile, printing the assembler's diagnostics.
+// a template doesn't compile, printing the assembler's diagnostics, or
+// disagrees with its schema.
 import {
   type ScriptExample,
   type ScriptType,
@@ -28,6 +34,9 @@ import {
   type CodeEdit,
 } from "../../web/lib/utils/tutorial-code.ts";
 import { sourceFilePath } from "../lib/source-file.ts";
+import { declaredSlotNames } from "../lib/storage-slot-names.ts";
+import { templateSchemas } from "../lib/template-schemas.ts";
+import type { PackageMetadata } from "../lib/types.ts";
 
 const API_URL = process.env.API_URL ?? "http://localhost:3001";
 
@@ -68,6 +77,7 @@ type CreatedPackage = {
 
 type CompiledPackage = {
   status: "draft" | "compiled" | "error";
+  metadata: PackageMetadata | null;
   // The assembler's rendering of the build's diagnostics.
   stderr: string;
 };
@@ -125,6 +135,34 @@ const compileScript = async (
   return compiled;
 };
 
+// Why a template disagrees with its schema, or null when it agrees: the
+// slot names it declares are the schema's, and its compiled package kept the
+// schemas the template has.
+const schemaMismatch = (
+  example: ScriptExample | "none",
+  code: string,
+  metadata: PackageMetadata | null,
+) => {
+  const schema = example === "none" ? undefined : templateSchemas[example];
+  if (!schema) {
+    return null;
+  }
+  if (schema.storage) {
+    const declared = declaredSlotNames(code);
+    const expected = schema.storage.slots.map(({ name }) => name).sort();
+    if (declared?.join("\n") !== [...new Set(expected)].join("\n")) {
+      return `the template declares the slots ${JSON.stringify(declared)}, its schema ${JSON.stringify(expected)}`;
+    }
+    if (!metadata?.storage) {
+      return "its package lost its storage schema on compile";
+    }
+  }
+  if (schema.noteStorage && !metadata?.noteStorage) {
+    return "its package lost its note storage schema on compile";
+  }
+  return null;
+};
+
 const failures: string[] = [];
 for (const { type, example } of scripts) {
   const label = `${type} (example: ${example})`;
@@ -153,15 +191,19 @@ for (const { type, example } of scripts) {
     }
     const script = await createScript(type, example);
     created.push(script);
-    const { status, stderr } = await compileScript(script, [
+    const { status, stderr, metadata } = await compileScript(script, [
       ...script.dependencies.map(({ id }) => id),
       ...dependencies,
     ]);
-    if (status === "compiled") {
-      console.info(`ok    ${label}`);
-    } else {
+    const mismatch = schemaMismatch(example, source(script), metadata);
+    if (status !== "compiled") {
       failures.push(label);
       console.error(`FAIL  ${label}\n${stderr}\n`);
+    } else if (mismatch) {
+      failures.push(label);
+      console.error(`FAIL  ${label}: ${mismatch}\n`);
+    } else {
+      console.info(`ok    ${label}`);
     }
   } finally {
     // The script first: a dependency can't be deleted while it's used.
@@ -200,7 +242,7 @@ for (const { label, example, edits } of tutorialEdits) {
 
 const total = scripts.length + tutorialEdits.length;
 if (failures.length > 0) {
-  console.error(`${failures.length}/${total} templates don't compile.`);
+  console.error(`${failures.length}/${total} templates fail.`);
   process.exit(1);
 }
-console.info(`All ${total} templates compile.`);
+console.info(`All ${total} templates compile and agree with their schemas.`);

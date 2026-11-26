@@ -24,14 +24,18 @@ const templateDependency = (
   },
 });
 
-// The commitments are the templates' as api-compile builds them: unknown
-// until the MASM templates are written (plan 02 of spec/remove-rust). A
-// compile answers the real one.
-export const basicWalletDependency = templateDependency("basic-wallet", "");
+// The commitments are the templates' as api-compile builds them under these
+// names (a package's commitment covers its name). They change with the
+// template or api-compile's toolchain: a compile answers the real one, so a
+// stale one is only shown until then.
+export const basicWalletDependency = templateDependency(
+  "basic-wallet",
+  "0x59e7859c8a1235c43f1d171452422e94d99ed434519c6d351eec2e0a71ab8983",
+);
 
 export const counterAccountDependency = templateDependency(
   "counter-account",
-  "",
+  "0xc586e89be2b913920e892f193b034eeb6e55409cf9b3554a5b4afb1a95eef155",
 );
 
 export const defaultDependenciesRecords = {

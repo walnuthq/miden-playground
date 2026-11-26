@@ -13,7 +13,6 @@ import {
 } from "@/db/packages";
 import { type AppEnv, createApp } from "@/lib/app";
 import {
-  basicWalletDependency,
   counterAccountDependency,
   defaultDependenciesRecords,
 } from "@/lib/default-dependencies";
@@ -36,7 +35,7 @@ import { exportFiles } from "@/lib/package-files";
 import { toPackageType } from "@/lib/package-type";
 import { rateLimit } from "@/lib/rate-limit";
 import { sourceFilePath } from "@/lib/source-file";
-import { templates } from "@/lib/templates";
+import { templateMetadata, templates } from "@/lib/templates";
 import type {
   CompiledPackage,
   Dependency,
@@ -75,7 +74,9 @@ type CreateScriptResponse = {
 
 const scriptsDependencies: Record<ScriptExample, Dependency[]> = {
   none: [],
-  "p2id-note": [basicWalletDependency],
+  // The note calls the standard wallet's procedures (miden-standards), which
+  // every wallet has: no script to depend on.
+  "p2id-note": [],
   "auth-no-auth": [],
   "counter-account": [],
   "counter-note": [],
@@ -248,6 +249,7 @@ const scripts = createApp()
         type: actualType,
         source: templates[example === "none" ? packageType : example],
         dependencies: scriptsDependencies[example],
+        metadata: example === "none" ? null : templateMetadata(example),
         ownerKeyHash: await requireKeyHash(c),
       });
       return c.json<CreateScriptResponse>({
