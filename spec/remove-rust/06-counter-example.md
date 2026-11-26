@@ -14,7 +14,7 @@ The home page's Counter Contract example launches again, built from MASM: a coun
 
 ## Current state
 
-- `apps/api/examples/counter-contract`: two Rust packages copied from the upstream Rust project, with a `compiled.json` snapshot (about 560 KB of base64 per note package), a source hash (`examples/hash.ts`) and `pnpm examples:compile` (`scripts/compile-examples.ts`). After plan 05 the example is unavailable or hidden.
+- `apps/api/examples/counter-contract`: two Rust packages copied from the upstream Rust project, with a `compiled.json` snapshot (about 560 KB of base64 per note package), a source hash (`examples/hash.ts`) and `pnpm examples:compile` (`scripts/compile-examples.ts`). After plan 05 the example's card is hidden by the `hidden` flag on its `ExampleMeta` (`lib/examples/meta.tsx`): remove the flag when the MASM example ships, and lift `test.fixme` from `e2e/example-counter-contract.spec.ts`. Miden Bank keeps its flag (decision 9).
 - `apps/web/lib/examples/counter-contract` and `meta.tsx` describe it; `e2e/example-counter-contract.spec.ts` and `e2e/example.ts` drive it (`test.fixme` since plan 05).
 - The example specs launch an example through `apps/api`: run it on port 3001 next to the web app on 3000.
 
