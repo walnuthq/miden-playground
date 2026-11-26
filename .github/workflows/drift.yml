@@ -2,7 +2,8 @@ name: Drift checks
 
 # Two generated files follow something outside this repository: the project
 # template's Cargo.lock (the crates api-compile warmed its cache with) and the
-# MASM vocabulary (the assembler's sources). Neither check can be required on
+# MASM vocabulary (the assembler's sources, at the version pinned in
+# apps/web/scripts/sync-masm-vocabulary.ts). Neither check can be required on
 # pull requests: they depend on api-compile and GitHub's raw files being up.
 on:
   schedule:
@@ -12,6 +13,7 @@ on:
     paths:
       - "apps/api/templates/project-template/Cargo.lock"
       - "apps/web/lib/masm/**"
+      - "apps/web/scripts/sync-masm-vocabulary.ts"
       - ".github/workflows/drift.yml"
   workflow_dispatch:
 

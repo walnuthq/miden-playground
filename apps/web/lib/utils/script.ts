@@ -11,12 +11,16 @@ import type {
   Script,
   Signature,
 } from "@/lib/types/script";
-import { scriptFilePaths } from "@/lib/types/script";
 import {
   formatProcedureExportPath,
   formatProcedureInputs,
 } from "@/lib/utils/procedure-inputs";
-import { findPackages } from "@/lib/utils/project-files";
+import {
+  findCargoOnlyDirectories,
+  findPackages,
+  manifestSourcePath,
+} from "@/lib/utils/project-files";
+import { scriptFilePaths } from "@/lib/utils/script-files";
 
 // Moved to `procedure-inputs.ts`, which the unit tests can load: still
 // exported here for the app's imports.
@@ -93,11 +97,10 @@ export const defaultScript = (): Script => ({
   updatedAt: Date.now(),
 });
 
-// Whether a script is built from its MASM source rather than from its package:
-// the built-in scripts, which have no package.
-// A compiled Rust script has both: its `masm` is the compiler's Miden Assembly,
-// shown in the MASM tab, which calls library procedures without including them
-// and doesn't reassemble into the package. Never branch on `masm` alone.
+// Whether a script is assembled in the browser from its `masm` rather than
+// loaded from its package: the built-in scripts, which have no package. The
+// API's scripts have a package once compiled, and an empty `masm`: their
+// source is in `files`.
 export const assembledFromMasm = ({
   masm,
   masp,
@@ -198,13 +201,22 @@ export const readFileAsArrayBuffer = (file: File): Promise<ArrayBuffer> =>
     fileReader.readAsArrayBuffer(file);
   });
 
-// The packages of a picked folder, keyed by directory (the API resolves
-// `path = "../<dir>"` dependencies against its last segment). Only their
-// manifests and sources are read: the folder can list thousands of files from
-// target/.
+// A picked folder's projects: the packages it can import, keyed by directory
+// (the API resolves `path = "../<dir>"` dependencies against its last
+// segment), and the directories it can't, with why.
+export type PickedProjects = {
+  packageSources: Record<string, PackageSource>;
+  refused: { directory: string; reason: string }[];
+};
+
+export const RUST_PROJECT_REASON =
+  "a Rust project: the Playground imports Miden Assembly projects only.";
+
+// Only the manifests and the modules they name are read: the folder can list
+// thousands of files from target/.
 export const fileListToPackageSources = async (
   fileList: FileList,
-): Promise<Record<string, PackageSource>> => {
+): Promise<PickedProjects> => {
   const files = new Map(
     Array.from(fileList, (file) => [file.webkitRelativePath, file]),
   );
@@ -212,20 +224,44 @@ export const fileListToPackageSources = async (
     const file = files.get(path);
     return file ? readFileAsText(file) : Promise.resolve("");
   };
-  return Object.fromEntries(
-    await Promise.all(
-      findPackages([...files.keys()]).map(
-        async ({ directory, manifestPath, sourcePath }) =>
-          [
-            directory,
-            {
-              midenProjectToml: await read(manifestPath),
-              rust: await read(sourcePath),
-            },
-          ] as const,
+  const paths = [...files.keys()];
+  const packages = await Promise.all(
+    findPackages(paths).map(async ({ directory, manifestPath, rust }) => {
+      const midenProjectToml = await read(manifestPath);
+      const sourcePath = manifestSourcePath(directory, midenProjectToml);
+      if (sourcePath && files.has(sourcePath)) {
+        return {
+          directory,
+          source: { midenProjectToml, masm: await read(sourcePath) },
+        };
+      }
+      return {
+        directory,
+        reason: rust
+          ? RUST_PROJECT_REASON
+          : sourcePath
+            ? `its [lib] path, ${sourcePath.slice(directory.length + 1)}, isn't in the folder.`
+            : "its miden-project.toml has no [lib] path naming a .masm file.",
+      };
+    }),
+  );
+  return {
+    packageSources: Object.fromEntries(
+      packages.flatMap(({ directory, source }) =>
+        source ? [[directory, source]] : [],
       ),
     ),
-  );
+    refused: [
+      ...packages.flatMap(({ directory, reason }) =>
+        reason ? [{ directory, reason }] : [],
+      ),
+      // A Cargo workspace's root has no manifest of its own: only a folder
+      // with no Miden manifest at all is told it's a Rust project.
+      ...(packages.length === 0 ? findCargoOnlyDirectories(paths) : []).map(
+        (directory) => ({ directory, reason: RUST_PROJECT_REASON }),
+      ),
+    ].sort((a, b) => a.directory.localeCompare(b.directory)),
+  };
 };
 
 export const packageToScript = ({
@@ -246,9 +282,9 @@ export const packageToScript = ({
   type,
   status: "compiled",
   readOnly: true,
-  // Its source and manifests, at the root of the verified upload.
+  // Its source and manifest, at the root of the verified upload.
   files: Object.fromEntries(
-    scriptFilePaths.flatMap((path) =>
+    scriptFilePaths({ name }).flatMap((path) =>
       files[path] === undefined ? [] : [[path, files[path]]],
     ),
   ),

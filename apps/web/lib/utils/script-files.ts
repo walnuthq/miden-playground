@@ -1,17 +1,44 @@
-// A script's files (`Script.files`): its source and, for scripts from the API,
-// its manifests. Plain node runs the unit tests: relative imports only.
+// A script's files (`Script.files`): its MASM source and, for scripts from
+// the API, its generated miden-project.toml. Both are named from the package
+// name, by the API's own helper. Plain node runs the unit tests: relative
+// imports only.
+import {
+  MANIFEST_FILE,
+  scriptFilePaths as packageFilePaths,
+  sourceFilePath,
+} from "../../../api/lib/source-file.ts";
 import type { Script, ScriptFiles } from "../types/script.ts";
 
-// The file a script's code is compiled from, and the only one edited.
-export const SCRIPT_FILE = "src/lib.rs";
+export { MANIFEST_FILE, sourceFilePath };
+
+// The file a script is assembled from, and the only one edited:
+// `counter-account` is `counter_account.masm`.
+export const scriptSourcePath = ({ name }: Pick<Script, "name">) =>
+  sourceFilePath(name);
+
+// The files a script can have, the source first, in the order the Explorer
+// lists them.
+export const scriptFilePaths = ({ name }: Pick<Script, "name">) =>
+  packageFilePaths(name);
 
 // The files of a script that only has a source (the built-in scripts and the
-// packages embedded for the tutorials). The MASM-only built-ins have none.
-export const sourceFiles = (source: string): ScriptFiles =>
-  source === "" ? {} : { [SCRIPT_FILE]: source };
+// packages embedded for the tutorials). The built-in libraries have none.
+export const sourceFiles = (name: string, source: string): ScriptFiles =>
+  source === "" ? {} : { [sourceFilePath(name)]: source };
 
-export const scriptSource = ({ files }: Pick<Script, "files">) =>
-  files[SCRIPT_FILE] ?? "";
+// Where a script persisted before the switch to MASM keeps its Rust source:
+// such a script can't be compiled any more.
+export const LEGACY_RUST_FILE = "src/lib.rs";
+
+export const scriptSource = (script: Pick<Script, "name" | "files">) =>
+  script.files[scriptSourcePath(script)] ?? "";
+
+// The files after the source was edited: the manifest stays the API's until
+// the next compile.
+export const filesWithSource = (
+  script: Pick<Script, "name" | "files">,
+  source: string,
+): ScriptFiles => ({ ...script.files, [scriptSourcePath(script)]: source });
 
 // A path dependency of miden-project.toml, as the API writes it
 // (`generateMidenProjectToml` in apps/api/lib/toml.ts).
@@ -59,13 +86,13 @@ export const filesWithDependency = (
   name: string,
   action: "add" | "remove",
 ): ScriptFiles => {
-  const toml = files["miden-project.toml"];
+  const toml = files[MANIFEST_FILE];
   if (toml === undefined) {
     return files;
   }
   return {
     ...files,
-    "miden-project.toml":
+    [MANIFEST_FILE]:
       action === "add"
         ? addTomlDependency(toml, name)
         : removeTomlDependency(toml, name),

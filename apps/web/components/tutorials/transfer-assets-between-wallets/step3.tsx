@@ -41,10 +41,9 @@ const Step3Content = ({
       when the send transaction was created. Feel free to read this standard
       note script by clicking the{" "}
       <TutorialLink href="/scripts/p2id">script shortcut</TutorialLink>. Its{" "}
-      <em>"MASM"</em> tab holds the <strong>Miden Assembly (MASM)</strong> code
-      the network runs: it is heavily commented and provides insights into the
-      underlying Miden architecture. The <em>"Explorer"</em> tab shows the same
-      logic written in <strong>Rust</strong>.
+      <em>"Explorer"</em> tab holds the <strong>Miden Assembly (MASM)</strong>{" "}
+      code the network runs: it is heavily commented and provides insights into
+      the underlying Miden architecture.
     </p>
     <p>
       When you're done, click the target account ID in the{" "}

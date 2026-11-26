@@ -2,7 +2,7 @@ import { toast } from "sonner";
 import useScripts from "@/hooks/use-scripts";
 import { sourceEditor } from "@/lib/source-editors";
 import type { Script } from "@/lib/types/script";
-import { SCRIPT_FILE, scriptSource } from "@/lib/utils/script-files";
+import { filesWithSource, scriptSource } from "@/lib/utils/script-files";
 import { applyCodeEdits, type CodeEdit } from "@/lib/utils/tutorial-code";
 
 // A script's source as the user sees it: its open editor's, else the state's.
@@ -35,8 +35,7 @@ const useApplyCode = () => {
       updateScript({
         id: script.id,
         status: "draft",
-        files: { ...script.files, [SCRIPT_FILE]: next },
-        masm: "",
+        files: filesWithSource(script, next),
       });
       return;
     }

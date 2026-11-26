@@ -70,7 +70,7 @@ export const counterAccountScript: Script = {
   type: "account-component",
   status: "compiled",
   readOnly: true,
-  files: sourceFiles(rust),
+  files: sourceFiles("counter-account", rust),
   masm: "",
   error: "",
   warnings: "",

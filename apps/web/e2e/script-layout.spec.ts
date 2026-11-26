@@ -7,7 +7,7 @@ import {
 } from "./editor";
 import { logBrowserErrors, TRANSACTION_TIMEOUT } from "./tutorial";
 
-// The Rust editor's height on screen, a few px while the console is maximized
+// The source editor's height on screen, a few px while the console is maximized
 // (Monaco keeps a minimum height).
 const editorHeight = (page: Page) =>
   page.evaluate(
@@ -62,26 +62,6 @@ test("script: editor and console layout", async ({ page }) => {
     });
   });
 
-  await test.step("maximize, then a location shows the editor", async () => {
-    await replaceInEditor(
-      page,
-      "self.count_map.get(key)\n    }",
-      "self.count_map.get(missing_key)\n    }",
-    );
-    await page.getByRole("button", { name: "Maximize console" }).click();
-    await expect.poll(() => editorHeight(page)).toBeLessThan(10);
-    await page.getByRole("button", { name: "Compile" }).click();
-    const location = page.getByRole("button", {
-      name: /^src\/lib\.rs:\d+:\d+$/,
-    });
-    await expect(location).toBeVisible({ timeout: TRANSACTION_TIMEOUT });
-    await location.click();
-    await expect.poll(() => editorHeight(page)).toBeGreaterThan(100);
-    await expect(
-      page.getByRole("button", { name: "Maximize console" }),
-    ).toBeVisible();
-  });
-
   await test.step("a dragged size is remembered", async () => {
     // The editor/console split's, not the Explorer's vertical one.
     const handle = page.locator(
@@ -99,9 +79,35 @@ test("script: editor and console layout", async ({ page }) => {
     await page.mouse.up();
     const height = await consoleHeight(page);
     await page.reload();
-    await waitForEditorText(page, "fn get_count(&self) -> Felt {");
+    await waitForEditorText(page, "pub proc get_count() -> felt");
     await expect
       .poll(async () => Math.abs((await consoleHeight(page)) - height))
       .toBeLessThan(4);
   });
+});
+
+// The console's links to the assembler's diagnostics come with plan 04 of
+// spec/remove-rust (the diagnostics reader).
+test.fixme("script: a location shows the maximized console's editor", async ({
+  page,
+}) => {
+  logBrowserErrors(page);
+  await createCounterScript(page);
+  await replaceInEditor(
+    page,
+    "pub proc get_count() -> felt\n",
+    "pub proc get_count() -> felt\n    bogus_instruction\n",
+  );
+  await page.getByRole("button", { name: "Maximize console" }).click();
+  await expect.poll(() => editorHeight(page)).toBeLessThan(10);
+  await page.getByRole("button", { name: "Compile" }).click();
+  const location = page.getByRole("button", {
+    name: /counter_account\.masm:\d+:\d+$/,
+  });
+  await expect(location).toBeVisible({ timeout: TRANSACTION_TIMEOUT });
+  await location.click();
+  await expect.poll(() => editorHeight(page)).toBeGreaterThan(100);
+  await expect(
+    page.getByRole("button", { name: "Maximize console" }),
+  ).toBeVisible();
 });

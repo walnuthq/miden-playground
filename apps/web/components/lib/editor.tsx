@@ -6,15 +6,15 @@ import useScripts from "@/hooks/use-scripts";
 import { updateEditorSettings, useEditorSettings } from "@/lib/editor-settings";
 import { MASM_LANGUAGE_ID, registerMasm } from "@/lib/masm/language";
 import { registerSourceEditor } from "@/lib/source-editors";
-import type { Script, ScriptFilePath } from "@/lib/types/script";
+import type { Script } from "@/lib/types/script";
 import { type Diagnostic, parseDiagnostics } from "@/lib/utils/diagnostics";
-import { SCRIPT_FILE } from "@/lib/utils/script-files";
+import { filesWithSource, scriptSourcePath } from "@/lib/utils/script-files";
 
 export type CodeEditor = Parameters<OnMount>[0];
 
 type Model = NonNullable<ReturnType<CodeEditor["getModel"]>>;
 
-const MARKER_OWNER = "cargo-miden";
+const MARKER_OWNER = "miden-assembler";
 
 type Marker = ReturnType<typeof toMarker>;
 
@@ -86,32 +86,30 @@ const toMarker = (
   };
 };
 
-// Monaco has no TOML language: `ini` colors its sections, keys and strings.
-const languages: Record<ScriptFilePath | "masm", string> = {
-  "src/lib.rs": "rust",
-  "Cargo.toml": "ini",
-  "miden-project.toml": "ini",
-  masm: MASM_LANGUAGE_ID,
-};
+// The source is MASM. Monaco has no TOML language: `ini` colors the
+// manifest's sections, keys and strings.
+const languageOf = (path: string) =>
+  path.endsWith(".masm") ? MASM_LANGUAGE_ID : "ini";
 
-// One of the script's files, or its MASM. Only its source (`src/lib.rs`) is
-// edited, and gets the compile markers: the manifests are the API's, the MASM
-// the compiler's.
+// One of the script's files, its source by default. Only the source is edited,
+// and gets the compile markers: the manifest is the API's.
 const Editor = ({
   script,
-  file = SCRIPT_FILE,
+  file,
   readOnly = false,
   height = "100%",
   onMount,
 }: {
   script: Script;
-  file?: ScriptFilePath | "masm";
+  file?: string;
   readOnly?: boolean;
   height?: string;
   onMount?: OnMount;
 }) => {
-  const isSource = file === SCRIPT_FILE;
-  const content = file === "masm" ? script.masm : (script.files[file] ?? "");
+  const sourcePath = scriptSourcePath(script);
+  const path = file ?? sourcePath;
+  const isSource = path === sourcePath;
+  const content = script.files[path] ?? "";
   const { resolvedTheme } = useTheme();
   const { updateScript } = useScripts();
   const { minimap, fontSize } = useEditorSettings();
@@ -144,7 +142,7 @@ const Editor = ({
       return;
     }
     const markers = parseDiagnostics(compileOutput)
-      .filter(({ file }) => file === SCRIPT_FILE)
+      .filter(({ file }) => file === sourcePath)
       .map((diagnostic) => toMarker(mounted.monaco, model, diagnostic));
     mounted.monaco.editor.setModelMarkers(model, MARKER_OWNER, markers);
     // The problems panel (F8) would keep showing the previous compile's.
@@ -168,12 +166,12 @@ const Editor = ({
         })),
       ),
     });
-  }, [mounted, compileOutput]);
+  }, [mounted, compileOutput, sourcePath]);
   return (
     <MonacoEditor
       height={height}
       theme={resolvedTheme === "dark" ? "vs-dark" : "light"}
-      defaultLanguage={languages[file]}
+      defaultLanguage={languageOf(path)}
       beforeMount={registerMasm}
       defaultValue={content}
       // The read-only files follow each compile, including one started from
@@ -213,8 +211,7 @@ const Editor = ({
               updateScript({
                 id: script.id,
                 status: "draft",
-                files: { ...script.files, [SCRIPT_FILE]: content ?? "" },
-                masm: "",
+                files: filesWithSource(script, content ?? ""),
               })
       }
       options={{

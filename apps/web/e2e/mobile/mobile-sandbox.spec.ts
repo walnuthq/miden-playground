@@ -102,11 +102,11 @@ test("mobile: a sandbox fits the screen", async ({ page }) => {
       0,
     );
     await page.getByRole("button", { name: "Files" }).click();
-    await page.getByRole("menuitem", { name: "Cargo.toml" }).click();
-    await expect(page.getByRole("tab", { name: "Cargo.toml" })).toHaveAttribute(
-      "aria-selected",
-      "true",
-    );
+    await page.getByRole("menuitem", { name: "miden-project.toml" }).click();
+    const manifestTab = page.getByRole("tab", { name: "miden-project.toml" });
+    await expect(manifestTab).toHaveAttribute("aria-selected", "true");
+    // The tabs row scrolls to the file opened.
+    await expectWithinWidth(manifestTab);
     // The console starts collapsed, and compiling opens it.
     await expect
       .poll(() => consoleHeight(page))

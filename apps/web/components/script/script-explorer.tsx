@@ -19,13 +19,9 @@ import Editor from "@/components/lib/editor";
 import EditorTabs from "@/components/script/editor-tabs";
 import FileExplorer from "@/components/script/file-explorer";
 import FileIcon from "@/components/script/file-icon";
-import {
-  type Script,
-  type ScriptFilePath,
-  scriptFilePaths,
-} from "@/lib/types/script";
+import type { Script } from "@/lib/types/script";
 import { buildFileTree } from "@/lib/utils/file-tree";
-import { SCRIPT_FILE } from "@/lib/utils/script-files";
+import { scriptFilePaths, scriptSourcePath } from "@/lib/utils/script-files";
 
 // On a phone the file tree would leave the editor a column a few words wide:
 // a menu at the start of the tabs row opens the files instead.
@@ -34,9 +30,9 @@ const FilesMenu = ({
   activePath,
   onOpen,
 }: {
-  paths: ScriptFilePath[];
-  activePath: ScriptFilePath | null;
-  onOpen: (path: ScriptFilePath) => void;
+  paths: string[];
+  activePath: string | null;
+  onOpen: (path: string) => void;
 }) => (
   <DropdownMenu>
     <DropdownMenuTrigger
@@ -75,10 +71,10 @@ const ScriptExplorer = ({
   onMountSource,
 }: {
   script: Script;
-  openPaths: ScriptFilePath[];
-  activePath: ScriptFilePath | null;
-  onOpen: (path: ScriptFilePath) => void;
-  onClose: (path: ScriptFilePath) => void;
+  openPaths: string[];
+  activePath: string | null;
+  onOpen: (path: string) => void;
+  onClose: (path: string) => void;
   onMountSource: Parameters<typeof Editor>[0]["onMount"];
 }) => {
   const panelId = useId();
@@ -89,10 +85,11 @@ const ScriptExplorer = ({
     storage: localStorage,
     onlySaveAfterUserInteractions: true,
   });
-  const paths = scriptFilePaths.filter(
+  const sourcePath = scriptSourcePath(script);
+  const paths = scriptFilePaths(script).filter(
     (path) => script.files[path] !== undefined,
   );
-  // A MASM-only built-in has no file to show.
+  // A built-in library has no file to show.
   const shownPaths = openPaths.filter((path) => paths.includes(path));
   const shownPath =
     activePath && paths.includes(activePath) ? activePath : null;
@@ -101,11 +98,11 @@ const ScriptExplorer = ({
       openPaths={shownPaths}
       activePath={shownPath}
       readOnlyPaths={paths.filter(
-        (path) => script.readOnly || path !== SCRIPT_FILE,
+        (path) => script.readOnly || path !== sourcePath,
       )}
       panelId={panelId}
-      onSelect={(path) => onOpen(path as ScriptFilePath)}
-      onClose={(path) => onClose(path as ScriptFilePath)}
+      onSelect={onOpen}
+      onClose={onClose}
       className={isMobile ? "min-w-0 flex-1" : undefined}
     />
   );
@@ -123,17 +120,17 @@ const ScriptExplorer = ({
         {/* Mounted while closed or hidden: its undo history, scroll
                 position and compile markers survive, and the console's links
                 reveal locations in it. */}
-        {paths.includes(SCRIPT_FILE) && (
-          <div className={cn("h-full", shownPath !== SCRIPT_FILE && "hidden")}>
+        {paths.includes(sourcePath) && (
+          <div className={cn("h-full", shownPath !== sourcePath && "hidden")}>
             <Editor
               script={script}
-              file={SCRIPT_FILE}
+              file={sourcePath}
               readOnly={script.readOnly}
               onMount={onMountSource}
             />
           </div>
         )}
-        {shownPath && shownPath !== SCRIPT_FILE && (
+        {shownPath && shownPath !== sourcePath && (
           <Editor key={shownPath} script={script} file={shownPath} />
         )}
         {!shownPath && (
@@ -157,7 +154,7 @@ const ScriptExplorer = ({
         <FileExplorer
           tree={buildFileTree(paths)}
           activePath={shownPath}
-          onOpen={(path) => onOpen(path as ScriptFilePath)}
+          onOpen={onOpen}
         />
       </ResizablePanel>
       <ResizableHandle className="bg-border" />

@@ -19,8 +19,8 @@ const INVOCATIONS = [
   "dynexec",
 ];
 
-// Token types the built-in `vs-dark` and `light` themes color, so the Rust
-// highlighting (same themes) is left as it is.
+// Token types the built-in `vs-dark` and `light` themes color, so the
+// manifest's highlighting (same themes) is left as it is.
 export const masmLanguage = {
   defaultToken: "",
   keywords: vocabulary.keywords.filter((word) => !CONTROL.includes(word)),

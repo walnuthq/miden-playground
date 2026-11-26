@@ -3,7 +3,8 @@
 `scripts/share-project.mjs` turns a local Miden project into one playground
 link. Whoever opens the link gets their own copies of its scripts in a new
 sandbox, and the accounts it names imported from the chain, ready to call. It
-is meant for coding agents and `cargo-miden` users: one command, no browser.
+is meant for coding agents and anyone writing Miden Assembly locally: one
+command, no browser.
 
 It needs Node 22 or later and nothing else. From this repository:
 
@@ -15,8 +16,9 @@ node scripts/share-project.mjs <folder> [--network mtst] [--title "…"] \
 The script copies to any other repository as it is.
 
 - `<folder>` is one package or a folder of packages. A package is a directory
-  with a `miden-project.toml` and a `src/lib.rs`, the same rule "Import
-  Project" uses. `target/`, `node_modules/` and hidden directories are
+  with a `miden-project.toml` whose `[lib] path` names its `.masm` file, the
+  same rule "Import Project" uses. A Rust project (a `Cargo.toml` and no
+  MASM) is refused. `target/`, `node_modules/` and hidden directories are
   skipped. Packages depend on each other through `path = "../<directory>"`.
 - `--network` is `mtst` (testnet, the default), `mdev` (devnet) or `mm`
   (Mainnet). The MockChain sandbox lives in one browser, so it can't be linked.
@@ -41,7 +43,7 @@ the same request "Import Project" sends:
 ```json
 {
   "packageSources": {
-    "<folder>/<directory>": { "midenProjectToml": "…", "rust": "…" }
+    "<folder>/<directory>": { "midenProjectToml": "…", "masm": "…" }
   }
 }
 ```
@@ -85,15 +87,14 @@ deleted.
 ## Accounts deployed outside the playground
 
 The playground lists a script as an account's component when the account's
-code holds the script's procedures, matched by digest. A local `cargo miden
-build` gives the same procedure digests as the playground's build when it uses
-the same dependency versions. This was checked on 2026-11-23, with cargo-miden
-0.11.0, for the counter and the bank example's packages. The package files
-still differ in their bytes.
+code holds the script's procedures, matched by digest. Assembling the same
+MASM gives the same procedure digests, whatever the module path or namespace
+it is assembled under, as long as it links the same `miden-protocol` and
+`miden-standards` versions as the playground's assembler
+(`spec/remove-rust.md`, Spike results).
 
-The `Cargo.lock` of a script exported from the playground (Export on the script
-page) pins those versions. With other versions an account may show no
-components. In that case deploy it from the playground instead:
+With other versions an account may show no components. In that case deploy it
+from the playground instead:
 
 1. Run the script without `--account`.
 2. Open the link.

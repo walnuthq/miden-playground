@@ -88,5 +88,5 @@ export const createCounterScript = async (page: Page) => {
   await selectOption(page, "Example", "Counter Contract");
   await dialog.getByRole("button", { name: "Create" }).click();
   await expect(page).toHaveURL(/\/scripts\/[0-9a-z_-]+$/);
-  await waitForEditorText(page, "fn get_count(&self) -> Felt {");
+  await waitForEditorText(page, "pub proc get_count() -> felt");
 };

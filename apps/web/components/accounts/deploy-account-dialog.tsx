@@ -83,8 +83,9 @@ const ComponentStorage = ({
       <h3 className="text-sm font-medium">{label}</h3>
       {!schema && (
         <p className="text-xs text-muted-foreground">
-          This script was compiled without its storage layout: add its slots
-          below, or recompile it to list its storage slots.
+          This script has no storage layout to list its slots: add the slots its
+          code reads and writes below, by the names it gives them in{" "}
+          <code>{'word("…")'}</code>.
         </p>
       )}
       <StorageSlotsEditor

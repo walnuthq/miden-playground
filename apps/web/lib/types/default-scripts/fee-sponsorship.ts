@@ -3,8 +3,6 @@ import type { Script } from "@/lib/types/script";
 import { defaultProcedureExport, defaultScript } from "@/lib/utils/script";
 import { sourceFiles } from "@/lib/utils/script-files";
 
-export const rust = ``;
-
 // miden-standards 0.17.1 asm/standards/notes/fee_sponsorship.masm, verbatim.
 // The fee payment of a transaction creating a note for a network account
 // creates one of these, paying the fee the network account charges for
@@ -215,7 +213,7 @@ const feeSponsorship: Script = {
   type: "note",
   status: "compiled",
   readOnly: true,
-  files: sourceFiles(rust),
+  files: sourceFiles("fee-sponsorship", masm),
   masm,
   commitment: FEE_SPONSORSHIP_NOTE_CODE,
   procedureExports: [

@@ -3,8 +3,6 @@ import type { Script } from "@/lib/types/script";
 import { defaultProcedureExport, defaultScript } from "@/lib/utils/script";
 import { sourceFiles } from "@/lib/utils/script-files";
 
-export const rust = ``;
-
 export const masm = `# The MASM code of the Multi-Signature Authentication component integrated with a state guardian.
 #
 # See the \`AuthGuardedMultisig\` Rust type's documentation for more details.
@@ -129,7 +127,7 @@ const authGuardedMultisig: Script = {
   type: "authentication-component",
   status: "compiled",
   readOnly: true,
-  files: sourceFiles(rust),
+  files: sourceFiles("auth-guarded-multisig", masm),
   masm,
   commitment:
     "0x4ec0dd8bf5ced6e758f661aeebe4f1cc6ea6eecf66b7758968ca953a7e9c1348",

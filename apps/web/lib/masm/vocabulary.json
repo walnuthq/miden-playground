@@ -1,5 +1,5 @@
 {
-  "source": "https://github.com/0xMiden/miden-vm/tree/v0.35.0",
+  "source": "https://github.com/0xMiden/miden-vm/tree/v0.36.5",
   "generatedBy": "pnpm masm:sync (scripts/sync-masm-vocabulary.ts)",
   "keywords": [
     "addrspace",

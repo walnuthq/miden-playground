@@ -3,8 +3,6 @@ import type { Script } from "@/lib/types/script";
 import { defaultProcedureExport, defaultScript } from "@/lib/utils/script";
 import { sourceFiles } from "@/lib/utils/script-files";
 
-export const rust = ``;
-
 export const masm = `use {NoteRecipient, NoteSerialNumber, NoteTag, NoteType} from miden::protocol::types
 use miden::protocol::active_note
 use miden::protocol::note
@@ -137,7 +135,7 @@ const txFee: Script = {
   type: "note",
   status: "compiled",
   readOnly: true,
-  files: sourceFiles(rust),
+  files: sourceFiles("tx-fee", masm),
   masm,
   commitment: TX_FEE_NOTE_CODE,
   procedureExports: [
