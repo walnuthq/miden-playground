@@ -1,3 +1,4 @@
+import CountReaderMissingScriptsAlert from "@/components/tutorials/foreign-procedure-invocation/missing-scripts-alert";
 import { ExternalLink } from "@/components/tutorials/prose";
 import type { TutorialStep } from "@/lib/types/tutorial";
 
@@ -5,6 +6,7 @@ const Step1: TutorialStep = {
   title: "Understand foreign procedure invocation.",
   Content: () => (
     <>
+      <CountReaderMissingScriptsAlert />
       <p>
         In the previous tutorials, you interacted with a counter contract
         deployed on testnet and deployed your own. In this tutorial, you'll

@@ -111,28 +111,26 @@ test("script: keyboard shortcuts", async ({ page }) => {
   });
 
   // Tutorial 10's count-reader: compiled, read-only, simulated in its
-  // console. The embedded Rust package went with the switch to MASM: back
-  // when plan 07 of spec/remove-rust re-embeds it from MASM.
-  await test.step.skip(
-    "a read-only package keeps the console's shortcuts only",
-    async () => {
-      await startTutorial(page, "Foreign procedure invocation");
-      await page.goto("/scripts/count-reader");
-      await waitForEditorText(page, "fn ");
-      await page.getByRole("tabpanel").locator(".view-lines").first().click();
-      await page.keyboard.press("ControlOrMeta+s");
-      await expect(page.getByRole("button", { name: "Compile" })).toHaveCount(
-        0,
-      );
-      await expect(
-        page.getByText("Simulation runs are logged here."),
-      ).toBeVisible();
-      await page.keyboard.press("ControlOrMeta+j");
-      await expect
-        .poll(() => consoleHeight(page))
-        .toBeLessThan(COLLAPSED_HEIGHT);
-      await page.keyboard.press("ControlOrMeta+j");
-      await expect.poll(() => consoleHeight(page)).toBeGreaterThan(100);
-    },
-  );
+  // console. The tutorial's starter adds it with an API id: opened from the
+  // scripts table.
+  await test.step("a read-only package keeps the console's shortcuts only", async () => {
+    await startTutorial(page, "Foreign procedure invocation");
+    await page.goto("/scripts");
+    await page
+      .getByRole("link", { name: "count-reader", exact: true })
+      .first()
+      .click();
+    await expect(page).toHaveURL(/\/scripts\/[0-9a-f-]{36}$/);
+    await waitForEditorText(page, "pub proc copy_count");
+    await page.getByRole("tabpanel").locator(".view-lines").first().click();
+    await page.keyboard.press("ControlOrMeta+s");
+    await expect(page.getByRole("button", { name: "Compile" })).toHaveCount(0);
+    await expect(
+      page.getByText("Simulation runs are logged here."),
+    ).toBeVisible();
+    await page.keyboard.press("ControlOrMeta+j");
+    await expect.poll(() => consoleHeight(page)).toBeLessThan(COLLAPSED_HEIGHT);
+    await page.keyboard.press("ControlOrMeta+j");
+    await expect.poll(() => consoleHeight(page)).toBeGreaterThan(100);
+  });
 });

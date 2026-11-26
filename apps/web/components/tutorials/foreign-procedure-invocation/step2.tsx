@@ -1,4 +1,6 @@
 import { useLocation } from "react-router";
+import CountReaderMissingScriptsAlert from "@/components/tutorials/foreign-procedure-invocation/missing-scripts-alert";
+import useCountReader from "@/components/tutorials/foreign-procedure-invocation/use-count-reader";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import { BulletList } from "@/components/tutorials/prose";
 import TutorialLink from "@/components/tutorials/tutorial-link";
@@ -7,15 +9,18 @@ import type { TutorialStep } from "@/lib/types/tutorial";
 
 const useCompleted = () => {
   const { pathname } = useLocation();
-  return pathname === "/scripts/count-reader";
+  const { countReaderScript } = useCountReader();
+  return !!countReaderScript && pathname === `/scripts/${countReaderScript.id}`;
 };
 
 const Step2: TutorialStep = {
   title: "Open the Count Reader script.",
   Content: () => {
     const completed = useCompleted();
+    const { countReaderScript } = useCountReader();
     return (
       <>
+        <CountReaderMissingScriptsAlert />
         <img
           className="max-h-96 object-contain"
           src="/img/count-copy-fpi-diagram.png"
@@ -45,7 +50,13 @@ const Step2: TutorialStep = {
         </BulletList>
         <p>
           Let's start by reading the code of the{" "}
-          <TutorialLink href="/scripts/count-reader">
+          <TutorialLink
+            href={
+              countReaderScript
+                ? `/scripts/${countReaderScript.id}`
+                : "/scripts"
+            }
+          >
             count-reader script
           </TutorialLink>{" "}
           to understand how the <strong>Count Reader</strong> contract works.

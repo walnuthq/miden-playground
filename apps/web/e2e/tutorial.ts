@@ -21,7 +21,11 @@ export const tutorialPanel = (page: Page) => {
     // is known: links built from synced state (e.g. the minted note) point to
     // ".../undefined" until the next state sync picks it up. A step can
     // mention the same link several times.
-    openLink: async (name: string, href: RegExp) => {
+    openLink: async (
+      name: string,
+      href: RegExp,
+      { breadcrumb }: { breadcrumb?: string } = {},
+    ) => {
       const link = root
         .locator("a")
         .filter({ hasText: new RegExp(`^${name}$`) })
@@ -33,12 +37,12 @@ export const tutorialPanel = (page: Page) => {
       await expect(page).toHaveURL(href);
       // React Router updates the URL before it renders the new page: wait for
       // the header breadcrumb, rendered with the page, to catch up. A script
-      // page shows the script's name: links go to built-in scripts only, whose
-      // name is their id.
+      // page shows the script's name: a built-in's is its id, another's
+      // (an API id) is given as `breadcrumb`.
       const [, route, resource] = new URL(page.url()).pathname.split("/");
       await expect(
         page.locator('header [data-slot="breadcrumb-page"]'),
-      ).toHaveText(resource ?? (route || "home"));
+      ).toHaveText(breadcrumb ?? resource ?? (route || "home"));
     },
   };
 };

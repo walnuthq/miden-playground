@@ -35,14 +35,19 @@ export type TutorialMeta = {
   unavailable?: string;
 };
 
+export type TutorialStarter = WorkspaceStarter &
+  Partial<Pick<State, "accounts">>;
+
 export type Tutorial = TutorialMeta & {
   networkId: NetworkId;
   state: State;
   store: Store | null;
   // Scripts and components fetched from the API when the tutorial starts
   // fresh (a precompiled example's packages, too big to embed), appended to
-  // `state`'s. When the API is down, the tutorial opens without them, with a
-  // warning. Most tutorials embed their scripts in `state` instead.
-  starter?: () => Promise<WorkspaceStarter>;
+  // `state`'s, with the accounts whose components are among them (a
+  // component is a script id, the API's UUID here). When the API is down, the
+  // tutorial opens without them, with a warning. Most tutorials embed their
+  // scripts in `state` instead.
+  starter?: () => Promise<TutorialStarter>;
   steps: TutorialStep[];
 };

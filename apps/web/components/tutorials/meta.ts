@@ -141,7 +141,6 @@ export const tutorialMetas: TutorialMeta[] = [
     initialRoute: "/scripts",
     stepCount: 6,
     requiresWallet: false,
-    unavailable: REWRITING_FOR_MASM,
   },
   {
     id: "your-first-smart-contract-and-custom-note",

@@ -1,20 +1,20 @@
 import { Plus } from "lucide-react";
 import { useLocation } from "react-router";
+import CountReaderMissingScriptsAlert from "@/components/tutorials/foreign-procedure-invocation/missing-scripts-alert";
+import useCountReader, {
+  COUNT_READER_SLOT_NAME,
+} from "@/components/tutorials/foreign-procedure-invocation/use-count-reader";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import { ButtonName, InlineCode } from "@/components/tutorials/prose";
 import TutorialLink from "@/components/tutorials/tutorial-link";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
-import useAccounts from "@/hooks/use-accounts";
 import type { Account } from "@/lib/types/account";
 import type { TutorialStep } from "@/lib/types/tutorial";
 
 const useCompleted = () => {
   const { pathname } = useLocation();
-  const { accounts } = useAccounts();
-  const countReader = accounts.find(({ components }) =>
-    components.includes("count-reader"),
-  );
-  return pathname === `/accounts/${countReader?.identifier}`;
+  const { countReader } = useCountReader();
+  return !!countReader && pathname === `/accounts/${countReader.identifier}`;
 };
 
 const Step4Content = ({ countReader }: { countReader?: Account }) => (
@@ -38,7 +38,7 @@ const Step4Content = ({ countReader }: { countReader?: Account }) => (
     <p>
       Once it's selected, its{" "}
       <strong>
-        <InlineCode>count_reader::count_reader::count</InlineCode>
+        <InlineCode>{COUNT_READER_SLOT_NAME}</InlineCode>
       </strong>{" "}
       storage slot is listed with its default value: keep the initial count set
       to <strong>0</strong>.
@@ -66,13 +66,11 @@ const Step4Content = ({ countReader }: { countReader?: Account }) => (
 const Step4: TutorialStep = {
   title: "Deploy your Count Reader contract.",
   Content: () => {
-    const { accounts } = useAccounts();
-    const countReader = accounts.find(({ components }) =>
-      components.includes("count-reader"),
-    );
+    const { countReader } = useCountReader();
     const completed = useCompleted();
     return (
       <>
+        <CountReaderMissingScriptsAlert />
         <Step4Content countReader={countReader} />
         <TutorialStepAlert
           completed={completed}

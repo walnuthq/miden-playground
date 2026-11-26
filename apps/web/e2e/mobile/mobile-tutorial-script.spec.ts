@@ -22,12 +22,6 @@ const editorConsole = (page: Page) =>
 const consoleHeight = async (page: Page) =>
   (await editorConsole(page).boundingBox())?.height ?? 0;
 
-// Tutorial 10 was written for Rust contracts: it's marked `unavailable`
-// until plan 07 of spec/remove-rust rewrites it in MASM. Remove its test's
-// `test.fixme` with its flag.
-const REWRITING_10 =
-  "Tutorial 10 is being rewritten for Miden Assembly (spec/remove-rust plan 07)";
-
 // A tutorial's read-only script that can be simulated has a console, whose
 // bar takes height from the page above the closed tutorial panel: the source
 // stays readable, and the page fits the screen (down to 320 px in
@@ -35,16 +29,16 @@ const REWRITING_10 =
 test("mobile: a tutorial's read-only script fits the screen", async ({
   page,
 }) => {
-  test.fixme(true, REWRITING_10);
   logBrowserErrors(page);
   await startTutorial(page, "Foreign procedure invocation");
   await nextStep(page);
   await tutorialPanel(page).openLink(
     "count-reader script",
-    /\/scripts\/count-reader$/,
+    /\/scripts\/[0-9a-f-]{36}$/,
+    { breadcrumb: "count-reader" },
   );
   await closePanel(page, 2);
-  await waitForEditorText(page, "fn copy_count");
+  await waitForEditorText(page, "pub proc copy_count");
   // No Compile button: the console is there for its Simulate tab.
   await expect(page.getByRole("button", { name: "Compile" })).toHaveCount(0);
   await expect
@@ -64,7 +58,7 @@ test("mobile: a tutorial's read-only script fits the screen", async ({
     editorConsole(page).getByRole("button", { name: "Invoke copy_count" }),
   ).toBeVisible();
   await expectNoHorizontalOverflow(page);
-  // The argument's field carries the parameter's name from the WIT, the
+  // The argument's field carries the parameter's name from the source, the
   // longest of the tutorials' (`counter_account_id`).
   await expectWithinWidth(
     editorConsole(page)
@@ -79,7 +73,7 @@ test("mobile: a tutorial's read-only script fits the screen", async ({
   await expectWithinWidth(
     page
       .getByTestId("editor")
-      .getByText("fn copy_count(counter_account_id: AccountId)"),
+      .getByText("proc copy_count(counter_account_id: AccountId)"),
   );
   await expectNoHorizontalOverflow(page);
 });
