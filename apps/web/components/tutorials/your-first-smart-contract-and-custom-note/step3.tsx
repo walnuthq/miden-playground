@@ -3,6 +3,7 @@ import CopyButton from "@/components/lib/copy-button";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import {
   ButtonName,
+  CodeBlock,
   ExternalLink,
   InlineCode,
 } from "@/components/tutorials/prose";
@@ -45,7 +46,9 @@ const Step3: TutorialStep = {
         </p>
         <p>
           Once your script is created, add the <strong>counter-account</strong>{" "}
-          script as a dependency. The note script calls the counter contract's{" "}
+          script as a dependency. The note script starts with{" "}
+          <InlineCode>use counter_account</InlineCode> and calls the counter
+          contract's{" "}
           <strong>
             <InlineCode>get_count</InlineCode>
           </strong>{" "}
@@ -53,20 +56,33 @@ const Step3: TutorialStep = {
           <strong>
             <InlineCode>increment_count</InlineCode>
           </strong>{" "}
-          procedures, so it needs to import the interface of the{" "}
+          procedures, so the assembler needs the{" "}
           <ExternalLink href="https://docs.miden.xyz/builder/glossary/#accountcomponent">
             account component
           </ExternalLink>{" "}
-          that defines them.
+          that defines them. Without it, compiling the note script fails with{" "}
+          <InlineCode>undefined item 'counter_account'</InlineCode>.
         </p>
         <p>
           Click the <em>"Manifest"</em> tab, then click the{" "}
           <ButtonName icon={Plus}>Add dependency</ButtonName> button. In the{" "}
           <em>"Add Dependency"</em> dialog, select the{" "}
           <strong>counter-account</strong> script and click the <em>"Add"</em>{" "}
-          button. The dependency also shows in the script's{" "}
-          <InlineCode>miden-project.toml</InlineCode>, which you can open from
-          the <em>"Explorer"</em> tab.
+          button. The dialog lists only compiled components, which is why you
+          compiled the counter contract first.
+        </p>
+        <p>
+          The dependency is listed under <em>"Package dependencies"</em>. It
+          also shows in the script's <InlineCode>miden-project.toml</InlineCode>
+          , the manifest the Playground generates for your script, which you can
+          open from the <em>"Explorer"</em> tab:
+        </p>
+        <CodeBlock code={`counter-account = { path = "../counter-account" }`} />
+        <p>
+          It's a path dependency: the assembler finds the{" "}
+          <strong>counter-account</strong> package next to your note script's,
+          and the note script refers to its module as{" "}
+          <InlineCode>counter_account</InlineCode>.
         </p>
         <TutorialStepAlert
           completed={completed}

@@ -18,179 +18,111 @@ const useCompleted = () => {
   return script?.status === "compiled";
 };
 
+// The lines quoted here are apps/api/templates/counter-note.masm's, the
+// source the script is created from: after editing the template, check them.
 const Step4: TutorialStep = {
   title: "Understand and compile the counter note script.",
   Content: () => {
     const completed = useCompleted();
     return (
       <>
-        <p>Now let's examine the note script you created.</p>
         <p>
-          <strong>No-std Setup</strong>
-        </p>
-        <p>
-          Like the counter contract, the note script uses{" "}
-          <strong>
-            <InlineCode>#![no_std]</InlineCode>
-          </strong>{" "}
-          and enables the{" "}
-          <strong>
-            <InlineCode>alloc_error_handler</InlineCode>
-          </strong>{" "}
-          language feature.
-        </p>
-        <p>
-          <strong>Miden Imports</strong>
-        </p>
-        <CodeBlock code={`use miden::*;`} />
-        <p>
-          The note script imports the whole{" "}
-          <strong>
-            <InlineCode>miden</InlineCode>
-          </strong>{" "}
-          prelude: the{" "}
-          <strong>
-            <InlineCode>#[note]</InlineCode>
-          </strong>{" "}
-          and{" "}
-          <strong>
-            <InlineCode>#[account]</InlineCode>
-          </strong>{" "}
-          macros, the basic field and word types (
-          <strong>
-            <InlineCode>Felt</InlineCode>
-          </strong>
-          ,{" "}
-          <strong>
-            <InlineCode>Word</InlineCode>
-          </strong>
-          ), and free functions such as{" "}
-          <strong>
-            <InlineCode>assert_eq</InlineCode>
-          </strong>
-          .
-        </p>
-        <p>
-          <strong>Note Script Structure</strong>
-        </p>
-        <p>
-          Note scripts use a struct-based pattern. The{" "}
-          <strong>
-            <InlineCode>#[note]</InlineCode>
-          </strong>{" "}
-          attribute on both the struct and the{" "}
-          <strong>
-            <InlineCode>impl</InlineCode>
-          </strong>{" "}
-          block marks this as a Miden note script:
-        </p>
-        <CodeBlock
-          code={`#[account(counter_account::CounterContract)]
-pub struct CounterAccount;
-
-#[note]
-struct CounterNote;
-
-#[note]
-impl CounterNote {
-    #[note_script]
-    fn run(self, _arg: Word, account: &mut CounterAccount) { ... }
-}`}
-        />
-        <p>
-          The{" "}
-          <strong>
-            <InlineCode>CounterNote</InlineCode>
-          </strong>{" "}
-          struct provides a named type for the note script. Unlike account
-          contracts, note scripts don't store persistent data: the struct serves
-          as the entry point container.
-        </p>
-        <p>
-          The{" "}
-          <strong>
-            <InlineCode>CounterAccount</InlineCode>
-          </strong>{" "}
-          type is declared with{" "}
-          <strong>
-            <InlineCode>
-              #[account(counter_account::CounterContract)]
-            </InlineCode>
-          </strong>
-          , which binds it to the{" "}
-          <strong>
-            <InlineCode>CounterContract</InlineCode>
-          </strong>{" "}
-          interface of the <strong>counter-account</strong> script you added as
-          a dependency. That's how the note script can call the counter
-          contract's procedures on the Account that consumes the Note.
-        </p>
-        <p>
-          Learn more about{" "}
+          Now let's examine the note script you created. A{" "}
           <ExternalLink href="https://docs.miden.xyz/reference/protocol/note/">
-            Notes
+            Note
           </ExternalLink>{" "}
-          in the Miden docs.
+          carries a script that runs when an Account consumes it, in a
+          Transaction of that Account: the script can call the consuming
+          Account's procedures.
         </p>
         <p>
-          <strong>The Note Script Function</strong>
+          <strong>Imports and Errors</strong>
         </p>
         <CodeBlock
-          code={`#[note_script]
-fn run(self, _arg: Word, account: &mut CounterAccount) {
-    let initial_value = account.get_count();
-    account.increment_count();
-    let expected_value = initial_value + felt!(1);
-    let final_value = account.get_count();
-    assert_eq(final_value, expected_value);
-}`}
+          code={`use counter_account
+
+const ERR_COUNT_NOT_INCREMENTED = "the count didn't go up by one"`}
         />
         <p>
-          The{" "}
+          <InlineCode>use counter_account</InlineCode> imports the module of the{" "}
+          <strong>counter-account</strong> script you added as a dependency.{" "}
           <strong>
-            <InlineCode>#[note_script]</InlineCode>
+            <InlineCode>ERR_COUNT_NOT_INCREMENTED</InlineCode>
           </strong>{" "}
-          attribute marks this method as the entry point of the note script,
-          executed when the Note is consumed. The{" "}
+          is an error message the script uses when its check fails.
+        </p>
+        <p>
+          <strong>The Note Script Procedure</strong>
+        </p>
+        <CodeBlock
+          code={`@note_script
+@locals(1)
+pub proc main()
+    call.counter_account::get_count
+    add.1 loc_store.0
+    call.counter_account::increment_count
+    drop call.counter_account::get_count
+    loc_load.0 assert_eq.err=ERR_COUNT_NOT_INCREMENTED
+end`}
+        />
+        <p>
+          This is the procedure without its comments. The{" "}
           <strong>
-            <InlineCode>self</InlineCode>
+            <InlineCode>@note_script</InlineCode>
           </strong>{" "}
-          parameter is required for methods in the{" "}
+          attribute marks{" "}
           <strong>
-            <InlineCode>impl</InlineCode>
+            <InlineCode>main</InlineCode>
           </strong>{" "}
-          block. The function:
+          as the entry point of the note script, executed when the Note is
+          consumed. <InlineCode>@locals(1)</InlineCode> reserves one slot of
+          local memory for the procedure. The procedure:
         </p>
         <NumberedList>
           <li>
-            <strong>Reads the initial counter value</strong> by calling{" "}
-            <strong>
-              <InlineCode>get_count</InlineCode>
-            </strong>{" "}
-            on the consuming account.
+            <strong>Reads the initial counter value</strong>:{" "}
+            <InlineCode>call</InlineCode> runs the consuming Account's{" "}
+            <InlineCode>get_count</InlineCode> on the top 16 elements of the
+            stack and puts its 16 outputs in their place, the count on top.
+          </li>
+          <li>
+            <strong>Keeps the expected value</strong>:{" "}
+            <InlineCode>add.1</InlineCode> adds one to the count, and{" "}
+            <InlineCode>loc_store.0</InlineCode> moves the result from the stack
+            to the local slot.
           </li>
           <li>
             <strong>
               Calls <InlineCode>increment_count</InlineCode>
             </strong>{" "}
-            to increment the counter.
+            to increment the counter, then drops the new count it returns.
           </li>
           <li>
-            <strong>Checks that the increment succeeded</strong> by asserting
-            that the final value equals the initial value plus one.
+            <strong>Checks that the increment succeeded</strong>: it reads the
+            count again with <InlineCode>get_count</InlineCode>,{" "}
+            <InlineCode>loc_load.0</InlineCode> pushes the expected value back,
+            and <InlineCode>assert_eq</InlineCode> checks that the two top
+            values are equal.
           </li>
         </NumberedList>
         <p>
           If the assertion fails, the Transaction consuming the Note fails too.
+          The Playground then shows its error as an error code, not as the{" "}
+          <InlineCode>ERR_COUNT_NOT_INCREMENTED</InlineCode> message.
         </p>
         <p>
-          This example demonstrates a complete interaction pattern: the account
-          contract manages persistent state, while the note script triggers
-          state changes when the Note is consumed.
+          A <InlineCode>call</InlineCode> names a procedure by its MAST root, a
+          hash of its code: the Account consuming the Note must have the{" "}
+          <strong>counter-account</strong> component, or it has no such
+          procedure and can't consume the Note. This example demonstrates a
+          complete interaction pattern: the account contract manages persistent
+          state, while the note script triggers state changes when the Note is
+          consumed.
         </p>
         <p>
           Once you've read the note script code, click the <em>"Compile"</em>{" "}
-          button to compile the script.
+          button to compile the script. If you compiled it before adding the
+          dependency, the button reads <em>"Re-compile"</em>.
         </p>
         <TutorialStepAlert
           completed={completed}

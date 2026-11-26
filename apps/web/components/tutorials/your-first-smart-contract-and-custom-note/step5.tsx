@@ -33,14 +33,16 @@ const Step5: TutorialStep = {
         </p>
         <p>
           Your compiled <strong>counter-account</strong> script is an account
-          component: its code, and its storage layout, which the compiler
-          derived from the storage struct. It defines a single map slot,{" "}
+          component. The Playground knows its storage layout from the Counter
+          Contract example: a single map slot,{" "}
           <strong>
-            <InlineCode>
-              counter_account::counter_contract::count_map
-            </InlineCode>
+            <InlineCode>counter_account::count_map</InlineCode>
           </strong>
-          , which holds the count under key <strong>1</strong>.
+          , which holds the count under the key{" "}
+          <strong>
+            <InlineCode>[1, 0, 0, 0]</InlineCode>
+          </strong>
+          .
         </p>
         <p>
           Head to the{" "}
@@ -58,9 +60,7 @@ const Step5: TutorialStep = {
         <p>
           Once it's selected, its{" "}
           <strong>
-            <InlineCode>
-              counter_account::counter_contract::count_map
-            </InlineCode>
+            <InlineCode>counter_account::count_map</InlineCode>
           </strong>{" "}
           storage slot is listed, with no entries: a key that was never written
           reads as zero, so the counter starts at <strong>0</strong>. Leave it
