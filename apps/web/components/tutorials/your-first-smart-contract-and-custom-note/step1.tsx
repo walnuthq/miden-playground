@@ -2,7 +2,11 @@ import { Plus } from "lucide-react";
 import { useLocation } from "react-router";
 import CopyButton from "@/components/lib/copy-button";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import { ButtonName, ExternalLink } from "@/components/tutorials/prose";
+import {
+  ButtonName,
+  ExternalLink,
+  InlineCode,
+} from "@/components/tutorials/prose";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import useScripts from "@/hooks/use-scripts";
 import { defaultScriptIds } from "@/lib/types/default-scripts";
@@ -34,14 +38,13 @@ const Step1: TutorialStep = {
           increments the counter of the Account that consumes the Note.
         </p>
         <p>
-          You'll learn how both scripts are structured, deploy the counter
-          contract on testnet, then create a Note with your note script and
-          consume it with the counter contract. This tutorial is based on the{" "}
-          <ExternalLink href="https://docs.miden.xyz/builder/get-started/your-first-smart-contract/">
-            Your First Smart Contract
+          Both are written in{" "}
+          <ExternalLink href="https://docs.miden.xyz/builder/glossary/#miden-assembly">
+            Miden Assembly
           </ExternalLink>{" "}
-          guide in the Miden docs, which builds the same contracts in a local
-          Rust project.
+          (MASM), the language of the Miden VM. You'll learn how both scripts
+          are structured, deploy the counter contract on testnet, then create a
+          Note with your note script and consume it with the counter contract.
         </p>
         <p>
           Let's start by creating the script that holds the contract code. Click
@@ -52,9 +55,11 @@ const Step1: TutorialStep = {
           the <strong>Counter Contract</strong> example.
         </p>
         <p>
-          Your script must be named <strong>counter-account</strong>: the note
-          script you'll create in step 3 refers to the counter contract's
-          package by this exact name.
+          Your script must be named <strong>counter-account</strong>: the
+          Playground turns this name into the module name{" "}
+          <InlineCode>counter_account</InlineCode>, and the note script you'll
+          create in step 3 calls the counter contract's procedures through that
+          exact module name.
         </p>
         <TutorialStepAlert
           completed={completed}

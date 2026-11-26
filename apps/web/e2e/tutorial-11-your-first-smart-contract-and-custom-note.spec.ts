@@ -41,14 +41,6 @@ const compile = async (page: Page) => {
   });
 };
 
-// Tutorial 11 was written for Rust contracts: it's marked `unavailable`
-// (components/tutorials/meta.ts, tutorial-unavailable.spec.ts) until plan 07
-// of spec/remove-rust rewrites it in MASM. Remove this with the flag.
-test.fixme(
-  true,
-  "Tutorial 11 is being rewritten for Miden Assembly (spec/remove-rust plan 07)",
-);
-
 test("tutorial 11: your first smart contract and custom note", async ({
   page,
   bread,
@@ -60,7 +52,7 @@ test("tutorial 11: your first smart contract and custom note", async ({
   await expect(page).toHaveURL(/\/scripts$/);
 
   await test.step("1. create the counter-account script", async () => {
-    // The tutorial derives the storage slot name from this exact name.
+    // The note script `use`s this name's module, `counter_account`.
     await createScript(page, {
       name: "counter-account",
       type: "Account Component",
@@ -109,11 +101,9 @@ test("tutorial 11: your first smart contract and custom note", async ({
     await expect(dialog.getByRole("combobox").first()).toContainText("Public");
     await expect(dialog.getByRole("combobox").nth(1)).toContainText("No Auth");
     await selectOption(page, "Account Component", "counter-account");
-    // The slot of the script's storage layout, its map empty: the counter
-    // starts at 0.
-    await expect(
-      dialog.getByText("counter_account::counter_contract::count_map"),
-    ).toBeVisible();
+    // The slot of the template's hand-written schema, its map empty: the
+    // counter starts at 0.
+    await expect(dialog.getByText("counter_account::count_map")).toBeVisible();
     await expect(dialog.getByPlaceholder("Key")).toHaveCount(0);
     await dialog.getByRole("button", { name: "Deploy" }).click();
     await expect(dialog).toBeHidden({ timeout: TRANSACTION_TIMEOUT });
@@ -158,8 +148,7 @@ test("tutorial 11: your first smart contract and custom note", async ({
     await expect(
       dialog.getByRole("switch", { name: /Network note/ }),
     ).not.toBeChecked();
-    // The note declares no storage struct, so it has no storage schema: raw
-    // felts, none added.
+    // The counter note has no note storage schema: raw felts, none added.
     await expect(
       dialog.getByRole("button", { name: "Add note storage" }),
     ).toBeVisible();

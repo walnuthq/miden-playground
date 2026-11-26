@@ -1,6 +1,6 @@
 import { Plus } from "lucide-react";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import { ButtonName } from "@/components/tutorials/prose";
+import { ButtonName, InlineCode } from "@/components/tutorials/prose";
 import TutorialLink from "@/components/tutorials/tutorial-link";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import useAccounts from "@/hooks/use-accounts";
@@ -59,8 +59,11 @@ const Step6: TutorialStep = {
         <p>
           Before creating it, you can click the <em>"Preview consumption"</em>{" "}
           button to see what the Note will do: the Playground runs it locally,
-          as if your counter contract consumed it now, and shows the count it
-          would store. Nothing is submitted.
+          as if your counter contract consumed it now, and shows the change to
+          its <InlineCode>count_map</InlineCode> slot: under the key, the value
+          goes from a Word of zeros to <InlineCode>0x0100…</InlineCode>, the
+          Word whose first Felt is the new count, 1 (the preview writes Words as
+          bytes in hexadecimal, lowest byte first). Nothing is submitted.
         </p>
         <p>
           Once you're done, click the <em>"Create"</em> button and confirm the

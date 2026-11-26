@@ -1,6 +1,5 @@
 import NextStepButton from "@/components/tutorials/next-step-button";
 import {
-  BulletList,
   CodeBlock,
   ExternalLink,
   InlineCode,
@@ -19,6 +18,8 @@ const useCompleted = () => {
   return script?.status === "compiled";
 };
 
+// The lines quoted here are apps/api/templates/counter-account.masm's, the
+// source the script is created from: after editing the template, check them.
 const Step2: TutorialStep = {
   title: "Understand and compile the counter contract script.",
   Content: () => {
@@ -26,197 +27,137 @@ const Step2: TutorialStep = {
     return (
       <>
         <p>
-          The script you created contains the Rust source code of the counter
-          contract, the same one you deployed in the{" "}
-          <em>"Deploy a counter contract"</em> tutorial. Let's take a closer
+          The script you created holds the source file{" "}
+          <strong>
+            <InlineCode>counter_account.masm</InlineCode>
+          </strong>
+          , the Miden Assembly code of the counter contract you started from in
+          the <em>"Deploy a counter contract"</em> tutorial. Let's take a closer
           look at how it's structured.
         </p>
         <p>
-          <strong>No-std Environment</strong>
-        </p>
-        <CodeBlock code={`#![no_std]`} />
-        <p>
-          Miden contracts run in a{" "}
-          <strong>
-            <InlineCode>no_std</InlineCode>
-          </strong>{" "}
-          environment, meaning they don't link against Rust's standard library.
-          This is essential for blockchain execution, where contracts need to be
-          deterministic and lightweight.
-        </p>
-        <p>
-          <strong>Miden Library Imports</strong>
+          <strong>Imports</strong>
         </p>
         <CodeBlock
-          code={`use miden::{component, component_storage, felt, Felt, StorageMap, Word};`}
+          code={`use miden::protocol::active_account
+use miden::protocol::native_account
+use miden::core::sys`}
         />
-        <p>These imports provide:</p>
-        <BulletList>
-          <li>
-            <strong>
-              <InlineCode>component</InlineCode>
-            </strong>
-            : macro for defining contract components
-          </li>
-          <li>
-            <strong>
-              <InlineCode>component_storage</InlineCode>
-            </strong>
-            : macro for defining a component's storage struct
-          </li>
-          <li>
-            <strong>
-              <InlineCode>felt</InlineCode>
-            </strong>
-            : macro for creating{" "}
-            <strong>
-              <InlineCode>Felt</InlineCode>
-            </strong>{" "}
-            literals (e.g.,{" "}
-            <strong>
-              <InlineCode>felt!(1)</InlineCode>
-            </strong>
-            )
-          </li>
-          <li>
-            <strong>
-              <InlineCode>Felt</InlineCode>
-            </strong>
-            /
-            <strong>
-              <InlineCode>Word</InlineCode>
-            </strong>
-            : Miden's native field element and word types
-          </li>
-          <li>
-            <strong>
-              <InlineCode>StorageMap</InlineCode>
-            </strong>
-            : key-value storage within an account storage slot
-          </li>
-        </BulletList>
         <p>
-          <strong>Contract Structure Definition</strong>
+          Each <InlineCode>use</InlineCode> line imports a module of Miden's
+          libraries, whose procedures the contract then calls by the module's
+          last name:{" "}
+          <strong>
+            <InlineCode>active_account</InlineCode>
+          </strong>{" "}
+          reads the storage of the Account the code runs on,{" "}
+          <strong>
+            <InlineCode>native_account</InlineCode>
+          </strong>{" "}
+          writes it, and{" "}
+          <strong>
+            <InlineCode>sys</InlineCode>
+          </strong>{" "}
+          has helpers for the stack.
+        </p>
+        <p>
+          <strong>Storage</strong>
         </p>
         <CodeBlock
-          code={`#[component_storage]
-struct CounterContractStorage {
-    /// Storage map holding the counter value.
-    #[storage(description = "counter contract storage map")]
-    count_map: StorageMap<Word, Felt>,
-}
-
-#[component]
-trait CounterContract {
-    #[account_procedure]
-    fn get_count(&self) -> Felt;
-    #[account_procedure]
-    fn increment_count(&mut self) -> Felt;
-}`}
+          code={`const COUNT_MAP_SLOT = word("counter_account::count_map")
+const COUNT_KEY = [1, 0, 0, 0]`}
         />
         <p>
-          The{" "}
-          <strong>
-            <InlineCode>#[component_storage]</InlineCode>
-          </strong>{" "}
-          attribute marks the storage struct of this{" "}
-          <ExternalLink href="https://docs.miden.xyz/reference/protocol/account/components">
-            account component
-          </ExternalLink>
-          , while the{" "}
-          <strong>
-            <InlineCode>#[component]</InlineCode>
-          </strong>{" "}
-          trait defines the component's interface. Every procedure that other
-          contracts and notes can call must be marked with{" "}
-          <strong>
-            <InlineCode>#[account_procedure]</InlineCode>
-          </strong>
-          : an unmarked method isn't exported.
-        </p>
-        <p>
-          The{" "}
-          <strong>
-            <InlineCode>count_map</InlineCode>
-          </strong>{" "}
-          field is a{" "}
-          <strong>
-            <InlineCode>StorageMap</InlineCode>
-          </strong>{" "}
-          stored in a named slot of the account storage. Storage slots are
-          identified by name rather than by index: the slot name is derived from
-          the script name, the trait name and the field name, here{" "}
-          <strong>
-            <InlineCode>
-              counter_account::counter_contract::count_map
-            </InlineCode>
-          </strong>
-          . The first part comes from your script's name,{" "}
-          <strong>counter-account</strong>.
-        </p>
-        <p>
-          <strong>Important</strong>:{" "}
           <ExternalLink href="https://docs.miden.xyz/reference/protocol/account/storage">
-            account storage
+            Account storage
           </ExternalLink>{" "}
           is organized into named slots, each holding either a single value or a
-          key-value map. Here,{" "}
+          key-value map. The counter is kept in a single map slot named{" "}
           <strong>
-            <InlineCode>
-              StorageMap{"<"}Word, Felt{">"}
-            </InlineCode>
-          </strong>{" "}
-          provides typed access to a map slot, converting its keys and values to
-          and from{" "}
+            <InlineCode>counter_account::count_map</InlineCode>
+          </strong>
+          , under the fixed key{" "}
+          <strong>
+            <InlineCode>[1, 0, 0, 0]</InlineCode>
+          </strong>
+          . A map's keys and values are{" "}
           <ExternalLink href="https://docs.miden.xyz/builder/glossary/#word">
             Words
           </ExternalLink>
-          . A Word is made of four field elements (
+          : a Word is made of four field elements (
           <ExternalLink href="https://docs.miden.xyz/builder/glossary/#felt">
             Felts
           </ExternalLink>
           ), and each Felt belongs to the Goldilocks prime field and is
-          represented using 64 bits.
+          represented using 64 bits. The count is the first Felt of its value.
         </p>
         <p>
-          <strong>Contract Implementation</strong>
+          The procedures don't use the slot's name but its id: the first two
+          Felts of the Word the name hashes to,{" "}
+          <InlineCode>COUNT_MAP_SLOT[0..2]</InlineCode>.
+        </p>
+        <p>
+          <strong>Account Procedures</strong>
         </p>
         <CodeBlock
-          code={`impl CounterContract for CounterContractStorage {
-    // Function implementations...
-}`}
+          code={`@account_procedure
+pub proc get_count() -> felt
+    push.COUNT_KEY push.COUNT_MAP_SLOT[0..2]
+    exec.active_account::get_map_item
+    exec.sys::truncate_stack
+end`}
+        />
+        <p>
+          This is the{" "}
+          <strong>
+            <InlineCode>get_count</InlineCode>
+          </strong>{" "}
+          procedure, without its comments. <InlineCode>pub</InlineCode> exports
+          it from the module, and the{" "}
+          <strong>
+            <InlineCode>@account_procedure</InlineCode>
+          </strong>{" "}
+          attribute makes it part of the{" "}
+          <ExternalLink href="https://docs.miden.xyz/reference/protocol/account/components">
+            account component
+          </ExternalLink>
+          's interface: notes and transaction scripts can call it on an Account
+          built with this component. <InlineCode>-{">"} felt</InlineCode>{" "}
+          declares that it returns one Felt, the count.
+        </p>
+        <p>
+          The Miden VM is a stack machine: each instruction takes its inputs
+          from the top of the stack and leaves its outputs there. The procedure
+          pushes the key, then the slot's id on top of it, and{" "}
+          <InlineCode>active_account::get_map_item</InlineCode> replaces them
+          with the Word stored under that key: the count, then three zeros.
+        </p>
+        <p>
+          A procedure that a note calls gets the top 16 elements of the stack as
+          its inputs, and must leave exactly 16 elements as its outputs. The doc
+          comment above it says so,{" "}
+          <InlineCode>Outputs: [count, pad(15)]</InlineCode>: the count, then 15
+          padding elements. <InlineCode>sys::truncate_stack</InlineCode> drops
+          what's left over below them.
+        </p>
+        <CodeBlock
+          code={`@account_procedure
+pub proc increment_count() -> felt`}
         />
         <p>
           The{" "}
           <strong>
-            <InlineCode>CounterContract</InlineCode>
+            <InlineCode>increment_count</InlineCode>
           </strong>{" "}
-          trait defines the external interface that other contracts and notes
-          can call. The{" "}
-          <strong>
-            <InlineCode>
-              impl CounterContract for CounterContractStorage
-            </InlineCode>
-          </strong>{" "}
-          block provides the behavior over the component's storage.
-        </p>
-        <p>
-          <strong>Storage Key Strategy</strong>
-        </p>
-        <CodeBlock
-          code={`let key = Word::new([felt!(1), felt!(0), felt!(0), felt!(0)]);`}
-        />
-        <p>
-          Both procedures of the counter contract use the same fixed key,{" "}
-          <strong>
-            <InlineCode>[1, 0, 0, 0]</InlineCode>
-          </strong>
-          , to store and retrieve the counter value within the storage map. This
-          demonstrates a simple but effective storage pattern.
+          procedure reads the count the same way, adds one to it with{" "}
+          <InlineCode>add.1</InlineCode>, writes the new count under the same
+          key with <InlineCode>native_account::set_map_item</InlineCode>, and
+          returns it.
         </p>
         <p>
           Once you've read the contract code, click the <em>"Compile"</em>{" "}
-          button to compile the script.
+          button to compile the script: the Miden assembler turns it into a{" "}
+          <strong>package</strong> that holds the code of both procedures.
         </p>
         <TutorialStepAlert
           completed={completed}

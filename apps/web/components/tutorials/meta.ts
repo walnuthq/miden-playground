@@ -153,7 +153,6 @@ export const tutorialMetas: TutorialMeta[] = [
     initialRoute: "/scripts",
     stepCount: 8,
     requiresWallet: true,
-    unavailable: REWRITING_FOR_MASM,
   },
   {
     id: "contract-verification",

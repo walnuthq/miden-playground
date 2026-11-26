@@ -4,8 +4,8 @@ import { TRANSACTION_TIMEOUT } from "./tutorial";
 
 // Tutorial 5 is marked `unavailable` (components/tutorials/meta.ts) until the
 // Guardian multisig client signs with Bread Wallet again: its card and its
-// project switcher item say so and can't be used. So are tutorials 11 and 12
-// until they're rewritten in MASM (6 to 10 are). Delete this spec with the last flag.
+// project switcher item say so and can't be used. So is tutorial 12 until
+// it's rewritten in MASM (6 to 11 are). Delete this spec with the last flag.
 const title = "Wallet backup using Miden Guardian";
 
 test("an unavailable tutorial can't be started", async ({ page }) => {
@@ -37,26 +37,24 @@ test("an unavailable tutorial can't be started", async ({ page }) => {
     const item = (number: number) =>
       items.find(({ text }) => text.startsWith(`${number}.`));
     expect(item(5)?.text).toContain("Unavailable");
-    // 5 waits for Guardian; 11 and 12 for their MASM rewrite
+    // 5 waits for Guardian; 12 for its MASM rewrite
     // (spec/remove-rust plan 07). The other tutorials stay available.
-    for (const number of [5, 11, 12]) {
+    for (const number of [5, 12]) {
       expect(item(number)?.disabled, `tutorial ${number}`).toBe(true);
     }
-    for (const number of [1, 2, 3, 4, 6, 7, 8, 9, 10]) {
+    for (const number of [1, 2, 3, 4, 6, 7, 8, 9, 10, 11]) {
       expect(item(number)?.disabled, `tutorial ${number}`).toBe(false);
     }
   }).toPass({ timeout: 60_000 });
 });
 
-test("tutorials 11 and 12 say they're being rewritten", async ({ page }) => {
+test("tutorial 12 says it's being rewritten", async ({ page }) => {
   await page.goto("/");
   const showAll = page.getByRole("button", { name: /Show all \d+ tutorials/ });
   await expect(showAll).toBeEnabled({ timeout: TRANSACTION_TIMEOUT });
   await showAll.click();
   const card = page.locator('[data-slot="card"]').filter({
-    has: page.getByText("Your first smart contract and custom note", {
-      exact: true,
-    }),
+    has: page.getByText("Contract verification", { exact: true }),
   });
   await expect(
     card.getByText("Being rewritten for Miden Assembly."),
