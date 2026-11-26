@@ -1,5 +1,36 @@
 import { expect, type Locator, type Page } from "@playwright/test";
-import { TRANSACTION_TIMEOUT } from "./tutorial";
+import { COMPILED, createCounterScript } from "./editor";
+import { selectOption, TRANSACTION_TIMEOUT } from "./tutorial";
+
+// A workspace holding a deployed counter, for the specs that launched the
+// Counter Contract example only to get one: the example is hidden until plan
+// 06 of spec/remove-rust rewrites it in MASM. Built from the Create Script
+// dialog's MASM counter template instead: the `counter-account` script,
+// compiled, and an account deployed from it, whose page it opens. Unlike the
+// example's, the workspace stays the network's sandbox (no `exampleId`).
+export const counterWorkspace = async (
+  page: Page,
+  { accountName = "Counter Contract" }: { accountName?: string } = {},
+) => {
+  await createCounterScript(page);
+  await page.getByRole("button", { name: "Compile" }).click();
+  await expect(page.getByText(COMPILED).last()).toBeVisible({
+    timeout: TRANSACTION_TIMEOUT,
+  });
+  // Not the sidebar's link: on a phone it's in the sidebar's sheet.
+  await page.goto("/accounts");
+  const create = page.getByRole("button", { name: "Create new account" });
+  await expect(create).toBeEnabled({ timeout: TRANSACTION_TIMEOUT });
+  await create.click();
+  await page.getByRole("menuitem", { name: "Deploy account" }).click();
+  const dialog = page.getByRole("dialog").filter({ hasText: "Deploy Account" });
+  await dialog.getByLabel("Name").fill(accountName);
+  await selectOption(page, "Account Component", "counter-account");
+  await dialog.getByRole("button", { name: "Deploy" }).click();
+  await expect(dialog).toBeHidden({ timeout: 2 * TRANSACTION_TIMEOUT });
+  await page.getByRole("cell", { name: accountName, exact: true }).click();
+  await expect(page).toHaveURL(/\/accounts\/m[a-z]+1[0-9a-z]+$/);
+};
 
 // Launching an example creates its precompiled packages through apps/api (run
 // it along with the dev server), opens the accounts page, then deploys the

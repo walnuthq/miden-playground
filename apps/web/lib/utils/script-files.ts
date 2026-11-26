@@ -26,10 +26,6 @@ export const scriptFilePaths = ({ name }: Pick<Script, "name">) =>
 export const sourceFiles = (name: string, source: string): ScriptFiles =>
   source === "" ? {} : { [sourceFilePath(name)]: source };
 
-// Where a script persisted before the switch to MASM keeps its Rust source:
-// such a script can't be compiled any more.
-export const LEGACY_RUST_FILE = "src/lib.rs";
-
 export const scriptSource = (script: Pick<Script, "name" | "files">) =>
   script.files[scriptSourcePath(script)] ?? "";
 

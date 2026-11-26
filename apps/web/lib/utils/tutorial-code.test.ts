@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { describe, test } from "node:test";
 import {
   applyCodeEdits,
@@ -11,13 +11,23 @@ import {
   timelockEdits,
 } from "./tutorial-code.ts";
 
-const read = (path: string) =>
-  readFileSync(new URL(path, import.meta.url), "utf8");
+// The API's Rust templates, which the tutorials' scripts were created from:
+// tutorials 7 and 12, then tutorial 8. They went with the switch to MASM,
+// and the snippets with tutorials 6 to 12 (unavailable until plan 07 of
+// spec/remove-rust rewrites each): the tests that edit them are skipped
+// until then.
+const RUST_TEMPLATES_GONE =
+  "the Rust templates are gone: plan 07 of spec/remove-rust rewrites the snippets";
 
-// The API's templates, which the tutorials' scripts are created from:
-// tutorials 7 and 12, then tutorial 8.
+const read = (path: string) => {
+  const url = new URL(path, import.meta.url);
+  return existsSync(url) ? readFileSync(url, "utf8") : "";
+};
+
 const counterAccount = read("../../../api/templates/counter-account.rs");
 const p2idNote = read("../../../api/templates/p2id-note.rs");
+const skip =
+  counterAccount === "" || p2idNote === "" ? RUST_TEMPLATES_GONE : false;
 
 // Every edit applies, then reads as applied, and applying it again changes
 // nothing.
@@ -35,7 +45,7 @@ const expectEditsApply = (source: string, edits: CodeEdit[]) => {
 };
 
 describe("tutorial code edits", () => {
-  test("tutorial 7: the increment value, not the key", () => {
+  test("tutorial 7: the increment value, not the key", { skip }, () => {
     const edited = expectEditsApply(counterAccount, increaseIncrementEdits);
     assert.equal(incrementValue(edited), INCREMENT);
     assert.match(
@@ -48,42 +58,50 @@ describe("tutorial code edits", () => {
     );
   });
 
-  test("tutorial 8: the timelock, from the note's input to the check", () => {
-    const edited = expectEditsApply(p2idNote, timelockEdits);
-    assert.match(
-      edited,
-      /\nuse miden::\{account, felt_repr::ToFeltRepr, note, tx, AccountId, Felt, Recipient, Word\};\n/,
-    );
-    // After the target account: the storage items follow the fields' order.
-    assert.match(
-      edited,
-      /\nstruct P2idNote \{\n {4}target_account_id: AccountId,\n {4}timelock_height: Felt,\n\}\n/,
-    );
-    assert.match(
-      edited,
-      /\n {4}pub fn build_recipient\(\n {8}target: AccountId,\n {8}serial_num: Word,\n {8}timelock_height: Felt,\n {4}\) -> Recipient \{\n {8}let inputs = P2idNote \{\n {12}target_account_id: target,\n {12}timelock_height,\n {8}\};\n/,
-    );
-    // Before the target check, a blank line apart.
-    assert.match(
-      edited,
-      /\n( +)pub fn script\(self, _arg: Word, account: &mut Wallet\) \{\n\1 {4}let block_number = tx::get_reference_block_number\(\);\n\1 {4}assert!\(block_number\.as_felt\(\) >= self\.timelock_height\);\n\n\1 {4}let current_account = account\.get_id\(\);\n/,
-    );
-  });
+  test(
+    "tutorial 8: the timelock, from the note's input to the check",
+    { skip },
+    () => {
+      const edited = expectEditsApply(p2idNote, timelockEdits);
+      assert.match(
+        edited,
+        /\nuse miden::\{account, felt_repr::ToFeltRepr, note, tx, AccountId, Felt, Recipient, Word\};\n/,
+      );
+      // After the target account: the storage items follow the fields' order.
+      assert.match(
+        edited,
+        /\nstruct P2idNote \{\n {4}target_account_id: AccountId,\n {4}timelock_height: Felt,\n\}\n/,
+      );
+      assert.match(
+        edited,
+        /\n {4}pub fn build_recipient\(\n {8}target: AccountId,\n {8}serial_num: Word,\n {8}timelock_height: Felt,\n {4}\) -> Recipient \{\n {8}let inputs = P2idNote \{\n {12}target_account_id: target,\n {12}timelock_height,\n {8}\};\n/,
+      );
+      // Before the target check, a blank line apart.
+      assert.match(
+        edited,
+        /\n( +)pub fn script\(self, _arg: Word, account: &mut Wallet\) \{\n\1 {4}let block_number = tx::get_reference_block_number\(\);\n\1 {4}assert!\(block_number\.as_felt\(\) >= self\.timelock_height\);\n\n\1 {4}let current_account = account\.get_id\(\);\n/,
+      );
+    },
+  );
 
-  test("tutorial 8: a later snippet adds the earlier ones it needs", () => {
-    // The field's button imports `Felt` too.
-    const withField = applyCodeEdits(p2idNote, timelockEdits, 1);
-    assert.ok(withField !== null);
-    assert.deepEqual(
-      timelockEdits.map((edit) => edit.applied(withField)),
-      [true, true, false, false, false, false],
-    );
-    // The check's button adds everything before it.
-    const withCheck = applyCodeEdits(p2idNote, timelockEdits, 5);
-    assert.equal(withCheck, applyCodeEdits(p2idNote, timelockEdits));
-  });
+  test(
+    "tutorial 8: a later snippet adds the earlier ones it needs",
+    { skip },
+    () => {
+      // The field's button imports `Felt` too.
+      const withField = applyCodeEdits(p2idNote, timelockEdits, 1);
+      assert.ok(withField !== null);
+      assert.deepEqual(
+        timelockEdits.map((edit) => edit.applied(withField)),
+        [true, true, false, false, false, false],
+      );
+      // The check's button adds everything before it.
+      const withCheck = applyCodeEdits(p2idNote, timelockEdits, 5);
+      assert.equal(withCheck, applyCodeEdits(p2idNote, timelockEdits));
+    },
+  );
 
-  test("tutorial 8: each part is told apart from the others", () => {
+  test("tutorial 8: each part is told apart from the others", { skip }, () => {
     const [imports, field, parameter, literal] = timelockEdits;
     assert.ok(imports && field && parameter && literal);
     // The constructor's parameter and struct literal aren't the struct's
@@ -118,7 +136,7 @@ describe("tutorial code edits", () => {
     assert.equal(imports.applied("use miden::{note, Felt};"), false);
   });
 
-  test("tutorial 12: reset_count in the trait and the impl", () => {
+  test("tutorial 12: reset_count in the trait and the impl", { skip }, () => {
     const edited = expectEditsApply(counterAccount, resetCountEdits);
     assert.match(
       edited,

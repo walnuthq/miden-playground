@@ -32,7 +32,6 @@ import {
   simulatedTargetMissing,
 } from "@/lib/simulation/simulated-target";
 import { useSimulatedAssetSymbols } from "@/lib/simulation/simulation-state";
-import { basicWalletScript } from "@/lib/tutorials/basic-wallet";
 import defaultScripts from "@/lib/types/default-scripts";
 import standardBasicWallet from "@/lib/types/default-scripts/basic-wallet";
 import type { Script } from "@/lib/types/script";
@@ -144,9 +143,7 @@ const TargetSimulation = ({
         script,
         components: targetComponents.map(({ script }) => script),
         builtIns: [standardBasicWallet],
-        // The Rust basic wallet names `receive-asset`, which the P2ID
-        // template calls: it isn't a workspace script.
-        named: [...scripts, ...defaultScripts, basicWalletScript],
+        named: [...scripts, ...defaultScripts],
       }),
     [script, targetComponents, scripts],
   );

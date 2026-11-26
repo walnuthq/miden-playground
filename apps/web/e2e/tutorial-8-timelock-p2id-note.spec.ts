@@ -17,6 +17,14 @@ import {
 // The tutorial leaves the script's name to the user.
 const SCRIPT_NAME = "timelock-p2id";
 
+// Tutorial 8 was written for Rust contracts: it's marked `unavailable`
+// (components/tutorials/meta.ts, tutorial-unavailable.spec.ts) until plan 07
+// of spec/remove-rust rewrites it in MASM. Remove this with the flag.
+test.fixme(
+  true,
+  "Tutorial 8 is being rewritten for Miden Assembly (spec/remove-rust plan 07)",
+);
+
 test("tutorial 8: timelock P2ID note", async ({ page, bread }) => {
   logBrowserErrors(page);
   const panel = tutorialPanel(page);

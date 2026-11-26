@@ -40,6 +40,11 @@ const expectStorageSlot = async (page: Page, name: string, value: RegExp) => {
   }).toPass({ timeout: TRANSACTION_TIMEOUT });
 };
 
+// Miden Bank is hidden (`hidden` in lib/examples/meta.tsx) until it's
+// rewritten in MASM (spec/remove-rust.md, decision 9). Remove this with the
+// flag.
+test.fixme(true, "Miden Bank is hidden until it's rewritten in Miden Assembly");
+
 test("example: miden bank deposit", async ({ page, bread }) => {
   logBrowserErrors(page);
   await bread.fund();

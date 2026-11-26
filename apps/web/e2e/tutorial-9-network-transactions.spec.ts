@@ -11,6 +11,14 @@ import {
   tutorialPanel,
 } from "./tutorial";
 
+// Tutorial 9 was written for Rust contracts: it's marked `unavailable`
+// (components/tutorials/meta.ts, tutorial-unavailable.spec.ts) until plan 07
+// of spec/remove-rust rewrites it in MASM. Remove this with the flag.
+test.fixme(
+  true,
+  "Tutorial 9 is being rewritten for Miden Assembly (spec/remove-rust plan 07)",
+);
+
 // The tutorial starts with the counter-contract example's compiled packages
 // (counter-account and increment-note), which it fetches from the API: run
 // apps/api next to the web app. They come precompiled, so the compile service
