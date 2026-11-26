@@ -2,7 +2,11 @@ import { Plus } from "lucide-react";
 import { useLocation } from "react-router";
 import useCounter from "@/components/tutorials/deploy-a-counter-contract/use-counter";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import { ButtonName, ExternalLink } from "@/components/tutorials/prose";
+import {
+  ButtonName,
+  ExternalLink,
+  InlineCode,
+} from "@/components/tutorials/prose";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import type { TutorialStep } from "@/lib/types/tutorial";
 
@@ -25,14 +29,14 @@ const Step1: TutorialStep = {
           counter.
         </p>
         <p>
-          To do so, you'll write the contract code in a script, compile it into
+          To do so, you'll write the contract code in a script, assemble it into
           an{" "}
           <ExternalLink href="https://docs.miden.xyz/reference/protocol/account/components">
             account component
-          </ExternalLink>{" "}
-          with its own storage layout, and deploy a new Account that uses this
-          component. This gives you a foundational understanding of how custom
-          smart contracts are developed and deployed on Miden.
+          </ExternalLink>
+          , and deploy a new Account that uses this component. This gives you a
+          foundational understanding of how custom smart contracts are developed
+          and deployed on Miden.
         </p>
         <p>
           Let's start by creating the script that holds the contract code. Click
@@ -42,8 +46,12 @@ const Step1: TutorialStep = {
         </p>
         <p>
           The name is yours to choose, for example <strong>my-counter</strong>.
-          It becomes the name of the package your code compiles to, and you'll
-          meet it again in the name of the contract's storage slot.
+          It becomes the name of the package your code assembles to, and of its
+          source file, with underscores for dashes:{" "}
+          <strong>
+            <InlineCode>my_counter.masm</InlineCode>
+          </strong>
+          .
         </p>
         <TutorialStepAlert
           completed={completed}

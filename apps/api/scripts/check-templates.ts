@@ -4,8 +4,9 @@
 // teaches it for the counter note): the check does the same. The code the
 // tutorials have users add to a template (their "Add to my script" buttons,
 // lib/utils/tutorial-code.ts in the web app) is compiled too, so an SDK bump
-// that breaks a snippet fails here: none for now, the tutorials' snippets
-// are Rust until they're rewritten in MASM (plan 07 of spec/remove-rust).
+// that breaks a snippet fails here; an edit whose step relies on the typed
+// forms must keep the template's schema. Tutorials 8 to 12 add theirs as
+// they're rewritten in MASM (plan 07 of spec/remove-rust).
 //
 // The home page's examples (examples/index.ts) are launched the same way
 // (POST /scripts/examples/:id): every package must compile, and one created
@@ -36,6 +37,7 @@ import {
 import {
   applyCodeEdits,
   type CodeEdit,
+  increaseIncrementEdits,
 } from "../../web/lib/utils/tutorial-code.ts";
 import { exampleIds } from "../examples/ids.ts";
 import { sourceFilePath } from "../lib/source-file.ts";
@@ -67,11 +69,22 @@ const userDependencies: Partial<Record<ScriptExample, ScriptExample>> = {
 };
 
 // The tutorials' edits, applied to the template their script is created from.
+// `keepsSchema`: the next steps use the typed forms, so the edited package
+// must keep the template's schema (the stale rule of lib/package-metadata.ts).
 const tutorialEdits: {
   label: string;
   example: ScriptExample;
   edits: CodeEdit[];
-}[] = [];
+  keepsSchema?: boolean;
+}[] = [
+  {
+    // Tutorial 7 deploys the edited counter with the typed storage form.
+    label: "tutorial 7: the counter's increment value",
+    example: "counter-account",
+    edits: increaseIncrementEdits,
+    keepsSchema: true,
+  },
+];
 
 type CreatedPackage = {
   id: string;
@@ -218,7 +231,7 @@ for (const { type, example } of scripts) {
   }
 }
 
-for (const { label, example, edits } of tutorialEdits) {
+for (const { label, example, edits, keepsSchema } of tutorialEdits) {
   const script = await createScript(scriptExamples[example].type, example);
   try {
     const edited = applyCodeEdits(source(script), edits);
@@ -229,16 +242,22 @@ for (const { label, example, edits } of tutorialEdits) {
       );
       continue;
     }
-    const { status, stderr } = await compileScript(
+    const { status, stderr, metadata } = await compileScript(
       script,
       script.dependencies.map(({ id }) => id),
       edited,
     );
-    if (status === "compiled") {
-      console.info(`ok    ${label}`);
-    } else {
+    const mismatch = keepsSchema
+      ? schemaMismatch(example, edited, metadata)
+      : null;
+    if (status !== "compiled") {
       failures.push(label);
       console.error(`FAIL  ${label}\n${stderr}\n`);
+    } else if (mismatch) {
+      failures.push(label);
+      console.error(`FAIL  ${label}: ${mismatch}\n`);
+    } else {
+      console.info(`ok    ${label}`);
     }
   } finally {
     await request(`/scripts/${script.id}`, { method: "DELETE" });

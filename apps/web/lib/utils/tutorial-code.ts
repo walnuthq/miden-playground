@@ -53,10 +53,18 @@ export const applyCodeEdits = (
   return next;
 };
 
-// Tutorial 7: the counter's increment value, the last `felt!(n)` of the
-// script (the key's `felt!(1)` comes before it).
-export const incrementValue = (source: string) =>
-  Number(Array.from(source.matchAll(/felt!\((\d*)\)/g)).at(-1)?.[1]);
+// Tutorial 7: the counter's increment value, the constant `add.<n>` adds to
+// the count in `increment_count` (apps/api/templates/counter-account.masm),
+// in decimal or hex. The edit leaves the slot names alone, so the script
+// keeps its storage schema (decision 3 of spec/remove-rust.md). NaN when the
+// procedure or its `add.<n>` isn't there.
+const INCREMENT_COUNT = /\bproc\s+increment_count\b[\s\S]*?\n\s*end\b/;
+const ADD_CONSTANT = /^(\s*add\.)(0x[0-9a-fA-F]+|\d+)\b/m;
+
+export const incrementValue = (source: string) => {
+  const body = INCREMENT_COUNT.exec(source)?.[0] ?? "";
+  return Number(ADD_CONSTANT.exec(body)?.[2]);
+};
 
 export const INCREMENT = 5;
 
@@ -64,10 +72,12 @@ export const increaseIncrementEdits: CodeEdit[] = [
   {
     applied: (source) => incrementValue(source) > 1,
     apply: (source) => {
-      const anchor = /(current_value\s*\+\s*felt!\()1(\))/;
-      return anchor.test(source)
-        ? source.replace(anchor, `$1${INCREMENT}$2`)
-        : null;
+      const match = INCREMENT_COUNT.exec(source);
+      if (!match || !ADD_CONSTANT.test(match[0])) {
+        return null;
+      }
+      const body = match[0].replace(ADD_CONSTANT, `$1${INCREMENT}`);
+      return `${source.slice(0, match.index)}${body}${source.slice(match.index + match[0].length)}`;
     },
   },
 ];
