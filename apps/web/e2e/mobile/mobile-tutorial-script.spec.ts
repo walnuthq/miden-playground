@@ -22,6 +22,14 @@ const editorConsole = (page: Page) =>
 const consoleHeight = async (page: Page) =>
   (await editorConsole(page).boundingBox())?.height ?? 0;
 
+// Its tutorials (8 and 10) were written for Rust contracts: they're marked
+// `unavailable` until plan 07 of spec/remove-rust rewrites them in MASM.
+// Remove this with the last of their flags.
+test.fixme(
+  true,
+  "Tutorials 8 and 10 are being rewritten for Miden Assembly (spec/remove-rust plan 07)",
+);
+
 // A tutorial's read-only script that can be simulated has a console, whose
 // bar takes height from the page above the closed tutorial panel: the source
 // stays readable, and the page fits the screen (down to 320 px in

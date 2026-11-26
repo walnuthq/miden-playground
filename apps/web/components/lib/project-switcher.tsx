@@ -48,6 +48,9 @@ import type { ProjectMeta } from "@/lib/types/project";
 import { isProjectLinkNetworkId } from "@/lib/utils/project-link";
 import { confirmWorkspaceSwitch } from "@/lib/utils/workspace-guard";
 
+// The examples the switcher offers: not the hidden ones (ExampleMeta.hidden).
+const shownExamples = examples.filter(({ hidden }) => !hidden);
+
 const errorMessage = (error: unknown) =>
   error instanceof Error ? error.message : String(error);
 
@@ -200,35 +203,39 @@ const ProjectSwitcher = () => {
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
             </DropdownMenuSub>
-            <DropdownMenuSeparator />
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger>Examples</DropdownMenuSubTrigger>
-              <DropdownMenuPortal>
-                <DropdownMenuSubContent>
-                  {examples.map((example) => (
-                    <DropdownMenuItem
-                      key={example.id}
-                      onClick={async () => {
-                        const toastId = toast.loading(
-                          `Launching ${example.title}…`,
-                        );
-                        const { error } = await launchExample(example.id);
-                        if (error !== undefined) {
-                          toast.error("Example couldn't be launched.", {
-                            id: toastId,
-                            description: error,
-                          });
-                        } else {
-                          toast.dismiss(toastId);
-                        }
-                      }}
-                    >
-                      {example.title}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuSubContent>
-              </DropdownMenuPortal>
-            </DropdownMenuSub>
+            {shownExamples.length > 0 && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>Examples</DropdownMenuSubTrigger>
+                  <DropdownMenuPortal>
+                    <DropdownMenuSubContent>
+                      {shownExamples.map((example) => (
+                        <DropdownMenuItem
+                          key={example.id}
+                          onClick={async () => {
+                            const toastId = toast.loading(
+                              `Launching ${example.title}…`,
+                            );
+                            const { error } = await launchExample(example.id);
+                            if (error !== undefined) {
+                              toast.error("Example couldn't be launched.", {
+                                id: toastId,
+                                description: error,
+                              });
+                            } else {
+                              toast.dismiss(toastId);
+                            }
+                          }}
+                        >
+                          {example.title}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuSubContent>
+                  </DropdownMenuPortal>
+                </DropdownMenuSub>
+              </>
+            )}
             <DropdownMenuSeparator />
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>Projects</DropdownMenuSubTrigger>

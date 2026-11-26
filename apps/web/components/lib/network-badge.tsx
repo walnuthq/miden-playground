@@ -9,6 +9,8 @@ import useDocumentVisible from "@/hooks/use-document-visible";
 import useExamples, { EXAMPLE_DEPLOY_FAILED_TOAST } from "@/hooks/use-examples";
 import useNetwork from "@/hooks/use-network";
 import { useImportProjectLinkAccounts } from "@/hooks/use-project-link";
+import { deletedRustProjects } from "@/lib/utils/project";
+import { takeWorkspaceReset } from "@/lib/utils/rust-state";
 import { workspaceLeft } from "@/lib/utils/workspace-guard";
 
 let callingPopState = false;
@@ -30,9 +32,43 @@ const NetworkBadge = () => {
     submittingTransaction,
     nextState,
     workspaceRun,
+    tutorialProgress,
   } = useGlobalContext();
   const switching = nextState !== null;
-  const { syncState, popState } = useAppState();
+  const { syncState, popState, pushState, freshSandboxState, sandboxStarter } =
+    useAppState();
+  // The persisted workspace held a Rust script (lib/utils/rust-state.ts): it
+  // becomes a new sandbox on its network, store and mock chain included,
+  // without a word. Its saved tutorials holding one are deleted meanwhile,
+  // and their progress with them.
+  useEffect(() => {
+    if (!takeWorkspaceReset()) {
+      return;
+    }
+    const resetWorkspace = async () => {
+      const [starter, deleted] = await Promise.all([
+        sandboxStarter(networkId),
+        deletedRustProjects(),
+      ]);
+      pushState(
+        freshSandboxState(networkId, {
+          starter,
+          tutorialProgress: Object.fromEntries(
+            Object.entries(tutorialProgress).filter(
+              ([id]) =>
+                !deleted.some(
+                  (project) => project.kind === "tutorial" && project.id === id,
+                ),
+            ),
+          ),
+        }),
+      );
+    };
+    resetWorkspace().catch((error) =>
+      console.error("ERROR: resetWorkspace", error),
+    );
+    // oxlint-disable-next-line react-hooks/exhaustive-deps -- on mount only.
+  }, []);
   const { exampleId, exampleScript, loadExample } = useExamples();
   // The account deployed with the example's script.
   const exampleAccount = exampleScript

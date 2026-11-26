@@ -9,7 +9,7 @@ Before working in one of these areas, read its file in `docs/claude/`. Their rul
 - MockChain sandbox (`mmck`), `lib/mock-chain.ts`, the mock client as the app's client, its saved chain: `mockchain-sandbox.md`.
 - Home-page examples, `compiled.json`, `pnpm examples:compile`: `examples.md`.
 - Read-only procedures, the Invoke button: `read-only-procedures.md`.
-- `apps/api/templates/*.rs`, `pnpm templates:check`/`sync`, the package embedded in `apps/web/lib/tutorials/basic-wallet.json`, note scripts and the wallets that can consume them: `script-templates.md`.
+- `apps/api/templates/*.masm`, `pnpm templates:check`, note scripts and the wallets that can consume them: `script-templates.md`.
 - `templates/project-template/Cargo.lock`, `pnpm lockfile:check`/`sync`, api-compile image bumps: `project-template-lockfile.md`.
 - Script page (`/scripts/:id`): editor, console, diagnostics, tabs, shortcuts, its e2e specs, script owners (the owner token), shared links and forks: `script-editor.md`.
 - The console's Simulate tab, `lib/simulation`, the mock client, `components/procedures`, storage slot values: `simulation.md`.

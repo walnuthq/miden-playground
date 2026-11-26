@@ -81,8 +81,8 @@ export const TESTNET_FAUCET_ADDRESS =
 export const DEVNET_FAUCET_ADDRESS = "";
 
 // The tutorials' counter contract (tutorial 6 imports it, tutorial 10 reads
-// it through FPI): an instance of the `counter-account` package
-// (lib/tutorials/counter-account.ts), deployed on 2026-11-08 by launching the
+// it through FPI): an instance of the Rust `counter-account` package (embedded
+// until the switch to MASM; plan 07 of spec/remove-rust replaces it), deployed on 2026-11-08 by launching the
 // "Counter Contract" example on playground.miden.xyz, so it's verified in the
 // registry and funded. A testnet reset wipes it: deploy a new one the same way
 // and update both constants (spec/tutorials-rust-pipeline.md, PR B).

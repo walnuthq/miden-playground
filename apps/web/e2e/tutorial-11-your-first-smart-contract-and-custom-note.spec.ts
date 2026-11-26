@@ -41,6 +41,14 @@ const compile = async (page: Page) => {
   });
 };
 
+// Tutorial 11 was written for Rust contracts: it's marked `unavailable`
+// (components/tutorials/meta.ts, tutorial-unavailable.spec.ts) until plan 07
+// of spec/remove-rust rewrites it in MASM. Remove this with the flag.
+test.fixme(
+  true,
+  "Tutorial 11 is being rewritten for Miden Assembly (spec/remove-rust plan 07)",
+);
+
 test("tutorial 11: your first smart contract and custom note", async ({
   page,
   bread,

@@ -9,6 +9,8 @@ export const exampleMetas: ExampleMeta[] = [
   {
     id: "counter-account",
     title: "Counter Contract",
+    // Until it's rewritten in MASM (spec/remove-rust/06-counter-example.md).
+    hidden: true,
     tagline: "Deploy a counter contract on testnet and increment it.",
     description: (
       <p>
@@ -29,6 +31,8 @@ export const exampleMetas: ExampleMeta[] = [
   {
     id: "bank-account",
     title: "Miden Bank",
+    // Until a MASM bank is written (spec/remove-rust.md, decision 9).
+    hidden: true,
     tagline:
       "Deploy a bank contract on testnet, then deposit and withdraw assets.",
     description: (
@@ -49,6 +53,9 @@ export const exampleMetas: ExampleMeta[] = [
     ),
   },
 ];
+
+// The examples the home page and the Projects switcher offer.
+export const shownExampleMetas = exampleMetas.filter(({ hidden }) => !hidden);
 
 export const exampleMeta = (id: ExampleId): ExampleMeta => {
   const meta = exampleMetas.find((meta) => meta.id === id);

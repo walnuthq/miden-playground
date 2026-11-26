@@ -54,6 +54,14 @@ const editorSource = (page: Page) =>
         ?.getValue() ?? "",
   );
 
+// Its tutorials (7, 8 and 12) were written for Rust contracts: they're marked
+// `unavailable` until plan 07 of spec/remove-rust rewrites them in MASM.
+// Remove this with the last of their flags.
+test.fixme(
+  true,
+  "Tutorials 7, 8 and 12 are being rewritten for Miden Assembly (spec/remove-rust plan 07)",
+);
+
 test("mobile: tutorial 7's increment, added by its button", async ({
   page,
 }) => {

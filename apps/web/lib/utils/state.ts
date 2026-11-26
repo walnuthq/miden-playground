@@ -10,7 +10,6 @@ import {
   type LegacyComponent,
   migrateLegacyComponents,
 } from "@/lib/utils/legacy-components";
-import { LEGACY_RUST_FILE } from "@/lib/utils/script-files";
 
 // The local storage key holding the serialized app state. Exported so the
 // Miden provider can drop it when the client store it describes is deleted.
@@ -156,11 +155,10 @@ export const stateSerializer = ({
   });
 
 // Scripts persisted before the package `digest` was renamed `commitment` still
-// carry the old field, on themselves and on their dependencies. Those
-// persisted before `files` have their Rust source in `rust` (saved projects
-// and tutorial snapshots too, which load through here): it goes where `files`
-// kept it, `src/lib.rs`, which is how a Rust script is told apart.
-// Transaction scripts persisted before the playground used Miden's canonical
+// carry the old field, on themselves and on their dependencies (saved
+// projects and tutorial snapshots too, which load through here). A state
+// holding a Rust script never gets here: it's reset first
+// (lib/utils/rust-state.ts). Transaction scripts persisted before the playground used Miden's canonical
 // kind name are typed "tx-script", themselves and as dependencies.
 type LegacyScriptType = ScriptType | "tx-script";
 
@@ -170,7 +168,6 @@ const migrateScriptType = (type: LegacyScriptType): ScriptType =>
 type LegacyScript = Omit<Script, "type" | "dependencies" | "files"> & {
   type: LegacyScriptType;
   digest?: string;
-  rust?: string;
   files?: Script["files"];
   dependencies: (Omit<Script["dependencies"][number], "type"> & {
     type: LegacyScriptType;
@@ -178,15 +175,10 @@ type LegacyScript = Omit<Script, "type" | "dependencies" | "files"> & {
   })[];
 };
 
-const migrateScript = ({
-  digest,
-  rust,
-  files,
-  ...script
-}: LegacyScript): Script => ({
+const migrateScript = ({ digest, files, ...script }: LegacyScript): Script => ({
   ...script,
   type: migrateScriptType(script.type),
-  files: files ?? (rust ? { [LEGACY_RUST_FILE]: rust } : {}),
+  files: files ?? {},
   commitment: script.commitment ?? digest ?? "",
   dependencies: script.dependencies.map(({ digest, ...dependency }) => ({
     ...dependency,

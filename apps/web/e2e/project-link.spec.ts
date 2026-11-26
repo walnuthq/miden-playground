@@ -2,8 +2,8 @@ import { expect, type Page, test } from "@playwright/test";
 import {
   componentRow,
   invoke,
+  counterWorkspace,
   invokeAndSubmit,
-  launchExample,
 } from "./example";
 import {
   atPhoneWidth,
@@ -51,17 +51,13 @@ test("a project link opens the scripts as copies and imports the accounts", asyn
   let scripts: { id: string; name: string }[] = [];
   let link = "";
 
-  await test.step("the author launches the counter example", async () => {
-    await launchExample(page, {
-      title: "Counter Contract",
-      accountName: "Counter Contract",
-    });
+  // A sandbox holding a counter stands in for the Counter Contract example
+  // until plan 06 of spec/remove-rust rewrites it in MASM.
+  await test.step("the author deploys a counter", async () => {
+    await counterWorkspace(page);
     address = page.url().split("/").at(-1) ?? "";
     scripts = (await apiScripts(page)).filter(({ id }) => UUID.test(id));
-    expect(scripts.map(({ name }) => name).sort()).toEqual([
-      "counter-account",
-      "increment-note",
-    ]);
+    expect(scripts.map(({ name }) => name).sort()).toEqual(["counter-account"]);
   });
 
   await test.step("and shares the project", async () => {
@@ -129,7 +125,7 @@ test("a project link opens the scripts as copies and imports the accounts", asyn
     await expect(reader.getByText("Counter: a demo & more")).toBeVisible({
       timeout: TRANSACTION_TIMEOUT,
     });
-    for (const name of ["counter-account", "increment-note"]) {
+    for (const name of ["counter-account"]) {
       await expect(reader.getByText(name, { exact: true })).toBeVisible();
     }
     await expect(reader.getByText("A script that was deleted")).toBeVisible();
@@ -161,10 +157,7 @@ test("a project link opens the scripts as copies and imports the accounts", asyn
     await expect(row).toBeVisible({ timeout: TRANSACTION_TIMEOUT });
     // The copies, not the author's scripts.
     const copies = (await apiScripts(reader)).filter(({ id }) => UUID.test(id));
-    expect(copies.map(({ name }) => name).sort()).toEqual([
-      "counter-account",
-      "increment-note",
-    ]);
+    expect(copies.map(({ name }) => name).sort()).toEqual(["counter-account"]);
     for (const { id } of copies) {
       expect(scripts.map((script) => script.id)).not.toContain(id);
     }
@@ -172,7 +165,7 @@ test("a project link opens the scripts as copies and imports the accounts", asyn
     await expect(reader).toHaveURL(new RegExp(`/accounts/${address}$`));
     await reader.getByRole("tab", { name: "Components" }).click();
     await expect(
-      componentRow(reader, "counter_account::counter_contract::count_map"),
+      componentRow(reader, "counter_account::count_map"),
     ).toBeVisible();
   });
 

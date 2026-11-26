@@ -30,6 +30,14 @@ const getCount = async (page: Page) => {
   return Number((await result.textContent())!.match(/^\d+/)![0]);
 };
 
+// Tutorial 6 was written for Rust contracts: it's marked `unavailable`
+// (components/tutorials/meta.ts, tutorial-unavailable.spec.ts) until plan 07
+// of spec/remove-rust rewrites it in MASM. Remove this with the flag.
+test.fixme(
+  true,
+  "Tutorial 6 is being rewritten for Miden Assembly (spec/remove-rust plan 07)",
+);
+
 test("tutorial 6: interact with the counter contract", async ({
   page,
   context,
