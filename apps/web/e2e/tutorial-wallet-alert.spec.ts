@@ -12,8 +12,8 @@ test("only tutorials that sign with Bread Wallet ask to install it", async ({
     "You need to install Bread Wallet.",
   );
 
-  // Tutorial 7 deploys a No Auth contract: nothing to sign.
-  await startTutorial(page, "Deploy a counter contract");
+  // Tutorial 1 funds a wallet from the faucet: nothing to sign.
+  await startTutorial(page, "Create and fund a wallet");
   await expect(installAlert).toBeHidden();
 
   // Tutorial 3 connects the wallet in its first step.

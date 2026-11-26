@@ -1,5 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
-import { launchExample, startExample } from "./example";
+import { counterWorkspace, startExample } from "./example";
 import {
   clickProjectsItem,
   closeMenu,
@@ -102,20 +102,19 @@ const stampProjectWithNewerClient = (page: Page, name: string) =>
 
 // Saving an example or a sandbox makes it a project, listed in the sidebar's
 // Projects submenu, which opens it again (switching networks when needed).
-// The example's packages come from apps/api: run it along with the dev
-// server. Creating the Mainnet sandbox needs no wallet.
+// The counter is compiled and deployed through apps/api: run it along with
+// the dev server. Creating the Mainnet sandbox needs no wallet. (A sandbox
+// holding a counter stands in for the Counter Contract example until plan 06
+// of spec/remove-rust rewrites it.)
 test("save, open and delete projects", async ({ page }) => {
   logBrowserErrors(page);
 
-  await test.step("save the counter example as a project", async () => {
-    await launchExample(page, {
-      title: "Counter Contract",
-      accountName: "Counter Contract",
-    });
-    await expect(switcher(page)).toContainText("Counter Contract");
+  await test.step("save a sandbox with a counter as a project", async () => {
+    await counterWorkspace(page);
+    await expect(switcher(page)).toContainText("Testnet sandbox");
     await saveProjectAs(page, {
       item: "Save",
-      proposed: "Counter Contract",
+      proposed: "Testnet sandbox",
       name: "My counter",
     });
   });
@@ -294,7 +293,10 @@ const TRANSACTION_COMMIT_TIMEOUT_MS = 60_000;
 // Leaving an example while its account is being deployed abandons the deploy,
 // which must not report to, or add its account to, the next workspace. The
 // proof is held back so the deploy is mid-transaction during the switch.
-test("a deploy still running doesn't reach the next workspace", async ({
+// Fixme while the Counter Contract example is hidden: it covers the example's
+// background deploy, and comes back with the example in plan 06 of
+// spec/remove-rust.
+test.fixme("a deploy still running doesn't reach the next workspace", async ({
   page,
 }) => {
   logBrowserErrors(page);
@@ -406,7 +408,10 @@ const savedTutorial = (page: Page, id: string) =>
 // 3 s, then let through. The test asserts the submit was answered after the
 // import, then that nothing of the deploy shows up in the tutorial or in its
 // saved store.
-test("a deploy that succeeds after leaving its example doesn't reach the next workspace", async ({
+// Fixme while the Counter Contract example is hidden: it covers the example's
+// background deploy, and comes back with the example in plan 06 of
+// spec/remove-rust.
+test.fixme("a deploy that succeeds after leaving its example doesn't reach the next workspace", async ({
   page,
 }) => {
   logBrowserErrors(page);

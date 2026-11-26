@@ -1,6 +1,5 @@
 import { ExternalLink, InlineCode } from "@/components/tutorials/prose";
 import TutorialLink from "@/components/tutorials/tutorial-link";
-import { basicWalletScript } from "@/lib/tutorials/basic-wallet";
 import type { TutorialStep } from "@/lib/types/tutorial";
 
 // Line numbers refer to apps/api/templates/p2id-note.rs, the source the script
@@ -55,9 +54,7 @@ const Step2: TutorialStep = {
       <p>
         That procedure isn't part of the script: it belongs to the consuming
         account. Lines <em>7-10</em> name where it comes from, the{" "}
-        <TutorialLink href={`/scripts/${basicWalletScript.id}`}>
-          basic-wallet
-        </TutorialLink>{" "}
+        <TutorialLink href="/scripts/basic-wallet">basic-wallet</TutorialLink>{" "}
         script that comes with this tutorial, a basic wallet component written
         in Rust. The note script calls it by its{" "}
         <ExternalLink href="https://docs.miden.xyz/reference/protocol/account/code">

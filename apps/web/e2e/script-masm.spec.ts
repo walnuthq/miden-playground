@@ -1,7 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
-import { COMPILED, replaceInEditor, waitForEditorText } from "./editor";
-import { launchExample } from "./example";
-import { logBrowserErrors, TRANSACTION_TIMEOUT } from "./tutorial";
+import { createCounterScript, waitForEditorText } from "./editor";
+import { logBrowserErrors } from "./tutorial";
 
 type Token = { offset: number; type: string };
 
@@ -36,13 +35,10 @@ const tokenize = (page: Page, text: string, language = "masm") =>
     { text, language },
   );
 
-test("script: MASM syntax highlighting", async ({ page }) => {
-  logBrowserErrors(page);
-
-  await test.step("open a built-in script's MASM tab", async () => {
-    await page.goto("/scripts/auth-no-auth?tab=masm");
-    await waitForEditorText(page, "pub proc auth_no_auth(");
-    const language = await page.evaluate(() =>
+// The language of the model holding `text`.
+const sourceLanguage = (page: Page, text: string) =>
+  page.evaluate(
+    (text) =>
       (
         window as unknown as {
           monaco: {
@@ -56,10 +52,18 @@ test("script: MASM syntax highlighting", async ({ page }) => {
         }
       ).monaco.editor
         .getModels()
-        .find((model) => model.getValue().includes("pub proc"))
+        .find((model) => model.getValue().includes(text))
         ?.getLanguageId(),
-    );
-    expect(language).toBe("masm");
+    text,
+  );
+
+test("script: MASM syntax highlighting", async ({ page }) => {
+  logBrowserErrors(page);
+
+  await test.step("a built-in script's source is MASM", async () => {
+    await page.goto("/scripts/auth-no-auth");
+    await waitForEditorText(page, "pub proc auth_no_auth(");
+    expect(await sourceLanguage(page, "pub proc auth_no_auth(")).toBe("masm");
   });
 
   await test.step("tokens", async () => {
@@ -142,7 +146,7 @@ test("script: MASM syntax highlighting", async ({ page }) => {
     ]);
   });
 
-  await test.step("the MASM tab is colored", async () => {
+  await test.step("the source is colored", async () => {
     // Keywords, names and comments each get their own color. Monaco can
     // render a line before tokenizing it (one color for the whole line), so
     // poll until the colors show. The words are ones no earlier line has, a
@@ -164,49 +168,15 @@ test("script: MASM syntax highlighting", async ({ page }) => {
   });
 });
 
-// The MASM model's language and text, once the tab has mounted its editor.
-const masmModel = (page: Page) =>
-  page.evaluate(() => {
-    const model = (
-      window as unknown as {
-        monaco: {
-          editor: {
-            getModels: () => {
-              getValue: () => string;
-              getLanguageId: () => string;
-              isDisposed: () => boolean;
-            }[];
-          };
-        };
-      }
-    ).monaco.editor
-      .getModels()
-      .find((model) => model.getLanguageId() === "masm" && !model.isDisposed());
-    return model?.getValue();
-  });
-
-test("script: a compiled script's MASM", async ({ page }) => {
+test("script: a script's source is MASM", async ({ page }) => {
   logBrowserErrors(page);
-  const masmTab = page.getByRole("tab", { name: "MASM" });
-  const compile = async () => {
-    await page.getByRole("button", { name: "Compile" }).click();
-  };
 
-  await test.step("an example's script has its MASM", async () => {
-    await launchExample(page, {
-      title: "Counter Contract",
-      accountName: "Counter Contract",
-    });
-    await page.getByRole("link", { name: "counter-account" }).click();
-    await waitForEditorText(page, "fn get_count(&self) -> Felt {");
-    await masmTab.click();
-    await expect.poll(() => masmModel(page)).toContain('pub proc "get-count"(');
-  });
-
-  await test.step("typing in it doesn't widen the page", async () => {
+  await test.step("typing in a read-only source doesn't widen the page", async () => {
     // Monaco's "Cannot edit in read-only editor" message brought up a
     // scrollbar, and the editor grew by its width on each key: the page's
     // flex items kept the editor's pixel width as their minimum.
+    await page.goto("/scripts/auth-no-auth");
+    await waitForEditorText(page, "pub proc auth_no_auth(");
     const pageWidth = () =>
       page.evaluate(() => document.documentElement.scrollWidth);
     const width = await pageWidth();
@@ -222,34 +192,22 @@ test("script: a compiled script's MASM", async ({ page }) => {
     expect(await pageWidth()).toBeLessThanOrEqual(width);
   });
 
-  await test.step("an edit disables it, a compile brings it back", async () => {
-    await page.getByRole("tab", { name: "Explorer" }).click();
-    await replaceInEditor(
-      page,
-      "current_value + felt!(1);",
-      "current_value + felt!(1234567);",
+  await test.step("a user's script is edited as MASM", async () => {
+    await createCounterScript(page);
+    expect(await sourceLanguage(page, "pub proc get_count() -> felt")).toBe(
+      "masm",
     );
-    await expect(masmTab).toBeDisabled();
-    await compile();
-    await expect(page.getByText(COMPILED)).toBeVisible({
-      timeout: TRANSACTION_TIMEOUT,
-    });
-    await masmTab.click();
-    await expect.poll(() => masmModel(page)).toContain("push.1234567");
   });
 
-  await test.step("a failed compile has none", async () => {
-    await page.getByRole("tab", { name: "Explorer" }).click();
-    await replaceInEditor(page, "felt!(1234567);", "felt!(1234567;");
-    await compile();
-    await expect(
-      page.getByRole("button", { name: /^src\/lib\.rs:\d+:\d+$/ }).first(),
-    ).toBeVisible({ timeout: TRANSACTION_TIMEOUT });
-    await expect(masmTab).toBeDisabled();
-    // Its panel, from a link, says how to get it.
+  await test.step("a link to the retired MASM tab opens the source", async () => {
     await page.goto(`${page.url()}?tab=masm`);
+    await expect(page.getByRole("tab", { name: "Explorer" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
     await expect(
-      page.getByText("Compile the script to see its Miden Assembly."),
-    ).toBeVisible();
+      page.getByRole("tab", { name: "MASM", exact: true }),
+    ).toHaveCount(0);
+    await waitForEditorText(page, "pub proc get_count() -> felt");
   });
 });

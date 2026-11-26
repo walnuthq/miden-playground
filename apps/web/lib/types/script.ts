@@ -37,22 +37,17 @@ export const scriptStatuses = {
 
 export type ScriptStatus = keyof typeof scriptStatuses;
 
-export const midenTypes = {
-  "miden:base/core-types@1.0.0/felt": "Felt",
-  "miden:base/core-types@1.0.0/word": "Word",
-  "miden:base/core-types@1.0.0/account-id": "AccountId",
-  "miden:base/core-types@1.0.0/asset": "Asset",
-} as const;
+// The four types the forms have an input for: a felt, a word, the account
+// picker and the asset input. `knownType` (lib/utils/procedure-inputs.ts)
+// reads them from a manifest's layout.
+export const midenTypes = ["Felt", "Word", "AccountId", "Asset"] as const;
 
-export type MidenRawType = keyof typeof midenTypes;
+export type MidenType = (typeof midenTypes)[number];
 
-export type MidenType = (typeof midenTypes)[keyof typeof midenTypes];
-
-// A struct's layout in a package's manifest: its name (`MidenRawType` for the
-// four types the forms know, `miden:base/core-types@1.0.0/note-idx`, or a
-// bare `pair` for a record the package defines), its size in bytes (four per
-// felt) and its fields in declaration order. The built-ins' hand-written
-// signatures have the name alone.
+// A struct's layout in a MASM package's manifest: its bare name (`AccountId`
+// and `Asset` for the two the forms know, or a struct the source defines),
+// its size in bytes (four per felt) and its fields in declaration order. The
+// built-ins' hand-written signatures copy the manifest's.
 export type MidenTypeStruct = {
   Struct: {
     name: string;
@@ -64,9 +59,10 @@ export type MidenTypeStruct = {
 
 export type MidenTypeField = { name?: string; ty: MidenTypeLayout };
 
-// A type as the manifest lays it out (midenc's `Type`): a primitive by name
-// (`"Felt"`, and `"U64"`, `"U32"`, `"I1"` for a `u64`, a `u32`, a `bool`), a
-// struct, or another kind under its own key (an option is `{ Enum: … }`).
+// A type as the manifest lays it out (miden-assembly's `Type`): a primitive
+// by name (`"Felt"`, and `"U64"`, `"U32"`, `"U16"`, `"U8"`, `"I1"`), a
+// struct, an array (`{ Array: { ty: "Felt", len: 4 } }` is a word), or an
+// enum (`{ Enum: { name, discriminant, variants } }`, `NoteType`).
 export type MidenTypeLayout =
   | string
   | MidenTypeStruct
@@ -112,13 +108,13 @@ export type ProcedureExport = {
   // (`simulationBlockedReason`), whose foreign account the mock client can't
   // serve.
   callsForeign?: boolean | null;
-  // The parameters' names and WIT types, kebab case, in the signature's
-  // order, from the WIT the package embeds (api-compile's `parameters`),
-  // stored with each export like `readOnly`. Missing when api-compile found
-  // none (a transaction script), from built-ins and from packages compiled
-  // before it reported them: the forms then name them `param_N`
-  // (`procedureParams`). The names are used, and the type to label a
-  // parameter the forms don't know.
+  // The parameters' names and types as the MASM source spells them
+  // (`counter_account_id: AccountId`), in the signature's order: api-compile
+  // reads them from the source (`parameters`), and the API stores them with
+  // each export like `readOnly`. Missing when api-compile found none (a
+  // procedure without parameters), and from packages compiled before it
+  // reported them: the forms then name them `param_N` (`procedureParams`).
+  // The names are used, and the type to label a parameter.
   parameters?: { name: string; type: string }[];
 };
 
@@ -141,26 +137,20 @@ export const toDependency = ({
   commitment,
 }: Dependency): Dependency => ({ id, name, type, commitment });
 
-// The body of the API's `POST /scripts/import`: a project's sources.
-export type PackageSource = { midenProjectToml: string; rust: string };
+// The body of the API's `POST /scripts/import`: a project's sources, its
+// manifest and its one MASM module.
+export type PackageSource = { midenProjectToml: string; masm: string };
 
-// The files of a script the editor shows, by path in its project. Only
-// `src/lib.rs` is edited: the API generates the manifests. The built-in
-// scripts and the packages embedded for the tutorials have no manifests, the
-// MASM-only built-ins no file at all.
-export const scriptFilePaths = [
-  "src/lib.rs",
-  "Cargo.toml",
-  "miden-project.toml",
-] as const;
-
-export type ScriptFilePath = (typeof scriptFilePaths)[number];
-
-export type ScriptFiles = Partial<Record<ScriptFilePath, string>>;
+// The files of a script the editor shows, by path in its project: its MASM
+// source (`scriptSourcePath` in lib/utils/script-files.ts), the only one
+// edited, and the miden-project.toml the API generates. The built-in scripts
+// and the packages embedded for the tutorials have no manifest, the built-in
+// libraries no file at all.
+export type ScriptFiles = Record<string, string>;
 
 // An account component's storage slot, as the package's storage schema
-// describes it (api-compile reads it from the account component metadata the
-// toolchain embeds). Types are the schema's names: `word`, `felt`, or a named
+// describes it. A MASM package has none: the schemas are hand-written, for
+// the built-ins and the API's templates. Types are the schema's names: `word`, `felt`, or a named
 // type such as `miden::standards::auth::pub_key`.
 export type StorageSlotSchema = {
   // The slot's full name, e.g. `counter_contract::counter_contract::count_map`.
@@ -209,6 +199,24 @@ export type PackageMetadata = {
   accountProcedures?: string[] | null;
 };
 
+// A diagnostic of api-compile's MASM build (the MASM wire format, in the
+// verifier repo's spec/remove-rust/README.md). `file` is relative to the
+// build's root, so it starts with the package's directory
+// (`counter-account/counter_account.masm`). `line` and `column` start at 1,
+// like Monaco's, and `length` counts characters. A diagnostic without a
+// position is shown in the console only.
+export type Diagnostic = {
+  severity: "error" | "warning";
+  message: string;
+  file?: string;
+  line?: number;
+  column?: number;
+  length?: number;
+  // What the span is marked with, when it says more than `message`.
+  label?: string;
+  help?: string;
+};
+
 export type Script = {
   id: string;
   name: string;
@@ -216,12 +224,19 @@ export type Script = {
   status: ScriptStatus;
   readOnly: boolean;
   files: ScriptFiles;
+  // The MASM a built-in script is assembled from in the browser
+  // (`assembledFromMasm`), also its source in `files`. Empty for the API's
+  // scripts, whose source is the MASM.
   masm: string;
-  // The last compile's output: rustc's rendered errors when it failed, its
-  // warnings when it succeeded. The API stores neither: a script fetched from
+  // The last compile's output: the assembler's rendered errors when it
+  // failed, its warnings when it succeeded. The API stores neither: a script fetched from
   // it (or saved before `warnings` existed) may lack them.
   error: string;
   warnings: string;
+  // The same diagnostics as a list, for the editor's markers and the
+  // console's counts. Missing where `error` and `warnings` are, and on a
+  // script compiled before api-compile assembled MASM.
+  diagnostics?: Diagnostic[];
   commitment: string;
   masp: string;
   exports: Export[];
@@ -248,6 +263,7 @@ export type CompiledPackage = Pick<
   | "exports"
   | "error"
   | "warnings"
+  | "diagnostics"
   | "dependencies"
   | "metadata"
 >;
@@ -263,7 +279,7 @@ export type MidenProjectToml = {
       };
     };
   };
-  lib: { kind: ScriptType; namespace: string };
+  lib: { kind: ScriptType; namespace: string; path?: string };
   dependencies: Record<string, string | { path: string }>;
 };
 

@@ -11,11 +11,16 @@ import {
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { Spinner } from "@workspace/ui/components/spinner";
+import { cn } from "@workspace/ui/lib/utils";
 import { useState } from "react";
 import { toast } from "sonner";
 import useScripts from "@/hooks/use-scripts";
-import type { PackageSource } from "@/lib/types/script";
-import { fileListToPackageSources } from "@/lib/utils/script";
+import {
+  fileListToPackageSources,
+  type PickedProjects,
+} from "@/lib/utils/script";
+
+const NOTHING_PICKED: PickedProjects = { packageSources: {}, refused: [] };
 
 const ImportProjectDialog = () => {
   const {
@@ -24,15 +29,14 @@ const ImportProjectDialog = () => {
     importScriptsFromPackageSources,
   } = useScripts();
   const [loading, setLoading] = useState(false);
-  const [packageSources, setPackageSources] = useState<
-    Record<string, PackageSource>
-  >({});
+  const [{ packageSources, refused }, setPicked] =
+    useState<PickedProjects>(NOTHING_PICKED);
   // Whether a folder was picked, to tell an empty one apart.
-  const [picked, setPicked] = useState(false);
+  const [picked, setFolderPicked] = useState(false);
   const packageDirectories = Object.keys(packageSources);
   const onClose = () => {
-    setPackageSources({});
-    setPicked(false);
+    setPicked(NOTHING_PICKED);
+    setFolderPicked(false);
     closeImportProjectDialog();
   };
   return (
@@ -46,12 +50,13 @@ const ImportProjectDialog = () => {
         <DialogHeader>
           <DialogTitle>Import Project</DialogTitle>
           <DialogDescription>
-            Import a Rust project, or a folder of projects that depend on each
-            other. Each project needs a miden-project.toml and a src/lib.rs.
+            Import a Miden Assembly project, or a folder of projects that depend
+            on each other. Each project needs a miden-project.toml whose [lib]
+            path names its .masm file.
           </DialogDescription>
         </DialogHeader>
         <form
-          id="import-rust-project-form"
+          id="import-project-form"
           onSubmit={async (event) => {
             event.preventDefault();
             setLoading(true);
@@ -60,17 +65,17 @@ const ImportProjectDialog = () => {
                 await importScriptsFromPackageSources(packageSources);
               if (scripts) {
                 toast.success(
-                  `Successfully imported Rust project, found ${scripts.length} ${scripts.length === 1 ? "script" : "scripts"}.`,
+                  `Successfully imported project, found ${scripts.length} ${scripts.length === 1 ? "script" : "scripts"}.`,
                 );
                 onClose();
               } else {
-                toast.error("Failed to import Rust project.", {
+                toast.error("Failed to import project.", {
                   description: error,
                 });
               }
             } catch (error) {
               console.error(error);
-              toast.error("Failed to import Rust project.", {
+              toast.error("Failed to import project.", {
                 description:
                   error instanceof Error ? error.message : String(error),
               });
@@ -91,9 +96,8 @@ const ImportProjectDialog = () => {
                   if (!files) {
                     return;
                   }
-                  const packageSources = await fileListToPackageSources(files);
-                  setPackageSources(packageSources);
-                  setPicked(true);
+                  setPicked(await fileListToPackageSources(files));
+                  setFolderPicked(true);
                 }}
               />
             </div>
@@ -101,10 +105,11 @@ const ImportProjectDialog = () => {
           {picked && (
             <div className="mt-4 text-sm">
               {packageDirectories.length === 0 ? (
-                <p className="text-destructive">
-                  No project found: no directory has both a miden-project.toml
-                  and a src/lib.rs.
-                </p>
+                refused.length === 0 && (
+                  <p className="text-destructive">
+                    No project found: no directory has a miden-project.toml.
+                  </p>
+                )
               ) : (
                 <>
                   <p className="text-muted-foreground">
@@ -118,6 +123,26 @@ const ImportProjectDialog = () => {
                   </ul>
                 </>
               )}
+              {refused.length > 0 && (
+                <>
+                  <p
+                    className={cn(
+                      "text-destructive",
+                      packageDirectories.length > 0 && "mt-2",
+                    )}
+                  >
+                    Can&apos;t import:
+                  </p>
+                  <ul className="mt-1 list-inside list-disc text-destructive">
+                    {refused.map(({ directory, reason }) => (
+                      <li key={directory}>
+                        <span className="font-mono">{directory || "."}</span>:{" "}
+                        {reason}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
             </div>
           )}
         </form>
@@ -126,7 +151,7 @@ const ImportProjectDialog = () => {
             Cancel
           </DialogClose>
           <Button
-            form="import-rust-project-form"
+            form="import-project-form"
             type="submit"
             disabled={loading || packageDirectories.length === 0}
           >

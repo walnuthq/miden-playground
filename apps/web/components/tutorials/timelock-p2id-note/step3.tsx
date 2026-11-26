@@ -7,7 +7,6 @@ import useNoteScript from "@/components/tutorials/timelock-p2id-note/use-note-sc
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import useAccounts from "@/hooks/use-accounts";
 import useTutorials from "@/hooks/use-tutorials";
-import { basicWalletScript } from "@/lib/tutorials/basic-wallet";
 import type { TutorialStep } from "@/lib/types/tutorial";
 import { scriptSource } from "@/lib/utils/script-files";
 import { timelockEdits } from "@/lib/utils/tutorial-code";
@@ -179,7 +178,7 @@ assert!(block_number.as_felt() >= self.timelock_height);`}
                 storageMode: "public",
                 components: [
                   { scriptId: "auth-no-auth", storageSlots: [] },
-                  { scriptId: basicWalletScript.id, storageSlots: [] },
+                  { scriptId: "basic-wallet", storageSlots: [] },
                 ],
                 fund: false,
               });

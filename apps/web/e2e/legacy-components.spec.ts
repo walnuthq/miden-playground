@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { componentRow, launchExample } from "./example";
+import { componentRow, counterWorkspace } from "./example";
 import { logBrowserErrors, selectOption } from "./tutorial";
 
 // Components were an entity of their own until they were removed
@@ -8,19 +8,18 @@ import { logBrowserErrors, selectOption } from "./tutorial";
 // before the API returned storage schemas. Loading it migrates it once
 // (`migrateLegacyComponents`): the account lists the component's script with
 // the slots the component had, and Deploy offers the script with them.
-// Launches the counter example (one testnet deploy, through apps/api), then
-// rewrites its persisted state into that shape and reloads.
-const SLOT = "counter_account::counter_contract::count_map";
+// Deploys a counter from the MASM template (one testnet deploy, through
+// apps/api; the Counter Contract example stood in until plan 06 of
+// spec/remove-rust), then rewrites its persisted state into that shape and
+// reloads. A MASM script: the state isn't reset as a Rust one would be.
+const SLOT = "counter_account::count_map";
 const LEGACY_ID = "my-counter_00000000-0000-4000-8000-000000000000";
 
 test("a state persisted with components migrates to scripts", async ({
   page,
 }) => {
   logBrowserErrors(page);
-  await launchExample(page, {
-    title: "Counter Contract",
-    accountName: "Counter Contract",
-  });
+  await counterWorkspace(page);
   const accountUrl = page.url();
 
   await test.step("seed the pre-migration state", async () => {

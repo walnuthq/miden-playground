@@ -13,7 +13,6 @@
     "**/public",
     "apps/api/examples/*/compiled.json",
     "apps/api/drizzle",
-    "apps/web/lib/masm/vocabulary.json",
-    "apps/web/lib/tutorials/basic-wallet.json"
+    "apps/web/lib/masm/vocabulary.json"
   ]
 }

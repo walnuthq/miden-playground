@@ -1,101 +1,56 @@
 import { parse } from "smol-toml";
 import type { Dependency, MidenProjectToml, PackageType } from "@/lib/types";
-import { kebabCase } from "./case.ts";
+import { masmNamespace, sourceFilePath } from "./source-file.ts";
 
-const extractTraitName = (rust: string) => {
-  const pattern =
-    /#\[\s*component\b[^\]]*\]\s*(?:#\[[^\]]*\]\s*)*(?:pub(?:\([^)]*\))?\s+)?(?:unsafe\s+)?trait\s+([A-Za-z_]\w*)/;
-  const match = rust.match(pattern);
-  return match ? match[1] : null;
-};
+// Whether a MASM source uses the standards library (`use
+// miden::standards::…`, or a fully qualified path): its package must then
+// depend on miden-standards. A mention in a comment adds it too, which costs
+// nothing.
+const usesStandards = (masm: string) => /\bmiden::standards\b/.test(masm);
 
-// The compiler derives the namespace it expects from the package name as-is,
-// while kebabCase (lodash's, see lib/case.ts) also splits letters from digits ("p2id-note" becomes
-// "p-2-id-note"): only kebab-case trait names, not names that already are.
-const toKebabCase = (value: string) =>
-  /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value) ? value : kebabCase(value);
-
-// api-compile's image comes with the dependencies already built for its
-// counter-contract example, and a build only reuses them with the same profile
-// and dependency versions: without `trim-paths` it rebuilds every one of them,
-// which runs past its build timeout. Keep this in step with
-// templates/project-template/Cargo.toml, and send it with the template's
-// Cargo.lock.
-export const generateCargoToml = ({
-  name,
-  version = "0.1.0",
-}: {
-  name: string;
-  version?: string;
-}) => {
-  let cargoToml = `cargo-features = ["trim-paths"]\n\n`;
-  cargoToml += `[package]\n`;
-  cargoToml += `name = "${name}"\n`;
-  cargoToml += `version = "${version}"\n`;
-  cargoToml += `edition = "2024"\n\n`;
-  cargoToml += `[lib]\n`;
-  cargoToml += `crate-type = ["cdylib"]\n\n`;
-  cargoToml += `[dependencies]\n`;
-  cargoToml += `miden = "0.15"\n\n`;
-  cargoToml += `[build-dependencies]\n`;
-  cargoToml += `miden-sdk-build-script-support = "0.15"\n\n`;
-  cargoToml += `[profile.release]\n`;
-  cargoToml += `trim-paths = ["diagnostics", "object"]\n\n`;
-  cargoToml += `[profile.dev]\n`;
-  cargoToml += `trim-paths = ["diagnostics", "object"]\n`;
-  return cargoToml;
-};
-
+// A package's miden-project.toml, which api-compile assembles: the core and
+// protocol libraries always, the standards library when the source uses it,
+// and the scripts it depends on by path (`../<name>`, next to it in the
+// build's files). "*" resolves to the versions api-compile ships.
 export const generateMidenProjectToml = ({
   name,
   version = "0.1.0",
   type,
-  rust,
+  masm,
   dependencies,
 }: {
   name: string;
   version?: string;
   type: PackageType;
-  rust: string;
+  masm: string;
   dependencies: Dependency[];
 }) => {
-  const traitName = extractTraitName(rust) ?? name;
   let midenProjectToml = `[package]\n`;
   midenProjectToml += `name = "${name}"\n`;
   midenProjectToml += `version = "${version}"\n\n`;
   midenProjectToml += `[lib]\n`;
   midenProjectToml += `kind = "${type}"\n`;
-  switch (type) {
-    case "account-component": {
-      midenProjectToml += `namespace = "miden:${name}/${toKebabCase(traitName)}@${version}"\n`;
-      break;
-    }
-    case "note": {
-      midenProjectToml += `namespace = "miden:${name}/miden-${toKebabCase(traitName)}@${version}"\n`;
-      break;
-    }
-    case "transaction-script": {
-      midenProjectToml += `namespace = "miden:base/transaction-script@1.0.0"\n`;
-      break;
-    }
-  }
-  midenProjectToml += `path = "src/lib.rs"\n\n`;
+  midenProjectToml += `namespace = "${masmNamespace(name)}"\n`;
+  midenProjectToml += `path = "${sourceFilePath(name)}"\n\n`;
   midenProjectToml += `[dependencies]\n`;
   midenProjectToml += `miden-core = "*"\n`;
   midenProjectToml += `miden-protocol = "*"\n`;
-  if (dependencies.length > 0) {
-    const midenDependencies = dependencies.map(
-      ({ name }) => `${name} = { path = "../${name}" }`,
-    );
-    midenProjectToml += `${midenDependencies.join("\n")}\n\n`;
+  if (usesStandards(masm)) {
+    midenProjectToml += `miden-standards = "*"\n`;
   }
-  midenProjectToml += "\n";
-  if (type === "account-component") {
-    midenProjectToml += `[package.metadata.miden]\n`;
-    midenProjectToml += `supported-types = ["RegularAccountUpdatableCode"]\n\n`;
+  for (const { name } of dependencies) {
+    midenProjectToml += `${name} = { path = "../${name}" }\n`;
   }
   return midenProjectToml;
 };
 
 export const parseMidenProjectToml = (midenProjectToml: string) =>
   parse(midenProjectToml) as MidenProjectToml;
+
+// The libraries api-compile provides: a manifest names them by version, not
+// by path.
+export const builtInDependencies = new Set([
+  "miden-core",
+  "miden-protocol",
+  "miden-standards",
+]);

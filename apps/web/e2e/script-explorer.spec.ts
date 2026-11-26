@@ -1,5 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
-import { replaceInEditor, waitForEditorText } from "./editor";
+import { replaceInEditor, scriptHeader, waitForEditorText } from "./editor";
 import {
   logBrowserErrors,
   selectOption,
@@ -60,50 +60,66 @@ const readOnly = (page: Page, text: string) =>
     text,
   );
 
+const scriptStatus = (page: Page) => scriptHeader(page).status;
+
 const DEPENDENCY_LINE = 'basic-wallet = { path = "../basic-wallet" }';
+
+// A Counter Contract script from the API, on its page.
+const createScript = async (page: Page, name: string) => {
+  await page.goto("/scripts");
+  await page.getByRole("button", { name: "Create new script" }).click();
+  const dialog = page.getByRole("dialog").filter({ hasText: "Create Script" });
+  await dialog.getByLabel("Name").fill(name);
+  await selectOption(page, "Type", "Account Component");
+  await selectOption(page, "Example", "Counter Contract");
+  await dialog.getByRole("button", { name: "Create" }).click();
+  await expect(page).toHaveURL(/\/scripts\/[0-9a-f-]{36}$/);
+};
 
 test("script: the Explorer's files and tabs", async ({ page }) => {
   logBrowserErrors(page);
   const { file, files, tabs, tab, close } = explorer(page);
 
-  await test.step("a built-in script has its source only", async () => {
+  await test.step("a built-in script has its MASM source only", async () => {
     await page.goto("/scripts/auth-no-auth");
-    await waitForEditorText(page, "fn auth_procedure(&mut self, _arg: Word) {");
-    await expect(files).toHaveText(["src", "lib.rs"]);
-    await expect(tabs).toHaveText(["lib.rs"]);
+    await waitForEditorText(page, "pub proc auth_no_auth(");
+    await expect(files).toHaveText(["auth_no_auth.masm"]);
+    await expect(tabs).toHaveText(["auth_no_auth.masm"]);
+    // No MASM tab: the source is the MASM.
+    await expect(
+      page.getByRole("tab", { name: "MASM", exact: true }),
+    ).toHaveCount(0);
   });
 
-  await test.step("a script from the API has its manifests", async () => {
-    await page.goto("/scripts");
-    await page.getByRole("button", { name: "Create new script" }).click();
-    const dialog = page
-      .getByRole("dialog")
-      .filter({ hasText: "Create Script" });
-    await dialog.getByLabel("Name").fill("explorer-check");
-    await selectOption(page, "Type", "Account Component");
-    await selectOption(page, "Example", "Counter Contract");
-    await dialog.getByRole("button", { name: "Create" }).click();
-    await expect(page).toHaveURL(/\/scripts\/[0-9a-f-]{36}$/);
+  await test.step("a script from the API has its manifest", async () => {
+    await createScript(page, "explorer-check");
     await expect(files).toHaveText([
-      "src",
-      "lib.rs",
-      "Cargo.toml",
+      "explorer_check.masm",
       "miden-project.toml",
     ]);
     // Only the source opens.
-    await expect(tabs).toHaveText(["lib.rs"]);
+    await expect(tabs).toHaveText(["explorer_check.masm"]);
   });
 
-  await test.step("open and close a manifest", async () => {
-    await file("Cargo.toml").click();
-    await expect(tabs).toHaveText(["lib.rs", "Cargo.toml"]);
-    await expect(tab("Cargo.toml")).toHaveAttribute("aria-selected", "true");
-    await waitForEditorText(page, 'crate-type = ["cdylib"]');
+  await test.step("open and close the manifest", async () => {
+    await file("miden-project.toml").click();
+    await expect(tabs).toHaveText([
+      "explorer_check.masm",
+      "miden-project.toml",
+    ]);
+    await expect(tab("miden-project.toml")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await waitForEditorText(page, 'path = "explorer_check.masm"');
     // Read-only: the API generates it.
-    expect(await readOnly(page, 'crate-type = ["cdylib"]')).toBe(true);
-    await close("Cargo.toml").click();
-    await expect(tabs).toHaveText(["lib.rs"]);
-    await expect(tab("lib.rs")).toHaveAttribute("aria-selected", "true");
+    expect(await readOnly(page, 'path = "explorer_check.masm"')).toBe(true);
+    await close("miden-project.toml").click();
+    await expect(tabs).toHaveText(["explorer_check.masm"]);
+    await expect(tab("explorer_check.masm")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
   });
 
   await test.step("a dependency shows in miden-project.toml", async () => {
@@ -120,29 +136,42 @@ test("script: the Explorer's files and tabs", async ({ page }) => {
     await waitForEditorText(page, DEPENDENCY_LINE);
   });
 
-  let errorLine = 0;
-  await test.step("a console link reopens the source", async () => {
-    await replaceInEditor(
-      page,
-      "self.count_map.get(key)\n    }",
-      "self.count_map.get(missing_key)\n    }",
-    );
-    await close("src/lib.rs").click();
+  await test.step("a compile from the manifest's tab regenerates it", async () => {
+    await close("explorer_check.masm").click();
     await expect(tabs).toHaveText(["miden-project.toml"]);
     await page.getByRole("button", { name: "Compile" }).click();
-    const location = page.getByRole("button", {
-      name: /^src\/lib\.rs:\d+:\d+$/,
+    await expect(scriptStatus(page)).toHaveText("Compiled", {
+      timeout: TRANSACTION_TIMEOUT,
     });
-    await expect(location).toBeVisible({ timeout: TRANSACTION_TIMEOUT });
-    errorLine = Number(
-      (await location.textContent())?.match(/:(\d+):/)?.[1] ?? 0,
-    );
-    await location.click();
-    await expect(tabs).toHaveText(["miden-project.toml", "lib.rs"]);
-    await expect(tab("lib.rs")).toHaveAttribute("aria-selected", "true");
-    await expect.poll(() => cursorLine(page)).toBe(errorLine);
     // The compile regenerated miden-project.toml, dependency included.
-    await tab("miden-project.toml").click();
     await waitForEditorText(page, DEPENDENCY_LINE);
   });
+});
+
+test("script: a console link reopens the source", async ({ page }) => {
+  logBrowserErrors(page);
+  const { tabs, tab, close } = explorer(page);
+  await createScript(page, "explorer-link");
+  await replaceInEditor(
+    page,
+    "pub proc get_count() -> felt\n",
+    "pub proc get_count() -> felt\n    bogus_instruction\n",
+  );
+  await close("explorer_link.masm").click();
+  await expect(tabs).toHaveCount(0);
+  await page.getByRole("button", { name: "Compile" }).click();
+  const location = page.getByRole("button", {
+    name: /explorer_link\.masm:\d+:\d+$/,
+  });
+  await expect(location).toBeVisible({ timeout: TRANSACTION_TIMEOUT });
+  const errorLine = Number(
+    (await location.textContent())?.match(/:(\d+):/)?.[1] ?? 0,
+  );
+  await location.click();
+  await expect(tabs).toHaveText(["explorer_link.masm"]);
+  await expect(tab("explorer_link.masm")).toHaveAttribute(
+    "aria-selected",
+    "true",
+  );
+  await expect.poll(() => cursorLine(page)).toBe(errorLine);
 });

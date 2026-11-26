@@ -1,0 +1,36 @@
+# A note that increments the counter of the account that consumes it, then
+# checks the count went up by one. It calls the counter's procedures, so it
+# needs them: add your counter-account script as a dependency, and the note
+# can only be consumed by an account built with that component.
+
+use counter_account
+
+const ERR_COUNT_NOT_INCREMENTED = "the count didn't go up by one"
+
+#! Increments the consuming account's count by one.
+#!
+#! Inputs:  []
+#! Outputs: []
+#!
+#! Panics if the count after the increment isn't the count before plus one.
+@note_script
+@locals(1)
+pub proc main()
+    # `call` runs an account procedure on the top 16 elements of the stack,
+    # and puts its 16 outputs in their place
+    call.counter_account::get_count
+    # => [count, pad(15)]
+
+    # keep the count we expect after the increment
+    add.1 loc_store.0
+    # => [pad(16)]
+
+    call.counter_account::increment_count
+    # => [new_count, pad(15)]
+
+    drop call.counter_account::get_count
+    # => [final_count, pad(15)]
+
+    loc_load.0 assert_eq.err=ERR_COUNT_NOT_INCREMENTED
+    # => [pad(16)]
+end

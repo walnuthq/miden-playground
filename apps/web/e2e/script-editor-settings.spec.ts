@@ -2,7 +2,7 @@ import { expect, type Page, test } from "@playwright/test";
 import { waitForEditorText } from "./editor";
 import { logBrowserErrors } from "./tutorial";
 
-// The options of the first editor (the `src/lib.rs` one).
+// The options of the first editor (the source).
 const editorOptions = (page: Page) =>
   page.evaluate(() => {
     type Editor = {
@@ -31,7 +31,7 @@ test("script: editor settings (minimap, font size)", async ({ page }) => {
 
   await test.step("the minimap shows by default", async () => {
     await page.goto("/scripts/auth-no-auth");
-    await waitForEditorText(page, "fn auth_procedure");
+    await waitForEditorText(page, "pub proc auth_no_auth(");
     await expect(page.locator(".minimap").first()).toBeVisible();
     expect((await editorOptions(page)).minimap).toBe(true);
   });
@@ -59,7 +59,7 @@ test("script: editor settings (minimap, font size)", async ({ page }) => {
 
   await test.step("kept across a reload", async () => {
     await page.reload();
-    await waitForEditorText(page, "fn auth_procedure");
+    await waitForEditorText(page, "pub proc auth_no_auth(");
     await expect
       .poll(() => editorOptions(page))
       .toEqual({ minimap: false, fontSize: 18 });

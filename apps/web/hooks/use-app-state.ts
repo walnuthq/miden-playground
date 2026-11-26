@@ -17,6 +17,7 @@ import { useParaWallet } from "@/components/providers/para-wallet-context";
 import useNetwork from "@/hooks/use-network";
 import useProjects from "@/hooks/use-projects";
 import { midenFaucetAccountId, P2ID_NOTE_CODE } from "@/lib/constants";
+import { exampleMeta } from "@/lib/examples/meta";
 import {
   asMockClient,
   type MockChainDump,
@@ -33,7 +34,10 @@ import {
   accountIdFromPrefixSuffix,
   midenFaucetAccount,
 } from "@/lib/utils/account";
-import { counterExampleStarter } from "@/lib/utils/counter-example";
+import {
+  COUNTER_EXAMPLE_ID,
+  counterExampleStarter,
+} from "@/lib/utils/counter-example";
 import { mainnetSandboxStarter } from "@/lib/utils/mainnet-sandbox";
 import { noteConsumed } from "@/lib/utils/note";
 import { defaultState } from "@/lib/utils/state";
@@ -476,9 +480,15 @@ const useAppState = () => {
   // A Mainnet sandbox doesn't start empty (see mainnetSandboxStarter), nor
   // does a MockChain one: the counter example's packages give it something to
   // deploy (`counterExampleStarter`). Without the API, they start empty,
-  // with a warning.
-  const sandboxStarter = async (newNetworkId: NetworkId) => {
-    if (newNetworkId !== "mm" && newNetworkId !== "mmck") {
+  // with a warning. While the example is hidden (it can't be launched until
+  // it's rewritten in MASM), they start empty without one.
+  const sandboxStarter = async (
+    newNetworkId: NetworkId,
+  ): Promise<WorkspaceStarter> => {
+    if (
+      (newNetworkId !== "mm" && newNetworkId !== "mmck") ||
+      exampleMeta(COUNTER_EXAMPLE_ID).hidden
+    ) {
       return { scripts: [] };
     }
     try {
@@ -535,6 +545,7 @@ const useAppState = () => {
     pushState,
     popState,
     freshSandboxState,
+    sandboxStarter,
     resetState,
   };
 };

@@ -2,45 +2,6 @@ import type { Script } from "@/lib/types/script";
 import { defaultProcedureExport, defaultScript } from "@/lib/utils/script";
 import { sourceFiles } from "@/lib/utils/script-files";
 
-export const rust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
-#![no_std]
-#![feature(alloc_error_handler)]
-
-// However, we could still use some standard library types while
-// remaining no-std compatible, if we uncommented the following lines:
-//
-//
-// extern crate alloc;
-// use alloc::vec::Vec;
-
-use miden::{component, component_storage, Word};
-
-#[component_storage]
-struct AuthComponentStorage;
-
-/// API of the no-auth authentication component.
-#[component]
-trait AuthComponent {
-    #[auth_script]
-    fn auth_procedure(&mut self, _arg: Word);
-}
-
-#[component]
-impl AuthComponent for AuthComponentStorage {
-    fn auth_procedure(&mut self, _arg: Word) {
-        // translated from MASM at
-        // https://github.com/0xMiden/miden-base/blob/e4912663276ab8eebb24b84d318417cb4ea0bba3/crates/miden-lib/asm/account_components/no_auth.masm?plain=1
-        let init_comm = miden::native_account::get_initial_commitment();
-        let curr_comm = self.compute_commitment();
-        // check if the account state has changed by comparing initial and final commitments
-        if curr_comm != init_comm {
-            // if the account has been updated, increment the nonce
-            self.incr_nonce();
-        }
-    }
-}
-`;
-
 export const masm = `use {AuthArgs} from miden::standards::types
 use miden::protocol::active_account
 use miden::protocol::native_account
@@ -119,7 +80,7 @@ const authNoAuth: Script = {
   type: "authentication-component",
   status: "compiled",
   readOnly: true,
-  files: sourceFiles(rust),
+  files: sourceFiles("auth-no-auth", masm),
   masm,
   commitment:
     "0xdf9079c0a5668001295dfa427f4c03a61c6fa4cb92c0c2b7293b30a622cb2982",

@@ -6,6 +6,11 @@ import type { TutorialId, TutorialMeta } from "@/lib/types/tutorial";
 // tutorials (loaders.ts) can't be in the shell's graph. Each tutorial's index.ts
 // spreads its entry here; loaders.ts checks `stepCount` against the steps in
 // dev. A new tutorial gets its entry here first.
+// Tutorials 6 to 12 were written for Rust contracts: unavailable until each
+// is rewritten (spec/remove-rust/07-tutorials-6-to-12.md). Drop the line from
+// a tutorial's entry, and the `test.fixme` in its e2e spec, when it is.
+const REWRITING_FOR_MASM = "Being rewritten for Miden Assembly.";
+
 export const tutorialMetas: TutorialMeta[] = [
   {
     id: "create-and-fund-wallet",
@@ -87,6 +92,7 @@ export const tutorialMetas: TutorialMeta[] = [
     initialRoute: "/scripts",
     stepCount: 6,
     requiresWallet: false,
+    unavailable: REWRITING_FOR_MASM,
   },
   {
     id: "deploy-a-counter-contract",
@@ -99,6 +105,7 @@ export const tutorialMetas: TutorialMeta[] = [
     initialRoute: "/scripts",
     stepCount: 6,
     requiresWallet: false,
+    unavailable: REWRITING_FOR_MASM,
   },
   {
     id: "timelock-p2id-note",
@@ -111,6 +118,7 @@ export const tutorialMetas: TutorialMeta[] = [
     initialRoute: "/scripts",
     stepCount: 5,
     requiresWallet: true,
+    unavailable: REWRITING_FOR_MASM,
   },
   {
     id: "network-transactions",
@@ -123,6 +131,7 @@ export const tutorialMetas: TutorialMeta[] = [
     initialRoute: "/accounts",
     stepCount: 5,
     requiresWallet: true,
+    unavailable: REWRITING_FOR_MASM,
   },
   {
     id: "foreign-procedure-invocation",
@@ -136,6 +145,7 @@ export const tutorialMetas: TutorialMeta[] = [
     initialRoute: "/scripts",
     stepCount: 6,
     requiresWallet: false,
+    unavailable: REWRITING_FOR_MASM,
   },
   {
     id: "your-first-smart-contract-and-custom-note",
@@ -148,6 +158,7 @@ export const tutorialMetas: TutorialMeta[] = [
     initialRoute: "/scripts",
     stepCount: 8,
     requiresWallet: true,
+    unavailable: REWRITING_FOR_MASM,
   },
   {
     id: "contract-verification",
@@ -160,6 +171,7 @@ export const tutorialMetas: TutorialMeta[] = [
     initialRoute: "/scripts",
     stepCount: 7,
     requiresWallet: false,
+    unavailable: REWRITING_FOR_MASM,
   },
 ];
 

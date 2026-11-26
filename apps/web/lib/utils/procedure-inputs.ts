@@ -1,30 +1,27 @@
 // A procedure's arguments, from a form to the `MidenInput`s a call script
 // pushes, and its result, from the stack to text. No SDK import: the unit
 // tests run on plain node.
-import {
-  type MidenInput,
-  type MidenType,
-  type MidenTypeLayout,
-  type MidenTypeStruct,
-  midenTypes,
-  type ProcedureExport,
-  type Signature,
+import type {
+  MidenInput,
+  MidenType,
+  MidenTypeLayout,
+  MidenTypeStruct,
+  ProcedureExport,
+  Signature,
 } from "../types/script.ts";
 
 // The Miden field's modulus: 2^64 - 2^32 + 1.
 const FELT_MODULUS = 2n ** 64n - 2n ** 32n + 1n;
 
-// The felts a call can pass on the stack. midenc refuses to compile an export
-// whose flattened parameters take more ("only up to 16 felt flattened params
-// supported", frontend/wasm/src/component/lift_exports.rs, sdk 0.15), so no
-// package has one: the check in `procedureArgumentsReady` is a guard.
+// The felts a call can pass on the stack: a `call`ed procedure gets the top
+// 16. The check in `procedureArgumentsReady` keeps a call within them.
 export const MAX_ARGUMENT_FELTS = 16;
 
 export type ProcedureParam = {
   name: string;
-  // Undefined for a type the forms don't know (`note-idx`, `asset-id`, a
-  // record the package defines…): entered as raw felts when `feltCount` is
-  // set, and otherwise the procedure can't be invoked from them.
+  // Undefined for a type the forms don't know (a struct the source defines,
+  // a `u64`…): entered as raw felts when `feltCount` is set, and otherwise
+  // the procedure can't be invoked from them.
   type?: MidenType;
   // Without a `type`: how many felts the type's layout flattens to, and each
   // one's field path in it (`feltNames`), in field order. Unset when the
@@ -32,11 +29,15 @@ export type ProcedureParam = {
   // (`feltLeaves`).
   feltCount?: number;
   feltNames?: string[];
-  // The type's name in the manifest, without its package: `felt`, `note-idx`.
+  // The type's name, as the source spells it when the export has names
+  // (`NoteTag`), else the manifest's (`u32`).
   rawType: string;
-  // What the form shows next to the name, `type` when unset: a note's `u32`
-  // field is entered as a felt.
+  // What the form shows next to the name, `type` when unset: a `u16` is
+  // entered as a felt.
   label?: string;
+  // The largest value of a `Felt` that stands for a smaller integer (a
+  // `u16`, a `bool`, an enum's discriminant).
+  max?: bigint;
 };
 
 // What a form holds for one parameter.
@@ -54,23 +55,111 @@ const structOf = (type: MidenTypeLayout) =>
     ? (type as MidenTypeStruct).Struct
     : undefined;
 
-// One of the four types the forms know, or nothing.
-const knownType = (type: MidenTypeLayout): MidenType | undefined => {
-  const name = structOf(type)?.name;
-  return name === undefined
-    ? undefined
-    : (midenTypes as Record<string, MidenType>)[name];
+const arrayOf = (type: MidenTypeLayout) => {
+  const array =
+    typeof type === "object" && type !== null
+      ? (type as { Array?: { ty?: MidenTypeLayout; len?: number } }).Array
+      : undefined;
+  return array?.ty !== undefined && typeof array.len === "number"
+    ? { ty: array.ty, len: array.len }
+    : undefined;
 };
 
-// A type's name without its package: `note-idx`. A primitive's in lower case
-// (`u64`), and another kind's own name, or its kind (`option0`, `enum`).
+type EnumVariant = {
+  name: string;
+  discriminant_value: number;
+  value: unknown;
+};
+
+// An enum whose variants carry no value (`NoteType`): on the stack, its
+// discriminant alone.
+const unitEnumOf = (type: MidenTypeLayout) => {
+  const layout =
+    typeof type === "object" && type !== null
+      ? (type as { Enum?: { name?: string; variants?: EnumVariant[] } }).Enum
+      : undefined;
+  const variants = layout?.variants;
+  return variants &&
+    variants.length > 0 &&
+    variants.every(
+      ({ name, discriminant_value, value }) =>
+        typeof name === "string" &&
+        Number.isSafeInteger(discriminant_value) &&
+        discriminant_value >= 0 &&
+        (value === null || value === undefined),
+    )
+    ? { name: layout.name ?? "enum", variants }
+    : undefined;
+};
+
+const isWordLayout = (type: MidenTypeLayout) => {
+  const array = arrayOf(type);
+  return array?.ty === "Felt" && array.len === 4;
+};
+
+// One of the four types the forms know, or nothing: a felt, a word (an array
+// of four felts), and the protocol's `AccountId` and `Asset` structs.
+const knownType = (type: MidenTypeLayout): MidenType | undefined => {
+  if (type === "Felt") {
+    return "Felt";
+  }
+  if (isWordLayout(type)) {
+    return "Word";
+  }
+  const name = structOf(type)?.name;
+  return name === "AccountId" || name === "Asset" ? name : undefined;
+};
+
+// The integers below a felt, each one felt on the stack, by their largest
+// value. A `u64` takes two (`feltLeaves`).
+const oneFeltIntegers: Record<string, bigint> = {
+  U8: 2n ** 8n - 1n,
+  U16: 2n ** 16n - 1n,
+  U32: 2n ** 32n - 1n,
+  I1: 1n,
+};
+
+// A parameter entered as one felt with a bound: an integer below a felt, a
+// `bool` (`i1`, 0 or 1) or an enum without values (its discriminant), with
+// what the form adds to its type's name.
+const boundedFelt = (
+  type: MidenTypeLayout,
+): { detail: string; max: bigint } | undefined => {
+  if (typeof type === "string") {
+    const max = oneFeltIntegers[type];
+    return max === undefined
+      ? undefined
+      : { detail: type === "I1" ? "0 or 1" : type.toLowerCase(), max };
+  }
+  const unitEnum = unitEnumOf(type);
+  if (unitEnum) {
+    const { variants } = unitEnum;
+    return {
+      detail: variants
+        .map(({ name, discriminant_value }) => `${discriminant_value} ${name}`)
+        .join(", "),
+      max: BigInt(
+        Math.max(
+          ...variants.map(({ discriminant_value }) => discriminant_value),
+        ),
+      ),
+    };
+  }
+  return undefined;
+};
+
+// A type's name in the manifest: a primitive's in lower case (`u64`), a
+// struct's or an enum's own name, a word as `word`, or another kind's kind.
 const rawProcedureTypeName = (type: MidenTypeLayout) => {
   if (typeof type === "string") {
     return type.toLowerCase();
   }
+  if (isWordLayout(type)) {
+    return "word";
+  }
   const struct = structOf(type);
   if (struct) {
-    return struct.name.split("/").at(-1) ?? struct.name;
+    return struct.name.split("::").at(-1) ?? struct.name;
   }
   const [kind, layout] = Object.entries(type)[0] ?? ["unknown"];
   const name = (layout as { name?: unknown } | undefined)?.name;
@@ -78,17 +167,33 @@ const rawProcedureTypeName = (type: MidenTypeLayout) => {
 };
 
 // The felts a type's layout flattens to, each as its path of field names, in
-// field order: `note-idx` is `["inner.inner"]`, `asset-id`
-// `["inner.a.inner", …, "inner.d.inner"]`. Undefined when the layout is
-// missing (a built-in's hand-written signature) or has a leaf that isn't a
-// felt (a `u64`, a `bool`, an option): how those reach the stack isn't
-// established.
+// field order, the first on top of the stack: an `AccountId` is
+// `["suffix", "prefix"]`, an array its elements by index, a `u64` its low
+// then its high 32-bit limb (miden-core-lib's `[a_lo, a_hi]`), and an integer
+// below a felt, a `bool` or an enum without values one felt. Undefined when
+// the layout is missing (a hand-written signature without fields) or has
+// another leaf (an enum with values).
 export const feltLeaves = (
   type: MidenTypeLayout,
   path: string[] = [],
 ): string[] | undefined => {
-  if (type === "Felt") {
+  if (type === "Felt" || boundedFelt(type)) {
     return [path.join(".")];
+  }
+  if (type === "U64") {
+    return [[...path, "lo"].join("."), [...path, "hi"].join(".")];
+  }
+  const array = arrayOf(type);
+  if (array) {
+    const leaves: string[] = [];
+    for (let index = 0; index < array.len; index += 1) {
+      const elementLeaves = feltLeaves(array.ty, [...path, String(index)]);
+      if (!elementLeaves) {
+        return undefined;
+      }
+      leaves.push(...elementLeaves);
+    }
+    return leaves;
   }
   const fields = structOf(type)?.fields;
   if (!fields) {
@@ -108,29 +213,19 @@ export const feltLeaves = (
 // How many felts a type takes on the stack, or nothing (`feltLeaves`).
 export const feltCount = (type: MidenTypeLayout) => feltLeaves(type)?.length;
 
-// What the form calls each felt of a raw argument: its field path without
-// the `inner` wrappers (`a`…`d` for an `asset-id`, `first` and `second` for
-// a record of two felts), or its position when that names nothing or isn't
-// unique.
-const feltNames = (leaves: string[]) => {
-  const names = leaves.map((leaf) =>
-    leaf
-      .split(".")
-      .filter((segment) => segment !== "inner")
-      .join("."),
-  );
-  return names.every((name) => name !== "") &&
-    new Set(names).size === names.length
-    ? names
+// What the form calls each felt of a raw argument: its field path (`lo` and
+// `hi` for a `u64`, `first` and `second` for a struct of two felts), or its
+// position when that names nothing or isn't unique.
+const feltNames = (leaves: string[]) =>
+  leaves.every((name) => name !== "") && new Set(leaves).size === leaves.length
+    ? leaves
     : leaves.map((_, index) => `felt ${index + 1}`);
-};
 
-// The parameters' names in snake case, as the Rust source spells them, from
-// the WIT names api-compile reports with the export: `deposit-asset` is
-// `deposit_asset`. Undefined when the list is missing (a package compiled
-// before api-compile reported them, a built-in, a transaction script), has
-// another length than the signature's, or holds an empty or repeated name:
-// the arguments are keyed by name, so names must be unique.
+// The parameters' names as the MASM source spells them, from the names
+// api-compile reports with the export. Undefined when the list is missing (a
+// package compiled before api-compile reported them), has another length than
+// the signature's, or holds an empty or repeated name: the arguments are
+// keyed by name, so names must be unique.
 export const procedureParameterNames = ({
   signature,
   parameters,
@@ -138,39 +233,59 @@ export const procedureParameterNames = ({
   if (!parameters || parameters.length !== signature.params.length) {
     return undefined;
   }
-  const names = parameters.map(({ name }) => name.replaceAll("-", "_"));
+  const names = parameters.map(({ name }) => name);
   return names.every((name) => name !== "") &&
     new Set(names).size === names.length
     ? names
     : undefined;
 };
 
-// The WIT's name for the type of a parameter the forms don't know, when the
-// export has names (`procedureParameterNames`), else the manifest's. The
-// manifest names a layout once: the basic wallet's `tag` and `note-type` are
-// both `note-idx` there, its `recipient` an `asset-id`.
-const unknownTypeName = (
+// A parameter's type as the source names it, when the export has names
+// (`procedureParameterNames`): the manifest resolves an alias, so the basic
+// wallet's `tag: NoteTag` is a `u32` there and its `recipient: NoteRecipient`
+// a word. Else the manifest's name.
+const sourceTypeName = (
   { parameters }: Pick<ProcedureExport, "parameters">,
   named: boolean,
   param: MidenTypeLayout,
   index: number,
 ) => (named && parameters?.[index]?.type) || rawProcedureTypeName(param);
 
-// The manifest's signature has the parameters' types, the WIT their names.
+// The manifest's signature has the parameters' types, the source their names.
 // Without names, every parameter is named by its position: never a mix.
 export const procedureParams = (
   procedureExport: Pick<ProcedureExport, "signature" | "parameters">,
 ): ProcedureParam[] => {
   const names = procedureParameterNames(procedureExport);
   return procedureExport.signature.params.map((param, index) => {
+    const name = names?.[index] ?? `param_${index}`;
+    const rawType = sourceTypeName(
+      procedureExport,
+      names !== undefined,
+      param,
+      index,
+    );
     const type = knownType(param);
-    const leaves = type ? undefined : feltLeaves(param);
+    if (type) {
+      return { name, type, rawType };
+    }
+    const bounded = boundedFelt(param);
+    if (bounded) {
+      const { detail, max } = bounded;
+      return {
+        name,
+        type: "Felt",
+        rawType,
+        // `u16`, `NoteTag (u32)`, `Bool (0 or 1)`, `NoteType (0 PRIVATE, 1
+        // PUBLIC)`.
+        label: rawType === detail ? detail : `${rawType} (${detail})`,
+        max,
+      };
+    }
+    const leaves = feltLeaves(param);
     return {
-      name: names?.[index] ?? `param_${index}`,
-      type,
-      rawType: type
-        ? rawProcedureTypeName(param)
-        : unknownTypeName(procedureExport, names !== undefined, param, index),
+      name,
+      rawType,
       ...(leaves && {
         feltCount: leaves.length,
         feltNames: feltNames(leaves),
@@ -179,43 +294,29 @@ export const procedureParams = (
   });
 };
 
-// Rust packages export kebab-case names, displayed as their snake_case source
-// names.
+// An export's procedure name: the last segment of its path
+// (`::counter_account::get_count` is `get_count`).
 export const formatProcedureExportPath = (path: string) =>
-  path.split("::").at(-1)?.replaceAll('"', "").replaceAll("-", "_") ?? "";
+  path.split("::").at(-1)?.replaceAll('"', "") ?? "";
 
-export const formatProcedureExportResultType = (type: MidenTypeLayout) => {
-  switch (structOf(type)?.name) {
-    case "miden:base/core-types@1.0.0/felt": {
-      return "Felt";
-    }
-    case "miden:base/core-types@1.0.0/word": {
-      return "Word";
-    }
-    case "miden:base/core-types@1.0.0/account-id": {
-      return "AccountId";
-    }
-    case "miden:base/core-types@1.0.0/asset": {
-      return "Asset";
-    }
-  }
-};
+export const formatProcedureExportResultType = (type: MidenTypeLayout) =>
+  knownType(type);
 
-// A procedure as its Rust signature: `fn deposit(depositor: AccountId,
-// deposit_asset: Asset)`, or its parameters' types alone when it has no
-// names (`procedureParameterNames`): `fn deposit(AccountId, Asset)`.
+// A procedure as its MASM signature: `proc copy_count(counter_account_id:
+// AccountId)`, or its parameters' types alone when it has no names
+// (`procedureParameterNames`): `proc copy_count(AccountId)`.
 export const procedureSignature = (procedureExport: ProcedureExport) => {
   const {
     path,
     signature: { params, results },
   } = procedureExport;
   const names = procedureParameterNames(procedureExport);
-  let result = `fn ${formatProcedureExportPath(path)}(`;
+  let result = `proc ${formatProcedureExportPath(path)}(`;
   result += params
     .map((param, index) => {
       const type =
         formatProcedureExportResultType(param) ??
-        unknownTypeName(procedureExport, names !== undefined, param, index);
+        sourceTypeName(procedureExport, names !== undefined, param, index);
       return names ? `${names[index]}: ${type}` : type;
     })
     .join(", ");
@@ -284,16 +385,23 @@ export const isFelt = (value: string) => {
 export const isWord = (value: string) =>
   /^0x[0-9a-fA-F]{64}$/.test(value.trim());
 
-// Why an argument can't be sent, or nothing when it can.
+// Why an argument can't be sent, or nothing when it can. `max` bounds a
+// `Felt` that stands for a smaller integer (`ProcedureParam.max`).
 export const procedureArgumentError = (
   argument: ProcedureArgument | undefined,
+  max?: bigint,
 ) => {
   if (!argument) {
     return "Required.";
   }
   switch (argument.type) {
     case "Felt": {
-      return isFelt(argument.value) ? undefined : "Not a field element.";
+      if (!isFelt(argument.value)) {
+        return "Not a field element.";
+      }
+      return max !== undefined && BigInt(argument.value.trim()) > max
+        ? `At most ${max}.`
+        : undefined;
     }
     case "Word": {
       return isWord(argument.value)
@@ -342,7 +450,7 @@ export const procedureArgumentsReady = (
   return (
     total !== undefined &&
     total <= MAX_ARGUMENT_FELTS &&
-    params.every(({ name, type, feltCount }) => {
+    params.every(({ name, type, feltCount, max }) => {
       const argument = args[name];
       return (
         argument !== undefined &&
@@ -350,7 +458,7 @@ export const procedureArgumentsReady = (
           ? argument.type === type
           : argument.type === "Felts" &&
             argument.values.length === feltCount) &&
-        procedureArgumentError(argument) === undefined
+        procedureArgumentError(argument, max) === undefined
       );
     })
   );
@@ -439,14 +547,14 @@ export const formatProcedureInputs = (inputs: MidenInput[]) =>
         case "Word": {
           return `push.${arg.value}`;
         }
-        // case "FaucetId":
+        // The protocol's `AccountId`, `[suffix, prefix]` with the suffix on
+        // top (miden-protocol 0.18's `struct { suffix: felt, prefix: felt }`).
         case "AccountId": {
           const { prefix, suffix } = JSON.parse(arg.value ?? "") as {
             prefix: string;
             suffix: string;
           };
-          // TODO calling convention differs between MASM and Rust
-          return `push.${suffix}.${prefix}`;
+          return `push.${prefix}.${suffix}`;
         }
         case "Asset": {
           const { prefix, suffix, amount } = JSON.parse(arg.value ?? "") as {
@@ -458,7 +566,7 @@ export const formatProcedureInputs = (inputs: MidenInput[]) =>
         }
         // A type's felts in the order of its layout's fields, the first on
         // top: pushed last. The typed cases above follow the same rule
-        // (`account-id` is `prefix` then `suffix`; an `asset` its id word
+        // (`AccountId` is `suffix` then `prefix`; an `Asset` its id word
         // `[0, 0, suffix, prefix]` then its value word `[amount, 0, 0, 0]`).
         case "Felts": {
           const felts = JSON.parse(arg.value ?? "[]") as string[];
@@ -483,9 +591,9 @@ export const wordToHex = (felts: bigint[]) =>
     )
     .join("")}`;
 
-// A procedure's result, from the top of the stack it leaves: a felt in
-// decimal, a word in hex, anything else as its felts. Empty when it returns
-// nothing.
+// A procedure's result, from the top of the stack it leaves: a felt or an
+// integer below one in decimal, a word in hex, anything else as its felts.
+// Empty when it returns nothing.
 export const decodeProcedureResult = (
   { results }: Pick<Signature, "results">,
   stack: bigint[],
@@ -495,19 +603,16 @@ export const decodeProcedureResult = (
     return "";
   }
   const type = knownType(result);
-  // Older manifests list a word's four felts as four results.
-  if (type === "Word" || results.length === 4) {
+  if (type === "Word") {
     return wordToHex(stack);
   }
-  if (type === "Felt") {
+  if (type === "Felt" || boundedFelt(result)) {
     return (stack[0] ?? 0n).toString();
   }
   // Four bytes per felt in the manifest's layout.
-  const size = structOf(result)?.size ?? 4;
-  return `[${stack
-    .slice(0, Math.max(1, Math.ceil(size / 4)))
-    .map(String)
-    .join(", ")}]`;
+  const count =
+    feltCount(result) ?? Math.ceil((structOf(result)?.size ?? 4) / 4);
+  return `[${stack.slice(0, Math.max(1, count)).map(String).join(", ")}]`;
 };
 
 // An execution error as the SDK reports it, without miette's hint and its

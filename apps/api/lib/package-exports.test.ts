@@ -3,8 +3,8 @@ import { describe, it } from "node:test";
 import { analyzedExports } from "./package-exports.ts";
 import type { Manifest, ProcedureExport } from "./types.ts";
 
-const DEPOSIT = '::"miden:bank-account/bank@0.1.0"::deposit';
-const INITIALIZE = '::"miden:bank-account/bank@0.1.0"::initialize';
+const DEPOSIT = "::bank_account::deposit";
+const INITIALIZE = "::bank_account::initialize";
 
 const procedure = (path: string, abi = 3): { Procedure: ProcedureExport } => ({
   Procedure: {
@@ -21,8 +21,8 @@ const manifest: Manifest = {
 };
 
 const parameters = [
-  { name: "depositor", type: "account-id" },
-  { name: "deposit-asset", type: "asset" },
+  { name: "depositor", type: "AccountId" },
+  { name: "deposit_asset", type: "Asset" },
 ];
 
 describe("analyzedExports", () => {
@@ -46,7 +46,7 @@ describe("analyzedExports", () => {
   });
 
   it("leaves out the names api-compile didn't report", () => {
-    // An older api-compile, a transaction script, or an export without names.
+    // An older api-compile, or an export without names.
     for (const parametersByPath of [undefined, {}]) {
       const [deposit] = analyzedExports(manifest, {
         readOnly: {},
@@ -54,5 +54,29 @@ describe("analyzedExports", () => {
       });
       assert.equal(deposit && "parameters" in deposit.Procedure, false);
     }
+  });
+
+  it("leaves out a type the source exports", () => {
+    // `pub type Pair = struct { first: felt, second: felt }`, as api-compile
+    // answers it.
+    const exports = analyzedExports(
+      {
+        exports: [
+          {
+            Type: {
+              path: "::probe::Pair",
+              ty: { Struct: { name: "Pair", size: 8, fields: [] } },
+            },
+          },
+          procedure(DEPOSIT),
+        ],
+        dependencies: [],
+      },
+      { readOnly: {} },
+    );
+    assert.deepEqual(
+      exports.map(({ Procedure: { path } }) => path),
+      [DEPOSIT],
+    );
   });
 });

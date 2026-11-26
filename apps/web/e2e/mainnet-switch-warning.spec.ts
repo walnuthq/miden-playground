@@ -10,6 +10,14 @@ import {
 // the account and what Bread sent it, so a switch warns first. On Miden Partner
 // Mainnet, on the same wallet as mainnet-network-counter.spec.ts (see there, and
 // e2e/README.md), but nothing is spent: Bread's request is never approved.
+// A Mainnet sandbox starts with the Counter Contract example's packages, and
+// that example is hidden until plan 06 of spec/remove-rust rewrites it in
+// MASM: the sandbox starts empty meanwhile. Remove this with the flag.
+test.fixme(
+  true,
+  "A Mainnet sandbox has no counter packages until the Counter Contract example is rewritten (spec/remove-rust plan 06)",
+);
+
 test.skip(
   process.env.MAINNET_E2E !== "1" ||
     !process.env.BREAD_PROFILE_DIR ||

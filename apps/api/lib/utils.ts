@@ -7,23 +7,29 @@ import {
 } from "@/db/packages";
 import { notFound } from "@/lib/errors";
 import { analyzedExports, type ExportAnalysis } from "@/lib/package-exports";
-import { buildFiles, ownFiles } from "@/lib/package-files";
-import { packageMetadata } from "@/lib/package-metadata";
-import { projectTemplateFiles } from "@/lib/templates";
-import { generateCargoToml, generateMidenProjectToml } from "@/lib/toml";
-import {
-  type CompiledPackage,
-  type Dependency,
-  type Export,
-  type Manifest,
-  type PackageMetadata,
-  type PackageType,
-  type ScriptFiles,
-  scriptFilePaths,
+import { buildFiles } from "@/lib/package-files";
+import { type BuildMetadata, compiledMetadata } from "@/lib/package-metadata";
+import { templates } from "@/lib/templates";
+import { generateMidenProjectToml } from "@/lib/toml";
+import type {
+  CompiledPackage,
+  Dependency,
+  Diagnostic,
+  Export,
+  Manifest,
+  PackageMetadata,
+  PackageType,
+  ScriptExample,
+  ScriptFiles,
 } from "@/lib/types";
 import { fetchApiCompile } from "@/lib/upstream";
+import {
+  MANIFEST_FILE,
+  scriptFilePaths,
+  sourceFilePath,
+} from "./source-file.ts";
 
-// The package files the web app gets: its source and manifests, without the
+// The package files the web app gets: its source and manifest, without the
 // `<name>/` prefix they're stored under (the build's files are a project dir
 // next to its dependencies').
 export const scriptFiles = (
@@ -31,23 +37,42 @@ export const scriptFiles = (
   files: Record<string, string>,
 ): ScriptFiles =>
   Object.fromEntries(
-    scriptFilePaths.flatMap((path) => {
+    scriptFilePaths(name).flatMap((path) => {
       const content = files[`${name}/${path}`];
       return content === undefined ? [] : [[path, content]];
     }),
   );
 
-// The source of a package, from its stored files.
-export const packageSource = (name: string, files: Record<string, string>) =>
-  files[`${name}/src/lib.rs`] ?? "";
+// A package's two files, under its `<name>/` directory: its MASM source and
+// the miden-project.toml generated for it.
+const packageFiles = ({
+  name,
+  type,
+  source,
+  dependencies,
+}: {
+  name: string;
+  type: PackageType;
+  source: string;
+  dependencies: Dependency[];
+}) => ({
+  [`${name}/${sourceFilePath(name)}`]: source,
+  [`${name}/${MANIFEST_FILE}`]: generateMidenProjectToml({
+    name,
+    type,
+    masm: source,
+    dependencies,
+  }),
+});
 
-// Creates a package from its source (`src/lib.rs`), with the project files
-// around it, and returns its id and the files the web app shows.
+// Creates a package from its MASM source and returns its id and the files
+// the web app shows.
 export const createPackage = async ({
   name,
   type,
   source,
   dependencies = [],
+  metadata = null,
   compiled,
   ownerKeyHash,
 }: {
@@ -55,10 +80,12 @@ export const createPackage = async ({
   type: PackageType;
   source: string;
   dependencies?: Dependency[];
-  // Compile output known ahead of time (examples/*/compiled.json): the package
+  // A template's hand-written schemas (lib/template-schemas.ts), which the
+  // package keeps while its source matches them.
+  metadata?: PackageMetadata | null;
+  // Compile output known ahead of time (an example's snapshot): the package
   // is inserted compiled instead of as a draft.
   compiled?: {
-    masm: string;
     masp: string;
     commitment: string;
     exports: Export[];
@@ -67,63 +94,52 @@ export const createPackage = async ({
   // The hash of the creator's owner token (lib/owner.ts).
   ownerKeyHash: string;
 }) => {
-  const files = {
-    [`${name}/.cargo/config.toml`]: projectTemplateFiles[".cargo/config.toml"],
-    [`${name}/src/lib.rs`]: source,
-    [`${name}/build.rs`]: projectTemplateFiles["build.rs"],
-    [`${name}/Cargo.toml`]: generateCargoToml({ name }),
-    [`${name}/Cargo.lock`]: projectTemplateFiles["Cargo.lock"],
-    [`${name}/miden-project.toml`]: generateMidenProjectToml({
-      name,
-      type,
-      rust: source,
-      dependencies,
-    }),
-    [`${name}/rust-toolchain.toml`]:
-      projectTemplateFiles["rust-toolchain.toml"],
-  };
+  const files = packageFiles({ name, type, source, dependencies });
   const id = await insertPackage({
     name,
     type,
     dependencies: dependencies.map(({ id }) => id),
     files,
     ownerKeyHash,
+    metadata,
     ...(compiled && { status: "compiled" as const, ...compiled }),
   });
   return { id, files: scriptFiles(name, files) };
 };
 
-// The release build's Miden Assembly, sent for `masm: true`: its `error` when
-// unavailable (or over api-compile's 4 MiB limit).
-type MasmOutput = { source: string } | { error: string };
+// api-compile's answer to `POST /compile` for a MASM project (the MASM wire
+// format, in the verifier repo's spec/remove-rust/README.md): a failed build
+// is a 200 too, with its diagnostics alone.
+type CompileOutput = {
+  stdout: string;
+  // The assembler's rendering of `diagnostics`.
+  stderr: string;
+  diagnostics?: Diagnostic[];
+};
 
-// api-compile's answer to `POST /compile`: a failed build is a 200 too, with
-// cargo-miden's output alone.
 type CompileResponse =
-  | { built: false; stdout: string; stderr: string }
+  | ({ built: false } & CompileOutput)
   | ({
       built: true;
-      stdout: string;
-      stderr: string;
       masp: string;
       commitment: string;
       manifest: Manifest;
+      // The project as sent.
+      files: Record<string, string>;
+      // The versions api-compile's assembler was built with.
+      builtWith?: string;
       // Whether each exported procedure is read-only and calls another
       // account's procedure (FPI), and its parameters' names
-      // (`analyzedExports`).
-      // The sources plus the lockfile the build used.
-      files: Record<string, string>;
-      masm?: MasmOutput;
-      // An account component's storage slots, a note's storage fields and a
-      // script's account procedures: absent for other packages, and from an
-      // api-compile older than them.
-    } & ExportAnalysis &
-      PackageMetadata);
+      // (`analyzedExports`), and a script's account procedures.
+    } & CompileOutput &
+      ExportAnalysis &
+      BuildMetadata);
 
-// The MASM tab's content: for reading only, it calls library procedures
-// without including them, so it doesn't reassemble into the package.
-const masmSource = (masm?: MasmOutput) =>
-  masm && "source" in masm ? masm.source : "";
+const compileOutput = ({ stdout, stderr, diagnostics }: CompileOutput) => ({
+  diagnostics: diagnostics ?? [],
+  stdout,
+  stderr,
+});
 
 export const compilePackage = async ({
   id,
@@ -132,7 +148,7 @@ export const compilePackage = async ({
   signal,
 }: {
   id: string;
-  // The new `src/lib.rs`.
+  // The new MASM source.
   source: string;
   dependencies: string[];
   signal?: AbortSignal;
@@ -147,43 +163,38 @@ export const compilePackage = async ({
     throw notFound("Error: Package not found.");
   }
   const { name, type } = dbPackage;
-  const updatedFiles = ownFiles(name, dbPackage.files);
-  updatedFiles[`${name}/src/lib.rs`] = source;
-  updatedFiles[`${name}/miden-project.toml`] = generateMidenProjectToml({
+  // Only the two files: whatever else an older row holds is dropped.
+  const updatedFiles = packageFiles({
     name,
     type,
-    rust: source,
+    source,
     dependencies: dependenciesPackages,
   });
   const files = buildFiles(updatedFiles, buildDependencies);
+  // What the package's schemas are checked against (lib/package-metadata.ts).
+  const compiledSource = {
+    masm: source,
+    shipped: (template: ScriptExample) =>
+      template === "none" ? undefined : templates[template],
+  };
   const build = await fetchApiCompile<CompileResponse>("/compile", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    // A stored lockfile can pin other crate versions than api-compile's warm
-    // cache (it moves with api-compile's own lockfiles): re-resolve it against
-    // the cache rather than download and rebuild them. The build sends the
-    // updated lockfile back, stored below.
-    // `masm`: also return the build's Miden Assembly, for the MASM tab.
-    body: JSON.stringify({
-      files,
-      entrypoint: name,
-      warmLockfile: true,
-      masm: true,
-    }),
+    body: JSON.stringify({ files, entrypoint: name }),
     signal,
   });
   if (build.built === false) {
     console.error(build.stderr);
+    // The schemas a package has stay through a failed build while the
+    // source matches them; what the build read from the code doesn't.
+    const metadata = compiledMetadata(dbPackage.metadata, {}, compiledSource);
     await updatePackage({
       id,
       status: "error",
       files: updatedFiles,
-      // No MASM for code that doesn't build.
-      masm: "",
       dependencies,
       exports: [],
-      // Nor schemas: the last build's would describe other code.
-      metadata: null,
+      metadata,
     });
     return {
       id,
@@ -191,13 +202,14 @@ export const compilePackage = async ({
       type,
       status: "error",
       files: scriptFiles(name, updatedFiles),
+      ...compileOutput(build),
       error: build.stderr,
       warnings: "",
       masm: "",
       commitment: "",
       masp: "",
       exports: [],
-      metadata: null,
+      metadata,
       dependencies: dependenciesPackages.map(
         ({ id, name, type, commitment }) => ({
           id,
@@ -216,34 +228,24 @@ export const compilePackage = async ({
     readOnly,
     callsForeign,
     parameters,
-    storage,
-    noteStorage,
     accountProcedures,
-    files: storedFiles,
-    masm: masmOutput,
   } = build;
-  const metadata = packageMetadata({
-    storage,
-    noteStorage,
-    accountProcedures,
-  });
+  const metadata = compiledMetadata(
+    dbPackage.metadata,
+    { accountProcedures },
+    compiledSource,
+  );
   const exports = analyzedExports(manifest, {
     readOnly,
     callsForeign,
     parameters,
   });
-  if (masmOutput && "error" in masmOutput) {
-    console.warn(`${name}: no MASM (${masmOutput.error})`);
-  }
-  const masm = masmSource(masmOutput);
-  const packageFiles = ownFiles(name, storedFiles);
-  // The package's own compiled sources plus the Cargo.lock the build used are
-  // sent back with the next compile to get the same dependency versions.
+  // The `masm` column isn't written any more (the source is the MASM): it
+  // keeps its default, "".
   await updatePackage({
     id,
     status: "compiled",
-    files: packageFiles,
-    masm,
+    files: updatedFiles,
     masp,
     commitment,
     exports,
@@ -255,11 +257,12 @@ export const compilePackage = async ({
     name,
     type,
     status: "compiled",
-    files: scriptFiles(name, packageFiles),
+    files: scriptFiles(name, updatedFiles),
+    ...compileOutput(build),
     error: "",
-    // A successful build still reports its warnings on stderr.
+    // A successful build still reports its warnings.
     warnings: stderr,
-    masm,
+    masm: "",
     commitment,
     masp,
     exports,

@@ -1,0 +1,17 @@
+{
+  "name": "counter-account",
+  "source": "# A counter: an account component that keeps a count in its storage and\n# increments it by one on each call to `increment_count`.\n\nuse miden::protocol::active_account\nuse miden::protocol::native_account\nuse miden::core::sys\nuse miden::core::mem\n\n# STORAGE\n# =================================================================================================\n\n# The storage map that holds the count. A slot is named by a string: the\n# account's storage knows it by this name, and the procedures below by the\n# slot id the name hashes to, the first two felts of `word(\"…\")`.\nconst COUNT_MAP_SLOT = word(\"counter_account::count_map\")\n\n# The map key the count is stored under.\nconst COUNT_KEY = [1, 0, 0, 0]\n\n# PROCEDURES\n# =================================================================================================\n\n#! Returns the current count.\n#!\n#! Inputs:  [pad(16)]\n#! Outputs: [count, pad(15)]\n@account_procedure\npub proc get_count() -> felt\n    push.COUNT_KEY push.COUNT_MAP_SLOT[0..2]\n    # => [slot_id_suffix, slot_id_prefix, COUNT_KEY, pad(16)]\n\n    exec.active_account::get_map_item\n    # => [count, 0, 0, 0, pad(16)]\n\n    # a procedure that is `call`ed must return 16 elements\n    exec.sys::truncate_stack\n    # => [count, pad(15)]\nend\n\n#! Increments the count by one and returns the new count.\n#!\n#! Inputs:  [pad(16)]\n#! Outputs: [new_count, pad(15)]\n@account_procedure\npub proc increment_count() -> felt\n    push.COUNT_KEY push.COUNT_MAP_SLOT[0..2]\n    exec.active_account::get_map_item\n    # => [count, 0, 0, 0, pad(16)]\n\n    add.1\n    # => [new_count, 0, 0, 0, pad(16)]\n\n    # keep a copy of the new count to return it\n    dupw\n    # => [new_count, 0, 0, 0, new_count, 0, 0, 0, pad(16)]\n\n    push.COUNT_KEY push.COUNT_MAP_SLOT[0..2]\n    # => [slot_id_suffix, slot_id_prefix, COUNT_KEY, new_count, 0, 0, 0, ...]\n\n    exec.native_account::set_map_item\n    # => [OLD_VALUE, new_count, 0, 0, 0, pad(16)]\n\n    dropw\n    # => [new_count, 0, 0, 0, pad(16)]\n\n    exec.sys::truncate_stack\n    # => [new_count, pad(15)]\nend\n",
+  "status": "compiled",
+  "diagnostics": [
+    {
+      "severity": "warning",
+      "message": "unused import",
+      "file": "counter-account/counter_account.masm",
+      "line": 7,
+      "column": 18,
+      "length": 3,
+      "help": "this import is never used and can be safely removed"
+    }
+  ],
+  "stderr": "  x syntax error\n  help: see emitted diagnostics for details\n\nWarning:   ! unused import\n   ,-[counter-account/counter_account.masm:7:18]\n 6 | use miden::core::sys\n 7 | use miden::core::mem\n   :                  ^^^\n 8 | \n   `----\n  help: this import is never used and can be safely removed\n"
+}

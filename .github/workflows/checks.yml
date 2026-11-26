@@ -5,7 +5,9 @@ name: Checks
 # leave the pull request waiting forever.
 on:
   pull_request:
-    branches: [main]
+    # feat/masm-switch: the integration branch of spec/remove-rust's plans 01
+    # to 05, which merges to main once. Remove it after that merge.
+    branches: [main, feat/masm-switch]
   workflow_dispatch:
 
 permissions:

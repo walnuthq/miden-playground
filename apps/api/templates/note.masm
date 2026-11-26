@@ -1,0 +1,6 @@
+# A note script: `main` runs when an account consumes the note.
+
+@note_script
+pub proc main()
+    nop
+end

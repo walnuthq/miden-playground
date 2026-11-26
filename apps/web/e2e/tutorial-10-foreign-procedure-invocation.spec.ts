@@ -22,6 +22,14 @@ const procedureRow = (page: Page, procedure: string) =>
     // The innermost row: the component's row contains its procedures table.
     .last();
 
+// Tutorial 10 was written for Rust contracts: it's marked `unavailable`
+// (components/tutorials/meta.ts, tutorial-unavailable.spec.ts) until plan 07
+// of spec/remove-rust rewrites it in MASM. Remove this with the flag.
+test.fixme(
+  true,
+  "Tutorial 10 is being rewritten for Miden Assembly (spec/remove-rust plan 07)",
+);
+
 test("tutorial 10: foreign procedure invocation", async ({ page }) => {
   logBrowserErrors(page);
   const panel = tutorialPanel(page);

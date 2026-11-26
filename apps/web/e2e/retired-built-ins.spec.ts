@@ -75,8 +75,9 @@ test("a retired built-in stays out of a sandbox's scripts", async ({
 });
 
 // Tutorials 7, 11 and 12 take the first account component script that isn't a
-// built-in for the one the user created.
-test("a retired built-in isn't the script a tutorial has the user create", async ({
+// built-in for the one the user created. Fixme while they're unavailable,
+// until plan 07 of spec/remove-rust rewrites them in MASM.
+test.fixme("a retired built-in isn't the script a tutorial has the user create", async ({
   page,
 }) => {
   logBrowserErrors(page);

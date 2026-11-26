@@ -5,7 +5,7 @@ import { LaunchExampleCardView } from "@/components/home/launch-example-card-vie
 import { NewSandboxCardView } from "@/components/home/new-sandbox-card-view";
 import { StartTutorialCardView } from "@/components/home/start-tutorial-card-view";
 import { tutorialMetas } from "@/components/tutorials/meta";
-import { exampleMetas } from "@/lib/examples/meta";
+import { shownExampleMetas } from "@/lib/examples/meta";
 import type { ExampleMeta } from "@/lib/types/example";
 import type { NetworkId } from "@/lib/types/network";
 import type { TutorialMeta } from "@/lib/types/tutorial";
@@ -99,7 +99,7 @@ const Examples = ({
       description="Get started with Miden by exploring project templates."
     />
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-      {exampleMetas.map((example) => (
+      {shownExampleMetas.map((example) => (
         <ExampleCard key={example.id} example={example} />
       ))}
     </div>
@@ -157,8 +157,12 @@ export const HomeView = ({ cards }: { cards?: HomeCards }) => {
       <div className="h-px border-b border-dashed" />
       <Tutorials pending={pending} TutorialCard={TutorialCard} />
       <SectionSeparator />
-      <Examples ExampleCard={ExampleCard} />
-      <SectionSeparator />
+      {shownExampleMetas.length > 0 && (
+        <>
+          <Examples ExampleCard={ExampleCard} />
+          <SectionSeparator />
+        </>
+      )}
       <SandboxEnvironments SandboxCard={SandboxCard} />
     </div>
   );

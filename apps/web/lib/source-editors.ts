@@ -1,6 +1,6 @@
 import type { CodeEditor } from "@/components/lib/editor";
 
-// The mounted source (`src/lib.rs`) editors, by script id. The source editor
+// The mounted source (`<name>.masm`) editors, by script id. The source editor
 // is uncontrolled: code added from outside it (a tutorial's "add to my script"
 // button) goes through its model while it's open, which reports the change
 // to the app state as typing does, with undo.

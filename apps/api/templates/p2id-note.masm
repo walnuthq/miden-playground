@@ -1,0 +1,69 @@
+# A pay-to-ID (P2ID) note: it carries assets for one account, the target,
+# named in the note's storage. Only the target can consume it, and the
+# assets go to its vault.
+#
+# The assets are moved by the standard wallet's `receive_asset`, which this
+# script calls by its MAST root: any account with the standard basic wallet
+# component (the SDK's, Bread's, Para's, or the basic-wallet template) can
+# consume the note.
+
+use miden::protocol::account_id
+use miden::protocol::active_account
+use miden::protocol::active_note
+use miden::standards::wallets::basic as basic_wallet
+
+# ERRORS
+# =================================================================================================
+
+const ERR_P2ID_WRONG_NUMBER_OF_STORAGE_ITEMS = "P2ID note expects exactly 2 note storage items"
+
+const ERR_P2ID_WRONG_TARGET = "P2ID note can only be consumed by its target account"
+
+# NOTE STORAGE
+# =================================================================================================
+
+# The note's storage, written when the note is created: the target account's
+# id, its prefix then its suffix. The script copies it to memory from
+# STORAGE_PTR on.
+const NUM_STORAGE_ITEMS = 2
+
+const STORAGE_PTR = 0
+const TARGET_ACCOUNT_ID_PREFIX_PTR = STORAGE_PTR
+const TARGET_ACCOUNT_ID_SUFFIX_PTR = STORAGE_PTR + 1
+
+# SCRIPT
+# =================================================================================================
+
+#! Moves the note's assets to the consuming account, which must be the target.
+#!
+#! Inputs:  []
+#! Outputs: []
+#!
+#! Panics if:
+#! - the note's storage doesn't hold exactly 2 items.
+#! - the consuming account isn't the target account.
+#! - the consuming account has no `receive_asset` procedure of the standard wallet.
+@note_script
+pub proc main()
+    # copy the note's storage to memory
+    push.NUM_STORAGE_ITEMS push.STORAGE_PTR exec.active_note::get_bounded_storage
+    # => [num_storage_items]
+
+    eq.NUM_STORAGE_ITEMS assert.err=ERR_P2ID_WRONG_NUMBER_OF_STORAGE_ITEMS
+    # => []
+
+    # the target account's id
+    mem_load.TARGET_ACCOUNT_ID_PREFIX_PTR mem_load.TARGET_ACCOUNT_ID_SUFFIX_PTR
+    # => [target_id_suffix, target_id_prefix]
+
+    # the consuming account's id
+    exec.active_account::get_id
+    # => [account_id_suffix, account_id_prefix, target_id_suffix, target_id_prefix]
+
+    exec.account_id::eq assert.err=ERR_P2ID_WRONG_TARGET
+    # => []
+
+    # call the account's `receive_asset` for each of the note's assets
+    exec.basic_wallet::move_note_assets_to_account
+    # => []
+end

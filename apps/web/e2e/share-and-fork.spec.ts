@@ -101,7 +101,7 @@ test("a shared script opens read-only, and a fork is the visitor's own", async (
           const compiled = await visitor.request.patch(request.url(), {
             headers,
             data: {
-              files: { "src/lib.rs": "// overwritten" },
+              files: { "counter_account.masm": "# overwritten" },
               dependencies: [],
             },
           });

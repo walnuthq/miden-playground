@@ -117,4 +117,30 @@ describe("state reducer", () => {
       assert.equal(next.accounts[1], added);
     });
   });
+
+  test("FORGET_TUTORIAL_PROGRESS drops progress, from a queued workspace too", () => {
+    const progress = (step: number) => ({ step, maxStep: 5, savedAt: 1 });
+    const current = {
+      tutorialProgress: {
+        "foreign-procedure-invocation": progress(2),
+        "private-transfers": progress(1),
+      },
+      nextState: {
+        tutorialProgress: { "foreign-procedure-invocation": progress(3) },
+      },
+    } as unknown as State;
+    const next = reducer(current, {
+      type: "FORGET_TUTORIAL_PROGRESS",
+      payload: { tutorialIds: ["foreign-procedure-invocation"] },
+    } as Action);
+    assert.deepEqual(next.tutorialProgress, {
+      "private-transfers": progress(1),
+    });
+    assert.deepEqual(next.nextState?.tutorialProgress, {});
+    const idle = reducer({ ...current, nextState: null }, {
+      type: "FORGET_TUTORIAL_PROGRESS",
+      payload: { tutorialIds: ["private-transfers"] },
+    } as Action);
+    assert.equal(idle.nextState, null);
+  });
 });

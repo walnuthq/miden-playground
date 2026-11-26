@@ -116,7 +116,8 @@ const VerifyNoteScriptDialog = () => {
                   if (!files) {
                     return;
                   }
-                  const packageSources = await fileListToPackageSources(files);
+                  const { packageSources } =
+                    await fileListToPackageSources(files);
                   const packageSourcesList = Object.values(packageSources);
                   const packageSourcesParsed = packageSourcesList.map(
                     (packageSource) => ({
@@ -134,24 +135,23 @@ const VerifyNoteScriptDialog = () => {
                     return;
                   }
                   setPackageSource(notePackage);
-                  const rawNotePackageDependencies =
-                    notePackage.parsedMidenProjectToml.package.metadata.miden
-                      .dependencies ?? {};
-                  const notePackageDependencies = Object.keys(
-                    rawNotePackageDependencies,
+                  // Its path dependencies (`name = { path = "../dir" }`),
+                  // found in the folder by their directory's name.
+                  const notePackageDependencies = Object.values(
+                    notePackage.parsedMidenProjectToml.dependencies ?? {},
                   )
                     .map((dependency) => {
-                      const { path: dependencyPath } =
-                        rawNotePackageDependencies[dependency] ?? {
-                          path: "",
-                        };
-                      const dependencyDir = dependencyPath.split("/").at(-1);
-                      const packagePath =
-                        Object.keys(packageSources).find((packagePath) => {
-                          const packageDir = packagePath.split("/").at(-1);
-                          return packageDir === dependencyDir;
-                        }) ?? "";
-                      return packageSources[packagePath];
+                      if (typeof dependency === "string") {
+                        return undefined;
+                      }
+                      const dependencyDir = dependency.path.split("/").at(-1);
+                      const packagePath = Object.keys(packageSources).find(
+                        (packagePath) =>
+                          packagePath.split("/").at(-1) === dependencyDir,
+                      );
+                      return packagePath === undefined
+                        ? undefined
+                        : packageSources[packagePath];
                     })
                     .filter((dependency) => dependency !== undefined);
                   setDependencies(notePackageDependencies);

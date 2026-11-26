@@ -3,8 +3,6 @@ import type { Script } from "@/lib/types/script";
 import { defaultProcedureExport, defaultScript } from "@/lib/utils/script";
 import { sourceFiles } from "@/lib/utils/script-files";
 
-export const rust = ``;
-
 export const masm = `# The MASM code of the AuthNetworkAccount authentication component.
 #
 # See the \`AuthNetworkAccount\` Rust type's documentation for more details.
@@ -224,7 +222,7 @@ const authNetworkAccount: Script = {
   type: "authentication-component",
   status: "compiled",
   readOnly: true,
-  files: sourceFiles(rust),
+  files: sourceFiles("auth-network-account", masm),
   masm,
   commitment:
     "0xd16c8eedd5e0c8cc784bb329a89bc952e7616529feca6f67a99c5fb76b6b1a00",

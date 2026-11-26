@@ -17,8 +17,8 @@ const script = (fields: Partial<Script>) =>
     ...fields,
   }) as Script;
 
-// The Rust basic wallet's `receive-asset` (lib/tutorials/basic-wallet.json),
-// which the P2ID template calls.
+// A Rust basic wallet's `receive-asset`, which the Rust P2ID template called
+// (the embedded wallet went with the switch to MASM): a root no built-in has.
 const RECEIVE_ASSET =
   "0x086e7fa3ab688ac1d4f215c53ba517b68c4c8d43418f6b8a0ac1f1b9a8a1db20";
 const rustWallet = script({

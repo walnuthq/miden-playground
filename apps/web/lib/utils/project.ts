@@ -1,6 +1,8 @@
 import type { NetworkId } from "@/lib/types/network";
 import type { Project, ProjectKind, ProjectMeta } from "@/lib/types/project";
 import type { Store } from "@/lib/types/store";
+import { holdsRustScript } from "@/lib/utils/rust-state";
+import storage from "@/lib/utils/storage";
 import { genesisBlockHeader } from "@/lib/utils/store";
 
 // Saved projects live in their own IndexedDB database: a snapshot holds a whole
@@ -75,10 +77,65 @@ export const putProject = async (project: Project) => {
   });
 };
 
-export const getProject = async (kind: ProjectKind, id: string) =>
-  (await withProjects<Project | undefined>("readonly", (projects) =>
-    projects.get(projectKey(kind, id)),
-  )) ?? null;
+// Deletes the snapshots whose state holds a Rust script, saved projects and
+// tutorials alike (lib/utils/rust-state.ts), and answers what it deleted. A
+// MockChain project's chain is in its record and goes with it. Reads every
+// snapshot, so it runs once per browser: once it has, storage remembers it,
+// as nothing written since the switch to MASM can hold a Rust script.
+const RUST_PROJECTS_DELETED_KEY = "rustProjectsDeleted";
+
+const deleteRustProjects = async (): Promise<ProjectMeta[]> => {
+  if (storage.get<boolean>(RUST_PROJECTS_DELETED_KEY)) {
+    return [];
+  }
+  const deleted: ProjectMeta[] = [];
+  await withProjects("readwrite", (projects, meta) => {
+    const request = projects.openCursor();
+    request.onsuccess = () => {
+      const cursor = request.result;
+      if (!cursor) {
+        return;
+      }
+      const project = cursor.value as Project;
+      if (holdsRustScript(project.state)) {
+        deleted.push(projectMeta(project));
+        meta.delete(cursor.key);
+        cursor.delete();
+      }
+      cursor.continue();
+    };
+    return request;
+  });
+  storage.set(RUST_PROJECTS_DELETED_KEY, true);
+  return deleted;
+};
+
+let rustProjectsDeleted: Promise<ProjectMeta[]> | undefined;
+
+// The sweep above, run once per page load: reading or listing the snapshots
+// waits for it, so a Rust one is never listed or opened. A failed sweep (the
+// database is blocked) answers nothing deleted and runs again next time.
+export const deletedRustProjects = () => {
+  rustProjectsDeleted ??= (
+    typeof indexedDB === "undefined"
+      ? Promise.resolve([])
+      : deleteRustProjects()
+  ).catch((error) => {
+    console.error("ERROR: deleteRustProjects", error);
+    rustProjectsDeleted = undefined;
+    return [];
+  });
+  return rustProjectsDeleted;
+};
+
+export const getProject = async (kind: ProjectKind, id: string) => {
+  await deletedRustProjects();
+  return (
+    (await withProjects<Project | undefined>("readonly", (projects) =>
+      projects.get(projectKey(kind, id)),
+    )) ?? null
+  );
+};
 
 export const deleteProject = async (kind: ProjectKind, id: string) => {
   const key = projectKey(kind, id);
@@ -89,14 +146,16 @@ export const deleteProject = async (kind: ProjectKind, id: string) => {
 };
 
 // The saved projects of a kind, most recently saved first.
-export const listProjects = async (kind: ProjectKind) =>
-  (
+export const listProjects = async (kind: ProjectKind) => {
+  await deletedRustProjects();
+  return (
     await withProjects<ProjectMeta[]>("readonly", (_projects, meta) =>
       meta.getAll(),
     )
   )
     .filter((project) => project.kind === kind)
     .sort((a, b) => b.savedAt - a.savedAt);
+};
 
 // Deletes every saved project, e.g. along with the client stores they were
 // taken from.

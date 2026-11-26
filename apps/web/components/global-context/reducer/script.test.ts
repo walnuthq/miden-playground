@@ -44,9 +44,9 @@ describe("script reducer", () => {
       name: "from-api",
       createdAt: 99,
       status: "compiled",
-      masm: "m",
+      masm: "",
       masp: "p",
-      files: { "src/lib.rs": "new", "Cargo.toml": "toml" },
+      files: { "mine.masm": "new", "miden-project.toml": "toml" },
       ...extra,
     });
   const compiling = () =>
@@ -54,7 +54,7 @@ describe("script reducer", () => {
       name: "mine",
       createdAt: 1,
       status: "draft",
-      files: { "src/lib.rs": "old" },
+      files: { "mine.masm": "old" },
       dependencies: [{ id: "d1" }, { id: "d2" }],
     });
   const dependencyIds = ["d1", "d2"];
@@ -71,7 +71,7 @@ describe("script reducer", () => {
     assert.equal(b?.createdAt, 1);
     assert.equal(b?.status, "compiled");
     assert.equal(b?.masp, "p");
-    assert.equal(b?.files["src/lib.rs"], "new");
+    assert.equal(b?.files["mine.masm"], "new");
     assert.ok((b?.updatedAt ?? 0) > 0);
   });
 

@@ -1,0 +1,21 @@
+# A transaction script that increments the counter of the account that runs
+# it. It calls the counter's procedures, so it needs them: add your
+# counter-account script as a dependency.
+
+use counter_account
+
+#! Increments the executing account's count by one.
+#!
+#! Inputs:  []
+#! Outputs: []
+@transaction_script
+pub proc main()
+    # `call` runs an account procedure on the top 16 elements of the stack,
+    # and puts its 16 outputs in their place
+    call.counter_account::increment_count
+    # => [new_count, pad(15)]
+
+    # the new count isn't needed
+    drop
+    # => [pad(16)]
+end

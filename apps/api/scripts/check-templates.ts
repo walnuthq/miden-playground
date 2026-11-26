@@ -4,24 +4,25 @@
 // teaches it for the counter note): the check does the same. The code the
 // tutorials have users add to a template (their "Add to my script" buttons,
 // lib/utils/tutorial-code.ts in the web app) is compiled too, so an SDK bump
-// that breaks a snippet fails here. So does a package the web app embeds
-// (lib/tutorials/basic-wallet.json) once the compiler builds it differently.
+// that breaks a snippet fails here: none for now, the tutorials' snippets
+// are Rust until they're rewritten in MASM (plan 07 of spec/remove-rust).
+//
+// A template with a hand-written schema (templates/*.schema.ts) must agree
+// with it: its slot names are the ones the source declares (the stale rule of
+// lib/package-metadata.ts, run on the template as shipped), and the package
+// created from it still has its schema once compiled.
 //
 // It goes through a running API (`pnpm dev`, which reaches whatever
 // API_COMPILE_URL it's configured with), exactly like the dialog then the
 // Compile button: POST /scripts, PATCH /scripts/:id with the script's code and
 // dependencies, then DELETE /scripts/:id. Run it after editing a template, and
-// after bumping the Miden SDK, the api-compile image or
-// templates/project-template.
+// after bumping the Miden SDK or the api-compile image.
 //
-//   node scripts/check-templates.ts [--write]
+//   node scripts/check-templates.ts
 //
 // API_URL defaults to the local API (http://localhost:3001). Exits with 1 when
-// a template doesn't compile, printing the compiler's diagnostics, or when an
-// embedded package is out of date: `--write` (`pnpm templates:sync`)
-// regenerates it instead.
-import { readFileSync, writeFileSync } from "node:fs";
-import path from "node:path";
+// a template doesn't compile, printing the assembler's diagnostics, or
+// disagrees with its schema.
 import {
   type ScriptExample,
   type ScriptType,
@@ -31,13 +32,13 @@ import {
 import {
   applyCodeEdits,
   type CodeEdit,
-  increaseIncrementEdits,
-  resetCountEdits,
-  timelockEdits,
 } from "../../web/lib/utils/tutorial-code.ts";
+import { sourceFilePath } from "../lib/source-file.ts";
+import { declaredSlotNames } from "../lib/storage-slot-names.ts";
+import { templateSchemas } from "../lib/template-schemas.ts";
+import type { PackageMetadata } from "../lib/types.ts";
 
 const API_URL = process.env.API_URL ?? "http://localhost:3001";
-const write = process.argv.includes("--write");
 
 // The types the dialog offers (see components/scripts/create-script-dialog.tsx
 // in the web app).
@@ -65,72 +66,20 @@ const tutorialEdits: {
   label: string;
   example: ScriptExample;
   edits: CodeEdit[];
-}[] = [
-  {
-    label: "tutorial 7 (increase the increment)",
-    example: "counter-account",
-    edits: increaseIncrementEdits,
-  },
-  {
-    label: "tutorial 8 (timelock)",
-    example: "p2id-note",
-    edits: timelockEdits,
-  },
-  {
-    label: "tutorial 12 (reset_count)",
-    example: "counter-account",
-    edits: resetCountEdits,
-  },
-];
-
-// The packages the web app embeds, each compiled from a template under the
-// name the snapshot's digests are for (procedure digests depend on the package
-// name). A snapshot is the template's source and what the web app builds a
-// script from: the package, its commitment and its exports, not its MASM.
-const embeddedPackages: {
-  name: string;
-  type: ScriptType;
-  template: string;
-  snapshot: string;
-}[] = [
-  {
-    // The Rust basic wallet the API compiles note scripts against
-    // (lib/default-dependencies.ts): tutorial 8's Test Wallet carries it, so
-    // it can consume the note built from the user's P2ID script.
-    name: "basic-wallet",
-    type: "account-component",
-    template: path.join(import.meta.dirname, "../templates/basic-wallet.rs"),
-    snapshot: path.join(
-      import.meta.dirname,
-      "../../web/lib/tutorials/basic-wallet.json",
-    ),
-  },
-];
-
-type Snapshot = {
-  source: string;
-  commitment: string;
-  masp: string;
-  exports: unknown[];
-};
-
-// What tells a snapshot is up to date. Not the package's bytes: the
-// commitment covers its code.
-const comparable = ({ source, commitment, exports }: Snapshot) =>
-  JSON.stringify({ source, commitment, exports });
+}[] = [];
 
 type CreatedPackage = {
   id: string;
-  files: { "src/lib.rs": string };
+  name: string;
+  files: Record<string, string>;
   dependencies: { id: string }[];
 };
 
 type CompiledPackage = {
   status: "draft" | "compiled" | "error";
-  error: string;
-  commitment: string;
-  masp: string;
-  exports: unknown[];
+  metadata: PackageMetadata | null;
+  // The assembler's rendering of the build's diagnostics.
+  stderr: string;
 };
 
 // This run's owner token: the API lets only a script's owner compile and
@@ -153,14 +102,6 @@ const request = async <T>(path: string, init: RequestInit): Promise<T> => {
   return response.json() as Promise<T>;
 };
 
-// The diagnostics of a failed compile, without cargo's progress lines.
-const diagnostics = (error: string) =>
-  error
-    .split("\n")
-    .filter((line) => /^(error|warning)\b|^\s+-->/.test(line))
-    .filter((line) => !line.includes("wide-arithmetic"))
-    .join("\n");
-
 const createScript = async (
   type: ScriptType,
   example: ScriptExample | "none",
@@ -170,24 +111,56 @@ const createScript = async (
     "/scripts",
     { method: "POST", body: JSON.stringify({ name, type, example }) },
   );
-  return created;
+  return { ...created, name };
 };
 
+const source = ({ name, files }: CreatedPackage) =>
+  files[sourceFilePath(name)] ?? "";
+
 const compileScript = async (
-  { id, files }: CreatedPackage,
+  script: CreatedPackage,
   dependencies: string[],
+  code = source(script),
 ) => {
   const { package: compiled } = await request<{ package: CompiledPackage }>(
-    `/scripts/${id}`,
+    `/scripts/${script.id}`,
     {
       method: "PATCH",
       body: JSON.stringify({
-        files: { "src/lib.rs": files["src/lib.rs"] },
+        files: { [sourceFilePath(script.name)]: code },
         dependencies,
       }),
     },
   );
   return compiled;
+};
+
+// Why a template disagrees with its schema, or null when it agrees: the
+// slot names it declares are the schema's, and its compiled package kept the
+// schemas the template has.
+const schemaMismatch = (
+  example: ScriptExample | "none",
+  code: string,
+  metadata: PackageMetadata | null,
+) => {
+  const schema = example === "none" ? undefined : templateSchemas[example];
+  if (!schema) {
+    return null;
+  }
+  if (schema.storage) {
+    const declared = declaredSlotNames(code);
+    const expected = schema.storage.slots.map(({ name }) => name).sort();
+    if (declared?.join("\n") !== [...new Set(expected)].join("\n")) {
+      return `the template declares the slots ${JSON.stringify(declared)}, its schema ${JSON.stringify(expected)}`;
+    }
+    if (!metadata?.storage) {
+      return "its package lost its storage schema on compile";
+    }
+  }
+  if (schema.noteStorage && !metadata?.noteStorage) {
+    return "its package lost its note storage schema on compile";
+  }
+  return null;
 };
 
 const failures: string[] = [];
@@ -207,26 +180,30 @@ for (const { type, example } of scripts) {
         dependencyExample,
       );
       created.push(dependency);
-      const { status, error } = await compileScript(
+      const { status, stderr } = await compileScript(
         dependency,
         dependency.dependencies.map(({ id }) => id),
       );
       if (status !== "compiled") {
-        throw new Error(`dependency ${dependencyExample}: ${error}`);
+        throw new Error(`dependency ${dependencyExample}: ${stderr}`);
       }
       dependencies.push(dependency.id);
     }
     const script = await createScript(type, example);
     created.push(script);
-    const { status, error } = await compileScript(script, [
+    const { status, stderr, metadata } = await compileScript(script, [
       ...script.dependencies.map(({ id }) => id),
       ...dependencies,
     ]);
-    if (status === "compiled") {
-      console.info(`ok    ${label}`);
-    } else {
+    const mismatch = schemaMismatch(example, source(script), metadata);
+    if (status !== "compiled") {
       failures.push(label);
-      console.error(`FAIL  ${label}\n${diagnostics(error)}\n`);
+      console.error(`FAIL  ${label}\n${stderr}\n`);
+    } else if (mismatch) {
+      failures.push(label);
+      console.error(`FAIL  ${label}: ${mismatch}\n`);
+    } else {
+      console.info(`ok    ${label}`);
     }
   } finally {
     // The script first: a dependency can't be deleted while it's used.
@@ -239,7 +216,7 @@ for (const { type, example } of scripts) {
 for (const { label, example, edits } of tutorialEdits) {
   const script = await createScript(scriptExamples[example].type, example);
   try {
-    const edited = applyCodeEdits(script.files["src/lib.rs"], edits);
+    const edited = applyCodeEdits(source(script), edits);
     if (edited === null) {
       failures.push(label);
       console.error(
@@ -247,59 +224,25 @@ for (const { label, example, edits } of tutorialEdits) {
       );
       continue;
     }
-    const { status, error } = await compileScript(
-      { ...script, files: { "src/lib.rs": edited } },
+    const { status, stderr } = await compileScript(
+      script,
       script.dependencies.map(({ id }) => id),
+      edited,
     );
     if (status === "compiled") {
       console.info(`ok    ${label}`);
     } else {
       failures.push(label);
-      console.error(`FAIL  ${label}\n${diagnostics(error)}\n`);
+      console.error(`FAIL  ${label}\n${stderr}\n`);
     }
   } finally {
     await request(`/scripts/${script.id}`, { method: "DELETE" });
   }
 }
 
-const staleSnapshots: string[] = [];
-for (const { name, type, template, snapshot } of embeddedPackages) {
-  const label = `embedded package ${name}`;
-  const source = readFileSync(template, "utf8");
-  const script = await createScript(type, "none", name);
-  try {
-    const { status, error, commitment, masp, exports } = await compileScript(
-      { ...script, files: { "src/lib.rs": source } },
-      script.dependencies.map(({ id }) => id),
-    );
-    if (status !== "compiled") {
-      failures.push(label);
-      console.error(`FAIL  ${label}\n${diagnostics(error)}\n`);
-      continue;
-    }
-    const compiled: Snapshot = { source, commitment, masp, exports };
-    const current = JSON.parse(readFileSync(snapshot, "utf8")) as Snapshot;
-    if (comparable(current) === comparable(compiled)) {
-      console.info(`ok    ${label}`);
-    } else if (write) {
-      writeFileSync(snapshot, `${JSON.stringify(compiled, null, 2)}\n`);
-      console.info(`wrote ${label} (${commitment})`);
-    } else {
-      staleSnapshots.push(label);
-      console.error(
-        `FAIL  ${label}: its snapshot is out of date, run \`pnpm templates:sync\`\n`,
-      );
-    }
-  } finally {
-    await request(`/scripts/${script.id}`, { method: "DELETE" });
-  }
-}
-
-const total = scripts.length + tutorialEdits.length + embeddedPackages.length;
+const total = scripts.length + tutorialEdits.length;
 if (failures.length > 0) {
-  console.error(`${failures.length}/${total} templates don't compile.`);
-}
-if (failures.length > 0 || staleSnapshots.length > 0) {
+  console.error(`${failures.length}/${total} templates fail.`);
   process.exit(1);
 }
-console.info(`All ${total} templates compile.`);
+console.info(`All ${total} templates compile and agree with their schemas.`);

@@ -35,14 +35,17 @@ const MAX_ACCOUNT_NAME_LENGTH = 40;
 const NETWORKS = ["mtst", "mdev", "mm"];
 
 const MANIFEST = "miden-project.toml";
-const SOURCE = "src/lib.rs";
 
-// A copy of findPackages (apps/web/lib/utils/project-files.ts), which "Import
-// Project" uses: keep the two in step (project-files.test.ts runs both on the
-// same paths). Paths are relative to the folder's parent, the folder's name
-// first, as a browser's folder picker gives them.
+// Copies of findPackages and manifestSourcePath
+// (apps/web/lib/utils/project-files.ts), which "Import Project" uses: keep
+// them in step (share-project-script.test.ts runs both on the same input).
+// Paths are relative to the folder's parent, the folder's name first, as a
+// browser's folder picker gives them.
 const skippedDirectory = (segment) =>
   segment === "target" || segment === "node_modules" || segment.startsWith(".");
+
+const joinPath = (directory, path) =>
+  directory === "" ? path : `${directory}/${path}`;
 
 export const findPackages = (paths) => {
   const pathSet = new Set(paths);
@@ -55,15 +58,46 @@ export const findPackages = (paths) => {
       );
     })
     .map((manifestPath) => {
-      const directory = manifestPath.slice(0, -`/${MANIFEST}`.length);
+      const directory = manifestPath.slice(0, -MANIFEST.length).slice(0, -1);
       return {
         directory,
         manifestPath,
-        sourcePath: directory === "" ? SOURCE : `${directory}/${SOURCE}`,
+        rust: pathSet.has(joinPath(directory, "Cargo.toml")),
       };
     })
-    .filter(({ sourcePath }) => pathSet.has(sourcePath))
     .sort((a, b) => a.directory.localeCompare(b.directory));
+};
+
+// The `[lib]` table's `path`, without a TOML parser: a `path = "…"` line
+// (basic or literal string, no escapes) between `[lib]` and the next table.
+const libPath = (manifest) => {
+  let inLib = false;
+  for (const line of manifest.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (trimmed.startsWith("[")) {
+      inLib = /^\[\s*lib\s*\]\s*(#.*)?$/.test(trimmed);
+    } else if (inLib) {
+      const match = trimmed.match(
+        /^path\s*=\s*(?:"([^"\\]*)"|'([^']*)')\s*(#.*)?$/,
+      );
+      if (match) {
+        return match[1] ?? match[2];
+      }
+    }
+  }
+  return undefined;
+};
+
+export const manifestSourcePath = (directory, manifest) => {
+  const path = libPath(manifest);
+  if (typeof path !== "string" || !path.endsWith(".masm")) {
+    return undefined;
+  }
+  const segments = path.replace(/^\.\//, "").split("/");
+  if (segments.some((segment) => segment === ".." || segment === "")) {
+    return undefined;
+  }
+  return joinPath(directory, segments.join("/"));
 };
 
 // The folder's files, as paths from its parent. Skips what findPackages
@@ -162,9 +196,9 @@ export const projectLink = (
 
 const usage = `Usage: node scripts/share-project.mjs <folder> [options]
 
-Uploads the Miden packages in <folder> (each directory with a
-miden-project.toml and src/lib.rs) to the playground, which compiles them,
-and prints a link that opens them in a new sandbox.
+Uploads the Miden Assembly packages in <folder> (each directory with a
+miden-project.toml whose [lib] path names its .masm file) to the playground,
+which compiles them, and prints a link that opens them in a new sandbox.
 
 Options:
   --network <id>  mtst (testnet, default), mdev (devnet) or mm (Mainnet)
@@ -177,11 +211,11 @@ Options:
   -h, --help      this help
 
 An account lists these scripts as its components when its code holds their
-procedures, matched by digest: a local cargo-miden build gives the
-playground's digests when it uses the same dependency versions (the
-Cargo.lock of a script the playground exports). If yours differ, deploy the
-account from the playground instead: open the link, deploy, then "Share
-project" in the Projects menu.`;
+procedures, matched by digest: an account deployed from the same MASM, built
+against the same miden-protocol and miden-standards versions, has the
+playground's digests. If yours differ, deploy the account from the
+playground instead: open the link, deploy, then "Share project" in the
+Projects menu.`;
 
 export const main = async (args) => {
   const { values, positionals } = parseArgs({
@@ -225,10 +259,13 @@ export const main = async (args) => {
   }
   const folder = resolve(positionals[0]);
   const parent = dirname(folder);
-  const packages = findPackages(await listFiles(folder));
+  const paths = await listFiles(folder);
+  const packages = findPackages(paths);
   if (packages.length === 0) {
     throw new UsageError(
-      `No package in ${folder}: a package is a directory with ${MANIFEST} and ${SOURCE}.`,
+      paths.some((path) => path.endsWith("/Cargo.toml"))
+        ? `${folder} is a Rust project: the playground takes Miden Assembly projects only.`
+        : `No package in ${folder}: a package is a directory with a ${MANIFEST} whose [lib] path names its .masm file.`,
     );
   }
   if (packages.length > MAX_PACKAGES) {
@@ -237,20 +274,32 @@ export const main = async (args) => {
     );
   }
   const packageSources = {};
-  for (const { directory, manifestPath, sourcePath } of packages) {
+  for (const { directory, manifestPath, rust } of packages) {
     const midenProjectToml = await readFile(join(parent, manifestPath), "utf8");
-    const rust = await readFile(join(parent, sourcePath), "utf8");
     if (midenProjectToml.length > MAX_MANIFEST_LENGTH) {
       throw new UsageError(
         `${manifestPath} is over ${MAX_MANIFEST_LENGTH} characters.`,
       );
     }
-    if (rust.length === 0 || rust.length > MAX_SOURCE_LENGTH) {
+    const sourcePath = manifestSourcePath(directory, midenProjectToml);
+    if (!sourcePath) {
+      throw new UsageError(
+        rust
+          ? `${directory} is a Rust project: the playground takes Miden Assembly projects only.`
+          : `${manifestPath} has no [lib] path naming a .masm file.`,
+      );
+    }
+    const masm = await readFile(join(parent, sourcePath), "utf8").catch(() => {
+      throw new UsageError(
+        `${sourcePath}, the [lib] path of ${manifestPath}, isn't there.`,
+      );
+    });
+    if (masm.length === 0 || masm.length > MAX_SOURCE_LENGTH) {
       throw new UsageError(
         `${sourcePath} is empty or over ${MAX_SOURCE_LENGTH} characters (512 KB).`,
       );
     }
-    packageSources[directory] = { midenProjectToml, rust };
+    packageSources[directory] = { midenProjectToml, masm };
   }
   const body = JSON.stringify({ packageSources });
   if (Buffer.byteLength(body) > MAX_BODY_SIZE) {
@@ -259,7 +308,7 @@ export const main = async (args) => {
     );
   }
   console.error(
-    `Uploading ${packages.length} package${packages.length === 1 ? "" : "s"} (${packages.map(({ directory }) => basename(directory)).join(", ")}): the playground compiles them, which can take a minute…`,
+    `Uploading ${packages.length} package${packages.length === 1 ? "" : "s"} (${packages.map(({ directory }) => basename(directory)).join(", ")}): the playground compiles them…`,
   );
   const response = await fetch(`${values.api}/scripts/import`, {
     method: "POST",

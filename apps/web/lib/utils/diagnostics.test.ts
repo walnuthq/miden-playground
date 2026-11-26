@@ -1,246 +1,213 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import { describe, test } from "node:test";
+import type { Diagnostic } from "../types/script.ts";
 import {
   countDiagnostics,
+  diagnosticMessage,
   outputLineSeverity,
-  parseDiagnostics,
+  sourceDiagnostics,
   splitLocations,
 } from "./diagnostics.ts";
+import { FIXTURES, fixture } from "./fixtures/compile-errors.ts";
 
-// Real outputs of the local api-compile for the counter contract example's
-// account component, each broken a different way.
-const fixture = (name: string) =>
-  readFileSync(
-    new URL(`./fixtures/compile-errors/${name}.txt`, import.meta.url),
-    "utf-8",
-  );
+// The text a located diagnostic marks in its source.
+const marked = (
+  source: string,
+  {
+    line,
+    column,
+    endColumn,
+  }: { line: number; column: number; endColumn?: number },
+) =>
+  source.split("\n")[line - 1]?.slice(column - 1, endColumn && endColumn - 1);
 
-describe("parseDiagnostics", () => {
-  test("successful compile's warnings (the API's `warnings`)", () => {
-    assert.deepEqual(parseDiagnostics(fixture("success-warnings")), [
-      {
-        severity: "warning",
-        message:
-          // The caret line's inline `help:` isn't kept, only `= note:` lines.
-          "unused variable: `unused`\nnote: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default",
-        file: "src/lib.rs",
-        line: 34,
-        column: 13,
-        endColumn: 19,
-      },
-    ]);
+describe("sourceDiagnostics", () => {
+  test("places an error on its span: 1-based, length in characters", () => {
+    const { name, source, diagnostics } = fixture("bad-instruction");
+    const [located] = sourceDiagnostics(diagnostics, { name });
+    assert.deepEqual(located, {
+      severity: "error",
+      message:
+        "invalid syntax: invalid instruction `addd` or malformed operands",
+      line: 49,
+      column: 5,
+      endColumn: 11,
+    });
+    assert.equal(marked(source, located), "addd.1");
   });
 
-  test("syntax error, with secondary labels and a help suggestion", () => {
-    assert.deepEqual(parseDiagnostics(fixture("syntax")), [
-      {
-        severity: "error",
-        message:
-          "expected one of `!` or `::`, found doc comment `/// Increments the counter value stored in the contract's storage map by one.`\nhelp: add a space before the last `/` to write a regular comment",
-        file: "src/lib.rs",
-        line: 26,
-        column: 5,
-        endColumn: 82,
-      },
-      {
-        severity: "error",
-        message:
-          "The `component` macro only supports a component trait or a trait implementation block.\nnote: this error originates in the attribute macro `component` (in Nightly builds, run with -Z macro-backtrace for more info)",
-        file: "src/lib.rs",
-        line: 21,
-        column: 1,
-        endColumn: 13,
-      },
-    ]);
+  test("an undefined procedure, with its help", () => {
+    const { name, source, diagnostics } = fixture("undefined-procedure");
+    const [located] = sourceDiagnostics(diagnostics, { name });
+    assert.ok(located);
+    assert.equal(
+      located.message,
+      "undefined item 'set_map_itemx'\nhelp: you might be missing an import, or the containing library has not been linked",
+    );
+    assert.equal(marked(source, located), "native_account::set_map_itemx");
   });
 
-  test("error code", () => {
-    assert.deepEqual(parseDiagnostics(fixture("e0425")), [
-      {
-        severity: "error",
-        message: "cannot find value `missing_key` in this scope",
-        code: "E0425",
-        file: "src/lib.rs",
-        line: 37,
-        column: 28,
-        endColumn: 39,
-      },
-    ]);
-  });
-
-  test("help block with its own snippet", () => {
-    const [diagnostic] = parseDiagnostics(fixture("mismatch"));
-    assert.equal(diagnostic?.code, "E0308");
-    assert.equal(diagnostic?.line, 37);
-    assert.equal(diagnostic?.column, 9);
-    assert.equal(diagnostic?.endColumn, 13);
-    assert.match(diagnostic?.message ?? "", /\nhelp: call `Into::into`/);
-  });
-
-  test("primary carets after secondary dashes on the same line", () => {
-    const [diagnostic] = parseDiagnostics(fixture("multiline"));
-    assert.equal(diagnostic?.line, 33);
-    assert.equal(diagnostic?.column, 28);
-    assert.equal(diagnostic?.endColumn, 32);
-  });
-
-  test("error and warning", () => {
-    const diagnostics = parseDiagnostics(fixture("warning-and-error"));
-    assert.deepEqual(
-      diagnostics.map(({ severity, code, line, column, endColumn }) => ({
-        severity,
-        code,
-        line,
-        column,
-        endColumn,
-      })),
-      [
-        {
-          severity: "error",
-          code: "E0596",
-          line: 37,
-          column: 9,
-          endColumn: 23,
-        },
-        {
-          severity: "warning",
-          code: undefined,
-          line: 48,
-          column: 13,
-          endColumn: 19,
-        },
-      ],
+  test("a syntax error, with its label", () => {
+    const { name, source, diagnostics } = fixture("syntax");
+    const [located] = sourceDiagnostics(diagnostics, { name });
+    assert.ok(located);
+    assert.equal(
+      located.message,
+      "syntax error\nexpected `end` to close procedure before top-level item",
     );
     assert.equal(
-      diagnostics[1]?.message,
-      "unused variable: `unused`\nnote: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default",
+      marked(source, located),
+      "#! Increments the count by one and returns the new count.",
     );
   });
 
-  test("summaries and the target feature warning are skipped", () => {
+  test("a missing dependency, in a script that uses it", () => {
+    const { name, source, diagnostics } = fixture("missing-dependency");
+    const [located] = sourceDiagnostics(diagnostics, { name });
+    assert.ok(located);
+    assert.equal(marked(source, located), "counter_account");
+  });
+
+  test("a successful compile's warning", () => {
+    const { name, source, status, diagnostics } = fixture("warning");
+    assert.equal(status, "compiled");
+    const [located] = sourceDiagnostics(diagnostics, { name });
+    assert.equal(located?.severity, "warning");
+    assert.ok(located);
+    assert.equal(marked(source, located), "mem");
+  });
+
+  test("a diagnostic without a position isn't placed", () => {
+    const { name, diagnostics } = fixture("no-position");
+    assert.equal(diagnostics.length, 1);
+    assert.deepEqual(sourceDiagnostics(diagnostics, { name }), []);
+  });
+
+  test("a diagnostic in another package's file isn't placed", () => {
+    const { diagnostics } = fixture("bad-instruction");
+    // The counter's error, read for a script that depends on it.
     assert.deepEqual(
-      parseDiagnostics(
-        [
-          "Command failed: cargo miden build --release --offline",
-          "   Compiling counter-account v0.1.0 (/tmp/miden-project-B46omH/counter-account)",
-          "warning: unstable feature specified for `-Ctarget-feature`: `wide-arithmetic`",
-          "  |",
-          "  = note: this feature is not stably supported; its behavior can change in the future",
-          "",
-          "warning: `counter-account` (lib) generated 1 warning",
-          "error: could not compile `counter-account` (lib) due to 1 previous error; 1 warning emitted",
-        ].join("\n"),
+      sourceDiagnostics(diagnostics, { name: "counter-note" }),
+      [],
+    );
+    // A package whose name ends with the script's.
+    assert.deepEqual(
+      sourceDiagnostics(
+        diagnostics.map((diagnostic) => ({
+          ...diagnostic,
+          file: `my-${diagnostic.file}`,
+        })),
+        { name: "counter-account" },
       ),
       [],
     );
   });
 
-  test("span over several lines", () => {
-    const [diagnostic] = parseDiagnostics(
-      [
-        "error[E0308]: mismatched types",
-        "  --> src/lib.rs:12:5",
-        "   |",
-        "12 | /     if a {",
-        "13 | |         b",
-        "14 | |     }",
-        "   | |_____^ expected `Felt`, found `()`",
-      ].join("\n"),
-    );
-    assert.equal(diagnostic?.line, 12);
-    assert.equal(diagnostic?.column, 5);
-    assert.equal(diagnostic?.endColumn, undefined);
-  });
-
-  test("ANSI colors and other files", () => {
-    assert.deepEqual(
-      parseDiagnostics(
-        "\u001b[1m\u001b[31merror\u001b[0m: boom\n  --> ../dep/src/lib.rs:3:1\n   |\n 3 | x\n   | ^",
-      ),
+  test("a span without a length has no end column", () => {
+    const [located] = sourceDiagnostics(
       [
         {
           severity: "error",
-          message: "boom",
-          file: "../dep/src/lib.rs",
-          line: 3,
-          column: 1,
-          endColumn: 2,
+          message: "m",
+          file: "a/a.masm",
+          line: 2,
+          column: 3,
         },
       ],
+      { name: "a" },
     );
+    assert.deepEqual(located, {
+      severity: "error",
+      message: "m",
+      line: 2,
+      column: 3,
+    });
   });
 });
 
-describe("splitLocations", () => {
-  test("links the script's locations only", () => {
-    assert.deepEqual(
-      splitLocations(
-        "a --> src/lib.rs:26:5\nb --> ../dep/src/lib.rs:3:1 c src/lib.rs:21:1",
-      ),
-      [
-        { text: "a --> " },
-        { text: "src/lib.rs:26:5", line: 26, column: 5 },
-        { text: "\nb --> ../dep/src/lib.rs:3:1 c " },
-        { text: "src/lib.rs:21:1", line: 21, column: 1 },
-      ],
+describe("diagnosticMessage", () => {
+  test("leaves out a label the message already says", () => {
+    assert.equal(
+      diagnosticMessage({ severity: "error", message: "m", label: "m" }),
+      "m",
     );
-  });
-
-  test("web links", () => {
-    assert.deepEqual(
-      splitLocations(
-        "see https://doc.rust-lang.org/error_codes/E0425.html. (`https://a.b/c`)",
+    assert.equal(
+      diagnosticMessage(
+        fixture("bad-instruction").diagnostics[0] as Diagnostic,
       ),
-      [
-        { text: "see " },
-        {
-          text: "https://doc.rust-lang.org/error_codes/E0425.html",
-          href: "https://doc.rust-lang.org/error_codes/E0425.html",
-        },
-        { text: ". (`" },
-        { text: "https://a.b/c", href: "https://a.b/c" },
-        { text: "`)" },
-      ],
+      "invalid syntax: invalid instruction `addd` or malformed operands",
     );
-  });
-
-  test("text without locations", () => {
-    assert.deepEqual(splitLocations("Script compiled successfully."), [
-      { text: "Script compiled successfully." },
-    ]);
   });
 });
 
 describe("countDiagnostics", () => {
-  test("counts located diagnostics only", () => {
-    assert.deepEqual(countDiagnostics(fixture("warning-and-error")), {
+  test("counts every diagnostic, positioned or not", () => {
+    assert.deepEqual(countDiagnostics(fixture("no-position").diagnostics), {
       errors: 1,
-      warnings: 1,
+      warnings: 0,
     });
-    assert.deepEqual(countDiagnostics(fixture("success-warnings")), {
+    assert.deepEqual(countDiagnostics(fixture("warning").diagnostics), {
       errors: 0,
       warnings: 1,
     });
-    assert.deepEqual(countDiagnostics(""), { errors: 0, warnings: 0 });
+  });
+
+  test("a script compiled before diagnostics existed has none", () => {
+    assert.deepEqual(countDiagnostics(undefined), { errors: 0, warnings: 0 });
   });
 });
 
 describe("outputLineSeverity", () => {
-  test("header lines only", () => {
-    assert.equal(
-      outputLineSeverity("error[E0425]: cannot find value"),
-      "error",
+  test("colors the reports' header lines only", () => {
+    const severities = (name: (typeof FIXTURES)[number]) =>
+      fixture(name).stderr.split("\n").map(outputLineSeverity).filter(Boolean);
+    assert.deepEqual(severities("bad-instruction"), ["error"]);
+    assert.deepEqual(severities("no-position"), ["error"]);
+    // The rollup's header, then the related warning.
+    assert.deepEqual(severities("warning"), ["error", "warning"]);
+  });
+
+  test("not a source line that starts like a header", () => {
+    assert.equal(outputLineSeverity(" 49 |     x bogus"), undefined);
+    assert.equal(outputLineSeverity("    x"), undefined);
+  });
+});
+
+describe("splitLocations", () => {
+  test("links the script's own source location", () => {
+    const { name, stderr } = fixture("bad-instruction");
+    const line = stderr.split("\n")[1] ?? "";
+    assert.deepEqual(splitLocations(line, { name }), [
+      { text: "    ,-[" },
+      {
+        text: "counter-account/counter_account.masm:49:5",
+        line: 49,
+        column: 5,
+      },
+      { text: "]" },
+    ]);
+  });
+
+  test("not another package's file, nor one under another directory", () => {
+    for (const text of [
+      "counter-note/counter_note.masm:3:4",
+      "my-counter-account/counter_account.masm:3:4",
+      "../counter-account/counter_account.masm:3:4",
+    ]) {
+      assert.deepEqual(splitLocations(text, { name: "counter-account" }), [
+        { text },
+      ]);
+    }
+  });
+
+  test("links web addresses, without trailing punctuation", () => {
+    assert.deepEqual(
+      splitLocations("see https://docs.miden.xyz/x.", { name: "a" }),
+      [
+        { text: "see " },
+        { text: "https://docs.miden.xyz/x", href: "https://docs.miden.xyz/x" },
+        { text: "." },
+      ],
     );
-    assert.equal(
-      outputLineSeverity("warning: unused variable: `x`"),
-      "warning",
-    );
-    assert.equal(
-      outputLineSeverity("\u001b[1m\u001b[31merror\u001b[0m: x"),
-      "error",
-    );
-    assert.equal(outputLineSeverity("  --> src/lib.rs:34:13"), undefined);
-    assert.equal(outputLineSeverity("   = note: on by default"), undefined);
   });
 });

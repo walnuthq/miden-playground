@@ -12,8 +12,10 @@ import {
   storageSlotsValid,
 } from "@/lib/utils/storage-slots";
 
+// A MASM slot's name as the templates give it, `<namespace>::<slot>`:
+// `counter_account::count_map`.
 export const slotNamePlaceholder = (name: string) =>
-  `${storageSlotPrefix(name)}component::field`;
+  `${storageSlotPrefix(name)}slot_name`;
 
 export const InvalidSlots = () => (
   <p className="text-xs text-destructive">

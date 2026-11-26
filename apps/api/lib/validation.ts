@@ -1,5 +1,8 @@
-// A package name: what Cargo accepts, as the web app's form does. It becomes
-// a directory name and a TOML string.
+import type { PackageSource } from "@/lib/types";
+
+// A package name, as the web app's form takes it. It becomes a directory
+// name, a TOML string and, with `-` as `_`, a MASM namespace and file name
+// (lib/source-file.ts).
 export const isValidPackageName = (name: unknown): name is string =>
   typeof name === "string" && /^[A-Za-z][A-Za-z0-9_-]{1,63}$/.test(name);
 
@@ -31,21 +34,31 @@ export const isId = (value: unknown): value is string =>
 export const isBoundedArray = (value: unknown): value is unknown[] =>
   Array.isArray(value) && value.length <= MAX_PACKAGES;
 
-export const isPackageSource = (
-  value: unknown,
-): value is { midenProjectToml: string; rust: string } =>
+// A body that still carries a Rust project (`{ midenProjectToml, rust }`, a
+// web app or a `share-project` from before MASM): refused with its own
+// message rather than as an invalid body.
+export const isRustPackageSource = (value: unknown) =>
+  typeof value === "object" &&
+  value !== null &&
+  "rust" in value &&
+  !("masm" in value);
+
+export const RUST_UNSUPPORTED =
+  "Error: Rust projects are no longer supported. Scripts are written in Miden Assembly (MASM): send each package's miden-project.toml and its .masm source.";
+
+export const isPackageSource = (value: unknown): value is PackageSource =>
   typeof value === "object" &&
   value !== null &&
   typeof (value as { midenProjectToml?: unknown }).midenProjectToml ===
     "string" &&
   (value as { midenProjectToml: string }).midenProjectToml.length <=
     MAX_MANIFEST_LENGTH &&
-  isSource((value as { rust?: unknown }).rust);
+  isSource((value as { masm?: unknown }).masm);
 
 // The packages of an import, keyed by directory.
 export const isPackageSources = (
   value: unknown,
-): value is Record<string, { midenProjectToml: string; rust: string }> =>
+): value is Record<string, PackageSource> =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&

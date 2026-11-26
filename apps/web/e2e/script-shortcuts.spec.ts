@@ -13,7 +13,7 @@ const consoleHeight = async (page: Page) =>
 // The collapsed console: its header bar only.
 const COLLAPSED_HEIGHT = 52;
 
-const rustCode = (page: Page) =>
+const sourceCode = (page: Page) =>
   page.evaluate(() =>
     (
       window as unknown as {
@@ -38,14 +38,14 @@ test("script: keyboard shortcuts", async ({ page }) => {
   });
 
   await test.step("Cmd/Ctrl+S in the editor compiles", async () => {
-    const code = await rustCode(page);
+    const code = await sourceCode(page);
     await page.getByRole("tabpanel").locator(".view-lines").click();
     await page.keyboard.press("ControlOrMeta+s");
     await expect(compiled).toHaveCount(1, { timeout: TRANSACTION_TIMEOUT });
     // Monaco's own bindings never ran.
     await page.keyboard.press("ControlOrMeta+Enter");
     await expect(compiled).toHaveCount(2, { timeout: TRANSACTION_TIMEOUT });
-    expect(await rustCode(page)).toBe(code);
+    expect(await sourceCode(page)).toBe(code);
   });
 
   await test.step("Cmd/Ctrl+Enter compiles from another tab", async () => {
@@ -101,7 +101,7 @@ test("script: keyboard shortcuts", async ({ page }) => {
 
   await test.step("a read-only script has no shortcuts", async () => {
     await page.goto("/scripts/basic-wallet");
-    await waitForEditorText(page, "fn ");
+    await waitForEditorText(page, "pub use {receive_asset}");
     await page.getByRole("tabpanel").locator(".view-lines").click();
     await page.keyboard.press("ControlOrMeta+s");
     await expect(
@@ -110,21 +110,29 @@ test("script: keyboard shortcuts", async ({ page }) => {
     await expect(page.getByRole("button", { name: "Compile" })).toHaveCount(0);
   });
 
-  await test.step("a read-only package keeps the console's shortcuts only", async () => {
-    // Tutorial 10's count-reader: compiled, read-only, simulated in its
-    // console.
-    await startTutorial(page, "Foreign procedure invocation");
-    await page.goto("/scripts/count-reader");
-    await waitForEditorText(page, "fn ");
-    await page.getByRole("tabpanel").locator(".view-lines").first().click();
-    await page.keyboard.press("ControlOrMeta+s");
-    await expect(page.getByRole("button", { name: "Compile" })).toHaveCount(0);
-    await expect(
-      page.getByText("Simulation runs are logged here."),
-    ).toBeVisible();
-    await page.keyboard.press("ControlOrMeta+j");
-    await expect.poll(() => consoleHeight(page)).toBeLessThan(COLLAPSED_HEIGHT);
-    await page.keyboard.press("ControlOrMeta+j");
-    await expect.poll(() => consoleHeight(page)).toBeGreaterThan(100);
-  });
+  // Tutorial 10's count-reader: compiled, read-only, simulated in its
+  // console. The embedded Rust package went with the switch to MASM: back
+  // when plan 07 of spec/remove-rust re-embeds it from MASM.
+  await test.step.skip(
+    "a read-only package keeps the console's shortcuts only",
+    async () => {
+      await startTutorial(page, "Foreign procedure invocation");
+      await page.goto("/scripts/count-reader");
+      await waitForEditorText(page, "fn ");
+      await page.getByRole("tabpanel").locator(".view-lines").first().click();
+      await page.keyboard.press("ControlOrMeta+s");
+      await expect(page.getByRole("button", { name: "Compile" })).toHaveCount(
+        0,
+      );
+      await expect(
+        page.getByText("Simulation runs are logged here."),
+      ).toBeVisible();
+      await page.keyboard.press("ControlOrMeta+j");
+      await expect
+        .poll(() => consoleHeight(page))
+        .toBeLessThan(COLLAPSED_HEIGHT);
+      await page.keyboard.press("ControlOrMeta+j");
+      await expect.poll(() => consoleHeight(page)).toBeGreaterThan(100);
+    },
+  );
 });

@@ -1,61 +1,42 @@
-import { projectTemplateFiles, templates } from "@/lib/templates";
-import { generateCargoToml, generateMidenProjectToml } from "@/lib/toml";
+import { templates } from "@/lib/templates";
+import { generateMidenProjectToml } from "@/lib/toml";
 import type { Dependency } from "@/lib/types";
+import { MANIFEST_FILE, sourceFilePath } from "./source-file.ts";
 
-export const basicWalletDependency: Dependency & {
-  files: Record<string, string>;
-} = {
-  id: "basic-wallet",
-  name: "basic-wallet",
+// A dependency built from a template, not a row: its files, under its
+// `<name>/` directory, as a build takes them.
+const templateDependency = (
+  name: "basic-wallet" | "counter-account",
+  commitment: string,
+): Dependency & { files: Record<string, string> } => ({
+  id: name,
+  name,
   type: "account-component",
-  commitment: "",
+  commitment,
   files: {
-    "basic-wallet/.cargo/config.toml":
-      projectTemplateFiles[".cargo/config.toml"],
-    "basic-wallet/src/lib.rs": templates["basic-wallet"],
-    "basic-wallet/build.rs": projectTemplateFiles["build.rs"],
-    "basic-wallet/Cargo.toml": generateCargoToml({
-      name: "basic-wallet",
-    }),
-    "basic-wallet/Cargo.lock": projectTemplateFiles["Cargo.lock"],
-    "basic-wallet/miden-project.toml": generateMidenProjectToml({
-      name: "basic-wallet",
+    [`${name}/${sourceFilePath(name)}`]: templates[name],
+    [`${name}/${MANIFEST_FILE}`]: generateMidenProjectToml({
+      name,
       type: "account-component",
-      rust: templates["basic-wallet"],
+      masm: templates[name],
       dependencies: [],
     }),
-    "basic-wallet/rust-toolchain.toml":
-      projectTemplateFiles["rust-toolchain.toml"],
   },
-};
+});
 
-export const counterAccountDependency: Dependency & {
-  files: Record<string, string>;
-} = {
-  id: "counter-account",
-  name: "counter-account",
-  type: "account-component",
-  commitment:
-    "0xb76d0a376ff5cc10f1f5d80385dd2d35f335100ed071673b1d69cb94111582ba",
-  files: {
-    "counter-account/.cargo/config.toml":
-      projectTemplateFiles[".cargo/config.toml"],
-    "counter-account/src/lib.rs": templates["counter-account"],
-    "counter-account/build.rs": projectTemplateFiles["build.rs"],
-    "counter-account/Cargo.toml": generateCargoToml({
-      name: "counter-account",
-    }),
-    "counter-account/Cargo.lock": projectTemplateFiles["Cargo.lock"],
-    "counter-account/miden-project.toml": generateMidenProjectToml({
-      name: "counter-account",
-      type: "account-component",
-      rust: templates["counter-account"],
-      dependencies: [],
-    }),
-    "counter-account/rust-toolchain.toml":
-      projectTemplateFiles["rust-toolchain.toml"],
-  },
-};
+// The commitments are the templates' as api-compile builds them under these
+// names (a package's commitment covers its name). They change with the
+// template or api-compile's toolchain: a compile answers the real one, so a
+// stale one is only shown until then.
+export const basicWalletDependency = templateDependency(
+  "basic-wallet",
+  "0x59e7859c8a1235c43f1d171452422e94d99ed434519c6d351eec2e0a71ab8983",
+);
+
+export const counterAccountDependency = templateDependency(
+  "counter-account",
+  "0xc586e89be2b913920e892f193b034eeb6e55409cf9b3554a5b4afb1a95eef155",
+);
 
 export const defaultDependenciesRecords = {
   "basic-wallet": basicWalletDependency,

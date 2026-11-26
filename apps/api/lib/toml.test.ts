@@ -1,18 +1,14 @@
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
-import {
-  generateCargoToml,
-  generateMidenProjectToml,
-  parseMidenProjectToml,
-} from "./toml.ts";
+import { generateMidenProjectToml, parseMidenProjectToml } from "./toml.ts";
 
 const noteToml =
-  '[package]\nname = "counter-note"\nversion = "0.1.0"\n\n[lib]\nkind = "note"\nnamespace = "miden:counter-note/miden-counter-note@0.1.0"\npath = "src/lib.rs"\n\n[dependencies]\nmiden-core = "*"\nmiden-protocol = "*"\n\n';
+  '[package]\nname = "counter-note"\nversion = "0.1.0"\n\n[lib]\nkind = "note"\nnamespace = "counter_note"\npath = "counter_note.masm"\n\n[dependencies]\nmiden-core = "*"\nmiden-protocol = "*"\n';
 
 const note = generateMidenProjectToml({
   name: "counter-note",
   type: "note",
-  rust: "fn main() {}",
+  masm: "@note_script\npub proc main()\n    nop\nend\n",
   dependencies: [],
 });
 
@@ -24,7 +20,7 @@ describe("generateMidenProjectToml", () => {
     const toml = generateMidenProjectToml({
       name: "counter-note",
       type: "note",
-      rust: "",
+      masm: "use counter_account",
       dependencies: [
         {
           id: "x",
@@ -36,65 +32,56 @@ describe("generateMidenProjectToml", () => {
     });
     assert.equal(
       toml,
-      `${noteToml.slice(0, -1)}counter-account = { path = "../counter-account" }\n\n\n`,
+      `${noteToml}counter-account = { path = "../counter-account" }\n`,
     );
   });
-  test("account component uses the trait name and metadata", () => {
-    const toml = generateMidenProjectToml({
-      name: "my-counter",
-      type: "account-component",
-      rust: "#[component]\npub trait CounterContract {}",
-      dependencies: [],
-    });
-    assert.ok(
-      toml.includes('namespace = "miden:my-counter/counter-contract@0.1.0"'),
-    );
-    assert.ok(
-      toml.endsWith(
-        '[package.metadata.miden]\nsupported-types = ["RegularAccountUpdatableCode"]\n\n',
-      ),
-    );
+  test("depends on miden-standards when the source uses it", () => {
+    for (const masm of [
+      "use {AuthArgs} from miden::standards::types\n",
+      "use miden::standards::wallets::basic\n",
+    ]) {
+      const toml = generateMidenProjectToml({
+        name: "auth",
+        type: "account-component",
+        masm,
+        dependencies: [],
+      });
+      assert.ok(toml.includes('miden-protocol = "*"\nmiden-standards = "*"\n'));
+    }
+    assert.ok(!note.includes("miden-standards"));
   });
-  test("kebab-case names are not re-split", () => {
+  test("the namespace and file are the package name with `_`", () => {
     const toml = generateMidenProjectToml({
       name: "p2id-note",
       type: "note",
-      rust: "",
+      masm: "",
       dependencies: [],
     });
     assert.ok(
-      toml.includes('namespace = "miden:p2id-note/miden-p2id-note@0.1.0"'),
+      toml.includes('namespace = "p2id_note"\npath = "p2id_note.masm"'),
     );
   });
-  test("transaction script namespace", () => {
+  test("a transaction script is named after its package too", () => {
     const toml = generateMidenProjectToml({
       name: "init",
       type: "transaction-script",
-      rust: "",
+      masm: "",
       dependencies: [],
     });
     assert.ok(
-      toml.includes('namespace = "miden:base/transaction-script@1.0.0"'),
-    );
-  });
-  test("library has no namespace", () => {
-    const toml = generateMidenProjectToml({
-      name: "my-lib",
-      type: "library",
-      rust: "",
-      dependencies: [],
-    });
-    assert.ok(!toml.includes("namespace"));
-  });
-});
-
-describe("generateCargoToml", () => {
-  test("starts with the trim-paths feature and package", () => {
-    assert.ok(
-      generateCargoToml({ name: "abc" }).startsWith(
-        'cargo-features = ["trim-paths"]\n\n[package]\nname = "abc"\nversion = "0.1.0"\n',
+      toml.includes(
+        'kind = "transaction-script"\nnamespace = "init"\npath = "init.masm"',
       ),
     );
+  });
+  test("no Rust metadata", () => {
+    const toml = generateMidenProjectToml({
+      name: "my-counter",
+      type: "account-component",
+      masm: "",
+      dependencies: [],
+    });
+    assert.ok(!toml.includes("[package.metadata.miden]"));
   });
 });
 
@@ -103,5 +90,6 @@ describe("parseMidenProjectToml", () => {
     const manifest = parseMidenProjectToml(note);
     assert.equal(manifest.package.name, "counter-note");
     assert.equal(manifest.lib.kind, "note");
+    assert.equal(manifest.lib.path, "counter_note.masm");
   });
 });

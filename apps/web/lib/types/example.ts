@@ -11,6 +11,10 @@ export type ExampleMeta = {
   title: string;
   tagline: string;
   description: ReactNode;
+  // Not offered (no card on the home page, no entry in the Projects switcher)
+  // while it can't be launched: its code stays, to be rewritten in MASM
+  // (spec/remove-rust.md, decision 9).
+  hidden?: boolean;
 };
 
 export type Example = ExampleMeta & {

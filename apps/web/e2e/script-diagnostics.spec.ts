@@ -2,7 +2,13 @@ import { expect, type Page, test } from "@playwright/test";
 import { COMPILED, createCounterScript, replaceInEditor } from "./editor";
 import { logBrowserErrors, TRANSACTION_TIMEOUT } from "./tutorial";
 
-type Marker = { severity: number; startLineNumber: number; message: string };
+type Marker = {
+  severity: number;
+  startLineNumber: number;
+  startColumn: number;
+  endColumn: number;
+  message: string;
+};
 
 const markers = (page: Page) =>
   page.evaluate(() =>
@@ -12,11 +18,15 @@ const markers = (page: Page) =>
       }
     ).monaco.editor
       .getModelMarkers({})
-      .map(({ severity, startLineNumber, message }) => ({
-        severity,
-        startLineNumber,
-        message,
-      })),
+      .map(
+        ({ severity, startLineNumber, startColumn, endColumn, message }) => ({
+          severity,
+          startLineNumber,
+          message,
+          startColumn,
+          endColumn,
+        }),
+      ),
   );
 
 const cursorLine = (page: Page) =>
@@ -41,6 +51,10 @@ const cursorLine = (page: Page) =>
 const ERROR = 8;
 const WARNING = 4;
 
+// The counter template's source, as api-compile names it in its diagnostics.
+const SOURCE = "counter-account/counter_account.masm";
+const LOCATION = /^counter-account\/counter_account\.masm:\d+:\d+$/;
+
 test("script: compile errors in the editor", async ({ page }) => {
   logBrowserErrors(page);
 
@@ -50,15 +64,9 @@ test("script: compile errors in the editor", async ({ page }) => {
 
   let errorLine = 0;
   await test.step("compile an error", async () => {
-    await replaceInEditor(
-      page,
-      "self.count_map.get(key)\n    }",
-      "self.count_map.get(missing_key)\n    }",
-    );
+    await replaceInEditor(page, "    add.1\n", "    addd.1\n");
     await page.getByRole("button", { name: "Compile" }).click();
-    const location = page.getByRole("button", {
-      name: /^src\/lib\.rs:\d+:\d+$/,
-    });
+    const location = page.getByRole("button", { name: LOCATION });
     await expect(location).toBeVisible({ timeout: TRANSACTION_TIMEOUT });
     errorLine = Number(
       (await location.textContent())?.match(/:(\d+):/)?.[1] ?? 0,
@@ -67,37 +75,33 @@ test("script: compile errors in the editor", async ({ page }) => {
       {
         severity: ERROR,
         startLineNumber: errorLine,
-        message: "cannot find value `missing_key` in this scope",
+        message:
+          "invalid syntax: invalid instruction `addd` or malformed operands",
+        startColumn: 5,
+        endColumn: 11,
       },
     ]);
+    // One error per build: the assembler stops at the first failing phase.
+    await expect(
+      page.getByText(/^Compilation failed in \d+\.\d s \(1 error\)\.$/),
+    ).toBeVisible();
   });
 
   await test.step("clean output, full output on demand", async () => {
-    // The build noise is hidden, rustc's --explain points to the docs.
-    await expect(page.getByText(/^Command failed:/)).toHaveCount(0);
-    await expect(
-      page.getByRole("link", { name: /error_codes\/E0425\.html$/ }),
-    ).toHaveAttribute(
-      "href",
-      "https://doc.rust-lang.org/error_codes/E0425.html",
-    );
+    // The assembler's report, with its source excerpt.
+    await expect(page.getByText(/^\s*x invalid syntax/)).toBeVisible();
+    await expect(page.getByText(/^\s*\d+ \|\s+addd\.1$/)).toBeVisible();
     const fullOutput = page.getByRole("button", { name: "Show full output" });
     await fullOutput.click();
-    await expect(page.getByText(/^Command failed:/)).toBeVisible();
-    await expect(page.getByText(/rustc --explain E0425/)).toBeVisible();
+    await expect(page.getByText(/^\s*x invalid syntax/)).toBeVisible();
     await fullOutput.click();
-    await expect(page.getByText(/^Command failed:/)).toHaveCount(0);
   });
 
   await test.step("the location follows edits", async () => {
-    await replaceInEditor(
-      page,
-      "#[component]\nimpl",
-      "// moved\n#[component]\nimpl",
-    );
+    await replaceInEditor(page, "# PROCEDURES\n", "# moved\n# PROCEDURES\n");
     expect((await markers(page))[0]?.startLineNumber).toBe(errorLine + 1);
     await page
-      .getByRole("button", { name: `src/lib.rs:${errorLine}:`, exact: false })
+      .getByRole("button", { name: `${SOURCE}:${errorLine}:`, exact: false })
       .click();
     expect(await cursorLine(page)).toBe(errorLine + 1);
     // Away from the location, for the next step.
@@ -122,7 +126,7 @@ test("script: compile errors in the editor", async ({ page }) => {
     // The console stays on every tab: its link opens the Explorer tab.
     await page.getByRole("tab", { name: "Manifest" }).click();
     await page
-      .getByRole("button", { name: `src/lib.rs:${errorLine}:`, exact: false })
+      .getByRole("button", { name: `${SOURCE}:${errorLine}:`, exact: false })
       .click();
     await expect(page.getByRole("tab", { name: "Explorer" })).toHaveAttribute(
       "aria-selected",
@@ -132,7 +136,7 @@ test("script: compile errors in the editor", async ({ page }) => {
   });
 
   await test.step("a successful compile clears the markers", async () => {
-    await replaceInEditor(page, "missing_key", "key");
+    await replaceInEditor(page, "    addd.1\n", "    add.1\n");
     await page.getByRole("button", { name: "Re-compile" }).click();
     await expect(page.getByText(COMPILED).last()).toBeVisible({
       timeout: TRANSACTION_TIMEOUT,
@@ -150,33 +154,52 @@ test("script: compile errors in the editor", async ({ page }) => {
       page.getByText(/^Compilation failed in \d+\.\d s \(1 error/),
     ).toBeVisible();
     await expect(
-      page.getByText(`src/lib.rs:${errorLine}:`, { exact: false }).first(),
+      page.getByText(`${SOURCE}:${errorLine}:`, { exact: false }).first(),
     ).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: /^src\/lib\.rs:\d+:\d+$/ }),
-    ).toHaveCount(0);
+    await expect(page.getByRole("button", { name: LOCATION })).toHaveCount(0);
   });
 
   await test.step("a successful compile's warnings", async () => {
     await page.getByRole("tab", { name: "Explorer" }).click();
     await replaceInEditor(
       page,
-      "self.count_map.get(key)\n    }",
-      "let unused = 1;\n        self.count_map.get(key)\n    }",
+      "use miden::core::sys\n",
+      "use miden::core::sys\nuse miden::core::mem\n",
     );
     await page.getByRole("button", { name: "Compile" }).click();
     await expect(
       page.getByText(/^Compiled \S+ in \d+\.\d s \(1 warning\)\.$/),
     ).toBeVisible({ timeout: TRANSACTION_TIMEOUT });
-    await expect(
-      page.getByRole("button", { name: /^src\/lib\.rs:\d+:\d+$/ }),
-    ).toHaveCount(1);
+    await expect(page.getByRole("button", { name: LOCATION })).toHaveCount(1);
+    // Not the rollup api-compile's second build renders around warnings.
+    await expect(page.getByText(/^\s*x syntax error$/)).toHaveCount(0);
+    await expect(page.getByText(/^\s*! unused import$/)).toBeVisible();
     expect(await markers(page)).toEqual([
       expect.objectContaining({
         severity: WARNING,
-        message: expect.stringContaining("unused variable: `unused`"),
+        message:
+          "unused import\nhelp: this import is never used and can be safely removed",
       }),
     ]);
+    // A warning doesn't block anything: the script is compiled.
+    await expect(page.getByRole("button", { name: "Compile" })).toBeVisible();
+  });
+
+  await test.step("a failure without a position", async () => {
+    await replaceInEditor(page, "use miden::core::mem\n", "");
+    for (const procedure of ["get_count", "increment_count"]) {
+      await replaceInEditor(
+        page,
+        `pub proc ${procedure}(`,
+        `proc ${procedure}(`,
+      );
+    }
+    await page.getByRole("button", { name: "Compile" }).click();
+    await expect(
+      page.getByText(/^\s*x package must contain at least one exported/),
+    ).toBeVisible({ timeout: TRANSACTION_TIMEOUT });
+    await expect(page.getByRole("button", { name: LOCATION })).toHaveCount(0);
+    expect(await markers(page)).toEqual([]);
   });
 
   await test.step("clear the console", async () => {

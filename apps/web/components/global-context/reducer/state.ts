@@ -2,6 +2,7 @@ import type { Account } from "@/lib/types/account";
 import type { InputNote } from "@/lib/types/note";
 import type { State } from "@/lib/types/state";
 import type { Transaction } from "@/lib/types/transaction";
+import type { TutorialId } from "@/lib/types/tutorial";
 
 export type StateAction =
   | { type: "SYNCING_STATE"; payload: { syncingState: boolean } }
@@ -29,6 +30,12 @@ export type StateAction =
     }
   // A project link's account was imported: no longer pending.
   | { type: "PROJECT_LINK_ACCOUNT_IMPORTED"; payload: { address: string } }
+  // These tutorials' saved progress was deleted (it held a Rust script,
+  // lib/utils/rust-state.ts): they start over, and aren't shown as resumable.
+  | {
+      type: "FORGET_TUTORIAL_PROGRESS";
+      payload: { tutorialIds: TutorialId[] };
+    }
   | { type: "OPEN_SAVE_PROJECT_DIALOG"; payload: { saveAs: boolean } }
   | { type: "CLOSE_SAVE_PROJECT_DIALOG" }
   | { type: "OPEN_DELETE_PROJECT_DIALOG" }
@@ -107,6 +114,24 @@ const reducer = (state: State, action: StateAction): State => {
         projectLinkAccounts: state.projectLinkAccounts.filter(
           ({ address }) => address !== action.payload.address,
         ),
+      };
+    }
+    case "FORGET_TUTORIAL_PROGRESS": {
+      const { tutorialIds } = action.payload;
+      const forget = (progress: State["tutorialProgress"]) =>
+        Object.fromEntries(
+          Object.entries(progress).filter(
+            ([id]) => !tutorialIds.includes(id as TutorialId),
+          ),
+        );
+      // A queued workspace carries the progress too, and replaces this one.
+      return {
+        ...state,
+        tutorialProgress: forget(state.tutorialProgress),
+        nextState: state.nextState && {
+          ...state.nextState,
+          tutorialProgress: forget(state.nextState.tutorialProgress),
+        },
       };
     }
     case "OPEN_SAVE_PROJECT_DIALOG": {

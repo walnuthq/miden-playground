@@ -1,27 +1,17 @@
-// Bundled as strings by the Text rule in wrangler.jsonc.
+// Bundled as strings by the Text rule in wrangler.jsonc. The hand-written
+// schemas of the templates that have one are next to them
+// (templates/*.schema.ts, lib/template-schemas.ts).
 
-import accountComponent from "@/templates/account-component.rs";
-import authNoAuth from "@/templates/auth-no-auth.rs";
-import basicWallet from "@/templates/basic-wallet.rs";
-import countReader from "@/templates/count-reader.rs";
-import counterAccount from "@/templates/counter-account.rs";
-import counterNote from "@/templates/counter-note.rs";
-import counterScript from "@/templates/counter-script.rs";
-import note from "@/templates/note.rs";
-import p2idNote from "@/templates/p2id-note.rs";
-import cargoConfigToml from "@/templates/project-template/.cargo/config.toml";
-import buildRs from "@/templates/project-template/build.rs";
-import cargoLock from "@/templates/project-template/Cargo.lock";
-import rustToolchainToml from "@/templates/project-template/rust-toolchain.toml";
-import transactionScript from "@/templates/transaction-script.rs";
-
-export const projectTemplateFiles = {
-  ".cargo/config.toml": cargoConfigToml,
-  "build.rs": buildRs,
-  // The lockfile api-compile's image was warmed with (see generateCargoToml).
-  "Cargo.lock": cargoLock,
-  "rust-toolchain.toml": rustToolchainToml,
-} as const;
+import accountComponent from "@/templates/account-component.masm";
+import authNoAuth from "@/templates/auth-no-auth.masm";
+import basicWallet from "@/templates/basic-wallet.masm";
+import countReader from "@/templates/count-reader.masm";
+import counterAccount from "@/templates/counter-account.masm";
+import counterNote from "@/templates/counter-note.masm";
+import counterScript from "@/templates/counter-script.masm";
+import note from "@/templates/note.masm";
+import p2idNote from "@/templates/p2id-note.masm";
+import transactionScript from "@/templates/transaction-script.masm";
 
 export const templates = {
   library: "",
@@ -37,3 +27,5 @@ export const templates = {
   "counter-script": counterScript,
   "count-reader": countReader,
 } as const;
+
+export { templateMetadata } from "./template-schemas.ts";
