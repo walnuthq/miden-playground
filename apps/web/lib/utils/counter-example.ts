@@ -6,9 +6,8 @@ import { compiledPackageToScript } from "@/lib/utils/script";
 export const COUNTER_EXAMPLE_ID = "counter-account";
 
 // The counter-contract example's packages (counter-account and increment-note),
-// as a workspace's starting scripts. The API
-// inserts the packages precompiled (compiled.json), as when launching the
-// example, without its auto-deployed account. A Mainnet sandbox starts from
+// as a workspace's starting scripts. The API creates and compiles them, as
+// when launching the example, without its auto-deployed account. A Mainnet sandbox starts from
 // them, and so does tutorial 9 (Tutorial.starter), which only reads them:
 // `readOnly` then leaves out what would change or remove them (editing,
 // compiling, their dependencies, deleting).

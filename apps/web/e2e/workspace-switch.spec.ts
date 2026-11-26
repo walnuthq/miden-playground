@@ -261,12 +261,7 @@ test("clicking the active project keeps unsaved work", async ({ page }) => {
 
 // A deploy that fails is tried once: each attempt asks the faucet for funds,
 // and tells the user again. Its toast offers to try again.
-// Fixme while the Counter Contract example is hidden: it covers the example's
-// background deploy, and comes back with the example in plan 06 of
-// spec/remove-rust.
-test.fixme("a failed example deploy doesn't retry by itself", async ({
-  page,
-}) => {
+test("a failed example deploy doesn't retry by itself", async ({ page }) => {
   logBrowserErrors(page);
   const prover = /tx-prover\.testnet\.miden\.io/;
   let attempts = 0;

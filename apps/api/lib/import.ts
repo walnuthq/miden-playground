@@ -1,8 +1,7 @@
 import { examples } from "@/examples";
-import { sourcesHash } from "@/examples/hash";
 import { notFound } from "@/lib/errors";
 import { resolvePackageSources } from "@/lib/package-sources";
-import type { CompiledPackage, Dependency, PackageSource } from "@/lib/types";
+import type { CompiledPackage, PackageSource } from "@/lib/types";
 import { compilePackage, createPackage } from "@/lib/utils";
 
 export const importScriptsFromPackageSources = async (
@@ -48,78 +47,39 @@ export const importScriptsFromPackageSources = async (
   return compiledPackages;
 };
 
-// Creates the packages of an example from its precompiled snapshot
-// (examples/*/compiled.json), without calling api-compile. Falls back to
-// compiling the sources when they were edited since the snapshot was taken.
+// Creates the packages of an example (examples/index.ts) and compiles them in
+// turn, each after the ones it depends on, as an import does.
 export const importExample = async (
   exampleId: string,
   { signal, ownerKeyHash }: { signal?: AbortSignal; ownerKeyHash: string },
 ): Promise<CompiledPackage[]> => {
   const example = Object.hasOwn(examples, exampleId)
-    ? examples[exampleId]
+    ? examples[exampleId as keyof typeof examples]
     : undefined;
   if (!example) {
     throw notFound("Error: Example not found.");
   }
-  const { sources, compiled } = example;
-  if ((await sourcesHash(sources)) !== compiled.sourcesHash) {
-    console.warn(
-      `Example ${exampleId}: sources changed since compiled.json was generated (run pnpm examples:compile), compiling them.`,
-    );
-    return importScriptsFromPackageSources(sources, { signal, ownerKeyHash });
-  }
-  const createdPackages = new Map<string, Dependency>();
+  const packageIds = new Map<string, string>();
   const compiledPackages: CompiledPackage[] = [];
-  for (const { name, type, masm, dependencies } of resolvePackageSources(
-    sources,
-  )) {
-    const compiledPackage = compiled.packages[name];
-    if (!compiledPackage) {
-      throw new Error(`Error: ${name} is missing from compiled.json.`);
-    }
-    const { masp, commitment, exports } = compiledPackage;
-    const metadata = compiledPackage.metadata ?? null;
-    const packageDependencies = dependencies.map((dependency) => {
-      const createdPackage = createdPackages.get(dependency);
-      if (!createdPackage) {
-        throw new Error(`Error: ${name} dependency ${dependency} not found.`);
-      }
-      return {
-        ...createdPackage,
-        // The commitment the package was compiled against.
-        commitment:
-          compiledPackage.dependencies.find(
-            (compiledDependency) => compiledDependency.name === dependency,
-          )?.commitment ?? createdPackage.commitment,
-      };
-    });
-    const { id, files } = await createPackage({
+  for (const { name, type, masm, dependencies, metadata } of example.packages) {
+    const { id } = await createPackage({
       name,
       type,
       source: masm,
-      dependencies: packageDependencies,
-      compiled: { masp, commitment, exports, metadata },
+      metadata,
       ownerKeyHash,
     });
-    createdPackages.set(name, { id, name, type, commitment });
-    compiledPackages.push({
-      id,
-      name,
-      type,
-      status: "compiled",
-      files,
-      diagnostics: [],
-      stdout: "",
-      stderr: "",
-      error: "",
-      warnings: "",
-      masm: "",
-      commitment,
-      masp,
-      exports,
-      metadata,
-      dependencies: packageDependencies,
-    });
+    packageIds.set(name, id);
+    compiledPackages.push(
+      await compilePackage({
+        id,
+        source: masm,
+        dependencies: dependencies.map(
+          (dependency) => packageIds.get(dependency) ?? "",
+        ),
+        signal,
+      }),
+    );
   }
   return compiledPackages;
 };

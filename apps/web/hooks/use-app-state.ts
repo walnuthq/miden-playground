@@ -480,8 +480,8 @@ const useAppState = () => {
   // A Mainnet sandbox doesn't start empty (see mainnetSandboxStarter), nor
   // does a MockChain one: the counter example's packages give it something to
   // deploy (`counterExampleStarter`). Without the API, they start empty,
-  // with a warning. While the example is hidden (it can't be launched until
-  // it's rewritten in MASM), they start empty without one.
+  // with a warning. While the example is hidden (`ExampleMeta.hidden`), they
+  // start empty without one.
   const sandboxStarter = async (
     newNetworkId: NetworkId,
   ): Promise<WorkspaceStarter> => {

@@ -9,22 +9,15 @@ export const exampleMetas: ExampleMeta[] = [
   {
     id: "counter-account",
     title: "Counter Contract",
-    // Until it's rewritten in MASM (spec/remove-rust/06-counter-example.md).
-    hidden: true,
     tagline: "Deploy a counter contract on testnet and increment it.",
     description: (
       <p>
-        This example is the companion code of the{" "}
-        <strong>Your First Smart Contract</strong> tutorial in the{" "}
-        <a
-          className="text-[#ff5500] font-medium underline underline-offset-4"
-          href="https://docs.miden.xyz/builder/get-started/your-first-smart-contract"
-          target="_blank"
-          rel="noreferrer"
-        >
-          Miden documentation
-        </a>
-        .
+        A counter written in Miden Assembly: an account component,{" "}
+        <code>counter-account</code>, that keeps a count in its storage, and a
+        note, <code>increment-note</code>, that increments the count of the
+        account that consumes it. The example deploys a counter account for you:
+        invoke <code>increment_count</code> from its page, then read the new
+        count with <code>get_count</code>.
       </p>
     ),
   },

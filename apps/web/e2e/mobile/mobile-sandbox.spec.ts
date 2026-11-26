@@ -1,11 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
 import { COMPILED } from "../editor";
-import {
-  componentRow,
-  counterWorkspace,
-  invoke,
-  previewDialog,
-} from "../example";
+import { componentRow, invoke, launchExample, previewDialog } from "../example";
 import { logBrowserErrors, TRANSACTION_TIMEOUT } from "../tutorial";
 import {
   expectHeaderFits,
@@ -21,16 +16,18 @@ const consoleHeight = async (page: Page) =>
   (await page.getByRole("region", { name: "Editor Console" }).boundingBox())
     ?.height ?? 0;
 
-// A sandbox on a phone, holding a counter (from the MASM template while the
-// Counter Contract example is hidden, until plan 06 of spec/remove-rust):
-// every page fits the screen, and the controls desktop layouts used to push off it stay on it.
+// A sandbox on a phone, from the counter example: every page fits the
+// screen, and the controls desktop layouts used to push off it stay on it.
 // Pages are opened from the sidebar rather than reloaded: a reload starts the
 // Miden client again, which takes about 30 s in WebKit.
 test("mobile: a sandbox fits the screen", async ({ page }) => {
   logBrowserErrors(page);
 
-  await test.step("deploy a counter", async () => {
-    await counterWorkspace(page);
+  await test.step("launch the counter example", async () => {
+    await launchExample(page, {
+      title: "Counter Contract",
+      accountName: "Counter Contract",
+    });
     await expectNoHorizontalOverflow(page);
     await expectHeaderFits(page);
   });
@@ -123,69 +120,63 @@ test("mobile: a sandbox fits the screen", async ({ page }) => {
     await expectHeaderFits(page);
   });
 
-  // The counter example's increment-note: back with the example in plan 06.
-  await test.step.skip(
-    "a note's Simulate tab fits, on the simulated account",
-    async () => {
-      await navigateWithSidebar(page, "Scripts", /\/scripts$/);
-      await page
-        .getByRole("cell", { name: "increment-note", exact: true })
-        .click();
-      await expect(page).toHaveURL(/\/scripts\/[0-9a-f-]+$/);
-      const editorConsole = page.getByRole("region", {
-        name: "Editor Console",
+  await test.step("a note's Simulate tab fits, on the simulated account", async () => {
+    await navigateWithSidebar(page, "Scripts", /\/scripts$/);
+    await page
+      .getByRole("cell", { name: "increment-note", exact: true })
+      .click();
+    await expect(page).toHaveURL(/\/scripts\/[0-9a-f-]+$/);
+    const editorConsole = page.getByRole("region", {
+      name: "Editor Console",
+    });
+    await editorConsole.getByRole("tab", { name: "Simulate" }).click();
+    // Both dropdowns' lists stay on screen.
+    const pick = async (trigger: string, option: string) => {
+      await editorConsole.getByRole("button", { name: trigger }).click();
+      const item = page.getByRole("menuitemradio", {
+        name: option,
+        exact: true,
       });
-      await editorConsole.getByRole("tab", { name: "Simulate" }).click();
-      // Both dropdowns' lists stay on screen.
-      const pick = async (trigger: string, option: string) => {
-        await editorConsole.getByRole("button", { name: trigger }).click();
-        const item = page.getByRole("menuitemradio", {
-          name: option,
-          exact: true,
-        });
-        await expectWithinWidth(item);
-        await item.click();
-        await expectWithinWidth(
-          editorConsole.getByRole("button", { name: option }),
-        );
-      };
-      await pick("Select account", "Simulated account");
-      // A row of the note's assets and one of the vault's: the simulated asset
-      // is picked.
-      for (const label of ["Note", "Vault"]) {
-        const rows = editorConsole.getByRole("group", {
-          name: `${label} assets`,
-        });
-        await rows.getByRole("button", { name: "Add asset" }).click();
-        await expectWithinWidth(rows.getByLabel(`${label} amount 1`));
-        await expectWithinWidth(
-          rows.getByRole("button", { name: `Remove ${label} asset 1` }),
-        );
-        await expectWithinWidth(rows.getByRole("button", { name: "SIM" }));
-        await expectWithinWidth(
-          rows.getByRole("button", { name: "New asset" }),
-        );
-      }
-      // The simulated account's storage, under the form.
-      const counter = editorConsole.getByRole("region", {
-        name: "Simulated account counter-account",
+      await expectWithinWidth(item);
+      await item.click();
+      await expectWithinWidth(
+        editorConsole.getByRole("button", { name: option }),
+      );
+    };
+    await pick("Select account", "Simulated account");
+    // A row of the note's assets and one of the vault's: the simulated asset
+    // is picked.
+    for (const label of ["Note", "Vault"]) {
+      const rows = editorConsole.getByRole("group", {
+        name: `${label} assets`,
       });
-      // Its switch, which makes the dependency a foreign account.
+      await rows.getByRole("button", { name: "Add asset" }).click();
+      await expectWithinWidth(rows.getByLabel(`${label} amount 1`));
       await expectWithinWidth(
-        counter.getByRole("switch", { name: "Foreign account" }),
+        rows.getByRole("button", { name: `Remove ${label} asset 1` }),
       );
-      await expectWithinWidth(counter.getByText("Foreign account"));
-      await counter.getByRole("button", { name: "Add entry" }).click();
-      const slot = "counter_account::counter_contract::count_map";
-      await expectWithinWidth(counter.getByLabel(`${slot} key 1`));
-      await expectWithinWidth(counter.getByLabel(`${slot} value 1`));
-      await expectWithinWidth(
-        editorConsole.getByRole("button", { name: "Simulate", exact: true }),
-      );
-      await expectNoHorizontalOverflow(page);
-      await expectHeaderFits(page);
-    },
-  );
+      await expectWithinWidth(rows.getByRole("button", { name: "SIM" }));
+      await expectWithinWidth(rows.getByRole("button", { name: "New asset" }));
+    }
+    // The simulated account's storage, under the form.
+    const counter = editorConsole.getByRole("region", {
+      name: "Simulated account counter-account",
+    });
+    // Its switch, which makes the dependency a foreign account.
+    await expectWithinWidth(
+      counter.getByRole("switch", { name: "Foreign account" }),
+    );
+    await expectWithinWidth(counter.getByText("Foreign account"));
+    await counter.getByRole("button", { name: "Add entry" }).click();
+    const slot = "counter_account::count_map";
+    await expectWithinWidth(counter.getByLabel(`${slot} key 1`));
+    await expectWithinWidth(counter.getByLabel(`${slot} value 1`));
+    await expectWithinWidth(
+      editorConsole.getByRole("button", { name: "Simulate", exact: true }),
+    );
+    await expectNoHorizontalOverflow(page);
+    await expectHeaderFits(page);
+  });
 
   await test.step("the sandbox saves as a project from the sheet", async () => {
     await navigateWithSidebar(page, "Accounts", /\/accounts$/);
@@ -202,7 +193,7 @@ test("mobile: a sandbox fits the screen", async ({ page }) => {
     // The sheet closes for the dialog, which fits the screen.
     await expect(sidebar).toBeHidden();
     const dialog = page.getByRole("dialog", { name: "Save Project" });
-    await expect(dialog.getByLabel("Name")).toHaveValue("Testnet sandbox");
+    await expect(dialog.getByLabel("Name")).toHaveValue("Counter Contract");
     await expectNoHorizontalOverflow(page);
     await expectWithinWidth(dialog.getByRole("button", { name: "Save" }));
     await dialog.getByLabel("Name").fill("Phone counter");

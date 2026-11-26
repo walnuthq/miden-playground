@@ -7,7 +7,7 @@ Before working in one of these areas, read its file in `docs/claude/`. Their rul
 - Saved projects, the Projects submenu, resumable tutorials, `PlaygroundProjects`, network resets: `saved-projects.md`.
 - Mainnet sandbox (`mm`), Bread Wallet, fees, network notes, built-in note scripts, note verification: `mainnet-sandbox.md`.
 - MockChain sandbox (`mmck`), `lib/mock-chain.ts`, the mock client as the app's client, its saved chain: `mockchain-sandbox.md`.
-- Home-page examples, `compiled.json`, `pnpm examples:compile`: `examples.md`.
+- Home-page examples, `apps/api/examples`: `examples.md`.
 - Read-only procedures, the Invoke button: `read-only-procedures.md`.
 - `apps/api/templates/*.masm`, `pnpm templates:check`, note scripts and the wallets that can consume them: `script-templates.md`.
 - `templates/project-template/Cargo.lock`, `pnpm lockfile:check`/`sync`, api-compile image bumps: `project-template-lockfile.md`.

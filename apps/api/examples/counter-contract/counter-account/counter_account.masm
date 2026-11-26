@@ -1,0 +1,67 @@
+# A counter: an account component that keeps a count in its storage and
+# increments it by one on each call to `increment_count`.
+
+use miden::protocol::active_account
+use miden::protocol::native_account
+use miden::core::sys
+
+# STORAGE
+# =================================================================================================
+
+# The storage map that holds the count. A slot is named by a string: the
+# account's storage knows it by this name, and the procedures below by the
+# slot id the name hashes to, the first two felts of `word("…")`.
+const COUNT_MAP_SLOT = word("counter_account::count_map")
+
+# The map key the count is stored under.
+const COUNT_KEY = [1, 0, 0, 0]
+
+# PROCEDURES
+# =================================================================================================
+
+#! Returns the current count.
+#!
+#! Inputs:  [pad(16)]
+#! Outputs: [count, pad(15)]
+@account_procedure
+pub proc get_count() -> felt
+    push.COUNT_KEY push.COUNT_MAP_SLOT[0..2]
+    # => [slot_id_suffix, slot_id_prefix, COUNT_KEY, pad(16)]
+
+    exec.active_account::get_map_item
+    # => [count, 0, 0, 0, pad(16)]
+
+    # a procedure that is `call`ed must return 16 elements
+    exec.sys::truncate_stack
+    # => [count, pad(15)]
+end
+
+#! Increments the count by one and returns the new count.
+#!
+#! Inputs:  [pad(16)]
+#! Outputs: [new_count, pad(15)]
+@account_procedure
+pub proc increment_count() -> felt
+    push.COUNT_KEY push.COUNT_MAP_SLOT[0..2]
+    exec.active_account::get_map_item
+    # => [count, 0, 0, 0, pad(16)]
+
+    add.1
+    # => [new_count, 0, 0, 0, pad(16)]
+
+    # keep a copy of the new count to return it
+    dupw
+    # => [new_count, 0, 0, 0, new_count, 0, 0, 0, pad(16)]
+
+    push.COUNT_KEY push.COUNT_MAP_SLOT[0..2]
+    # => [slot_id_suffix, slot_id_prefix, COUNT_KEY, new_count, 0, 0, 0, ...]
+
+    exec.native_account::set_map_item
+    # => [OLD_VALUE, new_count, 0, 0, 0, pad(16)]
+
+    dropw
+    # => [new_count, 0, 0, 0, pad(16)]
+
+    exec.sys::truncate_stack
+    # => [new_count, pad(15)]
+end

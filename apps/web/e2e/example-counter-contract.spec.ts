@@ -34,14 +34,6 @@ const nonce = async (page: Page) => {
   return Number(text);
 };
 
-// The Counter Contract example is hidden (`hidden` in lib/examples/meta.tsx)
-// until plan 06 of spec/remove-rust rewrites it in MASM. Remove this with
-// the flag.
-test.fixme(
-  true,
-  "The Counter Contract example is being rewritten for Miden Assembly (spec/remove-rust plan 06)",
-);
-
 test("example: counter contract", async ({ page }) => {
   logBrowserErrors(page);
 
@@ -52,7 +44,7 @@ test("example: counter contract", async ({ page }) => {
     });
     await page.getByRole("tab", { name: "Components" }).click();
     await expect(
-      componentRow(page, "counter_account::counter_contract::count_map"),
+      componentRow(page, "counter_account::count_map"),
     ).toBeVisible();
     await expectCount(page, 0);
   });

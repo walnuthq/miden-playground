@@ -36,20 +36,6 @@ const newMockChainSandbox = async (page: Page) => {
   });
 };
 
-// The counter from the MASM template, compiled, then the accounts page: the
-// sandbox starts without the counter example's packages while it's hidden.
-const compiledCounterScript = async (page: Page) => {
-  await createCounterScript(page);
-  await page.getByRole("button", { name: "Compile" }).click();
-  await expect(page.getByText(COMPILED).last()).toBeVisible({
-    timeout: TRANSACTION_TIMEOUT,
-  });
-  await page.goto("/accounts");
-  await expect(networkBadge(page)).toContainText(/MockChain\s*\|\s*#\d+/, {
-    timeout: TRANSACTION_TIMEOUT,
-  });
-};
-
 const openAccount = async (page: Page, name: string) => {
   await page.goto("/accounts");
   await page.getByRole("cell", { name, exact: true }).click();
@@ -196,9 +182,7 @@ test("MockChain sandbox: wallets, faucet, mint, consume, send", async ({
 });
 
 // The sandbox starts with the counter example's packages, as a Mainnet one
-// does: they need apps/api on port 3001. While the example is hidden (until
-// plan 06 of spec/remove-rust) it starts empty, and the counter comes from
-// the MASM template.
+// does: they need apps/api on port 3001.
 test("MockChain sandbox: deploy a counter and increment it", async ({
   page,
 }) => {
@@ -210,7 +194,6 @@ test("MockChain sandbox: deploy a counter and increment it", async ({
     }
   });
   await newMockChainSandbox(page);
-  await compiledCounterScript(page);
 
   await page.getByRole("button", { name: "Create new account" }).click();
   await page.getByRole("menuitem", { name: "Deploy account" }).click();
@@ -443,7 +426,6 @@ test("MockChain sandbox: the Simulate tab runs on the sandbox's accounts only", 
 }) => {
   logBrowserErrors(page);
   await newMockChainSandbox(page);
-  await compiledCounterScript(page);
   await page.getByRole("button", { name: "Create new account" }).click();
   await page.getByRole("menuitem", { name: "Deploy account" }).click();
   const deploy = page.getByRole("dialog").filter({ hasText: "Deploy Account" });
@@ -462,27 +444,23 @@ test("MockChain sandbox: the Simulate tab runs on the sandbox's accounts only", 
     await expect(simulateInvoke(page, "get_count")).toHaveCount(0);
   });
 
-  // The counter example's increment-note: back with the example in plan 06.
-  await test.step.skip(
-    "a note runs on a sandbox account, with no simulated account offered",
-    async () => {
-      await openScript(page, "increment-note");
-      await targetDropdown(page).click();
-      const options = page.getByRole("menuitemradio");
-      await expect(options).toHaveText(["Mock Counter"]);
-      await options.first().click();
-      await editorConsole(page)
-        .getByRole("button", { name: "Simulate", exact: true })
-        .click();
-      const dialog = page
-        .getByRole("dialog")
-        .filter({ hasText: "Simulation of increment-note" });
-      await expect(dialog.getByText("count_map")).toBeVisible({
-        timeout: MOCK_TIMEOUT,
-      });
-      await dialog.getByRole("button", { name: "Close" }).first().click();
-    },
-  );
+  await test.step("a note runs on a sandbox account, with no simulated account offered", async () => {
+    await openScript(page, "increment-note");
+    await targetDropdown(page).click();
+    const options = page.getByRole("menuitemradio");
+    await expect(options).toHaveText(["Mock Counter"]);
+    await options.first().click();
+    await editorConsole(page)
+      .getByRole("button", { name: "Simulate", exact: true })
+      .click();
+    const dialog = page
+      .getByRole("dialog")
+      .filter({ hasText: "Simulation of increment-note" });
+    await expect(dialog.getByText("count_map")).toBeVisible({
+      timeout: MOCK_TIMEOUT,
+    });
+    await dialog.getByRole("button", { name: "Close" }).first().click();
+  });
 
   await test.step("the sandbox still transacts, and nothing was executed for real", async () => {
     await page.goto("/accounts");
