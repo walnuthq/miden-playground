@@ -28,7 +28,7 @@ const SANDBOX_REASON =
 // The tutorials' counter contract (`TESTNET_COUNTER_CONTRACT_ADDRESS` in
 // lib/constants.ts, which reads Vite's env and so can't be imported here).
 const OTHER_ACCOUNT_ADDRESS =
-  "mtst1arjkfl0j33qk25gpl2tqrd6npsptfavv_qr7qqq9wr6w";
+  "mtst1azefsm04uzhwuytxgt8syk3xgyv59pyr_qr7qqq9wr6w";
 
 // A public basic wallet on Testnet: the faucet's funding account
 // (`TESTNET_FAUCET_FUNDER_ACCOUNT_ID` in lib/constants.ts). It's busy: a page
@@ -614,9 +614,10 @@ test("script: simulate a foreign call", async ({ page }) => {
     await dependency.getByRole("button", { name: "Add", exact: true }).click();
     await expect(dependency).toBeHidden();
     await compileScript(page);
-    // The workspace's counter, which adds 1. No sandbox account has it: the
-    // simulated account is preselected.
-    await expect(targetDropdown(page)).toHaveText("Simulated account");
+    // The workspace's counter, which adds 1. The imported Other Counter runs
+    // the same code (a MASM procedure's root doesn't depend on its package's
+    // name), so it's a target too and nothing is preselected.
+    await selectTarget(page, "Simulated account");
     const dialog = await simulateOnThrowaway(page, "counter-script");
     await expect(afterValue(dialog)).toHaveText(shownFelt(1));
     await dialog.getByRole("button", { name: "Close" }).first().click();
@@ -632,7 +633,8 @@ test("script: simulate a foreign call", async ({ page }) => {
     await page.getByRole("link", { name: "counter-script" }).first().click();
     await expect(page).toHaveURL(/\/scripts\//);
     await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
-    await expect(targetDropdown(page)).toHaveText("Simulated account");
+    // Other Counter still runs the code the script was compiled against.
+    await selectTarget(page, "Simulated account");
     await expect(
       editorConsole(page).getByText(
         "changed since this script was compiled. Compile this script again to run it against it.",
@@ -1206,29 +1208,21 @@ test("script: simulate a note and a transaction script", async ({ page }) => {
     await importAccount(page, "Other Counter", OTHER_ACCOUNT_ADDRESS);
   });
 
-  // The tutorials' counter is still the Rust one, whose procedure roots
-  // aren't the MASM counter's: it's a target again once plan 07 of
-  // spec/remove-rust redeploys it from this package (tutorial 6).
-  await test.step.skip(
-    "only the accounts with the procedures are targets",
-    async () => {
-      // The tutorials' counter was deployed from the same `counter-account`
-      // package as the example (lib/constants.ts): same procedure roots, so it
-      // can run the counter's note and script.
-      for (const script of ["increment-note", "counter-script"]) {
-        await page.getByRole("link", { name: script }).first().click();
-        await expect(page).toHaveURL(/\/scripts\//);
-        await editorConsole(page)
-          .getByRole("tab", { name: "Simulate" })
-          .click();
-        expect(await targetOptions(page)).toEqual([
-          "Counter Contract",
-          "Other Counter",
-          "Simulated account",
-        ]);
-      }
-    },
-  );
+  await test.step("only the accounts with the procedures are targets", async () => {
+    // The tutorials' counter was deployed from the same `counter-account`
+    // package as the example (lib/constants.ts): same procedure roots, so it
+    // can run the counter's note and script.
+    for (const script of ["increment-note", "counter-script"]) {
+      await page.getByRole("link", { name: script }).first().click();
+      await expect(page).toHaveURL(/\/scripts\//);
+      await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
+      expect(await targetOptions(page)).toEqual([
+        "Counter Contract",
+        "Other Counter",
+        "Simulated account",
+      ]);
+    }
+  });
 
   await test.step("a note's storage is typed by its storage schema", async () => {
     await page.goto("/scripts");

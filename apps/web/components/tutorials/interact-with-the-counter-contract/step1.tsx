@@ -1,4 +1,6 @@
 import { useLocation } from "react-router";
+import CounterMissingAlert from "@/components/tutorials/interact-with-the-counter-contract/counter-missing-alert";
+import useCounterScript from "@/components/tutorials/interact-with-the-counter-contract/use-counter-script";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import { ExternalLink, InlineCode } from "@/components/tutorials/prose";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
@@ -6,7 +8,8 @@ import type { TutorialStep } from "@/lib/types/tutorial";
 
 const useCompleted = () => {
   const { pathname } = useLocation();
-  return pathname === "/scripts/counter-account";
+  const counterScript = useCounterScript();
+  return !!counterScript && pathname === `/scripts/${counterScript.id}`;
 };
 
 const Step1: TutorialStep = {
@@ -15,6 +18,7 @@ const Step1: TutorialStep = {
     const completed = useCompleted();
     return (
       <>
+        <CounterMissingAlert />
         <p>
           In this tutorial, you'll use the Miden Playground to interact with a
           counter contract that is already deployed on testnet, and increment
@@ -34,16 +38,16 @@ const Step1: TutorialStep = {
           <ExternalLink href="https://docs.miden.xyz/reference/protocol/account/code">
             code
           </ExternalLink>
-          . This code can be written in Rust and compiled to{" "}
+          , written in{" "}
           <ExternalLink href="https://docs.miden.xyz/builder/glossary/#miden-assembly">
             Miden Assembly
           </ExternalLink>{" "}
-          (MASM) before being deployed on-chain. The scripts table lists the
+          (MASM), the language of the Miden VM. The scripts table lists the
           counter contract's script,{" "}
           <strong>
             <InlineCode>counter-account</InlineCode>
           </strong>
-          : its Rust source code and the package it compiles to, the same one
+          : its MASM source code and the package it assembles to, the same code
           the deployed contract runs.
         </p>
         <p>
