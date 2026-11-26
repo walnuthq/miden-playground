@@ -20,12 +20,12 @@
   "dependencies": {
     "drizzle-orm": "1.0.0-rc.6",
     "fflate": "0.8.3",
-    "hono": "4.13.21",
+    "hono": "4.13.22",
     "pg": "8.23.1",
     "smol-toml": "1.9.1"
   },
   "devDependencies": {
-    "@types/node": "26.6.7",
+    "@types/node": "26.6.10",
     "@types/pg": "8.23.1",
     "@workspace/typescript-config": "workspace:*",
     "drizzle-kit": "1.0.0-rc.6",
