@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { switcher } from "./projects-menu";
+import { openSubmenu } from "./projects-menu";
 import { TRANSACTION_TIMEOUT } from "./tutorial";
 
 // Tutorial 5 is marked `unavailable` (components/tutorials/meta.ts) until the
@@ -23,23 +23,29 @@ test("an unavailable tutorial can't be started", async ({ page }) => {
     card.getByRole("button", { name: "Unavailable" }),
   ).toBeDisabled();
 
-  await switcher(page).click();
-  await page.getByRole("menuitem", { name: "Tutorials" }).click();
-  const item = page.getByRole("menuitem", { name: /^5\. / });
-  await expect(item).toContainText("Unavailable");
-  await expect(item).toHaveAttribute("aria-disabled", "true");
-  // Tutorials 6 to 12 wait for their MASM rewrite (spec/remove-rust plan 07).
-  for (const number of [6, 7, 8, 9, 10, 11, 12]) {
-    await expect(
-      page.getByRole("menuitem", { name: new RegExp(`^${number}\\. `) }),
-    ).toHaveAttribute("aria-disabled", "true");
-  }
-  // The other tutorials stay available.
-  for (const number of [1, 2, 3, 4]) {
-    await expect(
-      page.getByRole("menuitem", { name: new RegExp(`^${number}\\. `) }),
-    ).not.toHaveAttribute("aria-disabled", "true");
-  }
+  // Under parallel load the submenu can close mid-check (the switcher
+  // re-renders as late state lands), so the items are read in one go, from
+  // a submenu opened again on a miss.
+  await expect(async () => {
+    const tutorials = await openSubmenu(page, "Tutorials");
+    const items = await tutorials.getByRole("menuitem").evaluateAll((nodes) =>
+      nodes.map((node) => ({
+        text: (node.textContent ?? "").trim(),
+        disabled: node.getAttribute("aria-disabled") === "true",
+      })),
+    );
+    const item = (number: number) =>
+      items.find(({ text }) => text.startsWith(`${number}.`));
+    expect(item(5)?.text).toContain("Unavailable");
+    // 5 waits for Guardian; 6 to 12 for their MASM rewrite (spec/remove-rust
+    // plan 07). The other tutorials stay available.
+    for (const number of [5, 6, 7, 8, 9, 10, 11, 12]) {
+      expect(item(number)?.disabled, `tutorial ${number}`).toBe(true);
+    }
+    for (const number of [1, 2, 3, 4]) {
+      expect(item(number)?.disabled, `tutorial ${number}`).toBe(false);
+    }
+  }).toPass({ timeout: 60_000 });
 });
 
 test("tutorials 6 to 12 say they're being rewritten", async ({ page }) => {
