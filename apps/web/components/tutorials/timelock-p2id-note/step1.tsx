@@ -5,7 +5,6 @@ import {
   BulletList,
   ButtonName,
   ExternalLink,
-  InlineCode,
 } from "@/components/tutorials/prose";
 import useNoteScript from "@/components/tutorials/timelock-p2id-note/use-note-script";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
@@ -37,8 +36,12 @@ const Step1: TutorialStep = {
             <ExternalLink href="https://docs.miden.xyz/reference/protocol/note#script">
               note script
             </ExternalLink>{" "}
-            as a <strong>Rust program</strong> and compile it to{" "}
-            <strong>Miden Assembly (MASM)</strong>, bundled into a package.
+            in{" "}
+            <ExternalLink href="https://docs.miden.xyz/builder/glossary/#miden-assembly">
+              Miden Assembly
+            </ExternalLink>{" "}
+            (MASM), the language of the Miden VM, and the Playground builds it
+            into a package.
           </li>
           <li>
             Then, your wallet executes a Transaction that creates the Note on
@@ -51,12 +54,7 @@ const Step1: TutorialStep = {
           <ExternalLink href="https://docs.miden.xyz/reference/protocol/note#storage">
             note storage
           </ExternalLink>
-          , which the note script can read. In a Rust note script, they are the
-          fields of the struct marked{" "}
-          <strong>
-            <InlineCode>#[note]</InlineCode>
-          </strong>
-          .
+          : a list of items the note script reads when it runs.
         </p>
         <p>
           In this timelock example, the note storage holds three items: the
@@ -68,10 +66,6 @@ const Step1: TutorialStep = {
           <ButtonName icon={Plus}>Create new script</ButtonName> button, enter a
           name, then select the <strong>Note Script</strong> type and the{" "}
           <strong>P2ID Note</strong> example.
-        </p>
-        <p>
-          The <strong>basic-wallet</strong> script that's already listed comes
-          with this tutorial: the next step tells you what it's for.
         </p>
         <TutorialStepAlert
           completed={completed}

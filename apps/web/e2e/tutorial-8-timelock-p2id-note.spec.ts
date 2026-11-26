@@ -17,13 +17,10 @@ import {
 // The tutorial leaves the script's name to the user.
 const SCRIPT_NAME = "timelock-p2id";
 
-// Tutorial 8 was written for Rust contracts: it's marked `unavailable`
-// (components/tutorials/meta.ts, tutorial-unavailable.spec.ts) until plan 07
-// of spec/remove-rust rewrites it in MASM. Remove this with the flag.
-test.fixme(
-  true,
-  "Tutorial 8 is being rewritten for Miden Assembly (spec/remove-rust plan 07)",
-);
+// The error the timelock fails with (lib/utils/tutorial-code.ts), and how
+// the VM reports a failed assertion: by a code derived from its message.
+const TIMELOCKED = "P2ID note is timelocked until its timelock height";
+const ASSERTION_FAILED = "assertion failed with error code";
 
 test("tutorial 8: timelock P2ID note", async ({ page, bread }) => {
   logBrowserErrors(page);
@@ -53,43 +50,52 @@ test("tutorial 8: timelock P2ID note", async ({ page, bread }) => {
 
   await test.step("3. add the timelock and compile", async () => {
     // Typed as the step shows it (the mobile spec uses its buttons): the
-    // imports, the note's new input, the constructor that sets it, the check.
+    // import, the third storage item and its address, the error, the check.
     await replaceInEditor(
       page,
-      "use miden::{account, felt_repr::ToFeltRepr, note, AccountId, Recipient, Word};",
-      "use miden::{account, felt_repr::ToFeltRepr, note, tx, AccountId, Felt, Recipient, Word};",
+      "use miden::protocol::active_note",
+      "use miden::protocol::active_note\nuse miden::protocol::tx",
     );
     await replaceInEditor(
       page,
-      "target_account_id: AccountId,",
-      ["target_account_id: AccountId,", "    timelock_height: Felt,"].join(
-        "\n",
-      ),
+      "const NUM_STORAGE_ITEMS = 2",
+      "const NUM_STORAGE_ITEMS = 3",
     );
     await replaceInEditor(
       page,
-      "pub fn build_recipient(target: AccountId, serial_num: Word) -> Recipient {",
+      "const TARGET_ACCOUNT_ID_SUFFIX_PTR = STORAGE_PTR + 1",
       [
-        "pub fn build_recipient(",
-        "        target: AccountId,",
-        "        serial_num: Word,",
-        "        timelock_height: Felt,",
-        "    ) -> Recipient {",
+        "const TARGET_ACCOUNT_ID_SUFFIX_PTR = STORAGE_PTR + 1",
+        "const TIMELOCK_HEIGHT_PTR = STORAGE_PTR + 2",
       ].join("\n"),
     );
     await replaceInEditor(
       page,
-      "target_account_id: target,",
-      ["target_account_id: target,", "            timelock_height,"].join("\n"),
+      "exactly 2 note storage items",
+      "exactly 3 note storage items",
     );
     await replaceInEditor(
       page,
-      "let current_account = account.get_id();",
+      'const ERR_P2ID_WRONG_TARGET = "P2ID note can only be consumed by its target account"',
       [
-        "let block_number = tx::get_reference_block_number();",
-        "        assert!(block_number.as_felt() >= self.timelock_height);",
+        'const ERR_P2ID_WRONG_TARGET = "P2ID note can only be consumed by its target account"',
         "",
-        "        let current_account = account.get_id();",
+        `const ERR_P2ID_TIMELOCKED = "${TIMELOCKED}"`,
+      ].join("\n"),
+    );
+    await replaceInEditor(
+      page,
+      "eq.NUM_STORAGE_ITEMS assert.err=ERR_P2ID_WRONG_NUMBER_OF_STORAGE_ITEMS\n    # => []",
+      [
+        "eq.NUM_STORAGE_ITEMS assert.err=ERR_P2ID_WRONG_NUMBER_OF_STORAGE_ITEMS",
+        "    # => []",
+        "",
+        "    # the timelock height, then the transaction's reference block",
+        "    mem_load.TIMELOCK_HEIGHT_PTR exec.tx::get_reference_block_number",
+        "    # => [block_number, timelock_height]",
+        "",
+        "    lte assert.err=ERR_P2ID_TIMELOCKED",
+        "    # => []",
       ].join("\n"),
     );
     // The step isn't done by the edits alone: the script must compile.
@@ -100,44 +106,34 @@ test("tutorial 8: timelock P2ID note", async ({ page, bread }) => {
       timeout: TRANSACTION_TIMEOUT,
     });
     await expect(scriptHeader(page).status).toHaveText("Compiled");
-    // Moving on creates the Test Wallet, the note's target account, with the
-    // Rust basic wallet the script is compiled against.
+    // Moving on creates the Test Wallet, the note's target account, a
+    // standard wallet.
     await nextStep(page);
   });
 
   await test.step("4. create the timelocked note", async () => {
     await bread.connect(page);
-    // The script's storage schema types its fields: the panel gives the
-    // block height only, the Test Wallet is picked from the accounts.
+    // The edited note has no typed form: the panel gives the raw storage
+    // items, the Test Wallet's prefix and suffix then the block height.
     const values = panel.root.locator("strong").filter({ hasText: /^\d+$/ });
-    await expect(values).toHaveCount(1, { timeout: TRANSACTION_TIMEOUT });
-    const height = (await values.textContent()) ?? "";
-    await expect(panel.root.getByText("target-account-id")).toBeVisible();
+    await expect(values).toHaveCount(3, { timeout: TRANSACTION_TIMEOUT });
+    const items = await values.allTextContents();
     await panel.openLink("notes page", /\/notes$/);
     const dialog = page.getByRole("dialog").filter({ hasText: "Create Note" });
-    // The typed fields fit a 320 px phone. The dialog is opened at that
-    // size: a resize across the phone breakpoint remounts it, empty.
+    const addStorage = dialog.getByRole("button", { name: "Add note storage" });
+    const item = (index: number) =>
+      dialog.getByLabel(`Note storage item ${index + 1}`, { exact: true });
+    // The raw items fit a 320 px phone. The dialog is opened at that size: a
+    // resize across the phone breakpoint remounts it, empty.
     await atPhoneWidth(page, async () => {
       await page.getByRole("button", { name: "Add note" }).click();
       await page.getByRole("menuitem", { name: "Create note" }).click();
       await selectOption(page, "Script", SCRIPT_NAME);
-      const height = dialog.locator(
-        "#create-note-storage-note-timelock-height",
-      );
-      await height.scrollIntoViewIfNeeded();
-      await expectWithinDialog(height, dialog);
-      const target = dialog
-        .locator("div")
-        .filter({ hasText: "target-account-id" })
-        .last();
-      await expectWithinDialog(
-        target.getByRole("button", { name: "Select account" }),
-        dialog,
-      );
-      await expectWithinDialog(
-        dialog.getByRole("switch", { name: "Enter as raw felts" }),
-        dialog,
-      );
+      for (const index of items.keys()) {
+        await addStorage.click();
+        await item(index).scrollIntoViewIfNeeded();
+        await expectWithinDialog(item(index), dialog);
+      }
       for (const name of ["Preview consumption", "Create", "Cancel"]) {
         const button = dialog.getByRole("button", { name, exact: true });
         await button.scrollIntoViewIfNeeded();
@@ -155,51 +151,27 @@ test("tutorial 8: timelock P2ID note", async ({ page, bread }) => {
     await dialog.getByRole("button", { name: "Select asset" }).click();
     await page.getByRole("menuitemradio", { name: /USDCX/i }).click();
     await dialog.getByLabel("Amount").fill("1");
-    // One typed field per field of the note's struct, in order.
+    // No typed field: the schema went with the edit.
     await expect(
-      dialog.getByRole("button", { name: "Add note storage" }),
+      dialog.getByRole("switch", { name: "Enter as raw felts" }),
     ).toHaveCount(0);
+    for (const [index, value] of items.entries()) {
+      await addStorage.click();
+      await item(index).fill(value);
+    }
     const create = dialog.getByRole("button", { name: "Create", exact: true });
-    const target = dialog
-      .locator("div")
-      .filter({ hasText: "target-account-id" })
-      .last();
-    await target.getByRole("button", { name: "Select account" }).click();
-    await page
-      .getByRole("menuitemradio", { name: /Test Wallet/ })
-      .first()
-      .click();
-    // Nothing is created from an empty field.
-    await expect(create).toBeDisabled();
-    const heightField = dialog.locator(
-      "#create-note-storage-note-timelock-height",
-    );
-    await heightField.fill(height);
     await expect(create).toBeEnabled();
     // The preview runs at the current block: the timelock fails it, which
     // doesn't stop the note from being created.
     await dialog.getByRole("button", { name: "Preview consumption" }).click();
     const failure = dialog.getByRole("alert");
-    await expect(failure).toContainText("assertion failed", {
+    await expect(failure).toContainText(ASSERTION_FAILED, {
       timeout: TRANSACTION_TIMEOUT,
     });
     await expect(failure).toContainText(
       "This doesn't stop you from creating the note.",
     );
     await expect(create).toBeEnabled();
-    // The raw felts the typed fields stand for: the Test Wallet's prefix and
-    // suffix, then the height. Back to typed, the values are kept.
-    const raw = dialog.getByRole("switch", { name: "Enter as raw felts" });
-    await raw.click();
-    await expect(failure).toBeHidden();
-    await expect(
-      dialog.getByLabel("Note storage item 3", { exact: true }),
-    ).toHaveValue(height);
-    await expect(
-      dialog.getByLabel("Note storage item 4", { exact: true }),
-    ).toHaveCount(0);
-    await raw.click();
-    await expect(heightField).toHaveValue(height);
     const request = await bread.approve(() => create.click(), {
       timeout: TRANSACTION_TIMEOUT,
     });
@@ -207,7 +179,7 @@ test("tutorial 8: timelock P2ID note", async ({ page, bread }) => {
     // Completes once the note is committed, recognized as the script's (its
     // script root is the compiled script's entry point) and targeted at the
     // Test Wallet: its storage starts with the Test Wallet's prefix and
-    // suffix, so the typed field is flattened in that order.
+    // suffix.
     await nextStep(page);
   });
 
@@ -225,9 +197,7 @@ test("tutorial 8: timelock P2ID note", async ({ page, bread }) => {
       .getByRole("menuitem", { name: "Consume note with Test Wallet" })
       .click();
     await expect(
-      page.locator("[data-sonner-toast]").filter({
-        hasText: "assertion failed",
-      }),
+      page.locator("[data-sonner-toast]").filter({ hasText: ASSERTION_FAILED }),
     ).toBeVisible({ timeout: TRANSACTION_TIMEOUT });
     await expect(noteRow).toHaveCount(1);
     await expect(panel.nextTutorialButton).toBeVisible();

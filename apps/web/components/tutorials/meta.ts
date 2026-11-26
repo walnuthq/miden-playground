@@ -116,7 +116,6 @@ export const tutorialMetas: TutorialMeta[] = [
     initialRoute: "/scripts",
     stepCount: 5,
     requiresWallet: true,
-    unavailable: REWRITING_FOR_MASM,
   },
   {
     id: "network-transactions",

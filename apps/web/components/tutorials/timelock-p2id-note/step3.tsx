@@ -21,8 +21,8 @@ const useCompleted = () => {
   );
 };
 
-// Line numbers refer to apps/api/templates/p2id-note.rs, the source the script
-// is created from, and only where the earlier snippets don't move them.
+// The lines quoted here are apps/api/templates/p2id-note.masm's, with the
+// edits of lib/utils/tutorial-code.ts: after editing the template, check them.
 const Step3: TutorialStep = {
   title: "Add the timelock logic to the P2ID note script.",
   Content: () => {
@@ -36,108 +36,89 @@ const Step3: TutorialStep = {
     return (
       <>
         <p>
-          The timelock block height is a new parameter of the Note, so it needs
-          a new field in the{" "}
-          <strong>
-            <InlineCode>P2idNote</InlineCode>
-          </strong>{" "}
-          struct. Add it after{" "}
-          <strong>
-            <InlineCode>target_account_id</InlineCode>
-          </strong>
-          , at line <em>14</em>: the storage items follow the order of the
-          fields.
-        </p>
-        <CodeBlock
-          code={`#[note]
-struct P2idNote {
-    target_account_id: AccountId,
-    timelock_height: Felt,
-}`}
-          // Also imports `Felt` (the next snippet): the field needs it to
-          // compile.
-          action={addButton(1)}
-        />
-        <p>
-          A block height fits in a single Felt. The script doesn't import the{" "}
-          <strong>
-            <InlineCode>Felt</InlineCode>
-          </strong>{" "}
-          type yet, nor the{" "}
+          The timelock compares the note's timelock height with the
+          Transaction's reference block number, which the{" "}
           <strong>
             <InlineCode>tx</InlineCode>
           </strong>{" "}
-          module that gives the block number: add both to the{" "}
+          module gives. Import it after the other{" "}
           <strong>
             <InlineCode>use</InlineCode>
           </strong>{" "}
-          statement at line <em>5</em>.
+          lines at the top of the script:
+        </p>
+        <CodeBlock code="use miden::protocol::tx" action={addButton(0)} />
+        <p>
+          The timelock height is a new parameter of the Note: a third storage
+          item, after the target Account ID. A block height fits in a single
+          Felt. Under the <em>NOTE STORAGE</em> comment, change{" "}
+          <strong>
+            <InlineCode>NUM_STORAGE_ITEMS</InlineCode>
+          </strong>{" "}
+          to <strong>3</strong>, and give the new item an address, the one after
+          the suffix's:
+        </p>
+        <CodeBlock
+          code={`const NUM_STORAGE_ITEMS = 3
+
+const STORAGE_PTR = 0
+const TARGET_ACCOUNT_ID_PREFIX_PTR = STORAGE_PTR
+const TARGET_ACCOUNT_ID_SUFFIX_PTR = STORAGE_PTR + 1
+const TIMELOCK_HEIGHT_PTR = STORAGE_PTR + 2`}
+          action={addButton(2)}
+        />
+        <p>
+          The error message under the <em>ERRORS</em> comment counts the items
+          too: change its <strong>2</strong> to <strong>3</strong> while you're
+          there (the button does). Then add an error for the timelock, after the
+          other two:
         </p>
         <CodeBlock
           // Wrapped to fit the panel: in the script it's a single line.
-          code={`use miden::{
-    account, felt_repr::ToFeltRepr, note, tx,
-    AccountId, Felt, Recipient, Word,
-};`}
-          action={addButton(0)}
-        />
-        <p>
-          The{" "}
-          <strong>
-            <InlineCode>build_recipient</InlineCode>
-          </strong>{" "}
-          constructor fills the struct in, so it has to set the new field too:
-          give it a{" "}
-          <strong>
-            <InlineCode>timelock_height</InlineCode>
-          </strong>{" "}
-          parameter and pass it on to the struct.
-        </p>
-        <CodeBlock
-          code={`pub fn build_recipient(
-    target: AccountId,
-    serial_num: Word,
-    timelock_height: Felt,
-) -> Recipient {
-    let inputs = P2idNote {
-        target_account_id: target,
-        timelock_height,
-    };
-    // ...
-}`}
+          code={`const ERR_P2ID_TIMELOCKED =
+    "P2ID note is timelocked until its timelock height"`}
           action={addButton(3)}
         />
         <p>
-          Now for the timelock itself. At the beginning of the{" "}
+          Now for the timelock itself. In the{" "}
           <strong>
-            <InlineCode>script</InlineCode>
+            <InlineCode>main</InlineCode>
           </strong>{" "}
-          method, get the Transaction's reference block number with{" "}
-          <strong>
-            <InlineCode>tx::get_reference_block_number()</InlineCode>
-          </strong>{" "}
-          and assert that it has reached the timelock block height. Before that
-          block, the assertion fails, and so does any Transaction that tries to
-          consume the Note.
+          procedure, right after the check of the number of storage items and
+          its <InlineCode>{"# => []"}</InlineCode> comment, add:
         </p>
         <CodeBlock
-          code={`let block_number = tx::get_reference_block_number();
-assert!(block_number.as_felt() >= self.timelock_height);`}
+          code={`# the timelock height, then the transaction's reference block
+mem_load.TIMELOCK_HEIGHT_PTR exec.tx::get_reference_block_number
+# => [block_number, timelock_height]
+
+lte assert.err=ERR_P2ID_TIMELOCKED
+# => []`}
           action={addButton(5)}
         />
         <p>
+          <InlineCode>mem_load.TIMELOCK_HEIGHT_PTR</InlineCode> pushes the
+          timelock height from memory, and{" "}
+          <InlineCode>tx::get_reference_block_number</InlineCode> pushes the
+          number of the block the Transaction executes against on top of it.{" "}
+          <InlineCode>lte</InlineCode> takes both and leaves 1 if the timelock
+          height is lower than or equal to the block number, 0 otherwise. Until
+          the network reaches the timelock height, the assertion fails, and so
+          does any Transaction that tries to consume the Note.
+        </p>
+        <p>
           Once you've added the timelock logic, click the <em>"Compile"</em>{" "}
           button above the editor. The console under the editor reports the
-          result: if the compiler finds an error, the console shows it and the
+          result: if the assembler finds an error, the console shows it and the
           editor underlines the faulty code, so that you can fix it and compile
           again.
         </p>
         <p>
           When you proceed to the next step, the Playground creates an Account
-          named <strong>Test Wallet</strong> for you, with the{" "}
-          <strong>basic-wallet</strong> script your note script relies on as an
-          account component: it will be the target account of your timelocked
-          note.
+          named <strong>Test Wallet</strong> for you, a standard wallet built
+          from the <strong>auth-no-auth</strong> and{" "}
+          <strong>basic-wallet</strong> scripts: it will be the target account
+          of your timelocked note.
         </p>
         <TutorialStepAlert
           completed={completed}
@@ -166,10 +147,9 @@ assert!(block_number.as_felt() >= self.timelock_height);`}
         disabled={!completed || creatingWallet}
         onClick={async () => {
           // Every user gets their own recipient wallet: a shared one piles up
-          // unconsumed notes that make the client slower to sync. It carries
-          // the Rust basic wallet the script is compiled against, whose
-          // `receive_asset` a standard wallet doesn't have. Not funded: the
-          // note it consumes pays for the transaction that creates it.
+          // unconsumed notes that make the client slower to sync. A standard
+          // wallet: the note calls the standard `receive_asset`. Not funded:
+          // the note it consumes pays for the transaction that creates it.
           if (!testWallet) {
             setCreatingWallet(true);
             try {

@@ -13,12 +13,11 @@ import {
   accountIdFromPrefixSuffix,
   getIdentifierPart,
 } from "@/lib/utils/account";
-import { createNoteStorageParams } from "@/lib/utils/note-storage";
 
 // A committed public note from the connected wallet, running the user's script
 // (a note takes its `scriptId` from the script whose entry point is its script
 // root) and targeted at the Test Wallet: the first two storage items are the
-// `target_account_id` field, prefix then suffix.
+// target account's id, prefix then suffix.
 const useCompleted = () => {
   const { connectedWallet, wallets } = useAccounts();
   const { inputNotes } = useNotes();
@@ -37,16 +36,15 @@ const useCompleted = () => {
   return !!note;
 };
 
+// The edited note has no typed storage form: a note script loses its
+// template's schema on any edit (decision 3 of spec/remove-rust.md), so the
+// storage items are entered as raw felts, in the order the script reads them.
 const Step4Content = ({
-  typed,
   accountIdPrefix,
   accountIdSuffix,
   address,
   syncHeight,
 }: {
-  // Whether the dialog shows typed fields for the user's script, or raw
-  // felts (a run resumed from before schemas, a schema it can't type).
-  typed: boolean;
   accountIdPrefix: string;
   accountIdSuffix: string;
   address: string;
@@ -76,71 +74,30 @@ const Step4Content = ({
       also the asset used to pay transaction fees on testnet, so you need to
       keep enough of it in your wallet to cover them.
     </p>
-    {typed ? (
-      <>
-        <p>
-          The final step is to fill in the note storage of your custom note: the
-          dialog shows one field per field of your{" "}
-          <strong>
-            <InlineCode>P2idNote</InlineCode>
-          </strong>{" "}
-          struct, in order.
-        </p>
-        <p>
-          In the{" "}
-          <strong>
-            <InlineCode>target-account-id</InlineCode>
-          </strong>{" "}
-          field, select the{" "}
-          <TutorialLink href={`/accounts/${address}`}>Test Wallet</TutorialLink>
-          . The Playground stores it as the two storage items of an Account ID,
-          its prefix then its suffix. Your script checks the consuming account
-          against this field, not against the recipient account you selected,
-          which only tells the Test Wallet that the Note is meant for it.
-        </p>
-        <p>
-          In the{" "}
-          <strong>
-            <InlineCode>timelock-height</InlineCode>
-          </strong>{" "}
-          field, enter any future block height, for example{" "}
-          <strong>{syncHeight}</strong>.
-        </p>
-      </>
-    ) : (
-      <>
-        <p>
-          The final step is to fill in the note storage of your custom note: the
-          fields of your{" "}
-          <strong>
-            <InlineCode>P2idNote</InlineCode>
-          </strong>{" "}
-          struct, in order. Click the <em>"Add note storage"</em> button three
-          times to add three storage items.
-        </p>
-        <p>
-          The first two storage items are the{" "}
-          <strong>
-            <InlineCode>target_account_id</InlineCode>
-          </strong>{" "}
-          field, the Account ID's prefix then its suffix: use the{" "}
-          <TutorialLink href={`/accounts/${address}`}>Test Wallet</TutorialLink>
-          's Account ID prefix <strong>{accountIdPrefix}</strong> and suffix{" "}
-          <strong>{accountIdSuffix}</strong>. Your script checks the consuming
-          account against these two items, not against the recipient account you
-          selected, which only tells the Test Wallet that the Note is meant for
-          it.
-        </p>
-        <p>
-          The third storage item is the{" "}
-          <strong>
-            <InlineCode>timelock_height</InlineCode>
-          </strong>{" "}
-          field: you can set it to any future block height, for example{" "}
-          <strong>{syncHeight}</strong>.
-        </p>
-      </>
-    )}
+    <p>
+      The final step is to fill in the note storage of your custom note. The
+      storage items have no names in your script, only addresses, so the dialog
+      can't tell what each one is: you enter them as raw Felts, in the order of
+      their addresses. Click the <em>"Add note storage"</em> button three times
+      to add three storage items.
+    </p>
+    <p>
+      The first two storage items are the target Account ID, its prefix then its
+      suffix: use the{" "}
+      <TutorialLink href={`/accounts/${address}`}>Test Wallet</TutorialLink>'s
+      Account ID prefix <strong>{accountIdPrefix}</strong> and suffix{" "}
+      <strong>{accountIdSuffix}</strong>. Your script checks the consuming
+      account against these two items, not against the recipient account you
+      selected, which only tells the Test Wallet that the Note is meant for it.
+    </p>
+    <p>
+      The third storage item is the timelock height, at{" "}
+      <strong>
+        <InlineCode>TIMELOCK_HEIGHT_PTR</InlineCode>
+      </strong>
+      : you can set it to any future block height, for example{" "}
+      <strong>{syncHeight}</strong>.
+    </p>
     <p>
       Before creating it, you can click the <em>"Preview consumption"</em>{" "}
       button to see what the Note will do: the Playground runs it locally, as if
@@ -162,7 +119,6 @@ const Step4: TutorialStep = {
     const { wallets } = useAccounts();
     const { syncHeight } = useSyncState();
     const completed = useCompleted();
-    const script = useNoteScript();
     const testWallet = wallets.find(({ name }) => name === "Test Wallet");
     const accountId = testWallet
       ? WasmAccountId.fromHex(testWallet.id)
@@ -170,7 +126,6 @@ const Step4: TutorialStep = {
     return (
       <>
         <Step4Content
-          typed={!!script && createNoteStorageParams(script) !== undefined}
           address={getIdentifierPart(testWallet?.address ?? "")}
           accountIdPrefix={accountId?.prefix().toString() ?? ""}
           accountIdSuffix={accountId?.suffix().toString() ?? ""}

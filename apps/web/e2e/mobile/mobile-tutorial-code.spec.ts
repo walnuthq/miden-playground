@@ -54,9 +54,9 @@ const editorSource = (page: Page) =>
         ?.getValue() ?? "",
   );
 
-// Tutorials 8 and 12 were written for Rust contracts: they're marked
-// `unavailable` until plan 07 of spec/remove-rust rewrites them in MASM.
-// Remove each test's `test.fixme` with its tutorial's flag.
+// Tutorial 12 was written for Rust contracts: it's marked `unavailable`
+// until plan 07 of spec/remove-rust rewrites it in MASM. Remove its test's
+// `test.fixme` with its tutorial's flag.
 const REWRITING = (number: number) =>
   `Tutorial ${number} is being rewritten for Miden Assembly (spec/remove-rust plan 07)`;
 
@@ -98,7 +98,6 @@ test("mobile: tutorial 7's increment, added by its button", async ({
 test("mobile: tutorial 8's timelock, added by its buttons", async ({
   page,
 }) => {
-  test.fixme(true, REWRITING(8));
   logBrowserErrors(page);
   const panel = tutorialPanel(page);
   await startTutorial(page, "Timelock P2ID note");
@@ -125,22 +124,18 @@ test("mobile: tutorial 8's timelock, added by its buttons", async ({
       )
       .toBeLessThanOrEqual(0);
     await expectNoHorizontalOverflow(page);
-    // The note's new input: its button imports the field's type too, the
-    // next snippet.
-    await addButtons.first().click();
-    await waitForEditorText(page, "timelock_height: Felt,\n}");
-    await waitForEditorText(page, "note, tx, AccountId, Felt, Recipient");
+    // The storage items' button adds the import before it too.
+    await addButtons.nth(1).click();
+    await waitForEditorText(page, "use miden::protocol::tx\n");
+    await waitForEditorText(
+      page,
+      "const TIMELOCK_HEIGHT_PTR = STORAGE_PTR + 2",
+    );
     await expect(addedButtons).toHaveCount(2);
-    // The last snippet's button adds the constructor's before it too.
+    // The check's button adds the error before it too.
     await addButtons.last().click();
-    await waitForEditorText(
-      page,
-      "serial_num: Word,\n        timelock_height: Felt,",
-    );
-    await waitForEditorText(
-      page,
-      "assert!(block_number.as_felt() >= self.timelock_height);",
-    );
+    await waitForEditorText(page, "const ERR_P2ID_TIMELOCKED =");
+    await waitForEditorText(page, "lte assert.err=ERR_P2ID_TIMELOCKED");
     await expect(addedButtons).toHaveCount(4);
     await expect(addButtons).toHaveCount(0);
     await compile(page);
