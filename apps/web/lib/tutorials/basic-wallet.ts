@@ -26,7 +26,7 @@ export const basicWalletScript: Script = {
     name: "basic-wallet",
     type: "account-component",
     status: "compiled",
-    files: sourceFiles(compiled.source),
+    files: sourceFiles("basic-wallet", compiled.source),
     masm: "",
     error: "",
     warnings: "",

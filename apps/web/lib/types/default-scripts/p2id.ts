@@ -4,57 +4,6 @@ import { type Script, toDependency } from "@/lib/types/script";
 import { defaultProcedureExport, defaultScript } from "@/lib/utils/script";
 import { sourceFiles } from "@/lib/utils/script-files";
 
-export const rust = `// Do not link against libstd (i.e. anything defined in \`std::\`)
-#![no_std]
-#![feature(alloc_error_handler)]
-
-// However, we could still use some standard library types while
-// remaining no-std compatible, if we uncommented the following lines:
-//
-// extern crate alloc;
-// use alloc::vec::Vec;
-
-use miden::*;
-
-/// Native account of the note: exposes the \`basic-wallet\` component methods (e.g.
-/// \`receive_asset\`) gathered from the \`basic_wallet\` package.
-#[account(basic_wallet::BasicWallet)]
-pub struct Wallet;
-
-#[note]
-struct P2idNote;
-
-#[note]
-impl P2idNote {
-    #[note_script]
-    pub fn run(self, _arg: Word, account: &mut Wallet) {
-        let storage = active_note::get_storage();
-
-        // make sure the note has 4 storage items
-        assert_eq(storage.len().into(), felt!(4));
-
-        // P2ID storage follows the protocol layout:
-        // [target_account_id_suffix, target_account_id_prefix, salt_0, salt_1]
-        // The salt makes the storage commitment hard to guess: the script doesn't read it.
-        let target_account_id_suffix = storage[0];
-        let target_account_id_prefix = storage[1];
-
-        // get consuming account id
-        let consuming_account_id = account.get_id();
-
-        // target account id
-        let target_account_id = AccountId::new(target_account_id_prefix, target_account_id_suffix);
-
-        assert_eq!(consuming_account_id, target_account_id);
-
-        let assets = active_note::get_initial_assets();
-        for asset in assets {
-            account.receive_asset(asset);
-        }
-    }
-}
-`;
-
 export const masm = `use {AccountId, NoteRecipient, NoteSerialNumber, NoteTag, NoteType} from miden::protocol::types
 use miden::protocol::active_note
 use miden::protocol::note
@@ -241,7 +190,7 @@ const p2id: Script = {
   type: "note",
   status: "compiled",
   readOnly: true,
-  files: sourceFiles(rust),
+  files: sourceFiles("p2id", masm),
   masm,
   commitment: P2ID_NOTE_CODE,
   dependencies: [toDependency(basicWallet)],

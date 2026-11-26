@@ -141,26 +141,20 @@ export const toDependency = ({
   commitment,
 }: Dependency): Dependency => ({ id, name, type, commitment });
 
-// The body of the API's `POST /scripts/import`: a project's sources.
-export type PackageSource = { midenProjectToml: string; rust: string };
+// The body of the API's `POST /scripts/import`: a project's sources, its
+// manifest and its one MASM module.
+export type PackageSource = { midenProjectToml: string; masm: string };
 
-// The files of a script the editor shows, by path in its project. Only
-// `src/lib.rs` is edited: the API generates the manifests. The built-in
-// scripts and the packages embedded for the tutorials have no manifests, the
-// MASM-only built-ins no file at all.
-export const scriptFilePaths = [
-  "src/lib.rs",
-  "Cargo.toml",
-  "miden-project.toml",
-] as const;
-
-export type ScriptFilePath = (typeof scriptFilePaths)[number];
-
-export type ScriptFiles = Partial<Record<ScriptFilePath, string>>;
+// The files of a script the editor shows, by path in its project: its MASM
+// source (`scriptSourcePath` in lib/utils/script-files.ts), the only one
+// edited, and the miden-project.toml the API generates. The built-in scripts
+// and the packages embedded for the tutorials have no manifest, the built-in
+// libraries no file at all.
+export type ScriptFiles = Record<string, string>;
 
 // An account component's storage slot, as the package's storage schema
-// describes it (api-compile reads it from the account component metadata the
-// toolchain embeds). Types are the schema's names: `word`, `felt`, or a named
+// describes it. A MASM package has none: the schemas are hand-written, for
+// the built-ins and the API's templates. Types are the schema's names: `word`, `felt`, or a named
 // type such as `miden::standards::auth::pub_key`.
 export type StorageSlotSchema = {
   // The slot's full name, e.g. `counter_contract::counter_contract::count_map`.
@@ -216,9 +210,12 @@ export type Script = {
   status: ScriptStatus;
   readOnly: boolean;
   files: ScriptFiles;
+  // The MASM a built-in script is assembled from in the browser
+  // (`assembledFromMasm`), also its source in `files`. Empty for the API's
+  // scripts, whose source is the MASM.
   masm: string;
-  // The last compile's output: rustc's rendered errors when it failed, its
-  // warnings when it succeeded. The API stores neither: a script fetched from
+  // The last compile's output: the assembler's rendered errors when it
+  // failed, its warnings when it succeeded. The API stores neither: a script fetched from
   // it (or saved before `warnings` existed) may lack them.
   error: string;
   warnings: string;
@@ -263,7 +260,7 @@ export type MidenProjectToml = {
       };
     };
   };
-  lib: { kind: ScriptType; namespace: string };
+  lib: { kind: ScriptType; namespace: string; path?: string };
   dependencies: Record<string, string | { path: string }>;
 };
 

@@ -119,7 +119,8 @@ const VerifyAccountComponentDialog = () => {
                   if (!files) {
                     return;
                   }
-                  const packageSources = await fileListToPackageSources(files);
+                  const { packageSources } =
+                    await fileListToPackageSources(files);
                   const packageSourcesList = Object.values(packageSources);
                   const [accountPackageSource = null] = packageSourcesList;
                   setPackageSource(accountPackageSource);

@@ -4,7 +4,11 @@ import { buildFileTree } from "./file-tree.ts";
 import {
   addTomlDependency,
   filesWithDependency,
+  filesWithSource,
   removeTomlDependency,
+  scriptFilePaths,
+  scriptSource,
+  sourceFiles,
 } from "./script-files.ts";
 
 // As the API generates them (apps/api/lib/toml.ts), without and with a
@@ -15,8 +19,8 @@ version = "0.1.0"
 
 [lib]
 kind = "note"
-namespace = "miden:counter-note/miden-counter-note@0.1.0"
-path = "src/lib.rs"
+namespace = "counter_note"
+path = "counter_note.masm"
 
 [dependencies]
 miden-core = "*"
@@ -30,8 +34,8 @@ version = "0.1.0"
 
 [lib]
 kind = "note"
-namespace = "miden:counter-note/miden-counter-note@0.1.0"
-path = "src/lib.rs"
+namespace = "counter_note"
+path = "counter_note.masm"
 
 [dependencies]
 miden-core = "*"
@@ -76,7 +80,7 @@ describe("miden-project.toml dependencies", () => {
   });
 
   test("a script without manifest keeps its files", () => {
-    const files = { "src/lib.rs": "fn main() {}" };
+    const files = { "a.masm": "begin end" };
     assert.equal(filesWithDependency(files, "a", "add"), files);
   });
 });
@@ -84,16 +88,42 @@ describe("miden-project.toml dependencies", () => {
 describe("buildFileTree", () => {
   test("folders first, then files, alphabetically", () => {
     assert.deepEqual(
-      buildFileTree(["miden-project.toml", "src/lib.rs", "Cargo.toml"]),
+      buildFileTree(["miden-project.toml", "src/a.masm", "counter.masm"]),
       [
         {
           name: "src",
           path: "src",
-          children: [{ name: "lib.rs", path: "src/lib.rs" }],
+          children: [{ name: "a.masm", path: "src/a.masm" }],
         },
-        { name: "Cargo.toml", path: "Cargo.toml" },
+        { name: "counter.masm", path: "counter.masm" },
         { name: "miden-project.toml", path: "miden-project.toml" },
       ],
     );
+  });
+});
+
+describe("a script's source", () => {
+  test("is the MASM file named after the script, next to its manifest", () => {
+    assert.deepEqual(scriptFilePaths({ name: "counter-account" }), [
+      "counter_account.masm",
+      "miden-project.toml",
+    ]);
+    const script = {
+      name: "counter-account",
+      files: { "counter_account.masm": "begin end", "miden-project.toml": "" },
+    };
+    assert.equal(scriptSource(script), "begin end");
+    assert.deepEqual(filesWithSource(script, "x"), {
+      "counter_account.masm": "x",
+      "miden-project.toml": "",
+    });
+  });
+
+  test("a built-in has its MASM as its source, a library no file", () => {
+    assert.deepEqual(sourceFiles("basic-wallet", "pub proc a end"), {
+      "basic_wallet.masm": "pub proc a end",
+    });
+    assert.deepEqual(sourceFiles("miden-core", ""), {});
+    assert.equal(scriptSource({ name: "miden-core", files: {} }), "");
   });
 });

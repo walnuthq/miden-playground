@@ -10,7 +10,7 @@ import {
   type LegacyComponent,
   migrateLegacyComponents,
 } from "@/lib/utils/legacy-components";
-import { sourceFiles } from "@/lib/utils/script-files";
+import { LEGACY_RUST_FILE } from "@/lib/utils/script-files";
 
 // The local storage key holding the serialized app state. Exported so the
 // Miden provider can drop it when the client store it describes is deleted.
@@ -157,8 +157,9 @@ export const stateSerializer = ({
 
 // Scripts persisted before the package `digest` was renamed `commitment` still
 // carry the old field, on themselves and on their dependencies. Those
-// persisted before `files` have their source in `rust` (saved projects and
-// tutorial snapshots too, which load through here).
+// persisted before `files` have their Rust source in `rust` (saved projects
+// and tutorial snapshots too, which load through here): it goes where `files`
+// kept it, `src/lib.rs`, which is how a Rust script is told apart.
 // Transaction scripts persisted before the playground used Miden's canonical
 // kind name are typed "tx-script", themselves and as dependencies.
 type LegacyScriptType = ScriptType | "tx-script";
@@ -185,7 +186,7 @@ const migrateScript = ({
 }: LegacyScript): Script => ({
   ...script,
   type: migrateScriptType(script.type),
-  files: files ?? sourceFiles(rust ?? ""),
+  files: files ?? (rust ? { [LEGACY_RUST_FILE]: rust } : {}),
   commitment: script.commitment ?? digest ?? "",
   dependencies: script.dependencies.map(({ digest, ...dependency }) => ({
     ...dependency,

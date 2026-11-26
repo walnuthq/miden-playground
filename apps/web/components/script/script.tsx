@@ -26,10 +26,7 @@ import {
   useDefaultLayout,
 } from "react-resizable-panels";
 import { useLocation, useNavigate, useSearchParams } from "react-router";
-import Editor, {
-  type CodeEditor,
-  currentPosition,
-} from "@/components/lib/editor";
+import { type CodeEditor, currentPosition } from "@/components/lib/editor";
 import NotFound from "@/components/lib/not-found";
 import AddDependencyDialog from "@/components/script/add-dependency-dialog";
 import EditorConsole, {
@@ -49,10 +46,9 @@ import useScriptShortcuts, {
 import useTutorials from "@/hooks/use-tutorials";
 import { clearConsoleLog } from "@/lib/console-log";
 import { canSimulate } from "@/lib/simulation/can-simulate";
-import type { Script, ScriptFilePath } from "@/lib/types/script";
+import type { Script } from "@/lib/types/script";
 import { isValidUUIDv4 } from "@/lib/utils";
-import { assembledFromMasm } from "@/lib/utils/script";
-import { SCRIPT_FILE, scriptSource } from "@/lib/utils/script-files";
+import { scriptSourcePath } from "@/lib/utils/script-files";
 
 // Puts the cursor on a location of the last compile's output. The code may have
 // changed since the compile: follow the location.
@@ -63,14 +59,7 @@ const reveal = (editor: CodeEditor, location: EditorLocation) => {
   editor.focus();
 };
 
-// A read-only script without MASM is a package embedded already compiled
-// (lib/tutorials): it has no Compile button to point at.
-const noMasm = ({ readOnly }: Pick<Script, "readOnly">) =>
-  readOnly
-    ? "This script ships already compiled, without its Miden Assembly."
-    : "Compile the script to see its Miden Assembly.";
-const NO_RUST =
-  "This script is written in Miden Assembly: it has no Rust source.";
+const NO_SOURCE = "This library ships compiled, without its source.";
 
 // The script page fills the viewport below the header (`h-16`, `h-12` with the
 // icon sidebar), so the editor and the console scroll, not the page.
@@ -98,18 +87,25 @@ const ScriptComponent = ({
   // A link clicked while the source is hidden (another tab or file), revealed
   // once it shows.
   const pendingReveal = useRef<EditorLocation | null>(null);
-  // The Explorer's open files, the source only at first.
-  const [openPaths, setOpenPaths] = useState<ScriptFilePath[]>([SCRIPT_FILE]);
-  const [activePath, setActivePath] = useState<ScriptFilePath | null>(
-    SCRIPT_FILE,
-  );
-  const openFile = (path: ScriptFilePath) => {
-    setOpenPaths((paths) => (paths.includes(path) ? paths : [...paths, path]));
+  // The source's path, named after the script: "" until a shared script
+  // arrives from the API.
+  const sourcePath = script ? scriptSourcePath(script) : "";
+  // The Explorer's open files, the source only at first (undefined until a
+  // file is opened or closed).
+  const [openPathsState, setOpenPaths] = useState<string[]>();
+  const [activePathState, setActivePath] = useState<string | null>();
+  const openPaths = openPathsState ?? [sourcePath];
+  const activePath =
+    activePathState === undefined ? sourcePath : activePathState;
+  const openFile = (path: string) => {
+    setOpenPaths((paths = [sourcePath]) =>
+      paths.includes(path) ? paths : [...paths, path],
+    );
     setActivePath(path);
   };
   // Closing the active tab activates the one that takes its place, or the new
   // last one.
-  const closeFile = (path: ScriptFilePath) => {
+  const closeFile = (path: string) => {
     const index = openPaths.indexOf(path);
     const remaining = openPaths.filter((openPath) => openPath !== path);
     setOpenPaths(remaining);
@@ -135,22 +131,22 @@ const ScriptComponent = ({
     onlySaveAfterUserInteractions: true,
   });
   const { compile, compiling } = useCompileScript(script);
-  // The MASM-only built-ins have no Rust source, so no files for the Explorer.
-  // Not just an empty source: an editable script's can be cleared, and other
-  // built-ins are assembled from MASM but come with a Rust source.
-  const masmOnly =
-    !!script && assembledFromMasm(script) && scriptSource(script) === "";
-  const defaultTab = masmOnly ? "masm" : "explorer";
-  // The tabs were called `rust` and `metadata` before the Explorer.
+  // The built-in libraries have no source, so no files for the Explorer. Not
+  // just an empty source: an editable script's can be cleared.
+  const noSource = !!script && script.files[sourcePath] === undefined;
+  const defaultTab = noSource ? "manifest" : "explorer";
+  // The tabs were called `rust` and `metadata` before the Explorer, and the
+  // compiler's MASM had its own tab before the source was MASM.
   const tabParam = searchParams.get("tab");
   const requestedTab =
-    tabParam === "rust"
+    tabParam === "rust" || tabParam === "masm"
       ? "explorer"
       : tabParam === "metadata"
         ? "manifest"
         : (tabParam ?? defaultTab);
-  // A `?tab=explorer` link to a MASM-only script shows its MASM.
-  const tab = masmOnly && requestedTab === "explorer" ? "masm" : requestedTab;
+  // A `?tab=explorer` link to a library shows its manifest.
+  const tab =
+    noSource && requestedTab === "explorer" ? "manifest" : requestedTab;
   const consoleState: ConsoleState = consoleCollapsed
     ? "collapsed"
     : editorCollapsed
@@ -200,7 +196,7 @@ const ScriptComponent = ({
     const location = pendingReveal.current;
     if (
       tab !== "explorer" ||
-      activePath !== SCRIPT_FILE ||
+      activePath !== sourcePath ||
       !editor ||
       !location
     ) {
@@ -210,7 +206,7 @@ const ScriptComponent = ({
     // Measure it now it's visible, or the reveal centers in a zero-size view.
     editor.layout();
     reveal(editor, location);
-  }, [tab, activePath]);
+  }, [tab, activePath, sourcePath]);
   if (!script) {
     return <NotFound />;
   }
@@ -221,12 +217,12 @@ const ScriptComponent = ({
     // Maximized console: show the editor again.
     editorPanelRef.current?.expand();
     const editor = editorRef.current;
-    if (tab === "explorer" && activePath === SCRIPT_FILE && editor) {
+    if (tab === "explorer" && activePath === sourcePath && editor) {
       reveal(editor, location);
       return;
     }
     pendingReveal.current = location;
-    openFile(SCRIPT_FILE);
+    openFile(sourcePath);
     if (tab !== "explorer") {
       navigate(pathname);
     }
@@ -235,7 +231,7 @@ const ScriptComponent = ({
     <>
       {/* Kept mounted across tabs: the source's undo history, scroll
           position and compile markers survive a look at the manifest. The
-          hidden `src/lib.rs` editor stays in the DOM and first in
+          hidden source editor stays in the DOM and first in
           `monaco.editor.getEditors()`: scope e2e locators to the visible
           tab. */}
       <TabsContent value="explorer" keepMounted className="h-full">
@@ -249,17 +245,6 @@ const ScriptComponent = ({
             editorRef.current = editor;
           }}
         />
-      </TabsContent>
-      <TabsContent value="masm" className="h-full">
-        {script.masm ? (
-          <Editor script={script} file="masm" readOnly />
-        ) : (
-          // Shown when the MASM goes while its tab is open: a failed compile
-          // started from it (Cmd+S), or a `?tab=masm` link to a draft.
-          <p className="flex h-full items-center justify-center border p-6 text-xs text-muted-foreground">
-            {noMasm(script)}
-          </p>
-        )}
       </TabsContent>
       <TabsContent value="manifest" className="h-full overflow-y-auto">
         <ScriptManifest script={script} />
@@ -279,7 +264,7 @@ const ScriptComponent = ({
       <Tabs
         className="min-h-0 flex-1"
         value={tab}
-        // The default tab (MASM for the MASM-only built-ins) has no `?tab=`.
+        // The default tab (the manifest for the libraries) has no `?tab=`.
         onValueChange={(value) =>
           navigate(
             value === defaultTab
@@ -292,7 +277,7 @@ const ScriptComponent = ({
             and the Compile button go under the tabs, on the right. */}
         <div className="flex flex-wrap items-center justify-between gap-2">
           <TabsList>
-            {masmOnly ? (
+            {noSource ? (
               <Tooltip>
                 <TooltipTrigger
                   delay={300}
@@ -302,29 +287,10 @@ const ScriptComponent = ({
                     Explorer
                   </TabsTrigger>
                 </TooltipTrigger>
-                <TooltipContent>{NO_RUST}</TooltipContent>
+                <TooltipContent>{NO_SOURCE}</TooltipContent>
               </Tooltip>
             ) : (
               <TabsTrigger value="explorer">Explorer</TabsTrigger>
-            )}
-            {/* Always there, so the tabs keep their width (the Explorer's
-                files line up with them): disabled until a compile succeeds.
-                A disabled tab ignores the pointer: the tooltip goes on a
-                wrapper. */}
-            {script.masm ? (
-              <TabsTrigger value="masm">MASM</TabsTrigger>
-            ) : (
-              <Tooltip>
-                <TooltipTrigger
-                  delay={300}
-                  render={<span className="flex h-full flex-1" />}
-                >
-                  <TabsTrigger value="masm" disabled>
-                    MASM
-                  </TabsTrigger>
-                </TooltipTrigger>
-                <TooltipContent>{noMasm(script)}</TooltipContent>
-              </Tooltip>
             )}
             <TabsTrigger value="manifest">Manifest</TabsTrigger>
           </TabsList>

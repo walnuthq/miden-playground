@@ -3,8 +3,6 @@ import type { Script } from "@/lib/types/script";
 import { defaultProcedureExport, defaultScript } from "@/lib/utils/script";
 import { sourceFiles } from "@/lib/utils/script-files";
 
-export const rust = "";
-
 export const masm = `# The MASM code of the Basic Fungible Faucet Account Component.
 #
 # See the \`FungibleFaucet\` Rust type's documentation for more details. This component
@@ -45,7 +43,7 @@ const fungibleFaucet: Script = {
   type: "account-component",
   status: "compiled",
   readOnly: true,
-  files: sourceFiles(rust),
+  files: sourceFiles("fungible-faucet", masm),
   masm,
   commitment:
     "0xa93f46f604b8c6b9896f18d5d6fc191f5bc3d03d20f4b6c315bd74d5c21b9011",

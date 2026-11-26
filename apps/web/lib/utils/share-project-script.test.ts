@@ -1,12 +1,13 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { findPackages } from "./project-files.ts";
+import { findPackages, manifestSourcePath } from "./project-files.ts";
 import { parseProjectLink } from "./project-link.ts";
 
 // scripts/share-project.mjs, the terminal path to a project link: plain
 // JavaScript at the repository's root, so loaded by URL (untyped).
 const script: {
   findPackages: typeof findPackages;
+  manifestSourcePath: typeof manifestSourcePath;
   projectLink: (
     webUrl: string,
     link: {
@@ -26,23 +27,33 @@ const script: {
 
 const folders = [
   // One package, the folder itself.
+  ["counter/miden-project.toml", "counter/counter.masm"],
+  // A Rust project.
   ["counter/miden-project.toml", "counter/src/lib.rs", "counter/Cargo.toml"],
-  // Several, with build outputs and hidden directories to skip, and a
-  // manifest without its source.
+  // Several, with build outputs and hidden directories to skip.
   [
     "bank/bank-account/miden-project.toml",
-    "bank/bank-account/src/lib.rs",
+    "bank/bank-account/bank_account.masm",
     "bank/deposit-note/miden-project.toml",
-    "bank/deposit-note/src/lib.rs",
-    "bank/draft/miden-project.toml",
+    "bank/deposit-note/deposit_note.masm",
     "bank/target/x/miden-project.toml",
-    "bank/target/x/src/lib.rs",
     "bank/.git/y/miden-project.toml",
-    "bank/.git/y/src/lib.rs",
     "bank/node_modules/z/miden-project.toml",
-    "bank/node_modules/z/src/lib.rs",
   ],
   [],
+];
+
+// What a manifest's `[lib] path` can look like, and what it can't be.
+const manifests = [
+  '[package]\nname = "a"\n\n[lib]\nkind = "note"\nnamespace = "a"\npath = "a.masm"\n\n[dependencies]\nmiden-core = "*"\n',
+  "[lib]\r\npath = 'src/a.masm' # the module\r\n",
+  '[lib]\npath = "./a.masm"\n',
+  '[lib]\nkind = "note"\n\n[dependencies]\npath = "a.masm"\n',
+  '[lib]\npath = "src/lib.rs"\n',
+  '[lib]\npath = "../b/b.masm"\n',
+  '[lib]\npath = "/abs/a.masm"\n',
+  '[package]\nname = "a"\n',
+  "",
 ];
 
 test("the script finds the packages Import Project finds", () => {
@@ -50,8 +61,32 @@ test("the script finds the packages Import Project finds", () => {
     assert.deepEqual(script.findPackages(paths), findPackages(paths));
   }
   assert.deepEqual(
-    script.findPackages(folders[1] ?? []).map(({ directory }) => directory),
+    script.findPackages(folders[2] ?? []).map(({ directory }) => directory),
     ["bank/bank-account", "bank/deposit-note"],
+  );
+});
+
+test("the script reads the [lib] path Import Project reads", () => {
+  for (const manifest of manifests) {
+    assert.equal(
+      script.manifestSourcePath("dir", manifest),
+      manifestSourcePath("dir", manifest),
+      manifest,
+    );
+  }
+  assert.deepEqual(
+    manifests.map((manifest) => script.manifestSourcePath("dir", manifest)),
+    [
+      "dir/a.masm",
+      "dir/src/a.masm",
+      "dir/a.masm",
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+    ],
   );
 });
 

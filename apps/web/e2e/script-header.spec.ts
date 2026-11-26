@@ -34,8 +34,8 @@ test("script: name, dirty state and status in the header", async ({ page }) => {
   await test.step("an edit makes it a draft", async () => {
     await replaceInEditor(
       page,
-      "self.count_map.get(key)\n    }",
-      "self.count_map.get(missing_key)\n    }",
+      "pub proc get_count() -> felt\n",
+      "pub proc get_count() -> felt\n    bogus_instruction\n",
     );
     await expect(header.status).toHaveText("Draft");
     await expect(header.dirty).toBeVisible();
@@ -50,11 +50,7 @@ test("script: name, dirty state and status in the header", async ({ page }) => {
   });
 
   await test.step("a successful compile", async () => {
-    await replaceInEditor(
-      page,
-      "self.count_map.get(missing_key)",
-      "self.count_map.get(key)",
-    );
+    await replaceInEditor(page, "    bogus_instruction\n", "");
     await expect(header.dirty).toBeVisible();
     await compile();
     await expect(page.getByText(COMPILED).last()).toBeVisible({
