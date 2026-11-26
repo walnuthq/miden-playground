@@ -9,6 +9,7 @@ import { notFound } from "@/lib/errors";
 import { analyzedExports, type ExportAnalysis } from "@/lib/package-exports";
 import { buildFiles } from "@/lib/package-files";
 import { type BuildMetadata, compiledMetadata } from "@/lib/package-metadata";
+import { templates } from "@/lib/templates";
 import { generateMidenProjectToml } from "@/lib/toml";
 import type {
   CompiledPackage,
@@ -18,6 +19,7 @@ import type {
   Manifest,
   PackageMetadata,
   PackageType,
+  ScriptExample,
   ScriptFiles,
 } from "@/lib/types";
 import { fetchApiCompile } from "@/lib/upstream";
@@ -70,6 +72,7 @@ export const createPackage = async ({
   type,
   source,
   dependencies = [],
+  metadata = null,
   compiled,
   ownerKeyHash,
 }: {
@@ -77,6 +80,9 @@ export const createPackage = async ({
   type: PackageType;
   source: string;
   dependencies?: Dependency[];
+  // A template's hand-written schemas (lib/template-schemas.ts), which the
+  // package keeps while its source matches them.
+  metadata?: PackageMetadata | null;
   // Compile output known ahead of time (an example's snapshot): the package
   // is inserted compiled instead of as a draft.
   compiled?: {
@@ -95,6 +101,7 @@ export const createPackage = async ({
     dependencies: dependencies.map(({ id }) => id),
     files,
     ownerKeyHash,
+    metadata,
     ...(compiled && { status: "compiled" as const, ...compiled }),
   });
   return { id, files: scriptFiles(name, files) };
@@ -164,6 +171,12 @@ export const compilePackage = async ({
     dependencies: dependenciesPackages,
   });
   const files = buildFiles(updatedFiles, buildDependencies);
+  // What the package's schemas are checked against (lib/package-metadata.ts).
+  const compiledSource = {
+    masm: source,
+    shipped: (template: ScriptExample) =>
+      template === "none" ? undefined : templates[template],
+  };
   const build = await fetchApiCompile<CompileResponse>("/compile", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -172,9 +185,9 @@ export const compilePackage = async ({
   });
   if (build.built === false) {
     console.error(build.stderr);
-    // The schemas a package has stay through a failed build; what the
-    // build read from the code doesn't.
-    const metadata = compiledMetadata(dbPackage.metadata, {});
+    // The schemas a package has stay through a failed build while the
+    // source matches them; what the build read from the code doesn't.
+    const metadata = compiledMetadata(dbPackage.metadata, {}, compiledSource);
     await updatePackage({
       id,
       status: "error",
@@ -217,7 +230,11 @@ export const compilePackage = async ({
     parameters,
     accountProcedures,
   } = build;
-  const metadata = compiledMetadata(dbPackage.metadata, { accountProcedures });
+  const metadata = compiledMetadata(
+    dbPackage.metadata,
+    { accountProcedures },
+    compiledSource,
+  );
   const exports = analyzedExports(manifest, {
     readOnly,
     callsForeign,

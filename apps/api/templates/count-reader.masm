@@ -1,6 +1,58 @@
-# Placeholder: an account component that reads another account's counter.
+# A count reader: an account component that reads another account's count,
+# by foreign procedure invocation (FPI), and keeps a copy in its own storage.
+# It calls the counter's `get_count` by its MAST root, so it depends on the
+# counter-account script.
 
+use counter_account
+use {AccountId} from miden::protocol::types
+use miden::protocol::native_account
+use miden::protocol::tx
+use miden::core::sys
+
+# STORAGE
+# =================================================================================================
+
+# The storage value that holds the copied count.
+const COUNT_SLOT = word("count_reader::count")
+
+# PROCEDURES
+# =================================================================================================
+
+#! Reads the count of the counter account `counter_account_id` and stores it
+#! in this account's storage.
+#!
+#! Inputs:  [counter_account_id_suffix, counter_account_id_prefix, pad(14)]
+#! Outputs: [pad(16)]
+#!
+#! Panics if the counter account has no `get_count` procedure of the
+#! counter-account component.
 @account_procedure
-pub proc read_count()
-    nop
+@locals(2)
+pub proc copy_count(counter_account_id: AccountId)
+    # set the counter account's id aside while the call is prepared
+    loc_store.0 loc_store.1
+    # => [pad(16)]
+
+    # `get_count` takes no inputs: 16 elements of padding
+    padw padw padw padw
+    # => [pad(16), pad(16)]
+
+    procref.counter_account::get_count
+    # => [GET_COUNT_ROOT, pad(16), pad(16)]
+
+    loc_load.1 loc_load.0
+    # => [counter_account_id_suffix, counter_account_id_prefix, GET_COUNT_ROOT, pad(32)]
+
+    exec.tx::execute_foreign_procedure
+    # => [count, pad(15), pad(16)]
+
+    # a storage value is a word: the count, then three zeros
+    push.0.0.0 movup.3
+    # => [count, 0, 0, 0, pad(15), pad(16)]
+
+    push.COUNT_SLOT[0..2] exec.native_account::set_item
+    # => [OLD_VALUE, pad(15), pad(16)]
+
+    dropw exec.sys::truncate_stack
+    # => [pad(16)]
 end

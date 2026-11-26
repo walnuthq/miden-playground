@@ -74,12 +74,20 @@ export type NoteStorageField = {
 export type PackageMetadata = {
   storage?: { slots: StorageSlotSchema[] };
   noteStorage?: { name: string; fields: NoteStorageField[] };
+  // The template a note was created from, while it keeps its `noteStorage`:
+  // a note's schema holds only while its source is that template's as
+  // shipped (lib/package-metadata.ts).
+  template?: ScriptExample;
   // A note or transaction script's account procedures: the MAST roots
   // (`0x…` hex, sorted) it `call`s, `[]` when it calls none. api-compile
   // sends `null` when it can't tell (a dynamic call is reachable); the API
   // stores no key then.
   accountProcedures?: string[] | null;
 };
+
+// A template's hand-written schemas (templates/*.schema.ts), which the API
+// sets as a package's `metadata` when it creates one from the template.
+export type TemplateSchema = Pick<PackageMetadata, "storage" | "noteStorage">;
 
 export const defaultPackage = (): Package => ({
   id: "",
