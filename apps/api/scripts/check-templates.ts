@@ -7,6 +7,10 @@
 // that breaks a snippet fails here: none for now, the tutorials' snippets
 // are Rust until they're rewritten in MASM (plan 07 of spec/remove-rust).
 //
+// The home page's examples (examples/index.ts) are launched the same way
+// (POST /scripts/examples/:id): every package must compile, and one created
+// with a schema must keep it.
+//
 // A template with a hand-written schema (templates/*.schema.ts) must agree
 // with it: its slot names are the ones the source declares (the stale rule of
 // lib/package-metadata.ts, run on the template as shipped), and the package
@@ -21,8 +25,8 @@
 //   node scripts/check-templates.ts
 //
 // API_URL defaults to the local API (http://localhost:3001). Exits with 1 when
-// a template doesn't compile, printing the assembler's diagnostics, or
-// disagrees with its schema.
+// a template or an example doesn't compile, printing the assembler's
+// diagnostics, or disagrees with its schema.
 import {
   type ScriptExample,
   type ScriptType,
@@ -33,6 +37,7 @@ import {
   applyCodeEdits,
   type CodeEdit,
 } from "../../web/lib/utils/tutorial-code.ts";
+import { exampleIds } from "../examples/ids.ts";
 import { sourceFilePath } from "../lib/source-file.ts";
 import { declaredSlotNames } from "../lib/storage-slot-names.ts";
 import { templateSchemas } from "../lib/template-schemas.ts";
@@ -240,9 +245,40 @@ for (const { label, example, edits } of tutorialEdits) {
   }
 }
 
-const total = scripts.length + tutorialEdits.length;
+for (const exampleId of exampleIds) {
+  const label = `example ${exampleId}`;
+  const { packages } = await request<{
+    packages: (CompiledPackage & { id: string; name: string })[];
+  }>(`/scripts/examples/${exampleId}`, { method: "POST" });
+  try {
+    const failed = packages.find(({ status }) => status !== "compiled");
+    // The example's account component is named after the example, and has a
+    // storage schema.
+    const account = packages.find(({ name }) => name === exampleId);
+    if (failed) {
+      failures.push(label);
+      console.error(`FAIL  ${label}: ${failed.name}\n${failed.stderr}\n`);
+    } else if (!account?.metadata?.storage) {
+      failures.push(label);
+      console.error(
+        `FAIL  ${label}: its account component has no storage schema once compiled\n`,
+      );
+    } else {
+      console.info(`ok    ${label}`);
+    }
+  } finally {
+    // Dependents first: a dependency can't be deleted while it's used.
+    for (const { id } of packages.reverse()) {
+      await request(`/scripts/${id}`, { method: "DELETE" });
+    }
+  }
+}
+
+const total = scripts.length + tutorialEdits.length + exampleIds.length;
 if (failures.length > 0) {
   console.error(`${failures.length}/${total} templates fail.`);
   process.exit(1);
 }
-console.info(`All ${total} templates compile and agree with their schemas.`);
+console.info(
+  `All ${total} templates and examples compile and agree with their schemas.`,
+);

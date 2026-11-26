@@ -9,8 +9,7 @@ import { logBrowserErrors, selectOption } from "./tutorial";
 // (`migrateLegacyComponents`): the account lists the component's script with
 // the slots the component had, and Deploy offers the script with them.
 // Deploys a counter from the MASM template (one testnet deploy, through
-// apps/api; the Counter Contract example stood in until plan 06 of
-// spec/remove-rust), then rewrites its persisted state into that shape and
+// apps/api), then rewrites its persisted state into that shape and
 // reloads. A MASM script: the state isn't reset as a Rust one would be.
 const SLOT = "counter_account::count_map";
 const LEGACY_ID = "my-counter_00000000-0000-4000-8000-000000000000";

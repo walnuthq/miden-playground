@@ -1062,12 +1062,8 @@ const simulate = async (page: Page, script: string) => {
   return dialog;
 };
 
-// It launches the Counter Contract example, which answers 404 until plan 06
-// of spec/remove-rust rewrites it in MASM, and its edits are Rust: plan 06
-// turns it on again.
-test.fixme("script: simulate a note and a transaction script", async ({
-  page,
-}) => {
+// On the Counter Contract example's packages.
+test("script: simulate a note and a transaction script", async ({ page }) => {
   logBrowserErrors(page);
 
   await test.step("launch the counter contract example", async () => {
@@ -1210,21 +1206,29 @@ test.fixme("script: simulate a note and a transaction script", async ({
     await importAccount(page, "Other Counter", OTHER_ACCOUNT_ADDRESS);
   });
 
-  await test.step("only the accounts with the procedures are targets", async () => {
-    // The tutorials' counter was deployed from the same `counter-account`
-    // package as the example (lib/constants.ts): same procedure roots, so it
-    // can run the counter's note and script.
-    for (const script of ["increment-note", "counter-script"]) {
-      await page.getByRole("link", { name: script }).first().click();
-      await expect(page).toHaveURL(/\/scripts\//);
-      await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
-      expect(await targetOptions(page)).toEqual([
-        "Counter Contract",
-        "Other Counter",
-        "Simulated account",
-      ]);
-    }
-  });
+  // The tutorials' counter is still the Rust one, whose procedure roots
+  // aren't the MASM counter's: it's a target again once plan 07 of
+  // spec/remove-rust redeploys it from this package (tutorial 6).
+  await test.step.skip(
+    "only the accounts with the procedures are targets",
+    async () => {
+      // The tutorials' counter was deployed from the same `counter-account`
+      // package as the example (lib/constants.ts): same procedure roots, so it
+      // can run the counter's note and script.
+      for (const script of ["increment-note", "counter-script"]) {
+        await page.getByRole("link", { name: script }).first().click();
+        await expect(page).toHaveURL(/\/scripts\//);
+        await editorConsole(page)
+          .getByRole("tab", { name: "Simulate" })
+          .click();
+        expect(await targetOptions(page)).toEqual([
+          "Counter Contract",
+          "Other Counter",
+          "Simulated account",
+        ]);
+      }
+    },
+  );
 
   await test.step("a note's storage is typed by its storage schema", async () => {
     await page.goto("/scripts");
@@ -1265,12 +1269,10 @@ test.fixme("script: simulate a note and a transaction script", async ({
 
   await test.step("the simulated account is the P2ID note's target", async () => {
     const storeBefore = await networkStoreAccounts(page);
-    // The template calls the Rust basic wallet's `receive-asset`
-    // (lib/tutorials/basic-wallet.ts), which none of the sandbox's accounts
-    // has: they carry the standard basic wallet, whose `receive_asset` has
-    // another root. The simulated account holds the note's `basic-wallet`
-    // dependency: it's preselected.
-    await expect(targetDropdown(page)).toHaveText("Simulated account");
+    // The template calls the standard basic wallet's `receive_asset` by its
+    // root, which the simulated account has: with no dependency, it holds
+    // the basic wallet only.
+    await selectTarget(page, "Simulated account");
     await expect(
       editorConsole(page).getByText(/It lacks procedures/),
     ).toHaveCount(0);
@@ -1375,105 +1377,117 @@ test.fixme("script: simulate a note and a transaction script", async ({
     await expect(row.getByRole("cell").last()).toHaveText(/^0\s*Invoke$/);
   });
 
-  await test.step("a note's foreign call reads a dependency marked as a foreign account", async () => {
-    // The note no longer calls its target: it reads the counter of the
-    // account its storage names, through FPI, and checks the count.
-    await page.getByRole("link", { name: "increment-note" }).first().click();
-    await expect(page).toHaveURL(/\/scripts\//);
-    await replaceInEditor(
-      page,
-      "struct IncrementNote;",
-      "struct IncrementNote {\n    counter_account_id: AccountId,\n    expected_count: Felt,\n}",
-    );
-    await replaceInEditor(
-      page,
-      "fn run(self, _arg: Word, account: &mut CounterAccount) {",
-      "fn run(self, _arg: Word) {\n        let account = CounterAccount::new(self.counter_account_id);",
-    );
-    await replaceInEditor(page, "account.increment_count();", "");
-    await replaceInEditor(
-      page,
-      "let expected_value = initial_value + felt!(1);",
-      "let expected_value = self.expected_count;",
-    );
-    await compileScript(page);
-    await selectTarget(page, "Simulated account");
-    // The dependency is a component of the simulated account until it's
-    // marked: then it's another account, staged on the mock chain.
-    await simulatedComponent(page, "counter-account")
-      .getByRole("switch", { name: "Foreign account" })
-      .click();
-    const foreign = editorConsole(page).getByRole("region", {
-      name: "Foreign account counter-account",
-    });
-    await foreign.getByRole("button", { name: "Add entry" }).click();
-    await foreign.getByLabel(`${SLOT} key 1`).fill("1");
-    await foreign.getByLabel(`${SLOT} value 1`).fill("7");
-    // The note's account field names it by a stand-in.
-    await editorConsole(page)
-      .locator("div")
-      .filter({ hasText: "counter-account-id" })
-      .last()
-      .getByRole("button", { name: "Select account" })
-      .click();
-    await page
-      .getByRole("menuitemradio", {
-        name: "counter-account (foreign account)",
-        exact: true,
-      })
-      .click();
-    const expected = editorConsole(page).getByLabel(/^expected-count/);
-    await expected.fill("7");
-    const dialog = await simulateOnThrowaway(page, "increment-note");
-    await expect(
-      dialog.getByText("1 note will be consumed", { exact: false }),
-    ).toBeVisible();
-    await expect(
-      dialog.getByText("Storage will not be changed."),
-    ).toBeVisible();
-    await dialog.getByRole("button", { name: "Close" }).first().click();
-    // Another count than the foreign account's fails the note's assertion.
-    // The log gives the staged account's id: a transaction script or a
-    // raw-felt note can only name it that way.
-    await expected.fill("8");
-    await simulateButton(page).click();
-    await expect(
-      editorConsole(page).getByText("Simulation of increment-note failed.", {
-        exact: true,
-      }),
-    ).toBeVisible();
-    await expect(
-      editorConsole(page)
-        .getByText(/Foreign account counter-account: 0x[0-9a-f]{30}/)
-        .last(),
-    ).toBeVisible();
-    // Back on the simulated account, the dependency isn't staged, and the
-    // field naming it says so.
-    await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
-    await foreign.getByRole("switch", { name: "Foreign account" }).click();
-    await expect(simulatedComponent(page, "counter-account")).toBeVisible();
-    await simulateButton(page).click();
-    await expect(
-      editorConsole(page).getByText(/which this run doesn't stage/),
-    ).toBeVisible();
-  });
-
-  await test.step("a plain wallet can't run the counter's scripts", async () => {
-    await importAccount(page, "Plain Wallet", WALLET_ACCOUNT_ID);
-    // Through the sidebar: a page load would wait for the wallet's sync. It
-    // has neither `get-count` nor `increment-count`. The note no longer
-    // calls its target since the step above: every account is its target.
-    for (const script of ["counter-script"]) {
-      await page.getByRole("link", { name: script }).first().click();
+  // Its edits are Rust: rewritten in MASM with tutorial 10's foreign call
+  // (plan 07 of spec/remove-rust).
+  await test.step.skip(
+    "a note's foreign call reads a dependency marked as a foreign account",
+    async () => {
+      // The note no longer calls its target: it reads the counter of the
+      // account its storage names, through FPI, and checks the count.
+      await page.getByRole("link", { name: "increment-note" }).first().click();
       await expect(page).toHaveURL(/\/scripts\//);
+      await replaceInEditor(
+        page,
+        "struct IncrementNote;",
+        "struct IncrementNote {\n    counter_account_id: AccountId,\n    expected_count: Felt,\n}",
+      );
+      await replaceInEditor(
+        page,
+        "fn run(self, _arg: Word, account: &mut CounterAccount) {",
+        "fn run(self, _arg: Word) {\n        let account = CounterAccount::new(self.counter_account_id);",
+      );
+      await replaceInEditor(page, "account.increment_count();", "");
+      await replaceInEditor(
+        page,
+        "let expected_value = initial_value + felt!(1);",
+        "let expected_value = self.expected_count;",
+      );
+      await compileScript(page);
+      await selectTarget(page, "Simulated account");
+      // The dependency is a component of the simulated account until it's
+      // marked: then it's another account, staged on the mock chain.
+      await simulatedComponent(page, "counter-account")
+        .getByRole("switch", { name: "Foreign account" })
+        .click();
+      const foreign = editorConsole(page).getByRole("region", {
+        name: "Foreign account counter-account",
+      });
+      await foreign.getByRole("button", { name: "Add entry" }).click();
+      await foreign.getByLabel(`${SLOT} key 1`).fill("1");
+      await foreign.getByLabel(`${SLOT} value 1`).fill("7");
+      // The note's account field names it by a stand-in.
+      await editorConsole(page)
+        .locator("div")
+        .filter({ hasText: "counter-account-id" })
+        .last()
+        .getByRole("button", { name: "Select account" })
+        .click();
+      await page
+        .getByRole("menuitemradio", {
+          name: "counter-account (foreign account)",
+          exact: true,
+        })
+        .click();
+      const expected = editorConsole(page).getByLabel(/^expected-count/);
+      await expected.fill("7");
+      const dialog = await simulateOnThrowaway(page, "increment-note");
+      await expect(
+        dialog.getByText("1 note will be consumed", { exact: false }),
+      ).toBeVisible();
+      await expect(
+        dialog.getByText("Storage will not be changed."),
+      ).toBeVisible();
+      await dialog.getByRole("button", { name: "Close" }).first().click();
+      // Another count than the foreign account's fails the note's assertion.
+      // The log gives the staged account's id: a transaction script or a
+      // raw-felt note can only name it that way.
+      await expected.fill("8");
+      await simulateButton(page).click();
+      await expect(
+        editorConsole(page).getByText("Simulation of increment-note failed.", {
+          exact: true,
+        }),
+      ).toBeVisible();
+      await expect(
+        editorConsole(page)
+          .getByText(/Foreign account counter-account: 0x[0-9a-f]{30}/)
+          .last(),
+      ).toBeVisible();
+      // Back on the simulated account, the dependency isn't staged, and the
+      // field naming it says so.
       await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
-      expect(await targetOptions(page)).toEqual([
-        "Counter Contract",
-        "Other Counter",
-        "Simulated account",
-      ]);
-    }
-  });
+      await foreign.getByRole("switch", { name: "Foreign account" }).click();
+      await expect(simulatedComponent(page, "counter-account")).toBeVisible();
+      await simulateButton(page).click();
+      await expect(
+        editorConsole(page).getByText(/which this run doesn't stage/),
+      ).toBeVisible();
+    },
+  );
+
+  // Lists the tutorials' counter as a target, and the note as edited by the
+  // skipped step above: back with them in plan 07 of spec/remove-rust.
+  await test.step.skip(
+    "a plain wallet can't run the counter's scripts",
+    async () => {
+      await importAccount(page, "Plain Wallet", WALLET_ACCOUNT_ID);
+      // Through the sidebar: a page load would wait for the wallet's sync. It
+      // has neither `get-count` nor `increment-count`. The note no longer
+      // calls its target since the step above: every account is its target.
+      for (const script of ["counter-script"]) {
+        await page.getByRole("link", { name: script }).first().click();
+        await expect(page).toHaveURL(/\/scripts\//);
+        await editorConsole(page)
+          .getByRole("tab", { name: "Simulate" })
+          .click();
+        expect(await targetOptions(page)).toEqual([
+          "Counter Contract",
+          "Other Counter",
+          "Simulated account",
+        ]);
+      }
+    },
+  );
 });
 
 // Compiles the open script, then shows its Simulate tab again.

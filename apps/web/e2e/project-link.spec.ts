@@ -51,8 +51,7 @@ test("a project link opens the scripts as copies and imports the accounts", asyn
   let scripts: { id: string; name: string }[] = [];
   let link = "";
 
-  // A sandbox holding a counter stands in for the Counter Contract example
-  // until plan 06 of spec/remove-rust rewrites it in MASM.
+  // A sandbox holding a counter, from the MASM template.
   await test.step("the author deploys a counter", async () => {
     await counterWorkspace(page);
     address = page.url().split("/").at(-1) ?? "";

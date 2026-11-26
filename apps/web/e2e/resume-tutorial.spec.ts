@@ -114,9 +114,7 @@ test("resume a tutorial left for an example or a sandbox", async ({ page }) => {
   logBrowserErrors(page);
   const wallet = await startTutorial1WithWallet(page);
 
-  // Every example is hidden until it's rewritten in MASM: the Counter
-  // Contract comes back in plan 06 of spec/remove-rust, and with it this step.
-  await test.step.skip("leave it for an example", async () => {
+  await test.step("leave it for an example", async () => {
     await launchExample(page, {
       title: "Counter Contract",
       accountName: "Counter Contract",

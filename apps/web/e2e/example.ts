@@ -2,12 +2,11 @@ import { expect, type Locator, type Page } from "@playwright/test";
 import { COMPILED, createCounterScript } from "./editor";
 import { selectOption, TRANSACTION_TIMEOUT } from "./tutorial";
 
-// A workspace holding a deployed counter, for the specs that launched the
-// Counter Contract example only to get one: the example is hidden until plan
-// 06 of spec/remove-rust rewrites it in MASM. Built from the Create Script
-// dialog's MASM counter template instead: the `counter-account` script,
-// compiled, and an account deployed from it, whose page it opens. Unlike the
-// example's, the workspace stays the network's sandbox (no `exampleId`).
+// A workspace holding a deployed counter, for the specs that need one but not
+// the Counter Contract example: built from the Create Script dialog's MASM
+// counter template, the `counter-account` script, compiled, and an account
+// deployed from it, whose page it opens. Unlike the example's, the workspace
+// stays the network's sandbox (no `exampleId`) and has no increment-note.
 export const counterWorkspace = async (
   page: Page,
   { accountName = "Counter Contract" }: { accountName?: string } = {},
