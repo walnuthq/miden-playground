@@ -22,13 +22,11 @@ const editorConsole = (page: Page) =>
 const consoleHeight = async (page: Page) =>
   (await editorConsole(page).boundingBox())?.height ?? 0;
 
-// Its tutorials (8 and 10) were written for Rust contracts: they're marked
-// `unavailable` until plan 07 of spec/remove-rust rewrites them in MASM.
-// Remove this with the last of their flags.
-test.fixme(
-  true,
-  "Tutorials 8 and 10 are being rewritten for Miden Assembly (spec/remove-rust plan 07)",
-);
+// Tutorial 10 was written for Rust contracts: it's marked `unavailable`
+// until plan 07 of spec/remove-rust rewrites it in MASM. Remove its test's
+// `test.fixme` with its flag.
+const REWRITING_10 =
+  "Tutorial 10 is being rewritten for Miden Assembly (spec/remove-rust plan 07)";
 
 // A tutorial's read-only script that can be simulated has a console, whose
 // bar takes height from the page above the closed tutorial panel: the source
@@ -37,6 +35,7 @@ test.fixme(
 test("mobile: a tutorial's read-only script fits the screen", async ({
   page,
 }) => {
+  test.fixme(true, REWRITING_10);
   logBrowserErrors(page);
   await startTutorial(page, "Foreign procedure invocation");
   await nextStep(page);
@@ -85,10 +84,9 @@ test("mobile: a tutorial's read-only script fits the screen", async ({
   await expectNoHorizontalOverflow(page);
 });
 
-// The Rust basic wallet's procedures take types the form doesn't know,
-// entered as raw felts: one input for a note index, a group of four for a
-// recipient (a word), two by two on a phone.
-test("mobile: raw felt arguments fit the screen", async ({ page }) => {
+// Tutorial 8's step 2 links to the built-in basic-wallet script, whose
+// procedures the P2ID note calls: its source fits a phone.
+test("mobile: tutorial 8's basic-wallet link", async ({ page }) => {
   logBrowserErrors(page);
   await startTutorial(page, "Timelock P2ID note");
   // Step 1 asks for a script: step 2 links to the wallet's.
@@ -101,39 +99,11 @@ test("mobile: raw felt arguments fit the screen", async ({ page }) => {
   await dialog.getByRole("button", { name: "Create" }).click();
   await expect(page).toHaveURL(/\/scripts\/[0-9a-z_-]+$/);
   await nextStep(page);
-  // Not `openLink`, which expects a script named as its id.
-  await tutorialPanel(page)
-    .root.locator("a")
-    .filter({ hasText: /^basic-wallet$/ })
-    .first()
-    .click();
-  await expect(page).toHaveURL(/\/scripts\/rust-basic-wallet$/);
+  await tutorialPanel(page).openLink(
+    "basic-wallet",
+    /\/scripts\/basic-wallet$/,
+  );
   await closePanel(page, 2);
-  await waitForEditorText(page, "fn create_note");
-  await editorConsole(page)
-    .getByRole("button", { name: "Restore console" })
-    .click();
-  await expect(
-    editorConsole(page).getByRole("button", { name: "Invoke create_note" }),
-  ).toBeVisible();
-  const recipient = editorConsole(page).getByRole("group", {
-    name: /^recipient/,
-  });
-  await expect(recipient).toContainText("recipient, 4 felts");
-  for (const name of ["a", "b", "c", "d"]) {
-    await expectWithinWidth(recipient.getByLabel(`recipient ${name}`));
-  }
-  await expectWithinWidth(
-    recipient.getByText(
-      "Entered as raw felts: the form doesn't know this type.",
-    ),
-  );
-  await expectWithinWidth(editorConsole(page).getByLabel(/^note_idx/));
-  // The longest name breaks: its row's button stays on the screen.
-  await expectWithinWidth(
-    editorConsole(page).getByRole("button", {
-      name: "Invoke move_asset_to_note",
-    }),
-  );
+  await waitForEditorText(page, "pub use {receive_asset}");
   await expectNoHorizontalOverflow(page);
 });

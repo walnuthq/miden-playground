@@ -5,8 +5,9 @@
 // tutorials have users add to a template (their "Add to my script" buttons,
 // lib/utils/tutorial-code.ts in the web app) is compiled too, so an SDK bump
 // that breaks a snippet fails here; an edit whose step relies on the typed
-// forms must keep the template's schema. Tutorials 8 to 12 add theirs as
-// they're rewritten in MASM (plan 07 of spec/remove-rust).
+// forms must keep the template's schema, and one whose step has the user
+// enter raw values must lose it. Tutorials 9 to 12 add theirs as they're
+// rewritten in MASM (plan 07 of spec/remove-rust).
 //
 // The home page's examples (examples/index.ts) are launched the same way
 // (POST /scripts/examples/:id): every package must compile, and one created
@@ -38,6 +39,7 @@ import {
   applyCodeEdits,
   type CodeEdit,
   increaseIncrementEdits,
+  timelockEdits,
 } from "../../web/lib/utils/tutorial-code.ts";
 import { exampleIds } from "../examples/ids.ts";
 import { sourceFilePath } from "../lib/source-file.ts";
@@ -71,11 +73,14 @@ const userDependencies: Partial<Record<ScriptExample, ScriptExample>> = {
 // The tutorials' edits, applied to the template their script is created from.
 // `keepsSchema`: the next steps use the typed forms, so the edited package
 // must keep the template's schema (the stale rule of lib/package-metadata.ts).
+// `losesNoteSchema`: the next steps tell the user which raw note storage
+// values to enter, so the edited note must have no typed form.
 const tutorialEdits: {
   label: string;
   example: ScriptExample;
   edits: CodeEdit[];
   keepsSchema?: boolean;
+  losesNoteSchema?: boolean;
 }[] = [
   {
     // Tutorial 7 deploys the edited counter with the typed storage form.
@@ -83,6 +88,13 @@ const tutorialEdits: {
     example: "counter-account",
     edits: increaseIncrementEdits,
     keepsSchema: true,
+  },
+  {
+    // Tutorial 8 creates the edited note from raw storage items.
+    label: "tutorial 8: the P2ID note's timelock",
+    example: "p2id-note",
+    edits: timelockEdits,
+    losesNoteSchema: true,
   },
 ];
 
@@ -231,7 +243,13 @@ for (const { type, example } of scripts) {
   }
 }
 
-for (const { label, example, edits, keepsSchema } of tutorialEdits) {
+for (const {
+  label,
+  example,
+  edits,
+  keepsSchema,
+  losesNoteSchema,
+} of tutorialEdits) {
   const script = await createScript(scriptExamples[example].type, example);
   try {
     const edited = applyCodeEdits(source(script), edits);
@@ -249,7 +267,9 @@ for (const { label, example, edits, keepsSchema } of tutorialEdits) {
     );
     const mismatch = keepsSchema
       ? schemaMismatch(example, edited, metadata)
-      : null;
+      : losesNoteSchema && metadata?.noteStorage
+        ? "the edited note kept its note storage schema"
+        : null;
     if (status !== "compiled") {
       failures.push(label);
       console.error(`FAIL  ${label}\n${stderr}\n`);

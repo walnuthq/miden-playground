@@ -11,8 +11,8 @@ import {
   timelockEdits,
 } from "./tutorial-code.ts";
 
-// The API's Rust templates, which the tutorials' scripts were created from:
-// tutorial 12, then tutorial 8 (tutorial 7 is MASM's now). They went with the switch to MASM,
+// The API's Rust template that tutorial 12's script was created from
+// (tutorials 7 and 8 are MASM's now). It went with the switch to MASM,
 // and the snippets with tutorials 6 to 12 (unavailable until plan 07 of
 // spec/remove-rust rewrites each): the tests that edit them are skipped
 // until then.
@@ -26,9 +26,8 @@ const read = (path: string) => {
 
 const counterAccount = read("../../../api/templates/counter-account.rs");
 const counterAccountMasm = read("../../../api/templates/counter-account.masm");
-const p2idNote = read("../../../api/templates/p2id-note.rs");
-const skip =
-  counterAccount === "" || p2idNote === "" ? RUST_TEMPLATES_GONE : false;
+const p2idNoteMasm = read("../../../api/templates/p2id-note.masm");
+const skip = counterAccount === "" ? RUST_TEMPLATES_GONE : false;
 
 // Every edit applies, then reads as applied, and applying it again changes
 // nothing.
@@ -75,82 +74,67 @@ describe("tutorial code edits", () => {
     );
   });
 
-  test(
-    "tutorial 8: the timelock, from the note's input to the check",
-    { skip },
-    () => {
-      const edited = expectEditsApply(p2idNote, timelockEdits);
-      assert.match(
-        edited,
-        /\nuse miden::\{account, felt_repr::ToFeltRepr, note, tx, AccountId, Felt, Recipient, Word\};\n/,
-      );
-      // After the target account: the storage items follow the fields' order.
-      assert.match(
-        edited,
-        /\nstruct P2idNote \{\n {4}target_account_id: AccountId,\n {4}timelock_height: Felt,\n\}\n/,
-      );
-      assert.match(
-        edited,
-        /\n {4}pub fn build_recipient\(\n {8}target: AccountId,\n {8}serial_num: Word,\n {8}timelock_height: Felt,\n {4}\) -> Recipient \{\n {8}let inputs = P2idNote \{\n {12}target_account_id: target,\n {12}timelock_height,\n {8}\};\n/,
-      );
-      // Before the target check, a blank line apart.
-      assert.match(
-        edited,
-        /\n( +)pub fn script\(self, _arg: Word, account: &mut Wallet\) \{\n\1 {4}let block_number = tx::get_reference_block_number\(\);\n\1 {4}assert!\(block_number\.as_felt\(\) >= self\.timelock_height\);\n\n\1 {4}let current_account = account\.get_id\(\);\n/,
-      );
-    },
-  );
-
-  test(
-    "tutorial 8: a later snippet adds the earlier ones it needs",
-    { skip },
-    () => {
-      // The field's button imports `Felt` too.
-      const withField = applyCodeEdits(p2idNote, timelockEdits, 1);
-      assert.ok(withField !== null);
-      assert.deepEqual(
-        timelockEdits.map((edit) => edit.applied(withField)),
-        [true, true, false, false, false, false],
-      );
-      // The check's button adds everything before it.
-      const withCheck = applyCodeEdits(p2idNote, timelockEdits, 5);
-      assert.equal(withCheck, applyCodeEdits(p2idNote, timelockEdits));
-    },
-  );
-
-  test("tutorial 8: each part is told apart from the others", { skip }, () => {
-    const [imports, field, parameter, literal] = timelockEdits;
-    assert.ok(imports && field && parameter && literal);
-    // The constructor's parameter and struct literal aren't the struct's
-    // field, nor the other way around.
-    const constructorOnly = applyCodeEdits(
-      p2idNote,
-      [imports, parameter, literal],
-      2,
+  test("tutorial 8: the timelock, from the import to the check", () => {
+    const edited = expectEditsApply(p2idNoteMasm, timelockEdits);
+    assert.match(
+      edited,
+      /\nuse miden::protocol::active_note\nuse miden::protocol::tx\n/,
     );
-    assert.ok(constructorOnly !== null);
-    assert.equal(field.applied(constructorOnly), false);
-    const fieldOnly = applyCodeEdits(p2idNote, timelockEdits, 1);
-    assert.ok(fieldOnly !== null);
-    assert.equal(parameter.applied(fieldOnly), false);
-    assert.equal(literal.applied(fieldOnly), false);
-    // A field declared before the target account changes the storage order.
+    assert.match(
+      edited,
+      /\nconst ERR_P2ID_WRONG_TARGET = .*\n\nconst ERR_P2ID_TIMELOCKED = "P2ID note is timelocked until its timelock height"\n/,
+    );
+    // The count and its message both say 3.
+    assert.match(edited, /\nconst NUM_STORAGE_ITEMS = 3\n/);
+    assert.match(edited, /expects exactly 3 note storage items"/);
+    // The third item, after the target account's prefix and suffix.
+    assert.match(
+      edited,
+      /\nconst TARGET_ACCOUNT_ID_SUFFIX_PTR = STORAGE_PTR \+ 1\nconst TIMELOCK_HEIGHT_PTR = STORAGE_PTR \+ 2\n/,
+    );
+    // After the storage count's check, before the target's, indented as
+    // the procedure's body.
+    assert.match(
+      edited,
+      /\n {4}eq\.NUM_STORAGE_ITEMS assert\.err=ERR_P2ID_WRONG_NUMBER_OF_STORAGE_ITEMS\n {4}# => \[\]\n\n {4}# the timelock height, then the transaction's reference block\n {4}mem_load\.TIMELOCK_HEIGHT_PTR exec\.tx::get_reference_block_number\n {4}# => \[block_number, timelock_height\]\n\n {4}lte assert\.err=ERR_P2ID_TIMELOCKED\n {4}# => \[\]\n\n {4}# the target account's id\n/,
+    );
+  });
+
+  test("tutorial 8: a later snippet adds the earlier ones it needs", () => {
+    const withCount = applyCodeEdits(p2idNoteMasm, timelockEdits, 2);
+    assert.ok(withCount !== null);
+    assert.deepEqual(
+      timelockEdits.map((edit) => edit.applied(withCount)),
+      [true, true, true, false, false, false],
+    );
+    // The check's button adds everything before it.
     assert.equal(
-      field.applied(
-        p2idNote.replace(
-          "    target_account_id: AccountId,\n}",
-          "    timelock_height: Felt,\n    target_account_id: AccountId,\n}",
-        ),
-      ),
+      applyCodeEdits(p2idNoteMasm, timelockEdits, 5),
+      applyCodeEdits(p2idNoteMasm, timelockEdits),
+    );
+  });
+
+  test("tutorial 8: typed by hand", () => {
+    const [imports, count, pointer] = timelockEdits;
+    assert.ok(imports && count && pointer);
+    // Another storage count isn't the timelock's.
+    assert.equal(count.applied(p2idNoteMasm), false);
+    assert.equal(
+      count.applied(p2idNoteMasm.replace("ITEMS = 2", "ITEMS = 4")),
       false,
     );
-    // Imports written by hand: a glob, or one name per line.
-    assert.equal(imports.applied("use miden::*;"), true);
+    // The height must be the third item, after the target account.
     assert.equal(
-      imports.applied("use miden::{\n    note,\n    tx,\n    Felt,\n};"),
+      pointer.applied("const TIMELOCK_HEIGHT_PTR = STORAGE_PTR + 0"),
+      false,
+    );
+    assert.equal(
+      pointer.applied("const TIMELOCK_HEIGHT_PTR = STORAGE_PTR + 2"),
       true,
     );
-    assert.equal(imports.applied("use miden::{note, Felt};"), false);
+    // An import elsewhere in the file, its own line.
+    assert.equal(imports.applied("use miden::protocol::tx\n"), true);
+    assert.equal(imports.applied("use miden::protocol::tx_kernel\n"), false);
   });
 
   test("tutorial 12: reset_count in the trait and the impl", { skip }, () => {

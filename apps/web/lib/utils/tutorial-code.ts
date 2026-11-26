@@ -82,120 +82,82 @@ export const increaseIncrementEdits: CodeEdit[] = [
   },
 ];
 
-// Tutorial 8: the timelock in the P2ID note script, each edit after the ones
-// it needs to compile: the imports (0) and the note's new input (1), the
-// constructor's parameter (2) and struct literal (3), the block number (4)
-// and its check (5) in the script. The regexes of `applied` are the step's
-// own completion check.
+// Tutorial 8: the timelock in the P2ID note script
+// (apps/api/templates/p2id-note.masm), each edit after the ones it needs to
+// compile: the `tx` module (0), a third storage item (1) and its pointer (2),
+// the error the check fails with (3), then in `main` the two values the check
+// compares (4) and the check (5). The regexes of `applied` are the step's own
+// completion check.
 
-// The names imported by the script's `use miden::{…};`.
-const MIDEN_IMPORTS = /use\s+miden::\{([^}]*)\}\s*;/;
-
-const midenImports = (source: string) =>
-  (MIDEN_IMPORTS.exec(source)?.[1] ?? "")
-    .split(",")
-    .map((name) => name.trim())
-    .filter((name) => name !== "");
-
-// Adds `name` after `after`, where the template's order puts it.
-const withImport = (names: string[], name: string, after: string) => {
-  if (names.includes(name)) {
-    return names;
-  }
-  const index = names.indexOf(after);
-  return index === -1 ? [...names, name] : names.toSpliced(index + 1, 0, name);
-};
+const NUM_STORAGE_ITEMS = /^([ \t]*const\s+NUM_STORAGE_ITEMS\s*=\s*)(\d+)\b/m;
+const WRONG_NUMBER_MESSAGE = /(expects exactly )(\d+)( note storage items)/;
 
 export const timelockEdits: CodeEdit[] = [
   {
-    applied: (source) => {
-      const names = midenImports(source);
-      return (
-        (names.includes("tx") && names.includes("Felt")) ||
-        /use\s+miden::\*\s*;/.test(source)
-      );
-    },
-    apply: (source) => {
-      if (!MIDEN_IMPORTS.test(source)) {
-        return null;
-      }
-      const names = withImport(
-        withImport(midenImports(source), "tx", "note"),
-        "Felt",
-        "AccountId",
-      );
-      return source.replace(MIDEN_IMPORTS, `use miden::{${names.join(", ")}};`);
-    },
-  },
-  {
-    // After the target account: the note's inputs follow the fields' order,
-    // which the next step's storage items rely on.
-    applied: (source) =>
-      /struct\s+P2idNote\s*\{[^}]*\btarget_account_id\s*:\s*AccountId\b[^}]*\btimelock_height\s*:\s*Felt\b/.test(
-        source,
-      ),
-    apply: (source) =>
-      insertAfterLine(source, /target_account_id\s*:\s*AccountId\s*,/, [
-        "timelock_height: Felt,",
-      ]),
-  },
-  {
-    applied: (source) =>
-      /fn\s+build_recipient\s*\([^)]*\btimelock_height\s*:\s*Felt\b/.test(
-        source,
-      ),
-    // One parameter per line, as rustfmt lays out a signature that no longer
-    // fits on one.
-    apply: (source) => {
-      const match = /^([ \t]*)(.*\bfn\s+build_recipient\s*)\(([^)]*)\)/m.exec(
-        source,
-      );
-      if (!match) {
-        return null;
-      }
-      const [signature, indent = "", head = "", parameters = ""] = match;
-      const lines = [...parameters.split(","), "timelock_height: Felt"]
-        .map((parameter) => parameter.trim())
-        .filter((parameter) => parameter !== "")
-        .map((parameter) => `${indent}    ${parameter},`);
-      return source.replace(
-        signature,
-        `${indent}${head}(\n${lines.join("\n")}\n${indent})`,
-      );
-    },
-  },
-  {
-    // The struct literal, not the struct's or the impl's own block.
-    applied: (source) =>
-      /(?<!\b(?:struct|impl)\s+)\bP2idNote\s*\{[^}]*\btimelock_height\b/.test(
-        source,
-      ),
-    apply: (source) =>
-      insertAfterLine(source, /target_account_id\s*:\s*target\s*,/, [
-        "timelock_height,",
-      ]),
-  },
-  {
-    applied: (source) =>
-      /let\s+block_number\s*=\s*tx::get_reference_block_number\(\)\s*;/.test(
-        source,
-      ),
-    apply: (source) =>
-      insertAfterLine(source, /fn\s+script\s*\([^)]*\)\s*\{/, [
-        "    let block_number = tx::get_reference_block_number();",
-      ]),
-  },
-  {
-    applied: (source) =>
-      /assert!\s*\(\s*block_number\.as_felt\(\)\s*>=\s*self\.timelock_height\s*\)\s*;/.test(
-        source,
-      ),
-    // A blank line after it sets the timelock apart from the target check.
+    applied: (source) => /^\s*use\s+miden::protocol::tx\s*$/m.test(source),
     apply: (source) =>
       insertAfterLine(
         source,
-        /let\s+block_number\s*=\s*tx::get_reference_block_number\(\)\s*;/,
-        ["assert!(block_number.as_felt() >= self.timelock_height);", ""],
+        /^[ \t]*use\s+miden::protocol::active_note\b.*$/m,
+        ["use miden::protocol::tx"],
+      ),
+  },
+  {
+    // The count the script checks, and the message it fails with.
+    applied: (source) => NUM_STORAGE_ITEMS.exec(source)?.[2] === "3",
+    apply: (source) =>
+      NUM_STORAGE_ITEMS.test(source)
+        ? source
+            .replace(NUM_STORAGE_ITEMS, "$13")
+            .replace(WRONG_NUMBER_MESSAGE, "$13$3")
+        : null,
+  },
+  {
+    // After the target account: the height is the third item, after the
+    // prefix and the suffix, which the next step's storage items rely on.
+    applied: (source) =>
+      /\bconst\s+TIMELOCK_HEIGHT_PTR\s*=\s*STORAGE_PTR\s*\+\s*2\b/.test(source),
+    apply: (source) =>
+      insertAfterLine(
+        source,
+        /^[ \t]*const\s+TARGET_ACCOUNT_ID_SUFFIX_PTR\s*=.*$/m,
+        ["const TIMELOCK_HEIGHT_PTR = STORAGE_PTR + 2"],
+      ),
+  },
+  {
+    applied: (source) => /\bconst\s+ERR_P2ID_TIMELOCKED\s*=/.test(source),
+    apply: (source) =>
+      insertAfterLine(source, /^[ \t]*const\s+ERR_P2ID_WRONG_TARGET\s*=.*$/m, [
+        "",
+        'const ERR_P2ID_TIMELOCKED = "P2ID note is timelocked until its timelock height"',
+      ]),
+  },
+  {
+    applied: (source) =>
+      /\bmem_load\.TIMELOCK_HEIGHT_PTR\s+exec\.tx::get_reference_block_number\b/.test(
+        source,
+      ),
+    // After the storage count's check, and the stack comment under it.
+    apply: (source) =>
+      insertAfterLine(
+        source,
+        /^[ \t]*eq\.NUM_STORAGE_ITEMS\s+assert\b.*\n[ \t]*# => \[\]/m,
+        [
+          "",
+          "# the timelock height, then the transaction's reference block",
+          "mem_load.TIMELOCK_HEIGHT_PTR exec.tx::get_reference_block_number",
+          "# => [block_number, timelock_height]",
+        ],
+      ),
+  },
+  {
+    applied: (source) =>
+      /\blte\s+assert\.err=ERR_P2ID_TIMELOCKED\b/.test(source),
+    apply: (source) =>
+      insertAfterLine(
+        source,
+        /^[ \t]*# => \[block_number, timelock_height\]/m,
+        ["", "lte assert.err=ERR_P2ID_TIMELOCKED", "# => []"],
       ),
   },
 ];

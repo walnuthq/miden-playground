@@ -3,10 +3,9 @@ import type { State } from "@/lib/types/state";
 import { midenFaucetAccount } from "@/lib/utils/account";
 import { defaultState } from "@/lib/utils/state";
 
-// The Rust basic wallet that came with the tutorial was deleted at the
-// switch to MASM: a MASM note calls the standard wallet's `receive_asset`,
-// which the built-in Basic Wallet has. The tutorial is unavailable until
-// plan 07 of spec/remove-rust rewrites it.
+// The built-in scripts: step 3 deploys the Test Wallet with the No Auth and
+// Basic Wallet components, the standard wallet's `receive_asset` that the
+// P2ID note calls.
 const state: State = {
   ...defaultState(),
   accounts: [midenFaucetAccount("mtst")],
