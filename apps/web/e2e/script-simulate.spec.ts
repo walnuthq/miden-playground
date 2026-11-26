@@ -7,7 +7,10 @@ import {
   TRANSACTION_TIMEOUT,
 } from "./tutorial";
 
-const SLOT = "counter_account::counter_contract::count_map";
+// The counter template's map (apps/api/templates/counter-account.masm), and
+// its description in the template's storage schema.
+const SLOT = "counter_account::count_map";
+const SLOT_DESCRIPTION = "The count, under the key [1, 0, 0, 0].";
 
 // What the log says of a procedure that spends more than the vault holds:
 // the kernel's bare error code, explained (`targetErrorHint`,
@@ -15,7 +18,7 @@ const SLOT = "counter_account::counter_contract::count_map";
 const VAULT_SHORT = /The account's vault holds less of the asset/;
 
 // The Count Reader's slot, which `copy_count` sets to the counter's count.
-const COUNT_SLOT = "count_reader::count_reader::count";
+const COUNT_SLOT = "count_reader::count";
 
 // What a foreign call's account argument says of the sandbox's accounts
 // (`SANDBOX_FOREIGN_ACCOUNT_REASON` in lib/simulation/blocked.ts).
@@ -31,6 +34,85 @@ const OTHER_ACCOUNT_ADDRESS =
 // (`TESTNET_FAUCET_FUNDER_ACCOUNT_ID` in lib/constants.ts). It's busy: a page
 // load after importing it waits minutes for the sync, so import it last.
 const WALLET_ACCOUNT_ID = "0x4e6fb40fd2f6a55140df2c42dfb5b7";
+
+// Where the spec adds procedures to the counter template: before its first.
+const FIRST_PROCEDURE = "#! Returns the current count.\n";
+
+// Two procedures on the counter: one reads the vault, one moves an asset from
+// it to a new private note.
+const VAULT_IMPORTS = `use {Asset} from miden::protocol::types
+use miden::protocol::active_account
+use miden::protocol::output_note
+`;
+const VAULT_PROCEDURES = `#! Returns the vault's balance of the asset's faucet.
+@account_procedure
+pub proc balance(asset: Asset) -> felt
+    exec.active_account::get_asset
+    # => [ASSET_VALUE, ASSET_VALUE, pad(8)]
+    exec.sys::truncate_stack
+end
+
+#! Moves the asset from the vault to a new private note.
+@account_procedure
+pub proc send(asset: Asset)
+    push.14.13.12.11 push.0 push.0
+    # => [tag, note_type, RECIPIENT, ASSET_ID, ASSET_VALUE, pad(8)]
+    exec.output_note::create
+    # => [note_idx, ASSET_ID, ASSET_VALUE, pad(8)]
+    movdn.8
+    dupw.1 dupw.1
+    exec.native_account::remove_asset dropw
+    exec.output_note::add_asset
+    exec.sys::truncate_stack
+end
+
+`;
+
+// Procedures whose parameters the forms enter in every way: a struct the
+// source defines, an account id, integers below a felt, an enum, a word, a
+// \`u64\`.
+const RAW_IMPORTS = `use {AccountId, NoteRecipient, NoteTag, NoteType} from miden::protocol::types
+use miden::protocol::active_account
+use miden::protocol::output_note
+`;
+const RAW_PROCEDURES = `#! Two felts, laid out as an account id is.
+pub type Pair = struct { first: felt, second: felt }
+
+@account_procedure
+pub proc prefix_of(id: AccountId) -> felt
+    drop
+end
+
+@account_procedure
+pub proc suffix_of(id: AccountId) -> felt
+    swap drop
+end
+
+#! One when the pair's felts are the id's, in its fields' order.
+@account_procedure
+pub proc same_id(id: AccountId, pair: Pair) -> felt
+    movup.2 eq movdn.2 eq and
+end
+
+#! Each argument's felt as a digit.
+@account_procedure
+pub proc pick(pair: Pair, idx: u16, last: felt) -> felt
+    push.1000 mul swap push.100 mul add swap push.10 mul add add
+end
+
+#! The basic wallet's \`create_note\`.
+@account_procedure
+pub proc create_note(tag: NoteTag, note_type: NoteType, recipient: NoteRecipient) -> u16
+    exec.output_note::create
+end
+
+#! A u64's limbs as digits: its low limb, then its high one.
+@account_procedure
+pub proc scalar(big: u64) -> felt
+    push.10 mul add
+end
+
+`;
 
 const editorConsole = (page: Page) =>
   page.getByRole("region", { name: "Editor Console" });
@@ -108,16 +190,15 @@ test("script: simulate an account component", async ({ page }) => {
     await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
     await expect(invoke(page, "get_count")).toBeEnabled();
     await expect(procedureRow(page, "get_count")).toContainText("Read-only");
+    await expect(
+      procedureRow(page, "get_count").getByText("proc get_count() -> Felt"),
+    ).toBeVisible();
   });
 
-  await test.step("the package's storage schema lists its slots", async () => {
+  await test.step("the template's storage schema lists its slots", async () => {
     // The counter's map, with its description, and no slot to add by hand.
     await expect(editorConsole(page).getByText(SLOT)).toBeVisible();
-    await expect(
-      editorConsole(page).getByText(
-        "counter contract storage map (word → felt)",
-      ),
-    ).toBeVisible();
+    await expect(editorConsole(page).getByText(SLOT_DESCRIPTION)).toBeVisible();
     await expect(editorConsole(page).getByLabel("New slot name")).toHaveCount(
       0,
     );
@@ -126,21 +207,18 @@ test("script: simulate an account component", async ({ page }) => {
     ).toHaveCount(0);
     // The map starts empty: the count reads zero.
     await invoke(page, "get_count").click();
-    await expect(
-      procedureRow(page, "get_count").getByRole("cell").nth(2),
-    ).toHaveText("0");
+    await expect(procedureResult(page, "get_count")).toHaveText("0");
   });
 
   await test.step("a read-only procedure returns the storage's value", async () => {
+    // Under the key [1, 0, 0, 0]: a felt is a word's first element.
     await editorConsole(page)
       .getByRole("button", { name: "Add entry" })
       .click();
     await editorConsole(page).getByLabel(`${SLOT} key 1`).fill("1");
     await editorConsole(page).getByLabel(`${SLOT} value 1`).fill("5");
     await invoke(page, "get_count").click();
-    await expect(
-      procedureRow(page, "get_count").getByRole("cell").nth(2),
-    ).toHaveText("5");
+    await expect(procedureResult(page, "get_count")).toHaveText("5");
   });
 
   await test.step("a state change shows its effects, without a submit", async () => {
@@ -157,9 +235,7 @@ test("script: simulate an account component", async ({ page }) => {
     await dialog.getByRole("button", { name: "Close" }).first().click();
     // Nothing was saved: the next run starts from the same storage.
     await invoke(page, "get_count").click();
-    await expect(
-      procedureRow(page, "get_count").getByRole("cell").nth(2),
-    ).toHaveText("5");
+    await expect(procedureResult(page, "get_count")).toHaveText("5");
   });
 
   await test.step("applying the result chains the next run", async () => {
@@ -172,9 +248,7 @@ test("script: simulate an account component", async ({ page }) => {
       "6",
     );
     await invoke(page, "get_count").click();
-    await expect(
-      procedureRow(page, "get_count").getByRole("cell").nth(2),
-    ).toHaveText("6");
+    await expect(procedureResult(page, "get_count")).toHaveText("6");
   });
 
   await test.step("an invalid value blocks the runs", async () => {
@@ -210,14 +284,10 @@ test("script: simulate an account component", async ({ page }) => {
   });
 
   await test.step("an edit blocks the runs until the next compile", async () => {
-    await replaceInEditor(page, "felt!(1);", "felt!(2);");
+    await replaceInEditor(page, "    add.1\n", "    add.2\n");
     await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
     await expect(invoke(page, "get_count")).toBeDisabled();
-    await page.getByRole("button", { name: "Compile" }).click();
-    await expect(page.getByText(COMPILED).last()).toBeVisible({
-      timeout: TRANSACTION_TIMEOUT,
-    });
-    await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
+    await compileScript(page);
     // The slot's edits were kept; the recompiled procedure adds 2.
     await expect(editorConsole(page).getByLabel(`${SLOT} value 1`)).toHaveValue(
       "6",
@@ -234,43 +304,15 @@ test("script: simulate an account component", async ({ page }) => {
   });
 
   await test.step("a procedure spends the vault it starts from", async () => {
-    // Two procedures on the counter: one reads the vault, one moves an asset
-    // from it to a new note. None of the examples' components spends from a
-    // procedure call (the Bank's `withdraw` needs a note's sender).
     await replaceInEditor(
       page,
-      "use miden::{component, component_storage, felt, Felt, StorageMap, Word};",
-      `use miden::{
-    active_account, component, component_storage, felt, native_account, output_note, Asset,
-    Felt, NoteType, Recipient, StorageMap, Tag, Word,
-};`,
+      "use miden::protocol::active_account\n",
+      VAULT_IMPORTS,
     );
     await replaceInEditor(
       page,
-      "fn increment_count(&mut self) -> Felt;",
-      `fn increment_count(&mut self) -> Felt;
-    /// Returns the vault's balance of the asset's faucet.
-    #[account_procedure]
-    fn balance(&self, asset: Asset) -> Felt;
-    /// Moves the asset from the vault to a new private note.
-    #[account_procedure]
-    fn send(&mut self, asset: Asset);`,
-    );
-    await replaceInEditor(
-      page,
-      "impl CounterContract for CounterContractStorage {",
-      `impl CounterContract for CounterContractStorage {
-    fn balance(&self, asset: Asset) -> Felt {
-        active_account::get_asset(asset.id)[0]
-    }
-
-    fn send(&mut self, asset: Asset) {
-        let recipient = Recipient::from(Word::new([felt!(11), felt!(12), felt!(13), felt!(14)]));
-        let note_idx = output_note::create(Tag::from(felt!(0)), NoteType::from(felt!(0)), recipient);
-        native_account::remove_asset(asset);
-        output_note::add_asset(asset, note_idx);
-    }
-`,
+      FIRST_PROCEDURE,
+      `${VAULT_PROCEDURES}${FIRST_PROCEDURE}`,
     );
     await compileScript(page);
     // An empty vault by default: the account starts as before, with no seed.
@@ -281,9 +323,7 @@ test("script: simulate an account component", async ({ page }) => {
     // A read-only procedure sees the seeded balance.
     await setAssetArgument(page, "balance", "SIM", "1");
     await invoke(page, "balance").click();
-    await expect(
-      procedureRow(page, "balance").getByRole("cell").nth(2),
-    ).toHaveText("1000");
+    await expect(procedureResult(page, "balance")).toHaveText("1000");
     // A transaction that spends: the changes are shown against the seeded
     // vault, at nonce 1.
     await setAssetArgument(page, "send", "SIM", "400");
@@ -305,17 +345,13 @@ test("script: simulate an account component", async ({ page }) => {
       assetRows(page, "Vault").getByLabel("Vault amount 1"),
     ).toHaveValue("600");
     await invoke(page, "balance").click();
-    await expect(
-      procedureRow(page, "balance").getByRole("cell").nth(2),
-    ).toHaveText("600");
+    await expect(procedureResult(page, "balance")).toHaveText("600");
     // A simulated asset of the script's own: another faucet.
     await newAsset(page, "Vault", "USDC");
     await addAsset(page, "Vault", "USDC", "25");
     await setAssetArgument(page, "balance", "USDC", "1");
     await invoke(page, "balance").click();
-    await expect(
-      procedureRow(page, "balance").getByRole("cell").nth(2),
-    ).toHaveText("25");
+    await expect(procedureResult(page, "balance")).toHaveText("25");
     // An invalid row blocks the runs.
     await assetRows(page, "Vault").getByLabel("Vault amount 2").fill("2.5");
     await expect(invoke(page, "balance")).toBeDisabled();
@@ -332,23 +368,72 @@ test("script: simulate an account component", async ({ page }) => {
     await expect(
       editorConsole(page).getByText(VAULT_SHORT).last(),
     ).toBeVisible();
-    await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
+  });
+
+  await test.step("a renamed slot drops the schema: the slots are raw", async () => {
+    // The template's schema names `counter_account::count_map`: a source
+    // that declares another slot keeps no schema (plan 02's stale rule).
+    await replaceInEditor(
+      page,
+      `word("${SLOT}")`,
+      'word("counter_account::renamed_map")',
+    );
+    await compileScript(page);
+    await expect(editorConsole(page).getByText(SLOT_DESCRIPTION)).toHaveCount(
+      0,
+    );
+    // The schema's slot stays, with its values, as a slot added by hand.
+    await editorConsole(page)
+      .getByRole("button", { name: `Remove slot ${SLOT}` })
+      .click();
+    await expect(editorConsole(page).getByText(SLOT)).toHaveCount(0);
+    const name = editorConsole(page).getByLabel("New slot name");
+    await expect(name).toBeVisible();
+    await expect(name).toHaveAttribute(
+      "placeholder",
+      "counter_account::slot_name",
+    );
+    // A slot added by hand, as the source names it, reaches the procedure.
+    await name.fill("counter_account::renamed_map");
+    await editorConsole(page)
+      .getByRole("combobox", { name: "New slot type" })
+      .click();
+    await page.getByRole("option", { name: "Map" }).click();
+    await editorConsole(page).getByRole("button", { name: "Add slot" }).click();
+    await editorConsole(page)
+      .getByRole("button", { name: "Add entry" })
+      .click();
+    await editorConsole(page)
+      .getByLabel("counter_account::renamed_map key 1")
+      .fill("1");
+    await editorConsole(page)
+      .getByLabel("counter_account::renamed_map value 1")
+      .fill("9");
+    await invoke(page, "get_count").click();
+    await expect(procedureResult(page, "get_count")).toHaveText("9");
+  });
+});
+
+test("script: simulate a foreign call", async ({ page }) => {
+  logBrowserErrors(page);
+
+  await test.step("the counter, as the template ships it", async () => {
+    // Its package has the commitment the Count Reader's built-in dependency
+    // names: the dependency resolves to it.
+    await createCounterScript(page);
+    await compileScript(page);
   });
 
   await test.step("a foreign call runs against a staged account", async () => {
     // The Count Reader's `copy_count` reads the counter through FPI: the
     // counter is staged on the mock chain from the script's `counter-account`
     // dependency, with the storage set in the tab.
-    await page.goto("/scripts");
-    await page.getByRole("button", { name: "Create new script" }).click();
-    const create = page
-      .getByRole("dialog")
-      .filter({ hasText: "Create Script" });
-    await create.getByLabel("Name").fill("count-reader");
-    await selectOption(page, "Type", "Account Component");
-    await selectOption(page, "Example", "Count Reader");
-    await create.getByRole("button", { name: "Create" }).click();
-    await expect(page).toHaveURL(/\/scripts\/[0-9a-z_-]+$/);
+    await createExampleScript(
+      page,
+      "count-reader",
+      "Account Component",
+      "Count Reader",
+    );
     // The example depends on `counter-account` on its own, under the API's
     // built-in id: the workspace's script of that name isn't offered again.
     await page.getByRole("tab", { name: "Manifest" }).click();
@@ -367,12 +452,8 @@ test("script: simulate an account component", async ({ page }) => {
     await page.getByRole("option", { name: "basic-wallet" }).click();
     await dependency.getByRole("button", { name: "Cancel" }).click();
     await expect(dependency).toBeHidden();
-    await page.getByRole("button", { name: "Compile" }).click();
-    await expect(page.getByText(COMPILED).last()).toBeVisible({
-      timeout: TRANSACTION_TIMEOUT,
-    });
-    await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
-    // The argument and the signature are named from the package's WIT.
+    await compileScript(page);
+    // The argument and the signature are named from the source.
     await expect(
       procedureArguments(page, "copy_count")
         .locator("label")
@@ -380,16 +461,17 @@ test("script: simulate an account component", async ({ page }) => {
     ).toBeVisible();
     await expect(
       procedureRow(page, "copy_count").getByText(
-        "fn copy_count(counter_account_id: AccountId)",
+        "proc copy_count(counter_account_id: AccountId)",
       ),
     ).toBeVisible();
-    // The workspace's `counter-account` was edited since: the dependency
-    // resolves to the package the web app embeds, with its storage schema.
+    // The workspace's counter, with the template's storage schema.
     const foreign = foreignAccount(page, "counter-account");
     await expect(foreign.getByText(SLOT)).toBeVisible();
     await foreign.getByRole("button", { name: "Add entry" }).click();
     await foreign.getByLabel(`${SLOT} key 1`).fill("1");
     await foreign.getByLabel(`${SLOT} value 1`).fill("7");
+    // The account id reaches the kernel's FPI as `[suffix, prefix]`: another
+    // order names no account, and the call fails.
     await selectCopyCountAccount(page, "counter-account");
     await copyCount(page, "7");
     // An edit is a new account, staged at the next run.
@@ -439,9 +521,7 @@ test("script: simulate an account component", async ({ page }) => {
       editorConsole(page).getByText(/The simulation's client crashed/),
     ).toBeVisible({ timeout: 30_000 });
     await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
-    await expect(
-      procedureRow(page, "copy_count").getByRole("cell").nth(2),
-    ).toHaveText("Failed");
+    await expect(procedureResult(page, "copy_count")).toHaveText("Failed");
     // The next run gets a new client, on which the counter is staged again.
     // The import's page load dropped the slot edits, which live in memory.
     const foreign = foreignAccount(page, "counter-account");
@@ -453,9 +533,7 @@ test("script: simulate an account component", async ({ page }) => {
     await page.getByRole("link", { name: "counter-account" }).first().click();
     await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
     await invoke(page, "get_count").click();
-    await expect(
-      procedureRow(page, "get_count").getByRole("cell").nth(2),
-    ).toHaveText("0");
+    await expect(procedureResult(page, "get_count")).toHaveText("0");
   });
 
   await test.step("after a crash, a note gets a new simulated account and asset", async () => {
@@ -465,15 +543,7 @@ test("script: simulate an account component", async ({ page }) => {
       .first()
       .click();
     await expect(page).toHaveURL(/\/scripts$/);
-    await page.getByRole("button", { name: "Create new script" }).click();
-    const create = page
-      .getByRole("dialog")
-      .filter({ hasText: "Create Script" });
-    await create.getByLabel("Name").fill("p2id-note");
-    await selectOption(page, "Type", "Note Script");
-    await selectOption(page, "Example", "P2ID Note");
-    await create.getByRole("button", { name: "Create" }).click();
-    await expect(page).toHaveURL(/\/scripts\/[0-9a-z_-]+$/);
+    await createExampleScript(page, "p2id-note", "Note Script", "P2ID Note");
     await page.getByRole("button", { name: "Compile" }).click();
     await expect(page.getByText(COMPILED).last()).toBeVisible({
       timeout: TRANSACTION_TIMEOUT,
@@ -502,8 +572,8 @@ test("script: simulate an account component", async ({ page }) => {
   });
 
   await test.step("a compile without names falls back to positions", async () => {
-    // As if api-compile found no names (an older api-compile, a package
-    // without its WIT): the argument is `param_0`, the signature types only.
+    // As if api-compile found no names (an older api-compile): the argument
+    // is `param_0`, the signature types only.
     await page
       .getByRole("link", { name: "Scripts", exact: true })
       .first()
@@ -519,7 +589,7 @@ test("script: simulate an account component", async ({ page }) => {
         .filter({ hasText: /^param_0/ }),
     ).toBeVisible();
     await expect(
-      procedureRow(page, "copy_count").getByText("fn copy_count(AccountId)"),
+      procedureRow(page, "copy_count").getByText("proc copy_count(AccountId)"),
     ).toBeVisible();
   });
 
@@ -529,15 +599,12 @@ test("script: simulate an account component", async ({ page }) => {
       .first()
       .click();
     await expect(page).toHaveURL(/\/scripts$/);
-    await page.getByRole("button", { name: "Create new script" }).click();
-    const create = page
-      .getByRole("dialog")
-      .filter({ hasText: "Create Script" });
-    await create.getByLabel("Name").fill("counter-script");
-    await selectOption(page, "Type", "Transaction Script");
-    await selectOption(page, "Example", "Counter Script");
-    await create.getByRole("button", { name: "Create" }).click();
-    await expect(page).toHaveURL(/\/scripts\/[0-9a-z_-]+$/);
+    await createExampleScript(
+      page,
+      "counter-script",
+      "Transaction Script",
+      "Counter Script",
+    );
     await page.getByRole("tab", { name: "Manifest" }).click();
     await page.getByRole("button", { name: "Add dependency" }).click();
     const dependency = page
@@ -547,11 +614,11 @@ test("script: simulate an account component", async ({ page }) => {
     await dependency.getByRole("button", { name: "Add", exact: true }).click();
     await expect(dependency).toBeHidden();
     await compileScript(page);
-    // The workspace's counter, which adds 2 since its last compile. No
-    // sandbox account has it: the simulated account is preselected.
+    // The workspace's counter, which adds 1. No sandbox account has it: the
+    // simulated account is preselected.
     await expect(targetDropdown(page)).toHaveText("Simulated account");
     const dialog = await simulateOnThrowaway(page, "counter-script");
-    await expect(afterValue(dialog)).toHaveText(shownFelt(2));
+    await expect(afterValue(dialog)).toHaveText(shownFelt(1));
     await dialog.getByRole("button", { name: "Close" }).first().click();
   });
 
@@ -560,7 +627,7 @@ test("script: simulate an account component", async ({ page }) => {
     // workspace's, and isn't one the web app embeds.
     await page.getByRole("link", { name: "counter-account" }).first().click();
     await expect(page).toHaveURL(/\/scripts\//);
-    await replaceInEditor(page, "felt!(2);", "felt!(3);");
+    await replaceInEditor(page, "    add.1\n", "    add.3\n");
     await compileScript(page);
     await page.getByRole("link", { name: "counter-script" }).first().click();
     await expect(page).toHaveURL(/\/scripts\//);
@@ -583,6 +650,29 @@ test("script: simulate an account component", async ({ page }) => {
   });
 });
 
+// Creates a script from one of the Create dialog's examples.
+const createExampleScript = async (
+  page: Page,
+  name: string,
+  type: string,
+  example: string,
+) => {
+  // Not again on the page: after an import, a page load waits for its sync.
+  if (!page.url().endsWith("/scripts")) {
+    await page.goto("/scripts");
+  }
+  const button = page.getByRole("button", { name: "Create new script" });
+  // The app shell shows it disabled until the client is ready.
+  await expect(button).toBeEnabled({ timeout: TRANSACTION_TIMEOUT });
+  await button.click();
+  const create = page.getByRole("dialog").filter({ hasText: "Create Script" });
+  await create.getByLabel("Name").fill(name);
+  await selectOption(page, "Type", type);
+  await selectOption(page, "Example", example);
+  await create.getByRole("button", { name: "Create" }).click();
+  await expect(page).toHaveURL(/\/scripts\/[0-9a-z_-]+$/);
+};
+
 // The result cell of a procedure's row.
 const procedureResult = (page: Page, procedure: string) =>
   procedureRow(page, procedure).getByRole("cell").nth(2);
@@ -595,105 +685,47 @@ const pickSimFaucet = async (page: Page, procedure: string) => {
     .click();
 };
 
-test("script: raw felts for the arguments the form can't type", async ({
-  page,
-}) => {
+test("script: the arguments of every type", async ({ page }) => {
   logBrowserErrors(page);
 
-  await test.step("a counter with a record, a note index, the wallet's note types", async () => {
+  await test.step("a counter with a struct, an account id, integers, an enum and a u64", async () => {
     await createCounterScript(page);
     await replaceInEditor(
       page,
-      "use miden::{component, component_storage, felt, Felt, StorageMap, Word};",
-      `use miden::{
-    component, component_storage, export_type, felt, output_note, AccountId, Felt, NoteIdx,
-    NoteType, Recipient, StorageMap, Tag, Word,
-};
-
-/// Two felts, laid out as an account id is.
-#[export_type]
-#[derive(Clone, Copy)]
-pub struct Pair {
-    /// The first felt.
-    pub first: Felt,
-    /// The second felt.
-    pub second: Felt,
-}`,
+      "use miden::protocol::active_account\n",
+      RAW_IMPORTS,
     );
     await replaceInEditor(
       page,
-      "fn increment_count(&mut self) -> Felt;",
-      `fn increment_count(&mut self) -> Felt;
-    #[account_procedure]
-    fn prefix_of(&self, id: AccountId) -> Felt;
-    #[account_procedure]
-    fn suffix_of(&self, id: AccountId) -> Felt;
-    /// One when the pair's felts are the id's, in its fields' order.
-    #[account_procedure]
-    fn same_id(&self, id: AccountId, pair: Pair) -> Felt;
-    /// Each argument's felt as a digit.
-    #[account_procedure]
-    fn pick(&self, pair: Pair, idx: NoteIdx, last: Felt) -> Felt;
-    /// The basic wallet's \`create_note\`.
-    #[account_procedure]
-    fn create_note(&mut self, tag: Tag, note_type: NoteType, recipient: Recipient) -> NoteIdx;
-    #[account_procedure]
-    fn scalar(&self, big: u64) -> Felt;`,
-    );
-    await replaceInEditor(
-      page,
-      "impl CounterContract for CounterContractStorage {",
-      `impl CounterContract for CounterContractStorage {
-    fn prefix_of(&self, id: AccountId) -> Felt {
-        id.prefix
-    }
-
-    fn suffix_of(&self, id: AccountId) -> Felt {
-        id.suffix
-    }
-
-    fn same_id(&self, id: AccountId, pair: Pair) -> Felt {
-        if pair.first == id.prefix && pair.second == id.suffix {
-            felt!(1)
-        } else {
-            felt!(0)
-        }
-    }
-
-    fn pick(&self, pair: Pair, idx: NoteIdx, last: Felt) -> Felt {
-        pair.first * felt!(1000) + pair.second * felt!(100) + idx.inner * felt!(10) + last
-    }
-
-    fn create_note(&mut self, tag: Tag, note_type: NoteType, recipient: Recipient) -> NoteIdx {
-        output_note::create(tag, note_type, recipient)
-    }
-
-    fn scalar(&self, big: u64) -> Felt {
-        let _ = big;
-        felt!(3)
-    }
-`,
+      FIRST_PROCEDURE,
+      `${RAW_PROCEDURES}${FIRST_PROCEDURE}`,
     );
     await compileScript(page);
   });
 
-  await test.step("an untyped argument is entered as its layout's felts", async () => {
+  await test.step("a struct is entered as its layout's felts", async () => {
     const args = procedureArguments(page, "pick");
-    // A record of two felts: a group, one input per field. A note index: one
-    // felt, one input.
+    // A struct of two felts: a group, one input per field. A u16: one
+    // bounded felt.
     const pair = args.getByRole("group", { name: /^pair/ });
-    await expect(pair).toContainText("pair, 2 felts");
-    await expect(args.getByText("note-idx, 1 felt")).toBeVisible();
+    await expect(pair).toContainText("Pair, 2 felts");
+    await expect(args.getByText("u16", { exact: true })).toBeVisible();
     await expect(
       args.getByText("Entered as raw felts: the form doesn't know this type."),
-    ).toHaveCount(2);
+    ).toHaveCount(1);
     await expect(args.getByText(/aren't supported yet/)).toHaveCount(0);
     await expect(invoke(page, "pick")).toBeDisabled();
     await pair.getByLabel("pair first").fill("1");
     await pair.getByLabel("pair second").fill("2");
-    await args.getByLabel(/^idx/).fill("3");
-    await expect(invoke(page, "pick")).toBeDisabled();
+    // Above a u16: flagged, and the run is blocked.
+    await args.getByLabel(/^idx/).fill("65536");
     await args.getByLabel(/^last/).fill("4");
+    await expect(args.getByLabel(/^idx/)).toHaveAttribute(
+      "aria-invalid",
+      "true",
+    );
+    await expect(invoke(page, "pick")).toBeDisabled();
+    await args.getByLabel(/^idx/).fill("3");
     await expect(invoke(page, "pick")).toBeEnabled();
     // Not a felt: flagged, and the run is blocked.
     await pair.getByLabel("pair second").fill("two");
@@ -725,46 +757,51 @@ pub struct Pair {
     expect(prefix).not.toBe(suffix);
     const args = procedureArguments(page, "same_id");
     await pickSimFaucet(page, "same_id");
-    await args.getByLabel("pair first").fill(prefix);
-    await args.getByLabel("pair second").fill(suffix);
+    // An `AccountId` is `{ suffix, prefix }`.
+    await args.getByLabel("pair first").fill(suffix);
+    await args.getByLabel("pair second").fill(prefix);
     await invoke(page, "same_id").click();
     await expect(procedureResult(page, "same_id")).toHaveText("1");
     // The other way round isn't.
-    await args.getByLabel("pair first").fill(suffix);
-    await args.getByLabel("pair second").fill(prefix);
+    await args.getByLabel("pair first").fill(prefix);
+    await args.getByLabel("pair second").fill(suffix);
     await invoke(page, "same_id").click();
     await expect(procedureResult(page, "same_id")).toHaveText("0");
   });
 
-  await test.step("the wallet's create_note runs from raw felts", async () => {
+  await test.step("the wallet's create_note runs from typed fields", async () => {
     const args = procedureArguments(page, "create_note");
-    // Named from the WIT: the manifest lays a tag out as a note index, a
-    // recipient as a word.
-    await expect(args.getByText("tag, 1 felt")).toBeVisible();
-    await expect(args.getByText("note-type, 1 felt")).toBeVisible();
-    await expect(args.getByText("recipient, 4 felts")).toBeVisible();
+    // The source's type names, the manifest's layouts: a tag is a u32, a
+    // note type an enum, a recipient a word.
+    await expect(args.getByText("NoteTag (u32)")).toBeVisible();
+    await expect(
+      args.getByText("NoteType (0 PRIVATE, 1 PUBLIC)"),
+    ).toBeVisible();
     await args.getByLabel(/^tag/).fill("0");
+    await args.getByLabel(/^recipient/).fill(`0x${"0b".repeat(32)}`);
+    // Not a note type.
+    await args.getByLabel(/^note_type/).fill("2");
+    await expect(invoke(page, "create_note")).toBeDisabled();
     await args.getByLabel(/^note_type/).fill("0");
-    for (const [index, name] of ["a", "b", "c", "d"].entries()) {
-      await args.getByLabel(`recipient ${name}`).fill(String(11 + index));
-    }
     await invoke(page, "create_note").click();
     const dialog = page
       .getByRole("dialog")
       .filter({ hasText: "Simulation of create_note" });
-    // A note index isn't a type the result is decoded as: its felt.
-    await expect(dialog.getByText("Returned: [0]")).toBeVisible();
+    // The note's index, a u16, in decimal.
+    await expect(dialog.getByText("Returned: 0")).toBeVisible();
     await expect(dialog.getByText(/1 note\s*will be created/)).toBeVisible();
     await dialog.getByRole("button", { name: "Close" }).first().click();
   });
 
-  await test.step("a type whose layout isn't felts stays unsupported", async () => {
-    await expect(
-      procedureArguments(page, "scalar").getByText(
-        "big: arguments of type u64 aren't supported yet.",
-      ),
-    ).toBeVisible();
-    await expect(invoke(page, "scalar")).toBeDisabled();
+  await test.step("a u64 is entered as its two limbs", async () => {
+    const args = procedureArguments(page, "scalar");
+    const big = args.getByRole("group", { name: /^big/ });
+    await expect(big).toContainText("u64, 2 felts");
+    await big.getByLabel("big lo").fill("1");
+    await big.getByLabel("big hi").fill("2");
+    // The low limb on top, as miden-core-lib takes a u64.
+    await invoke(page, "scalar").click();
+    await expect(procedureResult(page, "scalar")).toHaveText("12");
   });
 });
 
@@ -1025,7 +1062,12 @@ const simulate = async (page: Page, script: string) => {
   return dialog;
 };
 
-test("script: simulate a note and a transaction script", async ({ page }) => {
+// It launches the Counter Contract example, which answers 404 until plan 06
+// of spec/remove-rust rewrites it in MASM, and its edits are Rust: plan 06
+// turns it on again.
+test.fixme("script: simulate a note and a transaction script", async ({
+  page,
+}) => {
   logBrowserErrors(page);
 
   await test.step("launch the counter contract example", async () => {

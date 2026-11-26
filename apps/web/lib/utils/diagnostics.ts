@@ -1,120 +1,96 @@
-// Compile errors as api-compile returns them: the message of the failed
-// `cargo miden build`, which ends with rustc's rendered diagnostics. midenc
-// runs cargo with `--message-format json-render-diagnostics` but keeps only the
-// artifacts from the JSON, so this text is all there is to parse:
+// A compile's diagnostics, as api-compile answers them for a MASM project (the
+// MASM wire format, in the verifier repo's spec/remove-rust/README.md): a list
+// of `{ severity, message, file?, line?, column?, length?, label?, help? }`,
+// which the editor's markers and the console's counts read, and `stderr`, the
+// same diagnostics as the assembler renders them (miette's ASCII theme),
+// which the console shows:
 //
-//   error[E0425]: cannot find value `missing_key` in this scope
-//     --> src/lib.rs:44:32
-//      |
-//   44 |         self.count_map.get(missing_key)
-//      |                            ^^^^^^^^^^^ not found in this scope
-//      |
-//      = help: …
+//     x invalid syntax: invalid instruction `addd` or malformed operands
+//      ,-[counter-account/counter_account.masm:49:5]
+//   48 |
+//   49 |     addd.1
+//      :     ^^^|^^
+//      :        `-- invalid instruction `addd` or malformed operands
+//      `----
+//
+// The assembler stops at the first failing phase, so a failed build usually
+// has one error.
+import type { Diagnostic, Script } from "../types/script.ts";
+import { sourceFilePath } from "./script-files.ts";
 
-export type DiagnosticSeverity = "error" | "warning";
+export type DiagnosticSeverity = Diagnostic["severity"];
 
-export type Diagnostic = {
+// A diagnostic placed in the script's source, for an editor marker.
+export type LocatedDiagnostic = {
   severity: DiagnosticSeverity;
-  // The header's message, followed by its `help:` and `note:` lines.
+  // The message, its label when it says more, and its help.
   message: string;
-  // rustc's error code, e.g. E0425.
-  code?: string;
-  // Relative to the package's directory, e.g. src/lib.rs.
-  file: string;
   // 1-based, like Monaco. `endColumn` is exclusive, and undefined when the
-  // span's width isn't known (e.g. a span over several lines).
+  // span's length isn't known.
   line: number;
   column: number;
   endColumn?: number;
 };
 
-// oxlint-disable-next-line no-control-regex -- ANSI escapes.
-export const ANSI_ESCAPE = /\u001b\[[0-9;]*m/g;
-const HEADER = /^(error|warning)(?:\[(E\d+)\])?: (.+)$/;
-const LOCATION = /^\s*--> (.+):(\d+):(\d+)$/;
-// An annotation line: the gutter without a line number, e.g. `   |    ^^^ …`.
-const ANNOTATION = /^\s*\|/;
-// The primary span is underlined with carets (secondary ones with dashes). On
-// a span over several lines, they end a `|___^` connector instead.
-const CARETS = /(_?)(\^+)/;
-const HELP = /^\s*(?:= )?((?:help|note): .+)$/;
+// The source's path as the build names it: api-compile builds each package in
+// its own directory, named after the package.
+export const diagnosticSourcePath = ({ name }: Pick<Script, "name">) =>
+  `${name}/${sourceFilePath(name)}`;
 
-export const parseDiagnostics = (output: string): Diagnostic[] => {
-  const diagnostics: Diagnostic[] = [];
-  let current: Omit<Diagnostic, "file" | "line" | "column"> | undefined;
-  let located: Diagnostic | undefined;
-  // Past a `help:` or `note:` line, annotations belong to its suggestion.
-  let spanDone = false;
-  for (const line of output.replace(ANSI_ESCAPE, "").split("\n")) {
-    const header = HEADER.exec(line);
-    if (header) {
-      const [, severity, code, message = ""] = header;
-      current = {
-        severity: severity as DiagnosticSeverity,
-        message,
-        ...(code && { code }),
-      };
-      located = undefined;
-      spanDone = false;
-      continue;
+export const diagnosticMessage = ({ message, label, help }: Diagnostic) =>
+  [
+    message,
+    // `invalid syntax: invalid instruction …` is labelled `invalid
+    // instruction …`.
+    label && !message.includes(label) ? label : undefined,
+    help && `help: ${help}`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+// The diagnostics in the script's own source, where the editor marks them.
+// One in another file (a dependency's) or without a position shows in the
+// console only.
+export const sourceDiagnostics = (
+  diagnostics: Diagnostic[],
+  script: Pick<Script, "name">,
+): LocatedDiagnostic[] => {
+  const path = diagnosticSourcePath(script);
+  return diagnostics.flatMap((diagnostic) => {
+    const { severity, file, line, column, length } = diagnostic;
+    if (file !== path || !line || !column) {
+      return [];
     }
-    if (!current) {
-      continue;
-    }
-    if (!located) {
-      // Only the first location is the diagnostic's own. Headers without one
-      // (e.g. `error: could not compile …`) are summaries: never added.
-      const location = LOCATION.exec(line);
-      if (location) {
-        const [, file = "", lineNumber, column] = location;
-        located = {
-          ...current,
-          file,
-          line: Number(lineNumber),
-          column: Number(column),
-        };
-        diagnostics.push(located);
-      }
-      continue;
-    }
-    const help = HELP.exec(line);
-    if (help) {
-      located.message += `\n${help[1]}`;
-      spanDone = true;
-      continue;
-    }
-    if (!spanDone && ANNOTATION.test(line)) {
-      const carets = CARETS.exec(line);
-      if (carets) {
-        // A connector's caret only marks where a multi-line span ends.
-        if (!carets[1]) {
-          located.endColumn = located.column + (carets[2]?.length ?? 1);
-        }
-        spanDone = true;
-      }
-    }
-  }
-  return diagnostics;
+    return [
+      {
+        severity,
+        message: diagnosticMessage(diagnostic),
+        line,
+        column,
+        ...(length && { endColumn: column + length }),
+      },
+    ];
+  });
 };
 
-// The severity of a diagnostic's header line (`error[E0425]: …`,
-// `warning: …`), to color it in the console. Undefined for any other line.
+// How many errors and warnings a compile reports, positioned or not.
+export const countDiagnostics = (diagnostics: Diagnostic[] = []) => ({
+  errors: diagnostics.filter(({ severity }) => severity === "error").length,
+  warnings: diagnostics.filter(({ severity }) => severity === "warning").length,
+});
+
+// A report's header line in miette's ASCII theme: `  x …` for an error,
+// `  ! …` for a warning, `  i …` for advice (a warning on the wire), with
+// `Error: `, `Warning: ` or `Advice: ` before it for a related report.
+const HEADER = /^(?:(?:Error|Warning|Advice): )?\s{2}([x!i]) \S/;
+
+// The severity of a report's header line, to color it in the console.
+// Undefined for any other line.
 export const outputLineSeverity = (
   line: string,
-): DiagnosticSeverity | undefined =>
-  HEADER.exec(line.replace(ANSI_ESCAPE, ""))?.[1] as
-    | DiagnosticSeverity
-    | undefined;
-
-// How many errors and warnings an output reports, from its located
-// diagnostics (summaries such as `could not compile …` aren't counted).
-export const countDiagnostics = (output: string) => {
-  const diagnostics = parseDiagnostics(output);
-  return {
-    errors: diagnostics.filter(({ severity }) => severity === "error").length,
-    warnings: diagnostics.filter(({ severity }) => severity === "warning")
-      .length,
-  };
+): DiagnosticSeverity | undefined => {
+  const mark = HEADER.exec(line)?.[1];
+  return mark === undefined ? undefined : mark === "x" ? "error" : "warning";
 };
 
 export type OutputPart =
@@ -122,17 +98,26 @@ export type OutputPart =
   | { text: string; line: number; column: number }
   | { text: string; href: string };
 
-// A location in the script's file, not preceded by a path (`../dep/src/lib.rs`
-// is another package's file), or a web link (e.g. an error code's docs).
-const LINK =
-  /(?<![\w./-])src\/lib\.rs:(\d+):(\d+)|https:\/\/[^\s`'"<>]+[^\s`'"<>.,;:)]/g;
+const escapeRegExp = (text: string) =>
+  text.replaceAll(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-// Splits compiler output around the locations in the script's file and web
-// links, so they can be rendered as links to the editor or the web.
-export const splitLocations = (text: string): OutputPart[] => {
+const WEB_LINK = /https:\/\/[^\s`'"<>]+[^\s`'"<>.,;:)\]]/.source;
+
+// Splits compiler output around the locations in the script's source
+// (`counter-account/counter_account.masm:49:5`, not preceded by a path: a
+// dependency's directory is another package's) and web links, so they can be
+// rendered as links to the editor or the web.
+export const splitLocations = (
+  text: string,
+  script: Pick<Script, "name">,
+): OutputPart[] => {
+  const link = new RegExp(
+    `(?<![\\w./-])${escapeRegExp(diagnosticSourcePath(script))}:(\\d+):(\\d+)|${WEB_LINK}`,
+    "g",
+  );
   const parts: OutputPart[] = [];
   let index = 0;
-  for (const match of text.matchAll(LINK)) {
+  for (const match of text.matchAll(link)) {
     if (match.index > index) {
       parts.push({ text: text.slice(index, match.index) });
     }

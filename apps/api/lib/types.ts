@@ -148,6 +148,11 @@ export const defaultProcedureExport = (): ProcedureExport => ({
 
 export type Export = { Procedure: ProcedureExport };
 
+// An export of a manifest as api-compile answers it: a procedure, or a type
+// the source declares `pub` (`{ Type: { path, ty } }`), which carries no
+// signature.
+export type ManifestExport = Export | { Type: unknown; Procedure?: undefined };
+
 export type PackageDependency = {
   name: string;
   kind: string;
@@ -210,4 +215,7 @@ export type CompiledPackage = Pick<
   files: ScriptFiles;
 };
 
-export type Manifest = { exports: Export[]; dependencies: PackageDependency[] };
+export type Manifest = {
+  exports: ManifestExport[];
+  dependencies: PackageDependency[];
+};

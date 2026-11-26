@@ -139,6 +139,7 @@ const reducer = (state: State, action: ScriptAction): State => {
         procedureExports,
         error,
         warnings,
+        diagnostics,
         dependencies,
         metadata,
       } = script;
@@ -157,6 +158,7 @@ const reducer = (state: State, action: ScriptAction): State => {
                 procedureExports,
                 error,
                 warnings,
+                diagnostics,
                 dependencies,
                 metadata,
                 updatedAt: Date.now(),

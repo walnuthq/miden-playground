@@ -1,0 +1,17 @@
+{
+  "name": "counter-script",
+  "source": "# A transaction script that increments the counter of the account that runs\n# it. It calls the counter's procedures, so it needs them: add your\n# counter-account script as a dependency.\n\nuse counter_account\n\n#! Increments the executing account's count by one.\n#!\n#! Inputs:  []\n#! Outputs: []\n@transaction_script\npub proc main()\n    # `call` runs an account procedure on the top 16 elements of the stack,\n    # and puts its 16 outputs in their place\n    call.counter_account::increment_count\n    # => [new_count, pad(15)]\n\n    # the new count isn't needed\n    drop\n    # => [pad(16)]\nend\n",
+  "status": "error",
+  "diagnostics": [
+    {
+      "severity": "error",
+      "message": "undefined item 'counter_account'",
+      "file": "counter-script/counter_script.masm",
+      "line": 5,
+      "column": 5,
+      "length": 15,
+      "help": "you might be missing an import, or the containing library has not been linked"
+    }
+  ],
+  "stderr": "  x undefined item 'counter_account'\n   ,-[counter-script/counter_script.masm:5:5]\n 4 | \n 5 | use counter_account\n   :     ^^^^^^^^^^^^^^^\n 6 | \n   `----\n  help: you might be missing an import, or the containing library has not been linked\n"
+}

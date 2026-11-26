@@ -148,10 +148,7 @@ test("script: the Explorer's files and tabs", async ({ page }) => {
   });
 });
 
-// The console's links to the assembler's diagnostics come with plan 04 of
-// spec/remove-rust (the diagnostics reader): the parser still reads rustc's
-// rendering.
-test.fixme("script: a console link reopens the source", async ({ page }) => {
+test("script: a console link reopens the source", async ({ page }) => {
   logBrowserErrors(page);
   const { tabs, tab, close } = explorer(page);
   await createScript(page, "explorer-link");
