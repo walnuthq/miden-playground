@@ -1,0 +1,417 @@
+{
+  "//": "Procedure exports as the local api-compile builds them, through the API: plan 02 of spec/remove-rust templates, and probe-types (its source below), which declares a parameter of each kind. Re-capture them when miden-assembly changes how it lays out types.",
+  "templates": {
+    "counter-account": [
+      {
+        "path": "::counter_account::get_count",
+        "signature": {
+          "abi": 3,
+          "params": [],
+          "results": ["Felt"]
+        },
+        "parameters": [],
+        "readOnly": true,
+        "callsForeign": false
+      },
+      {
+        "path": "::counter_account::increment_count",
+        "signature": {
+          "abi": 3,
+          "params": [],
+          "results": ["Felt"]
+        },
+        "parameters": [],
+        "readOnly": false,
+        "callsForeign": false
+      }
+    ],
+    "count-reader": [
+      {
+        "path": "::count_reader::copy_count",
+        "signature": {
+          "abi": 3,
+          "params": [
+            {
+              "Struct": {
+                "name": "AccountId",
+                "repr": "Default",
+                "size": 8,
+                "fields": [
+                  {
+                    "name": "suffix",
+                    "index": 0,
+                    "align": 4,
+                    "offset": 0,
+                    "ty": "Felt"
+                  },
+                  {
+                    "name": "prefix",
+                    "index": 1,
+                    "align": 4,
+                    "offset": 4,
+                    "ty": "Felt"
+                  }
+                ]
+              }
+            }
+          ],
+          "results": []
+        },
+        "parameters": [
+          {
+            "name": "counter_account_id",
+            "type": "AccountId"
+          }
+        ],
+        "readOnly": false,
+        "callsForeign": true
+      }
+    ],
+    "counter-script": [
+      {
+        "path": "::counter_script::main",
+        "signature": {
+          "abi": 3,
+          "params": [],
+          "results": []
+        },
+        "parameters": [],
+        "readOnly": null,
+        "callsForeign": null
+      }
+    ],
+    "counter-note": [
+      {
+        "path": "::counter_note::main",
+        "signature": {
+          "abi": 3,
+          "params": [],
+          "results": []
+        },
+        "parameters": [],
+        "readOnly": null,
+        "callsForeign": null
+      }
+    ],
+    "basic-wallet": [
+      {
+        "path": "::basic_wallet::create_note",
+        "signature": {
+          "abi": 3,
+          "params": [
+            "U32",
+            {
+              "Enum": {
+                "name": "NoteType",
+                "discriminant": "U8",
+                "variants": [
+                  {
+                    "name": "PRIVATE",
+                    "discriminant_value": 0,
+                    "value": null
+                  },
+                  {
+                    "name": "PUBLIC",
+                    "discriminant_value": 1,
+                    "value": null
+                  }
+                ],
+                "offsets": [0, 0],
+                "size": 1,
+                "align": 1
+              }
+            },
+            {
+              "Array": {
+                "ty": "Felt",
+                "len": 4
+              }
+            }
+          ],
+          "results": ["U16"]
+        },
+        "parameters": [
+          {
+            "name": "tag",
+            "type": "NoteTag"
+          },
+          {
+            "name": "note_type",
+            "type": "NoteType"
+          },
+          {
+            "name": "recipient",
+            "type": "NoteRecipient"
+          }
+        ],
+        "readOnly": false,
+        "callsForeign": false
+      },
+      {
+        "path": "::basic_wallet::move_asset_to_note",
+        "signature": {
+          "abi": 3,
+          "params": [
+            {
+              "Struct": {
+                "name": "Asset",
+                "repr": "Default",
+                "size": 32,
+                "fields": [
+                  {
+                    "name": "id",
+                    "index": 0,
+                    "align": 4,
+                    "offset": 0,
+                    "ty": {
+                      "Array": {
+                        "ty": "Felt",
+                        "len": 4
+                      }
+                    }
+                  },
+                  {
+                    "name": "value",
+                    "index": 1,
+                    "align": 4,
+                    "offset": 16,
+                    "ty": {
+                      "Array": {
+                        "ty": "Felt",
+                        "len": 4
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "U16"
+          ],
+          "results": []
+        },
+        "parameters": [
+          {
+            "name": "asset",
+            "type": "Asset"
+          },
+          {
+            "name": "note_idx",
+            "type": "u16"
+          }
+        ],
+        "readOnly": false,
+        "callsForeign": false
+      },
+      {
+        "path": "::basic_wallet::receive_asset",
+        "signature": {
+          "abi": 3,
+          "params": [
+            {
+              "Struct": {
+                "name": "Asset",
+                "repr": "Default",
+                "size": 32,
+                "fields": [
+                  {
+                    "name": "id",
+                    "index": 0,
+                    "align": 4,
+                    "offset": 0,
+                    "ty": {
+                      "Array": {
+                        "ty": "Felt",
+                        "len": 4
+                      }
+                    }
+                  },
+                  {
+                    "name": "value",
+                    "index": 1,
+                    "align": 4,
+                    "offset": 16,
+                    "ty": {
+                      "Array": {
+                        "ty": "Felt",
+                        "len": 4
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "results": []
+        },
+        "parameters": [
+          {
+            "name": "asset",
+            "type": "Asset"
+          }
+        ],
+        "readOnly": false,
+        "callsForeign": false
+      }
+    ],
+    "auth-no-auth": [
+      {
+        "path": "::auth_no_auth::auth_no_auth",
+        "signature": {
+          "abi": 3,
+          "params": [
+            {
+              "Array": {
+                "ty": "Felt",
+                "len": 4
+              }
+            }
+          ],
+          "results": []
+        },
+        "parameters": [
+          {
+            "name": "auth_args",
+            "type": "AuthArgs"
+          }
+        ],
+        "readOnly": false,
+        "callsForeign": true
+      }
+    ],
+    "p2id-note": [
+      {
+        "path": "::p2id_note::main",
+        "signature": {
+          "abi": 3,
+          "params": [],
+          "results": []
+        },
+        "parameters": [],
+        "readOnly": false,
+        "callsForeign": false
+      }
+    ]
+  },
+  "probe-types": {
+    "source": "# Parameters of every kind the forms read.\n\npub type Pair = struct { first: felt, second: felt }\n\npub type WithU64 = struct { amount: u64, flag: i1 }\n\n#! Takes one parameter of each kind.\n@account_procedure\npub proc probe(small: u8, wide: u64, flag: i1, pair: Pair, mixed: WithU64) -> i1\n    dropw dropw drop drop push.1\nend\n\n#! Returns a struct.\n@account_procedure\npub proc pair() -> Pair\n    push.2 push.1\nend\n",
+    "exports": [
+      {
+        "path": "::probe_types::pair",
+        "signature": {
+          "abi": 3,
+          "params": [],
+          "results": [
+            {
+              "Struct": {
+                "name": "Pair",
+                "repr": "Default",
+                "size": 8,
+                "fields": [
+                  {
+                    "name": "first",
+                    "index": 0,
+                    "align": 4,
+                    "offset": 0,
+                    "ty": "Felt"
+                  },
+                  {
+                    "name": "second",
+                    "index": 1,
+                    "align": 4,
+                    "offset": 4,
+                    "ty": "Felt"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "parameters": [],
+        "readOnly": true,
+        "callsForeign": false
+      },
+      {
+        "path": "::probe_types::probe",
+        "signature": {
+          "abi": 3,
+          "params": [
+            "U8",
+            "U64",
+            "I1",
+            {
+              "Struct": {
+                "name": "Pair",
+                "repr": "Default",
+                "size": 8,
+                "fields": [
+                  {
+                    "name": "first",
+                    "index": 0,
+                    "align": 4,
+                    "offset": 0,
+                    "ty": "Felt"
+                  },
+                  {
+                    "name": "second",
+                    "index": 1,
+                    "align": 4,
+                    "offset": 4,
+                    "ty": "Felt"
+                  }
+                ]
+              }
+            },
+            {
+              "Struct": {
+                "name": "WithU64",
+                "repr": "Default",
+                "size": 12,
+                "fields": [
+                  {
+                    "name": "amount",
+                    "index": 0,
+                    "align": 4,
+                    "offset": 0,
+                    "ty": "U64"
+                  },
+                  {
+                    "name": "flag",
+                    "index": 1,
+                    "align": 1,
+                    "offset": 8,
+                    "ty": "I1"
+                  }
+                ]
+              }
+            }
+          ],
+          "results": ["I1"]
+        },
+        "parameters": [
+          {
+            "name": "small",
+            "type": "u8"
+          },
+          {
+            "name": "wide",
+            "type": "u64"
+          },
+          {
+            "name": "flag",
+            "type": "i1"
+          },
+          {
+            "name": "pair",
+            "type": "Pair"
+          },
+          {
+            "name": "mixed",
+            "type": "WithU64"
+          }
+        ],
+        "readOnly": true,
+        "callsForeign": false
+      }
+    ]
+  }
+}

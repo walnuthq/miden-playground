@@ -63,7 +63,7 @@ const useCompileScript = (script?: Script) => {
     if (compiledScript.error) {
       append({
         level: "error",
-        text: `Compilation failed in ${duration}${countsSuffix(countDiagnostics(compiledScript.error))}.`,
+        text: `Compilation failed in ${duration}${countsSuffix(countDiagnostics(compiledScript.diagnostics))}.`,
         output: compiledScript.error,
         compile: true,
       });
@@ -71,11 +71,11 @@ const useCompileScript = (script?: Script) => {
       return;
     }
     const warnings = compiledScript.warnings ?? "";
-    const counts = countDiagnostics(warnings);
+    const counts = countDiagnostics(compiledScript.diagnostics);
     append({
       level: counts.warnings > 0 ? "warning" : "success",
       text: `Compiled ${script.name} in ${duration}${countsSuffix(counts)}.`,
-      // Without located warnings, the clean output is empty.
+      // A build without warnings has an empty `stderr`.
       output: warnings || undefined,
       compile: true,
     });

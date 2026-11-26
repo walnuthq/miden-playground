@@ -293,10 +293,12 @@ export const packageToScript = ({
   warnings: "",
   commitment,
   masp,
-  exports: manifest.exports,
+  // A type the source exports (`{ Type: … }`) has no signature: not kept.
+  exports: manifest.exports.filter(({ Procedure }) => Procedure !== undefined),
   procedureExports: manifest.exports
     .filter(
       ({ Procedure: procedureExport }) =>
+        procedureExport !== undefined &&
         formatProcedureExportPath(procedureExport.path) !== "init",
     )
     .map(({ Procedure: procedureExport }) => ({

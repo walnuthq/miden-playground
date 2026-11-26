@@ -68,9 +68,11 @@ const STICK_TO_BOTTOM_PX = 16;
 const LINK_CLASS_NAME = "underline underline-offset-2 hover:text-foreground";
 
 const Output = ({
+  script,
   output,
   onRevealLocation,
 }: {
+  script: Pick<Script, "name">;
   output: string;
   // Undefined on older compiles: their locations predate the latest compile,
   // which the editor follows edits from.
@@ -84,7 +86,7 @@ const Output = ({
         key={lineIndex}
         className={cn("min-h-[1lh]", severity && levelClassNames[severity])}
       >
-        {splitLocations(line).map((part, index) =>
+        {splitLocations(line, script).map((part, index) =>
           "href" in part ? (
             <a
               // oxlint-disable-next-line react/no-array-index-key -- static parts.
@@ -115,11 +117,13 @@ const Output = ({
   });
 
 const Entry = ({
+  script,
   entry: { timestamp, level, text, output: rawOutput },
   latest,
   fullOutput,
   onRevealLocation,
 }: {
+  script: Pick<Script, "name">;
   entry: ConsoleEntry;
   latest: boolean;
   fullOutput: boolean;
@@ -136,6 +140,7 @@ const Entry = ({
       </div>
       {output && (
         <Output
+          script={script}
           output={output}
           onRevealLocation={latest ? onRevealLocation : undefined}
         />
@@ -245,7 +250,7 @@ const EditorConsole = ({
     ) {
       append({
         level: "error",
-        text: `Last compile failed${countsSuffix(countDiagnostics(script.error))}.`,
+        text: `Last compile failed${countsSuffix(countDiagnostics(script.diagnostics))}.`,
         output: script.error,
         compile: true,
       });
@@ -393,6 +398,7 @@ const EditorConsole = ({
           {entries.map((entry) => (
             <Entry
               key={entry.id}
+              script={script}
               entry={entry}
               latest={entry.id === latestCompileId}
               fullOutput={fullOutput}

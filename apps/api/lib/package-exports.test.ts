@@ -55,4 +55,28 @@ describe("analyzedExports", () => {
       assert.equal(deposit && "parameters" in deposit.Procedure, false);
     }
   });
+
+  it("leaves out a type the source exports", () => {
+    // `pub type Pair = struct { first: felt, second: felt }`, as api-compile
+    // answers it.
+    const exports = analyzedExports(
+      {
+        exports: [
+          {
+            Type: {
+              path: "::probe::Pair",
+              ty: { Struct: { name: "Pair", size: 8, fields: [] } },
+            },
+          },
+          procedure(DEPOSIT),
+        ],
+        dependencies: [],
+      },
+      { readOnly: {} },
+    );
+    assert.deepEqual(
+      exports.map(({ Procedure: { path } }) => path),
+      [DEPOSIT],
+    );
+  });
 });

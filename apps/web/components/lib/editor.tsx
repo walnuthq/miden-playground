@@ -1,13 +1,16 @@
 import MonacoEditor, { type Monaco, type OnMount } from "@monaco-editor/react";
 import { useIsMobile } from "@workspace/ui/hooks/use-mobile";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import useScripts from "@/hooks/use-scripts";
 import { updateEditorSettings, useEditorSettings } from "@/lib/editor-settings";
 import { MASM_LANGUAGE_ID, registerMasm } from "@/lib/masm/language";
 import { registerSourceEditor } from "@/lib/source-editors";
 import type { Script } from "@/lib/types/script";
-import { type Diagnostic, parseDiagnostics } from "@/lib/utils/diagnostics";
+import {
+  type LocatedDiagnostic,
+  sourceDiagnostics,
+} from "@/lib/utils/diagnostics";
 import { filesWithSource, scriptSourcePath } from "@/lib/utils/script-files";
 
 export type CodeEditor = Parameters<OnMount>[0];
@@ -21,7 +24,7 @@ type Marker = ReturnType<typeof toMarker>;
 // Monaco draws the markers' squiggles where the text moves them, but keeps the
 // markers' own positions, which F8 and the hover widget use. Each model tracks
 // its markers with decorations, which follow edits, keyed `line:column` as the
-// compile output prints their locations.
+// assembler's output prints their locations.
 const trackedMarkers = new WeakMap<
   Model,
   {
@@ -64,25 +67,28 @@ export const currentPosition = (
 const toMarker = (
   monaco: Monaco,
   model: Model,
-  { severity, message, code, line, column, endColumn }: Diagnostic,
+  { severity, message, line, column, endColumn }: LocatedDiagnostic,
 ) => {
   const lineNumber = Math.min(line, model.getLineCount());
+  const lineEnd = model.getLineMaxColumn(lineNumber);
   return {
     severity:
       severity === "error"
         ? monaco.MarkerSeverity.Error
         : monaco.MarkerSeverity.Warning,
     message,
-    code,
     source: MARKER_OWNER,
     startLineNumber: lineNumber,
     startColumn: column,
     endLineNumber: lineNumber,
-    // Without the span's width, underline the word at the location.
-    endColumn:
+    // A span past the line's end (one over several lines) stops at it.
+    // Without the span's length, underline the word at the location.
+    endColumn: Math.min(
       endColumn ??
-      model.getWordAtPosition({ lineNumber, column })?.endColumn ??
-      column + 1,
+        model.getWordAtPosition({ lineNumber, column })?.endColumn ??
+        column + 1,
+      Math.max(lineEnd, column + 1),
+    ),
   };
 };
 
@@ -122,28 +128,28 @@ const Editor = ({
     editor: CodeEditor;
     monaco: Monaco;
   }>();
-  // The last compile's output, which the markers show. Undefined while the
-  // script is a draft: edits keep the markers (moved with their text, see
+  // The last compile's diagnostics, which the markers show: a failed
+  // compile's errors, a successful one's warnings. Undefined while the script
+  // is a draft: edits keep the markers (moved with their text, see
   // syncMarkers) until the next compile replaces them. A draft loaded with an
-  // older error shows none, since its code changed since.
-  const compileOutput =
-    !isSource || readOnly
-      ? undefined
-      : script.status === "error"
-        ? // The API doesn't store errors: a script fetched from there has none.
-          (script.error ?? "")
-        : script.status === "compiled"
-          ? // A successful compile's warnings.
-            (script.warnings ?? "")
-          : undefined;
+  // older error shows none, since its code changed since. The API doesn't
+  // store diagnostics: a script fetched from there has none.
+  const showsDiagnostics = isSource && !readOnly && script.status !== "draft";
+  const located = useMemo(
+    () =>
+      showsDiagnostics
+        ? sourceDiagnostics(script.diagnostics ?? [], { name: script.name })
+        : undefined,
+    [showsDiagnostics, script.diagnostics, script.name],
+  );
   useEffect(() => {
     const model = mounted?.editor.getModel();
-    if (!mounted || !model || compileOutput === undefined) {
+    if (!mounted || !model || located === undefined) {
       return;
     }
-    const markers = parseDiagnostics(compileOutput)
-      .filter(({ file }) => file === sourcePath)
-      .map((diagnostic) => toMarker(mounted.monaco, model, diagnostic));
+    const markers = located.map((diagnostic) =>
+      toMarker(mounted.monaco, model, diagnostic),
+    );
     mounted.monaco.editor.setModelMarkers(model, MARKER_OWNER, markers);
     // The problems panel (F8) would keep showing the previous compile's.
     mounted.editor.trigger(MARKER_OWNER, "closeMarkersNavigation", null);
@@ -166,7 +172,7 @@ const Editor = ({
         })),
       ),
     });
-  }, [mounted, compileOutput, sourcePath]);
+  }, [mounted, located]);
   return (
     <MonacoEditor
       height={height}

@@ -86,9 +86,7 @@ test("script: editor and console layout", async ({ page }) => {
   });
 });
 
-// The console's links to the assembler's diagnostics come with plan 04 of
-// spec/remove-rust (the diagnostics reader).
-test.fixme("script: a location shows the maximized console's editor", async ({
+test("script: a location shows the maximized console's editor", async ({
   page,
 }) => {
   logBrowserErrors(page);

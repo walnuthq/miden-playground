@@ -27,291 +27,271 @@ import {
   wordToHex,
 } from "./procedure-inputs.ts";
 
-const struct = (name: string, size = 4) => ({
-  Struct: { name: `miden:base/core-types@1.0.0/${name}`, size },
-});
+// The exports api-compile builds for plan 02's templates and for a probe
+// that takes a parameter of each kind (fixtures/masm-manifests.json).
+const manifests = JSON.parse(
+  readFileSync(
+    new URL("./fixtures/masm-manifests.json", import.meta.url),
+    "utf8",
+  ),
+) as {
+  templates: Record<string, ProcedureExport[]>;
+  "probe-types": { exports: ProcedureExport[] };
+};
 
-// The embedded basic wallet's exports, whose parameters carry the layouts
-// midenc writes: `move-asset-to-note(asset, note-idx)` and
-// `create-note(tag, note-type, recipient)`, a `recipient` laid out as an
-// `asset-id` (a word).
-const wallet = (
-  JSON.parse(
-    readFileSync(
-      new URL("../tutorials/basic-wallet.json", import.meta.url),
-      "utf8",
-    ),
-  ) as { exports: { Procedure: ProcedureExport }[] }
-).exports.map(({ Procedure }) => Procedure);
-
-const walletExport = (name: string) => {
-  const procedureExport = wallet.find(({ path }) => path.endsWith(`"${name}"`));
-  assert.ok(procedureExport);
+const exported = (
+  procedureExports: ProcedureExport[] | undefined,
+  name: string,
+) => {
+  const procedureExport = procedureExports?.find(({ path }) =>
+    path.endsWith(`::${name}`),
+  );
+  assert.ok(procedureExport, name);
   return procedureExport;
 };
 
-const layout = (procedure: string, index: number) => {
-  const param = walletExport(procedure).signature.params[index];
-  assert.ok(param);
-  return param;
+const template = (script: string, procedure: string) =>
+  exported(manifests.templates[script], procedure);
+
+const probe = exported(manifests["probe-types"].exports, "probe");
+
+const param = (procedureExport: ProcedureExport, index: number) => {
+  const layout = procedureExport.signature.params[index];
+  assert.ok(layout);
+  return layout;
 };
 
-const noteIdx = layout("move-asset-to-note", 1);
-const assetId = layout("create-note", 2);
-const accountId: MidenTypeLayout = {
-  Struct: {
-    name: "miden:base/core-types@1.0.0/account-id",
-    size: 8,
-    fields: [
-      { name: "prefix", ty: struct("felt") },
-      { name: "suffix", ty: struct("felt") },
-    ].map(({ name, ty }) => ({
-      name,
-      ty: { Struct: { ...ty.Struct, fields: [{ name: "inner", ty: "Felt" }] } },
-    })),
-  },
-};
+const accountId = param(template("count-reader", "copy_count"), 0);
+const asset = param(template("basic-wallet", "receive_asset"), 0);
+const word = param(template("basic-wallet", "create_note"), 2);
+const pair = param(probe, 3);
 
-// A record a package defines, laid out as an account id: two felts.
-const pair: MidenTypeLayout = {
-  Struct: { ...accountId.Struct, name: "pair" },
-};
-
-const signature = (params: string[], results: string[] = []): Signature => ({
-  abi: 3,
-  params: params.map((name) => struct(name)),
-  results: results.map((name) => struct(name, name === "word" ? 16 : 4)),
-});
+const signature = (
+  params: MidenTypeLayout[],
+  results: MidenTypeLayout[] = [],
+): Signature => ({ abi: 3, params, results });
 
 const accountIdParts = () => ({ prefix: 10n, suffix: 20n });
 
 describe("feltCount", () => {
   test("counts a layout's felts", () => {
-    assert.equal(feltCount(noteIdx), 1);
-    assert.equal(feltCount(assetId), 4);
-    assert.equal(feltCount(layout("move-asset-to-note", 0)), 8);
     assert.equal(feltCount("Felt"), 1);
+    assert.equal(feltCount(word), 4);
+    assert.equal(feltCount(accountId), 2);
+    assert.equal(feltCount(asset), 8);
+    assert.equal(feltCount("U64"), 2);
+    assert.equal(feltCount(param(probe, 4)), 3);
   });
 
   test("lists them by field path, in field order", () => {
-    assert.deepEqual(feltLeaves(noteIdx), ["inner.inner"]);
-    assert.deepEqual(feltLeaves(assetId), [
-      "inner.a.inner",
-      "inner.b.inner",
-      "inner.c.inner",
-      "inner.d.inner",
+    assert.deepEqual(feltLeaves(accountId), ["suffix", "prefix"]);
+    assert.deepEqual(feltLeaves(word), ["0", "1", "2", "3"]);
+    assert.deepEqual(feltLeaves(pair), ["first", "second"]);
+    // A `u64`'s low limb first, as miden-core-lib takes it.
+    assert.deepEqual(feltLeaves(param(probe, 4)), [
+      "amount.lo",
+      "amount.hi",
+      "flag",
     ]);
-    assert.deepEqual(feltLeaves(pair), ["prefix.inner", "suffix.inner"]);
   });
 
   test("nothing without a layout, or with a leaf that isn't a felt", () => {
-    assert.equal(feltCount(struct("note-idx")), undefined);
-    assert.equal(feltCount("U64"), undefined);
+    // A hand-written signature with the name alone.
+    assert.equal(feltCount({ Struct: { name: "Pair" } }), undefined);
+    // An enum whose variants carry values.
     assert.equal(
       feltCount({
-        Struct: {
-          name: "mixed",
-          fields: [
-            { name: "first", ty: "Felt" },
-            { name: "flag", ty: "I1" },
+        Enum: {
+          name: "Option",
+          discriminant: "U8",
+          variants: [
+            { name: "None", discriminant_value: 0, value: null },
+            { name: "Some", discriminant_value: 1, value: "Felt" },
           ],
         },
       }),
-      undefined,
-    );
-    // An option.
-    assert.equal(
-      feltCount({ Enum: { name: "option0", discriminant: "U8" } }),
       undefined,
     );
   });
 });
 
 describe("procedureParams", () => {
-  test("names the parameters by position and maps the known types", () => {
+  test("the four known types, named from the source", () => {
+    assert.deepEqual(procedureParams(template("count-reader", "copy_count")), [
+      { name: "counter_account_id", type: "AccountId", rawType: "AccountId" },
+    ]);
     assert.deepEqual(
-      procedureParams({ signature: signature(["account-id", "asset"]) }),
+      procedureParams(template("basic-wallet", "receive_asset")),
+      [{ name: "asset", type: "Asset", rawType: "Asset" }],
+    );
+    assert.deepEqual(
+      procedureParams({ signature: signature(["Felt", word]) }),
       [
-        { name: "param_0", type: "AccountId", rawType: "account-id" },
-        { name: "param_1", type: "Asset", rawType: "asset" },
+        { name: "param_0", type: "Felt", rawType: "felt" },
+        { name: "param_1", type: "Word", rawType: "word" },
       ],
     );
   });
 
-  const parameters = [
-    { name: "depositor", type: "account-id" },
-    { name: "deposit-asset", type: "asset" },
-  ];
-
-  test("names the parameters from the WIT, in snake case", () => {
+  test("an integer below a felt, a bool and an enum are bounded felts", () => {
+    assert.deepEqual(procedureParams(template("basic-wallet", "create_note")), [
+      {
+        name: "tag",
+        type: "Felt",
+        rawType: "NoteTag",
+        label: "NoteTag (u32)",
+        max: 2n ** 32n - 1n,
+      },
+      {
+        name: "note_type",
+        type: "Felt",
+        rawType: "NoteType",
+        label: "NoteType (0 PRIVATE, 1 PUBLIC)",
+        max: 1n,
+      },
+      { name: "recipient", type: "Word", rawType: "NoteRecipient" },
+    ]);
     assert.deepEqual(
-      procedureParams({
-        signature: signature(["account-id", "asset"]),
-        parameters,
-      }).map(({ name }) => name),
-      ["depositor", "deposit_asset"],
+      procedureParams(template("basic-wallet", "move_asset_to_note"))[1],
+      {
+        name: "note_idx",
+        type: "Felt",
+        rawType: "u16",
+        label: "u16",
+        max: 65535n,
+      },
     );
+    const [small, , flag] = procedureParams(probe);
+    assert.deepEqual(small, {
+      name: "small",
+      type: "Felt",
+      rawType: "u8",
+      label: "u8",
+      max: 255n,
+    });
+    assert.deepEqual(flag, {
+      name: "flag",
+      type: "Felt",
+      rawType: "i1",
+      label: "i1 (0 or 1)",
+      max: 1n,
+    });
   });
+
+  test("a type the forms don't know gets its layout's felts", () => {
+    const [, wide, , pairParam, mixed] = procedureParams(probe);
+    assert.deepEqual(wide, {
+      name: "wide",
+      rawType: "u64",
+      feltCount: 2,
+      feltNames: ["lo", "hi"],
+    });
+    assert.deepEqual(pairParam, {
+      name: "pair",
+      rawType: "Pair",
+      feltCount: 2,
+      feltNames: ["first", "second"],
+    });
+    assert.deepEqual(mixed?.feltNames, ["amount.lo", "amount.hi", "flag"]);
+  });
+
+  test("a parameter without a layout can't be entered", () => {
+    const params = procedureParams({
+      signature: signature([{ Struct: { name: "Pair" } }]),
+    });
+    assert.deepEqual(params, [{ name: "param_0", rawType: "Pair" }]);
+    assert.equal(procedureArgumentsReady(params, {}), false);
+  });
+
+  const parameters = [
+    { name: "counter_account_id", type: "AccountId" },
+    { name: "amount", type: "felt" },
+  ];
 
   test("falls back to positions for every parameter", () => {
     const fallback = (
       parameters?: { name: string; type: string }[],
     ): string[] =>
       procedureParams({
-        signature: signature(["account-id", "asset"]),
+        signature: signature([accountId, "Felt"]),
         parameters,
       }).map(({ name }) => name);
-    // Missing: an older compile, a built-in, a transaction script.
+    assert.deepEqual(fallback(parameters), ["counter_account_id", "amount"]);
+    // Missing: a package compiled before api-compile reported them.
     assert.deepEqual(fallback(undefined), ["param_0", "param_1"]);
     // Not as many names as the signature has parameters.
     assert.deepEqual(fallback(parameters.slice(0, 1)), ["param_0", "param_1"]);
-    // An empty name, or two that are the same once in snake case.
+    // An empty name, or two that are the same.
     assert.deepEqual(
       fallback([
         parameters[0] as (typeof parameters)[number],
-        { name: "", type: "asset" },
+        { name: "", type: "felt" },
       ]),
       ["param_0", "param_1"],
     );
     assert.deepEqual(
       fallback([
-        { name: "an-id", type: "account-id" },
-        { name: "an_id", type: "asset" },
+        { name: "an_id", type: "AccountId" },
+        { name: "an_id", type: "felt" },
       ]),
       ["param_0", "param_1"],
     );
+    // A procedure without parameters has an empty list.
     assert.equal(
-      procedureParameterNames({ signature: signature([]), parameters: [] })
-        ?.length,
+      procedureParameterNames(template("counter-account", "get_count"))?.length,
       0,
     );
   });
 
-  test("leaves a type the forms don't know without a type", () => {
-    const params = procedureParams({ signature: signature(["note-idx"]) });
-    assert.equal(params[0]?.type, undefined);
-    assert.equal(params[0]?.rawType, "note-idx");
-    assert.equal(params[0]?.feltCount, undefined);
-    assert.equal(procedureArgumentsReady(params, {}), false);
-  });
-
-  test("an unknown type with a layout of felts gets its felts", () => {
-    assert.deepEqual(procedureParams(walletExport("move-asset-to-note")), [
-      { name: "asset", type: "Asset", rawType: "asset" },
-      {
-        name: "note_idx",
-        type: undefined,
-        rawType: "note-idx",
-        feltCount: 1,
-        feltNames: ["felt 1"],
-      },
-    ]);
-  });
-
-  test("names an unknown type from the WIT, its felts from the layout", () => {
-    // The manifest calls a `tag` and a `note-type` `note-idx`, a `recipient`
-    // `asset-id`.
-    assert.deepEqual(
-      procedureParams(walletExport("create-note")).map(
-        ({ rawType, feltCount, feltNames }) => ({
-          rawType,
-          feltCount,
-          feltNames,
-        }),
-      ),
-      [
-        { rawType: "tag", feltCount: 1, feltNames: ["felt 1"] },
-        { rawType: "note-type", feltCount: 1, feltNames: ["felt 1"] },
-        { rawType: "recipient", feltCount: 4, feltNames: ["a", "b", "c", "d"] },
-      ],
-    );
-    // Without names, the manifest's.
+  test("without names, a type is the manifest's", () => {
     assert.deepEqual(
       procedureParams({
-        signature: walletExport("create-note").signature,
-      }).map(({ name, rawType }) => `${name}: ${rawType}`),
-      ["param_0: note-idx", "param_1: note-idx", "param_2: asset-id"],
-    );
-  });
-
-  test("a parameter that isn't a struct has no type and no felts", () => {
-    assert.deepEqual(
-      procedureParams({
-        signature: {
-          abi: 3,
-          params: ["U64", { Enum: { name: "option0" } }],
-          results: [],
-        },
-      }),
+        signature: template("basic-wallet", "create_note").signature,
+      }).map(({ name, rawType, label }) => `${name}: ${label ?? rawType}`),
       [
-        { name: "param_0", type: undefined, rawType: "u64" },
-        { name: "param_1", type: undefined, rawType: "option0" },
+        "param_0: u32",
+        "param_1: NoteType (0 PRIVATE, 1 PUBLIC)",
+        "param_2: word",
       ],
     );
   });
-});
-
-const deposit = (
-  parameters?: ProcedureExport["parameters"],
-): ProcedureExport => ({
-  path: '::"miden:bank-account/bank@0.1.0"::deposit',
-  digest: "0x00",
-  signature: {
-    abi: 3,
-    params: [struct("account-id"), struct("asset")],
-    results: [struct("felt")],
-  },
-  attributes: { attrs: [] },
-  ...(parameters && { parameters }),
 });
 
 describe("procedureSignature", () => {
-  test("names the parameters when the procedure has names", () => {
+  test("the templates' procedures, as MASM", () => {
     assert.equal(
-      procedureSignature(
-        deposit([
-          { name: "depositor", type: "account-id" },
-          { name: "deposit-asset", type: "asset" },
-        ]),
-      ),
-      "fn deposit(depositor: AccountId, deposit_asset: Asset) -> Felt",
+      procedureSignature(template("counter-account", "get_count")),
+      "proc get_count() -> Felt",
+    );
+    assert.equal(
+      procedureSignature(template("count-reader", "copy_count")),
+      "proc copy_count(counter_account_id: AccountId)",
+    );
+    assert.equal(
+      procedureSignature(template("basic-wallet", "create_note")),
+      "proc create_note(tag: NoteTag, note_type: NoteType, recipient: Word) -> u16",
+    );
+    assert.equal(
+      procedureSignature(template("p2id-note", "main")),
+      "proc main()",
     );
   });
 
-  test("shows the types alone without names", () => {
-    assert.equal(
-      procedureSignature(deposit()),
-      "fn deposit(AccountId, Asset) -> Felt",
-    );
-    // Not as many names as parameters: none of them.
-    assert.equal(
-      procedureSignature(deposit([{ name: "depositor", type: "account-id" }])),
-      "fn deposit(AccountId, Asset) -> Felt",
-    );
-  });
-
-  test("shows a type the forms don't know by its WIT name", () => {
+  test("the types alone without names", () => {
     assert.equal(
       procedureSignature({
-        ...deposit([{ name: "note-index", type: "note-idx" }]),
-        signature: {
-          abi: 3,
-          params: [struct("note-idx")],
-          results: [],
-        },
+        ...template("count-reader", "copy_count"),
+        parameters: undefined,
       }),
-      "fn deposit(note_index: note-idx)",
+      "proc copy_count(AccountId)",
     );
     assert.equal(
-      procedureSignature(walletExport("create-note")),
-      "fn create_note(tag: tag, note_type: note-type, recipient: recipient) -> note-idx",
+      procedureSignature({ ...probe, parameters: undefined }),
+      "proc probe(u8, u64, i1, Pair, WithU64) -> i1",
     );
     assert.equal(
-      procedureSignature({
-        ...deposit(),
-        signature: { abi: 3, params: ["U64", "I1"], results: ["U32"] },
-      }),
-      "fn deposit(u64, i1) -> u32",
+      procedureSignature(probe),
+      "proc probe(small: u8, wide: u64, flag: i1, pair: Pair, mixed: WithU64) -> i1",
     );
   });
 });
@@ -335,7 +315,7 @@ describe("validation", () => {
   });
 
   test("every parameter needs a valid argument", () => {
-    const params = procedureParams({ signature: signature(["felt", "asset"]) });
+    const params = procedureParams({ signature: signature(["Felt", asset]) });
     assert.equal(procedureArgumentsReady(params, {}), false);
     assert.equal(
       procedureArgumentsReady(params, {
@@ -353,41 +333,55 @@ describe("validation", () => {
     );
   });
 
-  test("raw felts: as many as the layout's, each a felt", () => {
-    const params = procedureParams(walletExport("create-note"));
+  test("a bounded felt stays within its type", () => {
+    const params = procedureParams(template("basic-wallet", "create_note"));
     const args: ProcedureArguments = {
-      tag: { type: "Felts", values: ["1"] },
-      note_type: { type: "Felts", values: ["0x2"] },
-      recipient: { type: "Felts", values: ["1", "2", "3", "4"] },
+      tag: { type: "Felt", value: "4294967295" },
+      note_type: { type: "Felt", value: "1" },
+      recipient: { type: "Word", value: `0x${"1".repeat(64)}` },
     };
     assert.equal(procedureArgumentsReady(params, args), true);
+    assert.equal(
+      procedureArgumentsReady(params, {
+        ...args,
+        note_type: { type: "Felt", value: "2" },
+      }),
+      false,
+    );
+    assert.equal(
+      procedureArgumentError(
+        { type: "Felt", value: "0x100000000" },
+        2n ** 32n - 1n,
+      ),
+      "At most 4294967295.",
+    );
+    assert.equal(
+      procedureArgumentError({ type: "Felt", value: "2" }),
+      undefined,
+    );
+  });
+
+  test("raw felts: as many as the layout's, each a felt", () => {
+    const params = procedureParams({ signature: signature([pair]) });
+    assert.equal(
+      procedureArgumentsReady(params, {
+        param_0: { type: "Felts", values: ["1", "0x2"] },
+      }),
+      true,
+    );
     assert.equal(procedureArgumentsReady(params, {}), false);
+    for (const values of [["1", "x"], ["1", ""], ["1"]]) {
+      assert.equal(
+        procedureArgumentsReady(params, {
+          param_0: { type: "Felts", values },
+        }),
+        false,
+      );
+    }
+    // A typed argument for an untyped parameter.
     assert.equal(
       procedureArgumentsReady(params, {
-        ...args,
-        recipient: { type: "Felts", values: ["1", "2", "3", "x"] },
-      }),
-      false,
-    );
-    assert.equal(
-      procedureArgumentsReady(params, {
-        ...args,
-        recipient: { type: "Felts", values: ["1", "2", "3", ""] },
-      }),
-      false,
-    );
-    // Not the layout's count, or a typed argument for an untyped parameter.
-    assert.equal(
-      procedureArgumentsReady(params, {
-        ...args,
-        recipient: { type: "Felts", values: ["1", "2", "3"] },
-      }),
-      false,
-    );
-    assert.equal(
-      procedureArgumentsReady(params, {
-        ...args,
-        tag: { type: "Felt", value: "1" },
+        param_0: { type: "Felt", value: "1" },
       }),
       false,
     );
@@ -398,50 +392,40 @@ describe("validation", () => {
   });
 
   test("a call passes at most 16 felts", () => {
-    const word: ProcedureArgument = {
+    const felts: ProcedureArgument = {
       type: "Felts",
-      values: ["1", "2", "3", "4"],
+      values: ["1", "2", "3", "4", "5", "6"],
     };
-    const signature = (count: number): Signature => ({
-      abi: 3,
-      params: Array.from({ length: count }, () => assetId),
-      results: [],
-    });
+    const triple: MidenTypeLayout = {
+      Struct: {
+        name: "Triple",
+        fields: ["a", "b", "c", "d", "e", "f"].map((name) => ({
+          name,
+          ty: "Felt",
+        })),
+      },
+    };
+    const params = (count: number) =>
+      procedureParams({
+        signature: signature(Array.from({ length: count }, () => triple)),
+      });
     const args = (count: number) =>
       Object.fromEntries(
-        Array.from({ length: count }, (_, index) => [`param_${index}`, word]),
+        Array.from({ length: count }, (_, index) => [`param_${index}`, felts]),
       );
-    const four = procedureParams({ signature: signature(4) });
-    assert.equal(procedureArgumentFelts(four), 16);
-    assert.equal(procedureArgumentsReady(four, args(4)), true);
-    const five = procedureParams({ signature: signature(5) });
-    assert.equal(procedureArgumentFelts(five), 20);
-    assert.equal(procedureArgumentsReady(five, args(5)), false);
-    // The typed arguments count too: a felt, a word, an account id, an asset.
+    assert.equal(procedureArgumentFelts(params(2)), 12);
+    assert.equal(procedureArgumentsReady(params(2), args(2)), true);
+    assert.equal(procedureArgumentFelts(params(3)), 18);
+    assert.equal(procedureArgumentsReady(params(3), args(3)), false);
+    // The typed arguments count too: a felt, a word, an account id, an asset,
+    // and a bounded felt.
     assert.equal(
       procedureArgumentFelts(
         procedureParams({
-          signature: {
-            abi: 3,
-            params: [
-              struct("felt"),
-              struct("word"),
-              struct("account-id"),
-              struct("asset"),
-            ],
-            results: [],
-          },
+          signature: signature(["Felt", word, accountId, asset, "U16"]),
         }),
       ),
-      15,
-    );
-    assert.equal(
-      procedureArgumentFelts(
-        procedureParams({
-          signature: { abi: 3, params: ["U64"], results: [] },
-        }),
-      ),
-      undefined,
+      16,
     );
   });
 });
@@ -450,29 +434,20 @@ describe("raw felts", () => {
   test("are encoded in decimal, in field order", () => {
     assert.deepEqual(
       encodeProcedureArguments({
-        params: procedureParams(walletExport("move-asset-to-note")),
-        args: {
-          asset: { type: "Asset", faucetId: "0x02", amount: "100" },
-          note_idx: { type: "Felts", values: [" 0x10 "] },
-        },
+        params: procedureParams({
+          ...probe,
+          signature: signature([pair]),
+          parameters: undefined,
+        }),
+        args: { param_0: { type: "Felts", values: [" 0x10 ", "2"] } },
         accountIdParts,
       }),
-      [
-        {
-          name: "asset",
-          type: "Asset",
-          value: JSON.stringify({ prefix: "10", suffix: "37", amount: "100" }),
-        },
-        { name: "note_idx", type: "Felts", value: '["16"]' },
-      ],
+      [{ name: "param_0", type: "Felts", value: '["16","2"]' }],
     );
     assert.throws(() =>
       encodeProcedureArguments({
-        params: procedureParams(walletExport("move-asset-to-note")),
-        args: {
-          asset: { type: "Asset", faucetId: "0x02", amount: "100" },
-          note_idx: { type: "Felt", value: "16" },
-        },
+        params: procedureParams({ signature: signature([pair]) }),
+        args: { param_0: { type: "Felt", value: "16" } },
         accountIdParts,
       }),
     );
@@ -501,26 +476,32 @@ describe("raw felts", () => {
   test("an account id's two felts push as the typed argument", () => {
     const typed = formatProcedureInputs(
       encodeProcedureArguments({
-        params: procedureParams({
-          signature: { abi: 3, params: [accountId], results: [] },
-        }),
+        params: procedureParams({ signature: signature([accountId]) }),
         args: { param_0: { type: "AccountId", accountId: "0x01" } },
         accountIdParts,
       }),
     );
-    const params = procedureParams({
-      signature: { abi: 3, params: [pair], results: [] },
-    });
-    assert.deepEqual(params[0]?.feltNames, ["prefix", "suffix"]);
+    // A struct laid out as an account id: suffix, then prefix.
     const raw = formatProcedureInputs(
       encodeProcedureArguments({
-        params,
-        // `accountIdParts` above: the prefix, then the suffix.
-        args: { param_0: { type: "Felts", values: ["10", "20"] } },
+        params: procedureParams({
+          signature: signature([
+            {
+              Struct: {
+                ...(accountId as { Struct: object }).Struct,
+                name: "Id",
+              },
+            } as MidenTypeLayout,
+          ]),
+        }),
+        // `accountIdParts` above: the suffix, then the prefix.
+        args: { param_0: { type: "Felts", values: ["20", "10"] } },
         accountIdParts,
       }),
     );
-    assert.equal(typed, "push.20.10");
+    // The suffix on top: `[counter_account_id_suffix,
+    // counter_account_id_prefix, …]`, as count-reader takes it.
+    assert.equal(typed, "push.10.20");
     assert.equal(raw, typed);
   });
 
@@ -546,12 +527,31 @@ describe("raw felts", () => {
     );
     assert.equal(raw, "push.0.0.0.100.10.37.0.0");
   });
+
+  test("a bounded felt pushes as a felt", () => {
+    const params = procedureParams(
+      template("basic-wallet", "move_asset_to_note"),
+    );
+    assert.equal(
+      formatProcedureInputs(
+        encodeProcedureArguments({
+          params,
+          args: {
+            asset: { type: "Asset", faucetId: "0x02", amount: "100" },
+            note_idx: { type: "Felt", value: "3" },
+          },
+          accountIdParts,
+        }),
+      ).split("\n")[0],
+      "push.3",
+    );
+  });
 });
 
 describe("encodeProcedureArguments", () => {
   test("encodes as the account page's Invoke dialog does", () => {
     const params = procedureParams({
-      signature: signature(["felt", "account-id", "asset"]),
+      signature: signature(["Felt", accountId, asset]),
     });
     assert.deepEqual(
       encodeProcedureArguments({
@@ -582,7 +582,7 @@ describe("encodeProcedureArguments", () => {
   test("refuses a missing argument", () => {
     assert.throws(() =>
       encodeProcedureArguments({
-        params: procedureParams({ signature: signature(["felt"]) }),
+        params: procedureParams({ signature: signature(["Felt"]) }),
         args: {},
         accountIdParts,
       }),
@@ -593,27 +593,41 @@ describe("encodeProcedureArguments", () => {
 describe("decodeProcedureResult", () => {
   test("a felt in decimal", () => {
     assert.equal(
-      decodeProcedureResult(signature([], ["felt"]), [5n, 0n, 0n, 0n]),
+      decodeProcedureResult(
+        template("counter-account", "get_count").signature,
+        [5n, 0n, 0n, 0n],
+      ),
       "5",
     );
+  });
+
+  test("an integer below a felt in decimal", () => {
+    assert.equal(
+      decodeProcedureResult(template("basic-wallet", "create_note").signature, [
+        2n,
+        0n,
+      ]),
+      "2",
+    );
+    assert.equal(decodeProcedureResult(probe.signature, [1n, 0n]), "1");
   });
 
   test("a word in hex, as Word.toHex() prints it", () => {
     const hex = `0x0100000000000000${"0".repeat(48)}`;
     assert.equal(wordToHex([1n, 0n, 0n, 0n]), hex);
     assert.equal(
-      decodeProcedureResult(signature([], ["word"]), [1n, 0n, 0n, 0n]),
+      decodeProcedureResult(signature([], [word]), [1n, 0n, 0n, 0n]),
       hex,
     );
-    // Older manifests: four felt results.
+  });
+
+  test("another type as its felts", () => {
     assert.equal(
-      decodeProcedureResult(signature([], ["felt", "felt", "felt", "felt"]), [
-        1n,
-        0n,
-        0n,
-        0n,
-      ]),
-      hex,
+      decodeProcedureResult(
+        exported(manifests["probe-types"].exports, "pair").signature,
+        [1n, 2n, 0n],
+      ),
+      "[1, 2]",
     );
   });
 

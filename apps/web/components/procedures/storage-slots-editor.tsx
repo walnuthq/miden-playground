@@ -129,7 +129,7 @@ const StorageSlotsEditor = ({
   onChange,
   disabled = false,
   allowSlotEdits = false,
-  namePlaceholder = "package::component::field",
+  namePlaceholder = "package::slot_name",
   descriptions = {},
 }: {
   storageSlots: StorageSlot[];
