@@ -43,12 +43,9 @@ const Step1Content = ({ scriptName }: { scriptName: string }) => (
       <strong>Counter Contract</strong> example.
     </p>
     <p>
-      Your script must be named <strong>{scriptName}</strong>: the Playground
-      creates resources in the next steps, such as the contract's storage slot
-      name, that expect this exact name. The random suffix is unique to your run
-      of this tutorial. The script name ends up in your contract's code, so
-      nobody else will have deployed, let alone verified, the exact same
-      contract before you.
+      Your script must be named <strong>{scriptName}</strong>: the next steps
+      find your script by this name. The random suffix is unique to your run of
+      this tutorial.
     </p>
   </>
 );

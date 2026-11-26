@@ -1,5 +1,7 @@
 import ApplyCodeButton from "@/components/tutorials/apply-code-button";
-import useScriptName from "@/components/tutorials/contract-verification/use-script-name";
+import useScriptName, {
+  useRunTag,
+} from "@/components/tutorials/contract-verification/use-script-name";
 import NextStepButton from "@/components/tutorials/next-step-button";
 import {
   CodeBlock,
@@ -9,7 +11,11 @@ import {
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import useScripts from "@/hooks/use-scripts";
 import type { TutorialStep } from "@/lib/types/tutorial";
-import { resetCountEdits } from "@/lib/utils/tutorial-code";
+import { scriptSource } from "@/lib/utils/script-files";
+import {
+  resetCountEdits,
+  resetCountProcedure,
+} from "@/lib/utils/tutorial-code";
 
 const useScript = () => {
   const { scripts } = useScripts();
@@ -19,122 +25,132 @@ const useScript = () => {
   );
 };
 
+// An edit after the compile turns the script back into a draft, so the
+// compiled package is the one of the source checked here: a `reset_count`
+// export taking and returning nothing, built from a source that pushes this
+// run's number.
 const useCompleted = () => {
   const script = useScript();
-  const procedureExports = script?.procedureExports ?? [];
-  // The procedure digests depend on the script name, which is unique to each
-  // run, so look for a `reset_count` export taking and returning nothing.
-  const resetCountProcedure = procedureExports.find(
+  const [edit] = resetCountEdits(useRunTag());
+  const exported = (script?.procedureExports ?? []).some(
     ({ path, signature }) =>
-      path.endsWith('::"reset-count"') &&
+      path.endsWith("::reset_count") &&
       signature.params.length === 0 &&
       signature.results.length === 0,
   );
-  return script?.status === "compiled" && !!resetCountProcedure;
+  return (
+    script?.status === "compiled" &&
+    exported &&
+    !!edit?.applied(scriptSource(script))
+  );
 };
 
+// The lines quoted here are apps/api/templates/counter-account.masm's, the
+// source the script is created from: after editing the template, check them.
+// The edit adds a procedure and leaves the slot names alone, so the script
+// keeps the template's storage schema and step 3's typed deploy form.
 const Step2: TutorialStep = {
   title: "Add a procedure and compile the script.",
   Content: () => {
     const completed = useCompleted();
     const script = useScript();
+    const tag = useRunTag();
     return (
       <>
         <p>
           Let's extend the counter contract with a new procedure that resets the
-          counter value to zero. Add the following{" "}
+          count to zero. Add the following{" "}
           <strong>
             <InlineCode>reset_count</InlineCode>
           </strong>{" "}
-          method inside the{" "}
+          procedure at the end of your script, after the{" "}
           <strong>
-            <InlineCode>
-              impl CounterContract for CounterContractStorage
-            </InlineCode>
+            <InlineCode>end</InlineCode>
           </strong>{" "}
-          block, after{" "}
+          of{" "}
           <strong>
             <InlineCode>increment_count</InlineCode>
           </strong>
           :
         </p>
         <CodeBlock
-          code={`/// Resets the counter value to zero
-fn reset_count(&mut self) {
-    let key = Word::new([felt!(1), felt!(0), felt!(0), felt!(0)]);
-    self.count_map.set(key, felt!(0));
-}`}
+          code={resetCountProcedure(tag).join("\n")}
           action={
-            // Also declares it in the trait (the next snippet): both are
-            // needed to compile.
-            <ApplyCodeButton script={script} edits={resetCountEdits} upTo={1} />
+            <ApplyCodeButton script={script} edits={resetCountEdits(tag)} />
           }
         />
         <p>
-          Then declare its signature in the{" "}
-          <strong>
-            <InlineCode>CounterContract</InlineCode>
-          </strong>{" "}
-          trait, marked with{" "}
-          <strong>
-            <InlineCode>#[account_procedure]</InlineCode>
-          </strong>{" "}
-          so that it's exported:
+          Like the other two procedures, it's marked{" "}
+          <InlineCode>@account_procedure</InlineCode> and{" "}
+          <InlineCode>pub</InlineCode>, so the contract exports it. The
+          procedure writes the counter's new value the same way{" "}
+          <InlineCode>increment_count</InlineCode> does:{" "}
+          <InlineCode>padw</InlineCode> pushes the new value, a Word of four
+          zeros, then <InlineCode>push.COUNT_KEY</InlineCode> and{" "}
+          <InlineCode>push.COUNT_MAP_SLOT[0..2]</InlineCode> push the key and
+          the slot's id on top of it.{" "}
+          <InlineCode>native_account::set_map_item</InlineCode> writes the value
+          under the key and leaves the old one, which{" "}
+          <InlineCode>dropw</InlineCode> drops. A procedure that is called from
+          outside the contract must leave exactly 16 elements on the stack,
+          which <InlineCode>sys::truncate_stack</InlineCode> makes sure of.
         </p>
-        <CodeBlock
-          code={`#[component]
-trait CounterContract {
-    // ...
-    #[account_procedure]
-    fn reset_count(&mut self);
-}`}
-          action={
-            <ApplyCodeButton script={script} edits={resetCountEdits} upTo={0} />
-          }
-        />
         <p>
-          When you develop a smart contract, you write human-readable Rust code,
-          and a compiler turns it into{" "}
+          Its first instruction,{" "}
+          <strong>
+            <InlineCode>push.{tag} drop</InlineCode>
+          </strong>
+          , pushes a number unique to your run of this tutorial and drops it
+          right away: it doesn't change what the procedure does. You'll see
+          below why it's there.
+        </p>
+        <p>
+          Then click the <em>"Compile"</em> button above the editor. The
+          Playground sends your{" "}
           <ExternalLink href="https://docs.miden.xyz/builder/glossary/#miden-assembly">
             Miden Assembly (MASM)
           </ExternalLink>{" "}
-          code that the{" "}
+          source to the Miden assembler, which turns it into code that the{" "}
           <ExternalLink href="https://docs.miden.xyz/design/miden-vm/">
             Miden VM
           </ExternalLink>{" "}
-          can execute.
-        </p>
-        <p>
-          Click the <em>"Compile"</em> button to see this process in action. The
-          result of the compilation is a Miden package (a{" "}
+          can execute. The result is a Miden package (a{" "}
           <strong>
             <InlineCode>.masp</InlineCode>
           </strong>{" "}
-          file), which contains both the compiled code and a manifest describing
-          what the package exports. If the compiler reports an error instead,
-          the console under the editor shows it and the editor underlines the
-          faulty code: click the error's location in the console to jump to it.
+          file), which contains both the assembled code and a manifest
+          describing what the package exports. If the assembler reports an error
+          instead, the console under the editor shows it and the editor
+          underlines the faulty code: click the error's location in the console
+          to jump to it.
         </p>
         <p>
           Click the <em>"Manifest"</em> tab: under <em>"Package exports"</em>,
-          you'll find the procedures exported by the package, along with their
-          signatures.
+          you'll find the procedures exported by the package, now including{" "}
+          <InlineCode>reset_count</InlineCode>, along with their signatures.
         </p>
         <p>
-          Only the compiled code is stored on-chain, and each procedure is
+          Only the assembled code is stored on-chain, and each procedure is
           identified by its{" "}
           <ExternalLink href="https://docs.miden.xyz/reference/protocol/account/code">
             MAST root
           </ExternalLink>
           , a hash of its code, rather than by its name. The link with the
-          original Rust source code is lost, and so are the procedure
-          signatures, which you need to call the procedures with the right
-          arguments.
+          original source code is lost, with the names of its procedures and
+          constants, its comments, and the procedure signatures, which you need
+          to call the procedures with the right arguments.
         </p>
         <p>
           Contract verification bridges this gap: it links the on-chain code
-          back to its Rust source code and package manifest, so that anyone can
-          read the source code and know how to call the exported procedures.
+          back to its source code and package manifest, so that anyone can read
+          the source code and know how to call the exported procedures.
+        </p>
+        <p>
+          A MAST root depends only on the code: everyone who writes the same
+          procedure gets the same MAST root, whatever they named their script.
+          That's what <InlineCode>push.{tag} drop</InlineCode> is for: it makes
+          your <InlineCode>reset_count</InlineCode>, and so your contract's
+          code, different from the one of everyone else running this tutorial.
         </p>
         <TutorialStepAlert
           completed={completed}
@@ -142,10 +158,10 @@ trait CounterContract {
           titleWhenCompleted="You compiled the script."
           description={
             <p>
-              Add the <strong>reset_count</strong> procedure to the{" "}
-              <strong>CounterContract</strong> trait and its implementation (or
-              use the buttons under the code), then click the <em>"Compile"</em>{" "}
-              button.
+              Add the <strong>reset_count</strong> procedure after{" "}
+              <strong>increment_count</strong>, with its{" "}
+              <strong>push.{tag} drop</strong> line (or use the button under the
+              code), then click the <em>"Compile"</em> button.
             </p>
           }
         />

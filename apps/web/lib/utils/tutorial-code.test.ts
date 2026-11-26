@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { describe, test } from "node:test";
 import {
   applyCodeEdits,
@@ -8,26 +8,16 @@ import {
   increaseIncrementEdits,
   incrementValue,
   resetCountEdits,
+  resetCountProcedure,
+  runTag,
   timelockEdits,
 } from "./tutorial-code.ts";
 
-// The API's Rust template that tutorial 12's script was created from
-// (tutorials 7 and 8 are MASM's now). It went with the switch to MASM,
-// and the snippets with tutorials 6 to 12 (unavailable until plan 07 of
-// spec/remove-rust rewrites each): the tests that edit them are skipped
-// until then.
-const RUST_TEMPLATES_GONE =
-  "the Rust templates are gone: plan 07 of spec/remove-rust rewrites the snippets";
+const read = (path: string) =>
+  readFileSync(new URL(path, import.meta.url), "utf8");
 
-const read = (path: string) => {
-  const url = new URL(path, import.meta.url);
-  return existsSync(url) ? readFileSync(url, "utf8") : "";
-};
-
-const counterAccount = read("../../../api/templates/counter-account.rs");
 const counterAccountMasm = read("../../../api/templates/counter-account.masm");
 const p2idNoteMasm = read("../../../api/templates/p2id-note.masm");
-const skip = counterAccount === "" ? RUST_TEMPLATES_GONE : false;
 
 // Every edit applies, then reads as applied, and applying it again changes
 // nothing.
@@ -137,26 +127,38 @@ describe("tutorial code edits", () => {
     assert.equal(imports.applied("use miden::protocol::tx_kernel\n"), false);
   });
 
-  test("tutorial 12: reset_count in the trait and the impl", { skip }, () => {
-    const edited = expectEditsApply(counterAccount, resetCountEdits);
-    assert.match(
+  test("tutorial 12: reset_count after increment_count", () => {
+    const tag = runTag("qwerty");
+    const edits = resetCountEdits(tag);
+    const edited = expectEditsApply(counterAccountMasm, edits);
+    // Appended after increment_count, the last procedure: nothing else
+    // changes, so the slot names, and the schema, stay.
+    assert.equal(
       edited,
-      /\n( +)fn increment_count\(&mut self\) -> Felt;\n\1#\[account_procedure\]\n\1fn reset_count\(&mut self\);\n\}/,
+      `${counterAccountMasm.trimEnd()}\n\n${resetCountProcedure(tag).join("\n")}\n`,
     );
-    assert.match(
-      edited,
-      /\n( +)new_value\n {4}\}\n\n {4}\/\/\/ Resets the counter value to zero\n {4}fn reset_count\(&mut self\) \{\n {8}let key = Word::new/,
-    );
-    // The impl block still closes after the new method.
-    assert.match(
-      edited,
-      /self\.count_map\.set\(key, felt!\(0\)\);\n {4}\}\n\}\n?$/,
-    );
+    assert.match(edited, new RegExp(`\\n    push\\.${tag} drop\\n`));
+    // Another run's number isn't this run's.
+    assert.equal(resetCountEdits(runTag("asdfgh"))[0]?.applied(edited), false);
+    // One typed without the number is replaced, not doubled.
+    const typed = `${counterAccountMasm}\n@account_procedure\npub proc reset_count()\n    padw push.COUNT_KEY push.COUNT_MAP_SLOT[0..2]\n    exec.native_account::set_map_item\n    dropw\nend\n`;
+    const fixed = applyCodeEdits(typed, edits);
+    assert.ok(fixed !== null);
+    assert.equal(fixed.match(/proc reset_count\b/g)?.length, 1);
+    assert.equal(edits[0]?.applied(fixed), true);
+  });
+
+  test("tutorial 12: the run's number", () => {
+    assert.equal(runTag("aaaaaa"), 0);
+    assert.equal(runTag("aaaaab"), 1);
+    assert.equal(runTag("aaaaba"), 26);
+    // Six letters: below 26^6, far below a felt's modulus.
+    assert.equal(runTag("zzzzzz"), 26 ** 6 - 1);
   });
 
   test("an anchor that isn't there: null", () => {
     assert.equal(applyCodeEdits("fn main() {}", timelockEdits), null);
-    assert.equal(applyCodeEdits("fn main() {}", resetCountEdits, 1), null);
+    assert.equal(applyCodeEdits("fn main() {}", resetCountEdits(1)), null);
     assert.equal(applyCodeEdits("fn main() {}", increaseIncrementEdits), null);
   });
 });

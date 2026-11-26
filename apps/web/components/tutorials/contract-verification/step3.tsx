@@ -48,7 +48,7 @@ const Step3Content = ({
       <strong className="wrap-anywhere">{scriptName}</strong>, as the account
       component. Its{" "}
       <strong>
-        <InlineCode>count_map</InlineCode>
+        <InlineCode>counter_account::count_map</InlineCode>
       </strong>{" "}
       storage slot is listed with no entries: the counter starts at{" "}
       <strong>0</strong>. Leave it as it is.

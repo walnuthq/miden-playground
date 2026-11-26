@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useInterval } from "usehooks-ts";
 import NextStepButton from "@/components/tutorials/next-step-button";
-import { ExternalLink } from "@/components/tutorials/prose";
+import { ExternalLink, InlineCode } from "@/components/tutorials/prose";
 import TutorialLink from "@/components/tutorials/tutorial-link";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import useAccounts from "@/hooks/use-accounts";
@@ -64,9 +64,10 @@ const Step6Content = ({ counter }: { counter?: Account }) => (
     <p>
       Verification applies to the contract's code rather than to a single
       Account: any Account deployed with the same code is now verified too.
-      That's why your script name has a random suffix: without it, everyone
-      running this tutorial would deploy the same code, and the contract would
-      already be verified by the time you import it.
+      That's why your <InlineCode>reset_count</InlineCode> pushes a number
+      unique to your run: without it, everyone running this tutorial would
+      deploy the same code, and the contract would already be verified by the
+      time you import it.
     </p>
   </>
 );
