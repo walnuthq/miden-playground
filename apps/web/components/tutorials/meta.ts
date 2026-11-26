@@ -128,7 +128,6 @@ export const tutorialMetas: TutorialMeta[] = [
     initialRoute: "/accounts",
     stepCount: 5,
     requiresWallet: true,
-    unavailable: REWRITING_FOR_MASM,
   },
   {
     id: "foreign-procedure-invocation",

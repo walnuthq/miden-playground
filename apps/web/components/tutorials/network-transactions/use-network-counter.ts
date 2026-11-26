@@ -1,14 +1,10 @@
 import useAccounts from "@/hooks/use-accounts";
 import useScripts from "@/hooks/use-scripts";
 import { COUNTER_EXAMPLE_ID } from "@/lib/utils/counter-example";
-import { storageSlotName } from "@/lib/utils/storage-slots";
 
-// The counter's storage slot, named after its script (counter-account).
-export const COUNTER_SLOT_NAME = storageSlotName({
-  packageName: COUNTER_EXAMPLE_ID,
-  traitName: "CounterContract",
-  fieldName: "count_map",
-});
+// The counter's storage slot, as counter_account.masm names it in its source
+// (`word("counter_account::count_map")`).
+export const COUNTER_SLOT_NAME = "counter_account::count_map";
 
 // What the steps build on: the two scripts the tutorial starts with (the
 // counter-contract example's packages, see index.ts, found by name: their ids
