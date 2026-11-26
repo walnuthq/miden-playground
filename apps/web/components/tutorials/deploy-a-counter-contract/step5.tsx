@@ -42,12 +42,12 @@ const Step5Content = ({ counter }: { counter?: Account }) => (
       procedure. The Playground executes a Transaction against your counter
       contract with a transaction script that calls this procedure, which
       increments the counter by the value you chose, and opens a preview of it:
-      the{" "}
+      the change to the{" "}
       <strong>
         <InlineCode>count_map</InlineCode>
       </strong>{" "}
-      storage change and the contract's new nonce. Click the <em>"Submit"</em>{" "}
-      button to submit it to testnet.
+      slot and the contract's new nonce. Click the <em>"Submit"</em> button to
+      submit it to testnet.
     </p>
   </>
 );

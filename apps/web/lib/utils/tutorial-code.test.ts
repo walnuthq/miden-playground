@@ -12,7 +12,7 @@ import {
 } from "./tutorial-code.ts";
 
 // The API's Rust templates, which the tutorials' scripts were created from:
-// tutorials 7 and 12, then tutorial 8. They went with the switch to MASM,
+// tutorial 12, then tutorial 8 (tutorial 7 is MASM's now). They went with the switch to MASM,
 // and the snippets with tutorials 6 to 12 (unavailable until plan 07 of
 // spec/remove-rust rewrites each): the tests that edit them are skipped
 // until then.
@@ -25,6 +25,7 @@ const read = (path: string) => {
 };
 
 const counterAccount = read("../../../api/templates/counter-account.rs");
+const counterAccountMasm = read("../../../api/templates/counter-account.masm");
 const p2idNote = read("../../../api/templates/p2id-note.rs");
 const skip =
   counterAccount === "" || p2idNote === "" ? RUST_TEMPLATES_GONE : false;
@@ -45,16 +46,32 @@ const expectEditsApply = (source: string, edits: CodeEdit[]) => {
 };
 
 describe("tutorial code edits", () => {
-  test("tutorial 7: the increment value, not the key", { skip }, () => {
-    const edited = expectEditsApply(counterAccount, increaseIncrementEdits);
+  test("tutorial 7: the increment value of increment_count", () => {
+    assert.equal(incrementValue(counterAccountMasm), 1);
+    const edited = expectEditsApply(counterAccountMasm, increaseIncrementEdits);
     assert.equal(incrementValue(edited), INCREMENT);
-    assert.match(
-      edited,
-      new RegExp(`current_value \\+ felt!\\(${INCREMENT}\\)`),
-    );
+    // Only that line changes: the slot names stay, and so does the schema.
     assert.equal(
-      edited.match(/Word::new\(\[felt!\(1\), felt!\(0\)/g)?.length,
-      counterAccount.match(/Word::new\(\[felt!\(1\), felt!\(0\)/g)?.length,
+      edited,
+      counterAccountMasm.replace("\n    add.1\n", `\n    add.${INCREMENT}\n`),
+    );
+    // Typed by hand, in hex too.
+    assert.equal(
+      incrementValue(counterAccountMasm.replace("add.1", "add.0x10")),
+      16,
+    );
+    // An `add` elsewhere isn't the increment.
+    assert.ok(
+      Number.isNaN(
+        incrementValue(
+          counterAccountMasm
+            .replace("add.1", "push.1 add")
+            .replace(
+              "exec.sys::truncate_stack\n    # => [count, pad(15)]",
+              "add.7 exec.sys::truncate_stack\n    # => [count, pad(15)]",
+            ),
+        ),
+      ),
     );
   });
 

@@ -19,11 +19,11 @@ const Step4: TutorialStep = {
     return (
       <>
         <p>
-          Now that your script defines both the contract's{" "}
+          Now that your script is compiled into the contract's{" "}
           <ExternalLink href="https://docs.miden.xyz/reference/protocol/account/code">
             code
           </ExternalLink>{" "}
-          and its{" "}
+          and the Playground knows its{" "}
           <ExternalLink href="https://docs.miden.xyz/reference/protocol/account/storage">
             storage
           </ExternalLink>{" "}
@@ -44,8 +44,8 @@ const Step4: TutorialStep = {
           the account component.
         </p>
         <p>
-          Once it's selected, the storage slots its layout defines are listed
-          with their initial values, which you can set for this deployment. Your
+          Once it's selected, the slots of its storage layout are listed with
+          their initial values, which you can set for this deployment. Your
           counter's map starts empty: a key that was never written reads as
           zero, so the counter starts at <strong>0</strong>. Leave it as it is.
         </p>

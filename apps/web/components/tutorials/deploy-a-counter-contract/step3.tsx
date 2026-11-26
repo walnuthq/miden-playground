@@ -1,21 +1,20 @@
 import useCounter from "@/components/tutorials/deploy-a-counter-contract/use-counter";
 import {
   BulletList,
+  CodeBlock,
   ExternalLink,
   InlineCode,
 } from "@/components/tutorials/prose";
 import TutorialLink from "@/components/tutorials/tutorial-link";
 import type { TutorialStep } from "@/lib/types/tutorial";
 
-// No action: the compile of step 2 gave the script its storage layout. Cites
-// lines 13-18 of apps/api/templates/counter-account.rs (the storage struct),
-// which the tutorial's edit (line 46) doesn't move. The slot name is as long
-// as the user's script name and has no place to break: `wrap-anywhere` keeps
-// it inside the panel.
+// No action: the compile of step 2 kept the template's storage schema. Quotes
+// the slot constant of apps/api/templates/counter-account.masm, which the
+// tutorial's edit (`add.1`) leaves alone.
 const Step3: TutorialStep = {
   title: "Meet the contract's storage layout.",
   Content: () => {
-    const { script, slotName } = useCounter();
+    const { script } = useCounter();
     return (
       <>
         <p>
@@ -50,54 +49,50 @@ const Step3: TutorialStep = {
           </li>
         </BulletList>
         <p>
-          Your compiled script holds both. The compiler derives the storage
-          layout from the struct marked{" "}
+          The package you compiled holds the code: its two procedures. It
+          doesn't describe the storage they use, so the Playground keeps that
+          description for scripts created from the{" "}
+          <strong>Counter Contract</strong> example: one slot of type{" "}
+          <strong>Map</strong>, whose keys are Words and whose values are Felts,
+          where the contract keeps its counter under the key{" "}
           <strong>
-            <InlineCode>#[component_storage]</InlineCode>
-          </strong>{" "}
-          at lines <em>13-18</em>: its{" "}
-          <strong>
-            <InlineCode>count_map</InlineCode>
-          </strong>{" "}
-          field becomes a storage slot of type <strong>Map</strong>, where the
-          contract keeps its counter under the fixed key <strong>1</strong>.
+            <InlineCode>[1, 0, 0, 0]</InlineCode>
+          </strong>
+          .
         </p>
         <p>
-          Storage slots are identified by their name, which the compiler derives
-          from your code in three parts, separated by{" "}
+          A storage slot is identified by its name, the string your source
+          declares it with:
+        </p>
+        <CodeBlock
+          code={`const COUNT_MAP_SLOT = word("counter_account::count_map")`}
+        />
+        <p>
+          By convention, a slot's name has two parts separated by{" "}
           <strong>
             <InlineCode>::</InlineCode>
           </strong>
-          :
-        </p>
-        <BulletList>
-          <li>
-            the name of your script, <strong>{script?.name}</strong>, where any
-            character other than a letter, a digit or an underscore becomes an
-            underscore;
-          </li>
-          <li>
-            the name of the component's trait,{" "}
-            <strong>
-              <InlineCode>CounterContract</InlineCode>
-            </strong>
-            , in snake case;
-          </li>
-          <li>
-            the name of the field in the storage struct,{" "}
-            <strong>
-              <InlineCode>count_map</InlineCode>
-            </strong>
-            .
-          </li>
-        </BulletList>
-        <p>
-          So your counter lives in the slot{" "}
-          <strong className="wrap-anywhere">
-            <InlineCode>{slotName}</InlineCode>
+          : a namespace, here{" "}
+          <strong>
+            <InlineCode>counter_account</InlineCode>
           </strong>
-          . You can see it in the <em>"Simulate"</em> tab of the console under
-          the{" "}
+          , and the slot's own name,{" "}
+          <strong>
+            <InlineCode>count_map</InlineCode>
+          </strong>
+          . An Account can't hold two slots of the same name, so the namespace
+          keeps the slots of its components apart. The name is written in the
+          source: it doesn't change with your script's name.
+        </p>
+        <p>
+          The Playground keeps its description of the storage as long as your
+          source declares the same slot names. If you rename a slot, it can no
+          longer tell what the slot holds, and the deploy form has you add the
+          slots yourself, by name, with their values.
+        </p>
+        <p>
+          You can see the slot in the <em>"Simulate"</em> tab of the console
+          under the{" "}
           {script ? (
             <TutorialLink href={`/scripts/${script.id}`}>
               script's code

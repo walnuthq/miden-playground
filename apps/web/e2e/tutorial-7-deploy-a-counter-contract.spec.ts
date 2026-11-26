@@ -15,12 +15,11 @@ import {
 // the dev server.
 // The deployed contract is new, so its count goes from 0 to INCREMENT.
 const INCREMENT = 5;
-// The tutorial leaves the script's name to the user, and the storage slot's
-// name follows it as the compiler derives it: dashes become underscores, and
-// a digit stays with its letters (not `counter_v_2`). The contract only finds
-// its counter in a slot with that exact name.
+// The tutorial leaves the script's name to the user. The storage slot's name
+// is the template's (counter-account.masm), whatever the script's: the edit
+// leaves it alone, so the script keeps its schema and the typed forms.
 const SCRIPT_NAME = "counter-v2";
-const SLOT_NAME = "counter_v2::counter_contract::count_map";
+const SLOT_NAME = "counter_account::count_map";
 
 const invoke = async (page: Page, procedure: string) => {
   const row = page
@@ -31,14 +30,6 @@ const invoke = async (page: Page, procedure: string) => {
   await row.getByRole("button", { name: "Invoke" }).click();
   return row.getByRole("cell").last();
 };
-
-// Tutorial 7 was written for Rust contracts: it's marked `unavailable`
-// (components/tutorials/meta.ts, tutorial-unavailable.spec.ts) until plan 07
-// of spec/remove-rust rewrites it in MASM. Remove this with the flag.
-test.fixme(
-  true,
-  "Tutorial 7 is being rewritten for Miden Assembly (spec/remove-rust plan 07)",
-);
 
 test("tutorial 7: deploy a counter contract", async ({ page }) => {
   logBrowserErrors(page);
@@ -64,11 +55,11 @@ test("tutorial 7: deploy a counter contract", async ({ page }) => {
 
   await test.step(`2. increment by ${INCREMENT} and compile`, async () => {
     // The step isn't done by the edit alone: the script must compile.
-    await replaceInEditor(
-      page,
-      "current_value + felt!(1)",
-      `current_value + felt!(${INCREMENT})`,
-    );
+    // The source file is named after the script.
+    await expect(
+      page.getByText("counter_v2.masm", { exact: true }).first(),
+    ).toBeVisible();
+    await replaceInEditor(page, "add.1", `add.${INCREMENT}`);
     await expect(scriptHeader(page).status).toHaveText("Draft");
     await expect(panel.nextStepButton).toBeDisabled();
     await page.getByRole("button", { name: "Compile" }).click();
@@ -80,8 +71,8 @@ test("tutorial 7: deploy a counter contract", async ({ page }) => {
   });
 
   await test.step("3. the contract's storage layout", async () => {
-    // No action: the step shows the slot name derived from the script's
-    // name, which the compile listed in the Simulate tab.
+    // No action: the step quotes the slot's name, which the compile kept in
+    // the script's schema and the Simulate tab lists.
     await expect(panel.root.getByText(SLOT_NAME).first()).toBeVisible();
     await expect(panel.nextStepButton).toBeEnabled();
     // openLink expects a page named after its id: this one shows its name.

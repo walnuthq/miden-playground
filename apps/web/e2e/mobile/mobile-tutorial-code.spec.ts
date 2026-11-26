@@ -54,13 +54,11 @@ const editorSource = (page: Page) =>
         ?.getValue() ?? "",
   );
 
-// Its tutorials (7, 8 and 12) were written for Rust contracts: they're marked
+// Tutorials 8 and 12 were written for Rust contracts: they're marked
 // `unavailable` until plan 07 of spec/remove-rust rewrites them in MASM.
-// Remove this with the last of their flags.
-test.fixme(
-  true,
-  "Tutorials 7, 8 and 12 are being rewritten for Miden Assembly (spec/remove-rust plan 07)",
-);
+// Remove each test's `test.fixme` with its tutorial's flag.
+const REWRITING = (number: number) =>
+  `Tutorial ${number} is being rewritten for Miden Assembly (spec/remove-rust plan 07)`;
 
 test("mobile: tutorial 7's increment, added by its button", async ({
   page,
@@ -75,7 +73,7 @@ test("mobile: tutorial 7's increment, added by its button", async ({
   });
 
   await test.step("the editor is read-only", async () => {
-    await waitForEditorText(page, "current_value + felt!(1)");
+    await waitForEditorText(page, "add.1");
     const before = await editorSource(page);
     // Focused rather than clicked: the open tutorial panel covers part of
     // the editor, and the point to click varies with the engine's layout.
@@ -86,9 +84,9 @@ test("mobile: tutorial 7's increment, added by its button", async ({
 
   await test.step("2. change the increment and compile", async () => {
     await panel.root
-      .getByRole("button", { name: "Change it to felt!(5) for me" })
+      .getByRole("button", { name: "Change it to add.5 for me" })
       .click();
-    await waitForEditorText(page, "current_value + felt!(5)");
+    await waitForEditorText(page, "add.5");
     await expect(
       panel.root.getByRole("button", { name: "Increment value changed" }),
     ).toBeDisabled();
@@ -100,6 +98,7 @@ test("mobile: tutorial 7's increment, added by its button", async ({
 test("mobile: tutorial 8's timelock, added by its buttons", async ({
   page,
 }) => {
+  test.fixme(true, REWRITING(8));
   logBrowserErrors(page);
   const panel = tutorialPanel(page);
   await startTutorial(page, "Timelock P2ID note");
@@ -153,6 +152,7 @@ test("mobile: tutorial 8's timelock, added by its buttons", async ({
 test("mobile: tutorial 12's reset_count, added by its buttons", async ({
   page,
 }) => {
+  test.fixme(true, REWRITING(12));
   logBrowserErrors(page);
   const panel = tutorialPanel(page);
   await startTutorial(page, "Contract verification");
