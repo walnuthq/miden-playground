@@ -1,0 +1,13 @@
+# Placeholder: a note that increments the counter of the account that
+# consumes it. Add your counter-account script as a dependency.
+
+use counter_account
+
+@note_script
+pub proc main()
+    push.1
+    call.counter_account::increment_count
+    # The call leaves its 16 outputs over the amount: drop one, so the script
+    # ends at the depth of 16 it started with.
+    drop
+end

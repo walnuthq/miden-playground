@@ -28,15 +28,7 @@ type StringifyValues<EnvType extends Record<string, unknown>> = {
 declare namespace NodeJS {
 	interface ProcessEnv extends StringifyValues<Pick<Cloudflare.Env, "WEB_URL" | "API_COMPILE_URL" | "API_REGISTRY_URL">> {}
 }
-declare module "*.rs" {
-	const value: string;
-	export default value;
-}
-declare module "*.toml" {
-	const value: string;
-	export default value;
-}
-declare module "*.lock" {
+declare module "*.masm" {
 	const value: string;
 	export default value;
 }

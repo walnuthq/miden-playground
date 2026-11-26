@@ -1,0 +1,7 @@
+# A transaction script: `main` runs once in a transaction, against the
+# account that executes it.
+
+@transaction_script
+pub proc main()
+    nop
+end

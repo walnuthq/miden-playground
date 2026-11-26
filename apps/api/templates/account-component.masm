@@ -1,0 +1,7 @@
+# An account component: its public procedures are the account's interface.
+# Each one is called with 16 elements on the stack and returns 16.
+
+@account_procedure
+pub proc my_procedure()
+    nop
+end

@@ -1,0 +1,6 @@
+# Placeholder: a wallet component (receive_asset, move_asset_to_note).
+
+@account_procedure
+pub proc receive_asset()
+    nop
+end

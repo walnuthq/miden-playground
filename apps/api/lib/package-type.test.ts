@@ -6,6 +6,7 @@ describe("toPackageType", () => {
   for (const [input, expected] of [
     ["lib", "library"],
     ["account", "account-component"],
+    ["account-component", "account-component"],
     ["tx-script", "transaction-script"],
     ["transaction-script", "transaction-script"],
     ["note", "note"],

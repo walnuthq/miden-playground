@@ -1,0 +1,31 @@
+# Placeholder: a counter, an account component that keeps a count in storage.
+
+use miden::protocol::active_account
+use miden::protocol::native_account
+use miden::core::sys
+
+const COUNTER_SLOT = word("counter_account::count")
+
+#! Returns the current count.
+#!
+#! Inputs:  [pad(16)]
+#! Outputs: [count, pad(15)]
+@account_procedure
+pub proc get_count() -> felt
+    push.COUNTER_SLOT[0..2] exec.active_account::get_item
+    exec.sys::truncate_stack
+end
+
+#! Adds `amount` to the count.
+#!
+#! Inputs:  [amount, pad(15)]
+#! Outputs: [pad(16)]
+@account_procedure
+pub proc increment_count(amount: felt)
+    push.COUNTER_SLOT[0..2] exec.active_account::get_item
+    # => [count, 0, 0, 0, amount]
+    movup.4 add
+    push.COUNTER_SLOT[0..2] exec.native_account::set_item
+    dropw
+    exec.sys::truncate_stack
+end

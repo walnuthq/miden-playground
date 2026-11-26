@@ -15,16 +15,16 @@ const manifest = ({
   [
     name === undefined ? "[package]" : `[package]\nname = "${name}"`,
     `[lib]\nkind = "${kind}"`,
-    `[dependencies]\nmiden-core = "*"\nmiden-protocol = "*"`,
+    `[dependencies]\nmiden-core = "*"\nmiden-protocol = "*"\nmiden-standards = "*"`,
     ...dependencies.map(
       (dependency) => `${dependency} = { path = "../${dependency}" }`,
     ),
   ].join("\n");
 
-const source = (midenProjectToml: string, rust = "fn main() {}") => ({
-  midenProjectToml,
-  rust,
-});
+const source = (
+  midenProjectToml: string,
+  masm = "@note_script\npub proc main()\n    nop\nend\n",
+) => ({ midenProjectToml, masm });
 
 describe("resolvePackageSources", () => {
   test("orders dependencies first and resolves their names", () => {
@@ -41,7 +41,7 @@ describe("resolvePackageSources", () => {
     assert.deepEqual(result[1]?.dependencies, ["account-b"]);
     assert.equal(result[0]?.type, "account-component");
   });
-  test("ignores miden-core and miden-protocol", () => {
+  test("ignores the built-in libraries", () => {
     const [pkg] = resolvePackageSources({
       "note-a": source(manifest({ name: "note-a" })),
     });
@@ -74,12 +74,18 @@ describe("resolvePackageSources", () => {
       /has no valid \[lib\] kind/,
     );
   });
-  test("empty rust throws", () => {
+  test("empty source throws", () => {
     assert.throws(
       () =>
         resolvePackageSources({ a: source(manifest({ name: "pkg-a" }), "") }),
-      /src\/lib.rs is missing or empty/,
+      /MASM source is missing or empty/,
     );
+  });
+  test("keeps the source", () => {
+    const [pkg] = resolvePackageSources({
+      a: source(manifest({ name: "pkg-a" }), "SOURCE"),
+    });
+    assert.equal(pkg?.masm, "SOURCE");
   });
   test("duplicate names throw", () => {
     assert.throws(

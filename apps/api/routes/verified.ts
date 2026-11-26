@@ -4,18 +4,20 @@ import { createApp } from "@/lib/app";
 import { badRequest, errorResponse, notFound } from "@/lib/errors";
 import { buildFiles, ownFiles } from "@/lib/package-files";
 import { rateLimit } from "@/lib/rate-limit";
-import { projectTemplateFiles } from "@/lib/templates";
-import { generateCargoToml, parseMidenProjectToml } from "@/lib/toml";
-import type { PackageSource } from "@/lib/types";
+import { MANIFEST_FILE, sourceFilePath } from "@/lib/source-file";
+import { parseMidenProjectToml } from "@/lib/toml";
+import type { MidenProjectToml, PackageSource } from "@/lib/types";
 import { fetchApiRegistry, isAlreadyVerified } from "@/lib/upstream";
 import { isValidUUIDv4 } from "@/lib/uuid";
 import {
   isBoundedArray,
   isId,
   isPackageSource,
+  isRustPackageSource,
   isStringArray,
   isValidNetwork,
   isValidPackageName,
+  RUST_UNSUPPORTED,
 } from "@/lib/validation";
 
 type VerifyAccountComponentRequestBody = {
@@ -33,15 +35,38 @@ type VerifyNoteRequestBody = {
 
 type VerifyResponse = { verified: boolean };
 
-const packageSourceFiles = (name: string, packageSource: PackageSource) => ({
-  [`${name}/.cargo/config.toml`]: projectTemplateFiles[".cargo/config.toml"],
-  [`${name}/src/lib.rs`]: packageSource.rust,
-  [`${name}/build.rs`]: projectTemplateFiles["build.rs"],
-  [`${name}/Cargo.toml`]: generateCargoToml({ name }),
-  [`${name}/Cargo.lock`]: projectTemplateFiles["Cargo.lock"],
-  [`${name}/miden-project.toml`]: packageSource.midenProjectToml,
-  [`${name}/rust-toolchain.toml`]: projectTemplateFiles["rust-toolchain.toml"],
-});
+// A `[lib] path` the source can be written at: relative, inside the
+// package's directory, a `.masm` file.
+const isModulePath = (modulePath: unknown): modulePath is string =>
+  typeof modulePath === "string" &&
+  modulePath.length <= 255 &&
+  modulePath.endsWith(".masm") &&
+  modulePath
+    .split("/")
+    .every(
+      (segment) =>
+        /^[A-Za-z0-9_.-]+$/.test(segment) &&
+        segment !== "." &&
+        segment !== "..",
+    );
+
+// A project sent for verification, as api-compile builds it: its manifest as
+// sent, and its MASM source where the manifest's `[lib] path` points (the
+// Playground's own file name when it names none).
+const packageSourceFiles = (
+  name: string,
+  manifest: Partial<MidenProjectToml>,
+  packageSource: PackageSource,
+) => {
+  const modulePath = manifest.lib?.path ?? sourceFilePath(name);
+  if (!isModulePath(modulePath)) {
+    throw badRequest("Error: Invalid [lib] path in miden-project.toml.");
+  }
+  return {
+    [`${name}/${MANIFEST_FILE}`]: packageSource.midenProjectToml,
+    [`${name}/${modulePath}`]: packageSource.masm,
+  };
+};
 
 // The files api-compile needs to build a stored package: its own, plus its
 // dependencies', which its miden-project.toml points to by path
@@ -59,18 +84,30 @@ const packageFilesWithDependencies = async (
 
 const invalidBody = () => badRequest("Error: Invalid request body.");
 
-// The package name of a miden-project.toml, which becomes a directory name.
-const packageSourceName = (packageSource: PackageSource) => {
-  let name: unknown;
+// The files of a project sent for verification, under its package name,
+// which becomes a directory name.
+const sourceFiles = (packageSource: PackageSource) => {
+  let manifest: Partial<MidenProjectToml>;
   try {
-    name = parseMidenProjectToml(packageSource.midenProjectToml).package.name;
+    manifest = parseMidenProjectToml(packageSource.midenProjectToml);
   } catch {
     throw badRequest("Error: Invalid miden-project.toml.");
   }
+  const name = manifest.package?.name;
   if (!isValidPackageName(name)) {
     throw badRequest("Error: Invalid miden-project.toml.");
   }
-  return name;
+  return { name, files: packageSourceFiles(name, manifest, packageSource) };
+};
+
+// A body's project sources, checked: a Rust one is refused as such.
+const checkPackageSource = (packageSource: unknown) => {
+  if (isRustPackageSource(packageSource)) {
+    throw badRequest(RUST_UNSUPPORTED);
+  }
+  if (!isPackageSource(packageSource)) {
+    throw invalidBody();
+  }
 };
 
 // Asks api-registry to verify a project against an account or a note.
@@ -113,8 +150,8 @@ const verified = createApp()
       if (!isId(accountId)) {
         throw invalidBody();
       }
-      if (packageSource !== undefined && !isPackageSource(packageSource)) {
-        throw invalidBody();
+      if (packageSource !== undefined) {
+        checkPackageSource(packageSource);
       }
       if (
         packageIds !== undefined &&
@@ -125,12 +162,12 @@ const verified = createApp()
         throw invalidBody();
       }
       if (packageSource) {
-        const name = packageSourceName(packageSource);
+        const { name, files } = sourceFiles(packageSource);
         const verified = await verifyWithRegistry(
           `/v1/${network}/verified-accounts`,
           {
             accountId,
-            files: packageSourceFiles(name, packageSource),
+            files,
             entrypoint: name,
             source: "miden-playground",
           },
@@ -182,26 +219,24 @@ const verified = createApp()
       if (!isId(noteId)) {
         throw invalidBody();
       }
-      if (packageSource !== undefined && !isPackageSource(packageSource)) {
-        throw invalidBody();
+      if (packageSource !== undefined) {
+        checkPackageSource(packageSource);
       }
-      if (
-        dependencies !== undefined &&
-        (!isBoundedArray(dependencies) || !dependencies.every(isPackageSource))
-      ) {
-        throw invalidBody();
+      if (dependencies !== undefined) {
+        if (!isBoundedArray(dependencies)) {
+          throw invalidBody();
+        }
+        dependencies.forEach(checkPackageSource);
       }
       if (packageId !== undefined && !isValidUUIDv4(packageId)) {
         throw invalidBody();
       }
       if (packageSource && dependencies) {
-        const name = packageSourceName(packageSource);
+        const { name, files: ownSourceFiles } = sourceFiles(packageSource);
         const files: Record<string, string> = Object.assign(
-          packageSourceFiles(name, packageSource),
-          ...dependencies.map((dependency) => {
-            const dependencyName = packageSourceName(dependency);
-            return packageSourceFiles(dependencyName, dependency);
-          }),
+          {},
+          ...dependencies.map((dependency) => sourceFiles(dependency).files),
+          ownSourceFiles,
         );
         const verified = await verifyWithRegistry(
           `/v1/${network}/verified-notes`,

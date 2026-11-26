@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { packageMetadata } from "./package-metadata.ts";
+import { compiledMetadata } from "./package-metadata.ts";
 
 const storage = {
   slots: [
     {
-      name: "counter_contract::counter_contract::count_map",
+      name: "counter_contract::count_map",
       type: "map" as const,
       keyType: "word",
       valueType: "felt",
@@ -19,43 +19,55 @@ const noteStorage = {
   name: "p2id-note",
   fields: [{ name: "target-account-id", type: "account-id", width: 2 }],
 };
-
-describe("packageMetadata", () => {
-  it("keeps the schemas the build reported", () => {
-    assert.deepEqual(packageMetadata({ storage }), { storage });
-    assert.deepEqual(packageMetadata({ noteStorage }), { noteStorage });
+describe("compiledMetadata", () => {
+  it("keeps the schemas the package has, whatever the build", () => {
+    assert.deepEqual(compiledMetadata({ storage }, {}), { storage });
+    assert.deepEqual(compiledMetadata({ noteStorage }, {}), { noteStorage });
   });
 
-  it("is null when the build reported none", () => {
-    // A transaction script, or an api-compile older than the schemas.
-    assert.equal(packageMetadata({}), null);
-    assert.equal(
-      packageMetadata({ storage: undefined, noteStorage: undefined }),
-      null,
-    );
+  it("takes no schema from the build", () => {
+    // A MASM build reports none: an older answer's are ignored too.
+    const build = { storage, noteStorage } as unknown as Parameters<
+      typeof compiledMetadata
+    >[1];
+    assert.equal(compiledMetadata(null, build), null);
   });
 
-  it("keeps a script's account procedures, an empty list included", () => {
-    assert.deepEqual(packageMetadata({ accountProcedures }), {
+  it("is null when there's nothing to keep", () => {
+    assert.equal(compiledMetadata(null, {}), null);
+    assert.equal(compiledMetadata({}, {}), null);
+  });
+
+  it("takes a script's account procedures from the build, an empty list included", () => {
+    assert.deepEqual(compiledMetadata(null, { accountProcedures }), {
       accountProcedures,
     });
     // The script calls no account procedure: every account can run it.
-    assert.deepEqual(packageMetadata({ accountProcedures: [] }), {
+    assert.deepEqual(compiledMetadata(null, { accountProcedures: [] }), {
       accountProcedures: [],
     });
   });
 
-  it("drops account procedures api-compile couldn't tell", () => {
-    assert.equal(packageMetadata({ accountProcedures: null }), null);
+  it("replaces the account procedures of the last build", () => {
+    // A failed build reports none: the last build's described other code.
+    assert.equal(compiledMetadata({ accountProcedures }, {}), null);
     assert.deepEqual(
-      packageMetadata({ noteStorage, accountProcedures: null }),
+      compiledMetadata({ accountProcedures }, { accountProcedures: [] }),
+      { accountProcedures: [] },
+    );
+  });
+
+  it("drops account procedures api-compile couldn't tell", () => {
+    assert.equal(compiledMetadata(null, { accountProcedures: null }), null);
+    assert.deepEqual(
+      compiledMetadata({ noteStorage }, { accountProcedures: null }),
       { noteStorage },
     );
   });
 
   it("keeps every key together", () => {
     assert.deepEqual(
-      packageMetadata({ storage, noteStorage, accountProcedures }),
+      compiledMetadata({ storage, noteStorage }, { accountProcedures }),
       { storage, noteStorage, accountProcedures },
     );
   });

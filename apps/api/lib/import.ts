@@ -20,10 +20,10 @@ export const importScriptsFromPackageSources = async (
   const packageIds = new Map(
     await Promise.all(
       packages.map(
-        async ({ name, type, rust }) =>
+        async ({ name, type, masm }) =>
           [
             name,
-            (await createPackage({ name, type, source: rust, ownerKeyHash }))
+            (await createPackage({ name, type, source: masm, ownerKeyHash }))
               .id,
           ] as const,
       ),
@@ -33,11 +33,11 @@ export const importScriptsFromPackageSources = async (
   // full, so compile the packages in turn rather than all at once, each one
   // after the packages it depends on.
   const compiledPackages: CompiledPackage[] = [];
-  for (const { name, rust, dependencies } of packages) {
+  for (const { name, masm, dependencies } of packages) {
     compiledPackages.push(
       await compilePackage({
         id: packageIds.get(name) ?? "",
-        source: rust,
+        source: masm,
         dependencies: dependencies.map(
           (dependency) => packageIds.get(dependency) ?? "",
         ),
@@ -70,7 +70,7 @@ export const importExample = async (
   }
   const createdPackages = new Map<string, Dependency>();
   const compiledPackages: CompiledPackage[] = [];
-  for (const { name, type, rust, dependencies } of resolvePackageSources(
+  for (const { name, type, masm, dependencies } of resolvePackageSources(
     sources,
   )) {
     const compiledPackage = compiled.packages[name];
@@ -78,10 +78,7 @@ export const importExample = async (
       throw new Error(`Error: ${name} is missing from compiled.json.`);
     }
     const { masp, commitment, exports } = compiledPackage;
-    // Snapshots taken before api-compile returned the schemas have none.
     const metadata = compiledPackage.metadata ?? null;
-    // Snapshots taken before api-compile returned MASM have none.
-    const masm = compiledPackage.masm ?? "";
     const packageDependencies = dependencies.map((dependency) => {
       const createdPackage = createdPackages.get(dependency);
       if (!createdPackage) {
@@ -99,9 +96,9 @@ export const importExample = async (
     const { id, files } = await createPackage({
       name,
       type,
-      source: rust,
+      source: masm,
       dependencies: packageDependencies,
-      compiled: { masm, masp, commitment, exports, metadata },
+      compiled: { masp, commitment, exports, metadata },
       ownerKeyHash,
     });
     createdPackages.set(name, { id, name, type, commitment });
@@ -111,9 +108,12 @@ export const importExample = async (
       type,
       status: "compiled",
       files,
+      diagnostics: [],
+      stdout: "",
+      stderr: "",
       error: "",
       warnings: "",
-      masm,
+      masm: "",
       commitment,
       masp,
       exports,

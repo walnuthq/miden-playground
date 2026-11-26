@@ -35,6 +35,7 @@ import {
 import { exportFiles } from "@/lib/package-files";
 import { toPackageType } from "@/lib/package-type";
 import { rateLimit } from "@/lib/rate-limit";
+import { sourceFilePath } from "@/lib/source-file";
 import { templates } from "@/lib/templates";
 import type {
   CompiledPackage,
@@ -51,10 +52,12 @@ import { isValidUUIDv4 } from "@/lib/uuid";
 import {
   isBoundedArray,
   isPackageSources,
+  isRustPackageSource,
   isSource,
   isStringArray,
   isValidPackageName,
   MAX_PACKAGES,
+  RUST_UNSUPPORTED,
 } from "@/lib/validation";
 
 type CreateScriptRequestBody = {
@@ -97,7 +100,8 @@ type GetScriptResponse = {
 };
 
 type CompileScriptRequestBody = {
-  // The edited files: `src/lib.rs` only, the manifests are generated.
+  // The edited files: the MASM source only (`sourceFilePath`), the manifest
+  // is generated.
   files?: ScriptFiles;
   dependencies: string[];
 };
@@ -140,8 +144,11 @@ const forkedPackage = ({
   type: row.type,
   status: row.status,
   files: scriptFiles(row.name, row.files),
-  // rustc's output isn't stored: a fork of a script that doesn't build shows
-  // it after its next compile.
+  // The build's output isn't stored: a fork of a script that doesn't build
+  // shows it after its next compile.
+  diagnostics: [],
+  stdout: "",
+  stderr: "",
   error: "",
   warnings: "",
   masm: row.masm,
@@ -263,6 +270,13 @@ const scripts = createApp()
         .catch(() => {
           throw invalidBody();
         });
+      if (
+        typeof packageSources === "object" &&
+        packageSources !== null &&
+        Object.values(packageSources).some(isRustPackageSource)
+      ) {
+        throw badRequest(RUST_UNSUPPORTED);
+      }
       if (!isPackageSources(packageSources)) {
         throw invalidBody();
       }
@@ -387,10 +401,6 @@ const scripts = createApp()
         .catch(() => {
           throw invalidBody();
         });
-      const source = files?.["src/lib.rs"];
-      if (!isSource(source)) {
-        throw invalidBody();
-      }
       if (
         !isBoundedArray(dependencies) ||
         !isStringArray(dependencies) ||
@@ -405,6 +415,10 @@ const scripts = createApp()
       const dbPackage = await getPackage(id);
       if (!dbPackage) {
         throw notFound("Error: Package not found.");
+      }
+      const source = files?.[sourceFilePath(dbPackage.name)];
+      if (!isSource(source)) {
+        throw invalidBody();
       }
       await authorizeWrite(dbPackage, tokenHash);
       const compiledPackage = await compilePackage({

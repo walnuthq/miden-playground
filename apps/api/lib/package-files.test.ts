@@ -6,11 +6,11 @@ describe("ownFiles", () => {
   it("keeps only the entries under the package's directory", () => {
     assert.deepEqual(
       ownFiles("a", {
-        "a/src/lib.rs": "A",
-        "b/src/lib.rs": "B",
+        "a/a.masm": "A",
+        "b/b.masm": "B",
         "ab/x": "X",
       }),
-      { "a/src/lib.rs": "A" },
+      { "a/a.masm": "A" },
     );
   });
 });
@@ -18,20 +18,20 @@ describe("ownFiles", () => {
 describe("buildFiles", () => {
   it("puts the package and each dependency's own files side by side", () => {
     assert.deepEqual(
-      buildFiles({ "a/src/lib.rs": "A" }, [
+      buildFiles({ "a/a.masm": "A" }, [
         {
           name: "b",
-          files: { "b/src/lib.rs": "B", "c/src/lib.rs": "C" },
+          files: { "b/b.masm": "B", "c/c.masm": "C" },
         },
       ]),
-      { "a/src/lib.rs": "A", "b/src/lib.rs": "B" },
+      { "a/a.masm": "A", "b/b.masm": "B" },
     );
   });
 
   it("does not mutate its arguments", () => {
-    const own = { "a/src/lib.rs": "A" };
+    const own = { "a/a.masm": "A" };
     const dependencies = [
-      { name: "b", files: { "b/src/lib.rs": "B", "c/x": "C" } },
+      { name: "b", files: { "b/b.masm": "B", "c/x": "C" } },
     ];
     const ownBefore = structuredClone(own);
     const dependenciesBefore = structuredClone(dependencies);
@@ -47,23 +47,23 @@ describe("exportFiles", () => {
       exportFiles(
         "note",
         {
-          "note/src/lib.rs": "NOTE",
-          "note/Cargo.toml": "N",
-          "zz-removed/src/lib.rs": "STALE",
-          "zz-removed/Cargo.toml": "S",
+          "note/note.masm": "NOTE",
+          "note/miden-project.toml": "N",
+          "zz-removed/zz_removed.masm": "STALE",
+          "zz-removed/miden-project.toml": "S",
         },
         [],
       ),
-      { "src/lib.rs": "NOTE", "Cargo.toml": "N" },
+      { "note.masm": "NOTE", "miden-project.toml": "N" },
     );
   });
 
   it("keeps the directory prefixes when there are dependencies", () => {
     assert.deepEqual(
-      exportFiles("note", { "note/src/lib.rs": "NOTE" }, [
-        { name: "dep", files: { "dep/src/lib.rs": "DEP" } },
+      exportFiles("note", { "note/note.masm": "NOTE" }, [
+        { name: "dep", files: { "dep/dep.masm": "DEP" } },
       ]),
-      { "note/src/lib.rs": "NOTE", "dep/src/lib.rs": "DEP" },
+      { "note/note.masm": "NOTE", "dep/dep.masm": "DEP" },
     );
   });
 });

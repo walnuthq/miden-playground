@@ -1,0 +1,6 @@
+# Placeholder: an account component that reads another account's counter.
+
+@account_procedure
+pub proc read_count()
+    nop
+end

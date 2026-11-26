@@ -36,11 +36,11 @@
       "simple": { "limit": 30, "period": 60 },
     },
   ],
-  // Bundle the Rust templates and project files as strings (lib/templates.ts).
+  // Bundle the MASM templates as strings (lib/templates.ts).
   "rules": [
     {
       "type": "Text",
-      "globs": ["**/*.rs", "**/*.toml", "**/*.lock"],
+      "globs": ["**/*.masm"],
       "fallthrough": true,
     },
   ],
