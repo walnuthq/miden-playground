@@ -54,12 +54,6 @@ const editorSource = (page: Page) =>
         ?.getValue() ?? "",
   );
 
-// Tutorial 12 was written for Rust contracts: it's marked `unavailable`
-// until plan 07 of spec/remove-rust rewrites it in MASM. Remove its test's
-// `test.fixme` with its tutorial's flag.
-const REWRITING = (number: number) =>
-  `Tutorial ${number} is being rewritten for Miden Assembly (spec/remove-rust plan 07)`;
-
 test("mobile: tutorial 7's increment, added by its button", async ({
   page,
 }) => {
@@ -144,10 +138,9 @@ test("mobile: tutorial 8's timelock, added by its buttons", async ({
   });
 });
 
-test("mobile: tutorial 12's reset_count, added by its buttons", async ({
+test("mobile: tutorial 12's reset_count, added by its button", async ({
   page,
 }) => {
-  test.fixme(true, REWRITING(12));
   logBrowserErrors(page);
   const panel = tutorialPanel(page);
   await startTutorial(page, "Contract verification");
@@ -164,16 +157,18 @@ test("mobile: tutorial 12's reset_count, added by its buttons", async ({
   });
 
   await test.step("2. add reset_count and compile", async () => {
-    // The implementation's button declares it in the trait too.
-    await panel.root
-      .getByRole("button", { name: "Add to my script" })
+    await panel.root.getByRole("button", { name: "Add to my script" }).click();
+    await waitForEditorText(page, "pub proc reset_count()");
+    // With the number unique to this run, the one the step shows.
+    const runLine = (await panel.root
+      .locator("strong")
+      .filter({ hasText: /^push\.\d+ drop$/ })
       .first()
-      .click();
-    await waitForEditorText(page, "fn reset_count(&mut self) {");
-    await waitForEditorText(page, "fn reset_count(&mut self);");
-    await expect(panel.root.getByRole("button", { name: "Added" })).toHaveCount(
-      2,
-    );
+      .textContent()) as string;
+    await waitForEditorText(page, runLine);
+    await expect(
+      panel.root.getByRole("button", { name: "Added" }),
+    ).toBeVisible();
     await compile(page);
     await nextStep(page);
   });

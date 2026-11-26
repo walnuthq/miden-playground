@@ -6,8 +6,7 @@
 // lib/utils/tutorial-code.ts in the web app) is compiled too, so an SDK bump
 // that breaks a snippet fails here; an edit whose step relies on the typed
 // forms must keep the template's schema, and one whose step has the user
-// enter raw values must lose it. Tutorials 9 to 12 add theirs as they're
-// rewritten in MASM (plan 07 of spec/remove-rust).
+// enter raw values must lose it.
 //
 // The home page's examples (examples/index.ts) are launched the same way
 // (POST /scripts/examples/:id): every package must compile, and one created
@@ -39,6 +38,8 @@ import {
   applyCodeEdits,
   type CodeEdit,
   increaseIncrementEdits,
+  resetCountEdits,
+  runTag,
   timelockEdits,
 } from "../../web/lib/utils/tutorial-code.ts";
 import { exampleIds } from "../examples/ids.ts";
@@ -95,6 +96,14 @@ const tutorialEdits: {
     example: "p2id-note",
     edits: timelockEdits,
     losesNoteSchema: true,
+  },
+  {
+    // Tutorial 12 deploys the edited counter with the typed storage form,
+    // and reads its count from the slot by name. Any run's number will do.
+    label: "tutorial 12: the counter's reset_count",
+    example: "counter-account",
+    edits: resetCountEdits(runTag("check")),
+    keepsSchema: true,
   },
 ];
 

@@ -162,63 +162,68 @@ export const timelockEdits: CodeEdit[] = [
   },
 ];
 
-// The index after a block's closing brace, from the index of its opening one.
-const closingBrace = (source: string, open: number) => {
-  let depth = 0;
-  for (let index = open; index < source.length; index++) {
-    if (source[index] === "{") {
-      depth++;
-    } else if (source[index] === "}") {
-      depth--;
-      if (depth === 0) {
-        return index + 1;
-      }
-    }
-  }
-  return -1;
-};
+// Tutorial 12: a `reset_count` procedure after `increment_count`
+// (apps/api/templates/counter-account.masm), which writes a zero Word under
+// the count's key. Its first line pushes a number unique to the run and drops
+// it: that changes nothing the procedure does, but changes its code, hence its
+// MAST root and the account code's, so each run deploys code nobody verified
+// before (the registry verifies by code; the script's name doesn't reach the
+// code in MASM). The slot names stay, and so does the template's schema.
 
-// Tutorial 12: a `reset_count` procedure, declared in the component's trait
-// and implemented after `increment_count`.
-export const resetCountEdits: CodeEdit[] = [
+const RESET_COUNT =
+  /^[ \t]*(?:@account_procedure\s*\n[ \t]*)?(?:pub\s+)?proc\s+reset_count\b[\s\S]*?\n\s*end\b/m;
+
+// The run id (lowercase letters, randomLowercaseId) read in base 26: a number
+// well below a felt's modulus that the step can show and the code can push.
+export const runTag = (runId: string) =>
+  [...runId].reduce((tag, letter) => tag * 26 + (letter.charCodeAt(0) - 97), 0);
+
+export const resetCountProcedure = (tag: number) => [
+  "#! Resets the count to zero.",
+  "#!",
+  "#! Inputs:  [pad(16)]",
+  "#! Outputs: [pad(16)]",
+  "@account_procedure",
+  "pub proc reset_count()",
+  "    # a number unique to your run of this tutorial: it does nothing,",
+  "    # but it makes this procedure's code, and its MAST root, yours",
+  `    push.${tag} drop`,
+  "",
+  "    # the new value, a Word of four zeros, then the key and the slot id",
+  "    padw push.COUNT_KEY push.COUNT_MAP_SLOT[0..2]",
+  "    # => [slot_id_suffix, slot_id_prefix, COUNT_KEY, 0, 0, 0, 0, pad(16)]",
+  "",
+  "    exec.native_account::set_map_item",
+  "    # => [OLD_VALUE, pad(16)]",
+  "",
+  "    dropw",
+  "    # => [pad(16)]",
+  "",
+  "    exec.sys::truncate_stack",
+  "    # => [pad(16)]",
+  "end",
+];
+
+export const resetCountEdits = (tag: number): CodeEdit[] => [
   {
     applied: (source) =>
-      /fn\s+reset_count\s*\(\s*&mut\s+self\s*\)\s*;/.test(source),
-    apply: (source) =>
-      insertAfterLine(
-        source,
-        /fn\s+increment_count\s*\(\s*&mut\s+self\s*\)\s*->\s*Felt\s*;/,
-        ["#[account_procedure]", "fn reset_count(&mut self);"],
+      new RegExp(`^\\s*push\\.${tag}\\s+drop\\b`, "m").test(
+        RESET_COUNT.exec(source)?.[0] ?? "",
       ),
-  },
-  {
-    applied: (source) =>
-      /fn\s+reset_count\s*\(\s*&mut\s+self\s*\)\s*\{/.test(source),
     apply: (source) => {
-      const match =
-        /fn\s+increment_count\s*\(\s*&mut\s+self\s*\)\s*->\s*Felt\s*\{/.exec(
-          source,
-        );
+      const procedure = resetCountProcedure(tag).join("\n");
+      // One the user typed without this run's number: replaced, a second
+      // `reset_count` wouldn't assemble.
+      const typed = RESET_COUNT.exec(source);
+      if (typed) {
+        return `${source.slice(0, typed.index)}${procedure}${source.slice(typed.index + typed[0].length)}`;
+      }
+      const match = INCREMENT_COUNT.exec(source);
       if (!match) {
         return null;
       }
-      const end = closingBrace(source, match.index + match[0].length - 1);
-      if (end === -1) {
-        return null;
-      }
-      const lineStart = source.lastIndexOf("\n", match.index) + 1;
-      const indent = /^[ \t]*/.exec(source.slice(lineStart))?.[0] ?? "";
-      const method = [
-        "",
-        "/// Resets the counter value to zero",
-        "fn reset_count(&mut self) {",
-        "    let key = Word::new([felt!(1), felt!(0), felt!(0), felt!(0)]);",
-        "    self.count_map.set(key, felt!(0));",
-        "}",
-      ]
-        .map((line) => (line === "" ? "" : `${indent}${line}`))
-        .join("\n");
-      return `${source.slice(0, end)}\n${method}${source.slice(end)}`;
+      const end = match.index + match[0].length;
+      return `${source.slice(0, end)}\n\n${procedure}${source.slice(end)}`;
     },
   },
 ];

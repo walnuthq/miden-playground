@@ -9,35 +9,23 @@ import {
 } from "@/components/tutorials/prose";
 import TutorialStepAlert from "@/components/tutorials/tutorial-step-alert";
 import useAccounts from "@/hooks/use-accounts";
-import useScripts from "@/hooks/use-scripts";
 import { EMPTY_WORD } from "@/lib/constants";
 import type { Account } from "@/lib/types/account";
-import { defaultScriptIds } from "@/lib/types/default-scripts";
 import type { TutorialStep } from "@/lib/types/tutorial";
 import { getMapItem } from "@/lib/utils/account";
-import { storageSlotName } from "@/lib/utils/storage-slots";
+
+// The counter's storage slot, as counter_account.masm names it in its source
+// (`word("counter_account::count_map")`): the edit of step 2 leaves it alone.
+const COUNTER_SLOT_NAME = "counter_account::count_map";
 
 const useCompleted = () => {
   const { accounts } = useAccounts();
-  const { scripts } = useScripts();
   const counter = accounts.find(({ name }) => name === "Unverified Contract");
-  const script = scripts.find(
-    ({ id, type }) =>
-      !defaultScriptIds.includes(id) && type === "account-component",
-  );
   if (!counter) {
     return false;
   }
   const count = getMapItem(
-    counter.storage.find(
-      ({ name }) =>
-        name ===
-        storageSlotName({
-          packageName: script?.name ?? "",
-          traitName: "CounterContract",
-          fieldName: "count_map",
-        }),
-    ),
+    counter.storage.find(({ name }) => name === COUNTER_SLOT_NAME),
     "0x0100000000000000000000000000000000000000000000000000000000000000",
   );
   return counter.nonce >= 2 && count === EMPTY_WORD;

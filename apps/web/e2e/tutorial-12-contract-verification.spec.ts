@@ -25,14 +25,6 @@ const procedureRow = (page: Page, procedure: string) =>
     // The innermost row: the component's row contains its procedures table.
     .last();
 
-// Tutorial 12 was written for Rust contracts: it's marked `unavailable`
-// (components/tutorials/meta.ts, tutorial-unavailable.spec.ts) until plan 07
-// of spec/remove-rust rewrites it in MASM. Remove this with the flag.
-test.fixme(
-  true,
-  "Tutorial 12 is being rewritten for Miden Assembly (spec/remove-rust plan 07)",
-);
-
 test("tutorial 12: contract verification", async ({ page }) => {
   logBrowserErrors(page);
   const panel = tutorialPanel(page);
@@ -56,34 +48,35 @@ test("tutorial 12: contract verification", async ({ page }) => {
       await selectOption(page, "Type", "Account Component");
       await selectOption(page, "Example", "Counter Contract");
       await dialog.getByRole("button", { name: "Create" }).click();
-      await expect(page).toHaveURL(/\/scripts\/[0-9a-z_-]+$/);
+      // An API script: its id is a UUID.
+      await expect(page).toHaveURL(/\/scripts\/[0-9a-f-]{36}$/);
       await nextStep(page);
     });
 
     await test.step("2. add reset_count and compile", async () => {
+      // The step shows the number unique to this run, which keeps this
+      // run's code unverified until step 6.
+      const runLine = (await panel.root
+        .locator("strong")
+        .filter({ hasText: /^push\.\d+ drop$/ })
+        .first()
+        .textContent())!;
+      // Typed after increment_count, the template's last procedure.
       await replaceInEditor(
         page,
-        "    fn increment_count(&mut self) -> Felt;\n}",
+        "    # => [new_count, pad(15)]\nend",
         [
-          "    fn increment_count(&mut self) -> Felt;",
-          "    #[account_procedure]",
-          "    fn reset_count(&mut self);",
-          "}",
-        ].join("\n"),
-      );
-      await replaceInEditor(
-        page,
-        "        new_value\n    }\n}",
-        [
-          "        new_value",
-          "    }",
+          "    # => [new_count, pad(15)]",
+          "end",
           "",
-          "    /// Resets the counter value to zero",
-          "    fn reset_count(&mut self) {",
-          "        let key = Word::new([felt!(1), felt!(0), felt!(0), felt!(0)]);",
-          "        self.count_map.set(key, felt!(0));",
-          "    }",
-          "}",
+          "@account_procedure",
+          "pub proc reset_count()",
+          `    ${runLine}`,
+          "    padw push.COUNT_KEY push.COUNT_MAP_SLOT[0..2]",
+          "    exec.native_account::set_map_item",
+          "    dropw",
+          "    exec.sys::truncate_stack",
+          "end",
         ].join("\n"),
       );
       await page.getByRole("button", { name: "Compile" }).click();
@@ -93,7 +86,7 @@ test("tutorial 12: contract verification", async ({ page }) => {
       await page.getByRole("tab", { name: "Manifest" }).click();
       // Listed under "Package exports".
       await expect(
-        page.getByRole("row", { name: "reset_count fn reset_count()" }),
+        page.getByRole("row", { name: /^reset_count\b/ }),
       ).toBeVisible();
       await nextStep(page);
     });
