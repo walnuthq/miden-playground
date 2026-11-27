@@ -34,8 +34,7 @@ export type NewPackage = typeof packagesTable.$inferInsert;
 
 export type Package = Omit<
   typeof packagesTable.$inferSelect,
-  // `masm` is no longer read: the source is the MASM in `files`.
-  "files" | "exports" | "metadata" | "masm"
+  "files" | "exports" | "metadata"
 > & {
   files: Record<string, string>;
   exports: Export[];
