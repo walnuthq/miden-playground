@@ -1,0 +1,249 @@
+# A bank: an account component that holds its depositors' assets in its vault
+# and keeps each depositor's balance of each asset in its storage. Deposits
+# come in deposit notes, withdrawals are asked for in withdraw request notes:
+# the bank pays them back in a P2ID note to the depositor. Deposits are
+# refused until the bank is initialized, by the init-tx-script transaction
+# script.
+
+use {AccountId, Asset} from miden::protocol::types
+use {FUNGIBLE_ASSET_MAX_AMOUNT} from miden::protocol::asset
+use miden::protocol::active_account
+use miden::protocol::active_note
+use miden::protocol::asset
+use miden::protocol::native_account
+use miden::protocol::output_note
+use miden::standards::assets::fungible_asset
+use miden::standards::note::note_tag
+use miden::standards::notes::p2id
+use miden::core::sys
+
+# ERRORS
+# =================================================================================================
+
+const ERR_ALREADY_INITIALIZED = "the bank is already initialized"
+
+const ERR_NOT_INITIALIZED = "the bank isn't initialized: deposits aren't enabled"
+
+const ERR_DEPOSIT_TOO_LARGE = "the deposit exceeds the maximum allowed"
+
+const ERR_BALANCE_TOO_LARGE = "the balance would exceed the maximum allowed"
+
+const ERR_INSUFFICIENT_BALANCE = "the withdrawal exceeds the depositor's balance"
+
+# STORAGE
+# =================================================================================================
+
+# The storage value that tells whether the bank is initialized: [1, 0, 0, 0]
+# once it is, [0, 0, 0, 0] before.
+const INITIALIZED_SLOT = word("bank_account::initialized")
+
+# The storage map of the balances. A balance is keyed by its depositor and its
+# asset: [depositor_id_suffix, depositor_id_prefix, faucet_id_suffix_and_metadata,
+# faucet_id_prefix], the asset's id with the depositor's id in place of its two
+# zeros.
+const BALANCES_SLOT = word("bank_account::balances")
+
+# CONSTANTS
+# =================================================================================================
+
+# The most a single deposit can bring, in the asset's base units: 1 USDCX
+# (6 decimals). An arbitrary limit, for the example.
+const MAX_DEPOSIT_AMOUNT = 1000000
+
+# A public note: stored on chain, so the depositor's wallet finds it.
+const NOTE_TYPE_PUBLIC = 1
+
+# Where `withdraw` keeps the depositor's id and the asset.
+const DEPOSITOR_ID_SUFFIX_LOC = 0
+const DEPOSITOR_ID_PREFIX_LOC = 1
+const ASSET_LOC = 4
+
+# PROCEDURES
+# =================================================================================================
+
+#! Initializes the bank, which enables deposits.
+#!
+#! Inputs:  [pad(16)]
+#! Outputs: [pad(16)]
+#!
+#! Panics if the bank is already initialized.
+@account_procedure
+pub proc initialize()
+    push.INITIALIZED_SLOT[0..2] exec.active_account::get_item
+    # => [is_initialized, 0, 0, 0, pad(16)]
+
+    assertz.err=ERR_ALREADY_INITIALIZED drop drop drop
+    # => [pad(16)]
+
+    push.0.0.0.1 push.INITIALIZED_SLOT[0..2] exec.native_account::set_item
+    # => [OLD_VALUE, pad(16)]
+
+    dropw
+    # => [pad(16)]
+end
+
+#! Returns the balance the bank keeps for a depositor of an asset. The asset's
+#! amount is ignored: only its faucet counts.
+#!
+#! Inputs:  [depositor_id_suffix, depositor_id_prefix, ASSET_ID, ASSET_VALUE, pad(6)]
+#! Outputs: [balance, pad(15)]
+@account_procedure
+pub proc get_depositor_balance(depositor: AccountId, asset: Asset) -> felt
+    exec.balance_key
+    # => [KEY, ASSET_ID, ASSET_VALUE, pad(6)]
+
+    push.BALANCES_SLOT[0..2] exec.active_account::get_map_item
+    # => [balance, 0, 0, 0, ASSET_ID, ASSET_VALUE, pad(6)]
+
+    movdn.11 dropw dropw drop drop drop
+    # => [balance, pad(6)]
+
+    exec.sys::truncate_stack
+    # => [balance, pad(15)]
+end
+
+#! Adds a fungible asset to the bank's vault, and its amount to the
+#! depositor's balance of it.
+#!
+#! Inputs:  [depositor_id_suffix, depositor_id_prefix, ASSET_ID, ASSET_VALUE, pad(6)]
+#! Outputs: [pad(16)]
+#!
+#! Panics if:
+#! - the bank isn't initialized.
+#! - the asset isn't a fungible asset.
+#! - the amount exceeds MAX_DEPOSIT_AMOUNT.
+#! - the balance would exceed the most a fungible asset can hold.
+@account_procedure
+pub proc deposit(depositor: AccountId, asset: Asset)
+    exec.require_initialized
+
+    # set the depositor's id aside to check the asset
+    movdn.9 movdn.9
+    # => [ASSET_ID, ASSET_VALUE, depositor_id_suffix, depositor_id_prefix, pad(6)]
+
+    exec.fungible_asset::validate
+    dup.4 lte.MAX_DEPOSIT_AMOUNT assert.err=ERR_DEPOSIT_TOO_LARGE
+    # => [ASSET_ID, ASSET_VALUE, depositor_id_suffix, depositor_id_prefix, pad(6)]
+
+    movup.9 movup.9 exec.balance_key
+    # => [KEY, ASSET_ID, ASSET_VALUE, pad(6)]
+
+    dupw push.BALANCES_SLOT[0..2] exec.active_account::get_map_item
+    # => [balance, 0, 0, 0, KEY, ASSET_ID, ASSET_VALUE, pad(6)]
+
+    # both are at most FUNGIBLE_ASSET_MAX_AMOUNT: their sum doesn't wrap
+    dup.12 add
+    dup lte.FUNGIBLE_ASSET_MAX_AMOUNT assert.err=ERR_BALANCE_TOO_LARGE
+    # => [new_balance, 0, 0, 0, KEY, ASSET_ID, ASSET_VALUE, pad(6)]
+
+    swapw push.BALANCES_SLOT[0..2] exec.native_account::set_map_item
+    # => [OLD_VALUE, ASSET_ID, ASSET_VALUE, pad(6)]
+
+    dropw exec.native_account::add_asset
+    # => [FINAL_ASSET_VALUE, pad(6)]
+
+    dropw exec.sys::truncate_stack
+    # => [pad(16)]
+end
+
+#! Pays an asset back to the depositor: takes its amount from their balance,
+#! and moves it from the bank's vault to a public P2ID note to them. The
+#! depositor is the sender of the note being consumed, which no one else can
+#! pose as. The P2ID note's serial number is derived from that note's.
+#!
+#! Inputs:  [ASSET_ID, ASSET_VALUE, pad(8)]
+#! Outputs: [pad(16)]
+#!
+#! Panics if:
+#! - the bank isn't initialized.
+#! - it isn't called from a note.
+#! - the asset isn't a fungible asset.
+#! - the amount exceeds the depositor's balance.
+@account_procedure
+@locals(12)
+pub proc withdraw(asset: Asset)
+    exec.require_initialized
+    exec.fungible_asset::validate
+
+    # keep the asset for the note
+    dupw.1 dupw.1 locaddr.ASSET_LOC exec.asset::store
+    # => [ASSET_ID, ASSET_VALUE, pad(8)]
+
+    exec.active_note::get_sender
+    dup loc_store.DEPOSITOR_ID_SUFFIX_LOC dup.1 loc_store.DEPOSITOR_ID_PREFIX_LOC
+    # => [depositor_id_suffix, depositor_id_prefix, ASSET_ID, ASSET_VALUE, pad(8)]
+
+    exec.balance_key
+    # => [KEY, ASSET_ID, ASSET_VALUE, pad(8)]
+
+    dupw push.BALANCES_SLOT[0..2] exec.active_account::get_map_item
+    # => [balance, 0, 0, 0, KEY, ASSET_ID, ASSET_VALUE, pad(8)]
+
+    # felts wrap: check the balance covers the amount before subtracting
+    dup.12 dup.1 dup.1 gte assert.err=ERR_INSUFFICIENT_BALANCE
+    # => [amount, balance, 0, 0, 0, KEY, ASSET_ID, ASSET_VALUE, pad(8)]
+
+    sub
+    # => [new_balance, 0, 0, 0, KEY, ASSET_ID, ASSET_VALUE, pad(8)]
+
+    swapw push.BALANCES_SLOT[0..2] exec.native_account::set_map_item
+    # => [OLD_VALUE, ASSET_ID, ASSET_VALUE, pad(8)]
+
+    dropw dropw dropw
+    # => [pad(8)]
+
+    # the P2ID note to the depositor
+    exec.active_note::get_serial_number add.1
+    # => [SERIAL_NUM, pad(8)]
+
+    push.NOTE_TYPE_PUBLIC
+    loc_load.DEPOSITOR_ID_PREFIX_LOC exec.note_tag::create_account_target
+    loc_load.DEPOSITOR_ID_PREFIX_LOC loc_load.DEPOSITOR_ID_SUFFIX_LOC
+    # => [depositor_id_suffix, depositor_id_prefix, tag, note_type, SERIAL_NUM, pad(8)]
+
+    exec.p2id::prepare_note
+    # => [tag, note_type, RECIPIENT, pad(8)]
+
+    exec.output_note::create
+    # => [note_idx, pad(8)]
+
+    locaddr.ASSET_LOC exec.asset::load
+    # => [ASSET_ID, ASSET_VALUE, note_idx, pad(8)]
+
+    dupw.1 dupw.1 exec.native_account::remove_asset dropw
+    # => [ASSET_ID, ASSET_VALUE, note_idx, pad(8)]
+
+    exec.output_note::add_asset
+    # => [pad(8)]
+
+    exec.sys::truncate_stack
+    # => [pad(16)]
+end
+
+# HELPERS
+# =================================================================================================
+
+#! Panics if the bank isn't initialized.
+#!
+#! Inputs:  []
+#! Outputs: []
+proc require_initialized()
+    push.INITIALIZED_SLOT[0..2] exec.active_account::get_item
+    # => [is_initialized, 0, 0, 0]
+
+    eq.1 assert.err=ERR_NOT_INITIALIZED drop drop drop
+    # => []
+end
+
+#! The key of a depositor's balance of an asset in the balances map.
+#!
+#! Inputs:  [depositor_id_suffix, depositor_id_prefix, ASSET_ID]
+#! Outputs: [KEY, ASSET_ID]
+proc balance_key()
+    # ASSET_ID is [0, 0, faucet_id_suffix_and_metadata, faucet_id_prefix]
+    dup.5 dup.5
+    # => [faucet_id_suffix_and_metadata, faucet_id_prefix, depositor_id_suffix, depositor_id_prefix, ASSET_ID]
+
+    movup.2 movup.3 swap
+    # => [depositor_id_suffix, depositor_id_prefix, faucet_id_suffix_and_metadata, faucet_id_prefix, ASSET_ID]
+end

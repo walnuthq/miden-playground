@@ -1,0 +1,17 @@
+# A transaction script that initializes the bank that runs it, which enables
+# deposits. It calls the bank's `initialize`, so it depends on the
+# bank-account script.
+
+use bank_account
+
+#! Initializes the executing bank.
+#!
+#! Inputs:  []
+#! Outputs: []
+#!
+#! Panics if the bank is already initialized.
+@transaction_script
+pub proc main()
+    call.bank_account::initialize
+    # => [pad(16)]
+end

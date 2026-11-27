@@ -43,6 +43,7 @@ import {
   timelockEdits,
 } from "../../web/lib/utils/tutorial-code.ts";
 import { exampleIds } from "../examples/ids.ts";
+import { exampleSchemas } from "../examples/schemas.ts";
 import { sourceFilePath } from "../lib/source-file.ts";
 import { declaredSlotNames } from "../lib/storage-slot-names.ts";
 import { templateSchemas } from "../lib/template-schemas.ts";
@@ -301,8 +302,16 @@ for (const exampleId of exampleIds) {
   try {
     const failed = packages.find(({ status }) => status !== "compiled");
     // The example's account component is named after the example, and has a
-    // storage schema.
+    // storage schema; every package keeps the schemas it was created with
+    // (examples/schemas.ts).
     const account = packages.find(({ name }) => name === exampleId);
+    const lostSchema = packages.find(({ name, metadata }) => {
+      const schema = exampleSchemas[exampleId][name];
+      return (
+        (schema?.storage && !metadata?.storage) ||
+        (schema?.noteStorage && !metadata?.noteStorage)
+      );
+    });
     if (failed) {
       failures.push(label);
       console.error(`FAIL  ${label}: ${failed.name}\n${failed.stderr}\n`);
@@ -310,6 +319,11 @@ for (const exampleId of exampleIds) {
       failures.push(label);
       console.error(
         `FAIL  ${label}: its account component has no storage schema once compiled\n`,
+      );
+    } else if (lostSchema) {
+      failures.push(label);
+      console.error(
+        `FAIL  ${label}: ${lostSchema.name} lost its schema once compiled\n`,
       );
     } else {
       console.info(`ok    ${label}`);

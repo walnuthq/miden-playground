@@ -24,24 +24,17 @@ export const exampleMetas: ExampleMeta[] = [
   {
     id: "bank-account",
     title: "Miden Bank",
-    // Until a MASM bank is written (spec/remove-rust.md, decision 9).
-    hidden: true,
     tagline:
       "Deploy a bank contract on testnet, then deposit and withdraw assets.",
     description: (
       <p>
-        This example is the companion code of the{" "}
-        <strong>Building a Bank with Miden Rust</strong> tutorial in the{" "}
-        <a
-          className="text-[#ff5500] font-medium underline underline-offset-4"
-          href="https://docs.miden.xyz/builder/tutorials/miden-bank"
-          target="_blank"
-          rel="noreferrer"
-        >
-          Miden documentation
-        </a>
-        . Initialize the bank with the <code>init-tx-script</code> transaction
-        script before making deposits.
+        A bank written in Miden Assembly: an account component,{" "}
+        <code>bank-account</code>, that keeps its depositors' assets in its
+        vault and their balances in its storage. Deposit with a{" "}
+        <code>deposit-note</code>, withdraw with a{" "}
+        <code>withdraw-request-note</code>: the bank pays the amount back in a
+        P2ID note. The example deploys a bank account for you: run the{" "}
+        <code>init-tx-script</code> transaction script on it to enable deposits.
       </p>
     ),
   },
