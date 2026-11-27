@@ -10,11 +10,11 @@ import {
 } from "./procedure-inputs.ts";
 import { wordFelts } from "./storage-slots.ts";
 
-// How a field's type lowers to felts, as the compiler's `ToFeltRepr` writes
-// it (`sdk/field-repr` in 0xMiden/compiler): a felt as itself, a word as its
-// four elements in order, an account id as its prefix then its suffix (the
-// WIT record's field order, unlike a procedure call's stack), a `u64` as its
-// low then its high 32 bits, the other integers and a bool as one felt.
+// How a field's type lowers to felts, as the templates' MASM reads a note's
+// storage: a felt as itself, a word as its four elements in order, an account
+// id as its prefix then its suffix (the record's field order, unlike a
+// procedure call's stack), a `u64` as its low then its high 32 bits, the
+// other integers and a bool as one felt.
 // `max` bounds a one-felt integer.
 const fieldTypes: Record<
   string,

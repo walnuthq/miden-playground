@@ -15,6 +15,7 @@ import { isValidUUIDv4 } from "@/lib/uuid";
 
 export const getPackage = async (id: string) => {
   const dbPackage = await getDb().query.packagesTable.findFirst({
+    columns: { masm: false },
     where: { id },
   });
   return dbPackage
@@ -32,6 +33,7 @@ export const getPackages = async (ids: string[]) => {
     return [];
   }
   const dbPackages = await getDb().query.packagesTable.findMany({
+    columns: { masm: false },
     where: { id: { in: ids } },
   });
   return dbPackages.map((dbPackage) => ({

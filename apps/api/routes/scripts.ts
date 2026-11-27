@@ -152,7 +152,6 @@ const forkedPackage = ({
   stderr: "",
   error: "",
   warnings: "",
-  masm: row.masm,
   commitment: row.commitment,
   masp: row.masp,
   exports: row.exports,

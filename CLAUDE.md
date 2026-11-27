@@ -10,14 +10,12 @@ Before working in one of these areas, read its file in `docs/claude/`. Their rul
 - Home-page examples, `apps/api/examples`: `examples.md`.
 - Read-only procedures, the Invoke button: `read-only-procedures.md`.
 - `apps/api/templates/*.masm`, `pnpm templates:check`, note scripts and the wallets that can consume them: `script-templates.md`.
-- `templates/project-template/Cargo.lock`, `pnpm lockfile:check`/`sync`, api-compile image bumps: `project-template-lockfile.md`.
 - Script page (`/scripts/:id`): editor, console, diagnostics, tabs, shortcuts, its e2e specs, script owners (the owner token), shared links and forks: `script-editor.md`.
 - The console's Simulate tab, `lib/simulation`, the mock client, `components/procedures`, storage slot values: `simulation.md`.
 - Tutorial steps (`apps/web/components/tutorials`), adding a tutorial: `tutorial-copy.md`.
 - Layout, responsive classes, dialogs, the app shell and its SDK-free entry, anything that renders on a phone: `phone-layout.md`.
 - `packages/ui`, shadcn components, Base UI APIs (`render`, `Select`, dialogs), overlays: `ui-components.md`.
-- `apps/api/lib/case.ts`, `apps/web/lib/utils/case.ts`, `storageSlotName`, the component namespace in `lib/toml.ts`: `case-helpers.md`.
-- MASM tab highlighting, `pnpm masm:sync`: `masm-highlighting.md`.
+- The editor's MASM highlighting, `pnpm masm:sync`: `masm-highlighting.md`.
 - `apps/web/vite.config.ts` and its build plugins, Vite/Para/SDK bumps, testing the built app: `vite-build.md`.
 - `apps/api/db/schema.ts` (every change ships with its migration), Drizzle migrations, `drizzle-kit` bumps: `database-migrations.md`.
 - `.env*` files, `DATABASE_URL`, `.dev.vars`: `environment-variables.md`.

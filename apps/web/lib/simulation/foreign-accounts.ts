@@ -16,12 +16,10 @@ const hasPackage = (script: Script) => script.masp !== "";
 
 // Resolves each `account-component` dependency to the package the script was
 // compiled against (its `commitment`): a workspace script of the same id, else
-// any workspace script, else a package the web app embeds. `embedded` is
-// passed in so the tests don't load the embedded packages.
+// any workspace script.
 export const foreignDependencies = (
   script: Pick<Script, "dependencies">,
   scripts: Script[],
-  embedded: Script[],
 ): ForeignDependency[] =>
   script.dependencies
     .filter(({ type }) => type === "account-component")
@@ -37,8 +35,7 @@ export const foreignDependencies = (
         ) ??
         scripts.find(
           (candidate) => sameCommitment(candidate) && hasPackage(candidate),
-        ) ??
-        embedded.find(sameCommitment);
+        );
       if (resolved) {
         return { dependency, script: resolved };
       }

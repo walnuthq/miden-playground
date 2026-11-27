@@ -21,8 +21,8 @@ export const scriptSourcePath = ({ name }: Pick<Script, "name">) =>
 export const scriptFilePaths = ({ name }: Pick<Script, "name">) =>
   packageFilePaths(name);
 
-// The files of a script that only has a source (the built-in scripts and the
-// packages embedded for the tutorials). The built-in libraries have none.
+// The files of a script that only has a source (the built-in scripts). The
+// built-in libraries have none.
 export const sourceFiles = (name: string, source: string): ScriptFiles =>
   source === "" ? {} : { [sourceFilePath(name)]: source };
 

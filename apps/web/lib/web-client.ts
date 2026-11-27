@@ -646,9 +646,9 @@ export const storageMode = (accountId: WasmAccountIdType) =>
 // The components an account's code holds, as the ids of the scripts whose
 // exports it has: the built-ins and, given the workspace, its compiled
 // packages too, so an imported account whose code holds a package's
-// procedures lists that package. One script per package (`commitment`): the
-// workspace's counter and an embedded copy of it are the same component. A
-// draft has no exports and matches nothing.
+// procedures lists that package. One script per package (`commitment`): two
+// copies of the same counter are the same component. A draft has no exports
+// and matches nothing.
 export const verifyAccountComponents = (
   wasmAccount: WasmAccount,
   { scripts = defaultScripts }: Partial<Pick<State, "scripts">> = {},

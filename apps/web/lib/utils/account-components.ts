@@ -61,9 +61,8 @@ export const authComponents = (scripts: Script[]) => [
 ];
 
 // The slots of an account's storage that belong to a component: those its
-// script's schema declares, else (a package compiled or verified before
-// schemas existed) those named with its package's prefix, as the compiler
-// names them (`storageSlotName`).
+// script's schema declares, else (a package without a schema) those named
+// with its package's prefix, as the templates name them (`storageSlotPrefix`).
 export const componentStorageSlots = (
   { name, metadata }: Pick<Script, "name" | "metadata">,
   storage: StorageItem[],
