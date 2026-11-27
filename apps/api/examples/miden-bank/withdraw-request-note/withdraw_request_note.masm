@@ -1,0 +1,55 @@
+# A withdraw request note: the bank that consumes it pays the asset its
+# storage names back to the note's sender, the depositor, in a P2ID note. It
+# calls the bank's `withdraw`, so it depends on the bank-account script, and
+# it can only be consumed by an account built with that component.
+
+use bank_account
+use miden::protocol::active_note
+use miden::standards::assets::fungible_asset
+
+const ERR_WRONG_NUMBER_OF_STORAGE_ITEMS = "a withdraw request expects exactly 3 note storage items"
+
+# NOTE STORAGE
+# =================================================================================================
+
+# The note's storage, written when the note is created: the asset's faucet id,
+# its prefix then its suffix, then the amount. The script copies it to memory
+# from STORAGE_PTR on.
+const NUM_STORAGE_ITEMS = 3
+
+const STORAGE_PTR = 0
+const FAUCET_ID_PREFIX_PTR = STORAGE_PTR
+const FAUCET_ID_SUFFIX_PTR = STORAGE_PTR + 1
+const AMOUNT_PTR = STORAGE_PTR + 2
+
+# SCRIPT
+# =================================================================================================
+
+#! Asks the consuming bank to pay the asset back to the note's sender.
+#!
+#! Inputs:  []
+#! Outputs: []
+#!
+#! Panics if:
+#! - the note's storage doesn't hold exactly 3 items.
+#! - the bank refuses the withdrawal (see `bank_account::withdraw`).
+@note_script
+pub proc main()
+    push.NUM_STORAGE_ITEMS push.STORAGE_PTR exec.active_note::get_bounded_storage
+    # => [num_storage_items]
+
+    eq.NUM_STORAGE_ITEMS assert.err=ERR_WRONG_NUMBER_OF_STORAGE_ITEMS
+    # => []
+
+    mem_load.AMOUNT_PTR mem_load.FAUCET_ID_PREFIX_PTR mem_load.FAUCET_ID_SUFFIX_PTR
+    # => [faucet_id_suffix, faucet_id_prefix, amount]
+
+    exec.fungible_asset::create
+    # => [ASSET_ID, ASSET_VALUE, pad(16)]
+
+    call.bank_account::withdraw
+    # => [pad(16), pad(8)]
+
+    dropw dropw
+    # => [pad(16)]
+end

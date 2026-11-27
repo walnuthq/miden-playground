@@ -1,5 +1,5 @@
 import { declaredSlotNames } from "./storage-slot-names.ts";
-import type { PackageMetadata, ScriptExample } from "./types.ts";
+import type { NoteSchemaSource, PackageMetadata } from "./types.ts";
 
 // What a build reports that the API keeps in `metadata`: a note or
 // transaction script's account procedures. api-compile sends `null` when it
@@ -7,11 +7,11 @@ import type { PackageMetadata, ScriptExample } from "./types.ts";
 // another kind of package.
 export type BuildMetadata = { accountProcedures?: string[] | null };
 
-// The source a compile is for, and the templates' sources as shipped, which
-// a note's schema is checked against.
+// The source a compile is for, and the templates' and example packages'
+// sources as shipped, which a note's schema is checked against.
 export type CompiledSource = {
   masm: string;
-  shipped: (template: ScriptExample) => string | undefined;
+  shipped: (template: NoteSchemaSource) => string | undefined;
 };
 
 const sameNames = (left: string[], right: string[]) => {
@@ -47,9 +47,10 @@ const storageHolds = (
 // unless the source no longer matches them, and then they're dropped for
 // good: nothing brings them back.
 // - `storage` holds while the source declares the schema's slot names.
-// - `noteStorage` holds while the source is byte for byte the template's as
-//   shipped (`template`): a note's inputs have no names in MASM to compare,
-//   so any edit drops it, a comment's too. `template` goes with it.
+// - `noteStorage` holds while the source is byte for byte the template's or
+//   example package's as shipped (`template`): a note's inputs have no names
+//   in MASM to compare, so any edit drops it, a comment's too. `template`
+//   goes with it.
 // `accountProcedures` is the build's: kept when it's a list, `[]` included;
 // `null` (api-compile couldn't tell) or absent is dropped, which reads the
 // same: no filter. Null when nothing is left.

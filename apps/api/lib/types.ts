@@ -3,6 +3,7 @@ import type {
   packagesTable,
   packageTypeEnum,
 } from "@/db/schema";
+import type { ExamplePackageRef } from "@/examples/ids";
 
 export type ScriptExample =
   | "none"
@@ -12,6 +13,10 @@ export type ScriptExample =
   | "counter-note"
   | "counter-script"
   | "count-reader";
+
+// What a note's schema is checked against: a template, or an example's
+// package (examples/ids.ts).
+export type NoteSchemaSource = ScriptExample | ExamplePackageRef;
 
 export type MidenProjectToml = {
   package: {
@@ -74,10 +79,10 @@ export type NoteStorageField = {
 export type PackageMetadata = {
   storage?: { slots: StorageSlotSchema[] };
   noteStorage?: { name: string; fields: NoteStorageField[] };
-  // The template a note was created from, while it keeps its `noteStorage`:
-  // a note's schema holds only while its source is that template's as
-  // shipped (lib/package-metadata.ts).
-  template?: ScriptExample;
+  // The template or example package a note was created from, while it keeps
+  // its `noteStorage`: a note's schema holds only while its source is that
+  // template's or package's as shipped (lib/package-metadata.ts).
+  template?: NoteSchemaSource;
   // A note or transaction script's account procedures: the MAST roots
   // (`0x…` hex, sorted) it `call`s, `[]` when it calls none. api-compile
   // sends `null` when it can't tell (a dynamic call is reachable); the API

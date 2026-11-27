@@ -1,16 +1,29 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
+import { isExamplePackageRef } from "../examples/ids.ts";
 import { type CompiledSource, compiledMetadata } from "./package-metadata.ts";
 import { templateMetadata } from "./template-schemas.ts";
-import type { ScriptExample } from "./types.ts";
+import type { NoteSchemaSource } from "./types.ts";
 
 // The templates as shipped, read as the API bundles them.
 const template = (name: string) =>
   readFileSync(`${import.meta.dirname}/../templates/${name}.masm`, "utf8");
 
-const shipped = (name: ScriptExample) =>
-  name === "none" ? undefined : template(name);
+// The bank example's withdraw request note, as shipped.
+const withdrawRequestNote = readFileSync(
+  `${import.meta.dirname}/../examples/miden-bank/withdraw-request-note/withdraw_request_note.masm`,
+  "utf8",
+);
+
+const shipped = (name: NoteSchemaSource) =>
+  isExamplePackageRef(name)
+    ? name === "bank-account/withdraw-request-note"
+      ? withdrawRequestNote
+      : undefined
+    : name === "none"
+      ? undefined
+      : template(name);
 
 const source = (masm: string): CompiledSource => ({ masm, shipped });
 
@@ -116,6 +129,30 @@ describe("compiledMetadata: note storage", () => {
   it("doesn't bring it back when the edit is undone", () => {
     const dropped = compiledMetadata(p2idMetadata, {}, source(`${p2idNote}\n`));
     assert.equal(compiledMetadata(dropped, {}, source(p2idNote)), null);
+  });
+
+  it("keeps an example note's schema while its source is the example's", () => {
+    const metadata = {
+      noteStorage,
+      template: "bank-account/withdraw-request-note" as const,
+    };
+    assert.deepEqual(
+      compiledMetadata(metadata, {}, source(withdrawRequestNote)),
+      metadata,
+    );
+    assert.equal(
+      compiledMetadata(metadata, {}, source(`${withdrawRequestNote}\n`)),
+      null,
+    );
+    // Another example's package, or a template's source, doesn't hold it.
+    assert.equal(
+      compiledMetadata(
+        { noteStorage, template: "counter-account/increment-note" },
+        {},
+        source(withdrawRequestNote),
+      ),
+      null,
+    );
   });
 
   it("drops a note schema with no template to check it against", () => {

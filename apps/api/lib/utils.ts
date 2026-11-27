@@ -5,6 +5,8 @@ import {
   insertPackage,
   updatePackage,
 } from "@/db/packages";
+import { examplePackageSource } from "@/examples";
+import { isExamplePackageRef } from "@/examples/ids";
 import { notFound } from "@/lib/errors";
 import { analyzedExports, type ExportAnalysis } from "@/lib/package-exports";
 import { buildFiles } from "@/lib/package-files";
@@ -18,8 +20,8 @@ import type {
   Export,
   Manifest,
   PackageMetadata,
+  NoteSchemaSource,
   PackageType,
-  ScriptExample,
   ScriptFiles,
 } from "@/lib/types";
 import { fetchApiCompile } from "@/lib/upstream";
@@ -174,8 +176,12 @@ export const compilePackage = async ({
   // What the package's schemas are checked against (lib/package-metadata.ts).
   const compiledSource = {
     masm: source,
-    shipped: (template: ScriptExample) =>
-      template === "none" ? undefined : templates[template],
+    shipped: (template: NoteSchemaSource) =>
+      isExamplePackageRef(template)
+        ? examplePackageSource(template)
+        : template === "none"
+          ? undefined
+          : templates[template],
   };
   const build = await fetchApiCompile<CompileResponse>("/compile", {
     method: "POST",

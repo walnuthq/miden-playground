@@ -1,0 +1,59 @@
+# A deposit note: the bank that consumes it deposits each of its assets for
+# the note's sender, the depositor. It calls the bank's `deposit`, so it
+# depends on the bank-account script, and it can only be consumed by an
+# account built with that component.
+
+use bank_account
+use {ASSET_SIZE} from miden::protocol::asset
+use miden::protocol::active_note
+use miden::protocol::asset
+
+# Where the depositor's id is kept, after room for the note's assets (as the
+# standard wallet's `move_note_assets_to_account` allots them).
+const DEPOSITOR_ID_SUFFIX_LOC = 128
+const DEPOSITOR_ID_PREFIX_LOC = 129
+
+#! Deposits the note's assets in the consuming bank, for the note's sender.
+#!
+#! Inputs:  []
+#! Outputs: []
+#!
+#! Panics if the bank refuses a deposit (see `bank_account::deposit`).
+@note_script
+@locals(132)
+pub proc main()
+    exec.active_note::get_sender
+    loc_store.DEPOSITOR_ID_SUFFIX_LOC loc_store.DEPOSITOR_ID_PREFIX_LOC
+    # => []
+
+    # take the note's assets out of it, to memory
+    locaddr.0 exec.active_note::remove_all_assets
+    # => [num_assets]
+
+    mul.ASSET_SIZE locaddr.0 dup movdn.2 add swap
+    # => [ptr, end_ptr]
+
+    dup dup.2 neq
+    while.true
+        # `deposit` takes the depositor's id and the asset, then 6 elements
+        # of padding, which keep the pointers below the call's 16 elements
+        padw push.0.0 dup.6 exec.asset::load
+        # => [ASSET_ID, ASSET_VALUE, pad(6), ptr, end_ptr]
+
+        loc_load.DEPOSITOR_ID_PREFIX_LOC loc_load.DEPOSITOR_ID_SUFFIX_LOC
+        # => [depositor_id_suffix, depositor_id_prefix, ASSET_ID, ASSET_VALUE, pad(6), ptr, end_ptr]
+
+        call.bank_account::deposit
+        # => [pad(16), ptr, end_ptr]
+
+        dropw dropw dropw dropw
+        # => [ptr, end_ptr]
+
+        add.ASSET_SIZE dup dup.2 neq
+        # => [should_loop, ptr + ASSET_SIZE, end_ptr]
+    end
+    # => [ptr, end_ptr]
+
+    drop drop
+    # => []
+end
