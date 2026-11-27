@@ -220,6 +220,25 @@ Still open:
 
 - Decision 3 rests on an assumption about upstream (no storage schema planned). If it proves wrong, typed storage can come back.
 
+## Review after the migration
+
+Done on 2026-11-27, once every plan had shipped, with one question: does the MASM pipeline do everything the Rust one did, the Simulate tab above all, which read much of what it shows from what the Rust toolchain embedded in a package.
+
+Gaps the migration introduced, fixed the same day:
+
+- **Procedures without a signature were dropped.** A procedure written `pub proc add`, its stack effect in a comment, has a null signature in the manifest, and the API kept only the exports that have one: it couldn't be invoked or simulated, and a verified package holding one could crash the pages that list procedures. They're kept now, as `untyped`: the forms take the stack as raw felts and show the stack the procedure leaves.
+- **A Count Reader made alone from its template couldn't simulate its foreign call.** The web app used to embed the counter's package, which went with the Rust packages. The API now builds a built-in dependency's package on request (`GET /scripts/dependencies/:name`).
+- **A failed compile could drop a schema for good**, when its source couldn't be read (an unclosed string). The stale rules of decision 3 now run only on a compile that builds.
+- **A script without a schema started from no slot at all**, an import of an exported template included. The API now lists the slot names the source declares (`metadata.slotNames`) and the forms start from them, each one's type left to the user.
+
+Left as they were, since they were decisions rather than gaps. To revisit if they prove to cost more than expected:
+
+- **Typed note inputs only for unedited templates** (decision 3). A note written from scratch, or a template after any edit, takes its storage as raw felts in the Simulate tab and the Create Note dialog. What would change it: a way to name a note's inputs in MASM, or a schema the user edits next to the source.
+- **No schema on verified packages** (decisions 3 and 6). The registry stores none, so a verified import in the Playground and the verifier's viewer describe no storage. What would change it: upstream shipping a storage schema for MASM projects, which reopens decision 3, or the registry storing declared slot names as the Playground API does.
+- **One error per build.** The assembler stops at the first failing phase, where rustc reported every error of a build. It is upstream's behaviour, not ours to fix.
+
+Also still true, by decision: a component's typed storage exists only for our own content (the templates and the examples), and the registry no longer serves a separate debug package (decision 5).
+
 ## Spike results
 
 Run on 2026-11-24 in the verifier repo, on the local branch `spike/masm-assembly` (directory `spike/masm-assembly`, nothing committed or pushed). A small Rust tool assembles a `miden-project.toml` project with `miden-assembly` 0.36.4 against the core, protocol, kernel and standards packages of the 0.18.0 crates. Three projects: a counter account component, a note that calls it, a transaction script that calls it.

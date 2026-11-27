@@ -43,6 +43,19 @@ export const defaultProcedureExport = (): ProcedureExport => ({
   attributes: { attrs: [] },
 });
 
+// A manifest's procedure export as the app holds it. A procedure whose source
+// declares no signature has a null one in the manifest: the API stores it
+// with an empty one and `untyped` (`analyzedExports`), and a registry package
+// comes with the manifest as it is.
+export const typedProcedureExport = <
+  T extends { signature: Signature | null; untyped?: boolean },
+>(
+  procedureExport: T,
+): T & { signature: Signature } =>
+  procedureExport.signature === null
+    ? { ...procedureExport, signature: defaultSignature(), untyped: true }
+    : { ...procedureExport, signature: procedureExport.signature };
+
 export const defaultDependencies = (): Dependency[] => [
   {
     id: "miden-core",
@@ -174,7 +187,7 @@ export const compiledPackageToScript = (
     ? []
     : compiledPackage.exports.map((manifestExport) => ({
         ...defaultProcedureExport(),
-        ...manifestExport.Procedure,
+        ...typedProcedureExport(manifestExport.Procedure),
         readOnly: isReadOnlyProcedure(manifestExport.Procedure),
       })),
 });
@@ -293,7 +306,9 @@ export const packageToScript = ({
   commitment,
   masp,
   // A type the source exports (`{ Type: … }`) has no signature: not kept.
-  exports: manifest.exports.filter(({ Procedure }) => Procedure !== undefined),
+  exports: manifest.exports
+    .filter(({ Procedure }) => Procedure !== undefined)
+    .map(({ Procedure }) => ({ Procedure: typedProcedureExport(Procedure) })),
   procedureExports: manifest.exports
     .filter(
       ({ Procedure: procedureExport }) =>
@@ -301,7 +316,7 @@ export const packageToScript = ({
         formatProcedureExportPath(procedureExport.path) !== "init",
     )
     .map(({ Procedure: procedureExport }) => ({
-      ...procedureExport,
+      ...typedProcedureExport(procedureExport),
       readOnly: isReadOnlyProcedure(procedureExport),
       // The registry keeps the names apart from the manifest.
       ...(parameters?.[procedureExport.path] && {

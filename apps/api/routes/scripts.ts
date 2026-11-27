@@ -14,6 +14,7 @@ import {
 import { type AppEnv, createApp } from "@/lib/app";
 import {
   counterAccountDependency,
+  type DefaultDependency,
   defaultDependenciesRecords,
 } from "@/lib/default-dependencies";
 import {
@@ -46,7 +47,12 @@ import type {
   ScriptExample,
   ScriptFiles,
 } from "@/lib/types";
-import { compilePackage, createPackage, scriptFiles } from "@/lib/utils";
+import {
+  compileDefaultDependency,
+  compilePackage,
+  createPackage,
+  scriptFiles,
+} from "@/lib/utils";
 import { isValidUUIDv4 } from "@/lib/uuid";
 import {
   isBoundedArray,
@@ -345,6 +351,23 @@ const scripts = createApp()
         ownerKeyHash: await requireKeyHash(c),
       });
       return c.json<ImportScriptsResponse>({ packages });
+    } catch (error) {
+      return errorResponse(c, error);
+    }
+  })
+  // A built-in dependency's package, which no row holds: see
+  // `compileDefaultDependency`.
+  .get("/dependencies/:name", rateLimit, async (c) => {
+    try {
+      const name = c.req.param("name");
+      if (!Object.hasOwn(defaultDependenciesRecords, name)) {
+        throw notFound("Error: Package not found.");
+      }
+      const compiled = await compileDefaultDependency(
+        name as DefaultDependency,
+        c.req.raw.signal,
+      );
+      return c.json<CompileScriptResponse>({ package: compiled });
     } catch (error) {
       return errorResponse(c, error);
     }

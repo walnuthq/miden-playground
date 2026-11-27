@@ -7,10 +7,19 @@ import {
 } from "@/db/packages";
 import { examplePackageSource } from "@/examples";
 import { isExamplePackageRef } from "@/examples/ids";
+import {
+  type DefaultDependency,
+  defaultDependenciesRecords,
+} from "@/lib/default-dependencies";
 import { notFound } from "@/lib/errors";
 import { analyzedExports, type ExportAnalysis } from "@/lib/package-exports";
 import { buildFiles } from "@/lib/package-files";
-import { type BuildMetadata, compiledMetadata } from "@/lib/package-metadata";
+import {
+  type BuildMetadata,
+  compiledMetadata,
+  failedBuildMetadata,
+} from "@/lib/package-metadata";
+import { templateSchemas } from "@/lib/template-schemas";
 import { templates } from "@/lib/templates";
 import { generateMidenProjectToml } from "@/lib/toml";
 import type {
@@ -22,6 +31,7 @@ import type {
   PackageMetadata,
   NoteSchemaSource,
   PackageType,
+  ScriptExample,
   ScriptFiles,
 } from "@/lib/types";
 import { fetchApiCompile } from "@/lib/upstream";
@@ -143,6 +153,49 @@ const compileOutput = ({ stdout, stderr, diagnostics }: CompileOutput) => ({
   stderr,
 });
 
+// A built-in dependency's package (lib/default-dependencies.ts), built from
+// its template: what a script that depends on it was compiled against. It's
+// no row, so the web app can't get it as a script: the Simulate tab asks for
+// it to build the account a script's foreign call reads, when the workspace
+// holds no script with that package. Not stored: a build takes milliseconds.
+export const compileDefaultDependency = async (
+  name: DefaultDependency,
+  signal?: AbortSignal,
+): Promise<CompiledPackage> => {
+  const { id, type, files } = defaultDependenciesRecords[name];
+  const build = await fetchApiCompile<CompileResponse>("/compile", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ files, entrypoint: name }),
+    signal,
+  });
+  if (build.built === false) {
+    console.error(build.stderr);
+    throw new Error(`The ${name} template doesn't build.`);
+  }
+  const { stderr, masp, commitment, manifest, readOnly, callsForeign } = build;
+  const schema = templateSchemas[name as ScriptExample];
+  return {
+    id,
+    name,
+    type,
+    status: "compiled",
+    files: scriptFiles(name, files),
+    ...compileOutput(build),
+    error: "",
+    warnings: stderr,
+    commitment,
+    masp,
+    exports: analyzedExports(manifest, {
+      readOnly,
+      callsForeign,
+      parameters: build.parameters,
+    }),
+    metadata: schema?.storage ? { storage: schema.storage } : null,
+    dependencies: [],
+  };
+};
+
 export const compilePackage = async ({
   id,
   source,
@@ -176,6 +229,8 @@ export const compilePackage = async ({
   // What the package's schemas are checked against (lib/package-metadata.ts).
   const compiledSource = {
     masm: source,
+    accountComponent:
+      type === "account-component" || type === "authentication-component",
     shipped: (template: NoteSchemaSource) =>
       isExamplePackageRef(template)
         ? examplePackageSource(template)
@@ -191,9 +246,9 @@ export const compilePackage = async ({
   });
   if (build.built === false) {
     console.error(build.stderr);
-    // The schemas a package has stay through a failed build while the
-    // source matches them; what the build read from the code doesn't.
-    const metadata = compiledMetadata(dbPackage.metadata, {}, compiledSource);
+    // The schemas a package has stay through a failed build, whatever its
+    // source; what the last build read from the code doesn't.
+    const metadata = failedBuildMetadata(dbPackage.metadata);
     await updatePackage({
       id,
       status: "error",

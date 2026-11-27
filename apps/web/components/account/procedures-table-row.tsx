@@ -7,7 +7,7 @@ import useScripts from "@/hooks/use-scripts";
 import useTransactions from "@/hooks/use-transactions";
 import type { Account } from "@/lib/types/account";
 import type { ProcedureExport, Script } from "@/lib/types/script";
-import { decodeProcedureResult } from "@/lib/utils/procedure-inputs";
+import { procedureParams, procedureResult } from "@/lib/utils/procedure-inputs";
 import { formatProcedureExportPath } from "@/lib/utils/script";
 
 // Whether the Playground can invoke the procedure on the account from its
@@ -92,7 +92,7 @@ const ProceduresTableRow = ({
               // A state-changing procedure opens the dialog, with or without
               // arguments: it previews the transaction before submitting it.
               if (
-                procedureExport.signature.params.length > 0 ||
+                procedureParams(procedureExport).length > 0 ||
                 !procedureExport.readOnly
               ) {
                 openInvokeProcedureArgumentsDialog({
@@ -110,10 +110,7 @@ const ProceduresTableRow = ({
                   procedureExport,
                 });
                 setResult(
-                  decodeProcedureResult(
-                    procedureExport.signature,
-                    Array.from(word.toU64s()),
-                  ),
+                  procedureResult(procedureExport, Array.from(word.toU64s())),
                 );
               } catch (error) {
                 console.error(error);

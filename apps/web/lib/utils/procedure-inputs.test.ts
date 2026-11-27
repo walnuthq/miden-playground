@@ -22,7 +22,9 @@ import {
   procedureArgumentsReady,
   procedureParameterNames,
   procedureParams,
+  procedureResult,
   procedureSignature,
+  STACK_PARAM,
   withAccountIdsAmong,
   wordToHex,
 } from "./procedure-inputs.ts";
@@ -677,5 +679,80 @@ describe("withAccountIdsAmong", () => {
       param_2: { type: "Asset", faucetId: "0xsandbox", amount: "1" },
     } as const;
     assert.equal(withAccountIdsAmong(args, allowed), args);
+  });
+});
+
+// `pub proc add`, its stack effect in a comment: the manifest has no
+// signature for it, and the app holds it with an empty one and `untyped`.
+describe("a procedure without a signature", () => {
+  const add: ProcedureExport = {
+    path: "::counter::add",
+    digest: "0x00",
+    signature: { abi: 3, params: [], results: [] },
+    untyped: true,
+    attributes: { attrs: [] },
+  };
+  const params = procedureParams(add);
+  const stack = (value: string): ProcedureArguments => ({
+    [STACK_PARAM]: { type: "Stack", value },
+  });
+
+  test("takes its stack as one parameter of raw felts", () => {
+    assert.deepEqual(params, [
+      { name: STACK_PARAM, rawType: "felts", stack: true },
+    ]);
+    assert.equal(procedureParameterNames(add), undefined);
+    assert.equal(procedureSignature(add), "proc add");
+  });
+
+  test("is ready with no stack, or with up to 16 felts", () => {
+    assert.equal(procedureArgumentsReady(params, {}), true);
+    assert.equal(procedureArgumentsReady(params, stack("")), true);
+    assert.equal(procedureArgumentsReady(params, stack("5, 0 0\n0x10")), true);
+    assert.equal(procedureArgumentsReady(params, stack("5 five")), false);
+    assert.equal(
+      procedureArgumentsReady(params, stack(Array(16).fill("1").join(" "))),
+      true,
+    );
+    assert.equal(
+      procedureArgumentsReady(params, stack(Array(17).fill("1").join(" "))),
+      false,
+    );
+    assert.equal(
+      procedureArgumentError({ type: "Stack", value: "1 2 x" }),
+      "Not a field element.",
+    );
+  });
+
+  test("pushes the stack with its first felt on top", () => {
+    const inputs = encodeProcedureArguments({
+      params,
+      args: stack("5 0x10, 7"),
+      accountIdParts,
+    });
+    assert.deepEqual(inputs, [
+      { name: STACK_PARAM, type: "Felts", value: '["5","16","7"]' },
+    ]);
+    assert.equal(formatProcedureInputs(inputs), "push.7.16.5");
+    // Nothing typed pushes nothing.
+    assert.equal(
+      formatProcedureInputs(
+        encodeProcedureArguments({ params, args: {}, accountIdParts }),
+      ),
+      "",
+    );
+  });
+
+  test("shows the stack it leaves, without its padding", () => {
+    assert.equal(procedureResult(add, [7n, 0n, 3n, 0n, 0n]), "[7, 0, 3]");
+    assert.equal(procedureResult(add, [0n, 0n, 0n, 0n]), "[0]");
+    // A procedure with a signature is decoded by it.
+    assert.equal(
+      procedureResult(
+        { signature: { abi: 3, params: [], results: ["Felt"] } },
+        [7n, 9n],
+      ),
+      "7",
+    );
   });
 });

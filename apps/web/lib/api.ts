@@ -11,7 +11,11 @@ import type {
 } from "@/lib/types/script";
 import { isValidUUIDv4, toBase64 } from "@/lib/utils";
 import { fetchRetryingNetworkError } from "@/lib/utils/fetch";
-import { isReadOnlyProcedure, packageToScript } from "@/lib/utils/script";
+import {
+  compiledPackageToScript,
+  isReadOnlyProcedure,
+  packageToScript,
+} from "@/lib/utils/script";
 import { scriptSource, scriptSourcePath } from "@/lib/utils/script-files";
 
 export const createScript = async ({
@@ -307,6 +311,21 @@ export const getScript = async (id: string) => {
         readOnly: isReadOnlyProcedure(procedureExport),
       })),
     },
+  };
+};
+
+// A built-in dependency's package, built by the API from its template: no
+// row holds it, so it isn't a script of the workspace
+// (lib/simulation/built-in-dependencies.ts).
+export const getDefaultDependency = async (name: string) => {
+  const response = await fetch(`${API_URL}/scripts/dependencies/${name}`);
+  if (!response.ok) {
+    return { error: await response.text() };
+  }
+  const result = await response.json();
+  const { package: compiledPackage } = result as { package: CompiledPackage };
+  return {
+    script: { ...compiledPackageToScript(compiledPackage), readOnly: true },
   };
 };
 

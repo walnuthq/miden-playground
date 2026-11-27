@@ -1,9 +1,10 @@
-import { useCallback, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useSyncExternalStore } from "react";
 import {
   type AssetRow,
   DEFAULT_SIMULATED_ASSET,
 } from "@/lib/simulation/simulated-assets";
 import type { StorageSlot } from "@/lib/types/storage-slot";
+import { declaredStorageSlots } from "@/lib/utils/storage-schema";
 
 // The storage slots a script's simulations start from, per script, and those
 // of the foreign accounts staged for it (`foreignSlotsKey`). In memory only,
@@ -46,12 +47,41 @@ export const setSimulationStorageSlots = (
 export const useEditedStorageSlots = () =>
   useSyncExternalStore(subscribe, getSnapshot);
 
-// `initial` shows until the slots are edited.
+// The slot names each script's source declared so far (`metadata.slotNames`,
+// for a package without a storage schema): a name is added to the edited
+// slots the first time a compile brings it, and never again, so a slot the
+// user removed stays removed.
+const offeredSlotNames = new Map<string, ReadonlySet<string>>();
+
+// `initial` shows until the slots are edited. `declared` are the slot names
+// the source declares when the package has no schema: `initial` holds them,
+// and a name a later compile brings joins the edited slots.
 export const useSimulationStorageSlots = (
   key: string,
   initial: StorageSlot[],
+  declared?: string[],
 ) => {
   const edited = useEditedStorageSlots().get(key);
+  useEffect(() => {
+    if (!declared) {
+      return;
+    }
+    const offered = offeredSlotNames.get(key) ?? new Set<string>();
+    const fresh = declared.filter((name) => !offered.has(name));
+    if (fresh.length === 0) {
+      return;
+    }
+    offeredSlotNames.set(key, new Set([...offered, ...declared]));
+    const missing = fresh.filter(
+      (name) => !edited?.some((slot) => slot.name === name),
+    );
+    if (edited && missing.length > 0) {
+      setSimulationStorageSlots(key, [
+        ...edited,
+        ...declaredStorageSlots(missing),
+      ]);
+    }
+  }, [key, declared, edited]);
   const setStorageSlots = useCallback(
     (storageSlots: StorageSlot[]) =>
       setSimulationStorageSlots(key, storageSlots),

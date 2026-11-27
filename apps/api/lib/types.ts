@@ -78,6 +78,12 @@ export type NoteStorageField = {
 // has none.
 export type PackageMetadata = {
   storage?: { slots: StorageSlotSchema[] };
+  // The storage slot names an account component's source declares (its
+  // `word("…")` constants, sorted), when it has no `storage` schema: the web
+  // app's forms start from them, each one's type and value left to the user.
+  // Read on each build (lib/package-metadata.ts); absent when the source
+  // declares none or can't be read with certainty.
+  slotNames?: string[];
   noteStorage?: { name: string; fields: NoteStorageField[] };
   // The template or example package a note was created from, while it keeps
   // its `noteStorage`: a note's schema holds only while its source is that
@@ -123,6 +129,9 @@ export type ProcedureExport = {
   path: string;
   digest: string;
   signature: ProcedureSignature | null;
+  // Set by `analyzedExports` on a procedure whose source declares no
+  // signature, which it stores with an empty one.
+  untyped?: boolean;
   attributes: { attrs: string[] };
   // Whether the procedure is read-only, as api-compile reads it from the MAST
   // (`readOnly` next to the manifest, which doesn't record it): `null` when it

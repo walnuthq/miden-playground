@@ -14,12 +14,38 @@ export type ForeignDependency =
 
 const hasPackage = (script: Script) => script.masp !== "";
 
+// The API's built-in dependencies a script can depend on without the
+// workspace holding their script: a `count-reader` made from its template
+// depends on the `counter-account` template under this id
+// (apps/api/lib/default-dependencies.ts). The API builds their package on
+// request (lib/simulation/built-in-dependencies.ts). `basic-wallet` isn't
+// one: every simulated account carries the standard wallet, whose procedures
+// are the template's, and an account can't hold them twice.
+export const BUILT_IN_DEPENDENCY_IDS: readonly string[] = ["counter-account"];
+
+// The built-in dependencies of the script the workspace doesn't resolve:
+// what to ask the API for.
+export const missingBuiltInDependencies = (
+  script: Pick<Script, "dependencies">,
+  scripts: Script[],
+) =>
+  foreignDependencies(script, scripts, [])
+    .filter(
+      (resolution) =>
+        "reason" in resolution &&
+        resolution.reason === "missing" &&
+        BUILT_IN_DEPENDENCY_IDS.includes(resolution.dependency.id),
+    )
+    .map(({ dependency: { id } }) => id);
+
 // Resolves each `account-component` dependency to the package the script was
 // compiled against (its `commitment`): a workspace script of the same id, else
-// any workspace script.
+// any workspace script, else a built-in dependency's package from the API
+// (`builtIn`, passed in once loaded).
 export const foreignDependencies = (
   script: Pick<Script, "dependencies">,
   scripts: Script[],
+  builtIn: Script[],
 ): ForeignDependency[] =>
   script.dependencies
     .filter(({ type }) => type === "account-component")
@@ -34,6 +60,9 @@ export const foreignDependencies = (
             hasPackage(candidate),
         ) ??
         scripts.find(
+          (candidate) => sameCommitment(candidate) && hasPackage(candidate),
+        ) ??
+        builtIn.find(
           (candidate) => sameCommitment(candidate) && hasPackage(candidate),
         );
       if (resolved) {

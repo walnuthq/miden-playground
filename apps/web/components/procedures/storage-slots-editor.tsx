@@ -121,7 +121,8 @@ const MapEntries = ({
 
 // An account component's storage slots, their values edited in place: a felt
 // or a word for a value slot, key/value entries for a map. `allowSlotEdits`
-// adds and removes slots, for a component whose slots aren't known.
+// adds and removes slots and sets a slot's type, for a component whose slots
+// aren't known: a slot named from the source starts as a value.
 // `descriptions`, by slot name, show under the names. It holds only the "new
 // slot" row's state: the slots are the caller's.
 const StorageSlotsEditor = ({
@@ -161,9 +162,47 @@ const StorageSlotsEditor = ({
         <div key={storageSlot.name} className="flex flex-col gap-2 p-2">
           <div className="flex items-center gap-2">
             <StorageSlotName name={storageSlot.name} className="min-w-0" />
-            <Badge variant="outline">
-              {storageSlotTypes[storageSlot.type]}
-            </Badge>
+            {allowSlotEdits ? (
+              <Select
+                items={slotTypeItems}
+                value={storageSlot.type}
+                onValueChange={(value) =>
+                  value &&
+                  value !== storageSlot.type &&
+                  onChange(
+                    storageSlots.map((slot, slotIndex) =>
+                      slotIndex === index
+                        ? {
+                            ...slot,
+                            type: value as StorageSlotType,
+                            // A value's text isn't a map's entries.
+                            value: value === "value" ? "0" : "",
+                          }
+                        : slot,
+                    ),
+                  )
+                }
+              >
+                <SelectTrigger
+                  size="sm"
+                  aria-label={`${storageSlot.name} type`}
+                  disabled={disabled}
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {slotTypeItems.map(({ value, label }) => (
+                    <SelectItem key={value} value={value}>
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <Badge variant="outline">
+                {storageSlotTypes[storageSlot.type]}
+              </Badge>
+            )}
             {allowSlotEdits && (
               <Button
                 type="button"

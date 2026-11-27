@@ -168,6 +168,15 @@ pub proc scalar(big: u64) -> felt
     push.10 mul add
 end
 
+#! No signature, as most Miden Assembly declares a procedure.
+#!
+#! Inputs:  [a, b, pad(14)]
+#! Outputs: [a + 10 * b, pad(15)]
+@account_procedure
+pub proc combine
+    swap push.10 mul add
+end
+
 `;
 
 const editorConsole = (page: Page) =>
@@ -426,7 +435,7 @@ test("script: simulate an account component", async ({ page }) => {
     ).toBeVisible();
   });
 
-  await test.step("a renamed slot drops the schema: the slots are raw", async () => {
+  await test.step("a renamed slot drops the schema: the slots are the names the source declares", async () => {
     // The template's schema names `counter_account::count_map`: a source
     // that declares another slot keeps no schema (plan 02's stale rule).
     await replaceInEditor(
@@ -449,13 +458,16 @@ test("script: simulate an account component", async ({ page }) => {
       "placeholder",
       "counter_account::slot_name",
     );
-    // A slot added by hand, as the source names it, reaches the procedure.
-    await name.fill("counter_account::renamed_map");
+    // The name the source now declares is listed, read from its
+    // `word("…")`: as a value, since the source doesn't say it's a map.
+    await expect(
+      editorConsole(page).getByLabel("counter_account::renamed_map value"),
+    ).toHaveValue("0");
     await editorConsole(page)
-      .getByRole("combobox", { name: "New slot type" })
+      .getByRole("combobox", { name: "counter_account::renamed_map type" })
       .click();
     await page.getByRole("option", { name: "Map" }).click();
-    await editorConsole(page).getByRole("button", { name: "Add slot" }).click();
+    // Set to a map, it reaches the procedure.
     await editorConsole(page)
       .getByRole("button", { name: "Add entry" })
       .click();
@@ -743,6 +755,36 @@ const pickSimFaucet = async (page: Page, procedure: string) => {
     .click();
 };
 
+test("script: a Count Reader alone simulates its foreign call", async ({
+  page,
+}) => {
+  logBrowserErrors(page);
+
+  await test.step("the workspace holds no counter", async () => {
+    // The template depends on the API's built-in `counter-account`, which no
+    // script of the workspace holds: the tab asks the API for its package.
+    await createExampleScript(
+      page,
+      "count-reader",
+      "Account Component",
+      "Count Reader",
+    );
+    await compileScript(page);
+  });
+
+  await test.step("the counter is staged from the built-in package", async () => {
+    const foreign = foreignAccount(page, "counter-account");
+    // With the template's storage schema.
+    await expect(foreign.getByText(SLOT)).toBeVisible();
+    await expect(invoke(page, "copy_count")).toBeVisible();
+    await foreign.getByRole("button", { name: "Add entry" }).click();
+    await foreign.getByLabel(`${SLOT} key 1`).fill("1");
+    await foreign.getByLabel(`${SLOT} value 1`).fill("7");
+    await selectCopyCountAccount(page, "counter-account");
+    await copyCount(page, "7");
+  });
+});
+
 test("script: the arguments of every type", async ({ page }) => {
   logBrowserErrors(page);
 
@@ -860,6 +902,28 @@ test("script: the arguments of every type", async ({ page }) => {
     // The low limb on top, as miden-core-lib takes a u64.
     await invoke(page, "scalar").click();
     await expect(procedureResult(page, "scalar")).toHaveText("12");
+  });
+
+  await test.step("a procedure without a signature takes its stack as felts", async () => {
+    // The manifest has no signature for it: the row shows it as the source
+    // writes it, and the form takes the stack, its top first.
+    await expect(
+      procedureRow(page, "combine").getByText("proc combine", { exact: true }),
+    ).toBeVisible();
+    const args = procedureArguments(page, "combine");
+    const stack = args.getByLabel(/^stack/);
+    await expect(args.getByText("0 felts, top first")).toBeVisible();
+    await stack.fill("3 x");
+    await expect(invoke(page, "combine")).toBeDisabled();
+    await stack.fill("3, 4");
+    await expect(args.getByText("2 felts, top first")).toBeVisible();
+    await invoke(page, "combine").click();
+    // The stack it leaves, without its padding.
+    await expect(procedureResult(page, "combine")).toHaveText("[43]");
+    // An empty stack is one too.
+    await stack.fill("");
+    await invoke(page, "combine").click();
+    await expect(procedureResult(page, "combine")).toHaveText("[0]");
   });
 });
 

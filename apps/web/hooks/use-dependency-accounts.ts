@@ -1,6 +1,10 @@
 import { useMemo } from "react";
 import useGlobalContext from "@/components/global-context/hook";
-import { foreignDependencies } from "@/lib/simulation/foreign-accounts";
+import { useBuiltInDependencies } from "@/lib/simulation/built-in-dependencies";
+import {
+  foreignDependencies,
+  missingBuiltInDependencies,
+} from "@/lib/simulation/foreign-accounts";
 import {
   initialStorageSlots,
   shownStorageSlots,
@@ -34,7 +38,8 @@ export type UnresolvedDependency = {
 };
 
 // The script's `account-component` dependencies whose package the workspace
-// holds (`foreignDependencies`), each with the storage slots
+// holds, or the API for a built-in one (`foreignDependencies`), each with the
+// storage slots
 // its account starts from, edited in the Simulate tab. Their slots are keyed
 // `foreignSlotsKey(script.id, name)`: a script is either an account component
 // (foreign accounts) or a note or transaction script (its target's
@@ -42,14 +47,22 @@ export type UnresolvedDependency = {
 const useDependencyAccounts = (script: Script) => {
   const { scripts } = useGlobalContext();
   const edited = useEditedStorageSlots();
+  const missingBuiltIn = useMemo(
+    () => missingBuiltInDependencies(script, scripts),
+    [script, scripts],
+  );
+  const { packages: builtIn, settled } = useBuiltInDependencies(missingBuiltIn);
   const { accounts, unresolved } = useMemo(() => {
-    const resolved = foreignDependencies(script, scripts);
+    const resolved = foreignDependencies(script, scripts, builtIn);
     const accounts: DependencyAccount[] = [];
     const unresolved: UnresolvedDependency[] = [];
     for (const resolution of resolved) {
       const { name } = resolution.dependency;
       if ("reason" in resolution) {
-        unresolved.push({ name, reason: resolution.reason });
+        // Until the API has answered, a built-in one may still resolve.
+        if (settled || resolution.reason === "stale") {
+          unresolved.push({ name, reason: resolution.reason });
+        }
         continue;
       }
       const key = foreignSlotsKey(script.id, name);
@@ -68,7 +81,7 @@ const useDependencyAccounts = (script: Script) => {
       });
     }
     return { accounts, unresolved };
-  }, [script, scripts, edited]);
+  }, [script, scripts, edited, builtIn, settled]);
   return { accounts, unresolved };
 };
 
