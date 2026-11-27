@@ -1,0 +1,35 @@
+{
+  "type": "diff",
+  "version": "10",
+  "dialect": "postgres",
+  "id": "1f0948b3-557c-4cd7-8b43-498d98b26507",
+  "prevIds": [
+    "8a535195-6ab9-43f6-8751-7500e5ddaffd"
+  ],
+  "footprints": [
+    {
+      "statementType": "drop_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "packages",
+        "masm"
+      ],
+      "writes": [
+        "s|col|public.packages.masm",
+        "n|col|public.packages.masm",
+        "e|col|public.packages.masm"
+      ],
+      "reads": [
+        "n|tbl|public.packages",
+        "n|sch|public"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "drop",
+      "key": "columns\u0000[\"public\",\"packages\",\"masm\"]"
+    }
+  ]
+}

@@ -32,9 +32,6 @@ export const packagesTable = pgTable("packages", {
   status: packageStatusEnum().notNull().default("draft"),
   readOnly: boolean("read_only").notNull().default(false),
   files: jsonb().notNull().default({}),
-  // No longer read or written (decision 7 of spec/remove-rust.md): dropped
-  // in the release after the one that stopped reading it.
-  masm: text().notNull().default(""),
   commitment: varchar({ length: 66 })
     .notNull()
     .default(
