@@ -273,7 +273,6 @@ export const packageToScript = ({
   masp,
   manifest,
   parameters,
-  schemas,
   createdAt,
   updatedAt,
 }: Package): Script => ({
@@ -315,9 +314,8 @@ export const packageToScript = ({
     type: dependency.kind,
     commitment: dependency.digest,
   })),
-  // The registry keeps the schemas apart from the manifest too. Without them
-  // the script has no metadata, as one compiled before schemas existed.
-  ...(schemas && { metadata: schemas }),
+  // A MASM package has no schema, and the registry stores none: a verified
+  // script has no metadata.
   createdAt: new Date(createdAt).getTime(),
   updatedAt: new Date(updatedAt).getTime(),
 });

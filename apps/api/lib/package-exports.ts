@@ -2,7 +2,7 @@ import type { Export, Manifest, ProcedureParameter } from "@/lib/types";
 
 // What api-compile reads from a build next to its manifest, by export path:
 // whether each export is read-only and whether it calls another account
-// (`null` when it can't be told), and its parameters' names from the WIT.
+// (`null` when it can't be told), and its parameters' names from the source.
 // `callsForeign` and `parameters` are absent from an api-compile older than
 // them; `parameters` lacks an export whose names weren't found.
 export type ExportAnalysis = {

@@ -23,9 +23,6 @@ build
 dist
 .wrangler
 
-# Rust
-target/
-
 # Miden Client
 keystore/
 store.sqlite3

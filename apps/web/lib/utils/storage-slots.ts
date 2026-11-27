@@ -2,26 +2,11 @@
 // SDK import: the unit tests run on plain node.
 import type { StorageItem } from "../types/account.ts";
 import type { StorageSlot } from "../types/storage-slot.ts";
-import { snakeCase } from "./case.ts";
 import { isFelt, isWord, wordToHex } from "./procedure-inputs.ts";
 
-// A component's storage slot name, as the compiler derives it
-// (`derive_storage_slot_name` in miden-base-macros): the package name as it
-// is, with every character outside [A-Za-z0-9_] replaced by `_`, then the
-// trait in snake case, then the field. The package name isn't split into
-// words: `counter2` stays `counter2`, where snakeCase gives `counter_2`.
-export const storageSlotName = ({
-  packageName,
-  traitName,
-  fieldName,
-}: {
-  packageName: string;
-  traitName: string;
-  fieldName: string;
-}) => `${storageSlotPrefix(packageName)}${snakeCase(traitName)}::${fieldName}`;
-
-// What every slot a package's components declare starts with: its name with
-// every character outside [A-Za-z0-9_] replaced by `_`, then `::`.
+// What the slots a package's source declares start with, as the templates
+// name them (`word("counter_account::count_map")`): its name with every
+// character outside [A-Za-z0-9_] replaced by `_`, then `::`.
 export const storageSlotPrefix = (packageName: string) =>
   `${packageName.replace(/[^A-Za-z0-9_]/g, "_")}::`;
 

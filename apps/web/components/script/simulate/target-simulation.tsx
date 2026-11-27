@@ -203,7 +203,7 @@ const TargetSimulation = ({
                     ? " If the script calls a dependency on another account, mark it as a foreign account below."
                     : ""
               }${
-                dependencyAccounts.ready && missing.length > 0
+                missing.length > 0
                   ? ` It lacks procedures this script calls: ${missing.join(", ")}.`
                   : ""
               }`
@@ -345,10 +345,7 @@ const TargetSimulation = ({
           blocked !== undefined ||
           running ||
           targetAccountId === "" ||
-          (simulatedPicked &&
-            (!dependencyAccounts.ready ||
-              !dependencySlotsValid ||
-              !vaultValid)) ||
+          (simulatedPicked && (!dependencySlotsValid || !vaultValid)) ||
           !argumentValid ||
           !noteStorageValid ||
           (isNote && !noteAssetsValid)

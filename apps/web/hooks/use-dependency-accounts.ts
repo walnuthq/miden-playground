@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import useGlobalContext from "@/components/global-context/hook";
 import { foreignDependencies } from "@/lib/simulation/foreign-accounts";
-import { useEmbeddedPackages } from "@/lib/simulation/load-embedded-packages";
 import {
   initialStorageSlots,
   shownStorageSlots,
@@ -35,29 +34,22 @@ export type UnresolvedDependency = {
 };
 
 // The script's `account-component` dependencies whose package the workspace
-// or the web app holds (`foreignDependencies`), each with the storage slots
+// holds (`foreignDependencies`), each with the storage slots
 // its account starts from, edited in the Simulate tab. Their slots are keyed
 // `foreignSlotsKey(script.id, name)`: a script is either an account component
 // (foreign accounts) or a note or transaction script (its target's
 // components), never both.
 const useDependencyAccounts = (script: Script) => {
   const { scripts } = useGlobalContext();
-  const needsEmbedded = script.dependencies.some(
-    ({ type }) => type === "account-component",
-  );
-  const embedded = useEmbeddedPackages(needsEmbedded);
   const edited = useEditedStorageSlots();
   const { accounts, unresolved } = useMemo(() => {
-    const resolved = foreignDependencies(script, scripts, embedded ?? []);
+    const resolved = foreignDependencies(script, scripts);
     const accounts: DependencyAccount[] = [];
     const unresolved: UnresolvedDependency[] = [];
     for (const resolution of resolved) {
       const { name } = resolution.dependency;
       if ("reason" in resolution) {
-        // Until the embedded packages are loaded, one may still resolve.
-        if (embedded || resolution.reason === "stale") {
-          unresolved.push({ name, reason: resolution.reason });
-        }
+        unresolved.push({ name, reason: resolution.reason });
         continue;
       }
       const key = foreignSlotsKey(script.id, name);
@@ -76,10 +68,8 @@ const useDependencyAccounts = (script: Script) => {
       });
     }
     return { accounts, unresolved };
-  }, [script, scripts, embedded, edited]);
-  // The embedded packages aren't loaded yet: a dependency may still resolve.
-  const ready = !needsEmbedded || embedded !== undefined;
-  return { accounts, unresolved, ready };
+  }, [script, scripts, edited]);
+  return { accounts, unresolved };
 };
 
 export default useDependencyAccounts;

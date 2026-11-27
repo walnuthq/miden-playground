@@ -296,7 +296,7 @@ const ScriptComponent = ({
           </TabsList>
           <div className="ml-auto flex items-center gap-1">
             {/* The API's scripts have a link to share: not the built-in
-                ones, nor the packages embedded for the tutorials. */}
+                ones. */}
             {isValidUUIDv4(script.id) && <ShareScriptButton script={script} />}
             <EditorSettingsMenu />
             {!script.readOnly && (

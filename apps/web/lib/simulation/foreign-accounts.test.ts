@@ -41,29 +41,17 @@ describe("foreignDependencies", () => {
   test("resolves to the workspace script of the same id first", () => {
     const sameId = script({ id: "counter-account", commitment: "0xc0" });
     const other = script({ id: "copy", commitment: "0xc0" });
-    const embedded = script({ id: "embedded", commitment: "0xc0" });
-    assert.deepEqual(
-      foreignDependencies(reader(counter), [other, sameId], [embedded]),
-      [{ dependency: counter, script: sameId }],
-    );
+    assert.deepEqual(foreignDependencies(reader(counter), [other, sameId]), [
+      { dependency: counter, script: sameId },
+    ]);
   });
 
   test("then to any workspace script with the same commitment", () => {
     // The API's built-in id, not the workspace script's.
     const copy = script({ id: "random-id", commitment: "0xc0" });
-    const embedded = script({ id: "embedded", commitment: "0xc0" });
-    assert.deepEqual(foreignDependencies(reader(counter), [copy], [embedded]), [
+    assert.deepEqual(foreignDependencies(reader(counter), [copy]), [
       { dependency: counter, script: copy },
     ]);
-  });
-
-  test("then to an embedded package", () => {
-    const edited = script({ id: "random-id", commitment: "0xc1" });
-    const embedded = script({ id: "embedded", commitment: "0xc0" });
-    assert.deepEqual(
-      foreignDependencies(reader(counter), [edited], [embedded]),
-      [{ dependency: counter, script: embedded }],
-    );
   });
 
   test("skips a workspace script without a package", () => {
@@ -72,20 +60,20 @@ describe("foreignDependencies", () => {
       commitment: "0xc0",
       masp: "",
     });
-    assert.deepEqual(foreignDependencies(reader(counter), [draft], []), [
+    assert.deepEqual(foreignDependencies(reader(counter), [draft]), [
       { dependency: counter, reason: "stale" },
     ]);
   });
 
   test("a recompiled dependency is stale", () => {
     const recompiled = script({ id: "counter-account", commitment: "0xc1" });
-    assert.deepEqual(foreignDependencies(reader(counter), [recompiled], []), [
+    assert.deepEqual(foreignDependencies(reader(counter), [recompiled]), [
       { dependency: counter, reason: "stale" },
     ]);
   });
 
   test("an unknown package is missing", () => {
-    assert.deepEqual(foreignDependencies(reader(counter), [], []), [
+    assert.deepEqual(foreignDependencies(reader(counter), []), [
       { dependency: counter, reason: "missing" },
     ]);
   });
@@ -97,8 +85,8 @@ describe("foreignDependencies", () => {
       type: "library",
       commitment: "0xc0",
     };
-    const embedded = script({ id: "embedded", commitment: "0xc0" });
-    assert.deepEqual(foreignDependencies(reader(library), [], [embedded]), []);
+    const copy = script({ id: "lib", commitment: "0xc0" });
+    assert.deepEqual(foreignDependencies(reader(library), [copy]), []);
   });
 });
 

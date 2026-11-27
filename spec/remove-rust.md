@@ -1,6 +1,8 @@
 # Remove Rust: back to plain MASM
 
-Status: analysis and spike, 2026-11-24. Nothing is implemented. The decisions were taken with the user on 2026-11-24 and are recorded in [Decisions](#decisions). The spike ran the same day: its results are in [Spike results](#spike-results), and the one question it couldn't answer, whether upstream plans a storage schema for MASM projects, is closed by assumption: there is none (decision 3).
+Status: done in this repo, 2026-11-27, except the `masm` column's drop. Shipped: the switch (plans 01 to 05, released as #884 on 2026-11-26, with the production Rust rows deleted), the Counter Contract example in MASM (#885), tutorials 6 to 12 in MASM (#886 to #892) and the cleanup (plan 08). Not shipped: the `masm` column is no longer read or written, and its drop ships in the release after the cleanup's (`docs/claude/database-migrations.md`); Miden Bank stays hidden until it's rewritten in MASM (decision 9); tutorial 5 stays unavailable for an unrelated upstream break. The verifier's plans are done; `miden-verify` (step 8) is next, in its own repo.
+
+Written as an analysis and spike, 2026-11-24. The decisions were taken with the user on 2026-11-24 and are recorded in [Decisions](#decisions). The spike ran the same day: its results are in [Spike results](#spike-results), and the one question it couldn't answer, whether upstream plans a storage schema for MASM projects, is closed by assumption: there is none (decision 3).
 
 The Miden Rust compiler (`cargo-miden`, `midenc`, the `miden` SDK crate) is being phased out. The Playground (this repo) and the source code verification system (`walnuthq/miden-source-code-verification`, "the verifier" below) must both stop compiling, storing, showing and teaching Rust, and work from Miden Assembly sources instead.
 

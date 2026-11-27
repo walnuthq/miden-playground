@@ -34,7 +34,8 @@ export type NewPackage = typeof packagesTable.$inferInsert;
 
 export type Package = Omit<
   typeof packagesTable.$inferSelect,
-  "files" | "exports" | "metadata"
+  // `masm` is no longer read: the source is the MASM in `files`.
+  "files" | "exports" | "metadata" | "masm"
 > & {
   files: Record<string, string>;
   exports: Export[];
@@ -96,7 +97,6 @@ export const defaultPackage = (): Package => ({
   status: "compiled",
   readOnly: true,
   files: {},
-  masm: "",
   commitment: "",
   masp: "",
   exports: [],
@@ -196,7 +196,6 @@ export type CompiledPackage = Pick<
   | "name"
   | "type"
   | "status"
-  | "masm"
   | "commitment"
   | "masp"
   | "exports"

@@ -131,11 +131,8 @@ const useSimulation = (script: Script) => {
   );
   // The foreign accounts: one per `account-component` dependency whose
   // package the workspace or the web app holds.
-  const {
-    accounts: foreignAccounts,
-    unresolved: unresolvedForeignAccounts,
-    ready: foreignAccountsReady,
-  } = useDependencyAccounts(script);
+  const { accounts: foreignAccounts, unresolved: unresolvedForeignAccounts } =
+    useDependencyAccounts(script);
   const foreignAccountsStatus: ForeignAccountsStatus = {
     staged: foreignAccounts.length,
     stale: unresolvedForeignAccounts
@@ -310,7 +307,6 @@ const useSimulation = (script: Script) => {
     foreignAccounts,
     unresolvedForeignAccounts,
     foreignAccountsStatus,
-    foreignAccountsReady,
     simulatedAccounts,
     invoke,
   };

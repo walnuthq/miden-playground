@@ -1371,8 +1371,10 @@ test("script: simulate a note and a transaction script", async ({ page }) => {
     await expect(row.getByRole("cell").last()).toHaveText(/^0\s*Invoke$/);
   });
 
-  // Its edits are Rust: rewritten in MASM with tutorial 10's foreign call
-  // (plan 07 of spec/remove-rust).
+  // Its edits are Rust, and its note storage is typed by field name, which a
+  // MASM note doesn't have: to be rewritten in MASM with tutorial 10's foreign
+  // call, naming the foreign account in raw felts (the id the log gives).
+  // Not done by the remove-rust plans: a follow-up.
   await test.step.skip(
     "a note's foreign call reads a dependency marked as a foreign account",
     async () => {
@@ -1460,7 +1462,7 @@ test("script: simulate a note and a transaction script", async ({ page }) => {
   );
 
   // Lists the tutorials' counter as a target, and the note as edited by the
-  // skipped step above: back with them in plan 07 of spec/remove-rust.
+  // skipped step above: back with it.
   await test.step.skip(
     "a plain wallet can't run the counter's scripts",
     async () => {

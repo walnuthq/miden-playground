@@ -25,7 +25,7 @@ How to QA the Playground tutorials end to end with a headless browser, Bread Wal
 
 ### Local dev
 
-- `apps/web`: `pnpm dev` (port 3000). `apps/api`: `pnpm dev` (port 3001) with its Docker services (postgres, compile) running. Scripts created in tutorials 7, 8, 11 and 12 (and outside tutorials) go through the API: creating one hangs on "Creating…" with "Failed to fetch" if it's down, and so do exporting and verifying (tutorial 12).
+- `apps/web`: `pnpm dev` (port 3000). `apps/api`: `pnpm dev` (port 3001) with its Docker services (postgres, compile) running. Scripts created in tutorials 7, 8, 11 and 12 (and outside tutorials) go through the API, and tutorials 6, 9 and 10 have it assemble the counter when they start: creating one hangs on "Creating…" with "Failed to fetch" if it's down, and so do exporting and verifying (tutorial 12).
 - A different origin (localhost vs production) means a fresh Playground state and a new Bread connection request.
 
 ## 2. Pitfalls (read before driving the UI)
@@ -75,7 +75,7 @@ Retry at least once before reporting a failure as a Playground bug, and compare 
 
 ## 5. Automated tests (Playwright)
 
-`apps/web/e2e` holds Playwright tests that replay tutorials against a live Playground on testnet (`pnpm --filter miden-playground-web test:e2e`, `PLAYWRIGHT_BASE_URL` to target a deployment, local dev by default). Each test runs in a fresh browser context, so it's a brand-new user. All 12 tutorials are covered. Tutorials 7, 8, 11 and 12 need `apps/api` running locally, and tutorial 12 unzips the exported script with the system's `unzip`.
+`apps/web/e2e` holds Playwright tests that replay tutorials against a live Playground on testnet (`pnpm --filter miden-playground-web test:e2e`, `PLAYWRIGHT_BASE_URL` to target a deployment, local dev by default). Each test runs in a fresh browser context, so it's a brand-new user. All 12 tutorials are covered. Tutorials 6 to 12 need `apps/api` running locally, and tutorial 12 unzips the exported script with the system's `unzip`.
 
 - The examples (`example-*.spec.ts`) are covered too: they launch Counter Contract and Miden Bank from the home page, which imports and compiles their contracts from GitHub through `apps/api` (run it locally), then deploy the example account. The bank test makes a deposit from a new Bread Wallet and has the bank consume it.
 - Helpers are in `apps/web/e2e/tutorial.ts`: `startTutorial`, `nextStep` (waits for Next step to unlock), and `tutorialPanel(page).openLink`, which waits until a step link's target is known (links built from synced state point to `.../undefined` until the next sync).

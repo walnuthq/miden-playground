@@ -1,6 +1,6 @@
 # Tutorials on the real Rust compilation pipeline
 
-Status: done. Written 2026-11-06; PR A merged as #779, PR B as #781 and PR C
+Status: historical. Tutorials 6 to 12 were rewritten in MASM in November 2026 (`spec/remove-rust.md`, plan 07): nothing below describes the code any more. Done. Written 2026-11-06; PR A merged as #779, PR B as #781 and PR C
 as #782 (2026-11-08), PR D as #784, PR E as #785 and PR F as #787
 (2026-11-09). The open questions at the end remain.
 One PR per item below, in the order given; the tutorial PRs (B to E) are

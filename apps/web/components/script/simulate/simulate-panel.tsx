@@ -49,7 +49,6 @@ const AccountComponentSimulation = ({
     foreignAccounts,
     unresolvedForeignAccounts,
     foreignAccountsStatus,
-    foreignAccountsReady,
     simulatedAccounts,
     invoke,
   } = useSimulation(script);
@@ -118,12 +117,7 @@ const AccountComponentSimulation = ({
           <ProceduresList
             idPrefix={`simulate-${script.id}`}
             procedureExports={script.procedureExports}
-            disabled={
-              blocked !== undefined ||
-              !slotsValid ||
-              !vaultValid ||
-              !foreignAccountsReady
-            }
+            disabled={blocked !== undefined || !slotsValid || !vaultValid}
             blockedReason={(procedureExport) =>
               simulationBlockedReason(
                 procedureExport,

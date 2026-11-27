@@ -83,9 +83,9 @@ export type Signature = {
   results: MidenTypeLayout[];
 };
 
-// A procedure's attributes, as midenc's manifest serializes its externally
-// tagged `Attribute` enum: a marker for `#[note_script]`,
-// `#[transaction_script]` or `#[account_procedure]`. The built-in scripts have
+// A procedure's attributes, as the package manifest serializes its externally
+// tagged `Attribute` enum: a marker for `@note_script`,
+// `@transaction_script` or `@account_procedure`. The built-in scripts have
 // none.
 export type ProcedureAttribute = { Marker: string } | Record<string, unknown>;
 
@@ -144,8 +144,7 @@ export type PackageSource = { midenProjectToml: string; masm: string };
 // The files of a script the editor shows, by path in its project: its MASM
 // source (`scriptSourcePath` in lib/utils/script-files.ts), the only one
 // edited, and the miden-project.toml the API generates. The built-in scripts
-// and the packages embedded for the tutorials have no manifest, the built-in
-// libraries no file at all.
+// have no manifest, the built-in libraries no file at all.
 export type ScriptFiles = Record<string, string>;
 
 // An account component's storage slot, as the package's storage schema
@@ -171,9 +170,9 @@ export type StorageSchema = { slots: StorageSlotSchema[] };
 // A field of a note's storage. The fields' felts follow each
 // other in the note's storage, in declaration order.
 export type NoteStorageField = {
-  // The field's WIT name, in kebab case, e.g. `target-account-id`.
+  // The field's name, in kebab case, e.g. `target-account-id`.
   name: string;
-  // Its WIT type name: `felt`, `word`, `account-id`, `u64`... or a record the
+  // Its type name: `felt`, `word`, `account-id`, `u64`... or a record the
   // note defines.
   type: string;
   // The felts it takes. Absent when that varies (an `option` or a `variant`).
@@ -256,7 +255,6 @@ export type CompiledPackage = Pick<
   | "name"
   | "type"
   | "status"
-  | "masm"
   | "files"
   | "commitment"
   | "masp"
@@ -303,11 +301,6 @@ export type Package = {
   // `parameters`): null or missing for a package stored before it reported
   // them.
   parameters?: Record<string, { name: string; type: string }[]> | null;
-  // The registry's storage schemas (`PackageSchemas` in
-  // miden-source-code-verification): `{}` when the package has none, or when
-  // it was stored before the registry read them. Missing from a registry that
-  // predates them.
-  schemas?: Pick<PackageMetadata, "storage" | "noteStorage"> | null;
   createdAt: string;
   updatedAt: string;
 };

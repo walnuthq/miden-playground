@@ -1,6 +1,6 @@
 # Remove Rust: sub plans for this repo
 
-Written 2026-11-25 at `966084c`. Nothing here is implemented.
+Written 2026-11-25 at `966084c`. Status: done, 2026-11-27. Plans 01 to 07 are merged and deployed (#879 to #892); plan 08 is the cleanup PR, with the `masm` column drop left to the release after it. See the status at the top of [`../remove-rust.md`](../remove-rust.md).
 
 The analysis, the decisions and the spike results are in [`../remove-rust.md`](../remove-rust.md): read its Summary, [Decisions](../remove-rust.md#decisions) and [Spike results](../remove-rust.md#spike-results) before any plan. Each plan below is written for one agent in one session. Start a session with: "Read `spec/remove-rust.md` and `spec/remove-rust/README.md`, then carry out `spec/remove-rust/NN-….md`."
 

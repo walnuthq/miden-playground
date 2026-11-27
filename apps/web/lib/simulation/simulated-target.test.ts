@@ -17,17 +17,12 @@ const script = (fields: Partial<Script>) =>
     ...fields,
   }) as Script;
 
-// A Rust basic wallet's `receive-asset`, which the Rust P2ID template called
-// (the embedded wallet went with the switch to MASM): a root no built-in has.
+// A workspace wallet's `receive_asset`, which a note written against it
+// calls: a root no built-in has.
 const RECEIVE_ASSET =
   "0x086e7fa3ab688ac1d4f215c53ba517b68c4c8d43418f6b8a0ac1f1b9a8a1db20";
-const rustWallet = script({
-  procedureExports: [
-    procedure(
-      '::"miden:basic-wallet/basic-wallet@0.1.0"::"receive-asset"',
-      RECEIVE_ASSET,
-    ),
-  ],
+const workspaceWallet = script({
+  procedureExports: [procedure("::my_wallet::receive_asset", RECEIVE_ASSET)],
 });
 
 // The standard basic wallet, which every simulated account holds: another
@@ -49,43 +44,37 @@ const INCREMENT_COUNT =
   "0xfd4baa4cdaad14d4649856647535ba44b49b8bd6004b57f183801ccc5b44b879";
 const counter = script({
   procedureExports: [
-    procedure(
-      '::"miden:counter-account/counter-contract@0.1.0"::"get-count"',
-      GET_COUNT,
-    ),
-    procedure(
-      '::"miden:counter-account/counter-contract@0.1.0"::"increment-count"',
-      INCREMENT_COUNT,
-    ),
+    procedure("::counter_account::get_count", GET_COUNT),
+    procedure("::counter_account::increment_count", INCREMENT_COUNT),
   ],
 });
 
-const named = [counter, standardWallet, rustWallet];
+const named = [counter, standardWallet, workspaceWallet];
 const builtIns = [standardWallet];
 
-const p2id = script({ metadata: { accountProcedures: [RECEIVE_ASSET] } });
+const walletNote = script({ metadata: { accountProcedures: [RECEIVE_ASSET] } });
 const incrementNote = script({
   metadata: { accountProcedures: [GET_COUNT, INCREMENT_COUNT] },
 });
 
 describe("simulatedTargetMissing", () => {
-  test("P2ID lacks the Rust wallet's receive-asset without it", () => {
+  test("a note lacks the workspace wallet's receive_asset without it", () => {
     assert.deepEqual(
       simulatedTargetMissing({
-        script: p2id,
+        script: walletNote,
         components: [],
         builtIns,
         named,
       }),
-      ["receive-asset"],
+      ["receive_asset"],
     );
   });
 
-  test("P2ID lacks nothing with the Rust wallet", () => {
+  test("a note lacks nothing with the workspace wallet", () => {
     assert.deepEqual(
       simulatedTargetMissing({
-        script: p2id,
-        components: [rustWallet],
+        script: walletNote,
+        components: [workspaceWallet],
         builtIns,
         named,
       }),
@@ -126,7 +115,7 @@ describe("simulatedTargetMissing", () => {
         builtIns,
         named,
       }),
-      ["get-count", "increment-count"],
+      ["get_count", "increment_count"],
     );
   });
 

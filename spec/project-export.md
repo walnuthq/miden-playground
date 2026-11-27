@@ -1,6 +1,6 @@
 # Exporting a project to continue it locally
 
-Status: explored 2026-11-06, not scheduled. The round trip below was verified
+Status: explored 2026-11-06, not scheduled. Since the switch to MASM (2026-11-26, `spec/remove-rust.md`) an exported script is a MASM project (`miden-project.toml` and its `.masm`), not a Cargo one: the account and note file findings stand, the local build steps don't (`spec/account-files.md` has the note). The round trip below was verified
 with the installed tools; nothing is implemented.
 
 A saved project is the app state plus the client store (see

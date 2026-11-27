@@ -114,7 +114,7 @@ type CompileOutput = {
   stdout: string;
   // The assembler's rendering of `diagnostics`.
   stderr: string;
-  diagnostics?: Diagnostic[];
+  diagnostics: Diagnostic[];
 };
 
 type CompileResponse =
@@ -127,7 +127,7 @@ type CompileResponse =
       // The project as sent.
       files: Record<string, string>;
       // The versions api-compile's assembler was built with.
-      builtWith?: string;
+      builtWith: string;
       // Whether each exported procedure is read-only and calls another
       // account's procedure (FPI), and its parameters' names
       // (`analyzedExports`), and a script's account procedures.
@@ -136,7 +136,7 @@ type CompileResponse =
       BuildMetadata);
 
 const compileOutput = ({ stdout, stderr, diagnostics }: CompileOutput) => ({
-  diagnostics: diagnostics ?? [],
+  diagnostics,
   stdout,
   stderr,
 });
@@ -205,7 +205,6 @@ export const compilePackage = async ({
       ...compileOutput(build),
       error: build.stderr,
       warnings: "",
-      masm: "",
       commitment: "",
       masp: "",
       exports: [],
@@ -240,8 +239,6 @@ export const compilePackage = async ({
     callsForeign,
     parameters,
   });
-  // The `masm` column isn't written any more (the source is the MASM): it
-  // keeps its default, "".
   await updatePackage({
     id,
     status: "compiled",
@@ -262,7 +259,6 @@ export const compilePackage = async ({
     error: "",
     // A successful build still reports its warnings.
     warnings: stderr,
-    masm: "",
     commitment,
     masp,
     exports,
