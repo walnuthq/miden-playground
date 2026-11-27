@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { describe, test } from "node:test";
 import type { StorageSchema } from "../types/script.ts";
 import {
+  declaredStorageSlots,
+  initialSlotsOf,
   mergeStorageSlots,
   schemaStorageSlots,
   storageSlotDescriptions,
@@ -91,5 +93,27 @@ describe("storageSlotDescriptions", () => {
       [countMap]: "counter contract storage map (word → felt)",
       [owner]: "word",
     });
+  });
+});
+
+describe("initialSlotsOf", () => {
+  test("starts from the schema's slots when there is one", () => {
+    assert.deepEqual(
+      initialSlotsOf({ storage: schema, slotNames: ["ignored"] }),
+      schemaStorageSlots(schema),
+    );
+  });
+
+  test("else from the names the source declares, as values at zero", () => {
+    assert.deepEqual(initialSlotsOf({ slotNames: [countMap, owner] }), [
+      { name: countMap, type: "value", value: "0" },
+      { name: owner, type: "value", value: "0" },
+    ]);
+    assert.deepEqual(declaredStorageSlots([]), []);
+  });
+
+  test("else from nothing", () => {
+    assert.equal(initialSlotsOf(null), undefined);
+    assert.equal(initialSlotsOf({ accountProcedures: [] }), undefined);
   });
 });

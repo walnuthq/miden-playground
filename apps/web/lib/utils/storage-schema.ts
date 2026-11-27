@@ -1,7 +1,7 @@
 // An account component's storage slots from its package's storage schema. No
 // SDK import: the unit tests run on plain node.
 
-import type { StorageSchema } from "../types/script.ts";
+import type { PackageMetadata, StorageSchema } from "../types/script.ts";
 import type { StorageSlot } from "../types/storage-slot.ts";
 
 // The slots a schema declares, in its order, at their defaults: the schema's
@@ -12,6 +12,23 @@ export const schemaStorageSlots = ({ slots }: StorageSchema): StorageSlot[] =>
     type: slot.type,
     value: slot.type === "value" ? (slot.defaultValue ?? "0") : "",
   }));
+
+// The slots of the names a source declares, when its package has no schema:
+// each as a value at zero, the type being the user's to set (the source says
+// which slots there are, not whether one is a map).
+export const declaredStorageSlots = (slotNames: string[]): StorageSlot[] =>
+  slotNames.map((name) => ({ name, type: "value", value: "0" }));
+
+// The slots a component's forms start from: its schema's at their defaults,
+// else the names its source declares, else none (the user adds them).
+export const initialSlotsOf = (
+  metadata: PackageMetadata | null | undefined,
+): StorageSlot[] | undefined =>
+  metadata?.storage
+    ? schemaStorageSlots(metadata.storage)
+    : metadata?.slotNames
+      ? declaredStorageSlots(metadata.slotNames)
+      : undefined;
 
 // The schema's slots, each with the value it was edited to when a slot of
 // the same name and type was: a recompile keeps the edits of the slots it

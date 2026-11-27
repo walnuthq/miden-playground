@@ -28,7 +28,7 @@ import type { StorageSlot } from "@/lib/types/storage-slot";
 import { fromBase64 } from "@/lib/utils";
 import {
   cleanExecutionError,
-  decodeProcedureResult,
+  procedureResult,
 } from "@/lib/utils/procedure-inputs";
 import { type StorageChanges, wordFelts } from "@/lib/utils/storage-slots";
 import {
@@ -300,7 +300,12 @@ const procedureValue = async ({
   procedureExport: ProcedureExport;
   procedureInputs: MidenInput[];
 }) => {
-  if (procedureExport.signature.results.length === 0) {
+  // A procedure without a signature says nothing of what it returns: its
+  // stack is read all the same.
+  if (
+    !procedureExport.untyped &&
+    procedureExport.signature.results.length === 0
+  ) {
     return "";
   }
   // The raw client returns a FeltArray, not an array.
@@ -319,7 +324,7 @@ const procedureValue = async ({
     { length: Math.min(RESULT_FELTS, stack.length()) },
     (_, index) => stack.get(index).asInt(),
   );
-  return decodeProcedureResult(procedureExport.signature, felts);
+  return procedureResult(procedureExport, felts);
 };
 
 // Runs one of an account component's procedures against an account of the

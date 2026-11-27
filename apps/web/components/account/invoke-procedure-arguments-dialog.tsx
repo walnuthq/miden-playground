@@ -24,10 +24,10 @@ import { midenExplorerUrl } from "@/lib/constants";
 import type { MidenInput, ProcedureExport, Script } from "@/lib/types/script";
 import {
   cleanExecutionError,
-  decodeProcedureResult,
   encodeProcedureArguments,
   type ProcedureArguments,
   procedureArgumentsReady,
+  procedureResult,
   procedureParams,
 } from "@/lib/utils/procedure-inputs";
 import { formatProcedureExportPath } from "@/lib/utils/script";
@@ -210,8 +210,8 @@ const InvokeProcedureDialogContent = ({
               setReadOnlyProcedureResult({
                 accountId: senderAccountId,
                 digest: procedureExport.digest,
-                result: decodeProcedureResult(
-                  procedureExport.signature,
+                result: procedureResult(
+                  procedureExport,
                   Array.from(word.toU64s()),
                 ),
               });

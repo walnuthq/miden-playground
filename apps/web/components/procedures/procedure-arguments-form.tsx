@@ -10,6 +10,7 @@ import {
   type ProcedureArguments,
   type ProcedureParam,
   procedureArgumentError,
+  stackFelts,
 } from "@/lib/utils/procedure-inputs";
 
 const placeholders = {
@@ -58,8 +59,46 @@ const ProcedureArgumentsForm = ({
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       {params.map(
-        ({ name, type, rawType, label, feltCount, feltNames, max }) => {
+        ({ name, type, rawType, label, feltCount, feltNames, max, stack }) => {
           const id = `${idPrefix}-${name}`;
+          // A procedure that declares no signature: the stack it takes, as
+          // felts of any number.
+          if (stack) {
+            const current = value[name];
+            const text = current?.type === "Stack" ? current.value : "";
+            const count = stackFelts(text).length;
+            return (
+              <div key={name} className="grid gap-1.5 sm:col-span-2">
+                <Label htmlFor={id}>
+                  {name}
+                  <span className="font-normal text-muted-foreground">
+                    {count} felt{count === 1 ? "" : "s"}, top first
+                  </span>
+                </Label>
+                <Input
+                  id={id}
+                  className="font-mono"
+                  placeholder="Felts, top of the stack first, e.g. 5 0 0 0"
+                  value={text}
+                  aria-invalid={
+                    procedureArgumentError({ type: "Stack", value: text }) !==
+                    undefined
+                  }
+                  disabled={disabled}
+                  onChange={(event) =>
+                    onChange({
+                      ...value,
+                      [name]: { type: "Stack", value: event.target.value },
+                    })
+                  }
+                />
+                <p className="text-xs text-muted-foreground">
+                  This procedure declares no signature: enter the stack it
+                  takes, separated by spaces or commas, or leave it empty.
+                </p>
+              </div>
+            );
+          }
           // A type the forms don't know, entered as the felts of its layout,
           // in field order.
           if (!type && feltCount !== undefined) {

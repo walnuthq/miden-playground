@@ -11,6 +11,9 @@ export type BuildMetadata = { accountProcedures?: string[] | null };
 // sources as shipped, which a note's schema is checked against.
 export type CompiledSource = {
   masm: string;
+  // Whether the package is an account component: only one declares storage
+  // slots (`slotNames`).
+  accountComponent?: boolean;
   shipped: (template: NoteSchemaSource) => string | undefined;
 };
 
@@ -41,8 +44,26 @@ const storageHolds = (
   );
 };
 
-// The one place a package's `metadata` is decided, on each compile, built or
-// not. A MASM package carries no schema, so `storage` and `noteStorage` are
+// A package's `metadata` after a build that failed: its schemas as they are,
+// without what the last build read from the code (`accountProcedures`). The
+// stale rules below wait for a source that builds: one that doesn't may be a
+// typo away from the template's (an unclosed string makes its slot names
+// unreadable), and a dropped schema never comes back.
+export const failedBuildMetadata = (
+  current: PackageMetadata | null,
+): PackageMetadata | null => {
+  const { storage, slotNames, noteStorage, template } = current ?? {};
+  return storage || slotNames || noteStorage
+    ? {
+        ...(storage && { storage }),
+        ...(slotNames && { slotNames }),
+        ...(noteStorage && { noteStorage, template }),
+      }
+    : null;
+};
+
+// The one place a package's `metadata` is decided on a compile that built. A
+// MASM package carries no schema, so `storage` and `noteStorage` are
 // the ones the package already has (a template's hand-written schema),
 // unless the source no longer matches them, and then they're dropped for
 // good: nothing brings them back.
@@ -51,6 +72,9 @@ const storageHolds = (
 //   example package's as shipped (`template`): a note's inputs have no names
 //   in MASM to compare, so any edit drops it, a comment's too. `template`
 //   goes with it.
+// - `slotNames` is read from the source on each build, for an account
+//   component left without a `storage` schema: the names it declares, so the
+//   forms don't start empty. It says nothing of a slot's type.
 // `accountProcedures` is the build's: kept when it's a list, `[]` included;
 // `null` (api-compile couldn't tell) or absent is dropped, which reads the
 // same: no filter. Null when nothing is left.
@@ -70,10 +94,14 @@ export const compiledMetadata = (
     source.shipped(template) === source.masm
       ? current.noteStorage
       : undefined;
+  const declared =
+    !storage && source.accountComponent ? declaredSlotNames(source.masm) : null;
+  const slotNames = declared && declared.length > 0 ? declared : undefined;
   const { accountProcedures } = build;
-  return storage || noteStorage || Array.isArray(accountProcedures)
+  return storage || slotNames || noteStorage || Array.isArray(accountProcedures)
     ? {
         ...(storage && { storage }),
+        ...(slotNames && { slotNames }),
         ...(noteStorage && { noteStorage, template }),
         ...(Array.isArray(accountProcedures) && { accountProcedures }),
       }

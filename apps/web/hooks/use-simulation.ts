@@ -118,6 +118,7 @@ const useSimulation = (script: Script) => {
   const [slots, setStorageSlots] = useSimulationStorageSlots(
     script.id,
     useMemo(() => initialStorageSlots(script), [script]),
+    schema ? undefined : script.metadata?.slotNames,
   );
   const storageSlots = useMemo(
     () => shownStorageSlots(schema, slots),

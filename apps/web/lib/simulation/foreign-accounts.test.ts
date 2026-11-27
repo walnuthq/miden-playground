@@ -3,6 +3,7 @@ import { describe, test } from "node:test";
 import type { Dependency, Script } from "../types/script.ts";
 import {
   foreignDependencies,
+  missingBuiltInDependencies,
   SIMULATED_PREFIX,
   simulatedAccountName,
   simulatedAccountValue,
@@ -41,15 +42,16 @@ describe("foreignDependencies", () => {
   test("resolves to the workspace script of the same id first", () => {
     const sameId = script({ id: "counter-account", commitment: "0xc0" });
     const other = script({ id: "copy", commitment: "0xc0" });
-    assert.deepEqual(foreignDependencies(reader(counter), [other, sameId]), [
-      { dependency: counter, script: sameId },
-    ]);
+    assert.deepEqual(
+      foreignDependencies(reader(counter), [other, sameId], []),
+      [{ dependency: counter, script: sameId }],
+    );
   });
 
   test("then to any workspace script with the same commitment", () => {
     // The API's built-in id, not the workspace script's.
     const copy = script({ id: "random-id", commitment: "0xc0" });
-    assert.deepEqual(foreignDependencies(reader(counter), [copy]), [
+    assert.deepEqual(foreignDependencies(reader(counter), [copy], []), [
       { dependency: counter, script: copy },
     ]);
   });
@@ -60,20 +62,20 @@ describe("foreignDependencies", () => {
       commitment: "0xc0",
       masp: "",
     });
-    assert.deepEqual(foreignDependencies(reader(counter), [draft]), [
+    assert.deepEqual(foreignDependencies(reader(counter), [draft], []), [
       { dependency: counter, reason: "stale" },
     ]);
   });
 
   test("a recompiled dependency is stale", () => {
     const recompiled = script({ id: "counter-account", commitment: "0xc1" });
-    assert.deepEqual(foreignDependencies(reader(counter), [recompiled]), [
+    assert.deepEqual(foreignDependencies(reader(counter), [recompiled], []), [
       { dependency: counter, reason: "stale" },
     ]);
   });
 
   test("an unknown package is missing", () => {
-    assert.deepEqual(foreignDependencies(reader(counter), []), [
+    assert.deepEqual(foreignDependencies(reader(counter), [], []), [
       { dependency: counter, reason: "missing" },
     ]);
   });
@@ -86,7 +88,52 @@ describe("foreignDependencies", () => {
       commitment: "0xc0",
     };
     const copy = script({ id: "lib", commitment: "0xc0" });
-    assert.deepEqual(foreignDependencies(reader(library), [copy]), []);
+    assert.deepEqual(foreignDependencies(reader(library), [copy], []), []);
+  });
+
+  test("then to a built-in dependency's package from the API", () => {
+    const builtIn = script({ id: "counter-account", commitment: "0xc0" });
+    assert.deepEqual(foreignDependencies(reader(counter), [], [builtIn]), [
+      { dependency: counter, script: builtIn },
+    ]);
+    // The workspace's script comes first.
+    const copy = script({ id: "random-id", commitment: "0xc0" });
+    assert.deepEqual(foreignDependencies(reader(counter), [copy], [builtIn]), [
+      { dependency: counter, script: copy },
+    ]);
+    // The template changed since the script was compiled: another package.
+    const rebuilt = script({ id: "counter-account", commitment: "0xc1" });
+    assert.deepEqual(foreignDependencies(reader(counter), [], [rebuilt]), [
+      { dependency: counter, reason: "missing" },
+    ]);
+  });
+});
+
+describe("missingBuiltInDependencies", () => {
+  test("names the built-in dependencies the workspace doesn't hold", () => {
+    assert.deepEqual(missingBuiltInDependencies(reader(counter), []), [
+      "counter-account",
+    ]);
+  });
+
+  test("names none the workspace resolves, or holds recompiled", () => {
+    const copy = script({ id: "random-id", commitment: "0xc0" });
+    assert.deepEqual(missingBuiltInDependencies(reader(counter), [copy]), []);
+    const recompiled = script({ id: "counter-account", commitment: "0xc1" });
+    assert.deepEqual(
+      missingBuiltInDependencies(reader(counter), [recompiled]),
+      [],
+    );
+  });
+
+  test("names no dependency that isn't built in", () => {
+    const own: Dependency = { ...counter, id: "5f0c", name: "my-counter" };
+    const wallet: Dependency = {
+      ...counter,
+      id: "basic-wallet",
+      name: "basic-wallet",
+    };
+    assert.deepEqual(missingBuiltInDependencies(reader(own, wallet), []), []);
   });
 });
 

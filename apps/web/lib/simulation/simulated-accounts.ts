@@ -1,10 +1,7 @@
 import type { Account } from "@/lib/types/account";
 import type { Script, StorageSchema } from "@/lib/types/script";
 import type { StorageSlot } from "@/lib/types/storage-slot";
-import {
-  mergeStorageSlots,
-  schemaStorageSlots,
-} from "@/lib/utils/storage-schema";
+import { initialSlotsOf, mergeStorageSlots } from "@/lib/utils/storage-schema";
 
 const NO_SLOTS: StorageSlot[] = [];
 
@@ -37,12 +34,11 @@ export const simulatedAccount = (
 };
 
 // The slots a script's simulations start from: those of the package's
-// storage schema, at their defaults. Without one (a package compiled before
-// the API returned it), none: the user adds them.
-export const initialStorageSlots = (script: Script) => {
-  const schema = script.metadata?.storage;
-  return schema ? schemaStorageSlots(schema) : NO_SLOTS;
-};
+// storage schema, at their defaults. Without one, the names its source
+// declares, as values at zero whose type the user sets; and none when it
+// declares none: the user adds them.
+export const initialStorageSlots = (script: Script) =>
+  initialSlotsOf(script.metadata) ?? NO_SLOTS;
 
 // The slots shown: the user's edits over the initial ones. A recompile can
 // change the schema: the edits of the slots it still has stay, the others go.

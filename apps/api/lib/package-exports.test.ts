@@ -56,6 +56,38 @@ describe("analyzedExports", () => {
     }
   });
 
+  it("keeps a procedure that declares no signature, as untyped", () => {
+    // `pub proc add`, its stack effect in a comment: a null signature in the
+    // manifest.
+    const ADD = "::counter::add";
+    const [add] = analyzedExports(
+      {
+        exports: [
+          {
+            Procedure: {
+              path: ADD,
+              digest: "0x00",
+              signature: null,
+              attributes: { attrs: [] },
+            },
+          },
+        ],
+        dependencies: [],
+      },
+      { readOnly: { [ADD]: false }, callsForeign: { [ADD]: false } },
+    );
+    assert.deepEqual(add?.Procedure.signature, {
+      abi: 3,
+      params: [],
+      results: [],
+    });
+    assert.equal(add?.Procedure.untyped, true);
+    assert.equal(add?.Procedure.readOnly, false);
+    // A procedure with a signature isn't marked.
+    const [deposit] = analyzedExports(manifest, { readOnly: {} });
+    assert.equal(deposit && "untyped" in deposit.Procedure, false);
+  });
+
   it("leaves out a type the source exports", () => {
     // `pub type Pair = struct { first: felt, second: felt }`, as api-compile
     // answers it.

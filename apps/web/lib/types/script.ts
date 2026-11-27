@@ -93,6 +93,11 @@ export type ProcedureExport = {
   path: string;
   digest: string;
   signature: Signature;
+  // Set when the source declares no signature (`pub proc add`, its stack
+  // effect in a comment): the manifest's is null, and `signature` is then
+  // empty. The forms take the stack as raw felts (`procedureParams`) and show
+  // the stack it leaves (`procedureResult`).
+  untyped?: boolean;
   attributes: { attrs: ProcedureAttribute[] };
   // Whether it only reads state, so its Invoke button runs it locally
   // (`canInvokeProcedure`). api-compile reads it from the MAST and the API
@@ -187,6 +192,12 @@ export type NoteStorageSchema = { name: string; fields: NoteStorageField[] };
 // it.
 export type PackageMetadata = {
   storage?: StorageSchema;
+  // The storage slot names an account component's source declares (its
+  // `word("…")` constants), when it has no `storage` schema: the slots the
+  // forms start from, each one's type and value left to the user
+  // (`declaredStorageSlots`). Absent when the source declares none, and from
+  // packages compiled before the API read them.
+  slotNames?: string[];
   noteStorage?: NoteStorageSchema;
   // The account procedures a note or transaction script `call`s, by MAST root
   // (`0x…` hex, sorted): the Simulate tab's target dropdown lists only the

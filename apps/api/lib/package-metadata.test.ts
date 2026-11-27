@@ -2,7 +2,11 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 import { isExamplePackageRef } from "../examples/ids.ts";
-import { type CompiledSource, compiledMetadata } from "./package-metadata.ts";
+import {
+  type CompiledSource,
+  compiledMetadata,
+  failedBuildMetadata,
+} from "./package-metadata.ts";
 import { templateMetadata } from "./template-schemas.ts";
 import type { NoteSchemaSource } from "./types.ts";
 
@@ -215,5 +219,78 @@ describe("compiledMetadata: account procedures", () => {
       compiledMetadata(p2idMetadata, { accountProcedures }, source(p2idNote)),
       { noteStorage, template: "p2id-note", accountProcedures },
     );
+  });
+});
+
+describe("failedBuildMetadata", () => {
+  it("keeps the schemas, whatever the source that didn't build", () => {
+    // An unclosed string a typo away from the template: its slot names can't
+    // be read, and the schema must be there once it's fixed.
+    assert.deepEqual(failedBuildMetadata(counterMetadata), counterMetadata);
+    assert.deepEqual(failedBuildMetadata(p2idMetadata), p2idMetadata);
+  });
+
+  it("drops what the last build read from the code", () => {
+    assert.deepEqual(
+      failedBuildMetadata({ ...counterMetadata, accountProcedures }),
+      counterMetadata,
+    );
+    assert.equal(failedBuildMetadata({ accountProcedures }), null);
+    assert.equal(failedBuildMetadata(null), null);
+  });
+});
+
+describe("compiledMetadata: slot names", () => {
+  const component = (masm: string): CompiledSource => ({
+    ...source(masm),
+    accountComponent: true,
+  });
+  const renamed = counterAccount.replace(
+    'word("counter_account::count_map")',
+    'word("counter_account::counts")',
+  );
+
+  it("lists the names a component without a schema declares", () => {
+    assert.deepEqual(compiledMetadata(null, {}, component(counterAccount)), {
+      slotNames: ["counter_account::count_map"],
+    });
+  });
+
+  it("takes over from a schema the source no longer matches", () => {
+    assert.notEqual(renamed, counterAccount);
+    assert.deepEqual(
+      compiledMetadata(counterMetadata, {}, component(renamed)),
+      {
+        slotNames: ["counter_account::counts"],
+      },
+    );
+  });
+
+  it("follows the source on each build", () => {
+    assert.deepEqual(
+      compiledMetadata(
+        { slotNames: ["counter_account::count_map"] },
+        {},
+        component(renamed),
+      ),
+      { slotNames: ["counter_account::counts"] },
+    );
+  });
+
+  it("lists none next to a schema, for another kind of package, or when the source declares none", () => {
+    assert.deepEqual(
+      compiledMetadata(counterMetadata, {}, component(counterAccount)),
+      counterMetadata,
+    );
+    assert.equal(compiledMetadata(null, {}, source(counterAccount)), null);
+    assert.equal(
+      compiledMetadata(null, {}, component("pub proc noop\n    nop\nend\n")),
+      null,
+    );
+  });
+
+  it("stays through a failed build", () => {
+    const metadata = { slotNames: ["counter_account::count_map"] };
+    assert.deepEqual(failedBuildMetadata(metadata), metadata);
   });
 });

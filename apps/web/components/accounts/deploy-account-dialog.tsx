@@ -43,7 +43,7 @@ import {
 } from "@/lib/utils/account-components";
 import { entryPointExport } from "@/lib/utils/script";
 import {
-  schemaStorageSlots,
+  initialSlotsOf,
   storageSlotDescriptions,
 } from "@/lib/utils/storage-schema";
 import { storageSlotsValid } from "@/lib/utils/storage-slots";
@@ -54,16 +54,14 @@ const ALLOWED_NOTE_SCRIPTS =
 const ALLOWED_TX_SCRIPTS =
   "miden::standards::auth::network_account::allowed_tx_scripts";
 
-// A component's slots at their initial values: its schema's, else none (the
-// user adds them).
-const initialSlots = (script: Script | undefined) => {
-  const schema = script?.metadata?.storage;
-  return schema ? schemaStorageSlots(schema) : [];
-};
+// A component's slots at their initial values: its schema's, else the names
+// its source declares, else none (the user adds them).
+const initialSlots = (script: Script | undefined) =>
+  initialSlotsOf(script?.metadata) ?? [];
 
 // The storage of a component the account is deployed with, edited in place:
-// its schema's slots, or slots added by hand when the script has none (a
-// script compiled before the API returned schemas).
+// its schema's slots, or, when the script has none, the names its source
+// declares and slots added by hand.
 const ComponentStorage = ({
   label,
   script,
@@ -81,13 +79,20 @@ const ComponentStorage = ({
   return (
     <div className="flex min-w-0 flex-col gap-2">
       <h3 className="text-sm font-medium">{label}</h3>
-      {!schema && (
-        <p className="text-xs text-muted-foreground">
-          This script has no storage layout to list its slots: add the slots its
-          code reads and writes below, by the names it gives them in{" "}
-          <code>{'word("…")'}</code>.
-        </p>
-      )}
+      {!schema &&
+        (script.metadata?.slotNames ? (
+          <p className="text-xs text-muted-foreground">
+            This script has no storage layout: the slots below are the names its
+            code declares with <code>{'word("…")'}</code>. Set each one to a
+            value or a map, and remove any that isn't a storage slot.
+          </p>
+        ) : (
+          <p className="text-xs text-muted-foreground">
+            This script has no storage layout to list its slots: add the slots
+            its code reads and writes below, by the names it gives them in{" "}
+            <code>{'word("…")'}</code>.
+          </p>
+        ))}
       <StorageSlotsEditor
         storageSlots={storageSlots}
         onChange={onChange}

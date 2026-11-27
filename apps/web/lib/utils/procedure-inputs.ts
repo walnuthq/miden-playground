@@ -38,6 +38,10 @@ export type ProcedureParam = {
   // The largest value of a `Felt` that stands for a smaller integer (a
   // `u16`, a `bool`, an enum's discriminant).
   max?: bigint;
+  // The one parameter of a procedure that declares no signature
+  // (`ProcedureExport.untyped`): the stack it takes, as a list of felts of
+  // any length up to `MAX_ARGUMENT_FELTS`.
+  stack?: true;
 };
 
 // What a form holds for one parameter.
@@ -46,7 +50,10 @@ export type ProcedureArgument =
   | { type: "AccountId"; accountId: string }
   | { type: "Asset"; faucetId: string; amount: string }
   // A type the forms don't know, as its felts in field order.
-  | { type: "Felts"; values: string[] };
+  | { type: "Felts"; values: string[] }
+  // The stack of a procedure without a signature, as typed: felts separated
+  // by spaces or commas, the top of the stack first.
+  | { type: "Stack"; value: string };
 
 export type ProcedureArguments = Record<string, ProcedureArgument>;
 
@@ -229,8 +236,11 @@ const feltNames = (leaves: string[]) =>
 export const procedureParameterNames = ({
   signature,
   parameters,
-}: Pick<ProcedureExport, "signature" | "parameters">): string[] | undefined => {
-  if (!parameters || parameters.length !== signature.params.length) {
+  untyped,
+}: Pick<ProcedureExport, "signature" | "parameters" | "untyped">):
+  | string[]
+  | undefined => {
+  if (untyped || !parameters || parameters.length !== signature.params.length) {
     return undefined;
   }
   const names = parameters.map(({ name }) => name);
@@ -251,11 +261,23 @@ const sourceTypeName = (
   index: number,
 ) => (named && parameters?.[index]?.type) || rawProcedureTypeName(param);
 
+// What the form calls the stack of a procedure without a signature.
+export const STACK_PARAM = "stack";
+
 // The manifest's signature has the parameters' types, the source their names.
-// Without names, every parameter is named by its position: never a mix.
+// Without names, every parameter is named by its position: never a mix. A
+// procedure that declares no signature (`pub proc add`, its stack effect in a
+// comment) takes one parameter, its stack as raw felts: the manifest says
+// nothing of what it reads.
 export const procedureParams = (
-  procedureExport: Pick<ProcedureExport, "signature" | "parameters">,
+  procedureExport: Pick<
+    ProcedureExport,
+    "signature" | "parameters" | "untyped"
+  >,
 ): ProcedureParam[] => {
+  if (procedureExport.untyped) {
+    return [{ name: STACK_PARAM, rawType: "felts", stack: true }];
+  }
   const names = procedureParameterNames(procedureExport);
   return procedureExport.signature.params.map((param, index) => {
     const name = names?.[index] ?? `param_${index}`;
@@ -304,12 +326,16 @@ export const formatProcedureExportResultType = (type: MidenTypeLayout) =>
 
 // A procedure as its MASM signature: `proc copy_count(counter_account_id:
 // AccountId)`, or its parameters' types alone when it has no names
-// (`procedureParameterNames`): `proc copy_count(AccountId)`.
+// (`procedureParameterNames`): `proc copy_count(AccountId)`. A procedure that
+// declares no signature is written as its source writes it: `proc add`.
 export const procedureSignature = (procedureExport: ProcedureExport) => {
   const {
     path,
     signature: { params, results },
   } = procedureExport;
+  if (procedureExport.untyped) {
+    return `proc ${formatProcedureExportPath(path)}`;
+  }
   const names = procedureParameterNames(procedureExport);
   let result = `proc ${formatProcedureExportPath(path)}(`;
   result += params
@@ -381,6 +407,11 @@ export const isFelt = (value: string) => {
   return BigInt(value.trim()) < FELT_MODULUS;
 };
 
+// The felts of a stack as typed (`ProcedureArgument`'s `Stack`): separated by
+// spaces or commas, none when empty.
+export const stackFelts = (value: string) =>
+  value.split(/[\s,]+/).filter((felt) => felt !== "");
+
 // A word as MASM's `push` takes it: `0x` and 64 hex digits.
 export const isWord = (value: string) =>
   /^0x[0-9a-fA-F]{64}$/.test(value.trim());
@@ -421,17 +452,26 @@ export const procedureArgumentError = (
     case "Felts": {
       return argument.values.every(isFelt) ? undefined : "Not a field element.";
     }
+    case "Stack": {
+      const felts = stackFelts(argument.value);
+      return !felts.every(isFelt)
+        ? "Not a field element."
+        : felts.length > MAX_ARGUMENT_FELTS
+          ? `At most ${MAX_ARGUMENT_FELTS} felts.`
+          : undefined;
+    }
   }
 };
 
 // The felts each typed argument takes on the stack.
 const typedFeltCounts = { Felt: 1, Word: 4, AccountId: 2, Asset: 8 } as const;
 
-// The felts a call passes, or nothing when a parameter's count is unknown.
+// The felts a call passes, or nothing when a parameter's count is unknown. A
+// stack's count is its argument's (`procedureArgumentError` bounds it).
 export const procedureArgumentFelts = (params: ProcedureParam[]) => {
   let total = 0;
-  for (const { type, feltCount } of params) {
-    const count = type ? typedFeltCounts[type] : feltCount;
+  for (const { type, feltCount, stack } of params) {
+    const count = stack ? 0 : type ? typedFeltCounts[type] : feltCount;
     if (count === undefined) {
       return undefined;
     }
@@ -450,8 +490,16 @@ export const procedureArgumentsReady = (
   return (
     total !== undefined &&
     total <= MAX_ARGUMENT_FELTS &&
-    params.every(({ name, type, feltCount, max }) => {
+    params.every(({ name, type, feltCount, max, stack }) => {
       const argument = args[name];
+      if (stack) {
+        // Nothing typed is an empty stack: a procedure that takes none.
+        return (
+          argument === undefined ||
+          (argument.type === "Stack" &&
+            procedureArgumentError(argument) === undefined)
+        );
+      }
       return (
         argument !== undefined &&
         (type
@@ -483,8 +531,21 @@ export const encodeProcedureArguments = ({
   args: ProcedureArguments;
   accountIdParts: (accountId: string) => { prefix: bigint; suffix: bigint };
 }): MidenInput[] =>
-  params.map(({ name, type, feltCount }) => {
+  params.map(({ name, type, feltCount, stack }) => {
     const argument = args[name];
+    if (stack) {
+      return {
+        name,
+        type: "Felts",
+        value: JSON.stringify(
+          argument?.type === "Stack"
+            ? stackFelts(argument.value).map((value) =>
+                BigInt(value).toString(),
+              )
+            : [],
+        ),
+      };
+    }
     if (
       !type &&
       feltCount !== undefined &&
@@ -614,6 +675,24 @@ export const decodeProcedureResult = (
     feltCount(result) ?? Math.ceil((structOf(result)?.size ?? 4) / 4);
   return `[${stack.slice(0, Math.max(1, count)).map(String).join(", ")}]`;
 };
+
+// The stack a procedure without a signature leaves, which the manifest
+// doesn't describe: its felts from the top, without the zeros that pad it,
+// one at least.
+const untypedResult = (stack: bigint[]) => {
+  const last = stack.findLastIndex((felt) => felt !== 0n);
+  return `[${stack
+    .slice(0, Math.max(1, last + 1))
+    .map(String)
+    .join(", ")}]`;
+};
+
+// A procedure's result as the forms show it: decoded by its signature, or
+// the stack it leaves when it declares none.
+export const procedureResult = (
+  { signature, untyped }: Pick<ProcedureExport, "signature" | "untyped">,
+  stack: bigint[],
+) => (untyped ? untypedResult(stack) : decodeProcedureResult(signature, stack));
 
 // An execution error as the SDK reports it, without miette's hint and its
 // debug formatting: the diagnostic's message alone.
