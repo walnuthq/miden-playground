@@ -68,6 +68,62 @@ end
 
 `;
 
+// The Counter Contract example's increment note (apps/api/examples), and
+// what the spec makes of it: a note that reads the count of the account its
+// storage names, by a foreign call as tutorial 10's count reader does, and
+// checks it against the count its storage gives.
+const INCREMENT_NOTE_MAIN = `@note_script
+@locals(1)
+pub proc main()
+    # \`call\` runs an account procedure on the top 16 elements of the stack,
+    # and puts its 16 outputs in their place
+    call.counter_account::get_count
+    # => [count, pad(15)]
+
+    # keep the count we expect after the increment
+    add.1 loc_store.0
+    # => [pad(16)]
+
+    call.counter_account::increment_count
+    # => [new_count, pad(15)]
+
+    drop call.counter_account::get_count
+    # => [final_count, pad(15)]
+
+    loc_load.0 assert_eq.err=ERR_COUNT_NOT_INCREMENTED
+    # => [pad(16)]
+end`;
+const FPI_NOTE_IMPORTS = `use counter_account
+use miden::protocol::active_note
+use miden::protocol::tx
+use miden::core::sys
+
+const ERR_UNEXPECTED_COUNT = "the count isn't the expected one"
+`;
+const FPI_NOTE_MAIN = `@note_script
+pub proc main()
+    # the storage: the counter's id, prefix then suffix, and the count
+    push.3 push.0 exec.active_note::get_bounded_storage drop
+    # => [pad(16)]
+
+    padw padw padw padw procref.counter_account::get_count
+    mem_load.0 mem_load.1
+    # => [counter_id_suffix, counter_id_prefix, GET_COUNT_ROOT, pad(32)]
+
+    exec.tx::execute_foreign_procedure
+    # => [count, pad(31)]
+
+    mem_load.2 assert_eq.err=ERR_UNEXPECTED_COUNT
+    exec.sys::truncate_stack
+end`;
+
+// An account id's two felts, as decimal strings: its prefix, the first 8
+// bytes of its hex, and its suffix, the next 7 bytes above a zero byte.
+const accountIdFelts = (id: string) => ({
+  prefix: BigInt(`0x${id.slice(2, 18)}`).toString(),
+  suffix: (BigInt(`0x${id.slice(18, 32)}`) << 8n).toString(),
+});
+
 // Procedures whose parameters the forms enter in every way: a struct the
 // source defines, an account id, integers below a felt, an enum, a word, a
 // \`u64\`.
@@ -1371,119 +1427,103 @@ test("script: simulate a note and a transaction script", async ({ page }) => {
     await expect(row.getByRole("cell").last()).toHaveText(/^0\s*Invoke$/);
   });
 
-  // Its edits are Rust, and its note storage is typed by field name, which a
-  // MASM note doesn't have: to be rewritten in MASM with tutorial 10's foreign
-  // call, naming the foreign account in raw felts (the id the log gives).
-  // Not done by the remove-rust plans: a follow-up.
-  await test.step.skip(
-    "a note's foreign call reads a dependency marked as a foreign account",
-    async () => {
-      // The note no longer calls its target: it reads the counter of the
-      // account its storage names, through FPI, and checks the count.
-      await page.getByRole("link", { name: "increment-note" }).first().click();
-      await expect(page).toHaveURL(/\/scripts\//);
-      await replaceInEditor(
-        page,
-        "struct IncrementNote;",
-        "struct IncrementNote {\n    counter_account_id: AccountId,\n    expected_count: Felt,\n}",
-      );
-      await replaceInEditor(
-        page,
-        "fn run(self, _arg: Word, account: &mut CounterAccount) {",
-        "fn run(self, _arg: Word) {\n        let account = CounterAccount::new(self.counter_account_id);",
-      );
-      await replaceInEditor(page, "account.increment_count();", "");
-      await replaceInEditor(
-        page,
-        "let expected_value = initial_value + felt!(1);",
-        "let expected_value = self.expected_count;",
-      );
-      await compileScript(page);
-      await selectTarget(page, "Simulated account");
-      // The dependency is a component of the simulated account until it's
-      // marked: then it's another account, staged on the mock chain.
-      await simulatedComponent(page, "counter-account")
-        .getByRole("switch", { name: "Foreign account" })
-        .click();
-      const foreign = editorConsole(page).getByRole("region", {
-        name: "Foreign account counter-account",
+  await test.step("a note's foreign call reads a dependency marked as a foreign account", async () => {
+    // The note no longer calls its target: it reads the counter of the
+    // account its storage names, through FPI, and checks the count.
+    await page.getByRole("link", { name: "increment-note" }).first().click();
+    await expect(page).toHaveURL(/\/scripts\//);
+    await replaceInEditor(page, "use counter_account\n", FPI_NOTE_IMPORTS);
+    await replaceInEditor(
+      page,
+      'const ERR_COUNT_NOT_INCREMENTED = "the count didn\'t go up by one"\n',
+      "",
+    );
+    await replaceInEditor(page, INCREMENT_NOTE_MAIN, FPI_NOTE_MAIN);
+    await compileScript(page);
+    await selectTarget(page, "Simulated account");
+    // The dependency is a component of the simulated account until it's
+    // marked: then it's another account, staged on the mock chain.
+    await simulatedComponent(page, "counter-account")
+      .getByRole("switch", { name: "Foreign account" })
+      .click();
+    const foreign = editorConsole(page).getByRole("region", {
+      name: "Foreign account counter-account",
+    });
+    await foreign.getByRole("button", { name: "Add entry" }).click();
+    await foreign.getByLabel(`${SLOT} key 1`).fill("1");
+    await foreign.getByLabel(`${SLOT} value 1`).fill("7");
+    // A MASM note's storage is raw felts: the foreign account's id, prefix
+    // then suffix, then the count it should hold. The id is known once the
+    // account is staged: a first run, naming no account, gives it in the log.
+    const storage = (index: number) =>
+      editorConsole(page).getByLabel(`Note storage item ${index}`, {
+        exact: true,
       });
-      await foreign.getByRole("button", { name: "Add entry" }).click();
-      await foreign.getByLabel(`${SLOT} key 1`).fill("1");
-      await foreign.getByLabel(`${SLOT} value 1`).fill("7");
-      // The note's account field names it by a stand-in.
+    for (const index of [1, 2, 3]) {
       await editorConsole(page)
-        .locator("div")
-        .filter({ hasText: "counter-account-id" })
-        .last()
-        .getByRole("button", { name: "Select account" })
+        .getByRole("button", { name: "Add note storage" })
         .click();
-      await page
-        .getByRole("menuitemradio", {
-          name: "counter-account (foreign account)",
-          exact: true,
-        })
-        .click();
-      const expected = editorConsole(page).getByLabel(/^expected-count/);
-      await expected.fill("7");
-      const dialog = await simulateOnThrowaway(page, "increment-note");
-      await expect(
-        dialog.getByText("1 note will be consumed", { exact: false }),
-      ).toBeVisible();
-      await expect(
-        dialog.getByText("Storage will not be changed."),
-      ).toBeVisible();
-      await dialog.getByRole("button", { name: "Close" }).first().click();
-      // Another count than the foreign account's fails the note's assertion.
-      // The log gives the staged account's id: a transaction script or a
-      // raw-felt note can only name it that way.
-      await expected.fill("8");
-      await simulateButton(page).click();
-      await expect(
-        editorConsole(page).getByText("Simulation of increment-note failed.", {
-          exact: true,
-        }),
-      ).toBeVisible();
-      await expect(
-        editorConsole(page)
-          .getByText(/Foreign account counter-account: 0x[0-9a-f]{30}/)
-          .last(),
-      ).toBeVisible();
-      // Back on the simulated account, the dependency isn't staged, and the
-      // field naming it says so.
-      await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
-      await foreign.getByRole("switch", { name: "Foreign account" }).click();
-      await expect(simulatedComponent(page, "counter-account")).toBeVisible();
-      await simulateButton(page).click();
-      await expect(
-        editorConsole(page).getByText(/which this run doesn't stage/),
-      ).toBeVisible();
-    },
-  );
+      await storage(index).fill("0");
+    }
+    await simulateButton(page).click();
+    await expect(
+      editorConsole(page)
+        .getByText("Simulation of increment-note failed.", { exact: true })
+        .last(),
+    ).toBeVisible();
+    const staged = editorConsole(page)
+      .getByText(/Foreign account counter-account: 0x[0-9a-f]{30}/)
+      .last();
+    await expect(staged).toBeVisible();
+    const id = (await staged.textContent())?.match(/0x[0-9a-f]{30}/)?.[0];
+    if (!id) {
+      throw new Error("no foreign account id in the log");
+    }
+    const { prefix, suffix } = accountIdFelts(id);
+    await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
+    await storage(1).fill(prefix);
+    await storage(2).fill(suffix);
+    await storage(3).fill("7");
+    const dialog = await simulateOnThrowaway(page, "increment-note");
+    await expect(
+      dialog.getByText("1 note will be consumed", { exact: false }),
+    ).toBeVisible();
+    await expect(
+      dialog.getByText("Storage will not be changed."),
+    ).toBeVisible();
+    await dialog.getByRole("button", { name: "Close" }).first().click();
+    // Another count than the foreign account's fails the note's assertion:
+    // a second failure, with the kernel's error code for it.
+    await storage(3).fill("8");
+    await simulateButton(page).click();
+    await expect(
+      editorConsole(page).getByText("Simulation of increment-note failed.", {
+        exact: true,
+      }),
+    ).toHaveCount(2);
+    await expect(
+      editorConsole(page).getByText(/assertion failed with error code/),
+    ).toHaveCount(2);
+  });
 
-  // Lists the tutorials' counter as a target, and the note as edited by the
-  // skipped step above: back with it.
-  await test.step.skip(
-    "a plain wallet can't run the counter's scripts",
-    async () => {
-      await importAccount(page, "Plain Wallet", WALLET_ACCOUNT_ID);
-      // Through the sidebar: a page load would wait for the wallet's sync. It
-      // has neither `get-count` nor `increment-count`. The note no longer
-      // calls its target since the step above: every account is its target.
-      for (const script of ["counter-script"]) {
-        await page.getByRole("link", { name: script }).first().click();
-        await expect(page).toHaveURL(/\/scripts\//);
-        await editorConsole(page)
-          .getByRole("tab", { name: "Simulate" })
-          .click();
-        expect(await targetOptions(page)).toEqual([
-          "Counter Contract",
-          "Other Counter",
-          "Simulated account",
-        ]);
-      }
-    },
-  );
+  // Lists the tutorials' counter as a target, after the note no longer calls
+  // its target.
+  await test.step("a plain wallet can't run the counter's scripts", async () => {
+    await importAccount(page, "Plain Wallet", WALLET_ACCOUNT_ID);
+    // Through the sidebar: a page load would wait for the wallet's sync. It
+    // has neither `get_count` nor `increment_count`. The note no longer
+    // calls its target since the step above: every account is its target.
+    for (const script of ["counter-script"]) {
+      await page.getByRole("link", { name: script }).first().click();
+      await expect(page).toHaveURL(/\/scripts\//);
+      await editorConsole(page).getByRole("tab", { name: "Simulate" }).click();
+      expect(await targetOptions(page)).toEqual([
+        "Counter Contract",
+        "Other Counter",
+        "Simulated account",
+      ]);
+    }
+  });
 });
 
 // Compiles the open script, then shows its Simulate tab again.
