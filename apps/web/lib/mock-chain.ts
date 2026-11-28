@@ -265,8 +265,10 @@ const isWasmTrap = (event: Event) =>
 // panics on an account its chain doesn't hold (`committed_account(…)
 // .unwrap()`, miden-client 0.17.5 `test_utils/mock.rs:748`): in the client's
 // worker for a call that runs there (a sync, a transaction), on the page's
-// thread for the others (`importAccountById`). The SDK never settles the call,
-// and none after it: `terminate()` rejects them ("WebClient terminated").
+// thread for the others (`importAccountById`). Before SDK 0.18.1 it never
+// settled the call, nor any after it; since then it rejects a worker's ("WebClient
+// worker failed"). `terminate()` rejects whatever still waits ("WebClient
+// terminated").
 // `client.worker` isn't in the SDK's typings.
 const watchForCrash = (
   client: MockWasmWebClient,
