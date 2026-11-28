@@ -26,8 +26,8 @@ peerDependencyRules:
     "@miden-sdk/vite-plugin>vite": "8"
 
 overrides:
-  "@miden-sdk/miden-sdk": "0.18.0"
-  "@miden-sdk/react": "0.18.0"
+  "@miden-sdk/miden-sdk": "0.18.1"
+  "@miden-sdk/react": "0.18.1"
   # Security fixes for transitive dependencies (Dependabot alerts). Remove each
   # once the packages that pull it in (Para, monaco-editor, the node polyfills)
   # ship the patched version.

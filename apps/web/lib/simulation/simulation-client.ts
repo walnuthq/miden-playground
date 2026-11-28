@@ -116,9 +116,14 @@ const discardClient = (client: MockWasmWebClient) => {
 
 // Runs `run` on the mock client. A panic inside the SDK's worker (the mock
 // RPC unwraps its lookup of an account it doesn't hold: any foreign call)
-// never settles the call, and would hold every later simulation in the queue
-// until a reload. So a crash of the worker, or a run past `timeoutMs`,
-// discards the client and rejects with `SimulationClientReset`.
+// leaves a dead client. Before SDK 0.18.1 the call never settled, which held
+// every later simulation in the queue until a reload; since then the SDK
+// rejects it and every later one ("WebClient worker failed", kept as the
+// client's `workerFailure`), often before the worker's `error` event reaches
+// the listener below, and the run helpers turn that rejection into a failed
+// result. So a crash of the worker, seen as its `error` event or as
+// `workerFailure` once the run settled, or a run past `timeoutMs`, discards
+// the client and rejects with `SimulationClientReset`.
 export const withSimulationClient = async <T>(
   run: (client: MockWasmWebClient) => Promise<T>,
   timeoutMs = SIMULATION_TIMEOUT_MS,
@@ -128,8 +133,9 @@ export const withSimulationClient = async <T>(
   const worker = (client as unknown as { worker?: Worker }).worker;
   let onError: (() => void) | undefined;
   let timer: ReturnType<typeof setTimeout> | undefined;
+  let fail: (message: string) => void = () => undefined;
   const failure = new Promise<never>((_, reject) => {
-    const fail = (message: string) => {
+    fail = (message: string) => {
       discardClient(client);
       reject(new SimulationClientReset(message));
     };
@@ -139,7 +145,22 @@ export const withSimulationClient = async <T>(
     timer = setTimeout(() => fail(timedOut(timeoutMs)), timeoutMs);
   });
   try {
-    return await Promise.race([run(client), failure]);
+    const crashed = () => {
+      fail(CRASHED);
+      return failure;
+    };
+    return await Promise.race([
+      run(client).then(
+        (result) => (client.workerFailure ? crashed() : result),
+        (error: unknown) => {
+          if (client.workerFailure) {
+            return crashed();
+          }
+          throw error;
+        },
+      ),
+      failure,
+    ]);
   } finally {
     failRun = undefined;
     clearTimeout(timer);
